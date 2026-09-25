@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useWishlist } from '../context/WishlistContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useToast } from '../context/ToastContext';
 import '../styles/product.css';
 
 const defaultFormatCurrency = (value) => {
@@ -17,11 +19,14 @@ const ProductCard = ({
   product = {},
   onAddToCart,
   onViewDetail,
+  onQuickView,
   formatCurrency = defaultFormatCurrency
 }) => {
   const [imgSrc, setImgSrc] = useState(product?.image || product?.images?.[0] || FALLBACK_IMAGE);
   const [justAdded, setJustAdded] = useState(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
+  const { t } = useLanguage();
+  const { showToast } = useToast();
 
   if (!product || !product.name) {
     return null;
@@ -61,6 +66,7 @@ const ProductCard = ({
       onAddToCart(product, e);
     }
     setJustAdded(true);
+    showToast(t('add_to_cart_success', 'Đã thêm sản phẩm vào giỏ hàng!'), 'success');
     setTimeout(() => {
       setJustAdded(false);
     }, 1200);
@@ -69,6 +75,12 @@ const ProductCard = ({
   const handleWishlistClick = (e) => {
     e.stopPropagation();
     toggleWishlist(productId);
+    showToast(
+      wishlisted
+        ? t('wishlist_removed', 'Đã xóa khỏi danh sách yêu thích')
+        : t('wishlist_added', 'Đã thêm vào danh sách yêu thích!'),
+      'info'
+    );
   };
 
   const handleImageError = () => {
@@ -99,7 +111,7 @@ const ProductCard = ({
         <button
           type="button"
           onClick={handleWishlistClick}
-          aria-label={wishlisted ? "Xóa khỏi yêu thích" : "Thêm vào yêu thích"}
+          aria-label={wishlisted ? t('wishlist_removed', "Xóa khỏi yêu thích") : t('wishlist_added', "Thêm vào yêu thích")}
           style={{
             position: 'absolute',
             top: '8px',
@@ -115,7 +127,7 @@ const ProductCard = ({
             cursor: 'pointer',
             zIndex: 2,
             boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-            color: wishlisted ? '#ee4d2d' : '#888',
+            color: wishlisted ? 'var(--primary-color, #ea580c)' : '#888',
             transition: 'all 0.2s',
           }}
         >
@@ -124,14 +136,33 @@ const ProductCard = ({
           </svg>
         </button>
 
-        {/* Huy hiệu Amazon's Choice / Best Seller */}
+        {/* Quick View Button */}
+        {onQuickView && (
+          <button
+            type="button"
+            className="shopee-quickview-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickView(product, e);
+            }}
+            aria-label={t('quick_view_title', 'Xem nhanh')}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span>{t('quick_view_title', 'Xem nhanh')}</span>
+          </button>
+        )}
+
+        {/* Badge */}
         {badge ? (
           <span
             style={{
               position: 'absolute',
               top: '8px',
               left: '8px',
-              background: badge === "Amazon's Choice" ? '#232f3e' : '#e47911',
+              background: badge === "Amazon's Choice" ? '#1e293b' : 'var(--primary-color, #ea580c)',
               color: '#fff',
               fontSize: '10px',
               fontWeight: 700,
@@ -142,7 +173,7 @@ const ProductCard = ({
               letterSpacing: '0.4px',
             }}
           >
-            {badge}
+            {badge === "Amazon's Choice" ? t('nav_featured_picks', 'Tuyển Chọn') : badge}
           </span>
         ) : isMall ? (
           <span className="shopee-mall-badge">Mall</span>
@@ -152,7 +183,7 @@ const ProductCard = ({
         {hasDiscount && (
           <div className="shopee-discount-badge" style={{ top: badge ? '32px' : '0' }}>
             <span className="shopee-discount-percent">-{discountPercent}%</span>
-            <span className="shopee-discount-label">GIẢM</span>
+            <span className="shopee-discount-label">{t('sale_off', 'GIẢM')}</span>
           </div>
         )}
       </div>
@@ -180,20 +211,19 @@ const ProductCard = ({
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
             <span>{Number(rating).toFixed(1)}</span>
-            <span style={{ color: '#888', fontSize: '11px', marginLeft: '2px' }}>({reviewCount})</span>
+            <span style={{ color: 'var(--text-muted, #888)', fontSize: '11px', marginLeft: '2px' }}>({reviewCount})</span>
           </div>
           <span className="shopee-card-sold">
-            {sold > 1000 ? `Đã bán ${(sold / 1000).toFixed(1)}k` : `Đã bán ${sold}`}
+            {sold > 1000 ? `${t('sold', 'Đã bán')} ${(sold / 1000).toFixed(1)}k` : `${t('sold', 'Đã bán')} ${sold}`}
           </span>
         </div>
 
         {/* Fast Delivery Badge */}
         {isFastDelivery && (
           <div style={{ margin: '6px 0 2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '11px', color: '#1976d2', fontWeight: 700, background: '#e3f2fd', padding: '1px 6px', borderRadius: '3px' }}>
-              ⚡ Giao 2H
+            <span style={{ fontSize: '11px', color: 'var(--secondary-color, #0284c7)', fontWeight: 700, background: 'var(--primary-light, #f0f9ff)', padding: '1px 6px', borderRadius: '3px' }}>
+              ⚡ {t('nav_fast_delivery', 'Giao 2H')}
             </span>
-            <span style={{ fontSize: '11px', color: '#666' }}>Giao ngày mai</span>
           </div>
         )}
 
@@ -203,14 +233,14 @@ const ProductCard = ({
             type="button"
             className={`shopee-card-add-btn ${justAdded ? 'added' : ''}`}
             onClick={handleAddClick}
-            aria-label={`Thêm ${name} vào giỏ hàng`}
+            aria-label={`${t('add_to_cart')} ${name}`}
           >
             {justAdded ? (
               <>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                <span>Đã thêm!</span>
+                <span>{t('added_to_cart', 'Đã thêm!')}</span>
               </>
             ) : (
               <>
@@ -219,7 +249,7 @@ const ProductCard = ({
                   <circle cx="20" cy="21" r="1" />
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                 </svg>
-                <span>Thêm vào giỏ</span>
+                <span>{t('add_to_cart', 'Thêm vào giỏ')}</span>
               </>
             )}
           </button>
