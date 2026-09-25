@@ -68,6 +68,33 @@ Hệ thống CSS đã được nâng cấp toàn diện để tương thích nga
 
 ---
 
-## 5. Việc Cần Integration Agent Xử Lý
-1. Import `client/src/styles/index.css` vào `client/src/main.jsx` hoặc `client/src/App.jsx`.
-2. Thay thế markup inline trong các trang (`HomePage`, `CartPage`, `CheckoutPage`, v.v.) bằng các component hoàn chỉnh đã export từ `client/src/components/index.js`.
+## 5. Cải Tiến & Nâng Cấp Hệ Thống 3 Phân Quyền (Multi-Role & Multi-Vendor)
+Đã triển khai kiến trúc 3 cổng đăng nhập và điều khiển độc lập:
+1. **Khách hàng (Customer Portal):**
+   - Đăng nhập/Đăng ký tài khoản (`/login`, `/register`).
+   - Mua sắm, giỏ hàng localStorage, thanh toán đơn hàng.
+   - Trang thông tin cá nhân & sổ địa chỉ mặc định (`/profile`).
+   - Lịch sử đơn mua hàng phân loại theo tab trạng thái (`/orders`).
+2. **Kênh Người Bán (Multi-Vendor Shop Portal):**
+   - Đăng nhập tài khoản Chủ shop (`/login` -> tab Người Bán).
+   - Đăng ký mở shop kinh doanh mới (`/register` -> Mở Shop Kinh Doanh).
+   - Trang quản lý shop riêng biệt (`/seller/dashboard`):
+     - Cô lập dữ liệu: Shop A (Thời Trang GenZ) không thấy sản phẩm của Shop B (TechWorld Store).
+     - Thêm mới, chỉnh sửa, xóa và bật/tắt trạng thái ẩn/hiện sản phẩm.
+     - Quản lý danh sách đơn hàng thuộc phạm vi của Shop, cập nhật trạng thái đơn (Chờ xử lý, Đang giao, Đã giao).
+     - Thống kê doanh thu, số sản phẩm, số đơn hàng của riêng shop.
+3. **Quản Trị Sàn (Super Admin Portal):**
+   - Đăng nhập quyền Quản trị tối cao (`/admin/dashboard`).
+   - Thống kê toàn sàn: Tổng doanh thu GMV, tổng shop hoạt động, tổng thành viên, tổng đơn hàng.
+   - Quản lý & duyệt Shop: Phê duyệt shop mới, khóa tạm thời hoặc mở lại shop vi phạm.
+   - Quản lý người dùng: Xem danh sách thành viên và khóa/mở khóa tài khoản.
+
+## 6. Trạng Thái Vận Hành & Khởi Chạy
+- Dev server Vite: Đã khởi chạy tại `http://localhost:5173`.
+- Build verification: `npm run build` hoàn thành không lỗi.
+- Demo accounts tích hợp sẵn 1-click login:
+  - Khách hàng: `khachhang@shopee.vn` (Mật khẩu: `123456`)
+  - Chủ Shop 1: `shop.genz@shopee.vn` (Mật khẩu: `123456`)
+  - Chủ Shop 2: `shop.tech@shopee.vn` (Mật khẩu: `123456`)
+  - Quản trị viên: `admin@shopee.vn` (Mật khẩu: `admin123`)
+

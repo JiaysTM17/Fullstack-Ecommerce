@@ -138,17 +138,52 @@ Open the client at `http://localhost:5173`.
 The server recalculates `subtotal` and `total` from submitted items.
 
 ## Main Features
+ 
+ - Product listing with search and sort query params
+ - Product detail page
+ - Cart Context with add/remove/increase/decrease/direct quantity change
+ - Cart persistence in localStorage
+ - Checkout form validation
+ - Order creation through Express API
+ - Responsive ecommerce UI components
+ 
+-## Hệ Thống 3 Phân Quyền & Quản Lý Đa Shop (Multi-Role & Multi-Vendor)
++### 1. Phân Quyền Khách Hàng (Customer Portal)
++- Đăng nhập & Đăng ký: `/login`, `/register`
++- Mua sắm, giỏ hàng, đặt hàng thanh toán COD/Banking/Momo
++- Xem lịch sử đơn mua theo trạng thái: `/orders`
++- Quản lý hồ sơ cá nhân và sổ địa chỉ: `/profile`
++
++### 2. Kênh Người Bán / Chủ Shop (Seller Portal - Multi-Shop)
++- Truy cập: `/seller/dashboard`
++- Độc lập dữ liệu giữa các shop: Mỗi shop chỉ nhìn thấy, chỉnh sửa sản phẩm và đơn hàng của chính mình.
++- Thêm/Sửa/Xóa sản phẩm, bật/tắt ẩn hiện sản phẩm tức thì.
++- Cập nhật tiến độ xử lý đơn hàng cho shop.
++- Thống kê doanh thu, tồn kho, đơn hàng theo thời gian thực.
++
++### 3. Kênh Quản Trị Sàn (Super Admin Portal)
++- Truy cập: `/admin/dashboard`
++- Giám sát toàn sàn: Tổng doanh thu GMV, tổng số shop, tổng người dùng, tổng đơn hàng.
++- Quản lý & phê duyệt danh sách Shop (Khóa/Mở khóa vi phạm, kích hoạt shop mới).
++- Quản lý người dùng sàn (Khóa/Mở khóa tài khoản).
++
++## Tài Khoản Demo Sẵn Có (1-Click Login tại `/login`)
++
++| Phân quyền | Email | Mật khẩu | Chức năng nổi bật |
++|---|---|---|---|
++| **Khách hàng** | `khachhang@shopee.vn` | `123456` | Mua sắm, theo dõi đơn, sửa hồ sơ cá nhân |
++| **Chủ Shop 1 (Thời trang)** | `shop.genz@shopee.vn` | `123456` | Quản lý thời trang GenZ, đăng tải quần áo |
++| **Chủ Shop 2 (Công nghệ)** | `shop.tech@shopee.vn` | `123456` | Quản lý đồ công nghệ, tai nghe, phụ kiện |
++| **Quản trị viên** | `admin@shopee.vn` | `admin123` | Phê duyệt shop, quản lý người dùng, xem doanh thu toàn sàn |
++
++## Cách Khởi Chạy Nhanh Bằng File Batch (Windows)
++
++- Chạy Front-end: Click đúp vào `run-client.cmd` (mở tại `http://localhost:5173`)
++- Chạy Back-end: Click đúp vào `run-server.cmd` (mở tại `http://localhost:5000`)
++
++## Notes
+ 
+ - The app requires MongoDB local or MongoDB Atlas (hoặc tự động fallback sang offline mock data khi chưa kết nối MongoDB).
+ - Seed product images use remote Unsplash URLs.
+ - If client and server use different ports, update `VITE_API_URL` and `CLIENT_URL`.
 
-- Product listing with search and sort query params
-- Product detail page
-- Cart Context with add/remove/increase/decrease/direct quantity change
-- Cart persistence in localStorage
-- Checkout form validation
-- Order creation through Express API
-- Responsive ecommerce UI components
-
-## Notes
-
-- The app requires MongoDB local or MongoDB Atlas.
-- Seed product images use remote Unsplash URLs.
-- If client and server use different ports, update `VITE_API_URL` and `CLIENT_URL`.
