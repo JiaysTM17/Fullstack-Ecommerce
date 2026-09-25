@@ -1,0 +1,217 @@
+/* client/src/styles/header.css */
+.shopee-header-wrapper {
+  background: linear-gradient(-180deg, #f53d2d, #f63);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+/* Top bar navigation */
+.shopee-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.shopee-topbar-left,
+.shopee-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.shopee-topbar-link {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s;
+}
+
+.shopee-topbar-link:hover {
+  opacity: 0.8;
+}
+
+/* Main header section */
+.shopee-main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 12px;
+  gap: 24px;
+}
+
+/* Logo */
+.shopee-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.shopee-logo-icon {
+  width: 36px;
+  height: 36px;
+  fill: #fff;
+}
+
+.shopee-logo-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.shopee-logo-subtitle {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+
+/* Search bar */
+.shopee-search-form {
+  flex: 1;
+  max-width: 650px;
+  position: relative;
+  display: flex;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.shopee-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: transparent;
+  font-family: inherit;
+}
+
+.shopee-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.shopee-search-clear {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+}
+
+.shopee-search-btn {
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  outline: none;
+  padding: 0 24px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast);
+}
+
+.shopee-search-btn:hover {
+  background: var(--primary-hover);
+}
+
+/* Cart Button */
+.shopee-header-cart {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.shopee-header-cart:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.shopee-cart-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.shopee-cart-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.shopee-cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background: #fff;
+  color: var(--primary-color);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--primary-color);
+  line-height: 1.2;
+  min-width: 14px;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile header adjustments */
+@media (max-width: 768px) {
+  .shopee-topbar {
+    display: none;
+  }
+
+  .shopee-main-header {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 10px 0 8px;
+  }
+
+  .shopee-logo-title {
+    font-size: 20px;
+  }
+
+  .shopee-logo-subtitle {
+    display: none;
+  }
+
+  .shopee-search-form {
+    order: 3;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .shopee-search-btn {
+    padding: 0 16px;
+  }
+}
