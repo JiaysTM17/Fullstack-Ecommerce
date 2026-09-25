@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth, DEMO_ACCOUNTS } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -329,17 +330,28 @@ export default function SellerDashboardPage() {
             </p>
           </div>
 
-          {/* Công cụ chuyển đổi Shop để demo tính năng nhiều Shop khác nhau */}
-          <div className="shopee-shop-switcher">
-            <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>🔄 Xem Shop khác:</span>
-            <select
-              value={selectedShopId}
-              onChange={(e) => setSelectedShopId(e.target.value)}
-              aria-label="Chọn Shop quản lý"
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <Link
+              to={`/shop/${selectedShopId}`}
+              className="shopee-btn shopee-btn-secondary"
+              style={{ fontSize: '13px', padding: '6px 14px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
+              title="Xem giao diện khách hàng nhìn thấy shop của bạn"
             >
-              <option value="shop_01">Shop 1: Thời Trang GenZ Official</option>
-              <option value="shop_02">Shop 2: TechWorld Store</option>
-            </select>
+              🌐 Xem Gian Hàng Công Khai
+            </Link>
+
+            {/* Công cụ chuyển đổi Shop để demo tính năng nhiều Shop khác nhau */}
+            <div className="shopee-shop-switcher">
+              <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>🔄 Xem Shop khác:</span>
+              <select
+                value={selectedShopId}
+                onChange={(e) => setSelectedShopId(e.target.value)}
+                aria-label="Chọn Shop quản lý"
+              >
+                <option value="shop_01">Shop 1: Thời Trang GenZ Official</option>
+                <option value="shop_02">Shop 2: TechWorld Store</option>
+              </select>
+            </div>
           </div>
         </div>
 

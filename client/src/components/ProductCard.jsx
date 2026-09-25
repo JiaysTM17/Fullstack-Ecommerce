@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
+import { useCompare } from '../context/CompareContext';
 import '../styles/product.css';
 
 const defaultFormatCurrency = (value) => {
@@ -27,6 +28,7 @@ const ProductCard = ({
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { t } = useLanguage();
   const { showToast } = useToast();
+  const { addToCompare, isCompared } = useCompare();
 
   if (!product || !product.name) {
     return null;
@@ -134,6 +136,38 @@ const ProductCard = ({
           <svg width="18" height="18" viewBox="0 0 24 24" fill={wishlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
+        </button>
+
+        {/* Compare Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            addToCompare(product);
+          }}
+          title={isCompared(productId) ? "Đang trong danh sách so sánh" : "Thêm vào so sánh"}
+          aria-label="So sánh sản phẩm"
+          style={{
+            position: 'absolute',
+            top: '46px',
+            right: '8px',
+            background: isCompared(productId) ? 'var(--primary-color, #ea580c)' : 'rgba(255, 255, 255, 0.85)',
+            color: isCompared(productId) ? '#fff' : '#475569',
+            border: 'none',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 2,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+            fontSize: '13px',
+            transition: 'all 0.2s',
+          }}
+        >
+          ⚖️
         </button>
 
         {/* Quick View Button */}

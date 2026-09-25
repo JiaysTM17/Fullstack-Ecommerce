@@ -103,12 +103,47 @@ export default function CheckoutPage() {
 
     try {
       const order = await createOrder(orderPayload);
+      const generatedOrderId = order?.orderId || order?._id || order?.id || `ORD${Math.floor(100000 + Math.random() * 900000)}`;
+      const trackingCode = `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`;
+      const nowStr = new Date().toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      // Build customer order record for OrderHistoryPage
+      const newCustomerOrder = {
+        orderId: generatedOrderId,
+        trackingCode,
+        createdAt: nowStr,
+        shopName: checkoutItems[0]?.shopId === 'shop_02' ? 'TechWorld Store' : 'Thời Trang GenZ Official',
+        items: checkoutItems.map((it) => ({
+          name: it.name,
+          price: it.price,
+          quantity: it.quantity,
+          image: it.image,
+        })),
+        total: finalOrderTotal,
+        status: 'pending',
+        statusText: 'Chờ xác nhận & đóng gói',
+        stepIndex: 1,
+        paymentMethod: paymentMethod === 'BANK' ? 'Chuyển khoản VietQR' : paymentMethod === 'MOMO' ? 'Ví MoMo/ZaloPay' : paymentMethod === 'CARD' ? 'Thẻ Tín Dụng' : 'COD',
+        timeline: [
+          { time: nowStr, text: 'Đơn hàng đã được đặt thành công trên hệ thống' },
+          { time: 'Dự kiến hôm nay', text: 'Người bán đang chuẩn bị hàng và in vận đơn SPX Express' },
+        ],
+      };
+
+      try {
+        const existingOrders = JSON.parse(localStorage.getItem('mini_shopee_customer_orders') || '[]');
+        localStorage.setItem('mini_shopee_customer_orders', JSON.stringify([newCustomerOrder, ...existingOrders]));
+      } catch {
+        // ignore
+      }
+
       clearCart();
       navigate("/order-success", {
         replace: true,
         state: {
-          orderId: order?.orderId || order?._id || order?.id || `ORD-${Date.now()}`,
+          orderId: generatedOrderId,
           total: finalOrderTotal,
+          paymentMethod,
         },
       });
     } catch (err) {

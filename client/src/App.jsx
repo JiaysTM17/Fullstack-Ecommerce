@@ -8,9 +8,12 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { Footer, Header, ToastContainer } from "./components";
+import LiveChatWidget from "./components/LiveChatWidget";
+import ProductCompareModal from "./components/ProductCompareModal";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider, useCart } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
+import { CompareProvider } from "./context/CompareContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -26,6 +29,7 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage";
 import SellerDashboardPage from "./pages/SellerDashboardPage";
+import ShopStorefrontPage from "./pages/ShopStorefrontPage";
 import WishlistPage from "./pages/WishlistPage";
 
 function AppLayout() {
@@ -73,6 +77,7 @@ function AppLayout() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
+        <Route path="/shop/:shopId" element={<ShopStorefrontPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order-success" element={<OrderSuccessPage />} />
@@ -86,6 +91,8 @@ function AppLayout() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Footer />
+      <LiveChatWidget />
+      <ProductCompareModal />
       <ToastContainer />
     </>
   );
@@ -99,9 +106,11 @@ export default function App() {
           <ToastProvider>
             <AuthProvider>
               <WishlistProvider>
-                <CartProvider>
-                  <AppLayout />
-                </CartProvider>
+                <CompareProvider>
+                  <CartProvider>
+                    <AppLayout />
+                  </CartProvider>
+                </CompareProvider>
               </WishlistProvider>
             </AuthProvider>
           </ToastProvider>
@@ -110,4 +119,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

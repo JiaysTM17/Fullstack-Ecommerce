@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useWishlist } from '../context/WishlistContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { FALLBACK_PRODUCTS } from '../services/productService';
+import { formatCurrency } from '../utils/formatCurrency';
 import '../styles/header.css';
 
 const POPULAR_SEARCHES = [
@@ -98,6 +100,12 @@ const Header = ({
         s.toLowerCase().includes(currentSearch.toLowerCase())
       )
     : POPULAR_SEARCHES.slice(0, 5);
+
+  const matchingProducts = currentSearch.trim()
+    ? FALLBACK_PRODUCTS.filter((p) =>
+        p.name.toLowerCase().includes(currentSearch.toLowerCase())
+      ).slice(0, 3)
+    : [];
 
   return (
     <header className="shopee-header-wrapper">
@@ -248,7 +256,7 @@ const Header = ({
             </form>
 
             {/* Autocomplete Dropdown */}
-            {showSuggestions && filteredSuggestions.length > 0 && (
+            {showSuggestions && (filteredSuggestions.length > 0 || matchingProducts.length > 0) && (
               <div
                 style={{
                   position: 'absolute',
@@ -256,38 +264,92 @@ const Header = ({
                   left: 0,
                   right: 0,
                   background: 'var(--bg-card, #fff)',
-                  borderRadius: '0 0 8px 8px',
-                  boxShadow: 'var(--shadow-modal, 0 6px 16px rgba(0,0,0,0.15))',
+                  borderRadius: '0 0 12px 12px',
+                  boxShadow: 'var(--shadow-modal, 0 10px 25px rgba(0,0,0,0.18))',
                   zIndex: 100,
-                  border: '1px solid var(--border-medium, #e0e0e0)',
+                  border: '1px solid var(--border-medium, #e2e8f0)',
                   marginTop: '2px',
                   overflow: 'hidden',
                 }}
               >
-                <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
-                  {t('suggested_searches')}
-                </div>
-                {filteredSuggestions.map((item, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => handleSelectSuggestion(item)}
-                    style={{
-                      padding: '10px 14px',
-                      fontSize: '13.5px',
-                      color: 'var(--text-primary, #222)',
-                      cursor: 'pointer',
-                      borderBottom: idx < filteredSuggestions.length - 1 ? '1px solid var(--border-light, #f5f5f5)' : 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    <span style={{ color: 'var(--primary-color, #ea580c)' }}>•</span>
-                    <span>{item}</span>
+                {/* Search Keywords */}
+                {filteredSuggestions.length > 0 && (
+                  <div>
+                    <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
+                      {t('suggested_searches')}
+                    </div>
+                    {filteredSuggestions.map((item, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => handleSelectSuggestion(item)}
+                        style={{
+                          padding: '9px 14px',
+                          fontSize: '13px',
+                          color: 'var(--text-primary, #222)',
+                          cursor: 'pointer',
+                          borderBottom: '1px solid var(--border-light, #f5f5f5)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                      >
+                        <span style={{ color: 'var(--primary-color, #ea580c)' }}>🔍</span>
+                        <span>{item}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
+
+                {/* Matching Products with Thumbnail & Price */}
+                {matchingProducts.length > 0 && (
+                  <div>
+                    <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: '1px solid var(--border-light, #f0f0f0)', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
+                      ✨ Sản Phẩm Trùng Khớp
+                    </div>
+                    {matchingProducts.map((p) => {
+                      const id = p._id || p.id;
+                      return (
+                        <div
+                          key={id}
+                          onClick={() => {
+                            setShowSuggestions(false);
+                            navTo(`/products/${id}`);
+                          }}
+                          style={{
+                            padding: '8px 14px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid var(--border-light, #f5f5f5)',
+                            transition: 'background 0.15s ease',
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                        >
+                          <img
+                            src={p.image || p.images?.[0]}
+                            alt={p.name}
+                            style={{ width: '38px', height: '38px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light, #eee)' }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {p.name}
+                            </div>
+                            <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                              {p.brand || 'Chính hãng'} · {p.category}
+                            </div>
+                          </div>
+                          <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--primary-color, #ea580c)' }}>
+                            {formatCurrency(p.price)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
