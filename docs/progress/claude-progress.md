@@ -209,3 +209,34 @@ docs/progress/claude-progress.md
 ⚠️ **Agents đang share cùng working directory.** Khi agent khác checkout sang branch khác, thư mục `server/` (của tôi) biến mất khỏi filesystem. Commit đã push an toàn lên `origin/agent/claude-backend`.
 
 **Cần Integration Agent xử lý:** Nếu mỗi agent cần working directory riêng, dùng `git worktree` hoặc mỗi agent chạy trong thư mục khác.
+
+---
+
+## ✅ Trạng thái verify (2026-09-25)
+
+| Bước | Trạng thái |
+|------|-----------|
+| `npm install` | ✅ 123 packages, 0 vulnerabilities |
+| Syntax check toàn bộ file (`node --check`) | ✅ 8/8 file pass |
+| Smoke test `node server.js` | ✅ Server khởi động được |
+| MongoDB local | ❌ Chưa cài/chưa chạy (không tìm thấy `mongod`, port 27017 đóng) |
+| Seed data | ⏸ Chờ MongoDB |
+| Test API thật | ⏸ Chờ MongoDB |
+
+### Việc còn lại cho Integration Agent / người chạy dự án
+
+1. **Cài & khởi động MongoDB local** (hoặc đổi `server/.env` sang MongoDB Atlas URI):
+   ```
+   MONGO_URI=mongodb+srv://<user>:<pass>@cluster0.xxxxx.mongodb.net/ecommerce_mini
+   ```
+2. Chạy seed: `cd server && npm run seed`
+3. Chạy server: `cd server && npm run dev` (cần file `.env` copy từ `.env.example`)
+4. Test nhanh 3 endpoint:
+   - `GET http://localhost:5000/api/products`
+   - `GET http://localhost:5000/api/products/<id>`
+   - `POST http://localhost:5000/api/orders` (payload xem section API Contract)
+
+### Commits đã push
+
+- `7f24b25` — Build backend API (models, routes, controllers, middlewares, seed)
+- `e038d36` — Improve backend: server-side total calc, item validation, JSON body limit, CORS multi-origin
