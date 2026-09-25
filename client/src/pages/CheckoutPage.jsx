@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
+import VoucherPickerModal from "../components/VoucherPickerModal";
 import { createOrder } from "../services/orderService";
 import { formatCurrency } from "../utils/formatCurrency";
 import "../styles/checkout-multistep.css";
@@ -25,8 +26,12 @@ export default function CheckoutPage() {
     selectedSubtotal,
     appliedVoucher,
     voucherDiscount,
+    applyVoucher,
+    removeVoucher,
     clearCart,
   } = useCart();
+
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
 
   const handleCopyAccount = () => {
     navigator.clipboard?.writeText("0909123456");
@@ -436,6 +441,25 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              {/* Voucher status banner in Step 4 */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-page, #f8fafc)", border: "1px solid var(--border-medium, #e2e8f0)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13.5px" }}>
+                <div>
+                  <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>🎟️ Voucher Áp Dụng: </span>
+                  {appliedVoucher ? (
+                    <strong style={{ color: "var(--primary-color, #ea580c)" }}>{appliedVoucher.code} ({appliedVoucher.name}) - Giảm {formatCurrency(voucherDiscount)}</strong>
+                  ) : (
+                    <span style={{ color: "var(--text-muted)" }}>Chưa chọn voucher nào</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowVoucherModal(true)}
+                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}
+                >
+                  {appliedVoucher ? "Đổi mã khác >" : "+ Chọn mã giảm giá >"}
+                </button>
+              </div>
+
               {/* Item rows */}
               <div style={{ marginBottom: "20px" }}>
                 <div style={{ fontWeight: 700, fontSize: "14px", marginBottom: "8px" }}>
@@ -449,7 +473,7 @@ export default function CheckoutPage() {
                       alignItems: "center",
                       justifyContent: "space-between",
                       padding: "10px 0",
-                      borderBottom: "1px solid #f0f0f0",
+                      borderBottom: "1px solid var(--border-light, #f0f0f0)",
                       fontSize: "13.5px",
                     }}
                   >
@@ -461,10 +485,10 @@ export default function CheckoutPage() {
                       />
                       <div>
                         <div style={{ fontWeight: 600 }}>{item.name}</div>
-                        <div style={{ color: "#777", fontSize: "12px" }}>Số lượng: x{item.quantity}</div>
+                        <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>Số lượng: x{item.quantity}</div>
                       </div>
                     </div>
-                    <div style={{ fontWeight: 700, color: "#ee4d2d" }}>
+                    <div style={{ fontWeight: 700, color: "var(--primary-color, #ee4d2d)" }}>
                       {formatCurrency(item.price * item.quantity)}
                     </div>
                   </div>
@@ -508,42 +532,82 @@ export default function CheckoutPage() {
         </section>
 
         {/* Right Column: Mini Bill Summary */}
-        <aside style={{ background: "#fff", borderRadius: "10px", padding: "20px", border: "1px solid #e0e0e0" }}>
-          <h3 style={{ fontSize: "16px", fontWeight: 800, margin: "0 0 16px" }}>Bảng Kê Chi Phí</h3>
+        <aside style={{ background: "var(--bg-card, #fff)", borderRadius: "10px", padding: "20px", border: "1px solid var(--border-medium, #e0e0e0)" }}>
+          <h3 style={{ fontSize: "16px", fontWeight: 800, margin: "0 0 16px", color: "var(--text-primary)" }}>Bảng Kê Chi Phí</h3>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "14px", marginBottom: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "#666" }}>Tiền hàng ({checkoutItems.length} món):</span>
+              <span style={{ color: "var(--text-secondary, #666)" }}>Tiền hàng ({checkoutItems.length} món):</span>
               <span style={{ fontWeight: 600 }}>{formatCurrency(currentSubtotal)}</span>
             </div>
 
-            {voucherDiscount > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#2e7d32" }}>
-                <span>Voucher giảm giá ({appliedVoucher?.code}):</span>
-                <span style={{ fontWeight: 700 }}>-{formatCurrency(voucherDiscount)}</span>
+            {/* Interactive Voucher Section in Checkout summary */}
+            <div style={{ borderTop: "1px dashed var(--border-medium, #ddd)", borderBottom: "1px dashed var(--border-medium, #ddd)", padding: "10px 0", margin: "4px 0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>🎟️ Voucher / Giảm giá:</span>
+                <button
+                  type="button"
+                  onClick={() => setShowVoucherModal(true)}
+                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}
+                >
+                  {appliedVoucher ? "Đổi mã >" : "Chọn mã >"}
+                </button>
               </div>
-            )}
+
+              {appliedVoucher ? (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "6px 10px", borderRadius: "6px", border: "1px solid var(--primary-color, #ea580c)" }}>
+                  <span style={{ fontSize: "12.5px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
+                    ✓ {appliedVoucher.code} (-{formatCurrency(voucherDiscount)})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={removeVoucher}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px" }}
+                  >
+                    ✕ Gỡ
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowVoucherModal(true)}
+                  style={{ width: "100%", marginTop: "8px", padding: "8px", borderRadius: "6px", border: "1px dashed var(--primary-color, #ea580c)", background: "transparent", color: "var(--primary-color, #ea580c)", fontSize: "12.5px", fontWeight: 600, cursor: "pointer" }}
+                >
+                  + Nhấn để chọn mã giảm giá / Freeship
+                </button>
+              )}
+            </div>
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "#666" }}>Phí vận chuyển:</span>
+              <span style={{ color: "var(--text-secondary, #666)" }}>Phí vận chuyển:</span>
               <span style={{ fontWeight: 600 }}>
                 {finalShippingFee === 0 ? "MIỄN PHÍ" : formatCurrency(finalShippingFee)}
               </span>
             </div>
 
-            <div style={{ borderTop: "2px solid #222", paddingTop: "12px", marginTop: "4px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <div style={{ borderTop: "2px solid var(--border-dark, #222)", paddingTop: "12px", marginTop: "4px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <span style={{ fontSize: "15px", fontWeight: 800 }}>TỔNG CỘNG:</span>
-              <span style={{ fontSize: "22px", fontWeight: 800, color: "#ee4d2d" }}>
+              <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--primary-color, #ee4d2d)" }}>
                 {formatCurrency(finalOrderTotal)}
               </span>
             </div>
           </div>
 
-          <div style={{ fontSize: "12px", color: "#777", lineHeight: "1.5", borderTop: "1px solid #eee", paddingTop: "12px" }}>
+          <div style={{ fontSize: "12px", color: "var(--text-muted, #777)", lineHeight: "1.5", borderTop: "1px solid var(--border-light, #eee)", paddingTop: "12px" }}>
             🔒 Nhấn "Xác Nhận Đặt Hàng" đồng nghĩa bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Mini Shopee.
           </div>
         </aside>
       </div>
+
+      {/* Voucher Picker Modal */}
+      <VoucherPickerModal
+        isOpen={showVoucherModal}
+        onClose={() => setShowVoucherModal(false)}
+        onApplyVoucher={(code) => applyVoucher(code)}
+        onRemoveVoucher={removeVoucher}
+        appliedVoucher={appliedVoucher}
+        currentSubtotal={currentSubtotal}
+      />
     </main>
   );
 }

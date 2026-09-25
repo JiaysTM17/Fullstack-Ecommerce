@@ -7,7 +7,7 @@ const VOUCHER_STORAGE_KEY = 'mini_shopee_vouchers';
 const INITIAL_VOUCHERS = [
   {
     id: 'vouch_01',
-    code: 'AMAZON10',
+    code: 'MINI10',
     name: 'Giảm 10% Toàn Sàn',
     type: 'percent',
     value: 10,
@@ -71,7 +71,23 @@ export function getVouchers() {
       localStorage.setItem(VOUCHER_STORAGE_KEY, JSON.stringify(INITIAL_VOUCHERS));
       return INITIAL_VOUCHERS;
     }
-    return JSON.parse(raw);
+    let parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      localStorage.setItem(VOUCHER_STORAGE_KEY, JSON.stringify(INITIAL_VOUCHERS));
+      return INITIAL_VOUCHERS;
+    }
+    // Update any legacy AMAZON10 code to MINI10
+    parsed = parsed.map((v) =>
+      v.code === 'AMAZON10' ? { ...v, code: 'MINI10' } : v
+    );
+    // Ensure default initial vouchers are present
+    for (const initV of INITIAL_VOUCHERS) {
+      if (!parsed.some((v) => v.code === initV.code)) {
+        parsed.push(initV);
+      }
+    }
+    localStorage.setItem(VOUCHER_STORAGE_KEY, JSON.stringify(parsed));
+    return parsed;
   } catch {
     return INITIAL_VOUCHERS;
   }
@@ -79,9 +95,10 @@ export function getVouchers() {
 
 export function validateVoucher(code, orderSubtotal = 0) {
   if (!code) return { valid: false, message: 'Vui lòng nhập mã giảm giá' };
+  const normalized = code.trim().toUpperCase() === 'AMAZON10' ? 'MINI10' : code.trim().toUpperCase();
   const vouchers = getVouchers();
   const voucher = vouchers.find(
-    (v) => v.code.toUpperCase() === code.trim().toUpperCase()
+    (v) => v.code.toUpperCase() === normalized
   );
 
   if (!voucher) {
