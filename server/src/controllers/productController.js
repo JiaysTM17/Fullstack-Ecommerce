@@ -1,14 +1,13 @@
 import Product from "../models/Product.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 
-// @desc    Get all products with filters
+// @desc    Get all products with filters, search, sort, pagination
 // @route   GET /api/products
 // @access  Public
 const getProducts = async (req, res) => {
   try {
-    const { keyword, category, minPrice, maxPrice, sort, page = 1, limit = 12 } = req.query;
+    const { keyword, category, minPrice, maxPrice, sort, page, limit } = req.query;
 
-    // Build query
     const query = { isActive: true };
 
     if (keyword) {
@@ -21,11 +20,17 @@ const getProducts = async (req, res) => {
 
     if (minPrice || maxPrice) {
       query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
+      if (minPrice && !Number.isNaN(Number(minPrice))) {
+        query.price.$gte = Number(minPrice);
+      }
+      if (maxPrice && !Number.isNaN(Number(maxPrice))) {
+        query.price.$lte = Number(maxPrice);
+      }
+      if (Object.keys(query.price).length === 0) {
+        delete query.price;
+      }
     }
 
-    // Build sort
     let sortOption = {};
     if (sort === "price_asc") sortOption.price = 1;
     else if (sort === "price_desc") sortOption.price = -1;
@@ -33,9 +38,8 @@ const getProducts = async (req, res) => {
     else if (sort === "rating") sortOption.rating = -1;
     else sortOption.createdAt = -1;
 
-    // Pagination
-    const pageNum = Number(page);
-    const limitNum = Number(limit);
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 12));
     const skip = (pageNum - 1) * limitNum;
 
     const products = await Product.find(query)
@@ -51,7 +55,7 @@ const getProducts = async (req, res) => {
         page: pageNum,
         limit: limitNum,
         total,
-        totalPages: Math.ceil(total / limitNum),
+        totalPages: Math.ceil(total / limitNum) || 1,
       },
     });
   } catch (error) {

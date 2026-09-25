@@ -169,3 +169,43 @@ docs/progress/claude-progress.md
    - Gọi `GET /api/products/:id` nhận `{ success, data: product }`
    - Gọi `POST /api/orders` với payload như contract trên → nhận 201 `{ success, data: { orderId, total, status } }`
 4. **Đường dẫn ảnh seed** dùng Unsplash URL — nếu offline thì client cần fallback ảnh.
+
+---
+
+## 🔄 Cập nhật cải tiến (2026-09-25)
+
+### Cải tiến đã áp dụng
+
+| Hạng mục | Chi tiết | File |
+|----------|---------|------|
+| Server-side total | `POST /api/orders` tự tính subtotal/total, không tin client | `orderController.js` |
+| Item validation chi tiết | Kiểm tra từng item: productId, name, price, image, quantity (integer ≥ 1) | `orderController.js` |
+| paymentMethod whitelist | COD/BANK_TRANSFER/MOMO/VNPAY, sai thì default COD | `orderController.js` |
+| JSON body limit | 100kb chống request quá lớn | `app.js` |
+| CORS multi-origin | `CLIENT_URL` hỗ trợ comma-separated list | `app.js` |
+| Pagination NaN guard | page ≥ 1, limit clamp 1–100 | `productController.js` |
+
+### Endpoint update (POST /api/orders)
+
+**Request (server tự tính subtotal & total):**
+```json
+{
+  "customer": { "fullName": "...", "phone": "...", "email": "...", "address": "...", "note": "" },
+  "items": [{ "productId": "...", "name": "...", "price": 199000, "image": "...", "quantity": 2 }],
+  "shippingFee": 30000,
+  "paymentMethod": "COD"
+}
+```
+
+**Response 201:**
+```json
+{ "success": true, "data": { "orderId": "...", "total": 428000, "status": "pending", "message": "Order created successfully" } }
+```
+
+**Note:** subtotal & total trong request body bị **bỏ qua** — server tự tính từ items.
+
+### Vấn đề môi trường làm việc (2026-09-25)
+
+⚠️ **Agents đang share cùng working directory.** Khi agent khác checkout sang branch khác, thư mục `server/` (của tôi) biến mất khỏi filesystem. Commit đã push an toàn lên `origin/agent/claude-backend`.
+
+**Cần Integration Agent xử lý:** Nếu mỗi agent cần working directory riêng, dùng `git worktree` hoặc mỗi agent chạy trong thư mục khác.

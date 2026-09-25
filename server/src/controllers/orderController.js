@@ -6,37 +6,70 @@ import { sendSuccess, sendError } from "../utils/response.js";
 // @access  Public
 const createOrder = async (req, res) => {
   try {
-    const { customer, items, subtotal, shippingFee, total, paymentMethod } = req.body;
+    const { customer, items, shippingFee = 0, paymentMethod } = req.body;
 
-    // Validation
-    if (!customer || !customer.fullName || !customer.phone || !customer.email || !customer.address) {
+    // Validate customer
+    if (!customer) {
       return sendError(res, "Customer information is required", 400);
     }
 
-    if (!items || items.length === 0) {
-      return sendError(res, "Order items cannot be empty", 400);
+    const { fullName, phone, email, address } = customer;
+    if (!fullName || !phone || !email || !address) {
+      return sendError(res, "fullName, phone, email, address are required", 400);
     }
 
-    // Validate email format
+    // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(customer.email)) {
+    if (!emailRegex.test(email)) {
       return sendError(res, "Invalid email format", 400);
     }
 
-    // Validate phone format (9-11 digits)
+    // Validate phone (9-11 digits, strip spaces)
+    const cleanPhone = phone.replace(/\s/g, "");
     const phoneRegex = /^[0-9]{9,11}$/;
-    if (!phoneRegex.test(customer.phone.replace(/\s/g, ""))) {
+    if (!phoneRegex.test(cleanPhone)) {
       return sendError(res, "Phone number must be 9-11 digits", 400);
     }
 
-    // Create order
+    // Validate items
+    if (!Array.isArray(items) || items.length === 0) {
+      return sendError(res, "Order must contain at least one item", 400);
+    }
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (!item.productId || !item.name || item.price == null || !item.image || !item.quantity) {
+        return sendError(res, `Item ${i + 1} is missing required fields (productId, name, price, image, quantity)`, 400);
+      }
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+        return sendError(res, `Item ${i + 1} quantity must be a positive integer`, 400);
+      }
+      if (typeof item.price !== "number" || item.price < 0) {
+        return sendError(res, `Item ${i + 1} price must be a non-negative number`, 400);
+      }
+    }
+
+    // Recompute totals server-side (don't trust client)
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const total = subtotal + (Number(shippingFee) || 0);
+
+    // Validate paymentMethod
+    const allowedMethods = ["COD", "BANK_TRANSFER", "MOMO", "VNPAY"];
+    const method = allowedMethods.includes(paymentMethod) ? paymentMethod : "COD";
+
     const order = await Order.create({
-      customer,
+      customer: {
+        fullName,
+        phone: cleanPhone,
+        email,
+        address,
+        note: customer.note || "",
+      },
       items,
-      subtotal: subtotal || 0,
-      shippingFee: shippingFee || 0,
-      total: total || 0,
-      paymentMethod: paymentMethod || "COD",
+      subtotal,
+      shippingFee: Number(shippingFee) || 0,
+      total,
+      paymentMethod: method,
       status: "pending",
     });
 

@@ -36,3 +36,25 @@
 ## Trạng thái
 
 - Xem `docs/progress/claude-progress.md` để biết API contract chi tiết và tiến độ.
+
+---
+
+## Cập nhật cải tiến backend (2026-09-25)
+
+1. **Server tự tính lại total:** `POST /api/orders` giờ tự tính `subtotal = Σ(price × quantity)` và `total = subtotal + shippingFee` từ items. Client **vẫn gửi được** subtotal/total để tương thích, nhưng server ưu tiên giá trị tự tính — chống manipulated total.
+
+2. **Validate items chi tiết:** mỗi item cần có `productId`, `name`, `price`, `image`, `quantity` (integer ≥ 1). Thiếu/truyền sai → 400 với message nêu rõ item thứ mấy.
+
+3. **paymentMethod whitelist:** chỉ nhận `COD | BANK_TRANSFER | MOMO | VNPAY`, giá trị lạ → mặc định về `COD`.
+
+4. **JSON body limit 100kb:** tránh request body quá lớn.
+
+5. **CORS multi-origin:** biến `CLIENT_URL` trong `server/.env` giờ accept comma-separated list:
+   ```
+   CLIENT_URL=http://localhost:5173,http://localhost:5174
+   ```
+
+6. **Pagination an toàn:** `page` parse thành integer ≥ 1, `limit` clamp về 1–100, tránh query phá page/limit lạ (`?page=abc`, `?limit=99999`).
+
+### Nếu push bị lỗi branch conflict/remote change:
+- **KHÔNG tự merge/rebase/pull --force.** Ghi lỗi vào section này và dừng, để Integration Agent xử lý.
