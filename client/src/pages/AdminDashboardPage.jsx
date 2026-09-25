@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { formatCurrency } from '../utils/formatCurrency';
+import { getVouchers, createVoucher, deleteVoucher } from '../services/voucherService';
 import '../styles/dashboard.css';
 
 const INITIAL_ALL_SHOPS = [
@@ -10,10 +11,10 @@ const INITIAL_ALL_SHOPS = [
     ownerName: "Trần Thị Chủ Shop",
     email: "shop.genz@shopee.vn",
     phone: "0912345678",
-    productsCount: 3,
+    productsCount: 4,
     totalRevenue: 857000,
     status: "active",
-    statusText: "Đang hoạt động"
+    statusText: "Đang hoạt động",
   },
   {
     id: "shop_02",
@@ -24,7 +25,7 @@ const INITIAL_ALL_SHOPS = [
     productsCount: 4,
     totalRevenue: 2820000,
     status: "active",
-    statusText: "Đang hoạt động"
+    statusText: "Đang hoạt động",
   },
   {
     id: "shop_03",
@@ -35,29 +36,42 @@ const INITIAL_ALL_SHOPS = [
     productsCount: 1,
     totalRevenue: 0,
     status: "locked",
-    statusText: "Đang bị khóa"
-  }
+    statusText: "Đang bị khóa",
+  },
 ];
 
 const INITIAL_ALL_USERS = [
   { id: "usr_01", fullName: "Nguyễn Văn Khách", email: "khachhang@shopee.vn", role: "customer", ordersCount: 2, status: "active" },
   { id: "usr_02", fullName: "Trần Thị Chủ Shop", email: "shop.genz@shopee.vn", role: "seller", shopName: "Thời Trang GenZ", status: "active" },
   { id: "usr_03", fullName: "Lê Văn Chủ Shop", email: "shop.tech@shopee.vn", role: "seller", shopName: "TechWorld Store", status: "active" },
-  { id: "usr_04", fullName: "Tổng Quản Trị Viên", email: "admin@shopee.vn", role: "admin", status: "active" }
+  { id: "usr_04", fullName: "Tổng Quản Trị Viên", email: "admin@shopee.vn", role: "admin", status: "active" },
 ];
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'shops' | 'users' | 'products'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'shops' | 'users' | 'vouchers'
   const [shops, setShops] = useState(INITIAL_ALL_SHOPS);
   const [users, setUsers] = useState(INITIAL_ALL_USERS);
 
-  // Tính số liệu toàn sàn
+  // Voucher Management
+  const [vouchers, setVouchers] = useState(getVouchers);
+  const [showAddVoucher, setShowAddVoucher] = useState(false);
+  const [voucherForm, setVoucherForm] = useState({
+    code: '',
+    name: '',
+    type: 'percent',
+    value: '10',
+    minOrderValue: '200000',
+    maxDiscount: '100000',
+    description: '',
+  });
+
+  // Số liệu toàn sàn
   const totalPlatformRevenue = shops.reduce((sum, s) => sum + s.totalRevenue, 0);
   const totalActiveShops = shops.filter(s => s.status === 'active').length;
   const totalProducts = shops.reduce((sum, s) => sum + s.productsCount, 0);
+  const platformCommission = Math.round(totalPlatformRevenue * 0.05); // 5% take rate
 
-  // Khóa / Mở khóa Shop
   const handleToggleShopStatus = (shopId) => {
     setShops(prev => prev.map(s => {
       if (s.id === shopId) {
@@ -65,14 +79,13 @@ export default function AdminDashboardPage() {
         return {
           ...s,
           status: nextStatus,
-          statusText: nextStatus === 'active' ? 'Đang hoạt động' : 'Đang bị khóa'
+          statusText: nextStatus === 'active' ? 'Đang hoạt động' : 'Đang bị khóa',
         };
       }
       return s;
     }));
   };
 
-  // Khóa / Mở khóa User
   const handleToggleUserStatus = (userId) => {
     setUsers(prev => prev.map(u => {
       if (u.id === userId) {
@@ -82,12 +95,48 @@ export default function AdminDashboardPage() {
     }));
   };
 
+  const handleCreateVoucher = (e) => {
+    e.preventDefault();
+    if (!voucherForm.code || !voucherForm.value) return;
+
+    const created = createVoucher({
+      code: voucherForm.code,
+      name: voucherForm.name || `Voucher ${voucherForm.code}`,
+      type: voucherForm.type,
+      value: Number(voucherForm.value),
+      minOrderValue: Number(voucherForm.minOrderValue) || 0,
+      maxDiscount: Number(voucherForm.maxDiscount) || null,
+      description: voucherForm.description || `Giảm ${voucherForm.value}${voucherForm.type === 'percent' ? '%' : 'đ'}`,
+      isGlobal: true,
+      usageLimit: 500,
+    });
+
+    setVouchers([created, ...vouchers]);
+    setShowAddVoucher(false);
+    setVoucherForm({
+      code: '',
+      name: '',
+      type: 'percent',
+      value: '10',
+      minOrderValue: '200000',
+      maxDiscount: '100000',
+      description: '',
+    });
+  };
+
+  const handleDeleteVoucher = (vouchId) => {
+    if (window.confirm("Bạn có chắc muốn xóa mã voucher này khỏi sàn?")) {
+      const updated = deleteVoucher(vouchId);
+      setVouchers(updated);
+    }
+  };
+
   return (
     <div className="shopee-dashboard-container">
       {/* Sidebar Super Admin */}
       <aside className="shopee-sidebar">
         <div className="shopee-sidebar-brand">
-          <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: 'var(--primary-color)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: '#ee4d2d', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
             🛡️
           </div>
           <div className="shopee-sidebar-info">
@@ -103,7 +152,7 @@ export default function AdminDashboardPage() {
           className={`shopee-nav-item ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
-          📊 Tổng Quan Sàn
+          📊 Tổng Quan Sàn & GMV
         </button>
 
         <button
@@ -121,6 +170,14 @@ export default function AdminDashboardPage() {
         >
           👥 Quản Lý Người Dùng ({users.length})
         </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'vouchers' ? 'active' : ''}`}
+          onClick={() => setActiveTab('vouchers')}
+        >
+          🎟️ Quản Lý Voucher Sàn ({vouchers.length})
+        </button>
       </aside>
 
       {/* Main Content */}
@@ -129,7 +186,7 @@ export default function AdminDashboardPage() {
           <div>
             <h1 className="shopee-dashboard-title">Hệ Thống Quản Trị Tối Cao Sàn Mini Shopee</h1>
             <p className="shopee-dashboard-subtitle">
-              Giám sát toàn bộ cửa hàng, người bán, khách hàng và dòng tiền trên sàn.
+              Giám sát toàn bộ cửa hàng, người bán, khách hàng, voucher khuyến mãi và doanh thu toàn sàn.
             </p>
           </div>
         </div>
@@ -137,54 +194,61 @@ export default function AdminDashboardPage() {
         {/* 4 Thẻ chỉ số toàn sàn */}
         <div className="shopee-metrics-grid">
           <div className="shopee-metric-card">
-            <span className="shopee-metric-label">Doanh Thu Toàn Hệ Thống</span>
-            <span className="shopee-metric-value">{formatCurrency(totalPlatformRevenue)}</span>
-            <span className="shopee-metric-hint">Tổng giá trị giao dịch GMV</span>
+            <span className="shopee-metric-label">Tổng Doanh Số Sàn (GMV)</span>
+            <div className="shopee-metric-value">{formatCurrency(totalPlatformRevenue)}</div>
+            <span style={{ fontSize: '11px', color: '#2e7d32' }}>+18.4% so với tháng trước</span>
           </div>
+
           <div className="shopee-metric-card">
-            <span className="shopee-metric-label">Số Shop Đang Hoạt Động</span>
-            <span className="shopee-metric-value">{totalActiveShops} / {shops.length}</span>
-            <span className="shopee-metric-hint">{shops.length - totalActiveShops} shop bị khóa</span>
+            <span className="shopee-metric-label">Hoa Hồng Thu Sàn (5%)</span>
+            <div className="shopee-metric-value" style={{ color: '#2e7d32' }}>
+              {formatCurrency(platformCommission)}
+            </div>
+            <span style={{ fontSize: '11px', color: '#666' }}>Doanh thu thuần của sàn</span>
           </div>
+
           <div className="shopee-metric-card">
-            <span className="shopee-metric-label">Tổng Mặt Hàng Trên Sàn</span>
-            <span className="shopee-metric-value">{totalProducts}</span>
-            <span className="shopee-metric-hint">Phân bổ qua nhiều Shop</span>
+            <span className="shopee-metric-label">Gian Hàng Hoạt Động</span>
+            <div className="shopee-metric-value">{totalActiveShops} / {shops.length}</div>
+            <span style={{ fontSize: '11px', color: '#666' }}>Tỷ lệ duyệt shop: 95%</span>
           </div>
+
           <div className="shopee-metric-card">
-            <span className="shopee-metric-label">Tổng Tài Khoản Người Dùng</span>
-            <span className="shopee-metric-value">{users.length}</span>
-            <span className="shopee-metric-hint">Khách hàng & Chủ shop</span>
+            <span className="shopee-metric-label">Tổng Thành Viên Sàn</span>
+            <div className="shopee-metric-value">{users.length}</div>
+            <span style={{ fontSize: '11px', color: '#666' }}>{totalProducts} mặt hàng niêm yết</span>
           </div>
         </div>
 
-        {/* TAB 1: TỔNG QUAN SÀN */}
+        {/* TAB 1: TỔNG QUAN */}
         {activeTab === 'overview' && (
           <div className="shopee-table-card">
             <h2 style={{ fontSize: '16px', margin: '0 0 16px', fontWeight: 700 }}>
-              Cửa Hàng Hoạt Động Tiêu Biểu Trên Sàn
+              Xếp Hạng Doanh Thu Các Gian Hàng Trên Sàn
             </h2>
             <div className="shopee-table-responsive">
               <table className="shopee-data-table">
                 <thead>
                   <tr>
-                    <th>Tên Shop</th>
-                    <th>Chủ sở hữu</th>
-                    <th>Hotline</th>
-                    <th>Số sản phẩm</th>
-                    <th>Doanh số đóng góp</th>
-                    <th>Trạng thái</th>
+                    <th>Tên Cửa Hàng</th>
+                    <th>Chủ Sở Hữu</th>
+                    <th>Số Mặt Hàng</th>
+                    <th>Doanh Thu GMV</th>
+                    <th>Hoa Hồng Sàn (5%)</th>
+                    <th>Trạng Thái</th>
                   </tr>
                 </thead>
                 <tbody>
                   {shops.map(s => (
                     <tr key={s.id}>
                       <td><strong>{s.name}</strong></td>
-                      <td>{s.ownerName}</td>
-                      <td>{s.phone}</td>
-                      <td>{s.productsCount} mặt hàng</td>
-                      <td style={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+                      <td>{s.ownerName} ({s.email})</td>
+                      <td>{s.productsCount} sản phẩm</td>
+                      <td style={{ fontWeight: 700, color: 'var(--primary-color)' }}>
                         {formatCurrency(s.totalRevenue)}
+                      </td>
+                      <td style={{ fontWeight: 600, color: '#2e7d32' }}>
+                        {formatCurrency(Math.round(s.totalRevenue * 0.05))}
                       </td>
                       <td>
                         <span className={`shopee-status-badge ${s.status === 'active' ? 'status-active' : 'status-hidden'}`}>
@@ -199,54 +263,46 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* TAB 2: QUẢN LÝ CỬA HÀNG (SHOPS) */}
+        {/* TAB 2: QUẢN LÝ CỬA HÀNG */}
         {activeTab === 'shops' && (
           <div className="shopee-table-card">
-            <div className="shopee-table-toolbar">
-              <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 700 }}>
-                Danh Sách Tất Cả Cửa Hàng / Người Bán ({shops.length})
-              </h2>
-            </div>
-
+            <h2 style={{ fontSize: '16px', margin: '0 0 16px', fontWeight: 700 }}>
+              Danh Sách Gian Hàng Đăng Ký ({shops.length})
+            </h2>
             <div className="shopee-table-responsive">
               <table className="shopee-data-table">
                 <thead>
                   <tr>
                     <th>Shop ID</th>
-                    <th>Tên Cửa Hàng</th>
-                    <th>Chủ sở hữu / Email</th>
-                    <th>Số hàng hóa</th>
-                    <th>Doanh thu</th>
-                    <th>Trạng thái</th>
-                    <th>Hành động Admin</th>
+                    <th>Tên Gian Hàng</th>
+                    <th>Chủ Sở Hữu</th>
+                    <th>Hotline</th>
+                    <th>Doanh Số</th>
+                    <th>Tình Trạng</th>
+                    <th>Quyết Định</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {shops.map(shop => (
-                    <tr key={shop.id}>
-                      <td><code>{shop.id}</code></td>
-                      <td><strong>{shop.name}</strong></td>
+                  {shops.map(s => (
+                    <tr key={s.id}>
+                      <td><code>{s.id}</code></td>
+                      <td><strong>{s.name}</strong></td>
+                      <td>{s.ownerName}</td>
+                      <td>{s.phone}</td>
+                      <td>{formatCurrency(s.totalRevenue)}</td>
                       <td>
-                        <div>{shop.ownerName}</div>
-                        <small style={{ color: 'var(--text-muted)' }}>{shop.email}</small>
-                      </td>
-                      <td>{shop.productsCount} mặt hàng</td>
-                      <td style={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-                        {formatCurrency(shop.totalRevenue)}
-                      </td>
-                      <td>
-                        <span className={`shopee-status-badge ${shop.status === 'active' ? 'status-active' : 'status-hidden'}`}>
-                          {shop.statusText}
+                        <span className={`shopee-status-badge ${s.status === 'active' ? 'status-active' : 'status-hidden'}`}>
+                          {s.statusText}
                         </span>
                       </td>
                       <td>
                         <button
                           type="button"
-                          className={`shopee-btn shopee-btn-sm ${shop.status === 'active' ? 'shopee-btn-secondary' : 'shopee-btn-primary'}`}
-                          style={shop.status === 'active' ? { color: 'var(--color-error)' } : {}}
-                          onClick={() => handleToggleShopStatus(shop.id)}
+                          className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                          style={s.status === 'active' ? { color: '#d32f2f' } : { color: '#2e7d32' }}
+                          onClick={() => handleToggleShopStatus(s.id)}
                         >
-                          {shop.status === 'active' ? '🔒 Khóa Shop' : '🔓 Mở Khóa'}
+                          {s.status === 'active' ? '🚫 Khóa gian hàng' : '✓ Mở khóa hoạt động'}
                         </button>
                       </td>
                     </tr>
@@ -261,19 +317,18 @@ export default function AdminDashboardPage() {
         {activeTab === 'users' && (
           <div className="shopee-table-card">
             <h2 style={{ fontSize: '16px', margin: '0 0 16px', fontWeight: 700 }}>
-              Danh Sách Người Dùng Hệ Thống ({users.length})
+              Danh Sách Tài Khoản Người Dùng Toàn Sàn ({users.length})
             </h2>
-
             <div className="shopee-table-responsive">
               <table className="shopee-data-table">
                 <thead>
                   <tr>
                     <th>User ID</th>
-                    <th>Họ và tên</th>
+                    <th>Họ Và Tên</th>
                     <th>Email</th>
-                    <th>Vai trò (Role)</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
+                    <th>Vai Trò (Phân Quyền)</th>
+                    <th>Trạng Thái</th>
+                    <th>Thao Tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -297,12 +352,132 @@ export default function AdminDashboardPage() {
                           <button
                             type="button"
                             className="shopee-btn shopee-btn-secondary shopee-btn-sm"
-                            style={u.status === 'active' ? { color: 'var(--color-error)' } : { color: 'var(--color-success)' }}
+                            style={u.status === 'active' ? { color: '#d32f2f' } : { color: '#2e7d32' }}
                             onClick={() => handleToggleUserStatus(u.id)}
                           >
                             {u.status === 'active' ? 'Cấm tài khoản' : 'Mở khóa'}
                           </button>
                         )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: QUẢN LÝ VOUCHER KHUYẾN MÃI TOÀN SÀN */}
+        {activeTab === 'vouchers' && (
+          <div className="shopee-table-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 700 }}>
+                Quản Lý Mã Giảm Giá Sàn ({vouchers.length})
+              </h2>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-primary shopee-btn-sm"
+                onClick={() => setShowAddVoucher(prev => !prev)}
+              >
+                {showAddVoucher ? '✕ Đóng form' : '+ Tạo Voucher Mới'}
+              </button>
+            </div>
+
+            {/* Create voucher form */}
+            {showAddVoucher && (
+              <form onSubmit={handleCreateVoucher} style={{ background: '#fafafa', padding: '16px', borderRadius: '8px', border: '1px solid #ddd', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 12px' }}>Tạo Mã Giảm Giá Toàn Sàn</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 700 }}>Mã Voucher (Code):</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="VD: SUPERDEAL"
+                      className="shopee-form-input"
+                      value={voucherForm.code}
+                      onChange={(e) => setVoucherForm({ ...voucherForm, code: e.target.value })}
+                      style={{ textTransform: 'uppercase' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 700 }}>Loại giảm giá:</label>
+                    <select
+                      className="shopee-form-select"
+                      value={voucherForm.type}
+                      onChange={(e) => setVoucherForm({ ...voucherForm, type: e.target.value })}
+                    >
+                      <option value="percent">Giảm theo %</option>
+                      <option value="fixed">Giảm tiền mặt (₫)</option>
+                      <option value="shipping">Miễn phí ship (₫)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 700 }}>Mức giảm (% hoặc ₫):</label>
+                    <input
+                      type="number"
+                      required
+                      className="shopee-form-input"
+                      value={voucherForm.value}
+                      onChange={(e) => setVoucherForm({ ...voucherForm, value: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 700 }}>Đơn tối thiểu (₫):</label>
+                    <input
+                      type="number"
+                      className="shopee-form-input"
+                      value={voucherForm.minOrderValue}
+                      onChange={(e) => setVoucherForm({ ...voucherForm, minOrderValue: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                  <button type="submit" className="shopee-btn shopee-btn-primary">
+                    ✓ Phát Hành Voucher Toàn Sàn
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Vouchers Table */}
+            <div className="shopee-table-responsive">
+              <table className="shopee-data-table">
+                <thead>
+                  <tr>
+                    <th>Mã Code</th>
+                    <th>Tên Voucher</th>
+                    <th>Mức Giảm</th>
+                    <th>Đơn Tối Thiểu</th>
+                    <th>Giảm Tối Đa</th>
+                    <th>Đã Dùng</th>
+                    <th>Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {vouchers.map(v => (
+                    <tr key={v.id}>
+                      <td><strong style={{ color: '#ee4d2d', background: '#fff5f2', padding: '2px 8px', borderRadius: '4px' }}>{v.code}</strong></td>
+                      <td>{v.name}</td>
+                      <td style={{ fontWeight: 700 }}>
+                        {v.type === 'percent' ? `${v.value}%` : formatCurrency(v.value)}
+                      </td>
+                      <td>{formatCurrency(v.minOrderValue)}</td>
+                      <td>{v.maxDiscount ? formatCurrency(v.maxDiscount) : 'Không giới hạn'}</td>
+                      <td>{v.usedCount} lượt</td>
+                      <td>
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                          style={{ color: '#d32f2f' }}
+                          onClick={() => handleDeleteVoucher(v.id)}
+                        >
+                          Xóa
+                        </button>
                       </td>
                     </tr>
                   ))}

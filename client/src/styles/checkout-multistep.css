@@ -1,0 +1,181 @@
+/* Multi-step Checkout Styles - Amazon Style */
+
+.checkout-steps-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px 24px;
+  border: 1px solid #e0e0e0;
+}
+
+@media (max-width: 640px) {
+  .checkout-steps-nav {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+
+.checkout-step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #777;
+}
+
+.checkout-step-item.active {
+  color: #ee4d2d;
+}
+
+.checkout-step-item.completed {
+  color: #2e7d32;
+}
+
+.checkout-step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.checkout-step-item.active .checkout-step-number {
+  background: #ee4d2d;
+}
+
+.checkout-step-item.completed .checkout-step-number {
+  background: #2e7d32;
+}
+
+/* Address Cards */
+.address-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.address-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.address-card:hover {
+  border-color: #ee4d2d;
+}
+
+.address-card.selected {
+  border-color: #ee4d2d;
+  background: #fffbf9;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.15);
+}
+
+.address-default-badge {
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+/* Shipping Option Cards */
+.shipping-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.shipping-option-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.shipping-option-card:hover {
+  border-color: #ee4d2d;
+}
+
+.shipping-option-card.selected {
+  border-color: #ee4d2d;
+  background: #fffbf9;
+}
+
+.shipping-price-tag {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ee4d2d;
+}
+
+/* Payment Method Cards */
+.payment-methods-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.payment-method-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.payment-method-card.selected {
+  border-color: #ee4d2d;
+  background: #fffbf9;
+}
+
+.payment-card-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.payment-method-icon {
+  font-size: 24px;
+}
+
+.payment-qr-preview {
+  margin-top: 14px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 6px;
+  border: 1px dashed #ccc;
+  text-align: center;
+}
+
+.payment-qr-img {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 10px;
+  background: #fff;
+  padding: 6px;
+  border: 1px solid #ddd;
+}

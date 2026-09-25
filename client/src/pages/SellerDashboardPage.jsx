@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, DEMO_ACCOUNTS } from '../context/AuthContext';
 import { formatCurrency } from '../utils/formatCurrency';
+import ShippingLabelModal from '../components/ShippingLabelModal';
 import '../styles/dashboard.css';
+
 
 // Danh sách các Shop mẫu để demo tính năng nhiều shop quản lý độc lập
 const INITIAL_SHOPS = [
@@ -156,6 +158,8 @@ export default function SellerDashboardPage() {
   // Modal thêm / sửa mặt hàng
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [printingOrder, setPrintingOrder] = useState(null);
+
   const [productForm, setProductForm] = useState({
     name: '',
     price: '',
@@ -516,9 +520,19 @@ export default function SellerDashboardPage() {
                           {ord.status === 'completed' && (
                             <span style={{ fontSize: '12px', color: 'var(--color-success)' }}>✓ Đã hoàn tất</span>
                           )}
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                            style={{ marginLeft: '6px' }}
+                            onClick={() => setPrintingOrder(ord)}
+                            title="In phiếu gửi hàng & Hóa đơn"
+                          >
+                            🖨️ In Vận Đơn
+                          </button>
                         </td>
                       </tr>
                     ))
+
                   )}
                 </tbody>
               </table>
@@ -673,7 +687,18 @@ export default function SellerDashboardPage() {
             </div>
           </div>
         )}
+
+        {/* Modal In Phiếu Giao Hàng & Hóa Đơn */}
+        {printingOrder && (
+          <ShippingLabelModal
+            order={printingOrder}
+            shopName={currentShop.name}
+            onClose={() => setPrintingOrder(null)}
+          />
+        )}
+
       </main>
     </div>
   );
 }
+
