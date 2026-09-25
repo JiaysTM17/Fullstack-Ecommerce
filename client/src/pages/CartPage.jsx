@@ -9,6 +9,7 @@ export default function CartPage() {
     totalQuantity,
     increaseQuantity,
     decreaseQuantity,
+    setQuantity,
     removeFromCart,
   } = useCart();
 
@@ -58,9 +59,10 @@ export default function CartPage() {
                 </button>
                 <input
                   className="shopee-qty-input"
-                  readOnly
+                  min="1"
                   type="number"
                   value={item.quantity}
+                  onChange={(event) => setQuantity(item.productId, event.target.value)}
                 />
                 <button
                   className="shopee-qty-btn"
