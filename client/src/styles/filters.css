@@ -1,0 +1,170 @@
+/* Faceted Sidebar Filters - Amazon Style */
+
+.shopee-filter-sidebar {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid #e8e8e8;
+  height: fit-content;
+}
+
+.shopee-filter-section {
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.shopee-filter-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.shopee-filter-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shopee-filter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shopee-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #444;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.shopee-filter-item:hover {
+  color: #ee4d2d;
+}
+
+.shopee-filter-item.active {
+  color: #ee4d2d;
+  font-weight: 600;
+}
+
+.shopee-price-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.shopee-price-chip {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #333;
+}
+
+.shopee-price-chip:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+  background: #fff;
+}
+
+.shopee-price-chip.active {
+  background: #ee4d2d;
+  color: #fff;
+  border-color: #ee4d2d;
+  font-weight: 600;
+}
+
+.shopee-custom-price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shopee-custom-price-input {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.shopee-custom-price-input:focus {
+  border-color: #ee4d2d;
+  outline: none;
+}
+
+.shopee-price-apply-btn {
+  background: #ee4d2d;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.shopee-rating-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 0;
+  font-size: 13.5px;
+  color: #333;
+}
+
+.shopee-rating-filter-row:hover {
+  color: #ee4d2d;
+}
+
+.shopee-rating-stars {
+  color: #f5a623;
+  font-size: 15px;
+}
+
+.shopee-fast-delivery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #e3f2fd;
+  color: #1976d2;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.shopee-clear-filters-btn {
+  width: 100%;
+  background: #fff;
+  color: #ee4d2d;
+  border: 1px dashed #ee4d2d;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 14px;
+  transition: all 0.2s;
+}
+
+.shopee-clear-filters-btn:hover {
+  background: #fff5f2;
+}

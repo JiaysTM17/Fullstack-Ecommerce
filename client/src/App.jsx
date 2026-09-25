@@ -10,6 +10,7 @@ import {
 import { Footer, Header } from "./components";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider, useCart } from "./context/CartContext";
+import { WishlistProvider } from "./context/WishlistContext";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -22,6 +23,7 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage";
 import SellerDashboardPage from "./pages/SellerDashboardPage";
+import WishlistPage from "./pages/WishlistPage";
 
 function AppLayout() {
   const { totalQuantity } = useCart();
@@ -71,6 +73,7 @@ function AppLayout() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order-success" element={<OrderSuccessPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/profile" element={<ProfilePage />} />
@@ -88,11 +91,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <CartProvider>
-          <AppLayout />
-        </CartProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <AppLayout />
+          </CartProvider>
+        </WishlistProvider>
       </AuthProvider>
     </BrowserRouter>
   );
 }
-

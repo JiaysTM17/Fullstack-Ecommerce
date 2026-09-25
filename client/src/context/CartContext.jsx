@@ -5,10 +5,13 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useState,
 } from "react";
+import { validateVoucher } from "../services/voucherService";
 
 const CART_STORAGE_KEY = "cart";
 const LEGACY_CART_STORAGE_KEY = "mini_shopee_cart";
+const SAVED_ITEMS_KEY = "mini_shopee_saved_items";
 
 const CartContext = createContext(null);
 
@@ -21,12 +24,17 @@ function normalizeCartItem(product, quantity) {
 
   return {
     productId,
-    name: product.name || "San pham",
+    name: product.name || "Sản phẩm",
     price: Number(product.price) || 0,
+    originalPrice: Number(product.originalPrice) || Number(product.price) || 0,
     image: product.image || product.images?.[0] || "",
     quantity: Math.max(1, Number(quantity) || 1),
-    stock: Number(product.stock) || 0,
+    stock: Number(product.stock) || 50,
     slug: product.slug || "",
+    shopId: product.shopId || "shop_01",
+    shopName: product.shopName || "Thời Trang GenZ",
+    selectedColor: product.selectedColor || null,
+    selectedSize: product.selectedSize || null,
   };
 }
 
@@ -46,6 +54,16 @@ function loadCartFromStorage() {
       localStorage.getItem(LEGACY_CART_STORAGE_KEY);
     const savedCart = rawCart ? JSON.parse(rawCart) : [];
     return Array.isArray(savedCart) ? savedCart : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadSavedFromStorage() {
+  try {
+    if (typeof window === "undefined") return [];
+    const raw = localStorage.getItem(SAVED_ITEMS_KEY);
+    return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
@@ -139,14 +157,37 @@ export function CartProvider({ children }) {
     items: loadCartFromStorage(),
   }));
 
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+  // Selected items checkbox state
+  const [selectedItemIds, setSelectedItemIds] = useState(() => {
+    return loadCartFromStorage().map((item) => item.productId);
+  });
 
+  // Saved for later list
+  const [savedItems, setSavedItems] = useState(loadSavedFromStorage);
+
+  // Voucher state
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
+  const [voucherError, setVoucherError] = useState("");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items));
     localStorage.removeItem(LEGACY_CART_STORAGE_KEY);
+
+    // Keep selectedItemIds aligned
+    setSelectedItemIds((prev) => {
+      const validIds = state.items.map((i) => i.productId);
+      // Include any newly added items automatically
+      const newlyAdded = validIds.filter((id) => !prev.includes(id));
+      const remaining = prev.filter((id) => validIds.includes(id));
+      return [...remaining, ...newlyAdded];
+    });
   }, [state.items]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(SAVED_ITEMS_KEY, JSON.stringify(savedItems));
+  }, [savedItems]);
 
   const addToCart = useCallback((product, quantity = 1) => {
     dispatch({ type: "ADD_TO_CART", product, quantity });
@@ -154,6 +195,7 @@ export function CartProvider({ children }) {
 
   const removeFromCart = useCallback((productId) => {
     dispatch({ type: "REMOVE_FROM_CART", productId });
+    setSelectedItemIds((prev) => prev.filter((id) => id !== productId));
   }, []);
 
   const increaseQuantity = useCallback((productId) => {
@@ -170,14 +212,68 @@ export function CartProvider({ children }) {
 
   const clearCart = useCallback(() => {
     dispatch({ type: "CLEAR_CART" });
+    setSelectedItemIds([]);
+    setAppliedVoucher(null);
   }, []);
 
-  const getCartCount = useCallback(
+  // Selection methods
+  const toggleSelectItem = useCallback((productId) => {
+    setSelectedItemIds((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId],
+    );
+  }, []);
+
+  const selectAllItems = useCallback(() => {
+    setSelectedItemIds(state.items.map((i) => i.productId));
+  }, [state.items]);
+
+  const unselectAllItems = useCallback(() => {
+    setSelectedItemIds([]);
+  }, []);
+
+  const isItemSelected = useCallback(
+    (productId) => selectedItemIds.includes(productId),
+    [selectedItemIds],
+  );
+
+  // Save for later methods
+  const saveForLater = useCallback(
+    (productId) => {
+      const itemToSave = state.items.find((i) => i.productId === productId);
+      if (itemToSave) {
+        setSavedItems((prev) => {
+          if (prev.some((i) => i.productId === productId)) return prev;
+          return [...prev, itemToSave];
+        });
+        removeFromCart(productId);
+      }
+    },
+    [state.items, removeFromCart],
+  );
+
+  const moveToCartFromSaved = useCallback(
+    (savedItem) => {
+      addToCart(savedItem, savedItem.quantity || 1);
+      setSavedItems((prev) =>
+        prev.filter((i) => i.productId !== savedItem.productId),
+      );
+    },
+    [addToCart],
+  );
+
+  const removeFromSaved = useCallback((productId) => {
+    setSavedItems((prev) => prev.filter((i) => i.productId !== productId));
+  }, []);
+
+  // Calculations
+  const totalQuantity = useMemo(
     () => state.items.reduce((total, item) => total + item.quantity, 0),
     [state.items],
   );
 
-  const getCartSubtotal = useCallback(
+  const subtotal = useMemo(
     () =>
       state.items.reduce(
         (total, item) => total + item.price * item.quantity,
@@ -186,30 +282,122 @@ export function CartProvider({ children }) {
     [state.items],
   );
 
+  const selectedItems = useMemo(
+    () => state.items.filter((item) => selectedItemIds.includes(item.productId)),
+    [state.items, selectedItemIds],
+  );
+
+  const selectedSubtotal = useMemo(
+    () =>
+      selectedItems.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0,
+      ),
+    [selectedItems],
+  );
+
+  // Voucher validation and discount
+  const applyVoucher = useCallback(
+    (code) => {
+      const result = validateVoucher(code, selectedSubtotal || subtotal);
+      if (result.valid) {
+        setAppliedVoucher(result.voucher);
+        setVoucherError("");
+        return { success: true, message: result.message };
+      } else {
+        setVoucherError(result.message);
+        return { success: false, message: result.message };
+      }
+    },
+    [selectedSubtotal, subtotal],
+  );
+
+  const removeVoucher = useCallback(() => {
+    setAppliedVoucher(null);
+    setVoucherError("");
+  }, []);
+
+  const voucherDiscount = useMemo(() => {
+    if (!appliedVoucher) return 0;
+    const baseSubtotal = selectedSubtotal > 0 ? selectedSubtotal : subtotal;
+    if (appliedVoucher.type === "percent") {
+      const raw = Math.round((baseSubtotal * appliedVoucher.value) / 100);
+      return appliedVoucher.maxDiscount ? Math.min(raw, appliedVoucher.maxDiscount) : raw;
+    }
+    return appliedVoucher.value || 0;
+  }, [appliedVoucher, selectedSubtotal, subtotal]);
+
+  // Shipping calculation
+  const defaultShippingFee = selectedItems.length > 0 ? 25000 : 0;
+  const shippingFee =
+    appliedVoucher?.type === "shipping"
+      ? Math.max(0, defaultShippingFee - (appliedVoucher.value || 30000))
+      : defaultShippingFee;
+
+  const finalTotal = useMemo(() => {
+    const base = selectedSubtotal > 0 ? selectedSubtotal : subtotal;
+    if (base === 0) return 0;
+    return Math.max(0, base - voucherDiscount + shippingFee);
+  }, [selectedSubtotal, subtotal, voucherDiscount, shippingFee]);
+
   const value = useMemo(
     () => ({
       items: state.items,
-      totalQuantity: getCartCount(),
-      subtotal: getCartSubtotal(),
+      totalQuantity,
+      subtotal,
+      selectedItems,
+      selectedItemIds,
+      selectedSubtotal,
+      savedItems,
+      appliedVoucher,
+      voucherError,
+      voucherDiscount,
+      shippingFee,
+      finalTotal,
       addToCart,
       removeFromCart,
       increaseQuantity,
       decreaseQuantity,
       setQuantity,
       clearCart,
-      getCartCount,
-      getCartSubtotal,
+      toggleSelectItem,
+      selectAllItems,
+      unselectAllItems,
+      isItemSelected,
+      saveForLater,
+      moveToCartFromSaved,
+      removeFromSaved,
+      applyVoucher,
+      removeVoucher,
     }),
     [
       state.items,
-      getCartCount,
-      getCartSubtotal,
+      totalQuantity,
+      subtotal,
+      selectedItems,
+      selectedItemIds,
+      selectedSubtotal,
+      savedItems,
+      appliedVoucher,
+      voucherError,
+      voucherDiscount,
+      shippingFee,
+      finalTotal,
       addToCart,
       removeFromCart,
       increaseQuantity,
       decreaseQuantity,
       setQuantity,
       clearCart,
+      toggleSelectItem,
+      selectAllItems,
+      unselectAllItems,
+      isItemSelected,
+      saveForLater,
+      moveToCartFromSaved,
+      removeFromSaved,
+      applyVoucher,
+      removeVoucher,
     ],
   );
 
@@ -218,10 +406,8 @@ export function CartProvider({ children }) {
 
 export function useCart() {
   const context = useContext(CartContext);
-
   if (!context) {
     throw new Error("useCart must be used inside CartProvider");
   }
-
   return context;
 }

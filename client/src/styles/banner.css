@@ -1,0 +1,173 @@
+/* Hero Banner Carousel Styles - Amazon / Shopee Style */
+
+.shopee-hero-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.shopee-hero-carousel {
+  position: relative;
+  height: 340px;
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .shopee-hero-carousel {
+    height: 200px;
+  }
+}
+
+.shopee-hero-slide {
+  min-width: 100%;
+  height: 100%;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+}
+
+.shopee-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
+}
+
+.shopee-hero-content {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  padding: 0 48px;
+  max-width: 580px;
+}
+
+@media (max-width: 768px) {
+  .shopee-hero-content {
+    padding: 0 20px;
+    max-width: 100%;
+  }
+}
+
+.shopee-hero-badge {
+  display: inline-block;
+  background: #ee4d2d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.shopee-hero-title {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+  .shopee-hero-title {
+    font-size: 20px;
+  }
+}
+
+.shopee-hero-desc {
+  font-size: 15px;
+  opacity: 0.9;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .shopee-hero-desc {
+    display: none;
+  }
+}
+
+.shopee-hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffb703;
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 10px 24px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 183, 3, 0.4);
+}
+
+.shopee-hero-btn:hover {
+  background: #ffa200;
+  transform: translateY(-2px);
+}
+
+.shopee-hero-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.4);
+  color: #1a1a1a;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s;
+}
+
+.shopee-hero-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.shopee-hero-prev {
+  left: 16px;
+}
+
+.shopee-hero-next {
+  right: 16px;
+}
+
+.shopee-hero-dots {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+
+.shopee-hero-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.shopee-hero-dot.active {
+  background: #ee4d2d;
+  width: 24px;
+  border-radius: 10px;
+}

@@ -98,3 +98,30 @@ Hệ thống CSS đã được nâng cấp toàn diện để tương thích nga
   - Chủ Shop 2: `shop.tech@shopee.vn` (Mật khẩu: `123456`)
   - Quản trị viên: `admin@shopee.vn` (Mật khẩu: `admin123`)
 
+---
+
+## 7. Nâng Cấp Toàn Diện Chuẩn Sàn Quốc Tế (Amazon / Shopee / Lazada)
+Đã triển khai hệ thống tính năng thương mại điện tử chuyên nghiệp:
+1. **Trang chủ chuẩn Amazon:**
+   - Hero Banner Carousel trình chiếu chiến dịch khuyến mãi.
+   - Flash Deals / Giờ vàng giá sốc tích hợp đồng hồ đếm ngược thời gian thực và thanh tiến độ % đã bán.
+   - Sidebar bộ lọc đa tiêu chí (ProductFilters): khoảng giá presets/tự nhập, đánh giá 4★+, giao nhanh 2h, huy hiệu Amazon's Choice.
+2. **Trang chi tiết sản phẩm Amazon PDP:**
+   - Gallery đa ảnh với thumbnails strip chuyển đổi góc nhìn.
+   - Khung Amazon Buy Box: Cảnh báo tồn kho ("Còn hàng", "Chỉ còn 3 sản phẩm"), nút "Thêm vào giỏ" và "Mua ngay 1-click".
+   - Bộ chọn biến thể (Màu sắc, Kích thước) trực quan.
+   - Bảng thông số kỹ thuật chi tiết (Specifications table).
+   - Card Cửa hàng uy tín: Tỷ lệ chat, điểm đánh giá, nút Xem Shop / Chat ngay.
+   - Hệ thống đánh giá 5 sao: Biểu đồ thanh tỷ lệ phân bổ sao, danh sách nhận xét Đã mua hàng (Verified Purchase), form viết đánh giá có chấm điểm sao.
+3. **Giỏ hàng & Thanh toán đa bước:**
+   - Chọn từng món hàng để thanh toán bằng checkbox.
+   - Tính năng "Lưu lại mua sau" (Save for later).
+   - Hệ thống mã giảm giá sàn (Voucher engine: `AMAZON10`, `FREESHIP`, `WELCOME50`) trừ tiền trực quan.
+   - Quy trình thanh toán 4 bước: Địa chỉ -> Vận chuyển (Tiêu chuẩn/2H/Tiết kiệm) -> Thanh toán (COD/Visa Card mockup/MoMo/VietQR) -> Xác nhận đơn.
+4. **Trang Yêu thích (`/wishlist`):**
+   - Quản lý các mặt hàng thả tim, nút chuyển nhanh vào giỏ.
+5. **Kênh Người Bán & Quản Trị Sàn:**
+   - Modal In Phiếu Giao Hàng & Hóa Đơn (ShippingLabelModal) chuẩn sàn vận chuyển SPX Express.
+   - Quản lý mã giảm giá sàn (Voucher Manager) trong Super Admin Dashboard.
+
+

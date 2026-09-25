@@ -1,91 +1,512 @@
-import { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { CheckoutForm } from "../components";
+import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { createOrder } from "../services/orderService";
 import { formatCurrency } from "../utils/formatCurrency";
+import "../styles/checkout-multistep.css";
 
-const SHIPPING_FEE = 30000;
+const SHIPPING_OPTIONS = [
+  { id: "standard", name: "Giao Tiêu Chuẩn (2-3 ngày)", fee: 25000, desc: "Đơn vị vận chuyển SPX Express an toàn, tiết kiệm" },
+  { id: "express", name: "Giao Hỏa Tốc 2H (Prime Express)", fee: 45000, desc: "Nhận hàng trong vòng 2 giờ kể từ khi shop xác nhận" },
+  { id: "economy", name: "Giao Tiết Kiệm (4-5 ngày)", fee: 15000, desc: "Tối ưu chi phí cho các đơn hàng cồng kềnh" },
+];
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { items, subtotal, clearCart } = useCart();
-  const [submitError, setSubmitError] = useState("");
+  const { user } = useAuth();
+  const {
+    items,
+    selectedItems,
+    selectedSubtotal,
+    appliedVoucher,
+    voucherDiscount,
+    clearCart,
+  } = useCart();
+
+  // Active items for checkout
+  const checkoutItems = selectedItems.length > 0 ? selectedItems : items;
+  const currentSubtotal = selectedSubtotal > 0 ? selectedSubtotal : items.reduce((t, i) => t + i.price * i.quantity, 0);
+
+  // Stepper state (1: Address, 2: Shipping, 3: Payment, 4: Review)
+  const [currentStep, setCurrentStep] = useState(1);
+
+  // Form State
+  const [fullName, setFullName] = useState(user?.fullName || "Nguyễn Văn A");
+  const [phone, setPhone] = useState(user?.phone || "0909123456");
+  const [email, setEmail] = useState(user?.email || "khachhang@shopee.vn");
+  const [address, setAddress] = useState(user?.address || "123 Đường Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh");
+  const [note, setNote] = useState("");
+
+  // Shipping Method
+  const [selectedShipping, setSelectedShipping] = useState("standard");
+
+  // Payment Method
+  const [paymentMethod, setPaymentMethod] = useState("COD");
+  const [cardNumber, setCardNumber] = useState("4111 2222 3333 4444");
+  const [cardHolder, setCardHolder] = useState("NGUYEN VAN A");
+  const [cardExpiry, setCardExpiry] = useState("12/28");
+
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
-  const total = useMemo(() => subtotal + SHIPPING_FEE, [subtotal]);
-
-  if (items.length === 0) {
+  if (checkoutItems.length === 0) {
     return <Navigate to="/cart" replace />;
   }
 
-  async function handleSubmit(formValues) {
+  const shippingOption = SHIPPING_OPTIONS.find((s) => s.id === selectedShipping) || SHIPPING_OPTIONS[0];
+  const finalShippingFee = appliedVoucher?.type === "shipping" ? 0 : shippingOption.fee;
+  const finalOrderTotal = Math.max(0, currentSubtotal - voucherDiscount + finalShippingFee);
+
+  async function handleFinalPlaceOrder() {
     setSubmitError("");
+    setSubmitting(true);
 
     const orderPayload = {
       customer: {
-        fullName: formValues.fullName.trim(),
-        phone: formValues.phone.trim(),
-        email: formValues.email.trim(),
-        address: formValues.address.trim(),
-        note: formValues.note.trim(),
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        address: address.trim(),
+        note: note.trim(),
       },
-      items: items.map((item) => ({
+      items: checkoutItems.map((item) => ({
         productId: item.productId,
         name: item.name,
         price: item.price,
         image: item.image,
         quantity: item.quantity,
+        shopId: item.shopId || "shop_01",
       })),
-      subtotal,
-      shippingFee: SHIPPING_FEE,
-      total,
-      paymentMethod: formValues.paymentMethod,
+      subtotal: currentSubtotal,
+      voucherCode: appliedVoucher?.code || null,
+      voucherDiscount,
+      shippingFee: finalShippingFee,
+      shippingMethod: shippingOption.name,
+      total: finalOrderTotal,
+      paymentMethod,
     };
 
     try {
-      setSubmitting(true);
       const order = await createOrder(orderPayload);
       clearCart();
       navigate("/order-success", {
         replace: true,
         state: {
-          orderId: order?.orderId || order?._id || order?.id,
-          total: order?.total || total,
+          orderId: order?.orderId || order?._id || order?.id || `ORD-${Date.now()}`,
+          total: finalOrderTotal,
         },
       });
     } catch (err) {
-      setSubmitError(err.message || "Khong the tao don hang");
+      setSubmitError(err.message || "Không thể tạo đơn hàng, vui lòng thử lại.");
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <main className="shopee-container shopee-checkout-page">
-      <section>
-        <CheckoutForm
-          loading={submitting}
-          onSubmit={handleSubmit}
-          submitButtonText="Xac nhan dat hang"
-        />
-        {submitError ? <p className="shopee-form-error-msg">{submitError}</p> : null}
-      </section>
+    <main className="shopee-container" style={{ padding: "24px 0" }}>
+      {/* 4-Step Progress Indicator */}
+      <nav className="checkout-steps-nav">
+        <div className={`checkout-step-item ${currentStep === 1 ? "active" : currentStep > 1 ? "completed" : ""}`}>
+          <div className="checkout-step-number">{currentStep > 1 ? "✓" : "1"}</div>
+          <span>1. Địa Chỉ Nhận Hàng</span>
+        </div>
+        <span style={{ color: "#ccc" }}>→</span>
 
-      <aside className="shopee-cart-summary">
-        <h2>Tom tat don hang</h2>
-        {items.map((item) => (
-          <p key={item.productId}>
-            {item.name} x {item.quantity}: {formatCurrency(item.price * item.quantity)}
-          </p>
-        ))}
-        <p>Tam tinh: {formatCurrency(subtotal)}</p>
-        <p>Phi giao hang: {formatCurrency(SHIPPING_FEE)}</p>
-        <strong>Tong cong: {formatCurrency(total)}</strong>
-        <Link className="shopee-btn shopee-btn-secondary" to="/cart">
-          Sua gio hang
-        </Link>
-      </aside>
+        <div className={`checkout-step-item ${currentStep === 2 ? "active" : currentStep > 2 ? "completed" : ""}`}>
+          <div className="checkout-step-number">{currentStep > 2 ? "✓" : "2"}</div>
+          <span>2. Vận Chuyển</span>
+        </div>
+        <span style={{ color: "#ccc" }}>→</span>
+
+        <div className={`checkout-step-item ${currentStep === 3 ? "active" : currentStep > 3 ? "completed" : ""}`}>
+          <div className="checkout-step-number">{currentStep > 3 ? "✓" : "3"}</div>
+          <span>3. Phương Thức Thanh Toán</span>
+        </div>
+        <span style={{ color: "#ccc" }}>→</span>
+
+        <div className={`checkout-step-item ${currentStep === 4 ? "active" : ""}`}>
+          <div className="checkout-step-number">4</div>
+          <span>4. Xác Nhận & Đặt Hàng</span>
+        </div>
+      </nav>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "28px", alignItems: "start" }}>
+        {/* Left Column: Multi-Step Forms */}
+        <section style={{ background: "#fff", borderRadius: "10px", padding: "24px", border: "1px solid #e0e0e0" }}>
+          {/* STEP 1: Address */}
+          {currentStep === 1 && (
+            <div>
+              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px" }}>
+                📍 Bước 1: Chọn Địa Chỉ Giao Hàng
+              </h2>
+
+              <div className="address-card-grid">
+                <div className="address-card selected">
+                  <span className="address-default-badge">✓ MẶC ĐỊNH</span>
+                  <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px" }}>{fullName} ({phone})</div>
+                  <div style={{ color: "#555", fontSize: "13.5px", lineHeight: "1.5" }}>{address}</div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", background: "#fafafa", padding: "16px", borderRadius: "8px", border: "1px solid #eee" }}>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#333" }}>Hoặc cập nhật thông tin người nhận:</div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div>
+                    <label style={{ fontSize: "12px", fontWeight: 600 }}>Họ và tên:</label>
+                    <input
+                      type="text"
+                      className="shopee-form-input"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "12px", fontWeight: 600 }}>Số điện thoại:</label>
+                    <input
+                      type="text"
+                      className="shopee-form-input"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: "12px", fontWeight: 600 }}>Địa chỉ chi tiết (Số nhà, đường, phường, quận):</label>
+                  <input
+                    type="text"
+                    className="shopee-form-input"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginTop: "24px", display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-primary"
+                  onClick={() => setCurrentStep(2)}
+                >
+                  Tiếp Tục: Chọn Vận Chuyển →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: Shipping */}
+          {currentStep === 2 && (
+            <div>
+              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px" }}>
+                🚀 Bước 2: Tốc Độ & Phương Thức Vận Chuyển
+              </h2>
+
+              <div className="shipping-options-list">
+                {SHIPPING_OPTIONS.map((opt) => (
+                  <div
+                    key={opt.id}
+                    className={`shipping-option-card ${selectedShipping === opt.id ? "selected" : ""}`}
+                    onClick={() => setSelectedShipping(opt.id)}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px" }}>{opt.name}</div>
+                      <div style={{ color: "#666", fontSize: "13px" }}>{opt.desc}</div>
+                    </div>
+                    <div className="shipping-price-tag">
+                      {appliedVoucher?.type === "shipping" ? "MIỄN PHÍ" : formatCurrency(opt.fee)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "24px" }}>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => setCurrentStep(1)}
+                >
+                  ← Quay Lại Địa Chỉ
+                </button>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-primary"
+                  onClick={() => setCurrentStep(3)}
+                >
+                  Tiếp Tục: Chọn Thanh Toán →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: Payment */}
+          {currentStep === 3 && (
+            <div>
+              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px" }}>
+                💳 Bước 3: Phương Thức Thanh Toán
+              </h2>
+
+              <div className="payment-methods-grid">
+                {/* 1. COD */}
+                <div
+                  className={`payment-method-card ${paymentMethod === "COD" ? "selected" : ""}`}
+                  onClick={() => setPaymentMethod("COD")}
+                >
+                  <div className="payment-card-content">
+                    <span className="payment-method-icon">💵</span>
+                    <div>
+                      <div style={{ fontWeight: 700 }}>Thanh toán khi nhận hàng (COD)</div>
+                      <div style={{ fontSize: "12px", color: "#666" }}>Nhận hàng kiểm tra xong mới trả tiền mặt cho shipper</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Credit Card */}
+                <div
+                  className={`payment-method-card ${paymentMethod === "CARD" ? "selected" : ""}`}
+                  onClick={() => setPaymentMethod("CARD")}
+                >
+                  <div className="payment-card-content">
+                    <span className="payment-method-icon">💳</span>
+                    <div>
+                      <div style={{ fontWeight: 700 }}>Thẻ Tín Dụng / Ghi Nợ Quốc Tế (Visa, MasterCard)</div>
+                      <div style={{ fontSize: "12px", color: "#666" }}>Bảo mật mã hóa quốc tế 3D-Secure 256-bit</div>
+                    </div>
+                  </div>
+
+                  {paymentMethod === "CARD" && (
+                    <div style={{ marginTop: "14px", padding: "14px", background: "#f8f9fa", borderRadius: "6px", border: "1px solid #ddd" }}>
+                      <div style={{ marginBottom: "10px" }}>
+                        <label style={{ fontSize: "11px", fontWeight: 700 }}>SỐ THẺ VISA / MASTERCARD:</label>
+                        <input
+                          type="text"
+                          className="shopee-form-input"
+                          value={cardNumber}
+                          onChange={(e) => setCardNumber(e.target.value)}
+                        />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                        <div>
+                          <label style={{ fontSize: "11px", fontWeight: 700 }}>TÊN CHỦ THẺ:</label>
+                          <input
+                            type="text"
+                            className="shopee-form-input"
+                            value={cardHolder}
+                            onChange={(e) => setCardHolder(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: "11px", fontWeight: 700 }}>HẠN DÙNG (MM/YY):</label>
+                          <input
+                            type="text"
+                            className="shopee-form-input"
+                            value={cardExpiry}
+                            onChange={(e) => setCardExpiry(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. MoMo */}
+                <div
+                  className={`payment-method-card ${paymentMethod === "MOMO" ? "selected" : ""}`}
+                  onClick={() => setPaymentMethod("MOMO")}
+                >
+                  <div className="payment-card-content">
+                    <span className="payment-method-icon">👛</span>
+                    <div>
+                      <div style={{ fontWeight: 700 }}>Ví Điện Tử MoMo / ZaloPay</div>
+                      <div style={{ fontSize: "12px", color: "#666" }}>Quét mã QR trên ứng dụng ví để thanh toán tức thì</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Bank Transfer VietQR */}
+                <div
+                  className={`payment-method-card ${paymentMethod === "BANK" ? "selected" : ""}`}
+                  onClick={() => setPaymentMethod("BANK")}
+                >
+                  <div className="payment-card-content">
+                    <span className="payment-method-icon">🏦</span>
+                    <div>
+                      <div style={{ fontWeight: 700 }}>Chuyển Khoản Ngân Hàng (VietQR Tự Động)</div>
+                      <div style={{ fontSize: "12px", color: "#666" }}>Miễn phí chuyển khoản qua mọi App ngân hàng tại VN</div>
+                    </div>
+                  </div>
+
+                  {paymentMethod === "BANK" && (
+                    <div className="payment-qr-preview">
+                      <img
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=MiniShopee-Order-Payment"
+                        alt="QR Code thanh toán"
+                        className="payment-qr-img"
+                      />
+                      <div style={{ fontSize: "12px", fontWeight: 700 }}>NGÂN HÀNG MBBANK - SỐ TK: 0909123456</div>
+                      <div style={{ fontSize: "11px", color: "#777" }}>Chủ TK: CONG TY MINI SHOPEE VIET NAM</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "24px" }}>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => setCurrentStep(2)}
+                >
+                  ← Quay Lại Vận Chuyển
+                </button>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-primary"
+                  onClick={() => setCurrentStep(4)}
+                >
+                  Tiếp Tục: Xem Lại Đơn Hàng →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: Review and Place Order */}
+          {currentStep === 4 && (
+            <div>
+              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px" }}>
+                📋 Bước 4: Kiểm Tra & Đặt Hàng
+              </h2>
+
+              {submitError && (
+                <div style={{ background: "#ffebee", color: "#d32f2f", padding: "12px", borderRadius: "6px", marginBottom: "16px" }}>
+                  {submitError}
+                </div>
+              )}
+
+              {/* Delivery and payment summary */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", background: "#fdfdfd", border: "1px solid #e0e0e0", borderRadius: "8px", padding: "16px", marginBottom: "20px", fontSize: "13.5px" }}>
+                <div>
+                  <div style={{ fontWeight: 700, color: "#555", marginBottom: "4px" }}>GIAO TỚI:</div>
+                  <div style={{ fontWeight: 700 }}>{fullName} · {phone}</div>
+                  <div style={{ color: "#444" }}>{address}</div>
+                </div>
+
+                <div>
+                  <div style={{ fontWeight: 700, color: "#555", marginBottom: "4px" }}>VẬN CHUYỂN & THANH TOÁN:</div>
+                  <div>Gói: <strong>{shippingOption.name}</strong></div>
+                  <div>Thanh toán: <strong>{paymentMethod}</strong></div>
+                </div>
+              </div>
+
+              {/* Item rows */}
+              <div style={{ marginBottom: "20px" }}>
+                <div style={{ fontWeight: 700, fontSize: "14px", marginBottom: "8px" }}>
+                  Danh sách sản phẩm ({checkoutItems.length}):
+                </div>
+                {checkoutItems.map((item) => (
+                  <div
+                    key={item.productId}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 0",
+                      borderBottom: "1px solid #f0f0f0",
+                      fontSize: "13.5px",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{ width: "48px", height: "48px", objectFit: "cover", borderRadius: "4px" }}
+                      />
+                      <div>
+                        <div style={{ fontWeight: 600 }}>{item.name}</div>
+                        <div style={{ color: "#777", fontSize: "12px" }}>Số lượng: x{item.quantity}</div>
+                      </div>
+                    </div>
+                    <div style={{ fontWeight: 700, color: "#ee4d2d" }}>
+                      {formatCurrency(item.price * item.quantity)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Order Note */}
+              <div style={{ marginBottom: "24px" }}>
+                <label style={{ fontSize: "13px", fontWeight: 600, display: "block", marginBottom: "4px" }}>
+                  Ghi chú cho đơn hàng (tùy chọn):
+                </label>
+                <input
+                  type="text"
+                  className="shopee-form-input"
+                  placeholder="Ví dụ: Giao hàng vào giờ hành chính, gọi trước khi giao"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => setCurrentStep(3)}
+                >
+                  ← Sửa Phương Thức
+                </button>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-primary"
+                  style={{ padding: "12px 32px", fontSize: "16px", fontWeight: 800 }}
+                  disabled={submitting}
+                  onClick={handleFinalPlaceOrder}
+                >
+                  {submitting ? "Đang xử lý đơn hàng..." : `✓ Xác Nhận Đặt Hàng (${formatCurrency(finalOrderTotal)})`}
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Right Column: Mini Bill Summary */}
+        <aside style={{ background: "#fff", borderRadius: "10px", padding: "20px", border: "1px solid #e0e0e0" }}>
+          <h3 style={{ fontSize: "16px", fontWeight: 800, margin: "0 0 16px" }}>Bảng Kê Chi Phí</h3>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "14px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#666" }}>Tiền hàng ({checkoutItems.length} món):</span>
+              <span style={{ fontWeight: 600 }}>{formatCurrency(currentSubtotal)}</span>
+            </div>
+
+            {voucherDiscount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#2e7d32" }}>
+                <span>Voucher giảm giá ({appliedVoucher?.code}):</span>
+                <span style={{ fontWeight: 700 }}>-{formatCurrency(voucherDiscount)}</span>
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#666" }}>Phí vận chuyển:</span>
+              <span style={{ fontWeight: 600 }}>
+                {finalShippingFee === 0 ? "MIỄN PHÍ" : formatCurrency(finalShippingFee)}
+              </span>
+            </div>
+
+            <div style={{ borderTop: "2px solid #222", paddingTop: "12px", marginTop: "4px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <span style={{ fontSize: "15px", fontWeight: 800 }}>TỔNG CỘNG:</span>
+              <span style={{ fontSize: "22px", fontWeight: 800, color: "#ee4d2d" }}>
+                {formatCurrency(finalOrderTotal)}
+              </span>
+            </div>
+          </div>
+
+          <div style={{ fontSize: "12px", color: "#777", lineHeight: "1.5", borderTop: "1px solid #eee", paddingTop: "12px" }}>
+            🔒 Nhấn "Xác Nhận Đặt Hàng" đồng nghĩa bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Mini Shopee.
+          </div>
+        </aside>
+      </div>
     </main>
   );
 }
