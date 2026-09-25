@@ -35,6 +35,8 @@ export default function ProductDetailPage() {
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewContent, setReviewContent] = useState("");
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [hoverStar, setHoverStar] = useState(0);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -382,6 +384,14 @@ export default function ProductDetailPage() {
             >
               {isCompared(productId) ? "⚖️ Đã thêm vào so sánh" : "⚖️ So sánh với sản phẩm khác"}
             </button>
+            <button
+              type="button"
+              className="shopee-btn shopee-btn-secondary"
+              style={{ width: "100%", marginTop: "8px", fontWeight: 700, fontSize: "13px" }}
+              onClick={() => setShowShareModal(true)}
+            >
+              🔗 Chia Sẻ & Quét Mã QR
+            </button>
           </div>
 
           {/* Guarantees */}
@@ -530,21 +540,60 @@ export default function ProductDetailPage() {
                   />
                 </div>
 
-                <div style={{ marginBottom: "12px" }}>
+                <div style={{ marginBottom: "14px" }}>
                   <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "4px" }}>
                     Số sao đánh giá:
                   </label>
-                  <select
-                    className="shopee-form-select"
-                    value={reviewRating}
-                    onChange={(e) => setReviewRating(e.target.value)}
-                  >
-                    <option value="5">★★★★★ (5 sao - Tuyệt vời)</option>
-                    <option value="4">★★★★☆ (4 sao - Hài lòng)</option>
-                    <option value="3">★★★☆☆ (3 sao - Bình thường)</option>
-                    <option value="2">★★☆☆☆ (2 sao - Không hài lòng)</option>
-                    <option value="1">★☆☆☆☆ (1 sao - Rất tệ)</option>
-                  </select>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span
+                        key={star}
+                        style={{
+                          fontSize: "30px",
+                          cursor: "pointer",
+                          color: (hoverStar || reviewRating) >= star ? "#ffa41c" : "var(--border-medium, #cbd5e1)",
+                          transition: "transform 0.15s ease",
+                          transform: (hoverStar || reviewRating) >= star ? "scale(1.1)" : "scale(1)",
+                        }}
+                        onMouseEnter={() => setHoverStar(star)}
+                        onMouseLeave={() => setHoverStar(0)}
+                        onClick={() => setReviewRating(star)}
+                        title={`${star} sao`}
+                      >
+                        ★
+                      </span>
+                    ))}
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--primary-color, #ea580c)", marginLeft: "10px" }}>
+                      {reviewRating === 5 ? "Tuyệt vời (5 sao)" : reviewRating === 4 ? "Hài lòng (4 sao)" : reviewRating === 3 ? "Bình thường (3 sao)" : reviewRating === 2 ? "Không hài lòng (2 sao)" : "Rất tệ (1 sao)"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Quick Feedback Chips */}
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>
+                    Nhấp để thêm nhanh cảm nhận:
+                  </label>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                    {["📦 Giao hàng siêu nhanh", "✨ Đúng như mô tả", "💎 Chất lượng tuyệt vời", "👍 Đóng gói rất kỹ", "💯 Sẽ ủng hộ tiếp"].map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => setReviewContent((prev) => (prev ? `${prev} - ${chip}` : chip))}
+                        style={{
+                          background: "var(--bg-muted, #f8fafc)",
+                          border: "1px solid var(--border-medium, #cbd5e1)",
+                          borderRadius: "14px",
+                          padding: "3px 10px",
+                          fontSize: "12px",
+                          cursor: "pointer",
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        + {chip}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div style={{ marginBottom: "12px" }}>
@@ -678,6 +727,109 @@ export default function ProductDetailPage() {
         currentProductId={id}
         onProductClick={(p) => navigate(`/products/${p._id || p.id}`)}
       />
+
+      {/* Share Product & QR Code Modal */}
+      {showShareModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            background: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+          onClick={() => setShowShareModal(false)}
+        >
+          <div
+            style={{
+              background: 'var(--bg-card, #ffffff)',
+              borderRadius: '16px',
+              maxWidth: '460px',
+              width: '100%',
+              padding: '24px',
+              boxShadow: '0 20px 48px rgba(0,0,0,0.25)',
+              border: '1px solid var(--border-medium, #e2e8f0)',
+              textAlign: 'center',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                🔗 Chia Sẻ Sản Phẩm
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowShareModal(false)}
+                style={{ background: 'transparent', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-primary)' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* QR Code */}
+            <div style={{ background: 'var(--bg-muted, #f8fafc)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-light, #e2e8f0)', marginBottom: '16px' }}>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(window.location.href)}`}
+                alt="QR Code chia sẻ"
+                style={{ width: '160px', height: '160px', borderRadius: '8px', margin: '0 auto', display: 'block' }}
+              />
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '8px 0 0' }}>
+                Quét mã QR bằng Camera điện thoại hoặc Zalo để mở sản phẩm
+              </p>
+            </div>
+
+            {/* Direct Link Input */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+              <input
+                type="text"
+                readOnly
+                value={window.location.href}
+                className="shopee-form-input"
+                style={{ fontSize: '12px', background: 'var(--bg-page, #f8fafc)', color: 'var(--text-muted)' }}
+              />
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-primary"
+                style={{ fontSize: '13px', padding: '8px 14px', whiteSpace: 'nowrap', fontWeight: 700 }}
+                onClick={() => {
+                  navigator.clipboard?.writeText(window.location.href);
+                  showToast('Đã sao chép liên kết sản phẩm vào bộ nhớ tạm!', 'success');
+                }}
+              >
+                📋 Sao chép
+              </button>
+            </div>
+
+            {/* Quick Share Chips */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+                }}
+                className="shopee-btn shopee-btn-secondary"
+                style={{ fontSize: '12px', borderRadius: '20px' }}
+              >
+                Facebook
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(product.name)}`, '_blank');
+                }}
+                className="shopee-btn shopee-btn-secondary"
+                style={{ fontSize: '12px', borderRadius: '20px' }}
+              >
+                Telegram
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
