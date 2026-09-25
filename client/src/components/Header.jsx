@@ -3,16 +3,6 @@ import '../styles/header.css';
 
 /**
  * Header Component - Mini Shopee
- *
- * @param {Object} props
- * @param {number} [props.cartCount=0] - Tổng số lượng sản phẩm trong giỏ hàng
- * @param {string} [props.searchTerm=''] - Từ khóa tìm kiếm (chế độ controlled)
- * @param {function} [props.onSearchChange] - Callback khi giá trị ô tìm kiếm thay đổi
- * @param {function} [props.onSearchSubmit] - Callback khi submit form tìm kiếm (keyword, e)
- * @param {function} [props.onCartClick] - Callback khi click vào icon/nút giỏ hàng
- * @param {function} [props.onLogoClick] - Callback khi click logo để về trang chủ
- * @param {string} [props.logoText='Mini Shopee'] - Tên logo hiển thị
- * @param {string} [props.subTitle='Giá tốt mỗi ngày'] - Slogan bên dưới logo
  */
 const Header = ({
   cartCount = 0,
@@ -21,6 +11,9 @@ const Header = ({
   onSearchSubmit,
   onCartClick,
   onLogoClick,
+  user,
+  onLogout,
+  onNavigate,
   logoText = 'Mini Shopee',
   subTitle = 'Giá tốt mỗi ngày'
 }) => {
@@ -54,34 +47,84 @@ const Header = ({
     }
   };
 
+  const navTo = (path) => {
+    if (onNavigate) onNavigate(path);
+  };
+
   return (
     <header className="shopee-header-wrapper">
       <div className="shopee-container">
         {/* Top Mini Bar */}
         <div className="shopee-topbar">
           <div className="shopee-topbar-left">
-            <span className="shopee-topbar-link">Kênh Người Bán</span>
+            <span
+              className="shopee-topbar-link"
+              onClick={() => navTo('/seller/dashboard')}
+              style={{ cursor: 'pointer', fontWeight: 600 }}
+            >
+              🏪 Kênh Người Bán (Shop)
+            </span>
+            <span>|</span>
+            <span
+              className="shopee-topbar-link"
+              onClick={() => navTo('/admin/dashboard')}
+              style={{ cursor: 'pointer', fontWeight: 600 }}
+            >
+              🛡️ Quản Trị Sàn (Admin)
+            </span>
             <span>|</span>
             <span className="shopee-topbar-link">Tải ứng dụng</span>
-            <span>|</span>
-            <span className="shopee-topbar-link">Kết nối</span>
           </div>
+
           <div className="shopee-topbar-right">
-            <span className="shopee-topbar-link">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              Thông Báo
-            </span>
-            <span className="shopee-topbar-link">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-              Trợ Giúp
-            </span>
+            {user ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span
+                  className="shopee-topbar-link"
+                  onClick={() => navTo('/orders')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  📦 Đơn Mua
+                </span>
+                <span>|</span>
+                <span
+                  className="shopee-topbar-link"
+                  onClick={() => navTo('/profile')}
+                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  👤 <strong>{user.fullName || user.email}</strong>
+                  <small style={{ background: 'rgba(255,255,255,0.25)', padding: '1px 6px', borderRadius: '10px' }}>
+                    {user.role}
+                  </small>
+                </span>
+                <span>|</span>
+                <span
+                  className="shopee-topbar-link"
+                  onClick={onLogout}
+                  style={{ cursor: 'pointer', color: '#ffebee' }}
+                >
+                  Đăng xuất
+                </span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span
+                  className="shopee-topbar-link"
+                  onClick={() => navTo('/register')}
+                  style={{ cursor: 'pointer', fontWeight: 500 }}
+                >
+                  Đăng Ký
+                </span>
+                <span>|</span>
+                <span
+                  className="shopee-topbar-link"
+                  onClick={() => navTo('/login')}
+                  style={{ cursor: 'pointer', fontWeight: 600 }}
+                >
+                  Đăng Nhập
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -110,7 +153,7 @@ const Header = ({
             <input
               type="text"
               className="shopee-search-input"
-              placeholder="Shopee bao ship 0Đ - Đăng ký ngay!"
+              placeholder="Shopee bao ship 0Đ - Hàng ngàn mặt hàng từ nhiều Shop!"
               value={currentSearch}
               onChange={handleInputChange}
             />
