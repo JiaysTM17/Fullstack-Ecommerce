@@ -557,7 +557,7 @@ export default function CheckoutPage() {
               {appliedVoucher ? (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "6px 10px", borderRadius: "6px", border: "1px solid var(--primary-color, #ea580c)" }}>
                   <span style={{ fontSize: "12.5px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
-                    ✓ {appliedVoucher.code} (-{formatCurrency(voucherDiscount)})
+                    ✓ {appliedVoucher.code} ({appliedVoucher.type === 'shipping' ? 'Miễn phí ship' : `-${formatCurrency(voucherDiscount)}`})
                   </span>
                   <button
                     type="button"
@@ -577,6 +577,20 @@ export default function CheckoutPage() {
                 </button>
               )}
             </div>
+
+            {voucherDiscount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
+                <span>Voucher giảm giá ({appliedVoucher?.code}):</span>
+                <span style={{ fontWeight: 700 }}>-{formatCurrency(voucherDiscount)}</span>
+              </div>
+            )}
+
+            {appliedVoucher?.type === "shipping" && (
+              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
+                <span>Ưu đãi FreeShip ({appliedVoucher.code}):</span>
+                <span style={{ fontWeight: 700 }}>-{formatCurrency(shippingOption.fee)}</span>
+              </div>
+            )}
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--text-secondary, #666)" }}>Phí vận chuyển:</span>

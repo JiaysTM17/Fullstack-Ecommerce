@@ -55,25 +55,28 @@ export default function VoucherPickerModal({
       return;
     }
 
-    const res = validateVoucher(code, currentSubtotal);
-    if (res.valid) {
-      onApplyVoucher(code);
-      showToast(`Đã áp dụng mã "${code}" thành công!`, "success");
-      onClose();
-    } else {
+    const res = onApplyVoucher(code);
+    if (res && res.success === false) {
       setErrorMessage(res.message);
+    } else {
+      showToast(`✓ Đã áp dụng mã "${code}" thành công!`, "success");
+      onClose();
     }
   };
 
   const handleSelectVoucher = (v) => {
-    if (currentSubtotal < v.minOrderValue) {
+    if (v.minOrderValue > 0 && currentSubtotal > 0 && currentSubtotal < v.minOrderValue) {
       showToast(`Chưa đủ điều kiện: Cần mua thêm ${formatCurrency(v.minOrderValue - currentSubtotal)}`, "info");
       return;
     }
 
-    onApplyVoucher(v.code);
-    showToast(`Đã áp dụng mã "${v.code}"!`, "success");
-    onClose();
+    const res = onApplyVoucher(v.code);
+    if (res && res.success === false) {
+      showToast(res.message || "Không thể áp dụng mã", "error");
+    } else {
+      showToast(`✓ Đã áp dụng mã "${v.code}"!`, "success");
+      onClose();
+    }
   };
 
   const handleRemove = () => {
@@ -164,7 +167,7 @@ export default function VoucherPickerModal({
           ) : (
             filteredVouchers.map((v) => {
               const isSelected = appliedVoucher?.code === v.code;
-              const isEligible = currentSubtotal >= v.minOrderValue;
+              const isEligible = v.minOrderValue === 0 || currentSubtotal >= v.minOrderValue || currentSubtotal === 0;
               const missingAmount = Math.max(0, v.minOrderValue - currentSubtotal);
 
               let stubText = "";
@@ -188,6 +191,16 @@ export default function VoucherPickerModal({
                 <div
                   key={v.id}
                   className={`voucher-ticket ${isSelected ? "selected" : ""} ${!isEligible ? "not-eligible" : ""}`}
+                  onClick={() => {
+                    if (isSelected) {
+                      handleRemove();
+                    } else if (isEligible) {
+                      handleSelectVoucher(v);
+                    } else {
+                      showToast(`Chưa đủ điều kiện: Cần mua thêm ${formatCurrency(missingAmount)}`, "info");
+                    }
+                  }}
+                  style={{ cursor: isEligible ? "pointer" : "default" }}
                 >
                   {/* Left Ticket Stub */}
                   <div className={`voucher-ticket-left ${stubClass}`}>
@@ -230,7 +243,10 @@ export default function VoucherPickerModal({
                         <button
                           type="button"
                           className="voucher-apply-btn applied"
-                          onClick={handleRemove}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemove();
+                          }}
                           title="Bỏ dùng mã này"
                         >
                           ✕ Gỡ mã
@@ -239,7 +255,10 @@ export default function VoucherPickerModal({
                         <button
                           type="button"
                           className="voucher-apply-btn select"
-                          onClick={() => handleSelectVoucher(v)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectVoucher(v);
+                          }}
                         >
                           Áp Dụng
                         </button>
@@ -248,6 +267,7 @@ export default function VoucherPickerModal({
                           type="button"
                           className="voucher-apply-btn disabled"
                           disabled
+                          onClick={(e) => e.stopPropagation()}
                           title={`Đơn hàng tối thiểu ${formatCurrency(v.minOrderValue)}`}
                         >
                           Chưa đủ ĐK

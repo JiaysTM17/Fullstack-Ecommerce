@@ -6,4 +6,4 @@ set "ANTHROPIC_MODEL=claude-sonnet-5"
 set "ANTHROPIC_SMALL_FAST_MODEL=claude-sonnet-5"
 set "CLAUDE_CODE_GIT_BASH_PATH=D:\Program File\Git\bin\bash.exe"
 set "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1"
-"C:\Users\PC HP\AppData\Roaming\npm\node_modules\@anthropic-ai\claude-code\bin\claude.exe" %*
+"C:\Users\PC HP\.vscode\extensions\anthropic.claude-code-2.1.281-win32-x64\resources\native-binary\claude.exe" %*

@@ -12,6 +12,7 @@ import { validateVoucher } from "../services/voucherService";
 const CART_STORAGE_KEY = "cart";
 const LEGACY_CART_STORAGE_KEY = "mini_shopee_cart";
 const SAVED_ITEMS_KEY = "mini_shopee_saved_items";
+const APPLIED_VOUCHER_KEY = "mini_shopee_applied_voucher";
 
 const CartContext = createContext(null);
 
@@ -66,6 +67,16 @@ function loadSavedFromStorage() {
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
+  }
+}
+
+function loadAppliedVoucherFromStorage() {
+  try {
+    if (typeof window === "undefined") return null;
+    const raw = localStorage.getItem(APPLIED_VOUCHER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
   }
 }
 
@@ -165,8 +176,8 @@ export function CartProvider({ children }) {
   // Saved for later list
   const [savedItems, setSavedItems] = useState(loadSavedFromStorage);
 
-  // Voucher state
-  const [appliedVoucher, setAppliedVoucher] = useState(null);
+  // Voucher state with local storage persistence
+  const [appliedVoucher, setAppliedVoucher] = useState(loadAppliedVoucherFromStorage);
   const [voucherError, setVoucherError] = useState("");
 
   useEffect(() => {
@@ -188,6 +199,15 @@ export function CartProvider({ children }) {
     if (typeof window === "undefined") return;
     localStorage.setItem(SAVED_ITEMS_KEY, JSON.stringify(savedItems));
   }, [savedItems]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (appliedVoucher) {
+      localStorage.setItem(APPLIED_VOUCHER_KEY, JSON.stringify(appliedVoucher));
+    } else {
+      localStorage.removeItem(APPLIED_VOUCHER_KEY);
+    }
+  }, [appliedVoucher]);
 
   const addToCart = useCallback((product, quantity = 1) => {
     dispatch({ type: "ADD_TO_CART", product, quantity });
@@ -298,12 +318,19 @@ export function CartProvider({ children }) {
 
   // Voucher validation and discount
   const applyVoucher = useCallback(
-    (code) => {
-      const result = validateVoucher(code, selectedSubtotal || subtotal);
+    (codeOrVoucher) => {
+      if (!codeOrVoucher) {
+        setAppliedVoucher(null);
+        setVoucherError("");
+        return { success: false, message: "Mã không hợp lệ" };
+      }
+      const code = typeof codeOrVoucher === "string" ? codeOrVoucher : codeOrVoucher.code;
+      const baseSubtotal = selectedSubtotal > 0 ? selectedSubtotal : subtotal;
+      const result = validateVoucher(code, baseSubtotal);
       if (result.valid) {
         setAppliedVoucher(result.voucher);
         setVoucherError("");
-        return { success: true, message: result.message };
+        return { success: true, message: result.message, voucher: result.voucher };
       } else {
         setVoucherError(result.message);
         return { success: false, message: result.message };
@@ -319,6 +346,7 @@ export function CartProvider({ children }) {
 
   const voucherDiscount = useMemo(() => {
     if (!appliedVoucher) return 0;
+    if (appliedVoucher.type === "shipping") return 0;
     const baseSubtotal = selectedSubtotal > 0 ? selectedSubtotal : subtotal;
     if (appliedVoucher.type === "percent") {
       const raw = Math.round((baseSubtotal * appliedVoucher.value) / 100);
@@ -328,10 +356,10 @@ export function CartProvider({ children }) {
   }, [appliedVoucher, selectedSubtotal, subtotal]);
 
   // Shipping calculation
-  const defaultShippingFee = selectedItems.length > 0 ? 25000 : 0;
+  const defaultShippingFee = selectedItems.length > 0 ? 25000 : (state.items.length > 0 ? 25000 : 0);
   const shippingFee =
     appliedVoucher?.type === "shipping"
-      ? Math.max(0, defaultShippingFee - (appliedVoucher.value || 30000))
+      ? 0
       : defaultShippingFee;
 
   const finalTotal = useMemo(() => {
