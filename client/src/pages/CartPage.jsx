@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { CartItem, EmptyState } from "../components";
 import VoucherPickerModal from "../components/VoucherPickerModal";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
+import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { formatCurrency } from "../utils/formatCurrency";
 
@@ -37,6 +39,9 @@ export default function CartPage() {
     removeVoucher,
   } = useCart();
 
+  const { addToWishlist } = useWishlist();
+  const { showToast } = useToast();
+
   const [voucherInput, setVoucherInput] = useState("");
   const [voucherMessage, setVoucherMessage] = useState("");
   const [showVoucherModal, setShowVoucherModal] = useState(false);
@@ -45,6 +50,28 @@ export default function CartPage() {
   const hasFreeShipping = selectedSubtotal >= FREE_SHIPPING_THRESHOLD;
   const progressPercent = Math.min(100, Math.round((selectedSubtotal / FREE_SHIPPING_THRESHOLD) * 100));
   const neededAmount = Math.max(0, FREE_SHIPPING_THRESHOLD - selectedSubtotal);
+
+  const handleBulkRemoveSelected = () => {
+    if (selectedItemIds.length === 0) return;
+    if (window.confirm(`Bạn có chắc chắn muốn xóa ${selectedItemIds.length} sản phẩm đã chọn khỏi giỏ hàng?`)) {
+      selectedItemIds.forEach((id) => removeFromCart(id));
+      showToast(`Đã xóa ${selectedItemIds.length} sản phẩm khỏi giỏ hàng`, 'info');
+    }
+  };
+
+  const handleMoveToWishlist = (item) => {
+    addToWishlist({
+      _id: item.productId,
+      id: item.productId,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      stock: item.stock || 50,
+      rating: 5,
+    });
+    removeFromCart(item.productId);
+    showToast(`Đã chuyển "${item.name}" sang danh sách Yêu thích!`, 'success');
+  };
 
   const handleVoucherSubmit = (e) => {
     e.preventDefault();
@@ -126,7 +153,7 @@ export default function CartPage() {
             </div>
           </div>
 
-          <div style={{ background: "var(--bg-card, #fff)", borderRadius: "8px", padding: "16px 20px", marginBottom: "16px", border: "1px solid var(--border-medium, #e0e0e0)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ background: "var(--bg-card, #fff)", borderRadius: "8px", padding: "16px 20px", marginBottom: "16px", border: "1px solid var(--border-medium, #e0e0e0)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
             <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: 700, cursor: "pointer", color: "var(--text-primary)" }}>
               <input
                 type="checkbox"
@@ -137,9 +164,32 @@ export default function CartPage() {
               <span>{t('select_all', 'CHỌN TẤT CẢ')} ({items.length} {t('products_count', 'sản phẩm')})</span>
             </label>
 
-            <span style={{ fontSize: "13px", color: "var(--text-secondary, #666)" }}>
-              {t('selected_items', 'Đã chọn')} <strong>{selectedItems.length}</strong> {t('products_count', 'sản phẩm')}
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              {selectedItemIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleBulkRemoveSelected}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--color-error, #ef4444)",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    padding: 0,
+                  }}
+                >
+                  🗑️ Xóa đã chọn ({selectedItemIds.length})
+                </button>
+              )}
+
+              <span style={{ fontSize: "13px", color: "var(--text-secondary, #666)" }}>
+                {t('selected_items', 'Đã chọn')} <strong>{selectedItems.length}</strong> {t('products_count', 'sản phẩm')}
+              </span>
+            </div>
           </div>
 
           {/* Cart Item Cards */}
@@ -149,15 +199,16 @@ export default function CartPage() {
               <div
                 key={item.productId}
                 style={{
-                  background: isChecked ? "#fff" : "#fafafa",
+                  background: isChecked ? "var(--bg-card, #ffffff)" : "var(--bg-muted, #f8fafc)",
                   borderRadius: "8px",
                   padding: "16px",
                   marginBottom: "14px",
-                  border: isChecked ? "1px solid #e0e0e0" : "1px dashed #ddd",
-                  opacity: isChecked ? 1 : 0.8,
+                  border: isChecked ? "1px solid var(--border-medium, #e2e8f0)" : "1px dashed var(--border-medium, #cbd5e1)",
+                  opacity: isChecked ? 1 : 0.85,
                   display: "flex",
                   gap: "14px",
                   alignItems: "center",
+                  transition: "all 0.2s ease",
                 }}
               >
                 <input
@@ -178,19 +229,27 @@ export default function CartPage() {
                     formatCurrency={formatCurrency}
                   />
 
-                  {/* Actions row: Save for later */}
-                  <div style={{ display: "flex", gap: "14px", marginTop: "10px", paddingLeft: "100px", fontSize: "13px" }}>
+                  {/* Actions row: Save for later & Move to Wishlist */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", marginTop: "10px", paddingLeft: "100px", fontSize: "13px" }}>
                     <button
                       type="button"
-                      style={{ background: "none", border: "none", color: "#007185", cursor: "pointer", fontWeight: 600, padding: 0 }}
+                      style={{ background: "none", border: "none", color: "var(--secondary-color, #0284c7)", cursor: "pointer", fontWeight: 600, padding: 0 }}
                       onClick={() => saveForLater(item.productId)}
                     >
-                      📦 Lưu lại mua sau
+                      📦 Để dành mua sau
                     </button>
-                    <span style={{ color: "#ccc" }}>|</span>
+                    <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
                     <button
                       type="button"
-                      style={{ background: "none", border: "none", color: "#b12704", cursor: "pointer", padding: 0 }}
+                      style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", cursor: "pointer", fontWeight: 600, padding: 0 }}
+                      onClick={() => handleMoveToWishlist(item)}
+                    >
+                      ❤️ Chuyển vào Yêu thích
+                    </button>
+                    <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
+                    <button
+                      type="button"
+                      style={{ background: "none", border: "none", color: "var(--color-error, #ef4444)", cursor: "pointer", padding: 0 }}
                       onClick={() => removeFromCart(item.productId)}
                     >
                       Xóa khỏi giỏ
@@ -203,8 +262,8 @@ export default function CartPage() {
 
           {/* Save For Later Section (Amazon style) */}
           {savedItems.length > 0 && (
-            <div style={{ marginTop: "36px", background: "#fff", borderRadius: "8px", padding: "20px", border: "1px solid #e0e0e0" }}>
-              <h3 style={{ fontSize: "17px", fontWeight: 800, margin: "0 0 16px", color: "#111" }}>
+            <div style={{ marginTop: "36px", background: "var(--bg-card, #ffffff)", borderRadius: "8px", padding: "20px", border: "1px solid var(--border-medium, #e2e8f0)", boxShadow: "var(--shadow-sm)" }}>
+              <h3 style={{ fontSize: "17px", fontWeight: 800, margin: "0 0 16px", color: "var(--text-primary, #0f172a)" }}>
                 📦 Để Dành Mua Sau ({savedItems.length} sản phẩm)
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>

@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
+import ReturnRequestModal from '../components/ReturnRequestModal';
 import '../styles/dashboard.css';
 
 const INITIAL_CUSTOMER_ORDERS = [
@@ -88,6 +89,7 @@ export default function OrderHistoryPage() {
 
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
+  const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
 
   const saveOrders = (newOrders) => {
     setOrders(newOrders);
@@ -96,6 +98,28 @@ export default function OrderHistoryPage() {
     } catch {
       // ignore
     }
+  };
+
+  const handleReturnSubmit = ({ orderId, reason, refundMethod, note, refundAmount }) => {
+    const updated = orders.map((o) => {
+      if (o.orderId !== orderId) return o;
+      const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const nextTimeline = [
+        ...(o.timeline || []),
+        { time: `Hôm nay ${nowStr}`, text: `Đã gửi yêu cầu Trả hàng / Hoàn tiền: ${reason}. Nhận hoàn qua: ${refundMethod}` },
+      ];
+      return {
+        ...o,
+        status: 'returning',
+        statusText: 'Đang xử lý đổi trả',
+        returnDetails: { reason, refundMethod, note, refundAmount },
+        timeline: nextTimeline,
+      };
+    });
+
+    saveOrders(updated);
+    setSelectedReturnOrder(null);
+    showToast('Đã gửi yêu cầu trả hàng / hoàn tiền thành công! Shop sẽ phản hồi trong 24h.', 'success');
   };
 
   const handleSimulateNextStep = (orderId) => {
@@ -200,6 +224,7 @@ export default function OrderHistoryPage() {
             { id: 'all', label: t('all_orders', 'Tất cả đơn') },
             { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển') },
             { id: 'completed', label: t('status_completed', 'Hoàn thành') },
+            { id: 'returning', label: t('status_returning', 'Đổi trả / Hoàn tiền') },
             { id: 'cancelled', label: t('status_cancelled', 'Đã hủy') },
           ].map((tab) => (
             <button
@@ -252,8 +277,11 @@ export default function OrderHistoryPage() {
                           ? 'status-completed'
                           : ord.status === 'shipping'
                           ? 'status-shipping'
+                          : ord.status === 'returning'
+                          ? 'status-shipping'
                           : 'status-cancelled'
                       }`}
+                      style={ord.status === 'returning' ? { background: '#fef3c7', color: '#d97706', border: '1px solid #fde68a' } : {}}
                     >
                       {ord.statusText}
                     </span>
@@ -381,6 +409,17 @@ export default function OrderHistoryPage() {
                         🧾 {t('print_invoice', 'In hóa đơn VAT')}
                       </button>
 
+                      {ord.status === 'completed' && (
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-secondary"
+                          style={{ fontSize: '12px', color: '#d97706', borderColor: '#fde68a' }}
+                          onClick={() => setSelectedReturnOrder(ord)}
+                        >
+                          🔄 {t('return_refund', 'Trả hàng / Hoàn tiền')}
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         className="shopee-btn shopee-btn-primary"
@@ -460,6 +499,15 @@ export default function OrderHistoryPage() {
         <InvoiceReceiptModal
           order={selectedInvoiceOrder}
           onClose={() => setSelectedInvoiceOrder(null)}
+        />
+      )}
+
+      {/* Return & Refund Request Modal */}
+      {selectedReturnOrder && (
+        <ReturnRequestModal
+          order={selectedReturnOrder}
+          onClose={() => setSelectedReturnOrder(null)}
+          onSubmit={handleReturnSubmit}
         />
       )}
     </main>
