@@ -75,8 +75,8 @@ const CheckoutForm = ({
       case 'phone':
         if (!trimmed) {
           errorMsg = 'Vui lòng nhập số điện thoại';
-        } else if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(trimmed)) {
-          errorMsg = 'Số điện thoại không hợp lệ (cần 10 chữ số, bắt đầu bằng 03, 05, 07, 08, 09)';
+        } else if (!/^[0-9]{9,11}$/.test(trimmed.replace(/\s/g, ''))) {
+          errorMsg = 'Số điện thoại cần có 9-11 chữ số';
         }
         break;
 

@@ -44,6 +44,19 @@
   cursor: pointer;
 }
 
+.shopee-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--primary-border);
+  border-radius: var(--radius-sm);
+  background: var(--primary-light);
+  color: var(--primary-color);
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .shopee-pagination-summary {
   text-align: center;
   margin: 32px 0 16px;

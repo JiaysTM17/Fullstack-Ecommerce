@@ -1,13 +1,13 @@
 # Integration Agent Notes
 
 ## Branches Integrated
-- Base: `agent/claude-backend`
+- Base: `agent/claude-backend` (server)
 - Client logic: `agent/codex-client-logic`
-- UI components: `agent/antigravity-ui` (merge pending in this integration flow)
+- UI components: `agent/antigravity-ui` (merged 2026-09-25)
 
 ## Client Notes
 - `client/src/App.jsx` owns `BrowserRouter`, `CartProvider`, and route definitions.
-- If a future `client/src/main.jsx` wraps the app with `BrowserRouter`, remove the wrapper from `App.jsx` to avoid nested routers.
+- `client/src/main.jsx` renders `<App />` and imports `styles/index.css`.
 - API base URL uses `import.meta.env.VITE_API_URL` with fallback `http://localhost:5000`.
 - Cart persists to `localStorage` key `cart`.
 - Cart still reads the previous `mini_shopee_cart` key once for migration, then removes it after saving.
@@ -42,13 +42,22 @@
   ```
 - MongoDB must be running locally or `MONGO_URI` must point to MongoDB Atlas before seeding or testing APIs.
 
-## Integration Todo
-- Merge UI components/styles from `agent/antigravity-ui`.
-- Import `client/src/styles/index.css` into the client entry.
-- Create missing client project files (`package.json`, `index.html`, `src/main.jsx`) if they are not supplied by another branch.
-- Wire page logic to UI components where practical.
-- Verify client build and server startup.
-- Seed data and test end-to-end once MongoDB is available.
+## Integration Completed (2026-09-25)
+- ✅ Merged `agent/antigravity-ui` into `integration/final-merge`.
+- ✅ Created `client/package.json`, `client/index.html`, `client/vite.config.js`, `client/src/main.jsx`, `client/.env.example`.
+- ✅ Created root `README.md` and `.gitignore`.
+- ✅ Imported `styles/index.css` in `client/src/main.jsx`.
+- ✅ Wired `Header`, `Footer` into `App.jsx` via `AppLayout`.
+- ✅ Wired `ProductGrid` into `HomePage`, `CartItem` into `CartPage`, `CheckoutForm` into `CheckoutPage`.
+- ✅ Updated `CheckoutForm` phone validation to match backend: `/^[0-9]{9,11}$/`.
+- ✅ Added `.shopee-filter-chip` style for keyword badge.
+- ✅ Client `npm install` and `npm run build` — 61 modules, 0 errors.
+
+## Remaining for Manual Testing
+- Start MongoDB locally (or set `MONGO_URI` to Atlas).
+- Run `cd server && npm run seed && npm run dev`.
+- Run `cd client && npm run dev`.
+- Test full flow: browse products → add to cart → checkout → order created.
 
 ## Git Safety
 - Integration branch: `integration/final-merge`.
