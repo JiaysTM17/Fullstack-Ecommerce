@@ -1,0 +1,8 @@
+/* client/src/styles/index.css */
+@import './theme.css';
+@import './header.css';
+@import './footer.css';
+@import './product.css';
+@import './cart.css';
+@import './checkout.css';
+@import './feedback.css';
