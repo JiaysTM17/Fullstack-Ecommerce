@@ -1,17 +1,24 @@
 # Integration Agent Notes
 
 ## Branches Integrated
-- Base: `agent/claude-backend`
-- Client logic: `agent/codex-client-logic`
-- UI components: `agent/antigravity-ui` (merge pending in this integration flow)
+- Base/backend: `agent/claude-backend`
+- Client logic/cart: `agent/codex-client-logic`
+- UI components/styles: `agent/antigravity-ui`
+- Final branch: `integration/final-merge`
 
 ## Client Notes
-- `client/src/App.jsx` owns `BrowserRouter`, `CartProvider`, and route definitions.
-- If a future `client/src/main.jsx` wraps the app with `BrowserRouter`, remove the wrapper from `App.jsx` to avoid nested routers.
+- `client/src/App.jsx` owns `BrowserRouter`, `CartProvider`, route definitions, and the app layout.
+- `client/src/main.jsx` renders `<App />` and imports global CSS.
 - API base URL uses `import.meta.env.VITE_API_URL` with fallback `http://localhost:5000`.
 - Cart persists to `localStorage` key `cart`.
-- Cart still reads the previous `mini_shopee_cart` key once for migration, then removes it after saving.
+- Cart still reads previous `mini_shopee_cart` data once for migration, then removes it after saving.
 - Cart context exposes `addToCart`, `removeFromCart`, `increaseQuantity`, `decreaseQuantity`, `setQuantity`, `clearCart`, `getCartCount`, and `getCartSubtotal`.
+
+## UI Components
+- Components live in `client/src/components/` and are exported from `client/src/components/index.js`.
+- Available components: `Header`, `Footer`, `ProductCard`, `ProductGrid`, `CartItem`, `QuantityControl`, `CheckoutForm`, `Loading`, and `EmptyState`.
+- Global styles live in `client/src/styles/index.css`.
+- Components receive data and callbacks through props; business logic stays in pages/context/services.
 
 ## Backend Contract
 - `GET /api/products` returns:
@@ -42,15 +49,11 @@
   ```
 - MongoDB must be running locally or `MONGO_URI` must point to MongoDB Atlas before seeding or testing APIs.
 
-## Integration Todo
-- Merge UI components/styles from `agent/antigravity-ui`.
-- Import `client/src/styles/index.css` into the client entry.
-- Create missing client project files (`package.json`, `index.html`, `src/main.jsx`) if they are not supplied by another branch.
-- Wire page logic to UI components where practical.
-- Verify client build and server startup.
-- Seed data and test end-to-end once MongoDB is available.
+## Verify Notes
+- Server can start only after dependencies are installed and MongoDB settings are valid.
+- End-to-end data flow requires seed data from `server/src/seed/productSeed.js`.
+- If MongoDB is unavailable, build checks can still pass but API smoke tests that hit the database will fail.
 
 ## Git Safety
-- Integration branch: `integration/final-merge`.
 - Do not push to `main` or `master`.
 - If remote push is rejected because of non-fast-forward/conflict, do not force push. Record the error and stop for manual coordination.
