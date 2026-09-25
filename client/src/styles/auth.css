@@ -1,22 +1,26 @@
-/* client/src/styles/auth.css */
+/* client/src/styles/auth.css - Modern Design System */
+
 .shopee-auth-wrapper {
-  background: linear-gradient(-180deg, #f53d2d, #f63);
+  background: radial-gradient(circle at 50% 0%, rgba(234, 88, 12, 0.06) 0%, transparent 60%), var(--bg-page, #f8fafc);
   min-height: calc(100vh - 160px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 16px;
+  padding: 48px 16px;
   box-sizing: border-box;
+  transition: background-color var(--transition-normal);
 }
 
 .shopee-auth-card {
-  background: #fff;
+  background: var(--bg-card, #ffffff);
   width: 100%;
   max-width: 480px;
-  border-radius: var(--radius-sm);
-  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
-  padding: 32px 36px;
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-modal, 0 16px 36px rgba(0, 0, 0, 0.08));
+  border: 1px solid var(--border-medium, #e2e8f0);
+  padding: 36px 32px;
   box-sizing: border-box;
+  transition: all var(--transition-normal);
 }
 
 .shopee-auth-header {
@@ -24,17 +28,34 @@
   margin-bottom: 24px;
 }
 
-.shopee-auth-title {
-  font-size: 22px;
+.shopee-auth-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary-light, #fff7ed);
+  border: 1px solid var(--primary-border, #fed7aa);
+  color: var(--primary-color, #ea580c);
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 11.5px;
   font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 8px;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.shopee-auth-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+  margin: 0 0 6px;
+  letter-spacing: -0.3px;
 }
 
 .shopee-auth-subtitle {
-  font-size: 13px;
-  color: var(--text-secondary);
+  font-size: 13.5px;
+  color: var(--text-secondary, #475569);
   margin: 0;
+  line-height: 1.5;
 }
 
 /* Role Selector Tabs */
@@ -42,74 +63,89 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
-  background: #f1f1f1;
-  padding: 4px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 24px;
+  background: var(--bg-muted, #f1f5f9);
+  padding: 5px;
+  border-radius: var(--radius-md, 8px);
+  margin-bottom: 22px;
+  border: 1px solid var(--border-light, #e2e8f0);
 }
 
 .shopee-role-tab {
   background: transparent;
   border: none;
-  padding: 8px 4px;
-  font-size: 12px;
+  padding: 10px 4px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #475569);
   cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
+  border-radius: var(--radius-sm, 6px);
+  transition: all var(--transition-fast, 0.15s ease);
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  user-select: none;
+}
+
+.shopee-role-tab:hover {
+  color: var(--text-primary, #0f172a);
 }
 
 .shopee-role-tab.active {
-  background: #fff;
-  color: var(--primary-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--bg-card, #ffffff);
+  color: var(--primary-color, #ea580c);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
+  font-weight: 700;
 }
 
-/* Quick Demo Login Bar */
+/* Quick Demo Login Box */
 .shopee-demo-section {
-  background: #fff8f6;
-  border: 1px dashed var(--primary-border);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  margin-bottom: 20px;
+  background: var(--primary-light, #fff7ed);
+  border: 1px dashed var(--primary-border, #fed7aa);
+  border-radius: var(--radius-md, 8px);
+  padding: 14px;
+  margin-bottom: 22px;
 }
 
 .shopee-demo-title {
   font-size: 12px;
   font-weight: 700;
-  color: var(--primary-color);
-  margin-bottom: 8px;
+  color: var(--primary-color, #ea580c);
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
   gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .shopee-demo-buttons {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .shopee-demo-btn {
-  background: #fff;
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-sm);
-  padding: 6px 10px;
-  font-size: 12px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-medium, #e2e8f0);
+  border-radius: var(--radius-sm, 6px);
+  padding: 8px 12px;
+  font-size: 12.5px;
   text-align: left;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-fast, 0.15s ease);
+  color: var(--text-primary, #0f172a);
 }
 
 .shopee-demo-btn:hover {
-  border-color: var(--primary-color);
-  background-color: var(--primary-light);
-  color: var(--primary-color);
+  border-color: var(--primary-color, #ea580c);
+  background-color: var(--bg-hover, #f8fafc);
+  color: var(--primary-color, #ea580c);
+  transform: translateX(2px);
 }
 
 .shopee-demo-btn strong {
@@ -118,19 +154,118 @@
 
 .shopee-demo-btn span {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
 }
 
-/* Auth Footer */
+/* Form Layout */
+.shopee-form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.shopee-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  margin-bottom: 6px;
+}
+
+.shopee-form-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.shopee-form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border-medium, #cbd5e1);
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #0f172a);
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.shopee-form-input:focus {
+  border-color: var(--primary-color, #ea580c);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+}
+
+.shopee-password-toggle {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.shopee-password-toggle:hover {
+  color: var(--text-primary);
+}
+
+.shopee-form-error-msg {
+  background: var(--color-error-bg, #fef2f2);
+  color: var(--color-error, #ef4444);
+  border: 1px solid #fecaca;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Auth Submit Button */
+.shopee-auth-submit-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: var(--radius-sm, 6px);
+  border: none;
+  background: var(--primary-color, #ea580c);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.shopee-auth-submit-btn:hover {
+  background: var(--primary-hover, #c2410c);
+}
+
+.shopee-auth-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Auth Footer Links */
 .shopee-auth-footer {
-  margin-top: 20px;
+  margin-top: 24px;
   text-align: center;
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #475569);
+  border-top: 1px solid var(--border-light, #e2e8f0);
+  padding-top: 18px;
 }
 
 .shopee-auth-footer a {
-  color: var(--primary-color);
+  color: var(--primary-color, #ea580c);
   font-weight: 600;
   text-decoration: none;
   margin-left: 4px;
@@ -138,4 +273,47 @@
 
 .shopee-auth-footer a:hover {
   text-decoration: underline;
+}
+
+/* Dark Mode Overrides for Auth */
+[data-theme="dark"] .shopee-auth-wrapper {
+  background: radial-gradient(circle at 50% 0%, rgba(249, 115, 22, 0.08) 0%, transparent 60%), #0b0f19;
+}
+
+[data-theme="dark"] .shopee-auth-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .shopee-form-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .shopee-role-tabs {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .shopee-role-tab.active {
+  background: #1e293b;
+  color: var(--primary-color, #f97316);
+}
+
+[data-theme="dark"] .shopee-demo-section {
+  background: #29180c;
+  border-color: #7c2d12;
+}
+
+[data-theme="dark"] .shopee-demo-btn {
+  background: #141c2e;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .shopee-demo-btn:hover {
+  background: #1e293b;
+  border-color: var(--primary-color);
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, DEMO_ACCOUNTS } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import ShippingLabelModal from '../components/ShippingLabelModal';
 import '../styles/dashboard.css';
@@ -142,6 +143,7 @@ const INITIAL_SELLER_ORDERS = [
 
 export default function SellerDashboardPage() {
   const { user, loginAsDemo } = useAuth();
+  const toast = useToast();
 
   // Shop hiện tại đang được quản lý (cho phép đổi shop linh hoạt để trải nghiệm đa shop)
   const [selectedShopId, setSelectedShopId] = useState(() => {
@@ -228,6 +230,7 @@ export default function SellerDashboardPage() {
         }
         return p;
       }));
+      toast.success(`Đã cập nhật sản phẩm "${productForm.name}" thành công!`);
     } else {
       const newProd = {
         _id: 'prod_' + Date.now(),
@@ -242,6 +245,7 @@ export default function SellerDashboardPage() {
         isActive: true
       };
       setProducts(prev => [newProd, ...prev]);
+      toast.success(`Đã đăng bán mới "${productForm.name}" cho Shop!`);
     }
     setShowProductModal(false);
   };
@@ -250,6 +254,7 @@ export default function SellerDashboardPage() {
   const handleDeleteProduct = (prodId) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này khỏi Shop?")) {
       setProducts(prev => prev.filter(p => p._id !== prodId));
+      toast.info("Đã xóa sản phẩm khỏi danh sách cửa hàng");
     }
   };
 
@@ -257,7 +262,9 @@ export default function SellerDashboardPage() {
   const handleToggleActive = (prodId) => {
     setProducts(prev => prev.map(p => {
       if (p._id === prodId) {
-        return { ...p, isActive: !p.isActive };
+        const nextState = !p.isActive;
+        toast.info(nextState ? `Đã hiển thị sản phẩm trên sàn` : `Đã tạm ẩn sản phẩm`);
+        return { ...p, isActive: nextState };
       }
       return p;
     }));
@@ -271,6 +278,7 @@ export default function SellerDashboardPage() {
       }
       return o;
     }));
+    toast.success(`Đã cập nhật đơn #${orderId}: ${nextText}`);
   };
 
   return (
@@ -560,7 +568,7 @@ export default function SellerDashboardPage() {
             </div>
             <div className="shopee-form-group">
               <label className="shopee-form-label">Mã định danh Shop (Shop ID)</label>
-              <input type="text" className="shopee-form-input" value={currentShop.id} readOnly style={{ background: '#f5f5f5' }} />
+              <input type="text" className="shopee-form-input" value={currentShop.id} readOnly style={{ opacity: 0.8 }} />
             </div>
           </div>
         )}

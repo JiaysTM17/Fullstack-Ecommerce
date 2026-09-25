@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import { getVouchers, createVoucher, deleteVoucher } from '../services/voucherService';
 import '../styles/dashboard.css';
@@ -49,6 +50,7 @@ const INITIAL_ALL_USERS = [
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'shops' | 'users' | 'vouchers'
   const [shops, setShops] = useState(INITIAL_ALL_SHOPS);
   const [users, setUsers] = useState(INITIAL_ALL_USERS);
@@ -76,6 +78,7 @@ export default function AdminDashboardPage() {
     setShops(prev => prev.map(s => {
       if (s.id === shopId) {
         const nextStatus = s.status === 'active' ? 'locked' : 'active';
+        toast.info(nextStatus === 'active' ? `Đã mở khóa hoạt động cho ${s.name}` : `Đã khóa gian hàng ${s.name}`);
         return {
           ...s,
           status: nextStatus,
@@ -89,7 +92,9 @@ export default function AdminDashboardPage() {
   const handleToggleUserStatus = (userId) => {
     setUsers(prev => prev.map(u => {
       if (u.id === userId) {
-        return { ...u, status: u.status === 'active' ? 'banned' : 'active' };
+        const nextStatus = u.status === 'active' ? 'banned' : 'active';
+        toast.info(nextStatus === 'active' ? `Đã mở khóa tài khoản ${u.fullName}` : `Đã tạm khóa tài khoản ${u.fullName}`);
+        return { ...u, status: nextStatus };
       }
       return u;
     }));
@@ -100,8 +105,8 @@ export default function AdminDashboardPage() {
     if (!voucherForm.code || !voucherForm.value) return;
 
     const created = createVoucher({
-      code: voucherForm.code,
-      name: voucherForm.name || `Voucher ${voucherForm.code}`,
+      code: voucherForm.code.toUpperCase(),
+      name: voucherForm.name || `Voucher ${voucherForm.code.toUpperCase()}`,
       type: voucherForm.type,
       value: Number(voucherForm.value),
       minOrderValue: Number(voucherForm.minOrderValue) || 0,
@@ -112,6 +117,7 @@ export default function AdminDashboardPage() {
     });
 
     setVouchers([created, ...vouchers]);
+    toast.success(`Đã phát hành mã giảm giá ${created.code} thành công!`);
     setShowAddVoucher(false);
     setVoucherForm({
       code: '',
@@ -128,6 +134,7 @@ export default function AdminDashboardPage() {
     if (window.confirm("Bạn có chắc muốn xóa mã voucher này khỏi sàn?")) {
       const updated = deleteVoucher(vouchId);
       setVouchers(updated);
+      toast.info("Đã xóa mã voucher khỏi hệ thống");
     }
   };
 
@@ -136,12 +143,12 @@ export default function AdminDashboardPage() {
       {/* Sidebar Super Admin */}
       <aside className="shopee-sidebar">
         <div className="shopee-sidebar-brand">
-          <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: '#ee4d2d', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--primary-color), var(--primary-hover))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
             🛡️
           </div>
           <div className="shopee-sidebar-info">
             <h3>Super Admin</h3>
-            <span className="shopee-sidebar-badge" style={{ background: '#e3f2fd', color: '#1976d2' }}>
+            <span className="shopee-sidebar-badge" style={{ background: 'var(--primary-light, rgba(234, 88, 12, 0.1))', color: 'var(--primary-color)' }}>
               Quản Trị Toàn Sàn
             </span>
           </div>
@@ -196,27 +203,27 @@ export default function AdminDashboardPage() {
           <div className="shopee-metric-card">
             <span className="shopee-metric-label">Tổng Doanh Số Sàn (GMV)</span>
             <div className="shopee-metric-value">{formatCurrency(totalPlatformRevenue)}</div>
-            <span style={{ fontSize: '11px', color: '#2e7d32' }}>+18.4% so với tháng trước</span>
+            <span style={{ fontSize: '11px', color: 'var(--color-success)' }}>+18.4% so với tháng trước</span>
           </div>
 
           <div className="shopee-metric-card">
             <span className="shopee-metric-label">Hoa Hồng Thu Sàn (5%)</span>
-            <div className="shopee-metric-value" style={{ color: '#2e7d32' }}>
+            <div className="shopee-metric-value" style={{ color: 'var(--color-success)' }}>
               {formatCurrency(platformCommission)}
             </div>
-            <span style={{ fontSize: '11px', color: '#666' }}>Doanh thu thuần của sàn</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Doanh thu thuần của sàn</span>
           </div>
 
           <div className="shopee-metric-card">
             <span className="shopee-metric-label">Gian Hàng Hoạt Động</span>
             <div className="shopee-metric-value">{totalActiveShops} / {shops.length}</div>
-            <span style={{ fontSize: '11px', color: '#666' }}>Tỷ lệ duyệt shop: 95%</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Tỷ lệ duyệt shop: 95%</span>
           </div>
 
           <div className="shopee-metric-card">
             <span className="shopee-metric-label">Tổng Thành Viên Sàn</span>
             <div className="shopee-metric-value">{users.length}</div>
-            <span style={{ fontSize: '11px', color: '#666' }}>{totalProducts} mặt hàng niêm yết</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{totalProducts} mặt hàng niêm yết</span>
           </div>
         </div>
 
@@ -247,7 +254,7 @@ export default function AdminDashboardPage() {
                       <td style={{ fontWeight: 700, color: 'var(--primary-color)' }}>
                         {formatCurrency(s.totalRevenue)}
                       </td>
-                      <td style={{ fontWeight: 600, color: '#2e7d32' }}>
+                      <td style={{ fontWeight: 600, color: 'var(--color-success)' }}>
                         {formatCurrency(Math.round(s.totalRevenue * 0.05))}
                       </td>
                       <td>
@@ -299,7 +306,7 @@ export default function AdminDashboardPage() {
                         <button
                           type="button"
                           className="shopee-btn shopee-btn-secondary shopee-btn-sm"
-                          style={s.status === 'active' ? { color: '#d32f2f' } : { color: '#2e7d32' }}
+                          style={s.status === 'active' ? { color: 'var(--color-error)' } : { color: 'var(--color-success)' }}
                           onClick={() => handleToggleShopStatus(s.id)}
                         >
                           {s.status === 'active' ? '🚫 Khóa gian hàng' : '✓ Mở khóa hoạt động'}
@@ -352,7 +359,7 @@ export default function AdminDashboardPage() {
                           <button
                             type="button"
                             className="shopee-btn shopee-btn-secondary shopee-btn-sm"
-                            style={u.status === 'active' ? { color: '#d32f2f' } : { color: '#2e7d32' }}
+                            style={u.status === 'active' ? { color: 'var(--color-error)' } : { color: 'var(--color-success)' }}
                             onClick={() => handleToggleUserStatus(u.id)}
                           >
                             {u.status === 'active' ? 'Cấm tài khoản' : 'Mở khóa'}
@@ -385,7 +392,7 @@ export default function AdminDashboardPage() {
 
             {/* Create voucher form */}
             {showAddVoucher && (
-              <form onSubmit={handleCreateVoucher} style={{ background: '#fafafa', padding: '16px', borderRadius: '8px', border: '1px solid #ddd', marginBottom: '20px' }}>
+              <form onSubmit={handleCreateVoucher} style={{ background: 'var(--bg-card-hover, rgba(0,0,0,0.02))', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-medium)', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 12px' }}>Tạo Mã Giảm Giá Toàn Sàn</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
                   <div>
@@ -461,7 +468,7 @@ export default function AdminDashboardPage() {
                 <tbody>
                   {vouchers.map(v => (
                     <tr key={v.id}>
-                      <td><strong style={{ color: '#ee4d2d', background: '#fff5f2', padding: '2px 8px', borderRadius: '4px' }}>{v.code}</strong></td>
+                      <td><strong style={{ color: 'var(--primary-color)', background: 'var(--primary-light, rgba(234, 88, 12, 0.1))', padding: '2px 8px', borderRadius: '4px' }}>{v.code}</strong></td>
                       <td>{v.name}</td>
                       <td style={{ fontWeight: 700 }}>
                         {v.type === 'percent' ? `${v.value}%` : formatCurrency(v.value)}
@@ -473,7 +480,7 @@ export default function AdminDashboardPage() {
                         <button
                           type="button"
                           className="shopee-btn shopee-btn-secondary shopee-btn-sm"
-                          style={{ color: '#d32f2f' }}
+                          style={{ color: 'var(--color-error)' }}
                           onClick={() => handleDeleteVoucher(v.id)}
                         >
                           Xóa

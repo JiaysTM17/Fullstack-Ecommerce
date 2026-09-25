@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import '../styles/dashboard.css';
 
@@ -61,6 +63,8 @@ const INITIAL_CUSTOMER_ORDERS = [
 export default function OrderHistoryPage() {
   const { user } = useAuth();
   const { addToCart } = useCart();
+  const { t } = useLanguage();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('all');
@@ -73,47 +77,57 @@ export default function OrderHistoryPage() {
   });
 
   const handleCancelOrder = (orderId) => {
-    if (window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) {
+    if (window.confirm(t('confirm_cancel_order', "Bạn có chắc chắn muốn hủy đơn hàng này?"))) {
       setOrders((prev) =>
         prev.map((o) =>
           o.orderId === orderId
-            ? { ...o, status: "cancelled", statusText: "Đã hủy bởi bạn", stepIndex: 0 }
+            ? { ...o, status: "cancelled", statusText: t('status_cancelled_by_you', "Đã hủy bởi bạn"), stepIndex: 0 }
             : o
         )
       );
+      showToast(t('order_cancelled_toast', 'Đã hủy đơn hàng thành công'), 'info');
     }
   };
 
   const handleBuyAgain = (item) => {
     addToCart(item, 1);
+    showToast(t('buy_again_toast', 'Đã thêm sản phẩm vào giỏ hàng để mua lại!'), 'success');
     navigate('/cart');
   };
 
   return (
-    <main className="shopee-container" style={{ padding: '24px 16px', maxWidth: '980px' }}>
-      <div className="shopee-table-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+    <main className="shopee-container" style={{ padding: '28px 16px', maxWidth: '980px' }}>
+      <div 
+        style={{ 
+          background: 'var(--bg-card, #ffffff)', 
+          borderRadius: 'var(--radius-lg, 12px)', 
+          padding: '24px', 
+          border: '1px solid var(--border-medium, #e2e8f0)',
+          boxShadow: 'var(--shadow-sm)'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: '#111' }}>
-              📦 Đơn Hàng Của Tôi
+            <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+              📦 {t('my_orders', 'Đơn Hàng Của Tôi')}
             </h1>
-            <p style={{ margin: '4px 0 0', color: '#666', fontSize: '13.5px' }}>
-              Theo dõi chi tiết tiến độ vận chuyển và lịch sử mua sắm.
+            <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '13.5px' }}>
+              {t('orders_subtitle', 'Theo dõi chi tiết tiến độ vận chuyển và lịch sử mua sắm.')}
             </p>
           </div>
 
           <Link to="/" className="shopee-btn shopee-btn-secondary" style={{ fontSize: '13px' }}>
-            ← Tiếp tục mua sắm
+            ← {t('continue_shopping', 'Tiếp tục mua sắm')}
           </Link>
         </div>
 
         {/* Status Tabs */}
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #e0e0e0', paddingBottom: '12px', marginBottom: '20px', overflowX: 'auto' }}>
+        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-medium, #e0e0e0)', paddingBottom: '14px', marginBottom: '22px', overflowX: 'auto' }}>
           {[
-            { id: 'all', label: 'Tất cả đơn' },
-            { id: 'shipping', label: 'Đang vận chuyển' },
-            { id: 'completed', label: 'Hoàn thành' },
-            { id: 'cancelled', label: 'Đã hủy' },
+            { id: 'all', label: t('all_orders', 'Tất cả đơn') },
+            { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển') },
+            { id: 'completed', label: t('status_completed', 'Hoàn thành') },
+            { id: 'cancelled', label: t('status_cancelled', 'Đã hủy') },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -129,8 +143,8 @@ export default function OrderHistoryPage() {
 
         {/* Orders List */}
         {filteredOrders.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: '#777' }}>
-            <p>Không có đơn hàng nào trong mục này.</p>
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+            <p>{t('no_orders_in_tab', 'Không có đơn hàng nào trong mục này.')}</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -138,57 +152,58 @@ export default function OrderHistoryPage() {
               <div
                 key={ord.orderId}
                 style={{
-                  border: '1px solid #e0e0e0',
+                  border: '1px solid var(--border-medium, #e0e0e0)',
                   borderRadius: '10px',
                   padding: '20px',
-                  background: '#fff',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                  background: 'var(--bg-card, #fff)',
+                  boxShadow: 'var(--shadow-sm)',
                 }}
               >
                 {/* Header Row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f0f0f0', paddingBottom: '12px', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light, #f0f0f0)', paddingBottom: '12px', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontWeight: 800, fontSize: '15px', color: '#111' }}>
+                    <span style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>
                       🏪 {ord.shopName}
                     </span>
-                    <span style={{ color: '#aaa' }}>|</span>
-                    <span style={{ fontSize: '13px', color: '#555' }}>Mã đơn: <strong>{ord.orderId}</strong></span>
+                    <span style={{ color: 'var(--text-muted)' }}>|</span>
+                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                      {t('order_id', 'Mã đơn')}: <strong>{ord.orderId}</strong>
+                    </span>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '12px', color: '#888' }}>{ord.createdAt}</span>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{ord.createdAt}</span>
                     <span
-                      className={`shopee-badge ${
+                      className={`shopee-status-badge ${
                         ord.status === 'completed'
-                          ? 'shopee-badge-success'
+                          ? 'status-completed'
                           : ord.status === 'shipping'
-                          ? 'shopee-badge-warning'
-                          : 'shopee-badge-danger'
+                          ? 'status-shipping'
+                          : 'status-cancelled'
                       }`}
-                      style={{ fontSize: '12px', padding: '4px 10px', borderRadius: '12px' }}
                     >
                       {ord.statusText}
                     </span>
                   </div>
                 </div>
 
-                {/* Tracking Stepper Progress (Amazon Timeline) */}
+                {/* Tracking Stepper Progress */}
                 {ord.stepIndex > 0 && (
-                  <div style={{ background: '#fcfcfc', border: '1px solid #eee', borderRadius: '8px', padding: '14px 20px', marginBottom: '16px' }}>
+                  <div style={{ background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-light, #eee)', borderRadius: '8px', padding: '16px 20px', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
                       {[
-                        { num: 1, label: 'Đã Đặt Hàng' },
-                        { num: 2, label: 'Đã Xác Nhận' },
-                        { num: 3, label: 'Đang Vận Chuyển' },
-                        { num: 4, label: 'Đã Giao Hàng' },
+                        { num: 1, label: t('step_order_placed', 'Đã Đặt Hàng') },
+                        { num: 2, label: t('step_confirmed', 'Đã Xác Nhận') },
+                        { num: 3, label: t('step_shipping', 'Đang Vận Chuyển') },
+                        { num: 4, label: t('step_delivered', 'Đã Giao Hàng') },
                       ].map((step, idx) => (
                         <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
                           <div
                             style={{
-                              width: '26px',
-                              height: '26px',
+                              width: '28px',
+                              height: '28px',
                               borderRadius: '50%',
-                              background: ord.stepIndex >= step.num ? '#2e7d32' : '#ddd',
+                              background: ord.stepIndex >= step.num ? 'var(--color-success, #10b981)' : 'var(--border-dark, #cbd5e1)',
                               color: '#fff',
                               display: 'flex',
                               alignItems: 'center',
@@ -198,83 +213,83 @@ export default function OrderHistoryPage() {
                               marginBottom: '6px',
                             }}
                           >
-                            {ord.stepIndex > step.num ? '✓' : step.num}
+                            {ord.stepIndex >= step.num ? '✓' : step.num}
                           </div>
-                          <span style={{ fontSize: '11.5px', color: ord.stepIndex >= step.num ? '#2e7d32' : '#888', fontWeight: ord.stepIndex === step.num ? 700 : 500 }}>
+                          <span style={{ fontSize: '11.5px', fontWeight: ord.stepIndex >= step.num ? 700 : 500, color: ord.stepIndex >= step.num ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                             {step.label}
                           </span>
                         </div>
                       ))}
                     </div>
-
-                    {ord.trackingCode && (
-                      <div style={{ fontSize: '12px', color: '#555', marginTop: '10px', textAlign: 'center' }}>
-                        Mã vận đơn SPX: <strong>{ord.trackingCode}</strong>
-                      </div>
-                    )}
                   </div>
                 )}
 
                 {/* Items */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '14px' }}>
-                  {ord.items.map((it, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <img
-                          src={it.image}
-                          alt={it.name}
-                          style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #eee' }}
-                        />
-                        <div>
-                          <div style={{ fontSize: '14px', fontWeight: 600, color: '#222' }}>{it.name}</div>
-                          <div style={{ fontSize: '12px', color: '#777' }}>Số lượng: x{it.quantity}</div>
-                        </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+                  {ord.items.map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>{item.name}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Số lượng: x{item.quantity}</div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 700, color: '#ee4d2d', fontSize: '15px' }}>
-                          {formatCurrency(it.price * it.quantity)}
-                        </div>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {formatCurrency(item.price)}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Total and Actions */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: '14px', flexWrap: 'wrap', gap: '12px' }}>
-                  <div style={{ fontSize: '14px' }}>
-                    Thành tiền: <strong style={{ color: '#ee4d2d', fontSize: '18px' }}>{formatCurrency(ord.total)}</strong>
-                    <span style={{ fontSize: '12px', color: '#777', marginLeft: '8px' }}>({ord.paymentMethod})</span>
+                {/* Summary Row & Actions */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-light, #f0f0f0)', paddingTop: '14px', flexWrap: 'wrap', gap: '12px' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                    <span>{t('payment_method', 'Thanh toán')}: <strong>{ord.paymentMethod}</strong></span>
+                    {ord.trackingCode && (
+                      <span style={{ marginLeft: '12px' }}>
+                        Mã SPX: <strong style={{ color: 'var(--secondary-color, #0284c7)' }}>{ord.trackingCode}</strong>
+                      </span>
+                    )}
                   </div>
 
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    {ord.status === 'shipping' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ fontSize: '13px' }}>
+                      {t('total_payment', 'Tổng thanh toán')}: <strong style={{ fontSize: '18px', color: 'var(--primary-color, #ea580c)' }}>{formatCurrency(ord.total)}</strong>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {ord.status === 'shipping' && (
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-secondary"
+                          style={{ fontSize: '12px' }}
+                          onClick={() => handleCancelOrder(ord.orderId)}
+                        >
+                          {t('cancel_order', 'Hủy đơn hàng')}
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         className="shopee-btn shopee-btn-secondary"
                         style={{ fontSize: '12px' }}
-                        onClick={() => handleCancelOrder(ord.orderId)}
+                        onClick={() => setSelectedOrderDetails(ord)}
                       >
-                        Hủy đơn hàng
+                        {t('view_tracking_details', 'Xem lịch trình')}
                       </button>
-                    )}
 
-                    <button
-                      type="button"
-                      className="shopee-btn shopee-btn-secondary"
-                      style={{ fontSize: '12px' }}
-                      onClick={() => setSelectedOrderDetails(ord)}
-                    >
-                      Xem lịch trình chi tiết
-                    </button>
-
-                    <button
-                      type="button"
-                      className="shopee-btn shopee-btn-primary"
-                      style={{ fontSize: '12px' }}
-                      onClick={() => handleBuyAgain(ord.items[0])}
-                    >
-                      Mua Lại
-                    </button>
+                      <button
+                        type="button"
+                        className="shopee-btn shopee-btn-primary"
+                        style={{ fontSize: '12px' }}
+                        onClick={() => handleBuyAgain(ord.items[0])}
+                      >
+                        {t('buy_again', 'Mua Lại')}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -286,15 +301,15 @@ export default function OrderHistoryPage() {
       {/* Modal Detailed Timeline */}
       {selectedOrderDetails && (
         <div className="shopee-modal-overlay">
-          <div className="shopee-modal" style={{ maxWidth: '500px', background: '#fff', padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>
-                Hành Trình Đơn Hàng: {selectedOrderDetails.orderId}
+          <div className="shopee-modal-content" style={{ maxWidth: '500px' }}>
+            <div className="shopee-modal-header">
+              <h3>
+                {t('order_timeline_title', 'Hành Trình Đơn Hàng')}: {selectedOrderDetails.orderId}
               </h3>
               <button
                 type="button"
+                className="shopee-modal-close"
                 onClick={() => setSelectedOrderDetails(null)}
-                style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer' }}
               >
                 ✕
               </button>
@@ -303,8 +318,8 @@ export default function OrderHistoryPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
               {(selectedOrderDetails.timeline || []).map((tl, idx) => (
                 <div key={idx} style={{ display: 'flex', gap: '12px', fontSize: '13px' }}>
-                  <div style={{ color: '#ee4d2d', fontWeight: 700, minWidth: '85px' }}>{tl.time}</div>
-                  <div style={{ color: '#333' }}>{tl.text}</div>
+                  <div style={{ color: 'var(--primary-color, #ea580c)', fontWeight: 700, minWidth: '85px' }}>{tl.time}</div>
+                  <div style={{ color: 'var(--text-primary)' }}>{tl.text}</div>
                 </div>
               ))}
             </div>
@@ -315,7 +330,7 @@ export default function OrderHistoryPage() {
                 className="shopee-btn shopee-btn-primary"
                 onClick={() => setSelectedOrderDetails(null)}
               >
-                Đã hiểu
+                {t('close', 'Đã hiểu')}
               </button>
             </div>
           </div>
