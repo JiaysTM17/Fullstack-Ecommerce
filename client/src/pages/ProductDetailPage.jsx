@@ -145,7 +145,7 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <main className="shopee-container" style={{ padding: "40px 0", textAlign: "center" }}>
-        <p style={{ fontSize: "16px", color: "#666" }}>Đang tải dữ liệu sản phẩm chuẩn Amazon...</p>
+        <p style={{ fontSize: "16px", color: "var(--text-secondary, #666)" }}>{t('pdp_loading', 'Đang tải thông tin chi tiết sản phẩm...')}</p>
       </main>
     );
   }
@@ -697,10 +697,10 @@ export default function ProductDetailPage() {
               <div
                 key={p._id || p.id}
                 style={{
-                  background: "#fff",
+                  background: "var(--bg-card, #fff)",
                   borderRadius: "8px",
                   padding: "12px",
-                  border: "1px solid #e0e0e0",
+                  border: "1px solid var(--border-medium, #e0e0e0)",
                   cursor: "pointer",
                 }}
                 onClick={() => navigate(`/products/${p._id || p.id}`)}
@@ -710,10 +710,10 @@ export default function ProductDetailPage() {
                   alt={p.name}
                   style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: "6px", marginBottom: "8px" }}
                 />
-                <div style={{ fontSize: "13px", fontWeight: 700, color: "#111", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", marginBottom: "4px" }}>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary, #111)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", marginBottom: "4px" }}>
                   {p.name}
                 </div>
-                <div style={{ fontSize: "15px", fontWeight: 800, color: "#ee4d2d" }}>
+                <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
                   {formatCurrency(p.price)}
                 </div>
               </div>

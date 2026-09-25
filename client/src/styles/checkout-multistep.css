@@ -1,14 +1,15 @@
-/* Multi-step Checkout Styles - Amazon Style */
+/* Multi-step Checkout Styles - Modern Responsive & Theme Aware */
 
 .checkout-steps-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 28px;
-  background: #fff;
-  border-radius: 8px;
+  background: var(--bg-card, #ffffff);
+  border-radius: var(--radius-md, 8px);
   padding: 16px 24px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-medium, #e2e8f0);
+  box-shadow: var(--shadow-sm);
 }
 
 @media (max-width: 640px) {
@@ -25,35 +26,38 @@
   gap: 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #777;
+  color: var(--text-muted, #94a3b8);
 }
 
 .checkout-step-item.active {
-  color: #ee4d2d;
+  color: var(--primary-color, #ea580c);
 }
 
 .checkout-step-item.completed {
-  color: #2e7d32;
+  color: var(--color-success, #10b981);
 }
 
 .checkout-step-number {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #e0e0e0;
-  color: #fff;
+  background: var(--bg-muted, #e2e8f0);
+  color: var(--text-secondary, #475569);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
+  font-weight: 700;
 }
 
 .checkout-step-item.active .checkout-step-number {
-  background: #ee4d2d;
+  background: var(--primary-color, #ea580c);
+  color: #ffffff;
 }
 
 .checkout-step-item.completed .checkout-step-number {
-  background: #2e7d32;
+  background: var(--color-success, #10b981);
+  color: #ffffff;
 }
 
 /* Address Cards */
@@ -65,28 +69,29 @@
 }
 
 .address-card {
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border: 2px solid var(--border-medium, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
   padding: 16px;
   cursor: pointer;
-  background: #fff;
+  background: var(--bg-card, #ffffff);
   transition: all 0.2s ease;
   position: relative;
+  color: var(--text-primary, #0f172a);
 }
 
 .address-card:hover {
-  border-color: #ee4d2d;
+  border-color: var(--primary-color, #ea580c);
 }
 
 .address-card.selected {
-  border-color: #ee4d2d;
-  background: #fffbf9;
-  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.15);
+  border-color: var(--primary-color, #ea580c);
+  background: var(--primary-light, #fff7ed);
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.15);
 }
 
 .address-default-badge {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-success, #10b981);
   font-size: 11px;
   font-weight: 700;
   padding: 2px 8px;
@@ -104,30 +109,31 @@
 }
 
 .shipping-option-card {
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border: 2px solid var(--border-medium, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
   padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  background: #fff;
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #0f172a);
   transition: all 0.2s ease;
 }
 
 .shipping-option-card:hover {
-  border-color: #ee4d2d;
+  border-color: var(--primary-color, #ea580c);
 }
 
 .shipping-option-card.selected {
-  border-color: #ee4d2d;
-  background: #fffbf9;
+  border-color: var(--primary-color, #ea580c);
+  background: var(--primary-light, #fff7ed);
 }
 
 .shipping-price-tag {
   font-size: 16px;
   font-weight: 800;
-  color: #ee4d2d;
+  color: var(--primary-color, #ea580c);
 }
 
 /* Payment Method Cards */
@@ -139,17 +145,22 @@
 }
 
 .payment-method-card {
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border: 2px solid var(--border-medium, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
   padding: 16px;
   cursor: pointer;
-  background: #fff;
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #0f172a);
   transition: all 0.2s ease;
 }
 
+.payment-method-card:hover {
+  border-color: var(--primary-color, #ea580c);
+}
+
 .payment-method-card.selected {
-  border-color: #ee4d2d;
-  background: #fffbf9;
+  border-color: var(--primary-color, #ea580c);
+  background: var(--primary-light, #fff7ed);
 }
 
 .payment-card-content {
@@ -165,17 +176,19 @@
 .payment-qr-preview {
   margin-top: 14px;
   padding: 16px;
-  background: #fafafa;
+  background: var(--bg-muted, #f1f5f9);
   border-radius: 6px;
-  border: 1px dashed #ccc;
+  border: 1px dashed var(--border-dark, #cbd5e1);
   text-align: center;
+  color: var(--text-primary, #0f172a);
 }
 
 .payment-qr-img {
   width: 140px;
   height: 140px;
   margin: 0 auto 10px;
-  background: #fff;
+  background: #ffffff;
   padding: 6px;
-  border: 1px solid #ddd;
+  border-radius: 6px;
+  border: 1px solid var(--border-medium, #e2e8f0);
 }

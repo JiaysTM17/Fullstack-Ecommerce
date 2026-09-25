@@ -229,7 +229,7 @@ export default function CartPage() {
                       />
                       <div>
                         <div style={{ fontWeight: 600, fontSize: "14px" }}>{saved.name}</div>
-                        <div style={{ color: "#ee4d2d", fontWeight: 700, fontSize: "14px" }}>
+                        <div style={{ color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "14px" }}>
                           {formatCurrency(saved.price)}
                         </div>
                       </div>
@@ -386,7 +386,7 @@ export default function CartPage() {
 
             <div style={{ borderTop: "2px solid var(--border-dark, #333)", paddingTop: "12px", marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <span style={{ fontSize: "16px", fontWeight: 800 }}>{t('total', 'TỔNG CỘNG')}:</span>
-              <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--primary-color, #ee4d2d)" }}>
+              <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--primary-color, var(--primary-color, #ea580c))" }}>
                 {formatCurrency(finalTotal)}
               </span>
             </div>

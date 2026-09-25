@@ -164,7 +164,7 @@
 }
 
 .shopee-discount-label {
-  color: #ee4d2d;
+  color: var(--primary-color, #ea580c);
   font-size: 9px;
   text-transform: uppercase;
 }

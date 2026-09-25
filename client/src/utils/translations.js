@@ -176,12 +176,14 @@ export const TRANSLATIONS = {
     order_continue_shopping_btn: "🛍️ Tiếp Tục Mua Sắm",
     order_track_simulate_step: "⚡ Mô Phỏng Giao Hàng Tiếp Theo",
     order_track_title: "Hành Trình Vận Chuyển",
+    print_invoice: "In hóa đơn VAT",
+    pdp_loading: "Đang tải thông tin chi tiết sản phẩm...",
 
     // Footer
     footer_about: "Về Mini Shopee",
     footer_customer_care: "Chăm Sóc Khách Hàng",
     footer_policies: "Chính Sách & Điều Khoản",
-    footer_architecture_note: "Dự án cá nhân Portfolio - Kiến trúc & luồng nghiệp vụ được thiết kế dựa trên tiêu chuẩn sàn TMĐT hiện đại (Amazon, Shopee Core Architecture).",
+    footer_architecture_note: "Dự án cá nhân Portfolio - Kiến trúc & luồng nghiệp vụ được thiết kế theo tiêu chuẩn sàn Thương Mại Điện Tử hiện đại.",
     footer_view_portfolio: "Chi tiết kiến trúc dự án ↗",
   },
 
@@ -358,12 +360,14 @@ export const TRANSLATIONS = {
     order_continue_shopping_btn: "🛍️ Continue Shopping",
     order_track_simulate_step: "⚡ Simulate Next Shipping Step",
     order_track_title: "Shipping Journey",
+    print_invoice: "Print VAT Invoice",
+    pdp_loading: "Loading product details...",
 
     // Footer
     footer_about: "About Mini Shopee",
     footer_customer_care: "Customer Support",
     footer_policies: "Policies & Terms",
-    footer_architecture_note: "Personal Portfolio Project - Architecture & business flows modeled after enterprise e-commerce standards (Amazon, Shopee Core Architecture).",
+    footer_architecture_note: "Personal Portfolio Project - Architecture & business flows modeled after enterprise e-commerce standards.",
     footer_view_portfolio: "Architecture details ↗",
   },
 };
