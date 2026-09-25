@@ -1,4 +1,5 @@
 /* client/src/styles/header.css */
+/* Main Shopee Header Component */
 .shopee-header-wrapper {
   background: linear-gradient(-180deg, #f53d2d, #f63);
   color: #fff;
@@ -7,6 +8,45 @@
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
+}
+
+/* Compatibility styling for Codex App.jsx default Header */
+.shopee-header {
+  background: linear-gradient(-180deg, #f53d2d, #f63);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.shopee-header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.shopee-header-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.shopee-header-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.2s;
+}
+
+.shopee-header-links a:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Top bar navigation */
@@ -58,6 +98,8 @@
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
+  font-weight: 700;
+  font-size: 22px;
 }
 
 .shopee-logo-icon {

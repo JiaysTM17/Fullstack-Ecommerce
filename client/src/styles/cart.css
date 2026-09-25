@@ -1,5 +1,75 @@
 /* client/src/styles/cart.css */
 
+/* Cart Page Layout */
+.shopee-cart-page {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: start;
+  margin-top: 24px;
+  margin-bottom: 40px;
+}
+
+.shopee-cart-page h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.shopee-cart-summary {
+  background: #fff;
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 90px;
+}
+
+.shopee-cart-summary h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+
+.shopee-cart-summary p {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 8px 0;
+}
+
+.shopee-cart-summary strong {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  color: var(--primary-color);
+  margin: 16px 0 20px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-medium);
+}
+
+.shopee-cart-summary .shopee-btn {
+  width: 100%;
+  height: 44px;
+  font-size: 15px;
+}
+
+@media (max-width: 900px) {
+  .shopee-cart-page {
+    grid-template-columns: 1fr;
+  }
+
+  .shopee-cart-summary {
+    position: static;
+  }
+}
+
 /* Quantity Control Component */
 .shopee-qty-control {
   display: inline-flex;
@@ -226,17 +296,8 @@
     height: 64px;
   }
 
-  .shopee-cart-item-details-row {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 8px;
-    border-top: 1px dashed var(--border-light);
-  }
-
   .shopee-cart-item-price {
-    display: none; /* Combine into subtotal/quantity on mobile */
+    display: none;
   }
 
   .shopee-cart-item-subtotal {

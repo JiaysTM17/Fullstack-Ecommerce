@@ -1,4 +1,21 @@
 /* client/src/styles/checkout.css */
+
+/* Checkout Page Layout */
+.shopee-checkout-page {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+  margin-top: 24px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 900px) {
+  .shopee-checkout-page {
+    grid-template-columns: 1fr;
+  }
+}
+
 .shopee-checkout-form-card {
   background: #fff;
   border-radius: var(--radius-sm);
@@ -16,6 +33,7 @@
   border-bottom: 1px solid var(--border-light);
 }
 
+.shopee-checkout-header h1,
 .shopee-checkout-header h3 {
   font-size: 18px;
   font-weight: 600;

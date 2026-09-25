@@ -1,5 +1,23 @@
 /* client/src/styles/feedback.css */
 
+/* Generic Page Feedback messages */
+.shopee-feedback {
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+  border: 1px solid var(--border-light);
+  margin: 20px 0;
+}
+
+.shopee-feedback-error {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+  border-color: #ffcdd2;
+}
+
 /* Loading Component Styles */
 .shopee-loading-wrapper {
   display: flex;
@@ -110,17 +128,21 @@
   color: #ccc;
 }
 
-.shopee-empty-title {
-  font-size: 18px;
+.shopee-empty-title,
+.shopee-empty-state h1,
+.shopee-empty-state h2,
+.shopee-empty-state h3 {
+  font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 8px;
 }
 
-.shopee-empty-desc {
+.shopee-empty-desc,
+.shopee-empty-state p {
   font-size: 14px;
   color: var(--text-muted);
-  max-width: 400px;
+  max-width: 420px;
   line-height: 1.5;
   margin: 0 0 20px;
 }
