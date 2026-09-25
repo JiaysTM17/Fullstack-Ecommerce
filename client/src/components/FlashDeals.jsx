@@ -53,7 +53,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
           </div>
         </div>
 
-        <span style={{ fontSize: '13px', color: '#ee4d2d', fontWeight: 600 }}>
+        <span style={{ fontSize: '13px', color: 'var(--primary-color, #ea580c)', fontWeight: 600 }}>
           Xem tất cả deal sốc →
         </span>
       </div>

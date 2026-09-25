@@ -5,7 +5,7 @@ const SLIDES = [
   {
     id: 1,
     badge: "Siêu Hội Mua Sắm 2026",
-    title: "Amazon Prime Days & Đại Tiệc Công Nghệ",
+    title: "Đại Tiệc Công Nghệ & Phụ Kiện Cao Cấp",
     description: "Giảm tới 50% tai nghe chống ồn, bàn phím cơ và chuột công thái học. Miễn phí vận chuyển toàn quốc.",
     buttonText: "Khám Phá Ngay",
     category: "Điện tử",
@@ -22,7 +22,7 @@ const SLIDES = [
   },
   {
     id: 3,
-    badge: "Chính Hãng 100% Shopee Mall",
+    badge: "Chính Hãng 100% Mini Mall",
     title: "Không Gian Sống Tiện Nghi & Thông Minh",
     description: "Đèn bàn bảo vệ thị lực chuẩn y khoa, bình giữ nhiệt hiển thị nhiệt độ thông minh.",
     buttonText: "Xem Ưu Đãi",

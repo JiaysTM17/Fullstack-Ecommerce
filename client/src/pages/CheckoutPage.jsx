@@ -561,7 +561,7 @@ export default function CheckoutPage() {
                         <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>Số lượng: x{item.quantity}</div>
                       </div>
                     </div>
-                    <div style={{ fontWeight: 700, color: "var(--primary-color, #ee4d2d)" }}>
+                    <div style={{ fontWeight: 700, color: "var(--primary-color, #ea580c)" }}>
                       {formatCurrency(item.price * item.quantity)}
                     </div>
                   </div>
@@ -674,7 +674,7 @@ export default function CheckoutPage() {
 
             <div style={{ borderTop: "2px solid var(--border-dark, #222)", paddingTop: "12px", marginTop: "4px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <span style={{ fontSize: "15px", fontWeight: 800 }}>TỔNG CỘNG:</span>
-              <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--primary-color, #ee4d2d)" }}>
+              <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
                 {formatCurrency(finalOrderTotal)}
               </span>
             </div>

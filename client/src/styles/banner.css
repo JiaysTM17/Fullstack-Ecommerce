@@ -55,7 +55,7 @@
 
 .shopee-hero-badge {
   display: inline-block;
-  background: #ee4d2d;
+  background: var(--primary-color, #ea580c);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -167,7 +167,7 @@
 }
 
 .shopee-hero-dot.active {
-  background: #ee4d2d;
+  background: var(--primary-color, #ea580c);
   width: 24px;
   border-radius: 10px;
 }

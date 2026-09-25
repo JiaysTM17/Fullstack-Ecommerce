@@ -17,7 +17,7 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             <small style={{ color: '#666' }}>ĐƠN VỊ VẬN CHUYỂN: SPX EXPRESS VIỆT NAM</small>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '18px', fontWeight: 800, color: '#ee4d2d' }}>{trackingCode}</span>
+            <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary-color, #ea580c)' }}>{trackingCode}</span>
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fafafa', padding: '12px', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '20px' }}>
           <div>
             <div style={{ fontSize: '12px', color: '#666' }}>TIỀN THU HỘ (COD):</div>
-            <div style={{ fontSize: '18px', fontWeight: 800, color: '#ee4d2d' }}>
+            <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary-color, #ea580c)' }}>
               {(order.total || order.subtotal || 0).toLocaleString()}₫
             </div>
           </div>

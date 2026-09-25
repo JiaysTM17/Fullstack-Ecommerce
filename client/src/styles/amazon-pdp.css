@@ -1,13 +1,15 @@
-/* Amazon Style Product Detail Page (PDP) Styles */
+/* Amazon Style Product Detail Page (PDP) Styles - Enterprise Responsive & Theme Aware */
 
 .amazon-pdp-container {
   display: grid;
   grid-template-columns: 460px 1fr 340px;
   gap: 28px;
-  background: #ffffff;
-  border-radius: 12px;
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #0f172a);
+  border-radius: var(--radius-lg, 12px);
   padding: 28px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-medium, #e2e8f0);
   margin-bottom: 32px;
 }
 
@@ -38,10 +40,10 @@
 .amazon-main-image-wrap {
   width: 100%;
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 8px);
   overflow: hidden;
-  border: 1px solid #e5e5e5;
-  background: #fdfdfd;
+  border: 1px solid var(--border-medium, #e2e8f0);
+  background: var(--bg-muted, #f8fafc);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -56,15 +58,15 @@
 }
 
 .amazon-main-image:hover {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .amazon-badge-corner {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: #232f3e;
-  color: #fff;
+  background: #0f172a;
+  color: #ffffff;
   font-size: 11px;
   font-weight: 700;
   padding: 4px 10px;
@@ -74,7 +76,7 @@
 }
 
 .amazon-badge-corner.hot {
-  background: #e47911;
+  background: var(--primary-color, #ea580c);
 }
 
 .amazon-thumbnails-strip {
@@ -88,18 +90,18 @@
   width: 68px;
   height: 68px;
   border-radius: 6px;
-  border: 2px solid #ddd;
+  border: 2px solid var(--border-medium, #e2e8f0);
   overflow: hidden;
   cursor: pointer;
-  background: #f7f7f7;
+  background: var(--bg-muted, #f1f5f9);
   flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
 .amazon-thumbnail:hover,
 .amazon-thumbnail.active {
-  border-color: #e47911;
-  box-shadow: 0 0 0 1px #e47911;
+  border-color: var(--primary-color, #ea580c);
+  box-shadow: 0 0 0 1px var(--primary-color, #ea580c);
 }
 
 .amazon-thumbnail img {
@@ -117,15 +119,19 @@
 
 .amazon-product-brand {
   font-size: 13px;
-  color: #007185;
+  color: var(--secondary-color, #0284c7);
   font-weight: 600;
   text-decoration: none;
+}
+
+.amazon-product-brand:hover {
+  text-decoration: underline;
 }
 
 .amazon-product-title {
   font-size: 22px;
   font-weight: 700;
-  color: #0f1111;
+  color: var(--text-primary, #0f172a);
   line-height: 1.35;
   margin: 0;
 }
@@ -135,7 +141,7 @@
   align-items: center;
   gap: 10px;
   font-size: 14px;
-  color: #007185;
+  color: var(--secondary-color, #0284c7);
 }
 
 .amazon-stars {
@@ -154,25 +160,25 @@
   align-items: baseline;
   gap: 12px;
   padding: 12px 0;
-  border-top: 1px solid #f0f0f0;
-  border-bottom: 1px solid #f0f0f0;
+  border-top: 1px solid var(--border-medium, #e2e8f0);
+  border-bottom: 1px solid var(--border-medium, #e2e8f0);
 }
 
 .amazon-current-price {
   font-size: 28px;
   font-weight: 800;
-  color: #b12704;
+  color: var(--primary-color, #ea580c);
 }
 
 .amazon-original-price {
   font-size: 14px;
-  color: #565959;
+  color: var(--text-muted, #94a3b8);
   text-decoration: line-through;
 }
 
 .amazon-discount-percent {
   font-size: 14px;
-  color: #cc0c39;
+  color: var(--color-error, #ef4444);
   font-weight: 700;
 }
 
@@ -184,7 +190,7 @@
 .amazon-variant-label {
   font-size: 13.5px;
   font-weight: 700;
-  color: #0f1111;
+  color: var(--text-primary, #0f172a);
   margin-bottom: 8px;
 }
 
@@ -196,23 +202,24 @@
 
 .amazon-chip {
   padding: 6px 14px;
-  border: 1px solid #d5d9d9;
+  border: 1px solid var(--border-medium, #e2e8f0);
   border-radius: 6px;
   font-size: 13px;
-  background: #fff;
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #0f172a);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .amazon-chip:hover {
-  border-color: #e47911;
+  border-color: var(--primary-color, #ea580c);
 }
 
 .amazon-chip.active {
-  border-color: #e47911;
-  background: #fdf5ec;
+  border-color: var(--primary-color, #ea580c);
+  background: var(--primary-light, #fff7ed);
   font-weight: 700;
-  box-shadow: 0 0 0 1px #e47911;
+  box-shadow: 0 0 0 1px var(--primary-color, #ea580c);
 }
 
 /* Specs Table */
@@ -225,51 +232,53 @@
 
 .amazon-specs-table td {
   padding: 8px 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-medium, #e2e8f0);
+  color: var(--text-primary, #0f172a);
 }
 
 .amazon-specs-table td:first-child {
   font-weight: 700;
-  color: #565959;
+  color: var(--text-secondary, #475569);
   width: 35%;
-  background: #fafafa;
+  background: var(--bg-muted, #f8fafc);
 }
 
 /* 3. Right Buy Box Column */
 .amazon-buy-box {
-  background: #fcfcfc;
-  border: 1px solid #d5d9d9;
-  border-radius: 8px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-medium, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   height: fit-content;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary, #0f172a);
 }
 
 .amazon-buy-box-price {
   font-size: 24px;
   font-weight: 800;
-  color: #b12704;
+  color: var(--primary-color, #ea580c);
 }
 
 .amazon-stock-status {
   font-size: 15px;
   font-weight: 700;
-  color: #007600;
+  color: var(--color-success, #10b981);
 }
 
 .amazon-stock-status.low {
-  color: #b12704;
+  color: var(--primary-color, #ea580c);
 }
 
 .amazon-delivery-info {
   font-size: 13px;
-  color: #0f1111;
+  color: var(--text-primary, #0f172a);
   line-height: 1.5;
-  background: #f0f8ff;
-  border-left: 3px solid #007185;
+  background: var(--bg-muted, #f1f5f9);
+  border-left: 3px solid var(--secondary-color, #0284c7);
   padding: 8px 12px;
   border-radius: 4px;
 }
@@ -302,9 +311,9 @@
 }
 
 .amazon-btn-buy-now {
-  background: #ffa41c;
-  border: 1px solid #ff8f00;
-  color: #0f1111;
+  background: var(--primary-color, #ea580c);
+  border: 1px solid var(--primary-hover, #c2410c);
+  color: #ffffff;
   font-weight: 700;
   font-size: 14px;
   padding: 12px;
@@ -317,13 +326,13 @@
 }
 
 .amazon-btn-buy-now:hover {
-  background: #fa8900;
+  background: var(--primary-hover, #c2410c);
 }
 
 .amazon-btn-wishlist {
-  background: #fff;
-  border: 1px solid #d5d9d9;
-  color: #0f1111;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-medium, #e2e8f0);
+  color: var(--text-primary, #0f172a);
   font-weight: 600;
   font-size: 13px;
   padding: 8px;
@@ -336,31 +345,33 @@
 }
 
 .amazon-btn-wishlist:hover {
-  background: #f7f7f7;
+  background: var(--bg-muted, #f1f5f9);
 }
 
 .amazon-guarantees {
   font-size: 12px;
-  color: #565959;
+  color: var(--text-secondary, #64748b);
   display: flex;
   flex-direction: column;
   gap: 6px;
-  border-top: 1px solid #e7e7e7;
+  border-top: 1px solid var(--border-medium, #e2e8f0);
   padding-top: 12px;
 }
 
 /* Shop Card Section */
 .amazon-shop-card {
-  background: #fff;
-  border-radius: 10px;
+  background: var(--bg-card, #ffffff);
+  border-radius: var(--radius-md, 10px);
   padding: 20px 24px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-medium, #e2e8f0);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 20px;
+  color: var(--text-primary, #0f172a);
 }
 
 .amazon-shop-left {
@@ -373,8 +384,8 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #ee4d2d;
-  color: #fff;
+  background: var(--primary-color, #ea580c);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -385,27 +396,29 @@
 .amazon-shop-name {
   font-size: 17px;
   font-weight: 700;
-  color: #111;
+  color: var(--text-primary, #0f172a);
 }
 
 .amazon-shop-stats {
   display: flex;
   gap: 24px;
   font-size: 13px;
-  color: #555;
+  color: var(--text-secondary, #64748b);
 }
 
 .amazon-shop-stats strong {
-  color: #ee4d2d;
+  color: var(--primary-color, #ea580c);
 }
 
 /* Customer Reviews & Breakdown */
 .amazon-reviews-section {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--bg-card, #ffffff);
+  border-radius: var(--radius-lg, 12px);
   padding: 28px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-medium, #e2e8f0);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 32px;
+  color: var(--text-primary, #0f172a);
 }
 
 .amazon-reviews-grid {
@@ -427,15 +440,16 @@
   gap: 10px;
   font-size: 13px;
   margin-bottom: 8px;
+  color: var(--text-secondary, #475569);
 }
 
 .amazon-breakdown-bar-bg {
   flex: 1;
   height: 16px;
-  background: #f0f2f2;
+  background: var(--bg-muted, #f1f5f9);
   border-radius: 4px;
   overflow: hidden;
-  border: 1px solid #d5d9d9;
+  border: 1px solid var(--border-medium, #e2e8f0);
 }
 
 .amazon-breakdown-bar-fill {
@@ -445,7 +459,7 @@
 }
 
 .amazon-review-item {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-medium, #e2e8f0);
   padding-bottom: 18px;
   margin-bottom: 18px;
 }
@@ -465,7 +479,7 @@
 }
 
 .amazon-review-verified {
-  color: #c45500;
+  color: var(--color-success, #10b981);
   font-size: 12px;
   font-weight: 700;
 }
@@ -474,18 +488,20 @@
   font-size: 15px;
   font-weight: 700;
   margin-bottom: 6px;
+  color: var(--text-primary, #0f172a);
 }
 
 .amazon-review-body {
   font-size: 14px;
-  color: #333;
+  color: var(--text-secondary, #475569);
   line-height: 1.5;
 }
 
 .amazon-write-review-box {
-  background: #fafafa;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  background: var(--bg-muted, #f8fafc);
+  border: 1px solid var(--border-medium, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
   padding: 20px;
   margin-top: 20px;
+  color: var(--text-primary, #0f172a);
 }

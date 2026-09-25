@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
+import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
 import '../styles/dashboard.css';
 
 const INITIAL_CUSTOMER_ORDERS = [
@@ -86,6 +87,7 @@ export default function OrderHistoryPage() {
   });
 
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
+  const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
 
   const saveOrders = (newOrders) => {
     setOrders(newOrders);
@@ -372,6 +374,15 @@ export default function OrderHistoryPage() {
 
                       <button
                         type="button"
+                        className="shopee-btn shopee-btn-secondary"
+                        style={{ fontSize: '12px' }}
+                        onClick={() => setSelectedInvoiceOrder(ord)}
+                      >
+                        🧾 {t('print_invoice', 'In hóa đơn VAT')}
+                      </button>
+
+                      <button
+                        type="button"
                         className="shopee-btn shopee-btn-primary"
                         style={{ fontSize: '12px' }}
                         onClick={() => handleBuyAgain(ord.items[0])}
@@ -442,6 +453,14 @@ export default function OrderHistoryPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Printable Invoice & VAT Receipt Modal */}
+      {selectedInvoiceOrder && (
+        <InvoiceReceiptModal
+          order={selectedInvoiceOrder}
+          onClose={() => setSelectedInvoiceOrder(null)}
+        />
       )}
     </main>
   );

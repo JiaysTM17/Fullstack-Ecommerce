@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
+import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
 
 export default function OrderSuccessPage() {
   const location = useLocation();
@@ -10,9 +11,24 @@ export default function OrderSuccessPage() {
   const { t } = useLanguage();
   const { showToast } = useToast();
 
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+
   const orderId = location.state?.orderId || `ORD${Math.floor(100000 + Math.random() * 900000)}`;
   const total = location.state?.total || 0;
   const paymentMethod = location.state?.paymentMethod || 'COD';
+  const shippingAddress = location.state?.shippingAddress || '';
+  const customerName = location.state?.customerName || '';
+  const phone = location.state?.phone || '';
+
+  const orderData = {
+    orderId,
+    total,
+    paymentMethod: paymentMethod === 'BANK' ? 'Chuyển khoản VietQR' : paymentMethod === 'MOMO' ? 'Ví MoMo/ZaloPay' : paymentMethod === 'CARD' ? 'Thẻ Visa/Master' : 'Thanh toán khi nhận hàng (COD)',
+    shippingAddress,
+    customerName,
+    phone,
+    createdAt: new Date().toLocaleString('vi-VN'),
+  };
 
   const handleCopyOrderId = () => {
     navigator.clipboard?.writeText(orderId);
@@ -51,10 +67,10 @@ export default function OrderSuccessPage() {
         </div>
 
         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
-          {t('order_success_title')}
+          {t('order_success_title', 'Đặt Hàng Thành Công!')}
         </h1>
         <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: '1.6' }}>
-          {t('order_success_subtitle')} Thông tin xác nhận và mã vận đơn đã được gửi tới hệ thống xử lý.
+          {t('order_success_subtitle', 'Cảm ơn bạn đã tin tưởng mua sắm tại Mini Shopee.')} Thông tin xác nhận và mã vận đơn đã được gửi tới hệ thống xử lý.
         </p>
 
         {/* Order Details Card */}
@@ -69,7 +85,7 @@ export default function OrderSuccessPage() {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{t('order_code_label')}:</span>
+            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{t('order_code_label', 'Mã đơn hàng')}:</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <strong style={{ fontSize: '16px', color: 'var(--primary-color, #ea580c)', letterSpacing: '0.5px' }}>
                 {orderId}
@@ -103,7 +119,7 @@ export default function OrderSuccessPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
             <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Phương thức thanh toán:</span>
             <span style={{ fontSize: '13.5px', fontWeight: 600, color: 'var(--text-primary)' }}>
-              {paymentMethod === 'BANK' ? '🏦 Chuyển khoản VietQR' : paymentMethod === 'MOMO' ? '📱 Ví MoMo/ZaloPay' : paymentMethod === 'CARD' ? '💳 Thẻ Visa/Master' : '💵 Thanh toán khi nhận hàng (COD)'}
+              {orderData.paymentMethod}
             </span>
           </div>
 
@@ -123,7 +139,16 @@ export default function OrderSuccessPage() {
             style={{ padding: '12px 24px', fontSize: '15px', fontWeight: 800, width: '100%', borderRadius: '10px' }}
             onClick={() => navigate('/orders')}
           >
-            {t('order_view_tracking_btn')}
+            {t('order_view_tracking_btn', 'Theo dõi vận chuyển đơn hàng')}
+          </button>
+
+          <button
+            type="button"
+            className="shopee-btn shopee-btn-secondary"
+            style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', borderRadius: '10px' }}
+            onClick={() => setShowInvoiceModal(true)}
+          >
+            🧾 In Hóa Đơn / Xem Biên Lai VAT
           </button>
 
           <Link
@@ -131,10 +156,17 @@ export default function OrderSuccessPage() {
             className="shopee-btn shopee-btn-secondary"
             style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', textAlign: 'center', borderRadius: '10px', textDecoration: 'none' }}
           >
-            {t('order_continue_shopping_btn')}
+            {t('order_continue_shopping_btn', 'Tiếp tục mua sắm')}
           </Link>
         </div>
       </div>
+
+      {showInvoiceModal && (
+        <InvoiceReceiptModal
+          order={orderData}
+          onClose={() => setShowInvoiceModal(false)}
+        />
+      )}
     </main>
   );
 }
