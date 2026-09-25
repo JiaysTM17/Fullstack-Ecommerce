@@ -15,14 +15,26 @@ connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
-app.use(express.json());
+// Security: limit JSON body size to 100kb
+app.use(express.json({ limit: "100kb" }));
+
+// CORS: support comma-separated origins in CLIENT_URL
+const allowedOrigins = (process.env.CLIENT_URL || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: allowedOrigins.length > 0 ? allowedOrigins : "*",
+  })
+);
+
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// Routes
+// Health check
 app.get("/", (req, res) => {
   res.json({ message: "Mini Shopee API is running" });
 });
@@ -30,7 +42,7 @@ app.get("/", (req, res) => {
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 
-// Error handling
+// Error handling (must be last)
 app.use(notFound);
 app.use(errorHandler);
 

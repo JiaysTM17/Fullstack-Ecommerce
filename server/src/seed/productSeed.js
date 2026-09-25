@@ -142,7 +142,7 @@ const products = [
   },
   {
     name: "Máy xay sinh tố mini",
-   slug: "may-xay-sinh-to-mini",
+    slug: "may-xay-sinh-to-mini",
     description: "Máy xay cầm tay cá nhân 400ml, pin sạc USB, tiện lợi mang đi làm.",
     price: 420000,
     originalPrice: 550000,
