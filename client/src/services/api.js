@@ -20,6 +20,7 @@ export function buildQueryString(params = {}) {
 export async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   const headers = {
+    Accept: "application/json",
     "Content-Type": "application/json",
     ...options.headers,
   };
@@ -30,10 +31,18 @@ export async function apiRequest(endpoint, options = {}) {
   });
 
   const text = await response.text();
-  const payload = text ? JSON.parse(text) : null;
+  let payload = null;
+
+  if (text) {
+    try {
+      payload = JSON.parse(text);
+    } catch {
+      payload = { message: text };
+    }
+  }
 
   if (!response.ok || payload?.success === false) {
-    const error = new Error(payload?.message || "Request failed");
+    const error = new Error(payload?.message || `Request failed with status ${response.status}`);
     error.status = response.status;
     error.payload = payload;
     throw error;

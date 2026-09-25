@@ -18,7 +18,7 @@
 - `clearCart()`
 - `getCartCount()`
 - `getCartSubtotal()`
-- Luu gio hang vao `localStorage` bang key `mini_shopee_cart`.
+- Luu gio hang vao `localStorage` bang key `cart`.
 - Load lai gio hang tu `localStorage` khi app khoi dong.
 - Them cung san pham se tang quantity, khong tao dong trung.
 - Quantity khong nho hon 1 va khong vuot stock neu co stock.
@@ -69,3 +69,21 @@
 - Dam bao `react`, `react-dom`, `react-router-dom` co trong `client/package.json`.
 - Quyet dinh co import cac file CSS cua UI agent vao entrypoint hay khong.
 - Dong bo response backend dung contract phia tren.
+
+## Cap nhat: 2026-09-25 10:19:38 +07:00
+
+### Cai tien da thuc hien
+- `apiRequest` xu ly response non-JSON an toan hon va them header `Accept: application/json`.
+- Cart storage doi ve key `cart` de khop ke hoach du an, co doc migrate tu key cu `mini_shopee_cart`.
+- Them `setQuantity(productId, quantity)` trong CartContext de CartPage va UI CartItem co the cap nhat quantity truc tiep.
+- CartPage cho nhap quantity truc tiep va van clamp toi thieu 1 / toi da stock neu co.
+
+### Trang thai hoan thanh
+- Phan Codex client logic da hoan thanh cac muc chinh: page, cart state, localStorage, service API, checkout flow, route va progress file.
+
+### Van de dang gap
+- Chua the build client rieng vi branch Codex chua co `client/package.json` va `client/src/main.jsx`; can Integration Agent tong hop voi cac branch UI/backend.
+
+### Viec can Integration Agent xu ly
+- Merge `agent/codex-client-logic`, `agent/antigravity-ui`, va `agent/claude-backend` theo thu tu an toan.
+- Sau khi merge UI branch, co the thay fallback UI trong pages bang components UI san co neu muon dong bo giao dien.
