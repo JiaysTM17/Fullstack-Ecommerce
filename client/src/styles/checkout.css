@@ -1,0 +1,176 @@
+/* client/src/styles/checkout.css */
+
+/* Checkout Page Layout */
+.shopee-checkout-page {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+  margin-top: 24px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 900px) {
+  .shopee-checkout-page {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shopee-checkout-form-card {
+  background: #fff;
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light);
+}
+
+.shopee-checkout-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.shopee-checkout-header h1,
+.shopee-checkout-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shopee-form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.shopee-form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shopee-form-label-required {
+  color: var(--color-error);
+}
+
+.shopee-form-input,
+.shopee-form-textarea,
+.shopee-form-select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-sm);
+  background-color: #fff;
+  color: var(--text-primary);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.shopee-form-input:focus,
+.shopee-form-textarea:focus,
+.shopee-form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.15);
+}
+
+.shopee-form-input.has-error,
+.shopee-form-textarea.has-error {
+  border-color: var(--color-error);
+  background-color: #fff8f8;
+}
+
+.shopee-form-error-msg {
+  color: var(--color-error);
+  font-size: 12px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shopee-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Two columns grid for responsive fields */
+.shopee-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .shopee-form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+/* Payment method selection */
+.shopee-payment-methods {
+  margin: 20px 0;
+  padding: 16px;
+  background: var(--bg-muted);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+.shopee-payment-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.shopee-payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shopee-payment-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.shopee-payment-option.active {
+  border-color: var(--primary-color);
+  background-color: var(--primary-light);
+}
+
+.shopee-payment-option input[type="radio"] {
+  accent-color: var(--primary-color);
+  width: 16px;
+  height: 16px;
+}
+
+/* Submit button */
+.shopee-checkout-submit-btn {
+  width: 100%;
+  height: 46px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 12px;
+}
