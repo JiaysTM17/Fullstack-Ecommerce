@@ -41,6 +41,7 @@ const ProductCard = ({
   formatCurrency = defaultFormatCurrency
 }) => {
   const [imgSrc, setImgSrc] = useState(product?.image || FALLBACK_IMAGE);
+  const [justAdded, setJustAdded] = useState(false);
 
   if (!product || !product.name) {
     return null;
@@ -56,6 +57,8 @@ const ProductCard = ({
     sold = 0,
     isMall = false
   } = product;
+
+  const productId = _id || id;
 
   // Tính phần trăm giảm giá nếu có
   const hasDiscount = originalPrice > price;
@@ -74,6 +77,11 @@ const ProductCard = ({
     if (onAddToCart) {
       onAddToCart(product, e);
     }
+    // Hiệu ứng phản hồi thêm giỏ hàng trong 1.2s
+    setJustAdded(true);
+    setTimeout(() => {
+      setJustAdded(false);
+    }, 1200);
   };
 
   const handleImageError = () => {
@@ -81,13 +89,13 @@ const ProductCard = ({
   };
 
   return (
-    <div
+    <article
       className="shopee-product-card"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleCardClick(e)}
-      data-id={_id || id}
+      data-id={productId}
     >
       {/* Khung ảnh sản phẩm */}
       <div className="shopee-card-image-wrapper">
@@ -144,20 +152,31 @@ const ProductCard = ({
         <div className="shopee-card-actions">
           <button
             type="button"
-            className="shopee-card-add-btn"
+            className={`shopee-card-add-btn ${justAdded ? 'added' : ''}`}
             onClick={handleAddClick}
             aria-label={`Thêm ${name} vào giỏ hàng`}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="9" cy="21" r="1" />
-              <circle cx="20" cy="21" r="1" />
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-            </svg>
-            <span>Thêm vào giỏ</span>
+            {justAdded ? (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span>Đã thêm!</span>
+              </>
+            ) : (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="9" cy="21" r="1" />
+                  <circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                <span>Thêm vào giỏ</span>
+              </>
+            )}
           </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
