@@ -2,10 +2,14 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CartItem, EmptyState } from "../components";
 import { useCart } from "../context/CartContext";
+import { useLanguage } from "../context/LanguageContext";
 import { formatCurrency } from "../utils/formatCurrency";
+
+const FREE_SHIPPING_THRESHOLD = 300000;
 
 export default function CartPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const {
     items,
     selectedItems,
@@ -36,6 +40,9 @@ export default function CartPage() {
   const [voucherMessage, setVoucherMessage] = useState("");
 
   const allSelected = items.length > 0 && selectedItemIds.length === items.length;
+  const hasFreeShipping = selectedSubtotal >= FREE_SHIPPING_THRESHOLD;
+  const progressPercent = Math.min(100, Math.round((selectedSubtotal / FREE_SHIPPING_THRESHOLD) * 100));
+  const neededAmount = Math.max(0, FREE_SHIPPING_THRESHOLD - selectedSubtotal);
 
   const handleVoucherSubmit = (e) => {
     e.preventDefault();
@@ -53,9 +60,9 @@ export default function CartPage() {
     return (
       <main className="shopee-container" style={{ padding: "40px 0" }}>
         <EmptyState
-          title="Giỏ hàng của bạn đang trống"
-          description="Khám phá hàng ngàn sản phẩm giá tốt và ưu đãi hấp dẫn ngay hôm nay."
-          actionText="Bắt đầu mua sắm"
+          title={t('empty_cart_title', 'Giỏ hàng của bạn đang trống')}
+          description={t('empty_cart_desc', 'Khám phá hàng ngàn sản phẩm giá tốt và ưu đãi hấp dẫn ngay hôm nay.')}
+          actionText={t('start_shopping', 'Bắt đầu mua sắm')}
           onAction={() => navigate("/")}
         />
       </main>
@@ -67,19 +74,69 @@ export default function CartPage() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "28px", alignItems: "start" }}>
         {/* Left Column: Cart Items & Save For Later */}
         <section>
-          <div style={{ background: "#fff", borderRadius: "8px", padding: "16px 20px", marginBottom: "16px", border: "1px solid #e0e0e0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>
+          {/* Free Shipping Progress Bar */}
+          <div
+            style={{
+              background: "var(--bg-card, #fff)",
+              borderRadius: "8px",
+              padding: "16px 20px",
+              marginBottom: "16px",
+              border: "1px solid var(--border-medium, #e0e0e0)",
+              boxShadow: "var(--shadow-sm)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+              <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
+                {hasFreeShipping ? (
+                  <span style={{ color: "var(--color-success, #10b981)" }}>
+                    🎉 {t('freeship_qualified', 'Chúc mừng! Bạn đã đủ điều kiện nhận MIỄN PHÍ VẬN CHUYỂN!')}
+                  </span>
+                ) : (
+                  <span>
+                    🚚 {t('freeship_needed', 'Mua thêm')} <strong style={{ color: "var(--primary-color)" }}>{formatCurrency(neededAmount)}</strong> {t('freeship_to_qualify', 'để được MIỄN PHÍ VẬN CHUYỂN toàn quốc!')}
+                  </span>
+                )}
+              </span>
+              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)" }}>
+                {progressPercent}%
+              </span>
+            </div>
+            <div
+              style={{
+                height: "8px",
+                width: "100%",
+                backgroundColor: "var(--bg-muted, #e2e8f0)",
+                borderRadius: "9999px",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${progressPercent}%`,
+                  background: hasFreeShipping
+                    ? "linear-gradient(90deg, #10b981, #059669)"
+                    : "linear-gradient(90deg, #ea580c, #f97316)",
+                  borderRadius: "9999px",
+                  transition: "width 0.4s ease",
+                }}
+              />
+            </div>
+          </div>
+
+          <div style={{ background: "var(--bg-card, #fff)", borderRadius: "8px", padding: "16px 20px", marginBottom: "16px", border: "1px solid var(--border-medium, #e0e0e0)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: 700, cursor: "pointer", color: "var(--text-primary)" }}>
               <input
                 type="checkbox"
                 checked={allSelected}
                 onChange={() => (allSelected ? unselectAllItems() : selectAllItems())}
                 style={{ width: "18px", height: "18px" }}
               />
-              <span>CHỌN TẤT CẢ ({items.length} sản phẩm trong giỏ)</span>
+              <span>{t('select_all', 'CHỌN TẤT CẢ')} ({items.length} {t('products_count', 'sản phẩm')})</span>
             </label>
 
-            <span style={{ fontSize: "13px", color: "#666" }}>
-              Đã chọn <strong>{selectedItems.length}</strong> sản phẩm để thanh toán
+            <span style={{ fontSize: "13px", color: "var(--text-secondary, #666)" }}>
+              {t('selected_items', 'Đã chọn')} <strong>{selectedItems.length}</strong> {t('products_count', 'sản phẩm')}
             </span>
           </div>
 
@@ -202,42 +259,42 @@ export default function CartPage() {
 
         {/* Right Column: Sticky Order Summary & Voucher Input */}
         <aside className="shopee-cart-summary">
-          <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px" }}>Tóm Tắt Đơn Hàng</h2>
+          <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", color: "var(--text-primary)" }}>{t('order_summary', 'Tóm Tắt Đơn Hàng')}</h2>
 
           {/* Voucher Input Box */}
-          <div style={{ marginBottom: "18px", borderBottom: "1px solid #eee", paddingBottom: "16px" }}>
-            <label style={{ fontSize: "13px", fontWeight: 700, display: "block", marginBottom: "6px" }}>
-              Mã Giảm Giá / Voucher Sàn:
+          <div style={{ marginBottom: "18px", borderBottom: "1px solid var(--border-medium, #eee)", paddingBottom: "16px" }}>
+            <label style={{ fontSize: "13px", fontWeight: 700, display: "block", marginBottom: "6px", color: "var(--text-primary)" }}>
+              {t('voucher_code', 'Mã Giảm Giá / Voucher Sàn')}:
             </label>
             <form onSubmit={handleVoucherSubmit} style={{ display: "flex", gap: "6px" }}>
               <input
                 type="text"
                 className="shopee-form-input"
-                placeholder="Nhập: AMAZON10, FREESHIP"
+                placeholder="Nhập: MINI10, FREESHIP"
                 value={voucherInput}
                 onChange={(e) => setVoucherInput(e.target.value)}
                 style={{ fontSize: "13px", textTransform: "uppercase" }}
               />
               <button type="submit" className="shopee-btn shopee-btn-secondary" style={{ whiteSpace: "nowrap" }}>
-                Áp Dụng
+                {t('apply', 'Áp Dụng')}
               </button>
             </form>
 
             {voucherMessage && (
-              <div style={{ fontSize: "12px", color: appliedVoucher ? "#2e7d32" : "#d32f2f", marginTop: "6px", fontWeight: 600 }}>
+              <div style={{ fontSize: "12px", color: appliedVoucher ? "var(--color-success, #2e7d32)" : "var(--color-error, #d32f2f)", marginTop: "6px", fontWeight: 600 }}>
                 {voucherMessage}
               </div>
             )}
 
             {appliedVoucher && (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#e8f5e9", padding: "6px 10px", borderRadius: "4px", marginTop: "8px", fontSize: "12px", color: "#2e7d32" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, #e8f5e9)", padding: "6px 10px", borderRadius: "4px", marginTop: "8px", fontSize: "12px", color: "var(--color-success, #2e7d32)" }}>
                 <span>✓ Mã: <strong>{appliedVoucher.code}</strong> (-{formatCurrency(voucherDiscount)})</span>
                 <button
                   type="button"
                   onClick={removeVoucher}
-                  style={{ background: "none", border: "none", color: "#d32f2f", cursor: "pointer", fontWeight: 700 }}
+                  style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700 }}
                 >
-                  ✕ Gỡ
+                  ✕ {t('remove', 'Gỡ')}
                 </button>
               </div>
             )}
@@ -246,31 +303,31 @@ export default function CartPage() {
           {/* Price Breakdown */}
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "14px", marginBottom: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "#666" }}>Sản phẩm đã chọn:</span>
-              <span style={{ fontWeight: 600 }}>{selectedItems.length} món</span>
+              <span style={{ color: "var(--text-secondary, #666)" }}>{t('selected_items', 'Sản phẩm đã chọn')}:</span>
+              <span style={{ fontWeight: 600 }}>{selectedItems.length} {t('products_count', 'món')}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "#666" }}>Tạm tính:</span>
+              <span style={{ color: "var(--text-secondary, #666)" }}>{t('subtotal', 'Tạm tính')}:</span>
               <span style={{ fontWeight: 600 }}>{formatCurrency(selectedSubtotal)}</span>
             </div>
 
             {voucherDiscount > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#2e7d32" }}>
-                <span>Giảm giá Voucher:</span>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
+                <span>{t('voucher_discount', 'Giảm giá Voucher')}:</span>
                 <span style={{ fontWeight: 700 }}>-{formatCurrency(voucherDiscount)}</span>
               </div>
             )}
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "#666" }}>Phí vận chuyển dự kiến:</span>
+              <span style={{ color: "var(--text-secondary, #666)" }}>{t('shipping_fee', 'Phí vận chuyển')}:</span>
               <span style={{ fontWeight: 600 }}>
-                {shippingFee === 0 ? "MIỄN PHÍ" : formatCurrency(shippingFee)}
+                {shippingFee === 0 ? t('free', 'MIỄN PHÍ') : formatCurrency(shippingFee)}
               </span>
             </div>
 
-            <div style={{ borderTop: "2px solid #333", paddingTop: "12px", marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontSize: "16px", fontWeight: 800 }}>TỔNG CỘNG:</span>
-              <span style={{ fontSize: "22px", fontWeight: 800, color: "#ee4d2d" }}>
+            <div style={{ borderTop: "2px solid var(--border-dark, #333)", paddingTop: "12px", marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <span style={{ fontSize: "16px", fontWeight: 800 }}>{t('total', 'TỔNG CỘNG')}:</span>
+              <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--primary-color, #ee4d2d)" }}>
                 {formatCurrency(finalTotal)}
               </span>
             </div>
@@ -283,7 +340,7 @@ export default function CartPage() {
               to="/checkout"
               style={{ display: "block", textAlign: "center", padding: "14px", fontSize: "16px", fontWeight: 700 }}
             >
-              Tiến Hành Thanh Toán ({selectedItems.length}) →
+              {t('proceed_to_checkout', 'Tiến Hành Thanh Toán')} ({selectedItems.length}) →
             </Link>
           ) : (
             <button
@@ -292,13 +349,13 @@ export default function CartPage() {
               disabled
               style={{ width: "100%", padding: "14px", fontSize: "14px", opacity: 0.6 }}
             >
-              Vui lòng chọn sản phẩm để thanh toán
+              {t('select_items_warning', 'Vui lòng chọn sản phẩm để thanh toán')}
             </button>
           )}
 
           <div style={{ textAlign: "center", marginTop: "14px" }}>
-            <Link to="/" style={{ fontSize: "13px", color: "#007185", textDecoration: "none" }}>
-              ← Tiếp tục chọn thêm sản phẩm
+            <Link to="/" style={{ fontSize: "13px", color: "var(--secondary-color, #007185)", textDecoration: "none" }}>
+              ← {t('continue_shopping', 'Tiếp tục chọn thêm sản phẩm')}
             </Link>
           </div>
         </aside>

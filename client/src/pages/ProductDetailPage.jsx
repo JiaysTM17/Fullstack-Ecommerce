@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
+import { useToast } from "../context/ToastContext";
+import { useLanguage } from "../context/LanguageContext";
+import { RecentlyViewed, saveRecentlyViewed } from "../components/RecentlyViewed";
 import { addProductReview, getProductById, getProducts } from "../services/productService";
 import { formatCurrency } from "../utils/formatCurrency";
 import "../styles/amazon-pdp.css";
@@ -11,6 +14,8 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
+  const { showToast } = useToast();
+  const { t } = useLanguage();
 
   const [product, setProduct] = useState(null);
   const [activeImage, setActiveImage] = useState("");
@@ -40,6 +45,7 @@ export default function ProductDetailPage() {
 
         if (!ignore && result) {
           setProduct(result);
+          saveRecentlyViewed(result._id || result.id || id);
           setActiveImage(result.image || result.images?.[0] || "");
           if (result.variants?.colors?.length > 0) {
             setSelectedColor(result.variants.colors[0]);
@@ -89,6 +95,7 @@ export default function ProductDetailPage() {
       },
       quantity
     );
+    showToast(t('add_to_cart_success', 'Đã thêm sản phẩm vào giỏ hàng!'), 'success');
   }
 
   function handleBuyNow() {
@@ -121,6 +128,7 @@ export default function ProductDetailPage() {
     }));
 
     setReviewSuccess(true);
+    showToast(t('review_submit_success', 'Cảm ơn bạn đã gửi đánh giá!'), 'success');
     setReviewAuthor("");
     setReviewTitle("");
     setReviewContent("");
@@ -645,6 +653,12 @@ export default function ProductDetailPage() {
           </div>
         </section>
       )}
+
+      {/* Recently Viewed Products */}
+      <RecentlyViewed
+        currentProductId={id}
+        onProductClick={(p) => navigate(`/products/${p._id || p.id}`)}
+      />
     </main>
   );
 }

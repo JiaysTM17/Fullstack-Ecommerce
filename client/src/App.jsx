@@ -7,10 +7,13 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import { Footer, Header } from "./components";
+import { Footer, Header, ToastContainer } from "./components";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider, useCart } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import { LanguageProvider } from "./context/LanguageContext";
+import { ToastProvider } from "./context/ToastContext";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -83,6 +86,7 @@ function AppLayout() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Footer />
+      <ToastContainer />
     </>
   );
 }
@@ -90,13 +94,20 @@ function AppLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <WishlistProvider>
-          <CartProvider>
-            <AppLayout />
-          </CartProvider>
-        </WishlistProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <WishlistProvider>
+                <CartProvider>
+                  <AppLayout />
+                </CartProvider>
+              </WishlistProvider>
+            </AuthProvider>
+          </ToastProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }
+

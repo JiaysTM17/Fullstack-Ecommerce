@@ -1,51 +1,114 @@
-/* client/src/styles/theme.css */
-:root {
-  --primary-color: #ee4d2d;
-  --primary-hover: #d73211;
-  --primary-light: #fef6f5;
-  --primary-border: #ffb8a9;
+/* client/src/styles/theme.css - Modern Enterprise Design System */
+
+:root,
+[data-theme="light"],
+.theme-light {
+  /* Brand Palette (Deep Slate & Warm Terracotta - Soft on the eyes) */
+  --primary-color: #ea580c;
+  --primary-hover: #c2410c;
+  --primary-light: #fff7ed;
+  --primary-border: #fed7aa;
   
-  --secondary-color: #00bfa5;
-  --secondary-hover: #009688;
+  --secondary-color: #0284c7;
+  --secondary-hover: #0369a1;
   
-  --text-primary: #222222;
-  --text-secondary: #757575;
-  --text-muted: #999999;
+  --header-bg: #0f172a;
+  --header-bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --header-text: #f8fafc;
+  --header-border: #334155;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
   --text-white: #ffffff;
   
-  --bg-page: #f5f5f5;
+  --bg-page: #f8fafc;
   --bg-card: #ffffff;
-  --bg-muted: #fafafa;
-  --bg-hover: #f8f8f8;
+  --bg-muted: #f1f5f9;
+  --bg-hover: #f8fafc;
   
-  --border-light: #ececec;
-  --border-medium: #e0e0e0;
-  --border-dark: #cccccc;
+  --border-light: #f1f5f9;
+  --border-medium: #e2e8f0;
+  --border-dark: #cbd5e1;
+  --border-color: #e2e8f0;
   
-  --color-error: #ff424f;
-  --color-error-bg: #fff0f0;
-  --color-success: #26aa99;
-  --color-warning: #ffba00;
-  --color-star: #ffce3d;
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-star: #f59e0b;
   
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 8px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-full: 9999px;
   
-  --shadow-sm: 0 1px 1px 0 rgba(0, 0, 0, 0.05);
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.09);
-  --shadow-hover: 0 4px 16px 0 rgba(0, 0, 0, 0.12);
-  --shadow-modal: 0 8px 24px 0 rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 8px 24px 0 rgba(0, 0, 0, 0.1);
+  --shadow-modal: 0 16px 36px 0 rgba(0, 0, 0, 0.2);
   
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s ease;
   
   --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --container-max-width: 1200px;
+  --container-max-width: 1240px;
 }
 
-/* Base utility resets for UI components */
+/* Dark Mode Theme Tokens */
+[data-theme="dark"],
+.theme-dark {
+  --primary-color: #f97316;
+  --primary-hover: #ea580c;
+  --primary-light: #29180c;
+  --primary-border: #7c2d12;
+  
+  --secondary-color: #38bdf8;
+  --secondary-hover: #0284c7;
+  
+  --header-bg: #090d16;
+  --header-bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 100%);
+  --header-text: #f8fafc;
+  --header-border: #1e293b;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-white: #ffffff;
+  
+  --bg-page: #0b0f19;
+  --bg-card: #1e293b;
+  --bg-muted: #141c2e;
+  --bg-hover: #243147;
+  
+  --border-light: #1e293b;
+  --border-medium: #334155;
+  --border-dark: #475569;
+  --border-color: #334155;
+  
+  --color-error: #f87171;
+  --color-error-bg: #3f1515;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-star: #fbbf24;
+  
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 2px 8px 0 rgba(0, 0, 0, 0.35);
+  --shadow-hover: 0 8px 24px 0 rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 16px 36px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* Global resets & typography */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  transition: background-color 0.25s ease, color 0.25s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
 .shopee-container {
   width: 100%;
   max-width: var(--container-max-width);
@@ -60,16 +123,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-family: var(--font-family);
+  font-family: inherit;
+  font-weight: 600;
   font-size: 14px;
-  font-weight: 500;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: var(--radius-sm);
+  line-height: 1.2;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
-  outline: none;
   transition: all var(--transition-fast);
   text-decoration: none;
   box-sizing: border-box;
@@ -77,36 +138,100 @@
 
 .shopee-btn-primary {
   background-color: var(--primary-color);
-  color: var(--text-white);
+  color: #ffffff;
   border-color: var(--primary-color);
 }
 
 .shopee-btn-primary:hover:not(:disabled) {
   background-color: var(--primary-hover);
   border-color: var(--primary-hover);
-}
-
-.shopee-btn-outline {
-  background-color: var(--primary-light);
-  color: var(--primary-color);
-  border-color: var(--primary-border);
-}
-
-.shopee-btn-outline:hover:not(:disabled) {
-  background-color: #fdeee9;
+  transform: translateY(-1px);
 }
 
 .shopee-btn-secondary {
-  background-color: #fff;
+  background-color: var(--bg-card);
   color: var(--text-primary);
   border-color: var(--border-medium);
 }
 
 .shopee-btn-secondary:hover:not(:disabled) {
-  background-color: var(--bg-hover);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.shopee-btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.shopee-btn-lg {
+  padding: 14px 28px;
+  font-size: 16px;
 }
 
 .shopee-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* Modal utility overlay */
+.shopee-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Quick View Overlay Button */
+.shopee-quickview-btn {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(15, 23, 42, 0.88);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.22s ease;
+  z-index: 4;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.shopee-product-card:hover .shopee-quickview-btn {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.shopee-quickview-btn:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+

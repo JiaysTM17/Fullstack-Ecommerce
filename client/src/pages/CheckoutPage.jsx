@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useToast } from "../context/ToastContext";
+import { useLanguage } from "../context/LanguageContext";
 import { createOrder } from "../services/orderService";
 import { formatCurrency } from "../utils/formatCurrency";
 import "../styles/checkout-multistep.css";
@@ -15,6 +17,8 @@ const SHIPPING_OPTIONS = [
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
+  const { t } = useLanguage();
   const {
     items,
     selectedItems,
@@ -23,6 +27,11 @@ export default function CheckoutPage() {
     voucherDiscount,
     clearCart,
   } = useCart();
+
+  const handleCopyAccount = () => {
+    navigator.clipboard?.writeText("0909123456");
+    showToast(t('copied_account', "Đã sao chép số tài khoản MBBank: 0909123456"), "success");
+  };
 
   // Active items for checkout
   const checkoutItems = selectedItems.length > 0 ? selectedItems : items;
@@ -339,14 +348,42 @@ export default function CheckoutPage() {
                   </div>
 
                   {paymentMethod === "BANK" && (
-                    <div className="payment-qr-preview">
+                    <div className="payment-qr-preview" style={{ textAlign: "center", marginTop: "12px", background: "var(--bg-muted, #f8f9fa)", padding: "16px", borderRadius: "8px", border: "1px solid var(--border-medium, #e2e8f0)" }}>
                       <img
-                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=MiniShopee-Order-Payment"
-                        alt="QR Code thanh toán"
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=2|99|0909123456|MINI%20SHOPEE|${finalOrderTotal}|THANH%20TOAN%20DON%20HANG`}
+                        alt="VietQR thanh toán"
                         className="payment-qr-img"
+                        style={{ width: "150px", height: "150px", borderRadius: "6px", border: "1px solid #ddd" }}
                       />
-                      <div style={{ fontSize: "12px", fontWeight: 700 }}>NGÂN HÀNG MBBANK - SỐ TK: 0909123456</div>
-                      <div style={{ fontSize: "11px", color: "#777" }}>Chủ TK: CONG TY MINI SHOPEE VIET NAM</div>
+                      <div style={{ fontSize: "13px", fontWeight: 700, marginTop: "8px", color: "var(--text-primary)" }}>
+                        NGÂN HÀNG QUÂN ĐỘI (MBBANK)
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", margin: "6px 0" }}>
+                        <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--primary-color)" }}>STK: 0909123456</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyAccount();
+                          }}
+                          style={{
+                            background: "var(--primary-light, #fff7ed)",
+                            border: "1px solid var(--primary-border, #fed7aa)",
+                            color: "var(--primary-color, #ea580c)",
+                            borderRadius: "4px",
+                            padding: "2px 8px",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                          }}
+                        >
+                          📋 {t('copy', 'Sao chép')}
+                        </button>
+                      </div>
+                      <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>Chủ TK: CONG TY TNHH MINI SHOPEE</div>
+                      <div style={{ fontSize: "13px", fontWeight: 800, color: "var(--color-success, #10b981)", marginTop: "4px" }}>
+                        Số tiền: {formatCurrency(finalOrderTotal)}
+                      </div>
                     </div>
                   )}
                 </div>

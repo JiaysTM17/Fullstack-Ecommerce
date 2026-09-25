@@ -51,7 +51,18 @@
 - ✅ Wired `ProductGrid` into `HomePage`, `CartItem` into `CartPage`, `CheckoutForm` into `CheckoutPage`.
 - ✅ Updated `CheckoutForm` phone validation to match backend: `/^[0-9]{9,11}$/`.
 - ✅ Added `.shopee-filter-chip` style for keyword badge.
-- ✅ Client `npm install` and `npm run build` — 61 modules, 0 errors.
+- ✅ Client `npm install` and `npm run build` — 89 modules, 0 errors.
+
+## Modern Enterprise UI/UX Upgrade (2026-09-25)
+- 🎨 **Modern Design System (`theme.css`)**: Replaced eye-straining blinding orange with Deep Slate (`#0f172a`) and warm terracotta (`#ea580c`), soft light theme (`#f8fafc`), and deep obsidian dark theme (`#0b0f19` / `#1e293b`).
+- 🌓 **Dark / Light Mode**: Implemented `ThemeContext` with ☀️/🌙 toggle in header topbar, persistent via `localStorage`, zero layout shifts.
+- 🌐 **Bilingual Support (VI / EN)**: Implemented `LanguageContext` + `translations.js` with 🇻🇳/🇺🇸 toggle in header topbar, full dictionary covering Header, Nav, Filters, PDP, Cart, FreeShip, Checkout, and Footer.
+- 🔔 **Global Toast System**: Implemented `ToastContext` and `ToastContainer` for instant feedback on Add to Cart, Wishlist toggles, reviews, and copying account numbers.
+- 👁️ **Quick View Modal (`QuickViewModal`)**: Eye button on product cards allows previewing photos, attributes, and adding to cart without leaving current page.
+- 🕒 **Recently Viewed History (`RecentlyViewed`)**: Automatically tracks inspected items and renders carousel on homepage and product detail page.
+- 🚚 **Free Shipping Progress Bar**: Real-time progress bar in cart showing needed amount to unlock 100% Free Shipping.
+- 🏦 **Dynamic VietQR**: Auto-generates QR with exact order total and includes one-click "Sao chép STK" button with toast notification.
+- 💼 **Subtle Portfolio Branding**: Converted blaring Amazon text into a clean personal portfolio presentation with architectural references in the footer.
 
 ## Remaining for Manual Testing
 - Start MongoDB locally (or set `MONGO_URI` to Atlas).
@@ -63,3 +74,4 @@
 - Integration branch: `integration/final-merge`.
 - Do not push to `main` or `master`.
 - If remote push is rejected because of non-fast-forward/conflict, do not force push. Record the error and stop for manual coordination.
+

@@ -1,8 +1,8 @@
 /* client/src/styles/footer.css */
 .shopee-footer {
-  background-color: #fbfbfb;
-  border-top: 4px solid var(--primary-color);
-  color: var(--text-secondary);
+  background-color: var(--bg-card, #fbfbfb);
+  border-top: 3px solid var(--primary-color, #ea580c);
+  color: var(--text-secondary, #475569);
   font-size: 13px;
   padding: 40px 0 20px;
   margin-top: 40px;
@@ -16,7 +16,7 @@
 }
 
 .shopee-footer-col h4 {
-  color: var(--text-primary);
+  color: var(--text-primary, #0f172a);
   font-size: 14px;
   font-weight: 700;
   margin-top: 0;
@@ -36,13 +36,13 @@
 }
 
 .shopee-footer-link {
-  color: var(--text-secondary);
+  color: var(--text-secondary, #475569);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 .shopee-footer-link:hover {
-  color: var(--primary-color);
+  color: var(--primary-color, #ea580c);
 }
 
 .shopee-footer-badges {
@@ -52,22 +52,35 @@
 }
 
 .shopee-footer-badge {
-  background: #fff;
-  border: 1px solid var(--border-medium);
+  background: var(--bg-muted, #fff);
+  border: 1px solid var(--border-medium, #e2e8f0);
   border-radius: var(--radius-sm);
   padding: 6px 10px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--text-primary, #0f172a);
   font-weight: 500;
 }
 
 .shopee-footer-bottom {
-  border-top: 1px solid var(--border-medium);
+  border-top: 1px solid var(--border-medium, #e2e8f0);
   padding-top: 20px;
   text-align: center;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
   font-size: 12px;
   line-height: 1.6;
+}
+
+.portfolio-credit-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  background: var(--bg-muted, #f1f5f9);
+  border: 1px solid var(--border-medium, #e2e8f0);
+  font-size: 11.5px;
+  color: var(--text-secondary, #475569);
 }
 
 @media (max-width: 900px) {

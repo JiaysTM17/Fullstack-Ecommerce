@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useWishlist } from '../context/WishlistContext';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/header.css';
 
 const POPULAR_SEARCHES = [
@@ -24,12 +26,14 @@ const Header = ({
   onLogout,
   onNavigate,
   logoText = 'Mini Shopee',
-  subTitle = 'Mua Sắm Đa Kênh - Chuẩn Amazon'
+  subTitle = 'Smart Marketplace'
 }) => {
   const [localSearch, setLocalSearch] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchWrapRef = useRef(null);
   const { wishlistCount } = useWishlist();
+  const { theme, toggleTheme } = useTheme();
+  const { language, toggleLanguage, t } = useLanguage();
 
   const isControlled = typeof searchTerm === 'string';
   const currentSearch = isControlled ? searchTerm : localSearch;
@@ -106,7 +110,7 @@ const Header = ({
               onClick={() => navTo('/seller/dashboard')}
               style={{ cursor: 'pointer', fontWeight: 600 }}
             >
-              🏪 Kênh Người Bán (Shop)
+              {t('nav_seller_channel')}
             </span>
             <span>|</span>
             <span
@@ -114,13 +118,35 @@ const Header = ({
               onClick={() => navTo('/admin/dashboard')}
               style={{ cursor: 'pointer', fontWeight: 600 }}
             >
-              🛡️ Quản Trị Sàn (Admin)
+              {t('nav_admin_portal')}
             </span>
             <span>|</span>
             <span className="shopee-topbar-link">Hotline: 1900 6868</span>
           </div>
 
           <div className="shopee-topbar-right">
+            {/* Language Switcher */}
+            <button
+              type="button"
+              className="header-toggle-btn"
+              onClick={toggleLanguage}
+              title={language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+            >
+              {language === 'vi' ? '🇻🇳 VI' : '🇺🇸 EN'}
+            </button>
+
+            {/* Dark / Light Theme Toggle */}
+            <button
+              type="button"
+              className="header-toggle-btn"
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Chế độ Sáng' : 'Chế độ Tối'}
+            >
+              {theme === 'dark' ? '🌙 Tối' : '☀️ Sáng'}
+            </button>
+
+            <span>|</span>
+
             {user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span
@@ -128,7 +154,7 @@ const Header = ({
                   onClick={() => navTo('/orders')}
                   style={{ cursor: 'pointer' }}
                 >
-                  📦 Đơn Mua
+                  {t('nav_orders')}
                 </span>
                 <span>|</span>
                 <span
@@ -147,7 +173,7 @@ const Header = ({
                   onClick={onLogout}
                   style={{ cursor: 'pointer', color: '#ffebee' }}
                 >
-                  Đăng xuất
+                  {t('logout')}
                 </span>
               </div>
             ) : (
@@ -157,7 +183,7 @@ const Header = ({
                   onClick={() => navTo('/register')}
                   style={{ cursor: 'pointer', fontWeight: 500 }}
                 >
-                  Đăng Ký
+                  {t('register')}
                 </span>
                 <span>|</span>
                 <span
@@ -165,7 +191,7 @@ const Header = ({
                   onClick={() => navTo('/login')}
                   style={{ cursor: 'pointer', fontWeight: 600 }}
                 >
-                  Đăng Nhập
+                  {t('login')}
                 </span>
               </div>
             )}
@@ -198,7 +224,7 @@ const Header = ({
               <input
                 type="text"
                 className="shopee-search-input"
-                placeholder="Tìm kiếm hơn 100.000+ sản phẩm chính hãng, flash deals, thương hiệu..."
+                placeholder={t('search_placeholder')}
                 value={currentSearch}
                 onChange={handleInputChange}
                 onFocus={() => setShowSuggestions(true)}
@@ -208,12 +234,12 @@ const Header = ({
                   type="button"
                   className="shopee-search-clear"
                   onClick={handleClearSearch}
-                  aria-label="Xóa từ khóa"
+                  aria-label={t('clear_search', 'Xóa từ khóa')}
                 >
                   ✕
                 </button>
               )}
-              <button type="submit" className="shopee-search-btn" aria-label="Tìm kiếm">
+              <button type="submit" className="shopee-search-btn" aria-label={t('search', 'Tìm kiếm')}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <circle cx="11" cy="11" r="8" />
                   <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -229,17 +255,17 @@ const Header = ({
                   top: '100%',
                   left: 0,
                   right: 0,
-                  background: '#fff',
+                  background: 'var(--bg-card, #fff)',
                   borderRadius: '0 0 8px 8px',
-                  boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+                  boxShadow: 'var(--shadow-modal, 0 6px 16px rgba(0,0,0,0.15))',
                   zIndex: 100,
-                  border: '1px solid #e0e0e0',
+                  border: '1px solid var(--border-medium, #e0e0e0)',
                   marginTop: '2px',
                   overflow: 'hidden',
                 }}
               >
-                <div style={{ padding: '8px 14px', fontSize: '11px', color: '#888', fontWeight: 700, textTransform: 'uppercase', background: '#fafafa', borderBottom: '1px solid #f0f0f0' }}>
-                  🔍 Gợi ý tìm kiếm phổ biến
+                <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
+                  {t('suggested_searches')}
                 </div>
                 {filteredSuggestions.map((item, idx) => (
                   <div
@@ -248,17 +274,17 @@ const Header = ({
                     style={{
                       padding: '10px 14px',
                       fontSize: '13.5px',
-                      color: '#222',
+                      color: 'var(--text-primary, #222)',
                       cursor: 'pointer',
-                      borderBottom: idx < filteredSuggestions.length - 1 ? '1px solid #f5f5f5' : 'none',
+                      borderBottom: idx < filteredSuggestions.length - 1 ? '1px solid var(--border-light, #f5f5f5)' : 'none',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px',
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = '#fff5f2')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = '#fff')}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                   >
-                    <span style={{ color: '#ee4d2d' }}>•</span>
+                    <span style={{ color: 'var(--primary-color, #ea580c)' }}>•</span>
                     <span>{item}</span>
                   </div>
                 ))}
@@ -274,7 +300,7 @@ const Header = ({
               className="shopee-header-cart"
               onClick={() => navTo('/wishlist')}
               aria-label={`Yêu thích, ${wishlistCount} sản phẩm`}
-              title="Danh sách sản phẩm yêu thích"
+              title={t('wishlist_title')}
             >
               <div className="shopee-cart-icon-wrapper">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill={wishlistCount > 0 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
@@ -294,6 +320,7 @@ const Header = ({
               className="shopee-header-cart"
               onClick={onCartClick}
               aria-label={`Giỏ hàng, ${cartCount} sản phẩm`}
+              title={t('cart')}
             >
               <div className="shopee-cart-icon-wrapper">
                 <svg className="shopee-cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -314,7 +341,7 @@ const Header = ({
             alignItems: 'center',
             gap: '24px',
             padding: '10px 0 4px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.15)',
             fontSize: '13.5px',
             fontWeight: 600,
             color: '#fff',
@@ -325,37 +352,37 @@ const Header = ({
             onClick={() => navTo('/')}
             style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            ☰ Tất Cả Danh Mục
+            {t('nav_all_categories')}
           </span>
           <span
             onClick={() => navTo('/?badge=Hot+Deal')}
             style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: '#ffe082' }}
           >
-            ⚡ Flash Deals
+            {t('nav_flash_deals')}
           </span>
           <span
             onClick={() => navTo('/?badge=Best+Seller')}
             style={{ cursor: 'pointer' }}
           >
-            🏆 Bán Chạy Nhất
+            {t('nav_best_sellers')}
           </span>
           <span
             onClick={() => navTo('/?badge=Amazon%27s+Choice')}
             style={{ cursor: 'pointer' }}
           >
-            ✨ Amazon's Choice
+            {t('nav_featured_picks')}
           </span>
           <span
             onClick={() => navTo('/?fastDelivery=1')}
             style={{ cursor: 'pointer' }}
           >
-            🚀 Giao Siêu Tốc 2H
+            {t('nav_fast_delivery')}
           </span>
           <span
             onClick={() => navTo('/seller/dashboard')}
             style={{ cursor: 'pointer', marginLeft: 'auto', color: '#fff9c4' }}
           >
-            🏪 Đăng Bán Cùng Mini Shopee
+            {t('nav_seller_channel')}
           </span>
         </nav>
       </div>

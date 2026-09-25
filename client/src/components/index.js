@@ -16,3 +16,6 @@ export { default as HeroBanner } from './HeroBanner';
 export { default as FlashDeals } from './FlashDeals';
 export { default as ProductFilters } from './ProductFilters';
 export { default as ShippingLabelModal } from './ShippingLabelModal';
+export { default as QuickViewModal } from './QuickViewModal';
+export { default as RecentlyViewed } from './RecentlyViewed';
+export { default as ToastContainer } from './ToastContainer';

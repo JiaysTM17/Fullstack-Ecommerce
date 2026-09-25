@@ -22,6 +22,7 @@ const ProductGrid = ({
   loading = false,
   onAddToCart,
   onViewDetail,
+  onQuickView,
   emptyTitle = 'Không tìm thấy sản phẩm',
   emptyDescription = 'Thử tìm kiếm với từ khóa khác hoặc điều chỉnh lại bộ lọc của bạn.',
   onResetFilter,
@@ -54,6 +55,7 @@ const ProductGrid = ({
             product={product}
             onAddToCart={onAddToCart}
             onViewDetail={onViewDetail}
+            onQuickView={onQuickView}
             formatCurrency={formatCurrency}
           />
         );
