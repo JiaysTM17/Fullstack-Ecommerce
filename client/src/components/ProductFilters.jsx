@@ -33,6 +33,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
 
   const hasActiveFilters = Boolean(
     filters.category ||
+    filters.shopId ||
     filters.minPrice ||
     filters.maxPrice ||
     filters.minRating ||
@@ -63,7 +64,32 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
         </div>
       </div>
 
-      {/* 2. Fast Delivery */}
+      {/* 2. Shop Filter */}
+      <div className="shopee-filter-section">
+        <h4 className="shopee-filter-title">Cửa Hàng (Shop)</h4>
+        <div className="shopee-filter-list">
+          <div
+            className={`shopee-filter-item ${!filters.shopId ? "active" : ""}`}
+            onClick={() => onFilterChange("shopId", "")}
+          >
+            <span>🏪 Tất cả gian hàng</span>
+          </div>
+          <div
+            className={`shopee-filter-item ${filters.shopId === "shop_01" ? "active" : ""}`}
+            onClick={() => onFilterChange("shopId", filters.shopId === "shop_01" ? "" : "shop_01")}
+          >
+            <span>👗 Thời Trang GenZ</span>
+          </div>
+          <div
+            className={`shopee-filter-item ${filters.shopId === "shop_02" ? "active" : ""}`}
+            onClick={() => onFilterChange("shopId", filters.shopId === "shop_02" ? "" : "shop_02")}
+          >
+            <span>🎧 TechWorld Store</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Fast Delivery */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title">Vận Chuyển</h4>
         <label className="shopee-filter-item">
@@ -76,7 +102,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
         </label>
       </div>
 
-      {/* 3. Price Filter */}
+      {/* 4. Price Filter */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title">Khoảng Giá</h4>
         <div className="shopee-price-presets">
@@ -114,7 +140,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
         </form>
       </div>
 
-      {/* 4. Rating Filter */}
+      {/* 5. Rating Filter */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title">Đánh Giá Khách Hàng</h4>
         <div
@@ -133,7 +159,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
         </div>
       </div>
 
-      {/* 5. Special Badges */}
+      {/* 6. Special Badges */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title">Chứng Nhận Sàn</h4>
         <label className="shopee-filter-item">
@@ -144,7 +170,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
               onFilterChange("badge", e.target.checked ? "Amazon's Choice" : "")
             }
           />
-          <span style={{ fontWeight: 600, color: "#111" }}>Amazon's Choice</span>
+          <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>✨ Hàng Tuyển Chọn</span>
         </label>
         <label className="shopee-filter-item">
           <input

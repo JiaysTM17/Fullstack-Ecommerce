@@ -45,11 +45,23 @@ export default function CheckoutPage() {
   // Stepper state (1: Address, 2: Shipping, 3: Payment, 4: Review)
   const [currentStep, setCurrentStep] = useState(1);
 
+  // Load saved addresses
+  const [savedAddresses] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mini_shopee_saved_addresses');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const defaultSaved = savedAddresses.find((a) => a.isDefault) || savedAddresses[0];
+
   // Form State
-  const [fullName, setFullName] = useState(user?.fullName || "Nguyễn Văn A");
-  const [phone, setPhone] = useState(user?.phone || "0909123456");
+  const [fullName, setFullName] = useState(defaultSaved?.name || user?.fullName || "Nguyễn Văn A");
+  const [phone, setPhone] = useState(defaultSaved?.phone || user?.phone || "0909123456");
   const [email, setEmail] = useState(user?.email || "khachhang@shopee.vn");
-  const [address, setAddress] = useState(user?.address || "123 Đường Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh");
+  const [address, setAddress] = useState(defaultSaved?.address || user?.address || "123 Đường Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh");
   const [note, setNote] = useState("");
 
   // Shipping Method
@@ -192,11 +204,37 @@ export default function CheckoutPage() {
               </h2>
 
               <div className="address-card-grid">
-                <div className="address-card selected">
-                  <span className="address-default-badge">✓ MẶC ĐỊNH</span>
-                  <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px" }}>{fullName} ({phone})</div>
-                  <div style={{ color: "#555", fontSize: "13.5px", lineHeight: "1.5" }}>{address}</div>
-                </div>
+                {savedAddresses.length > 0 ? (
+                  savedAddresses.map((addr) => {
+                    const isSelected = fullName === addr.name && phone === addr.phone && address === addr.address;
+                    return (
+                      <div
+                        key={addr.id}
+                        className={`address-card ${isSelected ? "selected" : ""}`}
+                        onClick={() => {
+                          setFullName(addr.name);
+                          setPhone(addr.phone);
+                          setAddress(addr.address);
+                        }}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {addr.isDefault && <span className="address-default-badge">✓ MẶC ĐỊNH</span>}
+                        <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px" }}>
+                          {addr.name} ({addr.phone}) · <span style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>{addr.tag}</span>
+                        </div>
+                        <div style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.5" }}>
+                          {addr.address}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="address-card selected">
+                    <span className="address-default-badge">✓ MẶC ĐỊNH</span>
+                    <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px" }}>{fullName} ({phone})</div>
+                    <div style={{ color: "var(--text-secondary)", fontSize: "13.5px", lineHeight: "1.5" }}>{address}</div>
+                  </div>
+                )}
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "12px", background: "#fafafa", padding: "16px", borderRadius: "8px", border: "1px solid #eee" }}>

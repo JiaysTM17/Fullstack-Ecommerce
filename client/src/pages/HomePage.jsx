@@ -36,6 +36,7 @@ export default function HomePage() {
       fastDelivery: searchParams.get("fastDelivery") || "",
       inStock: searchParams.get("inStock") || "",
       badge: searchParams.get("badge") || "",
+      shopId: searchParams.get("shopId") || "",
     }),
     [searchParams],
   );

@@ -4,6 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { FALLBACK_PRODUCTS } from '../services/productService';
 import { formatCurrency } from '../utils/formatCurrency';
+import CategoryMegaMenuDrawer from './CategoryMegaMenuDrawer';
 import '../styles/header.css';
 
 const POPULAR_SEARCHES = [
@@ -32,6 +33,7 @@ const Header = ({
 }) => {
   const [localSearch, setLocalSearch] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showCategoryDrawer, setShowCategoryDrawer] = useState(false);
   const searchWrapRef = useRef(null);
   const { wishlistCount } = useWishlist();
   const { theme, toggleTheme } = useTheme();
@@ -411,10 +413,10 @@ const Header = ({
           }}
         >
           <span
-            onClick={() => navTo('/')}
+            onClick={() => setShowCategoryDrawer(true)}
             style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            {t('nav_all_categories')}
+            ☰ {t('nav_all_categories')}
           </span>
           <span
             onClick={() => navTo('/?badge=Hot+Deal')}
@@ -448,6 +450,12 @@ const Header = ({
           </span>
         </nav>
       </div>
+
+      {/* Category Mega Menu Drawer */}
+      <CategoryMegaMenuDrawer
+        isOpen={showCategoryDrawer}
+        onClose={() => setShowCategoryDrawer(false)}
+      />
     </header>
   );
 };

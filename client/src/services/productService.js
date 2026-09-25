@@ -561,6 +561,11 @@ export async function getProducts(params = {}) {
     list = list.filter((p) => p.badge === params.badge);
   }
 
+  // Shop filter
+  if (params.shopId) {
+    list = list.filter((p) => (p.shopId || "shop_01") === params.shopId);
+  }
+
   // Sort filter
   if (params.sort === "price_asc") {
     list.sort((a, b) => a.price - b.price);
