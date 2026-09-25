@@ -1,0 +1,25 @@
+{
+  "name": "mini-shopee-server",
+  "version": "1.0.0",
+  "description": "Backend API for Mini Shopee ecommerce website",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed": "node src/seed/productSeed.js"
+  },
+  "keywords": ["ecommerce", "api", "express", "mongodb"],
+  "author": "Claude Backend Agent",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
