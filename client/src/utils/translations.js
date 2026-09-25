@@ -178,6 +178,8 @@ export const TRANSLATIONS = {
     order_track_title: "Hành Trình Vận Chuyển",
     print_invoice: "In hóa đơn VAT",
     pdp_loading: "Đang tải thông tin chi tiết sản phẩm...",
+    status_returning: "Đổi trả / Hoàn tiền",
+    return_refund: "Trả hàng / Hoàn tiền",
 
     // Footer
     footer_about: "Về Mini Shopee",
@@ -362,6 +364,8 @@ export const TRANSLATIONS = {
     order_track_title: "Shipping Journey",
     print_invoice: "Print VAT Invoice",
     pdp_loading: "Loading product details...",
+    status_returning: "Return / Refund",
+    return_refund: "Return / Refund Request",
 
     // Footer
     footer_about: "About Mini Shopee",

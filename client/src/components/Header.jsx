@@ -5,7 +5,11 @@ import { useLanguage } from '../context/LanguageContext';
 import { FALLBACK_PRODUCTS } from '../services/productService';
 import { formatCurrency } from '../utils/formatCurrency';
 import CategoryMegaMenuDrawer from './CategoryMegaMenuDrawer';
+import NotificationsPopover from './NotificationsPopover';
 import '../styles/header.css';
+
+const RECENT_SEARCHES_KEY = 'mini_shopee_recent_searches';
+const DEFAULT_RECENTS = ['Tai nghe ANC', 'Áo thun cotton', 'Bàn phím cơ RGB', 'Bình giữ nhiệt'];
 
 const POPULAR_SEARCHES = [
   "Áo thun cotton",
@@ -39,6 +43,47 @@ const Header = ({
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
 
+  const [recentSearches, setRecentSearches] = useState(() => {
+    try {
+      const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // fallback
+    }
+    return DEFAULT_RECENTS;
+  });
+
+  const addRecentSearch = (text) => {
+    if (!text || !text.trim()) return;
+    const term = text.trim();
+    setRecentSearches((prev) => {
+      const updated = [term, ...prev.filter((item) => item.toLowerCase() !== term.toLowerCase())].slice(0, 6);
+      try {
+        localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const clearRecentSearches = (e) => {
+    e.stopPropagation();
+    setRecentSearches([]);
+    try {
+      localStorage.removeItem(RECENT_SEARCHES_KEY);
+    } catch {}
+  };
+
+  const removeRecentSearch = (e, term) => {
+    e.stopPropagation();
+    setRecentSearches((prev) => {
+      const updated = prev.filter((item) => item !== term);
+      try {
+        localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
   const isControlled = typeof searchTerm === 'string';
   const currentSearch = isControlled ? searchTerm : localSearch;
 
@@ -66,6 +111,9 @@ const Header = ({
   const handleFormSubmit = (e) => {
     e.preventDefault();
     setShowSuggestions(false);
+    if (currentSearch.trim()) {
+      addRecentSearch(currentSearch.trim());
+    }
     if (onSearchSubmit) {
       onSearchSubmit(currentSearch.trim(), e);
     }
@@ -79,6 +127,7 @@ const Header = ({
       onSearchChange(text, null);
     }
     setShowSuggestions(false);
+    addRecentSearch(text);
     if (onSearchSubmit) {
       onSearchSubmit(text, null);
     }
@@ -258,7 +307,7 @@ const Header = ({
             </form>
 
             {/* Autocomplete Dropdown */}
-            {showSuggestions && (filteredSuggestions.length > 0 || matchingProducts.length > 0) && (
+            {showSuggestions && (
               <div
                 style={{
                   position: 'absolute',
@@ -274,90 +323,188 @@ const Header = ({
                   overflow: 'hidden',
                 }}
               >
-                {/* Search Keywords */}
-                {filteredSuggestions.length > 0 && (
+                {!currentSearch.trim() ? (
                   <div>
-                    <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
-                      {t('suggested_searches')}
-                    </div>
-                    {filteredSuggestions.map((item, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => handleSelectSuggestion(item)}
-                        style={{
-                          padding: '9px 14px',
-                          fontSize: '13px',
-                          color: 'var(--text-primary, #222)',
-                          cursor: 'pointer',
-                          borderBottom: '1px solid var(--border-light, #f5f5f5)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                        }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
-                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                      >
-                        <span style={{ color: 'var(--primary-color, #ea580c)' }}>🔍</span>
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Matching Products with Thumbnail & Price */}
-                {matchingProducts.length > 0 && (
-                  <div>
-                    <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: '1px solid var(--border-light, #f0f0f0)', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
-                      ✨ Sản Phẩm Trùng Khớp
-                    </div>
-                    {matchingProducts.map((p) => {
-                      const id = p._id || p.id;
-                      return (
+                    {/* Recent Searches */}
+                    {recentSearches.length > 0 && (
+                      <div>
                         <div
-                          key={id}
-                          onClick={() => {
-                            setShowSuggestions(false);
-                            navTo(`/products/${id}`);
-                          }}
                           style={{
                             padding: '8px 14px',
+                            fontSize: '11px',
+                            color: 'var(--text-muted, #888)',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            background: 'var(--bg-muted, #fafafa)',
+                            borderBottom: '1px solid var(--border-light, #f0f0f0)',
                             display: 'flex',
+                            justifyContent: 'space-between',
                             alignItems: 'center',
-                            gap: '12px',
-                            cursor: 'pointer',
-                            borderBottom: '1px solid var(--border-light, #f5f5f5)',
-                            transition: 'background 0.15s ease',
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                         >
-                          <img
-                            src={p.image || p.images?.[0]}
-                            alt={p.name}
-                            style={{ width: '38px', height: '38px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light, #eee)' }}
-                          />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {p.name}
-                            </div>
-                            <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
-                              {p.brand || 'Chính hãng'} · {p.category}
-                            </div>
-                          </div>
-                          <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--primary-color, #ea580c)' }}>
-                            {formatCurrency(p.price)}
-                          </div>
+                          <span>🕒 Lịch Sử Tìm Kiếm Gần Đây</span>
+                          <span
+                            onClick={clearRecentSearches}
+                            style={{ cursor: 'pointer', textTransform: 'none', color: 'var(--primary-color, #ea580c)', fontWeight: 600 }}
+                          >
+                            Xóa lịch sử
+                          </span>
                         </div>
-                      );
-                    })}
+                        {recentSearches.map((item, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => handleSelectSuggestion(item)}
+                            style={{
+                              padding: '8px 14px',
+                              fontSize: '13px',
+                              color: 'var(--text-primary, #222)',
+                              cursor: 'pointer',
+                              borderBottom: '1px solid var(--border-light, #f5f5f5)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ color: 'var(--text-muted)' }}>🕒</span>
+                              <span>{item}</span>
+                            </div>
+                            <span
+                              onClick={(e) => removeRecentSearch(e, item)}
+                              style={{ color: 'var(--text-muted)', fontSize: '12px', padding: '2px 6px', cursor: 'pointer' }}
+                              title="Xóa mục này"
+                            >
+                              ✕
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Popular Searches */}
+                    <div>
+                      <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: recentSearches.length > 0 ? '1px solid var(--border-light, #f0f0f0)' : 'none', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
+                        🔥 {t('suggested_searches', 'Gợi Ý Tìm Kiếm Phổ Biến')}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '10px 14px' }}>
+                        {POPULAR_SEARCHES.slice(0, 6).map((item, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleSelectSuggestion(item)}
+                            style={{
+                              background: 'var(--bg-muted, #f1f5f9)',
+                              border: '1px solid var(--border-medium, #e2e8f0)',
+                              borderRadius: '20px',
+                              padding: '4px 12px',
+                              fontSize: '12px',
+                              color: 'var(--text-secondary, #475569)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
+                          >
+                            <span>🔍</span>
+                            <span>{item}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    {/* Search Keywords */}
+                    {filteredSuggestions.length > 0 && (
+                      <div>
+                        <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
+                          {t('suggested_searches')}
+                        </div>
+                        {filteredSuggestions.map((item, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => handleSelectSuggestion(item)}
+                            style={{
+                              padding: '9px 14px',
+                              fontSize: '13px',
+                              color: 'var(--text-primary, #222)',
+                              cursor: 'pointer',
+                              borderBottom: '1px solid var(--border-light, #f5f5f5)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                          >
+                            <span style={{ color: 'var(--primary-color, #ea580c)' }}>🔍</span>
+                            <span>{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Matching Products with Thumbnail & Price */}
+                    {matchingProducts.length > 0 && (
+                      <div>
+                        <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: '1px solid var(--border-light, #f0f0f0)', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
+                          ✨ Sản Phẩm Trùng Khớp
+                        </div>
+                        {matchingProducts.map((p) => {
+                          const id = p._id || p.id;
+                          return (
+                            <div
+                              key={id}
+                              onClick={() => {
+                                setShowSuggestions(false);
+                                navTo(`/products/${id}`);
+                              }}
+                              style={{
+                                padding: '8px 14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                cursor: 'pointer',
+                                borderBottom: '1px solid var(--border-light, #f5f5f5)',
+                                transition: 'background 0.15s ease',
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
+                              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                            >
+                              <img
+                                src={p.image || p.images?.[0]}
+                                alt={p.name}
+                                style={{ width: '38px', height: '38px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light, #eee)' }}
+                              />
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {p.name}
+                                </div>
+                                <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                                  {p.brand || 'Chính hãng'} · {p.category}
+                                </div>
+                              </div>
+                              <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--primary-color, #ea580c)' }}>
+                                {formatCurrency(p.price)}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             )}
           </div>
 
-          {/* Header Action Buttons: Wishlist & Cart */}
+          {/* Header Action Buttons: Notifications, Wishlist & Cart */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Notification Bell Dropdown */}
+            <NotificationsPopover />
+
             {/* Wishlist Icon */}
             <button
               type="button"
