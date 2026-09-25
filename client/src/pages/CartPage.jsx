@@ -296,7 +296,7 @@ export default function CartPage() {
                     🎟️ {appliedVoucher.code}
                   </span>
                   <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
-                    (-{formatCurrency(voucherDiscount)})
+                    ({appliedVoucher.type === 'shipping' ? 'Miễn phí vận chuyển' : `-${formatCurrency(voucherDiscount)}`})
                   </span>
                 </div>
                 <button
@@ -367,6 +367,13 @@ export default function CartPage() {
               <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
                 <span>{t('voucher_discount', 'Giảm giá Voucher')}:</span>
                 <span style={{ fontWeight: 700 }}>-{formatCurrency(voucherDiscount)}</span>
+              </div>
+            )}
+
+            {appliedVoucher?.type === "shipping" && (
+              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
+                <span>Miễn phí ship ({appliedVoucher.code}):</span>
+                <span style={{ fontWeight: 700 }}>-25.000₫</span>
               </div>
             )}
 

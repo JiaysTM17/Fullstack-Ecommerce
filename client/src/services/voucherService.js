@@ -12,8 +12,8 @@ const INITIAL_VOUCHERS = [
     type: 'percent',
     value: 10,
     maxDiscount: 100000,
-    minOrderValue: 200000,
-    description: 'Giảm 10% tối đa 100k cho đơn từ 200k',
+    minOrderValue: 0,
+    description: 'Giảm 10% tối đa 100k cho mọi đơn hàng (Không giới hạn)',
     expiryDate: '2026-12-31',
     usageLimit: 500,
     usedCount: 142,
@@ -26,8 +26,8 @@ const INITIAL_VOUCHERS = [
     type: 'shipping',
     value: 30000,
     maxDiscount: 30000,
-    minOrderValue: 150000,
-    description: 'Giảm tối đa 30k phí giao hàng cho đơn từ 150k',
+    minOrderValue: 0,
+    description: 'Giảm 30k phí giao hàng toàn quốc cho mọi đơn hàng',
     expiryDate: '2026-12-31',
     usageLimit: 1000,
     usedCount: 420,
@@ -35,27 +35,41 @@ const INITIAL_VOUCHERS = [
   },
   {
     id: 'vouch_03',
+    code: 'SUPERDEAL',
+    name: 'Siêu Giảm Giá 15%',
+    type: 'percent',
+    value: 15,
+    maxDiscount: 150000,
+    minOrderValue: 0,
+    description: 'Giảm 15% tối đa 150k cho đơn hàng hôm nay',
+    expiryDate: '2026-12-31',
+    usageLimit: 300,
+    usedCount: 88,
+    isGlobal: true,
+  },
+  {
+    id: 'vouch_04',
     code: 'WELCOME50',
     name: 'Mừng Bạn Mới',
     type: 'fixed',
     value: 50000,
     maxDiscount: 50000,
-    minOrderValue: 300000,
-    description: 'Giảm trực tiếp 50k cho khách hàng mới với đơn từ 300k',
+    minOrderValue: 100000,
+    description: 'Giảm trực tiếp 50k cho đơn từ 100.000₫',
     expiryDate: '2026-12-31',
     usageLimit: 200,
     usedCount: 78,
     isGlobal: true,
   },
   {
-    id: 'vouch_04',
+    id: 'vouch_05',
     code: 'SHOPGENZ',
     name: 'Voucher Shop GenZ',
     type: 'fixed',
     value: 20000,
     maxDiscount: 20000,
-    minOrderValue: 250000,
-    description: 'Shop Thời trang GenZ tặng 20k cho đơn từ 250k',
+    minOrderValue: 100000,
+    description: 'Shop Thời trang GenZ tặng 20k cho đơn từ 100.000₫',
     expiryDate: '2026-11-30',
     usageLimit: 100,
     usedCount: 35,
@@ -76,14 +90,20 @@ export function getVouchers() {
       localStorage.setItem(VOUCHER_STORAGE_KEY, JSON.stringify(INITIAL_VOUCHERS));
       return INITIAL_VOUCHERS;
     }
-    // Update any legacy AMAZON10 code to MINI10
-    parsed = parsed.map((v) =>
-      v.code === 'AMAZON10' ? { ...v, code: 'MINI10' } : v
-    );
-    // Ensure default initial vouchers are present
+    // Update existing vouchers with latest friendly minOrderValue
+    parsed = parsed.map((v) => {
+      const match = INITIAL_VOUCHERS.find(
+        (init) => init.code === v.code || (v.code === 'AMAZON10' && init.code === 'MINI10')
+      );
+      if (match) {
+        return { ...v, ...match };
+      }
+      return v;
+    });
+    // Ensure all default initial vouchers are present
     for (const initV of INITIAL_VOUCHERS) {
       if (!parsed.some((v) => v.code === initV.code)) {
-        parsed.push(initV);
+        parsed.unshift(initV);
       }
     }
     localStorage.setItem(VOUCHER_STORAGE_KEY, JSON.stringify(parsed));
@@ -105,7 +125,8 @@ export function validateVoucher(code, orderSubtotal = 0) {
     return { valid: false, message: 'Mã giảm giá không tồn tại hoặc đã hết hạn' };
   }
 
-  if (orderSubtotal < voucher.minOrderValue) {
+  // Check minimum order value only if minOrderValue > 0 and subtotal > 0
+  if (voucher.minOrderValue > 0 && orderSubtotal > 0 && orderSubtotal < voucher.minOrderValue) {
     return {
       valid: false,
       message: `Đơn hàng tối thiểu phải từ ${voucher.minOrderValue.toLocaleString('vi-VN')}₫ để dùng mã này`,
@@ -115,7 +136,8 @@ export function validateVoucher(code, orderSubtotal = 0) {
 
   let discountAmount = 0;
   if (voucher.type === 'percent') {
-    discountAmount = Math.round((orderSubtotal * voucher.value) / 100);
+    const base = orderSubtotal > 0 ? orderSubtotal : 100000;
+    discountAmount = Math.round((base * voucher.value) / 100);
     if (voucher.maxDiscount && discountAmount > voucher.maxDiscount) {
       discountAmount = voucher.maxDiscount;
     }
