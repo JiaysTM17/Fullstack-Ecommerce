@@ -7,7 +7,8 @@ import {
   useReducer,
 } from "react";
 
-const CART_STORAGE_KEY = "mini_shopee_cart";
+const CART_STORAGE_KEY = "cart";
+const LEGACY_CART_STORAGE_KEY = "mini_shopee_cart";
 
 const CartContext = createContext(null);
 
@@ -20,7 +21,7 @@ function normalizeCartItem(product, quantity) {
 
   return {
     productId,
-    name: product.name,
+    name: product.name || "San pham",
     price: Number(product.price) || 0,
     image: product.image || product.images?.[0] || "",
     quantity: Math.max(1, Number(quantity) || 1),
@@ -36,7 +37,13 @@ function clampQuantity(nextQuantity, stock) {
 
 function loadCartFromStorage() {
   try {
-    const rawCart = localStorage.getItem(CART_STORAGE_KEY);
+    if (typeof window === "undefined") {
+      return [];
+    }
+
+    const rawCart =
+      localStorage.getItem(CART_STORAGE_KEY) ||
+      localStorage.getItem(LEGACY_CART_STORAGE_KEY);
     const savedCart = rawCart ? JSON.parse(rawCart) : [];
     return Array.isArray(savedCart) ? savedCart : [];
   } catch {
@@ -107,6 +114,18 @@ function cartReducer(state, action) {
         ),
       };
 
+    case "SET_QUANTITY":
+      return {
+        items: state.items.map((item) =>
+          item.productId === action.productId
+            ? {
+                ...item,
+                quantity: clampQuantity(action.quantity, item.stock),
+              }
+            : item,
+        ),
+      };
+
     case "CLEAR_CART":
       return { items: [] };
 
@@ -121,7 +140,12 @@ export function CartProvider({ children }) {
   }));
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items));
+    localStorage.removeItem(LEGACY_CART_STORAGE_KEY);
   }, [state.items]);
 
   const addToCart = useCallback((product, quantity = 1) => {
@@ -138,6 +162,10 @@ export function CartProvider({ children }) {
 
   const decreaseQuantity = useCallback((productId) => {
     dispatch({ type: "DECREASE_QUANTITY", productId });
+  }, []);
+
+  const setQuantity = useCallback((productId, quantity) => {
+    dispatch({ type: "SET_QUANTITY", productId, quantity });
   }, []);
 
   const clearCart = useCallback(() => {
@@ -167,6 +195,7 @@ export function CartProvider({ children }) {
       removeFromCart,
       increaseQuantity,
       decreaseQuantity,
+      setQuantity,
       clearCart,
       getCartCount,
       getCartSubtotal,
@@ -179,6 +208,7 @@ export function CartProvider({ children }) {
       removeFromCart,
       increaseQuantity,
       decreaseQuantity,
+      setQuantity,
       clearCart,
     ],
   );

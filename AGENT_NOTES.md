@@ -1,60 +1,56 @@
-# AGENT_NOTES — Claude Backend
+# Integration Agent Notes
 
-**Branch:** `agent/claude-backend` | **Phạm vi:** `server/`, `docs/progress/claude-progress.md`, `AGENT_NOTES.md`
+## Branches Integrated
+- Base: `agent/claude-backend`
+- Client logic: `agent/codex-client-logic`
+- UI components: `agent/antigravity-ui` (merge pending in this integration flow)
 
-## Yêu cầu với Front-end / Integration Agent
+## Client Notes
+- `client/src/App.jsx` owns `BrowserRouter`, `CartProvider`, and route definitions.
+- If a future `client/src/main.jsx` wraps the app with `BrowserRouter`, remove the wrapper from `App.jsx` to avoid nested routers.
+- API base URL uses `import.meta.env.VITE_API_URL` with fallback `http://localhost:5000`.
+- Cart persists to `localStorage` key `cart`.
+- Cart still reads the previous `mini_shopee_cart` key once for migration, then removes it after saving.
+- Cart context exposes `addToCart`, `removeFromCart`, `increaseQuantity`, `decreaseQuantity`, `setQuantity`, `clearCart`, `getCartCount`, and `getCartSubtotal`.
 
-1. **Biến môi trường client:** đặt `VITE_API_URL=http://localhost:5000` trong `client/.env`.
+## Backend Contract
+- `GET /api/products` returns:
+  ```json
+  { "success": true, "data": { "products": [], "pagination": {} } }
+  ```
+- `GET /api/products/:id` returns:
+  ```json
+  { "success": true, "data": { "...": "product" } }
+  ```
+- `POST /api/orders` accepts `customer`, `items`, `shippingFee`, and `paymentMethod`. Client may send `subtotal` and `total`, but the server recalculates them from `items`.
+- `POST /api/orders` returns:
+  ```json
+  { "success": true, "data": { "orderId": "...", "total": 0, "status": "pending", "message": "Order created successfully" } }
+  ```
+- Backend validates email, 9-11 digit phone numbers, non-empty items, and required item fields.
+- Backend allows `paymentMethod` values `COD`, `BANK_TRANSFER`, `MOMO`, and `VNPAY`; invalid values default to `COD`.
 
-2. **Response shape của `GET /api/products`** (quan trọng, khác default):
-   ```json
-   { "success": true, "data": { "products": [...], "pagination": {...} } }
-   ```
-   → Client đọc `res.data.data.products` và `res.data.data.pagination`.
+## Environment
+- Server `.env` should be copied from `server/.env.example`.
+- Client `.env` should include:
+  ```txt
+  VITE_API_URL=http://localhost:5000
+  ```
+- Server `CLIENT_URL` supports comma-separated origins, for example:
+  ```txt
+  CLIENT_URL=http://localhost:5173,http://localhost:5174
+  ```
+- MongoDB must be running locally or `MONGO_URI` must point to MongoDB Atlas before seeding or testing APIs.
 
-3. **Response shape của `GET /api/products/:id`:** `{ "success": true, "data": product }`
+## Integration Todo
+- Merge UI components/styles from `agent/antigravity-ui`.
+- Import `client/src/styles/index.css` into the client entry.
+- Create missing client project files (`package.json`, `index.html`, `src/main.jsx`) if they are not supplied by another branch.
+- Wire page logic to UI components where practical.
+- Verify client build and server startup.
+- Seed data and test end-to-end once MongoDB is available.
 
-4. **Response shape của `POST /api/orders`:** 201 `{ "success": true, "data": { "orderId, total, status, message } }`
-   - Lỗi 400: `{ "success": false, "message": "..." }`
-   - Sau thành công, client nên điều hướng sang trang success kèm `orderId`.
-
-5. **Validate phía client nên khớp backend:**
-   - email regex
-   - phone 9–11 chữ số (backend bỏ qua space)
-   - `items` không được rỗng
-   - customer: fullName, phone, email, address là bắt buộc
-
-6. **Server CORS** chỉ cho phép `CLIENT_URL` (mặc định `http://localhost:5173`). Nếu client chạy port khác, sửa `server/.env`.
-
-7. **Seed data:** chạy `cd server && npm run seed` để nạp 16 sản phẩm mẫu. Ảnh dùng Unsplash URL (cần internet).
-
-## Git
-
-- Không push lên `main`/`master`.
-- Nếu push `agent/claude-backend` bị conflict remote → **không tự merge**, ghi lỗi vào đây và dừng an toàn cho Integration Agent.
-
-## Trạng thái
-
-- Xem `docs/progress/claude-progress.md` để biết API contract chi tiết và tiến độ.
-
----
-
-## Cập nhật cải tiến backend (2026-09-25)
-
-1. **Server tự tính lại total:** `POST /api/orders` giờ tự tính `subtotal = Σ(price × quantity)` và `total = subtotal + shippingFee` từ items. Client **vẫn gửi được** subtotal/total để tương thích, nhưng server ưu tiên giá trị tự tính — chống manipulated total.
-
-2. **Validate items chi tiết:** mỗi item cần có `productId`, `name`, `price`, `image`, `quantity` (integer ≥ 1). Thiếu/truyền sai → 400 với message nêu rõ item thứ mấy.
-
-3. **paymentMethod whitelist:** chỉ nhận `COD | BANK_TRANSFER | MOMO | VNPAY`, giá trị lạ → mặc định về `COD`.
-
-4. **JSON body limit 100kb:** tránh request body quá lớn.
-
-5. **CORS multi-origin:** biến `CLIENT_URL` trong `server/.env` giờ accept comma-separated list:
-   ```
-   CLIENT_URL=http://localhost:5173,http://localhost:5174
-   ```
-
-6. **Pagination an toàn:** `page` parse thành integer ≥ 1, `limit` clamp về 1–100, tránh query phá page/limit lạ (`?page=abc`, `?limit=99999`).
-
-### Nếu push bị lỗi branch conflict/remote change:
-- **KHÔNG tự merge/rebase/pull --force.** Ghi lỗi vào section này và dừng, để Integration Agent xử lý.
+## Git Safety
+- Integration branch: `integration/final-merge`.
+- Do not push to `main` or `master`.
+- If remote push is rejected because of non-fast-forward/conflict, do not force push. Record the error and stop for manual coordination.
