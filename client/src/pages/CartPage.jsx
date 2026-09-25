@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CartItem, EmptyState } from "../components";
+import VoucherPickerModal from "../components/VoucherPickerModal";
 import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
 import { formatCurrency } from "../utils/formatCurrency";
@@ -38,6 +39,7 @@ export default function CartPage() {
 
   const [voucherInput, setVoucherInput] = useState("");
   const [voucherMessage, setVoucherMessage] = useState("");
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
 
   const allSelected = items.length > 0 && selectedItemIds.length === items.length;
   const hasFreeShipping = selectedSubtotal >= FREE_SHIPPING_THRESHOLD;
@@ -261,21 +263,84 @@ export default function CartPage() {
         <aside className="shopee-cart-summary">
           <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", color: "var(--text-primary)" }}>{t('order_summary', 'Tóm Tắt Đơn Hàng')}</h2>
 
-          {/* Voucher Input Box */}
+          {/* Voucher Section with Picker & Input */}
           <div style={{ marginBottom: "18px", borderBottom: "1px solid var(--border-medium, #eee)", paddingBottom: "16px" }}>
-            <label style={{ fontSize: "13px", fontWeight: 700, display: "block", marginBottom: "6px", color: "var(--text-primary)" }}>
-              {t('voucher_code', 'Mã Giảm Giá / Voucher Sàn')}:
-            </label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+              <span style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
+                🎟️ {t('voucher_code', 'Mã Giảm Giá / Voucher')}:
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowVoucherModal(true)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--primary-color, #ea580c)",
+                  fontWeight: 700,
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  padding: "2px 4px",
+                }}
+              >
+                {appliedVoucher ? "Đổi mã khác >" : "Chọn mã có sẵn >"}
+              </button>
+            </div>
+
+            {appliedVoucher ? (
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--primary-color, #ea580c)", marginBottom: "10px" }}>
+                <div>
+                  <span style={{ fontWeight: 800, color: "var(--primary-color, #ea580c)", fontSize: "13.5px" }}>
+                    🎟️ {appliedVoucher.code}
+                  </span>
+                  <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
+                    (-{formatCurrency(voucherDiscount)})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeVoucher}
+                  style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px" }}
+                >
+                  ✕ {t('remove', 'Gỡ')}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary"
+                onClick={() => setShowVoucherModal(true)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "9px 12px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  marginBottom: "10px",
+                  borderColor: "var(--primary-color, #ea580c)",
+                  color: "var(--primary-color, #ea580c)",
+                  background: "var(--primary-light, rgba(234, 88, 12, 0.03))"
+                }}
+              >
+                <span>🎟️ Nhấn để chọn mã giảm giá & Freeship</span>
+                <span style={{ fontSize: "14px", fontWeight: 700 }}>›</span>
+              </button>
+            )}
+
             <form onSubmit={handleVoucherSubmit} style={{ display: "flex", gap: "6px" }}>
               <input
                 type="text"
                 className="shopee-form-input"
-                placeholder="Nhập: MINI10, FREESHIP"
+                placeholder="Hoặc nhập mã (VD: MINI10)..."
                 value={voucherInput}
                 onChange={(e) => setVoucherInput(e.target.value)}
-                style={{ fontSize: "13px", textTransform: "uppercase" }}
+                style={{ fontSize: "12.5px", textTransform: "uppercase" }}
               />
-              <button type="submit" className="shopee-btn shopee-btn-secondary" style={{ whiteSpace: "nowrap" }}>
+              <button type="submit" className="shopee-btn shopee-btn-secondary" style={{ whiteSpace: "nowrap", fontSize: "12.5px" }}>
                 {t('apply', 'Áp Dụng')}
               </button>
             </form>
@@ -283,19 +348,6 @@ export default function CartPage() {
             {voucherMessage && (
               <div style={{ fontSize: "12px", color: appliedVoucher ? "var(--color-success, #2e7d32)" : "var(--color-error, #d32f2f)", marginTop: "6px", fontWeight: 600 }}>
                 {voucherMessage}
-              </div>
-            )}
-
-            {appliedVoucher && (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, #e8f5e9)", padding: "6px 10px", borderRadius: "4px", marginTop: "8px", fontSize: "12px", color: "var(--color-success, #2e7d32)" }}>
-                <span>✓ Mã: <strong>{appliedVoucher.code}</strong> (-{formatCurrency(voucherDiscount)})</span>
-                <button
-                  type="button"
-                  onClick={removeVoucher}
-                  style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700 }}
-                >
-                  ✕ {t('remove', 'Gỡ')}
-                </button>
               </div>
             )}
           </div>
@@ -360,6 +412,16 @@ export default function CartPage() {
           </div>
         </aside>
       </div>
+
+      {/* Voucher Selection Modal */}
+      <VoucherPickerModal
+        isOpen={showVoucherModal}
+        onClose={() => setShowVoucherModal(false)}
+        onApplyVoucher={(code) => applyVoucher(code)}
+        onRemoveVoucher={removeVoucher}
+        appliedVoucher={appliedVoucher}
+        currentSubtotal={selectedSubtotal || items.reduce((t, i) => t + i.price * i.quantity, 0)}
+      />
     </main>
   );
 }
