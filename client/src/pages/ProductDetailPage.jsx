@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useCompare } from "../context/CompareContext";
 import { RecentlyViewed, saveRecentlyViewed } from "../components/RecentlyViewed";
 import { addProductReview, getProductById, getProducts } from "../services/productService";
 import { formatCurrency } from "../utils/formatCurrency";
@@ -16,6 +17,7 @@ export default function ProductDetailPage() {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { showToast } = useToast();
   const { t } = useLanguage();
+  const { addToCompare, isCompared } = useCompare();
 
   const [product, setProduct] = useState(null);
   const [activeImage, setActiveImage] = useState("");
@@ -372,6 +374,14 @@ export default function ProductDetailPage() {
             >
               {wishlisted ? "❤️ Đã lưu vào Yêu thích" : "🤍 Thêm vào Yêu thích"}
             </button>
+            <button
+              type="button"
+              className="shopee-btn shopee-btn-secondary"
+              style={{ width: "100%", marginTop: "8px", fontWeight: 700, fontSize: "13px" }}
+              onClick={() => addToCompare(product)}
+            >
+              {isCompared(productId) ? "⚖️ Đã thêm vào so sánh" : "⚖️ So sánh với sản phẩm khác"}
+            </button>
           </div>
 
           {/* Guarantees */}
@@ -391,7 +401,7 @@ export default function ProductDetailPage() {
           </div>
           <div>
             <div className="amazon-shop-name">{product.shopName || "Thời Trang GenZ"}</div>
-            <div style={{ fontSize: "12px", color: "#666" }}>Đang hoạt động online · Phản hồi trong 10 phút</div>
+            <div style={{ fontSize: "12px", color: "var(--text-muted, #666)" }}>Đang hoạt động online · Phản hồi trong 10 phút</div>
           </div>
         </div>
 
@@ -405,14 +415,23 @@ export default function ProductDetailPage() {
           <button
             type="button"
             className="shopee-btn shopee-btn-secondary"
-            onClick={() => alert(`Đã mở kênh chat riêng với ${product.shopName || "Shop"}!`)}
+            onClick={() => {
+              window.dispatchEvent(
+                new CustomEvent('open_live_chat', {
+                  detail: {
+                    shopName: product.shopName || "Thời Trang GenZ Official",
+                    shopId: product.shopId || "shop_01",
+                  },
+                })
+              );
+            }}
           >
             💬 Chat Ngay
           </button>
           <button
             type="button"
             className="shopee-btn shopee-btn-primary"
-            onClick={() => navigate("/")}
+            onClick={() => navigate(`/shop/${product.shopId || "shop_01"}`)}
           >
             🏪 Xem Gian Hàng
           </button>

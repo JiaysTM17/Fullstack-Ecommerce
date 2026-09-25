@@ -60,6 +60,8 @@ const INITIAL_CUSTOMER_ORDERS = [
   },
 ];
 
+const ORDERS_STORAGE_KEY = 'mini_shopee_customer_orders';
+
 export default function OrderHistoryPage() {
   const { user } = useAuth();
   const { addToCart } = useCart();
@@ -68,8 +70,78 @@ export default function OrderHistoryPage() {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('all');
-  const [orders, setOrders] = useState(INITIAL_CUSTOMER_ORDERS);
+  const [orders, setOrders] = useState(() => {
+    try {
+      const saved = localStorage.getItem(ORDERS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const existingIds = new Set(parsed.map(o => o.orderId));
+        const merged = [...parsed, ...INITIAL_CUSTOMER_ORDERS.filter(o => !existingIds.has(o.orderId))];
+        return merged;
+      }
+    } catch {
+      // fallback
+    }
+    return INITIAL_CUSTOMER_ORDERS;
+  });
+
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
+
+  const saveOrders = (newOrders) => {
+    setOrders(newOrders);
+    try {
+      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(newOrders));
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleSimulateNextStep = (orderId) => {
+    const updated = orders.map((o) => {
+      if (o.orderId !== orderId) return o;
+
+      const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      let nextStep = (o.stepIndex || 1) + 1;
+      let nextStatus = o.status;
+      let nextStatusText = o.statusText;
+      let newEventText = '';
+
+      if (nextStep === 2) {
+        nextStatus = 'shipping';
+        nextStatusText = 'Shop đã đóng gói & Bàn giao SPX';
+        newEventText = 'Shop đã hoàn tất đóng gói và bàn giao kiện hàng cho SPX Express';
+      } else if (nextStep === 3) {
+        nextStatus = 'shipping';
+        nextStatusText = 'Đang vận chuyển giao đến bạn';
+        newEventText = 'Bưu tá SPX Express đang di chuyển giao hàng đến địa chỉ của bạn';
+      } else if (nextStep >= 4) {
+        nextStep = 4;
+        nextStatus = 'completed';
+        nextStatusText = 'Giao hàng thành công';
+        newEventText = 'Đã giao hàng thành công tới tay người nhận. Ký nhận an toàn.';
+      }
+
+      const nextTimeline = [
+        ...(o.timeline || []),
+        { time: `Hôm nay ${nowStr}`, text: newEventText }
+      ];
+
+      return {
+        ...o,
+        stepIndex: nextStep,
+        status: nextStatus,
+        statusText: nextStatusText,
+        timeline: nextTimeline,
+      };
+    });
+
+    saveOrders(updated);
+    const updatedOrder = updated.find(o => o.orderId === orderId);
+    if (selectedOrderDetails?.orderId === orderId) {
+      setSelectedOrderDetails(updatedOrder);
+    }
+    showToast(`Đã mô phỏng bước tiếp theo: ${updatedOrder.statusText}!`, 'success');
+  };
 
   const filteredOrders = orders.filter((ord) => {
     if (activeTab === 'all') return true;
@@ -78,13 +150,12 @@ export default function OrderHistoryPage() {
 
   const handleCancelOrder = (orderId) => {
     if (window.confirm(t('confirm_cancel_order', "Bạn có chắc chắn muốn hủy đơn hàng này?"))) {
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.orderId === orderId
-            ? { ...o, status: "cancelled", statusText: t('status_cancelled_by_you', "Đã hủy bởi bạn"), stepIndex: 0 }
-            : o
-        )
+      const updated = orders.map((o) =>
+        o.orderId === orderId
+          ? { ...o, status: "cancelled", statusText: t('status_cancelled_by_you', "Đã hủy bởi bạn"), stepIndex: 0 }
+          : o
       );
+      saveOrders(updated);
       showToast(t('order_cancelled_toast', 'Đã hủy đơn hàng thành công'), 'info');
     }
   };
@@ -260,7 +331,25 @@ export default function OrderHistoryPage() {
                       {t('total_payment', 'Tổng thanh toán')}: <strong style={{ fontSize: '18px', color: 'var(--primary-color, #ea580c)' }}>{formatCurrency(ord.total)}</strong>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {ord.status !== 'cancelled' && (ord.stepIndex || 1) < 4 && (
+                        <button
+                          type="button"
+                          className="shopee-btn"
+                          style={{
+                            fontSize: '12px',
+                            background: 'var(--primary-light, #fff7ed)',
+                            border: '1px solid var(--primary-border, #fed7aa)',
+                            color: 'var(--primary-color, #ea580c)',
+                            fontWeight: 700,
+                          }}
+                          onClick={() => handleSimulateNextStep(ord.orderId)}
+                          title="Mô phỏng bưu tá giao hàng bước tiếp theo"
+                        >
+                          ⚡ {t('order_track_simulate_step')}
+                        </button>
+                      )}
+
                       {ord.status === 'shipping' && (
                         <button
                           type="button"
@@ -324,11 +413,29 @@ export default function OrderHistoryPage() {
               ))}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {selectedOrderDetails.status !== 'cancelled' && (selectedOrderDetails.stepIndex || 1) < 4 && (
+                <button
+                  type="button"
+                  className="shopee-btn"
+                  style={{
+                    background: 'var(--primary-light, #fff7ed)',
+                    border: '1px solid var(--primary-border, #fed7aa)',
+                    color: 'var(--primary-color, #ea580c)',
+                    fontWeight: 700,
+                    fontSize: '12.5px',
+                  }}
+                  onClick={() => handleSimulateNextStep(selectedOrderDetails.orderId)}
+                >
+                  ⚡ {t('order_track_simulate_step')}
+                </button>
+              )}
+
               <button
                 type="button"
                 className="shopee-btn shopee-btn-primary"
                 onClick={() => setSelectedOrderDetails(null)}
+                style={{ marginLeft: 'auto' }}
               >
                 {t('close', 'Đã hiểu')}
               </button>

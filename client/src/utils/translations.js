@@ -128,6 +128,55 @@ export const TRANSLATIONS = {
     checkout_momo: "Ví Điện Tử MoMo / ZaloPay",
     checkout_bank: "Chuyển Khoản Ngân Hàng (VietQR Tự Động)",
 
+    // Shop Storefront
+    shop_official_store: "Gian Hàng Chính Hãng",
+    shop_follow: "+ Theo Dõi",
+    shop_following: "✓ Đang Theo Dõi",
+    shop_followers: "Người theo dõi",
+    shop_rating: "Đánh giá Shop",
+    shop_response_rate: "Tỷ lệ phản hồi",
+    shop_chat_btn: "💬 Chat Với Shop",
+    shop_all_products: "Tất Cả Sản Phẩm Gian Hàng",
+    shop_vouchers_title: "Mã Giảm Giá Của Shop",
+    shop_search_placeholder: "Tìm sản phẩm tại shop này...",
+    shop_not_found: "Không tìm thấy gian hàng này",
+
+    // Live Chat Widget
+    chat_support_title: "Tư Vấn & Hỗ Trợ Mini Shopee",
+    chat_with_shop: "Chat Với Gian Hàng",
+    chat_online: "Trực tuyến",
+    chat_placeholder: "Nhập tin nhắn của bạn...",
+    chat_send: "Gửi",
+    chat_faq_title: "Câu hỏi thường gặp:",
+    chat_faq_shipping: "📦 Đơn hàng giao trong bao lâu?",
+    chat_faq_voucher: "🎟️ Có mã freeship hoặc giảm giá không?",
+    chat_faq_return: "🔄 Chính sách đổi trả như thế nào?",
+    chat_faq_advisor: "👨‍💼 Tôi cần gặp nhân viên tư vấn",
+
+    // Product Compare
+    compare_btn: "So sánh",
+    compare_title: "So Sánh Sản Phẩm Song Song",
+    compare_drawer_title: "Đang so sánh",
+    compare_view_btn: "Xem Bảng So Sánh",
+    compare_clear_all: "Xóa tất cả",
+    compare_max_items: "Tối đa 3 sản phẩm",
+    compare_price: "Giá bán",
+    compare_rating: "Đánh giá",
+    compare_brand: "Thương hiệu",
+    compare_category: "Danh mục",
+    compare_stock: "Tình trạng kho",
+    compare_specs: "Thông số chi tiết",
+    compare_warranty: "Chế độ bảo hành",
+
+    // Order Success & Simulator
+    order_success_title: "Đặt Hàng Thành Công!",
+    order_success_subtitle: "Cảm ơn bạn đã tin tưởng mua sắm tại Mini Shopee.",
+    order_code_label: "Mã đơn hàng",
+    order_view_tracking_btn: "📦 Theo Dõi Tiến Trình Đơn Hàng",
+    order_continue_shopping_btn: "🛍️ Tiếp Tục Mua Sắm",
+    order_track_simulate_step: "⚡ Mô Phỏng Giao Hàng Tiếp Theo",
+    order_track_title: "Hành Trình Vận Chuyển",
+
     // Footer
     footer_about: "Về Mini Shopee",
     footer_customer_care: "Chăm Sóc Khách Hàng",
@@ -260,6 +309,55 @@ export const TRANSLATIONS = {
     checkout_card: "Credit / Debit Card (Visa, MasterCard)",
     checkout_momo: "MoMo / ZaloPay E-Wallet",
     checkout_bank: "Bank Transfer (VietQR Instant)",
+
+    // Shop Storefront
+    shop_official_store: "Official Store",
+    shop_follow: "+ Follow",
+    shop_following: "✓ Following",
+    shop_followers: "Followers",
+    shop_rating: "Shop Rating",
+    shop_response_rate: "Response Rate",
+    shop_chat_btn: "💬 Chat With Shop",
+    shop_all_products: "All Shop Products",
+    shop_vouchers_title: "Shop Vouchers",
+    shop_search_placeholder: "Search products in this store...",
+    shop_not_found: "Shop not found",
+
+    // Live Chat Widget
+    chat_support_title: "Mini Shopee Live Support",
+    chat_with_shop: "Chat With Store",
+    chat_online: "Online",
+    chat_placeholder: "Type your message...",
+    chat_send: "Send",
+    chat_faq_title: "Frequently Asked Questions:",
+    chat_faq_shipping: "📦 How long does delivery take?",
+    chat_faq_voucher: "🎟️ Are there any active vouchers or freeship?",
+    chat_faq_return: "🔄 What is the return and refund policy?",
+    chat_faq_advisor: "👨‍💼 I want to talk with an agent",
+
+    // Product Compare
+    compare_btn: "Compare",
+    compare_title: "Side-by-Side Product Comparison",
+    compare_drawer_title: "Comparing",
+    compare_view_btn: "View Comparison",
+    compare_clear_all: "Clear All",
+    compare_max_items: "Max 3 items",
+    compare_price: "Price",
+    compare_rating: "Rating",
+    compare_brand: "Brand",
+    compare_category: "Category",
+    compare_stock: "Stock Status",
+    compare_specs: "Specifications",
+    compare_warranty: "Warranty",
+
+    // Order Success & Simulator
+    order_success_title: "Order Placed Successfully!",
+    order_success_subtitle: "Thank you for shopping with Mini Shopee.",
+    order_code_label: "Order Code",
+    order_view_tracking_btn: "📦 Track Order Progress",
+    order_continue_shopping_btn: "🛍️ Continue Shopping",
+    order_track_simulate_step: "⚡ Simulate Next Shipping Step",
+    order_track_title: "Shipping Journey",
 
     // Footer
     footer_about: "About Mini Shopee",
