@@ -21,7 +21,9 @@ npm install react react-dom react-router-dom
 - `client/src/App.jsx` includes `BrowserRouter`, `CartProvider`, and route definitions.
 - If Integration Agent wraps the app with `BrowserRouter` in `main.jsx`, remove the wrapper from `App.jsx` to avoid nested routers.
 - API base URL uses `import.meta.env.VITE_API_URL` with fallback `http://localhost:5000`.
-- Cart persists to `localStorage` key `mini_shopee_cart`.
+- Cart persists to `localStorage` key `cart`.
+- Cart still reads the previous `mini_shopee_cart` key once for migration, then removes it after saving.
+- UI branch already has presentational components. Integration Agent can merge UI branch and wire pages to those components, or keep current page-level fallbacks.
 
 ## Backend contract
 - `GET /api/products` should return either an array or `{ success: true, data: [...], pagination }`.
