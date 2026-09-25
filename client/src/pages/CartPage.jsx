@@ -1,8 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { CartItem, EmptyState } from "../components";
 import { useCart } from "../context/CartContext";
 import { formatCurrency } from "../utils/formatCurrency";
 
 export default function CartPage() {
+  const navigate = useNavigate();
   const {
     items,
     subtotal,
@@ -15,12 +17,13 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <main className="shopee-container shopee-empty-state">
-        <h1>Gio hang dang trong</h1>
-        <p>Hay them san pham de bat dau dat hang.</p>
-        <Link className="shopee-btn shopee-btn-primary" to="/">
-          Tiep tuc mua sam
-        </Link>
+      <main className="shopee-container">
+        <EmptyState
+          title="Gio hang dang trong"
+          description="Hay them san pham de bat dau dat hang."
+          actionText="Tiep tuc mua sam"
+          onAction={() => navigate("/")}
+        />
       </main>
     );
   }
@@ -30,63 +33,16 @@ export default function CartPage() {
       <section>
         <h1>Gio hang</h1>
         {items.map((item) => (
-          <article className="shopee-cart-item" key={item.productId}>
-            <Link className="shopee-cart-item-product" to={`/products/${item.productId}`}>
-              <span className="shopee-cart-item-image-wrapper">
-                {item.image ? (
-                  <img className="shopee-cart-item-image" src={item.image} alt={item.name} />
-                ) : null}
-              </span>
-              <span className="shopee-cart-item-info">
-                <strong className="shopee-cart-item-name">{item.name}</strong>
-                <span className="shopee-cart-item-stock-tag">
-                  Ton kho: {item.stock || "Dang cap nhat"}
-                </span>
-              </span>
-            </Link>
-
-            <span className="shopee-cart-item-price">{formatCurrency(item.price)}</span>
-
-            <div className="shopee-cart-item-quantity">
-              <div className="shopee-qty-control shopee-qty-md">
-                <button
-                  className="shopee-qty-btn"
-                  disabled={item.quantity <= 1}
-                  type="button"
-                  onClick={() => decreaseQuantity(item.productId)}
-                >
-                  -
-                </button>
-                <input
-                  className="shopee-qty-input"
-                  min="1"
-                  type="number"
-                  value={item.quantity}
-                  onChange={(event) => setQuantity(item.productId, event.target.value)}
-                />
-                <button
-                  className="shopee-qty-btn"
-                  disabled={item.stock > 0 && item.quantity >= item.stock}
-                  type="button"
-                  onClick={() => increaseQuantity(item.productId)}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <strong className="shopee-cart-item-subtotal">
-              {formatCurrency(item.price * item.quantity)}
-            </strong>
-
-            <button
-              className="shopee-cart-item-remove-btn"
-              type="button"
-              onClick={() => removeFromCart(item.productId)}
-            >
-              Xoa
-            </button>
-          </article>
+          <CartItem
+            key={item.productId}
+            item={item}
+            onIncrease={(cartItem) => increaseQuantity(cartItem.productId)}
+            onDecrease={(cartItem) => decreaseQuantity(cartItem.productId)}
+            onQuantityChange={(cartItem, quantity) => setQuantity(cartItem.productId, quantity)}
+            onRemove={(cartItem) => removeFromCart(cartItem.productId)}
+            onItemClick={(cartItem) => navigate(`/products/${cartItem.productId}`)}
+            formatCurrency={formatCurrency}
+          />
         ))}
       </section>
 

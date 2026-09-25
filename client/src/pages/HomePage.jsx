@@ -1,19 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { EmptyState, ProductGrid } from "../components";
 import { useCart } from "../context/CartContext";
 import { getProducts } from "../services/productService";
 import { formatCurrency } from "../utils/formatCurrency";
 
-function getDiscountPercent(product) {
-  if (!product.originalPrice || product.originalPrice <= product.price) {
-    return null;
-  }
-
-  return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
-}
-
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState(null);
@@ -72,24 +66,30 @@ export default function HomePage() {
     setSearchParams(nextParams);
   }
 
+  function resetFilters() {
+    setSearchParams(new URLSearchParams());
+  }
+
+  function viewProductDetail(product) {
+    const productId = product._id || product.id;
+    if (productId) {
+      navigate(`/products/${productId}`);
+    }
+  }
+
   return (
     <main className="shopee-container">
       <section className="shopee-page-header">
         <div>
           <h1>Mini Shopee</h1>
-          <p>Danh sach san pham tu API backend.</p>
+          <p>Duyet san pham, them vao gio va dat hang COD nhanh chong.</p>
         </div>
       </section>
 
       <section className="shopee-filter-bar" aria-label="Bo loc san pham">
-        <input
-          aria-label="Tim san pham"
-          className="shopee-form-input"
-          placeholder="Tim san pham..."
-          type="search"
-          value={filters.keyword}
-          onChange={(event) => updateFilter("keyword", event.target.value)}
-        />
+        {filters.keyword ? (
+          <span className="shopee-filter-chip">Tu khoa: {filters.keyword}</span>
+        ) : null}
         <select
           aria-label="Sap xep san pham"
           className="shopee-form-select"
@@ -100,73 +100,41 @@ export default function HomePage() {
           <option value="price_asc">Gia tang dan</option>
           <option value="price_desc">Gia giam dan</option>
         </select>
+        {(filters.keyword || filters.sort || filters.category) ? (
+          <button className="shopee-btn shopee-btn-secondary" type="button" onClick={resetFilters}>
+            Xoa bo loc
+          </button>
+        ) : null}
       </section>
 
-      {loading && <p className="shopee-feedback">Dang tai san pham...</p>}
       {error && <p className="shopee-feedback shopee-feedback-error">{error}</p>}
 
-      {!loading && !error && products.length === 0 && (
-        <section className="shopee-empty-state">
-          <h2>Chua co san pham</h2>
-          <p>Backend can tra du lieu tu GET /api/products.</p>
-        </section>
-      )}
-
-      {!loading && !error && products.length > 0 && (
+      {!error ? (
         <>
-          <section className="shopee-product-grid">
-            {products.map((product) => {
-              const productId = product._id || product.id;
-              const discountPercent = getDiscountPercent(product);
+          <ProductGrid
+            products={products}
+            loading={loading}
+            onAddToCart={addToCart}
+            onViewDetail={viewProductDetail}
+            onResetFilter={resetFilters}
+            emptyTitle="Chua co san pham"
+            emptyDescription="Backend can tra du lieu tu GET /api/products hoac hay thu bo loc khac."
+            formatCurrency={formatCurrency}
+          />
 
-              return (
-                <article className="shopee-product-card" key={productId}>
-                  <Link to={`/products/${productId}`} className="shopee-card-image-wrapper">
-                    {product.image ? (
-                      <img className="shopee-card-image" src={product.image} alt={product.name} />
-                    ) : (
-                      <div className="shopee-card-image" aria-label="Khong co anh" />
-                    )}
-                    {discountPercent ? (
-                      <span className="shopee-discount-badge">-{discountPercent}%</span>
-                    ) : null}
-                  </Link>
-
-                  <div className="shopee-card-content">
-                    <Link to={`/products/${productId}`} className="shopee-card-title">
-                      {product.name}
-                    </Link>
-                    <div className="shopee-card-price-row">
-                      <span className="shopee-card-price">{formatCurrency(product.price)}</span>
-                      {product.originalPrice ? (
-                        <span className="shopee-card-original-price">
-                          {formatCurrency(product.originalPrice)}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="shopee-card-meta">
-                      <span className="shopee-card-rating">★ {product.rating || 0}</span>
-                      <span className="shopee-card-sold">Da ban {product.sold || 0}</span>
-                    </div>
-                    <button
-                      className="shopee-card-add-btn"
-                      type="button"
-                      onClick={() => addToCart(product)}
-                    >
-                      Them vao gio
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
-
-          {pagination ? (
+          {!loading && pagination ? (
             <p className="shopee-pagination-summary">
               Trang {pagination.page || 1}/{pagination.totalPages || 1}
             </p>
           ) : null}
         </>
+      ) : (
+        <EmptyState
+          title="Khong the tai san pham"
+          description={error}
+          actionText="Thu lai"
+          onAction={() => window.location.reload()}
+        />
       )}
     </main>
   );
