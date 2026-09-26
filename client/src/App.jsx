@@ -17,6 +17,7 @@ import { CompareProvider } from "./context/CompareContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ToastProvider } from "./context/ToastContext";
+import { CoinProvider } from "./context/CoinContext";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -107,9 +108,11 @@ export default function App() {
             <AuthProvider>
               <WishlistProvider>
                 <CompareProvider>
-                  <CartProvider>
-                    <AppLayout />
-                  </CartProvider>
+                  <CoinProvider>
+                    <CartProvider>
+                      <AppLayout />
+                    </CartProvider>
+                  </CoinProvider>
                 </CompareProvider>
               </WishlistProvider>
             </AuthProvider>

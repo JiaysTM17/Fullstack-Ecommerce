@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
+import { useCoins } from '../context/CoinContext';
+import RewardsHubModal from '../components/RewardsHubModal';
 import '../styles/auth.css';
 
 const SAVED_ADDRESSES_KEY = 'mini_shopee_saved_addresses';
@@ -32,8 +34,10 @@ export default function ProfilePage() {
   const { showToast } = useToast();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { coins, streak, hasCheckedInToday, checkInToday, coinHistory } = useCoins();
+  const [showSpinModal, setShowSpinModal] = useState(false);
 
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'addresses' | 'vouchers' | 'orders'
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'addresses' | 'vouchers' | 'coins'
 
   // Tab 1: Profile form state
   const [formData, setFormData] = useState({
@@ -263,6 +267,28 @@ export default function ProfilePage() {
           >
             🎟️ Ví Voucher Của Tôi
           </button>
+
+          <button
+            type="button"
+            style={{
+              padding: '14px 24px',
+              border: 'none',
+              background: 'transparent',
+              fontSize: '14px',
+              fontWeight: activeTab === 'coins' ? 700 : 500,
+              color: activeTab === 'coins' ? '#d97706' : 'var(--text-secondary)',
+              borderBottom: activeTab === 'coins' ? '2.5px solid #d97706' : '2.5px solid transparent',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+            onClick={() => setActiveTab('coins')}
+          >
+            <span>🪙</span>
+            <span>Ví Mini Xu & Thưởng ({(coins || 0).toLocaleString('vi-VN')} Xu)</span>
+          </button>
         </div>
 
         {/* Tab 1: Profile Information */}
@@ -458,7 +484,240 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+
+        {/* Tab 4: Mini Xu & Rewards Wallet */}
+        {activeTab === 'coins' && (
+          <div style={{ padding: '28px' }}>
+            {/* Balance Card */}
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                color: '#fff',
+                borderRadius: '16px',
+                padding: '24px 28px',
+                boxShadow: '0 8px 24px rgba(15, 23, 42, 0.25)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '20px',
+                marginBottom: '28px',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '28px' }}>🪙</span>
+                  <span style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', color: '#fef08a', fontWeight: 700 }}>
+                    Ví Mini Xu Tích Lũy
+                  </span>
+                </div>
+                <div style={{ fontSize: '36px', fontWeight: 900, color: '#fbbf24', letterSpacing: '-0.5px' }}>
+                  {(coins || 0).toLocaleString('vi-VN')} <span style={{ fontSize: '20px', fontWeight: 600, color: '#fef08a' }}>Xu</span>
+                </div>
+                <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '4px' }}>
+                  ≈ {formatCurrency(coins || 0)} (Tỷ lệ 1 Xu = 1 VND, giảm trực tiếp tối đa 50% đơn hàng)
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowSpinModal(true)}
+                  style={{
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    padding: '12px 20px',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
+                    transition: 'transform 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                >
+                  <span>🎡</span> Vòng Quay May Mắn
+                </button>
+
+                <button
+                  type="button"
+                  disabled={hasCheckedInToday}
+                  onClick={() => {
+                    const res = checkInToday();
+                    if (res?.success) {
+                      showToast(`Điểm danh thành công! Nhận ngay +${res.reward.toLocaleString('vi-VN')} Xu`, 'success');
+                    } else {
+                      showToast('Hôm nay bạn đã điểm danh rồi!', 'info');
+                    }
+                  }}
+                  style={{
+                    background: hasCheckedInToday ? '#334155' : 'rgba(255, 255, 255, 0.15)',
+                    color: hasCheckedInToday ? '#94a3b8' : '#ffffff',
+                    border: hasCheckedInToday ? '1px solid #475569' : '1px solid rgba(255, 255, 255, 0.25)',
+                    borderRadius: '10px',
+                    padding: '12px 20px',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    cursor: hasCheckedInToday ? 'default' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <span>📅</span> {hasCheckedInToday ? 'Đã Điểm Danh Hôm Nay' : 'Điểm Danh Nhận Xu'}
+                </button>
+              </div>
+            </div>
+
+            {/* 7-Day Streak Section */}
+            <div
+              style={{
+                background: 'var(--bg-card, #ffffff)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
+                borderRadius: '12px',
+                padding: '20px',
+                marginBottom: '28px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800 }}>📅 Chuỗi Điểm Danh 7 Ngày Nhận Thưởng</h4>
+                  <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                    Điểm danh liên tục không ngắt quãng để nhận quà giá trị cao nhất vào ngày thứ 7
+                  </p>
+                </div>
+                <div style={{ background: '#fef3c7', color: '#92400e', padding: '4px 10px', borderRadius: '16px', fontSize: '12px', fontWeight: 700 }}>
+                  Chuỗi hiện tại: {streak}/7 ngày 🔥
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+                  gap: '10px',
+                }}
+              >
+                {[
+                  { day: 1, reward: 500 },
+                  { day: 2, reward: 1000 },
+                  { day: 3, reward: 1500 },
+                  { day: 4, reward: 2000 },
+                  { day: 5, reward: 2500 },
+                  { day: 6, reward: 3000 },
+                  { day: 7, reward: 5000, special: true },
+                ].map((item) => {
+                  const isChecked = item.day <= streak;
+                  const isNext = item.day === streak + 1 && !hasCheckedInToday;
+
+                  return (
+                    <div
+                      key={item.day}
+                      style={{
+                        padding: '12px 8px',
+                        borderRadius: '10px',
+                        textAlign: 'center',
+                        background: isChecked
+                          ? 'rgba(16, 185, 129, 0.1)'
+                          : isNext
+                          ? 'rgba(245, 158, 11, 0.12)'
+                          : 'var(--bg-muted, #f8fafc)',
+                        border: isChecked
+                          ? '1.5px solid #10b981'
+                          : isNext
+                          ? '1.5px solid #f59e0b'
+                          : '1px solid var(--border-light, #e2e8f0)',
+                        position: 'relative',
+                      }}
+                    >
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px' }}>
+                        Ngày {item.day}
+                      </div>
+                      <div style={{ fontSize: '18px', marginBottom: '2px' }}>
+                        {isChecked ? '✅' : item.special ? '🎁' : '🪙'}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '12px',
+                          fontWeight: 800,
+                          color: isChecked ? '#059669' : item.special ? '#d97706' : 'var(--text-primary)',
+                        }}
+                      >
+                        +{item.reward.toLocaleString('vi-VN')}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Coin Transaction History */}
+            <div
+              style={{
+                background: 'var(--bg-card, #ffffff)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
+                borderRadius: '12px',
+                padding: '20px',
+              }}
+            >
+              <h4 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 800 }}>📜 Lịch Sử Biến Động Mini Xu</h4>
+
+              {(!coinHistory || coinHistory.length === 0) ? (
+                <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--text-muted)', fontSize: '13px' }}>
+                  Chưa có giao dịch xu nào. Hãy điểm danh hoặc quay vòng quay may mắn!
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {coinHistory.slice(0, 10).map((record) => {
+                    const isCredit = record.type === 'credit';
+                    return (
+                      <div
+                        key={record.id}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '10px 14px',
+                          borderRadius: '8px',
+                          background: 'var(--bg-muted, #f8fafc)',
+                          fontSize: '13px',
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{record.description}</div>
+                          <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            {record.timestamp}
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            fontWeight: 800,
+                            fontSize: '14px',
+                            color: isCredit ? '#10b981' : '#ea580c',
+                          }}
+                        >
+                          {isCredit ? '+' : '-'}{Math.abs(record.amount).toLocaleString('vi-VN')} Xu
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Rewards Hub Modal (Spin Wheel & Rewards) */}
+      {showSpinModal && (
+        <RewardsHubModal onClose={() => setShowSpinModal(false)} />
+      )}
 
       {/* Modal Add New Address */}
       {showAddAddressModal && (

@@ -6,6 +6,8 @@ import { FALLBACK_PRODUCTS } from '../services/productService';
 import { formatCurrency } from '../utils/formatCurrency';
 import CategoryMegaMenuDrawer from './CategoryMegaMenuDrawer';
 import NotificationsPopover from './NotificationsPopover';
+import RewardsHubModal from './RewardsHubModal';
+import { useCoins } from '../context/CoinContext';
 import '../styles/header.css';
 
 const RECENT_SEARCHES_KEY = 'mini_shopee_recent_searches';
@@ -38,10 +40,12 @@ const Header = ({
   const [localSearch, setLocalSearch] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showCategoryDrawer, setShowCategoryDrawer] = useState(false);
+  const [showRewardsModal, setShowRewardsModal] = useState(false);
   const searchWrapRef = useRef(null);
   const { wishlistCount } = useWishlist();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
+  const { coins } = useCoins();
 
   const [recentSearches, setRecentSearches] = useState(() => {
     try {
@@ -202,6 +206,33 @@ const Header = ({
               title={theme === 'dark' ? 'Chế độ Sáng' : 'Chế độ Tối'}
             >
               {theme === 'dark' ? '🌙 Tối' : '☀️ Sáng'}
+            </button>
+
+            {/* Mini Xu Rewards Trigger */}
+            <button
+              type="button"
+              onClick={() => setShowRewardsModal(true)}
+              title="Mini Xu & Vòng Quay May Mắn"
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '12px',
+                border: 'none',
+                padding: '3px 10px',
+                borderRadius: '999px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)',
+                transition: 'transform 0.15s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <span>🪙</span>
+              <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
             </button>
 
             <span>|</span>
@@ -590,6 +621,21 @@ const Header = ({
             {t('nav_fast_delivery')}
           </span>
           <span
+            onClick={() => setShowRewardsModal(true)}
+            style={{
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              color: '#fef08a',
+              background: 'rgba(255, 255, 255, 0.12)',
+              padding: '2px 10px',
+              borderRadius: '12px'
+            }}
+          >
+            🎁 {language === 'vi' ? 'Săn Xu & Vòng Quay' : 'Rewards & Spin'}
+          </span>
+          <span
             onClick={() => navTo('/seller/dashboard')}
             style={{ cursor: 'pointer', marginLeft: 'auto', color: '#fff9c4' }}
           >
@@ -603,6 +649,11 @@ const Header = ({
         isOpen={showCategoryDrawer}
         onClose={() => setShowCategoryDrawer(false)}
       />
+
+      {/* Rewards Hub Modal */}
+      {showRewardsModal && (
+        <RewardsHubModal onClose={() => setShowRewardsModal(false)} />
+      )}
     </header>
   );
 };
