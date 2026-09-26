@@ -109,35 +109,27 @@ export default function NotificationsPopover() {
       {/* Bell Button */}
       <button
         type="button"
-        className="shopee-header-cart"
+        className="shopee-header-action-btn"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Thông báo hệ thống"
         title="Thông báo"
         style={{ position: 'relative' }}
       >
-        <div className="shopee-cart-icon-wrapper">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          {unreadCount > 0 && (
-            <span
-              className="shopee-cart-badge"
-              style={{
-                background: 'var(--primary-color, #ea580c)',
-                color: '#ffffff',
-                animation: 'pulse-glow 2s infinite',
-              }}
-            >
-              {unreadCount}
-            </span>
-          )}
-        </div>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+        {unreadCount > 0 && (
+          <span className="shopee-action-badge badge-indigo">
+            {unreadCount}
+          </span>
+        )}
       </button>
 
       {/* Popover Dropdown */}
       {isOpen && (
         <div
+          className="anim-dropdown"
           style={{
             position: 'absolute',
             top: 'calc(100% + 12px)',
@@ -146,11 +138,10 @@ export default function NotificationsPopover() {
             maxWidth: '90vw',
             background: 'var(--bg-card, #ffffff)',
             borderRadius: '12px',
-            boxShadow: 'var(--shadow-modal, 0 12px 32px rgba(0,0,0,0.18))',
+            boxShadow: 'var(--shadow-modal, 0 16px 36px rgba(0,0,0,0.22))',
             border: '1px solid var(--border-medium, #e2e8f0)',
             zIndex: 1000,
             overflow: 'hidden',
-            animation: 'fade-in 0.2s ease-out',
           }}
         >
           {/* Header */}

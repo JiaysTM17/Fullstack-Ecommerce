@@ -6,9 +6,9 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
   const trackingCode = order.trackingCode || `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`;
 
   return (
-    <div className="shopee-modal-overlay">
+    <div className="shopee-modal-overlay" style={{ animation: 'modalOverlayFadeIn 0.22s ease-out forwards' }}>
       <div
-        className="shopee-modal"
+        className="shopee-modal anim-modal-content"
         style={{ maxWidth: '600px', background: '#fff', padding: '24px' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #222', paddingBottom: '12px', marginBottom: '16px' }}>

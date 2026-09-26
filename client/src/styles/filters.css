@@ -52,11 +52,11 @@
 }
 
 .shopee-filter-item:hover {
-  color: var(--primary-color, #ea580c);
+  color: var(--primary-color, #4f46e5);
 }
 
 .shopee-filter-item.active {
-  color: var(--primary-color, #ea580c);
+  color: var(--primary-color, #4f46e5);
   font-weight: 600;
 }
 
@@ -79,15 +79,15 @@
 }
 
 .shopee-price-chip:hover {
-  border-color: var(--primary-color, #ea580c);
-  color: var(--primary-color, #ea580c);
+  border-color: var(--primary-color, #4f46e5);
+  color: var(--primary-color, #4f46e5);
   background: var(--bg-card, #ffffff);
 }
 
 .shopee-price-chip.active {
-  background: var(--primary-color, #ea580c);
+  background: var(--primary-color, #4f46e5);
   color: #ffffff;
-  border-color: var(--primary-color, #ea580c);
+  border-color: var(--primary-color, #4f46e5);
   font-weight: 600;
 }
 
@@ -108,12 +108,12 @@
 }
 
 .shopee-custom-price-input:focus {
-  border-color: var(--primary-color, #ea580c);
+  border-color: var(--primary-color, #4f46e5);
   outline: none;
 }
 
 .shopee-price-apply-btn {
-  background: var(--primary-color, #ea580c);
+  background: var(--primary-color, #4f46e5);
   color: #ffffff;
   border: none;
   border-radius: var(--radius-sm, 4px);
@@ -126,7 +126,7 @@
 }
 
 .shopee-price-apply-btn:hover {
-  background: var(--primary-hover, #c2410c);
+  background: var(--primary-hover, #4338ca);
 }
 
 .shopee-rating-filter-row {
@@ -141,7 +141,7 @@
 }
 
 .shopee-rating-filter-row:hover {
-  color: var(--primary-color, #ea580c);
+  color: var(--primary-color, #4f46e5);
 }
 
 .shopee-rating-stars {
@@ -153,8 +153,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(2, 132, 199, 0.12);
-  color: var(--secondary-color, #0284c7);
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--secondary-color, #0891b2);
   font-size: 11px;
   font-weight: 700;
   padding: 3px 8px;
@@ -164,8 +164,8 @@
 .shopee-clear-filters-btn {
   width: 100%;
   background: transparent;
-  color: var(--primary-color, #ea580c);
-  border: 1px dashed var(--primary-color, #ea580c);
+  color: var(--primary-color, #4f46e5);
+  border: 1px dashed var(--primary-color, #4f46e5);
   border-radius: 6px;
   padding: 8px;
   font-size: 13px;
@@ -176,5 +176,5 @@
 }
 
 .shopee-clear-filters-btn:hover {
-  background: var(--primary-light, #fff7ed);
+  background: var(--primary-light, #eef2ff);
 }

@@ -37,13 +37,14 @@ export default function InvoiceReceiptModal({ order, onClose }) {
         justifyContent: 'center',
         padding: '16px',
         overflowY: 'auto',
+        animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        className="invoice-printable-container"
+        className="invoice-printable-container anim-modal-content"
         style={{
           background: '#ffffff',
           color: '#1e293b',

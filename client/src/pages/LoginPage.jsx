@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -23,6 +24,14 @@ export default function LoginPage() {
     if (role === 'admin') navigate('/admin/dashboard');
     else if (role === 'seller') navigate('/seller/dashboard');
     else navigate(location.state?.from || '/');
+  };
+
+  const handleQuickLogin = (roleKey) => {
+    const u = loginAsDemo(roleKey);
+    if (u) {
+      showToast(t('auth_demo_success', `Đăng nhập thành công với vai trò ${u.role === 'admin' ? 'Quản Trị Viên' : u.role === 'seller' ? 'Chủ Shop' : 'Khách Mua Hàng'}!`), 'success');
+      redirectAfterLogin(u.role);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -43,14 +52,6 @@ export default function LoginPage() {
       setError(err.message || t('auth_error_failed', 'Đăng nhập không thành công'));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleQuickLogin = (roleKey) => {
-    const user = loginAsDemo(roleKey);
-    if (user) {
-      showToast(t('auth_demo_success', `Đăng nhập nhanh thành công với quyền ${user.role}!`), 'info');
-      redirectAfterLogin(user.role);
     }
   };
 
@@ -97,10 +98,8 @@ export default function LoginPage() {
         {/* Nút đăng nhập nhanh bằng tài khoản mẫu */}
         <div className="shopee-demo-section">
           <div className="shopee-demo-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
-            <span>{t('demo_quick_access', 'Trải nghiệm nhanh 1-Click:')}</span>
+            <span>⚡</span>
+            <span>{t('demo_quick_access', 'Chọn nhanh tài khoản trải nghiệm:')}</span>
           </div>
           <div className="shopee-demo-buttons">
             {activeRole === 'customer' && (
@@ -109,11 +108,10 @@ export default function LoginPage() {
                 className="shopee-demo-btn"
                 onClick={() => handleQuickLogin('customer')}
               >
-                <strong>Nguyễn Văn Khách (Customer)</strong>
+                <strong>👤 Nguyễn Văn Khách (Customer)</strong>
                 <span>khachhang@shopee.vn</span>
               </button>
             )}
-
             {activeRole === 'seller' && (
               <>
                 <button
@@ -121,7 +119,7 @@ export default function LoginPage() {
                   className="shopee-demo-btn"
                   onClick={() => handleQuickLogin('seller_fashion')}
                 >
-                  <strong>Thời Trang GenZ Official (Shop A)</strong>
+                  <strong>🏪 Thời Trang GenZ Official (Shop A)</strong>
                   <span>shop.genz@shopee.vn</span>
                 </button>
                 <button
@@ -129,19 +127,18 @@ export default function LoginPage() {
                   className="shopee-demo-btn"
                   onClick={() => handleQuickLogin('seller_tech')}
                 >
-                  <strong>TechWorld Store (Shop B)</strong>
+                  <strong>💻 TechWorld Store (Shop B)</strong>
                   <span>shop.tech@shopee.vn</span>
                 </button>
               </>
             )}
-
             {activeRole === 'admin' && (
               <button
                 type="button"
                 className="shopee-demo-btn"
                 onClick={() => handleQuickLogin('admin')}
               >
-                <strong>Tổng Quản Trị Viên Toàn Sàn (Super Admin)</strong>
+                <strong>🛡️ Tổng Quản Trị Viên Sàn (Super Admin)</strong>
                 <span>admin@shopee.vn</span>
               </button>
             )}
@@ -184,6 +181,24 @@ export default function LoginPage() {
                 {showPassword ? "🙈" : "👁️"}
               </button>
             </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', fontSize: '12.5px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                style={{ accentColor: 'var(--primary-color, #ea580c)' }}
+              />
+              <span>{t('remember_me', 'Ghi nhớ đăng nhập')}</span>
+            </label>
+            <span
+              onClick={() => showToast('Vui lòng liên hệ CSKH qua Live Chat hoặc Hotline 1900 6868 để đặt lại mật khẩu!', 'info')}
+              style={{ color: 'var(--primary-color, #ea580c)', cursor: 'pointer', fontWeight: 600 }}
+            >
+              {t('forgot_password', 'Quên mật khẩu?')}
+            </span>
           </div>
 
           <button
