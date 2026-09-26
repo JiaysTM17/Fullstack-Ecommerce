@@ -34,7 +34,7 @@ const Header = ({
   user,
   onLogout,
   onNavigate,
-  logoText = 'Mini Shopee',
+  logoText = 'Fullstack E-Commerce',
   subTitle = 'Smart Marketplace'
 }) => {
   const [localSearch, setLocalSearch] = useState('');
@@ -173,18 +173,20 @@ const Header = ({
               onClick={() => navTo('/seller/dashboard')}
               style={{ cursor: 'pointer', fontWeight: 600 }}
             >
-              {t('nav_seller_channel')}
+              🏪 {t('nav_seller_channel', 'Kênh Người Bán')}
             </span>
-            <span>|</span>
+            <span style={{ opacity: 0.3 }}>|</span>
             <span
               className="shopee-topbar-link"
               onClick={() => navTo('/admin/dashboard')}
               style={{ cursor: 'pointer', fontWeight: 600 }}
             >
-              {t('nav_admin_portal')}
+              🛡️ {t('nav_admin_portal', 'Quản Trị Sàn')}
             </span>
-            <span>|</span>
-            <span className="shopee-topbar-link">Hotline: 1900 6868</span>
+            <span style={{ opacity: 0.3 }}>|</span>
+            <span className="shopee-topbar-link" style={{ opacity: 0.9 }}>
+              📞 Hotline: 1900 6868
+            </span>
           </div>
 
           <div className="shopee-topbar-right">
@@ -208,11 +210,11 @@ const Header = ({
               {theme === 'dark' ? '🌙 Tối' : '☀️ Sáng'}
             </button>
 
-            {/* Mini Xu Rewards Trigger */}
+            {/* Xu Rewards Trigger */}
             <button
               type="button"
               onClick={() => setShowRewardsModal(true)}
-              title="Mini Xu & Vòng Quay May Mắn"
+              title="Điểm Thưởng & Săn Xu Hàng Ngày"
               style={{
                 background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                 color: '#ffffff',
@@ -235,35 +237,35 @@ const Header = ({
               <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
             </button>
 
-            <span>|</span>
+            <span style={{ opacity: 0.3 }}>|</span>
 
             {user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span
                   className="shopee-topbar-link"
                   onClick={() => navTo('/orders')}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', fontWeight: 500 }}
                 >
-                  {t('nav_orders')}
+                  📦 {t('nav_orders', 'Đơn Mua')}
                 </span>
-                <span>|</span>
+                <span style={{ opacity: 0.3 }}>|</span>
                 <span
                   className="shopee-topbar-link"
                   onClick={() => navTo('/profile')}
                   style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
                   👤 <strong>{user.fullName || user.email}</strong>
-                  <small style={{ background: 'rgba(255,255,255,0.25)', padding: '1px 6px', borderRadius: '10px' }}>
+                  <small style={{ background: 'rgba(255,255,255,0.25)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
                     {user.role}
                   </small>
                 </span>
-                <span>|</span>
+                <span style={{ opacity: 0.3 }}>|</span>
                 <span
                   className="shopee-topbar-link"
                   onClick={onLogout}
-                  style={{ cursor: 'pointer', color: '#ffebee' }}
+                  style={{ cursor: 'pointer', color: '#fecaca', fontWeight: 600 }}
                 >
-                  {t('logout')}
+                  🚪 {t('logout', 'Đăng xuất')}
                 </span>
               </div>
             ) : (
@@ -273,15 +275,15 @@ const Header = ({
                   onClick={() => navTo('/register')}
                   style={{ cursor: 'pointer', fontWeight: 500 }}
                 >
-                  {t('register')}
+                  {t('register', 'Đăng Ký')}
                 </span>
-                <span>|</span>
+                <span style={{ opacity: 0.3 }}>|</span>
                 <span
                   className="shopee-topbar-link"
                   onClick={() => navTo('/login')}
-                  style={{ cursor: 'pointer', fontWeight: 600 }}
+                  style={{ cursor: 'pointer', fontWeight: 700 }}
                 >
-                  {t('login')}
+                  🔑 {t('login', 'Đăng Nhập')}
                 </span>
               </div>
             )}
@@ -576,70 +578,62 @@ const Header = ({
           </div>
         </div>
 
-        {/* Mega Subnav Bar */}
-        <nav
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '24px',
-            padding: '10px 0 4px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.15)',
-            fontSize: '13.5px',
-            fontWeight: 600,
-            color: '#fff',
-            overflowX: 'auto',
-          }}
-        >
-          <span
+        {/* Mega Subnav Bar Redesign */}
+        <nav className="shopee-subnav">
+          <button
+            type="button"
+            className="shopee-subnav-cat-btn"
             onClick={() => setShowCategoryDrawer(true)}
-            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+            title="Mở danh mục ngành hàng"
           >
-            ☰ {t('nav_all_categories')}
-          </span>
+            <span>☰</span>
+            <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
+            <span style={{ fontSize: '9px', opacity: 0.8 }}>▼</span>
+          </button>
+
           <span
+            className="shopee-subnav-link highlight"
             onClick={() => navTo('/?badge=Hot+Deal')}
-            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: '#ffe082' }}
+            title="Săn deal chớp nhoáng"
           >
-            {t('nav_flash_deals')}
+            🔥 {t('nav_flash_deals', 'Flash Deals')}
           </span>
+
           <span
+            className="shopee-subnav-link"
             onClick={() => navTo('/?badge=Best+Seller')}
-            style={{ cursor: 'pointer' }}
           >
-            {t('nav_best_sellers')}
+            ⭐ {t('nav_best_sellers', 'Bán Chạy Nhất')}
           </span>
+
           <span
+            className="shopee-subnav-link"
             onClick={() => navTo('/?badge=Amazon%27s+Choice')}
-            style={{ cursor: 'pointer' }}
           >
-            {t('nav_featured_picks')}
+            ✨ {t('nav_featured_picks', 'Hàng Tuyển Chọn')}
           </span>
+
           <span
+            className="shopee-subnav-link"
             onClick={() => navTo('/?fastDelivery=1')}
-            style={{ cursor: 'pointer' }}
           >
-            {t('nav_fast_delivery')}
+            ⚡ {t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}
           </span>
+
           <span
+            className="shopee-subnav-link badge-pill"
             onClick={() => setShowRewardsModal(true)}
-            style={{
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              color: '#fef08a',
-              background: 'rgba(255, 255, 255, 0.12)',
-              padding: '2px 10px',
-              borderRadius: '12px'
-            }}
+            title="Vào Rewards Hub nhận xu & quay thưởng"
           >
-            🎁 {language === 'vi' ? 'Săn Xu & Vòng Quay' : 'Rewards & Spin'}
+            🎁 {t('nav_rewards_hub', 'Săn Xu & Voucher')}
           </span>
+
           <span
+            className="shopee-subnav-seller-btn"
             onClick={() => navTo('/seller/dashboard')}
-            style={{ cursor: 'pointer', marginLeft: 'auto', color: '#fff9c4' }}
+            title="Đến kênh nhà bán hàng"
           >
-            {t('nav_seller_channel')}
+            🚀 {t('nav_become_seller', 'Kênh Gian Hàng')}
           </span>
         </nav>
       </div>

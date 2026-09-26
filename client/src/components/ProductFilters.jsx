@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/filters.css';
 
-const CATEGORIES = ["Tất cả", "Thời trang", "Điện tử", "Đời sống"];
+const CATEGORIES = ["Tất cả", "Thời trang", "Điện tử", "Sắc đẹp", "Gia dụng", "Đời sống"];
 
 const PRICE_PRESETS = [
   { label: "Dưới 200k", min: "", max: "200000" },
@@ -85,6 +85,18 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             onClick={() => onFilterChange("shopId", filters.shopId === "shop_02" ? "" : "shop_02")}
           >
             <span>🎧 TechWorld Store</span>
+          </div>
+          <div
+            className={`shopee-filter-item ${filters.shopId === "shop_03" ? "active" : ""}`}
+            onClick={() => onFilterChange("shopId", filters.shopId === "shop_03" ? "" : "shop_03")}
+          >
+            <span>💄 Beauty Cosmetics</span>
+          </div>
+          <div
+            className={`shopee-filter-item ${filters.shopId === "shop_04" ? "active" : ""}`}
+            onClick={() => onFilterChange("shopId", filters.shopId === "shop_04" ? "" : "shop_04")}
+          >
+            <span>🏡 HomePro Gia Dụng</span>
           </div>
         </div>
       </div>

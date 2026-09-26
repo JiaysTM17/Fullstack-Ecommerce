@@ -5,24 +5,36 @@
 export const TRANSLATIONS = {
   vi: {
     // Header & Topbar
+    brand_name: "Fullstack E-Commerce",
+    brand_slogan: "Smart Marketplace",
     topbar_seller: "Kênh Người Bán",
+    nav_seller_channel: "Kênh Người Bán",
     topbar_admin: "Quản Trị Sàn",
+    nav_admin_portal: "Quản Trị Sàn",
     topbar_hotline: "Hotline Hỗ Trợ: 1900 6868",
     topbar_login: "Đăng Nhập",
+    login: "Đăng Nhập",
     topbar_register: "Đăng Ký",
+    register: "Đăng Ký",
     topbar_logout: "Đăng xuất",
+    logout: "Đăng xuất",
     topbar_orders: "Đơn Mua",
+    nav_orders: "Đơn Mua",
     topbar_profile: "Tài Khoản",
     search_placeholder: "Tìm kiếm hơn 100.000+ sản phẩm chính hãng, ưu đãi, thương hiệu...",
     search_suggestions_title: "Gợi ý tìm kiếm phổ biến",
     wishlist_title: "Sản phẩm yêu thích",
+    wishlist: "Yêu thích",
     cart_title: "Giỏ hàng",
-    nav_all_categories: "Tất Cả Danh Mục",
+    cart: "Giỏ hàng",
+    notifications: "Thông báo",
+    nav_all_categories: "Tất Cả Ngành Hàng",
     nav_flash_deals: "Flash Deals Giờ Vàng",
     nav_best_sellers: "Bán Chạy Nhất",
     nav_featured_picks: "Hàng Tuyển Chọn",
     nav_fast_delivery: "Giao Siêu Tốc 2H",
     nav_become_seller: "Mở Gian Hàng Kinh Doanh",
+    nav_rewards_hub: "Săn Xu & Vòng Quay",
     theme_light: "Giao diện Sáng",
     theme_dark: "Giao diện Tối",
 
@@ -142,7 +154,7 @@ export const TRANSLATIONS = {
     shop_not_found: "Không tìm thấy gian hàng này",
 
     // Live Chat Widget
-    chat_support_title: "Tư Vấn & Hỗ Trợ Mini Shopee",
+    chat_support_title: "Tư Vấn & Hỗ Trợ Khách Hàng",
     chat_with_shop: "Chat Với Gian Hàng",
     chat_online: "Trực tuyến",
     chat_placeholder: "Nhập tin nhắn của bạn...",
@@ -170,7 +182,7 @@ export const TRANSLATIONS = {
 
     // Order Success & Simulator
     order_success_title: "Đặt Hàng Thành Công!",
-    order_success_subtitle: "Cảm ơn bạn đã tin tưởng mua sắm tại Mini Shopee.",
+    order_success_subtitle: "Cảm ơn bạn đã tin tưởng mua sắm tại Fullstack E-Commerce.",
     order_code_label: "Mã đơn hàng",
     order_view_tracking_btn: "📦 Theo Dõi Tiến Trình Đơn Hàng",
     order_continue_shopping_btn: "🛍️ Tiếp Tục Mua Sắm",
@@ -182,7 +194,7 @@ export const TRANSLATIONS = {
     return_refund: "Trả hàng / Hoàn tiền",
 
     // Footer
-    footer_about: "Về Mini Shopee",
+    footer_about: "Về Fullstack E-Commerce",
     footer_customer_care: "Chăm Sóc Khách Hàng",
     footer_policies: "Chính Sách & Điều Khoản",
     footer_architecture_note: "Dự án cá nhân Portfolio - Kiến trúc & luồng nghiệp vụ được thiết kế theo tiêu chuẩn sàn Thương Mại Điện Tử hiện đại.",
@@ -191,24 +203,36 @@ export const TRANSLATIONS = {
 
   en: {
     // Header & Topbar
-    topbar_seller: "Seller Central",
+    brand_name: "Fullstack E-Commerce",
+    brand_slogan: "Smart Marketplace",
+    topbar_seller: "Seller Channel",
+    nav_seller_channel: "Seller Channel",
     topbar_admin: "Admin Portal",
+    nav_admin_portal: "Admin Portal",
     topbar_hotline: "Hotline Support: 1900 6868",
     topbar_login: "Sign In",
+    login: "Sign In",
     topbar_register: "Register",
+    register: "Register",
     topbar_logout: "Sign Out",
+    logout: "Sign Out",
     topbar_orders: "My Orders",
+    nav_orders: "My Orders",
     topbar_profile: "Account",
     search_placeholder: "Search across 100,000+ authentic items, deals, brands...",
     search_suggestions_title: "Popular Searches",
     wishlist_title: "Wishlist",
+    wishlist: "Wishlist",
     cart_title: "Cart",
+    cart: "Cart",
+    notifications: "Notifications",
     nav_all_categories: "All Departments",
     nav_flash_deals: "Flash Deals",
     nav_best_sellers: "Best Sellers",
     nav_featured_picks: "Featured Picks",
     nav_fast_delivery: "Prime 2-Hour Delivery",
-    nav_become_seller: "Sell on Mini Shopee",
+    nav_become_seller: "Open a Shop",
+    nav_rewards_hub: "Rewards & Spin",
     theme_light: "Light Mode",
     theme_dark: "Dark Mode",
 
@@ -328,7 +352,7 @@ export const TRANSLATIONS = {
     shop_not_found: "Shop not found",
 
     // Live Chat Widget
-    chat_support_title: "Mini Shopee Live Support",
+    chat_support_title: "Fullstack E-Commerce Live Support",
     chat_with_shop: "Chat With Store",
     chat_online: "Online",
     chat_placeholder: "Type your message...",
@@ -356,7 +380,7 @@ export const TRANSLATIONS = {
 
     // Order Success & Simulator
     order_success_title: "Order Placed Successfully!",
-    order_success_subtitle: "Thank you for shopping with Mini Shopee.",
+    order_success_subtitle: "Thank you for shopping with Fullstack E-Commerce.",
     order_code_label: "Order Code",
     order_view_tracking_btn: "📦 Track Order Progress",
     order_continue_shopping_btn: "🛍️ Continue Shopping",
@@ -368,7 +392,7 @@ export const TRANSLATIONS = {
     return_refund: "Return / Refund Request",
 
     // Footer
-    footer_about: "About Mini Shopee",
+    footer_about: "About Fullstack E-Commerce",
     footer_customer_care: "Customer Support",
     footer_policies: "Policies & Terms",
     footer_architecture_note: "Personal Portfolio Project - Architecture & business flows modeled after enterprise e-commerce standards.",

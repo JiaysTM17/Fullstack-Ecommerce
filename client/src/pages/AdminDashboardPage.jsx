@@ -280,7 +280,7 @@ export default function AdminDashboardPage() {
       <main className="shopee-dashboard-main">
         <div className="shopee-dashboard-header">
           <div>
-            <h1 className="shopee-dashboard-title">Hệ Thống Quản Trị Tối Cao Sàn Mini Shopee</h1>
+            <h1 className="shopee-dashboard-title">Hệ Thống Quản Trị Sàn Fullstack E-Commerce</h1>
             <p className="shopee-dashboard-subtitle">
               Giám sát toàn bộ cửa hàng, người bán, khách hàng, voucher khuyến mãi và doanh thu toàn sàn.
             </p>

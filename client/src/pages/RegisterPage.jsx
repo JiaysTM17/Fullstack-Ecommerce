@@ -77,7 +77,7 @@ export default function RegisterPage() {
         <div className="shopee-auth-header">
           <div className="shopee-auth-brand-badge">
             <span>✨</span>
-            <span>JOIN MINI SHOPEE ECOSYSTEM</span>
+            <span>JOIN FULLSTACK E-COMMERCE ECOSYSTEM</span>
           </div>
           <h2 className="shopee-auth-title">{t('register_title', 'Đăng Ký Tài Khoản')}</h2>
           <p className="shopee-auth-subtitle">{t('register_subtitle', 'Tham gia hệ sinh thái thương mại điện tử thông minh')}</p>

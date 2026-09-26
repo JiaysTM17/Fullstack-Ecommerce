@@ -62,7 +62,7 @@ export default function LoginPage() {
             <span>🛡️</span>
             <span>SECURE ACCESS PORTAL</span>
           </div>
-          <h2 className="shopee-auth-title">{t('login_title', 'Đăng Nhập')} Mini Shopee</h2>
+          <h2 className="shopee-auth-title">{t('login_title', 'Đăng Nhập')} Fullstack E-Commerce</h2>
           <p className="shopee-auth-subtitle">{t('login_subtitle', 'Chọn đúng phân hệ và vai trò truy cập của bạn')}</p>
         </div>
 

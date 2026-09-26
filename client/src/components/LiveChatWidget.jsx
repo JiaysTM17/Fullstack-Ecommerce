@@ -4,13 +4,53 @@ import { useTheme } from '../context/ThemeContext';
 
 const CHAT_STORAGE_KEY = 'mini_shopee_live_chat_history';
 
+// Biểu tượng Chatbot AI thông minh & hiện đại
+export function BotIcon({ size = 32, glow = false }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 36 36"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: 'block', filter: glow ? 'drop-shadow(0 2px 8px rgba(56, 189, 248, 0.6))' : 'none' }}
+    >
+      {/* Ăng-ten phát tín hiệu */}
+      <circle cx="18" cy="4" r="2.5" fill="#38bdf8" />
+      <line x1="18" y1="6.5" x2="18" y2="10" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
+      
+      {/* Tai nghe / Headset 2 bên */}
+      <rect x="3" y="14" width="3" height="8" rx="1.5" fill="#ea580c" />
+      <rect x="30" y="14" width="3" height="8" rx="1.5" fill="#ea580c" />
+      
+      {/* Khung đầu Robot */}
+      <rect x="5.5" y="9.5" width="25" height="18" rx="7" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.8" />
+      
+      {/* Màn hình hiển thị LED */}
+      <rect x="8" y="12" width="20" height="13" rx="4" fill="#1e293b" />
+      
+      {/* Mắt LED phát sáng */}
+      <ellipse cx="13" cy="17" rx="2.4" ry="2.8" fill="#38bdf8" />
+      <ellipse cx="23" cy="17" rx="2.4" ry="2.8" fill="#38bdf8" />
+      <circle cx="14" cy="16" r="0.8" fill="#ffffff" />
+      <circle cx="24" cy="16" r="0.8" fill="#ffffff" />
+      
+      {/* Nụ cười thân thiện */}
+      <path d="M15 21.5Q18 24 21 21.5" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
+      
+      {/* Khung vai áo hiện đại */}
+      <path d="M10 29C10 29 12 32.5 18 32.5C24 32.5 26 29 26 29" stroke="#ea580c" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 const DEFAULT_WELCOME_MESSAGES = [
   {
     id: 'msg_welcome_1',
     sender: 'agent',
-    agentName: 'Hỗ Trợ Mini Shopee',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
-    text: 'Xin chào! Mini Shopee rất hân hạnh được hỗ trợ bạn. Bạn đang cần tìm hiểu về đơn hàng, mã giảm giá hay muốn tư vấn sản phẩm nào ạ?',
+    agentName: 'Trợ Lý AI Fullstack E-Commerce',
+    avatar: null,
+    text: 'Xin chào! Tôi là Trợ Lý AI của sàn Fullstack E-Commerce. Tôi có thể hỗ trợ bạn tra cứu đơn hàng, tư vấn mã giảm giá voucher hoặc giải đáp chính sách giao hàng 24/7 ạ!',
     time: 'Vừa xong',
   }
 ];
@@ -105,7 +145,7 @@ export default function LiveChatWidget() {
       } else if (lower.includes('voucher') || lower.includes('giảm giá') || lower.includes('mã')) {
         replyText = '🎟️ Hiện sàn đang có mã MINI10 (giảm 10%), FREESHIP (miễn phí ship 30k) và SUPERDEAL (giảm 15%) không giới hạn đơn tối thiểu. Bạn có thể nhấn nút "Chọn mã giảm giá" trong giỏ hàng để dùng ngay!';
       } else if (lower.includes('đổi') || lower.includes('trả') || lower.includes('bảo hành')) {
-        replyText = '🔄 Mini Shopee cam kết chính sách ĐỔI TRẢ 30 NGÀY MIỄN PHÍ tận nhà nếu sản phẩm có lỗi từ nhà sản xuất hoặc không vừa kích cỡ. Bạn hoàn toàn an tâm nhé!';
+        replyText = '🔄 Fullstack E-Commerce cam kết chính sách ĐỔI TRẢ 30 NGÀY MIỄN PHÍ tận nhà nếu sản phẩm có lỗi từ nhà sản xuất hoặc không vừa kích cỡ. Bạn hoàn toàn an tâm nhé!';
       } else if (lower.includes('nhân viên') || lower.includes('tư vấn') || lower.includes('người')) {
         replyText = '👨‍💼 Dạ vâng, tư vấn viên Kim Ngân đã tiếp nhận cuộc trò chuyện của bạn và đang sẵn sàng giải đáp mọi thắc mắc.';
       } else if (targetShop) {
@@ -115,7 +155,7 @@ export default function LiveChatWidget() {
       const agentMsg = {
         id: `msg_agent_${Date.now()}`,
         sender: 'agent',
-        agentName: targetShop ? targetShop.name : 'CSKH Mini Shopee',
+        agentName: targetShop ? targetShop.name : 'CSKH Fullstack E-Commerce',
         avatar: targetShop?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
         text: replyText,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -144,36 +184,43 @@ export default function LiveChatWidget() {
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            zIndex: 998,
-            width: '60px',
-            height: '60px',
+            zIndex: 99998,
+            width: '62px',
+            height: '62px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--primary-color, #ea580c), #c2410c)',
+            background: 'linear-gradient(135deg, #0f172a, #1e293b)',
             color: '#fff',
-            border: 'none',
-            boxShadow: '0 8px 24px rgba(234, 88, 12, 0.45)',
+            border: '2px solid rgba(56, 189, 248, 0.45)',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.45), 0 0 16px rgba(56, 189, 248, 0.25)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '28px',
-            transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.08)')}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-          title={t('chat_support_title')}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.1)';
+            e.currentTarget.style.boxShadow = '0 10px 28px rgba(15, 23, 42, 0.55), 0 0 20px rgba(56, 189, 248, 0.5)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(15, 23, 42, 0.45), 0 0 16px rgba(56, 189, 248, 0.25)';
+          }}
+          title={t('chat_support_title', 'Trợ Lý AI & Tư Vấn 24/7')}
+          aria-label="Mở Trợ lý ảo AI"
         >
-          💬
+          <BotIcon size={34} glow />
           <span
             style={{
               position: 'absolute',
               top: '2px',
               right: '2px',
-              width: '14px',
-              height: '14px',
+              width: '13px',
+              height: '13px',
               borderRadius: '50%',
               background: '#22c55e',
-              border: '2px solid #fff',
+              border: '2px solid #0f172a',
+              boxShadow: '0 0 6px #22c55e',
             }}
           />
         </button>
@@ -184,17 +231,17 @@ export default function LiveChatWidget() {
         <div
           style={{
             position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            zIndex: 999,
+            bottom: '20px',
+            right: '20px',
+            zIndex: 100000,
             width: '380px',
             maxWidth: 'calc(100vw - 32px)',
-            height: '560px',
-            maxHeight: 'calc(100vh - 48px)',
+            height: 'min(490px, calc(100vh - 100px))',
+            maxHeight: 'calc(100vh - 100px)',
             background: 'var(--bg-card, #ffffff)',
             borderRadius: '16px',
-            boxShadow: '0 12px 36px rgba(0, 0, 0, 0.2)',
-            border: '1px solid var(--border-medium, #e2e8f0)',
+            boxShadow: '0 12px 36px rgba(0, 0, 0, 0.25)',
+            border: '1px solid var(--border-medium, #cbd5e1)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
@@ -204,21 +251,40 @@ export default function LiveChatWidget() {
           {/* Header */}
           <div
             style={{
-              padding: '14px 16px',
+              padding: '12px 16px',
               background: 'linear-gradient(135deg, #0f172a, #1e293b)',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              flexShrink: 0,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ position: 'relative' }}>
-                <img
-                  src={targetShop?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
-                  alt="Avatar"
-                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.4)' }}
-                />
+                {targetShop?.avatar ? (
+                  <img
+                    src={targetShop.avatar}
+                    alt={targetShop.name}
+                    style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.5)' }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '50%',
+                      background: '#0f172a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px solid #38bdf8',
+                      boxShadow: '0 0 10px rgba(56, 189, 248, 0.4)',
+                    }}
+                  >
+                    <BotIcon size={26} glow />
+                  </div>
+                )}
                 <span
                   style={{
                     position: 'absolute',
@@ -233,29 +299,78 @@ export default function LiveChatWidget() {
                 />
               </div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: '14.5px', lineHeight: '1.2' }}>
-                  {targetShop ? targetShop.name : t('chat_support_title')}
+                <div style={{ fontWeight: 700, fontSize: '14px', lineHeight: '1.2' }}>
+                  {targetShop ? targetShop.name : (t('brand_name') + ' Support')}
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                  <span style={{ color: '#22c55e' }}>●</span> {t('chat_online')} · {targetShop ? 'Phản hồi trong 10p' : 'Tự động & Nhân viên 24/7'}
+                <div style={{ fontSize: '11px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                  <span style={{ color: '#22c55e' }}>●</span> {t('chat_online')} · {targetShop ? 'Phản hồi trong 10p' : 'Hỗ trợ 24/7'}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <button
                 type="button"
                 onClick={handleClearHistory}
-                style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '6px', fontSize: '14px', borderRadius: '4px' }}
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: '5px 8px',
+                  fontSize: '13px',
+                  borderRadius: '6px',
+                  transition: 'background 0.2s',
+                }}
                 title="Xóa lịch sử chat"
+                aria-label="Xóa lịch sử"
               >
                 🗑️
               </button>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer', padding: '6px', fontSize: '18px', lineHeight: 1 }}
-                title="Đóng chat"
+                style={{
+                  background: 'rgba(255,255,255,0.15)',
+                  border: 'none',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  transition: 'background 0.2s',
+                }}
+                title="Thu nhỏ chat"
+                aria-label="Thu nhỏ"
+              >
+                —
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                style={{
+                  background: '#ea580c',
+                  border: 'none',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  boxShadow: '0 2px 6px rgba(234, 88, 12, 0.4)',
+                  transition: 'background 0.2s',
+                }}
+                title="Đóng cửa sổ chat"
+                aria-label="Đóng chat"
               >
                 ✕
               </button>
@@ -365,11 +480,29 @@ export default function LiveChatWidget() {
                   }}
                 >
                   {!isUser && (
-                    <img
-                      src={m.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
-                      alt="Agent"
-                      style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-                    />
+                    m.avatar ? (
+                      <img
+                        src={m.avatar}
+                        alt="Agent"
+                        style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: '50%',
+                          background: '#0f172a',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '1.5px solid #38bdf8',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <BotIcon size={18} />
+                      </div>
+                    )
                   )}
 
                   <div style={{ maxWidth: '78%' }}>

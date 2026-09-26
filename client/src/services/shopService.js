@@ -77,6 +77,83 @@ const SHOPS_DATA = [
         desc: "Miễn phí vận chuyển toàn quốc không giới hạn giá trị đơn"
       }
     ]
+  },
+  {
+    id: "shop_03",
+    name: "Beauty Cosmetics Official",
+    slug: "beauty-cosmetics",
+    isOfficial: true,
+    avatar: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=200",
+    banner: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200",
+    rating: 4.95,
+    reviewCount: 4520,
+    followers: 43200,
+    responseRate: 100,
+    responseTime: "Trong 3 phút",
+    joinedDate: "2 năm trước",
+    location: "Kho Quận 1, TP. Hồ Chí Minh",
+    phone: "0909 888 999",
+    description: "Gian hàng phân phối dược mỹ phẩm chính hãng hàng đầu Châu Á. Cam kết 100% nguồn gốc rõ ràng, tem phụ chống giả, đền gấp 10 lần nếu phát hiện hàng nhái.",
+    badges: ["Shopee Mall", "Dược Mỹ Phẩm 100%", "Đổi Trả 30N"],
+    vouchers: [
+      {
+        code: "BEAUTY30",
+        name: "Voucher Mỹ Phẩm - Giảm 30.000₫",
+        discount: 30000,
+        type: "fixed",
+        minOrderValue: 150000,
+        expires: "31/12/2026",
+        desc: "Áp dụng cho mọi sản phẩm chăm sóc da và làm đẹp"
+      },
+      {
+        code: "BEAUTYGLOW",
+        name: "Ưu Đãi Da Đẹp - Giảm 12%",
+        discount: 12,
+        type: "percent",
+        maxDiscount: 60000,
+        minOrderValue: 200000,
+        expires: "31/12/2026",
+        desc: "Giảm 12% tối đa 60k cho đơn từ 200k"
+      }
+    ]
+  },
+  {
+    id: "shop_04",
+    name: "HomePro Gia Dụng Thông Minh",
+    slug: "homepro-gia-dung",
+    isOfficial: true,
+    avatar: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=200",
+    banner: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1200",
+    rating: 4.88,
+    reviewCount: 2680,
+    followers: 19800,
+    responseRate: 98,
+    responseTime: "Trong 8 phút",
+    joinedDate: "3 năm trước",
+    location: "Kho Long Biên, Hà Nội",
+    phone: "0936 789 123",
+    description: "Hệ sinh thái thiết bị gia dụng và chăm sóc gia đình chuẩn công nghệ Nhật Bản. Nồi chiên không dầu, robot hút bụi, máy lọc không khí và nồi cơm điện cao tần.",
+    badges: ["Shopee Mall", "Bảo Hành 24T", "Giao Nhanh 2H"],
+    vouchers: [
+      {
+        code: "HOMEPRO80",
+        name: "Voucher Gia Dụng - Giảm 80.000₫",
+        discount: 80000,
+        type: "fixed",
+        minOrderValue: 400000,
+        expires: "31/12/2026",
+        desc: "Giảm ngay 80k cho thiết bị nhà bếp và đời sống"
+      },
+      {
+        code: "HOMESHIP",
+        name: "Miễn Phí Vận Chuyển Hàng Cồng Kềnh",
+        discount: 40000,
+        type: "shipping",
+        minOrderValue: 0,
+        expires: "31/12/2026",
+        desc: "Hỗ trợ 40k phí giao hàng thiết bị gia dụng lớn"
+      }
+    ]
   }
 ];
 
