@@ -70,7 +70,7 @@ export default function OrderSuccessPage() {
           {t('order_success_title', 'Đặt Hàng Thành Công!')}
         </h1>
         <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: '0 0 24px', lineHeight: '1.6' }}>
-          {t('order_success_subtitle', 'Cảm ơn bạn đã tin tưởng mua sắm tại Mini Shopee.')} Thông tin xác nhận và mã vận đơn đã được gửi tới hệ thống xử lý.
+          {t('order_success_subtitle', 'Cảm ơn bạn đã tin tưởng mua sắm tại Fullstack E-Commerce.')} Thông tin xác nhận và mã vận đơn đã được gửi tới hệ thống xử lý.
         </p>
 
         {/* Order Details Card */}

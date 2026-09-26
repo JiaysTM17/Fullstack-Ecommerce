@@ -315,7 +315,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
         {/* Destination & Safety Info */}
         <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
           📍 <strong>Địa chỉ giao tới:</strong> {customerAddress}<br />
-          🛡️ <em>Đơn hàng được bảo hiểm 100% bởi Mini Shopee Care & SPX Express. Vui lòng kiểm tra kiện hàng còn nguyên tem phong niêm phong trước khi nhận.</em>
+          🛡️ <em>Đơn hàng được bảo hiểm 100% bởi Fullstack E-Commerce Care & SPX Express. Vui lòng kiểm tra kiện hàng còn nguyên tem phong niêm phong trước khi nhận.</em>
         </div>
       </div>
     </div>

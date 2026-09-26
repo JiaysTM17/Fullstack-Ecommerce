@@ -13,7 +13,7 @@ const INITIAL_HISTORY = [
     date: '25/09/2026 09:00',
     amount: 15000,
     type: 'plus',
-    desc: 'Thưởng chào mừng thành viên mới Mini Shopee',
+    desc: 'Thưởng chào mừng thành viên mới Fullstack E-Commerce',
   },
   {
     id: 'tx_init_2',

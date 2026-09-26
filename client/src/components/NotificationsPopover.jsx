@@ -18,7 +18,7 @@ const INITIAL_NOTIFICATIONS = [
     type: 'voucher',
     icon: '🎟️',
     title: 'Quà tặng độc quyền: Voucher 50.000₫',
-    message: 'Mini Shopee gửi tặng bạn mã WELCOME50 giảm 50.000₫ cho đơn từ 100k. Dùng ngay kẻo hết hạn!',
+    message: 'Fullstack E-Commerce gửi tặng bạn mã WELCOME50 giảm 50.000₫ cho đơn từ 100k. Dùng ngay kẻo hết hạn!',
     time: '2 giờ trước',
     isRead: false,
     link: '/cart',
