@@ -134,15 +134,15 @@ export default function InvoiceReceiptModal({ order, onClose }) {
               >
                 S
               </div>
-              <span style={{ fontSize: '20px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px' }}>
-                MINI SHOPEE
+              <span style={{ fontSize: '18px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px' }}>
+                FULLSTACK E-COMMERCE
               </span>
             </div>
             <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
-              Công ty Cổ phần Thương Mại Điện Tử Mini Shopee<br />
+              Công ty Cổ phần Thương Mại Điện Tử Fullstack E-Commerce<br />
               Mã số thuế: <strong>0318924019</strong><br />
               Địa chỉ: Tầng 12, Tòa nhà Bitexco, Bến Nghé, Q.1, TP. HCM<br />
-              Hotline: 1900 1234 · cskh@minishopee.vn
+              Hotline: 1900 6868 · cskh@fullstack-ecommerce.vn
             </div>
           </div>
 
@@ -269,7 +269,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
               }}
             />
             <div style={{ fontSize: '11.5px', color: '#64748b', maxWidth: '200px', lineHeight: '1.4' }}>
-              Quét mã QR để kiểm tra tính hợp lệ của biên lai điện tử trên cổng Mini Shopee e-Invoice Portal.
+              Quét mã QR để kiểm tra tính hợp lệ của biên lai điện tử trên cổng Fullstack E-Commerce e-Invoice Portal.
             </div>
           </div>
 
@@ -320,7 +320,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
             lineHeight: '1.5',
           }}
         >
-          Cảm ơn bạn đã tin tưởng mua sắm tại <strong>Mini Shopee</strong>!<br />
+          Cảm ơn bạn đã tin tưởng mua sắm tại <strong>Fullstack E-Commerce</strong>!<br />
           Mọi thắc mắc về đơn hàng và hóa đơn, vui lòng liên hệ Trung tâm Trợ giúp hoặc gửi tin nhắn tại Kênh CSKH.
         </div>
       </div>

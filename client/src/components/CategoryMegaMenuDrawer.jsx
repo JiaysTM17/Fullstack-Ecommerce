@@ -149,11 +149,27 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
           </div>
           <div
             className="drawer-item"
+            onClick={() => handleNavigate('/?category=Sắc+đẹp')}
+            style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-primary)' }}
+          >
+            <span style={{ fontSize: '18px' }}>💄</span>
+            <span>Sắc Đẹp & Dược Mỹ Phẩm Chính Hãng</span>
+          </div>
+          <div
+            className="drawer-item"
+            onClick={() => handleNavigate('/?category=Gia+dụng')}
+            style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-primary)' }}
+          >
+            <span style={{ fontSize: '18px' }}>🍳</span>
+            <span>Gia Dụng & Thiết Bị Nhà Bếp Thông Minh</span>
+          </div>
+          <div
+            className="drawer-item"
             onClick={() => handleNavigate('/?category=Đời+sống')}
             style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-primary)' }}
           >
             <span style={{ fontSize: '18px' }}>🏠</span>
-            <span>Đời Sống & Nhà Cửa Thông Minh</span>
+            <span>Đời Sống & Tiện Ích Gia Đình</span>
           </div>
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--border-light, #e2e8f0)', margin: '16px 0' }} />
@@ -177,6 +193,22 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
           >
             <span style={{ fontSize: '18px' }}>🏪</span>
             <span>TechWorld Store</span>
+          </div>
+          <div
+            className="drawer-item"
+            onClick={() => handleNavigate('/shop/shop_03')}
+            style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-primary)' }}
+          >
+            <span style={{ fontSize: '18px' }}>💄</span>
+            <span>Beauty Cosmetics Official</span>
+          </div>
+          <div
+            className="drawer-item"
+            onClick={() => handleNavigate('/shop/shop_04')}
+            style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-primary)' }}
+          >
+            <span style={{ fontSize: '18px' }}>🏡</span>
+            <span>HomePro Gia Dụng Thông Minh</span>
           </div>
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--border-light, #e2e8f0)', margin: '16px 0' }} />

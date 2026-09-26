@@ -26,6 +26,24 @@ const INITIAL_SHOPS = [
     address: "Kho Cầu Giấy, Hà Nội",
     rating: 4.8,
     status: "active"
+  },
+  {
+    id: "shop_03",
+    name: "Beauty Cosmetics Official",
+    logo: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=120",
+    phone: "0909888999",
+    address: "Kho Quận 1, TP. Hồ Chí Minh",
+    rating: 4.95,
+    status: "active"
+  },
+  {
+    id: "shop_04",
+    name: "HomePro Gia Dụng Thông Minh",
+    logo: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=120",
+    phone: "0936789123",
+    address: "Kho Long Biên, Hà Nội",
+    rating: 4.88,
+    status: "active"
   }
 ];
 
@@ -102,6 +120,54 @@ const INITIAL_SELLER_PRODUCTS = [
     category: "Điện tử",
     image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300",
     isActive: true
+  },
+  {
+    _id: "prod_11",
+    shopId: "shop_03",
+    name: "Serum Vitamin C 15% Sáng Da Mờ Thâm Nám PureGlow",
+    price: 380000,
+    originalPrice: 550000,
+    stock: 120,
+    sold: 3450,
+    category: "Sắc đẹp",
+    image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300",
+    isActive: true
+  },
+  {
+    _id: "prod_12",
+    shopId: "shop_03",
+    name: "Kem Chống Nắng Phổ Rộng SPF50+ PA++++ DermaShield",
+    price: 290000,
+    originalPrice: 420000,
+    stock: 180,
+    sold: 4890,
+    category: "Sắc đẹp",
+    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300",
+    isActive: true
+  },
+  {
+    _id: "prod_15",
+    shopId: "shop_04",
+    name: "Nồi Chiên Không Dầu Điện Tử 6.5L Cảm Ứng HomePro",
+    price: 1290000,
+    originalPrice: 2190000,
+    stock: 45,
+    sold: 1540,
+    category: "Gia dụng",
+    image: "https://images.unsplash.com/photo-1585515320310-259814833e62?w=300",
+    isActive: true
+  },
+  {
+    _id: "prod_16",
+    shopId: "shop_04",
+    name: "Máy Hút Bụi Cầm Tay Không Dây 20000Pa HomePro",
+    price: 850000,
+    originalPrice: 1350000,
+    stock: 60,
+    sold: 980,
+    category: "Gia dụng",
+    image: "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=300",
+    isActive: true
   }
 ];
 
@@ -139,6 +205,28 @@ const INITIAL_SELLER_ORDERS = [
     status: "completed",
     statusText: "Đã hoàn thành",
     createdAt: "2026-09-20 09:15"
+  },
+  {
+    orderId: "ORD339102",
+    shopId: "shop_03",
+    customerName: "Đỗ Mỹ Linh",
+    phone: "0918776655",
+    productName: "Serum Vitamin C 15% PureGlow (x1)",
+    total: 380000,
+    status: "shipping",
+    statusText: "Đang giao hàng",
+    createdAt: "2026-09-26 10:15"
+  },
+  {
+    orderId: "ORD441920",
+    shopId: "shop_04",
+    customerName: "Hoàng Gia Bách",
+    phone: "0982112233",
+    productName: "Nồi Chiên Không Dầu Điện Tử 6.5L HomePro (x1)",
+    total: 1290000,
+    status: "pending",
+    statusText: "Chờ xác nhận",
+    createdAt: "2026-09-26 11:45"
   }
 ];
 
@@ -147,6 +235,8 @@ const INITIAL_SHOP_VOUCHERS = [
   { id: 'sv_02', shopId: 'shop_01', code: 'GENZ10P', name: 'Giảm 10% tối đa 50k', discount: 10, isPercent: true, minOrder: 200000, used: 80, limit: 200, active: true },
   { id: 'sv_03', shopId: 'shop_02', code: 'TECH50K', name: 'Giảm 50k thiết bị âm thanh', discount: 50000, isPercent: false, minOrder: 300000, used: 28, limit: 50, active: true },
   { id: 'sv_04', shopId: 'shop_02', code: 'TECHFSHIP', name: 'Freeship đơn công nghệ từ 500k', discount: 30000, isPercent: false, minOrder: 500000, used: 92, limit: 150, active: true },
+  { id: 'sv_05', shopId: 'shop_03', code: 'BEAUTY30K', name: 'Giảm 30k mỹ phẩm chính hãng', discount: 30000, isPercent: false, minOrder: 150000, used: 64, limit: 120, active: true },
+  { id: 'sv_06', shopId: 'shop_04', code: 'HOME80K', name: 'Giảm 80k gia dụng thông minh', discount: 80000, isPercent: false, minOrder: 400000, used: 31, limit: 80, active: true },
 ];
 
 export default function SellerDashboardPage() {

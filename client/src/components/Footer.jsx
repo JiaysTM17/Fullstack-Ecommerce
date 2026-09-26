@@ -9,7 +9,7 @@ import '../styles/footer.css';
  * @param {string} [props.shopName='Mini Shopee'] - Tên cửa hàng
  * @param {string|number} [props.brandYear=2026] - Năm hiển thị bản quyền
  */
-const Footer = ({ shopName = 'Mini Shopee', brandYear = 2026 }) => {
+const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
   const { t, language } = useLanguage();
 
   return (
