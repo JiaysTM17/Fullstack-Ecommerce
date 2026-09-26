@@ -150,6 +150,11 @@ const Header = ({
     if (onNavigate) onNavigate(path);
   };
 
+  const handleGoHome = () => {
+    handleClearSearch();
+    navTo('/');
+  };
+
   const filteredSuggestions = currentSearch
     ? POPULAR_SEARCHES.filter((s) =>
         s.toLowerCase().includes(currentSearch.toLowerCase())
@@ -575,6 +580,15 @@ const Header = ({
           </button>
 
           <span
+            className="shopee-subnav-link"
+            style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)' }}
+            onClick={handleGoHome}
+            title="Quay lại trang chủ và xem toàn bộ sản phẩm"
+          >
+            🏠 {t('nav_all_products', 'Trang Chủ (Tất Cả)')}
+          </span>
+
+          <span
             className="shopee-subnav-link highlight"
             onClick={() => navTo('/?badge=Hot+Deal')}
             title="Săn deal chớp nhoáng"
@@ -609,14 +623,6 @@ const Header = ({
             title="Vào Rewards Hub nhận xu & quay thưởng"
           >
             🎁 {t('nav_rewards_hub', 'Săn Xu & Voucher')}
-          </span>
-
-          <span
-            className="shopee-subnav-seller-btn"
-            onClick={() => navTo('/seller/dashboard')}
-            title="Đến kênh nhà bán hàng"
-          >
-            🚀 {t('nav_become_seller', 'Kênh Gian Hàng')}
           </span>
         </nav>
       </div>

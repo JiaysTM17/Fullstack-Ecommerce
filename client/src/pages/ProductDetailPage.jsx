@@ -365,6 +365,8 @@ export default function ProductDetailPage() {
               <input
                 className="shopee-qty-input"
                 type="number"
+                min="1"
+                max={product?.stock || 99}
                 value={quantity}
                 onChange={(e) => updateQuantity(e.target.value)}
               />

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { getAllShops } from '../services/shopService';
 
 export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
   const { user } = useAuth();
@@ -177,63 +178,33 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
 
           {/* Shops */}
           <div style={{ padding: '0 24px 12px', fontSize: '12px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-            Gian Hàng Nổi Bật (Shopee Mall)
+            Gian Hàng Chính Hãng Nổi Bật ({getAllShops().length} Shopee Mall)
           </div>
-          <div
-            className="drawer-item"
-            onClick={() => handleNavigate('/shop/shop_01')}
-            style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-primary)' }}
-          >
-            <span style={{ fontSize: '18px' }}>🏪</span>
-            <span>Thời Trang GenZ Official</span>
-          </div>
-          <div
-            className="drawer-item"
-            onClick={() => handleNavigate('/shop/shop_02')}
-            style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-primary)' }}
-          >
-            <span style={{ fontSize: '18px' }}>🏪</span>
-            <span>TechWorld Store</span>
-          </div>
-          <div
-            className="drawer-item"
-            onClick={() => handleNavigate('/shop/shop_03')}
-            style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-primary)' }}
-          >
-            <span style={{ fontSize: '18px' }}>💄</span>
-            <span>Beauty Cosmetics Official</span>
-          </div>
-          <div
-            className="drawer-item"
-            onClick={() => handleNavigate('/shop/shop_04')}
-            style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-primary)' }}
-          >
-            <span style={{ fontSize: '18px' }}>🏡</span>
-            <span>HomePro Gia Dụng Thông Minh</span>
-          </div>
+          {getAllShops().map((shop) => {
+            const icons = {
+              shop_01: '👗', shop_02: '🎧', shop_03: '💄', shop_04: '🏡',
+              shop_05: '⚽', shop_06: '🌿', shop_07: '📚', shop_08: '🚗',
+              shop_09: '🍼', shop_10: '🎵', shop_11: '🐾', shop_12: '⌚'
+            };
+            return (
+              <div
+                key={shop.id}
+                className="drawer-item"
+                onClick={() => handleNavigate(`/shop/${shop.id}`)}
+                style={{ padding: '10px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13.5px', color: 'var(--text-primary)' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '17px' }}>{icons[shop.id] || '🏪'}</span>
+                  <span style={{ fontWeight: 500 }}>{shop.name}</span>
+                </div>
+                <span style={{ fontSize: '10px', background: 'var(--primary-color, #ea580c)', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                  Mall
+                </span>
+              </div>
+            );
+          })}
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--border-light, #e2e8f0)', margin: '16px 0' }} />
-
-          {/* Portals */}
-          <div style={{ padding: '0 24px 12px', fontSize: '12px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-            Hệ Thống Quản Trị
-          </div>
-          <div
-            className="drawer-item"
-            onClick={() => handleNavigate('/seller/dashboard')}
-            style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--primary-color, #ea580c)', fontWeight: 700 }}
-          >
-            <span style={{ fontSize: '18px' }}>💼</span>
-            <span>Kênh Quản Lý Cửa Hàng (Seller)</span>
-          </div>
-          <div
-            className="drawer-item"
-            onClick={() => handleNavigate('/admin/dashboard')}
-            style={{ padding: '12px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: '#0284c7', fontWeight: 700 }}
-          >
-            <span style={{ fontSize: '18px' }}>🛡️</span>
-            <span>Bảng Quản Trị Toàn Sàn (Admin)</span>
-          </div>
         </div>
       </div>
     </div>

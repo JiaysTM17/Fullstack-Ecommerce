@@ -137,12 +137,19 @@ export function validateVoucher(code, orderSubtotal = 0) {
   let discountAmount = 0;
   if (voucher.type === 'percent') {
     const base = orderSubtotal > 0 ? orderSubtotal : 100000;
-    discountAmount = Math.round((base * voucher.value) / 100);
+    const boundedPercent = Math.min(100, Math.max(1, Number(voucher.value) || 10));
+    discountAmount = Math.round((base * boundedPercent) / 100);
     if (voucher.maxDiscount && discountAmount > voucher.maxDiscount) {
       discountAmount = voucher.maxDiscount;
     }
+    if (orderSubtotal > 0 && discountAmount > orderSubtotal) {
+      discountAmount = orderSubtotal;
+    }
   } else if (voucher.type === 'fixed' || voucher.type === 'shipping') {
-    discountAmount = voucher.value;
+    discountAmount = Number(voucher.value) || 0;
+    if (orderSubtotal > 0 && discountAmount > orderSubtotal && voucher.type === 'fixed') {
+      discountAmount = orderSubtotal;
+    }
   }
 
   return {
@@ -155,10 +162,20 @@ export function validateVoucher(code, orderSubtotal = 0) {
 
 export function createVoucher(newVoucher) {
   const current = getVouchers();
+  const rawType = newVoucher.type || 'percent';
+  let boundedValue = Number(newVoucher.value) || 10;
+  if (rawType === 'percent') {
+    boundedValue = Math.min(100, Math.max(1, boundedValue));
+  } else {
+    boundedValue = Math.max(1000, boundedValue);
+  }
+
   const created = {
     ...newVoucher,
     id: `vouch_${Date.now()}`,
     code: newVoucher.code.toUpperCase().trim(),
+    type: rawType,
+    value: boundedValue,
     usedCount: 0,
   };
   const updated = [created, ...current];
