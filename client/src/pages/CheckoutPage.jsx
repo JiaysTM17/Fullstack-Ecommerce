@@ -473,7 +473,7 @@ export default function CheckoutPage() {
                           📋 {t('copy', 'Sao chép')}
                         </button>
                       </div>
-                      <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>Chủ TK: CONG TY TNHH MINI SHOPEE</div>
+                      <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>Chủ TK: CONG TY TNHH FULLSTACK ECOMMERCE</div>
                       <div style={{ fontSize: "13px", fontWeight: 800, color: "var(--color-success, #10b981)", marginTop: "4px" }}>
                         Số tiền: {formatCurrency(finalOrderTotal)}
                       </div>
@@ -783,7 +783,7 @@ export default function CheckoutPage() {
           </div>
 
           <div style={{ fontSize: "12px", color: "var(--text-muted, #777)", lineHeight: "1.5", borderTop: "1px solid var(--border-light, #eee)", paddingTop: "12px" }}>
-            🔒 Nhấn "Xác Nhận Đặt Hàng" đồng nghĩa bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Mini Shopee.
+            🔒 Nhấn "Xác Nhận Đặt Hàng" đồng nghĩa bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Fullstack E-Commerce.
           </div>
         </aside>
       </div>

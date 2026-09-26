@@ -291,10 +291,10 @@ export default function RewardsHubModal({ onClose }) {
           <div style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: '14px' }}>
               <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800 }}>
-                🎡 Vòng Quay May Mắn Mini Shopee
+                🎡 Vòng Quay May Mắn Fullstack E-Commerce
               </h4>
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>
-                Quay là 100% trúng quà: Mini Xu khủng, Mã giảm 10%, Mã Freeship toàn quốc!
+                Quay là 100% trúng quà: Xu thưởng khủng, Mã giảm 10%, Mã Freeship toàn quốc!
               </p>
             </div>
 

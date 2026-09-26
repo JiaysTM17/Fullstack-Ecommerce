@@ -12,7 +12,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
   const invoiceDate = order.createdAt || new Date().toLocaleDateString('vi-VN');
   const items = order.items || [
     {
-      name: order.productName || 'Sản phẩm mua sắm tại Mini Shopee',
+      name: order.productName || 'Sản phẩm mua sắm tại Fullstack E-Commerce',
       price: order.total || 0,
       quantity: 1,
     }
@@ -190,7 +190,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
             <div style={{ color: '#64748b', fontSize: '11.5px', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
               Thông Tin Người Mua
             </div>
-            <div style={{ fontWeight: 700, color: '#0f172a' }}>{order.customerName || 'Khách Hàng Mini Shopee'}</div>
+            <div style={{ fontWeight: 700, color: '#0f172a' }}>{order.customerName || 'Khách Hàng Fullstack E-Commerce'}</div>
             <div style={{ color: '#475569' }}>{order.phone || '0988 123 456'}</div>
             <div style={{ color: '#475569' }}>{order.shippingAddress || 'Số 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh'}</div>
           </div>

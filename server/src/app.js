@@ -36,7 +36,7 @@ if (process.env.NODE_ENV === "development") {
 
 // Health check
 app.get("/", (req, res) => {
-  res.json({ message: "Mini Shopee API is running" });
+  res.json({ message: "Fullstack E-Commerce API is running" });
 });
 
 app.use("/api/products", productRoutes);

@@ -26,7 +26,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
     onSubmit({
       orderId: order.orderId,
       reason,
-      refundMethod: refundMethod === 'wallet' ? 'Ví điện tử Mini Shopee' : `Ngân hàng ${bankName} (${accountNumber})`,
+      refundMethod: refundMethod === 'wallet' ? 'Ví điện tử Fullstack E-Commerce' : `Ngân hàng ${bankName} (${accountNumber})`,
       note,
       refundAmount: order.total,
     });
@@ -183,7 +183,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
                   checked={refundMethod === 'wallet'}
                   onChange={() => setRefundMethod('wallet')}
                 />
-                <span>Ví Mini Shopee (Tức thì)</span>
+                <span>Ví Fullstack E-Commerce (Tức thì)</span>
               </label>
 
               <label

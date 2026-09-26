@@ -179,7 +179,7 @@ export function getShopById(shopId) {
     joinedDate: "2 năm trước",
     location: "Việt Nam",
     phone: "1900 6868",
-    description: "Cửa hàng bán lẻ chính hãng trên nền tảng Mini Shopee.",
+    description: "Cửa hàng bán lẻ chính hãng trên nền tảng Fullstack E-Commerce.",
     badges: ["Gian Hàng Uy Tín", "Chính Hãng"],
     vouchers: []
   };

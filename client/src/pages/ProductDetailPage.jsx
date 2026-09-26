@@ -657,7 +657,7 @@ export default function ProductDetailPage() {
 
                   {rev.verifiedPurchase && (
                     <div className="amazon-review-verified">
-                      ✓ Đã chứng nhận mua hàng tại Mini Shopee
+                      ✓ Đã chứng nhận mua hàng chính hãng tại Fullstack E-Commerce
                     </div>
                   )}
 
