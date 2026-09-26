@@ -9,42 +9,18 @@ import '../styles/dashboard.css';
 
 // Danh sách các Shop mẫu để demo tính năng nhiều shop quản lý độc lập
 const INITIAL_SHOPS = [
-  {
-    id: "shop_01",
-    name: "Thời Trang GenZ Official",
-    logo: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=120",
-    phone: "0912345678",
-    address: "Kho Tân Bình, TP. Hồ Chí Minh",
-    rating: 4.9,
-    status: "active"
-  },
-  {
-    id: "shop_02",
-    name: "TechWorld Store",
-    logo: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=120",
-    phone: "0987654321",
-    address: "Kho Cầu Giấy, Hà Nội",
-    rating: 4.8,
-    status: "active"
-  },
-  {
-    id: "shop_03",
-    name: "Beauty Cosmetics Official",
-    logo: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=120",
-    phone: "0909888999",
-    address: "Kho Quận 1, TP. Hồ Chí Minh",
-    rating: 4.95,
-    status: "active"
-  },
-  {
-    id: "shop_04",
-    name: "HomePro Gia Dụng Thông Minh",
-    logo: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=120",
-    phone: "0936789123",
-    address: "Kho Long Biên, Hà Nội",
-    rating: 4.88,
-    status: "active"
-  }
+  { id: "shop_01", name: "Thời Trang GenZ Official", logo: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=120", phone: "0912345678", address: "Kho Tân Bình, TP. Hồ Chí Minh", rating: 4.9, status: "active" },
+  { id: "shop_02", name: "TechWorld Store", logo: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=120", phone: "0987654321", address: "Kho Cầu Giấy, Hà Nội", rating: 4.8, status: "active" },
+  { id: "shop_03", name: "Beauty Cosmetics Official", logo: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=120", phone: "0909888999", address: "Kho Quận 1, TP. Hồ Chí Minh", rating: 4.95, status: "active" },
+  { id: "shop_04", name: "HomePro Gia Dụng Thông Minh", logo: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=120", phone: "0936789123", address: "Kho Long Biên, Hà Nội", rating: 4.88, status: "active" },
+  { id: "shop_05", name: "SportZone Thể Thao & Dã Ngoại", logo: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=120", phone: "0968123456", address: "Kho Nam Từ Liêm, Hà Nội", rating: 4.91, status: "active" },
+  { id: "shop_06", name: "GreenFarm Nông Sản & Organic Sạch", logo: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=120", phone: "0977888666", address: "Kho Đà Lạt & TP. Hồ Chí Minh", rating: 4.96, status: "active" },
+  { id: "shop_07", name: "Tri Thức BookStore & Văn Phòng Phẩm", logo: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=120", phone: "0918223344", address: "Kho Đống Đa, Hà Nội", rating: 4.94, status: "active" },
+  { id: "shop_08", name: "AutoPro Phụ Kiện Ô Tô Xe Máy", logo: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=120", phone: "0933555777", address: "Kho Hoàng Mai, Hà Nội", rating: 4.87, status: "active" },
+  { id: "shop_09", name: "BabyCare Siêu Thị Mẹ & Bé Yêu", logo: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=120", phone: "0908112233", address: "Kho Bình Thạnh, TP. Hồ Chí Minh", rating: 4.97, status: "active" },
+  { id: "shop_10", name: "AudioHiFi Âm Thanh Đẳng Cấp", logo: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=120", phone: "0945667788", address: "Kho Quận 3, TP. Hồ Chí Minh", rating: 4.93, status: "active" },
+  { id: "shop_11", name: "PetParadise Vương Quốc Thú Cưng", logo: "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=120", phone: "0922446688", address: "Kho Phú Nhuận, TP. Hồ Chí Minh", rating: 4.92, status: "active" },
+  { id: "shop_12", name: "LuxeTime Đồng Hồ Cơ Khí & Phụ Kiện", logo: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=120", phone: "0915999111", address: "Kho Ba Đình, Hà Nội", rating: 4.95, status: "active" },
 ];
 
 // Dữ liệu sản phẩm mẫu phân bổ theo từng shopId
@@ -323,7 +299,21 @@ export default function SellerDashboardPage() {
   // Lưu sản phẩm (Thêm mới hoặc Cập nhật)
   const handleSaveProduct = (e) => {
     e.preventDefault();
-    if (!productForm.name || !productForm.price) return;
+    if (!productForm.name || !productForm.price) {
+      toast.error('Vui lòng nhập tên và giá sản phẩm!');
+      return;
+    }
+
+    const price = Number(productForm.price);
+    const stock = Number(productForm.stock);
+    if (isNaN(price) || price < 1000) {
+      toast.error('Giá bán sản phẩm tối thiểu phải từ 1.000₫!');
+      return;
+    }
+    if (isNaN(stock) || stock < 0) {
+      toast.error('Số lượng tồn kho không được âm!');
+      return;
+    }
 
     if (editingProduct) {
       setProducts(prev => prev.map(p => {
@@ -395,18 +385,39 @@ export default function SellerDashboardPage() {
 
   const handleCreateShopVoucher = (e) => {
     e.preventDefault();
-    if (!voucherForm.code) return;
+    const code = voucherForm.code.toUpperCase().trim();
+    if (!code) {
+      toast.error('Vui lòng nhập mã ưu đãi!');
+      return;
+    }
+
+    const discountVal = Number(voucherForm.discount);
+    if (isNaN(discountVal) || discountVal <= 0) {
+      toast.error('Mức giảm giá phải lớn hơn 0!');
+      return;
+    }
+    if (voucherForm.isPercent) {
+      if (discountVal > 100) {
+        toast.error('Mức giảm theo % chỉ được từ 1% đến tối đa 100%!');
+        return;
+      }
+    } else {
+      if (discountVal < 1000) {
+        toast.error('Số tiền giảm tối thiểu là 1.000₫!');
+        return;
+      }
+    }
 
     const newVoucher = {
       id: `sv_${Date.now()}`,
       shopId: selectedShopId,
-      code: voucherForm.code.toUpperCase().trim(),
-      name: voucherForm.name || `Ưu đãi ${voucherForm.code.toUpperCase()}`,
-      discount: Number(voucherForm.discount) || 10000,
+      code,
+      name: voucherForm.name || `Ưu đãi ${code}`,
+      discount: discountVal,
       isPercent: voucherForm.isPercent,
-      minOrder: Number(voucherForm.minOrder) || 0,
+      minOrder: Math.max(0, Number(voucherForm.minOrder) || 0),
       used: 0,
-      limit: Number(voucherForm.limit) || 100,
+      limit: Math.max(1, Number(voucherForm.limit) || 100),
       active: true,
     };
 
@@ -514,8 +525,11 @@ export default function SellerDashboardPage() {
                 onChange={(e) => setSelectedShopId(e.target.value)}
                 aria-label="Chọn Shop quản lý"
               >
-                <option value="shop_01">Shop 1: Thời Trang GenZ Official</option>
-                <option value="shop_02">Shop 2: TechWorld Store</option>
+                {shops.map((s, idx) => (
+                  <option key={s.id} value={s.id}>
+                    Shop {idx + 1}: {s.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -993,22 +1007,40 @@ export default function SellerDashboardPage() {
                     <select
                       className="shopee-form-select"
                       value={voucherForm.isPercent ? 'percent' : 'amount'}
-                      onChange={(e) => setVoucherForm({ ...voucherForm, isPercent: e.target.value === 'percent' })}
+                      onChange={(e) => {
+                        const isP = e.target.value === 'percent';
+                        setVoucherForm({ 
+                          ...voucherForm, 
+                          isPercent: isP,
+                          discount: isP ? '10' : '20000'
+                        });
+                      }}
                     >
                       <option value="amount">Số tiền cố định (VNĐ)</option>
-                      <option value="percent">Phần trăm (%)</option>
+                      <option value="percent">Phần trăm (%) [Tối đa 100%]</option>
                     </select>
                   </div>
 
                   <div className="shopee-form-group">
-                    <label className="shopee-form-label">Mức Giảm *</label>
+                    <label className="shopee-form-label">
+                      {voucherForm.isPercent ? 'Mức Giảm (%) [1% - 100%] *' : 'Số Tiền Giảm (₫) [Min 1.000₫] *'}
+                    </label>
                     <input
                       type="number"
                       required
+                      min={voucherForm.isPercent ? 1 : 1000}
+                      max={voucherForm.isPercent ? 100 : undefined}
+                      step={voucherForm.isPercent ? 1 : 1000}
                       className="shopee-form-input"
-                      placeholder={voucherForm.isPercent ? '10' : '20000'}
+                      placeholder={voucherForm.isPercent ? 'VD: 10, 15, 20' : 'VD: 20000, 50000'}
                       value={voucherForm.discount}
-                      onChange={(e) => setVoucherForm({ ...voucherForm, discount: e.target.value })}
+                      onChange={(e) => {
+                        let val = e.target.value;
+                        if (voucherForm.isPercent && Number(val) > 100) {
+                          val = '100';
+                        }
+                        setVoucherForm({ ...voucherForm, discount: val });
+                      }}
                     />
                   </div>
                 </div>
@@ -1085,10 +1117,12 @@ export default function SellerDashboardPage() {
 
                 <div className="shopee-form-row">
                   <div className="shopee-form-group">
-                    <label className="shopee-form-label" htmlFor="price">Giá bán (VND) *</label>
+                    <label className="shopee-form-label" htmlFor="price">Giá bán (VND) [Tối thiểu 1.000₫] *</label>
                     <input
                       id="price"
                       type="number"
+                      min="1000"
+                      step="1000"
                       className="shopee-form-input"
                       placeholder="199000"
                       value={productForm.price}
@@ -1102,6 +1136,8 @@ export default function SellerDashboardPage() {
                     <input
                       id="originalPrice"
                       type="number"
+                      min="0"
+                      step="1000"
                       className="shopee-form-input"
                       placeholder="299000"
                       value={productForm.originalPrice}
@@ -1112,10 +1148,12 @@ export default function SellerDashboardPage() {
 
                 <div className="shopee-form-row">
                   <div className="shopee-form-group">
-                    <label className="shopee-form-label" htmlFor="stock">Số lượng tồn kho *</label>
+                    <label className="shopee-form-label" htmlFor="stock">Số lượng tồn kho [Tối thiểu 0] *</label>
                     <input
                       id="stock"
                       type="number"
+                      min="0"
+                      step="1"
                       className="shopee-form-input"
                       placeholder="50"
                       value={productForm.stock}

@@ -6,39 +6,18 @@ import { getVouchers, createVoucher, deleteVoucher } from '../services/voucherSe
 import '../styles/dashboard.css';
 
 const INITIAL_ALL_SHOPS = [
-  {
-    id: "shop_01",
-    name: "Thời Trang GenZ Official",
-    ownerName: "Trần Thị Chủ Shop",
-    email: "shop.genz@shopee.vn",
-    phone: "0912345678",
-    productsCount: 4,
-    totalRevenue: 857000,
-    status: "active",
-    statusText: "Đang hoạt động",
-  },
-  {
-    id: "shop_02",
-    name: "TechWorld Store",
-    ownerName: "Lê Văn Chủ Shop",
-    email: "shop.tech@shopee.vn",
-    phone: "0987654321",
-    productsCount: 4,
-    totalRevenue: 2820000,
-    status: "active",
-    statusText: "Đang hoạt động",
-  },
-  {
-    id: "shop_03",
-    name: "Mỹ Phẩm Xách Tay H&K (Vi phạm)",
-    ownerName: "Hoàng Văn C",
-    email: "shop.hk@example.com",
-    phone: "0944332211",
-    productsCount: 1,
-    totalRevenue: 0,
-    status: "locked",
-    statusText: "Đang bị khóa",
-  },
+  { id: "shop_01", name: "Thời Trang GenZ Official", ownerName: "Trần Thị Minh Tâm", email: "shop.genz@marketplace.vn", phone: "0912345678", productsCount: 9, totalRevenue: 18450000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_02", name: "TechWorld Store", ownerName: "Lê Văn Hùng", email: "shop.tech@marketplace.vn", phone: "0987654321", productsCount: 9, totalRevenue: 34820000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_03", name: "Beauty Cosmetics Official", ownerName: "Nguyễn Hương Giang", email: "shop.beauty@marketplace.vn", phone: "0909888999", productsCount: 9, totalRevenue: 27600000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_04", name: "HomePro Gia Dụng Thông Minh", ownerName: "Hoàng Gia Bách", email: "shop.homepro@marketplace.vn", phone: "0936789123", productsCount: 9, totalRevenue: 42100000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_05", name: "SportZone Thể Thao & Dã Ngoại", ownerName: "Đỗ Tuấn Kiệt", email: "shop.sport@marketplace.vn", phone: "0968123456", productsCount: 9, totalRevenue: 19800000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_06", name: "GreenFarm Nông Sản & Organic Sạch", ownerName: "Phạm Thúy Hằng", email: "shop.greenfarm@marketplace.vn", phone: "0977888666", productsCount: 9, totalRevenue: 15300000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_07", name: "Tri Thức BookStore & Văn Phòng Phẩm", ownerName: "Vũ Đình Trọng", email: "shop.books@marketplace.vn", phone: "0918223344", productsCount: 9, totalRevenue: 11200000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_08", name: "AutoPro Phụ Kiện Ô Tô Xe Máy", ownerName: "Mai Quốc Cường", email: "shop.autopro@marketplace.vn", phone: "0933555777", productsCount: 9, totalRevenue: 24700000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_09", name: "BabyCare Siêu Thị Mẹ & Bé Yêu", ownerName: "Trịnh Thị Tuyết", email: "shop.babycare@marketplace.vn", phone: "0908112233", productsCount: 9, totalRevenue: 28900000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_10", name: "AudioHiFi Âm Thanh Đẳng Cấp", ownerName: "Đặng Hoàng Nam", email: "shop.audio@marketplace.vn", phone: "0945667788", productsCount: 9, totalRevenue: 38500000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_11", name: "PetParadise Vương Quốc Thú Cưng", ownerName: "Bùi Mỹ Linh", email: "shop.pet@marketplace.vn", phone: "0922446688", productsCount: 8, totalRevenue: 14600000, status: "active", statusText: "Đang hoạt động" },
+  { id: "shop_12", name: "LuxeTime Đồng Hồ Cơ Khí & Phụ Kiện", ownerName: "Cao Anh Tuấn", email: "shop.luxetime@marketplace.vn", phone: "0915999111", productsCount: 8, totalRevenue: 52400000, status: "active", statusText: "Đang hoạt động" },
 ];
 
 const INITIAL_MODERATION_PRODUCTS = [
@@ -128,16 +107,36 @@ export default function AdminDashboardPage() {
 
   const handleCreateVoucher = (e) => {
     e.preventDefault();
-    if (!voucherForm.code || !voucherForm.value) return;
+    const code = voucherForm.code.trim().toUpperCase();
+    if (!code) {
+      toast.error('Vui lòng nhập mã voucher!');
+      return;
+    }
+    const val = Number(voucherForm.value);
+    if (isNaN(val) || val <= 0) {
+      toast.error('Mức giảm giá phải lớn hơn 0!');
+      return;
+    }
+    if (voucherForm.type === 'percent') {
+      if (val > 100) {
+        toast.error('Mức giảm theo % chỉ được từ 1% đến tối đa 100%!');
+        return;
+      }
+    } else {
+      if (val < 1000) {
+        toast.error('Mức giảm tiền mặt hoặc phí vận chuyển tối thiểu là 1.000₫!');
+        return;
+      }
+    }
 
     const created = createVoucher({
-      code: voucherForm.code.toUpperCase(),
-      name: voucherForm.name || `Voucher ${voucherForm.code.toUpperCase()}`,
+      code,
+      name: voucherForm.name.trim() || `Voucher ${code}`,
       type: voucherForm.type,
-      value: Number(voucherForm.value),
-      minOrderValue: Number(voucherForm.minOrderValue) || 0,
-      maxDiscount: Number(voucherForm.maxDiscount) || null,
-      description: voucherForm.description || `Giảm ${voucherForm.value}${voucherForm.type === 'percent' ? '%' : 'đ'}`,
+      value: val,
+      minOrderValue: Math.max(0, Number(voucherForm.minOrderValue) || 0),
+      maxDiscount: voucherForm.type === 'percent' ? (Number(voucherForm.maxDiscount) || null) : null,
+      description: voucherForm.description || `Giảm ${val}${voucherForm.type === 'percent' ? '%' : '₫'}`,
       isGlobal: true,
       usageLimit: 500,
     });
@@ -485,7 +484,7 @@ export default function AdminDashboardPage() {
                 <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 12px' }}>Tạo Mã Giảm Giá Toàn Sàn</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
                   <div>
-                    <label style={{ fontSize: '11px', fontWeight: 700 }}>Mã Voucher (Code):</label>
+                    <label style={{ fontSize: '11px', fontWeight: 700 }}>Mã Voucher (Code) *:</label>
                     <input
                       type="text"
                       required
@@ -502,29 +501,63 @@ export default function AdminDashboardPage() {
                     <select
                       className="shopee-form-select"
                       value={voucherForm.type}
-                      onChange={(e) => setVoucherForm({ ...voucherForm, type: e.target.value })}
+                      onChange={(e) => setVoucherForm({ 
+                        ...voucherForm, 
+                        type: e.target.value,
+                        value: e.target.value === 'percent' ? '10' : '20000'
+                      })}
                     >
-                      <option value="percent">Giảm theo %</option>
+                      <option value="percent">Giảm theo % (Tối đa 100%)</option>
                       <option value="fixed">Giảm tiền mặt (₫)</option>
                       <option value="shipping">Miễn phí ship (₫)</option>
                     </select>
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '11px', fontWeight: 700 }}>Mức giảm (% hoặc ₫):</label>
+                    <label style={{ fontSize: '11px', fontWeight: 700 }}>
+                      {voucherForm.type === 'percent' ? 'Mức giảm (%) [1% - 100%] *:' : 'Số tiền giảm (₫) [Min 1.000₫] *:'}
+                    </label>
                     <input
                       type="number"
                       required
+                      min={voucherForm.type === 'percent' ? 1 : 1000}
+                      max={voucherForm.type === 'percent' ? 100 : undefined}
+                      step={voucherForm.type === 'percent' ? 1 : 1000}
+                      placeholder={voucherForm.type === 'percent' ? 'VD: 10, 15, 20' : 'VD: 20000, 50000'}
                       className="shopee-form-input"
                       value={voucherForm.value}
-                      onChange={(e) => setVoucherForm({ ...voucherForm, value: e.target.value })}
+                      onChange={(e) => {
+                        let val = e.target.value;
+                        if (voucherForm.type === 'percent' && Number(val) > 100) {
+                          val = '100';
+                        }
+                        setVoucherForm({ ...voucherForm, value: val });
+                      }}
                     />
                   </div>
 
+                  {voucherForm.type === 'percent' && (
+                    <div>
+                      <label style={{ fontSize: '11px', fontWeight: 700 }}>Giảm tối đa (₫) [Tùy chọn]:</label>
+                      <input
+                        type="number"
+                        min="1000"
+                        step="1000"
+                        placeholder="VD: 50000, 100000"
+                        className="shopee-form-input"
+                        value={voucherForm.maxDiscount || ''}
+                        onChange={(e) => setVoucherForm({ ...voucherForm, maxDiscount: e.target.value })}
+                      />
+                    </div>
+                  )}
+
                   <div>
-                    <label style={{ fontSize: '11px', fontWeight: 700 }}>Đơn tối thiểu (₫):</label>
+                    <label style={{ fontSize: '11px', fontWeight: 700 }}>Đơn tối thiểu (₫) [0 = Mọi đơn]:</label>
                     <input
                       type="number"
+                      min="0"
+                      step="1000"
+                      placeholder="VD: 150000, 200000"
                       className="shopee-form-input"
                       value={voucherForm.minOrderValue}
                       onChange={(e) => setVoucherForm({ ...voucherForm, minOrderValue: e.target.value })}

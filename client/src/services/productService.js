@@ -1949,6 +1949,2396 @@ export const FALLBACK_PRODUCTS = [
     ],
     reviews: [],
   },
+  {
+    "_id": "prod_53",
+    "id": "prod_53",
+    "name": "Set 3 Áo Polo Nam Phối Bo Cổ Dệt Tổ Ong Thoáng Khí Chống Nhăn Cao Cấp",
+    "slug": "set-3-ao-polo-nam-phoi-bo-co",
+    "description": "Bộ 3 áo thun có cổ polo chất liệu sợi gai dệt tổ ong pique cotton siêu thoáng khí, co giãn 4 chiều, giữ form cổ áo đứng dáng sau 100 lần giặt.",
+    "price": 389000,
+    "originalPrice": 599000,
+    "image": "https://images.unsplash.com/photo-1625910513413-5bc217482fc6?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1625910513413-5bc217482fc6?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "GenZ Casual",
+    "badge": "Best Seller",
+    "stock": 85,
+    "sold": 1420,
+    "rating": 4.88,
+    "reviewCount": 310,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_01",
+    "shopName": "Thời Trang GenZ Official",
+    "shopRating": 4.9,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Set 3 Màu: Đen, Trắng, Navy",
+        "Set 3 Màu: Xám, Be, Rêu"
+      ],
+      "sizes": [
+        "M (50-62kg)",
+        "L (63-72kg)",
+        "XL (73-82kg)",
+        "XXL (83-95kg)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "95% Cotton Pique dệt tổ ong + 5% Spandex"
+      },
+      {
+        "label": "Xuất xứ",
+        "value": "Việt Nam xuất khẩu"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_54",
+    "id": "prod_54",
+    "name": "Quần Jean Nam Ống Suông Baggy Denim Cotton Dày Dặn Co Giãn Nhẹ Form Rộng",
+    "slug": "quan-jean-nam-ong-suong-baggy",
+    "description": "Thiết kế ống rộng trendy phong cách Hàn Quốc, chất vải jean denim 13oz bền chắc, xử lý wash màu tự nhiên không phai, túi sâu tiện lợi.",
+    "price": 320000,
+    "originalPrice": 480000,
+    "image": "https://images.unsplash.com/photo-1542272604-780c96856592?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1542272604-780c96856592?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "GenZ Casual",
+    "badge": "Hot Deal",
+    "stock": 60,
+    "sold": 890,
+    "rating": 4.85,
+    "reviewCount": 215,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_01",
+    "shopName": "Thời Trang GenZ Official",
+    "shopRating": 4.9,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Xanh Nhạt Vintage",
+        "Xanh Đậm Classic",
+        "Đen Khói Retro"
+      ],
+      "sizes": [
+        "29",
+        "30",
+        "31",
+        "32",
+        "34"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Vải",
+        "value": "100% Cotton Denim dệt thoi"
+      },
+      {
+        "label": "Kiểu dáng",
+        "value": "Baggy ống suông thoải mái"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_55",
+    "id": "prod_55",
+    "name": "Đầm Nữ Dáng Xòe Voan Hoa Nhí Cổ Vuông Tiểu Thư Dự Tiệc Sang Trọng 2 Lớp",
+    "slug": "dam-nu-dang-xoe-voan-hoa-nhi",
+    "description": "Chất voan tơ Hàn Quốc mềm bay nhẹ nhàng, lót trong kín đáo, tay bồng nhẹ che khuyết điểm bắp tay, tôn vòng eo thon gọn.",
+    "price": 349000,
+    "originalPrice": 520000,
+    "image": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "Flora Studio",
+    "badge": "Amazon's Choice",
+    "stock": 45,
+    "sold": 630,
+    "rating": 4.92,
+    "reviewCount": 178,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_01",
+    "shopName": "Thời Trang GenZ Official",
+    "shopRating": 4.9,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Hoa Nhí Vàng Mơ",
+        "Hoa Nhí Xanh Pastel",
+        "Hoa Nhí Trắng Hồng"
+      ],
+      "sizes": [
+        "S (40-48kg)",
+        "M (49-55kg)",
+        "L (56-62kg)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "Voan tơ tằm nhân tạo kèm lót lụa habutai"
+      },
+      {
+        "label": "Dài váy",
+        "value": "105cm qua gối tiểu thư"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_56",
+    "id": "prod_56",
+    "name": "Áo Len Dệt Kim Nữ Cổ Lọ Thu Đông Giữ Nhiệt Phong Cách Ulzzang Hàn Quốc",
+    "slug": "ao-len-det-kim-nu-co-lo",
+    "description": "Sợi len dệt kim tơ tằm nhân tạo siêu mềm mịn, không gây ngứa ngáy hay dặm ngứa da, cổ lọ 3cm ấm áp và thanh lịch.",
+    "price": 245000,
+    "originalPrice": 380000,
+    "image": "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "GenZ Casual",
+    "badge": "Hot Deal",
+    "stock": 70,
+    "sold": 1120,
+    "rating": 4.86,
+    "reviewCount": 290,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_01",
+    "shopName": "Thời Trang GenZ Official",
+    "shopRating": 4.9,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Trắng Sữa",
+        "Nâu Mocha",
+        "Xám Khói",
+        "Đen Huyền"
+      ],
+      "sizes": [
+        "Freesize (42-60kg)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "Len dệt kim giữ nhiệt chống co giãn"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_57",
+    "id": "prod_57",
+    "name": "Set Bộ Đồ Ngủ Lụa Satin Cao Cấp Mềm Mịn Thoáng Mát Phối Viền Ren Quý Phái",
+    "slug": "set-bo-do-ngu-lua-satin",
+    "description": "Chất liệu lụa Satin cao cấp bóng mượt, đường may tỉ mỉ, cạp quần chun co giãn thoải mái cho giấc ngủ trọn vẹn cả đêm.",
+    "price": 289000,
+    "originalPrice": 420000,
+    "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "Flora Studio",
+    "badge": "Best Seller",
+    "stock": 50,
+    "sold": 740,
+    "rating": 4.9,
+    "reviewCount": 165,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_01",
+    "shopName": "Thời Trang GenZ Official",
+    "shopRating": 4.9,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Hồng Phấn Ánh Kim",
+        "Xanh Rêu Luxury",
+        "Đỏ Rượu Vang"
+      ],
+      "sizes": [
+        "M (42-52kg)",
+        "L (53-62kg)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "100% Lụa Satin cao cấp 19 momme"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_58",
+    "id": "prod_58",
+    "name": "Chuột Không Dây Gaming Siêu Nhẹ 58g Cảm Biến PixArt 26.000 DPI Tần Số 1000Hz",
+    "slug": "chuot-khong-day-gaming-sieu-nhe-58g",
+    "description": "Trọng lượng chỉ 58g tối ưu vẩy chuột esports, switch quang học 80 triệu lần nhấn chống double click, kết nối không độ trễ 2.4G và Bluetooth.",
+    "price": 890000,
+    "originalPrice": 1290000,
+    "image": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "TechWorld Pro",
+    "badge": "Hot Deal",
+    "stock": 40,
+    "sold": 520,
+    "rating": 4.95,
+    "reviewCount": 142,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.8,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Trắng Tuyết Arctic",
+        "Đen Nhám Carbon"
+      ],
+      "sizes": [
+        "Form tay đối xứng vừa và nhỏ"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Cảm biến",
+        "value": "PixArt PAW3395 (26.000 DPI)"
+      },
+      {
+        "label": "Pin",
+        "value": "300mAh chơi liên tục 80 giờ"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_59",
+    "id": "prod_59",
+    "name": "Bàn Phím Cơ Không Dây 3 Chế Độ Bluetooth 5.1/2.4G/Type-C Hotswap Led RGB",
+    "slug": "ban-phim-co-khong-day-3-che-do",
+    "description": "Layout 75% 82 phím gọn gàng, gasket mount êm ái tiêu âm cực tốt, mạch xuôi hotswap 5 pin thay switch dễ dàng, keycap PBT doubleshot.",
+    "price": 1190000,
+    "originalPrice": 1650000,
+    "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "TechWorld Pro",
+    "badge": "Best Seller",
+    "stock": 35,
+    "sold": 480,
+    "rating": 4.93,
+    "reviewCount": 168,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.8,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Retro Grey Tone",
+        "Navy White Vintage"
+      ],
+      "sizes": [
+        "Linear Yellow Switch (Êm)",
+        "Tactile Brown Switch (Có khấc)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Cấu trúc",
+        "value": "Gasket Mount 5 lớp lót tiêu âm"
+      },
+      {
+        "label": "Pin",
+        "value": "4000mAh thời lượng 200 giờ"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_60",
+    "id": "prod_60",
+    "name": "Màn Hình Gaming Cong 27 Inch 2K QHD 165Hz IPS 1ms HDR400 Tràn Viền",
+    "slug": "man-hinh-gaming-cong-27-inch-2k",
+    "description": "Độ cong 1500R ôm trọn tầm nhìn mắt, tấm nền Fast IPS góc rộng 178 độ sắc nét, dải màu 100% sRGB hỗ trợ thiết kế đồ họa và chơi game mượt mà.",
+    "price": 3990000,
+    "originalPrice": 5200000,
+    "image": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "ViewTech",
+    "badge": "Amazon's Choice",
+    "stock": 25,
+    "sold": 310,
+    "rating": 4.91,
+    "reviewCount": 94,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.8,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Gaming Matte"
+      ],
+      "sizes": [
+        "27 Inch 2K 165Hz"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Độ phân giải",
+        "value": "2560 x 1440 (2K QHD)"
+      },
+      {
+        "label": "Cổng kết nối",
+        "value": "2x HDMI 2.0, 1x DP 1.4, Audio 3.5mm"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_61",
+    "id": "prod_61",
+    "name": "Cáp Sạc Nhanh Đa Năng 100W Type-C Bọc Dù Siêu Bền Chống Đứt Gãy Dài 1.5M",
+    "slug": "cap-sac-nhanh-da-nang-100w",
+    "description": "Chip E-Marker thông minh điều tiết dòng điện an toàn, hỗ trợ sạc nhanh cho Laptop Macbook, iPad và điện thoại Android, truyền data 480Mbps.",
+    "price": 135000,
+    "originalPrice": 220000,
+    "image": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "PowerCore",
+    "badge": "Hot Deal",
+    "stock": 120,
+    "sold": 2150,
+    "rating": 4.89,
+    "reviewCount": 520,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.8,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Bện Dù Kevlar",
+        "Xám Kim Loại"
+      ],
+      "sizes": [
+        "1.5 Mét",
+        "2.0 Mét"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Công suất",
+        "value": "Tối đa 100W (20V/5A) chuẩn PD 3.0"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_62",
+    "id": "prod_62",
+    "name": "Giá Đỡ Laptop Nhôm Nguyên Khối Công Thái Học Xoay 360 Độ Tản Nhiệt Hiệu Quả",
+    "slug": "gia-do-laptop-nhom-nguyen-khoi",
+    "description": "Hợp kim nhôm dày 4mm chắc chắn không rung lắc, mâm xoay bi 360 độ kèm âm thanh cơ học cực đã tai, chỉnh độ cao nâng niu cột sống cổ.",
+    "price": 299000,
+    "originalPrice": 450000,
+    "image": "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "ErgoStand",
+    "badge": "Best Seller",
+    "stock": 65,
+    "sold": 870,
+    "rating": 4.94,
+    "reviewCount": 230,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.8,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Bạc Silver Ánh Kim",
+        "Xám Space Grey"
+      ],
+      "sizes": [
+        "Phù hợp Laptop 11 - 17.3 Inch"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Vật liệu",
+        "value": "Hợp kim nhôm Anodized cao cấp"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_63",
+    "id": "prod_63",
+    "name": "Serum Tinh Chất Rau Má Phục Hồi Da Mụn Dưỡng Ẩm Chuyên Sâu 50ml",
+    "slug": "serum-tinh-chat-rau-ma-phuc-hoi",
+    "description": "Chiết xuất 100% rau má Madagascar tinh khiết, làm dịu da tức thì, củng cố hàng rào bảo vệ da, giảm sưng viêm mụn và kiềm dầu hiệu quả.",
+    "price": 320000,
+    "originalPrice": 450000,
+    "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800"
+    ],
+    "category": "Sắc đẹp",
+    "brand": "Centella Skin",
+    "badge": "Amazon's Choice",
+    "stock": 90,
+    "sold": 2400,
+    "rating": 4.96,
+    "reviewCount": 680,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_03",
+    "shopName": "Beauty Cosmetics Official",
+    "shopRating": 4.95,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Chai Thủy Tinh 50ml",
+        "Chai Siêu Tiết Kiệm 100ml"
+      ],
+      "sizes": [
+        "50ml",
+        "100ml"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Dung tích",
+        "value": "50ml"
+      },
+      {
+        "label": "Xuất xứ",
+        "value": "Hàn Quốc chính ngạch"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_64",
+    "id": "prod_64",
+    "name": "Kem Dưỡng Ẩm Chống Lão Hóa Ban Đêm Collagen Thủy Phân & Peptide 50g",
+    "slug": "kem-duong-am-chong-lao-hoa-ban-dem",
+    "description": "Công thức phức hợp 5 loại Peptide quý và Hyaluronic Acid thẩm thấu sâu, tái tạo độ đàn hồi, mờ nếp nhăn li ti và cấp ẩm căng bóng sau 1 đêm.",
+    "price": 395000,
+    "originalPrice": 560000,
+    "image": "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=800"
+    ],
+    "category": "Sắc đẹp",
+    "brand": "LuxeDerma",
+    "badge": "Best Seller",
+    "stock": 55,
+    "sold": 1320,
+    "rating": 4.93,
+    "reviewCount": 340,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_03",
+    "shopName": "Beauty Cosmetics Official",
+    "shopRating": 4.95,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Hũ Thủy Tinh Cao Cấp 50g"
+      ],
+      "sizes": [
+        "50g"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Thành phần",
+        "value": "Collagen Thủy Phân, Niacinamide 5%, Multi-Peptide"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_65",
+    "id": "prod_65",
+    "name": "Son Kem Lì Mịn Môi Kháng Nước Lâu Trôi 12 Giờ Bảng Màu Trendy Hàn Quốc",
+    "slug": "son-kem-li-min-moi-khang-nuoc",
+    "description": "Chất son velvet tint xốp mịn như nhung, che rãnh môi hoàn hảo, không gây khô môi, hương vani dịu ngọt với bảng màu chuẩn sắc.",
+    "price": 185000,
+    "originalPrice": 280000,
+    "image": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800"
+    ],
+    "category": "Sắc đẹp",
+    "brand": "GlowVelvet",
+    "badge": "Hot Deal",
+    "stock": 80,
+    "sold": 3100,
+    "rating": 4.91,
+    "reviewCount": 890,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_03",
+    "shopName": "Beauty Cosmetics Official",
+    "shopRating": 4.95,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "#01 Đỏ Nâu Gạch Chilli",
+        "#02 Cam Đất MLBB",
+        "#03 Hồng Trà Sữa Nhẹ Nhàng"
+      ],
+      "sizes": [
+        "Thỏi 4.5g"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Độ bền màu",
+        "value": "Lên đến 12 tiếng không dính cốc chén"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_66",
+    "id": "prod_66",
+    "name": "Nước Tẩy Trang Micellar Water Dịu Nhẹ Không Cồn Cho Da Nhạy Cảm 400ml",
+    "slug": "nuoc-tay-trang-micellar-water",
+    "description": "Công nghệ hạt micelle hút sạch dầu thừa và cặn trang điểm chống nước mà không cần chà xát mạnh, duy trì độ ẩm tự nhiên của da.",
+    "price": 219000,
+    "originalPrice": 320000,
+    "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800"
+    ],
+    "category": "Sắc đẹp",
+    "brand": "PureCleanse",
+    "badge": "Amazon's Choice",
+    "stock": 75,
+    "sold": 1980,
+    "rating": 4.94,
+    "reviewCount": 410,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_03",
+    "shopName": "Beauty Cosmetics Official",
+    "shopRating": 4.95,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Chai Nắp Hồng (Da nhạy cảm)",
+        "Chai Nắp Xanh (Da dầu mụn)"
+      ],
+      "sizes": [
+        "400ml"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Dung tích",
+        "value": "400ml dùng 4-5 tháng"
+      },
+      {
+        "label": "Tiêu chuẩn",
+        "value": "Không cồn, không paraben, không hương liệu"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_67",
+    "id": "prod_67",
+    "name": "Mặt Nạ Đất Sét Khoáng Hút Sạch Dầu Thừa Se Khít Lỗ Chân Lông Tro Núi Lửa 100g",
+    "slug": "mat-na-dat-set-khoang-tro-nui-lua",
+    "description": "Chiết xuất bùn khoáng tro núi lửa Jeju hấp thụ bã nhờn sâu trong lỗ chân lông, tẩy tế bào chết dịu nhẹ và ngăn ngừa mụn đầu đen.",
+    "price": 245000,
+    "originalPrice": 350000,
+    "image": "https://images.unsplash.com/photo-1567928805192-d35d641494b8?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1567928805192-d35d641494b8?w=800"
+    ],
+    "category": "Sắc đẹp",
+    "brand": "PureCleanse",
+    "badge": "Hot Deal",
+    "stock": 60,
+    "sold": 1450,
+    "rating": 4.88,
+    "reviewCount": 312,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_03",
+    "shopName": "Beauty Cosmetics Official",
+    "shopRating": 4.95,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Hũ Đất Sét Khoáng 100g"
+      ],
+      "sizes": [
+        "100g tặng cọ quét mặt nạ"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Thành phần",
+        "value": "Bột tro núi lửa, đất sét bentonite, chiết xuất rau má"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_68",
+    "id": "prod_68",
+    "name": "Máy Lọc Không Khí Kháng Khuẩn Bụi Mịn PM2.5 Ion Âm Cảm Biến Thông Minh",
+    "slug": "may-loc-khong-khi-khang-khuan-pm25",
+    "description": "Màng lọc HEPA H13 lọc sạch 99.97% hạt bụi siêu mịn và vi khuẩn, diện tích sử dụng 35-50m2, màn hình cảm ứng LED hiển thị chỉ số không khí theo thời gian thực.",
+    "price": 1890000,
+    "originalPrice": 2600000,
+    "image": "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "HomePro",
+    "badge": "Hot Deal",
+    "stock": 30,
+    "sold": 380,
+    "rating": 4.93,
+    "reviewCount": 115,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "HomePro Gia Dụng Thông Minh",
+    "shopRating": 4.88,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Trắng Ngọc Trai Tối Giản"
+      ],
+      "sizes": [
+        "Công suất lọc CADR 380m3/h"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Độ ồn",
+        "value": "Chế độ ngủ chỉ 28dB cực êm"
+      },
+      {
+        "label": "Bảo hành",
+        "value": "24 tháng chính hãng"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_69",
+    "id": "prod_69",
+    "name": "Nồi Cơm Điện Cao Tần IH 1.8L Lòng Nồi Hợp Kim 8 Lớp Chống Dính Chuẩn Nhật",
+    "slug": "noi-com-dien-cao-tan-ih-18l",
+    "description": "Công nghệ đốt nóng cảm ứng từ IH nhiệt lượng lan tỏa 360 độ hạt cơm chín đều dẻo ngọt, 12 chế độ nấu tự động: cơm gạo lứt, cháo dinh dưỡng, làm bánh.",
+    "price": 1590000,
+    "originalPrice": 2250000,
+    "image": "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "HomePro",
+    "badge": "Best Seller",
+    "stock": 25,
+    "sold": 490,
+    "rating": 4.95,
+    "reviewCount": 138,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "HomePro Gia Dụng Thông Minh",
+    "shopRating": 4.88,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Đen Titan Ánh Kim"
+      ],
+      "sizes": [
+        "Dung tích 1.8L (4-8 người ăn)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Công nghệ",
+        "value": "Gia nhiệt IH cảm ứng từ trường"
+      },
+      {
+        "label": "Lòng nồi",
+        "value": "Hợp kim đúc dày 3mm tráng men kim cương"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_70",
+    "id": "prod_70",
+    "name": "Máy Hút Bụi Cầm Tay Không Dây Lực Hút 25.000Pa Lọc HEPA Pin Rời Siêu Nhẹ",
+    "slug": "may-hut-bui-cam-tay-khong-day",
+    "description": "Động cơ không chổi than tốc độ cao 100.000 vòng/phút, lực hút bão táp 25.000Pa hút sạch bụi mịn thảm sofa, đầu hút đa năng 4 trong 1 linh hoạt.",
+    "price": 1750000,
+    "originalPrice": 2490000,
+    "image": "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "HomePro",
+    "badge": "Amazon's Choice",
+    "stock": 28,
+    "sold": 340,
+    "rating": 4.9,
+    "reviewCount": 96,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "HomePro Gia Dụng Thông Minh",
+    "shopRating": 4.88,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Xám Bạc Phối Đỏ Sport"
+      ],
+      "sizes": [
+        "Trọng lượng thân máy 1.4kg"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Lực hút",
+        "value": "25.000Pa"
+      },
+      {
+        "label": "Pin",
+        "value": "Lithium 2500mAh dùng 45 phút liên tục"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_71",
+    "id": "prod_71",
+    "name": "Quạt Tháp Không Cánh Tạo Ion Mát Lạnh Êm Ái Điều Khiển Từ Xa 9 Cấp Gió",
+    "slug": "quat-thap-khong-canh-tao-ion",
+    "description": "Thiết kế không cánh an toàn tuyệt đối cho trẻ nhỏ và thú cưng, luồng gió mềm tự nhiên góc xoay 90 độ, chế độ hẹn giờ thông minh 12 tiếng.",
+    "price": 1350000,
+    "originalPrice": 1950000,
+    "image": "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "HomePro",
+    "badge": "Hot Deal",
+    "stock": 35,
+    "sold": 410,
+    "rating": 4.87,
+    "reviewCount": 110,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "HomePro Gia Dụng Thông Minh",
+    "shopRating": 4.88,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Trắng Sứ Tối Giản",
+        "Đen Huyền Bí"
+      ],
+      "sizes": [
+        "Chiều cao 105cm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Công suất",
+        "value": "45W tiết kiệm điện"
+      },
+      {
+        "label": "Độ ồn",
+        "value": "Dưới 35dB cực êm"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_72",
+    "id": "prod_72",
+    "name": "Ấm Đun Nước Siêu Tốc Thủy Tinh Giữ Nhiệt Đèn LED Cảm Ứng 1.7L Thông Minh",
+    "slug": "am-dun-nuoc-sieu-toc-thuy-tinh",
+    "description": "Thủy tinh Borosilicate chịu nhiệt độ cao 200 độ C không thôi nhiễm chất độc hại, đèn LED đổi màu theo nhiệt độ, tính năng giữ ấm 40-90 độ C pha sữa, pha trà.",
+    "price": 360000,
+    "originalPrice": 520000,
+    "image": "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "HomePro",
+    "badge": "Best Seller",
+    "stock": 70,
+    "sold": 1100,
+    "rating": 4.92,
+    "reviewCount": 260,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "HomePro Gia Dụng Thông Minh",
+    "shopRating": 4.88,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Thủy Tinh Trong Suốt Viền Inox 304"
+      ],
+      "sizes": [
+        "Dung tích 1.7L"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Công suất",
+        "value": "1850W đun sôi chỉ 3 phút"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_73",
+    "id": "prod_73",
+    "name": "Bộ 5 Dây Kháng Lực Đàn Hồi Tập Gym Yoga Full Body Đa Năng Cao Cấp Kèm Túi",
+    "slug": "bo-5-day-khang-luc-dan-hoi",
+    "description": "Chất liệu cao su tự nhiên 100% siêu dai không đứt, 5 mức kháng lực từ 10 lbs đến 50 lbs phù hợp tập luyện mông đùi, cánh tay và ngực tại nhà.",
+    "price": 149000,
+    "originalPrice": 250000,
+    "image": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "SportZone",
+    "badge": "Best Seller",
+    "stock": 110,
+    "sold": 3400,
+    "rating": 4.91,
+    "reviewCount": 780,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "SportZone Thể Thao & Dã Ngoại",
+    "shopRating": 4.91,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Set 5 Dây Gradient Màu"
+      ],
+      "sizes": [
+        "Trọn bộ 5 dây + Túi rút bảo quản"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "Cao su latex tự nhiên thân thiện môi trường"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_74",
+    "id": "prod_74",
+    "name": "Thảm Tập Yoga Định Tuyến Chống Trượt TPE 2 Lớp Dày 8mm Kèm Dây Buộc & Túi Đựng",
+    "slug": "tham-tap-yoga-dinh-tuyen-chong-truot",
+    "description": "Đường kẻ định tuyến chuẩn xác giúp người mới tập đúng tư thế, bề mặt vân kim cương bám dính tuyệt hảo chống trơn trượt mồ hôi, êm ái bảo vệ khớp gối.",
+    "price": 265000,
+    "originalPrice": 390000,
+    "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "SportZone",
+    "badge": "Amazon's Choice",
+    "stock": 80,
+    "sold": 1850,
+    "rating": 4.95,
+    "reviewCount": 420,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "SportZone Thể Thao & Dã Ngoại",
+    "shopRating": 4.91,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Xanh Rêu Pastel",
+        "Hồng Tím Lavender",
+        "Xanh Biển Tươi Mát"
+      ],
+      "sizes": [
+        "183cm x 61cm x 8mm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "TPE nguyên sinh không mùi an toàn"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_75",
+    "id": "prod_75",
+    "name": "Vợt Cầu Lông Carbon Khung Siêu Nhẹ 4U Căng Sẵn 10.5kg Kèm Bao Đựng Vợt",
+    "slug": "vot-cau-long-carbon-khung-sieu-nhe",
+    "description": "Thân vợt dẻo trợ lực tối đa cho những cú đập cầu uy lực và phòng thủ linh hoạt, khung khí động học vát cạnh cản gió tối ưu tốc độ vung vợt.",
+    "price": 490000,
+    "originalPrice": 750000,
+    "image": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "SportZone",
+    "badge": "Hot Deal",
+    "stock": 50,
+    "sold": 920,
+    "rating": 4.93,
+    "reviewCount": 235,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "SportZone Thể Thao & Dã Ngoại",
+    "shopRating": 4.91,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Trắng Cam Năng Động",
+        "Đen Vàng Hoàng Gia"
+      ],
+      "sizes": [
+        "Trọng lượng 4U (82-84g)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "High Carbon Fiber siêu bền"
+      },
+      {
+        "label": "Sức căng",
+        "value": "Căng sẵn cước 10.5kg (Chịu lực tối đa 13kg)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_76",
+    "id": "prod_76",
+    "name": "Giày Chạy Bộ Nam Nữ Siêu Nhẹ Đệm Khí Êm Chân Thoáng Khí Kháng Khuẩn",
+    "slug": "giay-chay-bo-sieu-nhe-dem-khi",
+    "description": "Đế đệm khí Air-Cushion đàn hồi hấp thụ xung lực khi tiếp đất, vải dệt Flyknit ôm sát bàn chân thoáng khí mát mẻ, đế ngoài cao su ma sát chống trượt.",
+    "price": 520000,
+    "originalPrice": 790000,
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "SportZone",
+    "badge": "Best Seller",
+    "stock": 65,
+    "sold": 1420,
+    "rating": 4.89,
+    "reviewCount": 360,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "SportZone Thể Thao & Dã Ngoại",
+    "shopRating": 4.91,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đỏ Phối Trắng Thể Thao",
+        "Đen Full Black",
+        "Xám Trắng Phản Quang"
+      ],
+      "sizes": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Đế giày",
+        "value": "Phylong đệm khí Air kết hợp cao su tự nhiên"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_77",
+    "id": "prod_77",
+    "name": "Con Lăn Tập Cơ Bụng 4 Bánh Có Lò Xo Trợ Lực Tự Thu Hồi Kèm Đệm Gối",
+    "slug": "con-lan-tap-co-bung-4-banh",
+    "description": "Cơ chế lò xo carbon trợ lực tự động kéo về giúp bài tập gập bụng an toàn, không lo sụp hông hay đau lưng dưới, tay cầm bọc mút êm ái chống chai tay.",
+    "price": 219000,
+    "originalPrice": 340000,
+    "image": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "SportZone",
+    "badge": "Hot Deal",
+    "stock": 75,
+    "sold": 1670,
+    "rating": 4.9,
+    "reviewCount": 310,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "SportZone Thể Thao & Dã Ngoại",
+    "shopRating": 4.91,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Cam Đen Thể Thao",
+        "Xanh Dương Dynamic"
+      ],
+      "sizes": [
+        "Trọn bộ con lăn + Thảm lót gối"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Tải trọng",
+        "value": "Chịu lực lên đến 200kg"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_78",
+    "id": "prod_78",
+    "name": "Hạt Dinh Dưỡng Hỗn Hợp Macca Hạnh Nhân Óc Chó Nho Khô Hũ 500g Chuẩn Organic",
+    "slug": "hat-dinh-duong-hon-hop-organic",
+    "description": "Sấy mộc không đường không muối bảo toàn trọn vẹn vị béo ngậy giòn rụm tự nhiên, giàu Omega-3, vitamin E và khoáng chất tốt cho tim mạch và mẹ bầu.",
+    "price": 185000,
+    "originalPrice": 280000,
+    "image": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "GreenFarm",
+    "badge": "Best Seller",
+    "stock": 150,
+    "sold": 3800,
+    "rating": 4.97,
+    "reviewCount": 920,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_06",
+    "shopName": "GreenFarm Nông Sản & Organic Sạch",
+    "shopRating": 4.96,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Hũ Nắp Nhôm 500g",
+        "Combo 2 Hũ 1000g Tiết Kiệm"
+      ],
+      "sizes": [
+        "500g",
+        "1kg"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Thành phần",
+        "value": "Hạt Macca Đắk Lắk, Hạnh nhân Mỹ, Óc chó vàng, Nho khô Chile"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_79",
+    "id": "prod_79",
+    "name": "Trà Thảo Mộc Hoa Cúc Gạo Lứt Xạ Đen Thanh Nhiệt Giải Độc Ngủ Ngon Túi 30 Gói",
+    "slug": "tra-thao-moc-hoa-cuc-gao-lut",
+    "description": "Sự kết hợp giữa gạo lứt huyết rồng sao vàng, hoa cúc kim ngân, xạ đen và cỏ ngọt tạo nên tách trà thơm dịu thanh mát giúp an thần ngủ sâu giấc.",
+    "price": 125000,
+    "originalPrice": 190000,
+    "image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "GreenFarm",
+    "badge": "Amazon's Choice",
+    "stock": 120,
+    "sold": 2900,
+    "rating": 4.94,
+    "reviewCount": 650,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_06",
+    "shopName": "GreenFarm Nông Sản & Organic Sạch",
+    "shopRating": 4.96,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Túi Zip 30 Gói Lọc Tam Giác"
+      ],
+      "sizes": [
+        "Túi 450g"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Hạn sử dụng",
+        "value": "18 tháng kể từ ngày sản xuất"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_80",
+    "id": "prod_80",
+    "name": "Mật Ong Hoa Rừng Tự Nhiên Nguyên Chất 100% Chai Thủy Tinh 1000ml",
+    "slug": "mat-ong-hoa-rung-tu-nhien-nguyen-chat",
+    "description": "Mật ong tự nhiên thu hoạch từ hoa rừng cao nguyên đại ngàn, sánh đặc màu cánh gián thơm ngát, hàm lượng đường tự nhiên cao không bị kết tinh đường giả.",
+    "price": 240000,
+    "originalPrice": 350000,
+    "image": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "GreenFarm",
+    "badge": "Hot Deal",
+    "stock": 90,
+    "sold": 2100,
+    "rating": 4.96,
+    "reviewCount": 540,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_06",
+    "shopName": "GreenFarm Nông Sản & Organic Sạch",
+    "shopRating": 4.96,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Chai Thủy Tinh 1000ml"
+      ],
+      "sizes": [
+        "1 Lít (khoảng 1.35kg)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Độ ẩm",
+        "value": "Dưới 19% tiêu chuẩn xuất khẩu"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_81",
+    "id": "prod_81",
+    "name": "Hạt Chia Đen Hữu Cơ Nam Mỹ Giàu Omega-3 & Chất Xơ Gói 500g Nhập Khẩu",
+    "slug": "hat-chia-den-huu-co-nam-my",
+    "description": "100% hạt chia hữu cơ nhập khẩu Nam Mỹ, hỗ trợ tiêu hóa tốt, tạo cảm giác no lâu hỗ trợ chế độ ăn kiêng eat clean giữ dáng thon gọn.",
+    "price": 135000,
+    "originalPrice": 200000,
+    "image": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "GreenFarm",
+    "badge": "Best Seller",
+    "stock": 80,
+    "sold": 1780,
+    "rating": 4.92,
+    "reviewCount": 380,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_06",
+    "shopName": "GreenFarm Nông Sản & Organic Sạch",
+    "shopRating": 4.96,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Túi Hút Chân Không 500g"
+      ],
+      "sizes": [
+        "500g"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chứng nhận",
+        "value": "USDA Organic & EU Organic"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_82",
+    "id": "prod_82",
+    "name": "Tinh Bột Nghệ Vàng Nguyên Chất Tách Tinh Dầu Curcumin Hũ 500g",
+    "slug": "tinh-bot-nghe-vang-nguyen-chat",
+    "description": "Nghệ tươi Nghệ An được lọc bỏ tạp chất và dầu nghệ chống nóng trong, hạt tinh nghệ siêu mịn tan hoàn toàn trong nước ấm, hỗ trợ dạ dày và sáng đẹp da.",
+    "price": 195000,
+    "originalPrice": 300000,
+    "image": "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "GreenFarm",
+    "badge": "Hot Deal",
+    "stock": 60,
+    "sold": 1250,
+    "rating": 4.93,
+    "reviewCount": 290,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_06",
+    "shopName": "GreenFarm Nông Sản & Organic Sạch",
+    "shopRating": 4.96,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Hũ Nhựa Nắp Nhôm 500g"
+      ],
+      "sizes": [
+        "500g"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Hàm lượng Curcumin",
+        "value": "Cao gấp 3 lần nghệ thông thường"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_83",
+    "id": "prod_83",
+    "name": "Sách Đắc Nhân Tâm - Nghệ Thuật Thu Phục Lòng Người Bản Bìa Cứng Độc Quyền",
+    "slug": "sach-dac-nhan-tam-bia-cung",
+    "description": "Tác phẩm kinh điển vượt thời gian của Dale Carnegie về giao tiếp ứng xử, bản in chất lượng cao trên giấy xốp Phần Lan chống mỏi mắt.",
+    "price": 98000,
+    "originalPrice": 148000,
+    "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "First News",
+    "badge": "Best Seller",
+    "stock": 200,
+    "sold": 5600,
+    "rating": 4.98,
+    "reviewCount": 1450,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_07",
+    "shopName": "Tri Thức BookStore & Văn Phòng Phẩm",
+    "shopRating": 4.94,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Bản Bìa Cứng Ánh Vàng",
+        "Bản Bìa Mềm Tiêu Chuẩn"
+      ],
+      "sizes": [
+        "Khổ 14.5 x 20.5 cm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Số trang",
+        "value": "320 trang"
+      },
+      {
+        "label": "NXB",
+        "value": "NXB Tổng Hợp TP.HCM"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_84",
+    "id": "prod_84",
+    "name": "Sách Tư Duy Nhanh Và Chậm (Thinking, Fast and Slow) Tái Bản Đặc Biệt",
+    "slug": "sach-tu-duy-nhanh-va-cham",
+    "description": "Kiệt tác của nhà tâm lý học đoạt giải Nobel Daniel Kahneman giải mã hai hệ thống vận hành trong não bộ con người khi ra quyết định kinh tế.",
+    "price": 175000,
+    "originalPrice": 250000,
+    "image": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "Alpha Books",
+    "badge": "Amazon's Choice",
+    "stock": 90,
+    "sold": 2100,
+    "rating": 4.95,
+    "reviewCount": 620,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_07",
+    "shopName": "Tri Thức BookStore & Văn Phòng Phẩm",
+    "shopRating": 4.94,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Bìa Mềm Giấy Dày"
+      ],
+      "sizes": [
+        "612 trang"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Tác giả",
+        "value": "Daniel Kahneman"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_85",
+    "id": "prod_85",
+    "name": "Sổ Tay Bìa Da Khóa Nam Châm Cao Cấp Kèm Bút Ký Kim Loại Hộp Quà Sang Trọng",
+    "slug": "so-tay-bia-da-khoa-nam-cham",
+    "description": "Chất da PU mềm mịn chống thấm nước, giấy kẻ ngang 100gsm dày dặn không thấm mực bút máy, kèm bút ký kim loại khắc hoa văn mạ vàng tinh xảo.",
+    "price": 169000,
+    "originalPrice": 250000,
+    "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "LuxeNote",
+    "badge": "Hot Deal",
+    "stock": 80,
+    "sold": 1450,
+    "rating": 4.91,
+    "reviewCount": 310,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_07",
+    "shopName": "Tri Thức BookStore & Văn Phòng Phẩm",
+    "shopRating": 4.94,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Xanh Navy Doanh Nhân",
+        "Đen Quý Phái",
+        "Nâu Da Bò Cổ Điển"
+      ],
+      "sizes": [
+        "Khổ A5 (200 trang)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu giấy",
+        "value": "Giấy Dowling chống mỏi mắt 100gsm"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_86",
+    "id": "prod_86",
+    "name": "Bộ 12 Bút Gel Mực Đen Ngòi 0.5mm Nét Mịn Không Lem Chuẩn Học Sinh Sinh Viên",
+    "slug": "bo-12-but-gel-muc-den",
+    "description": "Mực gel gốc nước cao cấp ra đều êm tay không đứt nét, khô nhanh trong 1 giây không lem khi quẹt tay, thân bút đệm cao su êm ái chống mỏi tay.",
+    "price": 49000,
+    "originalPrice": 85000,
+    "image": "https://images.unsplash.com/photo-1585336261026-621532f1a5f4?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1585336261026-621532f1a5f4?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "Deli Stationery",
+    "badge": "Best Seller",
+    "stock": 300,
+    "sold": 7200,
+    "rating": 4.89,
+    "reviewCount": 1680,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_07",
+    "shopName": "Tri Thức BookStore & Văn Phòng Phẩm",
+    "shopRating": 4.94,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Hộp 12 Bút Mực Đen",
+        "Hộp 12 Bút Mực Xanh"
+      ],
+      "sizes": [
+        "Ngòi kim 0.5mm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Số lượng",
+        "value": "12 cây / hộp"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_87",
+    "id": "prod_87",
+    "name": "Balo Đựng Laptop 15.6 Inch Chống Thấm Nước Có Cổng Sạc USB Văn Phòng Nam Nữ",
+    "slug": "balo-dung-laptop-156-inch",
+    "description": "Vải Oxford 900D chống xước và kháng nước mưa tuyệt đối, ngăn chống sốc đệm tổ ong bảo vệ máy tính an toàn, quai đeo trợ lực giảm 30% áp lực vai.",
+    "price": 350000,
+    "originalPrice": 550000,
+    "image": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "Tigernu",
+    "badge": "Amazon's Choice",
+    "stock": 60,
+    "sold": 1390,
+    "rating": 4.93,
+    "reviewCount": 380,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_07",
+    "shopName": "Tri Thức BookStore & Văn Phòng Phẩm",
+    "shopRating": 4.94,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Xám Khói Hiện Đại",
+        "Đen Carbon Doanh Nhân"
+      ],
+      "sizes": [
+        "Kích thước 45 x 31 x 16cm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Tương thích",
+        "value": "Laptop 13 đến 16 inch"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_88",
+    "id": "prod_88",
+    "name": "Bơm Lốp Ô Tô Điện Tử Tự Ngắt Cầm Tay Không Dây 150 PSI Kèm Đèn LED Khẩn Cấp",
+    "slug": "bom-lop-o-to-dien-tu-tu-ngat",
+    "description": "Tự động ngắt khi đạt áp suất cài đặt chính xác, bơm căng lốp xe chỉ trong 3 phút, tích hợp đèn pin cứu hộ SOS và pin dự phòng sạc điện thoại.",
+    "price": 490000,
+    "originalPrice": 750000,
+    "image": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "AutoPro Gear",
+    "badge": "Hot Deal",
+    "stock": 50,
+    "sold": 980,
+    "rating": 4.92,
+    "reviewCount": 260,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_08",
+    "shopName": "AutoPro Phụ Kiện Ô Tô Xe Máy",
+    "shopRating": 4.87,
+    "shopResponseRate": 97,
+    "variants": {
+      "colors": [
+        "Đen Nhám Cầm Tay Không Dây"
+      ],
+      "sizes": [
+        "Pin sạc 6000mAh"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Áp suất tối đa",
+        "value": "150 PSI (Dùng cho ô tô, xe máy, xe đạp, bóng thể thao)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_89",
+    "id": "prod_89",
+    "name": "Camera Hành Trình Ô Tô Trước Sau 4K Ultra HD Tích Hợp GPS & WiFi Cảnh Báo",
+    "slug": "camera-hanh-trinh-o-to-4k",
+    "description": "Cảm biến Sony Starvis quay đêm sắc nét như ban ngày, góc rộng 170 độ ghi trọn 4 làn đường, cảnh báo biển báo giao thông bằng giọng nói tiếng Việt.",
+    "price": 1650000,
+    "originalPrice": 2350000,
+    "image": "https://images.unsplash.com/photo-1508974239320-0a029497e820?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1508974239320-0a029497e820?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "AutoPro Gear",
+    "badge": "Best Seller",
+    "stock": 35,
+    "sold": 620,
+    "rating": 4.95,
+    "reviewCount": 175,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_08",
+    "shopName": "AutoPro Phụ Kiện Ô Tô Xe Máy",
+    "shopRating": 4.87,
+    "shopResponseRate": 97,
+    "variants": {
+      "colors": [
+        "Trọn Bộ Cam Trước 4K + Cam Sau 1080P Kèm Thẻ 64GB"
+      ],
+      "sizes": [
+        "Thẻ nhớ 64GB chuyên dụng"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Độ phân giải",
+        "value": "4K (3840x2160) @30fps"
+      },
+      {
+        "label": "Bảo hành",
+        "value": "12 tháng đổi mới"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_90",
+    "id": "prod_90",
+    "name": "Bộ Dung Dịch Rửa Xe Phủ Ceramic Bóng Sơn Xe Chống Bám Nước Lá Sen 500ml",
+    "slug": "dung-dich-rua-xe-phu-ceramic",
+    "description": "Tạo lớp màng bảo vệ ceramic nano siêu bóng, chống bám bụi bẩn và tia UV làm phai màu sơn xe, hiệu ứng lá sen trôi tuột nước mưa cực đỉnh.",
+    "price": 180000,
+    "originalPrice": 290000,
+    "image": "https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "AutoPro Gear",
+    "badge": "Hot Deal",
+    "stock": 80,
+    "sold": 1450,
+    "rating": 4.89,
+    "reviewCount": 310,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_08",
+    "shopName": "AutoPro Phụ Kiện Ô Tô Xe Máy",
+    "shopRating": 4.87,
+    "shopResponseRate": 97,
+    "variants": {
+      "colors": [
+        "Chai Xịt 500ml Kèm Khăn Lau Chuyên Dụng"
+      ],
+      "sizes": [
+        "500ml"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Công nghệ",
+        "value": "Nano Ceramic Polymer cao cấp"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_91",
+    "id": "prod_91",
+    "name": "Gối Tựa Cổ Đầu Tựa Lưng Ô Tô Cao Su Non Công Thái Học Chống Mỏi Cổ",
+    "slug": "goi-tua-co-dau-tua-lung-o-to",
+    "description": "Lõi cao su non đúc nguyên khối mềm mại phục hồi chậm, nâng đỡ cột sống cổ và thắt lưng hoàn hảo, vải bọc thoáng khí 4 mùa tháo giặt dễ dàng.",
+    "price": 290000,
+    "originalPrice": 420000,
+    "image": "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "AutoPro Gear",
+    "badge": "Amazon's Choice",
+    "stock": 55,
+    "sold": 890,
+    "rating": 4.91,
+    "reviewCount": 195,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_08",
+    "shopName": "AutoPro Phụ Kiện Ô Tô Xe Máy",
+    "shopRating": 4.87,
+    "shopResponseRate": 97,
+    "variants": {
+      "colors": [
+        "Đen Sport Chỉ Đỏ",
+        "Nâu Da Bò Luxury",
+        "Kem Be Thanh Lịch"
+      ],
+      "sizes": [
+        "Combo Gối Đầu + Tựa Lưng"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Ruột gối",
+        "value": "100% Cao su non Memory Foam đàn hồi chậm"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_92",
+    "id": "prod_92",
+    "name": "Tẩu Sạc Ô Tô Nhanh 60W 2 Cổng Type-C & USB Sạc Đồng Thời Đèn Báo Điện Áp",
+    "slug": "tau-sac-o-to-nhanh-60w",
+    "description": "Vỏ hợp kim nhôm tản nhiệt cực nhanh, hỗ trợ sạc nhanh chuẩn PD & QC 3.0 cho 2 thiết bị cùng lúc với tốc độ tối đa, an toàn chống cháy nổ.",
+    "price": 165000,
+    "originalPrice": 250000,
+    "image": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "AutoPro Gear",
+    "badge": "Best Seller",
+    "stock": 90,
+    "sold": 1620,
+    "rating": 4.88,
+    "reviewCount": 320,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_08",
+    "shopName": "AutoPro Phụ Kiện Ô Tô Xe Máy",
+    "shopRating": 4.87,
+    "shopResponseRate": 97,
+    "variants": {
+      "colors": [
+        "Xám Không Gian Hợp Kim Nhôm"
+      ],
+      "sizes": [
+        "Cổng Type-C 30W + Cổng USB-A 30W"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Điện áp vào",
+        "value": "12V - 24V tương thích mọi dòng xe"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_93",
+    "id": "prod_93",
+    "name": "Bình Sữa Thủy Tinh Cổ Rộng Kháng Khuẩn PPSU Chống Đầy Hơi 240ml Cho Trẻ Sơ Sinh",
+    "slug": "binh-sua-thuy-tinh-co-rong-ppsu",
+    "description": "Chất liệu nhựa y tế PPSU nhập khẩu Đức không chứa BPA, chịu nhiệt 180 độ C tiệt trùng thoải mái, núm ty silicone siêu mềm mô phỏng ty mẹ chống sặc sữa.",
+    "price": 285000,
+    "originalPrice": 420000,
+    "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800"
+    ],
+    "category": "Mẹ & Bé",
+    "brand": "BabyCare",
+    "badge": "Best Seller",
+    "stock": 80,
+    "sold": 2150,
+    "rating": 4.97,
+    "reviewCount": 540,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_09",
+    "shopName": "BabyCare Siêu Thị Mẹ & Bé Yêu",
+    "shopRating": 4.97,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Vàng Mật Ong Tự Nhiên PPSU"
+      ],
+      "sizes": [
+        "160ml (0-3 tháng)",
+        "240ml (3 tháng trở lên)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "Nhựa y tế cao cấp PPSU siêu bền không độc hại"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_94",
+    "id": "prod_94",
+    "name": "Tã Dán Quần Hữu Cơ Cotton Mềm Mịn Siêu Mỏng Thoáng Khí Chống Hăm Đủ Size",
+    "slug": "ta-dan-quan-huu-co-cotton",
+    "description": "Lõi thấm hút 3D chứa hàng triệu hạt SAP khóa ẩm thần tốc trong 5 giây, bề mặt 100% sợi cotton hữu cơ mềm mại nâng niu làn da non nớt của bé.",
+    "price": 299000,
+    "originalPrice": 390000,
+    "image": "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=800"
+    ],
+    "category": "Mẹ & Bé",
+    "brand": "BabyCare",
+    "badge": "Hot Deal",
+    "stock": 120,
+    "sold": 3400,
+    "rating": 4.96,
+    "reviewCount": 780,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_09",
+    "shopName": "BabyCare Siêu Thị Mẹ & Bé Yêu",
+    "shopRating": 4.97,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Tã Dán",
+        "Tã Quần"
+      ],
+      "sizes": [
+        "Size NB/S (60 miếng)",
+        "Size M (54 miếng)",
+        "Size L (48 miếng)",
+        "Size XL (42 miếng)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Độ mỏng",
+        "value": "Chỉ 1.8mm siêu thoáng mát chống hăm tã"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_95",
+    "id": "prod_95",
+    "name": "Xe Đẩy Trẻ Em Gấp Gọn Siêu Nhẹ Khung Nhôm Hàng Không Đẩy 2 Chiều Du Lịch",
+    "slug": "xe-day-tre-em-gap-gon-sieu-nhe",
+    "description": "Thao tác gập mở bằng 1 tay chỉ trong 1 giây, trọng lượng siêu nhẹ 5.4kg xách lên máy bay tiện lợi, giảm xóc lò xo 4 bánh êm ái trên mọi cung đường.",
+    "price": 1450000,
+    "originalPrice": 2100000,
+    "image": "https://images.unsplash.com/photo-1591088398332-8a7791972843?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1591088398332-8a7791972843?w=800"
+    ],
+    "category": "Mẹ & Bé",
+    "brand": "BabyCare",
+    "badge": "Amazon's Choice",
+    "stock": 30,
+    "sold": 490,
+    "rating": 4.95,
+    "reviewCount": 140,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_09",
+    "shopName": "BabyCare Siêu Thị Mẹ & Bé Yêu",
+    "shopRating": 4.97,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Xám Khói Châu Âu",
+        "Xanh Mint Dịu Nhẹ",
+        "Đen Huyền Bí"
+      ],
+      "sizes": [
+        "Trọng lượng 5.4kg cho bé 0-4 tuổi (Tải trọng 30kg)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Góc ngả lưng",
+        "value": "Chỉnh 100 đến 175 độ nằm ngồi thoải mái"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_96",
+    "id": "prod_96",
+    "name": "Bộ Đồ Chơi Gỗ Xếp Hình Trí Tuệ Giáo Dục Phát Triển Tư Duy Montessori Cho Bé",
+    "slug": "bo-do-choi-go-xep-hinh-montessori",
+    "description": "Gỗ sồi tự nhiên bo tròn góc cạnh phủ sơn gốc nước không độc hại, rèn luyện tư duy logic, phối hợp tay mắt và nhận biết màu sắc hình khối.",
+    "price": 175000,
+    "originalPrice": 260000,
+    "image": "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=800"
+    ],
+    "category": "Mẹ & Bé",
+    "brand": "Montessori Toys",
+    "badge": "Best Seller",
+    "stock": 90,
+    "sold": 1820,
+    "rating": 4.93,
+    "reviewCount": 390,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_09",
+    "shopName": "BabyCare Siêu Thị Mẹ & Bé Yêu",
+    "shopRating": 4.97,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Bộ Xếp Khối Màu Sắc Gỗ Mộc"
+      ],
+      "sizes": [
+        "Bộ 60 chi tiết kèm túi vải canvas"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Độ tuổi",
+        "value": "Thích hợp cho trẻ từ 1 đến 6 tuổi"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_97",
+    "id": "prod_97",
+    "name": "Máy Tiệt Trùng Sấy Khô Bình Sữa Tia UV Diệt Khuẩn 99.9% Đa Năng Giữ Ấm",
+    "slug": "may-tiet-trung-say-kho-binh-sua-uv",
+    "description": "Đèn UV Philips không sinh ozone diệt sạch virus nấm mốc, công nghệ sấy khô khí ấm PTC chống tái nhiễm khuẩn, khoang chứa 16L khử khuẩn cả đồ chơi.",
+    "price": 1890000,
+    "originalPrice": 2600000,
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800"
+    ],
+    "category": "Mẹ & Bé",
+    "brand": "BabyCare",
+    "badge": "Hot Deal",
+    "stock": 25,
+    "sold": 380,
+    "rating": 4.98,
+    "reviewCount": 110,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_09",
+    "shopName": "BabyCare Siêu Thị Mẹ & Bé Yêu",
+    "shopRating": 4.97,
+    "shopResponseRate": 100,
+    "variants": {
+      "colors": [
+        "Trắng Sữa Viền Vàng Kim"
+      ],
+      "sizes": [
+        "Dung tích 16L chứa 12 bình sữa cùng lúc"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chức năng",
+        "value": "Tự động tiệt trùng, sấy khô, bảo quản vô trùng 24 giờ"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_98",
+    "id": "prod_98",
+    "name": "Loa Bluetooth Di Động Công Suất 40W Kháng Nước IPX7 Pin 15 Giờ Âm Bass Trầm Sâu",
+    "slug": "loa-bluetooth-di-dong-40w",
+    "description": "Củ loa kép toàn dải kết hợp 2 màng rung thụ động tăng cường âm trầm uy lực, chuẩn chống nước ngâm IPX7 thả ga tiệc tùng hồ bơi ngoài trời.",
+    "price": 890000,
+    "originalPrice": 1350000,
+    "image": "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "AudioHiFi",
+    "badge": "Best Seller",
+    "stock": 45,
+    "sold": 890,
+    "rating": 4.94,
+    "reviewCount": 260,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_10",
+    "shopName": "AudioHiFi Âm Thanh Đẳng Cấp",
+    "shopRating": 4.93,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Đen Midnight",
+        "Xanh Rêu Camo",
+        "Đỏ Rực Rỡ"
+      ],
+      "sizes": [
+        "Pin 5200mAh nghe nhạc 15 giờ"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Bluetooth",
+        "value": "V5.3 kết nối 2 loa TWS tạo hiệu ứng Stereo 80W"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_99",
+    "id": "prod_99",
+    "name": "Tai Nghe Kiểm Âm Studio Chuyên Nghiệp Chụp Tai Khép Kín Dải Tần Rộng 5Hz-30kHz",
+    "slug": "tai-nghe-kiem-am-studio-chuyen-nghiep",
+    "description": "Driver 45mm nam châm đất hiếm Neodymium tái hiện âm thanh trung thực chuẩn xác từng chi tiết, đệm tai da protein cách âm thụ động tuyệt hảo.",
+    "price": 1950000,
+    "originalPrice": 2800000,
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "AudioHiFi",
+    "badge": "Amazon's Choice",
+    "stock": 30,
+    "sold": 520,
+    "rating": 4.96,
+    "reviewCount": 175,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_10",
+    "shopName": "AudioHiFi Âm Thanh Đẳng Cấp",
+    "shopRating": 4.93,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Đen Nhám Chuyên Nghiệp"
+      ],
+      "sizes": [
+        "Tặng kèm 2 dây cáp 1.2m và 3m + Jack 6.35mm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Trở kháng",
+        "value": "38 Ohms dễ kéo trên cả điện thoại và soundcard"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_100",
+    "id": "prod_100",
+    "name": "Soundbar Tivi Kèm Loa Subwoofer Rời 120W Âm Thanh Vòm 3D Dolby Audio Rạp Phim",
+    "slug": "soundbar-tivi-kem-subwoofer-120w",
+    "description": "Hệ thống âm thanh 2.1 kênh công suất cực đại 120W, loa siêu trầm bass gầm sống động khi xem phim bom tấn, hỗ trợ cổng HDMI eARC, Optical và Bluetooth.",
+    "price": 2490000,
+    "originalPrice": 3500000,
+    "image": "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "AudioHiFi",
+    "badge": "Hot Deal",
+    "stock": 20,
+    "sold": 310,
+    "rating": 4.92,
+    "reviewCount": 88,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_10",
+    "shopName": "AudioHiFi Âm Thanh Đẳng Cấp",
+    "shopRating": 4.93,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Đen Kim Loại Sang Trọng"
+      ],
+      "sizes": [
+        "Thanh Soundbar 80cm + Loa Sub 6.5 Inch"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Âm thanh",
+        "value": "Dolby Audio, DTS Virtual:X tích hợp EQ Movie/Music/News"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_101",
+    "id": "prod_101",
+    "name": "Bộ DAC Giải Mã Âm Thanh Hi-Res 24bit/192kHz Cổng Quang Optical Sang RCA Amply",
+    "slug": "bo-dac-giai-ma-am-thanh-hi-res",
+    "description": "Chip giải mã Cirrus Logic CS8416 cao cấp loại bỏ tạp âm nhiễu nền, nâng cấp âm thanh từ Smart TV ra amply dàn loa nghe nhạc vàng bolero ấm áp chi tiết.",
+    "price": 450000,
+    "originalPrice": 650000,
+    "image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "AudioHiFi",
+    "badge": "Best Seller",
+    "stock": 50,
+    "sold": 790,
+    "rating": 4.9,
+    "reviewCount": 195,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_10",
+    "shopName": "AudioHiFi Âm Thanh Đẳng Cấp",
+    "shopRating": 4.93,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Vỏ Hợp Kim Nhôm Đen Chống Nhiễu"
+      ],
+      "sizes": [
+        "Kèm dây quang Optical bọc vàng và củ nguồn 5V"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Tỷ lệ lấy mẫu",
+        "value": "Hỗ trợ 24-bit/192kHz chuẩn Hi-Res Audio"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_102",
+    "id": "prod_102",
+    "name": "Thức Ăn Hạt Hữu Cơ Cho Mèo Trưởng Thành Thịt Cá Hồi & Rau Củ Tươi Túi 1.5kg",
+    "slug": "thuc-an-hat-huu-co-cho-meo",
+    "description": "Nguyên liệu thịt cá hồi tươi giàu đạm và taurine sáng mắt mượt lông, bổ sung men vi sinh Probiotic hỗ trợ tiêu hóa ngăn ngừa búi lông đường ruột.",
+    "price": 260000,
+    "originalPrice": 380000,
+    "image": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=800"
+    ],
+    "category": "Thú cưng",
+    "brand": "PetParadise",
+    "badge": "Best Seller",
+    "stock": 100,
+    "sold": 2800,
+    "rating": 4.95,
+    "reviewCount": 680,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_11",
+    "shopName": "PetParadise Vương Quốc Thú Cưng",
+    "shopRating": 4.92,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Vị Cá Hồi & Khoai Lang",
+        "Vị Gà Nướng & Cà Rốt"
+      ],
+      "sizes": [
+        "Túi Zip 1.5kg",
+        "Túi Tiết Kiệm 5kg"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Hàm lượng đạm",
+        "value": "Trên 34% protein tự nhiên không độn ngũ cốc"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_103",
+    "id": "prod_103",
+    "name": "Đệm Giường Nệm Êm Ái Cho Chó Mèo Vải Nhung Mềm Tháo Giặt Tiện Lợi Đủ Size",
+    "slug": "dem-giuong-nem-em-ai-cho-cho-meo",
+    "description": "Lớp nhung san hô êm ái giữ ấm mùa lạnh, đệm lót bông gòn cao cấp nâng đỡ cột sống thú cưng, đáy chống trượt chống thấm nước ẩm ướt sàn nhà.",
+    "price": 195000,
+    "originalPrice": 300000,
+    "image": "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800"
+    ],
+    "category": "Thú cưng",
+    "brand": "PetParadise",
+    "badge": "Hot Deal",
+    "stock": 75,
+    "sold": 1420,
+    "rating": 4.91,
+    "reviewCount": 320,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_11",
+    "shopName": "PetParadise Vương Quốc Thú Cưng",
+    "shopRating": 4.92,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Xám Khói Sang Trọng",
+        "Nâu Cà Phê Ấm Áp",
+        "Hồng Phấn Ngọt Ngào"
+      ],
+      "sizes": [
+        "Size M (Dưới 6kg)",
+        "Size L (Dưới 15kg)",
+        "Size XL (Dưới 30kg)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Vệ sinh",
+        "value": "Có khóa kéo tháo rời vỏ giặt máy tiện lợi"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_104",
+    "id": "prod_104",
+    "name": "Trụ Cào Móng Cho Mèo Kèm Võng Nằm Nhà Gỗ Cây Cào Móng Cao Cấp 3 Tầng",
+    "slug": "tru-cao-mong-cho-meo-3-tang",
+    "description": "Dây thừng gai đay tự nhiên bền chắc thỏa mãn sở thích cào móng giải tỏa stress của mèo, khung gỗ ép chắc chắn không rung lắc kèm bóng treo chơi đùa.",
+    "price": 360000,
+    "originalPrice": 520000,
+    "image": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=800"
+    ],
+    "category": "Thú cưng",
+    "brand": "PetParadise",
+    "badge": "Amazon's Choice",
+    "stock": 40,
+    "sold": 670,
+    "rating": 4.93,
+    "reviewCount": 165,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_11",
+    "shopName": "PetParadise Vương Quốc Thú Cưng",
+    "shopRating": 4.92,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Gỗ Tự Nhiên Phối Nỉ Be"
+      ],
+      "sizes": [
+        "Chiều cao 90cm 3 tầng vận động"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "Gỗ Plywood thân thiện thú cưng + Dây đay tự nhiên"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_105",
+    "id": "prod_105",
+    "name": "Đồng Hồ Nam Cơ Khí Automatic Lộ Cơ Toàn Phần Mặt Kính Sapphire Thép 316L",
+    "slug": "dong-ho-nam-co-khi-automatic-lo-co",
+    "description": "Bộ máy cơ khí tự động trữ cót 42 giờ độ chính xác cao, mặt kính Sapphire nguyên khối chống trầy xước dao cào, khả năng kháng nước 50M đi bơi thoải mái.",
+    "price": 2450000,
+    "originalPrice": 3800000,
+    "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "LuxeTime",
+    "badge": "Amazon's Choice",
+    "stock": 25,
+    "sold": 430,
+    "rating": 4.97,
+    "reviewCount": 125,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_12",
+    "shopName": "LuxeTime Đồng Hồ Cơ Khí & Phụ Kiện",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Mặt Đen Viền Vàng Hồng Rose Gold",
+        "Mặt Bạc Viền Thép Trắng Bạc"
+      ],
+      "sizes": [
+        "Đường kính mặt 41mm - Độ dày 12mm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Bộ máy",
+        "value": "Japan Miyota 8N24 Automatic Skeleton"
+      },
+      {
+        "label": "Dây đeo",
+        "value": "Thép không gỉ 316L đúc đặc mạ PVD"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_106",
+    "id": "prod_106",
+    "name": "Đồng Hồ Nữ Thạch Anh Kính Khoáng Chống Nước Đính Đá Swarovski Dây Kim Loại",
+    "slug": "dong-ho-nu-thach-anh-dinh-da-swarovski",
+    "description": "Thiết kế tiểu thư thanh lịch với viền đính đá Swarovski lấp lánh sang trọng, mặt xà cừ thiên nhiên đổi màu theo góc sáng, dây lưới kim loại khóa bướm tinh tế.",
+    "price": 980000,
+    "originalPrice": 1550000,
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "LuxeTime",
+    "badge": "Best Seller",
+    "stock": 40,
+    "sold": 760,
+    "rating": 4.94,
+    "reviewCount": 210,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_12",
+    "shopName": "LuxeTime Đồng Hồ Cơ Khí & Phụ Kiện",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Vàng Hồng Nữ Tính",
+        "Bạc Tinh Khôi"
+      ],
+      "sizes": [
+        "Đường kính mặt 28mm nhỏ nhắn vừa tay nữ"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chống nước",
+        "value": "3ATM rửa tay đi mưa an toàn"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_107",
+    "id": "prod_107",
+    "name": "Hộp Xoay Đồng Hồ Cơ Tự Động 2 Xoay Động Cơ Êm Ái Không Từ Tính Vỏ Gỗ Sơn Mài",
+    "slug": "hop-xoay-dong-ho-co-tu-dong",
+    "description": "Vỏ gỗ phủ sơn mài bóng bẩy như đàn piano, động cơ Mabuchi Nhật Bản vận hành cực êm không phát ra tiếng động, 4 chế độ xoay bảo vệ bộ cót đồng hồ cơ luôn chạy chuẩn giờ.",
+    "price": 850000,
+    "originalPrice": 1290000,
+    "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "LuxeTime",
+    "badge": "Hot Deal",
+    "stock": 25,
+    "sold": 340,
+    "rating": 4.92,
+    "reviewCount": 95,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_12",
+    "shopName": "LuxeTime Đồng Hồ Cơ Khí & Phụ Kiện",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Vân Gỗ Đen Piano Lót Da PU Đen",
+        "Vân Gỗ Nâu Trầm Lót Da Trắng"
+      ],
+      "sizes": [
+        "Bản 2 ổ xoay tự động"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Nguồn điện",
+        "value": "Sử dụng cắm điện Adapter hoặc pin AA dự phòng"
+      }
+    ],
+    "reviews": []
+  },
 ];
 
 function mergeWithCustomReviews(product) {

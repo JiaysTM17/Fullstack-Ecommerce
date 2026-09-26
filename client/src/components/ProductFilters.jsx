@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getAllShops } from '../services/shopService';
 import '../styles/filters.css';
 
 const CATEGORIES = ["Tất cả", "Thời trang", "Điện tử", "Sắc đẹp", "Gia dụng", "Đời sống"];
@@ -11,6 +12,7 @@ const PRICE_PRESETS = [
 ];
 
 export default function ProductFilters({ filters = {}, onFilterChange, onResetFilters }) {
+  const allShops = getAllShops();
   const [minPriceInput, setMinPriceInput] = useState(filters.minPrice || "");
   const [maxPriceInput, setMaxPriceInput] = useState(filters.maxPrice || "");
 
@@ -66,38 +68,31 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
 
       {/* 2. Shop Filter */}
       <div className="shopee-filter-section">
-        <h4 className="shopee-filter-title">Cửa Hàng (Shop)</h4>
-        <div className="shopee-filter-list">
+        <h4 className="shopee-filter-title">Cửa Hàng (Shop Chính Hãng)</h4>
+        <div className="shopee-filter-list" style={{ maxHeight: '240px', overflowY: 'auto' }}>
           <div
             className={`shopee-filter-item ${!filters.shopId ? "active" : ""}`}
             onClick={() => onFilterChange("shopId", "")}
           >
-            <span>🏪 Tất cả gian hàng</span>
+            <span>🏪 Tất cả gian hàng ({allShops.length})</span>
           </div>
-          <div
-            className={`shopee-filter-item ${filters.shopId === "shop_01" ? "active" : ""}`}
-            onClick={() => onFilterChange("shopId", filters.shopId === "shop_01" ? "" : "shop_01")}
-          >
-            <span>👗 Thời Trang GenZ</span>
-          </div>
-          <div
-            className={`shopee-filter-item ${filters.shopId === "shop_02" ? "active" : ""}`}
-            onClick={() => onFilterChange("shopId", filters.shopId === "shop_02" ? "" : "shop_02")}
-          >
-            <span>🎧 TechWorld Store</span>
-          </div>
-          <div
-            className={`shopee-filter-item ${filters.shopId === "shop_03" ? "active" : ""}`}
-            onClick={() => onFilterChange("shopId", filters.shopId === "shop_03" ? "" : "shop_03")}
-          >
-            <span>💄 Beauty Cosmetics</span>
-          </div>
-          <div
-            className={`shopee-filter-item ${filters.shopId === "shop_04" ? "active" : ""}`}
-            onClick={() => onFilterChange("shopId", filters.shopId === "shop_04" ? "" : "shop_04")}
-          >
-            <span>🏡 HomePro Gia Dụng</span>
-          </div>
+          {allShops.map((s) => {
+            const icons = {
+              shop_01: '👗', shop_02: '🎧', shop_03: '💄', shop_04: '🏡',
+              shop_05: '⚽', shop_06: '🌿', shop_07: '📚', shop_08: '🚗',
+              shop_09: '🍼', shop_10: '🎵', shop_11: '🐾', shop_12: '⌚'
+            };
+            return (
+              <div
+                key={s.id}
+                className={`shopee-filter-item ${filters.shopId === s.id ? "active" : ""}`}
+                onClick={() => onFilterChange("shopId", filters.shopId === s.id ? "" : s.id)}
+                title={s.description}
+              >
+                <span>{icons[s.id] || '🏪'} {s.name}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
