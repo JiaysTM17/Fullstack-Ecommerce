@@ -481,7 +481,7 @@ export default function AdminDashboardPage() {
 
             {/* Create voucher form */}
             {showAddVoucher && (
-              <form onSubmit={handleCreateVoucher} style={{ background: 'var(--bg-card-hover, rgba(0,0,0,0.02))', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-medium)', marginBottom: '20px' }}>
+              <form onSubmit={handleCreateVoucher} className="anim-accordion" style={{ background: 'var(--bg-card-hover, rgba(0,0,0,0.02))', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-medium)', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 12px' }}>Tạo Mã Giảm Giá Toàn Sàn</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
                   <div>

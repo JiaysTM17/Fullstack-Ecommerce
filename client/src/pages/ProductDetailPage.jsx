@@ -39,6 +39,14 @@ export default function ProductDetailPage() {
   const [hoverStar, setHoverStar] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showShopChat, setShowShopChat] = useState(false);
+  const [selectedStarFilter, setSelectedStarFilter] = useState("all");
+
+  const handleCopyLink = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      showToast("Đã sao chép liên kết sản phẩm vào bộ nhớ tạm!", "success");
+    }
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -173,6 +181,10 @@ export default function ProductDetailPage() {
     : 0;
 
   const reviewsList = product.reviews || [];
+  const filteredReviews = useMemo(() => {
+    if (selectedStarFilter === "all") return reviewsList;
+    return reviewsList.filter((r) => Number(r.rating) === Number(selectedStarFilter));
+  }, [reviewsList, selectedStarFilter]);
 
   return (
     <main className="shopee-container" style={{ padding: "20px 0" }}>
@@ -319,6 +331,18 @@ export default function ProductDetailPage() {
               : "✕ Tạm thời hết hàng"}
           </div>
 
+          {product.stock > 0 && product.stock <= 30 && (
+            <div style={{ margin: "10px 0", padding: "10px 12px", background: "#fff7ed", border: "1px solid #ffedd5", borderRadius: "8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "var(--primary-color, #ea580c)", marginBottom: "6px" }}>
+                <span>🔥 Sắp hết hàng</span>
+                <span>Chỉ còn {product.stock} sản phẩm</span>
+              </div>
+              <div style={{ height: "6px", background: "#fed7aa", borderRadius: "3px", overflow: "hidden" }}>
+                <div style={{ width: `${Math.min(100, Math.max(12, (product.stock / 30) * 100))}%`, height: "100%", background: "var(--primary-color, #ea580c)", borderRadius: "3px" }} />
+              </div>
+            </div>
+          )}
+
           <div className="amazon-delivery-info">
             <div style={{ fontWeight: 700, color: "#007185", marginBottom: "4px" }}>
               🚀 Vận chuyển tiêu chuẩn & Siêu tốc
@@ -386,14 +410,24 @@ export default function ProductDetailPage() {
             >
               {isCompared(productId) ? "⚖️ Đã thêm vào so sánh" : "⚖️ So sánh với sản phẩm khác"}
             </button>
-            <button
-              type="button"
-              className="shopee-btn shopee-btn-secondary"
-              style={{ width: "100%", marginTop: "8px", fontWeight: 700, fontSize: "13px" }}
-              onClick={() => setShowShareModal(true)}
-            >
-              🔗 Chia Sẻ & Quét Mã QR
-            </button>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "8px" }}>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary"
+                style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px" }}
+                onClick={handleCopyLink}
+              >
+                📋 Sao Chép Link
+              </button>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary"
+                style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px" }}
+                onClick={() => setShowShareModal(true)}
+              >
+                🔗 Chia Sẻ & QR
+              </button>
+            </div>
           </div>
 
           {/* Guarantees */}
@@ -631,9 +665,44 @@ export default function ProductDetailPage() {
               </form>
             )}
 
+            {/* Star Rating Filter Bar */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "16px", padding: "12px", background: "var(--bg-muted, #f8fafc)", borderRadius: "8px", border: "1px solid var(--border-medium, #e2e8f0)" }}>
+              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-secondary, #64748b)" }}>Lọc đánh giá:</span>
+              {[
+                { id: "all", label: `Tất cả (${reviewsList.length})` },
+                { id: "5", label: `5 Sao (${reviewsList.filter(r => r.rating === 5).length})` },
+                { id: "4", label: `4 Sao (${reviewsList.filter(r => r.rating === 4).length})` },
+                { id: "3", label: `3 Sao (${reviewsList.filter(r => r.rating === 3).length})` },
+                { id: "2", label: `2 Sao (${reviewsList.filter(r => r.rating === 2).length})` },
+                { id: "1", label: `1 Sao (${reviewsList.filter(r => r.rating === 1).length})` },
+              ].map((tab) => {
+                const isActive = selectedStarFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setSelectedStarFilter(tab.id)}
+                    style={{
+                      padding: "5px 12px",
+                      fontSize: "12.5px",
+                      fontWeight: isActive ? 700 : 500,
+                      borderRadius: "16px",
+                      border: isActive ? "1px solid var(--primary-color, #ea580c)" : "1px solid var(--border-medium, #cbd5e1)",
+                      background: isActive ? "var(--primary-color, #ea580c)" : "#fff",
+                      color: isActive ? "#fff" : "var(--text-primary, #0f172a)",
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+
             {/* List */}
-            {reviewsList.length > 0 ? (
-              reviewsList.map((rev) => (
+            {filteredReviews.length > 0 ? (
+              filteredReviews.map((rev) => (
                 <div key={rev.id} className="amazon-review-item">
                   <div className="amazon-review-header">
                     <img
@@ -666,7 +735,9 @@ export default function ProductDetailPage() {
               ))
             ) : (
               <div style={{ color: "#777", fontSize: "14px", padding: "16px 0" }}>
-                Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên trải nghiệm và chia sẻ cảm nhận!
+                {selectedStarFilter === "all" 
+                  ? "Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên trải nghiệm và chia sẻ cảm nhận!"
+                  : `Không có đánh giá nào ${selectedStarFilter} sao.`}
               </div>
             )}
           </div>

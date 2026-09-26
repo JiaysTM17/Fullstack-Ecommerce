@@ -53,7 +53,7 @@ export default function QuickViewModal({ product, onClose }) {
   return (
     <div className="shopee-modal-overlay" onClick={onClose} style={{ zIndex: 9998 }}>
       <div
-        className="shopee-modal"
+        className="shopee-modal anim-modal-content"
         style={{
           maxWidth: '780px',
           background: 'var(--bg-card, #ffffff)',
@@ -116,7 +116,7 @@ export default function QuickViewModal({ product, onClose }) {
                       borderRadius: '4px',
                       objectFit: 'cover',
                       cursor: 'pointer',
-                      border: selectedImg === img ? '2px solid #ea580c' : '1px solid var(--border-color, #e2e8f0)',
+                      border: selectedImg === img ? '2px solid var(--primary-color, #4f46e5)' : '1px solid var(--border-color, #e2e8f0)',
                     }}
                   />
                 ))}
@@ -135,7 +135,7 @@ export default function QuickViewModal({ product, onClose }) {
             </h2>
 
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-              <span style={{ fontSize: '24px', fontWeight: 800, color: '#ea580c' }}>
+              <span style={{ fontSize: '24px', fontWeight: 800, color: 'var(--primary-color, #4f46e5)' }}>
                 {formatCurrency(product.price)}
               </span>
               {hasDiscount && (
@@ -171,9 +171,9 @@ export default function QuickViewModal({ product, onClose }) {
                         fontSize: '12px',
                         borderRadius: '4px',
                         cursor: 'pointer',
-                        background: selectedColor === c ? '#ea580c' : 'var(--bg-card, #fff)',
+                        background: selectedColor === c ? 'var(--primary-color, #4f46e5)' : 'var(--bg-card, #fff)',
                         color: selectedColor === c ? '#fff' : 'var(--text-primary, #111)',
-                        border: selectedColor === c ? '1px solid #ea580c' : '1px solid var(--border-color, #ccc)',
+                        border: selectedColor === c ? '1px solid var(--primary-color, #4f46e5)' : '1px solid var(--border-color, #ccc)',
                       }}
                     >
                       {c}

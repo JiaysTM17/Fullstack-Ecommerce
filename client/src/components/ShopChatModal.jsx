@@ -72,6 +72,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose }) {
 
   return (
     <div
+      className="anim-chat-box"
       style={{
         position: 'fixed',
         bottom: '24px',
@@ -87,7 +88,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose }) {
         flexDirection: 'column',
         zIndex: 9999,
         overflow: 'hidden',
-        animation: 'slideUp 0.25s ease-out'
+        animation: 'chatPopUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards'
       }}
     >
       {/* Chat Header */}
@@ -106,12 +107,12 @@ export default function ShopChatModal({ shop, currentProduct, onClose }) {
           <img
             src={shop?.logo || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=80'}
             alt={shop?.name || 'Shop'}
-            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #ea580c' }}
+            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary-color, #4f46e5)' }}
           />
           <div>
             <div style={{ fontWeight: 800, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>{shop?.name || 'Gian Hàng Đối Tác'}</span>
-              <span style={{ fontSize: '10px', background: '#ea580c', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>
+              <span style={{ fontSize: '10px', background: 'var(--primary-color, #4f46e5)', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>
                 Mall
               </span>
             </div>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
@@ -18,9 +18,22 @@ const SHIPPING_OPTIONS = [
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { showToast } = useToast();
   const { t } = useLanguage();
+
+  const [shopNotes] = useState(() => {
+    if (location.state?.shopNotes && Object.keys(location.state.shopNotes).length > 0) {
+      return location.state.shopNotes;
+    }
+    try {
+      const saved = localStorage.getItem("mini_shopee_cart_shop_notes");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
   const {
     items,
     selectedItems,

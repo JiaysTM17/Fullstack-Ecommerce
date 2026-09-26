@@ -62,6 +62,7 @@ export default function RewardsHubModal({ onClose }) {
       }}
     >
       <div
+        className="anim-modal-content"
         style={{
           background: 'var(--bg-card, #ffffff)',
           color: 'var(--text-primary, #0f172a)',

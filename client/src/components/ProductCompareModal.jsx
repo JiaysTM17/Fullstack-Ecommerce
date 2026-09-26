@@ -31,6 +31,7 @@ export default function ProductCompareModal() {
             alignItems: 'center',
             gap: '16px',
             maxWidth: 'calc(100vw - 32px)',
+            animation: 'slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -129,10 +130,12 @@ export default function ProductCompareModal() {
             alignItems: 'center',
             justifyContent: 'center',
             padding: '16px',
+            animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
           }}
           onClick={() => setIsModalOpen(false)}
         >
           <div
+            className="anim-modal-content"
             style={{
               background: 'var(--bg-card, #ffffff)',
               borderRadius: '16px',

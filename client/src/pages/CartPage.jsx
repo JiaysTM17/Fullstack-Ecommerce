@@ -46,6 +46,51 @@ export default function CartPage() {
   const [voucherMessage, setVoucherMessage] = useState("");
   const [showVoucherModal, setShowVoucherModal] = useState(false);
 
+  const [shopNotes, setShopNotes] = useState(() => {
+    try {
+      const saved = localStorage.getItem("mini_shopee_cart_shop_notes");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const handleShopNoteChange = (shopId, text) => {
+    setShopNotes((prev) => {
+      const next = { ...prev, [shopId]: text };
+      try {
+        localStorage.setItem("mini_shopee_cart_shop_notes", JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  const shopNameMap = {
+    shop_01: "Thời Trang GenZ Official",
+    shop_02: "TechWorld Store",
+    shop_03: "GlowCosmetics Mall",
+    shop_04: "HomePro Living Store",
+  };
+
+  const cartItemsByShop = useMemo(() => {
+    const groups = {};
+    items.forEach((item) => {
+      const sId = item.shopId || "shop_01";
+      const sName = item.shopName || shopNameMap[sId] || "Fullstack Official Store";
+      if (!groups[sId]) {
+        groups[sId] = {
+          shopId: sId,
+          shopName: sName,
+          items: [],
+        };
+      }
+      groups[sId].items.push(item);
+    });
+    return Object.values(groups);
+  }, [items]);
+
   const allSelected = items.length > 0 && selectedItemIds.length === items.length;
   const hasFreeShipping = selectedSubtotal >= FREE_SHIPPING_THRESHOLD;
   const progressPercent = Math.min(100, Math.round((selectedSubtotal / FREE_SHIPPING_THRESHOLD) * 100));
@@ -192,73 +237,149 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* Cart Item Cards */}
-          {items.map((item) => {
-            const isChecked = isItemSelected(item.productId);
-            return (
+          {/* Cart Item Cards Grouped by Shop */}
+          {cartItemsByShop.map((shopGroup) => (
+            <div
+              key={shopGroup.shopId}
+              style={{
+                background: "var(--bg-card, #ffffff)",
+                borderRadius: "10px",
+                padding: "16px 20px",
+                marginBottom: "20px",
+                border: "1px solid var(--border-medium, #e2e8f0)",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+              }}
+            >
+              {/* Shop Header */}
               <div
-                key={item.productId}
                 style={{
-                  background: isChecked ? "var(--bg-card, #ffffff)" : "var(--bg-muted, #f8fafc)",
-                  borderRadius: "8px",
-                  padding: "16px",
-                  marginBottom: "14px",
-                  border: isChecked ? "1px solid var(--border-medium, #e2e8f0)" : "1px dashed var(--border-medium, #cbd5e1)",
-                  opacity: isChecked ? 1 : 0.85,
                   display: "flex",
-                  gap: "14px",
                   alignItems: "center",
-                  transition: "all 0.2s ease",
+                  justifyContent: "space-between",
+                  paddingBottom: "12px",
+                  marginBottom: "14px",
+                  borderBottom: "1px solid var(--border-medium, #e2e8f0)",
                 }}
               >
-                <input
-                  type="checkbox"
-                  checked={isChecked}
-                  onChange={() => toggleSelectItem(item.productId)}
-                  style={{ width: "18px", height: "18px", flexShrink: 0, cursor: "pointer" }}
-                />
-
-                <div style={{ flex: 1 }}>
-                  <CartItem
-                    item={item}
-                    onIncrease={(cartItem) => increaseQuantity(cartItem.productId)}
-                    onDecrease={(cartItem) => decreaseQuantity(cartItem.productId)}
-                    onQuantityChange={(cartItem, quantity) => setQuantity(cartItem.productId, quantity)}
-                    onRemove={(cartItem) => removeFromCart(cartItem.productId)}
-                    onItemClick={(cartItem) => navigate(`/products/${cartItem.productId}`)}
-                    formatCurrency={formatCurrency}
-                  />
-
-                  {/* Actions row: Save for later & Move to Wishlist */}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", marginTop: "10px", paddingLeft: "100px", fontSize: "13px" }}>
-                    <button
-                      type="button"
-                      style={{ background: "none", border: "none", color: "var(--secondary-color, #0284c7)", cursor: "pointer", fontWeight: 600, padding: 0 }}
-                      onClick={() => saveForLater(item.productId)}
-                    >
-                      📦 Để dành mua sau
-                    </button>
-                    <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
-                    <button
-                      type="button"
-                      style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", cursor: "pointer", fontWeight: 600, padding: 0 }}
-                      onClick={() => handleMoveToWishlist(item)}
-                    >
-                      ❤️ Chuyển vào Yêu thích
-                    </button>
-                    <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
-                    <button
-                      type="button"
-                      style={{ background: "none", border: "none", color: "var(--color-error, #ef4444)", cursor: "pointer", padding: 0 }}
-                      onClick={() => removeFromCart(item.productId)}
-                    >
-                      Xóa khỏi giỏ
-                    </button>
-                  </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "16px" }}>🏪</span>
+                  <strong style={{ fontSize: "14px", color: "var(--text-primary, #0f172a)" }}>
+                    {shopGroup.shopName}
+                  </strong>
+                  <span
+                    style={{
+                      background: "var(--primary-color, #ea580c)",
+                      color: "#fff",
+                      fontSize: "10.5px",
+                      fontWeight: 700,
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    Mall
+                  </span>
                 </div>
+                <span style={{ fontSize: "12.5px", color: "var(--text-secondary, #64748b)" }}>
+                  {shopGroup.items.length} món
+                </span>
               </div>
-            );
-          })}
+
+              {/* Items for this Shop */}
+              {shopGroup.items.map((item) => {
+                const isChecked = isItemSelected(item.productId);
+                return (
+                  <div
+                    key={item.productId}
+                    style={{
+                      background: isChecked ? "var(--bg-card, #ffffff)" : "var(--bg-muted, #f8fafc)",
+                      borderRadius: "8px",
+                      padding: "14px",
+                      marginBottom: "12px",
+                      border: isChecked ? "1px solid var(--border-medium, #e2e8f0)" : "1px dashed var(--border-medium, #cbd5e1)",
+                      opacity: isChecked ? 1 : 0.85,
+                      display: "flex",
+                      gap: "14px",
+                      alignItems: "center",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => toggleSelectItem(item.productId)}
+                      style={{ width: "18px", height: "18px", flexShrink: 0, cursor: "pointer" }}
+                    />
+
+                    <div style={{ flex: 1 }}>
+                      <CartItem
+                        item={item}
+                        onIncrease={(cartItem) => increaseQuantity(cartItem.productId)}
+                        onDecrease={(cartItem) => decreaseQuantity(cartItem.productId)}
+                        onQuantityChange={(cartItem, quantity) => setQuantity(cartItem.productId, quantity)}
+                        onRemove={(cartItem) => removeFromCart(cartItem.productId)}
+                        onItemClick={(cartItem) => navigate(`/products/${cartItem.productId}`)}
+                        formatCurrency={formatCurrency}
+                      />
+
+                      {/* Actions row: Save for later & Move to Wishlist */}
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", marginTop: "10px", paddingLeft: "100px", fontSize: "13px" }}>
+                        <button
+                          type="button"
+                          style={{ background: "none", border: "none", color: "var(--secondary-color, #0284c7)", cursor: "pointer", fontWeight: 600, padding: 0 }}
+                          onClick={() => saveForLater(item.productId)}
+                        >
+                          📦 Để dành mua sau
+                        </button>
+                        <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
+                        <button
+                          type="button"
+                          style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", cursor: "pointer", fontWeight: 600, padding: 0 }}
+                          onClick={() => handleMoveToWishlist(item)}
+                        >
+                          ❤️ Chuyển vào Yêu thích
+                        </button>
+                        <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
+                        <button
+                          type="button"
+                          style={{ background: "none", border: "none", color: "var(--color-error, #ef4444)", cursor: "pointer", padding: 0 }}
+                          onClick={() => removeFromCart(item.productId)}
+                        >
+                          Xóa khỏi giỏ
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Order note for this Shop */}
+              <div
+                style={{
+                  marginTop: "10px",
+                  padding: "10px 14px",
+                  background: "var(--bg-muted, #f8fafc)",
+                  borderRadius: "8px",
+                  border: "1px dashed var(--border-medium, #cbd5e1)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                }}
+              >
+                <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary, #475569)", whiteSpace: "nowrap" }}>
+                  ✍️ Lời nhắn cho Người bán:
+                </span>
+                <input
+                  type="text"
+                  placeholder={`Lưu ý cho shop (màu sắc, kích thước, đóng gói quà...)...`}
+                  value={shopNotes[shopGroup.shopId] || ""}
+                  onChange={(e) => handleShopNoteChange(shopGroup.shopId, e.target.value)}
+                  className="shopee-form-input"
+                  style={{ flex: 1, minWidth: "220px", fontSize: "13px", padding: "6px 12px" }}
+                />
+              </div>
+            </div>
+          ))}
 
           {/* Save For Later Section (Amazon style) */}
           {savedItems.length > 0 && (
@@ -456,6 +577,7 @@ export default function CartPage() {
             <Link
               className="shopee-btn shopee-btn-primary"
               to="/checkout"
+              state={{ shopNotes }}
               style={{ display: "block", textAlign: "center", padding: "14px", fontSize: "16px", fontWeight: 700 }}
             >
               {t('proceed_to_checkout', 'Tiến Hành Thanh Toán')} ({selectedItems.length}) →

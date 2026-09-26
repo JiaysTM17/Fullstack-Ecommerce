@@ -92,6 +92,18 @@ export default function OrderHistoryPage() {
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
   const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
   const [selectedLiveMapOrder, setSelectedLiveMapOrder] = useState(null);
+  const [selectedCancelOrder, setSelectedCancelOrder] = useState(null);
+  const [cancelReason, setCancelReason] = useState('Tôi muốn thay đổi địa chỉ nhận hàng');
+  const [cancelNote, setCancelNote] = useState('');
+
+  const CANCEL_REASONS = [
+    'Tôi muốn thay đổi địa chỉ nhận hàng',
+    'Tôi muốn đổi sản phẩm / kích thước / màu sắc',
+    'Tôi tìm thấy nơi khác bán giá tốt hơn',
+    'Thay đổi phương thức thanh toán',
+    'Thời gian giao hàng dự kiến quá lâu',
+    'Lý do cá nhân khác',
+  ];
 
   const saveOrders = (newOrders) => {
     setOrders(newOrders);
@@ -176,21 +188,43 @@ export default function OrderHistoryPage() {
     return ord.status === activeTab;
   });
 
-  const handleCancelOrder = (orderId) => {
-    if (window.confirm(t('confirm_cancel_order', "Bạn có chắc chắn muốn hủy đơn hàng này?"))) {
-      const updated = orders.map((o) =>
-        o.orderId === orderId
-          ? { ...o, status: "cancelled", statusText: t('status_cancelled_by_you', "Đã hủy bởi bạn"), stepIndex: 0 }
-          : o
-      );
-      saveOrders(updated);
-      showToast(t('order_cancelled_toast', 'Đã hủy đơn hàng thành công'), 'info');
-    }
+  const handleConfirmCancelOrder = () => {
+    if (!selectedCancelOrder) return;
+    const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const updated = orders.map((o) => {
+      if (o.orderId !== selectedCancelOrder.orderId) return o;
+      const nextTimeline = [
+        ...(o.timeline || []),
+        { time: `Hôm nay ${nowStr}`, text: `Đã hủy đơn hàng: ${cancelReason}. ${cancelNote ? `Ghi chú: ${cancelNote}` : ''}` }
+      ];
+      return {
+        ...o,
+        status: 'cancelled',
+        statusText: t('status_cancelled_by_you', 'Đã hủy bởi bạn'),
+        cancelReason,
+        cancelNote,
+        stepIndex: 0,
+        timeline: nextTimeline,
+      };
+    });
+    saveOrders(updated);
+    setSelectedCancelOrder(null);
+    setCancelNote('');
+    showToast(t('order_cancelled_toast', 'Đã hủy đơn hàng thành công'), 'info');
   };
 
   const handleBuyAgain = (item) => {
     addToCart(item, 1);
     showToast(t('buy_again_toast', 'Đã thêm sản phẩm vào giỏ hàng để mua lại!'), 'success');
+    navigate('/cart');
+  };
+
+  const handleReorderWholeOrder = (order) => {
+    if (!order || !order.items || order.items.length === 0) return;
+    order.items.forEach((item) => {
+      addToCart(item, item.quantity || 1);
+    });
+    showToast(`Đã thêm ${order.items.length} sản phẩm từ đơn ${order.orderId} vào giỏ hàng!`, 'success');
     navigate('/cart');
   };
 
@@ -386,10 +420,10 @@ export default function OrderHistoryPage() {
                         <button
                           type="button"
                           className="shopee-btn shopee-btn-secondary"
-                          style={{ fontSize: '12px' }}
-                          onClick={() => handleCancelOrder(ord.orderId)}
+                          style={{ fontSize: '12px', color: '#ef4444', borderColor: '#fca5a5' }}
+                          onClick={() => setSelectedCancelOrder(ord)}
                         >
-                          {t('cancel_order', 'Hủy đơn hàng')}
+                          ✕ {t('cancel_order', 'Hủy đơn hàng')}
                         </button>
                       )}
 
@@ -437,9 +471,10 @@ export default function OrderHistoryPage() {
                         type="button"
                         className="shopee-btn shopee-btn-primary"
                         style={{ fontSize: '12px' }}
-                        onClick={() => handleBuyAgain(ord.items[0])}
+                        onClick={() => handleReorderWholeOrder(ord)}
+                        title="Mua lại tất cả sản phẩm trong đơn hàng này"
                       >
-                        {t('buy_again', 'Mua Lại')}
+                        🔁 {t('buy_again_whole', 'Mua Lại Đơn')}
                       </button>
                     </div>
                   </div>
@@ -530,6 +565,136 @@ export default function OrderHistoryPage() {
           order={selectedLiveMapOrder}
           onClose={() => setSelectedLiveMapOrder(null)}
         />
+      )}
+
+      {/* Cancellation Reason Modal */}
+      {selectedCancelOrder && (
+        <div
+          className="shopee-modal-overlay"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1100,
+            background: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+            animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedCancelOrder(null);
+          }}
+        >
+          <div
+            className="anim-modal-content"
+            style={{
+              background: 'var(--bg-card, #ffffff)',
+              color: 'var(--text-primary, #0f172a)',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '480px',
+              padding: '24px',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.25)',
+              border: '1px solid var(--border-medium, #cbd5e1)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-light, #e2e8f0)', paddingBottom: '12px' }}>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>✕</span>
+                <span>Hủy Đơn Hàng: {selectedCancelOrder.orderId}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setSelectedCancelOrder(null)}
+                style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+              Vui lòng chọn lý do hủy đơn hàng để giúp sàn và nhà bán nâng cao chất lượng phục vụ:
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
+              {CANCEL_REASONS.map((r, idx) => (
+                <label
+                  key={idx}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    fontSize: '13.5px',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    background: cancelReason === r ? 'rgba(79, 70, 229, 0.08)' : 'var(--bg-muted, #f8fafc)',
+                    border: `1px solid ${cancelReason === r ? 'var(--primary-color, #4f46e5)' : 'var(--border-light, #e2e8f0)'}`,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="cancel_reason"
+                    checked={cancelReason === r}
+                    onChange={() => setCancelReason(r)}
+                  />
+                  <span>{r}</span>
+                </label>
+              ))}
+            </div>
+
+            <div style={{ marginBottom: '18px' }}>
+              <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                Ghi chú thêm (không bắt buộc):
+              </label>
+              <textarea
+                value={cancelNote}
+                onChange={(e) => setCancelNote(e.target.value)}
+                placeholder="Nhập chi tiết lý do bạn muốn hủy đơn..."
+                rows={3}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-medium, #cbd5e1)',
+                  background: 'var(--bg-card, #ffffff)',
+                  color: 'var(--text-primary)',
+                  fontSize: '13px',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary"
+                onClick={() => setSelectedCancelOrder(null)}
+                style={{ fontSize: '13px' }}
+              >
+                Giữ Lại Đơn
+              </button>
+              <button
+                type="button"
+                className="shopee-btn"
+                style={{
+                  background: '#ef4444',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                }}
+                onClick={handleConfirmCancelOrder}
+              >
+                Xác Nhận Hủy Đơn
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );

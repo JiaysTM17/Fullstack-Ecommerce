@@ -949,8 +949,8 @@ export default function SellerDashboardPage() {
 
         {/* MODAL TẠO VOUCHER SHOP */}
         {showVoucherModal && (
-          <div className="shopee-modal-overlay" onClick={() => setShowVoucherModal(false)}>
-            <div className="shopee-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+          <div className="shopee-modal-overlay" onClick={() => setShowVoucherModal(false)} style={{ animation: 'modalOverlayFadeIn 0.22s ease-out forwards' }}>
+            <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
               <div className="shopee-modal-header">
                 <h3>Tạo Mã Giảm Giá Cho {currentShop.name}</h3>
                 <button
@@ -1056,8 +1056,8 @@ export default function SellerDashboardPage() {
 
         {/* MODAL THÊM / CHỈNH SỬA SẢN PHẨM CỦA SHOP */}
         {showProductModal && (
-          <div className="shopee-modal-overlay" onClick={() => setShowProductModal(false)}>
-            <div className="shopee-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="shopee-modal-overlay" onClick={() => setShowProductModal(false)} style={{ animation: 'modalOverlayFadeIn 0.22s ease-out forwards' }}>
+            <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="shopee-modal-header">
                 <h3>{editingProduct ? 'Chỉnh Sửa Mặt Hàng' : 'Đăng Bán Mặt Hàng Mới Cho Shop'}</h3>
                 <button

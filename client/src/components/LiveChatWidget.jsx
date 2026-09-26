@@ -20,8 +20,8 @@ export function BotIcon({ size = 32, glow = false }) {
       <line x1="18" y1="6.5" x2="18" y2="10" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
       
       {/* Tai nghe / Headset 2 bên */}
-      <rect x="3" y="14" width="3" height="8" rx="1.5" fill="#ea580c" />
-      <rect x="30" y="14" width="3" height="8" rx="1.5" fill="#ea580c" />
+      <rect x="3" y="14" width="3" height="8" rx="1.5" fill="#4f46e5" />
+      <rect x="30" y="14" width="3" height="8" rx="1.5" fill="#4f46e5" />
       
       {/* Khung đầu Robot */}
       <rect x="5.5" y="9.5" width="25" height="18" rx="7" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.8" />
@@ -39,7 +39,7 @@ export function BotIcon({ size = 32, glow = false }) {
       <path d="M15 21.5Q18 24 21 21.5" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
       
       {/* Khung vai áo hiện đại */}
-      <path d="M10 29C10 29 12 32.5 18 32.5C24 32.5 26 29 26 29" stroke="#ea580c" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M10 29C10 29 12 32.5 18 32.5C24 32.5 26 29 26 29" stroke="#4f46e5" strokeWidth="2.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -229,6 +229,7 @@ export default function LiveChatWidget() {
       {/* Chat Window Popup */}
       {isOpen && (
         <div
+          className="anim-chat-box"
           style={{
             position: 'fixed',
             bottom: '20px',
@@ -246,6 +247,7 @@ export default function LiveChatWidget() {
             flexDirection: 'column',
             overflow: 'hidden',
             fontFamily: 'inherit',
+            animation: 'chatPopUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           }}
         >
           {/* Header */}

@@ -168,24 +168,16 @@ const Header = ({
         {/* Top Mini Bar */}
         <div className="shopee-topbar">
           <div className="shopee-topbar-left">
-            <span
-              className="shopee-topbar-link"
-              onClick={() => navTo('/seller/dashboard')}
-              style={{ cursor: 'pointer', fontWeight: 600 }}
-            >
-              🏪 {t('nav_seller_channel', 'Kênh Người Bán')}
+            <span className="shopee-topbar-link" style={{ opacity: 0.9 }}>
+              📱 {t('nav_download_app', 'Tải Ứng Dụng')}
             </span>
-            <span style={{ opacity: 0.3 }}>|</span>
-            <span
-              className="shopee-topbar-link"
-              onClick={() => navTo('/admin/dashboard')}
-              style={{ cursor: 'pointer', fontWeight: 600 }}
-            >
-              🛡️ {t('nav_admin_portal', 'Quản Trị Sàn')}
-            </span>
-            <span style={{ opacity: 0.3 }}>|</span>
+            <span className="shopee-topbar-divider" />
             <span className="shopee-topbar-link" style={{ opacity: 0.9 }}>
               📞 Hotline: 1900 6868
+            </span>
+            <span className="shopee-topbar-divider" />
+            <span className="shopee-topbar-link" style={{ opacity: 0.9 }}>
+              💬 {t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}
             </span>
           </div>
 
@@ -210,34 +202,19 @@ const Header = ({
               {theme === 'dark' ? '🌙 Tối' : '☀️ Sáng'}
             </button>
 
-            {/* Xu Rewards Trigger */}
+            {/* Xu Rewards Trigger Capsule */}
             <button
               type="button"
+              className="header-coin-capsule"
               onClick={() => setShowRewardsModal(true)}
               title="Điểm Thưởng & Săn Xu Hàng Ngày"
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: '12px',
-                border: 'none',
-                padding: '3px 10px',
-                borderRadius: '999px',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)',
-                transition: 'transform 0.15s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
               <span>🪙</span>
               <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
+              <span style={{ fontSize: '10px' }}>✨</span>
             </button>
 
-            <span style={{ opacity: 0.3 }}>|</span>
+            <span className="shopee-topbar-divider" />
 
             {user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -248,28 +225,29 @@ const Header = ({
                 >
                   📦 {t('nav_orders', 'Đơn Mua')}
                 </span>
-                <span style={{ opacity: 0.3 }}>|</span>
+                <span className="shopee-topbar-divider" />
                 <span
-                  className="shopee-topbar-link"
+                  className="header-user-badge"
                   onClick={() => navTo('/profile')}
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  style={{ cursor: 'pointer' }}
                 >
-                  👤 <strong>{user.fullName || user.email}</strong>
-                  <small style={{ background: 'rgba(255,255,255,0.25)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
+                  <span>👤</span>
+                  <strong style={{ fontSize: '12.5px' }}>{user.fullName || user.email}</strong>
+                  <small style={{ background: 'rgba(79, 70, 229, 0.35)', padding: '1px 7px', borderRadius: '10px', fontSize: '10px', color: '#c7d2fe', fontWeight: 700 }}>
                     {user.role}
                   </small>
                 </span>
-                <span style={{ opacity: 0.3 }}>|</span>
+                <span className="shopee-topbar-divider" />
                 <span
                   className="shopee-topbar-link"
                   onClick={onLogout}
-                  style={{ cursor: 'pointer', color: '#fecaca', fontWeight: 600 }}
+                  style={{ cursor: 'pointer', color: '#fca5a5', fontWeight: 600 }}
                 >
                   🚪 {t('logout', 'Đăng xuất')}
                 </span>
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span
                   className="shopee-topbar-link"
                   onClick={() => navTo('/register')}
@@ -277,14 +255,15 @@ const Header = ({
                 >
                   {t('register', 'Đăng Ký')}
                 </span>
-                <span style={{ opacity: 0.3 }}>|</span>
-                <span
-                  className="shopee-topbar-link"
+                <span className="shopee-topbar-divider" />
+                <button
+                  type="button"
+                  className="header-auth-btn-login"
                   onClick={() => navTo('/login')}
-                  style={{ cursor: 'pointer', fontWeight: 700 }}
                 >
-                  🔑 {t('login', 'Đăng Nhập')}
-                </span>
+                  <span>🔑</span>
+                  <span>{t('login', 'Đăng Nhập')}</span>
+                </button>
               </div>
             )}
           </div>
@@ -292,7 +271,7 @@ const Header = ({
 
         {/* Main Header Row */}
         <div className="shopee-main-header">
-          {/* Logo */}
+          {/* Logo with Modern Emblem */}
           <div
             className="shopee-header-logo"
             onClick={onLogoClick}
@@ -300,13 +279,18 @@ const Header = ({
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && onLogoClick && onLogoClick(e)}
           >
-            <svg className="shopee-logo-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z" />
-              <circle cx="12" cy="14" r="2" />
-            </svg>
-            <div>
-              <div className="shopee-logo-title">{logoText}</div>
-              <div className="shopee-logo-subtitle">{subTitle}</div>
+            <div className="shopee-logo-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </svg>
+            </div>
+            <div className="shopee-logo-title-group">
+              <div className="shopee-logo-title">
+                Fullstack <span className="brand-gradient">E-Commerce</span>
+              </div>
+              <div className="shopee-logo-subtitle">SMART MARKETPLACE</div>
             </div>
           </div>
 
@@ -342,6 +326,7 @@ const Header = ({
             {/* Autocomplete Dropdown */}
             {showSuggestions && (
               <div
+                className="anim-dropdown"
                 style={{
                   position: 'absolute',
                   top: '100%',
@@ -533,47 +518,45 @@ const Header = ({
             )}
           </div>
 
-          {/* Header Action Buttons: Notifications, Wishlist & Cart */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Header Action Dock: Notifications, Wishlist & Cart */}
+          <div className="header-actions-dock">
             {/* Notification Bell Dropdown */}
             <NotificationsPopover />
 
             {/* Wishlist Icon */}
             <button
               type="button"
-              className="shopee-header-cart"
+              className="shopee-header-action-btn"
               onClick={() => navTo('/wishlist')}
               aria-label={`Yêu thích, ${wishlistCount} sản phẩm`}
               title={t('wishlist_title')}
             >
-              <div className="shopee-cart-icon-wrapper">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill={wishlistCount > 0 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
-                {wishlistCount > 0 && (
-                  <span className="shopee-cart-badge" style={{ background: '#ffb703', color: '#111' }}>
-                    {wishlistCount > 99 ? '99+' : wishlistCount}
-                  </span>
-                )}
-              </div>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill={wishlistCount > 0 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              {wishlistCount > 0 && (
+                <span className="shopee-action-badge badge-amber">
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
+                </span>
+              )}
             </button>
 
             {/* Cart Icon */}
             <button
               type="button"
-              className="shopee-header-cart"
+              className="shopee-header-action-btn"
               onClick={onCartClick}
               aria-label={`Giỏ hàng, ${cartCount} sản phẩm`}
               title={t('cart')}
             >
-              <div className="shopee-cart-icon-wrapper">
-                <svg className="shopee-cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="9" cy="21" r="1" />
-                  <circle cx="20" cy="21" r="1" />
-                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                </svg>
-                <span className="shopee-cart-badge">{cartCount > 99 ? '99+' : cartCount}</span>
-              </div>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+              </svg>
+              <span className="shopee-action-badge badge-indigo">
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
             </button>
           </div>
         </div>

@@ -39,12 +39,14 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
         justifyContent: 'center',
         padding: '16px',
         overflowY: 'auto',
+        animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
+        className="anim-modal-content"
         style={{
           background: 'var(--bg-card, #ffffff)',
           color: 'var(--text-primary, #0f172a)',

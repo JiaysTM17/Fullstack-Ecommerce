@@ -22,12 +22,14 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         inset: 0,
         zIndex: 1100,
         background: 'rgba(0, 0, 0, 0.65)',
-        backdropFilter: 'blur(3px)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
+        animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
       }}
       onClick={onClose}
     >
       <div
+        className="anim-drawer-left"
         style={{
           width: '340px',
           maxWidth: '85vw',
@@ -37,7 +39,6 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
           display: 'flex',
           flexDirection: 'column',
           overflowY: 'auto',
-          animation: 'slideInLeft 0.25s ease-out',
         }}
         onClick={(e) => e.stopPropagation()}
       >
