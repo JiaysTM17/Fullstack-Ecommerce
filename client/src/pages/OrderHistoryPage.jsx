@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
 import ReturnRequestModal from '../components/ReturnRequestModal';
+import DeliveryLiveMapModal from '../components/DeliveryLiveMapModal';
 import '../styles/dashboard.css';
 
 const INITIAL_CUSTOMER_ORDERS = [
@@ -90,6 +91,7 @@ export default function OrderHistoryPage() {
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
   const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
+  const [selectedLiveMapOrder, setSelectedLiveMapOrder] = useState(null);
 
   const saveOrders = (newOrders) => {
     setOrders(newOrders);
@@ -400,6 +402,17 @@ export default function OrderHistoryPage() {
                         {t('view_tracking_details', 'Xem lịch trình')}
                       </button>
 
+                      {ord.status === 'shipping' && (
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-secondary"
+                          style={{ fontSize: '12px', color: '#0284c7', borderColor: '#bae6fd' }}
+                          onClick={() => setSelectedLiveMapOrder(ord)}
+                        >
+                          🗺️ Bản đồ Shipper
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         className="shopee-btn shopee-btn-secondary"
@@ -508,6 +521,14 @@ export default function OrderHistoryPage() {
           order={selectedReturnOrder}
           onClose={() => setSelectedReturnOrder(null)}
           onSubmit={handleReturnSubmit}
+        />
+      )}
+
+      {/* Live Driver & GPS Map Modal */}
+      {selectedLiveMapOrder && (
+        <DeliveryLiveMapModal
+          order={selectedLiveMapOrder}
+          onClose={() => setSelectedLiveMapOrder(null)}
         />
       )}
     </main>

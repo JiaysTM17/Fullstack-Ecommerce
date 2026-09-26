@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import VoucherPickerModal from "../components/VoucherPickerModal";
+import { useCoins } from "../context/CoinContext";
 import { createOrder } from "../services/orderService";
 import { formatCurrency } from "../utils/formatCurrency";
 import "../styles/checkout-multistep.css";
@@ -30,8 +31,10 @@ export default function CheckoutPage() {
     removeVoucher,
     clearCart,
   } = useCart();
+  const { coins, redeemCoins } = useCoins();
 
   const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [useCoinsToggle, setUseCoinsToggle] = useState(false);
 
   const handleCopyAccount = () => {
     navigator.clipboard?.writeText("0909123456");
@@ -82,7 +85,11 @@ export default function CheckoutPage() {
 
   const shippingOption = SHIPPING_OPTIONS.find((s) => s.id === selectedShipping) || SHIPPING_OPTIONS[0];
   const finalShippingFee = appliedVoucher?.type === "shipping" ? 0 : shippingOption.fee;
-  const finalOrderTotal = Math.max(0, currentSubtotal - voucherDiscount + finalShippingFee);
+  
+  // Coin calculation: 1 Xu = 1 VND, max 50% of currentSubtotal
+  const maxCoinsUsable = Math.min(coins || 0, Math.floor(currentSubtotal * 0.5));
+  const coinDiscount = (useCoinsToggle && maxCoinsUsable > 0) ? maxCoinsUsable : 0;
+  const finalOrderTotal = Math.max(0, currentSubtotal - voucherDiscount - coinDiscount + finalShippingFee);
 
   async function handleFinalPlaceOrder() {
     setSubmitError("");
@@ -107,6 +114,8 @@ export default function CheckoutPage() {
       subtotal: currentSubtotal,
       voucherCode: appliedVoucher?.code || null,
       voucherDiscount,
+      coinDiscount,
+      coinsUsed: coinDiscount,
       shippingFee: finalShippingFee,
       shippingMethod: shippingOption.name,
       total: finalOrderTotal,
@@ -118,6 +127,11 @@ export default function CheckoutPage() {
       const generatedOrderId = order?.orderId || order?._id || order?.id || `ORD${Math.floor(100000 + Math.random() * 900000)}`;
       const trackingCode = `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`;
       const nowStr = new Date().toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      // Deduct used coins if redeemed
+      if (coinDiscount > 0) {
+        redeemCoins(coinDiscount, generatedOrderId);
+      }
 
       // Build customer order record for OrderHistoryPage
       const newCustomerOrder = {
@@ -132,6 +146,7 @@ export default function CheckoutPage() {
           image: it.image,
         })),
         total: finalOrderTotal,
+        coinDiscount,
         status: 'pending',
         statusText: 'Chờ xác nhận & đóng gói',
         stepIndex: 1,
@@ -515,7 +530,7 @@ export default function CheckoutPage() {
               </div>
 
               {/* Voucher status banner in Step 4 */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-page, #f8fafc)", border: "1px solid var(--border-medium, #e2e8f0)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13.5px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-page, #f8fafc)", border: "1px solid var(--border-medium, #e2e8f0)", borderRadius: "8px", padding: "12px 16px", marginBottom: "12px", fontSize: "13.5px" }}>
                 <div>
                   <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>🎟️ Voucher Áp Dụng: </span>
                   {appliedVoucher ? (
@@ -531,6 +546,65 @@ export default function CheckoutPage() {
                 >
                   {appliedVoucher ? "Đổi mã khác >" : "+ Chọn mã giảm giá >"}
                 </button>
+              </div>
+
+              {/* Mini Xu Redemption Banner in Step 4 */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  background: useCoinsToggle ? "rgba(245, 158, 11, 0.08)" : "var(--bg-page, #f8fafc)",
+                  border: useCoinsToggle ? "1.5px solid #f59e0b" : "1px solid var(--border-medium, #e2e8f0)",
+                  borderRadius: "8px",
+                  padding: "12px 16px",
+                  marginBottom: "20px",
+                  fontSize: "13.5px",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "22px" }}>🪙</span>
+                  <div>
+                    <div style={{ fontWeight: 700, color: "var(--text-primary)" }}>
+                      Dùng Mini Xu để thanh toán
+                      <span style={{ color: "#d97706", marginLeft: "6px", fontWeight: 600 }}>
+                        [Số dư: {(coins || 0).toLocaleString("vi-VN")} Xu]
+                      </span>
+                    </div>
+                    <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>
+                      {maxCoinsUsable > 0
+                        ? `Dùng ${maxCoinsUsable.toLocaleString("vi-VN")} Xu để giảm trực tiếp ${formatCurrency(maxCoinsUsable)} (tối đa 50% tiền hàng)`
+                        : "Cần tối thiểu 1.000 Xu để áp dụng giảm trừ đơn hàng"}
+                    </div>
+                  </div>
+                </div>
+
+                <label
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    cursor: maxCoinsUsable > 0 ? "pointer" : "not-allowed",
+                    userSelect: "none",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={useCoinsToggle}
+                    disabled={maxCoinsUsable <= 0}
+                    onChange={(e) => setUseCoinsToggle(e.target.checked)}
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      accentColor: "#d97706",
+                      cursor: maxCoinsUsable > 0 ? "pointer" : "not-allowed",
+                    }}
+                  />
+                  <span style={{ fontWeight: 700, color: useCoinsToggle ? "#d97706" : "var(--text-muted)", fontSize: "13px" }}>
+                    {useCoinsToggle ? `Đang dùng ${maxCoinsUsable.toLocaleString("vi-VN")} Xu` : "Dùng Xu"}
+                  </span>
+                </label>
               </div>
 
               {/* Item rows */}
@@ -651,10 +725,38 @@ export default function CheckoutPage() {
               )}
             </div>
 
+            {/* Interactive Mini Xu Section in Checkout summary */}
+            <div style={{ borderBottom: "1px dashed var(--border-medium, #ddd)", padding: "10px 0", margin: "2px 0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
+                  🪙 Mini Xu [{(coins || 0).toLocaleString("vi-VN")}]:
+                </span>
+                <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: maxCoinsUsable > 0 ? "pointer" : "not-allowed" }}>
+                  <input
+                    type="checkbox"
+                    checked={useCoinsToggle}
+                    disabled={maxCoinsUsable <= 0}
+                    onChange={(e) => setUseCoinsToggle(e.target.checked)}
+                    style={{ width: "16px", height: "16px", accentColor: "#d97706", cursor: maxCoinsUsable > 0 ? "pointer" : "not-allowed" }}
+                  />
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: useCoinsToggle ? "#d97706" : "var(--text-muted)" }}>
+                    {useCoinsToggle ? `Giảm ${formatCurrency(maxCoinsUsable)}` : "Dùng Xu"}
+                  </span>
+                </label>
+              </div>
+            </div>
+
             {voucherDiscount > 0 && (
               <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
                 <span>Voucher giảm giá ({appliedVoucher?.code}):</span>
                 <span style={{ fontWeight: 700 }}>-{formatCurrency(voucherDiscount)}</span>
+              </div>
+            )}
+
+            {coinDiscount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#d97706" }}>
+                <span>Dùng Mini Xu ({coinDiscount.toLocaleString("vi-VN")} xu):</span>
+                <span style={{ fontWeight: 700 }}>-{formatCurrency(coinDiscount)}</span>
               </div>
             )}
 
