@@ -142,6 +142,13 @@ const INITIAL_SELLER_ORDERS = [
   }
 ];
 
+const INITIAL_SHOP_VOUCHERS = [
+  { id: 'sv_01', shopId: 'shop_01', code: 'GENZ20K', name: 'Giảm 20k đơn từ 150k', discount: 20000, isPercent: false, minOrder: 150000, used: 45, limit: 100, active: true },
+  { id: 'sv_02', shopId: 'shop_01', code: 'GENZ10P', name: 'Giảm 10% tối đa 50k', discount: 10, isPercent: true, minOrder: 200000, used: 80, limit: 200, active: true },
+  { id: 'sv_03', shopId: 'shop_02', code: 'TECH50K', name: 'Giảm 50k thiết bị âm thanh', discount: 50000, isPercent: false, minOrder: 300000, used: 28, limit: 50, active: true },
+  { id: 'sv_04', shopId: 'shop_02', code: 'TECHFSHIP', name: 'Freeship đơn công nghệ từ 500k', discount: 30000, isPercent: false, minOrder: 500000, used: 92, limit: 150, active: true },
+];
+
 export default function SellerDashboardPage() {
   const { user, loginAsDemo } = useAuth();
   const toast = useToast();
@@ -154,9 +161,21 @@ export default function SellerDashboardPage() {
   const [shops] = useState(INITIAL_SHOPS);
   const currentShop = shops.find(s => s.id === selectedShopId) || shops[0];
 
-  const [activeTab, setActiveTab] = useState('products'); // 'products' | 'orders' | 'settings'
+  const [activeTab, setActiveTab] = useState('products'); // 'products' | 'orders' | 'vouchers' | 'analytics' | 'settings'
   const [products, setProducts] = useState(INITIAL_SELLER_PRODUCTS);
   const [orders, setOrders] = useState(INITIAL_SELLER_ORDERS);
+  const [vouchers, setVouchers] = useState(INITIAL_SHOP_VOUCHERS);
+
+  // Modal voucher của shop
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [voucherForm, setVoucherForm] = useState({
+    code: '',
+    name: '',
+    discount: '20000',
+    isPercent: false,
+    minOrder: '150000',
+    limit: '100'
+  });
 
   // Modal thêm / sửa mặt hàng
   const [showProductModal, setShowProductModal] = useState(false);
@@ -282,6 +301,47 @@ export default function SellerDashboardPage() {
     toast.success(`Đã cập nhật đơn #${orderId}: ${nextText}`);
   };
 
+  const shopVouchers = vouchers.filter(v => v.shopId === selectedShopId);
+
+  const handleCreateShopVoucher = (e) => {
+    e.preventDefault();
+    if (!voucherForm.code) return;
+
+    const newVoucher = {
+      id: `sv_${Date.now()}`,
+      shopId: selectedShopId,
+      code: voucherForm.code.toUpperCase().trim(),
+      name: voucherForm.name || `Ưu đãi ${voucherForm.code.toUpperCase()}`,
+      discount: Number(voucherForm.discount) || 10000,
+      isPercent: voucherForm.isPercent,
+      minOrder: Number(voucherForm.minOrder) || 0,
+      used: 0,
+      limit: Number(voucherForm.limit) || 100,
+      active: true,
+    };
+
+    setVouchers(prev => [newVoucher, ...prev]);
+    setShowVoucherModal(false);
+    setVoucherForm({ code: '', name: '', discount: '20000', isPercent: false, minOrder: '150000', limit: '100' });
+    toast.success(`Đã tạo mã ưu đãi ${newVoucher.code} cho Shop thành công!`);
+  };
+
+  const handleToggleVoucher = (voucherId) => {
+    setVouchers(prev => prev.map(v => {
+      if (v.id === voucherId) {
+        const next = !v.active;
+        toast.info(next ? `Đã kích hoạt mã ${v.code}` : `Đã tạm ngưng mã ${v.code}`);
+        return { ...v, active: next };
+      }
+      return v;
+    }));
+  };
+
+  const handleDeleteShopVoucher = (voucherId) => {
+    setVouchers(prev => prev.filter(v => v.id !== voucherId));
+    toast.success('Đã xóa mã voucher của shop');
+  };
+
   return (
     <div className="shopee-dashboard-container">
       {/* Sidebar điều hướng Kênh Người Bán */}
@@ -308,6 +368,22 @@ export default function SellerDashboardPage() {
           onClick={() => setActiveTab('orders')}
         >
           📑 Đơn Hàng Của Shop ({shopOrders.length})
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'vouchers' ? 'active' : ''}`}
+          onClick={() => setActiveTab('vouchers')}
+        >
+          🎫 Voucher Của Shop ({shopVouchers.length})
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analytics')}
+        >
+          📊 Báo Cáo & Phân Tích
         </button>
 
         <button
@@ -581,6 +657,309 @@ export default function SellerDashboardPage() {
             <div className="shopee-form-group">
               <label className="shopee-form-label">Mã định danh Shop (Shop ID)</label>
               <input type="text" className="shopee-form-input" value={currentShop.id} readOnly style={{ opacity: 0.8 }} />
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: QUẢN LÝ VOUCHER CỦA SHOP */}
+        {activeTab === 'vouchers' && (
+          <div className="shopee-table-card">
+            <div className="shopee-table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 700 }}>
+                  Danh Sách Mã Giảm Giá Của Shop ({shopVouchers.length})
+                </h2>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+                  Khách hàng có thể lưu mã này trên trang Shop hoặc nhập tại bước thanh toán.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-primary"
+                onClick={() => setShowVoucherModal(true)}
+              >
+                + Tạo Mã Giảm Giá Mới
+              </button>
+            </div>
+
+            <div className="shopee-table-wrapper">
+              <table className="shopee-table">
+                <thead>
+                  <tr>
+                    <th>Mã Voucher</th>
+                    <th>Tên Ưu Đãi</th>
+                    <th>Mức Giảm</th>
+                    <th>Đơn Tối Thiểu</th>
+                    <th>Lượt Dùng</th>
+                    <th>Trạng Thái</th>
+                    <th style={{ textAlign: 'right' }}>Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shopVouchers.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
+                        Shop chưa tạo mã giảm giá nào. Hãy tạo mã đầu tiên để kích cầu mua sắm!
+                      </td>
+                    </tr>
+                  ) : (
+                    shopVouchers.map((v) => (
+                      <tr key={v.id}>
+                        <td>
+                          <span style={{ fontWeight: 800, color: 'var(--primary-color)', background: 'var(--primary-light)', padding: '3px 8px', borderRadius: '4px', fontSize: '13px' }}>
+                            {v.code}
+                          </span>
+                        </td>
+                        <td><strong>{v.name}</strong></td>
+                        <td>
+                          <span style={{ fontWeight: 700, color: 'var(--color-success)' }}>
+                            {v.isPercent ? `Giảm ${v.discount}%` : `-${formatCurrency(v.discount)}`}
+                          </span>
+                        </td>
+                        <td>{formatCurrency(v.minOrder)}</td>
+                        <td>{v.used} / {v.limit}</td>
+                        <td>
+                          <span className={`shopee-status-badge ${v.active ? 'status-delivered' : 'status-cancelled'}`}>
+                            {v.active ? 'Đang áp dụng' : 'Tạm dừng'}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                            onClick={() => handleToggleVoucher(v.id)}
+                            style={{ marginRight: '6px' }}
+                          >
+                            {v.active ? 'Tạm Dừng' : 'Kích Hoạt'}
+                          </button>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-sm"
+                            style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }}
+                            onClick={() => handleDeleteShopVoucher(v.id)}
+                          >
+                            Xóa
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: BÁO CÁO & PHÂN TÍCH DOANH THU SHOP */}
+        {activeTab === 'analytics' && (
+          <div>
+            {/* KPI Cards */}
+            <div className="shopee-metrics-grid" style={{ marginBottom: '20px' }}>
+              <div className="shopee-metric-card">
+                <span className="shopee-metric-icon">📈</span>
+                <div className="shopee-metric-val">{formatCurrency(totalRevenue)}</div>
+                <div className="shopee-metric-lbl">Doanh Thu Thuần (Đã trừ hủy)</div>
+              </div>
+
+              <div className="shopee-metric-card">
+                <span className="shopee-metric-icon">🎯</span>
+                <div className="shopee-metric-val">95.8%</div>
+                <div className="shopee-metric-lbl">Tỷ Lệ Giao Hàng Thành Công</div>
+              </div>
+
+              <div className="shopee-metric-card">
+                <span className="shopee-metric-icon">⚡</span>
+                <div className="shopee-metric-val">1.2 giờ</div>
+                <div className="shopee-metric-lbl">Thời Gian Chuẩn Bị Hàng TB</div>
+              </div>
+
+              <div className="shopee-metric-card">
+                <span className="shopee-metric-icon">⭐</span>
+                <div className="shopee-metric-val">{currentShop.rating} / 5.0</div>
+                <div className="shopee-metric-lbl">Đánh Giá Uy Tín Của Khách</div>
+              </div>
+            </div>
+
+            {/* Doanh thu 7 ngày mô phỏng trực quan */}
+            <div className="shopee-table-card" style={{ marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 800, margin: '0 0 16px' }}>
+                📊 Biểu Đồ Doanh Số 7 Ngày Gần Nhất (VND)
+              </h3>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', height: '180px', padding: '10px 0', borderBottom: '1px solid var(--border-medium)' }}>
+                {[
+                  { day: 'T2', val: 320000, height: '40%' },
+                  { day: 'T3', val: 540000, height: '65%' },
+                  { day: 'T4', val: 410000, height: '50%' },
+                  { day: 'T5', val: 780000, height: '85%' },
+                  { day: 'T6', val: 620000, height: '70%' },
+                  { day: 'T7', val: 950000, height: '100%' },
+                  { day: 'CN', val: 710000, height: '80%' },
+                ].map((item) => (
+                  <div key={item.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--primary-color)', marginBottom: '4px' }}>
+                      {Math.round(item.val / 1000)}k
+                    </span>
+                    <div
+                      style={{
+                        width: '100%',
+                        maxWidth: '42px',
+                        height: item.height,
+                        background: 'linear-gradient(180deg, var(--primary-color, #ea580c) 0%, rgba(234, 88, 12, 0.4) 100%)',
+                        borderRadius: '6px 6px 0 0',
+                        transition: 'height 0.3s ease',
+                      }}
+                    />
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginTop: '6px' }}>
+                      {item.day}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Top sản phẩm bán chạy nhất */}
+            <div className="shopee-table-card">
+              <h3 style={{ fontSize: '15px', fontWeight: 800, margin: '0 0 16px' }}>
+                🏆 Top Sản Phẩm Bán Chạy Nhất Của Shop
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {shopProducts.slice(0, 3).map((prod, idx) => (
+                  <div
+                    key={prod._id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 14px',
+                      background: 'var(--bg-muted, #f8fafc)',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-light, #f1f5f9)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontWeight: 800, fontSize: '16px', color: idx === 0 ? '#f59e0b' : idx === 1 ? '#94a3b8' : '#b45309', width: '20px' }}>
+                        #{idx + 1}
+                      </span>
+                      <img src={prod.image} alt={prod.name} style={{ width: '42px', height: '42px', borderRadius: '6px', objectFit: 'cover' }} />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '13.5px' }}>{prod.name}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Giá: {formatCurrency(prod.price)} · Tồn kho: {prod.stock}</div>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontWeight: 800, color: 'var(--color-success)' }}>{prod.sold || 100} đã bán</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Doanh số: {formatCurrency(prod.price * (prod.sold || 1))}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL TẠO VOUCHER SHOP */}
+        {showVoucherModal && (
+          <div className="shopee-modal-overlay" onClick={() => setShowVoucherModal(false)}>
+            <div className="shopee-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+              <div className="shopee-modal-header">
+                <h3>Tạo Mã Giảm Giá Cho {currentShop.name}</h3>
+                <button
+                  type="button"
+                  className="shopee-modal-close"
+                  onClick={() => setShowVoucherModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateShopVoucher}>
+                <div className="shopee-form-group">
+                  <label className="shopee-form-label">Mã Voucher (Ví dụ: SHOP20K, VIP10P) *</label>
+                  <input
+                    type="text"
+                    required
+                    className="shopee-form-input"
+                    placeholder="SHOP20K"
+                    value={voucherForm.code}
+                    onChange={(e) => setVoucherForm({ ...voucherForm, code: e.target.value.toUpperCase() })}
+                  />
+                </div>
+
+                <div className="shopee-form-group">
+                  <label className="shopee-form-label">Tên Chương Trình Ưu Đãi *</label>
+                  <input
+                    type="text"
+                    required
+                    className="shopee-form-input"
+                    placeholder="Giảm 20.000₫ cho đơn hàng thời trang"
+                    value={voucherForm.name}
+                    onChange={(e) => setVoucherForm({ ...voucherForm, name: e.target.value })}
+                  />
+                </div>
+
+                <div className="shopee-form-row">
+                  <div className="shopee-form-group">
+                    <label className="shopee-form-label">Loại Giảm Giá</label>
+                    <select
+                      className="shopee-form-select"
+                      value={voucherForm.isPercent ? 'percent' : 'amount'}
+                      onChange={(e) => setVoucherForm({ ...voucherForm, isPercent: e.target.value === 'percent' })}
+                    >
+                      <option value="amount">Số tiền cố định (VNĐ)</option>
+                      <option value="percent">Phần trăm (%)</option>
+                    </select>
+                  </div>
+
+                  <div className="shopee-form-group">
+                    <label className="shopee-form-label">Mức Giảm *</label>
+                    <input
+                      type="number"
+                      required
+                      className="shopee-form-input"
+                      placeholder={voucherForm.isPercent ? '10' : '20000'}
+                      value={voucherForm.discount}
+                      onChange={(e) => setVoucherForm({ ...voucherForm, discount: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="shopee-form-row">
+                  <div className="shopee-form-group">
+                    <label className="shopee-form-label">Đơn Hàng Tối Thiểu (VNĐ)</label>
+                    <input
+                      type="number"
+                      className="shopee-form-input"
+                      placeholder="150000"
+                      value={voucherForm.minOrder}
+                      onChange={(e) => setVoucherForm({ ...voucherForm, minOrder: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="shopee-form-group">
+                    <label className="shopee-form-label">Giới Hạn Lượt Dùng</label>
+                    <input
+                      type="number"
+                      className="shopee-form-input"
+                      placeholder="100"
+                      value={voucherForm.limit}
+                      onChange={(e) => setVoucherForm({ ...voucherForm, limit: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-secondary"
+                    onClick={() => setShowVoucherModal(false)}
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button type="submit" className="shopee-btn shopee-btn-primary">
+                    Phát Hành Voucher
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

@@ -41,6 +41,27 @@ const INITIAL_ALL_SHOPS = [
   },
 ];
 
+const INITIAL_MODERATION_PRODUCTS = [
+  { id: 'p_mod_01', name: 'Áo thun nam basic cotton 100%', shopName: 'Thời Trang GenZ Official', shopId: 'shop_01', price: 199000, category: 'Thời trang', stock: 50, status: 'approved', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100' },
+  { id: 'p_mod_02', name: 'Tai nghe Bluetooth True Wireless ANC', shopName: 'TechWorld Store', shopId: 'shop_02', price: 650000, category: 'Điện tử', stock: 80, status: 'approved', image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=100' },
+  { id: 'p_mod_03', name: 'Kem dưỡng trắng da cấp tốc 7 ngày (Chưa kiểm định)', shopName: 'Mỹ Phẩm Xách Tay H&K', shopId: 'shop_03', price: 89000, category: 'Mỹ phẩm', stock: 15, status: 'rejected', reason: 'Chưa có giấy phép lưu hành', image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=100' },
+  { id: 'p_mod_04', name: 'Bàn phím cơ Bluetooth RGB Hot-swap', shopName: 'TechWorld Store', shopId: 'shop_02', price: 890000, category: 'Điện tử', stock: 25, status: 'pending', image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=100' },
+  { id: 'p_mod_05', name: 'Áo khoác gió bomber chống nước siêu nhẹ', shopName: 'Thời Trang GenZ Official', shopId: 'shop_01', price: 349000, category: 'Thời trang', stock: 40, status: 'pending', image: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=100' },
+];
+
+const INITIAL_CATEGORIES = [
+  { id: 'cat_01', name: 'Thời trang', icon: '👕', count: 42, active: true },
+  { id: 'cat_02', name: 'Điện tử & Công nghệ', icon: '🎧', count: 35, active: true },
+  { id: 'cat_03', name: 'Đời sống & Nhà cửa', icon: '🏠', count: 28, active: true },
+  { id: 'cat_04', name: 'Sức khỏe & Làm đẹp', icon: '💄', count: 19, active: true },
+  { id: 'cat_05', name: 'Thể thao & Du lịch', icon: '⚽', count: 14, active: true },
+];
+
+const INITIAL_FINANCE_SETTLEMENTS = [
+  { id: 'fin_01', shopId: 'shop_01', shopName: 'Thời Trang GenZ Official', gmv: 857000, commission: 42850, netPayout: 814150, period: 'Kỳ 1 (01/09 - 15/09)', status: 'paid', statusText: 'Đã thanh toán' },
+  { id: 'fin_02', shopId: 'shop_02', shopName: 'TechWorld Store', gmv: 2820000, commission: 141000, netPayout: 2679000, period: 'Kỳ 1 (01/09 - 15/09)', status: 'pending', statusText: 'Chờ đối soát' },
+];
+
 const INITIAL_ALL_USERS = [
   { id: "usr_01", fullName: "Nguyễn Văn Khách", email: "khachhang@shopee.vn", role: "customer", ordersCount: 2, status: "active" },
   { id: "usr_02", fullName: "Trần Thị Chủ Shop", email: "shop.genz@shopee.vn", role: "seller", shopName: "Thời Trang GenZ", status: "active" },
@@ -51,9 +72,14 @@ const INITIAL_ALL_USERS = [
 export default function AdminDashboardPage() {
   const { user } = useAuth();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'shops' | 'users' | 'vouchers'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'shops' | 'users' | 'products' | 'categories' | 'finance' | 'vouchers'
   const [shops, setShops] = useState(INITIAL_ALL_SHOPS);
   const [users, setUsers] = useState(INITIAL_ALL_USERS);
+  const [moderationProducts, setModerationProducts] = useState(INITIAL_MODERATION_PRODUCTS);
+  const [categories, setCategories] = useState(INITIAL_CATEGORIES);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatIcon, setNewCatIcon] = useState('📦');
+  const [financeList, setFinanceList] = useState(INITIAL_FINANCE_SETTLEMENTS);
 
   // Voucher Management
   const [vouchers, setVouchers] = useState(getVouchers);
@@ -138,6 +164,45 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleApproveProduct = (prodId) => {
+    setModerationProducts(prev => prev.map(p => p.id === prodId ? { ...p, status: 'approved' } : p));
+    toast.success('Đã duyệt sản phẩm lên sàn thành công!');
+  };
+
+  const handleRejectProduct = (prodId) => {
+    setModerationProducts(prev => prev.map(p => p.id === prodId ? { ...p, status: 'rejected', reason: 'Vi phạm chính sách sàn' } : p));
+    toast.info('Đã từ chối / gỡ bỏ sản phẩm khỏi sàn');
+  };
+
+  const handleAddCategory = (e) => {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+    const newCat = {
+      id: `cat_${Date.now()}`,
+      name: newCatName.trim(),
+      icon: newCatIcon || '📦',
+      count: 0,
+      active: true,
+    };
+    setCategories(prev => [...prev, newCat]);
+    setNewCatName('');
+    toast.success(`Đã thêm danh mục "${newCat.name}" vào hệ thống sàn!`);
+  };
+
+  const handleToggleCategory = (catId) => {
+    setCategories(prev => prev.map(c => c.id === catId ? { ...c, active: !c.active } : c));
+  };
+
+  const handleDeleteCategory = (catId) => {
+    setCategories(prev => prev.filter(c => c.id !== catId));
+    toast.info('Đã xóa danh mục');
+  };
+
+  const handleSettlePayout = (finId) => {
+    setFinanceList(prev => prev.map(f => f.id === finId ? { ...f, status: 'paid', statusText: 'Đã thanh toán' } : f));
+    toast.success('Đã xác nhận đối soát và chuyển khoản tiền hàng cho Shop!');
+  };
+
   return (
     <div className="shopee-dashboard-container">
       {/* Sidebar Super Admin */}
@@ -172,6 +237,14 @@ export default function AdminDashboardPage() {
 
         <button
           type="button"
+          className={`shopee-nav-item ${activeTab === 'products' ? 'active' : ''}`}
+          onClick={() => setActiveTab('products')}
+        >
+          📦 Kiểm Duyệt Sản Phẩm ({moderationProducts.length})
+        </button>
+
+        <button
+          type="button"
           className={`shopee-nav-item ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
@@ -180,10 +253,26 @@ export default function AdminDashboardPage() {
 
         <button
           type="button"
+          className={`shopee-nav-item ${activeTab === 'categories' ? 'active' : ''}`}
+          onClick={() => setActiveTab('categories')}
+        >
+          📑 Quản Lý Danh Mục ({categories.length})
+        </button>
+
+        <button
+          type="button"
           className={`shopee-nav-item ${activeTab === 'vouchers' ? 'active' : ''}`}
           onClick={() => setActiveTab('vouchers')}
         >
           🎟️ Quản Lý Voucher Sàn ({vouchers.length})
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'finance' ? 'active' : ''}`}
+          onClick={() => setActiveTab('finance')}
+        >
+          💰 Đối Soát & Tài Chính
         </button>
       </aside>
 
@@ -485,6 +574,259 @@ export default function AdminDashboardPage() {
                         >
                           Xóa
                         </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: KIỂM DUYỆT SẢN PHẨM TOÀN SÀN */}
+        {activeTab === 'products' && (
+          <div className="shopee-table-card">
+            <div className="shopee-table-header">
+              <div>
+                <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 700 }}>
+                  Kiểm Duyệt Sản Phẩm Toàn Sàn ({moderationProducts.length})
+                </h2>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+                  Phê duyệt sản phẩm mới đăng của các shop trước khi xuất hiện trên sàn hoặc xử lý sản phẩm vi phạm.
+                </p>
+              </div>
+            </div>
+
+            <div className="shopee-table-responsive">
+              <table className="shopee-data-table">
+                <thead>
+                  <tr>
+                    <th>Sản Phẩm</th>
+                    <th>Gian Hàng Bán</th>
+                    <th>Danh Mục</th>
+                    <th>Giá Bán</th>
+                    <th>Tồn Kho</th>
+                    <th>Trạng Thái</th>
+                    <th style={{ textAlign: 'right' }}>Thao Tác Duyệt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {moderationProducts.map((p) => (
+                    <tr key={p.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <img src={p.image} alt={p.name} style={{ width: '38px', height: '38px', borderRadius: '4px', objectFit: 'cover' }} />
+                          <strong style={{ fontSize: '13px' }}>{p.name}</strong>
+                        </div>
+                      </td>
+                      <td>
+                        <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{p.shopName}</span>
+                      </td>
+                      <td>{p.category}</td>
+                      <td style={{ fontWeight: 700 }}>{formatCurrency(p.price)}</td>
+                      <td>{p.stock}</td>
+                      <td>
+                        <span
+                          className="shopee-status-badge"
+                          style={{
+                            background: p.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : p.status === 'pending' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(239, 68, 68, 0.1)',
+                            color: p.status === 'approved' ? '#059669' : p.status === 'pending' ? '#d97706' : '#dc2626',
+                            fontWeight: 700,
+                          }}
+                        >
+                          {p.status === 'approved' ? '✓ Đã Duyệt' : p.status === 'pending' ? '⏳ Chờ Duyệt' : '✕ Từ Chối / Gỡ Bỏ'}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        {p.status !== 'approved' && (
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-sm"
+                            style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #10b981', marginRight: '6px' }}
+                            onClick={() => handleApproveProduct(p.id)}
+                          >
+                            ✓ Duyệt Bán
+                          </button>
+                        )}
+                        {p.status !== 'rejected' && (
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-sm"
+                            style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #ef4444' }}
+                            onClick={() => handleRejectProduct(p.id)}
+                          >
+                            ✕ Gỡ Bỏ
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: QUẢN LÝ DANH MỤC SÀN */}
+        {activeTab === 'categories' && (
+          <div className="shopee-table-card">
+            <div className="shopee-table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 700 }}>
+                  Quản Lý Cây Danh Mục Sàn ({categories.length})
+                </h2>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+                  Định hình các nhóm ngành hàng để phân loại sản phẩm và hiển thị trên Mega Menu.
+                </p>
+              </div>
+            </div>
+
+            {/* Form thêm danh mục */}
+            <form onSubmit={handleAddCategory} style={{ display: 'flex', gap: '10px', margin: '16px 0', padding: '16px', background: 'var(--bg-muted, #f8fafc)', borderRadius: '8px' }}>
+              <input
+                type="text"
+                className="shopee-form-input"
+                placeholder="Nhập biểu tượng Emoji (VD: 📚, 🍔, 🚗)..."
+                value={newCatIcon}
+                onChange={(e) => setNewCatIcon(e.target.value)}
+                style={{ width: '140px' }}
+              />
+              <input
+                type="text"
+                required
+                className="shopee-form-input"
+                placeholder="Nhập tên ngành hàng / danh mục mới (VD: Sách & Văn Phòng Phẩm)..."
+                value={newCatName}
+                onChange={(e) => setNewCatName(e.target.value)}
+                style={{ flex: 1 }}
+              />
+              <button type="submit" className="shopee-btn shopee-btn-primary" style={{ whiteSpace: 'nowrap' }}>
+                + Thêm Danh Mục
+              </button>
+            </form>
+
+            <div className="shopee-table-responsive">
+              <table className="shopee-data-table">
+                <thead>
+                  <tr>
+                    <th>Icon</th>
+                    <th>Tên Danh Mục Ngành Hàng</th>
+                    <th>Số Mặt Hàng Đang Bán</th>
+                    <th>Trạng Thái Hiển Thị</th>
+                    <th style={{ textAlign: 'right' }}>Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categories.map((c) => (
+                    <tr key={c.id}>
+                      <td style={{ fontSize: '20px' }}>{c.icon}</td>
+                      <td><strong>{c.name}</strong></td>
+                      <td>{c.count} sản phẩm</td>
+                      <td>
+                        <span className={`shopee-status-badge ${c.active ? 'status-delivered' : 'status-cancelled'}`}>
+                          {c.active ? 'Hiển thị công khai' : 'Tạm ẩn'}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                          onClick={() => handleToggleCategory(c.id)}
+                          style={{ marginRight: '6px' }}
+                        >
+                          {c.active ? 'Tạm Ẩn' : 'Bật Hiển Thị'}
+                        </button>
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-sm"
+                          style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }}
+                          onClick={() => handleDeleteCategory(c.id)}
+                        >
+                          Xóa
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: BÁO CÁO TÀI CHÍNH & ĐỐI SOÁT HOA HỒNG SÀN */}
+        {activeTab === 'finance' && (
+          <div className="shopee-table-card">
+            <div className="shopee-table-header">
+              <div>
+                <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 700 }}>
+                  Đối Soát Doanh Thu & Hoa Hồng Sàn (Commission 5%)
+                </h2>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+                  Kỳ đối soát định kỳ 15 ngày/lần. Tự động tính toán phí chiết khấu sàn và số tiền thực nhận chuyển khoản cho từng Shop.
+                </p>
+              </div>
+            </div>
+
+            <div className="shopee-metrics-grid" style={{ margin: '16px 0 24px' }}>
+              <div className="shopee-metric-card">
+                <span className="shopee-metric-label">Tổng GMV Toàn Sàn Đối Soát</span>
+                <div className="shopee-metric-value">{formatCurrency(totalPlatformRevenue)}</div>
+              </div>
+              <div className="shopee-metric-card">
+                <span className="shopee-metric-label">Phí Hoa Hồng Sàn Thu Được (5%)</span>
+                <div className="shopee-metric-value" style={{ color: 'var(--primary-color)' }}>{formatCurrency(platformCommission)}</div>
+              </div>
+              <div className="shopee-metric-card">
+                <span className="shopee-metric-label">Tiền Cần Giải Ngân Cho Shop</span>
+                <div className="shopee-metric-value" style={{ color: 'var(--color-success)' }}>{formatCurrency(totalPlatformRevenue - platformCommission)}</div>
+              </div>
+            </div>
+
+            <div className="shopee-table-responsive">
+              <table className="shopee-data-table">
+                <thead>
+                  <tr>
+                    <th>Cửa Hàng Đối Tác</th>
+                    <th>Kỳ Đối Soát</th>
+                    <th>Tổng GMV Bán Được</th>
+                    <th>Phí Sàn Khấu Trừ (5%)</th>
+                    <th>Số Tiền Thực Trả Shop</th>
+                    <th>Trạng Thái</th>
+                    <th style={{ textAlign: 'right' }}>Thao Tác Giải Ngân</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {financeList.map((f) => (
+                    <tr key={f.id}>
+                      <td>
+                        <strong style={{ color: 'var(--text-primary)' }}>{f.shopName}</strong>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>ID: {f.shopId}</div>
+                      </td>
+                      <td>{f.period}</td>
+                      <td style={{ fontWeight: 700 }}>{formatCurrency(f.gmv)}</td>
+                      <td style={{ fontWeight: 700, color: 'var(--primary-color)' }}>-{formatCurrency(f.commission)}</td>
+                      <td style={{ fontWeight: 800, color: 'var(--color-success)', fontSize: '14px' }}>
+                        {formatCurrency(f.netPayout)}
+                      </td>
+                      <td>
+                        <span className={`shopee-status-badge ${f.status === 'paid' ? 'status-delivered' : 'status-pending'}`}>
+                          {f.statusText}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        {f.status === 'pending' ? (
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-primary shopee-btn-sm"
+                            onClick={() => handleSettlePayout(f.id)}
+                          >
+                            💳 Chuyển Khoản & Quyết Toán
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '12px', color: 'var(--color-success)', fontWeight: 700 }}>
+                            ✓ Đã Giải Ngân Thành Công
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -6,6 +6,7 @@ import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useCompare } from "../context/CompareContext";
 import { RecentlyViewed, saveRecentlyViewed } from "../components/RecentlyViewed";
+import ShopChatModal from "../components/ShopChatModal";
 import { addProductReview, getProductById, getProducts } from "../services/productService";
 import { formatCurrency } from "../utils/formatCurrency";
 import "../styles/amazon-pdp.css";
@@ -37,6 +38,7 @@ export default function ProductDetailPage() {
   const [reviewSuccess, setReviewSuccess] = useState(false);
   const [hoverStar, setHoverStar] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showShopChat, setShowShopChat] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -425,16 +427,7 @@ export default function ProductDetailPage() {
           <button
             type="button"
             className="shopee-btn shopee-btn-secondary"
-            onClick={() => {
-              window.dispatchEvent(
-                new CustomEvent('open_live_chat', {
-                  detail: {
-                    shopName: product.shopName || "Thời Trang GenZ Official",
-                    shopId: product.shopId || "shop_01",
-                  },
-                })
-              );
-            }}
+            onClick={() => setShowShopChat(true)}
           >
             💬 Chat Ngay
           </button>
@@ -829,6 +822,18 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Live Shop Seller Chat Modal */}
+      {showShopChat && (
+        <ShopChatModal
+          shop={{
+            name: product.shopName || "Thời Trang GenZ Official",
+            logo: product.shopLogo || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=80",
+          }}
+          currentProduct={product}
+          onClose={() => setShowShopChat(false)}
+        />
       )}
     </main>
   );
