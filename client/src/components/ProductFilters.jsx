@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { getAllShops } from '../services/shopService';
 import '../styles/filters.css';
 
-const CATEGORIES = ["Tất cả", "Thời trang", "Điện tử", "Sắc đẹp", "Gia dụng", "Đời sống"];
+const CATEGORIES = ["Tất cả", "Thời trang", "Điện tử", "Sắc đẹp", "Gia dụng", "Thể thao", "Đời sống"];
 
 const PRICE_PRESETS = [
   { label: "Dưới 200k", min: "", max: "200000" },

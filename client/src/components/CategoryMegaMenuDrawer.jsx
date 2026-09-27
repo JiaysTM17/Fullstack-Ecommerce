@@ -9,9 +9,9 @@ const CATEGORIES_DATA = [
     name: 'Thời Trang & May Mặc',
     icon: '👗',
     categoryParam: 'Thời trang',
-    badge: '18+ Sản phẩm',
-    description: 'Áo thun cotton, sơ mi lụa satin, quần jean ống đứng, polo dệt tổ ong',
-    subItems: ['Áo Thun Cotton Basic', 'Sơ Mi Lụa Satin', 'Quần Jean Baggy', 'Áo Polo Bo Cổ', 'Áo Khoác Gió'],
+    badge: '13 Sản phẩm',
+    description: 'Áo thun cotton basic, sơ mi lụa satin, quần jean ống đứng, áo khoác bomber, váy dạ tweed',
+    subItems: ['Áo thun cotton', 'Sơ mi lụa', 'Quần jean', 'Áo khoác gió', 'Váy dạ tweed', 'Giày cao gót'],
     shop: 'Thời Trang GenZ Official',
     shopId: 'shop_01',
     color: '#ec4899',
@@ -19,11 +19,11 @@ const CATEGORIES_DATA = [
   {
     id: 'dien-tu',
     name: 'Thiết Bị Điện Tử & Công Nghệ',
-    icon: '🎧',
+    icon: '💻',
     categoryParam: 'Điện tử',
-    badge: '22+ Sản phẩm',
-    description: 'Chuột gaming 58g, bàn phím cơ gasket, tai nghe ANC, màn hình 2K 165Hz',
-    subItems: ['Chuột Gaming Không Dây', 'Bàn Phím Cơ Hot-swap', 'Tai Nghe Chống Ồn', 'Màn Hình 27 Inch 2K'],
+    badge: '14 Sản phẩm',
+    description: 'Bàn phím cơ hot-swap, chuột không dây công thái học, màn hình 4K, webcam Ultra HD, tablet',
+    subItems: ['Bàn phím cơ', 'Chuột không dây', 'Webcam 4K', 'Máy tính bảng', 'Ổ cứng SSD', 'Sạc nhanh GaN'],
     shop: 'TechWorld Store',
     shopId: 'shop_02',
     color: '#3b82f6',
@@ -33,21 +33,21 @@ const CATEGORIES_DATA = [
     name: 'Sắc Đẹp & Dược Mỹ Phẩm',
     icon: '💄',
     categoryParam: 'Sắc đẹp',
-    badge: '16+ Sản phẩm',
-    description: 'Serum rau má B5, kem chống nắng phổ rộng, son velvet lì, nước tẩy trang',
-    subItems: ['Serum B5 Phục Hồi', 'Kem Chống Nắng SPF50+', 'Son Kem Lì Velvet', 'Nước Tẩy Trang Dịu Nhẹ'],
+    badge: '10 Sản phẩm',
+    description: 'Serum Vitamin C & B5, kem chống nắng SPF50+, son kem lì, nước tẩy trang, máy rửa mặt sóng âm',
+    subItems: ['Serum Vitamin C', 'Serum B5', 'Kem chống nắng', 'Son kem lì', 'Nước tẩy trang', 'Máy rửa mặt'],
     shop: 'Beauty Cosmetics Official',
     shopId: 'shop_03',
     color: '#f43f5e',
   },
   {
     id: 'gia-dung',
-    name: 'Gia Dụng & Đời Sống',
+    name: 'Gia Dụng & Đời Sống Thông Minh',
     icon: '🍳',
     categoryParam: 'Gia dụng',
-    badge: '15+ Sản phẩm',
-    description: 'Nồi cơm điện cao tần IH, nồi chiên 6.5L, máy hút bụi 20k Pa, máy lọc HEPA',
-    subItems: ['Nồi Cơm Điện Cao Tần IH', 'Nồi Chiên Không Dầu', 'Máy Hút Bụi Không Dây', 'Máy Lọc Không Khí'],
+    badge: '10 Sản phẩm',
+    description: 'Nồi cơm điện cao tần IH, nồi chiên không dầu 6.5L, máy hút bụi, máy lọc không khí HEPA, máy ép chậm',
+    subItems: ['Nồi cơm điện', 'Nồi chiên không dầu', 'Máy hút bụi', 'Máy lọc không khí', 'Máy ép chậm', 'Ghế công thái học'],
     shop: 'HomePro Gia Dụng Thông Minh',
     shopId: 'shop_04',
     color: '#f59e0b',
@@ -57,96 +57,76 @@ const CATEGORIES_DATA = [
     name: 'Thể Thao & Dã Ngoại',
     icon: '⚽',
     categoryParam: 'Thể thao',
-    badge: '8+ Sản phẩm',
-    description: 'Lều cắm trại tự bung thủy lực, thảm yoga TPE định tuyến, bình nước 1.5L',
-    subItems: ['Lều Cắm Trại Tự Bung', 'Thảm Tập Yoga Định Tuyến', 'Dây Kháng Lực Gym', 'Bình Nước 1500ml'],
+    badge: '3 Sản phẩm',
+    description: 'Lều cắm trại tự bung thủy lực, thảm tập yoga định tuyến TPE 8mm, bình nước thể thao Tritan 1500ml',
+    subItems: ['Lều cắm trại', 'Thảm tập yoga', 'Bình nước thể thao'],
     shop: 'SportZone Thể Thao & Dã Ngoại',
-    shopId: 'shop_05',
+    shopId: 'shop_01',
     color: '#10b981',
   },
   {
-    id: 'nong-san',
-    name: 'Nông Sản & Bách Hóa Sạch',
+    id: 'doi-song',
+    name: 'Đời Sống & Tiện Ích Văn Phòng',
     icon: '🌿',
     categoryParam: 'Đời sống',
-    badge: '7+ Sản phẩm',
-    description: 'Hạt dinh dưỡng macca óc chó organic, trà hoa cúc gạo lứt, mật ong hoa rừng',
-    subItems: ['Hạt Macca & Óc Chó', 'Trà Hoa Cúc Gạo Lứt', 'Hạt Chia Hữu Cơ', 'Mật Ong Hoa Rừng'],
-    shop: 'GreenFarm Nông Sản & Organic Sạch',
-    shopId: 'shop_06',
+    badge: '2 Sản phẩm',
+    description: 'Bình giữ nhiệt Lock&Lock hiển thị nhiệt độ thông minh, đèn bàn LED bảo vệ mắt chống cận thị',
+    subItems: ['Bình giữ nhiệt', 'Đèn bàn LED'],
+    shop: 'HomePro Gia Dụng Thông Minh',
+    shopId: 'shop_01',
     color: '#14b8a6',
   },
   {
-    id: 'sach',
-    name: 'Sách & Văn Phòng Phẩm',
-    icon: '📚',
-    categoryParam: 'Đời sống',
-    badge: '6+ Sản phẩm',
-    description: 'Sách phát triển bản thân, sổ tay da A5, bộ 12 bút gel mực đen mịn không lem',
-    subItems: ['Sách Kỹ Năng & Tư Duy', 'Sổ Tay Da Bìa Cứng A5', 'Bộ 12 Bút Gel Mực Đen', 'Balo Đựng Laptop'],
-    shop: 'Tri Thức BookStore',
-    shopId: 'shop_07',
-    color: '#8b5cf6',
-  },
-  {
-    id: 'oto-xe-may',
-    name: 'Phụ Kiện Ô Tô Xe Máy',
-    icon: '🚗',
-    categoryParam: 'Điện tử',
-    badge: '5+ Sản phẩm',
-    description: 'Bơm lốp mini 150 PSI tự ngắt, cam hành trình 4K Sony, tẩu sạc nhanh 60W',
-    subItems: ['Bơm Lốp Điện Tử Mini', 'Camera Hành Trình 4K', 'Tẩu Sạc Ô Tô 60W', 'Xịt Phủ Bóng Ceramic'],
-    shop: 'AutoPro Phụ Kiện Ô Tô Xe Máy',
-    shopId: 'shop_08',
-    color: '#06b6d4',
-  },
-  {
-    id: 'me-va-be',
-    name: 'Mẹ & Bé Yêu',
-    icon: '🍼',
-    categoryParam: 'Đời sống',
-    badge: '5+ Sản phẩm',
-    description: 'Bình sữa silicone y tế, tã bỉm hữu cơ kháng khuẩn, xe đẩy gấp gọn 5.4kg',
-    subItems: ['Bình Sữa Cổ Rộng PPSU', 'Tã Bỉm Hữu Cơ', 'Xe Đẩy Gấp Gọn Siêu Nhẹ', 'Bộ Đồ Chơi Gỗ'],
-    shop: 'BabyCare Siêu Thị Mẹ & Bé Yêu',
-    shopId: 'shop_09',
-    color: '#f97316',
-  },
-  {
     id: 'am-thanh',
-    name: 'Âm Thanh & Hi-Fi',
-    icon: '🎵',
-    categoryParam: 'Điện tử',
-    badge: '5+ Sản phẩm',
-    description: 'Loa Bluetooth 40W IPX7, tai nghe kiểm âm Studio, soundbar Dolby 120W',
-    subItems: ['Loa Bluetooth 40W IPX7', 'Tai Nghe Studio Monitor', 'Soundbar Dolby Audio 120W', 'DAC Giải Mã Hi-Res'],
-    shop: 'AudioHiFi Âm Thanh Đẳng Cấp',
-    shopId: 'shop_10',
+    name: 'Thiết Bị Âm Thanh & Tai Nghe',
+    icon: '🎧',
+    filterType: 'keyword',
+    keywordParam: 'Tai nghe',
+    badge: '2 Sản phẩm',
+    description: 'Tai nghe Bluetooth ANC SoundPeak Pro chống ồn chủ động, tai nghe gaming chụp tai âm thanh vòm 7.1',
+    subItems: ['Tai nghe Bluetooth', 'Tai nghe chống ồn', 'Tai nghe Gaming 7.1'],
+    shop: 'TechWorld Store',
+    shopId: 'shop_02',
     color: '#6366f1',
   },
   {
-    id: 'thu-cung',
-    name: 'Vương Quốc Thú Cưng',
-    icon: '🐾',
-    categoryParam: 'Đời sống',
-    badge: '4+ Sản phẩm',
-    description: 'Thức ăn hạt cá hồi tươi cho mèo, đệm nhung ấm áp thú cưng, trụ cào 3 tầng',
-    subItems: ['Thức Ăn Hạt Hữu Cơ', 'Đệm Nhung Mềm Mại', 'Trụ Cào Móng 3 Tầng', 'Bát Ăn Inox Đôi'],
-    shop: 'PetParadise Vương Quốc Thú Cưng',
-    shopId: 'shop_11',
-    color: '#eab308',
+    id: 'dong-ho',
+    name: 'Đồng Hồ Thông Minh & Smartwatch',
+    icon: '⌚',
+    filterType: 'keyword',
+    keywordParam: 'Đồng hồ',
+    badge: '1 Sản phẩm',
+    description: 'Đồng hồ thông minh Smartwatch Pro màn hình AMOLED sắc nét, cảm biến đo SpO2 & điện tâm đồ ECG',
+    subItems: ['Đồng hồ thông minh', 'Smartwatch AMOLED', 'Đo SpO2'],
+    shop: 'TechWorld Store',
+    shopId: 'shop_02',
+    color: '#8b5cf6',
   },
   {
-    id: 'dong-ho',
-    name: 'Đồng Hồ & Thời Gian',
-    icon: '⌚',
-    categoryParam: 'Thời trang',
-    badge: '4+ Sản phẩm',
-    description: 'Đồng hồ cơ khí Automatic lộ cơ mặt Sapphire thép 316L, đồng hồ Smartwatch Pro',
-    subItems: ['Đồng Hồ Automatic Lộ Cơ', 'Đồng Hồ Đính Đá Nữ', 'Hộp Xoay Đồng Hồ', 'Dây Da Bò Khóa Bướm'],
-    shop: 'LuxeTime Đồng Hồ Cơ Khí',
-    shopId: 'shop_12',
-    color: '#e11d48',
+    id: 'balo-vi',
+    name: 'Balo, Ví Da & Phụ Kiện',
+    icon: '🎒',
+    filterType: 'keyword',
+    keywordParam: 'da bò',
+    badge: '4 Sản phẩm',
+    description: 'Balo laptop chống rạch cổng USB, ví da bò sáp nam khâu tay, thắt lưng da bò, kính mát phi công',
+    subItems: ['Balo laptop', 'Ví da bò', 'Thắt lưng da bò', 'Kính mát phi công'],
+    shop: 'Thời Trang GenZ Official',
+    shopId: 'shop_01',
+    color: '#06b6d4',
+  },
+  {
+    id: 'gaming-gear',
+    name: 'Gaming Gear & Phụ Kiện PC',
+    icon: '🎮',
+    filterType: 'keyword',
+    keywordParam: 'Bàn phím',
+    badge: '4 Sản phẩm',
+    description: 'Bàn phím cơ không dây RGB, chuột công thái học, tay cầm chơi game Hall Effect, giá đỡ laptop',
+    subItems: ['Bàn phím cơ', 'Chuột không dây', 'Tay cầm chơi game', 'Giá đỡ laptop'],
+    shop: 'TechWorld Store',
+    shopId: 'shop_02',
+    color: '#d946ef',
   },
 ];
 
@@ -166,9 +146,15 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handleSelectCategory = (catParam) => {
+  const handleSelectCategory = (cat) => {
     onClose();
-    navigate(`/?category=${encodeURIComponent(catParam)}`);
+    if (!cat) return;
+    if (typeof cat === 'object' && cat.filterType === 'keyword') {
+      navigate(`/?keyword=${encodeURIComponent(cat.keywordParam || cat.name)}`);
+    } else {
+      const param = typeof cat === 'string' ? cat : cat.categoryParam;
+      navigate(`/?category=${encodeURIComponent(param)}`);
+    }
   };
 
   const handleSelectShop = (shopId) => {
@@ -360,11 +346,11 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             )}
           </div>
           <span style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)' }}>
-            Hiển thị <strong>{filteredCategories.length}</strong> / 12 ngành hàng
+            Hiển thị <strong>{filteredCategories.length}</strong> / {CATEGORIES_DATA.length} ngành hàng
           </span>
         </div>
 
-        {/* Mega Menu Body: 12 Category Cards in Responsive Grid */}
+        {/* Mega Menu Body: Category Cards in Responsive Grid */}
         <div
           className="mega-menu-scroll-hide"
           style={{
@@ -381,7 +367,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
           {filteredCategories.map((cat) => (
             <div
               key={cat.id}
-              onClick={() => handleSelectCategory(cat.categoryParam)}
+              onClick={() => handleSelectCategory(cat)}
               style={{
                 background: 'var(--bg-card, #ffffff)',
                 borderRadius: '14px',
