@@ -3,6 +3,10 @@ import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import sellerRoutes from "./routes/sellerRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import shopRoutes from "./routes/shopRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import notFound from "./middlewares/notFound.js";
@@ -10,7 +14,7 @@ import errorHandler from "./middlewares/errorHandler.js";
 
 dotenv.config();
 
-// Connect to database
+// Connect to database (gracefully falls back if MongoDB is offline)
 connectDB();
 
 const app = express();
@@ -36,9 +40,14 @@ if (process.env.NODE_ENV === "development") {
 
 // Health check
 app.get("/", (req, res) => {
-  res.json({ message: "Fullstack E-Commerce API is running" });
+  res.json({ message: "Mini Shopee Enterprise Multi-Vendor Marketplace API is running" });
 });
 
+// Mount Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/seller", sellerRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/shops", shopRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 

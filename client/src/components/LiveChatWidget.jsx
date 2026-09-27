@@ -164,7 +164,7 @@ export default function LiveChatWidget() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { theme } = useTheme();
-  const { addToCart } = useCart();
+  const { addToCart, applyVoucher } = useCart();
   const { showToast } = useToast();
 
   // Tự động cuộn xuống cuối khi có tin nhắn mới
@@ -223,20 +223,33 @@ export default function LiveChatWidget() {
     });
   };
 
-  // Helper áp dụng voucher thẳng vào đơn hàng
+  // Helper áp dụng voucher thẳng vào đơn hàng (tích hợp Dual Voucher Engine)
   const handleApplyVoucherToCart = (voucher) => {
     try {
-      localStorage.setItem('mini_shopee_applied_voucher', JSON.stringify({
-        code: voucher.code,
+      const code = typeof voucher === 'string' ? voucher : voucher.code;
+      if (applyVoucher) {
+        const res = applyVoucher(code);
+        playChime('cart');
+        if (res && res.success) {
+          showToast(`✓ Đã áp dụng mã "${code}" thành công vào giỏ hàng!`, 'success');
+          return;
+        } else if (res && res.message) {
+          showToast(res.message, 'info');
+          return;
+        }
+      }
+      // Fallback lưu trữ an toàn
+      localStorage.setItem('mini_shopee_applied_discount_voucher', JSON.stringify({
+        code: voucher.code || voucher,
         discountType: 'percentage',
-        discountValue: voucher.code === 'SUPERDEAL' ? 15 : 10,
+        discountValue: (voucher.code === 'SUPERDEAL' ? 15 : 10),
         maxDiscount: 100000,
         minOrderAmount: 0,
       }));
       playChime('cart');
-      showToast(`✓ Đã áp dụng mã "${voucher.code}" trực tiếp vào giỏ hàng của bạn!`, 'success');
+      showToast(`✓ Đã áp dụng mã "${voucher.code || voucher}" vào giỏ hàng!`, 'success');
     } catch {
-      handleCopyVoucher(voucher.code);
+      handleCopyVoucher(voucher.code || voucher);
     }
   };
 
