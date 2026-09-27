@@ -151,6 +151,7 @@ const CATEGORIES_DATA = [
 
 export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = React.useState('');
 
   if (!isOpen) return null;
 
@@ -168,6 +169,17 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
     onClose();
     navigate('/');
   };
+
+  const filteredCategories = CATEGORIES_DATA.filter((cat) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase();
+    return (
+      cat.name.toLowerCase().includes(q) ||
+      cat.description.toLowerCase().includes(q) ||
+      cat.shop.toLowerCase().includes(q) ||
+      cat.subItems.some((s) => s.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <div
@@ -217,6 +229,8 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             justifyContent: 'space-between',
             borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
             flexShrink: 0,
+            flexWrap: 'wrap',
+            gap: '12px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -280,6 +294,65 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
           </div>
         </div>
 
+        {/* Quick Filter Search Bar */}
+        <div
+          style={{
+            padding: '10px 24px',
+            background: 'var(--bg-card, #ffffff)',
+            borderBottom: '1px solid var(--border-light, #e2e8f0)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              flex: 1,
+              maxWidth: '480px',
+            }}
+          >
+            <input
+              type="text"
+              placeholder="🔍 Lọc nhanh theo tên ngành hàng, sản phẩm (ví dụ: Nồi cơm, Tai nghe, Áo thun)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '7px 32px 7px 12px',
+                borderRadius: '8px',
+                border: '1px solid var(--border-medium, #cbd5e1)',
+                fontSize: '13px',
+                outline: 'none',
+                background: 'var(--bg-muted, #f8fafc)',
+              }}
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#888',
+                  fontSize: '12px',
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)' }}>
+            Hiển thị <strong>{filteredCategories.length}</strong> / 12 ngành hàng
+          </span>
+        </div>
+
         {/* Mega Menu Body: 12 Category Cards in Responsive Grid */}
         <div
           className="mega-menu-scroll-hide"
@@ -294,7 +367,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             background: 'var(--bg-muted, #f8fafc)',
           }}
         >
-          {CATEGORIES_DATA.map((cat) => (
+          {filteredCategories.map((cat) => (
             <div
               key={cat.id}
               onClick={() => handleSelectCategory(cat.categoryParam)}
@@ -350,19 +423,37 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   {cat.description}
                 </p>
 
-                {/* Subcategory Pills */}
+                {/* Subcategory Interactive Pills */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
                   {cat.subItems.map((sub, idx) => (
                     <span
                       key={idx}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClose();
+                        navigate(`/?keyword=${encodeURIComponent(sub)}`);
+                      }}
                       style={{
                         fontSize: '11px',
                         background: 'var(--bg-muted, #f1f5f9)',
                         color: 'var(--text-primary)',
-                        padding: '2px 8px',
+                        padding: '3px 8px',
                         borderRadius: '6px',
                         border: '1px solid var(--border-light, #e2e8f0)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
                       }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = cat.color;
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.style.borderColor = cat.color;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'var(--bg-muted, #f1f5f9)';
+                        e.currentTarget.style.color = 'var(--text-primary)';
+                        e.currentTarget.style.borderColor = 'var(--border-light, #e2e8f0)';
+                      }}
+                      title={`Tìm kiếm "${sub}"`}
                     >
                       {sub}
                     </span>
