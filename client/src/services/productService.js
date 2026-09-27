@@ -654,7 +654,7 @@ export const FALLBACK_PRODUCTS = [
     image: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=800",
     images: [
       "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800",
-      "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800",
+      "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=800",
     ],
     category: "Gia dụng",
     brand: "HomePro",
@@ -736,9 +736,9 @@ export const FALLBACK_PRODUCTS = [
     description: "Công nghệ đốt nóng cảm ứng từ IH gia nhiệt đa chiều 360 độ giúp từng hạt cơm chín đều từ trong ra ngoài, giữ trọn vị ngọt tự nhiên. Lòng nồi gang phủ chống dính Binchotan cao cấp của Nhật Bản.",
     price: 1450000,
     originalPrice: 2300000,
-    image: "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800",
+    image: "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800",
     images: [
-      "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800",
+      "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=800",
     ],
     category: "Gia dụng",
     brand: "HomePro",
@@ -1661,8 +1661,8 @@ export const FALLBACK_PRODUCTS = [
     description: "Công nghệ đốt nóng cảm ứng từ IH 360 độ giúp từng hạt gạo chín đều dẻo ngọt giữ trọn dinh dưỡng. Lòng nồi gang đúc dày 3mm chống trầy xước bền bỉ 10 năm.",
     price: 1690000,
     originalPrice: 2490000,
-    image: "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800",
-    images: ["https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800"],
+    image: "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800",
+    images: ["https://images.unsplash.com/photo-1585515320310-259814833e62?w=800"],
     category: "Gia dụng",
     brand: "HomeChef",
     badge: "Hot Deal",
@@ -2686,9 +2686,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Công nghệ đốt nóng cảm ứng từ IH nhiệt lượng lan tỏa 360 độ hạt cơm chín đều dẻo ngọt, 12 chế độ nấu tự động: cơm gạo lứt, cháo dinh dưỡng, làm bánh.",
     "price": 1590000,
     "originalPrice": 2250000,
-    "image": "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800",
+    "image": "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800"
+      "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800"
     ],
     "category": "Gia dụng",
     "brand": "HomePro",

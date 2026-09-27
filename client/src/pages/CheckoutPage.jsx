@@ -39,9 +39,16 @@ export default function CheckoutPage() {
     selectedItems,
     selectedSubtotal,
     appliedVoucher,
+    appliedDiscountVoucher,
+    appliedShippingVoucher,
     voucherDiscount,
+    shippingDiscount,
     applyVoucher,
+    applyDiscountVoucher,
+    applyShippingVoucher,
     removeVoucher,
+    removeDiscountVoucher,
+    removeShippingVoucher,
     clearCart,
   } = useCart();
   const { coins, redeemCoins } = useCoins();
@@ -97,7 +104,10 @@ export default function CheckoutPage() {
   }
 
   const shippingOption = SHIPPING_OPTIONS.find((s) => s.id === selectedShipping) || SHIPPING_OPTIONS[0];
-  const finalShippingFee = appliedVoucher?.type === "shipping" ? 0 : shippingOption.fee;
+  const appliedShippingDiscount = appliedShippingVoucher
+    ? Math.min(appliedShippingVoucher.value || 30000, shippingOption.fee)
+    : (appliedVoucher?.type === "shipping" ? shippingOption.fee : 0);
+  const finalShippingFee = Math.max(0, shippingOption.fee - appliedShippingDiscount);
   
   // Coin calculation: 1 Xu = 1 VND, max 50% of currentSubtotal
   const maxCoinsUsable = Math.min(coins || 0, Math.floor(currentSubtotal * 0.5));
@@ -107,6 +117,10 @@ export default function CheckoutPage() {
   async function handleFinalPlaceOrder() {
     setSubmitError("");
     setSubmitting(true);
+
+    const activeVoucherCodes = [appliedDiscountVoucher?.code, appliedShippingVoucher?.code]
+      .filter(Boolean)
+      .join(" + ") || appliedVoucher?.code || null;
 
     const orderPayload = {
       customer: {
@@ -125,8 +139,9 @@ export default function CheckoutPage() {
         shopId: item.shopId || "shop_01",
       })),
       subtotal: currentSubtotal,
-      voucherCode: appliedVoucher?.code || null,
+      voucherCode: activeVoucherCodes,
       voucherDiscount,
+      shippingDiscount: appliedShippingDiscount,
       coinDiscount,
       coinsUsed: coinDiscount,
       shippingFee: finalShippingFee,
@@ -543,11 +558,22 @@ export default function CheckoutPage() {
               </div>
 
               {/* Voucher status banner in Step 4 */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-page, #f8fafc)", border: "1px solid var(--border-medium, #e2e8f0)", borderRadius: "8px", padding: "12px 16px", marginBottom: "12px", fontSize: "13.5px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-page, #f8fafc)", border: "1px solid var(--border-medium, #e2e8f0)", borderRadius: "8px", padding: "12px 16px", marginBottom: "12px", fontSize: "13.5px", flexWrap: "wrap", gap: "8px" }}>
                 <div>
                   <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>🎟️ Voucher Áp Dụng: </span>
-                  {appliedVoucher ? (
-                    <strong style={{ color: "var(--primary-color, #ea580c)" }}>{appliedVoucher.code} ({appliedVoucher.name}) - Giảm {formatCurrency(voucherDiscount)}</strong>
+                  {(appliedDiscountVoucher || appliedShippingVoucher) ? (
+                    <span style={{ marginLeft: "4px" }}>
+                      {appliedShippingVoucher && (
+                        <strong style={{ color: "#0284c7", marginRight: "8px" }}>
+                          🚚 {appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)})
+                        </strong>
+                      )}
+                      {appliedDiscountVoucher && (
+                        <strong style={{ color: "var(--primary-color, #ea580c)" }}>
+                          🏷️ {appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})
+                        </strong>
+                      )}
+                    </span>
                   ) : (
                     <span style={{ color: "var(--text-muted)" }}>Chưa chọn voucher nào</span>
                   )}
@@ -557,7 +583,7 @@ export default function CheckoutPage() {
                   onClick={() => setShowVoucherModal(true)}
                   style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}
                 >
-                  {appliedVoucher ? "Đổi mã khác >" : "+ Chọn mã giảm giá >"}
+                  {(appliedDiscountVoucher || appliedShippingVoucher) ? "Đổi mã khác >" : "+ Chọn mã giảm giá >"}
                 </button>
               </div>
 
@@ -701,33 +727,50 @@ export default function CheckoutPage() {
               <span style={{ fontWeight: 600 }}>{formatCurrency(currentSubtotal)}</span>
             </div>
 
-            {/* Interactive Voucher Section in Checkout summary */}
+            {/* Interactive Dual Voucher Section in Checkout summary */}
             <div style={{ borderTop: "1px dashed var(--border-medium, #ddd)", borderBottom: "1px dashed var(--border-medium, #ddd)", padding: "10px 0", margin: "4px 0" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: (appliedDiscountVoucher || appliedShippingVoucher) ? "8px" : "0" }}>
                 <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>🎟️ Voucher / Giảm giá:</span>
                 <button
                   type="button"
                   onClick={() => setShowVoucherModal(true)}
                   style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}
                 >
-                  {appliedVoucher ? "Đổi mã >" : "Chọn mã >"}
+                  {(appliedDiscountVoucher && appliedShippingVoucher) ? "Đổi mã >" : "Chọn mã >"}
                 </button>
               </div>
 
-              {appliedVoucher ? (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "6px 10px", borderRadius: "6px", border: "1px solid var(--primary-color, #ea580c)" }}>
-                  <span style={{ fontSize: "12.5px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
-                    ✓ {appliedVoucher.code} ({appliedVoucher.type === 'shipping' ? 'Miễn phí ship' : `-${formatCurrency(voucherDiscount)}`})
+              {appliedShippingVoucher && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", background: "#f0f9ff", padding: "6px 10px", borderRadius: "6px", border: "1px solid #0284c7" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#0284c7" }}>
+                    🚚 {appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)} ship)
                   </span>
                   <button
                     type="button"
-                    onClick={removeVoucher}
-                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px" }}
+                    onClick={removeShippingVoucher}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px" }}
                   >
                     ✕ Gỡ
                   </button>
                 </div>
-              ) : (
+              )}
+
+              {appliedDiscountVoucher && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "6px 10px", borderRadius: "6px", border: "1px solid var(--primary-color, #ea580c)" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
+                    🏷️ {appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={removeDiscountVoucher}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px" }}
+                  >
+                    ✕ Gỡ
+                  </button>
+                </div>
+              )}
+
+              {(!appliedDiscountVoucher && !appliedShippingVoucher) && (
                 <button
                   type="button"
                   onClick={() => setShowVoucherModal(true)}
@@ -761,7 +804,7 @@ export default function CheckoutPage() {
 
             {voucherDiscount > 0 && (
               <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
-                <span>Voucher giảm giá ({appliedVoucher?.code}):</span>
+                <span>Voucher giảm giá ({appliedDiscountVoucher?.code}):</span>
                 <span style={{ fontWeight: 700 }}>-{formatCurrency(voucherDiscount)}</span>
               </div>
             )}
@@ -773,10 +816,10 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {appliedVoucher?.type === "shipping" && (
-              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
-                <span>Ưu đãi FreeShip ({appliedVoucher.code}):</span>
-                <span style={{ fontWeight: 700 }}>-{formatCurrency(shippingOption.fee)}</span>
+            {appliedShippingDiscount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#0284c7" }}>
+                <span>Ưu đãi FreeShip ({appliedShippingVoucher?.code}):</span>
+                <span style={{ fontWeight: 700 }}>-{formatCurrency(appliedShippingDiscount)}</span>
               </div>
             )}
 
@@ -805,10 +848,16 @@ export default function CheckoutPage() {
       <VoucherPickerModal
         isOpen={showVoucherModal}
         onClose={() => setShowVoucherModal(false)}
-        onApplyVoucher={(code) => applyVoucher(code)}
+        appliedDiscountVoucher={appliedDiscountVoucher}
+        appliedShippingVoucher={appliedShippingVoucher}
+        onApplyDiscountVoucher={applyDiscountVoucher}
+        onApplyShippingVoucher={applyShippingVoucher}
+        onRemoveDiscountVoucher={removeDiscountVoucher}
+        onRemoveShippingVoucher={removeShippingVoucher}
+        onApplyVoucher={applyVoucher}
         onRemoveVoucher={removeVoucher}
-        appliedVoucher={appliedVoucher}
         currentSubtotal={currentSubtotal}
+        defaultShippingFee={shippingOption.fee}
       />
     </main>
   );

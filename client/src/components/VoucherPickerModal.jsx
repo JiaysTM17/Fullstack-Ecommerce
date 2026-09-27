@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { getVouchers, validateVoucher } from "../services/voucherService";
 import { formatCurrency } from "../utils/formatCurrency";
 import { useLanguage } from "../context/LanguageContext";
@@ -8,25 +8,53 @@ import "../styles/voucher-modal.css";
 export default function VoucherPickerModal({
   isOpen,
   onClose,
+  appliedDiscountVoucher = null,
+  appliedShippingVoucher = null,
+  appliedVoucher = null,
+  onApplyDiscountVoucher,
+  onApplyShippingVoucher,
   onApplyVoucher,
+  onRemoveDiscountVoucher,
+  onRemoveShippingVoucher,
   onRemoveVoucher,
-  appliedVoucher,
   currentSubtotal = 0,
+  defaultShippingFee = 25000,
 }) {
   const { t } = useLanguage();
   const { showToast } = useToast();
   const [vouchers, setVouchers] = useState([]);
   const [customCode, setCustomCode] = useState("");
-  const [activeTab, setActiveTab] = useState("all"); // 'all' | 'discount' | 'shipping'
+  const [activeTab, setActiveTab] = useState("all"); // 'all' | 'shipping' | 'discount'
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Local pending selections inside modal
+  const [selectedShipping, setSelectedShipping] = useState(null);
+  const [selectedDiscount, setSelectedDiscount] = useState(null);
+
+  // Sync state when modal opens
   useEffect(() => {
     if (isOpen) {
       setVouchers(getVouchers());
       setErrorMessage("");
       setCustomCode("");
+
+      // Determine initial discount voucher
+      const initialDiscount =
+        appliedDiscountVoucher ||
+        (appliedVoucher && appliedVoucher.type !== "shipping"
+          ? appliedVoucher
+          : null);
+      setSelectedDiscount(initialDiscount);
+
+      // Determine initial shipping voucher
+      const initialShipping =
+        appliedShippingVoucher ||
+        (appliedVoucher && appliedVoucher.type === "shipping"
+          ? appliedVoucher
+          : null);
+      setSelectedShipping(initialShipping);
     }
-  }, [isOpen]);
+  }, [isOpen, appliedDiscountVoucher, appliedShippingVoucher, appliedVoucher]);
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -38,15 +66,41 @@ export default function VoucherPickerModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Split vouchers into 2 groups
+  const shippingVouchers = useMemo(
+    () => vouchers.filter((v) => v.type === "shipping"),
+    [vouchers],
+  );
+
+  const discountVouchers = useMemo(
+    () => vouchers.filter((v) => v.type === "percent" || v.type === "fixed"),
+    [vouchers],
+  );
+
+  // Live savings calculation for preview
+  const previewShippingDiscount = useMemo(() => {
+    if (!selectedShipping) return 0;
+    const value = selectedShipping.value || 30000;
+    return Math.min(value, defaultShippingFee);
+  }, [selectedShipping, defaultShippingFee]);
+
+  const previewOrderDiscount = useMemo(() => {
+    if (!selectedDiscount) return 0;
+    const base = currentSubtotal > 0 ? currentSubtotal : 100000;
+    if (selectedDiscount.type === "percent") {
+      const raw = Math.round((base * selectedDiscount.value) / 100);
+      return selectedDiscount.maxDiscount
+        ? Math.min(raw, selectedDiscount.maxDiscount)
+        : raw;
+    }
+    return Math.min(selectedDiscount.value || 0, base);
+  }, [selectedDiscount, currentSubtotal]);
+
+  const totalPreviewSavings = previewShippingDiscount + previewOrderDiscount;
+
   if (!isOpen) return null;
 
-  // Filter vouchers by tab
-  const filteredVouchers = vouchers.filter((v) => {
-    if (activeTab === "shipping") return v.type === "shipping";
-    if (activeTab === "discount") return v.type === "percent" || v.type === "fixed";
-    return true;
-  });
-
+  // Handle custom voucher code input
   const handleApplyCustomCode = (e) => {
     e.preventDefault();
     const code = customCode.trim().toUpperCase();
@@ -55,46 +109,152 @@ export default function VoucherPickerModal({
       return;
     }
 
-    const res = onApplyVoucher(code);
-    if (res && res.success === false) {
+    const res = validateVoucher(code, currentSubtotal);
+    if (!res.valid) {
       setErrorMessage(res.message);
-    } else {
-      showToast(`✓ Đã áp dụng mã "${code}" thành công!`, "success");
-      onClose();
-    }
-  };
-
-  const handleSelectVoucher = (v) => {
-    if (v.minOrderValue > 0 && currentSubtotal > 0 && currentSubtotal < v.minOrderValue) {
-      showToast(`Chưa đủ điều kiện: Cần mua thêm ${formatCurrency(v.minOrderValue - currentSubtotal)}`, "info");
       return;
     }
 
-    const res = onApplyVoucher(v.code);
-    if (res && res.success === false) {
-      showToast(res.message || "Không thể áp dụng mã", "error");
+    setErrorMessage("");
+    if (res.voucher.type === "shipping") {
+      setSelectedShipping(res.voucher);
+      showToast(`✓ Đã chọn mã Freeship "${res.voucher.code}"`, "success");
     } else {
-      showToast(`✓ Đã áp dụng mã "${v.code}"!`, "success");
-      onClose();
+      setSelectedDiscount(res.voucher);
+      showToast(`✓ Đã chọn mã giảm giá "${res.voucher.code}"`, "success");
+    }
+    setCustomCode("");
+  };
+
+  // Toggle selection for shipping voucher
+  const handleToggleShipping = (v) => {
+    const isEligible =
+      v.minOrderValue === 0 ||
+      currentSubtotal >= v.minOrderValue ||
+      currentSubtotal === 0;
+
+    if (!isEligible) {
+      const missing = Math.max(0, v.minOrderValue - currentSubtotal);
+      showToast(
+        `Chưa đủ điều kiện: Cần mua thêm ${formatCurrency(missing)} để dùng mã freeship này`,
+        "info",
+      );
+      return;
+    }
+
+    if (selectedShipping?.code === v.code) {
+      setSelectedShipping(null);
+    } else {
+      setSelectedShipping(v);
     }
   };
 
-  const handleRemove = () => {
-    if (onRemoveVoucher) {
-      onRemoveVoucher();
-      showToast("Đã gỡ mã giảm giá", "info");
+  // Toggle selection for discount voucher
+  const handleToggleDiscount = (v) => {
+    const isEligible =
+      v.minOrderValue === 0 ||
+      currentSubtotal >= v.minOrderValue ||
+      currentSubtotal === 0;
+
+    if (!isEligible) {
+      const missing = Math.max(0, v.minOrderValue - currentSubtotal);
+      showToast(
+        `Chưa đủ điều kiện: Cần mua thêm ${formatCurrency(missing)} để dùng mã giảm giá này`,
+        "info",
+      );
+      return;
     }
+
+    if (selectedDiscount?.code === v.code) {
+      setSelectedDiscount(null);
+    } else {
+      setSelectedDiscount(v);
+    }
+  };
+
+  // Commit both selected vouchers to CartContext
+  const handleConfirmApply = () => {
+    // 1. Discount voucher
+    if (selectedDiscount) {
+      if (onApplyDiscountVoucher) {
+        onApplyDiscountVoucher(selectedDiscount);
+      } else if (onApplyVoucher) {
+        onApplyVoucher(selectedDiscount);
+      }
+    } else {
+      if (onRemoveDiscountVoucher) {
+        onRemoveDiscountVoucher();
+      } else if (onRemoveVoucher) {
+        onRemoveVoucher("discount");
+      }
+    }
+
+    // 2. Shipping voucher
+    if (selectedShipping) {
+      if (onApplyShippingVoucher) {
+        onApplyShippingVoucher(selectedShipping);
+      } else if (onApplyVoucher) {
+        onApplyVoucher(selectedShipping);
+      }
+    } else {
+      if (onRemoveShippingVoucher) {
+        onRemoveShippingVoucher();
+      } else if (onRemoveVoucher) {
+        onRemoveVoucher("shipping");
+      }
+    }
+
+    const appliedCount = (selectedDiscount ? 1 : 0) + (selectedShipping ? 1 : 0);
+    if (appliedCount === 2) {
+      showToast(
+        `✓ Đã áp dụng 2 Voucher: ${selectedDiscount.code} & ${selectedShipping.code}!`,
+        "success",
+      );
+    } else if (appliedCount === 1) {
+      const single = selectedDiscount || selectedShipping;
+      showToast(`✓ Đã áp dụng voucher ${single.code}!`, "success");
+    } else {
+      showToast("Đã gỡ tất cả mã giảm giá", "info");
+    }
+
+    onClose();
+  };
+
+  const handleClearAll = () => {
+    setSelectedDiscount(null);
+    setSelectedShipping(null);
   };
 
   return (
-    <div className="voucher-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="voucher-modal-dialog" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="voucher-modal-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="voucher-modal-dialog"
+        onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: "620px" }}
+      >
         {/* Header */}
         <div className="voucher-modal-header">
-          <h3 className="voucher-modal-title">
-            <span>🎟️</span>
-            <span>{t("select_voucher_title", "Chọn Mã Giảm Giá / Voucher Sàn")}</span>
-          </h3>
+          <div>
+            <h3 className="voucher-modal-title">
+              <span>🎟️</span>
+              <span>{t("select_voucher_title", "Chọn Shopee Voucher")}</span>
+            </h3>
+            <p
+              style={{
+                fontSize: "12px",
+                color: "var(--text-muted, #64748b)",
+                margin: "4px 0 0",
+              }}
+            >
+              Áp dụng tối đa <strong>1 Mã Miễn Phí Vận Chuyển</strong> &{" "}
+              <strong>1 Mã Giảm Giá Đơn Hàng</strong> cùng lúc
+            </p>
+          </div>
           <button
             type="button"
             className="voucher-modal-close"
@@ -110,7 +270,10 @@ export default function VoucherPickerModal({
           <input
             type="text"
             className="voucher-input-field"
-            placeholder={t("enter_voucher_placeholder", "Nhập mã voucher (VD: MINI10, FREESHIP)...")}
+            placeholder={t(
+              "enter_voucher_placeholder",
+              "Nhập mã voucher (VD: FREESHIP, MINI10, SUPERDEAL)...",
+            )}
             value={customCode}
             onChange={(e) => {
               setCustomCode(e.target.value);
@@ -120,14 +283,22 @@ export default function VoucherPickerModal({
           <button
             type="submit"
             className="voucher-apply-btn select"
-            style={{ padding: "0 18px" }}
+            style={{ padding: "0 18px", fontWeight: 700 }}
           >
             {t("apply", "Áp Dụng")}
           </button>
         </form>
 
         {errorMessage && (
-          <div style={{ padding: "8px 22px", background: "rgba(239, 68, 68, 0.08)", color: "var(--color-error, #ef4444)", fontSize: "12.5px", fontWeight: 600 }}>
+          <div
+            style={{
+              padding: "8px 22px",
+              background: "rgba(239, 68, 68, 0.08)",
+              color: "var(--color-error, #ef4444)",
+              fontSize: "12.5px",
+              fontWeight: 600,
+            }}
+          >
             ⚠️ {errorMessage}
           </div>
         )}
@@ -143,173 +314,479 @@ export default function VoucherPickerModal({
           </button>
           <button
             type="button"
-            className={`voucher-tab-btn ${activeTab === "discount" ? "active" : ""}`}
-            onClick={() => setActiveTab("discount")}
-          >
-            🏷️ {t("order_discount", "Giảm Giá Đơn Hàng")}
-          </button>
-          <button
-            type="button"
             className={`voucher-tab-btn ${activeTab === "shipping" ? "active" : ""}`}
             onClick={() => setActiveTab("shipping")}
           >
-            🚚 {t("shipping_voucher", "Miễn Phí Vận Chuyển")}
+            🚚 {t("shipping_voucher", "Miễn Phí Vận Chuyển")} (
+            {shippingVouchers.length})
+            {selectedShipping && (
+              <span
+                style={{
+                  marginLeft: "6px",
+                  background: "#10b981",
+                  color: "#fff",
+                  padding: "1px 6px",
+                  borderRadius: "10px",
+                  fontSize: "10.5px",
+                }}
+              >
+                1
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            className={`voucher-tab-btn ${activeTab === "discount" ? "active" : ""}`}
+            onClick={() => setActiveTab("discount")}
+          >
+            🏷️ {t("order_discount", "Giảm Giá Đơn Hàng")} (
+            {discountVouchers.length})
+            {selectedDiscount && (
+              <span
+                style={{
+                  marginLeft: "6px",
+                  background: "#10b981",
+                  color: "#fff",
+                  padding: "1px 6px",
+                  borderRadius: "10px",
+                  fontSize: "10.5px",
+                }}
+              >
+                1
+              </span>
+            )}
           </button>
         </div>
 
-        {/* Scrollable Voucher List */}
-        <div className="voucher-list-scroll">
-          {filteredVouchers.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "40px 20px", color: "var(--text-muted)" }}>
-              <div style={{ fontSize: "36px", marginBottom: "8px" }}>🎟️</div>
-              <p>Hiện không có mã giảm giá nào thuộc mục này.</p>
-            </div>
-          ) : (
-            filteredVouchers.map((v) => {
-              const isSelected = appliedVoucher?.code === v.code;
-              const isEligible = v.minOrderValue === 0 || currentSubtotal >= v.minOrderValue || currentSubtotal === 0;
-              const missingAmount = Math.max(0, v.minOrderValue - currentSubtotal);
-
-              let stubText = "";
-              let stubIcon = "🏷️";
-              let stubClass = "discount";
-
-              if (v.type === "percent") {
-                stubText = `GIẢM ${v.value}%`;
-                stubIcon = "⚡";
-              } else if (v.type === "shipping") {
-                stubText = "FREESHIP";
-                stubIcon = "🚚";
-                stubClass = "shipping";
-              } else {
-                stubText = `GIẢM ${formatCurrency(v.value)}`;
-                stubIcon = "💰";
-                stubClass = "fixed";
-              }
-
-              return (
+        {/* Scrollable Dual Voucher List */}
+        <div
+          className="voucher-list-scroll"
+          style={{ maxHeight: "460px", padding: "16px 20px" }}
+        >
+          {/* SECTION 1: FREESHIP VOUCHERS */}
+          {(activeTab === "all" || activeTab === "shipping") && (
+            <div style={{ marginBottom: "20px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "10px",
+                  paddingBottom: "6px",
+                  borderBottom: "1.5px solid #0284c7",
+                }}
+              >
                 <div
-                  key={v.id}
-                  className={`voucher-ticket ${isSelected ? "selected" : ""} ${!isEligible ? "not-eligible" : ""}`}
-                  onClick={() => {
-                    if (isSelected) {
-                      handleRemove();
-                    } else if (isEligible) {
-                      handleSelectVoucher(v);
-                    } else {
-                      showToast(`Chưa đủ điều kiện: Cần mua thêm ${formatCurrency(missingAmount)}`, "info");
-                    }
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
                   }}
-                  style={{ cursor: isEligible ? "pointer" : "default" }}
                 >
-                  {/* Left Ticket Stub */}
-                  <div className={`voucher-ticket-left ${stubClass}`}>
-                    <span className="voucher-stub-icon">{stubIcon}</span>
-                    <span className="voucher-stub-tag">{stubText}</span>
-                    <span className="voucher-stub-sub">{v.isGlobal ? "Toàn sàn" : "Shop"}</span>
-                  </div>
-
-                  {/* Body */}
-                  <div className="voucher-ticket-body">
-                    <div className="voucher-ticket-top">
-                      <div>
-                        <h4 className="voucher-title">{v.name}</h4>
-                        <span className="voucher-code-badge">{v.code}</span>
-                      </div>
-                      {isSelected && (
-                        <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-success, #10b981)", background: "rgba(16, 185, 129, 0.1)", padding: "2px 6px", borderRadius: "4px" }}>
-                          ✓ Đang dùng
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="voucher-desc">{v.description}</p>
-
-                    <div className="voucher-ticket-footer">
-                      <div className="voucher-condition-tag">
-                        {isEligible ? (
-                          <span className="eligible">✓ Đủ điều kiện</span>
-                        ) : (
-                          <span className="ineligible">
-                            Mua thêm {formatCurrency(missingAmount)}
-                          </span>
-                        )}
-                        <span style={{ color: "var(--text-muted)", marginLeft: "6px" }}>
-                          · HSD: {v.expiryDate || "31/12/2026"}
-                        </span>
-                      </div>
-
-                      {isSelected ? (
-                        <button
-                          type="button"
-                          className="voucher-apply-btn applied"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemove();
-                          }}
-                          title="Bỏ dùng mã này"
-                        >
-                          ✕ Gỡ mã
-                        </button>
-                      ) : isEligible ? (
-                        <button
-                          type="button"
-                          className="voucher-apply-btn select"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelectVoucher(v);
-                          }}
-                        >
-                          Áp Dụng
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="voucher-apply-btn disabled"
-                          disabled
-                          onClick={(e) => e.stopPropagation()}
-                          title={`Đơn hàng tối thiểu ${formatCurrency(v.minOrderValue)}`}
-                        >
-                          Chưa đủ ĐK
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                  <span style={{ fontSize: "18px" }}>🚚</span>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 800,
+                      color: "#0369a1",
+                    }}
+                  >
+                    Mã Miễn Phí Vận Chuyển
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      background: "#e0f2fe",
+                      color: "#0284c7",
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Chọn tối đa 1 mã
+                  </span>
                 </div>
-              );
-            })
+                {selectedShipping && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedShipping(null)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#ef4444",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ✕ Bỏ chọn ({selectedShipping.code})
+                  </button>
+                )}
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                {shippingVouchers.map((v) => {
+                  const isSelected = selectedShipping?.code === v.code;
+                  const isEligible =
+                    v.minOrderValue === 0 ||
+                    currentSubtotal >= v.minOrderValue ||
+                    currentSubtotal === 0;
+                  const missingAmount = Math.max(
+                    0,
+                    v.minOrderValue - currentSubtotal,
+                  );
+
+                  return (
+                    <div
+                      key={v.id}
+                      className={`voucher-ticket ${isSelected ? "selected" : ""} ${!isEligible ? "not-eligible" : ""}`}
+                      onClick={() => handleToggleShipping(v)}
+                      style={{
+                        cursor: isEligible ? "pointer" : "default",
+                        borderColor: isSelected ? "#0284c7" : undefined,
+                        boxShadow: isSelected
+                          ? "0 0 0 2px #0284c7"
+                          : undefined,
+                      }}
+                    >
+                      <div className="voucher-ticket-left shipping">
+                        <span className="voucher-stub-icon">🚚</span>
+                        <span className="voucher-stub-tag">FREESHIP</span>
+                        <span className="voucher-stub-sub">Toàn sàn</span>
+                      </div>
+
+                      <div className="voucher-ticket-body">
+                        <div className="voucher-ticket-top">
+                          <div>
+                            <h4 className="voucher-title">{v.name}</h4>
+                            <span className="voucher-code-badge">{v.code}</span>
+                          </div>
+                          <div
+                            style={{
+                              width: "20px",
+                              height: "20px",
+                              borderRadius: "50%",
+                              border: isSelected
+                                ? "6px solid #0284c7"
+                                : "2px solid #cbd5e1",
+                              background: "#fff",
+                              transition: "all 0.15s ease",
+                            }}
+                          />
+                        </div>
+
+                        <p className="voucher-desc">{v.description}</p>
+
+                        <div className="voucher-ticket-footer">
+                          <div className="voucher-condition-tag">
+                            {isEligible ? (
+                              <span className="eligible">✓ Đủ điều kiện</span>
+                            ) : (
+                              <span className="ineligible">
+                                Mua thêm {formatCurrency(missingAmount)}
+                              </span>
+                            )}
+                            <span
+                              style={{
+                                color: "var(--text-muted)",
+                                marginLeft: "6px",
+                              }}
+                            >
+                              · HSD: {v.expiryDate || "31/12/2026"}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            className={`voucher-apply-btn ${isSelected ? "applied" : isEligible ? "select" : "disabled"}`}
+                            style={{
+                              background: isSelected
+                                ? "#0284c7"
+                                : isEligible
+                                  ? undefined
+                                  : undefined,
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleShipping(v);
+                            }}
+                          >
+                            {isSelected
+                              ? "✓ Đã chọn"
+                              : isEligible
+                                ? "Chọn mã"
+                                : "Chưa đủ ĐK"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* SECTION 2: PRODUCT / ORDER DISCOUNT VOUCHERS */}
+          {(activeTab === "all" || activeTab === "discount") && (
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "10px",
+                  paddingBottom: "6px",
+                  borderBottom: "1.5px solid var(--primary-color, #ea580c)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <span style={{ fontSize: "18px" }}>🏷️</span>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 800,
+                      color: "var(--primary-color, #ea580c)",
+                    }}
+                  >
+                    Mã Giảm Giá Sàn / Shop
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      background: "rgba(234, 88, 12, 0.1)",
+                      color: "var(--primary-color, #ea580c)",
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Chọn tối đa 1 mã
+                  </span>
+                </div>
+                {selectedDiscount && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDiscount(null)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#ef4444",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ✕ Bỏ chọn ({selectedDiscount.code})
+                  </button>
+                )}
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                {discountVouchers.map((v) => {
+                  const isSelected = selectedDiscount?.code === v.code;
+                  const isEligible =
+                    v.minOrderValue === 0 ||
+                    currentSubtotal >= v.minOrderValue ||
+                    currentSubtotal === 0;
+                  const missingAmount = Math.max(
+                    0,
+                    v.minOrderValue - currentSubtotal,
+                  );
+
+                  let stubText = "";
+                  let stubIcon = "🏷️";
+                  let stubClass = "discount";
+
+                  if (v.type === "percent") {
+                    stubText = `GIẢM ${v.value}%`;
+                    stubIcon = "⚡";
+                  } else {
+                    stubText = `GIẢM ${formatCurrency(v.value)}`;
+                    stubIcon = "💰";
+                    stubClass = "fixed";
+                  }
+
+                  return (
+                    <div
+                      key={v.id}
+                      className={`voucher-ticket ${isSelected ? "selected" : ""} ${!isEligible ? "not-eligible" : ""}`}
+                      onClick={() => handleToggleDiscount(v)}
+                      style={{
+                        cursor: isEligible ? "pointer" : "default",
+                      }}
+                    >
+                      <div className={`voucher-ticket-left ${stubClass}`}>
+                        <span className="voucher-stub-icon">{stubIcon}</span>
+                        <span className="voucher-stub-tag">{stubText}</span>
+                        <span className="voucher-stub-sub">
+                          {v.isGlobal ? "Toàn sàn" : "Shop"}
+                        </span>
+                      </div>
+
+                      <div className="voucher-ticket-body">
+                        <div className="voucher-ticket-top">
+                          <div>
+                            <h4 className="voucher-title">{v.name}</h4>
+                            <span className="voucher-code-badge">{v.code}</span>
+                          </div>
+                          <div
+                            style={{
+                              width: "20px",
+                              height: "20px",
+                              borderRadius: "50%",
+                              border: isSelected
+                                ? "6px solid var(--primary-color, #ea580c)"
+                                : "2px solid #cbd5e1",
+                              background: "#fff",
+                              transition: "all 0.15s ease",
+                            }}
+                          />
+                        </div>
+
+                        <p className="voucher-desc">{v.description}</p>
+
+                        <div className="voucher-ticket-footer">
+                          <div className="voucher-condition-tag">
+                            {isEligible ? (
+                              <span className="eligible">✓ Đủ điều kiện</span>
+                            ) : (
+                              <span className="ineligible">
+                                Mua thêm {formatCurrency(missingAmount)}
+                              </span>
+                            )}
+                            <span
+                              style={{
+                                color: "var(--text-muted)",
+                                marginLeft: "6px",
+                              }}
+                            >
+                              · HSD: {v.expiryDate || "31/12/2026"}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            className={`voucher-apply-btn ${isSelected ? "applied" : isEligible ? "select" : "disabled"}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleDiscount(v);
+                            }}
+                          >
+                            {isSelected
+                              ? "✓ Đã chọn"
+                              : isEligible
+                                ? "Chọn mã"
+                                : "Chưa đủ ĐK"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </div>
 
-        {/* Modal Footer */}
-        <div className="voucher-modal-footer">
-          <div className="voucher-active-status">
-            {appliedVoucher ? (
+        {/* Modal Footer with Dual Voucher Total Savings Breakdown */}
+        <div
+          className="voucher-modal-footer"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "12px",
+            background: "#fff",
+            borderTop: "2px solid #e2e8f0",
+            padding: "16px 22px",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+            <div
+              style={{
+                fontSize: "12.5px",
+                color: "var(--text-secondary, #475569)",
+                display: "flex",
+                gap: "12px",
+                flexWrap: "wrap",
+              }}
+            >
               <span>
-                Đang áp dụng: <strong>{appliedVoucher.code}</strong>
+                🚚 Ship:{" "}
+                <strong style={{ color: "#0284c7" }}>
+                  {selectedShipping
+                    ? `-${formatCurrency(previewShippingDiscount)} (${selectedShipping.code})`
+                    : "0₫"}
+                </strong>
               </span>
-            ) : (
-              <span>Chưa áp dụng voucher nào</span>
-            )}
+              <span>
+                🏷️ Đơn:{" "}
+                <strong style={{ color: "var(--primary-color, #ea580c)" }}>
+                  {selectedDiscount
+                    ? `-${formatCurrency(previewOrderDiscount)} (${selectedDiscount.code})`
+                    : "0₫"}
+                </strong>
+              </span>
+            </div>
+            <div style={{ fontSize: "14px", fontWeight: 800 }}>
+              Tiết kiệm tổng cộng:{" "}
+              <span
+                style={{
+                  color: "var(--color-success, #10b981)",
+                  fontSize: "16px",
+                }}
+              >
+                -{formatCurrency(totalPreviewSavings)}
+              </span>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: "10px" }}>
-            {appliedVoucher && (
+
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            {(selectedDiscount || selectedShipping) && (
               <button
                 type="button"
                 className="shopee-btn shopee-btn-secondary"
-                style={{ fontSize: "12.5px", padding: "8px 14px" }}
-                onClick={handleRemove}
+                style={{ fontSize: "13px", padding: "9px 14px" }}
+                onClick={handleClearAll}
               >
-                Bỏ chọn
+                Bỏ chọn tất cả
               </button>
             )}
             <button
               type="button"
               className="shopee-btn shopee-btn-primary"
-              style={{ fontSize: "12.5px", padding: "8px 20px" }}
-              onClick={onClose}
+              style={{
+                fontSize: "13.5px",
+                padding: "9px 24px",
+                fontWeight: 800,
+              }}
+              onClick={handleConfirmApply}
             >
-              OK / Đóng
+              Áp Dụng
+              {selectedDiscount && selectedShipping
+                ? " (2 Voucher)"
+                : selectedDiscount || selectedShipping
+                  ? " (1 Voucher)"
+                  : ""}
             </button>
           </div>
         </div>

@@ -20,9 +20,13 @@ export default function CartPage() {
     selectedSubtotal,
     savedItems,
     appliedVoucher,
+    appliedDiscountVoucher,
+    appliedShippingVoucher,
     voucherError,
     voucherDiscount,
+    shippingDiscount,
     shippingFee,
+    defaultShippingFee,
     finalTotal,
     increaseQuantity,
     decreaseQuantity,
@@ -36,7 +40,11 @@ export default function CartPage() {
     moveToCartFromSaved,
     removeFromSaved,
     applyVoucher,
+    applyDiscountVoucher,
+    applyShippingVoucher,
     removeVoucher,
+    removeDiscountVoucher,
+    removeShippingVoucher,
   } = useCart();
 
   const { addToWishlist } = useWishlist();
@@ -469,53 +477,79 @@ export default function CartPage() {
               </button>
             </div>
 
-            {appliedVoucher ? (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--primary-color, #ea580c)", marginBottom: "10px" }}>
-                <div>
-                  <span style={{ fontWeight: 800, color: "var(--primary-color, #ea580c)", fontSize: "13.5px" }}>
-                    🎟️ {appliedVoucher.code}
-                  </span>
-                  <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
-                    ({appliedVoucher.type === 'shipping' ? 'Miễn phí vận chuyển' : `-${formatCurrency(voucherDiscount)}`})
-                  </span>
+            {/* Dual Voucher Badges */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "10px" }}>
+              {appliedShippingVoucher && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f0f9ff", padding: "8px 12px", borderRadius: "8px", border: "1px solid #0284c7" }}>
+                  <div>
+                    <span style={{ fontWeight: 800, color: "#0284c7", fontSize: "13px" }}>
+                      🚚 {appliedShippingVoucher.code}
+                    </span>
+                    <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
+                      (-{formatCurrency(shippingDiscount)} ship)
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeShippingVoucher}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px" }}
+                  >
+                    ✕ {t('remove', 'Gỡ')}
+                  </button>
                 </div>
+              )}
+
+              {appliedDiscountVoucher && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--primary-color, #ea580c)" }}>
+                  <div>
+                    <span style={{ fontWeight: 800, color: "var(--primary-color, #ea580c)", fontSize: "13px" }}>
+                      🏷️ {appliedDiscountVoucher.code}
+                    </span>
+                    <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
+                      (-{formatCurrency(voucherDiscount)})
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeDiscountVoucher}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px" }}
+                  >
+                    ✕ {t('remove', 'Gỡ')}
+                  </button>
+                </div>
+              )}
+
+              {(!appliedDiscountVoucher || !appliedShippingVoucher) && (
                 <button
                   type="button"
-                  onClick={removeVoucher}
-                  style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px" }}
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => setShowVoucherModal(true)}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "9px 12px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    borderColor: "var(--primary-color, #ea580c)",
+                    color: "var(--primary-color, #ea580c)",
+                    background: "var(--primary-light, rgba(234, 88, 12, 0.03))"
+                  }}
                 >
-                  ✕ {t('remove', 'Gỡ')}
+                  <span>
+                    🎟️ {appliedDiscountVoucher || appliedShippingVoucher ? "+ Chọn thêm mã còn lại" : "Nhấn để chọn mã giảm giá & Freeship"}
+                  </span>
+                  <span style={{ fontSize: "14px", fontWeight: 700 }}>›</span>
                 </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="shopee-btn shopee-btn-secondary"
-                onClick={() => setShowVoucherModal(true)}
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "9px 12px",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  marginBottom: "10px",
-                  borderColor: "var(--primary-color, #ea580c)",
-                  color: "var(--primary-color, #ea580c)",
-                  background: "var(--primary-light, rgba(234, 88, 12, 0.03))"
-                }}
-              >
-                <span>🎟️ Nhấn để chọn mã giảm giá & Freeship</span>
-                <span style={{ fontSize: "14px", fontWeight: 700 }}>›</span>
-              </button>
-            )}
+              )}
+            </div>
 
             <form onSubmit={handleVoucherSubmit} style={{ display: "flex", gap: "6px" }}>
               <input
                 type="text"
                 className="shopee-form-input"
-                placeholder="Hoặc nhập mã (VD: MINI10)..."
+                placeholder="Hoặc nhập mã (VD: MINI10, FREESHIP)..."
                 value={voucherInput}
                 onChange={(e) => setVoucherInput(e.target.value)}
                 style={{ fontSize: "12.5px", textTransform: "uppercase" }}
@@ -545,15 +579,15 @@ export default function CartPage() {
 
             {voucherDiscount > 0 && (
               <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
-                <span>{t('voucher_discount', 'Giảm giá Voucher')}:</span>
+                <span>{t('voucher_discount', 'Giảm giá Voucher')} ({appliedDiscountVoucher?.code}):</span>
                 <span style={{ fontWeight: 700 }}>-{formatCurrency(voucherDiscount)}</span>
               </div>
             )}
 
-            {appliedVoucher?.type === "shipping" && (
-              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
-                <span>Miễn phí ship ({appliedVoucher.code}):</span>
-                <span style={{ fontWeight: 700 }}>-25.000₫</span>
+            {shippingDiscount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#0284c7" }}>
+                <span>Ưu đãi Freeship ({appliedShippingVoucher?.code}):</span>
+                <span style={{ fontWeight: 700 }}>-{formatCurrency(shippingDiscount)}</span>
               </div>
             )}
 
@@ -605,10 +639,16 @@ export default function CartPage() {
       <VoucherPickerModal
         isOpen={showVoucherModal}
         onClose={() => setShowVoucherModal(false)}
-        onApplyVoucher={(code) => applyVoucher(code)}
+        appliedDiscountVoucher={appliedDiscountVoucher}
+        appliedShippingVoucher={appliedShippingVoucher}
+        onApplyDiscountVoucher={applyDiscountVoucher}
+        onApplyShippingVoucher={applyShippingVoucher}
+        onRemoveDiscountVoucher={removeDiscountVoucher}
+        onRemoveShippingVoucher={removeShippingVoucher}
+        onApplyVoucher={applyVoucher}
         onRemoveVoucher={removeVoucher}
-        appliedVoucher={appliedVoucher}
         currentSubtotal={selectedSubtotal || items.reduce((t, i) => t + i.price * i.quantity, 0)}
+        defaultShippingFee={defaultShippingFee || 25000}
       />
     </main>
   );

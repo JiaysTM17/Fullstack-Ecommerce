@@ -566,7 +566,7 @@ const products = [
     description: "Công nghệ đốt nóng cao tần IH 360 độ hạt cơm chín dẻo ngọt, lòng nồi hợp kim dày 3mm.",
     price: 1690000,
     originalPrice: 2490000,
-    image: "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800",
+    image: "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800",
     images: [],
     category: "Gia dụng",
     brand: "HomeChef",
@@ -973,9 +973,9 @@ const products = [
     "description": "Công nghệ đốt nóng cảm ứng từ IH nhiệt lượng lan tỏa 360 độ hạt cơm chín đều dẻo ngọt, 12 chế độ nấu tự động: cơm gạo lứt, cháo dinh dưỡng, làm bánh.",
     "price": 1590000,
     "originalPrice": 2250000,
-    "image": "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800",
+    "image": "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800"
+      "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800"
     ],
     "category": "Gia dụng",
     "brand": "HomePro",
@@ -1024,9 +1024,9 @@ const products = [
     "description": "Thủy tinh Borosilicate chịu nhiệt độ cao 200 độ C không thôi nhiễm chất độc hại, đèn LED đổi màu theo nhiệt độ, tính năng giữ ấm 40-90 độ C pha sữa, pha trà.",
     "price": 360000,
     "originalPrice": 520000,
-    "image": "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800",
+    "image": "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800"
+      "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800"
     ],
     "category": "Gia dụng",
     "brand": "HomePro",
