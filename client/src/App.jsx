@@ -8,6 +8,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { Footer, Header, ToastContainer } from "./components";
+import ErrorBoundary from "./components/ErrorBoundary";
 import LiveChatWidget from "./components/LiveChatWidget";
 import ProductCompareModal from "./components/ProductCompareModal";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -75,22 +76,24 @@ function AppLayout() {
         }}
         onNavigate={(path) => navigate(path)}
       />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/products/:id" element={<ProductDetailPage />} />
-        <Route path="/shop/:shopId" element={<ShopStorefrontPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/order-success" element={<OrderSuccessPage />} />
-        <Route path="/wishlist" element={<WishlistPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/orders" element={<OrderHistoryPage />} />
-        <Route path="/seller/dashboard" element={<SellerDashboardPage />} />
-        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/shop/:shopId" element={<ShopStorefrontPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/order-success" element={<OrderSuccessPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/orders" element={<OrderHistoryPage />} />
+          <Route path="/seller/dashboard" element={<SellerDashboardPage />} />
+          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </ErrorBoundary>
       <Footer />
       <LiveChatWidget />
       <ProductCompareModal />

@@ -26,6 +26,10 @@ export function ToastProvider({ children }) {
     toasts,
     showToast,
     removeToast,
+    success: (msg, action) => showToast(msg, 'success', action),
+    error: (msg, action) => showToast(msg, 'error', action),
+    info: (msg, action) => showToast(msg, 'info', action),
+    warning: (msg, action) => showToast(msg, 'warning', action),
   };
 
   return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;

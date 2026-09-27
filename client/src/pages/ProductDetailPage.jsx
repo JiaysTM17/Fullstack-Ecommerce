@@ -41,6 +41,12 @@ export default function ProductDetailPage() {
   const [showShopChat, setShowShopChat] = useState(false);
   const [selectedStarFilter, setSelectedStarFilter] = useState("all");
 
+  const reviewsList = useMemo(() => (Array.isArray(product?.reviews) ? product.reviews : []), [product?.reviews]);
+  const filteredReviews = useMemo(() => {
+    if (selectedStarFilter === "all") return reviewsList;
+    return reviewsList.filter((r) => Number(r?.rating) === Number(selectedStarFilter));
+  }, [reviewsList, selectedStarFilter]);
+
   const handleCopyLink = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
@@ -174,17 +180,11 @@ export default function ProductDetailPage() {
 
   const productId = product._id || product.id;
   const wishlisted = isWishlisted(productId);
-  const imagesList = product.images && product.images.length > 0 ? product.images : [product.image];
+  const imagesList = Array.isArray(product.images) && product.images.length > 0 ? product.images : [product.image || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80"];
   const hasDiscount = product.originalPrice > product.price;
   const discountPercent = hasDiscount
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
-
-  const reviewsList = product.reviews || [];
-  const filteredReviews = useMemo(() => {
-    if (selectedStarFilter === "all") return reviewsList;
-    return reviewsList.filter((r) => Number(r.rating) === Number(selectedStarFilter));
-  }, [reviewsList, selectedStarFilter]);
 
   return (
     <main className="shopee-container" style={{ padding: "20px 0" }}>
@@ -258,7 +258,7 @@ export default function ProductDetailPage() {
           </p>
 
           {/* Color Selection */}
-          {product.variants?.colors && product.variants.colors.length > 0 && (
+          {Array.isArray(product.variants?.colors) && product.variants.colors.length > 0 && (
             <div className="amazon-variant-block">
               <div className="amazon-variant-label">
                 Màu sắc: <strong>{selectedColor}</strong>
@@ -279,7 +279,7 @@ export default function ProductDetailPage() {
           )}
 
           {/* Size Selection */}
-          {product.variants?.sizes && product.variants.sizes.length > 0 && (
+          {Array.isArray(product.variants?.sizes) && product.variants.sizes.length > 0 && (
             <div className="amazon-variant-block">
               <div className="amazon-variant-label">
                 Kích thước / Cấu hình: <strong>{selectedSize}</strong>
@@ -300,7 +300,7 @@ export default function ProductDetailPage() {
           )}
 
           {/* Specifications Table */}
-          {product.specifications && product.specifications.length > 0 && (
+          {Array.isArray(product.specifications) && product.specifications.length > 0 && (
             <div style={{ marginTop: "12px" }}>
               <div style={{ fontSize: "14px", fontWeight: 700, color: "#111", marginBottom: "6px" }}>
                 Thông Số Kỹ Thuật Chi Tiết
@@ -672,11 +672,11 @@ export default function ProductDetailPage() {
               <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-secondary, #64748b)" }}>Lọc đánh giá:</span>
               {[
                 { id: "all", label: `Tất cả (${reviewsList.length})` },
-                { id: "5", label: `5 Sao (${reviewsList.filter(r => r.rating === 5).length})` },
-                { id: "4", label: `4 Sao (${reviewsList.filter(r => r.rating === 4).length})` },
-                { id: "3", label: `3 Sao (${reviewsList.filter(r => r.rating === 3).length})` },
-                { id: "2", label: `2 Sao (${reviewsList.filter(r => r.rating === 2).length})` },
-                { id: "1", label: `1 Sao (${reviewsList.filter(r => r.rating === 1).length})` },
+                { id: "5", label: `5 Sao (${reviewsList.filter(r => Number(r?.rating) === 5).length})` },
+                { id: "4", label: `4 Sao (${reviewsList.filter(r => Number(r?.rating) === 4).length})` },
+                { id: "3", label: `3 Sao (${reviewsList.filter(r => Number(r?.rating) === 3).length})` },
+                { id: "2", label: `2 Sao (${reviewsList.filter(r => Number(r?.rating) === 2).length})` },
+                { id: "1", label: `1 Sao (${reviewsList.filter(r => Number(r?.rating) === 1).length})` },
               ].map((tab) => {
                 const isActive = selectedStarFilter === tab.id;
                 return (
@@ -720,10 +720,10 @@ export default function ProductDetailPage() {
 
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                     <span style={{ color: "#ffa41c", fontSize: "14px" }}>
-                      {"★".repeat(rev.rating)}
-                      {"☆".repeat(5 - rev.rating)}
+                      {"★".repeat(Math.max(0, Math.min(5, Math.round(Number(rev?.rating) || 5))))}
+                      {"☆".repeat(Math.max(0, Math.min(5, 5 - Math.round(Number(rev?.rating) || 5))))}
                     </span>
-                    <span className="amazon-review-title">{rev.title}</span>
+                    <span className="amazon-review-title">{rev?.title || "Nhận xét của khách hàng"}</span>
                   </div>
 
                   {rev.verifiedPurchase && (
@@ -811,6 +811,7 @@ export default function ProductDetailPage() {
           onClick={() => setShowShareModal(false)}
         >
           <div
+            className="anim-modal-content"
             style={{
               background: 'var(--bg-card, #ffffff)',
               borderRadius: '16px',
