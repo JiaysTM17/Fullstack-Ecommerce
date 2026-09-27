@@ -10,7 +10,6 @@ const CHAT_STORAGE_KEY = 'mini_shopee_live_chat_history';
  * Biểu tượng Trợ lý AI Hologram / Cosmic Sparkle Orb hiện đại bậc nhất
  */
 export function BotIcon({ size = 32, glow = false }) {
-  const filterId = `aiGlow_${size}_${glow ? 'glow' : 'norm'}`;
   const gradId = `aiGrad_${size}`;
 
   return (
@@ -81,15 +80,25 @@ export function BotIcon({ size = 32, glow = false }) {
   );
 }
 
+// Thông tin Nhân viên hỗ trợ trực tuyến (Human Agent)
+const HUMAN_AGENT = {
+  name: 'Kim Ngân',
+  title: 'Chuyên Viên CSKH Hạng Nhất',
+  avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200',
+  id: 'CSKH-8821',
+  role: 'Human Support Specialist',
+  status: 'Trực tuyến • Sẵn sàng hỗ trợ',
+};
+
 const DEFAULT_WELCOME_MESSAGES = [
   {
     id: 'msg_welcome_1',
     sender: 'agent',
     agentName: 'Trợ Lý AI Fullstack E-Commerce',
     avatar: null,
-    text: 'Xin chào! Tôi là Trợ Lý AI của sàn Fullstack E-Commerce ✨. Tôi có thể giúp bạn tìm kiếm hàng trăm sản phẩm, tra cứu đơn hàng gần nhất hoặc tặng bạn các mã giảm giá hấp dẫn!',
+    text: 'Xin chào! Tôi là Trợ Lý AI của sàn Fullstack E-Commerce ✨. Tôi có thể giúp bạn tìm kiếm hàng trăm sản phẩm, tra cứu đơn hàng gần nhất hoặc kết nối trực tiếp với Chuyên viên tư vấn (Human Agent) bất cứ lúc nào!',
     time: 'Vừa xong',
-    suggestions: ['Gợi ý đồ công nghệ hot', 'Tra cứu đơn hàng của tôi', 'Lấy voucher 15%', 'Chính sách đổi trả 30 ngày'],
+    suggestions: ['Gợi ý đồ công nghệ hot', 'Tra cứu đơn hàng của tôi', 'Lấy voucher 15%', '👨‍💼 Kết nối nhân viên trực (Human Agent)'],
   }
 ];
 
@@ -99,6 +108,9 @@ export default function LiveChatWidget() {
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [copiedCode, setCopiedCode] = useState(null);
+
+  // Chế độ hội thoại: 'ai' (Trợ lý tự động) | 'handover_connecting' (Đang chuyển giao) | 'human' (Nhân viên trực)
+  const [chatMode, setChatMode] = useState('ai');
 
   const [messages, setMessages] = useState(() => {
     try {
@@ -119,7 +131,7 @@ export default function LiveChatWidget() {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isOpen, isTyping]);
+  }, [messages, isOpen, isTyping, chatMode]);
 
   // Lưu lịch sử vào localStorage
   useEffect(() => {
@@ -202,6 +214,55 @@ export default function LiveChatWidget() {
     }
   };
 
+  // =========================================================================
+  // LUỒNG CHUYỂN GIAO (HANDOVER PROTOCOL) TỪ AI SANG HUMAN AGENT
+  // =========================================================================
+  const handleTriggerHandover = () => {
+    setIsTyping(false);
+    setChatMode('handover_connecting');
+
+    // 1. Thông báo hệ thống đóng gói context và khởi tạo phiên nhân viên
+    const sysMsg = {
+      id: `msg_sys_${Date.now()}`,
+      sender: 'system',
+      text: '🔄 [HỆ THỐNG] Đang thiết lập luồng chuyển giao (Handover) sang Nhân Viên Tư Vấn Trực (Human Agent)... Toàn bộ lịch sử hội thoại và ngữ cảnh đơn hàng của bạn đã được chuyển tiếp an toàn.',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    setMessages((prev) => [...prev, sysMsg]);
+
+    // 2. Chuyển giao hoàn tất sau 1.2s: Nhân viên trực tiếp nhận
+    setTimeout(() => {
+      setChatMode('human');
+      const humanWelcome = {
+        id: `msg_human_${Date.now()}`,
+        sender: 'human_agent',
+        agentName: `${HUMAN_AGENT.name} (${HUMAN_AGENT.title})`,
+        avatar: HUMAN_AGENT.avatar,
+        text: `Dạ em là Kim Ngân - Chuyên viên hỗ trợ trực tuyến của sàn Fullstack E-Commerce. Em đã tiếp nhận đầy đủ lịch sử yêu cầu của anh/chị. Em có thể hỗ trợ trực tiếp vấn đề gì cho mình ngay bây giờ ạ?`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        suggestions: [
+          'Kiểm tra tiến độ đơn hàng gấp',
+          'Yêu cầu hoàn tiền / đổi hàng',
+          'Tư vấn chính sách bảo hành',
+          'Quay lại Trợ lý AI',
+        ],
+      };
+      setMessages((prev) => [...prev, humanWelcome]);
+    }, 1200);
+  };
+
+  // Chuyển giao ngược lại cho Trợ lý AI
+  const handleSwitchBackToAI = () => {
+    setChatMode('ai');
+    const returnMsg = {
+      id: `msg_sys_${Date.now()}`,
+      sender: 'system',
+      text: '✨ [HỆ THỐNG] Đã kết thúc phiên hỗ trợ nhân viên trực. Quyền hỗ trợ đã được chuyển lại cho Trợ Lý AI Fullstack 24/7.',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    setMessages((prev) => [...prev, returnMsg]);
+  };
+
   // Xử lý gửi tin nhắn
   const handleSendMessage = (textToSend) => {
     const content = (textToSend || inputMessage).trim();
@@ -218,28 +279,82 @@ export default function LiveChatWidget() {
     setInputMessage('');
     setIsTyping(true);
 
-    // Xử lý phản hồi AI thông minh
+    const lower = content.toLowerCase();
+
+    // 1. Nếu đang ở chế độ NHÂN VIÊN TRỰC (HUMAN AGENT MODE)
+    if (chatMode === 'human') {
+      setTimeout(() => {
+        // Kiểm tra nếu người dùng muốn quay lại AI
+        if (lower.includes('quay lại ai') || lower.includes('về ai') || lower.includes('trợ lý ai') || lower.includes('bot')) {
+          setIsTyping(false);
+          handleSwitchBackToAI();
+          return;
+        }
+
+        let humanReply = '';
+        let suggestions = ['Kiểm tra đơn hàng', 'Yêu cầu hoàn tiền', 'Đổi trả miễn phí', 'Quay lại Trợ lý AI'];
+
+        if (lower.includes('đơn') || lower.includes('giao') || lower.includes('chậm') || lower.includes('ship')) {
+          humanReply = 'Dạ em đã kiểm tra mã vận đơn của anh/chị trên hệ thống nội bộ. Em vừa chuyển trạng thái khẩn đến bưu cục phát SPX để tài xế ưu tiên phát ngay trong ngày hôm nay. Anh/chị cứ yên tâm nhé!';
+        } else if (lower.includes('hoàn tiền') || lower.includes('trả hàng') || lower.includes('lỗi') || lower.includes('hỏng')) {
+          humanReply = 'Dạ em rất xin lỗi vì sự bất tiện này ạ! Em đã mở hồ sơ tiếp nhận hoàn tiền/đổi trả 100% miễn phí tận nơi cho mình. Shipper sẽ đến lấy hàng và tiền sẽ hoàn về ví trong 24 giờ làm việc anh/chị nhé.';
+        } else if (lower.includes('bảo hành') || lower.includes('kỹ thuật') || lower.includes('đổi size')) {
+          humanReply = 'Dạ sản phẩm được áp dụng chính sách 1 đổi 1 trong vòng 30 ngày. Em đã ghi nhận yêu cầu đổi hàng vào phiếu CSKH, bên em sẽ giao sản phẩm mới đến tận tay và thu hồi sản phẩm cũ cùng lúc ạ.';
+        } else {
+          humanReply = 'Dạ em đã ghi nhận chi tiết nội dung của anh/chị. Em đang trực tiếp xử lý trên hệ thống để đảm bảo quyền lợi tốt nhất cho mình. Anh/chị cần em hỗ trợ thêm thông tin gì nữa không ạ?';
+        }
+
+        const agentMsg = {
+          id: `msg_human_${Date.now()}`,
+          sender: 'human_agent',
+          agentName: 'Chuyên viên Kim Ngân',
+          avatar: HUMAN_AGENT.avatar,
+          text: humanReply,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          suggestions,
+        };
+
+        setMessages((prev) => [...prev, agentMsg]);
+        setIsTyping(false);
+      }, 1000);
+      return;
+    }
+
+    // 2. Nếu ở chế độ TRỢ LÝ AI (AI BOT MODE)
+    // Kiểm tra yêu cầu chuyển giao sang nhân viên trực (Handover trigger)
+    if (
+      lower.includes('gặp nhân viên') || lower.includes('nhân viên') || 
+      lower.includes('tư vấn viên') || lower.includes('người trực') || 
+      lower.includes('human') || lower.includes('người thật') || 
+      lower.includes('kết nối') || lower.includes('cskh')
+    ) {
+      setTimeout(() => {
+        handleTriggerHandover();
+      }, 600);
+      return;
+    }
+
+    // Phản hồi AI thông thường
     setTimeout(() => {
-      const lower = content.toLowerCase();
       let replyText = '';
       let products = null;
       let vouchers = null;
       let orders = null;
       let suggestions = [];
 
-      // 1. Kiểm tra yêu cầu tra cứu đơn hàng
+      // A. Tra cứu đơn hàng
       if (lower.includes('đơn') || lower.includes('order') || lower.includes('tra cứu') || lower.includes('vận chuyển') || lower.includes('đến đâu')) {
         const recentOrders = getRecentOrders();
         if (recentOrders.length > 0) {
           orders = recentOrders.slice(0, 2);
           replyText = `Tôi đã tìm thấy ${recentOrders.length} đơn hàng trong hệ thống của bạn! Dưới đây là thông tin đơn hàng mới nhất:`;
-          suggestions = ['Xem chi tiết tất cả đơn', 'Theo dõi vận chuyển', 'Lấy voucher cho đơn mới'];
+          suggestions = ['Xem chi tiết tất cả đơn', 'Theo dõi vận chuyển', '👨‍💼 Kết nối nhân viên trực'];
         } else {
           replyText = 'Hiện bạn chưa có đơn hàng nào đang chờ xử lý trên hệ thống. Hãy chọn món hàng yêu thích và đặt ngay nhé!';
           suggestions = ['Gợi ý hàng bán chạy', 'Săn mã giảm giá', 'Giao siêu tốc 2H'];
         }
       } 
-      // 2. Kiểm tra yêu cầu tìm kiếm sản phẩm hoặc danh mục cụ thể
+      // B. Tìm kiếm sản phẩm
       else if (
         lower.includes('áo') || lower.includes('quần') || lower.includes('chuột') || 
         lower.includes('bàn phím') || lower.includes('tai nghe') || lower.includes('nồi') || 
@@ -248,7 +363,6 @@ export default function LiveChatWidget() {
         lower.includes('tìm') || lower.includes('sản phẩm') || lower.includes('gợi ý') || 
         lower.includes('hot') || lower.includes('mua')
       ) {
-        // Tách từ khóa tìm kiếm
         let cleanKeyword = lower.replace(/tìm|sản phẩm|gợi ý|cho tôi|có|nào|không|bán/g, '').trim();
         if (!cleanKeyword) cleanKeyword = 'bán chạy';
 
@@ -256,15 +370,14 @@ export default function LiveChatWidget() {
         if (found.length > 0) {
           products = found;
           replyText = `Dạ đây là các sản phẩm ${cleanKeyword ? `phù hợp với "${cleanKeyword}"` : 'nổi bật nhất'} đang có giá cực ưu đãi trên sàn:`;
-          suggestions = ['Xem thêm hàng khác', 'Lấy mã giảm giá', 'Đổi trả miễn phí ra sao?'];
+          suggestions = ['Xem thêm hàng khác', 'Lấy mã giảm giá', '👨‍💼 Kết nối nhân viên trực'];
         } else {
-          // Fallback sang top sản phẩm best seller
           products = FALLBACK_PRODUCTS.slice(0, 3);
           replyText = `Tôi xin gợi ý cho bạn top sản phẩm Best Seller được yêu thích nhất hiện nay:`;
           suggestions = ['Đồ công nghệ', 'Thời trang hot', 'Thiết bị gia dụng'];
         }
       }
-      // 3. Kiểm tra yêu cầu về voucher, khuyến mãi
+      // C. Voucher, khuyến mãi
       else if (lower.includes('voucher') || lower.includes('giảm giá') || lower.includes('mã') || lower.includes('khuyến mãi') || lower.includes('deal')) {
         vouchers = [
           { code: 'MINI10', discount: 'Giảm 10%', max: 'Tối đa 100.000₫', desc: 'Áp dụng cho mọi đơn hàng từ 100k' },
@@ -272,32 +385,27 @@ export default function LiveChatWidget() {
           { code: 'SUPERDEAL', discount: 'Giảm 15%', max: 'Tối đa 150.000₫', desc: 'Siêu sale ngày hội mua sắm' },
         ];
         replyText = '🎁 Dưới đây là các mã voucher độc quyền đang còn hiệu lực! Bạn hãy bấm "Sao Chép Mã" để dùng ngay trong giỏ hàng nhé:';
-        suggestions = ['Hướng dẫn dùng voucher', 'Tìm sản phẩm hot', 'Kiểm tra giỏ hàng'];
+        suggestions = ['Hướng dẫn dùng voucher', 'Tìm sản phẩm hot', '👨‍💼 Kết nối nhân viên trực'];
       }
-      // 4. Chính sách đổi trả & bảo hành
+      // D. Chính sách đổi trả
       else if (lower.includes('đổi') || lower.includes('trả') || lower.includes('bảo hành') || lower.includes('hoàn tiền')) {
         replyText = '🔄 Chính sách Đổi Trả & Bảo Hành Fullstack E-Commerce:\n• Miễn phí đổi trả 30 ngày tận nhà nếu có lỗi từ nhà sản xuất hoặc sai kích cỡ.\n• Cam kết hàng chính hãng 100%, đền bù gấp 2 lần nếu phát hiện hàng giả.\n• Bảo hành chính hãng từ 12 - 24 tháng đối với thiết bị điện tử gia dụng.';
-        suggestions = ['Tra cứu đơn hàng', 'Tư vấn viên hỗ trợ', 'Tiếp tục mua sắm'];
+        suggestions = ['👨‍💼 Gặp nhân viên hỗ trợ đổi trả', 'Tra cứu đơn hàng', 'Tiếp tục mua sắm'];
       }
-      // 5. Giao hàng & vận chuyển
+      // E. Giao hàng
       else if (lower.includes('giao') || lower.includes('ship') || lower.includes('2h') || lower.includes('hỏa tốc')) {
         replyText = '⚡ Dịch vụ vận chuyển siêu tốc:\n• Giao 2H Hỏa Tốc: Áp dụng nội thành TP.HCM & Hà Nội qua đối tác SPX Now.\n• Giao tiêu chuẩn: 24h - 48h trên toàn quốc với mức phí đồng giá cực rẻ.\n• Miễn phí giao hàng cho đơn từ 200k khi áp mã FREESHIP!';
         suggestions = ['Lấy mã FREESHIP', 'Tra cứu đơn hàng', 'Xem hàng giao 2H'];
       }
-      // 6. Gặp nhân viên tư vấn
-      else if (lower.includes('nhân viên') || lower.includes('tư vấn') || lower.includes('người') || lower.includes('cskh')) {
-        replyText = '👨‍💼 Chuyên viên CSKH Hoàng Long đã tiếp nhận phiên hỗ trợ của bạn. Đang sẵn sàng phục vụ và giải đáp mọi yêu cầu chi tiết của bạn!';
-        suggestions = ['Tư vấn sản phẩm', 'Hỗ trợ thanh toán', 'Bảo hành'];
-      }
-      // 7. Nhắn cho gian hàng cụ thể
+      // F. Nhắn cho gian hàng cụ thể
       else if (targetShop) {
         replyText = `Dạ ${targetShop.name} đã nhận được lời nhắn của bạn. Gian hàng hiện đang online và sẽ phản hồi tư vấn chi tiết cho bạn ngay ạ!`;
         suggestions = ['Sản phẩm có sẵn không?', 'Shop có voucher riêng không?', 'Giao trong bao lâu?'];
       }
-      // 8. Phản hồi mặc định thông minh
+      // G. Phản hồi mặc định
       else {
-        replyText = 'Tôi có thể hỗ trợ bạn tìm kiếm bất kỳ món đồ nào từ Thời trang, Công nghệ, Gia dụng đến Mỹ phẩm, hoặc kiểm tra đơn hàng và mã giảm giá. Bạn cần tôi trợ giúp gì nào?';
-        suggestions = ['Gợi ý hàng bán chạy', 'Lấy voucher 15%', 'Tra cứu đơn hàng', 'Giao 2H siêu tốc'];
+        replyText = 'Tôi có thể hỗ trợ bạn tìm kiếm bất kỳ món đồ nào từ Thời trang, Công nghệ, Gia dụng đến Mỹ phẩm, hoặc kiểm tra đơn hàng, mã giảm giá và chuyển giao sang nhân viên trực (Human Agent). Bạn cần tôi trợ giúp gì nào?';
+        suggestions = ['Gợi ý hàng bán chạy', 'Lấy voucher 15%', 'Tra cứu đơn hàng', '👨‍💼 Kết nối nhân viên trực (Human Agent)'];
       }
 
       const agentMsg = {
@@ -319,8 +427,9 @@ export default function LiveChatWidget() {
   };
 
   const handleClearHistory = () => {
-    if (window.confirm('Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện AI này?')) {
+    if (window.confirm('Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện này?')) {
       setMessages(DEFAULT_WELCOME_MESSAGES);
+      setChatMode('ai');
       localStorage.removeItem(CHAT_STORAGE_KEY);
     }
   };
@@ -358,8 +467,8 @@ export default function LiveChatWidget() {
             e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
             e.currentTarget.style.boxShadow = '0 10px 30px rgba(15, 23, 42, 0.6), 0 0 24px rgba(99, 102, 241, 0.45)';
           }}
-          title="Trợ Lý AI Fullstack - Hỗ trợ thông minh 24/7"
-          aria-label="Mở Trợ lý ảo AI"
+          title="Trợ Lý AI & Nhân Viên Trực CSKH 24/7"
+          aria-label="Mở Trợ lý ảo AI & CSKH"
         >
           <BotIcon size={38} glow />
           <span
@@ -378,7 +487,7 @@ export default function LiveChatWidget() {
         </button>
       )}
 
-      {/* Cửa sổ Chatbot AI Nâng Cấp Toàn Diện */}
+      {/* Cửa sổ Chatbot AI & Human Handover */}
       {isOpen && (
         <div
           className="anim-chat-box"
@@ -387,10 +496,10 @@ export default function LiveChatWidget() {
             bottom: '20px',
             right: '20px',
             zIndex: 100000,
-            width: '410px',
+            width: '420px',
             maxWidth: 'calc(100vw - 28px)',
-            height: 'min(580px, calc(100vh - 80px))',
-            maxHeight: 'calc(100vh - 80px)',
+            height: 'min(590px, calc(100vh - 70px))',
+            maxHeight: 'calc(100vh - 70px)',
             background: 'var(--bg-card, #ffffff)',
             borderRadius: '20px',
             boxShadow: '0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(99, 102, 241, 0.2)',
@@ -402,22 +511,31 @@ export default function LiveChatWidget() {
             animation: 'chatPopUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           }}
         >
-          {/* Header Cửa Sổ Chatbot */}
+          {/* Header Cửa Sổ Chat: Thích ứng động theo chế độ AI hoặc Human Agent */}
           <div
             style={{
               padding: '12px 16px',
-              background: 'linear-gradient(135deg, #090d16 0%, #1e1b4b 60%, #312e81 100%)',
+              background: chatMode === 'human'
+                ? 'linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%)'
+                : 'linear-gradient(135deg, #090d16 0%, #1e1b4b 60%, #312e81 100%)',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexShrink: 0,
               borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+              transition: 'background 0.3s ease',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ position: 'relative' }}>
-                {targetShop?.avatar ? (
+                {chatMode === 'human' ? (
+                  <img
+                    src={HUMAN_AGENT.avatar}
+                    alt={HUMAN_AGENT.name}
+                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #34d399', boxShadow: '0 0 10px rgba(52, 211, 153, 0.5)' }}
+                  />
+                ) : targetShop?.avatar ? (
                   <img
                     src={targetShop.avatar}
                     alt={targetShop.name}
@@ -455,20 +573,82 @@ export default function LiveChatWidget() {
               </div>
               <div>
                 <div style={{ fontWeight: 800, fontSize: '14.5px', lineHeight: '1.2', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span>{targetShop ? targetShop.name : 'Trợ Lý AI Thông Minh'}</span>
-                  {!targetShop && (
-                    <span style={{ background: 'linear-gradient(135deg, #4f46e5, #06b6d4)', fontSize: '9.5px', padding: '1px 6px', borderRadius: '6px', fontWeight: 700 }}>
-                      PRO AI
-                    </span>
-                  )}
+                  <span>
+                    {chatMode === 'human' 
+                      ? `${HUMAN_AGENT.name}` 
+                      : targetShop ? targetShop.name : 'Trợ Lý AI Thông Minh'}
+                  </span>
+                  <span
+                    style={{
+                      background: chatMode === 'human' ? '#10b981' : 'linear-gradient(135deg, #4f46e5, #06b6d4)',
+                      fontSize: '9.5px',
+                      padding: '1px 6px',
+                      borderRadius: '6px',
+                      fontWeight: 800,
+                      letterSpacing: '0.3px',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {chatMode === 'human' ? 'HUMAN AGENT' : 'PRO AI'}
+                  </span>
                 </div>
-                <div style={{ fontSize: '11px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                  <span style={{ color: '#22c55e' }}>●</span> Sẵn sàng phản hồi tức thì 24/7
+                <div style={{ fontSize: '11px', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                  <span style={{ color: '#22c55e' }}>●</span> 
+                  {chatMode === 'human' ? 'Nhân viên CSKH đang hỗ trợ trực tiếp' : 'Tự động phản hồi 24/7'}
                 </div>
               </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {/* Nút Chuyển đổi qua lại giữa AI và Human Agent */}
+              {chatMode === 'ai' ? (
+                <button
+                  type="button"
+                  onClick={handleTriggerHandover}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    border: 'none',
+                    color: '#ffffff',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    padding: '4px 9px',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 2px 6px rgba(16, 185, 129, 0.4)',
+                  }}
+                  title="Chuyển cuộc trò chuyện sang nhân viên tư vấn trực"
+                >
+                  <span>👨‍💼</span>
+                  <span>Gặp nhân viên</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSwitchBackToAI}
+                  style={{
+                    background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
+                    border: 'none',
+                    color: '#ffffff',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    padding: '4px 9px',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 2px 6px rgba(79, 70, 229, 0.4)',
+                  }}
+                  title="Quay lại trò chuyện với Trợ lý AI"
+                >
+                  <span>✨</span>
+                  <span>Về Trợ lý AI</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={handleClearHistory}
@@ -477,8 +657,8 @@ export default function LiveChatWidget() {
                   border: 'none',
                   color: '#cbd5e1',
                   cursor: 'pointer',
-                  padding: '5px 8px',
-                  fontSize: '13px',
+                  padding: '5px 7px',
+                  fontSize: '12px',
                   borderRadius: '6px',
                   transition: 'background 0.2s',
                 }}
@@ -495,15 +675,14 @@ export default function LiveChatWidget() {
                   border: 'none',
                   color: '#ffffff',
                   cursor: 'pointer',
-                  width: '28px',
-                  height: '28px',
+                  width: '26px',
+                  height: '26px',
                   borderRadius: '6px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '14px',
                   fontWeight: 700,
-                  transition: 'background 0.2s',
                 }}
                 title="Thu nhỏ chat"
                 aria-label="Thu nhỏ"
@@ -518,8 +697,8 @@ export default function LiveChatWidget() {
                   border: 'none',
                   color: '#ffffff',
                   cursor: 'pointer',
-                  width: '28px',
-                  height: '28px',
+                  width: '26px',
+                  height: '26px',
                   borderRadius: '6px',
                   display: 'flex',
                   alignItems: 'center',
@@ -527,7 +706,6 @@ export default function LiveChatWidget() {
                   fontSize: '14px',
                   fontWeight: 700,
                   boxShadow: '0 2px 6px rgba(234, 88, 12, 0.4)',
-                  transition: 'background 0.2s',
                 }}
                 title="Đóng chat"
                 aria-label="Đóng chat"
@@ -536,6 +714,63 @@ export default function LiveChatWidget() {
               </button>
             </div>
           </div>
+
+          {/* Banner Trạng Thái Chuyển Giao (Handover Live Status Banner) */}
+          {chatMode === 'human' && (
+            <div
+              style={{
+                padding: '6px 14px',
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(14, 165, 233, 0.12))',
+                borderBottom: '1px solid rgba(34, 197, 94, 0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '11.5px',
+                color: '#16a34a',
+                fontWeight: 600,
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+                Phiên CSKH trực tiếp: <strong>#CSKH-8821</strong>
+              </span>
+              <button
+                type="button"
+                onClick={handleSwitchBackToAI}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #16a34a',
+                  color: '#16a34a',
+                  padding: '2px 8px',
+                  borderRadius: '10px',
+                  fontSize: '10px',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                }}
+              >
+                Quay lại Trợ lý AI
+              </button>
+            </div>
+          )}
+
+          {chatMode === 'handover_connecting' && (
+            <div
+              style={{
+                padding: '8px 14px',
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15))',
+                borderBottom: '1px solid rgba(99, 102, 241, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '12px',
+                color: '#4f46e5',
+                fontWeight: 600,
+              }}
+            >
+              <span style={{ animation: 'spin 1.2s linear infinite', display: 'inline-block' }}>⏳</span>
+              Đang điều phối Chuyên viên CSKH trực tuyến... Vui lòng đợi trong giây lát!
+            </div>
+          )}
 
           {/* Quick FAQ Strip */}
           <div
@@ -550,36 +785,63 @@ export default function LiveChatWidget() {
               scrollbarWidth: 'none',
             }}
           >
-            {[
-              { label: '🔍 Tìm sản phẩm', text: 'Tìm sản phẩm hot deal' },
-              { label: '📦 Đơn mua của tôi', text: 'Kiểm tra đơn hàng của tôi' },
-              { label: '🎟️ Nhận voucher 15%', text: 'Cho tôi xin mã giảm giá' },
-              { label: '⚡ Giao 2H', text: 'Chính sách giao 2H' },
-              { label: '🔄 Đổi trả 30 ngày', text: 'Chính sách đổi trả bảo hành' },
-            ].map((chip, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => handleSendMessage(chip.text)}
-                style={{
-                  background: 'var(--bg-card, #ffffff)',
-                  border: '1px solid var(--border-medium, #cbd5e1)',
-                  color: 'var(--text-primary, #0f172a)',
-                  padding: '3px 10px',
-                  borderRadius: '12px',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                {chip.label}
-              </button>
-            ))}
+            {chatMode === 'human' ? (
+              [
+                { label: '📦 Kiểm tra đơn hàng', text: 'Nhờ em kiểm tra tiến độ đơn hàng gần nhất của anh/chị' },
+                { label: '🔄 Yêu cầu đổi trả / hoàn tiền', text: 'Anh/chị cần hỗ trợ hoàn tiền hoặc đổi sản phẩm' },
+                { label: '🛡️ Bảo hành chính hãng', text: 'Chính sách bảo hành sản phẩm thực hiện thế nào em?' },
+                { label: '✨ Quay lại Trợ lý AI', text: 'Quay lại Trợ lý AI' },
+              ].map((chip, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSendMessage(chip.text)}
+                  style={{
+                    background: 'var(--bg-card, #ffffff)',
+                    border: '1px solid #10b981',
+                    color: '#065f46',
+                    padding: '3px 10px',
+                    borderRadius: '12px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                >
+                  {chip.label}
+                </button>
+              ))
+            ) : (
+              [
+                { label: '👨‍💼 Gặp nhân viên trực (Handover)', text: 'Cho tôi gặp nhân viên trực CSKH' },
+                { label: '🔍 Tìm sản phẩm', text: 'Tìm sản phẩm hot deal' },
+                { label: '📦 Đơn mua của tôi', text: 'Kiểm tra đơn hàng của tôi' },
+                { label: '🎟️ Nhận voucher 15%', text: 'Cho tôi xin mã giảm giá' },
+                { label: '⚡ Giao 2H', text: 'Chính sách giao 2H' },
+              ].map((chip, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSendMessage(chip.text)}
+                  style={{
+                    background: idx === 0 ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15))' : 'var(--bg-card, #ffffff)',
+                    border: idx === 0 ? '1px solid #10b981' : '1px solid var(--border-medium, #cbd5e1)',
+                    color: idx === 0 ? '#059669' : 'var(--text-primary, #0f172a)',
+                    padding: '3px 10px',
+                    borderRadius: '12px',
+                    fontSize: '11px',
+                    fontWeight: idx === 0 ? 700 : 600,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                >
+                  {chip.label}
+                </button>
+              ))
+            )}
           </div>
 
-          {/* Danh Sách Tin Nhắn Đa Phương Tiện (Interactive Messages) */}
+          {/* Danh Sách Tin Nhắn Đa Phương Tiện */}
           <div
             style={{
               flex: 1,
@@ -592,7 +854,33 @@ export default function LiveChatWidget() {
             }}
           >
             {messages.map((m) => {
+              // 1. Tin nhắn hệ thống (System Notification)
+              if (m.sender === 'system') {
+                return (
+                  <div
+                    key={m.id}
+                    style={{
+                      alignSelf: 'center',
+                      margin: '6px 0',
+                      padding: '8px 14px',
+                      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(6, 182, 212, 0.08))',
+                      border: '1px dashed rgba(99, 102, 241, 0.35)',
+                      borderRadius: '12px',
+                      fontSize: '11.5px',
+                      color: 'var(--text-secondary, #475569)',
+                      textAlign: 'center',
+                      maxWidth: '92%',
+                      lineHeight: '1.45',
+                    }}
+                  >
+                    {m.text}
+                  </div>
+                );
+              }
+
               const isUser = m.sender === 'user';
+              const isHuman = m.sender === 'human_agent';
+
               return (
                 <div
                   key={m.id}
@@ -604,7 +892,13 @@ export default function LiveChatWidget() {
                   }}
                 >
                   {!isUser && (
-                    m.avatar ? (
+                    isHuman ? (
+                      <img
+                        src={HUMAN_AGENT.avatar}
+                        alt="Kim Ngan"
+                        style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, marginTop: '2px', border: '1.5px solid #10b981' }}
+                      />
+                    ) : m.avatar ? (
                       <img
                         src={m.avatar}
                         alt="Agent"
@@ -632,20 +926,33 @@ export default function LiveChatWidget() {
 
                   <div style={{ maxWidth: '82%', width: '100%' }}>
                     {!isUser && m.agentName && (
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted, #64748b)', marginBottom: '3px', marginLeft: '4px', fontWeight: 600 }}>
-                        {m.agentName}
+                      <div style={{ fontSize: '11px', color: isHuman ? '#059669' : 'var(--text-muted, #64748b)', marginBottom: '3px', marginLeft: '4px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>{m.agentName}</span>
+                        {isHuman && (
+                          <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#059669', fontSize: '9px', padding: '1px 5px', borderRadius: '4px' }}>
+                            Human
+                          </span>
+                        )}
                       </div>
                     )}
                     <div
                       style={{
                         padding: '10px 14px',
                         borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                        background: isUser ? 'var(--primary-color, #ea580c)' : 'var(--bg-card, #ffffff)',
+                        background: isUser 
+                          ? 'var(--primary-color, #ea580c)' 
+                          : isHuman 
+                            ? 'var(--bg-card, #ffffff)' 
+                            : 'var(--bg-card, #ffffff)',
                         color: isUser ? '#ffffff' : 'var(--text-primary)',
                         fontSize: '13px',
                         lineHeight: '1.5',
                         boxShadow: 'var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08))',
-                        border: isUser ? 'none' : '1px solid var(--border-medium, #e2e8f0)',
+                        border: isUser 
+                          ? 'none' 
+                          : isHuman 
+                            ? '1px solid rgba(16, 185, 129, 0.4)' 
+                            : '1px solid var(--border-medium, #e2e8f0)',
                         whiteSpace: 'pre-line',
                       }}
                     >
@@ -670,7 +977,7 @@ export default function LiveChatWidget() {
                               <img
                                 src={prod.image}
                                 alt={prod.name}
-                                style={{ width: '52px', height: '52px', borderRadius: '6px', objectFit: 'cover', flexShrink: 0 }}
+                                style={{ width: '50px', height: '50px', borderRadius: '6px', objectFit: 'cover', flexShrink: 0 }}
                               />
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -753,7 +1060,7 @@ export default function LiveChatWidget() {
                                   transition: 'background 0.2s',
                                 }}
                               >
-                                {copiedCode === vc.code ? '✓ Đã sao chép' : 'Sao chép'}
+                                {copiedCode === vc.code ? '✓ Đã lưu' : 'Sao chép'}
                               </button>
                             </div>
                           ))}
@@ -808,7 +1115,7 @@ export default function LiveChatWidget() {
                       )}
                     </div>
 
-                    {/* Suggestion Chips phụ dưới tin nhắn bot */}
+                    {/* Suggestion Chips phụ dưới tin nhắn */}
                     {m.suggestions && m.suggestions.length > 0 && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px', marginLeft: '4px' }}>
                         {m.suggestions.map((sug, sIdx) => (
@@ -818,8 +1125,8 @@ export default function LiveChatWidget() {
                             onClick={() => handleSendMessage(sug)}
                             style={{
                               background: 'transparent',
-                              border: '1px solid rgba(99, 102, 241, 0.35)',
-                              color: 'var(--primary-color, #4f46e5)',
+                              border: isHuman ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(99, 102, 241, 0.35)',
+                              color: isHuman ? '#059669' : 'var(--primary-color, #4f46e5)',
                               padding: '2px 8px',
                               borderRadius: '10px',
                               fontSize: '11px',
@@ -866,8 +1173,17 @@ export default function LiveChatWidget() {
                     gap: '6px',
                   }}
                 >
-                  <span style={{ display: 'inline-block', animation: 'spin 1.5s linear infinite' }}>✨</span>
-                  Trợ lý AI đang tìm kiếm câu trả lời tối ưu...
+                  {chatMode === 'human' ? (
+                    <>
+                      <span style={{ color: '#10b981', fontWeight: 700 }}>●</span>
+                      Chuyên viên Kim Ngân đang soạn phản hồi...
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ display: 'inline-block', animation: 'spin 1.5s linear infinite' }}>✨</span>
+                      Trợ lý AI đang tìm kiếm câu trả lời tối ưu...
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -892,7 +1208,11 @@ export default function LiveChatWidget() {
             <input
               type="text"
               className="shopee-form-input"
-              placeholder="Hỏi về sản phẩm, tra đơn, xin voucher..."
+              placeholder={
+                chatMode === 'human'
+                  ? 'Nhập tin nhắn trao đổi với Chuyên viên Kim Ngân...'
+                  : 'Hỏi sản phẩm, tra đơn, bấm "Gặp nhân viên"...'
+              }
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               style={{
@@ -911,7 +1231,11 @@ export default function LiveChatWidget() {
                 width: '38px',
                 height: '38px',
                 borderRadius: '50%',
-                background: inputMessage.trim() ? 'linear-gradient(135deg, #4f46e5, #06b6d4)' : 'var(--bg-muted, #cbd5e1)',
+                background: inputMessage.trim()
+                  ? chatMode === 'human'
+                    ? 'linear-gradient(135deg, #10b981, #059669)'
+                    : 'linear-gradient(135deg, #4f46e5, #06b6d4)'
+                  : 'var(--bg-muted, #cbd5e1)',
                 color: '#ffffff',
                 border: 'none',
                 cursor: inputMessage.trim() ? 'pointer' : 'not-allowed',
@@ -920,7 +1244,11 @@ export default function LiveChatWidget() {
                 justifyContent: 'center',
                 fontSize: '15px',
                 transition: 'all 0.2s ease',
-                boxShadow: inputMessage.trim() ? '0 2px 8px rgba(79, 70, 229, 0.4)' : 'none',
+                boxShadow: inputMessage.trim() 
+                  ? chatMode === 'human' 
+                    ? '0 2px 8px rgba(16, 185, 129, 0.4)' 
+                    : '0 2px 8px rgba(79, 70, 229, 0.4)' 
+                  : 'none',
               }}
               title="Gửi tin nhắn"
             >

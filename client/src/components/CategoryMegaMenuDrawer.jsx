@@ -175,12 +175,13 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         position: 'fixed',
         inset: 0,
         zIndex: 1200,
-        background: 'rgba(15, 23, 42, 0.72)',
+        background: 'rgba(15, 23, 42, 0.75)',
         backdropFilter: 'blur(6px)',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
-        padding: '24px 16px',
+        padding: '20px 14px',
+        overflowY: 'auto',
         animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
       }}
       onClick={onClose}
@@ -188,59 +189,62 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
       <div
         className="anim-modal-content"
         style={{
-          width: '1000px',
+          width: '1080px',
           maxWidth: '96vw',
-          maxHeight: '90vh',
+          maxHeight: 'calc(100vh - 40px)',
           background: 'var(--bg-card, #ffffff)',
           color: 'var(--text-primary, #0f172a)',
-          borderRadius: '20px',
-          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.35)',
-          border: '1px solid var(--border-medium, #e2e8f0)',
+          borderRadius: '18px',
+          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.45)',
+          border: '1px solid var(--border-medium, #cbd5e1)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          margin: '0 auto',
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Mega Menu Top Banner Header */}
         <div
           style={{
-            padding: '20px 28px',
+            padding: '16px 24px',
             background: 'linear-gradient(135deg, #090d16 0%, #1e1b4b 60%, #312e81 100%)',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+            flexShrink: 0,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div
               style={{
-                width: '42px',
-                height: '42px',
+                width: '40px',
+                height: '40px',
                 borderRadius: '12px',
                 background: 'linear-gradient(135deg, var(--primary-color, #4f46e5), #06b6d4)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '22px',
+                fontSize: '20px',
                 boxShadow: '0 4px 12px rgba(79, 70, 229, 0.4)',
+                flexShrink: 0,
               }}
             >
               ☰
             </div>
             <div>
-              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, letterSpacing: '-0.3px' }}>
+              <h2 style={{ margin: 0, fontSize: '17px', fontWeight: 800, letterSpacing: '-0.3px' }}>
                 Tất Cả Ngành Hàng & Danh Mục Sản Phẩm
               </h2>
-              <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: '#cbd5e1' }}>
+              <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#cbd5e1' }}>
                 Khám phá hơn 107+ sản phẩm chính hãng thuộc 12 phân hệ ngành hàng & 12 Shop Mall uy tín
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button
               type="button"
               onClick={handleViewAll}
@@ -277,12 +281,12 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         {/* Mega Menu Body: 12 Category Cards in Responsive Grid */}
         <div
           style={{
-            padding: '24px 28px',
+            padding: '20px 24px',
             overflowY: 'auto',
             flex: 1,
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '16px',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
+            gap: '14px',
             background: 'var(--bg-muted, #f8fafc)',
           }}
         >
@@ -319,7 +323,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '24px' }}>{cat.icon}</span>
-                    <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                    <strong style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
                       {cat.name}
                     </strong>
                   </div>
@@ -370,7 +374,8 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  fontSize: '11.5px',
+                  fontSize: '11px',
+                  gap: '8px',
                 }}
               >
                 <span
@@ -378,11 +383,24 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                     e.stopPropagation();
                     handleSelectShop(cat.shopId);
                   }}
-                  style={{ color: 'var(--primary-color)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}
+                  style={{
+                    color: 'var(--primary-color, #4f46e5)',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    flex: 1,
+                  }}
+                  title={cat.shop}
                 >
                   🏪 {cat.shop}
                 </span>
-                <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Xem ngành hàng →</span>
+                <span style={{ color: 'var(--text-muted, #64748b)', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  Xem ngành hàng →
+                </span>
               </div>
             </div>
           ))}
@@ -391,20 +409,30 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         {/* Mega Menu Footer: 12 Mall Shops Strip */}
         <div
           style={{
-            padding: '14px 28px',
+            padding: '12px 24px',
             background: 'var(--bg-card, #ffffff)',
             borderTop: '1px solid var(--border-medium, #e2e8f0)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
-            overflowX: 'auto',
+            gap: '12px',
+            flexShrink: 0,
           }}
         >
-          <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', whiteSpace: 'nowrap', flexShrink: 0 }}>
             🏪 12 Gian Hàng Mall:
           </div>
-          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '2px' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+              flex: 1,
+              padding: '2px 0',
+            }}
+          >
             {getAllShops().map((shop) => (
               <button
                 key={shop.id}
@@ -412,10 +440,10 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 onClick={() => handleSelectShop(shop.id)}
                 style={{
                   whiteSpace: 'nowrap',
-                  fontSize: '11.5px',
+                  fontSize: '11px',
                   fontWeight: 600,
-                  padding: '5px 12px',
-                  borderRadius: '16px',
+                  padding: '4px 10px',
+                  borderRadius: '14px',
                   background: 'var(--bg-muted, #f1f5f9)',
                   border: '1px solid var(--border-medium, #cbd5e1)',
                   color: 'var(--text-primary)',
@@ -423,12 +451,13 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   transition: 'all 0.15s ease',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '5px',
+                  gap: '4px',
+                  flexShrink: 0,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--primary-color)';
+                  e.currentTarget.style.background = 'var(--primary-color, #4f46e5)';
                   e.currentTarget.style.color = '#fff';
-                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color, #4f46e5)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'var(--bg-muted, #f1f5f9)';
@@ -436,7 +465,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   e.currentTarget.style.borderColor = 'var(--border-medium, #cbd5e1)';
                 }}
               >
-                <span>Mall</span>
+                <span style={{ background: '#ea580c', color: '#fff', fontSize: '9px', padding: '1px 4px', borderRadius: '4px', fontWeight: 800 }}>Mall</span>
                 <span>{shop.name}</span>
               </button>
             ))}
