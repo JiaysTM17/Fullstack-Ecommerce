@@ -41,7 +41,9 @@ const Header = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showCategoryDrawer, setShowCategoryDrawer] = useState(false);
   const [showRewardsModal, setShowRewardsModal] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const searchWrapRef = useRef(null);
+  const userMenuRef = useRef(null);
   const { wishlistCount } = useWishlist();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
@@ -95,6 +97,9 @@ const Header = ({
     function handleClickOutside(event) {
       if (searchWrapRef.current && !searchWrapRef.current.contains(event.target)) {
         setShowSuggestions(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserDropdown(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -218,59 +223,6 @@ const Header = ({
               <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
               <span style={{ fontSize: '10px' }}>✨</span>
             </button>
-
-            <span className="shopee-topbar-divider" />
-
-            {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span
-                  className="shopee-topbar-link"
-                  onClick={() => navTo('/orders')}
-                  style={{ cursor: 'pointer', fontWeight: 500 }}
-                >
-                  📦 {t('nav_orders', 'Đơn Mua')}
-                </span>
-                <span className="shopee-topbar-divider" />
-                <span
-                  className="header-user-badge"
-                  onClick={() => navTo('/profile')}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <span>👤</span>
-                  <strong style={{ fontSize: '12.5px' }}>{user.fullName || user.email}</strong>
-                  <small style={{ background: 'rgba(79, 70, 229, 0.35)', padding: '1px 7px', borderRadius: '10px', fontSize: '10px', color: '#c7d2fe', fontWeight: 700 }}>
-                    {user.role}
-                  </small>
-                </span>
-                <span className="shopee-topbar-divider" />
-                <span
-                  className="shopee-topbar-link"
-                  onClick={onLogout}
-                  style={{ cursor: 'pointer', color: '#fca5a5', fontWeight: 600 }}
-                >
-                  🚪 {t('logout', 'Đăng xuất')}
-                </span>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span
-                  className="shopee-topbar-link"
-                  onClick={() => navTo('/register')}
-                  style={{ cursor: 'pointer', fontWeight: 500 }}
-                >
-                  {t('register', 'Đăng Ký')}
-                </span>
-                <span className="shopee-topbar-divider" />
-                <button
-                  type="button"
-                  className="header-auth-btn-login"
-                  onClick={() => navTo('/login')}
-                >
-                  <span>🔑</span>
-                  <span>{t('login', 'Đăng Nhập')}</span>
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -563,6 +515,168 @@ const Header = ({
                 {cartCount > 99 ? '99+' : cartCount}
               </span>
             </button>
+
+            <span className="header-dock-divider" />
+
+            {/* User Account Popover or Guest Auth */}
+            {user ? (
+              <div className="header-user-menu-container" ref={userMenuRef}>
+                <button
+                  type="button"
+                  className={`header-user-dock-btn ${showUserDropdown ? 'active' : ''}`}
+                  onClick={() => setShowUserDropdown((prev) => !prev)}
+                  aria-expanded={showUserDropdown}
+                  title="Tài khoản của tôi"
+                >
+                  <div className="header-user-avatar-circle">
+                    {(user.fullName || user.email || 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <div className="header-user-dock-info">
+                    <span className="header-user-dock-name">
+                      {user.fullName || (user.email ? user.email.split('@')[0] : 'Tài khoản')}
+                    </span>
+                    <span className={`header-user-dock-role ${user.role}`}>
+                      {user.role === 'admin' ? 'Quản Trị' : user.role === 'seller' ? 'Người Bán' : 'Thành Viên'}
+                    </span>
+                  </div>
+                  <span className="header-user-caret">▼</span>
+                </button>
+
+                {showUserDropdown && (
+                  <div className="header-user-dropdown-card">
+                    <div className="user-dropdown-header">
+                      <div className="user-dropdown-avatar-large">
+                        {(user.fullName || user.email || 'U').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="user-dropdown-info">
+                        <div className="user-dropdown-name">{user.fullName || user.email}</div>
+                        <div className="user-dropdown-email">{user.email}</div>
+                        <span className={`user-dropdown-role-pill ${user.role}`}>
+                          {user.role === 'admin' ? '⚡ Quản Trị Viên' : user.role === 'seller' ? '🏪 Chủ Gian Hàng' : '✨ Thành Viên Shopee'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="user-dropdown-menu">
+                      <button
+                        type="button"
+                        className="user-dropdown-item primary-accent"
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          navTo('/orders');
+                        }}
+                      >
+                        <span className="item-icon">📦</span>
+                        <div className="item-text">
+                          <strong>{t('nav_orders', 'Đơn Mua Của Tôi')}</strong>
+                          <small>Kiểm tra đơn hàng & trạng thái vận chuyển</small>
+                        </div>
+                        <span className="item-badge">Xem ngay</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="user-dropdown-item"
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          navTo('/profile');
+                        }}
+                      >
+                        <span className="item-icon">👤</span>
+                        <div className="item-text">
+                          <strong>Hồ Sơ Cá Nhân</strong>
+                          <small>Cập nhật số điện thoại, địa chỉ nhận hàng</small>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="user-dropdown-item"
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          setShowRewardsModal(true);
+                        }}
+                      >
+                        <span className="item-icon">🪙</span>
+                        <div className="item-text">
+                          <strong>Ví Xu & Điểm Thưởng</strong>
+                          <small>{(coins || 0).toLocaleString('vi-VN')} Xu đang có</small>
+                        </div>
+                      </button>
+
+                      {user.role === 'seller' && (
+                        <button
+                          type="button"
+                          className="user-dropdown-item seller"
+                          onClick={() => {
+                            setShowUserDropdown(false);
+                            navTo('/seller');
+                          }}
+                        >
+                          <span className="item-icon">🏪</span>
+                          <div className="item-text">
+                            <strong>Kênh Quản Lý Gian Hàng</strong>
+                            <small>Đơn hàng shop, kho & sản phẩm bán</small>
+                          </div>
+                        </button>
+                      )}
+
+                      {user.role === 'admin' && (
+                        <button
+                          type="button"
+                          className="user-dropdown-item admin"
+                          onClick={() => {
+                            setShowUserDropdown(false);
+                            navTo('/admin');
+                          }}
+                        >
+                          <span className="item-icon">⚡</span>
+                          <div className="item-text">
+                            <strong>Bảng Điều Khiển Quản Trị</strong>
+                            <small>Quản lý toàn bộ hệ thống e-commerce</small>
+                          </div>
+                        </button>
+                      )}
+
+                      <div className="user-dropdown-divider" />
+
+                      <button
+                        type="button"
+                        className="user-dropdown-item logout"
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          onLogout();
+                        }}
+                      >
+                        <span className="item-icon">🚪</span>
+                        <div className="item-text">
+                          <strong style={{ color: '#ef4444' }}>{t('logout', 'Đăng Xuất')}</strong>
+                          <small>Thoát khỏi phiên đăng nhập hiện tại</small>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="header-guest-auth-group">
+                <button
+                  type="button"
+                  className="header-guest-login-btn"
+                  onClick={() => navTo('/login')}
+                >
+                  <span>🔑</span>
+                  <span>{t('login', 'Đăng Nhập')}</span>
+                </button>
+                <button
+                  type="button"
+                  className="header-guest-register-btn"
+                  onClick={() => navTo('/register')}
+                >
+                  {t('register', 'Đăng Ký')}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

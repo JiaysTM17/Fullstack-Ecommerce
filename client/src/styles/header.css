@@ -484,3 +484,325 @@
   color: #ffffff;
   transform: translateY(-0.5px);
 }
+
+/* ==========================================================================
+   USER ACCOUNT POPOVER & GUEST AUTH IN HEADER DOCK
+   ========================================================================== */
+.header-dock-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.16);
+  margin: 0 4px;
+}
+
+.header-user-menu-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.header-user-dock-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 4px 10px 4px 6px;
+  border-radius: 20px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  user-select: none;
+}
+
+.header-user-dock-btn:hover,
+.header-user-dock-btn.active {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
+}
+
+.header-user-avatar-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.header-user-dock-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.header-user-dock-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #f8fafc;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-user-dock-role {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #a5b4fc;
+}
+
+.header-user-dock-role.seller {
+  color: #38bdf8;
+}
+
+.header-user-dock-role.admin {
+  color: #f59e0b;
+}
+
+.header-user-caret {
+  font-size: 9px;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.header-user-dock-btn.active .header-user-caret {
+  transform: rotate(180deg);
+}
+
+/* User Popover Dropdown Card */
+.header-user-dropdown-card {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 290px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(99, 102, 241, 0.15);
+  backdrop-filter: blur(16px);
+  z-index: 1050;
+  padding: 12px;
+  animation: userCardFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes userCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.user-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 8px;
+}
+
+.user-dropdown-avatar-large {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+  flex-shrink: 0;
+}
+
+.user-dropdown-info {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-dropdown-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-dropdown-email {
+  font-size: 11.5px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-dropdown-role-pill {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-top: 4px;
+  align-self: flex-start;
+  background: rgba(99, 102, 241, 0.2);
+  color: #c7d2fe;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.user-dropdown-role-pill.seller {
+  background: rgba(14, 165, 233, 0.2);
+  color: #7dd3fc;
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+.user-dropdown-role-pill.admin {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.user-dropdown-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.user-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(2px);
+}
+
+.user-dropdown-item.primary-accent {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(6, 182, 212, 0.12));
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.user-dropdown-item.primary-accent:hover {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.25), rgba(6, 182, 212, 0.22));
+  border-color: rgba(99, 102, 241, 0.45);
+}
+
+.user-dropdown-item .item-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.user-dropdown-item .item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+}
+
+.user-dropdown-item .item-text strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.user-dropdown-item .item-text small {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.user-dropdown-item .item-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+.user-dropdown-item.logout:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6px 0;
+}
+
+/* Guest Auth Buttons in Dock */
+.header-guest-auth-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-guest-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #ffffff;
+  border: none;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.35);
+  white-space: nowrap;
+}
+
+.header-guest-login-btn:hover {
+  background: linear-gradient(135deg, #4338ca, #4f46e5);
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.5);
+}
+
+.header-guest-register-btn {
+  padding: 5px 10px;
+  background: transparent;
+  color: rgba(248, 250, 252, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.header-guest-register-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+

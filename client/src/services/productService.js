@@ -615,7 +615,7 @@ export const FALLBACK_PRODUCTS = [
     description: "Công nghệ micellar hút sạch dầu thừa, bụi mịn PM2.5 và lớp trang điểm chống nước mà không cần chà xát mạnh. Chiết xuất rau má Centella Asiatica làm dịu da tức thì, không gây cay mắt hay rát da.",
     price: 220000,
     originalPrice: 320000,
-    image: "https://images.unsplash.com/photo-1556228722-d0b5de70b774?w=800",
+    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800",
     images: [
       "https://images.unsplash.com/photo-1556228722-d0b5de70b774?w=800",
     ],
@@ -651,7 +651,7 @@ export const FALLBACK_PRODUCTS = [
     description: "Nồi chiên không dầu công nghệ luồng khí nóng đối lưu Rapid Air 360 độ, giảm 85% lượng dầu mỡ thừa. Màn hình cảm ứng LED một chạm với 10 chương trình nấu cài đặt sẵn, giỏ chiên phủ men gốm Ceramic chống dính an toàn tuyệt đối.",
     price: 1290000,
     originalPrice: 2190000,
-    image: "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800",
+    image: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=800",
     images: [
       "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800",
       "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800",
@@ -736,7 +736,7 @@ export const FALLBACK_PRODUCTS = [
     description: "Công nghệ đốt nóng cảm ứng từ IH gia nhiệt đa chiều 360 độ giúp từng hạt cơm chín đều từ trong ra ngoài, giữ trọn vị ngọt tự nhiên. Lòng nồi gang phủ chống dính Binchotan cao cấp của Nhật Bản.",
     price: 1450000,
     originalPrice: 2300000,
-    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800",
+    image: "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800",
     images: [
       "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800",
     ],
@@ -808,7 +808,7 @@ export const FALLBACK_PRODUCTS = [
     description: "Quần jean unisex form suông rộng trendy thời trang Hàn Quốc. Chất vải denim dệt thoi 12.5oz chắc chắn, bền màu, xử lý wash rách nhẹ cá tính, tôn dáng và che khuyết điểm chân cực tốt.",
     price: 320000,
     originalPrice: 480000,
-    image: "https://images.unsplash.com/photo-1542272604-780c96856592?w=800",
+    image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800",
     images: [
       "https://images.unsplash.com/photo-1542272604-780c96856592?w=800",
     ],
@@ -1356,8 +1356,10 @@ export const FALLBACK_PRODUCTS = [
     description: "Dung lượng pin 20.000mAh nạp đầy iPhone 15 Pro được 4.5 lần. Màn hình kỹ thuật số hiển thị phần trăm pin chính xác từng 1%, hỗ trợ sạc nhanh PD 20W & SCP 22.5W.",
     price: 390000,
     originalPrice: 590000,
-    image: "https://images.unsplash.com/photo-1609592424109-dd9892f1b177?w=800",
-    images: ["https://images.unsplash.com/photo-1609592424109-dd9892f1b177?w=800"],
+    image: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800",
+    ],
     category: "Điện tử",
     brand: "PowerCore",
     badge: "Best Seller",
@@ -1390,8 +1392,10 @@ export const FALLBACK_PRODUCTS = [
     description: "Trục xoay kim loại xoay 360 độ kèm âm thanh click click đã tai. Nhôm dày 3mm chịu lực 10kg không rung lắc khi gõ phím, nâng tầm mắt chuẩn công thái học.",
     price: 320000,
     originalPrice: 480000,
-    image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800",
-    images: ["https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800"],
+    image: "https://images.unsplash.com/photo-1616469829941-c7200edec809?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1616469829941-c7200edec809?w=800",
+    ],
     category: "Điện tử",
     brand: "ErgoDesk",
     badge: "Amazon's Choice",
@@ -1757,8 +1761,10 @@ export const FALLBACK_PRODUCTS = [
     description: "Thiết kế đệm đỡ cột sống chữ S ôm sát lưng dưới, giảm áp lực lên đĩa đệm khi ngồi làm việc lâu trước máy tính. Lưới Dragon chịu lực đàn hồi cao, ngả lưng nghỉ trưa 135 độ.",
     price: 1890000,
     originalPrice: 2800000,
-    image: "https://images.unsplash.com/photo-1580481077195-c3a82105e3b5?w=800",
-    images: ["https://images.unsplash.com/photo-1580481077195-c3a82105e3b5?w=800"],
+    image: "https://images.unsplash.com/photo-1505797149-43b0069ec26b?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1505797149-43b0069ec26b?w=800",
+    ],
     category: "Gia dụng",
     brand: "ErgoDesk",
     badge: "Hot Deal",
@@ -1957,9 +1963,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Bộ 3 áo thun có cổ polo chất liệu sợi gai dệt tổ ong pique cotton siêu thoáng khí, co giãn 4 chiều, giữ form cổ áo đứng dáng sau 100 lần giặt.",
     "price": 389000,
     "originalPrice": 599000,
-    "image": "https://images.unsplash.com/photo-1625910513413-5bc217482fc6?w=800",
+    "image": "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1625910513413-5bc217482fc6?w=800"
+      "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=800"
     ],
     "category": "Thời trang",
     "brand": "GenZ Casual",
@@ -2006,9 +2012,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Thiết kế ống rộng trendy phong cách Hàn Quốc, chất vải jean denim 13oz bền chắc, xử lý wash màu tự nhiên không phai, túi sâu tiện lợi.",
     "price": 320000,
     "originalPrice": 480000,
-    "image": "https://images.unsplash.com/photo-1542272604-780c96856592?w=800",
+    "image": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1542272604-780c96856592?w=800"
+      "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800"
     ],
     "category": "Thời trang",
     "brand": "GenZ Casual",
@@ -2332,9 +2338,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Chip E-Marker thông minh điều tiết dòng điện an toàn, hỗ trợ sạc nhanh cho Laptop Macbook, iPad và điện thoại Android, truyền data 480Mbps.",
     "price": 135000,
     "originalPrice": 220000,
-    "image": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800",
+    "image": "https://images.unsplash.com/photo-1588508065123-287b28e013da?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800"
+      "https://images.unsplash.com/photo-1588508065123-287b28e013da?w=800"
     ],
     "category": "Điện tử",
     "brand": "PowerCore",
@@ -2375,9 +2381,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Hợp kim nhôm dày 4mm chắc chắn không rung lắc, mâm xoay bi 360 độ kèm âm thanh cơ học cực đã tai, chỉnh độ cao nâng niu cột sống cổ.",
     "price": 299000,
     "originalPrice": 450000,
-    "image": "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800",
+    "image": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800"
+      "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800"
     ],
     "category": "Điện tử",
     "brand": "ErgoStand",
@@ -2594,9 +2600,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Chiết xuất bùn khoáng tro núi lửa Jeju hấp thụ bã nhờn sâu trong lỗ chân lông, tẩy tế bào chết dịu nhẹ và ngăn ngừa mụn đầu đen.",
     "price": 245000,
     "originalPrice": 350000,
-    "image": "https://images.unsplash.com/photo-1567928805192-d35d641494b8?w=800",
+    "image": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1567928805192-d35d641494b8?w=800"
+      "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800"
     ],
     "category": "Sắc đẹp",
     "brand": "PureCleanse",
@@ -2770,9 +2776,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Thiết kế không cánh an toàn tuyệt đối cho trẻ nhỏ và thú cưng, luồng gió mềm tự nhiên góc xoay 90 độ, chế độ hẹn giờ thông minh 12 tiếng.",
     "price": 1350000,
     "originalPrice": 1950000,
-    "image": "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=800",
+    "image": "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=800"
+      "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800"
     ],
     "category": "Gia dụng",
     "brand": "HomePro",
@@ -2816,9 +2822,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Thủy tinh Borosilicate chịu nhiệt độ cao 200 độ C không thôi nhiễm chất độc hại, đèn LED đổi màu theo nhiệt độ, tính năng giữ ấm 40-90 độ C pha sữa, pha trà.",
     "price": 360000,
     "originalPrice": 520000,
-    "image": "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800",
+    "image": "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=800"
+      "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800"
     ],
     "category": "Gia dụng",
     "brand": "HomePro",
@@ -3203,9 +3209,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "100% hạt chia hữu cơ nhập khẩu Nam Mỹ, hỗ trợ tiêu hóa tốt, tạo cảm giác no lâu hỗ trợ chế độ ăn kiêng eat clean giữ dáng thon gọn.",
     "price": 135000,
     "originalPrice": 200000,
-    "image": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800",
+    "image": "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800"
+      "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=800"
     ],
     "category": "Đời sống",
     "brand": "GreenFarm",
@@ -3415,9 +3421,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Mực gel gốc nước cao cấp ra đều êm tay không đứt nét, khô nhanh trong 1 giây không lem khi quẹt tay, thân bút đệm cao su êm ái chống mỏi tay.",
     "price": 49000,
     "originalPrice": 85000,
-    "image": "https://images.unsplash.com/photo-1585336261026-621532f1a5f4?w=800",
+    "image": "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1585336261026-621532f1a5f4?w=800"
+      "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=800"
     ],
     "category": "Đời sống",
     "brand": "Deli Stationery",
@@ -3669,9 +3675,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Vỏ hợp kim nhôm tản nhiệt cực nhanh, hỗ trợ sạc nhanh chuẩn PD & QC 3.0 cho 2 thiết bị cùng lúc với tốc độ tối đa, an toàn chống cháy nổ.",
     "price": 165000,
     "originalPrice": 250000,
-    "image": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800",
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800"
+      "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800"
     ],
     "category": "Điện tử",
     "brand": "AutoPro Gear",
@@ -4176,9 +4182,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Dây thừng gai đay tự nhiên bền chắc thỏa mãn sở thích cào móng giải tỏa stress của mèo, khung gỗ ép chắc chắn không rung lắc kèm bóng treo chơi đùa.",
     "price": 360000,
     "originalPrice": 520000,
-    "image": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=800",
+    "image": "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=800"
+      "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=800"
     ],
     "category": "Thú cưng",
     "brand": "PetParadise",
@@ -4217,9 +4223,9 @@ export const FALLBACK_PRODUCTS = [
     "description": "Bộ máy cơ khí tự động trữ cót 42 giờ độ chính xác cao, mặt kính Sapphire nguyên khối chống trầy xước dao cào, khả năng kháng nước 50M đi bơi thoải mái.",
     "price": 2450000,
     "originalPrice": 3800000,
-    "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+    "image": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=800",
     "images": [
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800"
+      "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=800"
     ],
     "category": "Thời trang",
     "brand": "LuxeTime",
