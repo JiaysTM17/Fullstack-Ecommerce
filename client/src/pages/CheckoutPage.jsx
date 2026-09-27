@@ -199,6 +199,13 @@ export default function CheckoutPage() {
           orderId: generatedOrderId,
           total: finalOrderTotal,
           paymentMethod,
+          shippingAddress: address,
+          customerName: fullName,
+          phone,
+          items: checkoutItems,
+          voucherDiscount,
+          shippingFee: finalShippingFee,
+          voucherCode: activeVoucherCodes,
         },
       });
     } catch (err) {

@@ -19,6 +19,10 @@ export default function OrderSuccessPage() {
   const shippingAddress = location.state?.shippingAddress || '';
   const customerName = location.state?.customerName || '';
   const phone = location.state?.phone || '';
+  const items = location.state?.items || [];
+  const voucherDiscount = location.state?.voucherDiscount || 0;
+  const shippingFee = location.state?.shippingFee || 0;
+  const voucherCode = location.state?.voucherCode || null;
 
   const orderData = {
     orderId,
@@ -27,6 +31,10 @@ export default function OrderSuccessPage() {
     shippingAddress,
     customerName,
     phone,
+    items,
+    voucherDiscount,
+    shippingFee,
+    voucherCode,
     createdAt: new Date().toLocaleString('vi-VN'),
   };
 
