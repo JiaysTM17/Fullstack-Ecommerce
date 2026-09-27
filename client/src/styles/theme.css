@@ -338,3 +338,15 @@ body {
   border-color: var(--primary-color);
 }
 
+.mega-menu-scroll-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mega-menu-scroll-hide::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+

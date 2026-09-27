@@ -2,12 +2,48 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 import { FALLBACK_PRODUCTS } from '../services/productService';
 
 const CHAT_STORAGE_KEY = 'mini_shopee_live_chat_history';
 
 /**
- * Biểu tượng Trợ lý AI Hologram / Cosmic Sparkle Orb hiện đại bậc nhất
+ * Hiệu ứng âm thanh thông minh nhẹ nhàng bằng Web Audio API (không cần tải file ngoài)
+ */
+function playChime(type = 'message') {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    if (type === 'message') {
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.22);
+    } else if (type === 'cart') {
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08);
+      osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.32);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.32);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Biểu tượng Trợ lý AI Cosmic Sparkle Orb hiện đại bậc nhất
  */
 export function BotIcon({ size = 32, glow = false }) {
   const gradId = `aiGrad_${size}`;
@@ -96,7 +132,7 @@ const DEFAULT_WELCOME_MESSAGES = [
     sender: 'agent',
     agentName: 'Trợ Lý AI Fullstack E-Commerce',
     avatar: null,
-    text: 'Xin chào! Tôi là Trợ Lý AI của sàn Fullstack E-Commerce ✨. Tôi có thể giúp bạn tìm kiếm hàng trăm sản phẩm, tra cứu đơn hàng gần nhất hoặc kết nối trực tiếp với Chuyên viên tư vấn (Human Agent) bất cứ lúc nào!',
+    text: 'Xin chào! Tôi là Trợ Lý AI của sàn Fullstack E-Commerce ✨. Tôi có thể giúp bạn tìm kiếm hàng trăm sản phẩm, thêm thẳng vào giỏ hàng, tra cứu tiến độ đơn hàng và kết nối trực tiếp với Chuyên viên tư vấn (Human Agent) bất cứ lúc nào!',
     time: 'Vừa xong',
     suggestions: ['Gợi ý đồ công nghệ hot', 'Tra cứu đơn hàng của tôi', 'Lấy voucher 15%', '👨‍💼 Kết nối nhân viên trực (Human Agent)'],
   }
@@ -108,8 +144,10 @@ export default function LiveChatWidget() {
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [copiedCode, setCopiedCode] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [agentRating, setAgentRating] = useState(null);
 
-  // Chế độ hội thoại: 'ai' (Trợ lý tự động) | 'handover_connecting' (Đang chuyển giao) | 'human' (Nhân viên trực)
+  // Chế độ hội thoại: 'ai' | 'handover_connecting' | 'human'
   const [chatMode, setChatMode] = useState('ai');
 
   const [messages, setMessages] = useState(() => {
@@ -122,9 +160,12 @@ export default function LiveChatWidget() {
   });
 
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { theme } = useTheme();
+  const { addToCart } = useCart();
+  const { showToast } = useToast();
 
   // Tự động cuộn xuống cuối khi có tin nhắn mới
   useEffect(() => {
@@ -177,8 +218,83 @@ export default function LiveChatWidget() {
   const handleCopyVoucher = (code) => {
     navigator.clipboard.writeText(code).then(() => {
       setCopiedCode(code);
+      showToast(`Đã sao chép mã ${code} vào bộ nhớ tạm!`, 'success');
       setTimeout(() => setCopiedCode(null), 2500);
     });
+  };
+
+  // Helper áp dụng voucher thẳng vào đơn hàng
+  const handleApplyVoucherToCart = (voucher) => {
+    try {
+      localStorage.setItem('mini_shopee_applied_voucher', JSON.stringify({
+        code: voucher.code,
+        discountType: 'percentage',
+        discountValue: voucher.code === 'SUPERDEAL' ? 15 : 10,
+        maxDiscount: 100000,
+        minOrderAmount: 0,
+      }));
+      playChime('cart');
+      showToast(`✓ Đã áp dụng mã "${voucher.code}" trực tiếp vào giỏ hàng của bạn!`, 'success');
+    } catch {
+      handleCopyVoucher(voucher.code);
+    }
+  };
+
+  // Thêm trực tiếp sản phẩm vào giỏ hàng ngay trong cuộc trò chuyện
+  const handleDirectAddToCart = (product) => {
+    if (!product) return;
+    addToCart(product, 1);
+    playChime('cart');
+    showToast(`🛒 Đã thêm "${product.name}" vào giỏ hàng thành công!`, 'success');
+  };
+
+  // Nhận diện giọng nói tiếng Việt bằng Web Speech API
+  const handleToggleVoice = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      showToast('Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói Web Speech.', 'info');
+      return;
+    }
+
+    if (isListening) {
+      try {
+        recognitionRef.current?.stop();
+      } catch {}
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'vi-VN';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        showToast('🎙️ Đang lắng nghe giọng nói của bạn...', 'info');
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setInputMessage((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        }
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch {
+      setIsListening(false);
+    }
   };
 
   // Thuật toán AI tìm kiếm sản phẩm thông minh
@@ -233,6 +349,7 @@ export default function LiveChatWidget() {
     // 2. Chuyển giao hoàn tất sau 1.2s: Nhân viên trực tiếp nhận
     setTimeout(() => {
       setChatMode('human');
+      playChime('message');
       const humanWelcome = {
         id: `msg_human_${Date.now()}`,
         sender: 'human_agent',
@@ -254,6 +371,7 @@ export default function LiveChatWidget() {
   // Chuyển giao ngược lại cho Trợ lý AI
   const handleSwitchBackToAI = () => {
     setChatMode('ai');
+    playChime('message');
     const returnMsg = {
       id: `msg_sys_${Date.now()}`,
       sender: 'system',
@@ -304,6 +422,7 @@ export default function LiveChatWidget() {
           humanReply = 'Dạ em đã ghi nhận chi tiết nội dung của anh/chị. Em đang trực tiếp xử lý trên hệ thống để đảm bảo quyền lợi tốt nhất cho mình. Anh/chị cần em hỗ trợ thêm thông tin gì nữa không ạ?';
         }
 
+        playChime('message');
         const agentMsg = {
           id: `msg_human_${Date.now()}`,
           sender: 'human_agent',
@@ -312,6 +431,7 @@ export default function LiveChatWidget() {
           text: humanReply,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           suggestions,
+          showRatingPrompt: true,
         };
 
         setMessages((prev) => [...prev, agentMsg]);
@@ -321,7 +441,6 @@ export default function LiveChatWidget() {
     }
 
     // 2. Nếu ở chế độ TRỢ LÝ AI (AI BOT MODE)
-    // Kiểm tra yêu cầu chuyển giao sang nhân viên trực (Handover trigger)
     if (
       lower.includes('gặp nhân viên') || lower.includes('nhân viên') || 
       lower.includes('tư vấn viên') || lower.includes('người trực') || 
@@ -334,7 +453,7 @@ export default function LiveChatWidget() {
       return;
     }
 
-    // Phản hồi AI thông thường
+    // Phản hồi AI thông minh
     setTimeout(() => {
       let replyText = '';
       let products = null;
@@ -347,7 +466,7 @@ export default function LiveChatWidget() {
         const recentOrders = getRecentOrders();
         if (recentOrders.length > 0) {
           orders = recentOrders.slice(0, 2);
-          replyText = `Tôi đã tìm thấy ${recentOrders.length} đơn hàng trong hệ thống của bạn! Dưới đây là thông tin đơn hàng mới nhất:`;
+          replyText = `Tôi đã tìm thấy ${recentOrders.length} đơn hàng trong hệ thống của bạn! Dưới đây là thông tin tiến độ giao hàng chi tiết:`;
           suggestions = ['Xem chi tiết tất cả đơn', 'Theo dõi vận chuyển', '👨‍💼 Kết nối nhân viên trực'];
         } else {
           replyText = 'Hiện bạn chưa có đơn hàng nào đang chờ xử lý trên hệ thống. Hãy chọn món hàng yêu thích và đặt ngay nhé!';
@@ -369,7 +488,7 @@ export default function LiveChatWidget() {
         const found = searchMatchingProducts(cleanKeyword);
         if (found.length > 0) {
           products = found;
-          replyText = `Dạ đây là các sản phẩm ${cleanKeyword ? `phù hợp với "${cleanKeyword}"` : 'nổi bật nhất'} đang có giá cực ưu đãi trên sàn:`;
+          replyText = `Dạ đây là các sản phẩm ${cleanKeyword ? `phù hợp với "${cleanKeyword}"` : 'nổi bật nhất'} đang có giá cực ưu đãi. Bạn có thể nhấn [Thêm vào giỏ] để mua ngay:`;
           suggestions = ['Xem thêm hàng khác', 'Lấy mã giảm giá', '👨‍💼 Kết nối nhân viên trực'];
         } else {
           products = FALLBACK_PRODUCTS.slice(0, 3);
@@ -384,7 +503,7 @@ export default function LiveChatWidget() {
           { code: 'FREESHIP', discount: 'Freeship 35K', max: 'Toàn quốc', desc: 'Miễn phí vận chuyển hỏa tốc & tiêu chuẩn' },
           { code: 'SUPERDEAL', discount: 'Giảm 15%', max: 'Tối đa 150.000₫', desc: 'Siêu sale ngày hội mua sắm' },
         ];
-        replyText = '🎁 Dưới đây là các mã voucher độc quyền đang còn hiệu lực! Bạn hãy bấm "Sao Chép Mã" để dùng ngay trong giỏ hàng nhé:';
+        replyText = '🎁 Dưới đây là các mã voucher độc quyền đang còn hiệu lực! Bạn có thể nhấn "Dùng ngay" để tự động áp vào giỏ hàng:';
         suggestions = ['Hướng dẫn dùng voucher', 'Tìm sản phẩm hot', '👨‍💼 Kết nối nhân viên trực'];
       }
       // D. Chính sách đổi trả
@@ -404,10 +523,11 @@ export default function LiveChatWidget() {
       }
       // G. Phản hồi mặc định
       else {
-        replyText = 'Tôi có thể hỗ trợ bạn tìm kiếm bất kỳ món đồ nào từ Thời trang, Công nghệ, Gia dụng đến Mỹ phẩm, hoặc kiểm tra đơn hàng, mã giảm giá và chuyển giao sang nhân viên trực (Human Agent). Bạn cần tôi trợ giúp gì nào?';
+        replyText = 'Tôi có thể hỗ trợ bạn tìm kiếm bất kỳ món đồ nào từ Thời trang, Công nghệ, Gia dụng đến Mỹ phẩm, tra cứu đơn hàng, áp voucher và chuyển giao sang nhân viên trực (Human Agent). Bạn cần tôi trợ giúp gì nào?';
         suggestions = ['Gợi ý hàng bán chạy', 'Lấy voucher 15%', 'Tra cứu đơn hàng', '👨‍💼 Kết nối nhân viên trực (Human Agent)'];
       }
 
+      playChime('message');
       const agentMsg = {
         id: `msg_agent_${Date.now()}`,
         sender: 'agent',
@@ -430,6 +550,7 @@ export default function LiveChatWidget() {
     if (window.confirm('Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện này?')) {
       setMessages(DEFAULT_WELCOME_MESSAGES);
       setChatMode('ai');
+      setAgentRating(null);
       localStorage.removeItem(CHAT_STORAGE_KEY);
     }
   };
@@ -496,10 +617,10 @@ export default function LiveChatWidget() {
             bottom: '20px',
             right: '20px',
             zIndex: 100000,
-            width: '420px',
-            maxWidth: 'calc(100vw - 28px)',
-            height: 'min(590px, calc(100vh - 70px))',
-            maxHeight: 'calc(100vh - 70px)',
+            width: '430px',
+            maxWidth: 'calc(100vw - 24px)',
+            height: 'min(620px, calc(100vh - 60px))',
+            maxHeight: 'calc(100vh - 60px)',
             background: 'var(--bg-card, #ffffff)',
             borderRadius: '20px',
             boxShadow: '0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(99, 102, 241, 0.2)',
@@ -572,7 +693,7 @@ export default function LiveChatWidget() {
                 />
               </div>
               <div>
-                <div style={{ fontWeight: 800, fontSize: '14.5px', lineHeight: '1.2', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ fontWeight: 800, fontSize: '14px', lineHeight: '1.2', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>
                     {chatMode === 'human' 
                       ? `${HUMAN_AGENT.name}` 
@@ -660,7 +781,6 @@ export default function LiveChatWidget() {
                   padding: '5px 7px',
                   fontSize: '12px',
                   borderRadius: '6px',
-                  transition: 'background 0.2s',
                 }}
                 title="Xóa lịch sử chat"
                 aria-label="Xóa lịch sử"
@@ -774,6 +894,7 @@ export default function LiveChatWidget() {
 
           {/* Quick FAQ Strip */}
           <div
+            className="mega-menu-scroll-hide"
             style={{
               padding: '8px 12px',
               background: 'var(--bg-muted, #f8fafc)',
@@ -782,7 +903,6 @@ export default function LiveChatWidget() {
               gap: '6px',
               overflowX: 'auto',
               whiteSpace: 'nowrap',
-              scrollbarWidth: 'none',
             }}
           >
             {chatMode === 'human' ? (
@@ -924,7 +1044,7 @@ export default function LiveChatWidget() {
                     )
                   )}
 
-                  <div style={{ maxWidth: '82%', width: '100%' }}>
+                  <div style={{ maxWidth: '84%', width: '100%' }}>
                     {!isUser && m.agentName && (
                       <div style={{ fontSize: '11px', color: isHuman ? '#059669' : 'var(--text-muted, #64748b)', marginBottom: '3px', marginLeft: '4px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <span>{m.agentName}</span>
@@ -958,7 +1078,7 @@ export default function LiveChatWidget() {
                     >
                       {m.text}
 
-                      {/* Card Sản Phẩm Gợi Ý Thông Minh */}
+                      {/* Card Sản Phẩm Gợi Ý Thông Minh: Tích hợp Thêm vào giỏ hàng trực tiếp */}
                       {m.products && m.products.length > 0 && (
                         <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           {m.products.map((prod) => (
@@ -977,7 +1097,7 @@ export default function LiveChatWidget() {
                               <img
                                 src={prod.image}
                                 alt={prod.name}
-                                style={{ width: '50px', height: '50px', borderRadius: '6px', objectFit: 'cover', flexShrink: 0 }}
+                                style={{ width: '54px', height: '54px', borderRadius: '6px', objectFit: 'cover', flexShrink: 0 }}
                               />
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -993,32 +1113,52 @@ export default function LiveChatWidget() {
                                     </span>
                                   )}
                                 </div>
+                                <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDirectAddToCart(prod)}
+                                    style={{
+                                      background: 'linear-gradient(135deg, #ea580c, #f97316)',
+                                      color: '#ffffff',
+                                      border: 'none',
+                                      borderRadius: '6px',
+                                      padding: '4px 8px',
+                                      fontSize: '10.5px',
+                                      fontWeight: 700,
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '3px',
+                                    }}
+                                  >
+                                    🛒 Thêm vào giỏ
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      navigate(`/products/${prod.id || prod._id}`);
+                                    }}
+                                    style={{
+                                      background: 'transparent',
+                                      color: 'var(--primary-color, #4f46e5)',
+                                      border: '1px solid rgba(79, 70, 229, 0.4)',
+                                      borderRadius: '6px',
+                                      padding: '4px 8px',
+                                      fontSize: '10.5px',
+                                      fontWeight: 600,
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    Chi tiết →
+                                  </button>
+                                </div>
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  navigate(`/products/${prod.id || prod._id}`);
-                                }}
-                                style={{
-                                  background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
-                                  color: '#ffffff',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  padding: '5px 9px',
-                                  fontSize: '11px',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  flexShrink: 0,
-                                }}
-                              >
-                                Xem ngay
-                              </button>
                             </div>
                           ))}
                         </div>
                       )}
 
-                      {/* Card Voucher Khuyến Mãi 1-Click Copy */}
+                      {/* Card Voucher Khuyến Mãi: Tích hợp Áp Dụng Ngay & Sao Chép */}
                       {m.vouchers && m.vouchers.length > 0 && (
                         <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           {m.vouchers.map((vc) => (
@@ -1045,29 +1185,48 @@ export default function LiveChatWidget() {
                                   {vc.desc}
                                 </div>
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => handleCopyVoucher(vc.code)}
-                                style={{
-                                  background: copiedCode === vc.code ? '#22c55e' : '#ea580c',
-                                  color: '#ffffff',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  padding: '5px 10px',
-                                  fontSize: '11px',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  transition: 'background 0.2s',
-                                }}
-                              >
-                                {copiedCode === vc.code ? '✓ Đã lưu' : 'Sao chép'}
-                              </button>
+                              <div style={{ display: 'flex', gap: '4px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleApplyVoucherToCart(vc)}
+                                  style={{
+                                    background: '#ea580c',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    padding: '5px 8px',
+                                    fontSize: '11px',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                  }}
+                                  title="Áp dụng mã này trực tiếp vào giỏ hàng"
+                                >
+                                  ⚡ Dùng ngay
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyVoucher(vc.code)}
+                                  style={{
+                                    background: copiedCode === vc.code ? '#22c55e' : 'var(--bg-muted, #e2e8f0)',
+                                    color: copiedCode === vc.code ? '#ffffff' : 'var(--text-primary)',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    padding: '5px 8px',
+                                    fontSize: '11px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    transition: 'background 0.2s',
+                                  }}
+                                >
+                                  {copiedCode === vc.code ? '✓' : 'Copy'}
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>
                       )}
 
-                      {/* Card Tra Cứu Đơn Hàng */}
+                      {/* Card Tra Cứu Đơn Hàng Chi Tiết & Tiến Độ */}
                       {m.orders && m.orders.length > 0 && (
                         <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           {m.orders.map((ord, idx) => (
@@ -1077,19 +1236,33 @@ export default function LiveChatWidget() {
                                 background: 'var(--bg-muted, #f1f5f9)',
                                 border: '1px solid var(--border-medium, #cbd5e1)',
                                 borderRadius: '10px',
-                                padding: '8px 10px',
+                                padding: '10px',
                               }}
                             >
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontWeight: 700, fontSize: '12px', color: '#4f46e5' }}>
+                                <span style={{ fontWeight: 700, fontSize: '12.5px', color: '#4f46e5' }}>
                                   #{ord.id || ord._id || `ORD-${Date.now().toString().slice(-6)}`}
                                 </span>
-                                <span style={{ fontSize: '10px', background: 'rgba(34, 197, 94, 0.15)', color: '#16a34a', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                                  {ord.status || 'Đang giao hàng (SPX 2H)'}
+                                <span style={{ fontSize: '10px', background: 'rgba(34, 197, 94, 0.15)', color: '#16a34a', padding: '2px 7px', borderRadius: '4px', fontWeight: 700 }}>
+                                  {ord.status || 'Đang giao hàng (SPX Now)'}
                                 </span>
                               </div>
                               <div style={{ fontSize: '11.5px', marginTop: '4px', color: 'var(--text-muted, #64748b)' }}>
                                 Tổng tiền: <strong style={{ color: '#ea580c' }}>{(ord.totalAmount || ord.total || 0).toLocaleString('vi-VN')}₫</strong>
+                              </div>
+
+                              {/* Thanh Tiến Trình Vận Chuyển Mini */}
+                              <div style={{ marginTop: '8px', padding: '6px 8px', background: 'var(--bg-card, #ffffff)', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '10.5px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#16a34a', fontWeight: 600 }}>
+                                  <span>✓ Đặt hàng</span>
+                                  <span>→</span>
+                                  <span>✓ Đóng gói</span>
+                                  <span>→</span>
+                                  <span style={{ fontWeight: 800 }}>🚚 Đang giao</span>
+                                </div>
+                                <div style={{ fontSize: '10px', color: '#64748b', marginTop: '4px' }}>
+                                  Dự kiến giao: <strong>Hôm nay (trước 18:00)</strong> qua SPX Express
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -1097,11 +1270,11 @@ export default function LiveChatWidget() {
                             type="button"
                             onClick={() => navigate('/orders')}
                             style={{
-                              background: '#4f46e5',
+                              background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
                               color: '#fff',
                               border: 'none',
                               borderRadius: '6px',
-                              padding: '6px',
+                              padding: '7px',
                               fontSize: '11.5px',
                               fontWeight: 700,
                               cursor: 'pointer',
@@ -1111,6 +1284,34 @@ export default function LiveChatWidget() {
                           >
                             📦 Xem toàn bộ lịch sử đơn mua
                           </button>
+                        </div>
+                      )}
+
+                      {/* Đánh giá chất lượng hỗ trợ của Chuyên viên Kim Ngân */}
+                      {isHuman && m.showRatingPrompt && (
+                        <div style={{ marginTop: '10px', padding: '8px', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                          <div style={{ fontSize: '11px', color: '#065f46', fontWeight: 600 }}>
+                            {agentRating ? `Cảm ơn bạn đã đánh giá ${agentRating}⭐ cho Kim Ngân!` : 'Đánh giá chất lượng hỗ trợ của Kim Ngân:'}
+                          </div>
+                          {!agentRating && (
+                            <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => {
+                                    setAgentRating(star);
+                                    playChime('cart');
+                                    showToast(`Cảm ơn bạn đã đánh giá ${star}⭐ cho Chuyên viên Kim Ngân!`, 'success');
+                                  }}
+                                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+                                  title={`${star} sao`}
+                                >
+                                  ⭐
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1190,7 +1391,7 @@ export default function LiveChatWidget() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Form Nhập Tin Nhắn */}
+          {/* Form Nhập Tin Nhắn: Hỗ trợ Giọng Nói (Voice) & Gửi */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -1209,9 +1410,11 @@ export default function LiveChatWidget() {
               type="text"
               className="shopee-form-input"
               placeholder={
-                chatMode === 'human'
-                  ? 'Nhập tin nhắn trao đổi với Chuyên viên Kim Ngân...'
-                  : 'Hỏi sản phẩm, tra đơn, bấm "Gặp nhân viên"...'
+                isListening
+                  ? '🎙️ Đang nghe bạn nói Tiếng Việt...'
+                  : chatMode === 'human'
+                    ? 'Nhắn tin trực tiếp với Chuyên viên Kim Ngân...'
+                    : 'Hỏi sản phẩm, tra đơn, xin voucher, gặp CSKH...'
               }
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
@@ -1220,10 +1423,37 @@ export default function LiveChatWidget() {
                 padding: '9px 14px',
                 fontSize: '13px',
                 borderRadius: '9999px',
-                background: 'var(--bg-page, #f8fafc)',
-                border: '1px solid var(--border-medium, #cbd5e1)',
+                background: isListening ? '#fef2f2' : 'var(--bg-page, #f8fafc)',
+                border: isListening ? '1.5px solid #ef4444' : '1px solid var(--border-medium, #cbd5e1)',
+                transition: 'all 0.2s',
               }}
             />
+
+            {/* Nút Voice Input bằng giọng nói */}
+            <button
+              type="button"
+              onClick={handleToggleVoice}
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                background: isListening ? '#ef4444' : 'var(--bg-muted, #f1f5f9)',
+                color: isListening ? '#ffffff' : 'var(--text-primary)',
+                border: isListening ? 'none' : '1px solid var(--border-medium, #cbd5e1)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px',
+                transition: 'all 0.2s ease',
+                boxShadow: isListening ? '0 0 10px rgba(239, 68, 68, 0.6)' : 'none',
+              }}
+              title={isListening ? 'Dừng lắng nghe' : 'Nói bằng giọng nói (Voice Input)'}
+            >
+              🎙️
+            </button>
+
+            {/* Nút Gửi Tin Nhắn */}
             <button
               type="submit"
               disabled={!inputMessage.trim()}

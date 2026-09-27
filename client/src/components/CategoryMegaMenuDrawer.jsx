@@ -189,8 +189,10 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
       <div
         className="anim-modal-content"
         style={{
-          width: '1080px',
+          width: '1120px',
           maxWidth: '96vw',
+          height: 'min(82vh, 760px)',
+          minHeight: '520px',
           maxHeight: 'calc(100vh - 40px)',
           background: 'var(--bg-card, #ffffff)',
           color: 'var(--text-primary, #0f172a)',
@@ -280,10 +282,12 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
 
         {/* Mega Menu Body: 12 Category Cards in Responsive Grid */}
         <div
+          className="mega-menu-scroll-hide"
           style={{
             padding: '20px 24px',
             overflowY: 'auto',
-            flex: 1,
+            flex: '1 1 0%',
+            minHeight: '0',
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
             gap: '14px',
@@ -422,6 +426,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             🏪 12 Gian Hàng Mall:
           </div>
           <div
+            className="mega-menu-scroll-hide"
             style={{
               display: 'flex',
               gap: '8px',
