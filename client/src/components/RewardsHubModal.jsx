@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useCoins } from '../context/CoinContext';
 import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -42,15 +43,23 @@ export default function RewardsHubModal({ onClose }) {
     }, 3000);
   };
 
-  return (
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
+  const modalContent = (
     <div
       className="shopee-modal-overlay"
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1200,
-        background: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(5px)',
+        zIndex: 999999,
+        background: 'rgba(0, 0, 0, 0.78)',
+        backdropFilter: 'blur(8px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -445,4 +454,9 @@ export default function RewardsHubModal({ onClose }) {
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+  return modalContent;
 }

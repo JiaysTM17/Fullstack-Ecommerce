@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { getAllShops } from '../services/shopService';
 
@@ -151,7 +152,17 @@ const CATEGORIES_DATA = [
 
 export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -181,18 +192,18 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
     );
   });
 
-  return (
+  const modalContent = (
     <div
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1200,
-        background: 'rgba(15, 23, 42, 0.75)',
-        backdropFilter: 'blur(6px)',
+        zIndex: 999999,
+        background: 'rgba(15, 23, 42, 0.78)',
+        backdropFilter: 'blur(8px)',
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px 14px',
+        padding: '24px 16px',
         overflowY: 'auto',
         animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
       }}
@@ -570,4 +581,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+  return modalContent;
 }
