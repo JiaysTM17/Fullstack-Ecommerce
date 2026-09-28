@@ -67,10 +67,13 @@ export default function ShopStorefrontPage() {
   const { toggleWishlist, isWishlisted } = useWishlist();
   const { addToCompare, isCompared } = useCompare();
 
-  const [shop, setShop] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [followerCount, setFollowerCount] = useState(0);
+  const [shop, setShop] = useState(() => getShopById(shopId) || null);
+  const [products, setProducts] = useState(() => (shopId ? getProductsByShop(shopId) : []));
+  const [isFollowing, setIsFollowing] = useState(() => (shopId ? isShopFollowed(shopId) : false));
+  const [followerCount, setFollowerCount] = useState(() => {
+    const s = getShopById(shopId);
+    return s?.followers || 12000;
+  });
   const [shopSearch, setShopSearch] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -107,54 +110,13 @@ export default function ShopStorefrontPage() {
     };
   }, [shopId]);
 
-  if (!shop) {
-    return (
-      <main className="shopee-container" style={{ padding: '60px 0', textAlign: 'center' }}>
-        <h2>{t('shop_not_found')}</h2>
-        <Link to="/" className="shopee-btn shopee-btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
-          Về trang chủ
-        </Link>
-      </main>
-    );
-  }
-
-  const handleToggleFollow = () => {
-    const nextState = toggleFollowShop(shop.id);
-    setIsFollowing(nextState);
-    setFollowerCount((prev) => (nextState ? prev + 1 : prev - 1));
-    showToast(
-      nextState ? `Đã theo dõi ${shop.name}!` : `Đã bỏ theo dõi ${shop.name}`,
-      nextState ? 'success' : 'info'
-    );
-  };
-
-  const handleOpenShopChat = () => {
-    window.dispatchEvent(
-      new CustomEvent('open_live_chat', {
-        detail: {
-          shopName: shop.name,
-          shopId: shop.id,
-          shopAvatar: shop.avatar,
-        },
-      })
-    );
-  };
-
-  const handleClaimVoucher = (voucher) => {
-    const res = applyVoucher(voucher.code);
-    if (res?.success) {
-      showToast(`Đã áp dụng mã ${voucher.code} của ${shop.name} thành công!`, 'success');
-    } else {
-      showToast(`Đã lưu mã ${voucher.code} vào ví voucher của bạn!`, 'success');
-    }
-  };
-
-  // Trích xuất các danh mục phân loại độc quyền có trong shop
+  // Trích xuất các danh mục phân loại độc quyền có trong shop (Luôn chạy trước mọi early return)
   const shopCategories = useMemo(() => {
+    const list = products || [];
     const map = new Map();
-    map.set('all', { key: 'all', label: 'Tất Cả Sản Phẩm', count: products.length });
+    map.set('all', { key: 'all', label: 'Tất Cả Sản Phẩm', count: list.length });
 
-    products.forEach((p) => {
+    list.forEach((p) => {
       const cls = getProductClassification(p);
       if (!map.has(cls.key)) {
         map.set(cls.key, { key: cls.key, label: cls.label, group: cls.group, count: 0 });
@@ -167,7 +129,7 @@ export default function ShopStorefrontPage() {
 
   // Phân chia sản phẩm theo phân loại được chọn và nhóm sản phẩm gợi ý thêm
   const { matchingProducts, otherProducts } = useMemo(() => {
-    let list = [...products];
+    let list = [...(products || [])];
 
     // Lọc theo từ khóa tìm kiếm trong shop
     if (shopSearch.trim()) {
@@ -198,6 +160,50 @@ export default function ShopStorefrontPage() {
 
     return { matchingProducts: matches, otherProducts: others };
   }, [products, shopSearch, sortBy, selectedCategory]);
+
+  const handleToggleFollow = () => {
+    if (!shop?.id) return;
+    const nextState = toggleFollowShop(shop.id);
+    setIsFollowing(nextState);
+    setFollowerCount((prev) => (nextState ? prev + 1 : prev - 1));
+    showToast(
+      nextState ? `Đã theo dõi ${shop.name}!` : `Đã bỏ theo dõi ${shop.name}`,
+      nextState ? 'success' : 'info'
+    );
+  };
+
+  const handleOpenShopChat = () => {
+    if (!shop?.id) return;
+    window.dispatchEvent(
+      new CustomEvent('open_live_chat', {
+        detail: {
+          shopName: shop.name,
+          shopId: shop.id,
+          shopAvatar: shop.avatar,
+        },
+      })
+    );
+  };
+
+  const handleClaimVoucher = (voucher) => {
+    const res = applyVoucher(voucher.code);
+    if (res?.success) {
+      showToast(`Đã áp dụng mã ${voucher.code} của ${shop?.name || 'Shop'} thành công!`, 'success');
+    } else {
+      showToast(`Đã lưu mã ${voucher.code} vào ví voucher của bạn!`, 'success');
+    }
+  };
+
+  if (!shop) {
+    return (
+      <main className="shopee-container" style={{ padding: '60px 0', textAlign: 'center' }}>
+        <h2>{t('shop_not_found')}</h2>
+        <Link to="/" className="shopee-btn shopee-btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
+          Về trang chủ
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main className="shopee-container" style={{ padding: '24px 0' }}>

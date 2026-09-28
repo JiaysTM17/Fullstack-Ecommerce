@@ -66,16 +66,108 @@ export default function VoucherPickerModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Split vouchers into 2 groups
-  const shippingVouchers = useMemo(
-    () => vouchers.filter((v) => v.type === "shipping"),
-    [vouchers],
-  );
+  // Hàm tính số tiền tiết kiệm thực tế cho từng voucher
+  const getVoucherSavings = (v) => {
+    if (!v) return 0;
+    const isEligible =
+      v.minOrderValue === 0 ||
+      currentSubtotal >= v.minOrderValue ||
+      currentSubtotal === 0;
+    if (!isEligible) return 0;
 
-  const discountVouchers = useMemo(
-    () => vouchers.filter((v) => v.type === "percent" || v.type === "fixed"),
-    [vouchers],
-  );
+    if (v.type === "shipping") {
+      const val = v.value || 30000;
+      return Math.min(val, defaultShippingFee > 0 ? defaultShippingFee : 30000);
+    }
+    const base = currentSubtotal > 0 ? currentSubtotal : 100000;
+    if (v.type === "percent") {
+      const raw = Math.round((base * v.value) / 100);
+      return v.maxDiscount ? Math.min(raw, v.maxDiscount) : raw;
+    }
+    return Math.min(v.value || 0, base);
+  };
+
+  // Hàm sắp xếp thông minh: Tốt nhất (giảm giá cao nhất) lên trên, sau đó giảm dần
+  const sortVouchersSmart = (list) => {
+    return [...list].sort((a, b) => {
+      const aEligible =
+        a.minOrderValue === 0 ||
+        currentSubtotal >= a.minOrderValue ||
+        currentSubtotal === 0;
+      const bEligible =
+        b.minOrderValue === 0 ||
+        currentSubtotal >= b.minOrderValue ||
+        currentSubtotal === 0;
+
+      // Cả 2 đều đủ điều kiện: Voucher nào tiết kiệm nhiều tiền hơn thì đẩy lên trước
+      if (aEligible && bEligible) {
+        const savA = getVoucherSavings(a);
+        const savB = getVoucherSavings(b);
+        if (savB !== savA) return savB - savA;
+        return a.minOrderValue - b.minOrderValue;
+      }
+
+      // Đủ điều kiện luôn ưu tiên xếp trên chưa đủ điều kiện
+      if (aEligible && !bEligible) return -1;
+      if (!aEligible && bEligible) return 1;
+
+      // Cả 2 chưa đủ điều kiện: Voucher nào cần mua thêm ít tiền hơn (gần đủ điều kiện hơn) đẩy lên trước
+      const missA = Math.max(0, a.minOrderValue - currentSubtotal);
+      const missB = Math.max(0, b.minOrderValue - currentSubtotal);
+      return missA - missB;
+    });
+  };
+
+  // Split vouchers into 2 sorted groups (Tốt nhất xếp trên cùng)
+  const shippingVouchers = useMemo(() => {
+    const list = vouchers.filter((v) => v.type === "shipping");
+    return sortVouchersSmart(list);
+  }, [vouchers, currentSubtotal, defaultShippingFee]);
+
+  const discountVouchers = useMemo(() => {
+    const list = vouchers.filter((v) => v.type === "percent" || v.type === "fixed");
+    return sortVouchersSmart(list);
+  }, [vouchers, currentSubtotal]);
+
+  // Tìm voucher tốt nhất trong mỗi nhóm
+  const bestShippingVoucher = useMemo(() => {
+    return (
+      shippingVouchers.find((v) => {
+        const eligible =
+          v.minOrderValue === 0 ||
+          currentSubtotal >= v.minOrderValue ||
+          currentSubtotal === 0;
+        return eligible && getVoucherSavings(v) > 0;
+      }) || null
+    );
+  }, [shippingVouchers, currentSubtotal, defaultShippingFee]);
+
+  const bestDiscountVoucher = useMemo(() => {
+    return (
+      discountVouchers.find((v) => {
+        const eligible =
+          v.minOrderValue === 0 ||
+          currentSubtotal >= v.minOrderValue ||
+          currentSubtotal === 0;
+        return eligible && getVoucherSavings(v) > 0;
+      }) || null
+    );
+  }, [discountVouchers, currentSubtotal]);
+
+  const bestComboSavings = useMemo(() => {
+    const shipSav = bestShippingVoucher ? getVoucherSavings(bestShippingVoucher) : 0;
+    const discSav = bestDiscountVoucher ? getVoucherSavings(bestDiscountVoucher) : 0;
+    return shipSav + discSav;
+  }, [bestShippingVoucher, bestDiscountVoucher, currentSubtotal, defaultShippingFee]);
+
+  const handleAutoApplyBestCombo = () => {
+    if (bestShippingVoucher) setSelectedShipping(bestShippingVoucher);
+    if (bestDiscountVoucher) setSelectedDiscount(bestDiscountVoucher);
+    showToast(
+      `✓ Đã tự động chọn gói Voucher tốt nhất! Tiết kiệm: ${formatCurrency(bestComboSavings)}`,
+      "success",
+    );
+  };
 
   // Live savings calculation for preview
   const previewShippingDiscount = useMemo(() => {
@@ -303,6 +395,30 @@ export default function VoucherPickerModal({
           </div>
         )}
 
+        {/* Smart Best Combo Recommendation Hero */}
+        {bestComboSavings > 0 && (
+          <div className="voucher-smart-recommendation-hero">
+            <div className="voucher-smart-hero-left">
+              <span className="voucher-smart-tag">⭐ GỢI Ý TỐI ƯU NHẤT CHO BẠN</span>
+              <div className="voucher-smart-hero-title">
+                Tiết kiệm tối đa: <span style={{ color: "#ea580c" }}>-{formatCurrency(bestComboSavings)}</span>
+              </div>
+              <div className="voucher-smart-hero-desc">
+                {bestShippingVoucher && <span>🚚 {bestShippingVoucher.code} (-{formatCurrency(getVoucherSavings(bestShippingVoucher))})</span>}
+                {bestShippingVoucher && bestDiscountVoucher && <span> + </span>}
+                {bestDiscountVoucher && <span>🏷️ {bestDiscountVoucher.code} (-{formatCurrency(getVoucherSavings(bestDiscountVoucher))})</span>}
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn-apply-best-combo"
+              onClick={handleAutoApplyBestCombo}
+            >
+              ⚡ Áp Dụng Ngay
+            </button>
+          </div>
+        )}
+
         {/* Category Tabs */}
         <div className="voucher-tabs-row">
           <button
@@ -441,6 +557,8 @@ export default function VoucherPickerModal({
                     0,
                     v.minOrderValue - currentSubtotal,
                   );
+                  const saving = getVoucherSavings(v);
+                  const isBest = bestShippingVoucher?.code === v.code;
 
                   return (
                     <div
@@ -464,8 +582,20 @@ export default function VoucherPickerModal({
                       <div className="voucher-ticket-body">
                         <div className="voucher-ticket-top">
                           <div>
-                            <h4 className="voucher-title">{v.name}</h4>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                              <h4 className="voucher-title">{v.name}</h4>
+                              {isBest && (
+                                <span className="voucher-best-badge">
+                                  👑 TỐT NHẤT CHO BẠN
+                                </span>
+                              )}
+                            </div>
                             <span className="voucher-code-badge">{v.code}</span>
+                            {isEligible && saving > 0 && (
+                              <div className="voucher-saving-highlight">
+                                ⚡ Tiết kiệm: -{formatCurrency(saving)}
+                              </div>
+                            )}
                           </div>
                           <div
                             style={{
@@ -610,6 +740,8 @@ export default function VoucherPickerModal({
                     0,
                     v.minOrderValue - currentSubtotal,
                   );
+                  const saving = getVoucherSavings(v);
+                  const isBest = bestDiscountVoucher?.code === v.code;
 
                   let stubText = "";
                   let stubIcon = "🏷️";
@@ -644,8 +776,20 @@ export default function VoucherPickerModal({
                       <div className="voucher-ticket-body">
                         <div className="voucher-ticket-top">
                           <div>
-                            <h4 className="voucher-title">{v.name}</h4>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                              <h4 className="voucher-title">{v.name}</h4>
+                              {isBest && (
+                                <span className="voucher-best-badge">
+                                  👑 TỐT NHẤT CHO BẠN
+                                </span>
+                              )}
+                            </div>
                             <span className="voucher-code-badge">{v.code}</span>
+                            {isEligible && saving > 0 && (
+                              <div className="voucher-saving-highlight">
+                                ⚡ Tiết kiệm: -{formatCurrency(saving)}
+                              </div>
+                            )}
                           </div>
                           <div
                             style={{
