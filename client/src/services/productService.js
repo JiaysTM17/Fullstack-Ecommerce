@@ -204,8 +204,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 650,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_02",
-    shopName: "TechWorld Store",
+    shopId: "shop_10",
+    shopName: "AudioHiFi Âm Thanh",
     shopRating: 4.95,
     shopResponseRate: 99,
     variants: {
@@ -361,8 +361,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 780,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_01",
-    shopName: "Thời Trang GenZ",
+    shopId: "shop_06",
+    shopName: "GreenFarm Organic",
     shopRating: 4.9,
     shopResponseRate: 98,
     variants: {
@@ -397,8 +397,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 160,
     isMall: false,
     isFastDelivery: false,
-    shopId: "shop_02",
-    shopName: "TechWorld Store",
+    shopId: "shop_07",
+    shopName: "Tri Thức BookStore",
     shopRating: 4.95,
     shopResponseRate: 99,
     variants: {
@@ -433,8 +433,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 390,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_01",
-    shopName: "Thời Trang GenZ",
+    shopId: "shop_08",
+    shopName: "AutoPro Phụ Kiện Xe",
     shopRating: 4.9,
     shopResponseRate: 98,
     variants: {
@@ -470,8 +470,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 520,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_02",
-    shopName: "TechWorld Store",
+    shopId: "shop_12",
+    shopName: "LuxeTime Đồng Hồ",
     shopRating: 4.95,
     shopResponseRate: 99,
     variants: {
@@ -995,8 +995,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 310,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_01",
-    shopName: "Thời Trang GenZ",
+    shopId: "shop_09",
+    shopName: "BabyCare Mẹ & Bé",
     shopRating: 4.9,
     shopResponseRate: 98,
     variants: {
@@ -1063,8 +1063,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 140,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_01",
-    shopName: "Thời Trang GenZ",
+    shopId: "shop_07",
+    shopName: "Tri Thức BookStore",
     shopRating: 4.9,
     shopResponseRate: 98,
     variants: {
@@ -1130,8 +1130,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 380,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_01",
-    shopName: "Thời Trang GenZ",
+    shopId: "shop_08",
+    shopName: "AutoPro Phụ Kiện Xe",
     shopRating: 4.9,
     shopResponseRate: 98,
     variants: {
@@ -1164,8 +1164,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 215,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_01",
-    shopName: "Thời Trang GenZ",
+    shopId: "shop_11",
+    shopName: "PetParadise Thú Cưng",
     shopRating: 4.9,
     shopResponseRate: 98,
     variants: {
@@ -1299,8 +1299,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 165,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_02",
-    shopName: "TechWorld Store",
+    shopId: "shop_10",
+    shopName: "AudioHiFi Âm Thanh",
     shopRating: 4.95,
     shopResponseRate: 99,
     variants: {
@@ -1369,8 +1369,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 420,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_02",
-    shopName: "TechWorld Store",
+    shopId: "shop_10",
+    shopName: "AudioHiFi Âm Thanh",
     shopRating: 4.95,
     shopResponseRate: 99,
     variants: {
@@ -1572,8 +1572,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 130,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_03",
-    shopName: "Mỹ Phẩm Seoul Official",
+    shopId: "shop_09",
+    shopName: "BabyCare Mẹ & Bé",
     shopRating: 4.92,
     shopResponseRate: 97,
     variants: {
@@ -1606,8 +1606,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 360,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_03",
-    shopName: "Mỹ Phẩm Seoul Official",
+    shopId: "shop_09",
+    shopName: "BabyCare Mẹ & Bé",
     shopRating: 4.92,
     shopResponseRate: 97,
     variants: {
@@ -1739,8 +1739,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 270,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_04",
-    shopName: "Home & Living Concept",
+    shopId: "shop_06",
+    shopName: "GreenFarm Organic",
     shopRating: 4.88,
     shopResponseRate: 96,
     variants: {
@@ -1774,8 +1774,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 110,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_04",
-    shopName: "Home & Living Concept",
+    shopId: "shop_11",
+    shopName: "PetParadise Thú Cưng",
     shopRating: 4.88,
     shopResponseRate: 96,
     variants: {
@@ -1874,8 +1874,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 380,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_01",
-    shopName: "Thời Trang GenZ",
+    shopId: "shop_05",
+    shopName: "SportZone Thể Thao",
     shopRating: 4.9,
     shopResponseRate: 98,
     variants: {
@@ -1907,8 +1907,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 650,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_01",
-    shopName: "Thời Trang GenZ",
+    shopId: "shop_05",
+    shopName: "SportZone Thể Thao",
     shopRating: 4.9,
     shopResponseRate: 98,
     variants: {
@@ -1940,8 +1940,8 @@ export const FALLBACK_PRODUCTS = [
     reviewCount: 105,
     isMall: true,
     isFastDelivery: true,
-    shopId: "shop_01",
-    shopName: "Thời Trang GenZ",
+    shopId: "shop_05",
+    shopName: "SportZone Thể Thao",
     shopRating: 4.9,
     shopResponseRate: 98,
     variants: {
@@ -4345,6 +4345,76 @@ export const FALLBACK_PRODUCTS = [
     ],
     "reviews": []
   },
+  {
+    "_id": "prod_108",
+    "id": "prod_108",
+    "name": "Giày Sneaker Nam Cổ Thấp Da Microfiber Phong Cách Hàn Quốc Đế Cao Su Non Chống Trượt",
+    "slug": "giay-sneaker-nam-co-thap-da-microfiber",
+    "description": "Chất liệu da microfiber cao cấp kháng nước, lót giày cao su non êm ái thoáng khí không đau chân, form giày ôm chân chuẩn dáng phong cách tối giản nam tính.",
+    "price": 389000,
+    "originalPrice": 650000,
+    "image": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "MenStyle",
+    "badge": "Best Seller",
+    "stock": 45,
+    "sold": 680,
+    "rating": 4.9,
+    "reviewCount": 142,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "MenStyle Thời Trang Phái Mạnh",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": ["Trắng Tinh Tế", "Đen Phối Trắng"],
+      "sizes": ["39", "40", "41", "42", "43"]
+    },
+    "specifications": [
+      { "label": "Chất liệu", "value": "Da Microfiber cao cấp mềm êm" },
+      { "label": "Đế giày", "value": "Cao su đúc nguyên khối chống mòn trượt" }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_109",
+    "id": "prod_109",
+    "name": "Giày Sandal Nữ Quai Mảnh Đế Vuông 5cm Da Mềm Êm Chân Thời Trang Đi Làm Đi Tiệc",
+    "slug": "giay-sandal-nu-quai-manh-de-vuong",
+    "description": "Thiết kế quai mảnh tôn dáng bàn chân, gót vuông 5cm cực kỳ vững chãi và thoải mái khi đi lại nhiều, lót da êm chân cao cấp dễ phối đồ công sở lẫn dạo phố.",
+    "price": 289000,
+    "originalPrice": 490000,
+    "image": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "ChicLady",
+    "badge": "Hot Deal",
+    "stock": 38,
+    "sold": 520,
+    "rating": 4.88,
+    "reviewCount": 115,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "ChicLady Thời Trang Nữ Cao Cấp",
+    "shopRating": 4.93,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": ["Màu Kem Nude", "Màu Đen Sang Trọng"],
+      "sizes": ["35", "36", "37", "38", "39"]
+    },
+    "specifications": [
+      { "label": "Chiều cao gót", "value": "5cm gót vuông vững chãi" },
+      { "label": "Chất liệu", "value": "Da tổng hợp cao cấp mềm mại" }
+    ],
+    "reviews": []
+  },
 ];
 
 function mergeWithCustomReviews(product) {
@@ -4361,6 +4431,166 @@ function mergeWithCustomReviews(product) {
   };
 }
 
+function hasWordToken(target, word) {
+  if (!word || word.length < 2) return false;
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\export async function getProducts(params = {}) {');
+  const rx = new RegExp('(^|[^a-zA-Z0-9àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ])' + escaped + '([^a-zA-Z0-9àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]|$)', 'i');
+  return rx.test(target);
+}
+
+export function getStoredProducts() {
+  try {
+    if (typeof window !== "undefined") {
+      const raw = localStorage.getItem("mini_shopee_seller_products");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map();
+          parsed.forEach((p) => {
+            const key = p._id || p.id;
+            if (key) map.set(key, p);
+          });
+
+          // Merge stored dynamic state (stock, sold, price, etc.) into full products
+          const mergedList = FALLBACK_PRODUCTS.map((fb) => {
+            const override = map.get(fb._id) || map.get(fb.id);
+            if (override) {
+              return {
+                ...fb,
+                ...override,
+                stock: typeof override.stock === "number" ? override.stock : fb.stock,
+                sold: typeof override.sold === "number" ? override.sold : fb.sold,
+                price: typeof override.price === "number" ? override.price : fb.price,
+                isActive: override.isActive !== undefined ? override.isActive : true,
+              };
+            }
+            return fb;
+          });
+
+          // Also append any newly created custom products by seller not in FALLBACK_PRODUCTS
+          const fallbackIds = new Set(FALLBACK_PRODUCTS.map((p) => p._id || p.id));
+          parsed.forEach((p) => {
+            const pid = p._id || p.id;
+            if (pid && !fallbackIds.has(pid)) {
+              mergedList.push({
+                ...p,
+                _id: pid,
+                id: pid,
+                images: p.images || [p.image || ""],
+                rating: p.rating || 5.0,
+                reviewCount: p.reviewCount || 0,
+                reviews: p.reviews || [],
+              });
+            }
+          });
+
+          return mergedList;
+        }
+      }
+    }
+  } catch {}
+  return FALLBACK_PRODUCTS;
+}
+
+export function deductProductStock(purchasedItems = []) {
+  try {
+    if (typeof window === "undefined" || !Array.isArray(purchasedItems) || purchasedItems.length === 0) return;
+    const raw = localStorage.getItem("mini_shopee_seller_products");
+    let currentProducts = [];
+    if (raw) {
+      try {
+        currentProducts = JSON.parse(raw);
+      } catch {
+        currentProducts = [];
+      }
+    }
+
+    if (!Array.isArray(currentProducts) || currentProducts.length === 0) {
+      currentProducts = FALLBACK_PRODUCTS.map((p) => ({
+        _id: p.id || p._id,
+        id: p.id || p._id,
+        shopId: p.shopId || "shop_01",
+        name: p.name,
+        price: p.price,
+        originalPrice: p.originalPrice || Math.round(p.price * 1.3),
+        stock: p.stock || 50,
+        sold: p.sold || 15,
+        category: p.category || "Thời trang",
+        image: p.image || (p.images && p.images[0]) || "",
+        isActive: true,
+      }));
+    }
+
+    const updated = currentProducts.map((p) => {
+      const match = purchasedItems.find((item) => {
+        const itemPid = item.productId || item._id || item.id;
+        const pId = p._id || p.id;
+        if (itemPid && pId && String(itemPid) === String(pId)) return true;
+        if (item.name && p.name && item.name.trim().toLowerCase() === p.name.trim().toLowerCase()) return true;
+        return false;
+      });
+
+      if (match) {
+        const qty = Number(match.quantity) || 1;
+        const currentStock = typeof p.stock === "number" ? p.stock : 50;
+        const currentSold = typeof p.sold === "number" ? p.sold : 0;
+        return {
+          ...p,
+          stock: Math.max(0, currentStock - qty),
+          sold: currentSold + qty,
+        };
+      }
+      return p;
+    });
+
+    localStorage.setItem("mini_shopee_seller_products", JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent("mini_shopee_inventory_updated", { detail: updated }));
+    window.dispatchEvent(new Event("storage"));
+    return updated;
+  } catch (err) {
+    console.error("Error deducting product stock:", err);
+  }
+}
+
+export function restoreProductStock(cancelledItems = []) {
+  try {
+    if (typeof window === "undefined" || !Array.isArray(cancelledItems) || cancelledItems.length === 0) return;
+    const raw = localStorage.getItem("mini_shopee_seller_products");
+    if (!raw) return;
+    const currentProducts = JSON.parse(raw);
+    if (!Array.isArray(currentProducts)) return;
+
+    const updated = currentProducts.map((p) => {
+      const match = cancelledItems.find((item) => {
+        const itemPid = item.productId || item._id || item.id;
+        const pId = p._id || p.id;
+        if (itemPid && pId && String(itemPid) === String(pId)) return true;
+        if (item.name && p.name && item.name.trim().toLowerCase() === p.name.trim().toLowerCase()) return true;
+        return false;
+      });
+
+      if (match) {
+        const qty = Number(match.quantity) || 1;
+        const currentStock = typeof p.stock === "number" ? p.stock : 50;
+        const currentSold = typeof p.sold === "number" ? p.sold : 0;
+        return {
+          ...p,
+          stock: currentStock + qty,
+          sold: Math.max(0, currentSold - qty),
+        };
+      }
+      return p;
+    });
+
+    localStorage.setItem("mini_shopee_seller_products", JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent("mini_shopee_inventory_updated", { detail: updated }));
+    window.dispatchEvent(new Event("storage"));
+    return updated;
+  } catch (err) {
+    console.error("Error restoring product stock:", err);
+  }
+}
+
 export async function getProducts(params = {}) {
   try {
     const payload = await apiRequest(`/api/products${buildQueryString(params)}`);
@@ -4375,16 +4605,22 @@ export async function getProducts(params = {}) {
     // console.warn("Backend API offline, using fallback products:", err.message);
   }
 
-  let list = FALLBACK_PRODUCTS.map(mergeWithCustomReviews);
+  let list = getStoredProducts().map(mergeWithCustomReviews);
 
-  // Keyword filter
+  // Keyword filter with multi-token, pipe separation, and deep-field search
   if (params.keyword) {
-    const kw = params.keyword.toLowerCase().trim();
-    list = list.filter((p) =>
-      p.name.toLowerCase().includes(kw) ||
-      (p.category && p.category.toLowerCase().includes(kw)) ||
-      (p.brand && p.brand.toLowerCase().includes(kw))
-    );
+    const rawKw = params.keyword.toLowerCase().trim();
+    const orTerms = rawKw.includes('|')
+      ? rawKw.split('|').map((s) => s.trim()).filter(Boolean)
+      : [rawKw];
+    list = list.filter((p) => {
+      const searchTarget = `${p.name} ${p.category || ''} ${p.brand || ''} ${p.description || ''} ${p.shopName || ''}`.toLowerCase();
+      return orTerms.some((term) => {
+        if (searchTarget.includes(term)) return true;
+        const words = term.split(/\s+/).filter((w) => w.length > 1);
+        return words.length > 1 && words.every((w) => hasWordToken(searchTarget, w));
+      });
+    });
   }
 
   // Category filter
@@ -4462,7 +4698,8 @@ export async function getProductById(productId) {
   } catch (err) {
     // console.warn("Backend API offline, fetching from fallback:", err.message);
   }
-  const found = FALLBACK_PRODUCTS.find((p) => p._id === productId || p.id === productId);
+  const allProducts = getStoredProducts();
+  const found = allProducts.find((p) => p._id === productId || p.id === productId);
   return found ? mergeWithCustomReviews(found) : null;
 }
 

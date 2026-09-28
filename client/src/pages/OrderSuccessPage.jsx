@@ -4,6 +4,7 @@ import { formatCurrency } from '../utils/formatCurrency';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
+import RewardsHubModal from '../components/RewardsHubModal';
 
 export default function OrderSuccessPage() {
   const location = useLocation();
@@ -12,6 +13,7 @@ export default function OrderSuccessPage() {
   const { showToast } = useToast();
 
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [showRewardsModal, setShowRewardsModal] = useState(false);
 
   const orderId = location.state?.orderId || `ORD${Math.floor(100000 + Math.random() * 900000)}`;
   const total = location.state?.total || 0;
@@ -139,6 +141,52 @@ export default function OrderSuccessPage() {
           </div>
         </div>
 
+        {/* Bonus Lucky Spin Award Banner */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #fff7ed, #ffedd5)',
+            border: '1.5px solid #fed7aa',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            textAlign: 'left',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ fontSize: '32px' }}>🎡</div>
+            <div>
+              <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#ea580c' }}>
+                Tặng +1 Lượt Quay Vòng Quay May Mắn!
+              </div>
+              <div style={{ fontSize: '12px', color: '#7c2d12', marginTop: '2px' }}>
+                Đơn hàng thành công đã tặng bạn 1 lượt quay 100% trúng thưởng Mini Xu & Voucher.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowRewardsModal(true)}
+            style={{
+              background: '#ea580c',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '9px 16px',
+              fontSize: '13px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)',
+            }}
+          >
+            Quay Ngay 🎁
+          </button>
+        </div>
+
         {/* Action Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <button
@@ -174,6 +222,10 @@ export default function OrderSuccessPage() {
           order={orderData}
           onClose={() => setShowInvoiceModal(false)}
         />
+      )}
+
+      {showRewardsModal && (
+        <RewardsHubModal onClose={() => setShowRewardsModal(false)} />
       )}
     </main>
   );

@@ -7,7 +7,8 @@ import {
   ProductFilters, 
   ProductGrid,
   QuickViewModal,
-  RecentlyViewed
+  RecentlyViewed,
+  CategoryShowcase
 } from "../components";
 import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -69,8 +70,17 @@ export default function HomePage() {
 
     loadProducts();
 
+    const handleMarketplaceSync = () => {
+      loadProducts();
+    };
+
+    window.addEventListener("storage", handleMarketplaceSync);
+    window.addEventListener("mini_shopee_inventory_updated", handleMarketplaceSync);
+
     return () => {
       ignore = true;
+      window.removeEventListener("storage", handleMarketplaceSync);
+      window.removeEventListener("mini_shopee_inventory_updated", handleMarketplaceSync);
     };
   }, [filters]);
 
@@ -88,6 +98,37 @@ export default function HomePage() {
     }
 
     setSearchParams(nextParams);
+  }
+
+  function updateFiltersBatch(updates) {
+    const nextParams = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && String(val).trim() !== "") {
+        nextParams.set(key, String(val).trim());
+      } else {
+        nextParams.delete(key);
+      }
+    });
+    nextParams.set("page", "1");
+    setSearchParams(nextParams);
+  }
+
+  function handleSelectShowcase({ category, keyword }) {
+    updateFiltersBatch({
+      category: category || "",
+      keyword: keyword || "",
+      shopId: "",
+      minPrice: "",
+      maxPrice: "",
+      badge: "",
+      fastDelivery: "",
+      minRating: "",
+      page: "1",
+    });
+    const catalogEl = document.getElementById("catalog-section");
+    if (catalogEl) {
+      catalogEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 
   function handlePageChange(newPage) {
@@ -126,7 +167,14 @@ export default function HomePage() {
       {/* 1. Hero Banner Carousel */}
       <HeroBanner onSelectCategory={(cat) => updateFilter("category", cat)} />
 
-      {/* 2. Flash Deals Section */}
+      {/* 2. 2-Tier Categories Showcase (Shopee / Modern E-Commerce Style) */}
+      <CategoryShowcase
+        onSelectShowcase={handleSelectShowcase}
+        onSelectCategory={(cat) => handleSelectShowcase({ category: cat, keyword: "" })}
+        onSelectKeyword={(kw) => handleSelectShowcase({ category: "", keyword: kw })}
+      />
+
+      {/* 3. Flash Deals Section */}
       <FlashDeals
         products={products}
         onProductClick={viewProductDetail}
@@ -147,6 +195,7 @@ export default function HomePage() {
         <ProductFilters
           filters={filters}
           onFilterChange={updateFilter}
+          onFilterBatch={updateFiltersBatch}
           onResetFilters={resetFilters}
         />
 
@@ -186,6 +235,12 @@ export default function HomePage() {
                   <button type="button" onClick={() => updateFilter("category", "")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "inherit", padding: 0 }}>✕</button>
                 </span>
               )}
+              {filters.shopId && (
+                <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  🏪 Shop: {filters.shopId}
+                  <button type="button" onClick={() => updateFilter("shopId", "")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "inherit", padding: 0 }}>✕</button>
+                </span>
+              )}
               {filters.badge && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                   {filters.badge === "Amazon's Choice" ? t('nav_featured_picks', 'Tuyển chọn') : filters.badge}
@@ -206,8 +261,12 @@ export default function HomePage() {
               )}
               {(filters.minPrice || filters.maxPrice) && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  💰 {filters.minPrice ? formatCurrency(Number(filters.minPrice)) : "0₫"} - {filters.maxPrice ? formatCurrency(Number(filters.maxPrice)) : "Vô cực"}
-                  <button type="button" onClick={() => { updateFilter("minPrice", ""); updateFilter("maxPrice", ""); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "inherit", padding: 0 }}>✕</button>
+                  💰 {filters.minPrice && filters.maxPrice
+                    ? `${formatCurrency(Number(filters.minPrice))} - ${formatCurrency(Number(filters.maxPrice))}`
+                    : filters.minPrice
+                    ? `≥ ${formatCurrency(Number(filters.minPrice))}`
+                    : `≤ ${formatCurrency(Number(filters.maxPrice))}`}
+                  <button type="button" onClick={() => updateFiltersBatch({ minPrice: "", maxPrice: "" })} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "inherit", padding: 0 }}>✕</button>
                 </span>
               )}
 

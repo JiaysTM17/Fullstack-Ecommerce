@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { getAllShops } from '../services/shopService';
@@ -133,6 +133,7 @@ const CATEGORIES_DATA = [
 export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const shopsScrollRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -513,7 +514,42 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
           <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', whiteSpace: 'nowrap', flexShrink: 0 }}>
             🏪 12 Gian Hàng Mall:
           </div>
+
+          {/* Left Scroll Button */}
+          <button
+            type="button"
+            onClick={() => shopsScrollRef.current?.scrollBy({ left: -220, behavior: 'smooth' })}
+            style={{
+              width: '26px',
+              height: '26px',
+              borderRadius: '50%',
+              background: 'var(--bg-muted, #f1f5f9)',
+              border: '1px solid var(--border-medium, #cbd5e1)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '15px',
+              fontWeight: 800,
+              flexShrink: 0,
+              transition: 'all 0.15s ease',
+            }}
+            title="Cuộn sang trái"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--primary-color, #4f46e5)';
+              e.currentTarget.style.color = '#fff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--bg-muted, #f1f5f9)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            }}
+          >
+            ‹
+          </button>
+
           <div
+            ref={shopsScrollRef}
             className="mega-menu-scroll-hide"
             style={{
               display: 'flex',
@@ -563,6 +599,39 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               </button>
             ))}
           </div>
+
+          {/* Right Scroll Button */}
+          <button
+            type="button"
+            onClick={() => shopsScrollRef.current?.scrollBy({ left: 220, behavior: 'smooth' })}
+            style={{
+              width: '26px',
+              height: '26px',
+              borderRadius: '50%',
+              background: 'var(--bg-muted, #f1f5f9)',
+              border: '1px solid var(--border-medium, #cbd5e1)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '15px',
+              fontWeight: 800,
+              flexShrink: 0,
+              transition: 'all 0.15s ease',
+            }}
+            title="Cuộn sang phải"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--primary-color, #4f46e5)';
+              e.currentTarget.style.color = '#fff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--bg-muted, #f1f5f9)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            }}
+          >
+            ›
+          </button>
         </div>
       </div>
     </div>

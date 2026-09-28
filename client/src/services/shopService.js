@@ -1,4 +1,4 @@
-import { FALLBACK_PRODUCTS } from "./productService";
+import { FALLBACK_PRODUCTS, getStoredProducts } from "./productService";
 
 const SHOPS_DATA = [
   {
@@ -359,22 +359,9 @@ export function getAllShops() {
 
 export function getProductsByShop(shopId) {
   const normalizedId = shopId || "shop_01";
-  
-  // Try to load any updated custom products first
-  try {
-    const custom = localStorage.getItem("mini_shopee_seller_products");
-    if (custom) {
-      const parsed = JSON.parse(custom);
-      const matched = parsed.filter((p) => (p.shopId || "shop_01") === normalizedId && p.isActive !== false);
-      if (matched.length > 0) return matched;
-    }
-  } catch {
-    // fallback
-  }
-
-  // Filter from FALLBACK_PRODUCTS
-  const filtered = FALLBACK_PRODUCTS.filter((p) => (p.shopId || "shop_01") === normalizedId);
-  return filtered.length > 0 ? filtered : FALLBACK_PRODUCTS.slice(0, 4);
+  const allStored = typeof getStoredProducts === "function" ? getStoredProducts() : FALLBACK_PRODUCTS;
+  const matched = allStored.filter((p) => (p.shopId || "shop_01") === normalizedId && p.isActive !== false);
+  return matched.length > 0 ? matched : allStored.slice(0, 4);
 }
 
 export function isShopFollowed(shopId) {

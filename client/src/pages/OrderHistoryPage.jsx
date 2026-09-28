@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -8,6 +8,7 @@ import { formatCurrency } from '../utils/formatCurrency';
 import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
 import ReturnRequestModal from '../components/ReturnRequestModal';
 import DeliveryLiveMapModal from '../components/DeliveryLiveMapModal';
+import { restoreProductStock } from '../services/productService';
 import '../styles/dashboard.css';
 
 const INITIAL_CUSTOMER_ORDERS = [
@@ -114,6 +115,24 @@ export default function OrderHistoryPage() {
     }
   };
 
+  // Lắng nghe sự kiện storage để đồng bộ thời gian thực khi Người bán cập nhật trạng thái đơn
+  useEffect(() => {
+    const handleStorageUpdate = () => {
+      try {
+        const saved = localStorage.getItem(ORDERS_STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setOrders(parsed);
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener('storage', handleStorageUpdate);
+    return () => window.removeEventListener('storage', handleStorageUpdate);
+  }, []);
+
   const handleReturnSubmit = ({ orderId, reason, refundMethod, note, refundAmount }) => {
     const updated = orders.map((o) => {
       if (o.orderId !== orderId) return o;
@@ -208,9 +227,37 @@ export default function OrderHistoryPage() {
       };
     });
     saveOrders(updated);
+
+    // 1. Hoàn trả tồn kho cho các sản phẩm trong đơn đã hủy
+    if (selectedCancelOrder.items && selectedCancelOrder.items.length > 0) {
+      restoreProductStock(selectedCancelOrder.items);
+    }
+
+    // 2. Đồng bộ trạng thái đơn hủy sang Kênh Quản Lý Người Bán
+    try {
+      const rawSeller = localStorage.getItem('mini_shopee_seller_orders');
+      if (rawSeller) {
+        const sellerOrders = JSON.parse(rawSeller);
+        const updatedSeller = sellerOrders.map(so => {
+          if (so.orderId === selectedCancelOrder.orderId) {
+            return {
+              ...so,
+              status: 'cancelled',
+              statusText: 'Đã hủy bởi người mua',
+              cancelReason,
+              cancelNote
+            };
+          }
+          return so;
+        });
+        localStorage.setItem('mini_shopee_seller_orders', JSON.stringify(updatedSeller));
+        window.dispatchEvent(new Event('storage'));
+      }
+    } catch {}
+
     setSelectedCancelOrder(null);
     setCancelNote('');
-    showToast(t('order_cancelled_toast', 'Đã hủy đơn hàng thành công'), 'info');
+    showToast(t('order_cancelled_toast', 'Đã hủy đơn hàng thành công và hoàn trả số lượng kho!'), 'info');
   };
 
   const handleBuyAgain = (item) => {
@@ -253,6 +300,76 @@ export default function OrderHistoryPage() {
             ← {t('continue_shopping', 'Tiếp tục mua sắm')}
           </Link>
         </div>
+
+        {/* Thông báo phân định vai trò Người Bán */}
+        {user?.role === 'seller' && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, rgba(208, 1, 27, 0.04) 100%)',
+            border: '1px solid rgba(234, 88, 12, 0.3)',
+            borderRadius: '10px',
+            padding: '12px 16px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '22px' }}>🏪</span>
+              <div>
+                <strong style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
+                  Bạn đang ở mục Đơn Mua Cá Nhân
+                </strong>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Để xem và xử lý các đơn hàng khách mua từ gian hàng {user?.shopName || 'của bạn'}, hãy truy cập Kênh Người Bán.
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/seller/dashboard"
+              className="shopee-btn shopee-btn-primary"
+              style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none' }}
+            >
+              Vào Kênh Quản Lý Shop →
+            </Link>
+          </div>
+        )}
+
+        {/* Thông báo phân định vai trò Quản Trị Viên */}
+        {user?.role === 'admin' && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.08)',
+            border: '1px solid rgba(239, 68, 68, 0.25)',
+            borderRadius: '10px',
+            padding: '12px 16px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '22px' }}>⚡</span>
+              <div>
+                <strong style={{ fontSize: '13.5px', color: '#dc2626' }}>
+                  Tài Khoản Tổng Quản Trị Viên Sàn
+                </strong>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Để quản lý đơn hàng toàn sàn của toàn bộ 12 shop, vui lòng xem tại Bảng Điều Khiển Quản Trị.
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/admin/dashboard"
+              className="shopee-btn"
+              style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', background: '#dc2626', color: '#fff' }}
+            >
+              Bảng Quản Trị Toàn Sàn →
+            </Link>
+          </div>
+        )}
 
         {/* Status Tabs */}
         <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-medium, #e0e0e0)', paddingBottom: '14px', marginBottom: '22px', overflowX: 'auto' }}>

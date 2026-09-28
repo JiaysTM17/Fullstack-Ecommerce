@@ -19,3 +19,4 @@ export { default as ShippingLabelModal } from './ShippingLabelModal';
 export { default as QuickViewModal } from './QuickViewModal';
 export { default as RecentlyViewed } from './RecentlyViewed';
 export { default as ToastContainer } from './ToastContainer';
+export { default as CategoryShowcase } from './CategoryShowcase';

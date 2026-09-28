@@ -7,6 +7,7 @@ import { useLanguage } from "../context/LanguageContext";
 import VoucherPickerModal from "../components/VoucherPickerModal";
 import { useCoins } from "../context/CoinContext";
 import { createOrder } from "../services/orderService";
+import { deductProductStock } from "../services/productService";
 import { formatCurrency } from "../utils/formatCurrency";
 import "../styles/checkout-multistep.css";
 
@@ -51,7 +52,7 @@ export default function CheckoutPage() {
     removeShippingVoucher,
     clearCart,
   } = useCart();
-  const { coins, redeemCoins } = useCoins();
+  const { coins, redeemCoins, grantOrderSpin } = useCoins();
 
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [useCoinsToggle, setUseCoinsToggle] = useState(false);
@@ -161,17 +162,83 @@ export default function CheckoutPage() {
         redeemCoins(coinDiscount, generatedOrderId);
       }
 
+      // 1. Tự động trừ tồn kho (stock) và tăng số lượng đã bán (sold) của các sản phẩm vừa mua
+      deductProductStock(checkoutItems);
+
+      // Group checkout items by shopId
+      const itemsByShop = {};
+      checkoutItems.forEach((it) => {
+        const sId = it.shopId || "shop_01";
+        if (!itemsByShop[sId]) {
+          itemsByShop[sId] = [];
+        }
+        itemsByShop[sId].push(it);
+      });
+
+      const shopKeys = Object.keys(itemsByShop);
+      const allocatedShippingFee = Math.round(finalShippingFee / Math.max(1, shopKeys.length));
+      const allocatedVoucherDiscount = Math.round(voucherDiscount / Math.max(1, shopKeys.length));
+
+      // 2. Tạo đơn hàng gửi trực tiếp về Kênh Quản Lý Người Bán cho từng Shop
+      const newSellerOrders = shopKeys.map((sId) => {
+        const shopItems = itemsByShop[sId];
+        const shopSubtotal = shopItems.reduce((acc, it) => acc + (it.price * it.quantity), 0);
+        const shopTotal = Math.max(0, shopSubtotal + allocatedShippingFee - allocatedVoucherDiscount);
+
+        return {
+          orderId: generatedOrderId,
+          shopId: sId,
+          customerName: fullName || "Khách Hàng Mini Shopee",
+          phone: phone || "0901234567",
+          address: address || "TP. Hồ Chí Minh / Hà Nội",
+          productName: shopItems.map((it) => `${it.name} (x${it.quantity})`).join(", "),
+          items: shopItems.map((it) => ({
+            productId: it.productId || it._id || it.id,
+            id: it.productId || it._id || it.id,
+            name: it.name,
+            price: it.price,
+            quantity: it.quantity,
+            image: it.image,
+          })),
+          total: shopTotal,
+          shippingFee: allocatedShippingFee,
+          paymentMethod: paymentMethod === 'BANK' ? 'VietQR Ngân Hàng' : paymentMethod === 'MOMO' ? 'Ví MoMo' : paymentMethod === 'CARD' ? 'Thẻ Tín Dụng' : 'Thanh toán khi nhận hàng (COD)',
+          trackingCode: trackingCode,
+          status: 'pending',
+          statusText: 'Chờ xác nhận',
+          createdAt: nowStr,
+          note: note || '',
+        };
+      });
+
+      try {
+        const existingSellerOrdersRaw = localStorage.getItem('mini_shopee_seller_orders');
+        const existingSellerOrders = existingSellerOrdersRaw ? JSON.parse(existingSellerOrdersRaw) : [];
+        const mergedSellerOrders = [...newSellerOrders, ...existingSellerOrders];
+        localStorage.setItem('mini_shopee_seller_orders', JSON.stringify(mergedSellerOrders));
+
+        // Phát sự kiện thông báo thời gian thực tới Kênh Người Bán
+        window.dispatchEvent(new CustomEvent('mini_shopee_order_placed', { detail: newSellerOrders }));
+        window.dispatchEvent(new Event('storage'));
+      } catch (err) {
+        console.error("Lỗi đồng bộ đơn hàng người bán:", err);
+      }
+
       // Build customer order record for OrderHistoryPage
       const newCustomerOrder = {
         orderId: generatedOrderId,
+        userId: user?.id || 'user_customer_01',
         trackingCode,
         createdAt: nowStr,
-        shopName: checkoutItems[0]?.shopId === 'shop_02' ? 'TechWorld Store' : 'Thời Trang GenZ Official',
+        shopName: checkoutItems[0]?.shopName || (checkoutItems[0]?.shopId === 'shop_02' ? 'TechWorld Store' : 'Thời Trang GenZ Official'),
+        shopId: checkoutItems[0]?.shopId || 'shop_01',
         items: checkoutItems.map((it) => ({
+          productId: it.productId || it._id || it.id,
           name: it.name,
           price: it.price,
           quantity: it.quantity,
           image: it.image,
+          shopId: it.shopId || 'shop_01',
         })),
         total: finalOrderTotal,
         coinDiscount,
@@ -192,6 +259,11 @@ export default function CheckoutPage() {
         // ignore
       }
 
+      // Tặng +1 lượt quay Vòng Quay May Mắn cho đơn hàng thành công
+      if (typeof grantOrderSpin === 'function') {
+        grantOrderSpin(generatedOrderId);
+      }
+
       clearCart();
       navigate("/order-success", {
         replace: true,
@@ -206,6 +278,7 @@ export default function CheckoutPage() {
           voucherDiscount,
           shippingFee: finalShippingFee,
           voucherCode: activeVoucherCodes,
+          earnedSpin: 1,
         },
       });
     } catch (err) {

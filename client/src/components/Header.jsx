@@ -212,17 +212,64 @@ const Header = ({
               {theme === 'dark' ? '🌙 Tối' : '☀️ Sáng'}
             </button>
 
-            {/* Xu Rewards Trigger Capsule */}
-            <button
-              type="button"
-              className="header-coin-capsule"
-              onClick={() => setShowRewardsModal(true)}
-              title="Điểm Thưởng & Săn Xu Hàng Ngày"
-            >
-              <span>🪙</span>
-              <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
-              <span style={{ fontSize: '10px' }}>✨</span>
-            </button>
+            {/* Hiển thị Capsule theo từng vai trò: Admin / Seller / Customer */}
+            {user?.role === 'admin' ? (
+              <div
+                className="header-admin-pill"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  color: '#dc2626',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  padding: '3px 10px',
+                  borderRadius: '20px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  letterSpacing: '0.4px',
+                }}
+              >
+                <span>🛡️</span>
+                <span>QUẢN TRỊ VIÊN SÀN</span>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a' }}></span>
+              </div>
+            ) : user?.role === 'seller' ? (
+              <button
+                type="button"
+                className="header-seller-capsule"
+                onClick={() => navTo('/seller/dashboard')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(208, 1, 27, 0.08) 100%)',
+                  color: '#ea580c',
+                  border: '1px solid rgba(234, 88, 12, 0.35)',
+                  padding: '3px 12px',
+                  borderRadius: '20px',
+                  fontSize: '11.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+                title="Kênh Quản Trị Gian Hàng Của Bạn"
+              >
+                <span>🏪</span>
+                <span>Kênh Người Bán</span>
+                <span style={{ fontSize: '9.5px', background: '#dc2626', color: '#fff', padding: '1px 5px', borderRadius: '8px', fontWeight: 800 }}>MALL</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="header-coin-capsule"
+                onClick={() => setShowRewardsModal(true)}
+                title="Điểm Thưởng & Săn Xu Hàng Ngày"
+              >
+                <span>🪙</span>
+                <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
+                <span style={{ fontSize: '10px' }}>✨</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -589,36 +636,56 @@ const Header = ({
                         </div>
                       </button>
 
-                      <button
-                        type="button"
-                        className="user-dropdown-item"
-                        onClick={() => {
-                          setShowUserDropdown(false);
-                          setShowRewardsModal(true);
-                        }}
-                      >
-                        <span className="item-icon">🪙</span>
-                        <div className="item-text">
-                          <strong>Ví Xu & Điểm Thưởng</strong>
-                          <small>{(coins || 0).toLocaleString('vi-VN')} Xu đang có</small>
-                        </div>
-                      </button>
-
-                      {user.role === 'seller' && (
+                      {/* Mục Ví Xu & Điểm Thưởng chỉ dành riêng cho Khách hàng (Customer) */}
+                      {(!user || user.role === 'customer') && (
                         <button
                           type="button"
-                          className="user-dropdown-item seller"
+                          className="user-dropdown-item"
                           onClick={() => {
                             setShowUserDropdown(false);
-                            navTo('/seller');
+                            setShowRewardsModal(true);
                           }}
                         >
-                          <span className="item-icon">🏪</span>
+                          <span className="item-icon">🪙</span>
                           <div className="item-text">
-                            <strong>Kênh Quản Lý Gian Hàng</strong>
-                            <small>Đơn hàng shop, kho & sản phẩm bán</small>
+                            <strong>Ví Xu & Điểm Thưởng</strong>
+                            <small>{(coins || 0).toLocaleString('vi-VN')} Xu đang có</small>
                           </div>
                         </button>
+                      )}
+
+                      {/* Mục Kênh Người Bán & Ví Doanh Thu dành riêng cho Chủ Shop */}
+                      {user?.role === 'seller' && (
+                        <>
+                          <button
+                            type="button"
+                            className="user-dropdown-item seller"
+                            onClick={() => {
+                              setShowUserDropdown(false);
+                              navTo('/seller/dashboard');
+                            }}
+                          >
+                            <span className="item-icon">🏪</span>
+                            <div className="item-text">
+                              <strong>Kênh Quản Lý Gian Hàng</strong>
+                              <small>Đơn hàng shop, kho & sản phẩm bán</small>
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            className="user-dropdown-item"
+                            onClick={() => {
+                              setShowUserDropdown(false);
+                              navTo('/seller/dashboard');
+                            }}
+                          >
+                            <span className="item-icon">💳</span>
+                            <div className="item-text">
+                              <strong>Ví Doanh Thu & Rút Tiền</strong>
+                              <small>Số dư thanh toán đơn hàng shop</small>
+                            </div>
+                          </button>
+                        </>
                       )}
 
                       {user.role === 'admin' && (
@@ -627,7 +694,7 @@ const Header = ({
                           className="user-dropdown-item admin"
                           onClick={() => {
                             setShowUserDropdown(false);
-                            navTo('/admin');
+                            navTo('/admin/dashboard');
                           }}
                         >
                           <span className="item-icon">⚡</span>

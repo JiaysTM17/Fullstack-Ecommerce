@@ -47,14 +47,42 @@ export default function ProfilePage() {
     address: user?.address || '',
   });
 
-  // Tab 2: Address book state
+  // Tab 2: Address book state - Phân vùng độc lập theo từng tài khoản
+  const userAddressKey = user ? `${SAVED_ADDRESSES_KEY}_${user.id || user._id}` : SAVED_ADDRESSES_KEY;
+
   const [addresses, setAddresses] = useState(() => {
     try {
-      const saved = localStorage.getItem(SAVED_ADDRESSES_KEY);
-      return saved ? JSON.parse(saved) : INITIAL_ADDRESSES;
-    } catch {
-      return INITIAL_ADDRESSES;
-    }
+      const key = user ? `${SAVED_ADDRESSES_KEY}_${user.id || user._id}` : SAVED_ADDRESSES_KEY;
+      const saved = localStorage.getItem(key);
+      if (saved) return JSON.parse(saved);
+
+      if (user?.role === 'seller') {
+        return [
+          {
+            id: 'addr_seller_01',
+            name: user.fullName || 'Chủ Shop',
+            phone: user.phone || '0912345678',
+            address: user.shopAddress || 'Kho Hàng Tân Bình, TP. Hồ Chí Minh',
+            tag: 'Kho xuất hàng',
+            isDefault: true,
+          }
+        ];
+      }
+
+      if (user?.role === 'admin') {
+        return [
+          {
+            id: 'addr_admin_01',
+            name: 'Trụ Sở Điều Hành Sàn Mini Shopee',
+            phone: '1900 1221',
+            address: 'Tòa nhà Landmark 81, 720A Điện Biên Phủ, P.22, Bình Thạnh, TP.HCM',
+            tag: 'Trụ sở sàn',
+            isDefault: true,
+          }
+        ];
+      }
+    } catch {}
+    return INITIAL_ADDRESSES;
   });
 
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
@@ -65,14 +93,17 @@ export default function ProfilePage() {
     tag: 'Nhà riêng',
   });
 
-  // Save addresses to localStorage
+  // Save addresses to localStorage partitioned by user
   useEffect(() => {
     try {
-      localStorage.setItem(SAVED_ADDRESSES_KEY, JSON.stringify(addresses));
+      localStorage.setItem(userAddressKey, JSON.stringify(addresses));
+      if (!user || user.role === 'customer') {
+        localStorage.setItem(SAVED_ADDRESSES_KEY, JSON.stringify(addresses));
+      }
     } catch {
       // ignore
     }
-  }, [addresses]);
+  }, [addresses, userAddressKey, user]);
 
   if (!user) {
     return (
@@ -674,8 +705,18 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {coinHistory.slice(0, 10).map((record) => {
-                    const isCredit = record.type === 'credit';
+                  {coinHistory.slice(0, 15).map((record) => {
+                    const isPlus = record.type === 'plus' || record.type === 'credit' || record.isCredit;
+                    const desc = record.desc || record.description || 'Giao dịch Mini Xu';
+                    const time = record.date || record.timestamp || '';
+                    const getIcon = () => {
+                      if (record.category === 'checkin' || desc.includes('Điểm danh')) return '📅';
+                      if (record.category === 'spin' || desc.includes('Vòng Quay') || desc.includes('quay')) return '🎡';
+                      if (record.category === 'order' || desc.includes('đơn hàng') || desc.includes('thanh toán')) return '🛒';
+                      if (record.category === 'welcome' || desc.includes('chào mừng')) return '🌟';
+                      return isPlus ? '🪙' : '💸';
+                    };
+
                     return (
                       <div
                         key={record.id}
@@ -683,26 +724,46 @@ export default function ProfilePage() {
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          padding: '10px 14px',
-                          borderRadius: '8px',
+                          padding: '12px 16px',
+                          borderRadius: '10px',
                           background: 'var(--bg-muted, #f8fafc)',
                           fontSize: '13px',
+                          border: '1px solid var(--border-light, #f1f5f9)',
+                          transition: 'background 0.15s ease',
                         }}
                       >
-                        <div>
-                          <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{record.description}</div>
-                          <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                            {record.timestamp}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              background: isPlus ? 'rgba(16, 185, 129, 0.12)' : 'rgba(234, 88, 12, 0.12)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '16px',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {getIcon()}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{desc}</div>
+                            <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                              {time}
+                            </div>
                           </div>
                         </div>
                         <div
                           style={{
                             fontWeight: 800,
-                            fontSize: '14px',
-                            color: isCredit ? '#10b981' : '#ea580c',
+                            fontSize: '15px',
+                            color: isPlus ? '#10b981' : '#ea580c',
+                            whiteSpace: 'nowrap',
                           }}
                         >
-                          {isCredit ? '+' : '-'}{Math.abs(record.amount).toLocaleString('vi-VN')} Xu
+                          {isPlus ? '+' : '-'}{Math.abs(record.amount).toLocaleString('vi-VN')} Xu
                         </div>
                       </div>
                     );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getShopById, getProductsByShop, isShopFollowed, toggleFollowShop } from '../services/shopService';
 import { useCart } from '../context/CartContext';
@@ -8,6 +8,55 @@ import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import ProductCard from '../components/ProductCard';
+
+// Hàm phân loại chuyên nghiệp cho từng mặt hàng trong gian hàng
+function getProductClassification(product) {
+  const name = (product?.name || '').toLowerCase();
+
+  // 1. Quần các loại
+  if (/(quần|jean|jeans|short|kaki|jogger|tây âu|quần dài|quần đùi)/i.test(name)) {
+    return { key: 'quan', label: '👖 Quần Các Loại', group: 'quần' };
+  }
+  // 2. Áo các loại
+  if (/(áo|thun|sơ mi|polo|hoodie|khoác|jacket|blazer|cardigan|sweater|t-shirt)/i.test(name)) {
+    return { key: 'ao', label: '👕 Áo Các Loại', group: 'áo' };
+  }
+  // 3. Váy & Đầm
+  if (/(váy|đầm|chân váy|skirt|dress|yếm)/i.test(name)) {
+    return { key: 'vay', label: '👗 Váy & Đầm Nữ', group: 'váy đầm' };
+  }
+  // 4. Tai nghe & Âm thanh
+  if (/(tai nghe|headphone|earphone|airpods|tws|anc|soundbar|loa|speaker)/i.test(name)) {
+    return { key: 'audio', label: '🎧 Tai Nghe & Loa', group: 'tai nghe & loa' };
+  }
+  // 5. Bàn phím & Chuột
+  if (/(bàn phím|keyboard|chuột|mouse|lót chuột|keycap)/i.test(name)) {
+    return { key: 'gear', label: '⌨️ Bàn Phím & Chuột', group: 'bàn phím & chuột' };
+  }
+  // 6. Mỹ phẩm / Dưỡng da
+  if (/(serum|kem dưỡng|tinh chất|toner|nước hoa hồng|essence|ampoule)/i.test(name)) {
+    return { key: 'duongda', label: '✨ Serum & Dưỡng Da', group: 'serum & dưỡng da' };
+  }
+  if (/(sữa rửa mặt|tẩy trang|cleanser|mặt nạ|tẩy tế bào)/i.test(name)) {
+    return { key: 'lamchuyen', label: '🧼 Làm Sạch & Chăm Sóc', group: 'sữa rửa mặt' };
+  }
+  if (/(son|lipstick|phấn|mascara|eyeliner|cushion|bb cream)/i.test(name)) {
+    return { key: 'trangdiem', label: '💄 Son Môi & Trang Điểm', group: 'son môi & trang điểm' };
+  }
+  // 7. Đồ gia dụng
+  if (/(nồi|chảo|nồi chiên|nồi cơm|bếp|chống dính|nấu ăn)/i.test(name)) {
+    return { key: 'nhabep', label: '🍳 Nồi Chiên & Nhà Bếp', group: 'nồi chiên & bếp' };
+  }
+  if (/(robot|máy hút bụi|lọc không khí|máy lọc nước|hút bụi)/i.test(name)) {
+    return { key: 'thietbi', label: '🤖 Robot & Hút Bụi', group: 'thiết bị gia dụng' };
+  }
+
+  // Fallback theo Category gốc
+  if (product?.category) {
+    return { key: product.category.toLowerCase().replace(/\s+/g, '_'), label: `📦 ${product.category}`, group: product.category };
+  }
+  return { key: 'khac', label: '🎒 Phụ Kiện & Khác', group: 'phụ kiện' };
+}
 
 export default function ShopStorefrontPage() {
   const { shopId } = useParams();
@@ -24,16 +73,38 @@ export default function ShopStorefrontPage() {
   const [followerCount, setFollowerCount] = useState(0);
   const [shopSearch, setShopSearch] = useState('');
   const [sortBy, setSortBy] = useState('featured');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
+  // Load shop và danh sách sản phẩm theo shopId
   useEffect(() => {
     const loadedShop = getShopById(shopId);
     setShop(loadedShop);
-    setFollowerCount(loadedShop.followers || 12000);
-    setIsFollowing(isShopFollowed(loadedShop.id));
-
-    const shopProds = getProductsByShop(loadedShop.id);
-    setProducts(shopProds);
+    setFollowerCount(loadedShop?.followers || 12000);
+    if (loadedShop?.id) {
+      setIsFollowing(isShopFollowed(loadedShop.id));
+      const shopProds = getProductsByShop(loadedShop.id);
+      setProducts(shopProds);
+    }
     window.scrollTo(0, 0);
+  }, [shopId]);
+
+  // Đồng bộ thời gian thực khi Chủ Shop thêm sản phẩm hoặc cập nhật tồn kho
+  useEffect(() => {
+    const handleLiveSync = () => {
+      if (!shopId) return;
+      const loadedShop = getShopById(shopId);
+      if (loadedShop?.id) {
+        setShop(loadedShop);
+        setProducts(getProductsByShop(loadedShop.id));
+      }
+    };
+
+    window.addEventListener('storage', handleLiveSync);
+    window.addEventListener('mini_shopee_inventory_updated', handleLiveSync);
+    return () => {
+      window.removeEventListener('storage', handleLiveSync);
+      window.removeEventListener('mini_shopee_inventory_updated', handleLiveSync);
+    };
   }, [shopId]);
 
   if (!shop) {
@@ -78,209 +149,510 @@ export default function ShopStorefrontPage() {
     }
   };
 
-  // Filter & sort products in this shop
-  const filteredProducts = products.filter((p) => {
-    if (!shopSearch.trim()) return true;
-    return p.name.toLowerCase().includes(shopSearch.toLowerCase());
-  }).sort((a, b) => {
-    if (sortBy === 'price_asc') return a.price - b.price;
-    if (sortBy === 'price_desc') return b.price - a.price;
-    if (sortBy === 'best_selling') return (b.sold || 0) - (a.sold || 0);
-    return 0;
-  });
+  // Trích xuất các danh mục phân loại độc quyền có trong shop
+  const shopCategories = useMemo(() => {
+    const map = new Map();
+    map.set('all', { key: 'all', label: 'Tất Cả Sản Phẩm', count: products.length });
+
+    products.forEach((p) => {
+      const cls = getProductClassification(p);
+      if (!map.has(cls.key)) {
+        map.set(cls.key, { key: cls.key, label: cls.label, group: cls.group, count: 0 });
+      }
+      map.get(cls.key).count += 1;
+    });
+
+    return Array.from(map.values());
+  }, [products]);
+
+  // Phân chia sản phẩm theo phân loại được chọn và nhóm sản phẩm gợi ý thêm
+  const { matchingProducts, otherProducts } = useMemo(() => {
+    let list = [...products];
+
+    // Lọc theo từ khóa tìm kiếm trong shop
+    if (shopSearch.trim()) {
+      const q = shopSearch.toLowerCase().trim();
+      list = list.filter((p) => (p.name || '').toLowerCase().includes(q));
+    }
+
+    // Sắp xếp
+    if (sortBy === 'price_asc') list.sort((a, b) => a.price - b.price);
+    else if (sortBy === 'price_desc') list.sort((a, b) => b.price - a.price);
+    else if (sortBy === 'best_selling') list.sort((a, b) => (b.sold || 0) - (a.sold || 0));
+
+    if (selectedCategory === 'all') {
+      return { matchingProducts: list, otherProducts: [] };
+    }
+
+    const matches = [];
+    const others = [];
+
+    list.forEach((p) => {
+      const cls = getProductClassification(p);
+      if (cls.key === selectedCategory) {
+        matches.push(p);
+      } else {
+        others.push(p);
+      }
+    });
+
+    return { matchingProducts: matches, otherProducts: others };
+  }, [products, shopSearch, sortBy, selectedCategory]);
 
   return (
     <main className="shopee-container" style={{ padding: '24px 0' }}>
-      {/* Breadcrumb */}
-      <nav style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-        <Link to="/" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Trang chủ</Link>
-        {' > '}
-        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Gian hàng: {shop.name}</span>
+      <style>{`
+        .mall-official-ribbon {
+          background: linear-gradient(90deg, #b91c1c 0%, #dc2626 40%, #ea580c 100%);
+          color: #ffffff;
+          padding: 10px 24px;
+          border-radius: 16px 16px 0 0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 12px;
+          box-shadow: 0 4px 15px rgba(220, 38, 38, 0.25);
+        }
+        .mall-badge-brand {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #ffffff;
+          color: #dc2626;
+          padding: 3px 10px;
+          border-radius: 6px;
+          font-weight: 900;
+          font-size: 11px;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+        .mall-title-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: linear-gradient(135deg, #d0011b 0%, #ee4d2d 100%);
+          color: #ffffff;
+          padding: 4px 12px;
+          border-radius: 6px;
+          font-size: 11.5px;
+          font-weight: 800;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+          box-shadow: 0 3px 10px rgba(208, 1, 27, 0.35);
+          border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+        .mall-metric-card {
+          background: var(--bg-card, #ffffff);
+          border: 1px solid var(--border-medium, #e2e8f0);
+          border-radius: 12px;
+          padding: 14px 18px;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          box-shadow: var(--shadow-sm);
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .mall-metric-card:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+        }
+        .mall-metric-icon {
+          width: 42px;
+          height: 42px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          flex-shrink: 0;
+        }
+        .mall-voucher-ticket {
+          background: var(--bg-card, #ffffff);
+          border: 1.5px dashed var(--primary-color, #ea580c);
+          border-radius: 12px;
+          padding: 16px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          position: relative;
+          box-shadow: var(--shadow-sm);
+          overflow: hidden;
+          transition: all 0.2s ease;
+        }
+        .mall-voucher-ticket:hover {
+          border-color: #dc2626;
+          box-shadow: 0 6px 18px rgba(234, 88, 12, 0.18);
+        }
+        .mall-voucher-ticket::before {
+          content: '';
+          position: absolute;
+          left: -8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: var(--bg-page, #f8fafc);
+          border-right: 1.5px dashed var(--primary-color, #ea580c);
+        }
+        .mall-voucher-ticket::after {
+          content: '';
+          position: absolute;
+          right: -8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: var(--bg-page, #f8fafc);
+          border-left: 1.5px dashed var(--primary-color, #ea580c);
+        }
+      `}</style>
+
+      {/* Breadcrumb Navigation */}
+      <nav style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Link to="/" style={{ color: 'var(--primary-color, #ea580c)', textDecoration: 'none', fontWeight: 600 }}>Trang chủ</Link>
+        <span>›</span>
+        <span style={{ color: 'var(--text-muted)' }}>Gian hàng chính hãng</span>
+        <span>›</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{shop.name}</span>
       </nav>
 
-      {/* Shop Profile Banner & Header Card */}
+      {/* Official Shopee Mall / TikTok Shop Header Card */}
       <section
         style={{
           background: 'var(--bg-card, #ffffff)',
           borderRadius: '16px',
           overflow: 'hidden',
           border: '1px solid var(--border-medium, #e2e8f0)',
-          boxShadow: 'var(--shadow-sm)',
-          marginBottom: '24px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+          marginBottom: '28px',
         }}
       >
-        {/* Cover Banner */}
+        {/* Top Official Guarantee Ribbon */}
+        <div className="mall-official-ribbon">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span className="mall-badge-brand">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#dc2626" style={{ marginRight: '2px' }}>
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+              </svg>
+              SHOPEE MALL
+            </span>
+            <span style={{ fontSize: '12.5px', fontWeight: 700, letterSpacing: '0.4px' }}>
+              GIAN HÀNG CHÍNH HÃNG 100% • TIKTOK SHOP & SHOPEE OFFICIAL STORE
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', fontSize: '12px', fontWeight: 600 }}>
+            <span>✓ Trả hàng miễn phí 15 ngày</span>
+            <span>✓ Đền bù 200% nếu phát hiện giả</span>
+            <span>✓ Giao hỏa tốc toàn quốc</span>
+          </div>
+        </div>
+
+        {/* Cover Photo Backdrop */}
         <div
           style={{
-            height: '180px',
+            height: '220px',
             width: '100%',
-            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.7)), url(${shop.banner})`,
+            backgroundImage: `linear-gradient(180deg, rgba(15, 23, 42, 0.25) 0%, rgba(15, 23, 42, 0.8) 100%), url(${shop.banner})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             position: 'relative',
           }}
-        />
+        >
+          <div style={{
+            position: 'absolute',
+            bottom: '16px',
+            right: '24px',
+            background: 'rgba(0, 0, 0, 0.55)',
+            backdropFilter: 'blur(8px)',
+            color: '#ffffff',
+            padding: '6px 14px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }}></span>
+            <span>Đang trực tuyến • Sẵn sàng hỗ trợ 24/7</span>
+          </div>
+        </div>
 
         {/* Shop Info Row */}
         <div
           style={{
-            padding: '0 24px 24px',
+            padding: '0 28px 24px',
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'flex-end',
             justifyContent: 'space-between',
-            gap: '20px',
-            marginTop: '-50px',
+            gap: '24px',
+            marginTop: '-60px',
             position: 'relative',
           }}
         >
-          {/* Avatar & Title */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '18px' }}>
-            <img
-              src={shop.avatar}
-              alt={shop.name}
-              style={{
-                width: '100px',
-                height: '100px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: '4px solid var(--bg-card, #ffffff)',
-                boxShadow: 'var(--shadow-md)',
-                background: '#ffffff',
-              }}
-            />
+          {/* Avatar & Title Block */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px' }}>
+            <div style={{ position: 'relative' }}>
+              <img
+                src={shop.avatar}
+                alt={shop.name}
+                style={{
+                  width: '110px',
+                  height: '110px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: '4px solid var(--bg-card, #ffffff)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                  background: '#ffffff',
+                }}
+              />
+              {/* Verified Blue/Gold Seal on Avatar */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '4px',
+                  right: '4px',
+                  background: '#d0011b',
+                  color: '#ffffff',
+                  width: '26px',
+                  height: '26px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px',
+                  fontWeight: 900,
+                  border: '2px solid #ffffff',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+                }}
+                title="Đã được Shopee Mall xác thực chứng nhận"
+              >
+                ✓
+              </div>
+            </div>
+
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
                   {shop.name}
                 </h1>
-                {shop.isOfficial && (
-                  <span
-                    style={{
-                      background: 'var(--primary-color, #ea580c)',
-                      color: '#ffffff',
-                      fontSize: '11px',
-                      fontWeight: 800,
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      letterSpacing: '0.5px',
-                    }}
-                  >
-                    ✓ SHOPEE MALL
-                  </span>
-                )}
+                
+                {/* Shopee Mall / TikTok Official Luxury Badge */}
+                <span className="mall-title-badge">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+                  </svg>
+                  SHOPEE MALL
+                </span>
+
+                <span style={{
+                  fontSize: '11.5px',
+                  fontWeight: 700,
+                  color: '#15803d',
+                  background: '#dcfce7',
+                  padding: '3px 10px',
+                  borderRadius: '9999px',
+                  border: '1px solid #bbf7d0',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a' }}></span>
+                  Chính Hãng 100%
+                </span>
               </div>
-              <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
-                📍 {shop.location} · Hoạt động {shop.joinedDate}
+
+              <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <span>📍 {shop.location}</span>
+                <span>•</span>
+                <span>📅 Hoạt động {shop.joinedDate}</span>
+                <span>•</span>
+                <span style={{ color: '#ea580c', fontWeight: 600 }}>⏰ Mở cửa: 08:00 - 21:00 hàng ngày</span>
               </p>
             </div>
           </div>
 
-          {/* Action Buttons: Follow & Chat */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Action Buttons: Follow, Chat, Hotline */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <button
               type="button"
-              className={isFollowing ? 'shopee-btn shopee-btn-secondary' : 'shopee-btn shopee-btn-primary'}
-              style={{ padding: '10px 20px', fontWeight: 700, borderRadius: '8px' }}
+              className={isFollowing ? 'shopee-btn shopee-btn-secondary' : 'shopee-btn'}
+              style={{
+                padding: '10px 22px',
+                fontWeight: 700,
+                borderRadius: '10px',
+                fontSize: '13.5px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: isFollowing ? 'var(--bg-muted, #f1f5f9)' : 'linear-gradient(135deg, #d0011b 0%, #ee4d2d 100%)',
+                color: isFollowing ? 'var(--text-primary)' : '#ffffff',
+                border: isFollowing ? '1px solid var(--border-medium, #cbd5e1)' : 'none',
+                boxShadow: isFollowing ? 'none' : '0 4px 14px rgba(238, 77, 45, 0.35)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
               onClick={handleToggleFollow}
             >
-              {isFollowing ? t('shop_following') : t('shop_follow')}
+              <span>{isFollowing ? '✓' : '＋'}</span>
+              <span>{isFollowing ? t('shop_following') : 'Theo Dõi Shop'}</span>
             </button>
 
             <button
               type="button"
               className="shopee-btn shopee-btn-secondary"
-              style={{ padding: '10px 20px', fontWeight: 700, borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              style={{
+                padding: '10px 20px',
+                fontWeight: 700,
+                borderRadius: '10px',
+                fontSize: '13.5px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#ffffff',
+                border: '1.5px solid var(--primary-color, #ea580c)',
+                color: 'var(--primary-color, #ea580c)',
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                transition: 'all 0.2s ease',
+              }}
               onClick={handleOpenShopChat}
             >
-              {t('shop_chat_btn')}
+              <span style={{ fontSize: '15px' }}>💬</span>
+              <span>Chat Với Shop</span>
             </button>
           </div>
         </div>
 
-        {/* Shop Key Metrics Bar */}
+        {/* 4 Professional Key Metric Cards */}
         <div
           style={{
-            borderTop: '1px solid var(--border-light, #e2e8f0)',
-            padding: '16px 24px',
+            borderTop: '1px solid var(--border-light, #f1f5f9)',
+            padding: '20px 28px',
             background: 'var(--bg-muted, #f8fafc)',
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
             gap: '16px',
-            textAlign: 'center',
           }}
         >
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t('shop_rating')}</div>
-            <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
-              ⭐ {shop.rating} / 5.0
+          <div className="mall-metric-card">
+            <div className="mall-metric-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
+              ⭐
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Đánh Giá Gian Hàng</div>
+              <div style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
+                {shop.rating} / 5.0 <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600 }}>(Xuất sắc)</span>
+              </div>
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t('shop_followers')}</div>
-            <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
-              {followerCount.toLocaleString()}
+
+          <div className="mall-metric-card">
+            <div className="mall-metric-icon" style={{ background: '#fee2e2', color: '#dc2626' }}>
+              👥
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Người Theo Dõi</div>
+              <div style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
+                {followerCount.toLocaleString()} <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>Khách hàng</span>
+              </div>
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t('shop_response_rate')}</div>
-            <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
-              {shop.responseRate}% ({shop.responseTime})
+
+          <div className="mall-metric-card">
+            <div className="mall-metric-icon" style={{ background: '#dcfce7', color: '#15803d' }}>
+              ⚡
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Tỉ Lệ Phản Hồi Chat</div>
+              <div style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
+                {shop.responseRate || 99}% <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600 }}>({shop.responseTime || 'vài phút'})</span>
+              </div>
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Tổng sản phẩm</div>
-            <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
-              {products.length} mặt hàng
+
+          <div className="mall-metric-card">
+            <div className="mall-metric-icon" style={{ background: '#e0e7ff', color: '#4338ca' }}>
+              📦
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Sản Phẩm Phân Phối</div>
+              <div style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
+                {products.length} <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>Mặt hàng sẵn kho</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Shop Exclusive Vouchers */}
+      {/* Shop Exclusive Vouchers / Coupon Section */}
       {shop.vouchers && shop.vouchers.length > 0 && (
-        <section style={{ marginBottom: '28px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-            <span style={{ fontSize: '20px' }}>🎟️</span>
-            <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-              {t('shop_vouchers_title')}
-            </h2>
+        <section style={{ marginBottom: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '22px' }}>🎟️</span>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                  {t('shop_vouchers_title')}
+                </h2>
+                <div style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                  Lưu voucher độc quyền của {shop.name} để áp dụng ngay khi đặt hàng
+                </div>
+              </div>
+            </div>
+            <span style={{ fontSize: '12.5px', color: '#ea580c', fontWeight: 700 }}>
+              Áp dụng chung cùng Freeship Xtra
+            </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
             {shop.vouchers.map((v) => (
-              <div
-                key={v.code}
-                style={{
-                  background: 'var(--bg-card, #ffffff)',
-                  border: '1.5px dashed var(--primary-color, #ea580c)',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  boxShadow: 'var(--shadow-sm)',
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--primary-color, #ea580c)' }}>
-                    {v.code}
+              <div key={v.code} className="mall-voucher-ticket">
+                <div style={{ paddingRight: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{
+                      background: '#fee2e2',
+                      color: '#dc2626',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontWeight: 800,
+                      fontSize: '11px',
+                    }}>
+                      MÃ SHOP
+                    </span>
+                    <strong style={{ fontSize: '15px', color: '#ea580c', letterSpacing: '0.5px' }}>
+                      {v.code}
+                    </strong>
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', margin: '2px 0' }}>
+                  <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 2px' }}>
                     {v.name}
                   </div>
-                  <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
-                    HSD: {v.expires} · {v.desc}
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                    HSD: {v.expires} • {v.desc}
                   </div>
                 </div>
 
                 <button
                   type="button"
                   className="shopee-btn shopee-btn-primary"
-                  style={{ padding: '6px 14px', fontSize: '12px', fontWeight: 700 }}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '12.5px',
+                    fontWeight: 700,
+                    borderRadius: '8px',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    background: 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)',
+                    boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)'
+                  }}
                   onClick={() => handleClaimVoucher(v)}
                 >
-                  Lưu & Dùng
+                  Lưu Mã
                 </button>
               </div>
             ))}
@@ -288,61 +660,174 @@ export default function ShopStorefrontPage() {
         </section>
       )}
 
+      {/* Phân Loại Ngành Hàng Độc Quyền Của Shop */}
+      <div style={{
+        background: 'var(--bg-card, #ffffff)',
+        padding: '14px 18px',
+        borderRadius: '12px',
+        border: '1px solid var(--border-medium, #e2e8f0)',
+        marginBottom: '16px',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '18px' }}>📑</span>
+            <span style={{ fontSize: '13.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-primary)' }}>
+              Danh Mục & Phân Loại Hàng Của Shop
+            </span>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              ({shopCategories.length - 1} phân loại chuyên sâu)
+            </span>
+          </div>
+          {selectedCategory !== 'all' && (
+            <button
+              type="button"
+              onClick={() => setSelectedCategory('all')}
+              style={{ background: 'transparent', border: 'none', color: '#ea580c', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+            >
+              ✕ Bỏ lọc phân loại (Xem tất cả)
+            </button>
+          )}
+        </div>
+
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          overflowX: 'auto',
+          paddingBottom: '4px',
+          scrollbarWidth: 'thin'
+        }}>
+          {shopCategories.map((cat) => {
+            const isActive = selectedCategory === cat.key;
+            return (
+              <button
+                key={cat.key}
+                type="button"
+                onClick={() => setSelectedCategory(cat.key)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 16px',
+                  borderRadius: '20px',
+                  border: isActive ? '2px solid var(--primary-color, #ea580c)' : '1px solid var(--border-medium, #e2e8f0)',
+                  background: isActive ? 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)' : 'var(--bg-page, #f8fafc)',
+                  color: isActive ? 'var(--primary-color, #ea580c)' : 'var(--text-primary)',
+                  fontWeight: isActive ? 800 : 600,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  boxShadow: isActive ? '0 2px 8px rgba(234, 88, 12, 0.2)' : 'none',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <span>{cat.label}</span>
+                <span style={{
+                  fontSize: '11px',
+                  background: isActive ? 'var(--primary-color, #ea580c)' : 'var(--border-medium, #cbd5e1)',
+                  color: isActive ? '#ffffff' : 'var(--text-secondary)',
+                  padding: '1px 6px',
+                  borderRadius: '10px',
+                  fontWeight: 700
+                }}>
+                  {cat.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Shop Catalog Header & Search */}
       <section>
         <div
           style={{
+            background: 'var(--bg-card, #ffffff)',
+            padding: '16px 20px',
+            borderRadius: '12px',
+            border: '1px solid var(--border-medium, #e2e8f0)',
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '16px',
             marginBottom: '20px',
-            paddingBottom: '14px',
-            borderBottom: '1px solid var(--border-medium, #e2e8f0)',
+            boxShadow: 'var(--shadow-sm)'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '20px' }}>🛍️</span>
-            <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-              {t('shop_all_products')} ({filteredProducts.length})
-            </h2>
+            <div>
+              <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                {selectedCategory === 'all'
+                  ? `Tất Cả Sản Phẩm Gian Hàng (${matchingProducts.length})`
+                  : `${shopCategories.find(c => c.key === selectedCategory)?.label || 'Sản Phẩm'} (${matchingProducts.length})`}
+              </h2>
+              <small style={{ color: 'var(--text-muted)' }}>
+                {selectedCategory === 'all'
+                  ? 'Cam kết 100% chính hãng, có sẵn giao ngay toàn quốc'
+                  : `Đang lọc các sản phẩm theo phân loại "${shopCategories.find(c => c.key === selectedCategory)?.label}"`}
+              </small>
+            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             {/* Search inside shop */}
-            <input
-              type="text"
-              placeholder={t('shop_search_placeholder')}
-              className="shopee-form-input"
-              value={shopSearch}
-              onChange={(e) => setShopSearch(e.target.value)}
-              style={{ width: '240px', padding: '8px 12px', fontSize: '13px' }}
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type="text"
+                placeholder={t('shop_search_placeholder')}
+                className="shopee-form-input"
+                value={shopSearch}
+                onChange={(e) => setShopSearch(e.target.value)}
+                style={{ width: '250px', padding: '8px 14px 8px 34px', fontSize: '13px', borderRadius: '8px' }}
+              />
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>
+                🔍
+              </span>
+            </div>
 
             {/* Sort */}
             <select
               className="shopee-form-select"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              style={{ padding: '8px 12px', fontSize: '13px' }}
+              style={{ padding: '8px 14px', fontSize: '13px', borderRadius: '8px', fontWeight: 600 }}
             >
-              <option value="featured">Nổi bật nhất</option>
-              <option value="best_selling">Bán chạy nhất</option>
-              <option value="price_asc">Giá: Thấp đến Cao</option>
-              <option value="price_desc">Giá: Cao đến Thấp</option>
+              <option value="featured">✨ Nổi Bật Nhất</option>
+              <option value="best_selling">🔥 Bán Chạy Nhất</option>
+              <option value="price_asc">💵 Giá: Thấp đến Cao</option>
+              <option value="price_desc">💎 Giá: Cao đến Thấp</option>
             </select>
           </div>
         </div>
 
         {/* Product Grid */}
-        {filteredProducts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
-            Không tìm thấy sản phẩm nào phù hợp với từ khóa "{shopSearch}".
+        {matchingProducts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', background: 'var(--bg-card, #ffffff)', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Không tìm thấy sản phẩm nào
+            </div>
+            <p style={{ margin: '6px 0 16px', fontSize: '13px' }}>
+              Không có sản phẩm nào phù hợp với bộ lọc hiện tại trong gian hàng này.
+            </p>
+            <button
+              type="button"
+              className="shopee-btn shopee-btn-secondary"
+              onClick={() => {
+                setShopSearch('');
+                setSelectedCategory('all');
+              }}
+              style={{ padding: '8px 18px', fontSize: '13px' }}
+            >
+              Xóa bộ lọc tìm kiếm
+            </button>
           </div>
         ) : (
           <div className="shopee-product-grid">
-            {filteredProducts.map((p) => {
+            {matchingProducts.map((p) => {
               const id = p._id || p.id;
               return (
                 <div key={id} style={{ position: 'relative' }}>
@@ -373,6 +858,66 @@ export default function ShopStorefrontPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Phần Gợi Ý Thông Minh Khi Kéo Hết Phân Loại */}
+        {selectedCategory !== 'all' && otherProducts.length > 0 && (
+          <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '2px dashed var(--border-medium, #cbd5e1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '22px' }}>💡</span>
+                  <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                    Gợi Ý Thêm Sản Phẩm Khác Từ Gian Hàng (Bạn Có Thể Cũng Thích)
+                  </h3>
+                </div>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+                  Bạn vừa xem hết các mẫu <strong>{shopCategories.find(c => c.key === selectedCategory)?.label || 'sản phẩm'}</strong>. Đừng bỏ lỡ các mặt hàng bán chạy khác từ {shop.name}!
+                </p>
+              </div>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary"
+                onClick={() => setSelectedCategory('all')}
+                style={{ fontSize: '12.5px', padding: '6px 14px', borderRadius: '8px', fontWeight: 700 }}
+              >
+                Xem Toàn Bộ {products.length} Sản Phẩm →
+              </button>
+            </div>
+
+            <div className="shopee-product-grid">
+              {otherProducts.map((p) => {
+                const id = p._id || p.id;
+                return (
+                  <div key={id} style={{ position: 'relative' }}>
+                    <ProductCard product={p} />
+                    <button
+                      type="button"
+                      onClick={() => addToCompare(p)}
+                      style={{
+                        position: 'absolute',
+                        bottom: '12px',
+                        left: '12px',
+                        background: isCompared(id) ? 'var(--primary-color)' : 'var(--bg-card, #ffffff)',
+                        color: isCompared(id) ? '#ffffff' : 'var(--text-primary)',
+                        border: '1px solid var(--border-medium, #cbd5e1)',
+                        borderRadius: '6px',
+                        padding: '4px 8px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        zIndex: 2,
+                        boxShadow: 'var(--shadow-sm)',
+                      }}
+                      title={t('compare_btn')}
+                    >
+                      ⚖️ {isCompared(id) ? 'Đã so sánh' : 'So sánh'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </section>
