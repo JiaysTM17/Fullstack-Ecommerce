@@ -125,4 +125,40 @@ export const requireShopAccess = (paramName = "shopId") => {
 
 export const verifyShopAccess = requireShopAccess;
 
-export default { authenticate, authorize, requireShopAccess, verifyShopAccess };
+/**
+ * Middleware: optionalAuthenticate
+ * Giống authenticate nhưng KHÔNG trả lỗi nếu không có token.
+ * Nếu có token hợp lệ → gắn req.user. Nếu không → req.user = null.
+ * Dùng cho endpoint hỗ trợ cả guest lẫn authenticated (ví dụ: đặt hàng)
+ */
+export const optionalAuthenticate = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      req.user = null;
+      return next();
+    }
+
+    const token = authHeader.split(" ")[1];
+    let decoded;
+    try {
+      decoded = verifyToken(token);
+    } catch {
+      req.user = null;
+      return next();
+    }
+
+    const user = await User.findById(decoded.id);
+    if (user && user.isActive && user.status !== "banned") {
+      req.user = user;
+    } else {
+      req.user = null;
+    }
+    next();
+  } catch {
+    req.user = null;
+    next();
+  }
+};
+
+export default { authenticate, optionalAuthenticate, authorize, requireShopAccess, verifyShopAccess };

@@ -1,8 +1,15 @@
 import express from "express";
-import { createOrder } from "../controllers/orderController.js";
+import { createOrder, getMyOrders, getOrderById, cancelOrder } from "../controllers/orderController.js";
+import { authenticate, optionalAuthenticate } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.post("/", createOrder);
+// Order creation supports both guest and authenticated checkout
+router.post("/", optionalAuthenticate, createOrder);
+
+// Authenticated routes
+router.get("/mine", authenticate, getMyOrders);
+router.get("/:id", authenticate, getOrderById);
+router.patch("/:id/cancel", authenticate, cancelOrder);
 
 export default router;

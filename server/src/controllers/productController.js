@@ -1,52 +1,46 @@
 import Product from "../models/Product.js";
+import memoryStore from "../models/memoryStore.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 
-// @desc    Get all products with filters, search, sort, pagination
+// @desc    Get products with filters, search, pagination
 // @route   GET /api/products
 // @access  Public
-const getProducts = async (req, res) => {
+export const getProducts = async (req, res) => {
   try {
-    const { keyword, category, minPrice, maxPrice, sort, page, limit } = req.query;
+    const {
+      keyword, category, brand, shopId,
+      minPrice, maxPrice, rating,
+      sort = "createdAt", order = "desc",
+      page = 1, limit = 20,
+    } = req.query;
 
-    const query = { isActive: true };
+    const query = { isActive: true, approvalStatus: "approved" };
 
+    // Full-text search
     if (keyword) {
-      query.name = { $regex: keyword, $options: "i" };
+      query.$or = [
+        { name: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+        { brand: { $regex: keyword, $options: "i" } },
+        { category: { $regex: keyword, $options: "i" } },
+      ];
     }
 
-    if (category) {
-      query.category = category;
-    }
-
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice && !Number.isNaN(Number(minPrice))) {
-        query.price.$gte = Number(minPrice);
-      }
-      if (maxPrice && !Number.isNaN(Number(maxPrice))) {
-        query.price.$lte = Number(maxPrice);
-      }
-      if (Object.keys(query.price).length === 0) {
-        delete query.price;
-      }
-    }
-
-    let sortOption = {};
-    if (sort === "price_asc") sortOption.price = 1;
-    else if (sort === "price_desc") sortOption.price = -1;
-    else if (sort === "sold") sortOption.sold = -1;
-    else if (sort === "rating") sortOption.rating = -1;
-    else sortOption.createdAt = -1;
+    if (category) query.category = category;
+    if (brand) query.brand = brand;
+    if (shopId) query.shopId = shopId;
+    if (minPrice) query.price = { ...query.price, $gte: Number(minPrice) };
+    if (maxPrice) query.price = { ...query.price, $lte: Number(maxPrice) };
+    if (rating) query.rating = { $gte: Number(rating) };
 
     const pageNum = Math.max(1, parseInt(page) || 1);
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 12));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
     const skip = (pageNum - 1) * limitNum;
 
-    const products = await Product.find(query)
-      .sort(sortOption)
-      .limit(limitNum)
-      .skip(skip);
+    const sortObj = {};
+    sortObj[sort] = order === "asc" ? 1 : -1;
 
+    const products = await Product.find(query).sort(sortObj).skip(skip).limit(limitNum);
     const total = await Product.countDocuments(query);
 
     sendSuccess(res, {
@@ -63,24 +57,94 @@ const getProducts = async (req, res) => {
   }
 };
 
-// @desc    Get product by ID
+// @desc    Get single product by ID or slug
 // @route   GET /api/products/:id
 // @access  Public
-const getProductById = async (req, res) => {
+export const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const { id } = req.params;
+
+    let product = await Product.findById(id);
+    if (!product) {
+      // Try finding by slug
+      product = await Product.findOne({ slug: id });
+    }
 
     if (!product) {
-      return sendError(res, "Product not found", 404);
+      return sendError(res, "Không tìm thấy sản phẩm", 404);
     }
 
-    sendSuccess(res, product);
+    // Get product reviews
+    const reviews = await memoryStore.reviews.find({ productId: product._id });
+
+    const result = product.toObject ? product.toObject() : { ...product };
+    result.reviews = reviews;
+
+    sendSuccess(res, result);
   } catch (error) {
-    if (error.kind === "ObjectId") {
-      return sendError(res, "Product not found", 404);
-    }
     sendError(res, error.message, 500);
   }
 };
 
-export { getProducts, getProductById };
+// @desc    Get all categories with product counts
+// @route   GET /api/products/categories/list
+// @access  Public
+export const getCategories = async (req, res) => {
+  try {
+    const categories = await memoryStore.categories.find();
+
+    // Enrich with product counts
+    const enriched = await Promise.all(
+      categories.map(async (cat) => {
+        const count = await Product.countDocuments({ category: cat.name, isActive: true });
+        return { ...cat, productCount: count };
+      })
+    );
+
+    sendSuccess(res, enriched);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Search products (dedicated search endpoint)
+// @route   GET /api/products/search
+// @access  Public
+export const searchProducts = async (req, res) => {
+  try {
+    const { q, page = 1, limit = 20 } = req.query;
+
+    if (!q || !q.trim()) {
+      return sendError(res, "Vui lòng nhập từ khóa tìm kiếm", 400);
+    }
+
+    const query = {
+      isActive: true,
+      approvalStatus: "approved",
+      $or: [
+        { name: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } },
+        { brand: { $regex: q, $options: "i" } },
+        { category: { $regex: q, $options: "i" } },
+        { shopName: { $regex: q, $options: "i" } },
+      ],
+    };
+
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const products = await Product.find(query).sort({ sold: -1 }).skip(skip).limit(limitNum);
+    const total = await Product.countDocuments(query);
+
+    sendSuccess(res, {
+      products,
+      pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) || 1 },
+      query: q,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+export default { getProducts, getProductById, getCategories, searchProducts };

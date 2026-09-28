@@ -9,18 +9,21 @@ import adminRoutes from "./routes/adminRoutes.js";
 import shopRoutes from "./routes/shopRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import voucherRoutes from "./routes/voucherRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 import notFound from "./middlewares/notFound.js";
 import errorHandler from "./middlewares/errorHandler.js";
 
 dotenv.config();
 
-// Connect to database (gracefully falls back if MongoDB is offline)
+// Connect to database (gracefully falls back to in-memory store if MongoDB is offline)
 connectDB();
 
 const app = express();
 
-// Security: limit JSON body size to 100kb
-app.use(express.json({ limit: "100kb" }));
+// Security: limit JSON body size to 500kb (increased for product images arrays)
+app.use(express.json({ limit: "500kb" }));
 
 // CORS: support comma-separated origins in CLIENT_URL
 const allowedOrigins = (process.env.CLIENT_URL || "")
@@ -31,6 +34,7 @@ const allowedOrigins = (process.env.CLIENT_URL || "")
 app.use(
   cors({
     origin: allowedOrigins.length > 0 ? allowedOrigins : "*",
+    credentials: true,
   })
 );
 
@@ -38,18 +42,41 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// Health check
+// Health check with system info
 app.get("/", (req, res) => {
-  res.json({ message: "Mini Shopee Enterprise Multi-Vendor Marketplace API is running" });
+  res.json({
+    message: "Mini Shopee Enterprise Multi-Vendor Marketplace API is running",
+    version: "2.0.0",
+    stack: {
+      runtime: "Node.js " + process.version,
+      framework: "Express.js",
+      database: "MongoDB (fallback: In-Memory Store with JSON persistence)",
+      auth: "JWT + bcryptjs",
+    },
+    endpoints: {
+      auth: "/api/auth",
+      products: "/api/products",
+      orders: "/api/orders",
+      cart: "/api/cart",
+      vouchers: "/api/vouchers",
+      reviews: "/api/reviews",
+      shops: "/api/shops",
+      seller: "/api/seller",
+      admin: "/api/admin",
+    },
+  });
 });
 
-// Mount Routes
+// Mount Routes (9 route groups)
 app.use("/api/auth", authRoutes);
-app.use("/api/seller", sellerRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/shops", shopRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/vouchers", voucherRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/shops", shopRoutes);
+app.use("/api/seller", sellerRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Error handling (must be last)
 app.use(notFound);
