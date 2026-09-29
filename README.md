@@ -5,9 +5,11 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20.x%2F24.x-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![CI/CD](https://img.shields.io/badge/GitHub_Actions-CI%2FCD-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/JiaysTM17/Fullstack-Ecommerce/actions)
 [![Tests Passing](https://img.shields.io/badge/Tests-450%2F450%20Passing%20(100%25)-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/JiaysTM17/Fullstack-Ecommerce)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
 > **Mini Shopee** là một nền tảng thương mại điện tử full-stack hiện đại, toàn diện và có độ tin cậy cao được xây dựng theo kiến trúc **Multi-Vendor (Đa gian hàng)**. Dự án tái hiện trọn vẹn trải nghiệm mua sắm thực tế của các sàn TMĐT hàng đầu (như Shopee, TikTok Shop), kết hợp trợ lý ảo **AI Chatbot**, hệ thống **Voucher kép (Dual Stacking)**, đồng bộ dữ liệu thời gian thực **(Real-time State Synchronization)**, phân quyền đa cấp **RBAC (Admin, Seller, Customer)**, và quy trình kiểm thử tự động toàn diện **450 tests (100% Pass)**.
 
@@ -24,7 +26,8 @@
 7. [🔑 Tài Khoản Trải Nghiệm Demo (Demo Credentials)](#-tài-khoản-trải-nghiệm-demo-demo-credentials)
 8. [📚 Hệ Thống Tài Liệu Kỹ Thuật Chi Tiết (Technical Documentation)](#-hệ-thống-tài-liệu-kỹ-thuật-chi-tiết-technical-documentation)
 9. [🧪 Kiểm Thử & Đảm Bảo Chất Lượng (Quality Assurance & Tests)](#-kiểm-thử--đảm-bảo-chất-lượng-quality-assurance--tests)
-10. [👨‍💻 Tác Giả & Liên Hệ (Author & Contact)](#-tác-giả--liên-hệ-author--contact)
+10. [🤝 Tiêu Chuẩn Cộng Đồng & Đóng Góp (Community & Contributing)](#-tiêu-chuẩn-cộng-đồng--đóng-góp-community--contributing)
+11. [👨‍💻 Tác Giả & Liên Hệ (Author & Contact)](#-tác-giả--liên-hệ-author--contact)
 
 ---
 
@@ -167,9 +170,14 @@ flowchart TD
 
 ```
 Website-Thuong-Mai-Dien-Tu-Mini-Plan/
-├── .github/                       # Cấu hình tự động hóa GitHub
-│   └── workflows/
-│       └── ci.yml                 # GitHub Actions CI/CD Pipeline
+├── .github/                       # Cấu hình tự động hóa & tiêu chuẩn GitHub
+│   ├── ISSUE_TEMPLATE/            # Mẫu báo cáo lỗi & yêu cầu tính năng
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   ├── workflows/
+│   │   └── ci.yml                 # GitHub Actions CI/CD Pipeline
+│   ├── PULL_REQUEST_TEMPLATE.md   # Mẫu tiêu chuẩn cho Pull Request
+│   └── dependabot.yml             # Cấu hình tự động quét cập nhật bảo mật phụ thuộc
 ├── client/                        # Mã nguồn ứng dụng Frontend (React + Vite)
 │   ├── public/                    # Tài nguyên tĩnh công khai (favicon, banners)
 │   ├── src/
@@ -181,6 +189,9 @@ Website-Thuong-Mai-Dien-Tu-Mini-Plan/
 │   │   ├── utils/                 # Các hàm tiện ích dùng chung (formatCurrency, validation)
 │   │   ├── App.jsx                # Định tuyến ứng dụng React Router
 │   │   └── main.jsx               # Entry point ứng dụng React
+│   ├── .dockerignore              # Danh sách loại trừ khi đóng gói Docker frontend
+│   ├── Dockerfile                 # Multi-stage Docker build & Nginx serving
+│   ├── nginx.conf                 # Cấu hình Nginx reverse proxy cho SPA client
 │   ├── package.json               # Dependencies Frontend
 │   └── vite.config.js             # Cấu hình Vite build tool
 ├── server/                        # Mã nguồn máy chủ Backend (Node.js + Express)
@@ -195,6 +206,8 @@ Website-Thuong-Mai-Dien-Tu-Mini-Plan/
 │   │   ├── seed/                  # Dữ liệu hạt giống khởi tạo (109 sản phẩm, 12 shops, 10 vouchers)
 │   │   ├── utils/                 # Tiện ích backend (response helper, persistence disk writer)
 │   │   └── app.js                 # Cấu hình ứng dụng Express
+│   ├── .dockerignore              # Danh sách loại trừ khi đóng gói Docker backend
+│   ├── Dockerfile                 # Production Container image cho Express backend
 │   ├── package.json               # Dependencies Backend
 │   └── server.js                  # Entry point khởi chạy HTTP Server (Port 5000)
 ├── docs/                          # Hệ thống tài liệu kỹ thuật chuyên sâu (Max Level)
@@ -212,9 +225,15 @@ Website-Thuong-Mai-Dien-Tu-Mini-Plan/
 │   ├── tier3_combinations/        # Kiểm thử tích hợp đa điều kiện
 │   ├── tier4_scenarios/           # Kiểm thử kịch bản người dùng thực tế
 │   └── run-all.js                 # Script thực thi toàn bộ 450 tests
+├── .dockerignore                  # Loại trừ tệp rác khi build root Docker
 ├── .env.example                   # Biến môi trường mẫu cho toàn dự án
-├── package.json                   # Root monorepo scripts quản lý dự án
-└── README.md                      # Tài liệu tổng quan dự án (Recruiter-ready)
+├── CODE_OF_CONDUCT.md             # Quy tắc ứng xử cộng đồng theo chuẩn Contributor Covenant
+├── CONTRIBUTING.md                # Hướng dẫn đóng góp mã nguồn & Gitflow chuẩn
+├── docker-compose.yml             # Điều phối đa container (MongoDB, Backend, Frontend SPA)
+├── LICENSE                        # Giấy phép mã nguồn mở MIT License
+├── package.json                   # Root monorepo scripts quản lý toàn diện dự án
+├── README.md                      # Tài liệu tổng quan dự án (Recruiter-ready)
+└── SECURITY.md                    # Chính sách báo cáo & xử lý lỗ hổng bảo mật
 ```
 
 ---
@@ -225,8 +244,24 @@ Website-Thuong-Mai-Dien-Tu-Mini-Plan/
 * **Node.js:** v18.x trở lên (Khuyến nghị Node.js v20 LTS hoặc v24)
 * **Trình quản lý gói:** npm hoặc yarn
 * **Git** cài đặt trên máy
+* *(Tùy chọn)* **Docker & Docker Compose** nếu muốn chạy qua container
 
-### 1. Khởi Chạy Nhanh Bằng Kịch Bản (Dành cho Windows)
+### 1. Khởi Chạy Nhanh 1-Click Bằng Docker Compose (Khuyến nghị)
+Toàn bộ hệ thống (Frontend SPA, Backend API, MongoDB) đã được đóng gói sẵn sàng:
+```bash
+# Clone mã nguồn
+git clone https://github.com/JiaysTM17/Fullstack-Ecommerce.git
+cd Fullstack-Ecommerce
+
+# Khởi chạy toàn bộ hệ thống
+docker-compose up -d --build
+
+# Truy cập ứng dụng:
+# -> Frontend: http://localhost:80 (hoặc http://localhost:5173 khi chạy dev)
+# -> Backend:  http://localhost:5000/api/health
+```
+
+### 2. Khởi Chạy Nhanh Bằng Kịch Bản (Dành cho Windows)
 ```powershell
 # Chạy máy chủ Backend (Port 5000)
 .\run-server.cmd
@@ -238,7 +273,7 @@ Website-Thuong-Mai-Dien-Tu-Mini-Plan/
 .\run-tests.cmd
 ```
 
-### 2. Khởi Chạy Thủ Công Từng Phần
+### 3. Khởi Chạy Thủ Công Từng Phần
 ```bash
 # 1. Clone mã nguồn
 git clone https://github.com/JiaysTM17/Fullstack-Ecommerce.git
@@ -297,6 +332,17 @@ Dự án áp dụng quy trình kiểm thử tự động nghiêm ngặt gồm **
 node tests/run-all.js
 ```
 *Kết quả:* **`450/450 tests passed (100% Pass Rate)`**.
+
+---
+
+## 🤝 Tiêu Chuẩn Cộng Đồng & Đóng Góp (Community & Contributing)
+
+Dự án cam kết tuân thủ các chuẩn mực mã nguồn mở cao nhất:
+
+* 📖 **[Hướng Dẫn Đóng Góp (CONTRIBUTING.md)](CONTRIBUTING.md):** Quy trình tạo nhánh (branching), quy ước đặt tên commit (Conventional Commits), và hướng dẫn tạo Pull Request.
+* 📜 **[Quy Tắc Ứng Xử (CODE_OF_CONDUCT.md)](CODE_OF_CONDUCT.md):** Tiêu chuẩn ứng xử văn minh dựa trên Contributor Covenant v2.1.
+* 🛡️ **[Chính Sách Bảo Mật (SECURITY.md)](SECURITY.md):** Hướng dẫn báo cáo và quy trình xử lý lỗ hổng bảo mật có trách nhiệm.
+* ⚖️ **[Giấy Phép Bản Quyền (LICENSE)](LICENSE):** Được phân phối theo giấy phép MIT License, hoàn toàn tự do sử dụng cho mục đích học tập và phát triển.
 
 ---
 
