@@ -126,15 +126,15 @@ export default function CartPage() {
     showToast(`Đã chuyển "${item.name}" sang danh sách Yêu thích!`, 'success');
   };
 
-  const handleVoucherSubmit = (e) => {
+  const handleVoucherSubmit = async (e) => {
     e.preventDefault();
     if (!voucherInput.trim()) return;
-    const res = applyVoucher(voucherInput.trim());
-    if (res.success) {
+    const res = await applyVoucher(voucherInput.trim());
+    if (res?.success) {
       setVoucherMessage(res.message);
       setVoucherInput("");
     } else {
-      setVoucherMessage(res.message);
+      setVoucherMessage(res?.message || "Mã giảm giá không hợp lệ");
     }
   };
 

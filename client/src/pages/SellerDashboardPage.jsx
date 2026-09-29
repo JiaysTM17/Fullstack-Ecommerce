@@ -6,6 +6,7 @@ import { formatCurrency } from '../utils/formatCurrency';
 import ShippingLabelModal from '../components/ShippingLabelModal';
 import PackingSlipModal from '../components/PackingSlipModal';
 import { FALLBACK_PRODUCTS, restoreProductStock } from '../services/productService';
+import { fetchSellerOrders, updateSellerOrderStatus, createSellerProduct } from '../services/api';
 import '../styles/dashboard.css';
 
 // 12 Gian hàng mẫu với đầy đủ thông tin chuẩn TMĐT
@@ -427,6 +428,52 @@ export default function SellerDashboardPage() {
     };
   }, [selectedShopId, toast]);
 
+  // Tải đơn hàng từ máy chủ backend (đồng bộ dữ liệu thực tế)
+  useEffect(() => {
+    let cancelled = false;
+    async function loadBackendOrders() {
+      try {
+        const res = await fetchSellerOrders();
+        const serverOrders = res?.orders || res?.data?.orders || (Array.isArray(res) ? res : []);
+        if (Array.isArray(serverOrders) && serverOrders.length > 0 && !cancelled) {
+          setOrders(prev => {
+            const existingIds = new Set(prev.map(o => o.orderId || o._id || o.id));
+            const formatted = serverOrders.map(so => ({
+              orderId: so.orderId || so._id || `ORD${Math.floor(100000 + Math.random() * 900000)}`,
+              _id: so._id,
+              id: so._id || so.orderId,
+              shopId: so.shopId || selectedShopId,
+              customerName: so.customerName || so.customer?.fullName || 'Khách Hàng',
+              phone: so.phone || so.customer?.phone || '',
+              address: so.address || so.customer?.address || '',
+              productName: Array.isArray(so.items) ? so.items.map(it => `${it.name} (x${it.quantity})`).join(', ') : 'Sản phẩm',
+              items: so.items || [],
+              total: so.total || 0,
+              shippingFee: so.shippingFee || 25000,
+              paymentMethod: so.paymentMethod || 'COD',
+              status: so.status || 'pending',
+              statusText: so.statusText || (so.status === 'shipping' ? 'Đang giao hàng' : so.status === 'completed' ? 'Đã hoàn thành' : 'Chờ xác nhận'),
+              createdAt: so.createdAt ? new Date(so.createdAt).toLocaleString('vi-VN') : new Date().toLocaleString('vi-VN'),
+            }));
+            const newFromBackend = formatted.filter(fo => !existingIds.has(fo.orderId) && !existingIds.has(fo._id));
+            if (newFromBackend.length > 0) {
+              const merged = [...newFromBackend, ...prev];
+              try {
+                localStorage.setItem('mini_shopee_seller_orders', JSON.stringify(merged));
+              } catch {}
+              return merged;
+            }
+            return prev;
+          });
+        }
+      } catch (err) {
+        // Backend offline or guest mode, ignore
+      }
+    }
+    loadBackendOrders();
+    return () => { cancelled = true; };
+  }, [selectedShopId]);
+
   // Lưu trữ dữ liệu khi có thay đổi
   useEffect(() => {
     try {
@@ -840,6 +887,21 @@ export default function SellerDashboardPage() {
         window.dispatchEvent(new CustomEvent('mini_shopee_inventory_updated', { detail: updatedList }));
         window.dispatchEvent(new Event('storage'));
       } catch {}
+
+      // Đồng bộ đăng bán sản phẩm lên backend API
+      try {
+        createSellerProduct({
+          name: newProd.name,
+          price: newProd.price,
+          originalPrice: newProd.originalPrice,
+          stock: newProd.stock,
+          category: newProd.category,
+          image: newProd.image,
+          images: newProd.images,
+          description: newProd.description,
+        }).catch(err => console.warn("Backend sync seller product:", err.message));
+      } catch {}
+
       toast.success(`🎉 Đã đăng bán sản phẩm mới "${newProd.name}" lên toàn sàn (Phân loại: ${detectedCat})!`);
     }
     setShowProductModal(false);
@@ -898,14 +960,15 @@ export default function SellerDashboardPage() {
   };
 
   // Cập nhật trạng thái đơn hàng (Quy trình chuẩn: Chờ xác nhận -> Đang giao -> Đã hoàn thành -> Đã hủy)
-  const handleUpdateOrderStatus = (orderId, nextStatus, nextText) => {
+  const handleUpdateOrderStatus = async (orderId, nextStatus, nextText) => {
     isSelfDispatchingRef.current = true;
     let affectedOrder = null;
     let updatedOrders = [];
 
     setOrders(prev => {
       updatedOrders = prev.map(o => {
-        if (o.orderId === orderId) {
+        const matches = o.orderId === orderId || o._id === orderId || o.id === orderId;
+        if (matches) {
           affectedOrder = o;
           // Nếu hủy đơn hàng, hoàn trả lại tồn kho sản phẩm cho Shop
           if (nextStatus === 'cancelled' && o.status !== 'cancelled' && Array.isArray(o.items) && o.items.length > 0) {
@@ -921,13 +984,21 @@ export default function SellerDashboardPage() {
       return updatedOrders;
     });
 
+    // Đồng bộ sang máy chủ backend API
+    try {
+      await updateSellerOrderStatus(orderId, nextStatus);
+    } catch (err) {
+      console.warn("Backend order status update fallback:", err.message);
+    }
+
     // Đồng bộ tức thì sang danh sách đơn hàng của người mua (Customer Order History)
     try {
       const rawCustomer = localStorage.getItem('mini_shopee_customer_orders');
       if (rawCustomer) {
         const parsed = JSON.parse(rawCustomer);
         const updatedCustomer = parsed.map(co => {
-          if (co.orderId === orderId) {
+          const matches = co.orderId === orderId || co._id === orderId || co.id === orderId;
+          if (matches) {
             let nextStep = co.stepIndex || 1;
             if (nextStatus === 'shipping') nextStep = 3;
             else if (nextStatus === 'completed') nextStep = 4;
@@ -959,7 +1030,7 @@ export default function SellerDashboardPage() {
     }
 
     toast.success(`✓ Đơn #${orderId}: ${nextText}`);
-    if (selectedOrderDetails && selectedOrderDetails.orderId === orderId) {
+    if (selectedOrderDetails && (selectedOrderDetails.orderId === orderId || selectedOrderDetails._id === orderId || selectedOrderDetails.id === orderId)) {
       setSelectedOrderDetails(prev => ({ ...prev, status: nextStatus, statusText: nextText }));
     }
   };

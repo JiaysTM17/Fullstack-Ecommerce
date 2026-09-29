@@ -301,11 +301,11 @@ export default function LiveChatWidget() {
   };
 
   // Áp dụng voucher thẳng vào hệ thống giỏ hàng
-  const handleApplyVoucherToCart = (voucher) => {
+  const handleApplyVoucherToCart = async (voucher) => {
     try {
       const code = typeof voucher === 'string' ? voucher : voucher.code;
       if (applyVoucher) {
-        const res = applyVoucher(code);
+        const res = await applyVoucher(code);
         playAudioChime('voucher', soundEnabled);
         if (res && res.success) {
           showToast(`✓ Đã áp dụng mã "${code}" thành công vào đơn hàng!`, 'success');

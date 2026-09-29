@@ -68,6 +68,7 @@ export default function ShopStorefrontPage() {
   const { addToCompare, isCompared } = useCompare();
 
   const [shop, setShop] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [isFollowing, setIsFollowing] = useState(() => (shopId ? isShopFollowed(shopId) : false));
   const [followerCount, setFollowerCount] = useState(12000);
@@ -79,14 +80,21 @@ export default function ShopStorefrontPage() {
   useEffect(() => {
     let cancelled = false;
     async function loadShop() {
-      const loadedShop = await getShopById(shopId);
-      if (cancelled) return;
-      setShop(loadedShop);
-      setFollowerCount(loadedShop?.followers || 12000);
-      if (loadedShop?.id) {
-        setIsFollowing(isShopFollowed(loadedShop.id));
-        const shopProds = await getProductsByShop(loadedShop.id);
-        if (!cancelled) setProducts(shopProds);
+      setLoading(true);
+      try {
+        const loadedShop = await getShopById(shopId);
+        if (cancelled) return;
+        setShop(loadedShop);
+        setFollowerCount(loadedShop?.followers || 12000);
+        if (loadedShop?.id) {
+          setIsFollowing(isShopFollowed(loadedShop.id));
+          const shopProds = await getProductsByShop(loadedShop.id);
+          if (!cancelled) setProducts(shopProds || []);
+        }
+      } catch (err) {
+        console.error("Lỗi tải gian hàng:", err);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
     loadShop();
@@ -102,7 +110,7 @@ export default function ShopStorefrontPage() {
       if (loadedShop?.id) {
         setShop(loadedShop);
         const prods = await getProductsByShop(loadedShop.id);
-        setProducts(prods);
+        setProducts(prods || []);
       }
     };
 
@@ -189,14 +197,35 @@ export default function ShopStorefrontPage() {
     );
   };
 
-  const handleClaimVoucher = (voucher) => {
-    const res = applyVoucher(voucher.code);
+  const handleClaimVoucher = async (voucher) => {
+    const res = await applyVoucher(voucher.code);
     if (res?.success) {
       showToast(`Đã áp dụng mã ${voucher.code} của ${shop?.name || 'Shop'} thành công!`, 'success');
     } else {
       showToast(`Đã lưu mã ${voucher.code} vào ví voucher của bạn!`, 'success');
     }
   };
+
+  if (loading) {
+    return (
+      <main className="shopee-container" style={{ padding: '80px 0', textAlign: 'center' }}>
+        <div style={{
+          display: 'inline-block',
+          width: '40px',
+          height: '40px',
+          border: '4px solid #f3f3f3',
+          borderTop: '4px solid #ea580c',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          marginBottom: '16px',
+        }} />
+        <h3 style={{ color: 'var(--text-primary)', fontSize: '16px', fontWeight: 600 }}>
+          Đang tải thông tin gian hàng...
+        </h3>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+      </main>
+    );
+  }
 
   if (!shop) {
     return (

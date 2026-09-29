@@ -408,17 +408,38 @@ export const updateSellerOrderStatus = async (req, res) => {
     const shopId = req.user.shopId;
     const { status } = req.body;
 
-    const validStatuses = ["confirmed", "shipping", "completed", "cancelled"];
+    const validStatuses = ["pending", "confirmed", "shipping", "completed", "cancelled"];
     if (!validStatuses.includes(status)) {
       return sendError(res, "Trạng thái đơn hàng không hợp lệ", 400);
     }
 
-    const order = await Order.findOne({ _id: req.params.id, "items.shopId": shopId });
+    // Try finding by _id or orderId
+    let order = await Order.findOne({ _id: req.params.id });
     if (!order) {
-      return sendError(res, "Không tìm thấy đơn hàng hoặc đơn hàng không thuộc về shop của bạn", 404);
+      order = await Order.findOne({ orderId: req.params.id });
+    }
+    if (!order) {
+      const allOrders = await Order.find();
+      order = allOrders.find((o) => o._id === req.params.id || o.orderId === req.params.id || o.id === req.params.id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    const hasShopItem = (order.items || []).some((item) => item.shopId === shopId);
+    if (!hasShopItem && req.user.role !== "admin") {
+      return sendError(res, "Đơn hàng không thuộc về shop của bạn", 403);
     }
 
     order.status = status;
+    if (status === "shipping") order.statusText = "Đang giao hàng";
+    else if (status === "completed") order.statusText = "Đã hoàn thành";
+    else if (status === "cancelled") order.statusText = "Đã hủy";
+    else if (status === "confirmed") order.statusText = "Đã xác nhận";
+    else if (status === "pending") order.statusText = "Chờ xác nhận";
+
+    order.updatedAt = new Date().toISOString();
     const updated = await order.save();
 
     sendSuccess(res, updated);

@@ -4596,9 +4596,22 @@ export async function getProducts(params = {}) {
     const payload = await apiRequest(`/api/products${buildQueryString(params)}`);
     const data = payload?.data?.products || (Array.isArray(payload?.data) ? payload.data : null);
     if (data && data.length > 0) {
+      // Merge with newly added custom products by seller stored locally
+      const storedProds = getStoredProducts();
+      const backendIds = new Set(data.map((p) => p._id || p.id));
+      const customNewProducts = storedProds.filter((p) => !backendIds.has(p._id) && !backendIds.has(p.id));
+
+      let combined = [...customNewProducts, ...data];
+      if (params.category && params.category !== "Tất cả") {
+        combined = combined.filter((p) => p.category === params.category);
+      }
+      if (params.shopId) {
+        combined = combined.filter((p) => (p.shopId || "shop_01") === params.shopId);
+      }
+
       return {
-        products: data.map(mergeWithCustomReviews),
-        pagination: payload.data.pagination || null,
+        products: combined.map(mergeWithCustomReviews),
+        pagination: payload.data?.pagination || null,
       };
     }
   } catch (err) {

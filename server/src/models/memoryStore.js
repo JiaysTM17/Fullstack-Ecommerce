@@ -11,6 +11,23 @@ const __dirname = dirname(__filename);
 // QUERY ENGINE — MongoDB-compatible in-memory query execution
 // ============================================================
 
+function getNestedValue(obj, path) {
+  if (obj == null) return undefined;
+  if (!path.includes(".")) return obj[path];
+  const parts = path.split(".");
+  let current = obj;
+  for (let i = 0; i < parts.length; i++) {
+    if (current == null) return undefined;
+    const part = parts[i];
+    if (Array.isArray(current)) {
+      const rest = parts.slice(i).join(".");
+      return current.flatMap((c) => getNestedValue(c, rest));
+    }
+    current = current[part];
+  }
+  return current;
+}
+
 function matchFilter(item, query = {}) {
   if (!query || Object.keys(query).length === 0) return true;
 
@@ -24,12 +41,7 @@ function matchFilter(item, query = {}) {
       continue;
     }
 
-    const actualVal = key.includes(".")
-      ? key.split(".").reduce((acc, part) => {
-          if (Array.isArray(acc)) return acc.map((s) => s?.[part]);
-          return acc?.[part];
-        }, item)
-      : item[key];
+    const actualVal = getNestedValue(item, key);
 
     if (val !== null && typeof val === "object" && !(val instanceof RegExp)) {
       if (val.$regex) {
