@@ -5,6 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useCoins } from '../context/CoinContext';
+import { getVouchers } from '../services/voucherService';
 import RewardsHubModal from '../components/RewardsHubModal';
 import '../styles/auth.css';
 
@@ -92,6 +93,49 @@ export default function ProfilePage() {
     address: '',
     tag: 'Nhà riêng',
   });
+
+  // Voucher Wallet State
+  const [vouchersList, setVouchersList] = useState([]);
+  const [savedVoucherCodes, setSavedVoucherCodes] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mini_shopee_saved_voucher_codes');
+      return saved ? JSON.parse(saved) : ['MINI10', 'FREESHIP'];
+    } catch {
+      return ['MINI10', 'FREESHIP'];
+    }
+  });
+  const [voucherFilterTab, setVoucherFilterTab] = useState('all');
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const vList = await getVouchers();
+        if (active && Array.isArray(vList)) {
+          setVouchersList(vList);
+        }
+      } catch (err) {
+        console.warn('Failed to load vouchers:', err);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const handleToggleSaveVoucher = (code) => {
+    setSavedVoucherCodes((prev) => {
+      const isSaved = prev.includes(code);
+      const next = isSaved ? prev.filter((c) => c !== code) : [...prev, code];
+      try {
+        localStorage.setItem('mini_shopee_saved_voucher_codes', JSON.stringify(next));
+      } catch {}
+      if (!isSaved) {
+        showToast(`🎉 Đã lưu mã ${code} vào ví voucher cá nhân!`, 'success');
+      } else {
+        showToast(`Đã bỏ lưu mã ${code}`, 'info');
+      }
+      return next;
+    });
+  };
 
   // Save addresses to localStorage partitioned by user
   useEffect(() => {
@@ -468,50 +512,188 @@ export default function ProfilePage() {
         {/* Tab 3: Voucher Wallet */}
         {activeTab === 'vouchers' && (
           <div style={{ padding: '28px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 16px', color: 'var(--text-primary)' }}>
-              🎟️ Kho Mã Giảm Giá Đang Khả Dụng
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                  🎟️ Ví Voucher Cá Nhân ({vouchersList.length || 5} mã)
+                </h3>
+                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  Lưu voucher vào ví để hệ thống tự động gợi ý và áp dụng mức giảm tối đa khi bạn mua hàng.
+                </span>
+              </div>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary"
+                style={{ fontSize: '12.5px', padding: '6px 14px' }}
+                onClick={() => navigate('/cart')}
+              >
+                🛒 Đến Giỏ Hàng Mua Sắm
+              </button>
+            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+            {/* Category Filter Pills */}
+            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '18px' }}>
               {[
-                { code: 'MINI10', title: 'Giảm 10% Toàn Sàn', desc: 'Không giới hạn đơn tối thiểu, giảm tối đa 100k', tag: 'Sàn' },
-                { code: 'FREESHIP', title: 'Miễn Phí Vận Chuyển', desc: 'Giảm 30.000₫ phí ship toàn quốc cho mọi đơn', tag: 'Vận chuyển' },
-                { code: 'SUPERDEAL', title: 'Siêu Deal Giảm 15%', desc: 'Ưu đãi giờ vàng, áp dụng cho mọi đơn hàng', tag: 'Hot Deal' },
-                { code: 'SHOPGENZ', title: 'Voucher Shop 20.000₫', desc: 'Đơn từ 100k các sản phẩm Thời Trang GenZ', tag: 'Shop' },
-                { code: 'TECHDEAL', title: 'Voucher Công Nghệ 50.000₫', desc: 'Đơn từ 200k thiết bị công nghệ TechWorld', tag: 'Shop' },
-              ].map((v) => (
-                <div
-                  key={v.code}
-                  style={{
-                    background: 'var(--bg-card, #ffffff)',
-                    border: '1.5px dashed var(--primary-color, #ea580c)',
-                    borderRadius: '12px',
-                    padding: '16px',
-                    boxShadow: 'var(--shadow-sm)',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <strong style={{ fontSize: '16px', color: 'var(--primary-color, #ea580c)' }}>{v.code}</strong>
-                    <span style={{ fontSize: '11px', background: 'var(--primary-light)', color: 'var(--primary-color)', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
-                      {v.tag}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>{v.title}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 12px' }}>{v.desc}</div>
-
+                { id: 'all', label: `Tất cả (${vouchersList.length})` },
+                { id: 'shipping', label: `🚚 Miễn Phí Vận Chuyển (${vouchersList.filter((v) => v.type === 'shipping').length})` },
+                { id: 'order', label: `🏷️ Giảm Giá Sàn (${vouchersList.filter((v) => v.type !== 'shipping' && v.isGlobal).length})` },
+                { id: 'shop', label: `🏪 Voucher Shop (${vouchersList.filter((v) => !v.isGlobal && v.shopId).length})` },
+                { id: 'saved', label: `⭐ Đã Lưu Trong Ví (${savedVoucherCodes.length})` },
+              ].map((tab) => {
+                const isActive = voucherFilterTab === tab.id;
+                return (
                   <button
+                    key={tab.id}
                     type="button"
-                    className="shopee-btn shopee-btn-secondary"
-                    style={{ width: '100%', fontSize: '12px', padding: '6px' }}
-                    onClick={() => {
-                      navigator.clipboard?.writeText(v.code);
-                      showToast(`Đã sao chép mã voucher ${v.code}!`, 'success');
+                    onClick={() => setVoucherFilterTab(tab.id)}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: '20px',
+                      fontSize: '12.5px',
+                      fontWeight: isActive ? 700 : 500,
+                      border: isActive ? '1.5px solid var(--primary-color, #ea580c)' : '1px solid var(--border-medium, #cbd5e1)',
+                      background: isActive ? 'var(--primary-light, #fff7ed)' : 'var(--bg-card, #ffffff)',
+                      color: isActive ? 'var(--primary-color, #ea580c)' : 'var(--text-secondary, #475569)',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.15s ease',
                     }}
                   >
-                    📋 Sao Chép Mã
+                    {tab.label}
                   </button>
-                </div>
-              ))}
+                );
+              })}
+            </div>
+
+            {/* Voucher Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+              {(vouchersList.length > 0 ? vouchersList : [
+                { code: 'MINI10', name: 'Giảm 10% Toàn Sàn', type: 'order', value: 10, isPercentage: true, minOrderValue: 0, maxDiscount: 100000, expiryDate: '2026-12-31', description: 'Không giới hạn đơn tối thiểu, giảm tối đa 100k' },
+                { code: 'FREESHIP', name: 'Miễn Phí Vận Chuyển', type: 'shipping', value: 30000, minOrderValue: 0, expiryDate: '2026-12-31', description: 'Giảm 30.000₫ phí ship toàn quốc cho mọi đơn' },
+                { code: 'SUPERDEAL', name: 'Siêu Deal Giảm 15%', type: 'order', value: 15, isPercentage: true, minOrderValue: 150000, expiryDate: '2026-12-31', description: 'Ưu đãi giờ vàng, áp dụng cho mọi đơn hàng' },
+                { code: 'SHOPGENZ', name: 'Voucher Shop Thời Trang', type: 'order', value: 20000, minOrderValue: 100000, expiryDate: '2026-12-31', description: 'Đơn từ 100k các sản phẩm Thời Trang GenZ' },
+                { code: 'TECHDEAL', name: 'Voucher Công Nghệ 50k', type: 'order', value: 50000, minOrderValue: 200000, expiryDate: '2026-12-31', description: 'Đơn từ 200k thiết bị công nghệ TechWorld' },
+              ])
+                .filter((v) => {
+                  if (voucherFilterTab === 'shipping') return v.type === 'shipping';
+                  if (voucherFilterTab === 'order') return v.type !== 'shipping' && (v.isGlobal || !v.shopId);
+                  if (voucherFilterTab === 'shop') return !v.isGlobal && v.shopId;
+                  if (voucherFilterTab === 'saved') return savedVoucherCodes.includes(v.code);
+                  return true;
+                })
+                .map((v) => {
+                  const isSaved = savedVoucherCodes.includes(v.code);
+                  const isShipping = v.type === 'shipping';
+                  return (
+                    <div
+                      key={v.code || v.id}
+                      style={{
+                        background: 'var(--bg-card, #ffffff)',
+                        border: isSaved ? '1.5px solid var(--primary-color, #ea580c)' : '1px dashed var(--border-medium, #cbd5e1)',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        boxShadow: 'var(--shadow-sm)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        position: 'relative',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {/* Ticket Notch effect */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: '-8px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          background: 'var(--bg-body, #f8fafc)',
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          right: '-8px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          background: 'var(--bg-body, #f8fafc)',
+                        }}
+                      />
+
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: 800,
+                              textTransform: 'uppercase',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              background: isShipping ? '#e0f2fe' : 'var(--primary-light, #fff7ed)',
+                              color: isShipping ? '#0369a1' : 'var(--primary-color, #ea580c)',
+                            }}
+                          >
+                            {isShipping ? '🚚 Freeship' : v.shopId ? '🏪 Voucher Shop' : '🏷️ Voucher Sàn'}
+                          </span>
+                          <strong style={{ fontSize: '15px', color: 'var(--primary-color, #ea580c)', letterSpacing: '0.5px' }}>
+                            {v.code}
+                          </strong>
+                        </div>
+
+                        <div style={{ fontSize: '14.5px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                          {v.name || v.title}
+                        </div>
+
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4', marginBottom: '8px' }}>
+                          {v.description || v.desc}
+                        </div>
+
+                        <div style={{ fontSize: '11.5px', color: '#64748b', marginBottom: '12px' }}>
+                          {v.minOrderValue > 0 ? `Đơn tối thiểu: ${formatCurrency(v.minOrderValue)}` : 'Đơn tối thiểu: 0₫'} · HSD: {v.expiryDate || '31/12/2026'}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px', paddingTop: '10px', borderTop: '1px solid var(--border-light, #f1f5f9)' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSaveVoucher(v.code)}
+                          style={{
+                            flex: 1,
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            border: isSaved ? '1px solid #10b981' : '1px solid var(--border-medium, #cbd5e1)',
+                            background: isSaved ? '#ecfdf5' : 'transparent',
+                            color: isSaved ? '#059669' : 'var(--text-secondary, #475569)',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          {isSaved ? '✓ Đã Lưu' : '📥 Lưu Mã'}
+                        </button>
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-primary"
+                          style={{ fontSize: '12px', padding: '6px 12px', fontWeight: 700 }}
+                          onClick={() => {
+                            navigator.clipboard?.writeText(v.code);
+                            showToast(`Đã sao chép mã ${v.code} và chuyển đến giỏ hàng!`, 'success');
+                            navigate('/cart');
+                          }}
+                        >
+                          Dùng Ngay
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         )}
