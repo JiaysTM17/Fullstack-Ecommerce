@@ -26,8 +26,8 @@ export default function LoginPage() {
     else navigate(location.state?.from || '/');
   };
 
-  const handleQuickLogin = (roleKey) => {
-    const u = loginAsDemo(roleKey);
+  const handleQuickLogin = async (roleKey) => {
+    const u = await loginAsDemo(roleKey);
     if (u) {
       showToast(t('auth_demo_success', `Đăng nhập thành công với vai trò ${u.role === 'admin' ? 'Quản Trị Viên' : u.role === 'seller' ? 'Chủ Shop' : 'Khách Mua Hàng'}!`), 'success');
       redirectAfterLogin(u.role);

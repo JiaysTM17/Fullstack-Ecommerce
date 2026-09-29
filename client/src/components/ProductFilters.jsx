@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getAllShops } from '../services/shopService';
 import { useLanguage } from '../context/LanguageContext';
 import '../styles/filters.css';
@@ -14,9 +14,13 @@ const PRICE_PRESETS = [
 
 export default function ProductFilters({ filters = {}, onFilterChange, onResetFilters, onFilterBatch }) {
   const { t, language } = useLanguage();
-  const allShops = getAllShops();
+  const [allShops, setAllShops] = useState([]);
   const [minPriceInput, setMinPriceInput] = useState(filters.minPrice || "");
   const [maxPriceInput, setMaxPriceInput] = useState(filters.maxPrice || "");
+
+  useEffect(() => {
+    getAllShops().then(shops => setAllShops(shops || []));
+  }, []);
 
   const handlePriceApply = (e) => {
     e.preventDefault();

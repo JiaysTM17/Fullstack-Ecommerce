@@ -369,14 +369,14 @@ export function CartProvider({ children }) {
 
   // Voucher actions: Discount (percent / fixed) and Shipping (freeship)
   const applyDiscountVoucher = useCallback(
-    (codeOrVoucher) => {
+    async (codeOrVoucher) => {
       if (!codeOrVoucher) {
         setAppliedDiscountVoucher(null);
         return { success: false, message: "Mã không hợp lệ" };
       }
       const code = typeof codeOrVoucher === "string" ? codeOrVoucher : codeOrVoucher.code;
       const baseSubtotal = selectedSubtotal > 0 ? selectedSubtotal : subtotal;
-      const result = validateVoucher(code, baseSubtotal);
+      const result = await validateVoucher(code, baseSubtotal);
       if (result.valid) {
         if (result.voucher.type === "shipping") {
           return { success: false, message: "Đây là mã freeship, vui lòng chọn ở mục Miễn Phí Vận Chuyển" };
@@ -393,14 +393,14 @@ export function CartProvider({ children }) {
   );
 
   const applyShippingVoucher = useCallback(
-    (codeOrVoucher) => {
+    async (codeOrVoucher) => {
       if (!codeOrVoucher) {
         setAppliedShippingVoucher(null);
         return { success: false, message: "Mã không hợp lệ" };
       }
       const code = typeof codeOrVoucher === "string" ? codeOrVoucher : codeOrVoucher.code;
       const baseSubtotal = selectedSubtotal > 0 ? selectedSubtotal : subtotal;
-      const result = validateVoucher(code, baseSubtotal);
+      const result = await validateVoucher(code, baseSubtotal);
       if (result.valid) {
         if (result.voucher.type !== "shipping") {
           return { success: false, message: "Đây là mã giảm giá đơn hàng, vui lòng chọn ở mục Giảm Giá Sàn" };
@@ -426,7 +426,7 @@ export function CartProvider({ children }) {
 
   // Smart router applyVoucher: applies to appropriate slot based on voucher type
   const applyVoucher = useCallback(
-    (codeOrVoucher) => {
+    async (codeOrVoucher) => {
       if (!codeOrVoucher) {
         setAppliedDiscountVoucher(null);
         setAppliedShippingVoucher(null);
@@ -435,7 +435,7 @@ export function CartProvider({ children }) {
       }
       const code = typeof codeOrVoucher === "string" ? codeOrVoucher : codeOrVoucher.code;
       const baseSubtotal = selectedSubtotal > 0 ? selectedSubtotal : subtotal;
-      const result = validateVoucher(code, baseSubtotal);
+      const result = await validateVoucher(code, baseSubtotal);
       if (result.valid) {
         if (result.voucher.type === "shipping") {
           setAppliedShippingVoucher(result.voucher);

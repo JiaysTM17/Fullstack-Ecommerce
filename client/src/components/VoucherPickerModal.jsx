@@ -34,7 +34,7 @@ export default function VoucherPickerModal({
   // Sync state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setVouchers(getVouchers());
+      getVouchers().then(v => setVouchers(v || []));
       setErrorMessage("");
       setCustomCode("");
 
@@ -193,7 +193,7 @@ export default function VoucherPickerModal({
   if (!isOpen) return null;
 
   // Handle custom voucher code input
-  const handleApplyCustomCode = (e) => {
+  const handleApplyCustomCode = async (e) => {
     e.preventDefault();
     const code = customCode.trim().toUpperCase();
     if (!code) {
@@ -201,7 +201,7 @@ export default function VoucherPickerModal({
       return;
     }
 
-    const res = validateVoucher(code, currentSubtotal);
+    const res = await validateVoucher(code, currentSubtotal);
     if (!res.valid) {
       setErrorMessage(res.message);
       return;

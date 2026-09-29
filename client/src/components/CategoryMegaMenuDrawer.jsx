@@ -134,6 +134,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const shopsScrollRef = useRef(null);
+  const [shopsList, setShopsList] = useState([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -144,6 +145,12 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
       };
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getAllShops().then(shops => { if (!cancelled) setShopsList(shops); });
+    return () => { cancelled = true; };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -562,7 +569,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               padding: '2px 0',
             }}
           >
-            {getAllShops().map((shop) => (
+            {shopsList.map((shop) => (
               <button
                 key={shop.id}
                 type="button"

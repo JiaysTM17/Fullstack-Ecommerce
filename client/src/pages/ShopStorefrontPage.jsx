@@ -67,38 +67,42 @@ export default function ShopStorefrontPage() {
   const { toggleWishlist, isWishlisted } = useWishlist();
   const { addToCompare, isCompared } = useCompare();
 
-  const [shop, setShop] = useState(() => getShopById(shopId) || null);
-  const [products, setProducts] = useState(() => (shopId ? getProductsByShop(shopId) : []));
+  const [shop, setShop] = useState(null);
+  const [products, setProducts] = useState([]);
   const [isFollowing, setIsFollowing] = useState(() => (shopId ? isShopFollowed(shopId) : false));
-  const [followerCount, setFollowerCount] = useState(() => {
-    const s = getShopById(shopId);
-    return s?.followers || 12000;
-  });
+  const [followerCount, setFollowerCount] = useState(12000);
   const [shopSearch, setShopSearch] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   // Load shop và danh sách sản phẩm theo shopId
   useEffect(() => {
-    const loadedShop = getShopById(shopId);
-    setShop(loadedShop);
-    setFollowerCount(loadedShop?.followers || 12000);
-    if (loadedShop?.id) {
-      setIsFollowing(isShopFollowed(loadedShop.id));
-      const shopProds = getProductsByShop(loadedShop.id);
-      setProducts(shopProds);
+    let cancelled = false;
+    async function loadShop() {
+      const loadedShop = await getShopById(shopId);
+      if (cancelled) return;
+      setShop(loadedShop);
+      setFollowerCount(loadedShop?.followers || 12000);
+      if (loadedShop?.id) {
+        setIsFollowing(isShopFollowed(loadedShop.id));
+        const shopProds = await getProductsByShop(loadedShop.id);
+        if (!cancelled) setProducts(shopProds);
+      }
     }
+    loadShop();
     window.scrollTo(0, 0);
+    return () => { cancelled = true; };
   }, [shopId]);
 
   // Đồng bộ thời gian thực khi Chủ Shop thêm sản phẩm hoặc cập nhật tồn kho
   useEffect(() => {
-    const handleLiveSync = () => {
+    const handleLiveSync = async () => {
       if (!shopId) return;
-      const loadedShop = getShopById(shopId);
+      const loadedShop = await getShopById(shopId);
       if (loadedShop?.id) {
         setShop(loadedShop);
-        setProducts(getProductsByShop(loadedShop.id));
+        const prods = await getProductsByShop(loadedShop.id);
+        setProducts(prods);
       }
     };
 

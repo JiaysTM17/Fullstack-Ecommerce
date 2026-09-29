@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
   const [financeList, setFinanceList] = useState(INITIAL_FINANCE_SETTLEMENTS);
 
   // Voucher Management
-  const [vouchers, setVouchers] = useState(getVouchers);
+  const [vouchers, setVouchers] = useState([]);
   const [showAddVoucher, setShowAddVoucher] = useState(false);
   const [voucherForm, setVoucherForm] = useState({
     code: '',
@@ -72,6 +72,11 @@ export default function AdminDashboardPage() {
     maxDiscount: '100000',
     description: '',
   });
+
+  // Load vouchers from backend on mount
+  useEffect(() => {
+    getVouchers().then(v => setVouchers(v || []));
+  }, []);
 
   // Số liệu toàn sàn
   const totalPlatformRevenue = shops.reduce((sum, s) => sum + s.totalRevenue, 0);
@@ -105,7 +110,7 @@ export default function AdminDashboardPage() {
     }));
   };
 
-  const handleCreateVoucher = (e) => {
+  const handleCreateVoucher = async (e) => {
     e.preventDefault();
     const code = voucherForm.code.trim().toUpperCase();
     if (!code) {
@@ -129,7 +134,7 @@ export default function AdminDashboardPage() {
       }
     }
 
-    const created = createVoucher({
+    const created = await createVoucher({
       code,
       name: voucherForm.name.trim() || `Voucher ${code}`,
       type: voucherForm.type,
@@ -155,10 +160,12 @@ export default function AdminDashboardPage() {
     });
   };
 
-  const handleDeleteVoucher = (vouchId) => {
+  const handleDeleteVoucher = async (vouchId) => {
     if (window.confirm("Bạn có chắc muốn xóa mã voucher này khỏi sàn?")) {
-      const updated = deleteVoucher(vouchId);
-      setVouchers(updated);
+      await deleteVoucher(vouchId);
+      // Reload vouchers from backend
+      const updated = await getVouchers();
+      setVouchers(updated || []);
       toast.info("Đã xóa mã voucher khỏi hệ thống");
     }
   };
