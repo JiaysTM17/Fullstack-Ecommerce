@@ -213,9 +213,11 @@ Website-Thuong-Mai-Dien-Tu-Mini-Plan/
 ├── docs/                          # Hệ thống tài liệu kỹ thuật chuyên sâu (Max Level)
 │   ├── roadmap.md                 # Đối chiếu lộ trình Fullstack Developer 8 giai đoạn
 │   ├── api.md                     # Đặc tả chi tiết 9 nhóm RESTful API endpoints
+│   ├── postman_collection.json    # Bộ request mẫu Postman v2.1.0 sẵn sàng import
 │   ├── architecture.md            # Sơ đồ kiến trúc luồng dữ liệu và Tenant Isolation
 │   ├── database.md                # Thiết kế cơ sở dữ liệu, ER Diagram & Data Dictionary
 │   ├── security.md                # Chính sách bảo mật, chuẩn OWASP và RBAC Guard
+│   ├── testing.md                 # Chiến lược kiểm thử tự động toàn diện (450 tests)
 │   ├── deployment.md              # Hướng dẫn triển khai Production (VPS, PM2, Nginx, Docker)
 │   └── progress/                  # Nhật ký tiến độ phát triển dự án
 ├── tests/                         # Bộ kiểm thử tự động toàn diện (450 tests)
@@ -311,9 +313,11 @@ Hệ thống tích hợp sẵn tính năng **Đăng Nhập Nhanh 1-Click** tại
 
 * [🗺️ Lộ Trình Phát Triển & Đối Chiếu 8 Giai Đoạn (docs/roadmap.md)](docs/roadmap.md)
 * [🔌 Tài Liệu Đặc Tả 9 Nhóm RESTful API (docs/api.md)](docs/api.md)
+* [📬 Bộ Thử Nghiệm API Postman Collection v2.1.0 (docs/postman_collection.json)](docs/postman_collection.json)
 * [🏗️ Kiến Trúc Hệ Thống & Luồng Request-Response (docs/architecture.md)](docs/architecture.md)
 * [🗄️ Thiết Kế Cơ Sở Dữ Liệu & Data Dictionary 7 Bảng (docs/database.md)](docs/database.md)
 * [🔒 Chính Sách Bảo Mật, Chuẩn OWASP & Phân Quyền RBAC (docs/security.md)](docs/security.md)
+* [🧪 Chiến Lược & Cấu Trúc 4 Tầng Kiểm Thử 450 Tests (docs/testing.md)](docs/testing.md)
 * [🚀 Hướng Dẫn Triển Khai Production: VPS, Nginx, PM2 & Docker (docs/deployment.md)](docs/deployment.md)
 
 ---

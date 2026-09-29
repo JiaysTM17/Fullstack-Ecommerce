@@ -1,0 +1,350 @@
+{
+  "info": {
+    "_postman_id": "b8a91a92-f012-4d2a-a912-9c17e3f42111",
+    "name": "Mini Shopee E-Commerce REST API",
+    "description": "Full collection of RESTful API endpoints for Mini Shopee Multi-Vendor Platform, supporting Auth, Products, Shops, Orders, Vouchers, and Seller Operations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. System Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@shopee.vn\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login Seller Fashion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"seller.fashion@shopee.vn\",\n  \"password\": \"seller123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@gmail.com\",\n  \"password\": \"customer123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Register New Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyen Van A\",\n  \"email\": \"newuser@gmail.com\",\n  \"password\": \"password123\",\n  \"role\": \"customer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Products",
+      "item": [
+        {
+          "name": "Get All Products (Paginated & Filtered)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?page=1&limit=20&sort=popular",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "sort", "value": "popular" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Detail by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/prod_1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "prod_1"]
+            }
+          }
+        },
+        {
+          "name": "Search Products by Keyword",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?q=áo",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "q", "value": "áo" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Shops & Stores",
+      "item": [
+        {
+          "name": "Get All Active Shops",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Storefront by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/shop_1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "shop_1"]
+            }
+          }
+        },
+        {
+          "name": "Get Products by Shop ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/shop_1/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "shop_1", "products"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Vouchers & Discounts",
+      "item": [
+        {
+          "name": "Get Active Vouchers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vouchers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "vouchers"]
+            }
+          }
+        },
+        {
+          "name": "Validate Voucher",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"GIAM20K\",\n  \"subtotal\": 350000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/vouchers/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "vouchers", "validate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Orders & Checkout",
+      "item": [
+        {
+          "name": "Get Customer Order History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/my-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "my-orders"]
+            }
+          }
+        },
+        {
+          "name": "Create New Order (Checkout)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"prod_1\",\n      \"title\": \"Áo Thun Basic Cotton 100%\",\n      \"price\": 149000,\n      \"quantity\": 2,\n      \"shopId\": \"shop_1\"\n    }\n  ],\n  \"subtotal\": 298000,\n  \"shippingFee\": 30000,\n  \"discount\": 20000,\n  \"coinUsed\": 10000,\n  \"totalAmount\": 298000,\n  \"paymentMethod\": \"cod\",\n  \"shippingAddress\": {\n    \"fullName\": \"Kiệt Trương\",\n    \"phone\": \"0987654321\",\n    \"address\": \"123 Đường Nguyễn Huệ, Quận 1, TP.HCM\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Seller Operations",
+      "item": [
+        {
+          "name": "Get Seller Store Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/seller/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "seller", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status (Dispatch Order)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipping\",\n  \"carrier\": \"SPX Express\",\n  \"trackingCode\": \"SPX99182741VN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/seller/orders/order_1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "seller", "orders", "order_1", "status"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
