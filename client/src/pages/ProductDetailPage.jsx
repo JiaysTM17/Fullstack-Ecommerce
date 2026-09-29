@@ -709,11 +709,11 @@ export default function ProductDetailPage() {
                   <div className="amazon-review-header">
                     <img
                       src={rev.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
-                      alt={rev.author}
+                      alt={rev.author || rev.userName || "Khách hàng"}
                       className="amazon-review-avatar"
                     />
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: "13.5px" }}>{rev.author}</div>
+                      <div style={{ fontWeight: 700, fontSize: "13.5px" }}>{rev.author || rev.userName || "Khách hàng Mini Shopee"}</div>
                       <div style={{ fontSize: "12px", color: "#888" }}>Đánh giá ngày {rev.date}</div>
                     </div>
                   </div>
@@ -729,6 +729,27 @@ export default function ProductDetailPage() {
                   {rev.verifiedPurchase && (
                     <div className="amazon-review-verified">
                       ✓ Đã chứng nhận mua hàng chính hãng tại Fullstack E-Commerce
+                    </div>
+                  )}
+
+                  {Array.isArray(rev?.tags) && rev.tags.length > 0 && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", margin: "6px 0" }}>
+                      {rev.tags.map((tag, tIdx) => (
+                        <span
+                          key={tIdx}
+                          style={{
+                            fontSize: "11px",
+                            background: "#eff6ff",
+                            color: "#1d4ed8",
+                            border: "1px solid #bfdbfe",
+                            padding: "2px 8px",
+                            borderRadius: "12px",
+                            fontWeight: 600,
+                          }}
+                        >
+                          🏷️ {tag}
+                        </span>
+                      ))}
                     </div>
                   )}
 

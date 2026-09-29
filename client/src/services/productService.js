@@ -4422,18 +4422,45 @@ function mergeWithCustomReviews(product) {
   const customMap = getLocalReviews();
   const prodId = product._id || product.id;
   const localList = customMap[prodId] || [];
+
+  let orderReviews = [];
+  try {
+    if (typeof window !== "undefined") {
+      const raw = localStorage.getItem(`mini_shopee_product_reviews_${prodId}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) orderReviews = parsed;
+      }
+    }
+  } catch {}
+
   const baseReviews = product.reviews || [];
-  const allReviews = [...localList, ...baseReviews];
+  const mergedMap = new Map();
+  [...localList, ...orderReviews, ...baseReviews].forEach((r) => {
+    if (r && (r.id || r._id)) {
+      const rId = r.id || r._id;
+      if (!mergedMap.has(rId)) mergedMap.set(rId, r);
+    } else if (r) {
+      mergedMap.set(`rev_${Math.random()}`, r);
+    }
+  });
+
+  const allReviews = Array.from(mergedMap.values());
+  const calculatedRating = allReviews.length > 0
+    ? Number((allReviews.reduce((acc, cur) => acc + (Number(cur.rating) || 5), 0) / allReviews.length).toFixed(1))
+    : (product.rating || 5);
+
   return {
     ...product,
     reviews: allReviews,
-    reviewCount: (product.reviewCount || baseReviews.length) + localList.length,
+    rating: calculatedRating,
+    reviewCount: allReviews.length > (product.reviewCount || 0) ? allReviews.length : (product.reviewCount || allReviews.length),
   };
 }
 
 function hasWordToken(target, word) {
   if (!word || word.length < 2) return false;
-  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\export async function getProducts(params = {}) {');
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const rx = new RegExp('(^|[^a-zA-Z0-9àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ])' + escaped + '([^a-zA-Z0-9àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]|$)', 'i');
   return rx.test(target);
 }
