@@ -35,6 +35,7 @@ export default function CartPage() {
     toggleSelectItem,
     selectAllItems,
     unselectAllItems,
+    toggleSelectShop,
     isItemSelected,
     saveForLater,
     moveToCartFromSaved,
@@ -269,7 +270,14 @@ export default function CartPage() {
                   borderBottom: "1px solid var(--border-medium, #e2e8f0)",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <input
+                    type="checkbox"
+                    aria-label={`Chọn tất cả sản phẩm của ${shopGroup.shopName}`}
+                    checked={shopGroup.items.length > 0 && shopGroup.items.every((it) => isItemSelected(it.productId))}
+                    onChange={() => toggleSelectShop(shopGroup.items.map((it) => it.productId))}
+                    style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                  />
                   <span style={{ fontSize: "16px" }}>🏪</span>
                   <strong style={{ fontSize: "14px", color: "var(--text-primary, #0f172a)" }}>
                     {shopGroup.shopName}

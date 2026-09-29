@@ -304,6 +304,18 @@ export function CartProvider({ children }) {
     setSelectedItemIds([]);
   }, []);
 
+  const toggleSelectShop = useCallback((shopProductIds) => {
+    setSelectedItemIds((prev) => {
+      const allShopSelected = shopProductIds.length > 0 && shopProductIds.every((id) => prev.includes(id));
+      if (allShopSelected) {
+        return prev.filter((id) => !shopProductIds.includes(id));
+      } else {
+        const toAdd = shopProductIds.filter((id) => !prev.includes(id));
+        return [...prev, ...toAdd];
+      }
+    });
+  }, []);
+
   const isItemSelected = useCallback(
     (productId) => selectedItemIds.includes(productId),
     [selectedItemIds],
@@ -522,6 +534,7 @@ export function CartProvider({ children }) {
       toggleSelectItem,
       selectAllItems,
       unselectAllItems,
+      toggleSelectShop,
       isItemSelected,
       saveForLater,
       moveToCartFromSaved,
@@ -559,6 +572,7 @@ export function CartProvider({ children }) {
       toggleSelectItem,
       selectAllItems,
       unselectAllItems,
+      toggleSelectShop,
       isItemSelected,
       saveForLater,
       moveToCartFromSaved,
