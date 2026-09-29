@@ -820,9 +820,8 @@ export default function ProductDetailPage() {
       />
 
       {/* Recently Viewed Products */}
-      <RecentlyViewed
+      <RecentlyViewedSection
         currentProductId={id}
-        onProductClick={(p) => navigate(`/products/${p._id || p.id}`)}
       />
 
       {/* Share Product & QR Code Modal */}

@@ -4779,3 +4779,90 @@ export function addProductReview(productId, reviewData) {
   localStorage.setItem(PRODUCT_REVIEWS_KEY, JSON.stringify(customMap));
   return newRev;
 }
+
+export async function getProductQuestions(productId) {
+  try {
+    const res = await apiRequest(`/api/products/${productId}/questions`);
+    if (res?.data?.questions) {
+      return res.data.questions;
+    }
+  } catch (err) {
+    // console.warn("Backend API offline for product questions:", err.message);
+  }
+  try {
+    const raw = localStorage.getItem(`mini_shopee_qa_${productId}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function askProductQuestion(productId, data) {
+  try {
+    const res = await apiRequest(`/api/products/${productId}/questions`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    if (res?.data?.question) {
+      return res.data.question;
+    }
+  } catch (err) {
+    // console.warn("Backend API offline for asking question:", err.message);
+  }
+  const now = new Date().toISOString();
+  const fallbackQ = {
+    _id: `q_local_${Date.now()}`,
+    id: `q_local_${Date.now()}`,
+    productId,
+    userName: data.userName || data.customerName || "Khách hàng Mini Shopee",
+    customerName: data.userName || data.customerName || "Khách hàng Mini Shopee",
+    question: data.question || data.questionText || "",
+    questionText: data.question || data.questionText || "",
+    createdAt: now,
+    askedAt: now,
+    helpfulCount: 0,
+    upvotes: 0,
+    answers: [],
+    isAnswered: false,
+    answer: null,
+    answeredAt: null,
+    answeredBy: null,
+  };
+  try {
+    const raw = localStorage.getItem(`mini_shopee_qa_${productId}`);
+    const list = raw ? JSON.parse(raw) : [];
+    const updated = [fallbackQ, ...list];
+    localStorage.setItem(`mini_shopee_qa_${productId}`, JSON.stringify(updated));
+  } catch {}
+  return fallbackQ;
+}
+
+export async function voteProductQuestion(productId, questionId) {
+  try {
+    const res = await apiRequest(`/api/products/${productId}/questions/${questionId}/vote`, {
+      method: "POST",
+    });
+    if (res?.data) {
+      return res.data;
+    }
+  } catch (err) {
+    // console.warn("Backend API offline for voting question:", err.message);
+  }
+  return { helpfulCount: 1, upvotes: 1, hasVoted: true };
+}
+
+export async function answerProductQuestion(productId, questionId, data) {
+  try {
+    const res = await apiRequest(`/api/products/${productId}/questions/${questionId}/answers`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    if (res?.data) {
+      return res.data;
+    }
+  } catch (err) {
+    // console.warn("Backend API offline for answering question:", err.message);
+  }
+  return null;
+}
+

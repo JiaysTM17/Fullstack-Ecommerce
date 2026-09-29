@@ -335,4 +335,117 @@ describe("Tier 3 - Cross-Feature Interaction Matrix", { tier: "tier3" }, () => {
     expect.equal(resolved.status, "refunded");
     expect.equal(resolved.resolvedBy, "admin");
   });
+  test("T3-21: PDP Engagement Flow: Buyer views product -> recorded in Recently Viewed -> submits Q&A question -> Seller replies -> Question upvoted", async () => {
+    const seller = await api.register({ email: createRandomEmail("sel_t3_21"), password: "Password123!", fullName: "Seller T3-21", role: "seller" });
+    const shop = await api.createShop(FIXTURES.shops.shopFashion, seller.token);
+    const prod = await api.createProduct({ name: "Áo Polo T3 Engagement", price: 299000, stock: 50 }, seller.token);
+
+    const buyer = await api.register({ email: createRandomEmail("buyer_t3_21"), password: "Password123!", fullName: "Buyer T3-21" });
+
+    // 1. Buyer views product -> recorded in Recently Viewed
+    await api.recordRecentlyViewed(prod, buyer.token);
+    const recent = await api.getRecentlyViewed(buyer.token);
+    expect.ok(recent.some((p) => p.id === prod.id));
+
+    // 2. Buyer submits Q&A question on PDP
+    const q = await api.createQuestion(prod.id, { question: "Chất liệu áo có co giãn tốt khi vận động thể thao không?" }, buyer.token);
+    expect.ok(q.id);
+    expect.equal(q.helpfulCount, 0);
+
+    // 3. Seller responds
+    const answered = await api.answerProductQuestion(prod.id, q.id, {
+      content: "Dạ vải cotton pha spandex co giãn 4 chiều cực kỳ thoáng mát ạ!",
+      authorName: shop.name,
+      isShopOwner: true,
+    });
+    expect.equal(answered.answers.length, 1);
+    expect.equal(answered.answers[0].isShopOwner, true);
+
+    // 4. Community upvotes question
+    const voter = await api.register({ email: createRandomEmail("voter_t3_21"), password: "Password123!", fullName: "Voter T3-21" });
+    const voteRes = await api.voteProductQuestion(prod.id, q.id, voter.token);
+    expect.equal(voteRes.helpfulCount, 1);
+
+    const questionsList = await api.getProductQuestions(prod.id);
+    expect.equal(questionsList.questions[0].helpfulCount, 1);
+  });
+
+  test("T3-22: Full Post-Purchase Flow: Buyer orders from Recently Viewed -> Tracking generates SPX live route -> Driver reaches delivery -> Electronic VAT Invoice issued", async () => {
+    const buyer = await api.register({ email: createRandomEmail("buyer_t3_22"), password: "Password123!", fullName: "Buyer T3-22" });
+
+    // 1. Buyer views item and places order
+    const viewedItem = { id: "p-t3-22-watch", name: "Đồng Hồ Thông Minh Sport", price: 750000 };
+    await api.recordRecentlyViewed(viewedItem, buyer.token);
+
+    const order = await api.createOrder(
+      generateCartPayload([{ productId: viewedItem.id, price: viewedItem.price, quantity: 1 }]),
+      buyer.token
+    );
+    expect.ok(order.id);
+
+    // 2. Query initial tracking
+    const tracking = await api.getOrderTracking(order.id, buyer.token);
+    expect.ok(tracking.trackingCode);
+    expect.ok(tracking.stages.find((s) => s.stage === "placed").completed);
+
+    // 3. Move order to shipping and check courier route simulation
+    order.status = "shipping";
+    const shippingTracking = await api.getOrderTracking(order.id, buyer.token);
+    expect.equal(shippingTracking.currentStage, "shipping");
+    expect.ok(shippingTracking.currentLocation.speedKmh > 0);
+
+    // 4. Deliver order and issue electronic VAT invoice
+    order.status = "delivered";
+    const deliveredTracking = await api.getOrderTracking(order.id, buyer.token);
+    expect.equal(deliveredTracking.currentLocation.distanceRemainingKm, 0);
+
+    const invoice = await api.getOrderInvoice(order.id, buyer.token);
+    expect.equal(invoice.invoiceSerial, "1C26MMS");
+    expect.equal(invoice.templateCode, "01GTKT0/001");
+    expect.equal(invoice.netSubtotal + invoice.actualVatAmount, order.subtotal);
+    expect.ok(invoice.qrCodeString.includes(order.id));
+  });
+
+  test("T3-23: Multi-Vendor VAT Split: Order containing items from 2 shops computes unified 8% VAT invoice while reflecting separate shop line items", async () => {
+    const buyer = await api.register({ email: createRandomEmail("buyer_t3_23"), password: "Password123!", fullName: "Doanh Nghiệp Multi-Vendor" });
+
+    const order = await api.createOrder(
+      generateCartPayload([
+        { name: "Sản phẩm Shop Hà Nội", price: 300000, quantity: 1, shopId: "shop-hanoi" },
+        { name: "Sản phẩm Shop Sài Gòn", price: 200000, quantity: 2, shopId: "shop-saigon" },
+      ]),
+      buyer.token
+    );
+
+    expect.equal(order.subtotal, 700000);
+
+    const invoice = await api.getOrderInvoice(order.id, buyer.token);
+    expect.equal(invoice.items.length, 2);
+    expect.equal(invoice.items[0].name, "Sản phẩm Shop Hà Nội");
+    expect.equal(invoice.items[1].name, "Sản phẩm Shop Sài Gòn");
+
+    const expectedNet = Math.round(700000 / 1.08);
+    const expectedVat = 700000 - expectedNet;
+
+    expect.equal(invoice.netSubtotal, expectedNet);
+    expect.equal(invoice.actualVatAmount, expectedVat);
+    expect.equal(invoice.netSubtotal + invoice.actualVatAmount, 700000);
+  });
+
+  test("T3-24: Cancelled Order Logistics & Invoice Guard: Cancelled order locks VAT invoice status and halts SPX live courier movement", async () => {
+    const buyer = await api.register({ email: createRandomEmail("buyer_t3_24"), password: "Password123!", fullName: "Buyer Cancel" });
+    const order = await api.createOrder(generateCartPayload([{ price: 400000, quantity: 1 }]), buyer.token);
+
+    const cancelled = await api.cancelOrder(order.id, buyer.token);
+    expect.equal(cancelled.status, "cancelled");
+
+    const tracking = await api.getOrderTracking(order.id, buyer.token);
+    expect.equal(tracking.status, "cancelled");
+    expect.equal(tracking.statusText, "Đơn hàng đã hủy");
+
+    const invoice = await api.getOrderInvoice(order.id, buyer.token);
+    expect.ok(invoice);
+    expect.equal(invoice.orderId, order.id);
+  });
+
 });

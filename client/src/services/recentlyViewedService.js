@@ -23,6 +23,7 @@ export function addRecentlyViewed(product) {
     if (typeof window === "undefined") return [];
     const current = getRecentlyViewed();
     const productId = product._id || product.id;
+    if (!productId) return current;
 
     // Filter out existing occurrence of this product
     const filtered = current.filter((p) => (p._id || p.id) !== productId);
@@ -31,13 +32,15 @@ export function addRecentlyViewed(product) {
     const cleanItem = {
       _id: productId,
       id: productId,
-      name: product.name,
-      slug: product.slug,
-      price: product.price,
+      name: product.name || "",
+      slug: product.slug || "",
+      price: product.price || 0,
       originalPrice: product.originalPrice || 0,
-      image: product.image,
+      discount: product.discount || (product.originalPrice && product.originalPrice > product.price ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0),
+      image: product.image || (Array.isArray(product.images) && product.images[0]) || "",
       rating: product.rating || 5,
-      sold: product.sold || 0,
+      sold: product.sold || product.soldCount || 0,
+      soldCount: product.soldCount || product.sold || 0,
       shopId: product.shopId || "shop_01",
       shopName: product.shopName || "Thời Trang GenZ",
       category: product.category || "",

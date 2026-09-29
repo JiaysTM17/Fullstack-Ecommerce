@@ -386,4 +386,146 @@ describe("Tier 4 - Real-World Application User Journeys", { tier: "tier4" }, () 
     const finalTracking = await api.getSPXTracking(order.id);
     expect.equal(finalTracking.currentStage, "delivered");
   });
+  // --------------------------------------------------------------------------
+  // JOURNEY 11: Buyer Pre-Purchase Engagement to Post-Purchase Audit
+  // --------------------------------------------------------------------------
+  test("Journey 11: Buyer Pre-Purchase Engagement to Post-Purchase Audit - Recently Viewed, Q&A, Dual Vouchers, Live SPX GPS Map, VAT Invoice", async () => {
+    const buyer = await api.register({ email: createRandomEmail("j11_buyer"), password: "Password123!", fullName: "Hoàng Minh Trí" });
+
+    // 1. Browse products -> populate Recently Viewed
+    const p1 = { id: "p-j11-blazer", name: "Áo Blazer Nam Hàn Quốc", price: 650000, shopName: "Thời Trang GenZ" };
+    const p2 = { id: "p-j11-trousers", name: "Quần Tây Form Suông", price: 350000, shopName: "Thời Trang GenZ" };
+
+    await api.recordRecentlyViewed(p1, buyer.token);
+    await api.recordRecentlyViewed(p2, buyer.token);
+
+    const viewedList = await api.getRecentlyViewed(buyer.token);
+    expect.equal(viewedList.length, 2);
+    expect.equal(viewedList[0].id, "p-j11-trousers");
+
+    // 2. Inspect PDP and ask sizing question via Community Q&A
+    const question = await api.createQuestion(p1.id, { question: "Cao 1m78 nặng 70kg thì mặc size nào vừa vặn nhất?" }, buyer.token);
+    expect.ok(question.id);
+    expect.equal(question.helpfulCount, 0);
+
+    // Shop responds to question
+    await api.answerProductQuestion(p1.id, question.id, {
+      content: "Dạ bạn mặc size L hoặc XL nếu thích phong cách oversize nhé!",
+      authorName: "Thời Trang GenZ Official",
+      isShopOwner: true,
+    });
+
+    // Community member upvotes the helpful answer
+    const communityUser = await api.register({ email: createRandomEmail("j11_peer"), password: "Password123!", fullName: "Lê Hoàng" });
+    await api.voteProductQuestion(p1.id, question.id, communityUser.token);
+
+    const qaFeed = await api.getProductQuestions(p1.id);
+    expect.equal(qaFeed.questions[0].helpfulCount, 1);
+    expect.equal(qaFeed.questions[0].answers.length, 1);
+
+    // 3. Buyer completes checkout using Dual Vouchers (FREESHIP15K + GIAM20K)
+    const orderPayload = generateCartPayload(
+      [
+        { productId: p1.id, price: p1.price, quantity: 1 },
+        { productId: p2.id, price: p2.price, quantity: 1 },
+      ],
+      {
+        shippingFee: 30000,
+        voucherCode: "GIAM20K",
+        freeshipCode: "FREESHIP15K",
+        customer: {
+          fullName: "Hoàng Minh Trí",
+          phone: "0908777888",
+          address: "Số 88 đường Nam Kỳ Khởi Nghĩa, Quận 1, TP. HCM",
+        },
+      }
+    );
+
+    const order = await api.createOrder(orderPayload, buyer.token);
+    expect.equal(order.subtotal, 1000000);
+    expect.equal(order.total, 995000);
+
+    // 4. Open Order History & monitor real-time SPX GPS route
+    order.status = "shipping";
+    const liveTracking = await api.getOrderTracking(order.id, buyer.token);
+    expect.equal(liveTracking.currentStage, "shipping");
+    expect.ok(liveTracking.currentLocation.label.includes("Tân Bình"));
+    expect.ok(liveTracking.currentLocation.speedKmh > 0);
+
+    // 5. Complete delivery and verify printable Electronic VAT Invoice
+    order.status = "delivered";
+    const finalTracking = await api.getOrderTracking(order.id, buyer.token);
+    expect.equal(finalTracking.currentStage, "delivered");
+    expect.equal(finalTracking.currentLocation.distanceRemainingKm, 0);
+
+    const invoice = await api.getOrderInvoice(order.id, buyer.token);
+    expect.equal(invoice.invoiceSerial, "1C26MMS");
+    expect.equal(invoice.templateCode, "01GTKT0/001");
+    expect.equal(invoice.netSubtotal + invoice.actualVatAmount, 1000000);
+    expect.ok(invoice.digitalSignature.verified);
+    expect.ok(invoice.qrCodeString.includes(order.id));
+  });
+
+  // --------------------------------------------------------------------------
+  // JOURNEY 12: Complete Customer Service & Logistics Exception Handling
+  // --------------------------------------------------------------------------
+  test("Journey 12: Customer Service & Logistics Exception Handling - Live Route Tracking, Hub Dispatch, VAT Corporate Audit, 5-Star Review with Xu Reward", async () => {
+    const customer = await api.register({ email: createRandomEmail("j12_cust"), password: "Password123!", fullName: "Phạm Hải Đăng" });
+
+    // 1. Customer places order
+    const order = await api.createOrder(
+      generateCartPayload(
+        [{ productId: "p-j12-mech-keyboard", name: "Bàn Phím Cơ Silent White", price: 1250000, quantity: 1 }],
+        {
+          shippingFee: 30000,
+          customer: {
+            fullName: "Công Ty TNHH Giải Pháp Số Alpha",
+            phone: "0918112233",
+            address: "Tầng 5, Tòa Nhà IPC, Quận 7, TP. HCM",
+            taxCode: "0309998888",
+          },
+        }
+      ),
+      customer.token
+    );
+
+    // 2. Track pending order via SPX live tracking
+    const pendingTracking = await api.getOrderTracking(order.id, customer.token);
+    expect.ok(pendingTracking.trackingCode.startsWith("SPXVN"));
+    expect.equal(pendingTracking.carrierHotline, "1900 1221");
+
+    // 3. Carrier dispatches through Tân Bình hub
+    order.status = "shipping";
+    const shippingTracking = await api.getOrderTracking(order.id, customer.token);
+    expect.equal(shippingTracking.currentStage, "shipping");
+    expect.ok(shippingTracking.stages.find((s) => s.stage === "shipping").completed);
+    expect.equal(shippingTracking.courier.name, "Nguyễn Văn Hùng");
+    expect.ok(shippingTracking.courier.rating >= 4.9);
+
+    // 4. Order delivered successfully
+    order.status = "delivered";
+    const deliveredTracking = await api.getOrderTracking(order.id, customer.token);
+    expect.equal(deliveredTracking.statusText, "Đã giao hàng thành công");
+
+    // 5. Customer inspects Electronic VAT Invoice for corporate tax submission
+    const vatInvoice = await api.getOrderInvoice(order.id, customer.token);
+    expect.equal(vatInvoice.orderId, order.id);
+    expect.equal(vatInvoice.netSubtotal + vatInvoice.actualVatAmount, 1250000);
+    expect.equal(vatInvoice.buyer.taxCode, "0309998888");
+
+    // 6. Customer writes 5-star review and earns Mini Xu reward
+    const review = await api.submitReview(
+      {
+        productId: "p-j12-mech-keyboard",
+        orderId: order.id,
+        rating: 5,
+        comment: "Bàn phím gõ rất êm, giao hàng nhanh chóng, hóa đơn VAT đầy đủ!",
+      },
+      customer.token
+    );
+    expect.equal(review.review.rating, 5);
+    expect.equal(review.review.verifiedPurchase, true);
+    expect.equal(review.rewardCoins, 200);
+  });
+
 });

@@ -264,34 +264,50 @@ class ApiClient {
   }
 
   // --- Feature 48: Recently Viewed Products (R2) ---
-  async recordRecentlyViewed(product, token) {
-    const user = this.oracle.verifyToken(token);
-    return this.oracle.recordRecentlyViewed(user.id, product);
+  async recordRecentlyViewed(product, token = null) {
+    const userId = token ? this.oracle.verifyToken(token).id : "guest_viewer";
+    return this.oracle.recordRecentlyViewed(userId, product);
   }
 
-  async getRecentlyViewed(token) {
-    const user = this.oracle.verifyToken(token);
-    return this.oracle.getRecentlyViewed(user.id);
+  async addRecentlyViewed(product, token = null) {
+    return this.recordRecentlyViewed(product, token);
   }
 
-  async clearRecentlyViewed(token) {
-    const user = this.oracle.verifyToken(token);
-    return this.oracle.clearRecentlyViewed(user.id);
+  async getRecentlyViewed(token = null) {
+    const userId = token ? this.oracle.verifyToken(token).id : "guest_viewer";
+    return this.oracle.getRecentlyViewed(userId);
+  }
+
+  async clearRecentlyViewed(token = null) {
+    const userId = token ? this.oracle.verifyToken(token).id : "guest_viewer";
+    return this.oracle.clearRecentlyViewed(userId);
   }
 
   // --- Feature 49: Product Community Q&A (R3) ---
-  async createQuestion(productId, payload, token) {
-    const user = this.oracle.verifyToken(token);
-    return this.oracle.createQuestion(user.id, productId, payload);
+  async createQuestion(productId, payload, token = null) {
+    const userId = token ? this.oracle.verifyToken(token).id : "guest_user";
+    return this.oracle.createQuestion(userId, productId, payload);
+  }
+
+  async askProductQuestion(productId, payload, token = null) {
+    return this.oracle.askProductQuestion(productId, payload, token);
   }
 
   async answerQuestion(productId, questionId, answerText, answeredBy) {
     return this.oracle.answerQuestion(productId, questionId, answerText, answeredBy);
   }
 
-  async voteQuestion(productId, questionId, token) {
-    const user = this.oracle.verifyToken(token);
-    return this.oracle.voteQuestion(user.id, productId, questionId);
+  async answerProductQuestion(productId, questionId, payload, answeredBy) {
+    return this.oracle.answerProductQuestion(productId, questionId, payload, answeredBy);
+  }
+
+  async voteQuestion(productId, questionId, token = null) {
+    const userId = token ? this.oracle.verifyToken(token).id : "guest_voter";
+    return this.oracle.voteQuestion(userId, productId, questionId);
+  }
+
+  async voteProductQuestion(productId, questionId, token = null) {
+    return this.oracle.voteProductQuestion(productId, questionId, token);
   }
 
   async getProductQuestions(productId) {
@@ -299,13 +315,13 @@ class ApiClient {
   }
 
   // --- Feature 50: Live SPX Express Logistics & VAT Invoice (R1, R4) ---
-  async getOrderTracking(orderId, token) {
-    this.oracle.verifyToken(token);
+  async getOrderTracking(orderId, token = null) {
+    if (token) this.oracle.verifyToken(token);
     return this.oracle.getOrderTracking(orderId);
   }
 
-  async getOrderInvoice(orderId, token) {
-    this.oracle.verifyToken(token);
+  async getOrderInvoice(orderId, token = null) {
+    if (token) this.oracle.verifyToken(token);
     return this.oracle.getOrderInvoice(orderId);
   }
 }

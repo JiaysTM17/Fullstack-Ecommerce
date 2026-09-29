@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../context/ToastContext';
-import { apiRequest } from '../services/api';
+import { getOrderTracking } from '../services/orderService';
 
 export default function DeliveryLiveMapModal({ order, onClose }) {
   const { showToast } = useToast();
@@ -11,13 +11,18 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
   useEffect(() => {
     const orderId = order?.orderId || order?._id || order?.id;
     if (orderId) {
-      apiRequest(`/api/orders/${orderId}/tracking`)
-        .then((res) => {
-          if (res?.data) {
-            setLiveTracking(res.data);
+      getOrderTracking(orderId)
+        .then((data) => {
+          if (data) {
+            setLiveTracking(data);
+            if (data.currentLocation?.etaMinutes) {
+              setEtaMinutes(data.currentLocation.etaMinutes);
+            }
           }
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.warn('Could not load live tracking:', err);
+        });
     }
   }, [order]);
 
@@ -29,17 +34,43 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
     return () => clearInterval(timer);
   }, []);
 
+  const courier = liveTracking?.courier || {
+    name: 'Nguyễn Văn Hùng',
+    phone: '0908 123 456',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+    vehicle: 'Xe máy Honda Wave Alpha',
+    licensePlate: '59-P1 839.22',
+    rating: 4.95,
+  };
+
+  const currentLocation = liveTracking?.currentLocation || {
+    lat: 10.7769,
+    lng: 106.7009,
+    label: 'Bưu cục phát SPX Express Quận 1, TP. Hồ Chí Minh',
+    address: 'Bưu cục phát SPX Express Quận 1, TP. Hồ Chí Minh',
+    bearing: 45,
+    speedKmh: 28,
+    distanceRemainingKm: 1.2,
+    etaMinutes: 15,
+  };
+
+  const hubs = liveTracking?.hubs || [
+    { name: 'Hub Củ Chi SOC', time: '08:30', completed: true },
+    { name: 'Hub Tân Bình', time: '11:15', completed: true },
+    { name: 'Bưu cục phát Quận 1', time: '14:45', completed: false },
+  ];
+
+  const carrier = liveTracking?.carrier || 'SPX Express';
+  const trackingCode = liveTracking?.trackingCode || liveTracking?.trackingNumber || order?.trackingCode || 'SPX-VN-84729104';
+  const customerAddress = order?.shippingAddress || 'Số 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh';
+
   const handleCallShipper = () => {
-    const shipperPhone = liveTracking?.courier?.phone || '0912 888 999';
-    showToast(`📞 Đang kết nối cuộc gọi tới Shipper Nguyễn Văn Hùng (${shipperPhone})...`, 'info');
+    showToast(`📞 Đang kết nối cuộc gọi tới Shipper ${courier.name} (${courier.phone})...`, 'info');
   };
 
   const handleChatShipper = () => {
-    showToast('💬 Đã mở khung chat với Shipper SPX Express!', 'success');
+    showToast(`💬 Đã mở khung chat với Shipper ${carrier}!`, 'success');
   };
-
-  const trackingCode = liveTracking?.trackingCode || order?.trackingCode || 'SPX-VN-84729104';
-  const customerAddress = order?.shippingAddress || 'Số 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh';
 
   return (
     <div
@@ -92,9 +123,21 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>
                 Theo Dõi Vị Trí Shipper Trực Tiếp
               </h3>
+              <span
+                style={{
+                  background: '#ffedd5',
+                  color: '#ea580c',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                }}
+              >
+                {carrier}
+              </span>
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              Vận đơn: <strong>{trackingCode}</strong> · Đơn vị: <strong>SPX Express Siêu Tốc</strong>
+              Mã vận đơn: <strong>{trackingCode}</strong> · Trạng thái: <strong>{liveTracking?.statusText || 'Đang giao hàng'}</strong>
             </div>
           </div>
 
@@ -122,7 +165,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
             borderRadius: '12px',
             overflow: 'hidden',
-            marginBottom: '18px',
+            marginBottom: '16px',
             border: '1px solid #334155',
             boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.4)',
           }}
@@ -158,11 +201,11 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             />
           </svg>
 
-          {/* Node 1: Warehouse Start */}
+          {/* Node 1: Warehouse / Hub Start */}
           <div
             style={{
               position: 'absolute',
-              left: '42px',
+              left: '32px',
               top: '160px',
               background: '#0284c7',
               color: '#fff',
@@ -176,7 +219,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               gap: '4px',
             }}
           >
-            🏢 Kho Tân Bình
+            🏢 {hubs[1]?.name || 'Kho Tân Bình'}
           </div>
 
           {/* Node 2: Customer Destination */}
@@ -248,7 +291,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             </div>
           </div>
 
-          {/* Floating ETA Badge */}
+          {/* Floating ETA & Telemetry Badge */}
           <div
             style={{
               position: 'absolute',
@@ -261,9 +304,132 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               borderRadius: '8px',
               border: '1px solid rgba(255,255,255,0.15)',
               fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              flexWrap: 'wrap',
             }}
           >
-            ⏱️ Dự kiến giao: <strong style={{ color: '#f59e0b' }}>{etaMinutes} phút nữa</strong> · Cách bạn ~1.8 km
+            <span>⏱️ Dự kiến giao: <strong style={{ color: '#f59e0b' }}>{etaMinutes} phút nữa</strong></span>
+            <span>·</span>
+            <span>Cách bạn ~{currentLocation.distanceRemainingKm || 1.2} km</span>
+            <span>·</span>
+            <span>Vận tốc: {currentLocation.speedKmh || 28} km/h</span>
+          </div>
+        </div>
+
+        {/* Real-time GPS Telemetry Bar */}
+        <div
+          style={{
+            background: 'var(--bg-muted, #f8fafc)',
+            border: '1px solid var(--border-medium, #e2e8f0)',
+            borderRadius: '8px',
+            padding: '8px 12px',
+            marginBottom: '14px',
+            fontSize: '11.5px',
+            color: 'var(--text-secondary)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '6px',
+          }}
+        >
+          <div>
+            📍 <strong>Vị trí hiện tại:</strong> {currentLocation.label || currentLocation.address}
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <span>Tọa độ: <strong>{typeof currentLocation.lat === 'number' ? currentLocation.lat.toFixed(4) : currentLocation.lat}, {typeof currentLocation.lng === 'number' ? currentLocation.lng.toFixed(4) : currentLocation.lng}</strong></span>
+            <span>Góc hướng: <strong>{currentLocation.bearing || 45}°</strong></span>
+          </div>
+        </div>
+
+        {/* 3-Stage Hub Progress Timeline */}
+        <div
+          style={{
+            background: 'var(--bg-card, #ffffff)',
+            border: '1px solid var(--border-medium, #e2e8f0)',
+            borderRadius: '10px',
+            padding: '12px 14px',
+            marginBottom: '14px',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '12.5px',
+              fontWeight: 800,
+              color: 'var(--text-primary)',
+              marginBottom: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>📦</span> Tiến Trình Luân Chuyển 3 Hub SPX Express
+            </span>
+            <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>
+              {hubs.filter((h) => h.completed).length}/{hubs.length} trạm hoàn tất
+            </span>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '8px',
+            }}
+          >
+            {hubs.map((hub, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: hub.completed
+                    ? 'rgba(34, 197, 94, 0.08)'
+                    : idx === 1
+                    ? 'rgba(234, 88, 12, 0.08)'
+                    : 'var(--bg-muted, #f8fafc)',
+                  border: hub.completed
+                    ? '1px solid #86efac'
+                    : idx === 1
+                    ? '1px solid #fdba74'
+                    : '1px solid var(--border-light, #e2e8f0)',
+                  borderRadius: '8px',
+                  padding: '8px 10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '3px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      background: hub.completed ? '#16a34a' : idx === 1 ? '#ea580c' : '#94a3b8',
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {hub.completed ? '✓' : idx + 1}
+                  </span>
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    {hub.time || '--:--'}
+                  </span>
+                </div>
+                <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
+                  {hub.name}
+                </div>
+                <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                  {hub.completed ? '✓ Đã hoàn tất' : idx === 1 ? '🚚 Đang luân chuyển' : '⏳ Chờ tiếp nhận'}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -273,27 +439,49 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             background: 'var(--bg-muted, #f8fafc)',
             border: '1px solid var(--border-medium, #e2e8f0)',
             borderRadius: '10px',
-            padding: '14px 18px',
+            padding: '12px 16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '14px',
-            marginBottom: '16px',
+            gap: '12px',
+            marginBottom: '14px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100"
+              src={courier.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}
               alt="Shipper"
-              style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary-color, #ea580c)' }}
+              style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '2px solid var(--primary-color, #ea580c)',
+              }}
             />
             <div>
               <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                Nguyễn Văn Hùng <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>✓ Bưu tá chính thức SPX</span>
+                {courier.name}{' '}
+                <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>
+                  ✓ Bưu tá chính thức SPX
+                </span>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                Biển số: <strong>59-P1 839.22</strong> (Honda Wave đỏ) · Đánh giá: ⭐ <strong>4.95</strong>/5.0
+                Biển số:{' '}
+                <strong
+                  style={{
+                    background: '#e2e8f0',
+                    color: '#0f172a',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    fontWeight: 800,
+                  }}
+                >
+                  {courier.licensePlate || '59-P1 839.22'}
+                </strong>{' '}
+                ({courier.vehicle || 'Xe máy'}) · Đánh giá: ⭐{' '}
+                <strong>{courier.rating || 4.95}</strong>/5.0
               </div>
             </div>
           </div>
@@ -307,12 +495,12 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                 background: 'var(--primary-color, #ea580c)',
                 color: '#fff',
                 padding: '8px 14px',
-                fontSize: '12.5px',
+                fontSize: '12px',
                 fontWeight: 700,
                 borderRadius: '8px',
               }}
             >
-              📞 Gọi Điện
+              📞 Gọi ({courier.phone || '0908 123 456'})
             </button>
             <button
               type="button"
@@ -320,7 +508,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               className="shopee-btn shopee-btn-secondary"
               style={{
                 padding: '8px 14px',
-                fontSize: '12.5px',
+                fontSize: '12px',
                 fontWeight: 700,
                 borderRadius: '8px',
               }}
@@ -331,9 +519,14 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
         </div>
 
         {/* Destination & Safety Info */}
-        <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-          📍 <strong>Địa chỉ giao tới:</strong> {customerAddress}<br />
-          🛡️ <em>Đơn hàng được bảo hiểm 100% bởi Fullstack E-Commerce Care & SPX Express. Vui lòng kiểm tra kiện hàng còn nguyên tem phong niêm phong trước khi nhận.</em>
+        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+          📍 <strong>Địa chỉ giao tới:</strong> {customerAddress}
+          <br />
+          🛡️{' '}
+          <em>
+            Đơn hàng được bảo hiểm 100% bởi Fullstack E-Commerce Care & {carrier}. Vui lòng kiểm tra
+            kiện hàng còn nguyên tem phong niêm phong trước khi nhận.
+          </em>
         </div>
       </div>
     </div>

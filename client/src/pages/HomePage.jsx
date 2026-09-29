@@ -8,6 +8,7 @@ import {
   ProductGrid,
   QuickViewModal,
   RecentlyViewed,
+  RecentlyViewedSection,
   CategoryShowcase
 } from "../components";
 import { useCart } from "../context/CartContext";
@@ -451,7 +452,7 @@ export default function HomePage() {
       </div>
 
       {/* 4. Recently Viewed Products Section */}
-      <RecentlyViewed onProductClick={viewProductDetail} />
+      <RecentlyViewedSection onProductClick={viewProductDetail} />
 
       {/* 5. Quick View Modal */}
       <QuickViewModal

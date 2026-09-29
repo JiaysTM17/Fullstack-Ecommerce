@@ -18,5 +18,7 @@ export { default as ProductFilters } from './ProductFilters';
 export { default as ShippingLabelModal } from './ShippingLabelModal';
 export { default as QuickViewModal } from './QuickViewModal';
 export { default as RecentlyViewed } from './RecentlyViewed';
+export { default as RecentlyViewedSection } from './RecentlyViewedSection';
+export { default as ProductQASection } from './ProductQASection';
 export { default as ToastContainer } from './ToastContainer';
 export { default as CategoryShowcase } from './CategoryShowcase';

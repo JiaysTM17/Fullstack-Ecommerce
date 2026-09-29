@@ -7,6 +7,7 @@ import {
   getProductQuestions,
   askProductQuestion,
   voteProductQuestion,
+  answerProductQuestion,
 } from "../controllers/productController.js";
 import { optionalAuthenticate } from "../middlewares/auth.js";
 
@@ -21,6 +22,7 @@ router.get("/", getProducts);
 router.get("/:id/questions", getProductQuestions);
 router.post("/:id/questions", optionalAuthenticate, askProductQuestion);
 router.post("/:id/questions/:questionId/vote", voteProductQuestion);
+router.post("/:id/questions/:questionId/answers", optionalAuthenticate, answerProductQuestion);
 
 // Get single product
 router.get("/:id", getProductById);

@@ -694,7 +694,7 @@ export default function OrderHistoryPage() {
                         {t('view_tracking_details', 'Xem lịch trình')}
                       </button>
 
-                      {ord.status === 'shipping' && (
+                      {['shipping', 'delivering'].includes(ord.status) && (
                         <button
                           type="button"
                           className="shopee-btn shopee-btn-secondary"

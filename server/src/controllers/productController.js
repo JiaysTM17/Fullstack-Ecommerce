@@ -180,14 +180,57 @@ export const searchProducts = async (req, res) => {
 export const getProductQuestions = async (req, res) => {
   try {
     const { id } = req.params;
-    const questions = await memoryStore.questions.find({
+    const rawQuestions = await memoryStore.questions.find({
       $or: [{ productId: id }, { productId: String(id) }]
+    });
+
+    const normalized = (rawQuestions || []).map((q) => {
+      const qId = q._id || q.id;
+      const qText = q.question || q.questionText || "";
+      const author = q.userName || q.customerName || "Khách hàng Mini Shopee";
+      const votes = q.helpfulCount !== undefined ? q.helpfulCount : q.upvotes || 0;
+      const date = q.createdAt || q.askedAt || new Date().toISOString();
+      const answers = Array.isArray(q.answers) ? q.answers : [];
+      const firstAnswer = answers[0] || null;
+
+      return {
+        _id: qId,
+        id: qId,
+        productId: id,
+        userName: author,
+        customerName: author,
+        question: qText,
+        questionText: qText,
+        createdAt: date,
+        askedAt: date,
+        helpfulCount: votes,
+        upvotes: votes,
+        answers: answers.map((ans) => ({
+          _id: ans._id || ans.id || `ans_${Date.now()}`,
+          id: ans._id || ans.id || `ans_${Date.now()}`,
+          authorName: ans.authorName || ans.answeredBy || "Người bán",
+          isShopOwner: ans.isShopOwner !== undefined ? ans.isShopOwner : true,
+          content: ans.content || ans.answer || "",
+          createdAt: ans.createdAt || ans.answeredAt || date,
+        })),
+        isAnswered: q.isAnswered !== undefined ? q.isAnswered : answers.length > 0,
+        answer: q.answer || (firstAnswer ? firstAnswer.content : null),
+        answeredAt: q.answeredAt || (firstAnswer ? firstAnswer.createdAt : null),
+        answeredBy: q.answeredBy || (firstAnswer ? firstAnswer.authorName : null),
+      };
+    });
+
+    // Sort primarily by helpful votes, then newest first
+    normalized.sort((a, b) => {
+      const voteDiff = (b.helpfulCount || 0) - (a.helpfulCount || 0);
+      if (voteDiff !== 0) return voteDiff;
+      return new Date(b.createdAt) - new Date(a.createdAt);
     });
 
     sendSuccess(res, {
       productId: id,
-      total: questions.length,
-      questions: questions.sort((a, b) => (b.helpfulCount || 0) - (a.helpfulCount || 0)),
+      total: normalized.length,
+      questions: normalized,
     });
   } catch (error) {
     sendError(res, error.message, 500);
@@ -200,24 +243,46 @@ export const getProductQuestions = async (req, res) => {
 export const askProductQuestion = async (req, res) => {
   try {
     const { id } = req.params;
-    const { question, userName } = req.body;
+    const { question, questionText, userName, customerName } = req.body;
+    const qText = (question || questionText || "").trim();
 
-    if (!question || !question.trim()) {
+    if (!qText) {
       return sendError(res, "Nội dung câu hỏi không được để trống", 400);
     }
 
-    const author = req.user?.fullName || req.user?.name || userName || "Khách hàng Mini Shopee";
+    const author = req.user?.fullName || req.user?.name || customerName || userName || "Khách hàng Mini Shopee";
+    const qId = `q_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    const now = new Date().toISOString();
+
     const newQ = await memoryStore.questions.create({
-      _id: `q_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      _id: qId,
+      id: qId,
       productId: id,
       userName: author.trim(),
-      question: question.trim(),
-      createdAt: new Date().toISOString(),
+      customerName: author.trim(),
+      question: qText,
+      questionText: qText,
+      createdAt: now,
+      askedAt: now,
       answers: [],
       helpfulCount: 0,
+      upvotes: 0,
+      isAnswered: false,
+      answer: null,
+      answeredAt: null,
+      answeredBy: null,
+      votedUsers: [],
     });
 
-    sendSuccess(res, { question: newQ, message: "Đã gửi câu hỏi thành công! Người bán sẽ phản hồi sớm." }, 201);
+    sendSuccess(
+      res,
+      {
+        question: newQ,
+        questionDoc: newQ,
+        message: "Đã gửi câu hỏi thành công! Người bán sẽ phản hồi sớm.",
+      },
+      201
+    );
   } catch (error) {
     sendError(res, error.message, 500);
   }
@@ -229,13 +294,89 @@ export const askProductQuestion = async (req, res) => {
 export const voteProductQuestion = async (req, res) => {
   try {
     const { questionId } = req.params;
-    const q = await memoryStore.questions.findOne({ _id: questionId });
+    const q = await memoryStore.questions.findOne({
+      $or: [{ _id: questionId }, { id: questionId }]
+    });
     if (!q) return sendError(res, "Không tìm thấy câu hỏi", 404);
 
-    q.helpfulCount = (q.helpfulCount || 0) + 1;
-    await memoryStore.questions.findByIdAndUpdate(q._id, { helpfulCount: q.helpfulCount });
+    q.helpfulCount = (q.helpfulCount || q.upvotes || 0) + 1;
+    q.upvotes = q.helpfulCount;
+    await memoryStore.questions.findByIdAndUpdate(q._id || q.id, {
+      helpfulCount: q.helpfulCount,
+      upvotes: q.helpfulCount,
+    });
 
-    sendSuccess(res, { helpfulCount: q.helpfulCount, message: "Cảm ơn bạn đã bình chọn câu hỏi hữu ích!" });
+    sendSuccess(res, {
+      helpfulCount: q.helpfulCount,
+      upvotes: q.helpfulCount,
+      hasVoted: true,
+      message: "Cảm ơn bạn đã bình chọn câu hỏi hữu ích!",
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Answer a product question (Shop / Admin / Community)
+// @route   POST /api/products/:id/questions/:questionId/answers
+// @access  Public / Authenticated
+export const answerProductQuestion = async (req, res) => {
+  try {
+    const { id, questionId } = req.params;
+    const { content, answerText, authorName, answeredBy, isShopOwner } = req.body;
+    const text = (content || answerText || "").trim();
+
+    if (!text) {
+      return sendError(res, "Nội dung câu trả lời không được để trống", 400);
+    }
+
+    const q = await memoryStore.questions.findOne({
+      $or: [{ _id: questionId }, { id: questionId }]
+    });
+    if (!q) return sendError(res, "Không tìm thấy câu hỏi", 404);
+
+    const author = authorName || answeredBy || req.user?.fullName || req.user?.name || "Shop Official";
+    const now = new Date().toISOString();
+    const ansId = `ans_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+
+    const newAns = {
+      _id: ansId,
+      id: ansId,
+      authorName: author,
+      answeredBy: author,
+      isShopOwner: isShopOwner !== undefined ? Boolean(isShopOwner) : true,
+      content: text,
+      answer: text,
+      createdAt: now,
+      answeredAt: now,
+    };
+
+    if (!Array.isArray(q.answers)) {
+      q.answers = [];
+    }
+    q.answers.push(newAns);
+    q.isAnswered = true;
+    q.answer = text;
+    q.answeredAt = now;
+    q.answeredBy = author;
+
+    await memoryStore.questions.findByIdAndUpdate(q._id || q.id, {
+      answers: q.answers,
+      isAnswered: true,
+      answer: text,
+      answeredAt: now,
+      answeredBy: author,
+    });
+
+    sendSuccess(
+      res,
+      {
+        question: q,
+        answer: newAns,
+        message: "Đã trả lời câu hỏi thành công!",
+      },
+      201
+    );
   } catch (error) {
     sendError(res, error.message, 500);
   }
@@ -249,4 +390,6 @@ export default {
   getProductQuestions,
   askProductQuestion,
   voteProductQuestion,
+  answerProductQuestion,
 };
+

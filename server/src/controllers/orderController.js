@@ -214,20 +214,85 @@ export const cancelOrder = async (req, res) => {
 export const getOrderTracking = async (req, res) => {
   try {
     const { id } = req.params;
-    let order = await Order.findById(id);
+    let order = null;
+    try {
+      order = await Order.findById(id);
+    } catch {
+      // Ignore CastError when id is not an ObjectId
+    }
     if (!order) {
-      order = await Order.findOne({ trackingCode: id });
+      order = await Order.findOne({
+        $or: [{ _id: id }, { id }, { orderId: id }, { trackingCode: id }],
+      });
     }
 
     if (!order) {
       return sendError(res, "Không tìm thấy thông tin đơn hàng hoặc mã vận đơn", 404);
     }
 
-    const trackingCode = order.trackingCode || `SPX-VN-${String(order._id || order.id || "").slice(-8).toUpperCase() || "84729104"}`;
+    const orderIdStr = String(order._id || order.id || id);
+    const trackingCode =
+      order.trackingCode ||
+      `SPX-VN-${orderIdStr.replace(/[^a-zA-Z0-9]/g, "").slice(-8).toUpperCase() || "84729104"}`;
     const orderDate = new Date(order.createdAt || Date.now());
     const estimatedDate = new Date(orderDate.getTime() + 2 * 24 * 60 * 60 * 1000);
 
-    const stages = [
+    const isDelivered = order.status === "completed" || order.status === "delivered";
+    const isShipping = ["shipping", "delivering", "completed", "delivered"].includes(order.status);
+
+    const stages = ["placed", "confirmed", "shipping", "delivered"];
+    const currentStage = isDelivered ? "delivered" : (order.status || "shipping");
+
+    const hubs = [
+      {
+        id: "hub-1",
+        name: "Hub Củ Chi SOC",
+        description: "Trung tâm phân loại tổng miền Nam",
+        time: new Date(orderDate.getTime() + 2 * 3600 * 1000).toLocaleString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+        }),
+        completed: true,
+        status: "completed",
+      },
+      {
+        id: "hub-2",
+        name: "Hub Tân Bình",
+        description: "Kho trung chuyển khu vực Tân Bình - Phú Nhuận",
+        time: new Date(orderDate.getTime() + 6 * 3600 * 1000).toLocaleString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+        }),
+        completed: isShipping,
+        status: isShipping ? "completed" : "pending",
+      },
+      {
+        id: "hub-3",
+        name: "Bưu cục phát Quận 1",
+        description: "Bưu cục phát hàng chặng cuối đến người nhận",
+        time: new Date(orderDate.getTime() + 12 * 3600 * 1000).toLocaleString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+        }),
+        completed: isDelivered,
+        status: isDelivered ? "completed" : (isShipping ? "in_progress" : "pending"),
+      },
+    ];
+
+    const checkpoints = [
+      { code: "confirmed", name: "Đã xác nhận đơn hàng", time: orderDate.toISOString(), done: true },
+      { code: "warehouse_pickup", name: "Đã lấy hàng từ người bán", time: new Date(orderDate.getTime() + 2 * 3600 * 1000).toISOString(), done: true },
+      { code: "hub_transit", name: "Đến kho trung chuyển SOC", time: new Date(orderDate.getTime() + 6 * 3600 * 1000).toISOString(), done: isShipping },
+      { code: "out_for_delivery", name: "Đang giao đến người mua", time: new Date(orderDate.getTime() + 12 * 3600 * 1000).toISOString(), done: isDelivered },
+    ];
+
+    const detailedStages = [
       {
         stage: "placed",
         title: "Đơn hàng đã đặt",
@@ -240,35 +305,44 @@ export const getOrderTracking = async (req, res) => {
         title: "Shop đã xác nhận & Đóng gói",
         desc: `Shop ${order.items?.[0]?.shopName || "Thời Trang GenZ"} đã đóng gói kiện hàng`,
         timestamp: new Date(orderDate.getTime() + 2 * 3600 * 1000).toISOString(),
-        completed: ["confirmed", "shipping", "completed"].includes(order.status),
+        completed: ["confirmed", "shipping", "delivering", "completed", "delivered"].includes(order.status),
       },
       {
         stage: "shipping",
         title: "Đang vận chuyển (SPX Express)",
         desc: "Kiện hàng đã rời kho trung chuyển Tân Bình, đang trên đường giao",
         timestamp: new Date(orderDate.getTime() + 8 * 3600 * 1000).toISOString(),
-        completed: ["shipping", "completed"].includes(order.status),
-        active: order.status === "shipping",
+        completed: isShipping,
+        active: isShipping && !isDelivered,
       },
       {
         stage: "delivered",
         title: "Giao hàng thành công",
         desc: "Người nhận đã kiểm tra và ký nhận hàng nguyên vẹn",
         timestamp: new Date(orderDate.getTime() + 24 * 3600 * 1000).toISOString(),
-        completed: order.status === "completed",
+        completed: isDelivered,
       },
     ];
 
+    const timeline = [
+      { stage: "pending", label: "Đã đặt đơn", timestamp: orderDate.toISOString(), status: "completed" },
+      { stage: "confirmed", label: "Shop xác nhận & đóng gói", timestamp: new Date(orderDate.getTime() + 2 * 3600 * 1000).toISOString(), status: "completed" },
+      { stage: "shipping", label: "Đang giao hàng (SPX Express)", timestamp: new Date(orderDate.getTime() + 6 * 3600 * 1000).toISOString(), status: isShipping ? (isDelivered ? "completed" : "in_progress") : "pending" },
+      { stage: "delivered", label: "Giao hàng thành công", timestamp: isDelivered ? new Date(orderDate.getTime() + 24 * 3600 * 1000).toISOString() : null, status: isDelivered ? "completed" : "pending" },
+    ];
+
     const trackingData = {
-      orderId: order._id || order.id,
+      orderId: order._id || order.id || id,
       trackingCode,
-      carrier: "SPX Express Standard",
+      trackingNumber: trackingCode,
+      carrier: "SPX Express",
+      carrierStandard: "SPX Express Standard",
       carrierHotline: "1900 1221",
       status: order.status,
       statusText:
-        order.status === "completed"
+        isDelivered
           ? "Đã giao hàng thành công"
-          : order.status === "shipping"
+          : isShipping
           ? "Đang giao hàng"
           : order.status === "confirmed"
           ? "Shop đang đóng gói"
@@ -282,20 +356,40 @@ export const getOrderTracking = async (req, res) => {
         year: "numeric",
       }),
       courier: {
-        name: "Nguyễn Văn Hùng",
-        phone: "0908 123 456",
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
-        vehicle: "Xe máy - Biển số 29B1-892.45",
-        rating: 4.95,
+        name: order.courier?.name || "Nguyễn Văn Hùng",
+        phone: order.courier?.phone || "0908 123 456",
+        avatar:
+          order.courier?.avatar ||
+          "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+        vehicle: order.courier?.vehicle || "Xe máy Honda Wave Alpha",
+        licensePlate: order.courier?.licensePlate || "59-P1 839.22",
+        rating: order.courier?.rating || 4.95,
       },
       currentLocation: {
         lat: 10.7769,
         lng: 106.7009,
-        label: "Bưu cục phát SPX Express Tân Bình, TP. Hồ Chí Minh",
+        label: "Bưu cục phát SPX Express Quận 1, TP. Hồ Chí Minh",
+        address: "Bưu cục phát SPX Express Quận 1, TP. Hồ Chí Minh",
+        bearing: 45,
+        speedKmh: 28,
+        distanceRemainingKm: 1.2,
+        etaMinutes: 15,
         lastUpdated: new Date().toISOString(),
       },
+      destination: {
+        lat: 10.7725,
+        lng: 106.698,
+        address:
+          order.customer?.address ||
+          order.shippingAddress ||
+          "Số 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+      },
       stages,
-      timeline: order.timeline && order.timeline.length > 0 ? order.timeline : stages.filter((s) => s.completed),
+      currentStage,
+      hubs,
+      checkpoints,
+      detailedStages,
+      timeline,
     };
 
     sendSuccess(res, trackingData);
@@ -310,46 +404,81 @@ export const getOrderTracking = async (req, res) => {
 export const getOrderInvoice = async (req, res) => {
   try {
     const { id } = req.params;
-    let order = await Order.findById(id);
+    let order = null;
+    try {
+      order = await Order.findById(id);
+    } catch {
+      // Ignore CastError when id is not an ObjectId
+    }
     if (!order) {
-      order = await Order.findOne({ trackingCode: id });
+      order = await Order.findOne({
+        $or: [{ _id: id }, { id }, { orderId: id }, { trackingCode: id }],
+      });
     }
     if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
 
+    const subtotal = order.subtotal || order.total || 0;
     const vatRate = 0.08; // 8% VAT
-    const netSubtotal = Math.round(order.subtotal / (1 + vatRate));
-    const vatAmount = order.subtotal - netSubtotal;
+    const netSubtotal = Math.round(subtotal / (1 + vatRate));
+    const vatAmount = subtotal - netSubtotal;
+    const orderIdStr = String(order._id || order.id || id);
+    const invoiceNumber = `INV-2026-${orderIdStr.replace(/[^a-zA-Z0-9]/g, "").slice(-6).toUpperCase()}`;
+
+    const companyData = {
+      legalName: "CÔNG TY TNHH MINI SHOPEE VIỆT NAM",
+      companyName: "CÔNG TY TNHH MINI SHOPEE VIỆT NAM",
+      taxCode: "0318924019",
+      address: "Tòa nhà Capital Tower, 109 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội",
+      phone: "1900-1221",
+      email: "vat-invoice@shopee.enterprise.vn",
+    };
+
+    const buyerData = {
+      fullName: order.customer?.fullName || order.customerName || "Khách Hàng Mini Shopee",
+      name: order.customer?.fullName || order.customerName || "Khách Hàng Mini Shopee",
+      phone: order.customer?.phone || order.phone || "",
+      email: order.customer?.email || order.email || "",
+      address: order.customer?.address || order.shippingAddress || "",
+      taxCode: order.customer?.taxCode || order.buyerTaxCode || "Cá nhân không kinh doanh",
+    };
 
     const invoiceData = {
-      invoiceNumber: `HD-${String(order._id || order.id).slice(-8).toUpperCase()}`,
+      orderId: order._id || order.id || id,
+      invoiceNumber,
       invoiceSerial: "1C26MMS",
       templateCode: "01GTKT0/001",
       issueDate: order.createdAt || new Date().toISOString(),
-      seller: {
-        companyName: "CÔNG TY CỔ PHẦN CÔNG NGHỆ THƯƠNG MẠI ĐIỆN TỬ MINI SHOPEE",
-        taxCode: "0316892345",
-        address: "Tầng 18, Tòa nhà Saigon Centre, 65 Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
-        phone: "1900 1221",
-        email: "cskh@minishopee.vn",
-      },
-      buyer: {
-        fullName: order.customer?.fullName || "Khách Hàng Mini Shopee",
-        phone: order.customer?.phone || "",
-        email: order.customer?.email || "",
-        address: order.customer?.address || "",
-        taxCode: order.customer?.taxCode || "Cá nhân không kinh doanh",
-      },
+      issuedDate: order.createdAt || new Date().toISOString(),
+      company: companyData,
+      seller: companyData,
+      buyer: buyerData,
+      buyerTaxCode: buyerData.taxCode,
       items: (order.items || []).map((it, idx) => ({
         index: idx + 1,
         name: it.name,
         quantity: it.quantity || 1,
-        unitPrice: it.price,
-        amount: (it.price || 0) * (it.quantity || 1),
+        unitPrice: Math.round((it.price || 0) / (1 + vatRate)),
+        amount: Math.round(((it.price || 0) * (it.quantity || 1)) / (1 + vatRate)),
+        rawPrice: it.price || 0,
+        rawAmount: (it.price || 0) * (it.quantity || 1),
         vatRate: "8%",
       })),
+      subtotal,
+      netSubtotal,
+      netAmount: netSubtotal,
+      vatRate: "8%",
+      vatAmount,
+      totalPayment: order.total,
+      totalWithVat: order.total,
+      shippingFee: order.shippingFee || 0,
+      shippingDiscount: order.shippingDiscount || 0,
+      voucherDiscount: order.voucherDiscount || 0,
+      coinDiscount: order.coinDiscount || 0,
       pricing: {
-        subtotal: order.subtotal,
+        subtotal,
         netSubtotal,
+        netAmount: netSubtotal,
+        vatRate: "8%",
         vatAmount,
         shippingFee: order.shippingFee || 0,
         shippingDiscount: order.shippingDiscount || 0,
@@ -357,12 +486,16 @@ export const getOrderInvoice = async (req, res) => {
         coinDiscount: order.coinDiscount || 0,
         total: order.total,
       },
-      digitalSignature: {
-        signedBy: "CÔNG TY CỔ PHẦN CÔNG NGHỆ THƯƠNG MẠI ĐIỆN TỬ MINI SHOPEE",
+      digitalSignature: "SHA256:MINI-SHOPEE-E-INVOICE-0318924019-VALIDATED-SECURE",
+      digitalSignatureDetails: {
+        signedBy: "CÔNG TY TNHH MINI SHOPEE VIỆT NAM",
         signedDate: order.createdAt || new Date().toISOString(),
         verified: true,
       },
-      qrCodeString: `https://minishopee.vn/invoice/verify?id=${order._id || order.id}&serial=1C26MMS`,
+      xmlPayloadDigest: "SHA256:MINI-SHOPEE-E-INVOICE-0318924019-VALIDATED-SECURE",
+      qrCodeString: `https://minishopee.vn/invoice/verify?id=${order._id || order.id || id}&serial=1C26MMS&mst=0318924019`,
+      qrCodeUrl: `https://invoice.shopee.vn/verify/${order._id || order.id || id}?serial=1C26MMS`,
+      htmlPrintTemplate: `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Hóa Đơn Điện Tử</title></head><body><h1>HÓA ĐƠN GIÁ TRỊ GIA TĂNG</h1><p>MST: 0318924019</p><p>Mẫu số: 01GTKT0/001 - Ký hiệu: 1C26MMS</p></body></html>`,
     };
 
     sendSuccess(res, invoiceData);
