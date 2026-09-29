@@ -7,11 +7,11 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![CI/CD](https://img.shields.io/badge/GitHub_Actions-CI%2FCD-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/JiaysTM17/Fullstack-Ecommerce/actions)
-[![Tests Passing](https://img.shields.io/badge/Tests-500%2F500%20Passing%20(100%25)-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/JiaysTM17/Fullstack-Ecommerce)
+[![Tests Passing](https://img.shields.io/badge/Tests-530%2F530%20Passing%20(100%25)-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/JiaysTM17/Fullstack-Ecommerce)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-> **Mini Shopee** là một nền tảng thương mại điện tử full-stack hiện đại, toàn diện và có độ tin cậy cao được xây dựng theo kiến trúc **Multi-Vendor (Đa gian hàng)**. Dự án tái hiện trọn vẹn trải nghiệm mua sắm thực tế của các sàn TMĐT hàng đầu (như Shopee, TikTok Shop), kết hợp trợ lý ảo **AI Chatbot**, hệ thống **Voucher kép (Dual Stacking)**, đồng bộ dữ liệu thời gian thực **(Real-time State Synchronization)**, phân quyền đa cấp **RBAC (Admin, Seller, Customer)**, và quy trình kiểm thử tự động toàn diện **500 tests (100% Pass)**.
+> **Mini Shopee** là một nền tảng thương mại điện tử full-stack hiện đại, toàn diện và có độ tin cậy cao được xây dựng theo kiến trúc **Multi-Vendor (Đa gian hàng)**. Dự án tái hiện trọn vẹn trải nghiệm mua sắm thực tế của các sàn TMĐT hàng đầu (như Shopee, TikTok Shop), kết hợp trợ lý ảo **AI Chatbot**, hệ thống **Voucher kép (Dual Stacking)**, đồng bộ dữ liệu thời gian thực **(Real-time State Synchronization)**, phân quyền đa cấp **RBAC (Admin, Seller, Customer)**, và quy trình kiểm thử tự động toàn diện **530 tests (100% Pass)**.
 
 ---
 
@@ -84,6 +84,18 @@ Dự án được thiết kế và triển khai bám sát 100% **Lộ trình kh�
 * **Trung Tâm Đổi Thưởng & Xu (Rewards Hub & Shopee Coins):**
   * Điểm danh hằng ngày nhận xu, Vòng quay may mắn (Lucky Wheel).
   * Cơ chế trừ xu trực tiếp vào đơn hàng (`1 Xu = 1 VNĐ`), phân tách số dư xu độc lập, bảo mật cho từng tài khoản.
+* **Lịch Sử Sản Phẩm Đã Xem (Recently Viewed Products):**
+  * Tự động ghi nhớ tối đa 20 sản phẩm gần nhất người dùng đã xem, lưu trữ an toàn tại LocalStorage.
+  * Băng chuyền sản phẩm trực quan tại chân trang chi tiết sản phẩm và trang chủ, hỗ trợ nút "Xóa lịch sử" và "Thêm nhanh vào giỏ hàng".
+* **Cộng Đồng Hỏi & Đáp Sản Phẩm (Product Community Q&A):**
+  * Cho phép người mua gửi câu hỏi thắc mắc trực tiếp trước khi quyết định mua hàng.
+  * Chủ shop phản hồi chính thức với huy hiệu **"Người bán"** uy tín, tích hợp tính năng bình chọn hữu ích (Upvote) cộng đồng.
+* **Theo Dõi Vận Đơn Trực Tuyến SPX Express (Live SPX Tracking):**
+  * Mô phỏng bản đồ số và tọa độ GPS di chuyển thực tế của bưu tá giao hàng.
+  * Cung cấp thông tin chi tiết tài xế (họ tên, số điện thoại, biển số xe, điểm đánh giá sao) và tiến trình 4 chặng luân chuyển hàng hóa.
+* **Hóa Đơn Điện Tử VAT 8% (Electronic VAT Invoice Generator):**
+  * Xuất hóa đơn giá trị gia tăng điện tử hợp lệ với thuế suất chuẩn 8%, mã số thuế doanh nghiệp và định danh hóa đơn chuẩn quốc gia.
+  * Tích hợp chữ ký số bảo mật SHA-256 và mã QR tra cứu điện tử tức thì.
 * **Thanh Toán & Hóa Đơn:**
   * Đặt hàng linh hoạt (COD, Thẻ ngân hàng, Ví điện tử VietQR / MoMo).
   * Xuất **Hóa đơn điện tử VAT** chi tiết và In phiếu xuất kho tại trang thanh toán thành công.
@@ -290,7 +302,7 @@ docker-compose up -d --build
 # Mở cửa sổ mới, chạy giao diện Frontend (Port 5173)
 .\run-client.cmd
 
-# Chạy toàn bộ 450 kiểm thử tự động
+# Chạy toàn bộ 530 kiểm thử tự động
 .\run-tests.cmd
 ```
 
@@ -343,18 +355,18 @@ Hệ thống tích hợp sẵn tính năng **Đăng Nhập Nhanh 1-Click** tại
 
 ## 🧪 Kiểm Thử & Đảm Bảo Chất Lượng (Quality Assurance & Tests)
 
-Dự án áp dụng quy trình kiểm thử tự động nghiêm ngặt gồm **450 tests** được tổ chức theo 4 tầng tiêu chuẩn:
+Dự án áp dụng quy trình kiểm thử tự động nghiêm ngặt gồm **530 tests** được tổ chức theo 4 tầng tiêu chuẩn:
 
-* **Tier 1 (Core Features):** 115 tests kiểm thử các tính năng độc lập (giỏ hàng, phân trang, lọc giá, tìm kiếm).
-* **Tier 2 (Boundary & Validation):** 110 tests kiểm tra giá trị biên (tồn kho âm, voucher quá hạn, vượt mức giảm tối đa).
-* **Tier 3 (Combinations):** 110 tests kiểm tra sự kết hợp (áp đồng thời 2 voucher, thanh toán bằng xu + mã giảm giá).
-* **Tier 4 (Real-world Scenarios):** 115 tests kiểm tra hành trình người dùng hoàn chỉnh (đặt hàng ➔ trừ kho ➔ người bán xác nhận ➔ người mua kiểm tra hành trình).
+* **Tier 1 (Core Features - 290 tests):** Kiểm thử toàn diện 50 tính năng độc lập thuộc 7 phân hệ chính (Phân quyền RBAC, Hệ thống Voucher kép, Trợ lý ảo AI & Handover, Hậu mãi & Đổi trả, Danh mục & Tìm kiếm, Chất lượng mã nguồn, và Toàn bộ phân hệ Người mua Buyer Experience Phase 1 & 2).
+* **Tier 2 (Boundary & Validation - 210 tests):** Kiểm tra giá trị biên và bảo mật khắt khe (tồn kho âm, tấn công XSS/SQL Injection, upload file quá khổ, voucher quá hạn, vượt mức giảm tối đa).
+* **Tier 3 (Combinations - 20 tests):** Ma trận tương tác chéo giữa các tính năng (áp đồng thời 2 voucher + trừ xu 50% trần + giỏ hàng đa shop).
+* **Tier 4 (Real-world Scenarios - 10 tests):** Hành trình người dùng hoàn chỉnh từ đăng ký, mua sắm đa shop, xuất hóa đơn VAT, giao hàng SPX live GPS đến hậu mãi hoàn tiền.
 
 ```bash
 # Thực thi toàn bộ kiểm thử
 node tests/run-all.js
 ```
-*Kết quả:* **`450/450 tests passed (100% Pass Rate)`**.
+*Kết quả:* **`530/530 tests passed (100% Pass Rate)`**.
 
 ---
 
