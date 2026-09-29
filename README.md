@@ -59,9 +59,28 @@ Dự án được thiết kế và triển khai bám sát 100% **Lộ trình kh�
 * **Trang Chi Tiết Sản Phẩm (PDP):**
   * Thư viện hình ảnh sắc nét, chọn biến thể (kích thước, màu sắc), hiển thị số lượng tồn kho thực tế.
   * Phù hiệu Shopee Mall, huy hiệu gian hàng chính hãng và cam kết bảo hành.
+  * **Hiển thị đánh giá khách hàng thời gian thực:** Đồng bộ trực tiếp các lượt đánh giá từ khách hàng kèm số sao, nhãn tag cảm nhận nhanh (🏷️ "Đúng mô tả", "Giao hàng nhanh", "Chất lượng tuyệt vời") và huy hiệu xác thực đã mua hàng chính hãng.
+* **Sổ Địa Chỉ Giao Hàng Đa Điểm (Multi-Address Book):**
+  * Quản lý danh bạ nhiều địa chỉ nhận hàng tại trang Hồ Sơ Cá Nhân và ngay tại trang **Thanh Toán (Checkout)**.
+  * Modal thêm nhanh địa chỉ mới trong 5 giây, hỗ trợ phân loại thẻ (Nhà riêng / Văn phòng), thiết lập hoặc đổi địa chỉ giao hàng mặc định linh hoạt.
+* **Hệ Thống Đánh Giá Sau Mua & Tích Xu Thưởng (Product Reviews & Ratings):**
+  * Đơn hàng đã giao thành công được kích hoạt nút **"⭐ Đánh giá"**.
+  * Chấm điểm 1-5 sao, chọn tag phản hồi nhanh và nhận ngay **+200 Mini Xu thưởng** vào tài khoản sau mỗi lượt đánh giá thành công.
+* **Thao Tác Đơn Hàng Nâng Cao (Order Actions):**
+  * **Mua lại 1-click:** Tự động nạp lại toàn bộ sản phẩm của đơn hàng cũ vào giỏ hàng.
+  * **Hủy đơn hàng an toàn:** Cho phép chọn lý do hủy đơn, tự động hoàn trả tồn kho sản phẩm và hoàn trả 100% số dư Shopee Xu đã sử dụng.
+  * **Yêu cầu Trả hàng / Hoàn tiền:** Tiếp nhận phản hồi và xử lý hoàn tiền minh bạch.
 * **Giỏ Hàng & Hệ Thống Voucher Kép Độc Quyền (Dual Voucher Stacking):**
   * Áp dụng đồng thời 2 loại mã: **Mã giảm giá sản phẩm (%)** VÀ **Mã miễn phí vận chuyển (Freeship)**.
   * Thuật toán **Smart Ranking**: Tự động đưa các mã giảm giá nhiều tiền nhất và đủ điều kiện lên trên cùng kèm huy hiệu 👑 **TỐT NHẤT CHO BẠN**.
+* **Ví Voucher Cá Nhân Đa Phân Loại (Personal Voucher Wallet):**
+  * Danh mục 5 bộ lọc trực quan: *Tất cả*, *🚚 Miễn Phí Vận Chuyển*, *🏷️ Giảm Giá Sàn*, *🏪 Voucher Shop*, *⭐ Đã Lưu Trong Ví*.
+  * Cơ chế "📥 Lưu Mã" vào ví cá nhân và nút "Dùng Ngay" 1-click chuyển thẳng sang Giỏ hàng.
+* **Trung Tâm Thông Báo Thời Gian Thực (Buyer Notification Center):**
+  * Hộp popover thông báo trên thanh tiêu đề với 4 tab lọc: *Tất cả*, *📦 Đơn hàng*, *🎟️ Voucher & Khuyến mãi*, *Chưa đọc*.
+  * Tự động phát thông báo khi phát sinh sự kiện đặt hàng, hủy đơn, nhận thưởng xu, hoặc cập nhật ưu đãi.
+* **Danh Sách Yêu Thích Tương Tác Cao (Wishlist Center):**
+  * Lọc theo danh mục sản phẩm yêu thích và nút **"🛒 Thêm tất cả vào giỏ hàng"** chỉ với 1 click.
 * **Trung Tâm Đổi Thưởng & Xu (Rewards Hub & Shopee Coins):**
   * Điểm danh hằng ngày nhận xu, Vòng quay may mắn (Lucky Wheel).
   * Cơ chế trừ xu trực tiếp vào đơn hàng (`1 Xu = 1 VNĐ`), phân tách số dư xu độc lập, bảo mật cho từng tài khoản.
