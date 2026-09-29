@@ -6,6 +6,9 @@ import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useCompare } from "../context/CompareContext";
 import { RecentlyViewed, saveRecentlyViewed } from "../components/RecentlyViewed";
+import RecentlyViewedSection from "../components/RecentlyViewedSection";
+import ProductQASection from "../components/ProductQASection";
+import { addRecentlyViewed } from "../services/recentlyViewedService";
 import ShopChatModal from "../components/ShopChatModal";
 import { addProductReview, getProductById, getProducts } from "../services/productService";
 import { formatCurrency } from "../utils/formatCurrency";
@@ -66,6 +69,7 @@ export default function ProductDetailPage() {
         if (!ignore && result) {
           setProduct(result);
           saveRecentlyViewed(result._id || result.id || id);
+          addRecentlyViewed(result);
           setActiveImage(result.image || result.images?.[0] || "");
           if (result.variants?.colors?.length > 0) {
             setSelectedColor(result.variants.colors[0]);
@@ -808,6 +812,12 @@ export default function ProductDetailPage() {
           </div>
         </section>
       )}
+
+      {/* Product Questions & Answers Section */}
+      <ProductQASection
+        productId={product._id || product.id || id}
+        shopName={product.shopName || "Thời Trang GenZ Official"}
+      />
 
       {/* Recently Viewed Products */}
       <RecentlyViewed

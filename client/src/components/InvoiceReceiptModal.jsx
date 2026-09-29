@@ -1,15 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
+import { apiRequest } from '../services/api';
 
 export default function InvoiceReceiptModal({ order, onClose }) {
   if (!order) return null;
+
+  const [liveInvoice, setLiveInvoice] = useState(null);
+
+  useEffect(() => {
+    const orderId = order.orderId || order._id || order.id;
+    if (orderId) {
+      apiRequest(`/api/orders/${orderId}/invoice`)
+        .then((res) => {
+          if (res?.data) {
+            setLiveInvoice(res.data);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [order]);
 
   const handlePrint = () => {
     window.print();
   };
 
-  const invoiceNo = `INV-${order.orderId || '999999'}`;
-  const invoiceDate = order.createdAt || new Date().toLocaleDateString('vi-VN');
+  const invoiceNo = liveInvoice?.invoiceNumber || `INV-${order.orderId || '999999'}`;
+  const invoiceDate = liveInvoice?.issueDate ? new Date(liveInvoice.issueDate).toLocaleDateString('vi-VN') : (order.createdAt || new Date().toLocaleDateString('vi-VN'));
   const items = order.items || [
     {
       name: order.productName || 'Sản phẩm mua sắm tại Fullstack E-Commerce',

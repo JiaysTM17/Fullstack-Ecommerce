@@ -1,10 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../context/ToastContext';
+import { apiRequest } from '../services/api';
 
 export default function DeliveryLiveMapModal({ order, onClose }) {
   const { showToast } = useToast();
   const [progress, setProgress] = useState(65); // percent of transit completed
   const [etaMinutes, setEtaMinutes] = useState(18);
+  const [liveTracking, setLiveTracking] = useState(null);
+
+  useEffect(() => {
+    const orderId = order?.orderId || order?._id || order?.id;
+    if (orderId) {
+      apiRequest(`/api/orders/${orderId}/tracking`)
+        .then((res) => {
+          if (res?.data) {
+            setLiveTracking(res.data);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [order]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -15,14 +30,15 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
   }, []);
 
   const handleCallShipper = () => {
-    showToast('📞 Đang kết nối cuộc gọi tới Shipper Nguyễn Văn Hùng (0912 888 999)...', 'info');
+    const shipperPhone = liveTracking?.courier?.phone || '0912 888 999';
+    showToast(`📞 Đang kết nối cuộc gọi tới Shipper Nguyễn Văn Hùng (${shipperPhone})...`, 'info');
   };
 
   const handleChatShipper = () => {
     showToast('💬 Đã mở khung chat với Shipper SPX Express!', 'success');
   };
 
-  const trackingCode = order?.trackingCode || 'SPX-VN-84729104';
+  const trackingCode = liveTracking?.trackingCode || order?.trackingCode || 'SPX-VN-84729104';
   const customerAddress = order?.shippingAddress || 'Số 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh';
 
   return (
