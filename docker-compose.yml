@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # 1. Cơ sở dữ liệu MongoDB
+  database:
+    image: mongo:6.0
+    container_name: mini_shopee_mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - shopee_network
+
+  # 2. Máy chủ Backend REST API
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: mini_shopee_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://database:27017/ecommerce_mini
+      - CLIENT_URL=http://localhost:5173
+      - NODE_ENV=production
+      - JWT_SECRET=mini_shopee_jwt_production_docker_secret_2026
+    depends_on:
+      - database
+    networks:
+      - shopee_network
+
+  # 3. Giao diện Frontend React + Nginx
+  web:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: mini_shopee_frontend
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+    networks:
+      - shopee_network
+
+volumes:
+  mongo_data:
+
+networks:
+  shopee_network:
+    driver: bridge
