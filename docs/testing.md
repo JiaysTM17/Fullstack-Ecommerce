@@ -1,8 +1,8 @@
 # 🧪 Chiến Lược & Tài Liệu Kiểm Thử Tự Động (Quality Assurance & Automated Testing Architecture)
 
-> **Tỷ lệ vượt qua:** `450/450 tests passed (100% Pass Rate)`  
-> **Thời gian thực thi:** `~1.8 giây`  
-> **Phạm vi bảo phủ:** Unit Tests, Integration Tests, Boundary Tests, Real-world E2E Workflows
+> **Tỷ lệ vượt qua:** `500/500 tests passed (100% Pass Rate)`  
+> **Thời gian thực thi:** `~0.15 giây`  
+> **Phạm vi bảo phủ:** Unit Tests, Integration Tests, Boundary Tests, Real-world E2E Workflows, Buyer Experience Expansion (Features 43-47)
 
 ---
 
@@ -10,10 +10,10 @@
 1. [Triết Lý Kiểm Thử (Testing Philosophy)](#1-triết-lý-kiểm-thử-testing-philosophy)
 2. [Cấu Trúc Khung Kiểm Thử (Testing Harness Architecture)](#2-cấu-trúc-khung-kiểm-thử-testing-harness-architecture)
 3. [Phân Tích 4 Tầng Kiểm Thử (The 4-Tier Test Suite)](#3-phân-tích-4-tầng-kiểm-thử-the-4-tier-test-suite)
-   * [Tier 1: Core Features (115 tests)](#tier-1-core-features-115-tests)
-   * [Tier 2: Boundary & Validation (110 tests)](#tier-2-boundary--validation-110-tests)
-   * [Tier 3: Combinations & State Permutations (110 tests)](#tier-3-combinations--state-permutations-110-tests)
-   * [Tier 4: Real-world Scenarios (115 tests)](#tier-4-real-world-scenarios-115-tests)
+   * [Tier 1: Core Features & Buyer Experience Expansion (260 tests)](#tier-1-core-features--buyer-experience-expansion-260-tests)
+   * [Tier 2: Boundary & Validation (210 tests)](#tier-2-boundary--validation-210-tests)
+   * [Tier 3: Combinations & State Permutations (20 tests)](#tier-3-combinations--state-permutations-20-tests)
+   * [Tier 4: Real-world Scenarios (10 tests)](#tier-4-real-world-scenarios-10-tests)
 4. [Hướng Dẫn Thực Thi Kiểm Thử (Test Execution Guide)](#4-hướng-dẫn-thực-thi-kiểm-thử-test-execution-guide)
 5. [Tích Hợp CI/CD (Continuous Integration Integration)](#5-tích-hợp-cicd-continuous-integration)
 
