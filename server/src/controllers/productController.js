@@ -9,9 +9,10 @@ export const getProducts = async (req, res) => {
   try {
     const {
       keyword, category, brand, shopId,
-      minPrice, maxPrice, rating,
+      minPrice, maxPrice, rating, minRating,
+      badge, fastDelivery, inStock,
       sort = "createdAt", order = "desc",
-      page = 1, limit = 20,
+      page = 1, limit = 16,
     } = req.query;
 
     const query = { isActive: true, approvalStatus: "approved" };
@@ -26,19 +27,45 @@ export const getProducts = async (req, res) => {
       ];
     }
 
-    if (category) query.category = category;
+    if (category && category !== "Tất cả") query.category = category;
     if (brand) query.brand = brand;
     if (shopId) query.shopId = shopId;
+    if (badge) query.badge = badge;
+    if (fastDelivery === "true" || fastDelivery === true) query.isFastDelivery = true;
+    if (inStock === "true" || inStock === true) query.stock = { $gt: 0 };
     if (minPrice) query.price = { ...query.price, $gte: Number(minPrice) };
     if (maxPrice) query.price = { ...query.price, $lte: Number(maxPrice) };
-    if (rating) query.rating = { $gte: Number(rating) };
+    const effectiveRating = minRating || rating;
+    if (effectiveRating) query.rating = { $gte: Number(effectiveRating) };
 
     const pageNum = Math.max(1, parseInt(page) || 1);
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 16));
     const skip = (pageNum - 1) * limitNum;
 
-    const sortObj = {};
-    sortObj[sort] = order === "asc" ? 1 : -1;
+    let sortField = "createdAt";
+    let sortDir = -1;
+
+    if (sort === "price_asc") {
+      sortField = "price";
+      sortDir = 1;
+    } else if (sort === "price_desc") {
+      sortField = "price";
+      sortDir = -1;
+    } else if (sort === "sold_desc") {
+      sortField = "sold";
+      sortDir = -1;
+    } else if (sort === "rating_desc") {
+      sortField = "rating";
+      sortDir = -1;
+    } else if (sort === "newest" || sort === "createdAt") {
+      sortField = "createdAt";
+      sortDir = order === "asc" ? 1 : -1;
+    } else if (sort) {
+      sortField = sort;
+      sortDir = order === "asc" ? 1 : -1;
+    }
+
+    const sortObj = { [sortField]: sortDir };
 
     const products = await Product.find(query).sort(sortObj).skip(skip).limit(limitNum);
     const total = await Product.countDocuments(query);

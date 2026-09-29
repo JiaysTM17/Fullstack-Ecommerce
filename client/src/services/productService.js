@@ -4736,7 +4736,7 @@ export async function getProducts(params = {}) {
   }
 
   const page = Math.max(1, Number(params.page) || 1);
-  const limit = Math.max(1, Number(params.limit) || 12);
+  const limit = Math.max(1, Number(params.limit) || 16);
   const total = list.length;
   const totalPages = Math.ceil(total / limit) || 1;
   const paginatedList = list.slice((page - 1) * limit, page * limit);

@@ -84,6 +84,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isFastDelivery: {
+      type: Boolean,
+      default: false,
+    },
     badge: {
       type: String,
       default: null,
