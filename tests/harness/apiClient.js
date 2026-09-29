@@ -177,6 +177,91 @@ class ApiClient {
   async getBundleMetrics() {
     return this.oracle.getBundleMetrics();
   }
+
+  // --- Buyer Experience (R1-R5) ---
+  async addAddress(payload, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.addAddress(user.id, payload);
+  }
+
+  async getUserAddresses(token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.getUserAddresses(user.id);
+  }
+
+  async updateAddress(addressId, updates, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.updateAddress(user.id, addressId, updates);
+  }
+
+  async deleteAddress(addressId, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.deleteAddress(user.id, addressId);
+  }
+
+  async setDefaultAddress(addressId, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.setDefaultAddress(user.id, addressId);
+  }
+
+  async submitReview(payload, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.submitReview(payload, user);
+  }
+
+  async getProductReviews(productId) {
+    return this.oracle.getProductReviews(productId);
+  }
+
+  async repurchaseOrder(orderId, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.repurchaseOrder(orderId, user);
+  }
+
+  async claimVoucher(voucherCode, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.claimVoucher(user.id, voucherCode);
+  }
+
+  async getUserClaimedVouchers(token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.getUserClaimedVouchers(user.id);
+  }
+
+  async getOptimalVouchers(subtotal, token = null) {
+    const user = token ? this.oracle.verifyToken(token) : null;
+    return this.oracle.getOptimalVouchers(subtotal, user ? user.id : null);
+  }
+
+  async getCoinTransactions(token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.getCoinTransactions(user.id);
+  }
+
+  async triggerNotification(payload, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.triggerNotification(user.id, payload);
+  }
+
+  async getUserNotifications(filter = "all", token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.getUserNotifications(user.id, filter);
+  }
+
+  async getUnreadNotificationCount(token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.getUnreadNotificationCount(user.id);
+  }
+
+  async markNotificationAsRead(notifId, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.markNotificationAsRead(user.id, notifId);
+  }
+
+  async markAllNotificationsAsRead(token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.markAllNotificationsAsRead(user.id);
+  }
 }
 
 export const api = new ApiClient();

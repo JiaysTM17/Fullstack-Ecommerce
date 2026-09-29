@@ -7,28 +7,14 @@ import { formatCurrency } from '../utils/formatCurrency';
 import { useCoins } from '../context/CoinContext';
 import { getVouchers } from '../services/voucherService';
 import RewardsHubModal from '../components/RewardsHubModal';
+import {
+  getSavedAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
+} from '../services/addressService';
 import '../styles/auth.css';
-
-const SAVED_ADDRESSES_KEY = 'mini_shopee_saved_addresses';
-
-const INITIAL_ADDRESSES = [
-  {
-    id: 'addr_01',
-    name: 'Nguyễn Văn Khách',
-    phone: '0909 123 456',
-    address: 'Số 123 Đường Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh',
-    tag: 'Nhà riêng',
-    isDefault: true,
-  },
-  {
-    id: 'addr_02',
-    name: 'Nguyễn Văn Khách (Văn phòng)',
-    phone: '0909 123 456',
-    address: 'Tòa nhà Landmark 81, 720A Điện Biên Phủ, Phường 22, Bình Thạnh, TP. Hồ Chí Minh',
-    tag: 'Văn phòng',
-    isDefault: false,
-  },
-];
 
 export default function ProfilePage() {
   const { user, updateProfile } = useAuth();
@@ -48,43 +34,8 @@ export default function ProfilePage() {
     address: user?.address || '',
   });
 
-  // Tab 2: Address book state - Phân vùng độc lập theo từng tài khoản
-  const userAddressKey = user ? `${SAVED_ADDRESSES_KEY}_${user.id || user._id}` : SAVED_ADDRESSES_KEY;
-
-  const [addresses, setAddresses] = useState(() => {
-    try {
-      const key = user ? `${SAVED_ADDRESSES_KEY}_${user.id || user._id}` : SAVED_ADDRESSES_KEY;
-      const saved = localStorage.getItem(key);
-      if (saved) return JSON.parse(saved);
-
-      if (user?.role === 'seller') {
-        return [
-          {
-            id: 'addr_seller_01',
-            name: user.fullName || 'Chủ Shop',
-            phone: user.phone || '0912345678',
-            address: user.shopAddress || 'Kho Hàng Tân Bình, TP. Hồ Chí Minh',
-            tag: 'Kho xuất hàng',
-            isDefault: true,
-          }
-        ];
-      }
-
-      if (user?.role === 'admin') {
-        return [
-          {
-            id: 'addr_admin_01',
-            name: 'Trụ Sở Điều Hành Sàn Mini Shopee',
-            phone: '1900 1221',
-            address: 'Tòa nhà Landmark 81, 720A Điện Biên Phủ, P.22, Bình Thạnh, TP.HCM',
-            tag: 'Trụ sở sàn',
-            isDefault: true,
-          }
-        ];
-      }
-    } catch {}
-    return INITIAL_ADDRESSES;
-  });
+  // Tab 2: Address book state with unified addressService
+  const [addresses, setAddresses] = useState(() => getSavedAddresses(user));
 
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
   const [newAddressForm, setNewAddressForm] = useState({
@@ -92,7 +43,35 @@ export default function ProfilePage() {
     phone: '',
     address: '',
     tag: 'Nhà riêng',
+    isDefault: false,
   });
+
+  const [showEditAddressModal, setShowEditAddressModal] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+  const [editAddressForm, setEditAddressForm] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    tag: 'Nhà riêng',
+    isDefault: false,
+  });
+
+  // Re-sync addresses when user changes or cross-tab/checkout updates occur
+  useEffect(() => {
+    setAddresses(getSavedAddresses(user));
+  }, [user]);
+
+  useEffect(() => {
+    const handleSync = () => {
+      setAddresses(getSavedAddresses(user));
+    };
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('mini_shopee_address_updated', handleSync);
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('mini_shopee_address_updated', handleSync);
+    };
+  }, [user]);
 
   // Voucher Wallet State
   const [vouchersList, setVouchersList] = useState([]);
@@ -137,18 +116,6 @@ export default function ProfilePage() {
     });
   };
 
-  // Save addresses to localStorage partitioned by user
-  useEffect(() => {
-    try {
-      localStorage.setItem(userAddressKey, JSON.stringify(addresses));
-      if (!user || user.role === 'customer') {
-        localStorage.setItem(SAVED_ADDRESSES_KEY, JSON.stringify(addresses));
-      }
-    } catch {
-      // ignore
-    }
-  }, [addresses, userAddressKey, user]);
-
   if (!user) {
     return (
       <main className="shopee-container" style={{ padding: '60px 0', textAlign: 'center' }}>
@@ -171,36 +138,58 @@ export default function ProfilePage() {
   };
 
   const handleSetDefaultAddress = (addrId) => {
-    setAddresses((prev) =>
-      prev.map((a) => ({
-        ...a,
-        isDefault: a.id === addrId,
-      }))
-    );
+    const updated = setDefaultAddress(addrId, user);
+    setAddresses(updated);
     showToast('Đã đặt làm địa chỉ giao hàng mặc định!', 'success');
   };
 
   const handleDeleteAddress = (addrId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) {
-      setAddresses((prev) => prev.filter((a) => a.id !== addrId));
+      const updated = deleteAddress(addrId, user);
+      setAddresses(updated);
       showToast('Đã xóa địa chỉ thành công', 'info');
     }
   };
 
   const handleAddAddressSubmit = (e) => {
     e.preventDefault();
-    if (!newAddressForm.name || !newAddressForm.phone || !newAddressForm.address) return;
+    if (!newAddressForm.name.trim() || !newAddressForm.phone.trim() || !newAddressForm.address.trim()) {
+      showToast('Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ!', 'error');
+      return;
+    }
 
-    const newAddr = {
-      id: `addr_${Date.now()}`,
-      ...newAddressForm,
-      isDefault: addresses.length === 0,
-    };
-
-    setAddresses((prev) => [...prev, newAddr]);
+    const updated = addAddress(newAddressForm, user);
+    setAddresses(updated);
     setShowAddAddressModal(false);
-    setNewAddressForm({ name: '', phone: '', address: '', tag: 'Nhà riêng' });
+    setNewAddressForm({ name: '', phone: '', address: '', tag: 'Nhà riêng', isDefault: false });
     showToast('Đã thêm địa chỉ giao hàng mới thành công!', 'success');
+  };
+
+  const handleOpenEditModal = (addr) => {
+    setEditingAddress(addr);
+    setEditAddressForm({
+      name: addr.name || addr.fullName || '',
+      phone: addr.phone || '',
+      address: addr.address || '',
+      tag: addr.tag || 'Nhà riêng',
+      isDefault: Boolean(addr.isDefault),
+    });
+    setShowEditAddressModal(true);
+  };
+
+  const handleEditAddressSubmit = (e) => {
+    e.preventDefault();
+    if (!editingAddress) return;
+    if (!editAddressForm.name.trim() || !editAddressForm.phone.trim() || !editAddressForm.address.trim()) {
+      showToast('Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ!', 'error');
+      return;
+    }
+
+    const updated = updateAddress(editingAddress.id, editAddressForm, user);
+    setAddresses(updated);
+    setShowEditAddressModal(false);
+    setEditingAddress(null);
+    showToast('Đã cập nhật địa chỉ giao hàng thành công!', 'success');
   };
 
   return (
@@ -496,7 +485,16 @@ export default function ProfilePage() {
                     )}
                     <button
                       type="button"
-                      style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '13px', cursor: 'pointer', padding: '6px' }}
+                      className="shopee-btn shopee-btn-secondary"
+                      style={{ fontSize: '12px', padding: '5px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      onClick={() => handleOpenEditModal(addr)}
+                      title="Chỉnh sửa địa chỉ"
+                    >
+                      ✏️ Sửa
+                    </button>
+                    <button
+                      type="button"
+                      style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '15px', cursor: 'pointer', padding: '6px' }}
                       onClick={() => handleDeleteAddress(addr.id)}
                       title="Xóa địa chỉ"
                     >
@@ -1027,6 +1025,18 @@ export default function ProfilePage() {
                 </select>
               </div>
 
+              <div className="shopee-form-group" style={{ marginTop: '12px' }}>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
+                  <input
+                    type="checkbox"
+                    checked={newAddressForm.isDefault}
+                    onChange={(e) => setNewAddressForm((prev) => ({ ...prev, isDefault: e.target.checked }))}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--primary-color, #ea580c)' }}
+                  />
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Đặt làm địa chỉ giao hàng mặc định</span>
+                </label>
+              </div>
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
                 <button
                   type="button"
@@ -1037,6 +1047,103 @@ export default function ProfilePage() {
                 </button>
                 <button type="submit" className="shopee-btn shopee-btn-primary">
                   Lưu Địa Chỉ
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Edit Address */}
+      {showEditAddressModal && editingAddress && (
+        <div className="shopee-modal-overlay">
+          <div className="shopee-modal-content" style={{ maxWidth: '480px' }}>
+            <div className="shopee-modal-header">
+              <h3>Chỉnh Sửa Địa Chỉ Giao Hàng</h3>
+              <button
+                type="button"
+                className="shopee-modal-close"
+                onClick={() => {
+                  setShowEditAddressModal(false);
+                  setEditingAddress(null);
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleEditAddressSubmit}>
+              <div className="shopee-form-group">
+                <label className="shopee-form-label">Tên Người Nhận</label>
+                <input
+                  type="text"
+                  required
+                  className="shopee-form-input"
+                  value={editAddressForm.name}
+                  onChange={(e) => setEditAddressForm((prev) => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+
+              <div className="shopee-form-group">
+                <label className="shopee-form-label">Số Điện Thoại</label>
+                <input
+                  type="tel"
+                  required
+                  className="shopee-form-input"
+                  value={editAddressForm.phone}
+                  onChange={(e) => setEditAddressForm((prev) => ({ ...prev, phone: e.target.value }))}
+                />
+              </div>
+
+              <div className="shopee-form-group">
+                <label className="shopee-form-label">Địa Chỉ Chi Tiết (Số nhà, đường, phường, quận, TP)</label>
+                <textarea
+                  required
+                  rows="3"
+                  className="shopee-form-input"
+                  value={editAddressForm.address}
+                  onChange={(e) => setEditAddressForm((prev) => ({ ...prev, address: e.target.value }))}
+                />
+              </div>
+
+              <div className="shopee-form-group">
+                <label className="shopee-form-label">Nhãn Địa Chỉ</label>
+                <select
+                  className="shopee-form-select"
+                  value={editAddressForm.tag}
+                  onChange={(e) => setEditAddressForm((prev) => ({ ...prev, tag: e.target.value }))}
+                >
+                  <option value="Nhà riêng">Nhà riêng</option>
+                  <option value="Văn phòng">Văn phòng</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+
+              <div className="shopee-form-group" style={{ marginTop: '12px' }}>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
+                  <input
+                    type="checkbox"
+                    checked={editAddressForm.isDefault}
+                    onChange={(e) => setEditAddressForm((prev) => ({ ...prev, isDefault: e.target.checked }))}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--primary-color, #ea580c)' }}
+                  />
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Đặt làm địa chỉ giao hàng mặc định</span>
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => {
+                    setShowEditAddressModal(false);
+                    setEditingAddress(null);
+                  }}
+                >
+                  Hủy
+                </button>
+                <button type="submit" className="shopee-btn shopee-btn-primary">
+                  Lưu Thay Đổi
                 </button>
               </div>
             </form>

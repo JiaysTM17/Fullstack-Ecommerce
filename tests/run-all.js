@@ -6,13 +6,14 @@
 
 import { runAllTests } from "./harness/testRunner.js";
 
-// Import Tier 1 Suites (210 tests)
+// Import Tier 1 Suites (260 tests across 7 subsystems)
 import "./tier1_features/sub1_rbac.test.js";
 import "./tier1_features/sub2_vouchers.test.js";
 import "./tier1_features/sub3_chat_ai.test.js";
 import "./tier1_features/sub4_post_order.test.js";
 import "./tier1_features/sub5_catalog.test.js";
 import "./tier1_features/sub6_quality.test.js";
+import "./tier1_features/sub7_buyer_experience.test.js";
 
 // Import Tier 2 Suites (210 tests)
 import "./tier2_boundaries/sub1_rbac_edge.test.js";

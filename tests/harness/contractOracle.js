@@ -19,6 +19,11 @@ export class ContractOracle {
     this.invoices = new Map();
     this.chatSessions = new Map();
     this.coinLedger = new Map(); // userId -> { balance, streak, lastCheckinDate, lastSpinDate }
+    this.userAddresses = new Map(); // userId -> Array of address objects
+    this.reviews = new Map(); // productId -> Array of review objects
+    this.userClaimedVouchers = new Map(); // userId -> Set of voucher codes
+    this.coinTransactions = new Map(); // userId -> Array of coin transaction objects
+    this.userNotifications = new Map(); // userId -> Array of notification objects
     this.initDefaultFixtures();
   }
 
@@ -154,6 +159,16 @@ export class ContractOracle {
       lastCheckinDate: null,
       lastSpinDate: null,
     });
+    this.coinTransactions.set(id, [
+      {
+        id: `c-tx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        timestamp: new Date().toISOString(),
+        amount: 10000,
+        type: "plus",
+        category: "welcome",
+        orderId: null,
+      },
+    ]);
 
     return {
       token: `jwt-token-${id}-${role}`,
@@ -449,6 +464,17 @@ export class ContractOracle {
         throw new Error("INSUFFICIENT_COINS: User does not have enough Mini Xu");
       }
       ledger.balance -= pricing.coinsUsed;
+
+      const txs = this.coinTransactions.get(user.id) || [];
+      txs.unshift({
+        id: `c-tx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        timestamp: new Date().toISOString(),
+        amount: pricing.coinsUsed,
+        type: "minus",
+        category: "order",
+        orderId,
+      });
+      this.coinTransactions.set(user.id, txs);
     }
 
     // Decrement catalog stock for each item
@@ -488,6 +514,16 @@ export class ContractOracle {
     };
 
     this.orders.set(orderId, order);
+
+    if (user && user.id) {
+      this.triggerNotification(user.id, {
+        type: "order",
+        title: `Đặt hàng thành công #${orderId}`,
+        message: `Đơn hàng trị giá ${order.total} VND đã được tiếp nhận.`,
+        orderId,
+      });
+    }
+
     return order;
   }
 
@@ -509,6 +545,25 @@ export class ContractOracle {
     // Refund coins if used
     if (order.coinsUsed > 0 && order.customerId && this.coinLedger.has(order.customerId)) {
       this.coinLedger.get(order.customerId).balance += order.coinsUsed;
+      const txs = this.coinTransactions.get(order.customerId) || [];
+      txs.unshift({
+        id: `c-tx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        timestamp: new Date().toISOString(),
+        amount: order.coinsUsed,
+        type: "plus",
+        category: "refund",
+        orderId: order.id,
+      });
+      this.coinTransactions.set(order.customerId, txs);
+    }
+
+    if (order.customerId) {
+      this.triggerNotification(order.customerId, {
+        type: "order",
+        title: `Đã hủy đơn hàng #${order.id}`,
+        message: "Đơn hàng đã được hủy thành công và hoàn lại tiền/xu.",
+        orderId: order.id,
+      });
     }
 
     return order;
@@ -819,6 +874,17 @@ export class ContractOracle {
     ledger.balance += rewardXu;
     ledger.lastCheckinDate = todayStr;
 
+    const txs = this.coinTransactions.get(user.id) || [];
+    txs.unshift({
+      id: `c-tx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      timestamp: new Date().toISOString(),
+      amount: rewardXu,
+      type: "plus",
+      category: "checkin",
+      orderId: null,
+    });
+    this.coinTransactions.set(user.id, txs);
+
     return {
       streak: ledger.streak,
       rewardXu,
@@ -852,6 +918,16 @@ export class ContractOracle {
     const won = outcomes[Math.floor(Math.random() * outcomes.length)];
     if (won.type === "coins") {
       ledger.balance += won.value;
+      const txs = this.coinTransactions.get(user.id) || [];
+      txs.unshift({
+        id: `c-tx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        timestamp: new Date().toISOString(),
+        amount: won.value,
+        type: "plus",
+        category: "spin",
+        orderId: null,
+      });
+      this.coinTransactions.set(user.id, txs);
     }
     ledger.lastSpinDate = todayStr;
 
@@ -1024,6 +1100,359 @@ export class ContractOracle {
         imageFallbackActive: true,
       },
     };
+  }
+
+  // ==========================================
+  // SUBSYSTEM 7: BUYER EXPERIENCE (Features 43-47)
+  // ==========================================
+
+  // --- Feature 43: Multi-Address Book (R1) ---
+  addAddress(userId, payload) {
+    if (!payload.name || !payload.phone || !payload.address) {
+      throw new Error("INVALID_ADDRESS_PAYLOAD");
+    }
+    const cleanPhone = String(payload.phone).trim();
+    const vnPhoneRegex = /^(\+84|0)(3[2-9]|5[689]|7[06-9]|8[1-9]|9[0-9])[0-9]{7}$/;
+    if (!vnPhoneRegex.test(cleanPhone)) {
+      throw new Error("INVALID_PHONE_NUMBER: Must be a valid Vietnamese mobile phone number");
+    }
+
+    const list = this.userAddresses.get(userId) || [];
+    const isFirst = list.length === 0;
+    const isDefault = isFirst ? true : Boolean(payload.isDefault);
+
+    if (isDefault) {
+      for (const item of list) {
+        item.isDefault = false;
+      }
+    }
+
+    const addr = {
+      id: `addr-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      userId,
+      name: payload.name.trim(),
+      phone: cleanPhone,
+      address: payload.address.trim(),
+      tag: payload.tag || "Nhà riêng",
+      isDefault,
+      createdAt: new Date().toISOString(),
+    };
+
+    list.push(addr);
+    this.userAddresses.set(userId, list);
+    return addr;
+  }
+
+  getUserAddresses(userId) {
+    return this.userAddresses.get(userId) || [];
+  }
+
+  updateAddress(userId, addressId, updates) {
+    const list = this.userAddresses.get(userId) || [];
+    const addr = list.find((a) => a.id === addressId);
+    if (!addr) throw new Error("ADDRESS_NOT_FOUND");
+
+    if (updates.phone) {
+      const cleanPhone = String(updates.phone).trim();
+      const vnPhoneRegex = /^(\+84|0)(3[2-9]|5[689]|7[06-9]|8[1-9]|9[0-9])[0-9]{7}$/;
+      if (!vnPhoneRegex.test(cleanPhone)) {
+        throw new Error("INVALID_PHONE_NUMBER: Must be a valid Vietnamese mobile phone number");
+      }
+      addr.phone = cleanPhone;
+    }
+    if (updates.name !== undefined) addr.name = updates.name.trim();
+    if (updates.address !== undefined) addr.address = updates.address.trim();
+    if (updates.tag !== undefined) addr.tag = updates.tag;
+    if (updates.isDefault === true) {
+      for (const a of list) a.isDefault = false;
+      addr.isDefault = true;
+    }
+    return addr;
+  }
+
+  deleteAddress(userId, addressId) {
+    const list = this.userAddresses.get(userId) || [];
+    const index = list.findIndex((a) => a.id === addressId);
+    if (index === -1) throw new Error("ADDRESS_NOT_FOUND");
+
+    const [deleted] = list.splice(index, 1);
+    if (deleted.isDefault && list.length > 0) {
+      list[0].isDefault = true;
+    }
+    this.userAddresses.set(userId, list);
+    return list;
+  }
+
+  setDefaultAddress(userId, addressId) {
+    const list = this.userAddresses.get(userId) || [];
+    const addr = list.find((a) => a.id === addressId);
+    if (!addr) throw new Error("ADDRESS_NOT_FOUND");
+
+    for (const a of list) a.isDefault = false;
+    addr.isDefault = true;
+    return addr;
+  }
+
+  // --- Feature 44: Reviews, Ratings & Verified Badge (R2) ---
+  submitReview(payload, user) {
+    if (!user) throw new Error("UNAUTHORIZED");
+    const { orderId, productId, rating, comment, tags } = payload;
+
+    const numRating = Number(rating);
+    if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+      throw new Error("INVALID_RATING: Rating must be an integer between 1 and 5");
+    }
+
+    const order = this.orders.get(orderId);
+    if (!order) throw new Error("ORDER_NOT_FOUND");
+    if (order.customerId !== user.id) throw new Error("UNAUTHORIZED");
+
+    const inOrder = order.items.some((it) => it.productId === productId);
+    if (!inOrder) {
+      throw new Error("PRODUCT_NOT_IN_ORDER: Cannot review a product not purchased in this order");
+    }
+
+    if (order.status !== "delivered" && order.status !== "completed") {
+      throw new Error("ORDER_NOT_COMPLETED: Can only review delivered or completed orders");
+    }
+
+    const productReviews = this.reviews.get(productId) || [];
+    const alreadyReviewed = productReviews.some((r) => r.orderId === orderId && r.userId === user.id);
+    if (alreadyReviewed) {
+      throw new Error("DUPLICATE_REVIEW: You have already submitted a review for this product in this order");
+    }
+
+    const review = {
+      id: `rev-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      orderId,
+      productId,
+      userId: user.id,
+      authorName: user.fullName || "Khách hàng Mini Shopee",
+      rating: numRating,
+      comment: comment || "",
+      tags: Array.isArray(tags) ? tags : [],
+      verifiedPurchase: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    productReviews.unshift(review);
+    this.reviews.set(productId, productReviews);
+
+    // Recalculate product rating & reviewCount
+    const prod = this.products.get(productId);
+    if (prod) {
+      const curRating = typeof prod.rating === "number" ? prod.rating : 5.0;
+      const curCount = typeof prod.reviewCount === "number" ? prod.reviewCount : 0;
+      const newCount = curCount + 1;
+      const newRating = Number(((curRating * curCount + numRating) / newCount).toFixed(1));
+      prod.rating = newRating;
+      prod.reviewCount = newCount;
+    }
+
+    // Award 200 Mini Xu to buyer
+    let ledger = this.coinLedger.get(user.id);
+    if (!ledger) {
+      ledger = { balance: 0, streak: 0, lastCheckinDate: null, lastSpinDate: null };
+      this.coinLedger.set(user.id, ledger);
+    }
+    ledger.balance += 200;
+
+    const txs = this.coinTransactions.get(user.id) || [];
+    txs.unshift({
+      id: `c-tx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      timestamp: new Date().toISOString(),
+      amount: 200,
+      type: "plus",
+      category: "review",
+      orderId,
+    });
+    this.coinTransactions.set(user.id, txs);
+
+    this.triggerNotification(user.id, {
+      type: "voucher",
+      title: "Nhận +200 Mini Xu thưởng đánh giá",
+      message: `Bạn nhận được 200 Xu cho đơn hàng #${orderId}.`,
+      orderId,
+    });
+
+    return {
+      review,
+      rewardCoins: 200,
+      productRating: prod ? prod.rating : numRating,
+      productReviewCount: prod ? prod.reviewCount : 1,
+    };
+  }
+
+  getProductReviews(productId) {
+    return this.reviews.get(productId) || [];
+  }
+
+  // --- Feature 45: Advanced Order Actions (R3) ---
+  repurchaseOrder(orderId, user) {
+    if (!user) throw new Error("UNAUTHORIZED");
+    const order = this.orders.get(orderId);
+    if (!order) throw new Error("ORDER_NOT_FOUND");
+
+    const itemsToReorder = [];
+    const outOfStockItems = [];
+
+    for (const item of order.items) {
+      const prod = this.products.get(item.productId);
+      if (prod && prod.stock >= (item.quantity || 1)) {
+        itemsToReorder.push({
+          productId: prod.id,
+          name: prod.name,
+          price: prod.price,
+          quantity: item.quantity,
+          shopId: prod.shopId,
+        });
+      } else {
+        outOfStockItems.push({
+          productId: item.productId,
+          name: item.name,
+          availableStock: prod ? prod.stock : 0,
+        });
+      }
+    }
+
+    return {
+      success: true,
+      canReorderFully: outOfStockItems.length === 0,
+      itemsToReorder,
+      outOfStockItems,
+    };
+  }
+
+  // --- Feature 46: Voucher Wallet & Coin Ledger (R4) ---
+  claimVoucher(userId, voucherCode) {
+    const code = String(voucherCode).trim().toUpperCase();
+    const v = this.vouchers.get(code);
+    if (!v || !v.isActive || (v.expiryDate && new Date(v.expiryDate) < new Date())) {
+      throw new Error("VOUCHER_EXPIRED_OR_INACTIVE: This voucher is either expired, inactive or does not exist");
+    }
+
+    let claimed = this.userClaimedVouchers.get(userId);
+    if (!claimed) {
+      claimed = new Set();
+      this.userClaimedVouchers.set(userId, claimed);
+    }
+
+    if (claimed.has(code)) {
+      throw new Error("ALREADY_CLAIMED: You have already saved this voucher to your wallet");
+    }
+
+    claimed.add(code);
+    return v;
+  }
+
+  getUserClaimedVouchers(userId) {
+    const claimed = this.userClaimedVouchers.get(userId) || new Set();
+    const list = [];
+    for (const code of claimed) {
+      if (this.vouchers.has(code)) {
+        list.push(this.vouchers.get(code));
+      }
+    }
+    return list;
+  }
+
+  getOptimalVouchers(subtotal, userId = null) {
+    const amt = Number(subtotal) || 0;
+    let maxDiscountAmount = 0;
+    let optimalDiscountVoucher = null;
+
+    let maxShippingDiscount = 0;
+    let optimalFreeshipVoucher = null;
+
+    for (const v of this.vouchers.values()) {
+      if (!v.isActive) continue;
+      if (v.expiryDate && new Date(v.expiryDate) < new Date()) continue;
+      if (v.minSpend && amt < v.minSpend) continue;
+
+      if (v.type === "freeship") {
+        const shipDisc = v.maxShippingDiscount || v.discountAmount || 0;
+        if (shipDisc > maxShippingDiscount) {
+          maxShippingDiscount = shipDisc;
+          optimalFreeshipVoucher = v;
+        }
+      } else {
+        let disc = 0;
+        const pct = v.percentage || v.discountPercent;
+        if (pct) {
+          disc = Math.round((amt * pct) / 100);
+          if (v.maxDiscount) disc = Math.min(disc, v.maxDiscount);
+        } else if (v.discountAmount) {
+          disc = v.discountAmount;
+        }
+        if (disc > maxDiscountAmount) {
+          maxDiscountAmount = disc;
+          optimalDiscountVoucher = v;
+        }
+      }
+    }
+
+    return {
+      optimalDiscountVoucher,
+      maxDiscountAmount,
+      optimalFreeshipVoucher,
+      maxShippingDiscount,
+    };
+  }
+
+  getCoinTransactions(userId) {
+    return this.coinTransactions.get(userId) || [];
+  }
+
+  // --- Feature 47: Order & Promotion Notification Center (R5) ---
+  triggerNotification(userId, payload) {
+    const list = this.userNotifications.get(userId) || [];
+    const notif = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      userId,
+      type: payload.type || "system",
+      title: payload.title || "Thông báo hệ thống",
+      message: payload.message || "",
+      orderId: payload.orderId || null,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    list.unshift(notif);
+    if (list.length > 50) {
+      list.length = 50;
+    }
+    this.userNotifications.set(userId, list);
+    return notif;
+  }
+
+  getUserNotifications(userId, filter = "all") {
+    const list = this.userNotifications.get(userId) || [];
+    if (filter === "all") return [...list];
+    return list.filter((n) => n.type === filter);
+  }
+
+  getUnreadNotificationCount(userId) {
+    const list = this.userNotifications.get(userId) || [];
+    return list.filter((n) => !n.isRead).length;
+  }
+
+  markNotificationAsRead(userId, notifId) {
+    const list = this.userNotifications.get(userId) || [];
+    const notif = list.find((n) => n.id === notifId);
+    if (notif) notif.isRead = true;
+    return notif;
+  }
+
+  markAllNotificationsAsRead(userId) {
+    const list = this.userNotifications.get(userId) || [];
+    let count = 0;
+    for (const n of list) {
+      if (!n.isRead) {
+        n.isRead = true;
+        count++;
+      }
+    }
+    return { unreadCount: 0, markedCount: count };
   }
 }
 
