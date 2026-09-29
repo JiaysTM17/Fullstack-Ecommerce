@@ -419,3 +419,6 @@ export function useCoins() {
   }
   return context;
 }
+
+export const useCoin = useCoins;
+

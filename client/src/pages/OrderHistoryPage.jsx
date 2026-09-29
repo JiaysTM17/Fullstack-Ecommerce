@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useCoin } from '../context/CoinContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
 import ReturnRequestModal from '../components/ReturnRequestModal';
 import DeliveryLiveMapModal from '../components/DeliveryLiveMapModal';
+import ProductReviewModal from '../components/ProductReviewModal';
 import { restoreProductStock } from '../services/productService';
 import '../styles/dashboard.css';
 
@@ -69,6 +71,7 @@ const ORDERS_STORAGE_KEY = 'mini_shopee_customer_orders';
 export default function OrderHistoryPage() {
   const { user } = useAuth();
   const { addToCart } = useCart();
+  const { earnCoins } = useCoin();
   const { t } = useLanguage();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -94,6 +97,7 @@ export default function OrderHistoryPage() {
   const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
   const [selectedLiveMapOrder, setSelectedLiveMapOrder] = useState(null);
   const [selectedCancelOrder, setSelectedCancelOrder] = useState(null);
+  const [selectedReviewOrder, setSelectedReviewOrder] = useState(null);
   const [cancelReason, setCancelReason] = useState('Tôi muốn thay đổi địa chỉ nhận hàng');
   const [cancelNote, setCancelNote] = useState('');
 
@@ -255,9 +259,56 @@ export default function OrderHistoryPage() {
       }
     } catch {}
 
+    // 3. Hoàn trả xu đã sử dụng khi hủy đơn (nếu có)
+    const coinRefundAmount = Number(selectedCancelOrder.coinUsed || selectedCancelOrder.coinsDeducted || 0);
+    if (coinRefundAmount > 0 && earnCoins) {
+      earnCoins(coinRefundAmount, `Hoàn xu do hủy đơn hàng #${selectedCancelOrder.orderId}`, selectedCancelOrder.orderId, 'refund');
+    }
+
     setSelectedCancelOrder(null);
     setCancelNote('');
-    showToast(t('order_cancelled_toast', 'Đã hủy đơn hàng thành công và hoàn trả số lượng kho!'), 'info');
+    showToast(t('order_cancelled_toast', 'Đã hủy đơn hàng thành công, hoàn trả số lượng kho và số dư xu!'), 'info');
+  };
+
+  const handleReviewSubmit = (reviewData) => {
+    const updated = orders.map((o) => {
+      if (o.orderId === reviewData.orderId) {
+        return {
+          ...o,
+          reviewed: true,
+          reviewData,
+        };
+      }
+      return o;
+    });
+    saveOrders(updated);
+
+    // Lưu đánh giá vào bộ nhớ sản phẩm để hiển thị ngay trên PDP
+    try {
+      const pKey = `mini_shopee_product_reviews_${reviewData.productId}`;
+      const rawPrev = localStorage.getItem(pKey);
+      const prevReviews = rawPrev ? JSON.parse(rawPrev) : [];
+      const newRev = {
+        id: `rev_${Date.now()}`,
+        userName: user?.name || 'Khách hàng Mini Shopee',
+        rating: reviewData.rating,
+        date: new Date().toLocaleDateString('vi-VN'),
+        title: reviewData.tags?.[0] || 'Đánh giá sản phẩm',
+        content: reviewData.comment,
+        verifiedPurchase: true,
+        tags: reviewData.tags,
+      };
+      localStorage.setItem(pKey, JSON.stringify([newRev, ...prevReviews]));
+      window.dispatchEvent(new Event('storage'));
+    } catch {}
+
+    // Thưởng 200 Mini Xu cho khách hàng
+    if (earnCoins) {
+      earnCoins(200, `Thưởng đánh giá sản phẩm đơn hàng #${reviewData.orderId}`, reviewData.orderId, 'review');
+    }
+
+    setSelectedReviewOrder(null);
+    showToast('🎉 Cảm ơn bạn! Đã gửi đánh giá thành công và nhận thưởng +200 Mini Xu!', 'success');
   };
 
   const handleBuyAgain = (item) => {
@@ -584,6 +635,44 @@ export default function OrderHistoryPage() {
                         </button>
                       )}
 
+                      {ord.status === 'completed' && (
+                        ord.reviewed ? (
+                          <span
+                            className="shopee-badge-success"
+                            style={{
+                              fontSize: '12px',
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              background: '#ecfdf5',
+                              color: '#059669',
+                              border: '1px solid #a7f3d0',
+                              fontWeight: 700,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
+                          >
+                            ✓ {t('reviewed_badge', 'Đã đánh giá (+200 Xu)')}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            className="shopee-btn"
+                            style={{
+                              fontSize: '12px',
+                              background: '#fffbeb',
+                              color: '#b45309',
+                              border: '1px solid #fde68a',
+                              fontWeight: 700,
+                              padding: '6px 12px',
+                            }}
+                            onClick={() => setSelectedReviewOrder(ord)}
+                          >
+                            ⭐ {t('review_order_btn', 'Đánh giá (+200 Xu)')}
+                          </button>
+                        )
+                      )}
+
                       <button
                         type="button"
                         className="shopee-btn shopee-btn-primary"
@@ -812,6 +901,15 @@ export default function OrderHistoryPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal Đánh Giá Sản Phẩm (+200 Mini Xu) */}
+      {selectedReviewOrder && (
+        <ProductReviewModal
+          order={selectedReviewOrder}
+          onClose={() => setSelectedReviewOrder(null)}
+          onSubmitReview={handleReviewSubmit}
+        />
       )}
     </main>
   );
