@@ -1,50 +1,37 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { loginAPI, registerAPI, demoLoginAPI, fetchCurrentUser, updateProfileAPI, API_BASE_URL } from '../services/api';
 
 const AuthContext = createContext(null);
 
-// Danh sách tài khoản mẫu để trải nghiệm tức thì cho cả 3 vai trò
+// Demo accounts for quick UI preview (fallback only)
 export const DEMO_ACCOUNTS = {
   customer: {
-    _id: "user_customer_01",
-    id: "user_customer_01",
-    email: "khachhang@shopee.vn",
-    fullName: "Nguyễn Văn Khách",
-    phone: "0901234567",
-    role: "customer",
+    _id: "user_customer_01", id: "user_customer_01",
+    email: "khachhang@shopee.vn", fullName: "Nguyễn Văn Khách",
+    phone: "0901234567", role: "customer",
     address: "123 Đường Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
     avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120"
   },
   seller_fashion: {
-    _id: "user_seller_01",
-    id: "user_seller_01",
-    email: "shop.genz@shopee.vn",
-    fullName: "Trần Thị Chủ Shop (Thời Trang)",
-    phone: "0912345678",
-    role: "seller",
-    shopId: "shop_01",
-    shopName: "Thời Trang GenZ Official",
+    _id: "user_seller_01", id: "user_seller_01",
+    email: "shop.genz@shopee.vn", fullName: "Trần Thị Chủ Shop (Thời Trang)",
+    phone: "0912345678", role: "seller",
+    shopId: "shop_01", shopName: "Thời Trang GenZ Official",
     shopLogo: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=120",
     shopAddress: "Kho Tân Bình, TP. Hồ Chí Minh"
   },
   seller_tech: {
-    _id: "user_seller_02",
-    id: "user_seller_02",
-    email: "shop.tech@shopee.vn",
-    fullName: "Lê Văn Chủ Shop (Công Nghệ)",
-    phone: "0987654321",
-    role: "seller",
-    shopId: "shop_02",
-    shopName: "TechWorld Store",
+    _id: "user_seller_02", id: "user_seller_02",
+    email: "shop.tech@shopee.vn", fullName: "Lê Văn Chủ Shop (Công Nghệ)",
+    phone: "0987654321", role: "seller",
+    shopId: "shop_02", shopName: "TechWorld Store",
     shopLogo: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=120",
     shopAddress: "Kho Cầu Giấy, Hà Nội"
   },
   admin: {
-    _id: "user_admin_01",
-    id: "user_admin_01",
-    email: "admin@shopee.vn",
-    fullName: "Tổng Quản Trị Viên Sàn",
-    phone: "0999999999",
-    role: "admin",
+    _id: "user_admin_01", id: "user_admin_01",
+    email: "admin@shopee.vn", fullName: "Tổng Quản Trị Viên Sàn",
+    phone: "0999999999", role: "admin",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120"
   }
 };
@@ -63,6 +50,7 @@ export const AuthProvider = ({ children }) => {
     return localStorage.getItem('mini_shopee_token') || null;
   });
 
+  // Persist user + token to localStorage
   useEffect(() => {
     if (user) {
       localStorage.setItem('mini_shopee_user', JSON.stringify(user));
@@ -79,45 +67,69 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Đăng nhập
-  const login = async (email, password, roleHint = 'customer') => {
+  // On mount: verify token is still valid
+  useEffect(() => {
+    if (token && !token.startsWith('mock_')) {
+      fetchCurrentUser()
+        .then((userData) => {
+          if (userData) {
+            setUser(prev => ({ ...prev, ...userData, id: userData._id || userData.id }));
+          }
+        })
+        .catch(() => {
+          // Token invalid or backend offline — keep local user data
+        });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // === LOGIN — Backend-first, local fallback ===
+  const login = useCallback(async (email, password, roleHint = 'customer') => {
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data.user);
+      const data = await loginAPI(email, password);
+      if (data.token && data.user) {
+        const userData = { ...data.user, id: data.user._id || data.user.id };
+        setUser(userData);
         setToken(data.token);
-        return { success: true, user: data.user };
+        return { success: true, user: userData };
       }
     } catch (err) {
-      console.warn("API Auth offline, falling back to local session:", err);
+      // If backend rejects with specific error, don't fallback
+      if (err.status === 401 || err.status === 403) {
+        return { success: false, error: err.message || 'Email hoặc mật khẩu không đúng' };
+      }
+      console.warn("Backend auth offline, using local fallback:", err.message);
     }
 
-    // Mock Login nếu backend chưa có endpoint auth
+    // Local fallback (only if backend is unreachable)
     let matched = Object.values(DEMO_ACCOUNTS).find(acc => acc.email === email);
     if (!matched) {
       matched = {
-        _id: 'user_' + Date.now(),
-        id: 'user_' + Date.now(),
-        email,
-        fullName: email.split('@')[0],
-        role: roleHint,
+        _id: 'user_' + Date.now(), id: 'user_' + Date.now(),
+        email, fullName: email.split('@')[0], role: roleHint,
         shopId: roleHint === 'seller' ? 'shop_' + Date.now() : undefined,
         shopName: roleHint === 'seller' ? `Shop ${email.split('@')[0]}` : undefined
       };
     }
-
     setUser(matched);
     setToken('mock_jwt_token_' + matched.role + '_' + Date.now());
     return { success: true, user: matched };
-  };
+  }, []);
 
-  // Đăng nhập nhanh bằng tài khoản mẫu
-  const loginAsDemo = (roleKey) => {
+  // === DEMO LOGIN — Uses backend /api/auth/demo for real JWT ===
+  const loginAsDemo = useCallback(async (roleKey) => {
+    try {
+      const data = await demoLoginAPI(roleKey);
+      if (data.token && data.user) {
+        const userData = { ...data.user, id: data.user._id || data.user.id };
+        setUser(userData);
+        setToken(data.token);
+        return userData;
+      }
+    } catch (err) {
+      console.warn("Backend demo login offline, using local fallback:", err.message);
+    }
+
+    // Fallback
     const account = DEMO_ACCOUNTS[roleKey];
     if (account) {
       setUser(account);
@@ -125,60 +137,66 @@ export const AuthProvider = ({ children }) => {
       return account;
     }
     return null;
-  };
+  }, []);
 
-  // Đăng ký
-  const register = async (userData) => {
+  // === REGISTER — Backend-first ===
+  const register = useCallback(async (userData) => {
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data.user);
+      const data = await registerAPI(userData);
+      if (data.token && data.user) {
+        const newUser = { ...data.user, id: data.user._id || data.user.id };
+        setUser(newUser);
         setToken(data.token);
-        return { success: true, user: data.user };
+        return { success: true, user: newUser };
       }
     } catch (err) {
-      console.warn("API Auth offline, registering locally:", err);
+      if (err.status === 400 || err.status === 409) {
+        return { success: false, error: err.message || 'Không thể đăng ký' };
+      }
+      console.warn("Backend register offline, using local fallback:", err.message);
     }
 
+    // Local fallback
     const newUser = {
-      _id: 'user_' + Date.now(),
-      id: 'user_' + Date.now(),
+      _id: 'user_' + Date.now(), id: 'user_' + Date.now(),
       email: userData.email,
       fullName: userData.fullName || userData.email.split('@')[0],
-      phone: userData.phone || '',
-      role: userData.role || 'customer',
+      phone: userData.phone || '', role: userData.role || 'customer',
       shopId: userData.role === 'seller' ? 'shop_' + Date.now() : undefined,
       shopName: userData.shopName || (userData.role === 'seller' ? 'Cửa Hàng Mới' : undefined),
-      address: userData.address || ''
+      address: userData.address || '', coins: 25000
     };
-
     setUser(newUser);
     setToken('mock_jwt_token_' + newUser.role + '_' + Date.now());
     return { success: true, user: newUser };
-  };
+  }, []);
 
-  // Đăng xuất
-  const logout = () => {
+  // === LOGOUT ===
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('mini_shopee_user');
     localStorage.removeItem('mini_shopee_token');
-  };
+  }, []);
 
-  // Cập nhật thông tin profile
-  const updateProfile = (data) => {
+  // === UPDATE PROFILE — Sync with backend ===
+  const updateProfile = useCallback(async (data) => {
+    // Update local state immediately for responsive UI
     setUser(prev => {
       const updated = { ...prev, ...data };
       return updated;
     });
-  };
 
-  // Kiểm tra quyền
+    // Sync to backend (fire & forget)
+    if (token && !token.startsWith('mock_')) {
+      try {
+        await updateProfileAPI(data);
+      } catch (err) {
+        console.warn("Profile sync to backend failed:", err.message);
+      }
+    }
+  }, [token]);
+
   const isCustomer = user?.role === 'customer';
   const isSeller = user?.role === 'seller';
   const isAdmin = user?.role === 'admin';
@@ -186,17 +204,10 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider
       value={{
-        user,
-        token,
+        user, token,
         isAuthenticated: !!user,
-        isCustomer,
-        isSeller,
-        isAdmin,
-        login,
-        loginAsDemo,
-        register,
-        logout,
-        updateProfile
+        isCustomer, isSeller, isAdmin,
+        login, loginAsDemo, register, logout, updateProfile
       }}
     >
       {children}

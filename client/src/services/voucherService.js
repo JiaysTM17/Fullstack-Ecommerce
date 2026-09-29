@@ -151,7 +151,25 @@ const INITIAL_VOUCHERS = [
   },
 ];
 
-export function getVouchers() {
+const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
+
+export async function getVouchers(shopId) {
+  // Try backend API first
+  try {
+    const params = new URLSearchParams();
+    if (shopId) params.set("shopId", shopId);
+    const response = await fetch(`${API_URL}/api/vouchers${params.toString() ? '?' + params.toString() : ''}`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.data && data.data.length > 0) {
+        return data.data;
+      }
+    }
+  } catch (err) {
+    // Backend offline
+  }
+
+  // Fallback to localStorage
   try {
     const raw = localStorage.getItem(VOUCHER_STORAGE_KEY);
     if (!raw) {
@@ -163,17 +181,13 @@ export function getVouchers() {
       localStorage.setItem(VOUCHER_STORAGE_KEY, JSON.stringify(INITIAL_VOUCHERS));
       return INITIAL_VOUCHERS;
     }
-    // Update existing vouchers with latest friendly minOrderValue
     parsed = parsed.map((v) => {
       const match = INITIAL_VOUCHERS.find(
         (init) => init.code === v.code || (v.code === 'AMAZON10' && init.code === 'MINI10')
       );
-      if (match) {
-        return { ...v, ...match };
-      }
+      if (match) return { ...v, ...match };
       return v;
     });
-    // Ensure all default initial vouchers are present
     for (const initV of INITIAL_VOUCHERS) {
       if (!parsed.some((v) => v.code === initV.code)) {
         parsed.unshift(initV);
@@ -186,19 +200,39 @@ export function getVouchers() {
   }
 }
 
-export function validateVoucher(code, orderSubtotal = 0) {
+export async function validateVoucher(code, orderSubtotal = 0) {
   if (!code) return { valid: false, message: 'Vui lòng nhập mã giảm giá' };
+
+  // Try backend API first
+  try {
+    const response = await fetch(`${API_URL}/api/vouchers/apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code.trim().toUpperCase(), orderSubtotal }),
+    });
+    const data = await response.json();
+    if (response.ok && data?.data) {
+      return {
+        valid: true,
+        message: data.data.message || `Áp dụng thành công mã ${data.data.code}!`,
+        discountAmount: data.data.discountAmount,
+        voucher: data.data,
+      };
+    }
+    return { valid: false, message: data?.message || 'Mã giảm giá không hợp lệ' };
+  } catch (err) {
+    // Backend offline, validate locally
+  }
+
+  // Local fallback validation
   const normalized = code.trim().toUpperCase() === 'AMAZON10' ? 'MINI10' : code.trim().toUpperCase();
-  const vouchers = getVouchers();
-  const voucher = vouchers.find(
-    (v) => v.code.toUpperCase() === normalized
-  );
+  const vouchers = await getVouchers();
+  const voucher = vouchers.find((v) => v.code.toUpperCase() === normalized);
 
   if (!voucher) {
     return { valid: false, message: 'Mã giảm giá không tồn tại hoặc đã hết hạn' };
   }
 
-  // Check minimum order value only if minOrderValue > 0 and subtotal > 0
   if (voucher.minOrderValue > 0 && orderSubtotal > 0 && orderSubtotal < voucher.minOrderValue) {
     return {
       valid: false,
@@ -233,8 +267,28 @@ export function validateVoucher(code, orderSubtotal = 0) {
   };
 }
 
-export function createVoucher(newVoucher) {
-  const current = getVouchers();
+export async function createVoucher(newVoucher) {
+  // Try backend API
+  try {
+    const token = localStorage.getItem('mini_shopee_token');
+    const response = await fetch(`${API_URL}/api/vouchers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(newVoucher),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data?.data || data;
+    }
+  } catch (err) {
+    // Backend offline
+  }
+
+  // Local fallback
+  const current = await getVouchers();
   const rawType = newVoucher.type || 'percent';
   let boundedValue = Number(newVoucher.value) || 10;
   if (rawType === 'percent') {
@@ -256,9 +310,27 @@ export function createVoucher(newVoucher) {
   return created;
 }
 
-export function deleteVoucher(voucherId) {
-  const current = getVouchers();
+export async function deleteVoucher(voucherId) {
+  // Try backend API
+  try {
+    const token = localStorage.getItem('mini_shopee_token');
+    const response = await fetch(`${API_URL}/api/vouchers/${voucherId}`, {
+      method: 'DELETE',
+      headers: {
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+    });
+    if (response.ok) {
+      return true;
+    }
+  } catch (err) {
+    // Backend offline
+  }
+
+  // Local fallback
+  const current = await getVouchers();
   const updated = current.filter((v) => v.id !== voucherId);
   localStorage.setItem(VOUCHER_STORAGE_KEY, JSON.stringify(updated));
   return updated;
 }
+

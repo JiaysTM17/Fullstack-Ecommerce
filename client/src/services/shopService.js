@@ -327,38 +327,110 @@ const SHOPS_DATA = [
 
 const FOLLOWED_SHOPS_KEY = "mini_shopee_followed_shops";
 
-export function getShopById(shopId) {
+export async function getShopById(shopId) {
   const normalizedId = shopId || "shop_01";
+
+  // Try backend API first
+  try {
+    const response = await fetch(`${import.meta.env?.VITE_API_URL || "http://localhost:5000"}/api/shops/${normalizedId}`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.data) {
+        const shop = data.data;
+        // Map backend fields to frontend expected shape
+        return {
+          id: shop.shopId || shop._id,
+          name: shop.name,
+          slug: shop.slug,
+          isOfficial: shop.isOfficial ?? true,
+          avatar: shop.logo || shop.avatar,
+          banner: shop.banner,
+          rating: shop.rating,
+          reviewCount: shop.reviewCount,
+          followers: shop.followers,
+          responseRate: shop.responseRate,
+          responseTime: shop.responseTime,
+          joinedDate: shop.createdAt ? new Date(shop.createdAt).toLocaleDateString("vi-VN") : "2024",
+          location: shop.address,
+          phone: shop.phone,
+          description: shop.description,
+          badges: shop.badges || [],
+          vouchers: [],
+          productCount: shop.productCount,
+        };
+      }
+    }
+  } catch (err) {
+    // Backend offline, use local data
+  }
+
+  // Fallback to hardcoded data
   const found = SHOPS_DATA.find((s) => s.id === normalizedId || s.slug === normalizedId);
   if (found) return found;
 
-  // Fallback dynamic shop if unknown
   return {
     id: normalizedId,
-    name: normalizedId === "shop_02" ? "TechWorld Store" : "Thời Trang GenZ Official",
+    name: "Cửa Hàng",
     isOfficial: true,
     avatar: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200",
     banner: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200",
-    rating: 4.9,
-    reviewCount: 1200,
-    followers: 10500,
-    responseRate: 98,
-    responseTime: "Trong 10 phút",
-    joinedDate: "2 năm trước",
-    location: "Việt Nam",
+    rating: 4.9, reviewCount: 1200, followers: 10500,
+    responseRate: 98, responseTime: "Trong 10 phút",
+    joinedDate: "2 năm trước", location: "Việt Nam",
     phone: "1900 6868",
-    description: "Cửa hàng bán lẻ chính hãng trên nền tảng Fullstack E-Commerce.",
-    badges: ["Gian Hàng Uy Tín", "Chính Hãng"],
+    description: "Cửa hàng bán lẻ chính hãng.",
+    badges: ["Gian Hàng Uy Tín"],
     vouchers: []
   };
 }
 
-export function getAllShops() {
+export async function getAllShops() {
+  try {
+    const response = await fetch(`${import.meta.env?.VITE_API_URL || "http://localhost:5000"}/api/shops`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.data && data.data.length > 0) {
+        return data.data.map(shop => ({
+          id: shop.shopId || shop._id,
+          name: shop.name,
+          slug: shop.slug,
+          isOfficial: shop.isOfficial ?? true,
+          avatar: shop.logo || shop.avatar,
+          banner: shop.banner,
+          rating: shop.rating,
+          reviewCount: shop.reviewCount,
+          followers: shop.followers,
+          responseRate: shop.responseRate,
+          responseTime: shop.responseTime,
+          location: shop.address,
+          description: shop.description,
+          badges: shop.badges || [],
+        }));
+      }
+    }
+  } catch (err) {
+    // Backend offline
+  }
   return SHOPS_DATA;
 }
 
-export function getProductsByShop(shopId) {
+export async function getProductsByShop(shopId) {
   const normalizedId = shopId || "shop_01";
+
+  try {
+    const response = await fetch(`${import.meta.env?.VITE_API_URL || "http://localhost:5000"}/api/shops/${normalizedId}/products`);
+    if (response.ok) {
+      const data = await response.json();
+      const products = data?.data?.products || data?.data;
+      if (products && products.length > 0) {
+        return products;
+      }
+    }
+  } catch (err) {
+    // Backend offline
+  }
+
+  // Fallback
   const allStored = typeof getStoredProducts === "function" ? getStoredProducts() : FALLBACK_PRODUCTS;
   const matched = allStored.filter((p) => (p.shopId || "shop_01") === normalizedId && p.isActive !== false);
   return matched.length > 0 ? matched : allStored.slice(0, 4);
