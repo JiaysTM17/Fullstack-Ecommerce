@@ -83,6 +83,10 @@ export const createOrder = async (req, res) => {
       total: Number(total),
       paymentMethod: paymentMethod || "COD",
       status: "pending",
+      trackingCode: `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`,
+      timeline: [
+        { time: new Date().toISOString(), text: "Đơn hàng đã được đặt thành công" },
+      ],
     });
 
     // === CLEAR CART after successful order ===
@@ -204,4 +208,167 @@ export const cancelOrder = async (req, res) => {
   }
 };
 
-export default { createOrder, getMyOrders, getOrderById, cancelOrder };
+// @desc    Get real-time SPX logistics tracking for an order
+// @route   GET /api/orders/:id/tracking
+// @access  Public / Authenticated
+export const getOrderTracking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let order = await Order.findById(id);
+    if (!order) {
+      order = await Order.findOne({ trackingCode: id });
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy thông tin đơn hàng hoặc mã vận đơn", 404);
+    }
+
+    const trackingCode = order.trackingCode || `SPX-VN-${String(order._id || order.id || "").slice(-8).toUpperCase() || "84729104"}`;
+    const orderDate = new Date(order.createdAt || Date.now());
+    const estimatedDate = new Date(orderDate.getTime() + 2 * 24 * 60 * 60 * 1000);
+
+    const stages = [
+      {
+        stage: "placed",
+        title: "Đơn hàng đã đặt",
+        desc: "Khách hàng đã hoàn tất thanh toán/đặt hàng thành công",
+        timestamp: orderDate.toISOString(),
+        completed: true,
+      },
+      {
+        stage: "confirmed",
+        title: "Shop đã xác nhận & Đóng gói",
+        desc: `Shop ${order.items?.[0]?.shopName || "Thời Trang GenZ"} đã đóng gói kiện hàng`,
+        timestamp: new Date(orderDate.getTime() + 2 * 3600 * 1000).toISOString(),
+        completed: ["confirmed", "shipping", "completed"].includes(order.status),
+      },
+      {
+        stage: "shipping",
+        title: "Đang vận chuyển (SPX Express)",
+        desc: "Kiện hàng đã rời kho trung chuyển Tân Bình, đang trên đường giao",
+        timestamp: new Date(orderDate.getTime() + 8 * 3600 * 1000).toISOString(),
+        completed: ["shipping", "completed"].includes(order.status),
+        active: order.status === "shipping",
+      },
+      {
+        stage: "delivered",
+        title: "Giao hàng thành công",
+        desc: "Người nhận đã kiểm tra và ký nhận hàng nguyên vẹn",
+        timestamp: new Date(orderDate.getTime() + 24 * 3600 * 1000).toISOString(),
+        completed: order.status === "completed",
+      },
+    ];
+
+    const trackingData = {
+      orderId: order._id || order.id,
+      trackingCode,
+      carrier: "SPX Express Standard",
+      carrierHotline: "1900 1221",
+      status: order.status,
+      statusText:
+        order.status === "completed"
+          ? "Đã giao hàng thành công"
+          : order.status === "shipping"
+          ? "Đang giao hàng"
+          : order.status === "confirmed"
+          ? "Shop đang đóng gói"
+          : order.status === "cancelled"
+          ? "Đơn hàng đã hủy"
+          : "Chờ người bán xác nhận",
+      estimatedDelivery: estimatedDate.toLocaleDateString("vi-VN", {
+        weekday: "long",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }),
+      courier: {
+        name: "Nguyễn Văn Hùng",
+        phone: "0908 123 456",
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+        vehicle: "Xe máy - Biển số 29B1-892.45",
+        rating: 4.95,
+      },
+      currentLocation: {
+        lat: 10.7769,
+        lng: 106.7009,
+        label: "Bưu cục phát SPX Express Tân Bình, TP. Hồ Chí Minh",
+        lastUpdated: new Date().toISOString(),
+      },
+      stages,
+      timeline: order.timeline && order.timeline.length > 0 ? order.timeline : stages.filter((s) => s.completed),
+    };
+
+    sendSuccess(res, trackingData);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Get Electronic VAT Invoice for an order
+// @route   GET /api/orders/:id/invoice
+// @access  Public / Authenticated
+export const getOrderInvoice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let order = await Order.findById(id);
+    if (!order) {
+      order = await Order.findOne({ trackingCode: id });
+    }
+    if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
+
+    const vatRate = 0.08; // 8% VAT
+    const netSubtotal = Math.round(order.subtotal / (1 + vatRate));
+    const vatAmount = order.subtotal - netSubtotal;
+
+    const invoiceData = {
+      invoiceNumber: `HD-${String(order._id || order.id).slice(-8).toUpperCase()}`,
+      invoiceSerial: "1C26MMS",
+      templateCode: "01GTKT0/001",
+      issueDate: order.createdAt || new Date().toISOString(),
+      seller: {
+        companyName: "CÔNG TY CỔ PHẦN CÔNG NGHỆ THƯƠNG MẠI ĐIỆN TỬ MINI SHOPEE",
+        taxCode: "0316892345",
+        address: "Tầng 18, Tòa nhà Saigon Centre, 65 Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+        phone: "1900 1221",
+        email: "cskh@minishopee.vn",
+      },
+      buyer: {
+        fullName: order.customer?.fullName || "Khách Hàng Mini Shopee",
+        phone: order.customer?.phone || "",
+        email: order.customer?.email || "",
+        address: order.customer?.address || "",
+        taxCode: order.customer?.taxCode || "Cá nhân không kinh doanh",
+      },
+      items: (order.items || []).map((it, idx) => ({
+        index: idx + 1,
+        name: it.name,
+        quantity: it.quantity || 1,
+        unitPrice: it.price,
+        amount: (it.price || 0) * (it.quantity || 1),
+        vatRate: "8%",
+      })),
+      pricing: {
+        subtotal: order.subtotal,
+        netSubtotal,
+        vatAmount,
+        shippingFee: order.shippingFee || 0,
+        shippingDiscount: order.shippingDiscount || 0,
+        voucherDiscount: order.voucherDiscount || 0,
+        coinDiscount: order.coinDiscount || 0,
+        total: order.total,
+      },
+      digitalSignature: {
+        signedBy: "CÔNG TY CỔ PHẦN CÔNG NGHỆ THƯƠNG MẠI ĐIỆN TỬ MINI SHOPEE",
+        signedDate: order.createdAt || new Date().toISOString(),
+        verified: true,
+      },
+      qrCodeString: `https://minishopee.vn/invoice/verify?id=${order._id || order.id}&serial=1C26MMS`,
+    };
+
+    sendSuccess(res, invoiceData);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+export default { createOrder, getMyOrders, getOrderById, cancelOrder, getOrderTracking, getOrderInvoice };

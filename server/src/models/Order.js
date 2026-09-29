@@ -37,9 +37,12 @@ const orderSchema = new mongoose.Schema(
     paymentMethod: { type: String, enum: ["COD", "BANK_TRANSFER", "MOMO", "VNPAY"], default: "COD" },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "shipping", "completed", "cancelled"],
+      enum: ["pending", "confirmed", "shipping", "completed", "cancelled", "returning"],
       default: "pending",
     },
+    trackingCode: { type: String, default: "" },
+    invoiceIssued: { type: Boolean, default: false },
+    timeline: { type: Array, default: [] },
   },
   { timestamps: true }
 );

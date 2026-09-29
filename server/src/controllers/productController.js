@@ -174,4 +174,79 @@ export const searchProducts = async (req, res) => {
   }
 };
 
-export default { getProducts, getProductById, getCategories, searchProducts };
+// @desc    Get questions and answers for a product
+// @route   GET /api/products/:id/questions
+// @access  Public
+export const getProductQuestions = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const questions = await memoryStore.questions.find({
+      $or: [{ productId: id }, { productId: String(id) }]
+    });
+
+    sendSuccess(res, {
+      productId: id,
+      total: questions.length,
+      questions: questions.sort((a, b) => (b.helpfulCount || 0) - (a.helpfulCount || 0)),
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Ask a new question about a product
+// @route   POST /api/products/:id/questions
+// @access  Public / Authenticated
+export const askProductQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { question, userName } = req.body;
+
+    if (!question || !question.trim()) {
+      return sendError(res, "Nội dung câu hỏi không được để trống", 400);
+    }
+
+    const author = req.user?.fullName || req.user?.name || userName || "Khách hàng Mini Shopee";
+    const newQ = await memoryStore.questions.create({
+      _id: `q_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      productId: id,
+      userName: author.trim(),
+      question: question.trim(),
+      createdAt: new Date().toISOString(),
+      answers: [],
+      helpfulCount: 0,
+    });
+
+    sendSuccess(res, { question: newQ, message: "Đã gửi câu hỏi thành công! Người bán sẽ phản hồi sớm." }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Upvote a helpful question or answer
+// @route   POST /api/products/:id/questions/:questionId/vote
+// @access  Public
+export const voteProductQuestion = async (req, res) => {
+  try {
+    const { questionId } = req.params;
+    const q = await memoryStore.questions.findOne({ _id: questionId });
+    if (!q) return sendError(res, "Không tìm thấy câu hỏi", 404);
+
+    q.helpfulCount = (q.helpfulCount || 0) + 1;
+    await memoryStore.questions.findByIdAndUpdate(q._id, { helpfulCount: q.helpfulCount });
+
+    sendSuccess(res, { helpfulCount: q.helpfulCount, message: "Cảm ơn bạn đã bình chọn câu hỏi hữu ích!" });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+export default {
+  getProducts,
+  getProductById,
+  getCategories,
+  searchProducts,
+  getProductQuestions,
+  askProductQuestion,
+  voteProductQuestion,
+};

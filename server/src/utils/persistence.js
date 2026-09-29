@@ -34,6 +34,7 @@ export function saveToDisk(memoryStoreInstance) {
       carts: memoryStoreInstance.cartsStore,
       reviews: memoryStoreInstance.reviewsStore,
       categories: memoryStoreInstance.categoriesStore,
+      questions: memoryStoreInstance.questionsStore || [],
     };
     writeFileSync(STORE_FILE, JSON.stringify(snapshot, null, 2), "utf8");
     return true;

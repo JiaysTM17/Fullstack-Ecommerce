@@ -319,6 +319,43 @@ const INITIAL_CATEGORIES = [
   { _id: "cat_08", name: "Thú cưng", slug: "thu-cung", icon: "🐾", order: 8 },
 ];
 
+const INITIAL_QUESTIONS = [
+  {
+    _id: "q_01",
+    productId: "prod_01",
+    userName: "Văn Minh",
+    question: "Sản phẩm này có size XL cho người 75kg cao 1m75 không shop?",
+    createdAt: "2026-09-22T08:30:00.000Z",
+    answers: [
+      {
+        _id: "ans_01",
+        authorName: "Thời Trang GenZ Official",
+        isShopOwner: true,
+        content: "Dạ chào bạn, với chiều cao 1m75 nặng 75kg bạn mặc size XL form rộng rãi thoải mái chuẩn đẹp luôn ạ!",
+        createdAt: "2026-09-22T08:45:00.000Z",
+      },
+    ],
+    helpfulCount: 12,
+  },
+  {
+    _id: "q_02",
+    productId: "prod_01",
+    userName: "Hoàng Yến",
+    question: "Vải có bị co rút sau khi giặt máy không ạ?",
+    createdAt: "2026-09-23T14:10:00.000Z",
+    answers: [
+      {
+        _id: "ans_02",
+        authorName: "Thời Trang GenZ Official",
+        isShopOwner: true,
+        content: "Chào bạn, sản phẩm được dệt từ cotton 100% xử lý chống co rút nhiệt định hình nên bạn hoàn toàn yên tâm giặt máy nhé!",
+        createdAt: "2026-09-23T14:20:00.000Z",
+      },
+    ],
+    helpfulCount: 8,
+  },
+];
+
 const INITIAL_ORDERS = [
   { _id: "order_demo_01", userId: "user_customer_01", customer: { fullName: "Nguyễn Văn Khách", phone: "0901234567", email: "khachhang@shopee.vn", address: "123 Đường Lê Lợi, Q1, TP.HCM", note: "Giao giờ hành chính" }, items: [{ productId: "prod_01", name: "Áo thun nam basic cotton", price: 199000, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500", quantity: 2, shopId: "shop_01", shopName: "Thời Trang GenZ", status: "confirmed" }], subtotal: 398000, shippingFee: 30000, total: 428000, paymentMethod: "COD", status: "confirmed", createdAt: new Date(Date.now() - 3600000 * 5).toISOString() },
   { _id: "order_demo_02", userId: "user_customer_01", customer: { fullName: "Nguyễn Văn Khách", phone: "0901234567", email: "khachhang@shopee.vn", address: "123 Đường Lê Lợi, Q1, TP.HCM", note: "" }, items: [{ productId: "prod_15", name: "Tai nghe Bluetooth ANC", price: 1250000, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500", quantity: 1, shopId: "shop_02", shopName: "TechWorld Store", status: "completed" }], subtotal: 1250000, shippingFee: 0, total: 1250000, paymentMethod: "VNPAY", status: "completed", createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
@@ -405,6 +442,7 @@ class MemoryStore {
       this.cartsStore = saved.carts || [];
       this.reviewsStore = saved.reviews || [];
       this.categoriesStore = saved.categories || [];
+      this.questionsStore = saved.questions && saved.questions.length > 0 ? saved.questions : [...INITIAL_QUESTIONS];
       console.log(`[MemoryStore] Restored from disk: ${this.productsStore.length} products, ${this.ordersStore.length} orders, ${this.usersStore.length} users`);
     } else {
       this.usersStore = [...INITIAL_USERS];
@@ -415,6 +453,7 @@ class MemoryStore {
       this.cartsStore = [];
       this.reviewsStore = [];
       this.categoriesStore = [...INITIAL_CATEGORIES];
+      this.questionsStore = [...INITIAL_QUESTIONS];
       console.log(`[MemoryStore] Initialized with seed data: ${this.productsStore.length} products, ${this.shopsStore.length} shops`);
       this.persist(); // Save initial state
     }
@@ -434,6 +473,7 @@ class MemoryStore {
   orders = createCollectionAPI("ordersStore", wrapOrder);
   vouchers = createCollectionAPI("vouchersStore", wrapVoucher);
   reviews = createCollectionAPI("reviewsStore", wrapReview);
+  questions = createCollectionAPI("questionsStore", (q) => q);
 
   // Categories - simple read-only collection
   categories = {
