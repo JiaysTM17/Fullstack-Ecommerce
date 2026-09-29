@@ -9,6 +9,7 @@ import { useCoins } from "../context/CoinContext";
 import { createOrder } from "../services/orderService";
 import { deductProductStock } from "../services/productService";
 import { formatCurrency } from "../utils/formatCurrency";
+import { pushBuyerNotification } from "../utils/notificationHelper";
 import "../styles/checkout-multistep.css";
 
 const SHIPPING_OPTIONS = [
@@ -329,6 +330,15 @@ export default function CheckoutPage() {
       } catch {
         // ignore
       }
+
+      // Phát thông báo tức thời tới Notification Center của Người Mua
+      pushBuyerNotification({
+        type: 'order',
+        icon: '📦',
+        title: `Đặt hàng thành công #${generatedOrderId}`,
+        message: `Đơn hàng trị giá ${formatCurrency(finalOrderTotal)} đã được ghi nhận. Bạn được tặng +1 lượt quay may mắn!`,
+        link: '/orders',
+      });
 
       // Tặng +1 lượt quay Vòng Quay May Mắn cho đơn hàng thành công
       if (typeof grantOrderSpin === 'function') {

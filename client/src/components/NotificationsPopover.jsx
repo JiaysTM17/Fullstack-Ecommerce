@@ -74,6 +74,23 @@ export default function NotificationsPopover() {
   };
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const orderCount = notifications.filter((n) => n.type === 'order').length;
+  const voucherCount = notifications.filter((n) => n.type === 'voucher' || n.type === 'promo').length;
+
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const saved = localStorage.getItem(NOTIFS_STORAGE_KEY);
+        if (saved) setNotifications(JSON.parse(saved));
+      } catch {}
+    };
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('mini_shopee_new_notification', handleSync);
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('mini_shopee_new_notification', handleSync);
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -90,6 +107,11 @@ export default function NotificationsPopover() {
     saveNotifications(updated);
   };
 
+  const handleClearRead = () => {
+    const updated = notifications.filter((n) => !n.isRead);
+    saveNotifications(updated);
+  };
+
   const handleItemClick = (notif) => {
     const updated = notifications.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n));
     saveNotifications(updated);
@@ -101,6 +123,8 @@ export default function NotificationsPopover() {
 
   const filteredNotifs = notifications.filter((n) => {
     if (activeTab === 'unread') return !n.isRead;
+    if (activeTab === 'order') return n.type === 'order';
+    if (activeTab === 'voucher') return n.type === 'voucher' || n.type === 'promo';
     return true;
   });
 
@@ -199,43 +223,42 @@ export default function NotificationsPopover() {
           <div
             style={{
               display: 'flex',
-              padding: '8px 14px',
-              gap: '8px',
+              padding: '8px 12px',
+              gap: '6px',
+              overflowX: 'auto',
               borderBottom: '1px solid var(--border-light, #f1f5f9)',
+              background: 'var(--bg-card, #ffffff)',
             }}
           >
-            <button
-              type="button"
-              onClick={() => setActiveTab('all')}
-              style={{
-                background: activeTab === 'all' ? 'var(--primary-color, #ea580c)' : 'transparent',
-                color: activeTab === 'all' ? '#ffffff' : 'var(--text-secondary, #475569)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '4px 10px',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Tất cả ({notifications.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('unread')}
-              style={{
-                background: activeTab === 'unread' ? 'var(--primary-color, #ea580c)' : 'transparent',
-                color: activeTab === 'unread' ? '#ffffff' : 'var(--text-secondary, #475569)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '4px 10px',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Chưa đọc ({unreadCount})
-            </button>
+            {[
+              { id: 'all', label: `Tất cả (${notifications.length})` },
+              { id: 'order', label: `📦 Đơn hàng (${orderCount})` },
+              { id: 'voucher', label: `🎟️ Ưu đãi (${voucherCount})` },
+              { id: 'unread', label: `Chưa đọc (${unreadCount})` },
+            ].map((tab) => {
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    background: active ? 'var(--primary-color, #ea580c)' : 'transparent',
+                    color: active ? '#ffffff' : 'var(--text-secondary, #475569)',
+                    border: 'none',
+                    borderRadius: '20px',
+                    padding: '4px 10px',
+                    fontSize: '11.5px',
+                    fontWeight: active ? 700 : 500,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Notifications List */}
@@ -329,7 +352,9 @@ export default function NotificationsPopover() {
           <div
             style={{
               padding: '10px 16px',
-              textAlign: 'center',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               borderTop: '1px solid var(--border-light, #f1f5f9)',
               background: 'var(--bg-muted, #f8fafc)',
             }}
@@ -344,13 +369,30 @@ export default function NotificationsPopover() {
                 background: 'none',
                 border: 'none',
                 color: 'var(--primary-color, #ea580c)',
-                fontSize: '12.5px',
+                fontSize: '12px',
                 fontWeight: 700,
                 cursor: 'pointer',
               }}
             >
-              Xem tiến trình tất cả đơn hàng →
+              Xem tất cả đơn hàng →
             </button>
+
+            {notifications.some((n) => n.isRead) && (
+              <button
+                type="button"
+                onClick={handleClearRead}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted, #94a3b8)',
+                  fontSize: '11.5px',
+                  cursor: 'pointer',
+                }}
+                title="Xóa các thông báo đã đọc"
+              >
+                🗑️ Dọn dẹp
+              </button>
+            )}
           </div>
         </div>
       )}

@@ -11,6 +11,7 @@ import ReturnRequestModal from '../components/ReturnRequestModal';
 import DeliveryLiveMapModal from '../components/DeliveryLiveMapModal';
 import ProductReviewModal from '../components/ProductReviewModal';
 import { restoreProductStock } from '../services/productService';
+import { pushBuyerNotification } from '../utils/notificationHelper';
 import '../styles/dashboard.css';
 
 const INITIAL_CUSTOMER_ORDERS = [
@@ -265,6 +266,14 @@ export default function OrderHistoryPage() {
       earnCoins(coinRefundAmount, `Hoàn xu do hủy đơn hàng #${selectedCancelOrder.orderId}`, selectedCancelOrder.orderId, 'refund');
     }
 
+    pushBuyerNotification({
+      type: 'order',
+      icon: '⚠️',
+      title: `Đã hủy đơn hàng #${selectedCancelOrder.orderId}`,
+      message: `Đơn hàng đã được hủy thành công. Tồn kho và ${coinRefundAmount > 0 ? `${coinRefundAmount} xu` : 'dữ liệu'} đã được hoàn trả.`,
+      link: '/orders',
+    });
+
     setSelectedCancelOrder(null);
     setCancelNote('');
     showToast(t('order_cancelled_toast', 'Đã hủy đơn hàng thành công, hoàn trả số lượng kho và số dư xu!'), 'info');
@@ -306,6 +315,14 @@ export default function OrderHistoryPage() {
     if (earnCoins) {
       earnCoins(200, `Thưởng đánh giá sản phẩm đơn hàng #${reviewData.orderId}`, reviewData.orderId, 'review');
     }
+
+    pushBuyerNotification({
+      type: 'voucher',
+      icon: '🪙',
+      title: `Nhận +200 Mini Xu thưởng`,
+      message: `Bạn nhận được 200 Mini Xu thưởng nhờ đánh giá sản phẩm cho đơn #${reviewData.orderId}!`,
+      link: '/profile',
+    });
 
     setSelectedReviewOrder(null);
     showToast('🎉 Cảm ơn bạn! Đã gửi đánh giá thành công và nhận thưởng +200 Mini Xu!', 'success');
