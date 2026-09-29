@@ -39,7 +39,7 @@ export default function HomePage() {
       badge: searchParams.get("badge") || "",
       shopId: searchParams.get("shopId") || "",
       page: searchParams.get("page") || "1",
-      limit: searchParams.get("limit") || "12",
+      limit: searchParams.get("limit") || "16",
     }),
     [searchParams],
   );
@@ -140,7 +140,7 @@ export default function HomePage() {
   }
 
   function resetFilters() {
-    setSearchParams(new URLSearchParams({ page: "1", limit: filters.limit || "12" }));
+    setSearchParams(new URLSearchParams({ page: "1", limit: filters.limit || "16" }));
   }
 
   const hasActiveFilters = Boolean(

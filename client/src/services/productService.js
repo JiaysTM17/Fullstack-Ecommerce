@@ -4622,23 +4622,46 @@ export async function getProducts(params = {}) {
   try {
     const payload = await apiRequest(`/api/products${buildQueryString(params)}`);
     const data = payload?.data?.products || (Array.isArray(payload?.data) ? payload.data : null);
-    if (data && data.length > 0) {
-      // Merge with newly added custom products by seller stored locally
-      const storedProds = getStoredProducts();
-      const backendIds = new Set(data.map((p) => p._id || p.id));
-      const customNewProducts = storedProds.filter((p) => !backendIds.has(p._id) && !backendIds.has(p.id));
+    if (data && Array.isArray(data)) {
+      // Merge dynamic seller overrides (stock, price, isActive) from localStorage
+      let storedMap = new Map();
+      try {
+        if (typeof window !== "undefined") {
+          const raw = localStorage.getItem("mini_shopee_seller_products");
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              parsed.forEach((p) => {
+                const k = p._id || p.id;
+                if (k) storedMap.set(k, p);
+              });
+            }
+          }
+        }
+      } catch {}
 
-      let combined = [...customNewProducts, ...data];
-      if (params.category && params.category !== "Tất cả") {
-        combined = combined.filter((p) => p.category === params.category);
-      }
-      if (params.shopId) {
-        combined = combined.filter((p) => (p.shopId || "shop_01") === params.shopId);
-      }
+      const mergedData = data.map((p) => {
+        const override = storedMap.get(p._id) || storedMap.get(p.id);
+        if (override) {
+          return {
+            ...p,
+            stock: typeof override.stock === "number" ? override.stock : p.stock,
+            sold: typeof override.sold === "number" ? override.sold : p.sold,
+            price: typeof override.price === "number" ? override.price : p.price,
+            isActive: override.isActive !== undefined ? override.isActive : p.isActive,
+          };
+        }
+        return p;
+      }).filter((p) => p.isActive !== false);
 
       return {
-        products: combined.map(mergeWithCustomReviews),
-        pagination: payload.data?.pagination || null,
+        products: mergedData.map(mergeWithCustomReviews),
+        pagination: payload.data?.pagination || {
+          page: Number(params.page) || 1,
+          limit: Number(params.limit) || 16,
+          total: payload.data?.pagination?.total || data.length,
+          totalPages: payload.data?.pagination?.totalPages || 1,
+        },
       };
     }
   } catch (err) {
