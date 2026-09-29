@@ -135,9 +135,9 @@ class ApiClient {
     return this.oracle.checkinDailyStreak(user);
   }
 
-  async spinLuckyWheel(token) {
+  async spinLuckyWheel(token, forcedOutcome = null) {
     const user = this.oracle.verifyToken(token);
-    return this.oracle.spinLuckyWheel(user);
+    return this.oracle.spinLuckyWheel(user, forcedOutcome);
   }
 
   // --- Logistics & Tracking ---

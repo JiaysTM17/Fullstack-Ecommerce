@@ -556,9 +556,10 @@ describe("Tier 1 - Subsystem 7: Buyer Experience Expansion (R1-R5)", () => {
       expect.equal(txsAfterCheckin.some((t) => t.category === "checkin"), true);
 
       // 3. Spin
-      await api.spinLuckyWheel(buyer.token);
+      await api.spinLuckyWheel(buyer.token, { prize: "1000_XU", value: 1000, type: "coins", angle: 90 });
       const txsAfterSpin = await api.getCoinTransactions(buyer.token);
       expect.ok(txsAfterSpin.length >= 3);
+      expect.equal(txsAfterSpin.some((t) => t.category === "spin"), true);
     });
 
     test("F46-T8: 7-day check-in streak ladder: Verifies daily rewards [500, 1000, 1500, 2000, 2500, 3000, 5000]", async () => {

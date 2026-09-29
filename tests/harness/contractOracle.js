@@ -894,7 +894,7 @@ export class ContractOracle {
     };
   }
 
-  spinLuckyWheel(user) {
+  spinLuckyWheel(user, forcedOutcome = null) {
     if (!user) throw new Error("UNAUTHORIZED");
     let ledger = this.coinLedger.get(user.id);
     if (!ledger) {
@@ -915,7 +915,7 @@ export class ContractOracle {
       { prize: "5000_XU", value: 5000, type: "coins", angle: 360 },
     ];
 
-    const won = outcomes[Math.floor(Math.random() * outcomes.length)];
+    const won = forcedOutcome || outcomes[Math.floor(Math.random() * outcomes.length)];
     if (won.type === "coins") {
       ledger.balance += won.value;
       const txs = this.coinTransactions.get(user.id) || [];
