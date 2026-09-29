@@ -207,9 +207,35 @@ export default function OrderHistoryPage() {
     showToast(`Đã mô phỏng bước tiếp theo: ${updatedOrder.statusText}!`, 'success');
   };
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const getTabCount = (tabId) => {
+    if (tabId === 'all') return orders.length;
+    if (tabId === 'pending') return orders.filter((o) => o.status === 'pending' || o.status === 'confirmed').length;
+    return orders.filter((o) => o.status === tabId).length;
+  };
+
   const filteredOrders = orders.filter((ord) => {
-    if (activeTab === 'all') return true;
-    return ord.status === activeTab;
+    // 1. Status Tab filter
+    if (activeTab === 'pending') {
+      if (ord.status !== 'pending' && ord.status !== 'confirmed') return false;
+    } else if (activeTab !== 'all' && ord.status !== activeTab) {
+      return false;
+    }
+
+    // 2. Keyword Search filter
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      const matchId = (ord.orderId || '').toLowerCase().includes(term);
+      const matchTracking = (ord.trackingCode || '').toLowerCase().includes(term);
+      const matchItems = (ord.items || []).some((item) =>
+        (item.name || '').toLowerCase().includes(term)
+      );
+      const matchShop = (ord.shopName || '').toLowerCase().includes(term);
+      return matchId || matchTracking || matchItems || matchShop;
+    }
+
+    return true;
   });
 
   const handleConfirmCancelOrder = () => {
@@ -439,25 +465,72 @@ export default function OrderHistoryPage() {
           </div>
         )}
 
-        {/* Status Tabs */}
+        {/* Search Order Bar */}
+        <div style={{ marginBottom: '18px', position: 'relative' }}>
+          <input
+            type="text"
+            placeholder="🔍 Tìm kiếm đơn hàng theo Mã đơn, Mã vận đơn hoặc Tên sản phẩm..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px 16px 10px 38px',
+              fontSize: '13.5px',
+              borderRadius: '8px',
+              border: '1px solid var(--border-medium, #cbd5e1)',
+              background: 'var(--bg-muted, #f8fafc)',
+              color: 'var(--text-primary, #0f172a)',
+              outline: 'none',
+              transition: 'border-color 0.2s',
+            }}
+            onFocus={(e) => { e.target.style.borderColor = 'var(--primary-color, #ea580c)'; e.target.style.background = '#fff'; }}
+            onBlur={(e) => { e.target.style.borderColor = 'var(--border-medium, #cbd5e1)'; e.target.style.background = 'var(--bg-muted, #f8fafc)'; }}
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              aria-label="Xóa tìm kiếm"
+              onClick={() => setSearchTerm('')}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px',
+                color: 'var(--text-muted, #94a3b8)',
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Status Tabs with Dynamic Badges */}
         <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-medium, #e0e0e0)', paddingBottom: '14px', marginBottom: '22px', overflowX: 'auto' }}>
           {[
             { id: 'all', label: t('all_orders', 'Tất cả đơn') },
+            { id: 'pending', label: 'Chờ xác nhận' },
             { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển') },
             { id: 'completed', label: t('status_completed', 'Hoàn thành') },
             { id: 'returning', label: t('status_returning', 'Đổi trả / Hoàn tiền') },
             { id: 'cancelled', label: t('status_cancelled', 'Đã hủy') },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`shopee-btn ${activeTab === tab.id ? 'shopee-btn-primary' : 'shopee-btn-secondary'}`}
-              style={{ fontSize: '13px', padding: '7px 16px', borderRadius: '20px' }}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
+          ].map((tab) => {
+            const count = getTabCount(tab.id);
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                className={`shopee-btn ${activeTab === tab.id ? 'shopee-btn-primary' : 'shopee-btn-secondary'}`}
+                style={{ fontSize: '13px', padding: '7px 16px', borderRadius: '20px', whiteSpace: 'nowrap' }}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label} {count > 0 && `(${count})`}
+              </button>
+            );
+          })}
         </div>
 
         {/* Orders List */}
