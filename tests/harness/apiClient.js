@@ -262,6 +262,52 @@ class ApiClient {
     const user = this.oracle.verifyToken(token);
     return this.oracle.markAllNotificationsAsRead(user.id);
   }
+
+  // --- Feature 48: Recently Viewed Products (R2) ---
+  async recordRecentlyViewed(product, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.recordRecentlyViewed(user.id, product);
+  }
+
+  async getRecentlyViewed(token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.getRecentlyViewed(user.id);
+  }
+
+  async clearRecentlyViewed(token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.clearRecentlyViewed(user.id);
+  }
+
+  // --- Feature 49: Product Community Q&A (R3) ---
+  async createQuestion(productId, payload, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.createQuestion(user.id, productId, payload);
+  }
+
+  async answerQuestion(productId, questionId, answerText, answeredBy) {
+    return this.oracle.answerQuestion(productId, questionId, answerText, answeredBy);
+  }
+
+  async voteQuestion(productId, questionId, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.voteQuestion(user.id, productId, questionId);
+  }
+
+  async getProductQuestions(productId) {
+    return this.oracle.getProductQuestions(productId);
+  }
+
+  // --- Feature 50: Live SPX Express Logistics & VAT Invoice (R1, R4) ---
+  async getOrderTracking(orderId, token) {
+    this.oracle.verifyToken(token);
+    return this.oracle.getOrderTracking(orderId);
+  }
+
+  async getOrderInvoice(orderId, token) {
+    this.oracle.verifyToken(token);
+    return this.oracle.getOrderInvoice(orderId);
+  }
 }
 
 export const api = new ApiClient();

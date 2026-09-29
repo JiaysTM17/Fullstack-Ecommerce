@@ -726,4 +726,309 @@ describe("Tier 1 - Subsystem 7: Buyer Experience Expansion (R1-R5)", () => {
       expect.equal(user2Notifs[0].title, "User 2 Private Notif");
     });
   });
+
+  // =========================================================================
+  // FEATURE 48: Recently Viewed Products History & Persistence (R2) - 10 Tests
+  // =========================================================================
+  describe("Feature 48: Recently Viewed Products History & Persistence (R2)", () => {
+    test("F48-T1: Recording a viewed product stores it with viewedAt timestamp", async () => {
+      const prod = { id: "p-view-1", name: "Áo Thun Oversize", price: 120000, image: "/img/1.png" };
+      await api.recordRecentlyViewed(prod, buyer.token);
+
+      const list = await api.getRecentlyViewed(buyer.token);
+      expect.equal(list.length, 1);
+      expect.equal(list[0].id, "p-view-1");
+      expect.ok(list[0].viewedAt);
+    });
+
+    test("F48-T2: Viewing same product multiple times deduplicates and pushes to front", async () => {
+      const p1 = { id: "p-1", name: "Sản phẩm 1", price: 100000 };
+      const p2 = { id: "p-2", name: "Sản phẩm 2", price: 200000 };
+
+      await api.recordRecentlyViewed(p1, buyer.token);
+      await api.recordRecentlyViewed(p2, buyer.token);
+      // View p1 again
+      await api.recordRecentlyViewed(p1, buyer.token);
+
+      const list = await api.getRecentlyViewed(buyer.token);
+      expect.equal(list.length, 2);
+      expect.equal(list[0].id, "p-1");
+      expect.equal(list[1].id, "p-2");
+    });
+
+    test("F48-T3: FIFO / capacity limit: Maximum 20 products kept in recently viewed list", async () => {
+      for (let i = 1; i <= 25; i++) {
+        await api.recordRecentlyViewed({ id: `p-bulk-${i}`, name: `Item ${i}`, price: i * 1000 }, buyer.token);
+      }
+
+      const list = await api.getRecentlyViewed(buyer.token);
+      expect.equal(list.length, 20);
+      expect.equal(list[0].id, "p-bulk-25"); // latest
+    });
+
+    test("F48-T4: Clear history empties the user's recently viewed list", async () => {
+      await api.recordRecentlyViewed({ id: "p-clear-1", name: "Item to clear" }, buyer.token);
+      expect.ok((await api.getRecentlyViewed(buyer.token)).length > 0);
+
+      await api.clearRecentlyViewed(buyer.token);
+      const list = await api.getRecentlyViewed(buyer.token);
+      expect.equal(list.length, 0);
+    });
+
+    test("F48-T5: Recently viewed list isolates products between different buyers", async () => {
+      const buyer2 = await api.register({ email: "buyer2_recent@test.vn", password: "Password123!", fullName: "Buyer 2" });
+
+      await api.recordRecentlyViewed({ id: "p-b1", name: "Buyer 1 Item" }, buyer.token);
+      await api.recordRecentlyViewed({ id: "p-b2", name: "Buyer 2 Item" }, buyer2.token);
+
+      const list1 = await api.getRecentlyViewed(buyer.token);
+      const list2 = await api.getRecentlyViewed(buyer2.token);
+
+      expect.equal(list1.some((p) => p.id === "p-b1"), true);
+      expect.equal(list1.some((p) => p.id === "p-b2"), false);
+      expect.equal(list2.some((p) => p.id === "p-b2"), true);
+      expect.equal(list2.some((p) => p.id === "p-b1"), false);
+    });
+
+    test("F48-T6: Recording product without valid id is safely ignored without throwing", async () => {
+      await api.clearRecentlyViewed(buyer.token);
+      await api.recordRecentlyViewed(null, buyer.token);
+      await api.recordRecentlyViewed({}, buyer.token);
+
+      const list = await api.getRecentlyViewed(buyer.token);
+      expect.equal(list.length, 0);
+    });
+
+    test("F48-T7: Recently viewed item preserves all product properties (price, name, image)", async () => {
+      const prod = { id: "p-full-data", name: "Tai nghe Bluetooth", price: 350000, image: "/headphone.jpg", shopName: "Audio Store" };
+      await api.recordRecentlyViewed(prod, buyer.token);
+
+      const list = await api.getRecentlyViewed(buyer.token);
+      const found = list.find((p) => p.id === "p-full-data");
+      expect.ok(found);
+      expect.equal(found.name, "Tai nghe Bluetooth");
+      expect.equal(found.price, 350000);
+      expect.equal(found.shopName, "Audio Store");
+    });
+
+    test("F48-T8: Most recently viewed product is always first element in returned array", async () => {
+      await api.clearRecentlyViewed(buyer.token);
+      await api.recordRecentlyViewed({ id: "item-alpha", name: "Alpha" }, buyer.token);
+      await api.recordRecentlyViewed({ id: "item-beta", name: "Beta" }, buyer.token);
+      await api.recordRecentlyViewed({ id: "item-omega", name: "Omega" }, buyer.token);
+
+      const list = await api.getRecentlyViewed(buyer.token);
+      expect.equal(list[0].id, "item-omega");
+    });
+
+    test("F48-T9: Re-viewing an old item restores it to top position without duplicating length", async () => {
+      await api.clearRecentlyViewed(buyer.token);
+      await api.recordRecentlyViewed({ id: "item-1", name: "1" }, buyer.token);
+      await api.recordRecentlyViewed({ id: "item-2", name: "2" }, buyer.token);
+      await api.recordRecentlyViewed({ id: "item-3", name: "3" }, buyer.token);
+      expect.equal((await api.getRecentlyViewed(buyer.token)).length, 3);
+
+      await api.recordRecentlyViewed({ id: "item-1", name: "1" }, buyer.token);
+      const list = await api.getRecentlyViewed(buyer.token);
+      expect.equal(list.length, 3);
+      expect.equal(list[0].id, "item-1");
+    });
+
+    test("F48-T10: New buyer starts with an empty recently viewed array", async () => {
+      const freshBuyer = await api.register({ email: "fresh_buyer@test.vn", password: "Password123!", fullName: "Fresh Buyer" });
+      const list = await api.getRecentlyViewed(freshBuyer.token);
+      expect.equal(Array.isArray(list), true);
+      expect.equal(list.length, 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 49: Product Community Q&A System (R3) - 10 Tests
+  // =========================================================================
+  describe("Feature 49: Product Community Q&A System (R3)", () => {
+    const testProdId = "prod-qa-test-100";
+
+    test("F49-T1: Buyer can submit question for a product with question text and customer name", async () => {
+      const q = await api.createQuestion(testProdId, { questionText: "Sản phẩm này có chống nước không shop?", customerName: "Văn Kiệt" }, buyer.token);
+      expect.ok(q.id);
+      expect.equal(q.productId, testProdId);
+      expect.equal(q.questionText, "Sản phẩm này có chống nước không shop?");
+      expect.equal(q.customerName, "Văn Kiệt");
+      expect.equal(q.isAnswered, false);
+      expect.equal(q.upvotes, 0);
+    });
+
+    test("F49-T2: Empty question text is strictly rejected with QUESTION_TEXT_REQUIRED", async () => {
+      await expect.rejects(
+        () => api.createQuestion(testProdId, { questionText: "   " }, buyer.token),
+        /QUESTION_TEXT_REQUIRED/
+      );
+    });
+
+    test("F49-T3: Unanswered question initializes with isAnswered false and null answer", async () => {
+      const q = await api.createQuestion(testProdId, { questionText: "Bao nhiêu ngày có hàng?" }, buyer.token);
+      expect.equal(q.isAnswered, false);
+      expect.equal(q.answer, null);
+      expect.equal(q.answeredAt, null);
+    });
+
+    test("F49-T4: Shop owner or official can answer a question", async () => {
+      const q = await api.createQuestion(testProdId, { questionText: "Có màu đỏ không?" }, buyer.token);
+      const answered = await api.answerQuestion(testProdId, q.id, "Chào bạn, hiện tại shop có đủ size và màu đỏ bạn nhé!", "Shop Official");
+
+      expect.equal(answered.isAnswered, true);
+      expect.equal(answered.answer, "Chào bạn, hiện tại shop có đủ size và màu đỏ bạn nhé!");
+      expect.equal(answered.answeredBy, "Shop Official");
+      expect.ok(answered.answeredAt);
+    });
+
+    test("F49-T5: Answering non-existent question is rejected with QUESTION_NOT_FOUND", async () => {
+      await expect.rejects(
+        () => api.answerQuestion(testProdId, "non-existent-q-id", "Câu trả lời"),
+        /QUESTION_NOT_FOUND/
+      );
+    });
+
+    test("F49-T6: Buyer can upvote a helpful question", async () => {
+      const q = await api.createQuestion(testProdId, { questionText: "Có hỗ trợ xuất hóa đơn VAT không?" }, buyer.token);
+      const res = await api.voteQuestion(testProdId, q.id, buyer.token);
+
+      expect.equal(res.upvotes, 1);
+      expect.equal(res.hasVoted, true);
+    });
+
+    test("F49-T7: Upvoting again by same user toggles/removes upvote", async () => {
+      const q = await api.createQuestion(testProdId, { questionText: "Chất liệu là gì?" }, buyer.token);
+      await api.voteQuestion(testProdId, q.id, buyer.token); // +1
+      const res2 = await api.voteQuestion(testProdId, q.id, buyer.token); // toggle off
+
+      expect.equal(res2.upvotes, 0);
+      expect.equal(res2.hasVoted, false);
+    });
+
+    test("F49-T8: Multiple users can upvote, accumulating upvote count accurately", async () => {
+      const buyer3 = await api.register({ email: "buyer3_qa@test.vn", password: "Password123!", fullName: "Buyer 3" });
+      const q = await api.createQuestion(testProdId, { questionText: "Chính sách bảo hành bao lâu?" }, buyer.token);
+
+      await api.voteQuestion(testProdId, q.id, buyer.token);
+      const res = await api.voteQuestion(testProdId, q.id, buyer3.token);
+
+      expect.equal(res.upvotes, 2);
+    });
+
+    test("F49-T9: Product questions list contains all questions for that product in reverse chronological order", async () => {
+      const prodX = "prod-qa-list-999";
+      await api.createQuestion(prodX, { questionText: "Câu 1" }, buyer.token);
+      await api.createQuestion(prodX, { questionText: "Câu 2" }, buyer.token);
+
+      const questions = await api.getProductQuestions(prodX);
+      expect.equal(questions.length, 2);
+      expect.equal(questions[0].questionText, "Câu 2");
+    });
+
+    test("F49-T10: Questions for different products are properly isolated", async () => {
+      const prodA = "prod-qa-isolation-a";
+      const prodB = "prod-qa-isolation-b";
+
+      await api.createQuestion(prodA, { questionText: "Hỏi sp A" }, buyer.token);
+      await api.createQuestion(prodB, { questionText: "Hỏi sp B" }, buyer.token);
+
+      const qA = await api.getProductQuestions(prodA);
+      const qB = await api.getProductQuestions(prodB);
+
+      expect.equal(qA.length, 1);
+      expect.equal(qA[0].questionText, "Hỏi sp A");
+      expect.equal(qB.length, 1);
+      expect.equal(qB[0].questionText, "Hỏi sp B");
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 50: Live SPX Express Logistics & VAT Invoice (R1, R4) - 10 Tests
+  // =========================================================================
+  describe("Feature 50: Live SPX Express Logistics & VAT Invoice (R1, R4)", () => {
+    let testOrder;
+
+    test("F50-T1: Get tracking returns SPX tracking code starting with SPXVN", async () => {
+      const payload = generateCartPayload([{ price: 200000, quantity: 1 }]);
+      testOrder = await api.createOrder(payload, buyer.token);
+
+      const tracking = await api.getOrderTracking(testOrder.id, buyer.token);
+      expect.ok(tracking.trackingCode);
+      expect.ok(tracking.trackingCode.startsWith("SPXVN"));
+      expect.equal(tracking.carrier, "SPX Express Standard");
+    });
+
+    test("F50-T2: Tracking details include courier name, phone, vehicle, and rating", async () => {
+      const tracking = await api.getOrderTracking(testOrder.id, buyer.token);
+      expect.ok(tracking.courier);
+      expect.ok(tracking.courier.name);
+      expect.ok(tracking.courier.phone);
+      expect.ok(tracking.courier.vehicle);
+      expect.ok(tracking.courier.rating >= 4.0);
+    });
+
+    test("F50-T3: Tracking provides current GPS coordinates (lat, lng) and facility address", async () => {
+      const tracking = await api.getOrderTracking(testOrder.id, buyer.token);
+      expect.ok(tracking.currentLocation);
+      expect.ok(typeof tracking.currentLocation.lat === "number");
+      expect.ok(typeof tracking.currentLocation.lng === "number");
+      expect.ok(tracking.currentLocation.address);
+    });
+
+    test("F50-T4: Checkpoints array contains 4 delivery stages", async () => {
+      const tracking = await api.getOrderTracking(testOrder.id, buyer.token);
+      expect.equal(Array.isArray(tracking.checkpoints), true);
+      expect.equal(tracking.checkpoints.length, 4);
+      expect.equal(tracking.checkpoints[0].code, "confirmed");
+      expect.equal(tracking.checkpoints[1].code, "warehouse_pickup");
+      expect.equal(tracking.checkpoints[2].code, "hub_transit");
+      expect.equal(tracking.checkpoints[3].code, "out_for_delivery");
+    });
+
+    test("F50-T5: Estimated delivery string is provided in response", async () => {
+      const tracking = await api.getOrderTracking(testOrder.id, buyer.token);
+      expect.ok(tracking.estimatedDelivery);
+      expect.ok(tracking.estimatedDelivery.length > 0);
+    });
+
+    test("F50-T6: VAT invoice generates unique invoiceNumber matching INV-2026 format", async () => {
+      const invoice = await api.getOrderInvoice(testOrder.id, buyer.token);
+      expect.ok(invoice.invoiceNumber);
+      expect.ok(invoice.invoiceNumber.startsWith("INV-2026-"));
+      expect.equal(invoice.orderId, testOrder.id);
+    });
+
+    test("F50-T7: VAT rate is standardized at 8% (0.08)", async () => {
+      const invoice = await api.getOrderInvoice(testOrder.id, buyer.token);
+      expect.equal(invoice.vatRate, 0.08);
+    });
+
+    test("F50-T8: VAT amount and totalWithVat are computed correctly from order subtotal", async () => {
+      const invoice = await api.getOrderInvoice(testOrder.id, buyer.token);
+      const expectedVat = Math.round(invoice.subtotal * 0.08);
+      expect.equal(invoice.vatAmount, expectedVat);
+      expect.equal(invoice.totalWithVat, invoice.subtotal + expectedVat);
+    });
+
+    test("F50-T9: VAT invoice includes valid digitalSignature and QR verification URL", async () => {
+      const invoice = await api.getOrderInvoice(testOrder.id, buyer.token);
+      expect.ok(invoice.digitalSignature);
+      expect.ok(invoice.digitalSignature.includes("SHA256"));
+      expect.ok(invoice.qrCodeUrl);
+      expect.ok(invoice.qrCodeUrl.includes(testOrder.id));
+    });
+
+    test("F50-T10: Unauthenticated request for tracking or invoice requires valid auth token", async () => {
+      await expect.rejects(
+        () => api.getOrderTracking(testOrder.id, "invalid_or_expired_token"),
+        /UNAUTHORIZED/
+      );
+      await expect.rejects(
+        () => api.getOrderInvoice(testOrder.id, "invalid_or_expired_token"),
+        /UNAUTHORIZED/
+      );
+    });
+  });
 });
+

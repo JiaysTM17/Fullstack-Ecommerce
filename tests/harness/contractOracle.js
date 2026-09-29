@@ -24,6 +24,8 @@ export class ContractOracle {
     this.userClaimedVouchers = new Map(); // userId -> Set of voucher codes
     this.coinTransactions = new Map(); // userId -> Array of coin transaction objects
     this.userNotifications = new Map(); // userId -> Array of notification objects
+    this.recentlyViewed = new Map(); // userId -> Array of product objects
+    this.questions = new Map(); // productId -> Array of question objects
     this.initDefaultFixtures();
   }
 
@@ -1453,6 +1455,142 @@ export class ContractOracle {
       }
     }
     return { unreadCount: 0, markedCount: count };
+  }
+
+  // --- Feature 48: Recently Viewed Products History & Persistence (R2) ---
+  recordRecentlyViewed(userId, product) {
+    if (!product || !product.id) return [];
+    let list = this.recentlyViewed.get(userId) || [];
+    list = list.filter((p) => p.id !== product.id);
+    list.unshift({
+      ...product,
+      viewedAt: new Date().toISOString(),
+    });
+    if (list.length > 20) {
+      list.length = 20;
+    }
+    this.recentlyViewed.set(userId, list);
+    return list;
+  }
+
+  getRecentlyViewed(userId) {
+    return this.recentlyViewed.get(userId) || [];
+  }
+
+  clearRecentlyViewed(userId) {
+    this.recentlyViewed.set(userId, []);
+    return [];
+  }
+
+  // --- Feature 49: Product Community Q&A System (R3) ---
+  createQuestion(userId, productId, { questionText, customerName = "Người mua" }) {
+    if (!questionText || questionText.trim().length === 0) {
+      throw new Error("QUESTION_TEXT_REQUIRED");
+    }
+    const list = this.questions.get(productId) || [];
+    const question = {
+      id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      productId,
+      userId,
+      customerName,
+      questionText: questionText.trim(),
+      askedAt: new Date().toISOString(),
+      isAnswered: false,
+      answer: null,
+      answeredAt: null,
+      answeredBy: null,
+      upvotes: 0,
+      votedUsers: [],
+    };
+    list.unshift(question);
+    this.questions.set(productId, list);
+    return question;
+  }
+
+  answerQuestion(productId, questionId, answerText, answeredBy = "Shop Official") {
+    const list = this.questions.get(productId) || [];
+    const q = list.find((item) => item.id === questionId);
+    if (!q) throw new Error("QUESTION_NOT_FOUND");
+    q.answer = answerText;
+    q.isAnswered = true;
+    q.answeredAt = new Date().toISOString();
+    q.answeredBy = answeredBy;
+    return q;
+  }
+
+  voteQuestion(userId, productId, questionId) {
+    const list = this.questions.get(productId) || [];
+    const q = list.find((item) => item.id === questionId);
+    if (!q) throw new Error("QUESTION_NOT_FOUND");
+    if (!q.votedUsers) q.votedUsers = [];
+    const alreadyVoted = q.votedUsers.includes(userId);
+    if (alreadyVoted) {
+      q.votedUsers = q.votedUsers.filter((u) => u !== userId);
+      q.upvotes = Math.max(0, q.upvotes - 1);
+    } else {
+      q.votedUsers.push(userId);
+      q.upvotes += 1;
+    }
+    return { upvotes: q.upvotes, hasVoted: !alreadyVoted };
+  }
+
+  getProductQuestions(productId) {
+    return this.questions.get(productId) || [];
+  }
+
+  // --- Feature 50: Live SPX Express Logistics & VAT Invoice (R1, R4) ---
+  getOrderTracking(orderId) {
+    const order = this.orders.get(orderId);
+    const trackingCode = `SPXVN${orderId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 10).toUpperCase()}`;
+    const status = order ? order.status : "delivering";
+
+    const stages = [
+      { code: "confirmed", name: "Đã xác nhận đơn hàng", time: "09:00 29/09/2026", done: true },
+      { code: "warehouse_pickup", name: "Đã lấy hàng từ người bán", time: "11:30 29/09/2026", done: true },
+      { code: "hub_transit", name: "Đến kho trung chuyển SOC", time: "14:15 29/09/2026", done: status === "delivering" || status === "delivered" },
+      { code: "out_for_delivery", name: "Đang giao đến người mua", time: "16:45 29/09/2026", done: status === "delivered" }
+    ];
+
+    return {
+      orderId,
+      trackingCode,
+      carrier: "SPX Express Standard",
+      status,
+      courier: {
+        name: "Nguyễn Văn Hùng",
+        phone: "0982345678",
+        vehicle: "Honda Wave Alpha (29-X1 987.65)",
+        rating: 4.95,
+      },
+      currentLocation: {
+        lat: 21.028511,
+        lng: 105.854444,
+        address: "Kho phân loại SOC Hà Nội",
+      },
+      checkpoints: stages,
+      estimatedDelivery: "Trong ngày hôm nay - Trước 18:00",
+    };
+  }
+
+  getOrderInvoice(orderId) {
+    const order = this.orders.get(orderId);
+    const subtotal = order ? (order.subtotal || order.total || 100000) : 100000;
+    const vatRate = 0.08;
+    const vatAmount = Math.round(subtotal * vatRate);
+    const totalWithVat = subtotal + vatAmount;
+
+    return {
+      invoiceNumber: `INV-2026-${orderId.slice(-6).toUpperCase()}`,
+      orderId,
+      issueDate: new Date().toISOString(),
+      vatRate,
+      subtotal,
+      vatAmount,
+      totalWithVat,
+      buyerTaxCode: "0109988776",
+      digitalSignature: "SHA256:MINI-SHOPEE-E-INVOICE-VALIDATED-SECURE",
+      qrCodeUrl: `https://invoice.shopee.vn/verify/${orderId}`,
+    };
   }
 }
 
