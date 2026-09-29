@@ -239,3 +239,46 @@ Phát hành mã khuyến mãi toàn sàn (Flash Sale, Siêu Sale Ngày Đôi).
 
 ### `DELETE /api/admin/vouchers/:id`
 Hủy hoặc thu hồi mã khuyến mãi.
+
+---
+
+## 10. Mở Rộng Nghiệp Vụ Người Mua & Vận Chuyển (Buyer Experience & Logistics API)
+
+### `GET /api/orders/:id/tracking`
+Tra cứu hành trình vận chuyển thời gian thực của đơn hàng qua đơn vị vận chuyển SPX Express:
+- **Header:** `Authorization: Bearer <token>`
+- **Response:**
+  - `trackingCode`: Mã vận đơn SPX (ví dụ: `SPXVNORD123456`)
+  - `carrier`: Đơn vị vận chuyển (`SPX Express Standard`)
+  - `courier`: Thông tin bưu tá (họ tên, số điện thoại, biển số xe, điểm đánh giá 4.95⭐)
+  - `currentLocation`: Tọa độ GPS thời gian thực (lat, lng) và địa chỉ bưu cục hiện tại
+  - `checkpoints`: Mảng tiến trình 4 giai đoạn (`confirmed`, `warehouse_pickup`, `hub_transit`, `out_for_delivery`)
+
+### `GET /api/orders/:id/invoice`
+Tạo và xuất dữ liệu hóa đơn điện tử giá trị gia tăng (E-Invoice):
+- **Header:** `Authorization: Bearer <token>`
+- **Response:**
+  - `invoiceNumber`: Ký hiệu số hóa đơn điện tử (ví dụ: `INV-2026-ORD123`)
+  - `vatRate`: Thuế suất giá trị gia tăng quy định (8% / 0.08)
+  - `subtotal`: Tổng tiền hàng trước thuế
+  - `vatAmount`: Tiền thuế VAT được khấu trừ
+  - `totalWithVat`: Tổng tiền thanh toán đã bao gồm thuế
+  - `buyerTaxCode`: Mã số thuế người mua
+  - `digitalSignature`: Chữ ký điện tử bảo mật SHA-256
+  - `qrCodeUrl`: Đường dẫn mã QR xác thực hóa đơn trực tuyến
+
+### `GET /api/products/:id/questions`
+Lấy danh sách các câu hỏi cộng đồng và phản hồi của người bán cho sản phẩm:
+- **Response:** Mảng danh sách câu hỏi kèm câu trả lời của Shop, thời gian phản hồi và số lượt upvote hữu ích.
+
+### `POST /api/products/:id/questions`
+Người mua gửi câu hỏi thắc mắc mới về sản phẩm:
+- **Header:** `Authorization: Bearer <token>` (Tùy chọn)
+- **Request Body:** `{ "questionText": "Sản phẩm có sẵn hàng không shop?", "customerName": "Kiệt Trương" }`
+- **Response:** Bản ghi câu hỏi mới khởi tạo (`isAnswered: false`, `upvotes: 0`).
+
+### `POST /api/products/:id/questions/:questionId/vote`
+Bình chọn (hoặc bỏ bình chọn) câu hỏi hữu ích:
+- **Request Body:** `{ "userId": "usr-123" }`
+- **Response:** `{ "success": true, "upvotes": 5, "hasVoted": true }`
+

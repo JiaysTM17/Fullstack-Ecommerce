@@ -1,8 +1,8 @@
 # 🧪 Chiến Lược & Tài Liệu Kiểm Thử Tự Động (Quality Assurance & Automated Testing Architecture)
 
-> **Tỷ lệ vượt qua:** `500/500 tests passed (100% Pass Rate)`  
+> **Tỷ lệ vượt qua:** `530/530 tests passed (100% Pass Rate)`  
 > **Thời gian thực thi:** `~0.15 giây`  
-> **Phạm vi bảo phủ:** Unit Tests, Integration Tests, Boundary Tests, Real-world E2E Workflows, Buyer Experience Expansion (Features 43-47)
+> **Phạm vi bảo phủ:** Unit Tests, Integration Tests, Boundary Tests, Real-world E2E Workflows, Buyer Experience Expansion (Features 43-50)
 
 ---
 
@@ -10,7 +10,7 @@
 1. [Triết Lý Kiểm Thử (Testing Philosophy)](#1-triết-lý-kiểm-thử-testing-philosophy)
 2. [Cấu Trúc Khung Kiểm Thử (Testing Harness Architecture)](#2-cấu-trúc-khung-kiểm-thử-testing-harness-architecture)
 3. [Phân Tích 4 Tầng Kiểm Thử (The 4-Tier Test Suite)](#3-phân-tích-4-tầng-kiểm-thử-the-4-tier-test-suite)
-   * [Tier 1: Core Features & Buyer Experience Expansion (260 tests)](#tier-1-core-features--buyer-experience-expansion-260-tests)
+   * [Tier 1: Core Features & Buyer Experience Phase 1 & 2 (290 tests)](#tier-1-core-features--buyer-experience-phase-1--2-290-tests)
    * [Tier 2: Boundary & Validation (210 tests)](#tier-2-boundary--validation-210-tests)
    * [Tier 3: Combinations & State Permutations (20 tests)](#tier-3-combinations--state-permutations-20-tests)
    * [Tier 4: Real-world Scenarios (10 tests)](#tier-4-real-world-scenarios-10-tests)
@@ -62,14 +62,25 @@ tests/
 
 ## 3. Phân Tích 4 Tầng Kiểm Thử (The 4-Tier Test Suite)
 
-### Tier 1: Core Features (115 tests)
-Tập trung kiểm thử tính chính xác của các đơn vị logic cơ bản:
-* **Quản lý Giỏ hàng:** Thêm sản phẩm, thay đổi số lượng, xóa từng món, làm trống giỏ hàng, tính tổng tiền tạm tính (`subtotal`).
-* **Bộ lọc & Phân loại:** Lọc theo ngành hàng, khoảng giá `minPrice - maxPrice`, sắp xếp theo giá tăng/giảm, bán chạy.
-* **Phân trang & Tìm kiếm:** Thuật toán phân trang mượt mà, tìm kiếm không phân biệt chữ hoa/thường, gợi ý từ khóa.
-* **Hệ thống Mã giảm giá đơn:** Áp dụng mã phần trăm (%) và mã tiền mặt (cố định), kiểm tra trừ tiền chính xác.
+### Tier 1: Core Features & Buyer Experience Phase 1 & 2 (290 tests)
+Tập trung kiểm thử tính chính xác của 50 tính năng độc lập thuộc 7 phân hệ chính:
+* **Phân hệ 1 - RBAC & Xác thực:** Đăng ký, đăng nhập, bảo vệ token JWT, phân quyền 3 cấp (Admin, Seller, Customer), Tenant Isolation.
+* **Phân hệ 2 - Voucher & Khuyến mãi:** Voucher giảm %, voucher cố định, mã miễn phí vận chuyển Freeship, thuật toán Smart Ranking.
+* **Phân hệ 3 - AI Chatbot & Handover:** Phiên hội thoại tự động, gợi ý sản phẩm 1-click, nhận diện giọng nói tiếng Việt, chuyển giao tư vấn viên Kim Ngân kèm âm thanh chuông.
+* **Phân hệ 4 - Quản trị đơn & Hậu mãi:** Tạo đơn, hủy đơn hoàn tồn kho, quy trình hoàn tiền / đổi trả bảo hành, phân xử tranh chấp.
+* **Phân hệ 5 - Danh mục & Tìm kiếm:** Lọc đa tiêu chí, phân trang nghiêm ngặt 16 items/page, sắp xếp đa chiều, sản phẩm giao nhanh.
+* **Phân hệ 6 - Chất lượng mã nguồn & Audit:** Kiểm tra tuân thủ kiến trúc, tối ưu bundle, xử lý lỗi an toàn.
+* **Phân hệ 7 - Nâng cấp Trải nghiệm Người mua Phase 1 & 2 (Features 43 - 50):**
+  * *F43:* Sổ địa chỉ đa điểm (Multi-Address Book CRUD).
+  * *F44:* Đánh giá sản phẩm sau mua & thưởng +200 Mini Xu.
+  * *F45:* Mua lại đơn hàng cũ 1-click (Repurchase Order).
+  * *F46:* Ví voucher cá nhân & Gamification chuỗi điểm danh 7 ngày.
+  * *F47:* Trung tâm thông báo đa phân loại (Order, Promo, Voucher, System).
+  * *F48:* Lịch sử sản phẩm đã xem gần đây (Recently Viewed Storage & Deduplication).
+  * *F49:* Cộng đồng Hỏi & Đáp sản phẩm (Product Community Q&A & Helpful Upvotes).
+  * *F50:* Tra cứu vận đơn SPX Express thời gian thực & Xuất hóa đơn VAT 8%.
 
-### Tier 2: Boundary & Validation (110 tests)
+### Tier 2: Boundary & Validation (210 tests)
 Kiểm tra sức chịu đựng của hệ thống khi đối mặt với các giá trị bất thường hoặc cố tình gian lận:
 * **Tồn kho biên:** Đặt hàng vượt số lượng tồn thực tế, số lượng bằng `0`, số lượng âm (`-1`), số lượng không phải số nguyên (`1.5`, `"abc"`).
 * **Điều kiện Voucher khắt khe:**
@@ -107,7 +118,7 @@ Mô phỏng hành trình người dùng xuyên suốt từ lúc đăng ký đế
 
 ### Cách 1: Chạy bằng Node.js trực tiếp (Mọi hệ điều hành)
 ```bash
-# Thực thi toàn bộ 450 tests
+# Thực thi toàn bộ 530 tests
 node tests/run-all.js
 ```
 
