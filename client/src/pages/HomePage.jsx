@@ -161,6 +161,7 @@ export default function HomePage() {
   const hasActiveFilters = Boolean(
     filters.keyword ||
     filters.category ||
+    filters.brand ||
     filters.minPrice ||
     filters.maxPrice ||
     filters.minRating ||

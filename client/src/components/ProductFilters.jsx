@@ -49,6 +49,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
 
   const hasActiveFilters = Boolean(
     filters.category ||
+    filters.brand ||
     filters.shopId ||
     filters.minPrice ||
     filters.maxPrice ||
@@ -80,7 +81,29 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
         </div>
       </div>
 
-      {/* 2. Shop Filter */}
+      {/* 2. Brand Filter (Hãng / Thương hiệu) */}
+      <div className="shopee-filter-section">
+        <h4 className="shopee-filter-title">{t('filter_brands', 'Thương Hiệu / Hãng')}</h4>
+        <div className="shopee-filter-list" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+          <div
+            className={`shopee-filter-item ${!filters.brand ? "active" : ""}`}
+            onClick={() => onFilterChange("brand", "")}
+          >
+            <span>🏷️ {t('all_brands', 'Tất cả thương hiệu')}</span>
+          </div>
+          {["Apple", "Samsung", "Sony", "Xiaomi", "Asus", "Dell", "Nike", "Adidas", "Lock&Lock", "Dyson", "Shopee Basic", "Elegance"].map((b) => (
+            <div
+              key={b}
+              className={`shopee-filter-item ${filters.brand === b ? "active" : ""}`}
+              onClick={() => onFilterChange("brand", filters.brand === b ? "" : b)}
+            >
+              <span>• {b}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. Shop Filter */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title">{t('filter_official_shops', 'Cửa Hàng (Shop Chính Hãng)')}</h4>
         <div className="shopee-filter-list" style={{ maxHeight: '240px', overflowY: 'auto' }}>
@@ -110,7 +133,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
         </div>
       </div>
 
-      {/* 3. Fast Delivery */}
+      {/* 4. Fast Delivery */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title">{t('filter_shipping', 'Vận Chuyển')}</h4>
         <label className="shopee-filter-item">

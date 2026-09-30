@@ -1,5 +1,748 @@
 [
   {
+    "_id": "prod_flagship_01",
+    "id": "prod_flagship_01",
+    "name": "Apple iPhone 18 Pro Max 1TB - Khung Titanium Sa Mạc (Chip A20 Pro 2nm, Camera Tiềm Vọng 200x)",
+    "slug": "apple-iphone-18-pro-max-1tb-titan-sa-mac",
+    "description": "iPhone 18 Pro Max là đỉnh cao công nghệ di động 2026 với chip Apple A20 Pro tiến trình 2nm siêu mạnh mẽ, camera tiềm vọng thế hệ mới zoom quang học 10x và zoom kỹ thuật số 200x AI. Màn hình OLED ProMotion 6.9 inch độ sáng kỷ lục 3200 nits hiển thị rực rỡ dưới ánh nắng chói chang, kết hợp sạc nhanh MagSafe 45W.",
+    "price": 41990000,
+    "originalPrice": 46990000,
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800",
+      "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800",
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "Apple",
+    "badge": "Amazon's Choice",
+    "stock": 45,
+    "sold": 1580,
+    "rating": 5,
+    "reviewCount": 420,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Titan Sa Mạc",
+        "Titan Tự Nhiên",
+        "Titan Đen Vũ Trụ",
+        "Titan Trắng"
+      ],
+      "capacities": [
+        "256GB",
+        "512GB",
+        "1TB"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Vi xử lý",
+        "value": "Apple A20 Pro (2nm) 6 nhân CPU & 6 nhân GPU"
+      },
+      {
+        "label": "Màn hình",
+        "value": "6.9 inch Super Retina XDR OLED, 120Hz ProMotion, 3200 nits"
+      },
+      {
+        "label": "Camera sau",
+        "value": "Chính 48MP Fused + Góc siêu rộng 48MP + Tiềm vọng 48MP 10x"
+      },
+      {
+        "label": "Dung lượng lưu trữ",
+        "value": "1TB NVMe tốc độ cao"
+      },
+      {
+        "label": "Pin & Sạc",
+        "value": "5100 mAh, sạc nhanh dây 45W, MagSafe 25W"
+      },
+      {
+        "label": "Chống nước & Bụi",
+        "value": "IP68 (độ sâu 6 mét trong 30 phút)"
+      },
+      {
+        "label": "Bảo hành",
+        "value": "12 tháng chính hãng Apple Care Việt Nam (1 đổi 1)"
+      }
+    ],
+    "createdAt": "2026-09-30T10:00:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_02",
+    "id": "prod_flagship_02",
+    "name": "Samsung Galaxy S25 Ultra 5G 512GB - Bút S-Pen AI Tích Hợp (Snapdragon 8 Gen 4 Galaxy)",
+    "slug": "samsung-galaxy-s25-ultra-5g-512gb",
+    "description": "Samsung Galaxy S25 Ultra mang đến kỷ nguyên Galaxy AI 2.0 toàn diện, trang bị chip Snapdragon 8 Gen 4 độc quyền cho tốc độ xử lý AI vượt bậc. Cảm biến camera 200MP bắt trọn màn đêm, thân máy Titanium viền mỏng đối xứng tuyệt mỹ và bút S-Pen thông minh với độ trễ chỉ 2.8ms.",
+    "price": 34990000,
+    "originalPrice": 38990000,
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800",
+      "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "Samsung",
+    "badge": "Best Seller",
+    "stock": 60,
+    "sold": 1890,
+    "rating": 4.9,
+    "reviewCount": 380,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Titan Xám Bạc",
+        "Titan Đen Onyx",
+        "Titan Tím Hoàng Gia",
+        "Titan Xanh Ngọc"
+      ],
+      "capacities": [
+        "256GB",
+        "512GB",
+        "1TB"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Vi xử lý",
+        "value": "Snapdragon 8 Gen 4 for Galaxy (3nm TSMC)"
+      },
+      {
+        "label": "Màn hình",
+        "value": "6.8 inch Dynamic AMOLED 2X, QHD+, 120Hz LTPO, Kính Gorilla Armor"
+      },
+      {
+        "label": "Camera sau",
+        "value": "200MP OIS + 50MP Periscope 5x + 50MP Ultra-wide + 10MP 3x"
+      },
+      {
+        "label": "Bút cảm ứng",
+        "value": "S-Pen Bluetooth tích hợp trong thân máy"
+      },
+      {
+        "label": "Pin & Sạc",
+        "value": "5500 mAh, sạc nhanh có dây 65W"
+      },
+      {
+        "label": "Bảo hành",
+        "value": "12 tháng chính hãng Samsung Vina"
+      }
+    ],
+    "createdAt": "2026-09-30T09:30:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_03",
+    "id": "prod_flagship_03",
+    "name": "Apple MacBook Pro 16 inch M4 Max (64GB RAM / 1TB SSD) - Space Black Chuyên Nghiệp",
+    "slug": "apple-macbook-pro-16-inch-m4-max-64gb-1tb",
+    "description": "MacBook Pro 16 inch trang bị chip M4 Max đỉnh cao với 16 nhân CPU và 40 nhân GPU, xử lý mượt mà render 3D 8K, huấn luyện mô hình LLM AI trực tiếp và biên tập phim điện ảnh. Màn hình Liquid Retina XDR với công nghệ phủ chống lóa Nano-texture cao cấp.",
+    "price": 89990000,
+    "originalPrice": 96990000,
+    "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800",
+      "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "Apple",
+    "badge": "Amazon's Choice",
+    "stock": 20,
+    "sold": 430,
+    "rating": 5,
+    "reviewCount": 195,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Không Gian (Space Black)",
+        "Bạc (Silver)"
+      ],
+      "sizes": [
+        "14 inch",
+        "16 inch"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chipset",
+        "value": "Apple M4 Max (16 CPU, 40 GPU, 16 Neural Engine)"
+      },
+      {
+        "label": "RAM Hợp nhất",
+        "value": "64GB Unified Memory (Băng thông 546 GB/s)"
+      },
+      {
+        "label": "Ổ cứng",
+        "value": "1TB SSD PCIe Gen 4 tốc độ đọc 7.4 GB/s"
+      },
+      {
+        "label": "Màn hình",
+        "value": "16.2 inch Liquid Retina XDR (3456 x 2234), 1600 nits đỉnh"
+      },
+      {
+        "label": "Cổng kết nối",
+        "value": "3x Thunderbolt 5, HDMI 2.1, Khe thẻ SDXC, MagSafe 3"
+      },
+      {
+        "label": "Thời lượng pin",
+        "value": "Lên tới 24 giờ sử dụng liên tục"
+      }
+    ],
+    "createdAt": "2026-09-30T09:00:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_04",
+    "id": "prod_flagship_04",
+    "name": "Laptop Gaming Asus ROG Zephyrus G16 (2026) - Intel Core Ultra 9 / RTX 5080 / Màn 2.5K 240Hz OLED",
+    "slug": "laptop-gaming-asus-rog-zephyrus-g16-2026-rtx-5080",
+    "description": "Quái vật gaming siêu mỏng nhẹ ROG Zephyrus G16 2026 sở hữu card đồ họa NVIDIA GeForce RTX 5080 thế hệ Blackwell cùng màn hình chuẩn điện ảnh ROG Nebula OLED 240Hz 0.2ms. Vỏ nhôm CNC nguyên khối với dải đèn Slash Lighting phong cách cyberpunk cực chất.",
+    "price": 68990000,
+    "originalPrice": 74990000,
+    "image": "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800",
+      "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "Asus",
+    "badge": "Best Seller",
+    "stock": 25,
+    "sold": 520,
+    "rating": 4.9,
+    "reviewCount": 160,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Eclipse Gray",
+        "Platinum White"
+      ],
+      "sizes": [
+        "16 inch OLED 240Hz"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "CPU",
+        "value": "Intel Core Ultra 9 285H (16 nhân, 22 luồng, NPU AI)"
+      },
+      {
+        "label": "Card đồ họa",
+        "value": "NVIDIA GeForce RTX 5080 16GB GDDR7 (TGP 125W)"
+      },
+      {
+        "label": "Màn hình",
+        "value": "16 inch 2.5K (2560x1600) OLED, 240Hz, 0.2ms, 100% DCI-P3, G-Sync"
+      },
+      {
+        "label": "RAM & Ổ cứng",
+        "value": "32GB LPDDR5X 7500MHz + 2TB SSD NVMe PCIe 4.0"
+      },
+      {
+        "label": "Trọng lượng",
+        "value": "Chỉ 1.85 kg, độ dày 1.49 cm"
+      }
+    ],
+    "createdAt": "2026-09-30T08:30:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_05",
+    "id": "prod_flagship_05",
+    "name": "Sony Alpha A7R V (ILCE-7RM5) Máy Ảnh Full-Frame 61MP Chống Rung 8 Stop & Quay Phim 8K AI",
+    "slug": "sony-alpha-a7r-v-ilce-7rm5-61mp-8k",
+    "description": "Tuyệt tác máy ảnh chuyên nghiệp Sony Alpha A7R V tích hợp chip AI nhận diện chủ thể theo thời gian thực (người, động vật, chim, xe, máy bay). Cảm biến Exmor R BSI CMOS 61 triệu điểm ảnh tái hiện chi tiết phi thường cho nhiếp ảnh gia thương mại.",
+    "price": 79990000,
+    "originalPrice": 86990000,
+    "image": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800",
+      "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "Sony",
+    "badge": "Amazon's Choice",
+    "stock": 15,
+    "sold": 290,
+    "rating": 5,
+    "reviewCount": 145,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Chuyên Nghiệp"
+      ],
+      "sizes": [
+        "Body Only",
+        "Body + Lens 24-70mm GM II"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Cảm biến",
+        "value": "61.0 MP Full-Frame Exmor R BSI CMOS Sensor"
+      },
+      {
+        "label": "Bộ xử lý",
+        "value": "BIONZ XR kép + Đơn vị xử lý AI chuyên dụng"
+      },
+      {
+        "label": "Chống rung",
+        "value": "Ổn định hình ảnh 5 trục 8.0 stop trong thân máy"
+      },
+      {
+        "label": "Quay phim",
+        "value": "8K 24p / 4K 60p 10-bit 4:2:2 All-Intra, S-Cinetone"
+      },
+      {
+        "label": "Bảo hành",
+        "value": "24 tháng chính hãng Sony Việt Nam"
+      }
+    ],
+    "createdAt": "2026-09-30T08:00:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_06",
+    "id": "prod_flagship_06",
+    "name": "Apple Watch Ultra 3 Titanium 49mm GPS + Cellular - Kính Sapphire Siêu Bền (Dây Alpine Loop)",
+    "slug": "apple-watch-ultra-3-titanium-49mm-gps-cellular",
+    "description": "Chiếc đồng hồ thể thao mạo hiểm tối thượng của Apple thế hệ thứ 3 với vỏ titan cấp 5 siêu nhẹ, màn hình micro-LED 3000 nits siêu sáng và còi báo động khẩn cấp 86dB. Hỗ trợ lặn biển chuyên nghiệp đạt chuẩn EN13319 cùng GPS băng tần kép L1 & L5 cực chính xác.",
+    "price": 21990000,
+    "originalPrice": 23990000,
+    "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "Apple",
+    "badge": "Best Seller",
+    "stock": 50,
+    "sold": 1450,
+    "rating": 4.9,
+    "reviewCount": 380,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Titanium Tự Nhiên",
+        "Titanium Đen Nhám"
+      ],
+      "sizes": [
+        "Dây Alpine Loop",
+        "Dây Trail Loop",
+        "Dây Ocean Band"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Kích thước & Chất liệu",
+        "value": "49mm Vỏ Titanium hàng không + Kính Sapphire phẳng"
+      },
+      {
+        "label": "Màn hình",
+        "value": "Always-On Retina micro-LED độ sáng 3000 nits"
+      },
+      {
+        "label": "Thời lượng pin",
+        "value": "36 giờ chế độ thường / 72 giờ chế độ tiết kiệm năng lượng"
+      },
+      {
+        "label": "Tính năng an toàn",
+        "value": "Phát hiện té ngã, Phát hiện va chạm xe, Còi báo động 86dB"
+      },
+      {
+        "label": "Kháng nước",
+        "value": "100m, lặn sâu 40m tiêu chuẩn quốc tế"
+      }
+    ],
+    "createdAt": "2026-09-30T07:30:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_07",
+    "id": "prod_flagship_07",
+    "name": "Tai Nghe Chống Ồn Cao Cấp Sony WH-1000XM6 Hi-Res Audio Wireless (Bộ Xử Lý QN3 Chống Ồn Kép)",
+    "slug": "tai-nghe-chong-on-sony-wh-1000xm6",
+    "description": "Đỉnh cao tai nghe chống ồn không dây thế hệ thứ 6 từ Sony với bộ xử lý HD QN3 và hệ thống 8 micro thu âm thông minh, triệt tiêu 99% tạp âm xung quanh. Hỗ trợ chuẩn âm thanh Hi-Res Audio Wireless LDAC, tự động điều chỉnh âm học theo dáng tai và môi trường.",
+    "price": 8490000,
+    "originalPrice": 9990000,
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800",
+      "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "Sony",
+    "badge": "Amazon's Choice",
+    "stock": 75,
+    "sold": 2310,
+    "rating": 4.95,
+    "reviewCount": 620,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "TechWorld Store",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Midnight",
+        "Bạc Bạch Kim (Silver)",
+        "Xanh Khói (Smoky Blue)"
+      ],
+      "sizes": [
+        "Tiêu chuẩn"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Công nghệ chống ồn",
+        "value": "Active Noise Cancelling kép HD Noise Cancelling Processor QN3"
+      },
+      {
+        "label": "Màng loa",
+        "value": "Dynamic Driver 30mm sợi carbon gia cường"
+      },
+      {
+        "label": "Thời lượng pin",
+        "value": "40 giờ (bật ANC), sạc nhanh 3 phút nghe được 3 giờ"
+      },
+      {
+        "label": "Kết nối",
+        "value": "Bluetooth 5.4, Multipoint đa thiết bị, cổng 3.5mm mạ vàng"
+      },
+      {
+        "label": "Trọng lượng",
+        "value": "245g êm ái, bọc da tổng hợp cao cấp"
+      }
+    ],
+    "createdAt": "2026-09-30T07:00:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_08",
+    "id": "prod_flagship_08",
+    "name": "Robot Hút Bụi Lau Nhà Ecovacs Deebot T30 Pro Omni (Giặt Giẻ Nước Nóng 70°C, Lực Hút 11.000Pa)",
+    "slug": "robot-hut-bui-ecovacs-deebot-t30-pro-omni",
+    "description": "Ecovacs Deebot T30 Pro Omni là siêu phẩm dọn dẹp thông minh 2026 với công nghệ TruEdge vươn giẻ lau sát mép góc chết 1mm và lực hút cực đại 11.000Pa. Trạm sạc All-in-One tự động giặt giẻ bằng nước nóng 70°C diệt khuẩn, sấy khô khí nóng và tự gom rác lên tới 90 ngày.",
+    "price": 18990000,
+    "originalPrice": 22990000,
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800",
+      "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "Ecovacs",
+    "badge": "Amazon's Choice",
+    "stock": 40,
+    "sold": 890,
+    "rating": 4.9,
+    "reviewCount": 275,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "HomePro Gia Dụng Thông Minh",
+    "shopRating": 4.88,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Trắng Sứ Tinh Tế",
+        "Đen Huyền Bí"
+      ],
+      "sizes": [
+        "Bản Tự Động Bơm Xả Nước",
+        "Bản Tiêu Chuẩn Kèm Bình Nước"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Lực hút",
+        "value": "11.000 Pa công nghệ quạt hút phản lực"
+      },
+      {
+        "label": "Công nghệ lau",
+        "value": "OZMO Turbo 2.0 xoay kép tốc độ cao + vươn giẻ TruEdge sát mép"
+      },
+      {
+        "label": "Trạm OMNI",
+        "value": "Tự giặt giẻ nước nóng 70°C, sấy khí nóng 45°C, tự động gom rác"
+      },
+      {
+        "label": "Điều hướng & Né tránh",
+        "value": "Laser dToF TrueDetect 3D 3.0 thế hệ mới, nhận diện vật thể mm"
+      },
+      {
+        "label": "Bảo hành",
+        "value": "24 tháng chính hãng tại Việt Nam"
+      }
+    ],
+    "createdAt": "2026-09-30T06:30:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_09",
+    "id": "prod_flagship_09",
+    "name": "Máy Lọc Không Khí Kiêm Quạt Không Cánh Dyson Purifier Hot+Cool Formaldehyde HP09",
+    "slug": "dyson-purifier-hot-cool-formaldehyde-hp09",
+    "description": "Thiết bị lọc khí và điều hòa không gian Dyson HP09 tích hợp cảm biến xúc tác bán dẫn phát hiện và phân hủy liên tục khí độc Formaldehyde thành nước và CO2. Màng lọc HEPA H13 kín khít 360 độ giữ lại 99.97% hạt bụi mịn PM0.1, phấn hoa và vi rút.",
+    "price": 21490000,
+    "originalPrice": 24990000,
+    "image": "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "Dyson",
+    "badge": "Best Seller",
+    "stock": 30,
+    "sold": 670,
+    "rating": 4.95,
+    "reviewCount": 210,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "HomePro Gia Dụng Thông Minh",
+    "shopRating": 4.88,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Vàng Trắng (Nickel / Gold)",
+        "Bạc Đồng (Silver / Gold)"
+      ],
+      "sizes": [
+        "Chiều cao 76.4 cm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Công nghệ",
+        "value": "Air Multiplier tuần hoàn luồng không khí thanh lọc khắp phòng"
+      },
+      {
+        "label": "Bộ lọc",
+        "value": "Bộ lọc xúc tác Cryptomic vĩnh cửu + HEPA H13 tiêu chuẩn y tế"
+      },
+      {
+        "label": "Chức năng 3 trong 1",
+        "value": "Lọc không khí + Quạt mát mùa hè + Sưởi ấm mùa đông"
+      },
+      {
+        "label": "Điều khiển",
+        "value": "Màn hình LCD hiển thị chất lượng khí trực tiếp, kết nối App MyDyson"
+      },
+      {
+        "label": "Bảo hành",
+        "value": "2 năm chính hãng Dyson toàn cầu"
+      }
+    ],
+    "createdAt": "2026-09-30T06:00:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_10",
+    "id": "prod_flagship_10",
+    "name": "Giày Chạy Bộ Marathon Nike Air Zoom Alphafly 3 Premium - Đế Đệm ZoomX & Đĩa Đệm Carbon Flyplate",
+    "slug": "giay-chay-bo-nike-air-zoom-alphafly-3",
+    "description": "Đôi giày phá kỷ lục thế giới cự ly Marathon đỉnh cao nhất hành tinh Nike Alphafly 3. Cấu trúc đế kép gồm hai túi đệm Air Zoom ở bàn chân trước, lớp bọt ZoomX siêu nhẹ hoàn trả năng lượng tối đa và đĩa sợi carbon Flyplate toàn chiều dài giúp đẩy bạn về phía trước trong từng bước chạy.",
+    "price": 7490000,
+    "originalPrice": 8500000,
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+      "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "Nike",
+    "badge": "Amazon's Choice",
+    "stock": 55,
+    "sold": 1420,
+    "rating": 4.9,
+    "reviewCount": 390,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "SportZone Thể Thao & Dã Ngoại",
+    "shopRating": 4.91,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Volt Cam Lửa (Proto)",
+        "Trắng Ngọc / Xanh Mint",
+        "Đen Triple Black"
+      ],
+      "sizes": [
+        "39",
+        "40",
+        "41",
+        "42",
+        "42.5",
+        "43",
+        "44"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu thân giày",
+        "value": "AtomKnit 3.0 thoáng khí, ôm chân khí động học"
+      },
+      {
+        "label": "Đế giữa (Midsole)",
+        "value": "Bọt ZoomX nguyên khối + 2 túi khí Air Zoom Pods"
+      },
+      {
+        "label": "Tấm đẩy (Plate)",
+        "value": "Sợi carbon Flyplate toàn phần siêu nhẹ trợ lực"
+      },
+      {
+        "label": "Trọng lượng",
+        "value": "218g (size 42)"
+      },
+      {
+        "label": "Mục đích sử dụng",
+        "value": "Chạy đua Marathon 21km - 42km, tập luyện tốc độ cao"
+      }
+    ],
+    "createdAt": "2026-09-30T05:30:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_11",
+    "id": "prod_flagship_11",
+    "name": "Vợt Pickleball Selkirk Vanguard Control Raw Carbon 16mm Chính Hãng USAPA Đạt Chuẩn Thi Đấu",
+    "slug": "vot-pickleball-selkirk-vanguard-control-raw-carbon-16mm",
+    "description": "Vợt Pickleball đỉnh cao chuyên kiểm soát bóng và xoáy bóng từ thương hiệu số 1 thế giới Selkirk Sports (USA). Bề mặt vật liệu Raw QuadCarbon độc quyền tạo độ ma sát tối đa khi vung vợt, lõi tổ ong Polypropylene X5 16mm triệt tiêu rung chấn bảo vệ khuỷu tay người chơi.",
+    "price": 5800000,
+    "originalPrice": 6500000,
+    "image": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "Selkirk",
+    "badge": "Best Seller",
+    "stock": 40,
+    "sold": 1120,
+    "rating": 4.95,
+    "reviewCount": 310,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "SportZone Thể Thao & Dã Ngoại",
+    "shopRating": 4.91,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Carbon Raw",
+        "Viền Đỏ Invikta",
+        "Viền Xanh Epic"
+      ],
+      "sizes": [
+        "Cán tiêu chuẩn 4 1/4 inch"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Bề mặt",
+        "value": "T700 Raw Carbon Fiber tạo xoáy cực mạnh"
+      },
+      {
+        "label": "Độ dày lõi",
+        "value": "16 mm X5 Polymer Honeycomb Core hấp thụ lực"
+      },
+      {
+        "label": "Trọng lượng",
+        "value": "225g - 232g (7.9 - 8.2 oz)"
+      },
+      {
+        "label": "Tiêu chuẩn",
+        "value": "Được chứng nhận bởi Hiệp hội Pickleball Hoa Kỳ (USA Pickleball Approved)"
+      },
+      {
+        "label": "Bảo hành",
+        "value": "Bảo hành trọn đời giới hạn từ hãng Selkirk"
+      }
+    ],
+    "createdAt": "2026-09-30T05:00:00.000Z"
+  },
+  {
+    "_id": "prod_flagship_12",
+    "id": "prod_flagship_12",
+    "name": "Serum Chống Lão Hóa Ban Đêm Estee Lauder Advanced Night Repair Synchronized 50ml",
+    "slug": "serum-estee-lauder-advanced-night-repair-50ml",
+    "description": "Huyền thoại phục hồi da ban đêm số 1 thế giới với công nghệ độc quyền Chronolux Power Signal Technology giúp kích hoạt quá trình tái tạo tế bào tự nhiên của làn da. Thấm nhanh, cấp ẩm sâu 72 giờ và giảm thiểu rõ rệt 7 dấu hiệu lão hóa sớm.",
+    "price": 2890000,
+    "originalPrice": 3450000,
+    "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800",
+      "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800"
+    ],
+    "category": "Sắc đẹp",
+    "brand": "Estee Lauder",
+    "badge": "Amazon's Choice",
+    "stock": 80,
+    "sold": 3450,
+    "rating": 4.95,
+    "reviewCount": 890,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_03",
+    "shopName": "Beauty Cosmetics Official",
+    "shopRating": 4.95,
+    "shopResponseRate": 100,
+    "variants": {
+      "capacities": [
+        "30ml",
+        "50ml",
+        "75ml",
+        "100ml"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Dung tích",
+        "value": "50 ml chai thủy tinh cao cấp có vòi hút giọt"
+      },
+      {
+        "label": "Loại da",
+        "value": "Mọi loại da, kể cả da nhạy cảm và da đang treatment"
+      },
+      {
+        "label": "Thành phần chính",
+        "value": "Bifida Ferment Lysate, Tripeptide-32, Sodium Hyaluronate"
+      },
+      {
+        "label": "Xuất xứ",
+        "value": "Mỹ (Phân phối chính hãng tem phụ tiếng Việt)"
+      },
+      {
+        "label": "Hạn sử dụng",
+        "value": "3 năm kể từ ngày sản xuất"
+      }
+    ],
+    "createdAt": "2026-09-30T04:30:00.000Z"
+  },
+  {
     "_id": "prod_01",
     "id": "prod_01",
     "name": "Áo thun nam basic cotton 100% thoáng mát dệt sợi tự nhiên",
