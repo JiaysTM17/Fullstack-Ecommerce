@@ -420,6 +420,33 @@ export default function OtpVerificationModal({
             </span>
           )}
         </div>
+
+        {/* Development Mode Helper Badge - Subtle & Non-Intrusive */}
+        {activeOtp && (
+          <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed #e2e8f0' }}>
+            <span
+              onClick={() => {
+                alert(`[Mã Xác Thực 2FA]: ${activeOtp}\n(Hệ thống mô phỏng gửi đến email: ${displayEmail || 'của bạn'})\nVui lòng tự tay nhập 6 chữ số này vào các ô phía trên để kích hoạt.`);
+              }}
+              style={{
+                fontSize: '11px',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                userSelect: 'none',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                background: '#f8fafc'
+              }}
+              title="Nhấn để xem mã nếu chưa kết nối hòm thư thực tế"
+            >
+              <span>📨</span>
+              <span>Xem thông điệp mã hộp thư (Môi trường Test)</span>
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
