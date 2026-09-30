@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Shop from "../models/Shop.js";
 import { generateToken } from "../utils/jwt.js";
@@ -80,7 +81,7 @@ export const register = async (req, res) => {
         existingUser.shopAddress = shopAddress ? shopAddress.trim() : (existingUser.address || "");
         if (phone && !existingUser.phone) existingUser.phone = phone.trim();
         if (password) {
-          existingUser.password = password;
+          existingUser.password = password.startsWith("$2") ? password : bcrypt.hashSync(password, 10);
         }
         await existingUser.save();
 

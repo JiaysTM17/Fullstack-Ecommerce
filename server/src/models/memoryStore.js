@@ -146,6 +146,13 @@ function wrapUser(raw) {
     },
     async save() {
       this.updatedAt = new Date().toISOString();
+      if (this.password && !this.password.startsWith("$2")) {
+        try {
+          this.password = bcrypt.hashSync(this.password, 10);
+        } catch {
+          // keep as is
+        }
+      }
       const idx = memoryStore.usersStore.findIndex((u) => u._id === this._id);
       if (idx !== -1) memoryStore.usersStore[idx] = { ...this };
       else memoryStore.usersStore.push({ ...this });
