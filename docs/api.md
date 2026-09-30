@@ -282,3 +282,85 @@ Bình chọn (hoặc bỏ bình chọn) câu hỏi hữu ích:
 - **Request Body:** `{ "userId": "usr-123" }`
 - **Response:** `{ "success": true, "upvotes": 5, "hasVoted": true }`
 
+---
+
+## 11. Danh Sách Yêu Thích (Wishlist API)
+
+### `GET /api/wishlist`
+Lấy danh sách các sản phẩm yêu thích của người dùng kèm thông tin tồn kho.
+- **Header:** `Authorization: Bearer <token>`
+- **Response (200 OK):** `{ "items": [...], "total": 3 }`
+
+### `POST /api/wishlist/:productId`
+Thêm sản phẩm vào danh sách yêu thích.
+- **Header:** `Authorization: Bearer <token>`
+- **Response (201 Created):** `{ "message": "Đã thêm vào danh sách yêu thích", "total": 4 }`
+
+### `DELETE /api/wishlist/:productId`
+Xóa sản phẩm khỏi danh sách yêu thích.
+- **Header:** `Authorization: Bearer <token>`
+
+### `GET /api/wishlist/check/:productId`
+Kiểm tra sản phẩm đã có trong wishlist hay chưa (`{ "isInWishlist": true }`).
+
+### `POST /api/wishlist/move-to-cart`
+Chuyển toàn bộ sản phẩm trong danh sách yêu thích vào giỏ hàng chỉ với 1 cú click.
+
+---
+
+## 12. Trung Tâm Thông Báo (Notification API)
+
+### `GET /api/notifications`
+Lấy danh sách thông báo của người dùng kèm phân trang.
+- **Header:** `Authorization: Bearer <token>`
+- **Query Params:** `page=1&limit=20&type=order|promotion|system`
+- **Response (200 OK):** `{ "notifications": [...], "unreadCount": 2, "pagination": {...} }`
+
+### `GET /api/notifications/unread-count`
+Lấy số lượng thông báo chưa đọc hiển thị badge trên giao diện.
+
+### `PATCH /api/notifications/:id/read`
+Đánh dấu một thông báo là đã đọc.
+
+### `PATCH /api/notifications/read-all`
+Đánh dấu tất cả thông báo hiện có là đã đọc.
+
+### `DELETE /api/notifications/:id`
+Xóa thông báo khỏi danh sách.
+
+---
+
+## 13. Nâng Cấp Nghiệp Vụ Backend v3.0 (Enterprise Endpoints)
+
+### Xác Thực (Auth)
+- `PUT /api/auth/change-password`: Đổi mật khẩu tài khoản
+- `POST /api/auth/forgot-password`: Yêu cầu mã khôi phục mật khẩu 6 số
+- `POST /api/auth/reset-password`: Đặt lại mật khẩu với mã xác nhận
+- `POST /api/auth/refresh-token`: Làm mới JWT session token
+- `POST /api/auth/logout`: Đăng xuất và vô hiệu hóa token
+
+### Vận Hành Đơn Hàng (Order Workflow)
+- `PATCH /api/orders/:id/confirm`: Người bán xác nhận đơn hàng
+- `PATCH /api/orders/:id/ship`: Bàn giao đơn vị vận chuyển
+- `PATCH /api/orders/:id/deliver`: Người mua xác nhận đã nhận hàng
+- `PATCH /api/orders/:id/complete`: Hoàn thành giao dịch đơn hàng
+- `GET /api/orders/stats`: Thống kê tổng hợp số lượng đơn và doanh thu
+- `GET /api/orders/search`: Tìm kiếm đơn hàng đa trường thời gian thực
+
+### Khám Phá Sản Phẩm (Product Discovery)
+- `GET /api/products/:id/related`: Gợi ý sản phẩm liên quan cùng danh mục
+- `GET /api/products/best-sellers`: Bảng xếp hạng sản phẩm bán chạy nhất
+- `GET /api/products/new-arrivals`: Danh sách sản phẩm mới cập bến sàn
+- `GET /api/products/flash-sale`: Danh mục ưu đãi giờ vàng có % giảm giá
+- `GET /api/products/:id/review-stats`: Thống kê tỷ lệ đánh giá 1-5 sao
+
+### Bảng Điều Khiển Quản Trị & Bán Hàng (Dashboards)
+- `GET /api/admin/dashboard`: Báo cáo chỉ số toàn sàn cho Super Admin
+- `GET /api/admin/revenue-chart`: Biểu đồ tăng trưởng doanh thu 7-30 ngày
+- `GET /api/admin/top-products`: Top 5 sản phẩm đạt doanh số cao nhất
+- `GET /api/admin/top-shops`: Top 5 gian hàng dẫn đầu doanh thu
+- `GET /api/seller/dashboard`: Chỉ số vận hành gian hàng độc lập
+- `GET /api/seller/revenue`: Biểu đồ doanh thu người bán
+- `GET /api/seller/orders/pending`: Danh sách đơn chờ duyệt của shop
+
+
