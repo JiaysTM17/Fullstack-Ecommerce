@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import { FALLBACK_PRODUCTS, getProductById } from '../services/productService';
+import { clearWishlist as clearWishlistService, moveAllWishlistToCart } from '../services/wishlistService';
 import { formatCurrency } from '../utils/formatCurrency';
 import { pushBuyerNotification } from '../utils/notificationHelper';
 
@@ -59,14 +60,17 @@ export default function WishlistPage() {
     return wishlistProducts.filter((p) => p.category === selectedCategory);
   }, [wishlistProducts, selectedCategory]);
 
-  const handleClear = () => {
+  const handleClear = async () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa toàn bộ sản phẩm khỏi danh sách yêu thích?')) {
       clearWishlist();
+      try {
+        await clearWishlistService();
+      } catch {}
       showToast(t('wishlist_cleared', 'Đã xóa toàn bộ sản phẩm yêu thích'), 'info');
     }
   };
 
-  const handleAddAllToCart = () => {
+  const handleAddAllToCart = async () => {
     const availableItems = wishlistProducts.filter((p) => (Number(p.stock) || 0) > 0);
     if (availableItems.length === 0) {
       showToast('Tất cả sản phẩm trong danh sách yêu thích đều đang tạm hết hàng!', 'warning');
@@ -76,6 +80,10 @@ export default function WishlistPage() {
     availableItems.forEach((p) => {
       addToCart(p, 1);
     });
+
+    try {
+      await moveAllWishlistToCart();
+    } catch {}
 
     showToast(`Đã thêm ${availableItems.length} sản phẩm còn hàng vào giỏ!`, 'success');
 
