@@ -8036,5 +8036,415 @@
       }
     ],
     "reviews": []
+  },
+  {
+    "_id": "prod_118",
+    "id": "prod_118",
+    "name": "Đài Phun Nước Lọc Tự Động Cho Mèo Petkit Eversweet Solo Khử Khuẩn Ion Bạc Yên Tĩnh 1.8L",
+    "slug": "dai-phun-nuoc-cho-meo-petkit-eversweet-solo",
+    "description": "Máy lọc nước tự động cho chó mèo thế hệ mới dung tích 1.8L, hệ thống lọc 3 lớp (lưới lọc xốp, than hoạt tính vỏ dừa, nhựa trao đổi ion) lọc sạch lông bụi và làm mềm nước cứng, động cơ bơm không chổi than siêu êm dưới 30dB, đèn LED đổi màu báo hết nước và nhắc thay lõi lọc.",
+    "price": 490000,
+    "originalPrice": 750000,
+    "image": "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=800"
+    ],
+    "category": "Thú cưng",
+    "brand": "Petkit",
+    "badge": "Hot Deal",
+    "stock": 50,
+    "sold": 890,
+    "rating": 4.96,
+    "reviewCount": 245,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_03",
+    "shopName": "PetParadise Chăm Sóc Thú Cưng",
+    "shopRating": 4.96,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Trắng Sứ Trong Suốt",
+        "Xanh Matcha Dịu Mắt"
+      ],
+      "sizes": [
+        "Dung tích 1.8L Tiêu Chuẩn"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Dung tích",
+        "value": "1.8 Lít (Đủ nước uống cho mèo 5-7 ngày)"
+      },
+      {
+        "label": "Hệ thống lọc",
+        "value": "3 lớp than hoạt tính và ion kim loại lọc cặn bẩn"
+      },
+      {
+        "label": "Độ ồn",
+        "value": "Dưới 30dB siêu yên tĩnh khi ngủ ban đêm"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_119",
+    "id": "prod_119",
+    "name": "Máy Hút Sữa Điện Đôi Không Dây Rảnh Tay Spectra Dual Compact Công Nghệ Hút Êm 12 Cấp Độ Pin Sạc",
+    "slug": "may-hut-sua-dien-doi-spectra-dual-compact",
+    "description": "Máy hút sữa điện đôi cao cấp Hàn Quốc Spectra Dual Compact trang bị 2 động cơ độc lập điều chỉnh lực hút riêng biệt từng bên ngực, 5 cấp độ massage kích sữa êm ái và 12 cấp độ hút sâu không gây đau rát, màn hình LED cảm ứng hiển thị thời lượng hút và mức pin.",
+    "price": 3490000,
+    "originalPrice": 4690000,
+    "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800"
+    ],
+    "category": "Mẹ & Bé",
+    "brand": "Spectra",
+    "badge": "Mall Chính Hãng",
+    "stock": 25,
+    "sold": 410,
+    "rating": 4.97,
+    "reviewCount": 130,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "BabyCare Mẹ & Bé Official",
+    "shopRating": 4.98,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Trắng Phối Vàng Kim (Rose Gold)"
+      ],
+      "sizes": [
+        "Bộ Full Đầy Đủ Phụ Kiện Hút Đôi"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chế độ hút",
+        "value": "5 cấp độ massage kích sữa + 12 cấp độ hút sâu êm ái"
+      },
+      {
+        "label": "Động cơ",
+        "value": "Động cơ kép điều chỉnh lực độc lập 2 bên ngực"
+      },
+      {
+        "label": "Pin sạc",
+        "value": "Lithium Polymer tích hợp sử dụng liên tục hơn 2 giờ"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_120",
+    "id": "prod_120",
+    "name": "Giày Chạy Bộ Nam Nữ Nike Air Zoom Pegasus 41 Đệm Khí Phản Hồi Năng Lượng Êm Ái Thoáng Khí",
+    "slug": "giay-chay-bo-nike-air-zoom-pegasus-41",
+    "description": "Dòng giày chạy biểu tượng Nike Pegasus 41 nâng cấp đế bọt ReactX hoàn toàn mới gia tăng năng lượng phản hồi thêm 13% và giảm thiểu dấu chân carbon, kết hợp 2 túi đệm khí Zoom Air ở gót và mũi chân cho từng bước chạy tiếp đất êm ái bật nảy.",
+    "price": 3490000,
+    "originalPrice": 4290000,
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "Nike",
+    "badge": "Best Seller",
+    "stock": 32,
+    "sold": 580,
+    "rating": 4.95,
+    "reviewCount": 172,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_07",
+    "shopName": "SportZone Thiết Bị Thể Thao",
+    "shopRating": 4.94,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Đỏ Phối Trắng Nổi Bật",
+        "Đen Trắng Phối Neon",
+        "Xanh Dương Thể Thao"
+      ],
+      "sizes": [
+        "40",
+        "41",
+        "42",
+        "42.5",
+        "43",
+        "44"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Đế đệm",
+        "value": "Bọt ReactX kết hợp đệm khí Zoom Air kép mũi và gót"
+      },
+      {
+        "label": "Thân trên (Upper)",
+        "value": "Vải lưới kỹ thuật Engineered Mesh thoáng khí đa chiều"
+      },
+      {
+        "label": "Mục đích",
+        "value": "Chạy bộ hàng ngày, luyện tập marathon cự ly 5km - 42km"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_121",
+    "id": "prod_121",
+    "name": "Bàn Làm Việc Nâng Hạ Chiều Cao Công Thái Học Ergowork 2 Động Cơ Mặt Gỗ Chống Xước Khung Thép SPCC",
+    "slug": "ban-lam-viec-nang-ha-cong-thai-hoc-ergowork",
+    "description": "Bàn nâng hạ thông minh 2 động cơ Dual Motor chịu tải 125kg, tốc độ nâng 38mm/s siêu mượt mà êm ái, bảng điều khiển cảm ứng ghi nhớ 4 vị trí chiều cao yêu thích từ 60cm đến 125cm, cảm biến chống va chạm tự dừng khi gặp vật cản, bảo vệ cột sống tối ưu khi làm việc.",
+    "price": 5890000,
+    "originalPrice": 7800000,
+    "image": "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "Ergowork",
+    "badge": "Hot Deal",
+    "stock": 12,
+    "sold": 145,
+    "rating": 4.93,
+    "reviewCount": 52,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_08",
+    "shopName": "HomeDecor & Đời Sống Hiện Đại",
+    "shopRating": 4.93,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Mặt Gỗ Sồi Tự Nhiên Chân Trắng",
+        "Mặt Gỗ Óc Chó Chân Đen"
+      ],
+      "sizes": [
+        "140cm x 70cm",
+        "160cm x 80cm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Động cơ",
+        "value": "2 Động cơ Dual-Motor êm ái tải trọng tối đa 125kg"
+      },
+      {
+        "label": "Dải chiều cao",
+        "value": "60cm đến 125cm phù hợp cả đứng và ngồi"
+      },
+      {
+        "label": "Bảng điều khiển",
+        "value": "Màn hình LED hiển thị độ cao + 4 nút nhớ thông minh"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_122",
+    "id": "prod_122",
+    "name": "Máy Pha Cà Phê Espresso Gia Đình DeLonghi Dedica EC685 Áp Suất Bơm 15 Bar Vòi Đánh Sữa Chuyên Nghiệp",
+    "slug": "may-pha-ca-phe-delonghi-dedica-ec685",
+    "description": "Thiết kế kim loại mỏng gọn chuẩn phong cách Ý bề ngang chỉ 15cm, công nghệ gia nhiệt Thermoblock làm nóng nước nhanh chóng trong 35 giây, áp suất bơm 15 bar tiêu chuẩn chiết xuất lớp Crema béo ngậy thơm ngon, vòi đánh sữa truyền thống tạo bọt cappuccino mịn màng.",
+    "price": 5890000,
+    "originalPrice": 7990000,
+    "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "DeLonghi",
+    "badge": "Mall Chính Hãng",
+    "stock": 16,
+    "sold": 340,
+    "rating": 4.96,
+    "reviewCount": 118,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_06",
+    "shopName": "SmartHome Gia Dụng Thông Minh",
+    "shopRating": 4.96,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Bạc Thép Không Gỉ (Silver)",
+        "Đen Mờ Lịch Lãm (Black)",
+        "Đỏ Cổ Điển (Red)"
+      ],
+      "sizes": [
+        "Bản Máy Tiêu Chuẩn Kèm Tay Cầm & 3 Phin Lọc"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Áp suất bơm",
+        "value": "15 Bar tiêu chuẩn chuyên nghiệp chiết xuất espresso"
+      },
+      {
+        "label": "Công suất",
+        "value": "1300W công nghệ gia nhiệt nhiệt khối Thermoblock"
+      },
+      {
+        "label": "Dung tích bình nước",
+        "value": "1.1 Lít tháo rời dễ dàng châm nước"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_123",
+    "id": "prod_123",
+    "name": "Tinh Chất Phục Hồi Chống Lão Hóa Ban Đêm Estee Lauder Advanced Night Repair Synchronized 50ml",
+    "slug": "tinh-chat-phuc-hoi-estee-lauder-advanced-night-repair-50ml",
+    "description": "Huyết thanh phục hồi da số 1 thế giới với công nghệ độc quyền Chronolux Power Signal kích hoạt quá trình tái tạo collagen tự nhiên của da vào ban đêm, cấp ẩm sâu 72 giờ, thu nhỏ lỗ chân lông rõ rệt và làm mờ các dấu hiệu nếp nhăn lão hóa sau 3 tuần sử dụng.",
+    "price": 2850000,
+    "originalPrice": 3700000,
+    "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800"
+    ],
+    "category": "Sắc đẹp",
+    "brand": "Estee Lauder",
+    "badge": "Mall Chính Hãng",
+    "stock": 45,
+    "sold": 980,
+    "rating": 4.98,
+    "reviewCount": 380,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "GlowBeauty Mỹ Phẩm Chính Hãng",
+    "shopRating": 4.97,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Chai Thủy Tinh Hổ Phách Nắp Vàng"
+      ],
+      "sizes": [
+        "50ml Tiêu Chuẩn",
+        "75ml Tiết Kiệm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Công nghệ",
+        "value": "Chronolux Power Signal độc quyền tái tạo phục hồi da"
+      },
+      {
+        "label": "Thành phần chính",
+        "value": "Hyaluronic Acid, Tripeptide-32, lợi khuẩn lên men"
+      },
+      {
+        "label": "Xuất xứ",
+        "value": "Mỹ (Estée Lauder Inc., New York)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_124",
+    "id": "prod_124",
+    "name": "Balo Laptop Nam Cao Cấp Chống Nước Chống Trộm Bange Business Khóa Số TSA Cổng Sạc USB Ngoài",
+    "slug": "balo-laptop-nam-chong-nuoc-bange-business",
+    "description": "Balo công sở doanh nhân chất liệu vải Oxford tráng màng TPU chống thấm nước tuyệt đối, ngăn laptop chống sốc đệm khí 3D đựng vừa laptop 15.6 - 17.3 inch, tích hợp khóa số chống trộm chuẩn TSA Hải quan quốc tế, cổng sạc USB nối nhanh ra bên ngoài tiện lợi khi di chuyển.",
+    "price": 790000,
+    "originalPrice": 1290000,
+    "image": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "Bange",
+    "badge": "Best Seller",
+    "stock": 35,
+    "sold": 640,
+    "rating": 4.93,
+    "reviewCount": 154,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "MenStyle Thời Trang Phái Mạnh",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Carbon Doanh Nhân",
+        "Xám Titan Hiện Đại"
+      ],
+      "sizes": [
+        "Ngăn chứa Laptop 15.6 inch",
+        "Ngăn chứa Laptop 17.3 inch mở rộng"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "Vải Oxford cao cấp phủ film TPU chống nước xước"
+      },
+      {
+        "label": "Khóa an toàn",
+        "value": "Khóa số chống trộm mật mã 3 chữ số chuẩn TSA"
+      },
+      {
+        "label": "Kích thước",
+        "value": "46cm x 31cm x 16cm (trọng lượng 1.1kg)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_125",
+    "id": "prod_125",
+    "name": "Máy Đọc Sách Kindle Paperwhite Gen 12 Màn Hình E-Ink Carta 1200 6.8 Inch Chống Nước IPX8 Đèn Vàng Dịu Mắt",
+    "slug": "may-doc-sach-kindle-paperwhite-gen-12",
+    "description": "Trải nghiệm đọc sách như trang giấy in thật với màn hình E-Ink 300 ppi không lóa dưới trời nắng gắt, hệ thống đèn nền 17 bóng LED điều chỉnh nhiệt độ màu vàng ấm bảo vệ mắt khi đọc đêm, kháng nước chuẩn IPX8 đọc sách thư giãn bên bãi biển hoặc bồn tắm, pin bền bỉ 10 tuần.",
+    "price": 3790000,
+    "originalPrice": 4590000,
+    "image": "https://images.unsplash.com/photo-1592496431122-2349e0fbc666?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1592496431122-2349e0fbc666?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "Kindle",
+    "badge": "Mall Chính Hãng",
+    "stock": 28,
+    "sold": 470,
+    "rating": 4.96,
+    "reviewCount": 162,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_01",
+    "shopName": "TechWorld Official Store",
+    "shopRating": 4.98,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Nhám (Black)",
+        "Xanh Ngọc Bích (Agave Green)",
+        "Xanh Denim (Denim)"
+      ],
+      "sizes": [
+        "Bộ nhớ 16GB",
+        "Bộ nhớ 32GB Signature Edition"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Màn hình",
+        "value": "6.8 inch E-ink Carta 1200 mật độ 300 ppi chống chói"
+      },
+      {
+        "label": "Chuẩn chống nước",
+        "value": "IPX8 (ngâm nước ngọt sâu 2 mét trong 60 phút)"
+      },
+      {
+        "label": "Thời lượng pin",
+        "value": "Lên đến 10 tuần cho mỗi lần sạc đầy qua cổng Type-C"
+      }
+    ],
+    "reviews": []
   }
 ]
