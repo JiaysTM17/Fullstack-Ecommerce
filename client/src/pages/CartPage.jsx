@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CartItem, EmptyState } from "../components";
 import VoucherPickerModal from "../components/VoucherPickerModal";
@@ -7,6 +7,7 @@ import { useWishlist } from "../context/WishlistContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { formatCurrency } from "../utils/formatCurrency";
+import { previewVoucherDiscount } from "../services/voucherService";
 
 const FREE_SHIPPING_THRESHOLD = 300000;
 
@@ -53,7 +54,26 @@ export default function CartPage() {
 
   const [voucherInput, setVoucherInput] = useState("");
   const [voucherMessage, setVoucherMessage] = useState("");
+  const [voucherLivePreview, setVoucherLivePreview] = useState(null);
   const [showVoucherModal, setShowVoucherModal] = useState(false);
+
+  useEffect(() => {
+    const trimmed = voucherInput.trim().toUpperCase();
+    if (trimmed.length < 3) {
+      setVoucherLivePreview(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const baseSubtotal = selectedSubtotal > 0 ? selectedSubtotal : 100000;
+        const preview = await previewVoucherDiscount(trimmed, baseSubtotal);
+        setVoucherLivePreview(preview);
+      } catch {
+        setVoucherLivePreview(null);
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [voucherInput, selectedSubtotal]);
 
   const [shopNotes, setShopNotes] = useState(() => {
     try {
@@ -566,6 +586,26 @@ export default function CartPage() {
                 {t('apply', 'Áp Dụng')}
               </button>
             </form>
+
+            {voucherLivePreview && (
+              <div
+                style={{
+                  marginTop: "8px",
+                  padding: "6px 10px",
+                  background: "rgba(16, 185, 129, 0.08)",
+                  border: "1px dashed #10b981",
+                  borderRadius: "6px",
+                  fontSize: "12px",
+                  color: "#047857",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span>✨ <strong>{voucherLivePreview.voucherCode}</strong>: Giảm xem trước</span>
+                <strong style={{ color: "#059669" }}>-{formatCurrency(voucherLivePreview.discountAmount)}</strong>
+              </div>
+            )}
 
             {voucherMessage && (
               <div style={{ fontSize: "12px", color: appliedVoucher ? "var(--color-success, #2e7d32)" : "var(--color-error, #d32f2f)", marginTop: "6px", fontWeight: 600 }}>
