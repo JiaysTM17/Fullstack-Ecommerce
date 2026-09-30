@@ -8,14 +8,22 @@ import {
   askProductQuestion,
   voteProductQuestion,
   answerProductQuestion,
+  getRelatedProducts,
+  getBestSellers,
+  getNewArrivals,
+  getFlashSale,
+  getProductReviewStats,
 } from "../controllers/productController.js";
 import { optionalAuthenticate } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-// Search must be before :id to avoid conflicts
+// Collection endpoints (must be before :id to avoid conflicts)
 router.get("/search", searchProducts);
 router.get("/categories/list", getCategories);
+router.get("/best-sellers", getBestSellers);
+router.get("/new-arrivals", getNewArrivals);
+router.get("/flash-sale", getFlashSale);
 router.get("/", getProducts);
 
 // Product Q&A
@@ -24,7 +32,9 @@ router.post("/:id/questions", optionalAuthenticate, askProductQuestion);
 router.post("/:id/questions/:questionId/vote", voteProductQuestion);
 router.post("/:id/questions/:questionId/answers", optionalAuthenticate, answerProductQuestion);
 
-// Get single product
+// Product details and related
+router.get("/:id/related", getRelatedProducts);
+router.get("/:id/review-stats", getProductReviewStats);
 router.get("/:id", getProductById);
 
 export default router;

@@ -393,3 +393,150 @@ export default {
   answerProductQuestion,
 };
 
+// @desc    Get related products (same category, exclude self)
+// @route   GET /api/products/:id/related
+// @access  Public
+export const getRelatedProducts = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { limit = 8 } = req.query;
+
+    let product = await Product.findById(id);
+    if (!product) product = await Product.findOne({ slug: id });
+    if (!product) return sendError(res, "Sản phẩm không tồn tại", 404);
+
+    const limitNum = Math.min(20, Math.max(1, parseInt(limit)));
+
+    const related = await Product.find({
+      category: product.category,
+      _id: { $ne: product._id },
+      isActive: true,
+      approvalStatus: "approved",
+    })
+      .sort({ sold: -1, rating: -1 })
+      .limit(limitNum);
+
+    sendSuccess(res, { products: related, total: related.length });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Get best-selling products
+// @route   GET /api/products/best-sellers
+// @access  Public
+export const getBestSellers = async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+
+    const products = await Product.find({
+      isActive: true,
+      approvalStatus: "approved",
+    })
+      .sort({ sold: -1 })
+      .limit(limitNum);
+
+    sendSuccess(res, { products, total: products.length });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Get new arrivals
+// @route   GET /api/products/new-arrivals
+// @access  Public
+export const getNewArrivals = async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+
+    const products = await Product.find({
+      isActive: true,
+      approvalStatus: "approved",
+    })
+      .sort({ createdAt: -1 })
+      .limit(limitNum);
+
+    sendSuccess(res, { products, total: products.length });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Get flash sale products (products with discount)
+// @route   GET /api/products/flash-sale
+// @access  Public
+export const getFlashSale = async (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+
+    const allProducts = await Product.find({
+      isActive: true,
+      approvalStatus: "approved",
+    });
+
+    // Filter products where originalPrice > price (on sale)
+    const flashSaleProducts = allProducts
+      .filter((p) => p.originalPrice && p.originalPrice > p.price)
+      .map((p) => ({
+        ...p.toObject ? p.toObject() : p,
+        discountPercent: Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100),
+        savedAmount: p.originalPrice - p.price,
+      }))
+      .sort((a, b) => b.discountPercent - a.discountPercent)
+      .slice(0, limitNum);
+
+    sendSuccess(res, { products: flashSaleProducts, total: flashSaleProducts.length });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Get review statistics for a product
+// @route   GET /api/products/:id/review-stats
+// @access  Public
+export const getProductReviewStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    let product = await Product.findById(id);
+    if (!product) product = await Product.findOne({ slug: id });
+    if (!product) return sendError(res, "Sản phẩm không tồn tại", 404);
+
+    const reviews = await memoryStore.reviews.find({ productId: id });
+    const total = reviews.length;
+
+    const ratingBreakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    let sumRating = 0;
+    let withImages = 0;
+    let withComment = 0;
+
+    for (const review of reviews) {
+      if (review.rating >= 1 && review.rating <= 5) {
+        ratingBreakdown[review.rating]++;
+        sumRating += review.rating;
+      }
+      if (review.images && review.images.length > 0) withImages++;
+      if (review.content || review.comment) withComment++;
+    }
+
+    sendSuccess(res, {
+      productId: id,
+      totalReviews: total,
+      averageRating: total > 0 ? Number((sumRating / total).toFixed(1)) : 0,
+      ratingBreakdown,
+      withImages,
+      withComment,
+      ratingPercentages: Object.fromEntries(
+        Object.entries(ratingBreakdown).map(([star, count]) => [
+          star,
+          total > 0 ? Number(((count / total) * 100).toFixed(1)) : 0,
+        ])
+      ),
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
