@@ -294,3 +294,189 @@ export default {
   getPlatformOverviewAdmin,
   getFinanceSettlementsAdmin,
 };
+
+// @desc    Admin Dashboard — Tổng quan hệ thống
+// @route   GET /api/admin/dashboard
+// @access  Private (Admin)
+export const getDashboard = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalOrders = await Order.countDocuments();
+    const totalProducts = await Product.countDocuments();
+    const totalShops = await Shop.countDocuments();
+
+    const allOrders = await Order.find({});
+    const today = new Date().toISOString().slice(0, 10);
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    let revenueToday = 0, revenueWeek = 0, revenueMonth = 0, revenueTotal = 0;
+    let ordersToday = 0, ordersPending = 0;
+
+    for (const order of allOrders) {
+      const total = order.total || 0;
+      const date = (order.createdAt || "").slice(0, 10);
+      const isCompleted = order.status === "completed" || order.status === "delivered";
+
+      if (isCompleted) revenueTotal += total;
+      if (date === today) { ordersToday++; if (isCompleted) revenueToday += total; }
+      if (date >= weekAgo && isCompleted) revenueWeek += total;
+      if (date >= monthAgo && isCompleted) revenueMonth += total;
+      if (order.status === "pending") ordersPending++;
+    }
+
+    const activeUsers = await User.countDocuments({ isActive: true });
+    const activeShops = await Shop.countDocuments({ status: "active" });
+
+    sendSuccess(res, {
+      totalUsers,
+      activeUsers,
+      totalOrders,
+      ordersToday,
+      ordersPending,
+      totalProducts,
+      totalShops,
+      activeShops,
+      revenue: { today: revenueToday, week: revenueWeek, month: revenueMonth, total: revenueTotal },
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Revenue chart data — 7 ngày gần nhất
+// @route   GET /api/admin/revenue-chart
+// @access  Private (Admin)
+export const getRevenueChart = async (req, res) => {
+  try {
+    const { days = 7 } = req.query;
+    const numDays = Math.min(30, Math.max(1, parseInt(days)));
+    const allOrders = await Order.find({});
+
+    const chartData = [];
+    for (let i = numDays - 1; i >= 0; i--) {
+      const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      const dateStr = date.toISOString().slice(0, 10);
+      let revenue = 0;
+      let orderCount = 0;
+
+      for (const order of allOrders) {
+        const orderDate = (order.createdAt || "").slice(0, 10);
+        if (orderDate === dateStr) {
+          orderCount++;
+          if (order.status === "completed" || order.status === "delivered") {
+            revenue += order.total || 0;
+          }
+        }
+      }
+
+      chartData.push({
+        date: dateStr,
+        label: date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }),
+        revenue,
+        orderCount,
+      });
+    }
+
+    sendSuccess(res, { chartData, period: `${numDays} ngày gần nhất` });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Top sản phẩm bán chạy nhất
+// @route   GET /api/admin/top-products
+// @access  Private (Admin)
+export const getTopProducts = async (req, res) => {
+  try {
+    const { limit = 5 } = req.query;
+    const limitNum = Math.min(20, Math.max(1, parseInt(limit)));
+
+    const products = await Product.find({ isActive: true })
+      .sort({ sold: -1 })
+      .limit(limitNum);
+
+    const topProducts = products.map((p, idx) => ({
+      rank: idx + 1,
+      productId: p._id,
+      name: p.name,
+      price: p.price,
+      sold: p.sold || 0,
+      revenue: (p.price || 0) * (p.sold || 0),
+      rating: p.rating || 0,
+      shopName: p.shopName || "",
+      image: p.image,
+    }));
+
+    sendSuccess(res, { topProducts });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Top gian hàng doanh thu cao nhất
+// @route   GET /api/admin/top-shops
+// @access  Private (Admin)
+export const getTopShops = async (req, res) => {
+  try {
+    const { limit = 5 } = req.query;
+    const limitNum = Math.min(20, Math.max(1, parseInt(limit)));
+
+    const allOrders = await Order.find({});
+    const shops = await Shop.find({});
+
+    // Calculate revenue per shop
+    const shopRevenueMap = new Map();
+    for (const order of allOrders) {
+      if (order.status !== "completed" && order.status !== "delivered") continue;
+      for (const item of order.items || []) {
+        const shopId = item.shopId || "shop_01";
+        shopRevenueMap.set(shopId, (shopRevenueMap.get(shopId) || 0) + ((item.price || 0) * (item.quantity || 1)));
+      }
+    }
+
+    const topShops = shops
+      .map((shop) => ({
+        shopId: shop.shopId,
+        name: shop.name,
+        revenue: shopRevenueMap.get(shop.shopId) || 0,
+        status: shop.status,
+        commissionRate: shop.commissionRate || 0.05,
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, limitNum)
+      .map((s, idx) => ({ rank: idx + 1, ...s }));
+
+    sendSuccess(res, { topShops });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Đơn hàng gần nhất
+// @route   GET /api/admin/recent-orders
+// @access  Private (Admin)
+export const getRecentOrders = async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+
+    const orders = await Order.find({}).sort({ createdAt: -1 }).limit(limitNum);
+
+    const recentOrders = orders.map((o) => ({
+      orderId: o._id || o.id,
+      customer: o.customer?.fullName || "Khách hàng",
+      phone: o.customer?.phone || "",
+      total: o.total,
+      status: o.status,
+      paymentMethod: o.paymentMethod || "COD",
+      trackingCode: o.trackingCode || "",
+      createdAt: o.createdAt,
+      itemCount: (o.items || []).length,
+    }));
+
+    sendSuccess(res, { recentOrders });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};

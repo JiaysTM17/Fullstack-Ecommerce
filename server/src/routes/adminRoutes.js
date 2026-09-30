@@ -8,12 +8,24 @@ import {
   updateUserStatusAdmin,
   getPlatformOverviewAdmin,
   getFinanceSettlementsAdmin,
+  getDashboard,
+  getRevenueChart,
+  getTopProducts,
+  getTopShops,
+  getRecentOrders,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
 
 // All routes require Super Admin privileges
 router.use(authenticate, authorize("admin"));
+
+// Dashboard Analytics
+router.get("/dashboard", getDashboard);
+router.get("/revenue-chart", getRevenueChart);
+router.get("/top-products", getTopProducts);
+router.get("/top-shops", getTopShops);
+router.get("/recent-orders", getRecentOrders);
 
 // Shops moderation
 router.get("/shops", getAllShopsAdmin);
