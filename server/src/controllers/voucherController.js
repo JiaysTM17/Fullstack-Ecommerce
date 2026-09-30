@@ -152,3 +152,131 @@ export const deleteVoucher = async (req, res) => {
 };
 
 export default { getVouchers, applyVoucher, createVoucher, deleteVoucher };
+
+// @desc    Validate a voucher code without applying
+// @route   POST /api/vouchers/validate
+// @access  Private
+export const validateVoucher = async (req, res) => {
+  try {
+    const { code, orderTotal = 0 } = req.body;
+    if (!code) return sendError(res, "Mã voucher là bắt buộc", 400);
+
+    const voucher = await memoryStore.vouchers.findOne({ code: code.toUpperCase() });
+    if (!voucher) return sendError(res, "Mã voucher không tồn tại", 404);
+
+    const issues = [];
+
+    // Check expiry
+    if (voucher.expiryDate && new Date(voucher.expiryDate) < new Date()) {
+      issues.push("Voucher đã hết hạn");
+    }
+
+    // Check usage limit
+    if (voucher.usageLimit && voucher.usedCount >= voucher.usageLimit) {
+      issues.push("Voucher đã hết lượt sử dụng");
+    }
+
+    // Check minimum order
+    if (voucher.minOrderValue && orderTotal < voucher.minOrderValue) {
+      issues.push(`Đơn hàng tối thiểu ${voucher.minOrderValue.toLocaleString("vi-VN")}₫`);
+    }
+
+    const isValid = issues.length === 0;
+
+    let estimatedDiscount = 0;
+    if (isValid && orderTotal > 0) {
+      if (voucher.type === "percentage") {
+        estimatedDiscount = Math.round(orderTotal * (voucher.value || 0) / 100);
+        if (voucher.maxDiscount) estimatedDiscount = Math.min(estimatedDiscount, voucher.maxDiscount);
+      } else {
+        estimatedDiscount = voucher.value || 0;
+      }
+      estimatedDiscount = Math.min(estimatedDiscount, orderTotal);
+    }
+
+    sendSuccess(res, {
+      code: voucher.code,
+      name: voucher.name || voucher.code,
+      type: voucher.type,
+      value: voucher.value,
+      isValid,
+      issues,
+      estimatedDiscount,
+      expiryDate: voucher.expiryDate,
+      remainingUses: voucher.usageLimit ? Math.max(0, voucher.usageLimit - (voucher.usedCount || 0)) : "Không giới hạn",
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Get user's saved/claimed vouchers
+// @route   GET /api/vouchers/my
+// @access  Private
+export const getMyVouchers = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const claimed = memoryStore.userClaimedVouchers?.get?.(userId) || [];
+
+    const enrichedVouchers = [];
+    for (const entry of claimed) {
+      const voucher = await memoryStore.vouchers.findOne({ code: entry.code || entry });
+      if (voucher) {
+        const isExpired = voucher.expiryDate && new Date(voucher.expiryDate) < new Date();
+        enrichedVouchers.push({
+          code: voucher.code,
+          name: voucher.name || voucher.code,
+          type: voucher.type,
+          value: voucher.value,
+          minOrderValue: voucher.minOrderValue,
+          expiryDate: voucher.expiryDate,
+          isExpired,
+          isUsed: entry.isUsed || false,
+          claimedAt: entry.claimedAt || null,
+        });
+      }
+    }
+
+    sendSuccess(res, { vouchers: enrichedVouchers, total: enrichedVouchers.length });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Voucher usage statistics (Admin)
+// @route   GET /api/vouchers/stats
+// @access  Private (Admin)
+export const getVoucherStats = async (req, res) => {
+  try {
+    const allVouchers = await memoryStore.vouchers.find({});
+
+    let totalVouchers = allVouchers.length;
+    let activeVouchers = 0;
+    let expiredVouchers = 0;
+    let totalUsed = 0;
+    const now = new Date();
+
+    for (const v of allVouchers) {
+      totalUsed += v.usedCount || 0;
+      if (v.expiryDate && new Date(v.expiryDate) < now) {
+        expiredVouchers++;
+      } else {
+        activeVouchers++;
+      }
+    }
+
+    sendSuccess(res, {
+      totalVouchers,
+      activeVouchers,
+      expiredVouchers,
+      totalUsed,
+      byType: {
+        percentage: allVouchers.filter((v) => v.type === "percentage").length,
+        fixed: allVouchers.filter((v) => v.type === "fixed").length,
+        freeship: allVouchers.filter((v) => v.type === "freeship").length,
+      },
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
