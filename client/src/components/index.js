@@ -22,3 +22,4 @@ export { default as RecentlyViewedSection } from './RecentlyViewedSection';
 export { default as ProductQASection } from './ProductQASection';
 export { default as ToastContainer } from './ToastContainer';
 export { default as CategoryShowcase } from './CategoryShowcase';
+export { default as AuthModal } from './AuthModal';

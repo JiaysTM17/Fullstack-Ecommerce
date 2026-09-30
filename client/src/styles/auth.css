@@ -1,173 +1,566 @@
-/* client/src/styles/auth.css - Modern Design System */
+/* client/src/styles/auth.css - Modern Enterprise Auth Design System */
 
-.shopee-auth-wrapper {
-  background: radial-gradient(circle at 50% 0%, rgba(234, 88, 12, 0.06) 0%, transparent 60%), var(--bg-page, #f8fafc);
-  min-height: calc(100vh - 160px);
+/* ==========================================================================
+   1. SPLIT-SCREEN AUTH CONTAINER (FOR /login & /register)
+   ========================================================================== */
+.shopee-auth-page-wrapper {
+  min-height: calc(100vh - 120px);
+  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.05) 0%, transparent 70%), var(--bg-page, #f8fafc);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 16px;
+  padding: 40px 20px;
   box-sizing: border-box;
-  transition: background-color var(--transition-normal);
 }
 
-.shopee-auth-card {
-  background: var(--bg-card, #ffffff);
+.shopee-auth-split-container {
   width: 100%;
-  max-width: 480px;
-  border-radius: var(--radius-lg, 12px);
-  box-shadow: var(--shadow-modal, 0 16px 36px rgba(0, 0, 0, 0.08));
+  max-width: 1080px;
+  min-height: 640px;
+  background: var(--bg-card, #ffffff);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
   border: 1px solid var(--border-medium, #e2e8f0);
-  padding: 36px 32px;
-  box-sizing: border-box;
-  transition: all var(--transition-normal);
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  overflow: hidden;
+  position: relative;
 }
 
-.shopee-auth-header {
-  text-align: center;
-  margin-bottom: 24px;
+[data-theme="dark"] .shopee-auth-split-container {
+  background: #111827;
+  border-color: #1f2937;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
-.shopee-auth-brand-badge {
+/* Left Hero Branding Column */
+.shopee-auth-hero-col {
+  background: linear-gradient(145deg, #090d16 0%, #0f172a 60%, #1e1b4b 100%);
+  color: #ffffff;
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.shopee-auth-hero-col::before {
+  content: "";
+  position: absolute;
+  top: -80px;
+  left: -80px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.shopee-auth-hero-col::after {
+  content: "";
+  position: absolute;
+  bottom: -60px;
+  right: -60px;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.shopee-auth-hero-brand {
+  position: relative;
+  z-index: 1;
+}
+
+.shopee-auth-hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--primary-light, #fff7ed);
-  border: 1px solid var(--primary-border, #fed7aa);
-  color: var(--primary-color, #ea580c);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #60a5fa;
   padding: 4px 12px;
-  border-radius: var(--radius-full, 9999px);
-  font-size: 11.5px;
+  border-radius: 9999px;
+  font-size: 11px;
   font-weight: 700;
-  margin-bottom: 12px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(8px);
 }
 
-.shopee-auth-title {
-  font-size: 24px;
+.shopee-auth-hero-title {
+  font-size: 28px;
   font-weight: 800;
-  color: var(--text-primary, #0f172a);
-  margin: 0 0 6px;
-  letter-spacing: -0.3px;
+  line-height: 1.25;
+  color: #ffffff;
+  margin: 0 0 12px;
+  letter-spacing: -0.4px;
 }
 
-.shopee-auth-subtitle {
+.shopee-auth-hero-title span {
+  background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.shopee-auth-hero-desc {
   font-size: 13.5px;
-  color: var(--text-secondary, #475569);
-  margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  color: rgba(248, 250, 252, 0.75);
+  margin: 0 0 32px;
 }
 
-/* Role Selector Tabs */
-.shopee-role-tabs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  background: var(--bg-muted, #f1f5f9);
-  padding: 5px;
-  border-radius: var(--radius-md, 8px);
-  margin-bottom: 22px;
-  border: 1px solid var(--border-light, #e2e8f0);
+/* Feature Guarantees Checklist */
+.shopee-auth-hero-features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 32px;
 }
 
-.shopee-role-tab {
-  background: transparent;
-  border: none;
-  padding: 10px 4px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-secondary, #475569);
-  cursor: pointer;
-  border-radius: var(--radius-sm, 6px);
-  transition: all var(--transition-fast, 0.15s ease);
-  text-align: center;
+.shopee-auth-hero-feat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 14px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.shopee-auth-hero-feat-item:hover {
+  background: rgba(255, 255, 255, 0.09);
+  transform: translateX(3px);
+}
+
+.shopee-auth-hero-feat-icon {
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  user-select: none;
 }
 
-.shopee-role-tab:hover {
-  color: var(--text-primary, #0f172a);
+.shopee-auth-hero-feat-text strong {
+  display: block;
+  font-size: 12.5px;
+  color: #ffffff;
+  font-weight: 600;
 }
 
-.shopee-role-tab.active {
-  background: var(--bg-card, #ffffff);
-  color: var(--primary-color, #ea580c);
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
-  font-weight: 700;
+.shopee-auth-hero-feat-text span {
+  font-size: 11.5px;
+  color: rgba(248, 250, 252, 0.65);
 }
 
-/* Quick Demo Login Box */
-.shopee-demo-section {
-  background: var(--primary-light, #fff7ed);
-  border: 1px dashed var(--primary-border, #fed7aa);
-  border-radius: var(--radius-md, 8px);
-  padding: 14px;
-  margin-bottom: 22px;
+/* Hero Stats Capsule */
+.shopee-auth-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 1;
 }
 
-.shopee-demo-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--primary-color, #ea580c);
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.shopee-auth-hero-stat-card {
+  text-align: center;
+}
+
+.shopee-auth-hero-stat-card strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 800;
+  color: #38bdf8;
+}
+
+.shopee-auth-hero-stat-card span {
+  font-size: 10.5px;
+  color: rgba(248, 250, 252, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.shopee-demo-buttons {
+/* Right Form Column */
+.shopee-auth-form-col {
+  padding: 40px 36px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  justify-content: center;
+  box-sizing: border-box;
+  background: var(--bg-card, #ffffff);
 }
 
-.shopee-demo-btn {
-  background: var(--bg-card, #ffffff);
-  border: 1px solid var(--border-medium, #e2e8f0);
-  border-radius: var(--radius-sm, 6px);
-  padding: 8px 12px;
-  font-size: 12.5px;
-  text-align: left;
-  cursor: pointer;
+[data-theme="dark"] .shopee-auth-form-col {
+  background: #111827;
+}
+
+/* ==========================================================================
+   2. AUTH MODAL (POPUP SLIDE-UP DIALOG)
+   ========================================================================== */
+.shopee-auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(9, 13, 22, 0.7);
+  backdrop-filter: blur(8px);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  transition: all var(--transition-fast, 0.15s ease);
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  animation: authFadeIn 0.25s ease forwards;
+}
+
+.shopee-auth-modal-card {
+  width: 100%;
+  max-width: 500px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--bg-card, #ffffff);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25), 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-medium, #e2e8f0);
+  padding: 32px 28px;
+  box-sizing: border-box;
+  position: relative;
+  animation: authModalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+[data-theme="dark"] .shopee-auth-modal-card {
+  background: #111827;
+  border-color: #1f2937;
+  color: #f8fafc;
+}
+
+.shopee-auth-modal-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-muted, #f1f5f9);
+  border: 1px solid var(--border-medium, #e2e8f0);
+  color: var(--text-secondary, #64748b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.shopee-auth-modal-close-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+  transform: rotate(90deg);
+}
+
+/* ==========================================================================
+   3. MAIN FORM ELEMENTS & TABS
+   ========================================================================== */
+/* Master Mode Tabs (ĐĂNG NHẬP vs ĐĂNG KÝ) */
+.shopee-auth-mode-tabs {
+  display: flex;
+  background: var(--bg-muted, #f1f5f9);
+  padding: 4px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-light, #e2e8f0);
+}
+
+[data-theme="dark"] .shopee-auth-mode-tabs {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.shopee-auth-mode-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.shopee-auth-mode-tab.active {
+  background: var(--bg-card, #ffffff);
+  color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .shopee-auth-mode-tab.active {
+  background: #111827;
+  color: #60a5fa;
+}
+
+/* Role Selector Tabs (3 roles) */
+.shopee-role-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.shopee-role-card {
+  padding: 10px 8px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-medium, #e2e8f0);
+  background: var(--bg-card, #ffffff);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+[data-theme="dark"] .shopee-role-card {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.shopee-role-card:hover {
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+
+.shopee-role-card.active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.15);
+}
+
+[data-theme="dark"] .shopee-role-card.active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #3b82f6;
+}
+
+.shopee-role-card-icon {
+  font-size: 20px;
+}
+
+.shopee-role-card-title {
+  font-size: 12px;
+  font-weight: 700;
   color: var(--text-primary, #0f172a);
 }
 
-.shopee-demo-btn:hover {
-  border-color: var(--primary-color, #ea580c);
-  background-color: var(--bg-hover, #f8fafc);
-  color: var(--primary-color, #ea580c);
-  transform: translateX(2px);
+.shopee-role-card.active .shopee-role-card-title {
+  color: #1d4ed8;
 }
 
-.shopee-demo-btn strong {
-  font-size: 12px;
+[data-theme="dark"] .shopee-role-card.active .shopee-role-card-title {
+  color: #93c5fd;
 }
 
-.shopee-demo-btn span {
-  font-size: 11px;
+.shopee-role-card-sub {
+  font-size: 10px;
   color: var(--text-muted, #94a3b8);
 }
 
-/* Form Layout */
+/* Login Sub-Type (Mật Khẩu vs Quét Mã QR) */
+.shopee-auth-method-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+
+.shopee-auth-method-link {
+  color: #3b82f6;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s ease;
+}
+
+.shopee-auth-method-link:hover {
+  text-decoration: underline;
+}
+
+/* QR Code Section */
+.shopee-qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  text-align: center;
+  background: var(--bg-muted, #f8fafc);
+  border-radius: 16px;
+  border: 1px dashed var(--border-dark, #cbd5e1);
+  margin-bottom: 20px;
+}
+
+[data-theme="dark"] .shopee-qr-container {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.shopee-qr-box {
+  width: 170px;
+  height: 170px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.shopee-qr-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Animated Scanning Laser Line */
+.shopee-qr-laser {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+  box-shadow: 0 0 10px #3b82f6;
+  animation: qrLaserScan 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.shopee-qr-hint {
+  font-size: 12px;
+  color: var(--text-secondary, #475569);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Demo 1-Click Quick Access Box */
+.shopee-demo-container {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.04) 0%, rgba(14, 165, 233, 0.06) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+
+.shopee-demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.shopee-demo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .shopee-demo-tag {
+  color: #60a5fa;
+}
+
+.shopee-demo-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.shopee-demo-item-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-medium, #e2e8f0);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-align: left;
+}
+
+[data-theme="dark"] .shopee-demo-item-btn {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.shopee-demo-item-btn:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  transform: translateX(2px);
+}
+
+.shopee-demo-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shopee-demo-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.shopee-demo-btn-text strong {
+  display: block;
+  font-size: 12px;
+  color: var(--text-primary, #0f172a);
+}
+
+.shopee-demo-btn-text span {
+  font-size: 10.5px;
+  color: var(--text-secondary, #64748b);
+}
+
+.shopee-demo-action-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #dbeafe;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+/* ==========================================================================
+   4. FORM INPUTS & VALIDATION
+   ========================================================================== */
 .shopee-form-group {
   margin-bottom: 16px;
-  text-align: left;
 }
 
 .shopee-form-label {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary, #0f172a);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
   margin-bottom: 6px;
 }
 
@@ -180,24 +573,31 @@
 .shopee-form-input {
   width: 100%;
   padding: 10px 14px;
-  border-radius: var(--radius-sm, 6px);
-  border: 1px solid var(--border-medium, #cbd5e1);
+  font-size: 13.5px;
+  font-family: inherit;
+  border: 1.5px solid var(--border-medium, #cbd5e1);
+  border-radius: 10px;
   background: var(--bg-card, #ffffff);
   color: var(--text-primary, #0f172a);
-  font-size: 14px;
   box-sizing: border-box;
-  outline: none;
-  transition: border-color var(--transition-fast);
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .shopee-form-input {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f8fafc;
 }
 
 .shopee-form-input:focus {
-  border-color: var(--primary-color, #ea580c);
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .shopee-password-toggle {
   position: absolute;
-  right: 10px;
+  right: 12px;
   background: none;
   border: none;
   color: var(--text-muted, #94a3b8);
@@ -206,38 +606,65 @@
   padding: 4px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
 }
 
 .shopee-password-toggle:hover {
-  color: var(--text-primary);
+  color: var(--text-primary, #0f172a);
 }
 
-.shopee-form-error-msg {
-  background: var(--color-error-bg, #fef2f2);
-  color: var(--color-error, #ef4444);
-  border: 1px solid #fecaca;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm, 6px);
-  font-size: 13px;
-  font-weight: 500;
-  margin-bottom: 16px;
+/* Password Strength Meter */
+.shopee-pwd-meter {
+  margin-top: 8px;
+}
+
+.shopee-pwd-meter-bars {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  gap: 4px;
+  height: 4px;
+  margin-bottom: 6px;
 }
 
-/* Auth Submit Button */
+.shopee-pwd-meter-segment {
+  flex: 1;
+  border-radius: 4px;
+  background: #e2e8f0;
+  transition: background 0.25s ease;
+}
+
+.shopee-pwd-meter-segment.active-weak {
+  background: #ef4444;
+}
+
+.shopee-pwd-meter-segment.active-fair {
+  background: #f59e0b;
+}
+
+.shopee-pwd-meter-segment.active-strong {
+  background: #10b981;
+}
+
+.shopee-pwd-meter-label {
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary, #64748b);
+}
+
+/* Submit Button */
 .shopee-auth-submit-btn {
   width: 100%;
   padding: 12px;
-  font-size: 15px;
-  font-weight: 700;
-  border-radius: var(--radius-sm, 6px);
+  border-radius: 12px;
   border: none;
-  background: var(--primary-color, #ea580c);
-  color: #fff;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color var(--transition-fast);
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
   margin-top: 8px;
   display: flex;
   align-items: center;
@@ -245,8 +672,10 @@
   gap: 8px;
 }
 
-.shopee-auth-submit-btn:hover {
-  background: var(--primary-hover, #c2410c);
+.shopee-auth-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
 }
 
 .shopee-auth-submit-btn:disabled {
@@ -254,66 +683,123 @@
   cursor: not-allowed;
 }
 
-/* Auth Footer Links */
-.shopee-auth-footer {
-  margin-top: 24px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-secondary, #475569);
-  border-top: 1px solid var(--border-light, #e2e8f0);
-  padding-top: 18px;
+/* Social Login Divider */
+.shopee-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 16px;
 }
 
-.shopee-auth-footer a {
-  color: var(--primary-color, #ea580c);
+.shopee-auth-divider::before,
+.shopee-auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-medium, #e2e8f0);
+}
+
+.shopee-auth-divider span {
+  font-size: 11.5px;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Social Buttons */
+.shopee-social-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.shopee-social-btn {
+  padding: 8px;
+  border: 1px solid var(--border-medium, #e2e8f0);
+  border-radius: 10px;
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #0f172a);
+  font-size: 12px;
   font-weight: 600;
-  text-decoration: none;
-  margin-left: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
-.shopee-auth-footer a:hover {
-  text-decoration: underline;
-}
-
-/* Dark Mode Overrides for Auth */
-[data-theme="dark"] .shopee-auth-wrapper {
-  background: radial-gradient(circle at 50% 0%, rgba(249, 115, 22, 0.08) 0%, transparent 60%), #0b0f19;
-}
-
-[data-theme="dark"] .shopee-auth-card {
-  background: #1e293b;
-  border-color: #334155;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
-}
-
-[data-theme="dark"] .shopee-form-input {
-  background: #0f172a;
-  border-color: #334155;
+[data-theme="dark"] .shopee-social-btn {
+  background: #1f2937;
+  border-color: #374151;
   color: #f8fafc;
 }
 
-[data-theme="dark"] .shopee-role-tabs {
-  background: #0f172a;
-  border-color: #334155;
+.shopee-social-btn:hover {
+  background: var(--bg-muted, #f1f5f9);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
 }
 
-[data-theme="dark"] .shopee-role-tab.active {
-  background: #1e293b;
-  color: var(--primary-color, #f97316);
+/* Error message banner */
+.shopee-form-error-msg {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-[data-theme="dark"] .shopee-demo-section {
-  background: #29180c;
-  border-color: #7c2d12;
+/* Keyframes */
+@keyframes authFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-[data-theme="dark"] .shopee-demo-btn {
-  background: #141c2e;
-  border-color: #334155;
-  color: #f8fafc;
+@keyframes authModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-[data-theme="dark"] .shopee-demo-btn:hover {
-  background: #1e293b;
-  border-color: var(--primary-color);
+@keyframes qrLaserScan {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 96%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+/* ==========================================================================
+   5. RESPONSIVE QUERIES
+   ========================================================================== */
+@media (max-width: 900px) {
+  .shopee-auth-split-container {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+  .shopee-auth-hero-col {
+    display: none;
+  }
+  .shopee-auth-form-col {
+    padding: 32px 24px;
+  }
 }

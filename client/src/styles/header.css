@@ -6,7 +6,7 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
   width: 100%;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
@@ -187,14 +187,14 @@
 }
 
 .shopee-logo-icon-wrap {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
   color: #ffffff;
   flex-shrink: 0;
 }
@@ -205,7 +205,7 @@
 }
 
 .shopee-logo-title {
-  font-size: 16.5px;
+  font-size: 17px;
   font-weight: 800;
   letter-spacing: -0.3px;
   white-space: nowrap;
@@ -214,7 +214,7 @@
 }
 
 .shopee-logo-title .brand-gradient {
-  background: linear-gradient(135deg, #818cf8 0%, #38bdf8 100%);
+  background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -231,14 +231,15 @@
 /* Search Island */
 .shopee-search-form {
   flex: 1;
-  max-width: 620px;
+  max-width: 640px;
   position: relative;
   display: flex;
   background: #ffffff;
-  border-radius: 10px;
-  padding: 2px 3px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.12);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  border-radius: 9999px;
+  padding: 3px 4px 3px 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.2s ease;
 }
 
 [data-theme="dark"] .shopee-search-form {
@@ -247,7 +248,7 @@
 }
 
 .shopee-search-form:focus-within {
-  box-shadow: 0 3px 18px rgba(79, 70, 229, 0.25), 0 0 0 2px #6366f1;
+  box-shadow: 0 4px 22px rgba(59, 130, 246, 0.35), 0 0 0 2px #3b82f6;
 }
 
 .shopee-search-input {
@@ -288,25 +289,25 @@
 }
 
 .shopee-search-btn {
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #ffffff;
   border: none;
   outline: none;
-  padding: 0 16px;
-  height: 32px;
-  border-radius: 7px;
+  padding: 0 20px;
+  height: 36px;
+  border-radius: 9999px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
   transition: all 0.2s ease;
 }
 
 .shopee-search-btn:hover {
-  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   transform: translateY(-0.5px);
-  box-shadow: 0 3px 10px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.5);
 }
 
 /* Action Dock on Right */
@@ -356,24 +357,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid #090d16;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  border: 1.5px solid var(--header-bg, #ee4d2d);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   pointer-events: none;
 }
 
 .badge-indigo {
-  background: #4f46e5;
-  color: #ffffff;
+  background: #ffffff;
+  color: #ee4d2d;
+  font-weight: 800;
 }
 
 .badge-amber {
-  background: #f59e0b;
-  color: #0f172a;
+  background: #fef08a;
+  color: #9a3412;
+  font-weight: 800;
 }
 
 .badge-cyan {
-  background: #06b6d4;
-  color: #0f172a;
+  background: #ffedd5;
+  color: #c2410c;
+  font-weight: 800;
 }
 
 /* ==========================================================================
@@ -401,24 +405,26 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.85), rgba(6, 182, 212, 0.85));
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 16px;
-  color: #ffffff;
+  padding: 5px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+  color: #f8fafc;
   cursor: pointer;
   transition: all 0.22s ease;
   white-space: nowrap;
   font-weight: 700;
   font-size: 12px;
-  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   user-select: none;
+  backdrop-filter: blur(4px);
 }
 
 .shopee-subnav-cat-btn:hover {
-  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-0.5px);
-  box-shadow: 0 3px 10px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
 .shopee-subnav-link {
@@ -517,23 +523,23 @@
 
 .header-user-dock-btn:hover,
 .header-user-dock-btn.active {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(99, 102, 241, 0.6);
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
 }
 
 .header-user-avatar-circle {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
+  background: linear-gradient(135deg, #f97316, #ea580c);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 13px;
   color: #ffffff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .header-user-dock-info {
@@ -619,14 +625,14 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  background: linear-gradient(135deg, #f97316, #ea580c);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
   font-weight: 800;
   color: #ffffff;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.35);
   flex-shrink: 0;
 }
 
@@ -761,48 +767,50 @@
 .header-guest-auth-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .header-guest-login-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  gap: 6px;
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #ffffff;
   border: none;
-  border-radius: 16px;
-  font-size: 12px;
+  border-radius: 9999px;
+  font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.35);
   white-space: nowrap;
 }
 
 .header-guest-login-btn:hover {
-  background: linear-gradient(135deg, #4338ca, #4f46e5);
-  transform: translateY(-0.5px);
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.5);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.5);
 }
 
 .header-guest-register-btn {
-  padding: 5px 10px;
-  background: transparent;
-  color: rgba(248, 250, 252, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 16px;
+  padding: 5px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  backdrop-filter: blur(4px);
 }
 
 .header-guest-register-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.45);
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-0.5px);
 }
 

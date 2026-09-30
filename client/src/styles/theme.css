@@ -3,19 +3,19 @@
 :root,
 [data-theme="light"],
 .theme-light {
-  /* Brand Palette (Electric Indigo & Cyber Cyan - Modern Tech Enterprise) */
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-light: #eef2ff;
-  --primary-border: #c7d2fe;
+  /* Modern Luxury Tech Marketplace */
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: #eff6ff;
+  --primary-border: #bfdbfe;
   
-  --secondary-color: #06b6d4;
-  --secondary-hover: #0891b2;
+  --secondary-color: #0ea5e9;
+  --secondary-hover: #0284c7;
   
   --header-bg: #090d16;
-  --header-bg-gradient: linear-gradient(135deg, #090d16 0%, #1e1b4b 100%);
+  --header-bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 60%, #171c38 100%);
   --header-text: #f8fafc;
-  --header-border: #1e293b;
+  --header-border: rgba(255, 255, 255, 0.08);
   
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -58,18 +58,18 @@
 /* Dark Mode Theme Tokens */
 [data-theme="dark"],
 .theme-dark {
-  --primary-color: #6366f1;
-  --primary-hover: #4f46e5;
-  --primary-light: #1e1b4b;
-  --primary-border: #3730a3;
+  --primary-color: #f97316;
+  --primary-hover: #ea580c;
+  --primary-light: #2c1a14;
+  --primary-border: #7c2d12;
   
-  --secondary-color: #38bdf8;
-  --secondary-hover: #0284c7;
+  --secondary-color: #fb923c;
+  --secondary-hover: #f97316;
   
-  --header-bg: #05070e;
-  --header-bg-gradient: linear-gradient(135deg, #05070e 0%, #0f172a 100%);
+  --header-bg: #181414;
+  --header-bg-gradient: linear-gradient(135deg, #181414 0%, #251d1a 60%, #1f1816 100%);
   --header-text: #f8fafc;
-  --header-border: #1e293b;
+  --header-border: rgba(255, 255, 255, 0.12);
   
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;

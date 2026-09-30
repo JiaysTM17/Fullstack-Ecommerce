@@ -8,6 +8,7 @@ import CategoryMegaMenuDrawer from './CategoryMegaMenuDrawer';
 import NotificationsPopover from './NotificationsPopover';
 import RewardsHubModal from './RewardsHubModal';
 import { useCoins } from '../context/CoinContext';
+import { useAuthModal } from '../context/AuthModalContext';
 import '../styles/header.css';
 
 const RECENT_SEARCHES_KEY = 'mini_shopee_recent_searches';
@@ -48,6 +49,7 @@ const Header = ({
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
   const { coins } = useCoins();
+  const { openAuthModal } = useAuthModal() || {};
 
   const [recentSearches, setRecentSearches] = useState(() => {
     try {
@@ -730,7 +732,14 @@ const Header = ({
                 <button
                   type="button"
                   className="header-guest-login-btn"
-                  onClick={() => navTo('/login')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (openAuthModal) {
+                      openAuthModal('login');
+                    } else {
+                      navTo('/login');
+                    }
+                  }}
                 >
                   <span>🔑</span>
                   <span>{t('login', 'Đăng Nhập')}</span>
@@ -738,7 +747,14 @@ const Header = ({
                 <button
                   type="button"
                   className="header-guest-register-btn"
-                  onClick={() => navTo('/register')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (openAuthModal) {
+                      openAuthModal('register');
+                    } else {
+                      navTo('/register');
+                    }
+                  }}
                 >
                   {t('register', 'Đăng Ký')}
                 </button>

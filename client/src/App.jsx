@@ -8,11 +8,12 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import { Footer, Header, ToastContainer } from "./components";
+import { Footer, Header, ToastContainer, AuthModal } from "./components";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LiveChatWidget from "./components/LiveChatWidget";
 import ProductCompareModal from "./components/ProductCompareModal";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthModalProvider } from "./context/AuthModalContext";
 import { CartProvider, useCart } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import { CompareProvider } from "./context/CompareContext";
@@ -101,6 +102,7 @@ function AppLayout() {
       <LiveChatWidget />
       <ProductCompareModal />
       <ToastContainer />
+      <AuthModal />
     </>
   );
 }
@@ -112,15 +114,17 @@ export default function App() {
         <LanguageProvider>
           <ToastProvider>
             <AuthProvider>
-              <WishlistProvider>
-                <CompareProvider>
-                  <CoinProvider>
-                    <CartProvider>
-                      <AppLayout />
-                    </CartProvider>
-                  </CoinProvider>
-                </CompareProvider>
-              </WishlistProvider>
+              <AuthModalProvider>
+                <WishlistProvider>
+                  <CompareProvider>
+                    <CoinProvider>
+                      <CartProvider>
+                        <AppLayout />
+                      </CartProvider>
+                    </CoinProvider>
+                  </CompareProvider>
+                </WishlistProvider>
+              </AuthModalProvider>
             </AuthProvider>
           </ToastProvider>
         </LanguageProvider>
