@@ -259,3 +259,178 @@ export const demo = async (req, res) => {
 };
 
 export default { register, login, me, profile, demo };
+
+// === Token blacklist (in-memory) for logout ===
+const tokenBlacklist = new Set();
+
+// === Password reset tokens (in-memory) ===
+const resetTokens = new Map();
+
+// @desc    Change password (authenticated user)
+// @route   PUT /api/auth/change-password
+// @access  Private
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return sendError(res, "Vui lòng nhập mật khẩu cũ và mật khẩu mới", 400);
+    }
+
+    if (newPassword.length < 8) {
+      return sendError(res, "Mật khẩu mới tối thiểu phải từ 8 ký tự", 400);
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      return sendError(res, "Mật khẩu mới phải có ít nhất 1 chữ hoa", 400);
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+      return sendError(res, "Mật khẩu mới phải có ít nhất 1 chữ số", 400);
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return sendError(res, "Không tìm thấy tài khoản", 404);
+
+    const isMatch = await user.matchPassword(oldPassword);
+    if (!isMatch) {
+      return sendError(res, "Mật khẩu cũ không chính xác", 401);
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    sendSuccess(res, { message: "Đổi mật khẩu thành công" });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Request password reset (simulation — generates token)
+// @route   POST /api/auth/forgot-password
+// @access  Public
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return sendError(res, "Email là bắt buộc", 400);
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return sendSuccess(res, {
+        message: "Nếu email tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.",
+      });
+    }
+
+    // Generate reset token (6-digit code)
+    const resetCode = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = Date.now() + 30 * 60 * 1000; // 30 phút
+
+    resetTokens.set(normalizedEmail, { code: resetCode, expiresAt });
+
+    // In production, send email here. For demo, return the code.
+    sendSuccess(res, {
+      message: "Nếu email tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.",
+      _devResetCode: process.env.NODE_ENV !== "production" ? resetCode : undefined,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Reset password with token
+// @route   POST /api/auth/reset-password
+// @access  Public
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, resetCode, newPassword } = req.body;
+
+    if (!email || !resetCode || !newPassword) {
+      return sendError(res, "Vui lòng cung cấp email, mã xác nhận và mật khẩu mới", 400);
+    }
+
+    if (newPassword.length < 8) {
+      return sendError(res, "Mật khẩu mới tối thiểu phải từ 8 ký tự", 400);
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const storedToken = resetTokens.get(normalizedEmail);
+
+    if (!storedToken || storedToken.code !== resetCode) {
+      return sendError(res, "Mã xác nhận không hợp lệ hoặc đã hết hạn", 400);
+    }
+
+    if (Date.now() > storedToken.expiresAt) {
+      resetTokens.delete(normalizedEmail);
+      return sendError(res, "Mã xác nhận đã hết hạn (30 phút). Vui lòng yêu cầu mã mới.", 400);
+    }
+
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) return sendError(res, "Không tìm thấy tài khoản", 404);
+
+    user.password = newPassword;
+    await user.save();
+
+    resetTokens.delete(normalizedEmail);
+
+    sendSuccess(res, { message: "Đặt lại mật khẩu thành công. Vui lòng đăng nhập với mật khẩu mới." });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Refresh access token
+// @route   POST /api/auth/refresh-token
+// @access  Private
+export const refreshToken = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const user = await User.findById(userId);
+
+    if (!user) return sendError(res, "Không tìm thấy tài khoản", 404);
+
+    if (!user.isActive || user.status === "banned") {
+      return sendError(res, "Tài khoản đã bị khóa", 403);
+    }
+
+    const newToken = generateToken({
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      shopId: user.shopId,
+    });
+
+    sendSuccess(res, {
+      token: newToken,
+      message: "Token đã được làm mới",
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Logout — invalidate current token
+// @route   POST /api/auth/logout
+// @access  Private
+export const logout = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      tokenBlacklist.add(token);
+
+      // Auto-cleanup blacklist after 24h
+      setTimeout(() => tokenBlacklist.delete(token), 24 * 60 * 60 * 1000);
+    }
+
+    sendSuccess(res, { message: "Đăng xuất thành công" });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// Export blacklist checker for auth middleware
+export const isTokenBlacklisted = (token) => tokenBlacklist.has(token);
