@@ -4,12 +4,14 @@ import {
   changePassword, forgotPassword, resetPassword,
   refreshToken, logout,
   sendRegistrationOtp, verifyRegistrationOtp,
+  checkEmailAvailability,
 } from "../controllers/authController.js";
 import { authenticate } from "../middlewares/auth.js";
 
 const router = express.Router();
 
 // Public routes
+router.get("/check-email", checkEmailAvailability);
 router.post("/register", register);
 router.post("/login", login);
 router.post("/demo", demo);

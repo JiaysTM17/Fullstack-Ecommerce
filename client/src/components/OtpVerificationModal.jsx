@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 
 /**
  * Enterprise 2FA OTP Verification Modal
- * Professional banking & e-commerce design:
- * - Direct hand-input into 6 individual digit cells
- * - Smooth auto-advance, backspace navigation, arrow keys, and multi-digit paste support
- * - Eliminates public OTP banners and instant auto-fill shortcuts
- * - 60s countdown timer with re-request capability
+ * Uses Single-Input Segmented UI Display pattern:
+ * - Completely immune to Windows IME / Unikey key repeat bugs
+ * - Perfectly captures every typed digit sequentially (e.g. 271880)
+ * - Full paste, backspace, arrow, and enter key bindings
+ * - 60s countdown timer with fresh OTP resend support
  * Author: Kiệt Trương <truonggiakiet110806@gmail.com>
  */
 export default function OtpVerificationModal({
@@ -23,37 +23,41 @@ export default function OtpVerificationModal({
   title = 'Xác Thực Tài Khoản (2FA OTP)',
   subtitle = 'Nhập mã bảo mật 6 số để kích hoạt tài khoản của bạn'
 }) {
-  const [digits, setDigits] = useState(['', '', '', '', '', '']);
+  const [otpValue, setOtpValue] = useState('');
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendNotice, setResendNotice] = useState('');
   const [activeOtp, setActiveOtp] = useState(expectedOtp || '');
-  const inputRefs = useRef([]);
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef(null);
 
   const displayEmail = targetEmail || email;
   const displayPhone = targetPhone || phone;
 
-  // Initialize state when modal opens
+  // Initialize and auto-focus when modal opens
   useEffect(() => {
     if (!isOpen) return;
-    setDigits(['', '', '', '', '', '']);
+    setOtpValue('');
     setError('');
     setResendNotice('');
     setCountdown(60);
     setCanResend(false);
     if (expectedOtp) setActiveOtp(expectedOtp);
 
-    // Auto-focus the first digit input
     const timer = setTimeout(() => {
-      if (inputRefs.current[0]) {
-        inputRefs.current[0].focus();
-        inputRefs.current[0].select();
+      if (inputRef.current) {
+        inputRef.current.focus();
       }
     }, 150);
     return () => clearTimeout(timer);
   }, [isOpen, expectedOtp]);
+
+  // Keep activeOtp updated if prop changes
+  useEffect(() => {
+    if (expectedOtp) setActiveOtp(expectedOtp);
+  }, [expectedOtp]);
 
   // Countdown timer for OTP re-send
   useEffect(() => {
@@ -75,71 +79,29 @@ export default function OtpVerificationModal({
 
   if (!isOpen) return null;
 
-  // Handle single digit typing with auto-advance
-  const handleChange = (index, value) => {
-    const cleaned = value.replace(/\D/g, '');
-    if (!cleaned) {
-      const next = [...digits];
-      next[index] = '';
-      setDigits(next);
-      return;
-    }
-
-    const digit = cleaned.slice(-1);
-    const next = [...digits];
-    next[index] = digit;
-    setDigits(next);
+  // Handle typing inside the unified input
+  const handleInputChange = (e) => {
+    const raw = e.target.value;
+    const digitsOnly = raw.replace(/\D/g, '').slice(0, 6);
+    setOtpValue(digitsOnly);
     setError('');
+  };
 
-    // Move to next input box automatically
-    if (index < 5 && inputRefs.current[index + 1]) {
-      inputRefs.current[index + 1].focus();
-      inputRefs.current[index + 1].select();
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && otpValue.length === 6) {
+      e.preventDefault();
+      handleVerify();
     }
   };
 
-  // Handle backspace and arrow navigation
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace') {
-      if (!digits[index] && index > 0 && inputRefs.current[index - 1]) {
-        inputRefs.current[index - 1].focus();
-        const next = [...digits];
-        next[index - 1] = '';
-        setDigits(next);
-      }
-    } else if (e.key === 'ArrowLeft' && index > 0 && inputRefs.current[index - 1]) {
-      inputRefs.current[index - 1].focus();
-    } else if (e.key === 'ArrowRight' && index < 5 && inputRefs.current[index + 1]) {
-      inputRefs.current[index + 1].focus();
-    } else if (e.key === 'Enter') {
-      if (digits.join('').length === 6) {
-        handleVerify();
-      }
-    }
-  };
-
-  // Support pasting full 6-digit code copied from email
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (!pasted) return;
-
-    const next = [...digits];
-    for (let i = 0; i < 6; i++) {
-      next[i] = pasted[i] || '';
-    }
-    setDigits(next);
-    setError('');
-
-    const targetIdx = Math.min(pasted.length, 5);
-    if (inputRefs.current[targetIdx]) {
-      inputRefs.current[targetIdx].focus();
+  const handleBoxClick = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
   };
 
   const handleVerify = async () => {
-    const code = digits.join('');
-    if (code.length < 6) {
+    if (otpValue.length < 6) {
       setError('Vui lòng tự tay nhập đầy đủ 6 chữ số mã OTP xác nhận');
       return;
     }
@@ -148,13 +110,13 @@ export default function OtpVerificationModal({
     setError('');
 
     try {
-      if (activeOtp && code !== activeOtp) {
+      if (activeOtp && otpValue !== activeOtp) {
         setError('Mã OTP không chính xác. Vui lòng kiểm tra lại hòm thư email của bạn');
         setLoading(false);
         return;
       }
-      if (typeof onVerify === 'function') await onVerify(code);
-      if (typeof onVerifySuccess === 'function') await onVerifySuccess(code);
+      if (typeof onVerify === 'function') await onVerify(otpValue);
+      if (typeof onVerifySuccess === 'function') await onVerifySuccess(otpValue);
     } catch (err) {
       setError(err.message || 'Xác thực mã OTP thất bại');
     } finally {
@@ -164,7 +126,7 @@ export default function OtpVerificationModal({
 
   const handleResendClick = async () => {
     if (!canResend) return;
-    setDigits(['', '', '', '', '', '']);
+    setOtpValue('');
     setError('');
     setCountdown(60);
     setCanResend(false);
@@ -183,8 +145,8 @@ export default function OtpVerificationModal({
     const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     setResendNotice(`✓ Mã xác thực OTP mới đã được gửi lại vào hòm thư lúc ${timeStr}!`);
 
-    if (inputRefs.current[0]) {
-      inputRefs.current[0].focus();
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
   };
 
@@ -323,45 +285,79 @@ export default function OtpVerificationModal({
           </div>
         )}
 
-        {/* 6 Individual Digit Inputs - Hand typed */}
+        {/* Unified 6-Digit Container (Clicking any box focuses the hidden master input) */}
         <div
+          onClick={handleBoxClick}
           style={{
+            position: 'relative',
             display: 'flex',
             gap: '8px',
             justifyContent: 'center',
             marginBottom: '24px',
+            cursor: 'text',
           }}
-          onPaste={handlePaste}
         >
-          {digits.map((digit, idx) => (
-            <input
-              key={idx}
-              ref={(el) => (inputRefs.current[idx] = el)}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              autoComplete="one-time-code"
-              value={digit}
-              onChange={(e) => handleChange(idx, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(idx, e)}
-              style={{
-                width: '48px',
-                height: '56px',
-                textAlign: 'center',
-                fontSize: '24px',
-                fontWeight: 800,
-                color: '#0f172a',
-                background: digit ? '#f0fdf4' : '#f8fafc',
-                border: digit ? '2px solid #22c55e' : '1.5px solid #cbd5e1',
-                borderRadius: '12px',
-                outline: 'none',
-                boxShadow: digit
-                  ? '0 0 0 3px rgba(34, 197, 94, 0.15)'
-                  : 'inset 0 1px 2px rgba(0, 0, 0, 0.05)',
-                transition: 'all 0.18s ease',
-              }}
-            />
-          ))}
+          {/* Master Hidden Input: handles all keystrokes smoothly without focus jumps */}
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={6}
+            autoComplete="one-time-code"
+            value={otpValue}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              opacity: 0,
+              zIndex: 3,
+              cursor: 'text',
+            }}
+          />
+
+          {/* 6 Visual Segmented Boxes */}
+          {[0, 1, 2, 3, 4, 5].map((idx) => {
+            const digit = otpValue[idx] || '';
+            const isActive = isFocused && (otpValue.length === idx || (idx === 5 && otpValue.length === 6));
+            return (
+              <div
+                key={idx}
+                style={{
+                  width: '48px',
+                  height: '56px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  fontWeight: 800,
+                  color: '#0f172a',
+                  background: digit ? '#f0fdf4' : '#f8fafc',
+                  border: isActive
+                    ? '2px solid #2563eb'
+                    : digit
+                    ? '2px solid #22c55e'
+                    : '1.5px solid #cbd5e1',
+                  borderRadius: '12px',
+                  boxShadow: isActive
+                    ? '0 0 0 3px rgba(37, 99, 235, 0.2)'
+                    : digit
+                    ? '0 0 0 3px rgba(34, 197, 94, 0.12)'
+                    : 'inset 0 1px 2px rgba(0, 0, 0, 0.04)',
+                  transition: 'all 0.18s ease',
+                  userSelect: 'none',
+                }}
+              >
+                {digit}
+              </div>
+            );
+          })}
         </div>
 
         {/* Verify Action Button */}
@@ -369,18 +365,18 @@ export default function OtpVerificationModal({
           type="button"
           className="shopee-btn shopee-btn-primary"
           onClick={handleVerify}
-          disabled={loading || digits.join('').length < 6}
+          disabled={loading || otpValue.length < 6}
           style={{
             width: '100%',
             height: '46px',
             fontSize: '14.5px',
             fontWeight: 700,
             borderRadius: '12px',
-            background: digits.join('').length === 6 ? '#2563eb' : '#94a3b8',
+            background: otpValue.length === 6 ? '#2563eb' : '#94a3b8',
             color: '#ffffff',
             border: 'none',
-            cursor: digits.join('').length === 6 ? 'pointer' : 'not-allowed',
-            boxShadow: digits.join('').length === 6 ? '0 4px 14px rgba(37, 99, 235, 0.35)' : 'none',
+            cursor: otpValue.length === 6 ? 'pointer' : 'not-allowed',
+            boxShadow: otpValue.length === 6 ? '0 4px 14px rgba(37, 99, 235, 0.35)' : 'none',
             transition: 'all 0.2s ease',
             marginBottom: '16px',
             display: 'flex',

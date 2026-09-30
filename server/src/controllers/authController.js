@@ -449,10 +449,11 @@ export const sendRegistrationOtp = async (req, res) => {
     }
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Check duplicate email
+    // Check duplicate email (including demo accounts)
     const existingUser = await User.findOne({ email: normalizedEmail });
-    if (existingUser) {
-      return sendError(res, "Email này đã được sử dụng bởi một tài khoản khác", 400);
+    const isDemoEmail = Object.values(DEMO_EMAILS).includes(normalizedEmail);
+    if (existingUser || isDemoEmail) {
+      return sendError(res, "Email này đã được đăng ký tài khoản trên hệ thống. Vui lòng bấm Đăng Nhập để tiếp tục.", 409);
     }
 
     // Cooldown check (60s)
@@ -516,6 +517,37 @@ export const verifyRegistrationOtp = async (req, res) => {
     sendSuccess(res, {
       message: "Xác thực mã OTP bảo mật thành công",
       verified: true
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Check if email already exists in system (Realtime validation)
+// @route   GET /api/auth/check-email
+// @access  Public
+export const checkEmailAvailability = async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email || !email.trim()) {
+      return sendError(res, "Email là bắt buộc", 400);
+    }
+    const normalizedEmail = email.toLowerCase().trim();
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    const isDemoEmail = Object.values(DEMO_EMAILS).includes(normalizedEmail);
+
+    if (existingUser || isDemoEmail) {
+      return sendSuccess(res, {
+        available: false,
+        exists: true,
+        message: "Email này đã được đăng ký tài khoản trong hệ thống. Vui lòng bấm Đăng Nhập."
+      });
+    }
+
+    sendSuccess(res, {
+      available: true,
+      exists: false,
+      message: "Email hợp lệ, sẵn sàng để đăng ký."
     });
   } catch (error) {
     sendError(res, error.message, 500);

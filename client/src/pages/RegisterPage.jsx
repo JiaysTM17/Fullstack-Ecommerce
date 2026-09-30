@@ -40,6 +40,32 @@ export default function RegisterPage() {
   const [showPendingApprovalModal, setShowPendingApprovalModal] = useState(false);
   const [registeredShopInfo, setRegisteredShopInfo] = useState(null);
   const [expectedOtp, setExpectedOtp] = useState('');
+  const [emailExistsError, setEmailExistsError] = useState(false);
+  const [checkingEmail, setCheckingEmail] = useState(false);
+
+  // Realtime Email Duplicate Verification
+  const verifyEmailUnique = async (emailToTest) => {
+    const trimmed = (emailToTest || formData.email || '').trim();
+    if (!trimmed || !/^\S+@\S+\.\S+$/.test(trimmed)) return;
+    setCheckingEmail(true);
+    try {
+      const resp = await fetch(`/api/auth/check-email?email=${encodeURIComponent(trimmed)}`);
+      const data = await resp.json();
+      if (resp.ok && data.success) {
+        if (data.data?.exists) {
+          setEmailExistsError(true);
+          setError('Email này đã được đăng ký tài khoản trong hệ thống. Vui lòng bấm "Đăng nhập ngay" để tiếp tục.');
+          setSliderVerified(false);
+        } else {
+          setEmailExistsError(false);
+        }
+      }
+    } catch {
+      // ignore
+    } finally {
+      setCheckingEmail(false);
+    }
+  };
 
   // Smart Email Autocomplete Dropdown
   const [showEmailDropdown, setShowEmailDropdown] = useState(false);
@@ -91,6 +117,7 @@ export default function RegisterPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
     if (error) setError('');
     if (name === 'email') {
+      setEmailExistsError(false);
       setShowEmailDropdown(Boolean(value && value.trim().length > 0));
     }
   };
@@ -99,6 +126,7 @@ export default function RegisterPage() {
     setFormData(prev => ({ ...prev, email: fullEmail }));
     setShowEmailDropdown(false);
     if (error) setError('');
+    verifyEmailUnique(fullEmail);
   };
 
   // Preserve form data on role toggle, but reset agreement & slider
@@ -142,8 +170,9 @@ export default function RegisterPage() {
 
   const pwdStrength = getPasswordStrength(formData.password);
 
-  // Form validity for slider captcha
+  // Form validity for slider captcha - strictly requires unused email
   const isFormValid = Boolean(
+    !emailExistsError &&
     formData.fullName.trim().length >= 2 &&
     /^\S+@\S+\.\S+$/.test(formData.email.trim()) &&
     (!formData.phone || /(84|0[3|5|7|8|9])+([0-9]{8})\b/.test(formData.phone.replace(/\s+/g, ''))) &&
@@ -156,6 +185,11 @@ export default function RegisterPage() {
     e.preventDefault();
     if (!formData.fullName.trim() || !formData.email.trim() || !formData.password) {
       setError(t('auth_error_required_fields', 'Vui lòng điền đầy đủ các trường bắt buộc (*)'));
+      return;
+    }
+    // Chặn tài khoản đã đăng ký trước đó
+    if (emailExistsError) {
+      setError('Tài khoản với email này đã tồn tại trên hệ thống. Vui lòng bấm Đăng Nhập để tiếp tục.');
       return;
     }
     // Ràng buộc nghiêm ngặt: Phải đạt đủ cả 4 tiêu chuẩn (4 tick xanh)
@@ -205,16 +239,22 @@ export default function RegisterPage() {
           console.log(`[Mini Shopee Security 2FA] Mã OTP xác thực gửi tới ${formData.email.trim()}:`, data.data._devOtp);
         }
         showToast(data.message || `Đã gửi mã xác thực 2FA tới email ${formData.email.trim()}`, 'success');
+        setShowOtpModal(true);
       } else {
-        // Fallback local random OTP generator
-        const fallback = Math.floor(100000 + Math.random() * 900000).toString();
-        setExpectedOtp(fallback);
+        const errMsg = data.message || 'Email này đã được đăng ký tài khoản trên hệ thống. Vui lòng bấm Đăng Nhập.';
+        setError(errMsg);
+        showToast(errMsg, 'error');
+        if (resp.status === 409 || errMsg.includes('đăng ký') || errMsg.includes('tài khoản')) {
+          setEmailExistsError(true);
+        }
+        setSliderVerified(false);
+        setShowOtpModal(false);
+        return;
       }
-      setShowOtpModal(true);
     } catch {
-      const fallback = Math.floor(100000 + Math.random() * 900000).toString();
-      setExpectedOtp(fallback);
-      setShowOtpModal(true);
+      setError('Không thể kết nối đến máy chủ xác thực email. Vui lòng thử lại sau.');
+      setSliderVerified(false);
+      setShowOtpModal(false);
     } finally {
       setLoading(false);
     }
@@ -522,7 +562,37 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {error && <div className="shopee-form-error-msg">{error}</div>}
+            {error && (
+              <div className="shopee-form-error-msg" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>⚠️</span>
+                  <span>{error}</span>
+                </div>
+                {emailExistsError && (
+                  <Link
+                    to={`/login?email=${encodeURIComponent(formData.email)}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '8px 16px',
+                      background: '#2563eb',
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      textDecoration: 'none',
+                      marginTop: '4px',
+                      boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
+                    }}
+                  >
+                    <span>🔑</span>
+                    <span>Đăng Nhập Ngay Với Email Này ➔</span>
+                  </Link>
+                )}
+              </div>
+            )}
 
             <div className="shopee-form-group">
               <label className="shopee-form-label" htmlFor="reg-fullName">
@@ -555,14 +625,48 @@ export default function RegisterPage() {
                       id="reg-email"
                       name="email"
                       type="email"
-                      className="shopee-form-input"
+                      className={`shopee-form-input ${emailExistsError ? 'shopee-input-error' : ''}`}
                       placeholder="an.nguyen@example.com"
                       value={formData.email}
                       onChange={handleChange}
+                      onBlur={() => verifyEmailUnique(formData.email)}
                       onFocus={() => setShowEmailDropdown(Boolean(formData.email && formData.email.trim()))}
                       autoComplete="email"
+                      style={emailExistsError ? { borderColor: '#ef4444', background: '#fef2f2' } : {}}
                     />
                   </div>
+
+                  {emailExistsError && (
+                    <div
+                      style={{
+                        marginTop: '6px',
+                        padding: '6px 10px',
+                        background: '#fef2f2',
+                        border: '1px solid #f87171',
+                        borderRadius: '8px',
+                        fontSize: '11.5px',
+                        color: '#991b1b',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '6px',
+                        lineHeight: 1.3
+                      }}
+                    >
+                      <span>⚠️ Email này đã được đăng ký.</span>
+                      <Link
+                        to={`/login?email=${encodeURIComponent(formData.email)}`}
+                        style={{
+                          color: '#2563eb',
+                          fontWeight: 700,
+                          textDecoration: 'underline',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        Đăng nhập ➔
+                      </Link>
+                    </div>
+                  )}
 
                   {/* Autocomplete Dropdown */}
                   {showEmailDropdown && emailSuggestions.length > 0 && (
