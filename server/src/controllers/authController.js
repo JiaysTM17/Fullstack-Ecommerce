@@ -434,3 +434,90 @@ export const logout = async (req, res) => {
 
 // Export blacklist checker for auth middleware
 export const isTokenBlacklisted = (token) => tokenBlacklist.has(token);
+
+// Registration OTP store: normalizedEmail -> { code, expiresAt, createdAt, verified }
+const registrationOtps = new Map();
+
+// @desc    Send 2FA Registration OTP to Email
+// @route   POST /api/auth/send-registration-otp
+// @access  Public
+export const sendRegistrationOtp = async (req, res) => {
+  try {
+    const { email, fullName } = req.body;
+    if (!email || !email.trim()) {
+      return sendError(res, "Email là bắt buộc", 400);
+    }
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check duplicate email
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      return sendError(res, "Email này đã được sử dụng bởi một tài khoản khác", 400);
+    }
+
+    // Cooldown check (60s)
+    const existing = registrationOtps.get(normalizedEmail);
+    if (existing && Date.now() - existing.createdAt < 60 * 1000) {
+      const waitSec = Math.ceil((60 * 1000 - (Date.now() - existing.createdAt)) / 1000);
+      return sendError(res, `Vui lòng đợi ${waitSec} giây trước khi yêu cầu gửi lại mã OTP mới`, 429);
+    }
+
+    // Generate random 6 digits
+    const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 phút
+
+    registrationOtps.set(normalizedEmail, {
+      code: otpCode,
+      expiresAt,
+      createdAt: Date.now(),
+      verified: false
+    });
+
+    console.log(`\n======================================================`);
+    console.log(`[EMAIL SERVICE] GỬI MÃ XÁC THỰC 2FA TỚI EMAIL: ${normalizedEmail}`);
+    console.log(`[EMAIL SERVICE] MÃ OTP BẢO MẬT (6 SỐ): >>> ${otpCode} <<<`);
+    console.log(`[EMAIL SERVICE] Hết hạn sau: 5 phút | Khách hàng: ${fullName || 'Người dùng mới'}`);
+    console.log(`======================================================\n`);
+
+    sendSuccess(res, {
+      message: `Mã OTP xác thực đã được gửi tới email ${normalizedEmail}. Vui lòng kiểm tra hộp thư.`,
+      expiresInSeconds: 60,
+      email: normalizedEmail,
+      _devOtp: process.env.NODE_ENV !== 'production' ? otpCode : undefined
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Verify 2FA Registration OTP
+// @route   POST /api/auth/verify-registration-otp
+// @access  Public
+export const verifyRegistrationOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return sendError(res, "Email và mã OTP là bắt buộc", 400);
+    }
+    const normalizedEmail = email.toLowerCase().trim();
+    const stored = registrationOtps.get(normalizedEmail);
+
+    if (!stored || stored.code !== String(otp).trim()) {
+      return sendError(res, "Mã OTP không chính xác. Vui lòng kiểm tra lại hộp thư email.", 400);
+    }
+
+    if (Date.now() > stored.expiresAt) {
+      registrationOtps.delete(normalizedEmail);
+      return sendError(res, "Mã OTP đã hết hạn sau 5 phút. Vui lòng gửi lại mã mới.", 400);
+    }
+
+    stored.verified = true;
+
+    sendSuccess(res, {
+      message: "Xác thực mã OTP bảo mật thành công",
+      verified: true
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};

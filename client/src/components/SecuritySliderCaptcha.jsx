@@ -165,17 +165,17 @@ export default function SecuritySliderCaptcha({
           {isVerified ? (
             <>
               <span style={{ fontSize: '15px', color: '#10b981' }}>✓</span>
-              <span>Xác minh bảo mật thành công</span>
+              <span>Đã xác minh bảo mật thành công</span>
             </>
           ) : disabled ? (
             <>
-              <span style={{ fontSize: '13px' }}>🔒</span>
+              <span style={{ fontSize: '13px', opacity: 0.7 }}>🛡️</span>
               <span>{disabledMessage}</span>
             </>
           ) : (
             <>
-              <span style={{ fontSize: '14px' }}>🛡️</span>
-              <span>Kéo thanh trượt hoặc nhấp để xác thực</span>
+              <span style={{ fontSize: '14px', color: '#2563eb' }}>❯❯</span>
+              <span>Kéo thanh trượt sang phải để xác nhận</span>
             </>
           )}
         </span>
@@ -195,14 +195,14 @@ export default function SecuritySliderCaptcha({
             background: isVerified
               ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
               : disabled
-              ? '#cbd5e1'
+              ? '#e2e8f0'
               : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
             borderRadius: '9999px',
             boxShadow: disabled ? 'none' : '0 2px 10px rgba(0, 0, 0, 0.2)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ffffff',
+            color: disabled ? '#94a3b8' : '#ffffff',
             cursor: isVerified ? 'default' : disabled ? 'not-allowed' : 'grab',
             transition: isDragging ? 'none' : 'left 0.25s ease, background 0.25s ease',
             zIndex: 2,

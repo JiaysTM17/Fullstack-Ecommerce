@@ -734,11 +734,7 @@ const Header = ({
                   className="header-guest-login-btn"
                   onClick={(e) => {
                     e.preventDefault();
-                    if (openAuthModal) {
-                      openAuthModal('login');
-                    } else {
-                      navTo('/login');
-                    }
+                    navTo('/login');
                   }}
                 >
                   <span>🔑</span>
@@ -749,11 +745,7 @@ const Header = ({
                   className="header-guest-register-btn"
                   onClick={(e) => {
                     e.preventDefault();
-                    if (openAuthModal) {
-                      openAuthModal('register');
-                    } else {
-                      navTo('/register');
-                    }
+                    navTo('/register');
                   }}
                 >
                   {t('register', 'Đăng Ký')}

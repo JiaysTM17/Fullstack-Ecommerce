@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -8,6 +9,16 @@ import '../styles/auth.css';
 
 export default function AuthModal() {
   const { isOpen, authTab, setAuthTab, initialRole, closeAuthModal } = useAuthModal();
+  const navigate = useNavigate();
+
+  // Redirect immediately to the full-featured auth page if modal is somehow opened
+  useEffect(() => {
+    if (isOpen) {
+      closeAuthModal();
+      navigate(authTab === 'register' ? '/register' : '/login');
+    }
+  }, [isOpen, authTab, closeAuthModal, navigate]);
+
   const { login, register, loginAsDemo } = useAuth();
   const { showToast } = useToast();
   const { t } = useLanguage();

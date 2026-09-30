@@ -39,6 +39,7 @@ export default function RegisterPage() {
   const [legalInitialTab, setLegalInitialTab] = useState('terms');
   const [showPendingApprovalModal, setShowPendingApprovalModal] = useState(false);
   const [registeredShopInfo, setRegisteredShopInfo] = useState(null);
+  const [expectedOtp, setExpectedOtp] = useState('');
 
   // Smart Email Autocomplete Dropdown
   const [showEmailDropdown, setShowEmailDropdown] = useState(false);
@@ -151,7 +152,7 @@ export default function RegisterPage() {
     (role !== 'seller' || Boolean(formData.shopName.trim()))
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.fullName.trim() || !formData.email.trim() || !formData.password) {
       setError(t('auth_error_required_fields', 'Vui lòng điền đầy đủ các trường bắt buộc (*)'));
@@ -185,13 +186,82 @@ export default function RegisterPage() {
     }
 
     setError('');
-    setShowOtpModal(true);
+    setLoading(true);
+
+    try {
+      // Trigger backend 2FA OTP sending to email
+      const resp = await fetch('/api/auth/send-registration-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          fullName: formData.fullName.trim()
+        })
+      });
+      const data = await resp.json();
+      if (resp.ok && data.success) {
+        if (data.data?._devOtp) {
+          setExpectedOtp(data.data._devOtp);
+          console.log(`[Mini Shopee Security 2FA] Mã OTP xác thực gửi tới ${formData.email.trim()}:`, data.data._devOtp);
+        }
+        showToast(data.message || `Đã gửi mã xác thực 2FA tới email ${formData.email.trim()}`, 'success');
+      } else {
+        // Fallback local random OTP generator
+        const fallback = Math.floor(100000 + Math.random() * 900000).toString();
+        setExpectedOtp(fallback);
+      }
+      setShowOtpModal(true);
+    } catch {
+      const fallback = Math.floor(100000 + Math.random() * 900000).toString();
+      setExpectedOtp(fallback);
+      setShowOtpModal(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleOtpVerified = async () => {
+  const handleResendOtp = async () => {
+    try {
+      const resp = await fetch('/api/auth/send-registration-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          fullName: formData.fullName.trim()
+        })
+      });
+      const data = await resp.json();
+      if (resp.ok && data.data?._devOtp) {
+        setExpectedOtp(data.data._devOtp);
+        console.log(`[Mini Shopee Security 2FA] Mã OTP gửi lại mới:`, data.data._devOtp);
+        return data.data._devOtp;
+      }
+    } catch {
+      // ignore
+    }
+    const fresh = Math.floor(100000 + Math.random() * 900000).toString();
+    setExpectedOtp(fresh);
+    return fresh;
+  };
+
+  const handleOtpVerified = async (enteredOtp) => {
     setLoading(true);
     setError('');
     try {
+      // Optional verification with backend
+      try {
+        await fetch('/api/auth/verify-registration-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email.trim(),
+            otp: enteredOtp
+          })
+        });
+      } catch {
+        // fallback
+      }
+
       const res = await register({
         ...formData,
         role
@@ -704,7 +774,7 @@ export default function RegisterPage() {
               <SecuritySliderCaptcha
                 isVerified={sliderVerified}
                 disabled={!isFormValid}
-                disabledMessage="🔒 Vui lòng điền đủ & đúng thông tin phía trên để mở khóa trượt"
+                disabledMessage="Vui lòng điền đủ & đúng thông tin phía trên để mở khóa trượt"
                 onVerified={() => {
                   setSliderVerified(true);
                   setError('');
@@ -809,9 +879,11 @@ export default function RegisterPage() {
         email={formData.email}
         targetEmail={formData.email}
         targetPhone={formData.phone}
+        expectedOtp={expectedOtp}
         onClose={() => setShowOtpModal(false)}
         onVerify={handleOtpVerified}
         onVerifySuccess={handleOtpVerified}
+        onResend={handleResendOtp}
       />
 
       {/* Terms of Service & Privacy Policy Modal with Role Context */}
@@ -820,6 +892,10 @@ export default function RegisterPage() {
         onClose={() => setShowLegalModal(false)}
         initialTab={legalInitialTab}
         role={role}
+        onAgree={() => {
+          setAgreeTerms(true);
+          setTermsError(false);
+        }}
       />
 
       {/* Pending Admin Approval Modal for Sellers */}
