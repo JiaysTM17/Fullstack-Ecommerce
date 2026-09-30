@@ -3,6 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import { getVouchers, createVoucher, deleteVoucher } from '../services/voucherService';
+import {
+  getAdminUsers,
+  deleteAdminUser,
+  updateAdminUserStatus,
+  getAdminShops,
+  deleteAdminShop,
+  updateAdminShopStatus,
+} from '../services/adminService';
 import '../styles/dashboard.css';
 
 const INITIAL_ALL_SHOPS = [
@@ -75,6 +83,11 @@ export default function AdminDashboardPage() {
   const [newCatIcon, setNewCatIcon] = useState('📦');
   const [financeList, setFinanceList] = useState(INITIAL_FINANCE_SETTLEMENTS);
 
+  // States cho tính năng Xóa tài khoản & Xóa gian hàng
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [shopToDelete, setShopToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Voucher Management
   const [vouchers, setVouchers] = useState([]);
   const [showAddVoucher, setShowAddVoucher] = useState(false);
@@ -88,9 +101,46 @@ export default function AdminDashboardPage() {
     description: '',
   });
 
-  // Load vouchers from backend on mount
+  // Load vouchers, users, shops from backend on mount
   useEffect(() => {
     getVouchers().then(v => setVouchers(v || []));
+
+    // Đồng bộ danh sách người dùng thực tế từ Backend Database
+    getAdminUsers().then(res => {
+      if (Array.isArray(res) && res.length > 0) {
+        setUsers(res.map(u => ({
+          id: u._id || u.id,
+          fullName: u.fullName || 'Người dùng',
+          email: u.email,
+          role: u.role || 'customer',
+          status: u.status || (u.isActive ? 'active' : 'banned'),
+          shopName: u.shopName || '',
+          shopId: u.shopId || '',
+          ordersCount: u.ordersCount || 0,
+        })));
+      }
+    });
+
+    // Đồng bộ danh sách gian hàng thực tế từ Backend
+    getAdminShops().then(res => {
+      if (Array.isArray(res) && res.length > 0) {
+        setShops(prev => {
+          const remoteShops = res.map(s => ({
+            id: s._id || s.id || s.shopId,
+            shopId: s.shopId || s._id,
+            name: s.name,
+            ownerName: typeof s.ownerId === 'object' ? s.ownerId?.fullName : (s.ownerName || 'Chủ Shop'),
+            email: typeof s.ownerId === 'object' ? s.ownerId?.email : (s.email || ''),
+            phone: s.phone || '',
+            productsCount: s.productsCount || 0,
+            totalRevenue: s.totalRevenue || 0,
+            status: s.status || 'active',
+            statusText: s.status === 'active' ? 'Đang hoạt động' : s.status === 'locked' ? 'Đang bị khóa' : 'Chờ phê duyệt',
+          }));
+          return remoteShops;
+        });
+      }
+    });
   }, []);
 
   // Số liệu toàn sàn
@@ -135,11 +185,18 @@ export default function AdminDashboardPage() {
     });
   };
 
-  const handleToggleShopStatus = (shopId) => {
+  const handleToggleShopStatus = async (shopId) => {
+    const targetShop = shops.find(s => s.id === shopId);
+    const nextStatus = targetShop?.status === 'active' ? 'locked' : 'active';
+    try {
+      await updateAdminShopStatus(shopId, nextStatus);
+    } catch {
+      // Offline fallback
+    }
+
     setShops(prev => {
       const updated = prev.map(s => {
         if (s.id === shopId) {
-          const nextStatus = s.status === 'active' ? 'locked' : 'active';
           toast.info(nextStatus === 'active' ? `Đã mở khóa hoạt động cho ${s.name}` : `Đã khóa gian hàng ${s.name}`);
           return {
             ...s,
@@ -154,15 +211,87 @@ export default function AdminDashboardPage() {
     });
   };
 
-  const handleToggleUserStatus = (userId) => {
+  const handleToggleUserStatus = async (userId) => {
+    const targetUser = users.find(u => u.id === userId);
+    const nextStatus = targetUser?.status === 'active' ? 'banned' : 'active';
+    try {
+      await updateAdminUserStatus(userId, nextStatus);
+    } catch {
+      // Offline fallback
+    }
+
     setUsers(prev => prev.map(u => {
       if (u.id === userId) {
-        const nextStatus = u.status === 'active' ? 'banned' : 'active';
         toast.info(nextStatus === 'active' ? `Đã mở khóa tài khoản ${u.fullName}` : `Đã tạm khóa tài khoản ${u.fullName}`);
         return { ...u, status: nextStatus };
       }
       return u;
     }));
+  };
+
+  // Xóa tài khoản Người mua hoặc Người bán
+  const handleConfirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteAdminUser(userToDelete.id);
+    } catch (err) {
+      console.warn("Delete API warning:", err.message);
+    }
+
+    // Cập nhật state UI
+    setUsers(prev => prev.filter(u => u.id !== userToDelete.id && u.email !== userToDelete.email));
+
+    // Nếu xóa người bán, loại bỏ luôn gian hàng liên kết khỏi UI & localStorage
+    if (userToDelete.role === 'seller' || userToDelete.shopId) {
+      setShops(prev => prev.filter(s => 
+        s.ownerId !== userToDelete.id &&
+        s.email !== userToDelete.email &&
+        s.id !== userToDelete.shopId &&
+        s.shopId !== userToDelete.shopId
+      ));
+      try {
+        const saved = localStorage.getItem('mini_shopee_seller_shops');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const filtered = parsed.filter(s => s.id !== userToDelete.shopId && s.email !== userToDelete.email);
+          localStorage.setItem('mini_shopee_seller_shops', JSON.stringify(filtered));
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    toast.success(`Đã xóa vĩnh viễn tài khoản ${userToDelete.fullName} (${userToDelete.email}). Bạn có thể dùng email này để test đăng ký lại ngay bây giờ!`);
+    setIsDeleting(false);
+    setUserToDelete(null);
+  };
+
+  // Xóa gian hàng
+  const handleConfirmDeleteShop = async () => {
+    if (!shopToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteAdminShop(shopToDelete.id || shopToDelete.shopId);
+    } catch (err) {
+      console.warn("Delete shop API warning:", err.message);
+    }
+
+    setShops(prev => prev.filter(s => s.id !== shopToDelete.id && s.shopId !== shopToDelete.shopId));
+    try {
+      const saved = localStorage.getItem('mini_shopee_seller_shops');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const filtered = parsed.filter(s => s.id !== shopToDelete.id && s.shopId !== shopToDelete.shopId);
+        localStorage.setItem('mini_shopee_seller_shops', JSON.stringify(filtered));
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    toast.success(`Đã xóa gian hàng "${shopToDelete.name}" thành công!`);
+    setIsDeleting(false);
+    setShopToDelete(null);
   };
 
   const handleCreateVoucher = async (e) => {
@@ -471,7 +600,7 @@ export default function AdminDashboardPage() {
                       </td>
                       <td>
                         {s.status === 'pending' ? (
-                          <div style={{ display: 'flex', gap: '6px' }}>
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                             <button
                               type="button"
                               className="shopee-btn shopee-btn-sm"
@@ -486,7 +615,7 @@ export default function AdminDashboardPage() {
                               }}
                               onClick={() => handleApproveShop(s.id)}
                             >
-                              ✓ Phê duyệt
+                              ✓ Duyệt
                             </button>
                             <button
                               type="button"
@@ -496,16 +625,36 @@ export default function AdminDashboardPage() {
                             >
                               ✕ Từ chối
                             </button>
+                            <button
+                              type="button"
+                              className="shopee-btn shopee-btn-sm"
+                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
+                              onClick={() => setShopToDelete(s)}
+                              title="Xóa gian hàng này"
+                            >
+                              🗑️ Xóa
+                            </button>
                           </div>
                         ) : (
-                          <button
-                            type="button"
-                            className="shopee-btn shopee-btn-secondary shopee-btn-sm"
-                            style={s.status === 'active' ? { color: 'var(--color-error)' } : { color: 'var(--color-success)' }}
-                            onClick={() => handleToggleShopStatus(s.id)}
-                          >
-                            {s.status === 'active' ? '🚫 Khóa gian hàng' : '✓ Mở khóa hoạt động'}
-                          </button>
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                              style={s.status === 'active' ? { color: 'var(--color-error)' } : { color: 'var(--color-success)' }}
+                              onClick={() => handleToggleShopStatus(s.id)}
+                            >
+                              {s.status === 'active' ? 'Khóa' : 'Mở khóa'}
+                            </button>
+                            <button
+                              type="button"
+                              className="shopee-btn shopee-btn-sm"
+                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
+                              onClick={() => setShopToDelete(s)}
+                              title="Xóa gian hàng này"
+                            >
+                              🗑️ Xóa
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -551,15 +700,41 @@ export default function AdminDashboardPage() {
                         </span>
                       </td>
                       <td>
-                        {u.role !== 'admin' && (
-                          <button
-                            type="button"
-                            className="shopee-btn shopee-btn-secondary shopee-btn-sm"
-                            style={u.status === 'active' ? { color: 'var(--color-error)' } : { color: 'var(--color-success)' }}
-                            onClick={() => handleToggleUserStatus(u.id)}
-                          >
-                            {u.status === 'active' ? 'Cấm tài khoản' : 'Mở khóa'}
-                          </button>
+                        {u.role !== 'admin' ? (
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                              style={u.status === 'active' ? { color: 'var(--color-error)' } : { color: 'var(--color-success)' }}
+                              onClick={() => handleToggleUserStatus(u.id)}
+                            >
+                              {u.status === 'active' ? 'Cấm' : 'Mở'}
+                            </button>
+                            <button
+                              type="button"
+                              className="shopee-btn shopee-btn-sm"
+                              style={{
+                                background: '#fee2e2',
+                                color: '#dc2626',
+                                border: '1px solid #fca5a5',
+                                fontWeight: 700,
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                              onClick={() => setUserToDelete(u)}
+                              title="Xóa tài khoản vĩnh viễn để test đăng ký lại"
+                            >
+                              🗑️ Xóa
+                            </button>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic', fontWeight: 600 }}>
+                            🛡️ Bảo vệ Admin
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -973,6 +1148,309 @@ export default function AdminDashboardPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* ==================== MODAL XÁC NHẬN XÓA TÀI KHOẢN (NGƯỜI MUA & NGƯỜI BÁN) ==================== */}
+        {userToDelete && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '16px'
+          }}>
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              maxWidth: '520px',
+              width: '100%',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              overflow: 'hidden'
+            }}>
+              {/* Header */}
+              <div style={{
+                background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                padding: '18px 24px',
+                borderBottom: '1px solid #fca5a5',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px'
+              }}>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '50%',
+                  background: '#ef4444',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  flexShrink: 0
+                }}>
+                  ⚠️
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#991b1b' }}>
+                    Xác Nhận Xóa Vĩnh Viễn Tài Khoản
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#b91c1c' }}>
+                    Hỗ trợ dọn sạch dữ liệu để kiểm thử (Test) đăng ký lại
+                  </p>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div style={{ padding: '22px 24px' }}>
+                <p style={{ margin: '0 0 14px', fontSize: '14px', color: '#334155', lineHeight: 1.5 }}>
+                  Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản người dùng sau?
+                </p>
+
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                    <span style={{ color: '#64748b' }}>Họ và tên:</span>
+                    <strong style={{ color: '#0f172a' }}>{userToDelete.fullName}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                    <span style={{ color: '#64748b' }}>Email:</span>
+                    <code style={{ color: '#dc2626', fontWeight: 700, background: '#fee2e2', padding: '2px 6px', borderRadius: '4px' }}>
+                      {userToDelete.email}
+                    </code>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                    <span style={{ color: '#64748b' }}>Phân quyền vai trò:</span>
+                    <span style={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      padding: '2px 8px',
+                      borderRadius: '999px',
+                      background: userToDelete.role === 'seller' ? '#e0f2fe' : '#f1f5f9',
+                      color: userToDelete.role === 'seller' ? '#0369a1' : '#475569'
+                    }}>
+                      {userToDelete.role === 'seller' ? '🏪 Người bán (Seller)' : '🛒 Người mua (Customer)'}
+                    </span>
+                  </div>
+                  {userToDelete.role === 'seller' && (
+                    <div style={{
+                      marginTop: '6px',
+                      paddingTop: '8px',
+                      borderTop: '1px dashed #cbd5e1',
+                      color: '#b45309',
+                      fontSize: '12px',
+                      lineHeight: 1.5
+                    }}>
+                      🏬 <strong>Gian hàng đi kèm:</strong> Hệ thống sẽ tự động dọn sạch gian hàng của người bán này và các mặt hàng niêm yết để giải phóng hoàn toàn tên shop.
+                    </div>
+                  )}
+                </div>
+
+                <div style={{
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  borderRadius: '8px',
+                  padding: '10px 14px',
+                  fontSize: '13px',
+                  color: '#166534',
+                  display: 'flex',
+                  gap: '8px',
+                  alignItems: 'center'
+                }}>
+                  <span>💡</span>
+                  <span><strong>Mục đích kiểm thử:</strong> Sau khi xóa, bạn có thể nhập lại email này trên trang Đăng ký để test lại toàn bộ luồng từ đầu.</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div style={{
+                padding: '16px 24px',
+                background: '#f8fafc',
+                borderTop: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '12px'
+              }}>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => setUserToDelete(null)}
+                  style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600 }}
+                >
+                  Hủy Bỏ
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  className="shopee-btn"
+                  onClick={handleConfirmDeleteUser}
+                  style={{
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    cursor: isDeleting ? 'not-allowed' : 'pointer',
+                    opacity: isDeleting ? 0.7 : 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  {isDeleting ? 'Đang Xóa...' : '🗑️ Xác Nhận Xóa Vĩnh Viễn'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ==================== MODAL XÁC NHẬN XÓA GIAN HÀNG ==================== */}
+        {shopToDelete && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '16px'
+          }}>
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              maxWidth: '520px',
+              width: '100%',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                padding: '18px 24px',
+                borderBottom: '1px solid #fca5a5',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px'
+              }}>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '50%',
+                  background: '#ef4444',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  flexShrink: 0
+                }}>
+                  🏪
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#991b1b' }}>
+                    Xác Nhận Xóa Gian Hàng
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#b91c1c' }}>
+                    Gỡ bỏ gian hàng và toàn bộ sản phẩm niêm yết
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ padding: '22px 24px' }}>
+                <p style={{ margin: '0 0 14px', fontSize: '14px', color: '#334155', lineHeight: 1.5 }}>
+                  Bạn có chắc chắn muốn xóa gian hàng sau khỏi sàn?
+                </p>
+
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                    <span style={{ color: '#64748b' }}>Tên gian hàng:</span>
+                    <strong style={{ color: '#0f172a' }}>{shopToDelete.name}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                    <span style={{ color: '#64748b' }}>Mã Shop:</span>
+                    <code style={{ color: '#0284c7', fontWeight: 700 }}>{shopToDelete.shopId || shopToDelete.id}</code>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                    <span style={{ color: '#64748b' }}>Chủ sở hữu:</span>
+                    <span style={{ color: '#334155' }}>{shopToDelete.ownerName || 'N/A'}</span>
+                  </div>
+                </div>
+
+                <p style={{ margin: 0, fontSize: '12px', color: '#dc2626' }}>
+                  ⚠️ Cảnh báo: Thao tác này sẽ xóa vĩnh viễn gian hàng và toàn bộ sản phẩm của gian hàng này.
+                </p>
+              </div>
+
+              <div style={{
+                padding: '16px 24px',
+                background: '#f8fafc',
+                borderTop: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '12px'
+              }}>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => setShopToDelete(null)}
+                  style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600 }}
+                >
+                  Hủy Bỏ
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  className="shopee-btn"
+                  onClick={handleConfirmDeleteShop}
+                  style={{
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    cursor: isDeleting ? 'not-allowed' : 'pointer',
+                    opacity: isDeleting ? 0.7 : 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  {isDeleting ? 'Đang Xóa...' : '🗑️ Xác Nhận Xóa Gian Hàng'}
+                </button>
+              </div>
             </div>
           </div>
         )}

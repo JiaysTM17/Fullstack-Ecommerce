@@ -2,6 +2,7 @@ import Shop from "../models/Shop.js";
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
+import memoryStore from "../models/memoryStore.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 
 // ==================== QUẢN TRỊ GIAN HÀNG (SHOPS) ====================
@@ -126,6 +127,47 @@ export const updateShopCommissionAdmin = async (req, res) => {
   }
 };
 
+// @desc    Xóa vĩnh viễn gian hàng của người bán
+// @route   DELETE /api/admin/shops/:id
+// @access  Private (Super Admin only)
+export const deleteShopAdmin = async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.id);
+    if (!shop) {
+      return sendError(res, "Không tìm thấy gian hàng", 404);
+    }
+
+    const shopId = shop.shopId || shop._id;
+
+    // Xóa tất cả sản phẩm của shop
+    await Product.deleteMany({ shopId });
+
+    // Cập nhật chủ shop về vai trò customer nếu có
+    if (shop.ownerId) {
+      const ownerId = typeof shop.ownerId === "object" ? (shop.ownerId._id || shop.ownerId.id) : shop.ownerId;
+      const owner = await User.findById(ownerId);
+      if (owner && owner.role === "seller") {
+        owner.role = "customer";
+        owner.shopId = null;
+        owner.shopName = null;
+        await owner.save();
+      }
+    }
+
+    await Shop.findByIdAndDelete(req.params.id);
+    await Shop.deleteOne({ $or: [{ _id: req.params.id }, { shopId: shopId }] });
+
+    sendSuccess(res, {
+      id: req.params.id,
+      shopId,
+      name: shop.name,
+      message: `Đã xóa gian hàng "${shop.name}" và toàn bộ sản phẩm liên quan thành công.`,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 // ==================== QUẢN TRỊ NGƯỜI DÙNG (USERS) ====================
 
 // @desc    Lấy danh sách người dùng toàn sàn
@@ -204,6 +246,70 @@ export const updateUserStatusAdmin = async (req, res) => {
         status === "active"
           ? `Đã mở khóa tài khoản cho ${user.fullName}`
           : `Đã tạm khóa tài khoản của ${user.fullName}`,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Xóa vĩnh viễn tài khoản người mua hoặc người bán (Dọn sạch liên kết để tiện test)
+// @route   DELETE /api/admin/users/:id
+// @access  Private (Super Admin only)
+export const deleteUserAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) {
+      return sendError(res, "Không tìm thấy người dùng", 404);
+    }
+
+    // BẢO VỆ ADMIN: Không thể xóa tài khoản Quản trị viên sàn
+    if (user.role === "admin" || user.email === "admin@shopee.vn") {
+      return sendError(
+        res,
+        "Quy tắc an toàn: Không thể xóa tài khoản Quản trị viên sàn (Super Admin)",
+        403
+      );
+    }
+
+    // Nếu tài khoản là Người bán hoặc có Shop liên kết, xóa toàn bộ Shop và sản phẩm liên quan
+    let deletedShopName = null;
+    const shopMatches = await Shop.find({
+      $or: [
+        { ownerId: user._id || user.id },
+        { ownerId: String(user._id || user.id) },
+        { shopId: user.shopId },
+        { _id: user.shopId },
+      ],
+    });
+
+    if (shopMatches && shopMatches.length > 0) {
+      for (const s of shopMatches) {
+        deletedShopName = s.name;
+        if (s.shopId) {
+          await Product.deleteMany({ shopId: s.shopId });
+        }
+        await Shop.findByIdAndDelete(s._id || s.id);
+        await Shop.deleteOne({ $or: [{ _id: s._id || s.id }, { shopId: s.shopId }] });
+      }
+    }
+
+    // Xóa giỏ hàng người dùng (nếu có)
+    if (memoryStore?.carts?.clearByUserId) {
+      memoryStore.carts.clearByUserId(id);
+    }
+
+    // Xóa user khỏi database
+    await User.findByIdAndDelete(id);
+    await User.deleteOne({ $or: [{ _id: id }, { id: id }, { email: user.email }] });
+
+    sendSuccess(res, {
+      id,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+      deletedShop: deletedShopName,
+      message: `Đã xóa vĩnh viễn tài khoản ${user.fullName} (${user.email}). Email này hiện đã được giải phóng để bạn có thể test đăng ký mới.`,
     });
   } catch (error) {
     sendError(res, error.message, 500);

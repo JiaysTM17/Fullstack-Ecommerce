@@ -4,8 +4,10 @@ import {
   getAllShopsAdmin,
   updateShopStatusAdmin,
   updateShopCommissionAdmin,
+  deleteShopAdmin,
   getAllUsersAdmin,
   updateUserStatusAdmin,
+  deleteUserAdmin,
   getPlatformOverviewAdmin,
   getFinanceSettlementsAdmin,
   getDashboard,
@@ -31,10 +33,12 @@ router.get("/recent-orders", getRecentOrders);
 router.get("/shops", getAllShopsAdmin);
 router.put("/shops/:id/status", updateShopStatusAdmin);
 router.put("/shops/:id/commission", updateShopCommissionAdmin);
+router.delete("/shops/:id", deleteShopAdmin);
 
 // Users moderation
 router.get("/users", getAllUsersAdmin);
 router.put("/users/:id/status", updateUserStatusAdmin);
+router.delete("/users/:id", deleteUserAdmin);
 
 // Platform Overview & Finance
 router.get("/overview", getPlatformOverviewAdmin);

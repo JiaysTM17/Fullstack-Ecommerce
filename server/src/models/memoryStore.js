@@ -401,6 +401,20 @@ function createCollectionAPI(storeName, wrapFn) {
       memoryStore.persist();
       return wrapFn(target);
     },
+    findByIdAndDelete: async (id) => {
+      const idx = memoryStore[storeName].findIndex((item) => item._id === id || item.id === id || item.shopId === id);
+      if (idx === -1) return null;
+      const deleted = memoryStore[storeName].splice(idx, 1)[0];
+      memoryStore.persist();
+      return wrapFn(deleted);
+    },
+    deleteOne: async (query = {}) => {
+      const idx = memoryStore[storeName].findIndex((item) => matchFilter(item, query));
+      if (idx === -1) return { deletedCount: 0 };
+      memoryStore[storeName].splice(idx, 1);
+      memoryStore.persist();
+      return { deletedCount: 1 };
+    },
     findOneAndDelete: async (query = {}) => {
       const idx = memoryStore[storeName].findIndex((item) => matchFilter(item, query));
       if (idx === -1) return null;
