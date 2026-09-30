@@ -302,39 +302,43 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
         onClick={() => handleCategoryClick(item)}
         className="category-showcase-card"
         style={{
-          width: '112px',
-          minWidth: '112px',
-          height: '148px',
+          width: '124px',
+          minWidth: '124px',
+          height: '156px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '12px 6px',
+          padding: '12px 8px',
+          margin: '4px',
+          borderRadius: '12px',
           background: 'var(--bg-card, #ffffff)',
-          borderRight: '1px solid var(--border-light, #f1f5f9)',
-          borderBottom: '1px solid var(--border-light, #f1f5f9)',
           cursor: 'pointer',
-          transition: 'all 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
           textAlign: 'center',
           userSelect: 'none',
           boxSizing: 'border-box',
           position: 'relative',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.08)';
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.zIndex = '3';
+          e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.08)';
+          e.currentTarget.style.transform = 'translateY(-4px)';
+          e.currentTarget.style.background = 'var(--bg-page, #f8fafc)';
+          const imgEl = e.currentTarget.querySelector('img');
+          if (imgEl) imgEl.style.transform = 'scale(1.1)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.boxShadow = 'none';
           e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.zIndex = '1';
+          e.currentTarget.style.background = 'var(--bg-card, #ffffff)';
+          const imgEl = e.currentTarget.querySelector('img');
+          if (imgEl) imgEl.style.transform = 'scale(1)';
         }}
       >
         <div
           style={{
-            width: '68px',
-            height: '68px',
+            width: '72px',
+            height: '72px',
             borderRadius: '50%',
             background: item.bg,
             display: 'flex',
@@ -343,9 +347,9 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             marginBottom: '10px',
             position: 'relative',
             overflow: 'hidden',
-            border: `1.5px solid ${item.bg}`,
-            transition: 'transform 0.25s ease',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            border: `2px solid ${item.bg}`,
+            transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            boxShadow: '0 3px 10px rgba(0,0,0,0.06)',
           }}
         >
           <img
@@ -360,7 +364,9 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             }}
             onError={(e) => {
               e.currentTarget.style.display = 'none';
-              e.currentTarget.nextSibling.style.display = 'flex';
+              if (e.currentTarget.nextSibling) {
+                e.currentTarget.nextSibling.style.display = 'flex';
+              }
             }}
           />
           <div
@@ -370,7 +376,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               height: '100%',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '28px',
+              fontSize: '30px',
             }}
           >
             {item.icon}
@@ -379,9 +385,9 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
 
         <span
           style={{
-            fontSize: '12px',
+            fontSize: '12.5px',
             fontWeight: 600,
-            lineHeight: 1.3,
+            lineHeight: 1.35,
             color: 'var(--text-primary, #0f172a)',
             display: '-webkit-box',
             WebkitLineClamp: 2,
@@ -389,7 +395,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             padding: '0 4px',
-            height: '32px',
+            height: '34px',
           }}
         >
           {displayName}
@@ -403,18 +409,19 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
       aria-label="Categories Showcase"
       style={{
         background: 'var(--bg-card, #ffffff)',
-        borderRadius: '12px',
-        marginBottom: '24px',
+        borderRadius: '16px',
+        marginBottom: '28px',
         border: '1px solid var(--border-medium, #e2e8f0)',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
         overflow: 'hidden',
         position: 'relative',
+        padding: '6px 0 12px',
       }}
     >
       {/* Header Bar */}
       <div
         style={{
-          padding: '16px 20px',
+          padding: '16px 24px 12px',
           borderBottom: '1px solid var(--border-light, #f1f5f9)',
           display: 'flex',
           alignItems: 'center',
@@ -425,15 +432,15 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
           <div
             style={{
               width: '4px',
-              height: '18px',
-              background: 'var(--primary-color, #ea580c)',
+              height: '20px',
+              background: 'linear-gradient(to bottom, #ee4d2d, #ff5722)',
               borderRadius: '2px',
             }}
           />
           <h3
             style={{
               margin: 0,
-              fontSize: '16px',
+              fontSize: '16.5px',
               fontWeight: 800,
               letterSpacing: '0.5px',
               color: 'var(--text-primary, #0f172a)',
@@ -446,7 +453,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
 
         <span
           style={{
-            fontSize: '12px',
+            fontSize: '12.5px',
             color: 'var(--text-secondary, #64748b)',
             fontWeight: 500,
           }}
@@ -465,32 +472,36 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             aria-label="Previous categories"
             style={{
               position: 'absolute',
-              left: '4px',
+              left: '8px',
               top: '50%',
               transform: 'translateY(-50%)',
-              width: '32px',
-              height: '32px',
+              width: '36px',
+              height: '36px',
               borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.95)',
+              background: 'rgba(255, 255, 255, 0.96)',
               border: '1px solid var(--border-medium, #cbd5e1)',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.12)',
               color: 'var(--text-primary, #0f172a)',
-              fontSize: '18px',
+              fontSize: '20px',
               fontWeight: 800,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               zIndex: 10,
-              transition: 'all 0.15s ease',
+              transition: 'all 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--primary-color, #ea580c)';
+              e.currentTarget.style.background = '#ee4d2d';
               e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.borderColor = '#ee4d2d';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.96)';
               e.currentTarget.style.color = 'var(--text-primary, #0f172a)';
+              e.currentTarget.style.borderColor = 'var(--border-medium, #cbd5e1)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
             ‹
@@ -509,14 +520,16 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             WebkitOverflowScrolling: 'touch',
             display: 'flex',
             flexDirection: 'column',
+            padding: '4px 10px',
+            gap: '4px',
           }}
         >
           {/* Row 1 */}
-          <div style={{ display: 'flex' }}>
+          <div style={{ display: 'flex', gap: '6px' }}>
             {row1.map(renderItem)}
           </div>
           {/* Row 2 */}
-          <div style={{ display: 'flex' }}>
+          <div style={{ display: 'flex', gap: '6px' }}>
             {row2.map(renderItem)}
           </div>
         </div>
@@ -529,32 +542,36 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             aria-label="Next categories"
             style={{
               position: 'absolute',
-              right: '4px',
+              right: '8px',
               top: '50%',
               transform: 'translateY(-50%)',
-              width: '32px',
-              height: '32px',
+              width: '36px',
+              height: '36px',
               borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.95)',
+              background: 'rgba(255, 255, 255, 0.96)',
               border: '1px solid var(--border-medium, #cbd5e1)',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.12)',
               color: 'var(--text-primary, #0f172a)',
-              fontSize: '18px',
+              fontSize: '20px',
               fontWeight: 800,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               zIndex: 10,
-              transition: 'all 0.15s ease',
+              transition: 'all 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--primary-color, #ea580c)';
+              e.currentTarget.style.background = '#ee4d2d';
               e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.borderColor = '#ee4d2d';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.96)';
               e.currentTarget.style.color = 'var(--text-primary, #0f172a)';
+              e.currentTarget.style.borderColor = 'var(--border-medium, #cbd5e1)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
             ›
