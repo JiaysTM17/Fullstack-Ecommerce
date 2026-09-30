@@ -161,3 +161,128 @@ export const clearCart = async (req, res) => {
 };
 
 export default { getCart, addToCart, updateCartItem, removeFromCart, clearCart };
+
+// @desc    Preview voucher application on cart
+// @route   POST /api/cart/apply-voucher
+// @access  Private
+export const applyVoucherPreview = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const { voucherCode } = req.body;
+
+    if (!voucherCode) return sendError(res, "Vui lòng nhập mã voucher", 400);
+
+    const cart = memoryStore.carts.findByUserId(userId);
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return sendError(res, "Giỏ hàng trống", 400);
+    }
+
+    // Calculate cart total
+    let cartTotal = 0;
+    for (const item of cart.items) {
+      if (item.selected !== false) {
+        const product = await memoryStore.products.findOne({ _id: item.productId });
+        if (product) cartTotal += product.price * item.quantity;
+      }
+    }
+
+    // Look up voucher
+    const voucher = await memoryStore.vouchers.findOne({ code: voucherCode.toUpperCase() });
+    if (!voucher) {
+      return sendError(res, "Mã voucher không hợp lệ hoặc không tồn tại", 404);
+    }
+
+    // Validate voucher
+    if (voucher.minOrderValue && cartTotal < voucher.minOrderValue) {
+      return sendError(res, `Đơn hàng tối thiểu ${voucher.minOrderValue.toLocaleString("vi-VN")}₫ để áp dụng voucher này`, 400);
+    }
+
+    if (voucher.usageLimit && voucher.usedCount >= voucher.usageLimit) {
+      return sendError(res, "Voucher đã hết lượt sử dụng", 400);
+    }
+
+    let discountAmount = 0;
+    if (voucher.type === "percentage") {
+      discountAmount = Math.round(cartTotal * (voucher.value || 0) / 100);
+      if (voucher.maxDiscount) discountAmount = Math.min(discountAmount, voucher.maxDiscount);
+    } else {
+      discountAmount = voucher.value || 0;
+    }
+
+    discountAmount = Math.min(discountAmount, cartTotal);
+
+    sendSuccess(res, {
+      voucherCode: voucher.code,
+      voucherName: voucher.name || voucher.code,
+      type: voucher.type,
+      value: voucher.value,
+      cartTotal,
+      discountAmount,
+      finalTotal: cartTotal - discountAmount,
+      message: `Áp dụng voucher thành công! Giảm ${discountAmount.toLocaleString("vi-VN")}₫`,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Get cart summary with estimated totals
+// @route   GET /api/cart/summary
+// @access  Private
+export const getCartSummary = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const cart = memoryStore.carts.findByUserId(userId);
+
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return sendSuccess(res, {
+        itemCount: 0,
+        selectedCount: 0,
+        subtotal: 0,
+        estimatedShipping: 0,
+        estimatedTotal: 0,
+        shops: [],
+      });
+    }
+
+    let subtotal = 0;
+    let selectedCount = 0;
+    let itemCount = cart.items.length;
+    const shopMap = new Map();
+
+    for (const item of cart.items) {
+      const product = await memoryStore.products.findOne({ _id: item.productId });
+      if (!product || !product.isActive) continue;
+
+      const lineTotal = product.price * item.quantity;
+
+      if (item.selected !== false) {
+        subtotal += lineTotal;
+        selectedCount += item.quantity;
+      }
+
+      const shopId = product.shopId || "default";
+      if (!shopMap.has(shopId)) {
+        shopMap.set(shopId, { shopId, shopName: product.shopName || shopId, itemCount: 0, subtotal: 0 });
+      }
+      const shopEntry = shopMap.get(shopId);
+      shopEntry.itemCount += item.quantity;
+      shopEntry.subtotal += lineTotal;
+    }
+
+    const estimatedShipping = subtotal > 300000 ? 0 : 30000;
+
+    sendSuccess(res, {
+      itemCount,
+      selectedCount,
+      subtotal,
+      estimatedShipping,
+      estimatedTotal: subtotal + estimatedShipping,
+      shops: Array.from(shopMap.values()),
+      freeShippingThreshold: 300000,
+      amountToFreeShipping: subtotal >= 300000 ? 0 : 300000 - subtotal,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
