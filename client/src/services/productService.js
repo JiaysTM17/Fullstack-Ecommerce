@@ -8459,6 +8459,409 @@ export const FALLBACK_PRODUCTS = [
       }
     ],
     "reviews": []
+  },
+  {
+    "_id": "prod_126",
+    "id": "prod_126",
+    "name": "Cây Cào Móng Nhà Cây Cho Mèo Cat Tree 5 Tầng Gỗ Tự Nhiên Dây Thừng Sisal Bền Chắc",
+    "slug": "cay-cao-mong-nha-cay-cho-meo-cat-tree-5-tang",
+    "description": "Tháp leo trèo cào móng 5 tầng bằng gỗ bạch dương tự nhiên vững chãi không rung lắc, trụ quấn dây thừng sợi đay sisal bền bỉ thỏa mãn bản năng cào móng của mèo, tích hợp võng ngủ treo êm ái và cabin trú ẩn riêng tư bọc nệm nhung mềm mại.",
+    "price": 890000,
+    "originalPrice": 1350000,
+    "image": "https://images.unsplash.com/photo-1513245543132-31f507417b26?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1513245543132-31f507417b26?w=800"
+    ],
+    "category": "Thú cưng",
+    "brand": "PawHut",
+    "badge": "Best Seller",
+    "stock": 20,
+    "sold": 310,
+    "rating": 4.93,
+    "reviewCount": 89,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_03",
+    "shopName": "PetParadise Chăm Sóc Thú Cưng",
+    "shopRating": 4.96,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Gỗ Sáng Phối Nỉ Be Ấm Áp",
+        "Gỗ Xám Khói Hiện Đại"
+      ],
+      "sizes": [
+        "Cao 145cm (Đế rộng 50x50cm)",
+        "Cao 175cm (Đế rộng 60x60cm)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "Gỗ tự nhiên chống ẩm + Dây đay Sisal 100% tự nhiên"
+      },
+      {
+        "label": "Tải trọng",
+        "value": "Chịu lực tối đa 35kg (cho 2-3 chú mèo cùng chơi)"
+      },
+      {
+        "label": "Kích thước",
+        "value": "50 x 50 x 145 cm (Trọng lượng 14kg)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_127",
+    "id": "prod_127",
+    "name": "Ghế Ngồi Ô Tô Cho Bé Sơ Sinh Đến 4 Tuổi Combi Coccoro An Toàn Tiêu Chuẩn Châu Âu ECE R44/04",
+    "slug": "ghe-ngoi-o-to-combi-coccoro",
+    "description": "Ghế ngồi ô tô Combi thương hiệu Nhật Bản danh tiếng, công nghệ đệm Dacco ôm trọn cơ thể trẻ sơ sinh định hình cột sống thẳng và chống cong vẹo cổ, lớp đệm EggShock hấp thụ và triệt tiêu toàn bộ lực va đập rung chấn, trọng lượng siêu nhẹ 4.4kg dễ dàng lắp đặt.",
+    "price": 3990000,
+    "originalPrice": 5290000,
+    "image": "https://images.unsplash.com/photo-1544126592-807ade215a0b?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1544126592-807ade215a0b?w=800"
+    ],
+    "category": "Mẹ & Bé",
+    "brand": "Combi",
+    "badge": "Mall Chính Hãng",
+    "stock": 15,
+    "sold": 190,
+    "rating": 4.97,
+    "reviewCount": 65,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "BabyCare Mẹ & Bé Official",
+    "shopRating": 4.98,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Hạt Dẻ Cổ Điển (Chestnut)",
+        "Đỏ Rượu Vang (Cherry Red)"
+      ],
+      "sizes": [
+        "Bản Tiêu Chuẩn Dùng Đến 4 Tuổi"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Độ tuổi sử dụng",
+        "value": "Sơ sinh đến 4 tuổi (Trọng lượng 0 - 18kg)"
+      },
+      {
+        "label": "Tiêu chuẩn an toàn",
+        "value": "ECE R44/04 Châu Âu nghiêm ngặt"
+      },
+      {
+        "label": "Trọng lượng ghế",
+        "value": "4.4 kg gọn nhẹ lắp vừa mọi dòng xe hơi"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_128",
+    "id": "prod_128",
+    "name": "Thảm Tập Yoga Chống Trượt Định Tuyến Cao Su Tự Nhiên Liforme Alignment Mat 4.2mm Bám Dính Tuyệt Đối",
+    "slug": "tham-tap-yoga-cao-su-tu-nhien-liforme-4-2mm",
+    "description": "Thảm yoga hàng đầu thế giới được các huấn luyện viên chuyên nghiệp tin dùng, chất liệu cao su tự nhiên nguyên chất kết hợp bề mặt GripForMe độc quyền cho độ bám dính siêu việt ngay cả khi ra nhiều mồ hôi, hệ thống vạch định tuyến AlignForMe khắc laser chuẩn xác.",
+    "price": 3490000,
+    "originalPrice": 4290000,
+    "image": "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "Liforme",
+    "badge": "Best Seller",
+    "stock": 22,
+    "sold": 290,
+    "rating": 4.98,
+    "reviewCount": 110,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_07",
+    "shopName": "SportZone Thiết Bị Thể Thao",
+    "shopRating": 4.94,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Xanh Xám Đậm (Signature Grey)",
+        "Hồng San Hô (Coral Pink)",
+        "Xanh Ngọc (Emerald Green)"
+      ],
+      "sizes": [
+        "185cm x 68cm x 4.2mm (Kèm túi đựng Liforme)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "Đế cao su thiên nhiên + Mặt PU Polyurethane thân thiện sinh thái"
+      },
+      {
+        "label": "Độ dày",
+        "value": "4.2mm bảo vệ êm ái khớp gối và cổ tay"
+      },
+      {
+        "label": "Trọng lượng",
+        "value": "2.5 kg đầm chắc nằm phẳng tuyệt đối trên sàn"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_129",
+    "id": "prod_129",
+    "name": "Đèn Bàn Học Chống Cận Thị Bảo Vệ Mắt Xiaomi Mijia Smart Desk Lamp 1S Điều Khiển App Quang Phổ Đầy Đủ",
+    "slug": "den-ban-hoc-chong-can-xiaomi-mijia-1s",
+    "description": "Đèn bàn bảo vệ thị lực thế hệ mới nâng cấp chỉ số hoàn màu Ra90 tái hiện màu sắc trung thực chuẩn tự nhiên, đạt chứng nhận không nhấp nháy quang học A-Level chuẩn quốc gia, núm xoay vô cấp chỉnh độ sáng và dải nhiệt độ màu từ 2600K đến 5000K, kết nối Apple HomeKit và Mi Home.",
+    "price": 690000,
+    "originalPrice": 990000,
+    "image": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "Xiaomi",
+    "badge": "Hot Deal",
+    "stock": 45,
+    "sold": 1250,
+    "rating": 4.94,
+    "reviewCount": 380,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_08",
+    "shopName": "HomeDecor & Đời Sống Hiện Đại",
+    "shopRating": 4.93,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Trắng Tinh Khôi Dây Đỏ Biểu Tượng"
+      ],
+      "sizes": [
+        "Bản Quốc Tế Kết Nối Wifi"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chỉ số hoàn màu",
+        "value": "Ra90 ánh sáng tự nhiên trung thực"
+      },
+      {
+        "label": "Nhiệt độ màu",
+        "value": "2600K - 5000K tùy chỉnh đọc sách, máy tính, học bài"
+      },
+      {
+        "label": "Kết nối thông minh",
+        "value": "Wifi IEEE 802.11 b/g/n 2.4GHz điều khiển qua giọng nói Siri & Google Assistant"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_130",
+    "id": "prod_130",
+    "name": "Máy Lọc Không Khí Coway AP-1516D Storm Hệ Thống Lọc 4 Lớp Màng Lọc HEPA Kháng Khuẩn 99.9% Diện Tích 50m2",
+    "slug": "may-loc-khong-khi-coway-ap-1516d-storm",
+    "description": "Máy lọc không khí cao cấp sản xuất 100% tại Hàn Quốc với luồng khí đa chiều thổi xa đến 6 mét luân chuyển không khí nhanh chóng, hệ thống màng lọc kháng khuẩn Green HEPA tiêu diệt 99.9% bụi mịn PM0.01 và vi khuẩn nấm mốc, đèn LED cảm biến chất lượng không khí 4 màu thông minh.",
+    "price": 7990000,
+    "originalPrice": 10900000,
+    "image": "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "Coway",
+    "badge": "Mall Chính Hãng",
+    "stock": 12,
+    "sold": 240,
+    "rating": 4.97,
+    "reviewCount": 92,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_06",
+    "shopName": "SmartHome Gia Dụng Thông Minh",
+    "shopRating": 4.96,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Trắng Thanh Lịch Mặt Lưới Vòng Tròn"
+      ],
+      "sizes": [
+        "Công suất lọc phòng 50m2"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Hệ thống lọc",
+        "value": "4 lớp: Lọc thô -> Lọc tùy chỉnh -> Khử mùi than hoạt tính -> Green HEPA"
+      },
+      {
+        "label": "Công suất lọc CADR",
+        "value": "492 m3/giờ lọc sạch phòng 50m2 chỉ trong 10 phút"
+      },
+      {
+        "label": "Xuất xứ",
+        "value": "Hàn Quốc (Coway Co., Ltd)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_131",
+    "id": "prod_131",
+    "name": "Máy Sấy Tóc Tạo Kiểu Ion Âm Dyson Supersonic Nural Cảm Biến Bảo Vệ Da Đầu Tự Động Hạ Nhiệt Chống Hư Tổn",
+    "slug": "may-say-toc-dyson-supersonic-nural",
+    "description": "Siêu phẩm sấy tóc thông minh mới nhất của Dyson trang bị mạng lưới cảm biến Nural tự động hạ nhiệt độ xuống 55 độ C khi máy đến gần da đầu để bảo vệ hàng rào độ ẩm tự nhiên, động cơ kỹ thuật số Dyson V9 quay 110.000 vòng/phút sấy tóc khô siêu tốc không dùng nhiệt cực đoan.",
+    "price": 12990000,
+    "originalPrice": 14990000,
+    "image": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800"
+    ],
+    "category": "Sắc đẹp",
+    "brand": "Dyson",
+    "badge": "Mall Chính Hãng",
+    "stock": 18,
+    "sold": 180,
+    "rating": 4.98,
+    "reviewCount": 76,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "GlowBeauty Mỹ Phẩm Chính Hãng",
+    "shopRating": 4.97,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Xanh Ngọc Phối Cam (Ceramic Patina/Topaz)",
+        "Dâu Tây Tươi Tắn (Strawberry Bronze)"
+      ],
+      "sizes": [
+        "Bản Full Box Kèm 5 Đầu Sấy Tạo Kiểu"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Động cơ",
+        "value": "Dyson V9 kỹ thuật số 110.000 rpm đẩy 13 lít không khí mỗi giây"
+      },
+      {
+        "label": "Cảm biến thông minh",
+        "value": "Nural Time-of-Flight tự nhận diện khoảng cách đến da đầu"
+      },
+      {
+        "label": "Công nghệ ion",
+        "value": "Ion âm giảm tĩnh điện giúp tóc suôn mượt óng ả"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_132",
+    "id": "prod_132",
+    "name": "Kính Mát Phi Công Phân Cực Ray-Ban Aviator Classic Tròng Kính G-15 Khung Kim Loại Mạ Vàng Chống Tia UV400",
+    "slug": "kinh-mat-ray-ban-aviator-classic-g15",
+    "description": "Biểu tượng thời trang phi thời gian kính phi công Ray-Ban Aviator gọng kim loại thanh mảnh mạ vàng cao cấp, tròng thủy tinh xanh rêu G-15 trứ danh hấp thụ 85% ánh sáng khả kiến và chặn hoàn toàn 100% tia cực tím UVA/UVB độc hại, đệm mũi silicon êm ái chống trượt.",
+    "price": 3650000,
+    "originalPrice": 4850000,
+    "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "Ray-Ban",
+    "badge": "Mall Chính Hãng",
+    "stock": 25,
+    "sold": 410,
+    "rating": 4.95,
+    "reviewCount": 142,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "MenStyle Thời Trang Phái Mạnh",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Khung Vàng Tròng Xanh Rêu G-15",
+        "Khung Bạc Tròng Đen Khói"
+      ],
+      "sizes": [
+        "Size 58mm (Chuẩn khuôn mặt)",
+        "Size 62mm (Khuôn mặt to)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu tròng",
+        "value": "Thủy tinh khoáng tinh khiết chống trầy xước"
+      },
+      {
+        "label": "Bảo vệ mắt",
+        "value": "Chống tia cực tím UV400 100%, chống mỏi mắt khi lái xe"
+      },
+      {
+        "label": "Xuất xứ",
+        "value": "Ý (Made in Italy - Luxottica Group)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_133",
+    "id": "prod_133",
+    "name": "Đồng Hồ Thông Minh Thể Thao Chuyên Nghiệp Garmin Forerunner 265 Màn Hình AMOLED GPS Đa Băng Tần Pin 13 Ngày",
+    "slug": "dong-ho-garmin-forerunner-265-amoled",
+    "description": "Đồng hồ chạy bộ GPS đỉnh cao màn hình cảm ứng AMOLED rực rỡ sắc nét, định vị vệ tinh đa băng tần GNSS chính xác đến từng mét cung đường chạy, chỉ số mức độ sẵn sàng luyện tập Training Readiness, báo cáo buổi sáng Morning Report và thời lượng pin vượt trội 13 ngày ở chế độ smartwatch.",
+    "price": 10490000,
+    "originalPrice": 11990000,
+    "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "Garmin",
+    "badge": "Mall Chính Hãng",
+    "stock": 20,
+    "sold": 280,
+    "rating": 4.98,
+    "reviewCount": 95,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_01",
+    "shopName": "TechWorld Official Store",
+    "shopRating": 4.98,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Dây Silicone Đen/Xám",
+        "Trắng Dây Xanh Biển/Trắng",
+        "Xanh Biển Năng Động"
+      ],
+      "sizes": [
+        "Bản 46mm Tiêu Chuẩn",
+        "Bản 42mm (Forerunner 265S)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Màn hình",
+        "value": "1.3 inch AMOLED Always-On độ phân giải 416 x 416 pixels"
+      },
+      {
+        "label": "Định vị vệ tinh",
+        "value": "Multi-Band GNSS (GPS, GLONASS, Galileo) với công nghệ SatIQ"
+      },
+      {
+        "label": "Thời lượng pin",
+        "value": "13 ngày chế độ đồng hồ thông minh, 20 giờ chế độ GPS liên tục"
+      }
+    ],
+    "reviews": []
   }
 ];
 
