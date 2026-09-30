@@ -11,6 +11,10 @@ import {
   deleteSellerProduct,
   getSellerOrders,
   updateSellerOrderStatus,
+  getSellerDashboard,
+  getSellerRevenue,
+  getSellerPendingOrders,
+  confirmSellerOrder,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -20,6 +24,10 @@ router.post("/shop/onboard", authenticate, onboardShop);
 
 // All subsequent routes require seller (or admin) role and shop access guard
 router.use(authenticate, authorize("seller", "admin"), requireShopAccess());
+
+// Seller Dashboard & Analytics
+router.get("/dashboard", getSellerDashboard);
+router.get("/revenue", getSellerRevenue);
 
 router.route("/shop")
   .get(getMySellerShop)
@@ -36,6 +44,8 @@ router.route("/products/:id")
   .delete(deleteSellerProduct);
 
 router.get("/orders", getSellerOrders);
+router.get("/orders/pending", getSellerPendingOrders);
 router.patch("/orders/:id/status", updateSellerOrderStatus);
+router.patch("/orders/:id/confirm", confirmSellerOrder);
 
 export default router;

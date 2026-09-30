@@ -460,3 +460,182 @@ export default {
   getSellerOrders,
   updateSellerOrderStatus,
 };
+
+// @desc    Seller Dashboard — Thống kê gian hàng tổng quan
+// @route   GET /api/seller/dashboard
+// @access  Private (Seller)
+export const getSellerDashboard = async (req, res) => {
+  try {
+    const shopId = req.user.shopId;
+    if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+    const shop = await Shop.findOne({ shopId });
+    const products = await Product.find({ shopId });
+    const allOrders = await Order.find({});
+
+    // Filter orders containing this shop's items
+    const shopOrders = allOrders.filter((order) =>
+      (order.items || []).some((item) => item.shopId === shopId)
+    );
+
+    let totalRevenue = 0;
+    let pendingOrders = 0;
+    let shippingOrders = 0;
+    let completedOrders = 0;
+    const today = new Date().toISOString().slice(0, 10);
+    let todayRevenue = 0;
+    let todayOrders = 0;
+
+    for (const order of shopOrders) {
+      const shopItemsTotal = (order.items || [])
+        .filter((item) => item.shopId === shopId)
+        .reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
+
+      if (order.status === "completed" || order.status === "delivered") {
+        totalRevenue += shopItemsTotal;
+        completedOrders++;
+      }
+      if (order.status === "pending") pendingOrders++;
+      if (order.status === "shipping") shippingOrders++;
+
+      const orderDate = (order.createdAt || "").slice(0, 10);
+      if (orderDate === today) {
+        todayOrders++;
+        if (order.status === "completed" || order.status === "delivered") {
+          todayRevenue += shopItemsTotal;
+        }
+      }
+    }
+
+    const totalProducts = products.length;
+    const activeProducts = products.filter((p) => p.isActive && p.approvalStatus === "approved").length;
+    const avgRating = products.length > 0
+      ? Number((products.reduce((sum, p) => sum + (p.rating || 0), 0) / products.length).toFixed(1))
+      : 0;
+
+    sendSuccess(res, {
+      shop: { shopId, name: shop?.name || "", status: shop?.status || "active" },
+      metrics: {
+        totalRevenue,
+        todayRevenue,
+        totalOrders: shopOrders.length,
+        todayOrders,
+        pendingOrders,
+        shippingOrders,
+        completedOrders,
+        totalProducts,
+        activeProducts,
+        avgRating,
+      },
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Seller Revenue Chart — Biểu đồ doanh thu 7 ngày
+// @route   GET /api/seller/revenue
+// @access  Private (Seller)
+export const getSellerRevenue = async (req, res) => {
+  try {
+    const shopId = req.user.shopId;
+    if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+    const { days = 7 } = req.query;
+    const numDays = Math.min(30, Math.max(1, parseInt(days)));
+    const allOrders = await Order.find({});
+
+    const chartData = [];
+    for (let i = numDays - 1; i >= 0; i--) {
+      const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      const dateStr = date.toISOString().slice(0, 10);
+      let revenue = 0;
+      let orderCount = 0;
+
+      for (const order of allOrders) {
+        const orderDate = (order.createdAt || "").slice(0, 10);
+        if (orderDate !== dateStr) continue;
+
+        const hasShopItems = (order.items || []).some((item) => item.shopId === shopId);
+        if (!hasShopItems) continue;
+
+        orderCount++;
+        if (order.status === "completed" || order.status === "delivered") {
+          revenue += (order.items || [])
+            .filter((item) => item.shopId === shopId)
+            .reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
+        }
+      }
+
+      chartData.push({
+        date: dateStr,
+        label: date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }),
+        revenue,
+        orderCount,
+      });
+    }
+
+    sendSuccess(res, { chartData, period: `${numDays} ngày gần nhất` });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Seller Pending Orders — Đơn chờ xác nhận
+// @route   GET /api/seller/orders/pending
+// @access  Private (Seller)
+export const getSellerPendingOrders = async (req, res) => {
+  try {
+    const shopId = req.user.shopId;
+    if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+    const allOrders = await Order.find({ status: "pending" }).sort({ createdAt: -1 });
+
+    const pendingOrders = allOrders
+      .filter((order) => (order.items || []).some((item) => item.shopId === shopId))
+      .map((order) => ({
+        orderId: order._id || order.id,
+        customer: order.customer?.fullName || "Khách hàng",
+        phone: order.customer?.phone || "",
+        total: order.total,
+        itemCount: (order.items || []).filter((item) => item.shopId === shopId).length,
+        createdAt: order.createdAt,
+        trackingCode: order.trackingCode || "",
+      }));
+
+    sendSuccess(res, { orders: pendingOrders, total: pendingOrders.length });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Seller Confirm Order
+// @route   PATCH /api/seller/orders/:id/confirm
+// @access  Private (Seller)
+export const confirmSellerOrder = async (req, res) => {
+  try {
+    const shopId = req.user.shopId;
+    if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+    const order = await Order.findById(req.params.id);
+    if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
+
+    const hasShopItems = (order.items || []).some((item) => item.shopId === shopId);
+    if (!hasShopItems) return sendError(res, "Đơn hàng không thuộc gian hàng của bạn", 403);
+
+    if (order.status !== "pending") {
+      return sendError(res, "Chỉ có thể xác nhận đơn hàng đang chờ", 400);
+    }
+
+    order.status = "confirmed";
+    order.confirmedAt = new Date().toISOString();
+    if (Array.isArray(order.timeline)) {
+      order.timeline.push({ time: new Date().toISOString(), text: "Người bán đã xác nhận đơn hàng" });
+    }
+    await order.save();
+
+    sendSuccess(res, { order, message: "Đã xác nhận đơn hàng" });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
