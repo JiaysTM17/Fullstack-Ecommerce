@@ -4866,3 +4866,74 @@ export async function answerProductQuestion(productId, questionId, data) {
   return null;
 }
 
+export async function getFlashSale(limit = 10) {
+  try {
+    const res = await apiRequest(`/api/products/flash-sale?limit=${limit}`);
+    if (res?.data?.products) {
+      return res.data.products;
+    }
+  } catch (err) {
+    // fallback to products with discount
+  }
+  return FALLBACK_PRODUCTS
+    .filter((p) => p.originalPrice && p.originalPrice > p.price)
+    .slice(0, limit);
+}
+
+export async function getBestSellers(limit = 10) {
+  try {
+    const res = await apiRequest(`/api/products/best-sellers?limit=${limit}`);
+    if (res?.data?.products) {
+      return res.data.products;
+    }
+  } catch (err) {
+    // fallback
+  }
+  return [...FALLBACK_PRODUCTS].sort((a, b) => (b.sold || 0) - (a.sold || 0)).slice(0, limit);
+}
+
+export async function getNewArrivals(limit = 10) {
+  try {
+    const res = await apiRequest(`/api/products/new-arrivals?limit=${limit}`);
+    if (res?.data?.products) {
+      return res.data.products;
+    }
+  } catch (err) {
+    // fallback
+  }
+  return [...FALLBACK_PRODUCTS].slice(0, limit);
+}
+
+export async function getRelatedProducts(productId, limit = 8) {
+  try {
+    const res = await apiRequest(`/api/products/${productId}/related?limit=${limit}`);
+    if (res?.data?.products) {
+      return res.data.products;
+    }
+  } catch (err) {
+    // fallback
+  }
+  const cur = FALLBACK_PRODUCTS.find((p) => p._id === productId || p.id === productId);
+  const cat = cur?.category || "Thời trang";
+  return FALLBACK_PRODUCTS.filter((p) => (p._id !== productId && p.id !== productId) && p.category === cat).slice(0, limit);
+}
+
+export async function getProductReviewStats(productId) {
+  try {
+    const res = await apiRequest(`/api/products/${productId}/review-stats`);
+    if (res?.data) {
+      return res.data;
+    }
+  } catch (err) {
+    // fallback
+  }
+  const cur = FALLBACK_PRODUCTS.find((p) => p._id === productId || p.id === productId);
+  return {
+    productId,
+    totalReviews: cur?.reviewCount || 10,
+    averageRating: cur?.rating || 4.8,
+    ratingBreakdown: { 5: 8, 4: 2, 3: 0, 2: 0, 1: 0 },
+    ratingPercentages: { 5: 80, 4: 20, 3: 0, 2: 0, 1: 0 },
+  };
+}
+

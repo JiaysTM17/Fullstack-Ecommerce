@@ -13,7 +13,7 @@ import {
 } from "../components";
 import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
-import { getProducts } from "../services/productService";
+import { getProducts, getFlashSale, getBestSellers, getNewArrivals } from "../services/productService";
 import { formatCurrency } from "../utils/formatCurrency";
 
 export default function HomePage() {
@@ -23,6 +23,7 @@ export default function HomePage() {
   const { t } = useLanguage();
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [quickViewProduct, setQuickViewProduct] = useState(null);
@@ -52,11 +53,24 @@ export default function HomePage() {
       try {
         setLoading(true);
         setError("");
-        const result = await getProducts(filters);
+        let result;
+
+        if (activeTab === "best_sellers") {
+          const prods = await getBestSellers(16);
+          result = { products: prods, pagination: { total: prods.length, page: 1, totalPages: 1 } };
+        } else if (activeTab === "new_arrivals") {
+          const prods = await getNewArrivals(16);
+          result = { products: prods, pagination: { total: prods.length, page: 1, totalPages: 1 } };
+        } else if (activeTab === "flash_sale") {
+          const prods = await getFlashSale(16);
+          result = { products: prods, pagination: { total: prods.length, page: 1, totalPages: 1 } };
+        } else {
+          result = await getProducts(filters);
+        }
 
         if (!ignore) {
-          setProducts(result.products);
-          setPagination(result.pagination);
+          setProducts(result.products || []);
+          setPagination(result.pagination || null);
         }
       } catch (err) {
         if (!ignore) {
@@ -83,7 +97,7 @@ export default function HomePage() {
       window.removeEventListener("storage", handleMarketplaceSync);
       window.removeEventListener("mini_shopee_inventory_updated", handleMarketplaceSync);
     };
-  }, [filters]);
+  }, [filters, activeTab]);
 
   function updateFilter(key, value) {
     const nextParams = new URLSearchParams(searchParams);
@@ -202,6 +216,65 @@ export default function HomePage() {
 
         {/* Right Product Grid Area */}
         <section>
+          {/* Freeship Max Banner */}
+          <div
+            style={{
+              background: "linear-gradient(90deg, #10b981 0%, #059669 100%)",
+              color: "#fff",
+              padding: "12px 18px",
+              borderRadius: "10px",
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontSize: "13px",
+              fontWeight: 600,
+              boxShadow: "0 2px 8px rgba(16, 185, 129, 0.2)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "18px" }}>🚚</span>
+              <span><strong>FREESHIP MAX:</strong> Miễn phí vận chuyển toàn quốc cho đơn hàng từ <strong>300.000₫</strong></span>
+            </div>
+            <span style={{ background: "rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: "12px", fontSize: "12px" }}>
+              Tự động áp dụng
+            </span>
+          </div>
+
+          {/* Discovery Tabs */}
+          <div style={{ display: "flex", gap: "8px", marginBottom: "16px", overflowX: "auto", paddingBottom: "4px" }}>
+            {[
+              { id: "all", label: "Tất cả sản phẩm", icon: "🛍️" },
+              { id: "best_sellers", label: "Bán chạy nhất", icon: "🔥" },
+              { id: "new_arrivals", label: "Hàng mới về", icon: "✨" },
+              { id: "flash_sale", label: "Ưu đãi Flash Sale", icon: "⚡" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  padding: "10px 18px",
+                  borderRadius: "20px",
+                  border: activeTab === tab.id ? "2px solid var(--primary-color, #ea580c)" : "1px solid var(--border-medium, #e2e8f0)",
+                  background: activeTab === tab.id ? "var(--primary-color, #ea580c)" : "var(--bg-card, #fff)",
+                  color: activeTab === tab.id ? "#fff" : "var(--text-primary, #0f172a)",
+                  fontWeight: 600,
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  transition: "all 0.2s ease",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
           {/* Top Filter Bar & Sorting */}
           <div
             style={{
