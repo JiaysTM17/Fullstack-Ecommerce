@@ -12,8 +12,12 @@ import orderRoutes from "./routes/orderRoutes.js";
 import voucherRoutes from "./routes/voucherRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import notFound from "./middlewares/notFound.js";
 import errorHandler from "./middlewares/errorHandler.js";
+import { apiLimiter, authLimiter } from "./middlewares/rateLimiter.js";
+import requestLogger from "./middlewares/requestLogger.js";
 
 dotenv.config();
 
@@ -42,16 +46,23 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
+// Request Logger — ghi log chuẩn hóa mọi request
+app.use(requestLogger);
+
+// Rate Limiter — giới hạn request trên toàn API
+app.use("/api", apiLimiter);
+
 // Health check with system info
 app.get("/", (req, res) => {
   res.json({
     message: "Mini Shopee Enterprise Multi-Vendor Marketplace API is running",
-    version: "2.0.0",
+    version: "3.0.0",
     stack: {
       runtime: "Node.js " + process.version,
       framework: "Express.js",
       database: "MongoDB (fallback: In-Memory Store with JSON persistence)",
       auth: "JWT + bcryptjs",
+      security: "Rate Limiter + Request Logger + Input Validator",
     },
     endpoints: {
       auth: "/api/auth",
@@ -63,6 +74,8 @@ app.get("/", (req, res) => {
       shops: "/api/shops",
       seller: "/api/seller",
       admin: "/api/admin",
+      wishlist: "/api/wishlist",
+      notifications: "/api/notifications",
     },
   });
 });
@@ -75,8 +88,8 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Mount Routes (9 route groups)
-app.use("/api/auth", authRoutes);
+// Mount Routes (11 route groups)
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
@@ -85,6 +98,8 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/shops", shopRoutes);
 app.use("/api/seller", sellerRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Error handling (must be last)
 app.use(notFound);
