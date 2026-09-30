@@ -47,10 +47,10 @@ export const createRateLimiter = (max = 100, message = "Quá nhiều yêu cầu,
 };
 
 // Rate limiter mặc định cho API chung: 1000 req/15 phút (phù hợp SPA e-commerce đa request)
-export const apiLimiter = createRateLimiter(1000, "Quá nhiều yêu cầu đến API, vui lòng thử lại sau 15 phút");
+export const apiLimiter = createRateLimiter(2000, "Quá nhiều yêu cầu đến API, vui lòng thử lại sau 15 phút");
 
-// Rate limiter nghiêm ngặt cho auth: 10 req/15 phút
-export const authLimiter = createRateLimiter(10, "Quá nhiều lần đăng nhập/đăng ký thất bại, vui lòng thử lại sau 15 phút");
+// Rate limiter cho auth: nới lỏng 1000 req/15 phút để người dùng thoải mái test đăng ký/đăng nhập
+export const authLimiter = createRateLimiter(1000, "Quá nhiều lần đăng nhập/đăng ký thất bại, vui lòng thử lại sau 15 phút");
 
 // Dọn dẹp bộ nhớ định kỳ mỗi 30 phút
 setInterval(() => {

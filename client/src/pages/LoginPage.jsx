@@ -53,10 +53,27 @@ export default function LoginPage() {
     return () => clearInterval(timer);
   }, [isLocked, lockoutTimer]);
 
-  const redirectAfterLogin = (role) => {
-    if (role === 'admin') navigate('/admin/dashboard');
-    else if (role === 'seller') navigate('/seller/dashboard');
-    else navigate(location.state?.from || '/');
+  const redirectAfterLogin = (userRole) => {
+    if (userRole === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (userRole === 'seller') {
+      if (activeRole === 'customer') {
+        // Chủ shop đăng nhập ở tab Khách Hàng -> Đi vào trang mua sắm bình thường
+        navigate(location.state?.from || '/');
+      } else {
+        // Đăng nhập ở tab Kênh Người Bán -> Đi vào Kênh Bán Hàng
+        navigate('/seller/dashboard');
+      }
+    } else {
+      // userRole === 'customer'
+      if (activeRole === 'seller') {
+        // Tài khoản khách hàng đăng nhập ở tab Shop -> Gợi ý mở Shop ngay
+        showToast('Tài khoản của bạn chưa kích hoạt Gian Hàng. Đang chuyển hướng để bạn mở Shop ngay!', 'info');
+        navigate(`/register?role=seller&email=${encodeURIComponent(email)}`);
+      } else {
+        navigate(location.state?.from || '/');
+      }
+    }
   };
 
   const handleQuickLogin = async (roleKey) => {

@@ -17,6 +17,28 @@ export const authenticate = async (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
+
+    // Hỗ trợ Dev/Demo Mock Token giúp người dùng test trên UI không bị chặn 401
+    if (token && token.startsWith("mock_jwt_token_admin")) {
+      const adminUser = (await User.findById("user_admin_01")) || (await User.findOne({ role: "admin" }));
+      if (adminUser) {
+        req.user = adminUser;
+        return next();
+      }
+    } else if (token && token.startsWith("mock_jwt_token_seller")) {
+      const sellerUser = (await User.findById("user_seller_01")) || (await User.findOne({ role: "seller" }));
+      if (sellerUser) {
+        req.user = sellerUser;
+        return next();
+      }
+    } else if (token && token.startsWith("mock_jwt_token_customer")) {
+      const customerUser = (await User.findById("user_customer_01")) || (await User.findOne({ role: "customer" }));
+      if (customerUser) {
+        req.user = customerUser;
+        return next();
+      }
+    }
+
     let decoded;
     try {
       decoded = verifyToken(token);

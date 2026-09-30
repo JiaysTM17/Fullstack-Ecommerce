@@ -42,22 +42,38 @@ export default function RegisterPage() {
   const [expectedOtp, setExpectedOtp] = useState('');
   const [emailExistsError, setEmailExistsError] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
+  const [canUpgradeToSeller, setCanUpgradeToSeller] = useState(false);
+  const [existingUserName, setExistingUserName] = useState('');
 
-  // Realtime Email Duplicate Verification
-  const verifyEmailUnique = async (emailToTest) => {
+  // Realtime Email Duplicate & Account Upgrade Verification
+  const verifyEmailUnique = async (emailToTest, roleToCheck = role) => {
     const trimmed = (emailToTest || formData.email || '').trim();
     if (!trimmed || !/^\S+@\S+\.\S+$/.test(trimmed)) return;
     setCheckingEmail(true);
     try {
-      const resp = await fetch(`/api/auth/check-email?email=${encodeURIComponent(trimmed)}`);
+      const resp = await fetch(`/api/auth/check-email?email=${encodeURIComponent(trimmed)}&role=${roleToCheck}`);
       const data = await resp.json();
       if (resp.ok && data.success) {
-        if (data.data?.exists) {
+        if (roleToCheck === 'seller' && data.data?.canUpgradeToSeller) {
+          // HỢP NHẤT TÀI KHOẢN (Chuẩn Shopee): Cho phép kích hoạt mở Shop trên tài khoản Người Mua đã có!
+          setEmailExistsError(false);
+          setCanUpgradeToSeller(true);
+          setExistingUserName(data.data.fullName || '');
+          if (data.data.fullName && !formData.fullName) {
+            setFormData(prev => ({ ...prev, fullName: data.data.fullName }));
+          }
+          if (data.data.phone && !formData.phone) {
+            setFormData(prev => ({ ...prev, phone: data.data.phone }));
+          }
+          setError('');
+        } else if (data.data?.exists) {
           setEmailExistsError(true);
-          setError('Email này đã được đăng ký tài khoản trong hệ thống. Vui lòng bấm "Đăng nhập ngay" để tiếp tục.');
+          setCanUpgradeToSeller(false);
+          setError(data.data.message || 'Email này đã được đăng ký tài khoản trong hệ thống. Vui lòng bấm "Đăng nhập ngay" để tiếp tục.');
           setSliderVerified(false);
         } else {
           setEmailExistsError(false);
+          setCanUpgradeToSeller(false);
         }
       }
     } catch {
@@ -137,6 +153,9 @@ export default function RegisterPage() {
     setSliderVerified(false);
     setTermsError(false);
     setError('');
+    if (formData.email) {
+      verifyEmailUnique(formData.email, newRole);
+    }
   };
 
   // Password rules checklist
@@ -170,9 +189,9 @@ export default function RegisterPage() {
 
   const pwdStrength = getPasswordStrength(formData.password);
 
-  // Form validity for slider captcha - strictly requires unused email
+  // Form validity for slider captcha - strictly requires unused email (hoặc cho phép nếu là nâng cấp lên Người Bán)
   const isFormValid = Boolean(
-    !emailExistsError &&
+    (!emailExistsError || (role === 'seller' && canUpgradeToSeller)) &&
     formData.fullName.trim().length >= 2 &&
     /^\S+@\S+\.\S+$/.test(formData.email.trim()) &&
     (!formData.phone || /(84|0[3|5|7|8|9])+([0-9]{8})\b/.test(formData.phone.replace(/\s+/g, ''))) &&
@@ -187,8 +206,8 @@ export default function RegisterPage() {
       setError(t('auth_error_required_fields', 'Vui lòng điền đầy đủ các trường bắt buộc (*)'));
       return;
     }
-    // Chặn tài khoản đã đăng ký trước đó
-    if (emailExistsError) {
+    // Chặn tài khoản đã đăng ký trước đó (trừ trường hợp nâng cấp lên Người Bán hợp nhất)
+    if (emailExistsError && !(role === 'seller' && canUpgradeToSeller)) {
       setError('Tài khoản với email này đã tồn tại trên hệ thống. Vui lòng bấm Đăng Nhập để tiếp tục.');
       return;
     }
@@ -229,7 +248,8 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email.trim(),
-          fullName: formData.fullName.trim()
+          fullName: formData.fullName.trim(),
+          role: role
         })
       });
       const data = await resp.json();
@@ -276,7 +296,8 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email.trim(),
-          fullName: formData.fullName.trim()
+          fullName: formData.fullName.trim(),
+          role: role
         })
       });
       const data = await resp.json();
@@ -569,6 +590,27 @@ export default function RegisterPage() {
               <span>{t('register_role_seller', 'Mở Shop Bán Hàng')}</span>
             </button>
           </div>
+
+          {/* Banner nhận diện tài khoản khi nâng cấp lên Người Bán */}
+          {role === 'seller' && canUpgradeToSeller && (
+            <div style={{
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '10px',
+              padding: '12px 14px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px'
+            }}>
+              <span style={{ fontSize: '20px', lineHeight: 1 }}>🎉</span>
+              <div style={{ fontSize: '13px', color: '#1e40af', lineHeight: 1.5 }}>
+                <strong>Nhận diện tài khoản:</strong> Email <strong>{formData.email}</strong> đã có tài khoản Người Mua{existingUserName ? ` (Chủ tài khoản: ${existingUserName})` : ''}.
+                <br />
+                Hệ thống hỗ trợ 1 tài khoản hợp nhất chuẩn Shopee. Bạn chỉ cần hoàn thiện thông tin Shop bên dưới để <strong>kích hoạt mở Gian Hàng ngay</strong> mà không cần tạo email mới!
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             {error && (
@@ -952,7 +994,7 @@ export default function RegisterPage() {
               {loading 
                 ? t('creating_account', 'Đang thiết lập tài khoản...') 
                 : role === 'seller' 
-                  ? 'Tiếp tục xác thực OTP mở gian hàng' 
+                  ? (canUpgradeToSeller ? 'Tiếp tục xác thực OTP kích hoạt mở gian hàng' : 'Tiếp tục xác thực OTP mở gian hàng') 
                   : 'Tiếp tục xác thực OTP tạo tài khoản'}
             </button>
           </form>

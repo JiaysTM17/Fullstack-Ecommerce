@@ -36,8 +36,73 @@ export const register = async (req, res) => {
 
     // Check duplicate email
     const existingUser = await User.findOne({ email: normalizedEmail });
+
+    // SINGLE ACCOUNT ARCHITECTURE (Chuẩn Shopee):
+    // Nếu tài khoản đã tồn tại mà đăng ký làm Người Bán (seller):
+    // Cho phép kích hoạt / nâng cấp tài khoản Người Mua thành Người Bán mà không bắt tạo email mới!
     if (existingUser) {
-      return sendError(res, "Email này đã được đăng ký tài khoản trong hệ thống", 400);
+      if (role === "seller") {
+        if (existingUser.role === "seller" || existingUser.shopId) {
+          return sendError(res, "Email này đã có gian hàng bán hàng trong hệ thống. Vui lòng đăng nhập Kênh Shop.", 409);
+        }
+
+        // Tiến hành kích hoạt mở Shop cho tài khoản Người Mua này
+        if (!shopName || !shopName.trim()) {
+          return sendError(res, "Tên gian hàng (shopName) là bắt buộc khi đăng ký mở Shop", 400);
+        }
+
+        const shopCount = await Shop.countDocuments();
+        const createdShopId = `shop_${String(shopCount + 1).padStart(2, "0")}_${Date.now().toString().slice(-4)}`;
+        const createdShopName = shopName.trim();
+        const slug = createdShopName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+        await Shop.create({
+          shopId: createdShopId,
+          slug: `${slug}-${Date.now().toString().slice(-4)}`,
+          name: createdShopName,
+          ownerId: existingUser._id || existingUser.id || normalizedEmail,
+          phone: phone ? phone.trim() : (existingUser.phone || "0900000000"),
+          address: shopAddress ? shopAddress.trim() : (address ? address.trim() : (existingUser.address || "Kho hàng")),
+          description: `Gian hàng của ${existingUser.fullName}`,
+          bankAccount: {
+            bankName: "Vietcombank",
+            accountNumber: "0071000000000",
+            accountName: createdShopName.toUpperCase(),
+          },
+          commissionRate: 0.05,
+          status: "active",
+        });
+
+        // Nâng cấp user
+        existingUser.role = "seller";
+        existingUser.shopId = createdShopId;
+        existingUser.shopName = createdShopName;
+        existingUser.shopAddress = shopAddress ? shopAddress.trim() : (existingUser.address || "");
+        if (phone && !existingUser.phone) existingUser.phone = phone.trim();
+        if (password) {
+          existingUser.password = password;
+        }
+        await existingUser.save();
+
+        const token = generateToken({
+          id: existingUser._id || existingUser.id,
+          email: existingUser.email,
+          role: existingUser.role,
+          shopId: existingUser.shopId,
+        });
+
+        const safeUser = existingUser.toSafeObject ? existingUser.toSafeObject() : existingUser;
+
+        return res.status(200).json({
+          success: true,
+          token,
+          user: safeUser,
+          isUpgrade: true,
+          message: `Kích hoạt mở gian hàng "${createdShopName}" thành công! Tài khoản của bạn hiện có thể vừa mua sắm vừa quản lý bán hàng.`,
+        });
+      }
+
+      return sendError(res, "Email này đã được đăng ký tài khoản trong hệ thống. Vui lòng bấm Đăng Nhập.", 409);
     }
 
     // Prevent privilege escalation: only allow 'customer' or 'seller'
@@ -443,17 +508,33 @@ const registrationOtps = new Map();
 // @access  Public
 export const sendRegistrationOtp = async (req, res) => {
   try {
-    const { email, fullName } = req.body;
+    const { email, fullName, role } = req.body;
     if (!email || !email.trim()) {
       return sendError(res, "Email là bắt buộc", 400);
     }
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(email.trim())) {
+      return sendError(res, "Định dạng email không hợp lệ", 400);
+    }
+
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Check duplicate email (including demo accounts)
+    // Check duplicate email
     const existingUser = await User.findOne({ email: normalizedEmail });
     const isDemoEmail = Object.values(DEMO_EMAILS).includes(normalizedEmail);
-    if (existingUser || isDemoEmail) {
-      return sendError(res, "Email này đã được đăng ký tài khoản trên hệ thống. Vui lòng bấm Đăng Nhập để tiếp tục.", 409);
+
+    // Xử lý theo kiến trúc 1 Tài Khoản Dùng Chung (Shopee standard):
+    if (role === "seller") {
+      // Nếu đã có gian hàng bán hàng
+      if (existingUser && (existingUser.role === "seller" || existingUser.shopId)) {
+        return sendError(res, "Email này đã có gian hàng bán hàng trong hệ thống. Vui lòng bấm Đăng Nhập Kênh Shop.", 409);
+      }
+      // Nếu là Người Mua -> Cho phép gửi OTP để kích hoạt mở Gian Hàng!
+    } else {
+      // Người Mua đăng ký mới: chặn nếu email đã đăng ký
+      if (existingUser || isDemoEmail) {
+        return sendError(res, "Email này đã được đăng ký tài khoản trên hệ thống. Vui lòng bấm Đăng Nhập để tiếp tục.", 409);
+      }
     }
 
     // Cooldown check (60s)
@@ -528,7 +609,7 @@ export const verifyRegistrationOtp = async (req, res) => {
 // @access  Public
 export const checkEmailAvailability = async (req, res) => {
   try {
-    const { email } = req.query;
+    const { email, role } = req.query;
     if (!email || !email.trim()) {
       return sendError(res, "Email là bắt buộc", 400);
     }
@@ -537,9 +618,31 @@ export const checkEmailAvailability = async (req, res) => {
     const isDemoEmail = Object.values(DEMO_EMAILS).includes(normalizedEmail);
 
     if (existingUser || isDemoEmail) {
+      if (role === "seller") {
+        const isAlreadySeller = existingUser && (existingUser.role === "seller" || existingUser.shopId);
+        if (!isAlreadySeller) {
+          return sendSuccess(res, {
+            available: true,
+            exists: true,
+            canUpgradeToSeller: true,
+            fullName: existingUser?.fullName || "",
+            phone: existingUser?.phone || "",
+            message: `Email này đã có tài khoản Người Mua (${existingUser?.fullName || 'Khách Hàng'}). Bạn có thể kích hoạt mở thêm Gian Hàng bán hàng ngay!`
+          });
+        } else {
+          return sendSuccess(res, {
+            available: false,
+            exists: true,
+            canUpgradeToSeller: false,
+            message: "Email này đã có gian hàng bán hàng trong hệ thống. Vui lòng bấm Đăng Nhập Kênh Shop."
+          });
+        }
+      }
+
       return sendSuccess(res, {
         available: false,
         exists: true,
+        canUpgradeToSeller: false,
         message: "Email này đã được đăng ký tài khoản trong hệ thống. Vui lòng bấm Đăng Nhập."
       });
     }
@@ -547,6 +650,7 @@ export const checkEmailAvailability = async (req, res) => {
     sendSuccess(res, {
       available: true,
       exists: false,
+      canUpgradeToSeller: false,
       message: "Email hợp lệ, sẵn sàng để đăng ký."
     });
   } catch (error) {

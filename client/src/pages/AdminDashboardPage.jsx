@@ -101,12 +101,9 @@ export default function AdminDashboardPage() {
     description: '',
   });
 
-  // Load vouchers, users, shops from backend on mount
-  useEffect(() => {
-    getVouchers().then(v => setVouchers(v || []));
-
-    // Đồng bộ danh sách người dùng thực tế từ Backend Database
-    getAdminUsers().then(res => {
+  const refreshUserData = async (showToastNotice = false) => {
+    try {
+      const res = await getAdminUsers();
       if (Array.isArray(res) && res.length > 0) {
         setUsers(res.map(u => ({
           id: u._id || u.id,
@@ -118,30 +115,54 @@ export default function AdminDashboardPage() {
           shopId: u.shopId || '',
           ordersCount: u.ordersCount || 0,
         })));
+        if (showToastNotice) toast.success(`Đã đồng bộ ${res.length} tài khoản từ Database!`);
+        return res.length;
       }
-    });
+    } catch {
+      // ignore
+    }
+    return 0;
+  };
 
-    // Đồng bộ danh sách gian hàng thực tế từ Backend
-    getAdminShops().then(res => {
+  const refreshShopData = async (showToastNotice = false) => {
+    try {
+      const res = await getAdminShops();
       if (Array.isArray(res) && res.length > 0) {
-        setShops(prev => {
-          const remoteShops = res.map(s => ({
-            id: s._id || s.id || s.shopId,
-            shopId: s.shopId || s._id,
-            name: s.name,
-            ownerName: typeof s.ownerId === 'object' ? s.ownerId?.fullName : (s.ownerName || 'Chủ Shop'),
-            email: typeof s.ownerId === 'object' ? s.ownerId?.email : (s.email || ''),
-            phone: s.phone || '',
-            productsCount: s.productsCount || 0,
-            totalRevenue: s.totalRevenue || 0,
-            status: s.status || 'active',
-            statusText: s.status === 'active' ? 'Đang hoạt động' : s.status === 'locked' ? 'Đang bị khóa' : 'Chờ phê duyệt',
-          }));
-          return remoteShops;
-        });
+        setShops(res.map(s => ({
+          id: s._id || s.id || s.shopId,
+          shopId: s.shopId || s._id,
+          name: s.name,
+          ownerName: typeof s.ownerId === 'object' ? s.ownerId?.fullName : (s.ownerName || 'Chủ Shop'),
+          email: typeof s.ownerId === 'object' ? s.ownerId?.email : (s.email || ''),
+          phone: s.phone || '',
+          productsCount: s.productsCount || 0,
+          totalRevenue: s.totalRevenue || 0,
+          status: s.status || 'active',
+          statusText: s.status === 'active' ? 'Đang hoạt động' : s.status === 'locked' ? 'Đang bị khóa' : 'Chờ phê duyệt',
+        })));
+        if (showToastNotice) toast.success(`Đã đồng bộ ${res.length} gian hàng từ Database!`);
+        return res.length;
       }
-    });
+    } catch {
+      // ignore
+    }
+    return 0;
+  };
+
+  // Load vouchers, users, shops from backend on mount and tab switch
+  useEffect(() => {
+    getVouchers().then(v => setVouchers(v || []));
+    refreshUserData();
+    refreshShopData();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'users') {
+      refreshUserData();
+    } else if (activeTab === 'shops') {
+      refreshShopData();
+    }
+  }, [activeTab]);
 
   // Số liệu toàn sàn
   const totalPlatformRevenue = shops.reduce((sum, s) => sum + (s.totalRevenue || 0), 0);
@@ -552,9 +573,19 @@ export default function AdminDashboardPage() {
         {/* TAB 2: QUẢN LÝ CỬA HÀNG */}
         {activeTab === 'shops' && (
           <div className="shopee-table-card">
-            <h2 style={{ fontSize: '16px', margin: '0 0 16px', fontWeight: 700 }}>
-              Danh Sách Gian Hàng Đăng Ký ({shops.length})
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 700 }}>
+                Danh Sách Gian Hàng Đăng Ký ({shops.length})
+              </h2>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                onClick={() => refreshShopData(true)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px' }}
+              >
+                🔄 Đồng Bộ / Làm Mới
+              </button>
+            </div>
             <div className="shopee-table-responsive">
               <table className="shopee-data-table">
                 <thead>
@@ -668,9 +699,19 @@ export default function AdminDashboardPage() {
         {/* TAB 3: QUẢN LÝ NGƯỜI DÙNG */}
         {activeTab === 'users' && (
           <div className="shopee-table-card">
-            <h2 style={{ fontSize: '16px', margin: '0 0 16px', fontWeight: 700 }}>
-              Danh Sách Tài Khoản Người Dùng Toàn Sàn ({users.length})
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 700 }}>
+                Danh Sách Tài Khoản Người Dùng Toàn Sàn ({users.length})
+              </h2>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                onClick={() => refreshUserData(true)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px' }}
+              >
+                🔄 Đồng Bộ / Làm Mới
+              </button>
+            </div>
             <div className="shopee-table-responsive">
               <table className="shopee-data-table">
                 <thead>
