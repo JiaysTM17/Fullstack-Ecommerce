@@ -372,6 +372,33 @@ export default function LoginPage() {
                       autoComplete="email"
                     />
                   </div>
+                  {/* Quick Domain Tag Helpers */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
+                    {['@gmail.com', '@student.hcmute.edu.vn', '@shopee.vn', '@hcmute.edu.vn', '@outlook.com'].map((dom) => (
+                      <button
+                        key={dom}
+                        type="button"
+                        onClick={() => {
+                          let raw = email.trim();
+                          if (raw.includes('@')) raw = raw.split('@')[0];
+                          setEmail(`${raw}${dom}`);
+                          if (error) setError('');
+                        }}
+                        style={{
+                          background: '#f1f5f9',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '6px',
+                          padding: '2px 6px',
+                          fontSize: '10.5px',
+                          color: '#2563eb',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {dom}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="shopee-form-group">
@@ -428,7 +455,12 @@ export default function LoginPage() {
                     <div style={{ fontSize: '12px', fontWeight: 700, color: '#dc2626', marginBottom: '4px' }}>
                       ⚠️ Yêu cầu kiểm tra an ninh (Lần thử {failedAttempts}/5):
                     </div>
-                    <SecuritySliderCaptcha onSuccess={() => setSliderVerified(true)} />
+                    <SecuritySliderCaptcha
+                      isVerified={sliderVerified}
+                      onSuccess={() => setSliderVerified(true)}
+                      onVerified={() => setSliderVerified(true)}
+                      onReset={() => setSliderVerified(false)}
+                    />
                   </div>
                 )}
 

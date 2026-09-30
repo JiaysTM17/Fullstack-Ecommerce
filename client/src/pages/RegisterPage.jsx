@@ -14,6 +14,7 @@ export default function RegisterPage() {
 
   const [role, setRole] = useState('customer'); // 'customer' | 'seller'
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -32,8 +33,20 @@ export default function RegisterPage() {
   const [sliderVerified, setSliderVerified] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
 
+  const quickEmailDomains = ['@gmail.com', '@student.hcmute.edu.vn', '@hcmute.edu.vn', '@outlook.com'];
+
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    if (error) setError('');
+  };
+
+  const handleApplyEmailDomain = (domain) => {
+    let raw = (formData.email || '').trim();
+    if (raw.includes('@')) {
+      raw = raw.split('@')[0];
+    }
+    setFormData(prev => ({ ...prev, email: `${raw}${domain}` }));
+    if (error) setError('');
   };
 
   // Password rules checklist
@@ -43,6 +56,12 @@ export default function RegisterPage() {
     hasNumber: /[0-9]/.test(formData.password || ''),
     hasSpecial: /[^A-Za-z0-9]/.test(formData.password || '')
   };
+
+  const isAllPasswordCriteriaMet = 
+    passwordChecks.length && 
+    passwordChecks.hasUpper && 
+    passwordChecks.hasNumber && 
+    passwordChecks.hasSpecial;
 
   // Calculate password strength
   const getPasswordStrength = (pwd) => {
@@ -63,19 +82,24 @@ export default function RegisterPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.email || !formData.password) {
-      setError(t('auth_error_required_fields', 'Vui lòng điền đầy đủ các trường bắt buộc'));
+    if (!formData.fullName.trim() || !formData.email.trim() || !formData.password) {
+      setError(t('auth_error_required_fields', 'Vui lòng điền đầy đủ các trường bắt buộc (*)'));
       return;
     }
-    if (formData.password.length < 6) {
-      setError('Mật khẩu phải có tối thiểu 6 ký tự');
+    // Ràng buộc nghiêm ngặt: Phải đạt đủ cả 4 tiêu chuẩn (4 tick xanh)
+    if (!isAllPasswordCriteriaMet) {
+      setError('Mật khẩu chưa đạt tiêu chuẩn! Cần thỏa mãn đầy đủ cả 4 tiêu chí bảo mật (Tối thiểu 8 ký tự, có chữ in hoa, có chữ số và ký tự đặc biệt).');
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      setError(t('auth_error_password_match', 'Mật khẩu xác nhận không khớp'));
+      setError(t('auth_error_password_match', 'Mật khẩu xác nhận không khớp với mật khẩu đã nhập'));
       return;
     }
-    if (role === 'seller' && !formData.shopName) {
+    if (formData.phone && !/(84|0[3|5|7|8|9])+([0-9]{8})\b/.test(formData.phone.replace(/\s+/g, ''))) {
+      setError('Số điện thoại không đúng định dạng di động Việt Nam (gồm 10 số, ví dụ 0362 217 721).');
+      return;
+    }
+    if (role === 'seller' && !formData.shopName.trim()) {
       setError(t('auth_error_shop_name', 'Vui lòng nhập tên Cửa Hàng / Shop của bạn'));
       return;
     }
@@ -84,7 +108,7 @@ export default function RegisterPage() {
       return;
     }
     if (!sliderVerified) {
-      setError('Vui lòng kéo thanh trượt xác minh bảo mật bên dưới trước khi tiếp tục');
+      setError('Vui lòng kéo thanh trượt xác minh bảo mật bên dưới trước khi tiếp tục.');
       return;
     }
 
@@ -273,10 +297,38 @@ export default function RegisterPage() {
                     autoComplete="email"
                   />
                 </div>
+                {/* Domain Quick-fill Tags */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
+                  {quickEmailDomains.map((dom) => (
+                    <button
+                      key={dom}
+                      type="button"
+                      onClick={() => handleApplyEmailDomain(dom)}
+                      style={{
+                        background: '#f1f5f9',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
+                        padding: '2px 6px',
+                        fontSize: '10.5px',
+                        color: '#2563eb',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                      }}
+                      title={`Nhấp để chọn đuôi ${dom}`}
+                    >
+                      {dom}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="shopee-form-group">
-                <label className="shopee-form-label" htmlFor="reg-phone">{t('phone', 'Số điện thoại')}</label>
+                <label className="shopee-form-label" htmlFor="reg-phone">
+                  {t('phone', 'Số điện thoại')}
+                  <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 400, marginLeft: '4px' }}>
+                    (10 số)
+                  </span>
+                </label>
                 <div className="shopee-form-input-wrap">
                   <span className="shopee-input-lead-icon">📞</span>
                   <input
@@ -284,12 +336,17 @@ export default function RegisterPage() {
                     name="phone"
                     type="tel"
                     className="shopee-form-input"
-                    placeholder="0912 345 678"
+                    placeholder="0362 217 721"
                     value={formData.phone}
                     onChange={handleChange}
                     autoComplete="tel"
                   />
                 </div>
+                {formData.phone && !/(84|0[3|5|7|8|9])+([0-9]{8})\b/.test(formData.phone.replace(/\s+/g, '')) && (
+                  <span style={{ fontSize: '10.5px', color: '#d97706', marginTop: '4px', display: 'block' }}>
+                    ⚠️ Cần đúng định dạng 10 chữ số (VD: 0362 217 721)
+                  </span>
+                )}
               </div>
             </div>
 
@@ -366,7 +423,7 @@ export default function RegisterPage() {
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     className="shopee-form-input"
-                    placeholder={t('password_min_chars', 'Tối thiểu 6 ký tự')}
+                    placeholder="Nhập mật khẩu an toàn"
                     value={formData.password}
                     onChange={handleChange}
                     autoComplete="new-password"
@@ -391,28 +448,60 @@ export default function RegisterPage() {
                   <input
                     id="reg-confirmPassword"
                     name="confirmPassword"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     className="shopee-form-input"
                     placeholder={t('confirm_password_placeholder', 'Nhập lại mật khẩu')}
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     autoComplete="new-password"
                   />
+                  <button
+                    type="button"
+                    className="shopee-password-toggle"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label="Hiện xác nhận mật khẩu"
+                  >
+                    {showConfirmPassword ? '🙈' : '👁️'}
+                  </button>
                 </div>
+                {formData.confirmPassword && (
+                  <div style={{ marginTop: '4px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {formData.password === formData.confirmPassword ? (
+                      <span style={{ color: '#10b981', fontWeight: 600 }}>✓ Mật khẩu xác nhận hoàn toàn trùng khớp</span>
+                    ) : (
+                      <span style={{ color: '#ef4444', fontWeight: 600 }}>✕ Mật khẩu xác nhận chưa khớp</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Password strength meter & live security checklist */}
             {formData.password && (
               <div style={{ marginBottom: '14px', background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                <div className="shopee-pwd-strength" style={{ marginBottom: '8px', marginTop: 0 }}>
-                  <div className="shopee-pwd-bars">
-                    <div className={`shopee-pwd-bar ${pwdStrength.score >= 1 ? pwdStrength.colorClass : ''}`} />
-                    <div className={`shopee-pwd-bar ${pwdStrength.score >= 2 ? pwdStrength.colorClass : ''}`} />
-                    <div className={`shopee-pwd-bar ${pwdStrength.score >= 3 ? pwdStrength.colorClass : ''}`} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <div className="shopee-pwd-strength" style={{ margin: 0 }}>
+                    <div className="shopee-pwd-bars">
+                      <div className={`shopee-pwd-bar ${pwdStrength.score >= 1 ? pwdStrength.colorClass : ''}`} />
+                      <div className={`shopee-pwd-bar ${pwdStrength.score >= 2 ? pwdStrength.colorClass : ''}`} />
+                      <div className={`shopee-pwd-bar ${pwdStrength.score >= 3 ? pwdStrength.colorClass : ''}`} />
+                    </div>
+                    <span className="shopee-pwd-text">
+                      Độ mạnh: <strong>{pwdStrength.text}</strong>
+                    </span>
                   </div>
-                  <span className="shopee-pwd-text">
-                    Độ mạnh: <strong>{pwdStrength.text}</strong>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: isAllPasswordCriteriaMet ? '#059669' : '#d97706',
+                      background: isAllPasswordCriteriaMet ? '#dcfce7' : '#fef3c7',
+                      padding: '2px 8px',
+                      borderRadius: '999px',
+                      border: isAllPasswordCriteriaMet ? '1px solid #86efac' : '1px solid #fde68a',
+                    }}
+                  >
+                    {isAllPasswordCriteriaMet ? '✓ Đạt đủ 4/4 tiêu chuẩn' : `Đạt ${Object.values(passwordChecks).filter(Boolean).length}/4 tiêu chuẩn`}
                   </span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11px' }}>
@@ -435,9 +524,17 @@ export default function RegisterPage() {
             {/* Anti-Bot Security Slider */}
             <div style={{ marginBottom: '14px' }}>
               <SecuritySliderCaptcha
+                isVerified={sliderVerified}
                 onVerified={() => {
                   setSliderVerified(true);
                   setError('');
+                }}
+                onSuccess={() => {
+                  setSliderVerified(true);
+                  setError('');
+                }}
+                onReset={() => {
+                  setSliderVerified(false);
                 }}
               />
             </div>
@@ -462,14 +559,45 @@ export default function RegisterPage() {
               type="submit"
               className="shopee-auth-submit-btn"
               disabled={loading}
+              style={{
+                background: !isAllPasswordCriteriaMet || !sliderVerified
+                  ? 'linear-gradient(135deg, #64748b 0%, #475569 100%)'
+                  : undefined,
+              }}
             >
               {loading 
                 ? t('creating_account', 'Đang thiết lập tài khoản...') 
-                : role === 'seller' 
-                  ? 'Tiếp tục xác thực OTP mở gian hàng' 
-                  : 'Tiếp tục xác thực OTP tạo tài khoản'}
+                : !isAllPasswordCriteriaMet
+                  ? `Cần đạt đủ 4/4 tiêu chuẩn mật khẩu (${Object.values(passwordChecks).filter(Boolean).length}/4)`
+                  : !sliderVerified
+                    ? 'Kéo thanh trượt xác minh để tiếp tục'
+                    : role === 'seller' 
+                      ? 'Tiếp tục xác thực OTP mở gian hàng' 
+                      : 'Tiếp tục xác thực OTP tạo tài khoản'}
             </button>
           </form>
+
+          {/* Security Trust Badges */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+            fontSize: '11px',
+            color: '#64748b',
+            marginTop: '16px',
+            textAlign: 'center',
+            padding: '8px 12px',
+            background: '#f8fafc',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+          }}>
+            <span>🔒 SSL 256-Bit</span>
+            <span>•</span>
+            <span>🛡️ Bảo mật 2FA OTP</span>
+            <span>•</span>
+            <span>✨ 100% Bảo vệ tài khoản</span>
+          </div>
 
           <div className="shopee-auth-footer" style={{ marginTop: '18px' }}>
             {t('already_have_account', 'Đã có tài khoản?')}
