@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -25,30 +25,89 @@ export default function RegisterPage() {
     shopAddress: '',
     shopCategory: 'Thời trang'
   });
-  const [agreeTerms, setAgreeTerms] = useState(true);
+
+  // Strict non-default agreement
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [termsError, setTermsError] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Security & 2FA states
+  // Security, 2FA & Modals
   const [sliderVerified, setSliderVerified] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalInitialTab, setLegalInitialTab] = useState('terms');
+  const [showPendingApprovalModal, setShowPendingApprovalModal] = useState(false);
+  const [registeredShopInfo, setRegisteredShopInfo] = useState(null);
 
-  const quickEmailDomains = ['@gmail.com', '@student.hcmute.edu.vn', '@hcmute.edu.vn', '@outlook.com'];
+  // Smart Email Autocomplete Dropdown
+  const [showEmailDropdown, setShowEmailDropdown] = useState(false);
+  const emailInputRef = useRef(null);
+  const emailDropdownRef = useRef(null);
+  const commonDomains = ['gmail.com', 'student.hcmute.edu.vn', 'hcmute.edu.vn', 'outlook.com', 'yahoo.com'];
+
+  const getEmailSuggestions = (val) => {
+    if (!val || !val.trim()) return [];
+    const trimmed = val.trim();
+    if (!trimmed.includes('@')) {
+      return commonDomains.map(d => ({
+        full: `${trimmed}@${d}`,
+        prefix: trimmed,
+        domain: `@${d}`
+      }));
+    }
+    const [prefix, domainPart] = trimmed.split('@');
+    if (!prefix) return [];
+    return commonDomains
+      .filter(d => d.toLowerCase().startsWith((domainPart || '').toLowerCase()))
+      .map(d => ({
+        full: `${prefix}@${d}`,
+        prefix: `${prefix}@`,
+        domain: d
+      }));
+  };
+
+  const emailSuggestions = getEmailSuggestions(formData.email);
+
+  // Close email dropdown on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (
+        emailDropdownRef.current &&
+        !emailDropdownRef.current.contains(e.target) &&
+        emailInputRef.current &&
+        !emailInputRef.current.contains(e.target)
+      ) {
+        setShowEmailDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) setError('');
+    if (name === 'email') {
+      setShowEmailDropdown(Boolean(value && value.trim().length > 0));
+    }
+  };
+
+  const handleSelectEmailSuggestion = (fullEmail) => {
+    setFormData(prev => ({ ...prev, email: fullEmail }));
+    setShowEmailDropdown(false);
     if (error) setError('');
   };
 
-  const handleApplyEmailDomain = (domain) => {
-    let raw = (formData.email || '').trim();
-    if (raw.includes('@')) {
-      raw = raw.split('@')[0];
-    }
-    setFormData(prev => ({ ...prev, email: `${raw}${domain}` }));
-    if (error) setError('');
+  // Preserve form data on role toggle, but reset agreement & slider
+  const handleRoleChange = (newRole) => {
+    if (newRole === role) return;
+    setRole(newRole);
+    setAgreeTerms(false);
+    setSliderVerified(false);
+    setTermsError(false);
+    setError('');
   };
 
   // Password rules checklist
@@ -82,6 +141,16 @@ export default function RegisterPage() {
 
   const pwdStrength = getPasswordStrength(formData.password);
 
+  // Form validity for slider captcha
+  const isFormValid = Boolean(
+    formData.fullName.trim().length >= 2 &&
+    /^\S+@\S+\.\S+$/.test(formData.email.trim()) &&
+    (!formData.phone || /(84|0[3|5|7|8|9])+([0-9]{8})\b/.test(formData.phone.replace(/\s+/g, ''))) &&
+    isAllPasswordCriteriaMet &&
+    formData.password === formData.confirmPassword &&
+    (role !== 'seller' || Boolean(formData.shopName.trim()))
+  );
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.fullName.trim() || !formData.email.trim() || !formData.password) {
@@ -106,7 +175,8 @@ export default function RegisterPage() {
       return;
     }
     if (!agreeTerms) {
-      setError('Bạn cần đồng ý với Điều khoản dịch vụ và Chính sách bảo mật');
+      setTermsError(true);
+      setError('Vui lòng đọc và bấm tick chọn "Tôi đồng ý với Điều khoản dịch vụ & Chính sách bảo mật" trước khi tiếp tục.');
       return;
     }
     if (!sliderVerified) {
@@ -127,24 +197,38 @@ export default function RegisterPage() {
         role
       });
       if (res && res.success) {
-        // Tặng thưởng onboarding: +1.000 Xu bonus & Voucher tân thủ 50K
-        if (res.user?.id) {
-          const coinKey = `mini_shopee_user_coins_customer_${res.user.id}`;
-          const current = localStorage.getItem(coinKey);
-          const newAmount = (current !== null ? Number(current) : 25000) + 1000;
-          localStorage.setItem(coinKey, String(newAmount));
-        }
-
-        showToast(
-          role === 'seller'
-            ? t('auth_register_seller_success', 'Chào mừng chủ shop mới! Gian hàng của bạn đã sẵn sàng kinh doanh cùng mã định danh chính thức.')
-            : 'Đăng ký bảo mật thành công! Bạn nhận được 1.000 Xu tích lũy và Voucher tân thủ 50.000đ.',
-          'success'
-        );
-        setShowOtpModal(false);
         if (role === 'seller') {
-          navigate('/seller/dashboard');
+          // Lưu shop vào danh sách chờ phê duyệt của Admin
+          const savedShops = JSON.parse(localStorage.getItem('mini_shopee_seller_shops') || '[]');
+          const newShop = {
+            id: res.user?.shopId || `shop_${Date.now().toString().slice(-4)}`,
+            name: formData.shopName.trim(),
+            ownerName: formData.fullName.trim(),
+            email: formData.email.trim(),
+            phone: formData.phone.trim() || '0900000000',
+            category: formData.shopCategory || 'Thời trang',
+            address: formData.shopAddress?.trim() || 'TP. Hồ Chí Minh',
+            productsCount: 0,
+            totalRevenue: 0,
+            status: 'pending',
+            statusText: 'Chờ phê duyệt',
+            createdAt: new Date().toISOString(),
+          };
+          localStorage.setItem('mini_shopee_seller_shops', JSON.stringify([newShop, ...savedShops]));
+          setRegisteredShopInfo(newShop);
+          setShowOtpModal(false);
+          setShowPendingApprovalModal(true);
         } else {
+          // Tặng thưởng onboarding khách hàng: +1.000 Xu bonus & Voucher tân thủ 50K
+          if (res.user?.id) {
+            const coinKey = `mini_shopee_user_coins_customer_${res.user.id}`;
+            const current = localStorage.getItem(coinKey);
+            const newAmount = (current !== null ? Number(current) : 25000) + 1000;
+            localStorage.setItem(coinKey, String(newAmount));
+          }
+
+          showToast('Đăng ký bảo mật thành công! Bạn nhận được 1.000 Xu tích lũy và Voucher tân thủ 50.000đ.', 'success');
+          setShowOtpModal(false);
           navigate('/');
         }
       }
@@ -180,117 +264,119 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          {/* Role-specific Perks list */}
-          <div className="shopee-auth-hero-features">
-            {role === 'seller' ? (
-              <>
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">💰</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>0% Phí Sàn Tháng Đầu Tiên</strong>
-                    <span>Tối ưu hóa 100% doanh thu và lợi nhuận bán lẻ</span>
+          {/* Centered Middle Section: 6 Perks + Live Ticker */}
+          <div className="shopee-auth-hero-middle">
+            <div className="shopee-auth-hero-features">
+              {role === 'seller' ? (
+                <>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">💰</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>0% Phí Sàn Tháng Đầu Tiên</strong>
+                      <span>Tối ưu hóa 100% doanh thu và lợi nhuận bán lẻ</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">📈</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Tiếp Cận 50.000+ Khách Hàng Tiềm Năng</strong>
-                    <span>Thuật toán AI tự động gợi ý sản phẩm lên đầu trang</span>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">📈</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Tiếp Cận 50.000+ Khách Hàng Tiềm Năng</strong>
+                      <span>Thuật toán AI tự động gợi ý sản phẩm lên đầu trang</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">📦</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Tạo & In Vận Đơn Tự Động 1-Click</strong>
-                    <span>Tích hợp đồng bộ SPX Express, Giao Hàng Nhanh, Viettel Post</span>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">📦</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Tạo & In Vận Đơn Tự Động 1-Click</strong>
+                      <span>Tích hợp đồng bộ SPX Express, Giao Hàng Nhanh, Viettel Post</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">💳</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Rút Tiền Doanh Thu Ví Shop 24/7</strong>
-                    <span>Tiền chuyển thẳng tài khoản ngân hàng tức thì miễn phí</span>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">💳</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Rút Tiền Doanh Thu Ví Shop 24/7</strong>
+                      <span>Tiền chuyển thẳng tài khoản ngân hàng tức thì miễn phí</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">🤖</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Trợ Lý Báo Cáo Doanh Thu AI Thông Minh</strong>
-                    <span>Phân tích biểu đồ lãi lỗ, kiểm soát tồn kho tức thời</span>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">🤖</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Trợ Lý Báo Cáo Doanh Thu AI Thông Minh</strong>
+                      <span>Phân tích biểu đồ lãi lỗ, kiểm soát tồn kho tức thời</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">🎯</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Tặng Gói QC Flash Sale Độc Quyền</strong>
-                    <span>Hỗ trợ đẩy top từ khóa gian hàng ngay tuần mở bán</span>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">🎯</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Tặng Gói QC Flash Sale Độc Quyền</strong>
+                      <span>Hỗ trợ đẩy top từ khóa gian hàng ngay tuần mở bán</span>
+                    </div>
                   </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">🎉</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Gói Voucher Tân Thủ 500.000đ</strong>
-                    <span>Tặng ngay mã giảm 50K cho đơn hàng đầu tiên</span>
+                </>
+              ) : (
+                <>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">🎉</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Gói Voucher Tân Thủ 500.000đ</strong>
+                      <span>Tặng ngay mã giảm 50K cho đơn hàng đầu tiên</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">🪙</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Tặng 1.000 Xu Tích Lũy Vào Ví</strong>
-                    <span>Dùng trừ tiền trực tiếp vào hóa đơn thanh toán</span>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">🪙</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Tặng 1.000 Xu Tích Lũy Vào Ví</strong>
+                      <span>Dùng trừ tiền trực tiếp vào hóa đơn thanh toán</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">🚚</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Freeship Xtra Không Giới Hạn</strong>
-                    <span>Miễn phí vận chuyển toàn quốc cho mọi đơn hàng</span>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">🚚</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Freeship Xtra Không Giới Hạn</strong>
+                      <span>Miễn phí vận chuyển toàn quốc cho mọi đơn hàng</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">🛡️</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Cam Kết 100% Hàng Chính Hãng</strong>
-                    <span>Đền bù 200% nếu phát hiện sản phẩm giả mạo</span>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">🛡️</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Cam Kết 100% Hàng Chính Hãng</strong>
+                      <span>Đền bù 200% nếu phát hiện sản phẩm giả mạo</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">🔄</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Đổi Trả Dễ Dàng Trong 30 Ngày</strong>
-                    <span>Shipper thu hồi tận nơi, hoàn tiền tức thì qua Ví</span>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">🔄</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Đổi Trả Dễ Dàng Trong 30 Ngày</strong>
+                      <span>Shipper thu hồi tận nơi, hoàn tiền tức thì qua Ví</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="shopee-auth-hero-feat-item">
-                  <div className="shopee-auth-hero-feat-icon">⚡</div>
-                  <div className="shopee-auth-hero-feat-text">
-                    <strong>Giao Siêu Tốc Trong 2 Giờ (2H)</strong>
-                    <span>Nhận hàng ngay trong ngày tại TP.HCM & Hà Nội</span>
+                  <div className="shopee-auth-hero-feat-item">
+                    <div className="shopee-auth-hero-feat-icon">⚡</div>
+                    <div className="shopee-auth-hero-feat-text">
+                      <strong>Giao Siêu Tốc Trong 2 Giờ (2H)</strong>
+                      <span>Nhận hàng ngay trong ngày tại TP.HCM & Hà Nội</span>
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
-          </div>
+                </>
+              )}
+            </div>
 
-          {/* Live Activity & Security Trust Ticker */}
-          <div className="shopee-auth-live-ticker">
-            <div className="shopee-auth-live-pulse-dot" />
-            <div className="shopee-auth-live-text">
-              <span>Hơn <strong>1.480+</strong> người dùng & đối tác đang trực tuyến</span>
-              <small>🛡️ Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)</small>
+            {/* Live Activity & Security Trust Ticker */}
+            <div className="shopee-auth-live-ticker">
+              <div className="shopee-auth-live-pulse-dot" />
+              <div className="shopee-auth-live-text">
+                <span>Hơn <strong>1.480+</strong> người dùng & đối tác đang trực tuyến</span>
+                <small>🛡️ Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)</small>
+              </div>
             </div>
           </div>
 
@@ -350,7 +436,7 @@ export default function RegisterPage() {
             <button
               type="button"
               className={`shopee-role-tab ${role === 'customer' ? 'active' : ''}`}
-              onClick={() => setRole('customer')}
+              onClick={() => handleRoleChange('customer')}
             >
               <span>🛒</span>
               <span>{t('register_role_customer', 'Mua Hàng')}</span>
@@ -358,7 +444,7 @@ export default function RegisterPage() {
             <button
               type="button"
               className={`shopee-role-tab ${role === 'seller' ? 'active' : ''}`}
-              onClick={() => setRole('seller')}
+              onClick={() => handleRoleChange('seller')}
             >
               <span>🏪</span>
               <span>{t('register_role_seller', 'Mở Shop Bán Hàng')}</span>
@@ -388,43 +474,44 @@ export default function RegisterPage() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px' }}>
+              {/* Email with Smart Autocomplete Dropdown */}
               <div className="shopee-form-group">
                 <label className="shopee-form-label" htmlFor="reg-email">Email *</label>
-                <div className="shopee-form-input-wrap">
-                  <span className="shopee-input-lead-icon">✉️</span>
-                  <input
-                    id="reg-email"
-                    name="email"
-                    type="email"
-                    className="shopee-form-input"
-                    placeholder="an.nguyen@example.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    autoComplete="email"
-                  />
-                </div>
-                {/* Domain Quick-fill Tags */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
-                  {quickEmailDomains.map((dom) => (
-                    <button
-                      key={dom}
-                      type="button"
-                      onClick={() => handleApplyEmailDomain(dom)}
-                      style={{
-                        background: '#f1f5f9',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '6px',
-                        padding: '2px 6px',
-                        fontSize: '10.5px',
-                        color: '#2563eb',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                      }}
-                      title={`Nhấp để chọn đuôi ${dom}`}
-                    >
-                      {dom}
-                    </button>
-                  ))}
+                <div className="shopee-email-autocomplete-wrap">
+                  <div className="shopee-form-input-wrap">
+                    <span className="shopee-input-lead-icon">✉️</span>
+                    <input
+                      ref={emailInputRef}
+                      id="reg-email"
+                      name="email"
+                      type="email"
+                      className="shopee-form-input"
+                      placeholder="an.nguyen@example.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                      onFocus={() => setShowEmailDropdown(Boolean(formData.email && formData.email.trim()))}
+                      autoComplete="email"
+                    />
+                  </div>
+
+                  {/* Autocomplete Dropdown */}
+                  {showEmailDropdown && emailSuggestions.length > 0 && (
+                    <div ref={emailDropdownRef} className="shopee-email-dropdown">
+                      {emailSuggestions.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="shopee-email-dropdown-item"
+                          onClick={() => handleSelectEmailSuggestion(item.full)}
+                        >
+                          <span>📬</span>
+                          <span>
+                            <span className="email-prefix">{item.prefix}</span>
+                            <span className="email-domain">{item.domain}</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -450,7 +537,7 @@ export default function RegisterPage() {
                 </div>
                 {formData.phone && !/(84|0[3|5|7|8|9])+([0-9]{8})\b/.test(formData.phone.replace(/\s+/g, '')) && (
                   <span style={{ fontSize: '10.5px', color: '#d97706', marginTop: '4px', display: 'block' }}>
-                    ⚠️ Cần đúng định dạng 10 chữ số (VD: 0362 217 721)
+                    ⚠️ Cần đúng 10 số (VD: 0362 217 721)
                   </span>
                 )}
               </div>
@@ -612,10 +699,12 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* Anti-Bot Security Slider */}
+            {/* Anti-Bot Security Slider - Locked until full info filled */}
             <div style={{ marginBottom: '14px' }}>
               <SecuritySliderCaptcha
                 isVerified={sliderVerified}
+                disabled={!isFormValid}
+                disabledMessage="🔒 Vui lòng điền đủ & đúng thông tin phía trên để mở khóa trượt"
                 onVerified={() => {
                   setSliderVerified(true);
                   setError('');
@@ -630,12 +719,16 @@ export default function RegisterPage() {
               />
             </div>
 
+            {/* Non-default Agreement Checkbox with Error Highlight */}
             <div style={{ marginBottom: '18px', fontSize: '12.5px', color: 'var(--text-secondary)' }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
+              <label className={termsError && !agreeTerms ? 'shopee-checkbox-error' : ''} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   checked={agreeTerms}
-                  onChange={(e) => setAgreeTerms(e.target.checked)}
+                  onChange={(e) => {
+                    setAgreeTerms(e.target.checked);
+                    if (e.target.checked) setTermsError(false);
+                  }}
                   style={{ accentColor: 'var(--primary-color, #3b82f6)', marginTop: '2px' }}
                 />
                 <span>
@@ -649,7 +742,7 @@ export default function RegisterPage() {
                     }}
                     style={{ color: '#2563eb', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
                   >
-                    Điều khoản dịch vụ
+                    Điều khoản dịch vụ {role === 'seller' ? '(Dành cho Shop)' : '(Dành cho Người mua)'}
                   </span>
                   {' '}&{' '}
                   <span
@@ -663,7 +756,7 @@ export default function RegisterPage() {
                   >
                     Chính sách bảo mật
                   </span>
-                  {' '}của Fullstack E-Commerce.
+                  {' '}của sàn Fullstack E-Commerce.
                 </span>
               </label>
             </div>
@@ -721,12 +814,127 @@ export default function RegisterPage() {
         onVerifySuccess={handleOtpVerified}
       />
 
-      {/* Terms of Service & Privacy Policy Modal */}
+      {/* Terms of Service & Privacy Policy Modal with Role Context */}
       <LegalModal
         isOpen={showLegalModal}
         onClose={() => setShowLegalModal(false)}
         initialTab={legalInitialTab}
+        role={role}
       />
+
+      {/* Pending Admin Approval Modal for Sellers */}
+      {showPendingApprovalModal && registeredShopInfo && (
+        <div className="shopee-auth-modal-overlay">
+          <div
+            className="shopee-auth-modal-card"
+            style={{
+              maxWidth: '520px',
+              textAlign: 'center',
+              padding: '36px 30px',
+            }}
+          >
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(245, 158, 11, 0.15)',
+                border: '2px solid rgba(245, 158, 11, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '32px',
+                margin: '0 auto 16px',
+              }}
+            >
+              ⏳
+            </div>
+
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(245, 158, 11, 0.12)',
+                color: '#b45309',
+                padding: '4px 12px',
+                borderRadius: '9999px',
+                fontSize: '12px',
+                fontWeight: 700,
+                marginBottom: '12px',
+              }}
+            >
+              <span>●</span>
+              <span>HỒ SƠ ĐANG CHỜ PHÊ DUYỆT</span>
+            </div>
+
+            <h3 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 10px', color: '#0f172a' }}>
+              Đăng Ký Hồ Sơ Gian Hàng Thành Công!
+            </h3>
+
+            <p style={{ fontSize: '13.5px', color: '#64748b', lineHeight: 1.6, margin: '0 0 20px' }}>
+              Chúc mừng bạn đã hoàn tất đăng ký gian hàng <strong>{registeredShopInfo.name}</strong>. Theo quy định an toàn thương mại điện tử, hồ sơ của bạn đang được chuyển đến Quản Trị Viên (Admin) để kiểm duyệt.
+            </p>
+
+            <div
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '14px',
+                padding: '14px 18px',
+                textAlign: 'left',
+                fontSize: '12.5px',
+                marginBottom: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>Mã định danh Shop:</span>
+                <strong style={{ color: '#0f172a' }}>{registeredShopInfo.id}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>Tên gian hàng:</span>
+                <strong style={{ color: '#2563eb' }}>{registeredShopInfo.name}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>Email đại diện:</span>
+                <span>{registeredShopInfo.email}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>Thời gian xét duyệt dự kiến:</span>
+                <strong style={{ color: '#d97706' }}>Trong vòng 24 giờ</strong>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary"
+                onClick={() => {
+                  setShowPendingApprovalModal(false);
+                  navigate('/');
+                }}
+                style={{ flex: 1, padding: '10px 16px', fontWeight: 700 }}
+              >
+                Về Trang Chủ
+              </button>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-primary"
+                onClick={() => {
+                  setShowPendingApprovalModal(false);
+                  navigate('/login');
+                }}
+                style={{ flex: 1, padding: '10px 16px', fontWeight: 700, background: '#2563eb', color: '#fff' }}
+              >
+                Đến Trang Đăng Nhập
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

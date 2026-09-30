@@ -6,7 +6,7 @@ export default function OtpVerificationModal({
   email,
   targetPhone,
   phone,
-  expectedOtp = '889966',
+  expectedOtp,
   onVerify,
   onVerifySuccess,
   onResend,
@@ -19,15 +19,21 @@ export default function OtpVerificationModal({
   const [canResend, setCanResend] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [currentOtp, setCurrentOtp] = useState('');
+  const [resendNotice, setResendNotice] = useState('');
   const inputRefs = useRef([]);
 
   const displayEmail = targetEmail || email;
   const displayPhone = targetPhone || phone;
 
+  // Initialize or generate random 6-digit OTP when modal opens
   useEffect(() => {
     if (!isOpen) return;
+    const generated = expectedOtp || Math.floor(100000 + Math.random() * 900000).toString();
+    setCurrentOtp(generated);
     setDigits(['', '', '', '', '', '']);
     setError('');
+    setResendNotice('');
     setCountdown(60);
     setCanResend(false);
 
@@ -36,8 +42,9 @@ export default function OtpVerificationModal({
       if (inputRefs.current[0]) inputRefs.current[0].focus();
     }, 150);
     return () => clearTimeout(timer);
-  }, [isOpen]);
+  }, [isOpen, expectedOtp]);
 
+  // Countdown timer: 60s
   useEffect(() => {
     if (!isOpen || countdown <= 0) {
       setCanResend(true);
@@ -58,7 +65,6 @@ export default function OtpVerificationModal({
   if (!isOpen) return null;
 
   const handleChange = (index, value) => {
-    // Only accept numeric digit
     const cleaned = value.replace(/\D/g, '');
     if (!cleaned) {
       const next = [...digits];
@@ -81,7 +87,6 @@ export default function OtpVerificationModal({
 
   const handleKeyDown = (index, e) => {
     if (e.key === 'Backspace' && !digits[index] && index > 0) {
-      // Move focus back
       inputRefs.current[index - 1].focus();
     }
   };
@@ -111,8 +116,8 @@ export default function OtpVerificationModal({
     setError('');
 
     try {
-      if (expectedOtp && code !== expectedOtp) {
-        setError('Mã OTP không chính xác. Vui lòng kiểm tra lại');
+      if (currentOtp && code !== currentOtp) {
+        setError('Mã OTP không chính xác hoặc đã hết hạn. Vui lòng kiểm tra lại');
         setLoading(false);
         return;
       }
@@ -127,11 +132,15 @@ export default function OtpVerificationModal({
 
   const handleResendClick = () => {
     if (!canResend) return;
+    const freshOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    setCurrentOtp(freshOtp);
     setCountdown(60);
     setCanResend(false);
     setDigits(['', '', '', '', '', '']);
     setError('');
-    if (onResend) onResend();
+    const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setResendNotice(`✓ Đã gửi mã OTP ngẫu nhiên mới về hòm thư lúc ${timeStr}!`);
+    if (typeof onResend === 'function') onResend(freshOtp);
     if (inputRefs.current[0]) inputRefs.current[0].focus();
   };
 
@@ -140,7 +149,7 @@ export default function OtpVerificationModal({
       <div
         className="shopee-auth-modal-card"
         style={{
-          maxWidth: '460px',
+          maxWidth: '480px',
           textAlign: 'center',
           padding: '36px 30px',
         }}
@@ -177,50 +186,67 @@ export default function OtpVerificationModal({
         <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px', color: 'var(--text-primary, #0f172a)' }}>
           {title}
         </h3>
-        <p style={{ fontSize: '13px', color: 'var(--text-secondary, #64748b)', margin: '0 0 20px', lineHeight: 1.5 }}>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary, #64748b)', margin: '0 0 16px', lineHeight: 1.5 }}>
           {subtitle}
           {displayEmail && (
             <span style={{ display: 'block', fontWeight: 700, color: '#3b82f6', marginTop: '4px' }}>
-              {displayEmail} {displayPhone ? `· ${displayPhone}` : ''}
+              📧 {displayEmail} {displayPhone ? `· 📞 ${displayPhone}` : ''}
             </span>
           )}
         </p>
 
-        {/* Test code hint banner */}
+        {resendNotice && (
+          <div style={{
+            background: '#ecfdf5',
+            border: '1px solid #10b981',
+            borderRadius: '10px',
+            padding: '8px 12px',
+            fontSize: '12px',
+            color: '#047857',
+            marginBottom: '14px',
+            fontWeight: 600,
+          }}>
+            {resendNotice}
+          </div>
+        )}
+
+        {/* Real OTP simulation notification card */}
         <div
           style={{
             background: 'rgba(59, 130, 246, 0.08)',
             border: '1px dashed rgba(59, 130, 246, 0.35)',
-            borderRadius: '10px',
-            padding: '8px 12px',
-            fontSize: '12px',
-            color: '#2563eb',
+            borderRadius: '12px',
+            padding: '10px 14px',
+            fontSize: '12.5px',
+            color: '#1e40af',
             marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
+            justifyContent: 'space-between',
+            gap: '8px',
           }}
         >
-          <span>💡 Mã OTP bảo mật của bạn:</span>
-          <strong style={{ letterSpacing: '2px', fontSize: '13.5px' }}>{expectedOtp}</strong>
+          <div style={{ textAlign: 'left' }}>
+            <span style={{ display: 'block', fontSize: '11px', color: '#64748b' }}>Mã xác nhận bảo mật gửi về hộp thư:</span>
+            <strong style={{ letterSpacing: '3px', fontSize: '15px', color: '#1d4ed8' }}>{currentOtp}</strong>
+          </div>
           <button
             type="button"
             onClick={() => {
-              const splitted = expectedOtp.split('');
+              const splitted = currentOtp.split('');
               setDigits(splitted);
               setError('');
             }}
             style={{
-              marginLeft: '8px',
-              padding: '2px 8px',
+              padding: '5px 12px',
               background: '#3b82f6',
               color: '#ffffff',
               border: 'none',
-              borderRadius: '6px',
-              fontSize: '11px',
+              borderRadius: '8px',
+              fontSize: '12px',
               fontWeight: 700,
               cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(59, 130, 246, 0.25)',
             }}
           >
             Nhập nhanh
@@ -280,12 +306,12 @@ export default function OtpVerificationModal({
           disabled={loading || digits.join('').length < 6}
           style={{ marginBottom: '16px' }}
         >
-          {loading ? 'Đang kiểm tra...' : 'Xác Nhận & Tiếp Tục ➔'}
+          {loading ? 'Đang kiểm tra an ninh...' : 'Xác Nhận & Tiếp Tục ➔'}
         </button>
 
         {/* Resend Countdown */}
         <div style={{ fontSize: '12.5px', color: 'var(--text-secondary, #64748b)' }}>
-          Chưa nhận được mã?{' '}
+          Chưa nhận được mã qua email?{' '}
           {canResend ? (
             <span
               onClick={handleResendClick}
@@ -295,7 +321,7 @@ export default function OtpVerificationModal({
             </span>
           ) : (
             <span style={{ color: '#94a3b8' }}>
-              Gửi lại sau <strong style={{ color: '#3b82f6' }}>{countdown}s</strong>
+              Yêu cầu gửi lại sau <strong style={{ color: '#3b82f6' }}>{countdown}s</strong>
             </span>
           )}
         </div>

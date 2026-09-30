@@ -52,7 +52,22 @@ export default function AdminDashboardPage() {
   const { user } = useAuth();
   const toast = useToast();
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'shops' | 'users' | 'products' | 'categories' | 'finance' | 'vouchers'
-  const [shops, setShops] = useState(INITIAL_ALL_SHOPS);
+  const [shops, setShops] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mini_shopee_seller_shops');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(INITIAL_ALL_SHOPS.map(s => s.id));
+          const additions = parsed.filter(s => !existingIds.has(s.id));
+          return [...additions, ...INITIAL_ALL_SHOPS];
+        }
+      }
+    } catch (e) {
+      // fallback
+    }
+    return INITIAL_ALL_SHOPS;
+  });
   const [users, setUsers] = useState(INITIAL_ALL_USERS);
   const [moderationProducts, setModerationProducts] = useState(INITIAL_MODERATION_PRODUCTS);
   const [categories, setCategories] = useState(INITIAL_CATEGORIES);
@@ -79,24 +94,64 @@ export default function AdminDashboardPage() {
   }, []);
 
   // Số liệu toàn sàn
-  const totalPlatformRevenue = shops.reduce((sum, s) => sum + s.totalRevenue, 0);
+  const totalPlatformRevenue = shops.reduce((sum, s) => sum + (s.totalRevenue || 0), 0);
   const totalActiveShops = shops.filter(s => s.status === 'active').length;
-  const totalProducts = shops.reduce((sum, s) => sum + s.productsCount, 0);
+  const totalProducts = shops.reduce((sum, s) => sum + (s.productsCount || 0), 0);
   const platformCommission = Math.round(totalPlatformRevenue * 0.05); // 5% take rate
 
+  const handleApproveShop = (shopId) => {
+    setShops(prev => {
+      const updated = prev.map(s => {
+        if (s.id === shopId) {
+          toast.success(`Đã chính thức phê duyệt mở gian hàng: ${s.name}`);
+          return {
+            ...s,
+            status: 'active',
+            statusText: 'Đang hoạt động',
+          };
+        }
+        return s;
+      });
+      localStorage.setItem('mini_shopee_seller_shops', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleRejectShop = (shopId) => {
+    setShops(prev => {
+      const updated = prev.map(s => {
+        if (s.id === shopId) {
+          toast.info(`Đã từ chối phê duyệt hồ sơ gian hàng: ${s.name}`);
+          return {
+            ...s,
+            status: 'locked',
+            statusText: 'Bị từ chối',
+          };
+        }
+        return s;
+      });
+      localStorage.setItem('mini_shopee_seller_shops', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const handleToggleShopStatus = (shopId) => {
-    setShops(prev => prev.map(s => {
-      if (s.id === shopId) {
-        const nextStatus = s.status === 'active' ? 'locked' : 'active';
-        toast.info(nextStatus === 'active' ? `Đã mở khóa hoạt động cho ${s.name}` : `Đã khóa gian hàng ${s.name}`);
-        return {
-          ...s,
-          status: nextStatus,
-          statusText: nextStatus === 'active' ? 'Đang hoạt động' : 'Đang bị khóa',
-        };
-      }
-      return s;
-    }));
+    setShops(prev => {
+      const updated = prev.map(s => {
+        if (s.id === shopId) {
+          const nextStatus = s.status === 'active' ? 'locked' : 'active';
+          toast.info(nextStatus === 'active' ? `Đã mở khóa hoạt động cho ${s.name}` : `Đã khóa gian hàng ${s.name}`);
+          return {
+            ...s,
+            status: nextStatus,
+            statusText: nextStatus === 'active' ? 'Đang hoạt động' : 'Đang bị khóa',
+          };
+        }
+        return s;
+      });
+      localStorage.setItem('mini_shopee_seller_shops', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const handleToggleUserStatus = (userId) => {
@@ -393,19 +448,65 @@ export default function AdminDashboardPage() {
                       <td>{s.phone}</td>
                       <td>{formatCurrency(s.totalRevenue)}</td>
                       <td>
-                        <span className={`shopee-status-badge ${s.status === 'active' ? 'status-active' : 'status-hidden'}`}>
-                          {s.statusText}
-                        </span>
+                        {s.status === 'pending' ? (
+                          <span
+                            className="shopee-status-badge"
+                            style={{
+                              background: '#fef3c7',
+                              color: '#b45309',
+                              border: '1px solid #f59e0b',
+                              fontWeight: 700,
+                              fontSize: '11px',
+                              padding: '3px 8px',
+                              borderRadius: '6px',
+                            }}
+                          >
+                            ⏳ Chờ phê duyệt
+                          </span>
+                        ) : (
+                          <span className={`shopee-status-badge ${s.status === 'active' ? 'status-active' : 'status-hidden'}`}>
+                            {s.statusText}
+                          </span>
+                        )}
                       </td>
                       <td>
-                        <button
-                          type="button"
-                          className="shopee-btn shopee-btn-secondary shopee-btn-sm"
-                          style={s.status === 'active' ? { color: 'var(--color-error)' } : { color: 'var(--color-success)' }}
-                          onClick={() => handleToggleShopStatus(s.id)}
-                        >
-                          {s.status === 'active' ? '🚫 Khóa gian hàng' : '✓ Mở khóa hoạt động'}
-                        </button>
+                        {s.status === 'pending' ? (
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              className="shopee-btn shopee-btn-sm"
+                              style={{
+                                background: '#10b981',
+                                color: '#ffffff',
+                                border: 'none',
+                                fontWeight: 700,
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                              }}
+                              onClick={() => handleApproveShop(s.id)}
+                            >
+                              ✓ Phê duyệt
+                            </button>
+                            <button
+                              type="button"
+                              className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                              style={{ color: '#ef4444', padding: '4px 8px', borderRadius: '6px' }}
+                              onClick={() => handleRejectShop(s.id)}
+                            >
+                              ✕ Từ chối
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                            style={s.status === 'active' ? { color: 'var(--color-error)' } : { color: 'var(--color-success)' }}
+                            onClick={() => handleToggleShopStatus(s.id)}
+                          >
+                            {s.status === 'active' ? '🚫 Khóa gian hàng' : '✓ Mở khóa hoạt động'}
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

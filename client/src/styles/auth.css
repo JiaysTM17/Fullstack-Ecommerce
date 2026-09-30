@@ -45,7 +45,6 @@
   padding: 40px 36px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
   position: relative;
   overflow: hidden;
 }
@@ -115,6 +114,17 @@
   line-height: 1.55;
   color: rgba(248, 250, 252, 0.75);
   margin: 0 0 4px;
+}
+
+/* Hero Middle Section: Centered vertically between header and stats */
+.shopee-auth-hero-middle {
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+  padding: 12px 0;
 }
 
 /* Feature Guarantees Checklist */
@@ -237,7 +247,6 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   z-index: 1;
-  margin-top: auto;
 }
 
 .shopee-auth-hero-stat-card {
@@ -261,6 +270,80 @@
   color: rgba(248, 250, 252, 0.65);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* Smart Email Autocomplete Dropdown */
+.shopee-email-autocomplete-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.shopee-email-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+  animation: authFadeIn 0.15s ease;
+}
+
+[data-theme="dark"] .shopee-email-dropdown {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.shopee-email-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+[data-theme="dark"] .shopee-email-dropdown-item {
+  color: #f1f5f9;
+}
+
+.shopee-email-dropdown-item:hover,
+.shopee-email-dropdown-item.active {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+.shopee-email-dropdown-item span.email-prefix {
+  font-weight: 700;
+  color: inherit;
+}
+
+.shopee-email-dropdown-item span.email-domain {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+/* Agreement checkbox error state */
+.shopee-checkbox-error {
+  animation: shakeCheckbox 0.35s ease;
+  border: 1.5px solid #ef4444 !important;
+  border-radius: 8px;
+  padding: 6px 10px !important;
+  background: rgba(239, 68, 68, 0.06);
+}
+
+@keyframes shakeCheckbox {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
 }
 
 /* Right Form Column - Refined Light Porcelain UI */
