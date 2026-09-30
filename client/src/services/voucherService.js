@@ -327,10 +327,49 @@ export async function deleteVoucher(voucherId) {
     // Backend offline
   }
 
-  // Local fallback
   const current = await getVouchers();
   const updated = current.filter((v) => v.id !== voucherId);
   localStorage.setItem(VOUCHER_STORAGE_KEY, JSON.stringify(updated));
   return updated;
 }
+
+export async function previewVoucherDiscount(code, cartSubtotal) {
+  try {
+    const token = localStorage.getItem('mini_shopee_token');
+    const response = await fetch(`${API_URL}/api/cart/apply-voucher`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ voucherCode: code, cartSubtotal }),
+    });
+    const data = await response.json();
+    if (response.ok && data?.success) {
+      return data.data;
+    }
+  } catch (err) {}
+
+  // Local fallback
+  const vouchers = await getVouchers();
+  const v = vouchers.find((it) => it.code.toUpperCase() === code.toUpperCase().trim());
+  if (!v) throw new Error("Mã giảm giá không tồn tại hoặc đã hết hạn");
+  if (v.minOrderValue && cartSubtotal < v.minOrderValue) {
+    throw new Error(`Đơn hàng tối thiểu phải từ ${v.minOrderValue.toLocaleString('vi-VN')}₫`);
+  }
+  let discount = 0;
+  if (v.type === 'percentage') {
+    discount = Math.round((cartSubtotal * v.value) / 100);
+    if (v.maxDiscount) discount = Math.min(discount, v.maxDiscount);
+  } else {
+    discount = v.value || 0;
+  }
+  return {
+    voucherCode: v.code,
+    cartTotal: cartSubtotal,
+    discountAmount: discount,
+    finalTotal: Math.max(0, cartSubtotal - discount),
+  };
+}
+
 
