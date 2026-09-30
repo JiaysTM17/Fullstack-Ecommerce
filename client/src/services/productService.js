@@ -8862,6 +8862,411 @@ export const FALLBACK_PRODUCTS = [
       }
     ],
     "reviews": []
+  },
+  {
+    "_id": "prod_134",
+    "id": "prod_134",
+    "name": "Balo Phi Hành Gia Vận Chuyển Chó Mèo Cửa Sổ Trong Suốt Thoáng Khí Chống Ngột Quai Đeo Đệm Khí",
+    "slug": "balo-phi-hanh-gia-cho-meo",
+    "description": "Balo phi hành gia vận chuyển thú cưng vỏ nhựa PC cứng cáp chịu va đập, nắp cầu bán nguyệt trong suốt mở rộng tầm nhìn cho bé ngắm cảnh, hệ thống 9 lỗ thông gió và 2 mặt lưới thoáng khí lưu thông oxy liên tục, đáy balo lót đệm êm ái chống thấm nước dễ vệ sinh.",
+    "price": 290000,
+    "originalPrice": 450000,
+    "image": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=800"
+    ],
+    "category": "Thú cưng",
+    "brand": "PetCare",
+    "badge": "Best Seller",
+    "stock": 40,
+    "sold": 820,
+    "rating": 4.92,
+    "reviewCount": 215,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_03",
+    "shopName": "PetParadise Chăm Sóc Thú Cưng",
+    "shopRating": 4.96,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Vàng Tươi Năng Động",
+        "Hồng Pastel Dễ Thương",
+        "Đen Huyền Bí"
+      ],
+      "sizes": [
+        "Thích hợp chó mèo dưới 7kg"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "Nhựa PC cao cấp + Vải Oxford 600D chống thấm"
+      },
+      {
+        "label": "Kích thước",
+        "value": "42cm x 32cm x 29cm (Trọng lượng 1.2kg)"
+      },
+      {
+        "label": "Tải trọng",
+        "value": "Thú cưng tối đa 7kg (mèo, cún poodle, phốc sóc)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_135",
+    "id": "prod_135",
+    "name": "Nôi Cũi Gỗ Sồi Tự Nhiên Đa Năng Cho Bé 6 Chế Độ Kèm Nệm Cao Su Non Kháng Khuẩn Bánh Xe Khóa An Toàn",
+    "slug": "noi-cui-go-soi-da-nang-cho-be",
+    "description": "Nôi cũi đa năng chế tác từ 100% gỗ sồi Nga tự nhiên phủ sơn gốc nước không mùi an toàn tuyệt đối cho trẻ nhỏ, linh hoạt chuyển đổi 6 nấc: nôi sơ sinh, giường ghép cạnh bố mẹ, cũi vui chơi, bàn học khi bé lớn, trang bị 4 bánh xe cao su xoay 360 độ có khóa hãm chống trôi.",
+    "price": 3290000,
+    "originalPrice": 4500000,
+    "image": "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800"
+    ],
+    "category": "Mẹ & Bé",
+    "brand": "Chilux",
+    "badge": "Mall Chính Hãng",
+    "stock": 16,
+    "sold": 210,
+    "rating": 4.96,
+    "reviewCount": 82,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "BabyCare Mẹ & Bé Official",
+    "shopRating": 4.98,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Gỗ Tự Nhiên Sơn Phủ Mờ",
+        "Sơn Trắng Tinh Khiết"
+      ],
+      "sizes": [
+        "120cm x 65cm (Tặng kèm nệm sơ sinh & cọc mùng)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "100% Gỗ sồi tự nhiên nguyên khối đã qua xử lý chống mối mọt"
+      },
+      {
+        "label": "Chức năng",
+        "value": "6 chế độ điều chỉnh độ cao tầng nệm và mở bên hông ghép giường"
+      },
+      {
+        "label": "Tải trọng tĩnh",
+        "value": "Lên đến 60kg bền bỉ theo năm tháng"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_136",
+    "id": "prod_136",
+    "name": "Bộ Tạ Tay Đa Năng Điều Chỉnh Khối Lượng Bowflex SelectTech 552 Từ 2kg Đến 24kg Khay Khóa Thông Minh",
+    "slug": "bo-ta-tay-dieu-chinh-bowflex-552",
+    "description": "Hệ thống tạ tay thông minh thay thế 15 cặp tạ cồng kềnh truyền thống chỉ với một núm xoay chuyển số tạ từ 2kg đến 24kg (5 - 52.5 lbs) trong 2 giây, đĩa tạ đúc thép bọc nhựa nhiệt dẻo cao cấp chống trầy xước sàn nhà và không gây tiếng ồn va đập kim loại khi tập luyện tại nhà.",
+    "price": 4290000,
+    "originalPrice": 5600000,
+    "image": "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "Bowflex",
+    "badge": "Best Seller",
+    "stock": 18,
+    "sold": 320,
+    "rating": 4.95,
+    "reviewCount": 115,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_07",
+    "shopName": "SportZone Thiết Bị Thể Thao",
+    "shopRating": 4.94,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Đen Nhám Phối Đỏ Thể Thao"
+      ],
+      "sizes": [
+        "Cặp 2 Quả (Tối đa 48kg kèm khay đế)",
+        "Đơn 1 Quả (Tối đa 24kg kèm khay đế)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Dải trọng lượng",
+        "value": "2.3kg đến 24kg mỗi quả (15 nấc điều chỉnh)"
+      },
+      {
+        "label": "Cơ chế khóa",
+        "value": "Khóa xoay an toàn tự động cố định đĩa tạ"
+      },
+      {
+        "label": "Chất liệu",
+        "value": "Lõi thép hợp kim cường độ cao bọc nhựa composite giảm ồn"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_137",
+    "id": "prod_137",
+    "name": "Bàn Phím Cơ Không Dây Keychron Q1 Pro Full Nhôm CNC Gasket Mount Switch Gateron Jupiter Hotswap RGB",
+    "slug": "ban-phim-co-keychron-q1-pro-full-nhom",
+    "description": "Kiệt tác bàn phím cơ Custom cao cấp vỏ nhôm nguyên khối 6063 gia công CNC tinh xảo, cấu trúc đệm Gasket Mount cho cảm giác gõ êm đầm và âm thanh trầm ấm, kết nối Bluetooth 5.1 cùng lúc 3 thiết bị hoặc cáp Type-C tần số quét 1000Hz, tùy biến layout phím và macro không giới hạn qua phần mềm QMK/VIA.",
+    "price": 4490000,
+    "originalPrice": 5290000,
+    "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "Keychron",
+    "badge": "Hot Deal",
+    "stock": 24,
+    "sold": 380,
+    "rating": 4.97,
+    "reviewCount": 140,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_08",
+    "shopName": "HomeDecor & Đời Sống Hiện Đại",
+    "shopRating": 4.93,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Đen Carbon (Carbon Black)",
+        "Bạc Ánh Kim (Silver Grey)",
+        "Xanh Vỏ Đậu (Shell White)"
+      ],
+      "sizes": [
+        "Red Switch (Êm ái mượt mà)",
+        "Brown Switch (Cảm giác khấc nảy)",
+        "Banana Switch (Tactile sớm độc quyền)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu vỏ",
+        "value": "Nhôm nguyên khối gia công CNC bắn cát và mạ Anode"
+      },
+      {
+        "label": "Layout phím",
+        "value": "Layout 75% gọn gàng tích hợp núm xoay kim loại đa năng"
+      },
+      {
+        "label": "Thời lượng pin",
+        "value": "4000mAh sử dụng đến 300 giờ khi tắt đèn nền"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_138",
+    "id": "prod_138",
+    "name": "Nồi Cơm Điện Cao Tần IH Tiger JKT-D18V Dung Tích 1.8L Lòng Nồi Hợp Kim 3 Lớp Men Gốm Hồng Ngoại Xa",
+    "slug": "noi-com-dien-cao-tan-tiger-jkt-d18v",
+    "description": "Nồi cơm điện cao tần Induction Heating sản xuất nguyên chiếc tại Nhật Bản, công nghệ đốt nóng cảm ứng từ trường IH truyền nhiệt trực tiếp sâu vào từng hạt gạo chín đều dẻo ngọt, lòng nồi dày 1.5mm tráng 3 lớp hợp kim và phủ men gốm tạo tia hồng ngoại xa giữ trọn vẹn dưỡng chất hạt cơm.",
+    "price": 6890000,
+    "originalPrice": 8990000,
+    "image": "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "Tiger",
+    "badge": "Mall Chính Hãng",
+    "stock": 14,
+    "sold": 260,
+    "rating": 4.97,
+    "reviewCount": 95,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_06",
+    "shopName": "SmartHome Gia Dụng Thông Minh",
+    "shopRating": 4.96,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Kim Loại Thép Không Gỉ"
+      ],
+      "sizes": [
+        "Dung tích 1.8L (Cho gia đình 4-6 người)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Công nghệ gia nhiệt",
+        "value": "Cao tần IH (Induction Heating) áp suất nhiệt độ cao"
+      },
+      {
+        "label": "Lòng nồi",
+        "value": "3 lớp phủ men gốm hồng ngoại xa chống dính cực bền"
+      },
+      {
+        "label": "Xuất xứ",
+        "value": "Nhật Bản (Made in Japan - Tiger Corporation)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_139",
+    "id": "prod_139",
+    "name": "Nước Hoa Nam Cao Cấp Dior Sauvage Eau De Parfum 100ml Hương Gỗ Cay Nồng Quyến Rũ Sang Trọng",
+    "slug": "nuoc-hoa-nam-dior-sauvage-edp-100ml",
+    "description": "Chai nước hoa nam huyền thoại mang tính biểu tượng của nhà mốt Christian Dior, nốt hương mở đầu thanh mát bùng nổ của cam Bergamot vùng Calabria, tiếp nối với tầng hương cay ấm nồng nàn của tiêu Tứ Xuyên và nhục đậu khấu, đọng lại lưu luyến suốt 10-12 giờ với hương vani Papua New Guinea và hổ phách Ambroxan mê hoặc.",
+    "price": 3850000,
+    "originalPrice": 4600000,
+    "image": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800"
+    ],
+    "category": "Sắc đẹp",
+    "brand": "Dior",
+    "badge": "Mall Chính Hãng",
+    "stock": 30,
+    "sold": 760,
+    "rating": 4.98,
+    "reviewCount": 310,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "GlowBeauty Mỹ Phẩm Chính Hãng",
+    "shopRating": 4.97,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Chai Xanh Đêm Đậm Nắp Nam Châm"
+      ],
+      "sizes": [
+        "Chai 60ml",
+        "Chai 100ml Tiêu Chuẩn",
+        "Chai 200ml Tiết Kiệm"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Nồng độ",
+        "value": "Eau De Parfum (EDP) độ lưu hương 8-12 tiếng"
+      },
+      {
+        "label": "Nhóm hương",
+        "value": "Oriental Fougere - Hương dương xỉ phương Đông cay nồng ấm áp"
+      },
+      {
+        "label": "Xuất xứ",
+        "value": "Pháp (Parfums Christian Dior Paris)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_140",
+    "id": "prod_140",
+    "name": "Ví Nam Da Bò Thật Dập Vân Saffiano Dáng Đứng Cao Cấp Chống Trộm Sóng RFID Nhiều Ngăn Đựng Thẻ",
+    "slug": "vi-nam-da-bo-that-saffiano-rfid",
+    "description": "Ví nam da bò lớp 1 (Top-Grain Cowhide) dập vân Saffiano sang trọng có khả năng chống thấm nước và chống trầy xước vượt trội, thiết kế form đứng hiện đại nhỏ gọn ôm túi quần không bị cộm, tích hợp màng ngăn chặn sóng vô tuyến RFID bảo vệ an toàn thẻ tín dụng không bị quét trộm tiền từ xa.",
+    "price": 350000,
+    "originalPrice": 580000,
+    "image": "https://images.unsplash.com/photo-1627123424574-724758594e93?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1627123424574-724758594e93?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "MenStyle",
+    "badge": "Best Seller",
+    "stock": 55,
+    "sold": 1120,
+    "rating": 4.92,
+    "reviewCount": 290,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "MenStyle Thời Trang Phái Mạnh",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Saffiano Lịch Lãm",
+        "Nâu Chocolate Cổ Điển",
+        "Xanh Navy Hiện Đại"
+      ],
+      "sizes": [
+        "Dáng Đứng (11.5cm x 9.5cm)",
+        "Dáng Ngang (12cm x 9.5cm)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "100% Da bò thật nguyên tấm dập vân Saffiano"
+      },
+      {
+        "label": "Bảo mật",
+        "value": "Công nghệ chống quét trộm sóng RFID tần số 13.56 MHz"
+      },
+      {
+        "label": "Sức chứa",
+        "value": "2 ngăn đựng tiền giấy + 8 khe thẻ ATM + 1 ngăn kính ảnh"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_141",
+    "id": "prod_141",
+    "name": "Flycam Mini 4K DJI Mini 4 Pro Bản Fly More Combo Cảm Biến Đa Hướng Thời Gian Bay 34 Phút Truyền Sóng 20km",
+    "slug": "flycam-dji-mini-4-pro-fly-more-combo",
+    "description": "Flycam siêu nhẹ dưới 249g không cần xin phép bay tại nhiều quốc gia, trang bị hệ thống cảm biến thị giác đa hướng chủ động tránh vật cản 360 độ, camera 48MP cảm biến CMOS 1/1.3 inch quay video 4K/60fps HDR và Slow-Motion 4K/100fps, chế độ quay khung hình dọc chân thực True Vertical Shooting lý tưởng cho TikTok và Reels.",
+    "price": 23990000,
+    "originalPrice": 26900000,
+    "image": "https://images.unsplash.com/photo-1507582020474-9a35b7d455d9?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1507582020474-9a35b7d455d9?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "DJI",
+    "badge": "Mall Chính Hãng",
+    "stock": 12,
+    "sold": 165,
+    "rating": 4.99,
+    "reviewCount": 78,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_01",
+    "shopName": "TechWorld Official Store",
+    "shopRating": 4.98,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Xám Bạc DJI Đặc Trưng"
+      ],
+      "sizes": [
+        "Bản Fly More Combo (Tay cầm RC 2 màn hình + 3 Pin + Hub sạc + Túi đeo)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Trọng lượng cất cánh",
+        "value": "< 249 gram siêu nhỏ gọn bỏ túi"
+      },
+      {
+        "label": "Camera",
+        "value": "48MP CMOS 1/1.3 inch, f/1.7, quay 4K/60fps HDR, 10-bit D-Log M"
+      },
+      {
+        "label": "Hệ thống truyền hình ảnh",
+        "value": "DJI O4 truyền video FHD 1080p/60fps xa tới 20km"
+      }
+    ],
+    "reviews": []
   }
 ];
 
