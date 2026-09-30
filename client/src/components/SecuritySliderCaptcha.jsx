@@ -157,12 +157,12 @@ export default function SecuritySliderCaptcha({
           {isVerified ? (
             <>
               <span style={{ fontSize: '15px', color: '#10b981' }}>✓</span>
-              <span>Đã xác minh bảo mật người dùng thành công</span>
+              <span>Xác minh bảo mật thành công</span>
             </>
           ) : (
             <>
               <span style={{ fontSize: '14px' }}>🛡️</span>
-              <span>Kéo thanh trượt hoặc nhấp vào dải này để xác thực</span>
+              <span>Kéo thanh trượt hoặc nhấp để xác thực</span>
             </>
           )}
         </span>
@@ -197,32 +197,6 @@ export default function SecuritySliderCaptcha({
         >
           {isVerified ? '✓' : '➔'}
         </div>
-
-        {/* Re-verify Button if verified */}
-        {isVerified && (
-          <button
-            type="button"
-            onClick={handleReset}
-            title="Nhấp để xác thực lại"
-            style={{
-              position: 'absolute',
-              right: '48px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 3,
-              background: 'transparent',
-              border: 'none',
-              color: '#059669',
-              cursor: 'pointer',
-              fontSize: '11px',
-              fontWeight: 600,
-              textDecoration: 'underline',
-              padding: '4px 6px',
-            }}
-          >
-            Làm lại
-          </button>
-        )}
       </div>
     </div>
   );

@@ -26,3 +26,4 @@ export { default as AuthModal } from './AuthModal';
 export { default as SecuritySliderCaptcha } from './SecuritySliderCaptcha';
 export { default as OtpVerificationModal } from './OtpVerificationModal';
 export { default as ForgotPasswordModal } from './ForgotPasswordModal';
+export { default as LegalModal } from './LegalModal';

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
-import { SecuritySliderCaptcha, OtpVerificationModal } from '../components';
+import { SecuritySliderCaptcha, OtpVerificationModal, LegalModal } from '../components';
 import '../styles/auth.css';
 
 export default function RegisterPage() {
@@ -32,6 +32,8 @@ export default function RegisterPage() {
   // Security & 2FA states
   const [sliderVerified, setSliderVerified] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [showLegalModal, setShowLegalModal] = useState(false);
+  const [legalInitialTab, setLegalInitialTab] = useState('terms');
 
   const quickEmailDomains = ['@gmail.com', '@student.hcmute.edu.vn', '@hcmute.edu.vn', '@outlook.com'];
 
@@ -478,33 +480,18 @@ export default function RegisterPage() {
 
             {/* Password strength meter & live security checklist */}
             {formData.password && (
-              <div style={{ marginBottom: '14px', background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div className="shopee-pwd-strength" style={{ margin: 0 }}>
-                    <div className="shopee-pwd-bars">
-                      <div className={`shopee-pwd-bar ${pwdStrength.score >= 1 ? pwdStrength.colorClass : ''}`} />
-                      <div className={`shopee-pwd-bar ${pwdStrength.score >= 2 ? pwdStrength.colorClass : ''}`} />
-                      <div className={`shopee-pwd-bar ${pwdStrength.score >= 3 ? pwdStrength.colorClass : ''}`} />
-                    </div>
-                    <span className="shopee-pwd-text">
-                      Độ mạnh: <strong>{pwdStrength.text}</strong>
-                    </span>
+              <div style={{ marginBottom: '14px', background: '#f8fafc', padding: '12px 14px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <div className="shopee-pwd-strength" style={{ marginBottom: '10px', marginTop: 0 }}>
+                  <div className="shopee-pwd-bars">
+                    <div className={`shopee-pwd-bar ${pwdStrength.score >= 1 ? pwdStrength.colorClass : ''}`} />
+                    <div className={`shopee-pwd-bar ${pwdStrength.score >= 2 ? pwdStrength.colorClass : ''}`} />
+                    <div className={`shopee-pwd-bar ${pwdStrength.score >= 3 ? pwdStrength.colorClass : ''}`} />
                   </div>
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: isAllPasswordCriteriaMet ? '#059669' : '#d97706',
-                      background: isAllPasswordCriteriaMet ? '#dcfce7' : '#fef3c7',
-                      padding: '2px 8px',
-                      borderRadius: '999px',
-                      border: isAllPasswordCriteriaMet ? '1px solid #86efac' : '1px solid #fde68a',
-                    }}
-                  >
-                    {isAllPasswordCriteriaMet ? '✓ Đạt đủ 4/4 tiêu chuẩn' : `Đạt ${Object.values(passwordChecks).filter(Boolean).length}/4 tiêu chuẩn`}
+                  <span className="shopee-pwd-text">
+                    Độ mạnh: <strong>{pwdStrength.text}</strong>
                   </span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11.5px' }}>
                   <div style={{ color: passwordChecks.length ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <span style={{ fontWeight: 800 }}>{passwordChecks.length ? '✓' : '○'}</span> Tối thiểu 8 ký tự
                   </div>
@@ -539,7 +526,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            <div style={{ marginBottom: '18px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <div style={{ marginBottom: '18px', fontSize: '12.5px', color: 'var(--text-secondary)' }}>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
                 <input
                   type="checkbox"
@@ -549,8 +536,30 @@ export default function RegisterPage() {
                 />
                 <span>
                   Tôi đồng ý với{' '}
-                  <span style={{ color: '#3b82f6', fontWeight: 600 }}>Điều khoản dịch vụ</span> &{' '}
-                  <span style={{ color: '#3b82f6', fontWeight: 600 }}>Chính sách bảo mật</span> của Shopee Mini Plan.
+                  <span
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setLegalInitialTab('terms');
+                      setShowLegalModal(true);
+                    }}
+                    style={{ color: '#2563eb', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    Điều khoản dịch vụ
+                  </span>
+                  {' '}&{' '}
+                  <span
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setLegalInitialTab('privacy');
+                      setShowLegalModal(true);
+                    }}
+                    style={{ color: '#2563eb', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    Chính sách bảo mật
+                  </span>
+                  {' '}của Fullstack E-Commerce.
                 </span>
               </label>
             </div>
@@ -559,21 +568,12 @@ export default function RegisterPage() {
               type="submit"
               className="shopee-auth-submit-btn"
               disabled={loading}
-              style={{
-                background: !isAllPasswordCriteriaMet || !sliderVerified
-                  ? 'linear-gradient(135deg, #64748b 0%, #475569 100%)'
-                  : undefined,
-              }}
             >
               {loading 
                 ? t('creating_account', 'Đang thiết lập tài khoản...') 
-                : !isAllPasswordCriteriaMet
-                  ? `Cần đạt đủ 4/4 tiêu chuẩn mật khẩu (${Object.values(passwordChecks).filter(Boolean).length}/4)`
-                  : !sliderVerified
-                    ? 'Kéo thanh trượt xác minh để tiếp tục'
-                    : role === 'seller' 
-                      ? 'Tiếp tục xác thực OTP mở gian hàng' 
-                      : 'Tiếp tục xác thực OTP tạo tài khoản'}
+                : role === 'seller' 
+                  ? 'Tiếp tục xác thực OTP mở gian hàng' 
+                  : 'Tiếp tục xác thực OTP tạo tài khoản'}
             </button>
           </form>
 
@@ -612,6 +612,13 @@ export default function RegisterPage() {
         email={formData.email}
         onClose={() => setShowOtpModal(false)}
         onVerifySuccess={handleOtpVerified}
+      />
+
+      {/* Terms of Service & Privacy Policy Modal */}
+      <LegalModal
+        isOpen={showLegalModal}
+        onClose={() => setShowLegalModal(false)}
+        initialTab={legalInitialTab}
       />
     </div>
   );

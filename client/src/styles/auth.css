@@ -385,6 +385,66 @@
   color: #60a5fa;
 }
 
+/* 2-Role Segmented Control (Mua Hàng vs Mở Shop) */
+.shopee-role-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+}
+
+[data-theme="dark"] .shopee-role-tabs {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.shopee-role-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.shopee-role-tab:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="dark"] .shopee-role-tab:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.shopee-role-tab.active {
+  background: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .shopee-role-tab.active {
+  background: #0f172a;
+  color: #60a5fa;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+.shopee-role-tab span:first-child {
+  font-size: 17px;
+}
+
 /* Role Selector Tabs (3 roles) */
 .shopee-role-picker {
   display: grid;
