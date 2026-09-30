@@ -10,7 +10,8 @@ import RecentlyViewedSection from "../components/RecentlyViewedSection";
 import ProductQASection from "../components/ProductQASection";
 import { addRecentlyViewed } from "../services/recentlyViewedService";
 import ShopChatModal from "../components/ShopChatModal";
-import { addProductReview, getProductById, getProducts } from "../services/productService";
+import { addProductReview, getProductById, getProducts, getRelatedProducts, getProductReviewStats } from "../services/productService";
+import { addToWishlist as apiAddToWishlist, removeFromWishlist as apiRemoveFromWishlist } from "../services/wishlistService";
 import { formatCurrency } from "../utils/formatCurrency";
 import "../styles/amazon-pdp.css";
 
@@ -31,6 +32,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [reviewStats, setReviewStats] = useState(null);
 
   // New review form state
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -79,11 +81,15 @@ export default function ProductDetailPage() {
           }
 
           // Load related products from same category
-          const related = await getProducts({ category: result.category });
+          const related = await getRelatedProducts(result._id || result.id || id, 6);
           if (!ignore) {
-            setRelatedProducts(
-              (related.products || []).filter((p) => (p._id || p.id) !== (result._id || result.id)).slice(0, 4)
-            );
+            setRelatedProducts(related || []);
+          }
+
+          // Load review stats breakdown
+          const stats = await getProductReviewStats(result._id || result.id || id);
+          if (!ignore && stats) {
+            setReviewStats(stats);
           }
         }
       } catch (err) {
@@ -498,41 +504,23 @@ export default function ProductDetailPage() {
               <span style={{ fontSize: "13px", color: "#777" }}>trên 5 sao</span>
             </div>
 
-            <div className="amazon-breakdown-bar-row">
-              <span>5 sao</span>
-              <div className="amazon-breakdown-bar-bg">
-                <div className="amazon-breakdown-bar-fill" style={{ width: "82%" }} />
-              </div>
-              <span>82%</span>
-            </div>
-            <div className="amazon-breakdown-bar-row">
-              <span>4 sao</span>
-              <div className="amazon-breakdown-bar-bg">
-                <div className="amazon-breakdown-bar-fill" style={{ width: "12%" }} />
-              </div>
-              <span>12%</span>
-            </div>
-            <div className="amazon-breakdown-bar-row">
-              <span>3 sao</span>
-              <div className="amazon-breakdown-bar-bg">
-                <div className="amazon-breakdown-bar-fill" style={{ width: "4%" }} />
-              </div>
-              <span>4%</span>
-            </div>
-            <div className="amazon-breakdown-bar-row">
-              <span>2 sao</span>
-              <div className="amazon-breakdown-bar-bg">
-                <div className="amazon-breakdown-bar-fill" style={{ width: "1%" }} />
-              </div>
-              <span>1%</span>
-            </div>
-            <div className="amazon-breakdown-bar-row">
-              <span>1 sao</span>
-              <div className="amazon-breakdown-bar-bg">
-                <div className="amazon-breakdown-bar-fill" style={{ width: "1%" }} />
-              </div>
-              <span>1%</span>
-            </div>
+            {(() => {
+              const breakdown = reviewStats?.ratingBreakdown || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+              const totalRev = (breakdown[5] + breakdown[4] + breakdown[3] + breakdown[2] + breakdown[1]) || 1;
+              return [5, 4, 3, 2, 1].map((star) => {
+                const count = breakdown[star] || 0;
+                const pct = Math.round((count / totalRev) * 100);
+                return (
+                  <div key={star} className="amazon-breakdown-bar-row">
+                    <span>{star} sao</span>
+                    <div className="amazon-breakdown-bar-bg">
+                      <div className="amazon-breakdown-bar-fill" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span>{pct}%</span>
+                  </div>
+                );
+              });
+            })()}
 
             <button
               type="button"
