@@ -13,6 +13,1633 @@ function getLocalReviews() {
 
 export const FALLBACK_PRODUCTS = [
 {
+  "_id": "prod_exp_01",
+  "id": "prod_exp_01",
+  "name": "Apple iPhone 18 Pro 256GB - Titan Tự Nhiên (Chip A20 Pro 2nm, Màn Hình 120Hz 3200 Nits)",
+  "slug": "apple-iphone-18-pro-256gb---titan-tu-nhien-chip-a20-pro-2nm-man-hinh-120hz-3200-nits",
+  "description": "iPhone 18 Pro là siêu phẩm di động chuẩn mực cho nhà sáng tạo nội dung với thiết kế Titan cấp 5 siêu nhẹ, camera tiềm vọng quang học 5x và quay phim ProRes Log 4K 120fps.",
+  "price": 31990000,
+  "originalPrice": 34990000,
+  "image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Apple",
+  "badge": "Best Seller",
+  "stock": 70,
+  "sold": 1250,
+  "rating": 4.95,
+  "reviewCount": 350,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Màn hình",
+      "value": "6.3 inch Super Retina XDR OLED, 120Hz ProMotion"
+    },
+    {
+      "label": "Vi xử lý",
+      "value": "Apple A20 Pro (2nm) Neural Engine thế hệ 8"
+    },
+    {
+      "label": "Camera",
+      "value": "48MP Fusion + 48MP Ultra-Wide + 48MP Telephoto 5x"
+    },
+    {
+      "label": "Pin",
+      "value": "4200 mAh sạc nhanh MagSafe 25W"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_01_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T11:37:53.311Z"
+},
+{
+  "_id": "prod_exp_02",
+  "id": "prod_exp_02",
+  "name": "Apple iPhone 18 128GB - Xanh Biển Sâu (Camera 48MP Kép, Chip Apple A20 3nm)",
+  "slug": "apple-iphone-18-128gb---xanh-bien-sau-camera-48mp-kep-chip-apple-a20-3nm",
+  "description": "iPhone 18 tiêu chuẩn mang đến trải nghiệm Dynamic Island thông minh, sạc USB-C và camera chính 48MP zoom 2x chất lượng quang học sắc nét.",
+  "price": 22490000,
+  "originalPrice": 24990000,
+  "image": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Apple",
+  "badge": "Amazon's Choice",
+  "stock": 90,
+  "sold": 2100,
+  "rating": 4.9,
+  "reviewCount": 588,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Màn hình",
+      "value": "6.1 inch OLED Super Retina XDR 2000 nits"
+    },
+    {
+      "label": "Vi xử lý",
+      "value": "Apple A20 Bionic tốc độ cao"
+    },
+    {
+      "label": "Camera",
+      "value": "48MP Main f/1.6 + 12MP Ultra-wide"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_02_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T10:37:53.321Z"
+},
+{
+  "_id": "prod_exp_03",
+  "id": "prod_exp_03",
+  "name": "Apple iPhone 18 Plus 256GB - Hồng Pastel (Màn Hình Lớn 6.7 Inch, Thời Lượng Pin 28 Giờ)",
+  "slug": "apple-iphone-18-plus-256gb---hong-pastel-man-hinh-lon-67-inch-thoi-luong-pin-28-gio",
+  "description": "iPhone 18 Plus là lựa chọn hoàn hảo cho người thích màn hình lớn và thời lượng pin vượt trội cho cả ngày dài làm việc và giải trí.",
+  "price": 26990000,
+  "originalPrice": 29990000,
+  "image": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Apple",
+  "badge": "Hot Deal",
+  "stock": 55,
+  "sold": 980,
+  "rating": 4.88,
+  "reviewCount": 274,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Màn hình",
+      "value": "6.7 inch Super Retina XDR OLED sắc nét"
+    },
+    {
+      "label": "Thời lượng pin",
+      "value": "Lên tới 28 giờ phát video liên tục"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_03_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T09:37:53.321Z"
+},
+{
+  "_id": "prod_exp_04",
+  "id": "prod_exp_04",
+  "name": "Samsung Galaxy Z Fold 7 5G 512GB - Bản Lề FlexHinge Titan (Màn Hình Gập 7.6 Inch 120Hz)",
+  "slug": "samsung-galaxy-z-fold-7-5g-512gb---ban-le-flexhinge-titan-man-hinh-gap-76-inch-120hz",
+  "description": "Galaxy Z Fold 7 siêu mỏng nhẹ với khung viền Titanium và bản lề FlexHinge thế hệ mới không nếp gấp, nâng tầm đa nhiệm với Galaxy AI.",
+  "price": 44990000,
+  "originalPrice": 48990000,
+  "image": "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Samsung",
+  "badge": "Best Seller",
+  "stock": 35,
+  "sold": 460,
+  "rating": 4.92,
+  "reviewCount": 129,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Màn hình chính",
+      "value": "7.6 inch Dynamic AMOLED 2X gập dẻo 120Hz"
+    },
+    {
+      "label": "Màn hình ngoài",
+      "value": "6.3 inch Dynamic AMOLED 2X 120Hz"
+    },
+    {
+      "label": "Vi xử lý",
+      "value": "Snapdragon 8 Gen 4 for Galaxy"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_04_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T08:37:53.321Z"
+},
+{
+  "_id": "prod_exp_05",
+  "id": "prod_exp_05",
+  "name": "Samsung Galaxy Z Flip 7 256GB - Tím Lavender (Màn Hình Ngoài FlexWindow 3.9 Inch Tràn Viền)",
+  "slug": "samsung-galaxy-z-flip-7-256gb---tim-lavender-man-hinh-ngoai-flexwindow-39-inch-tran-vien",
+  "description": "Chiếc điện thoại gập thời trang nhỏ gọn nhất với màn hình ngoài FlexWindow mở rộng xem thông báo, trả lời tin nhắn và chụp ảnh selfie trực tiếp.",
+  "price": 25990000,
+  "originalPrice": 28990000,
+  "image": "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Samsung",
+  "badge": "Hot Deal",
+  "stock": 50,
+  "sold": 1120,
+  "rating": 4.89,
+  "reviewCount": 314,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Màn hình trong",
+      "value": "6.7 inch FHD+ Dynamic AMOLED 2X 120Hz"
+    },
+    {
+      "label": "Màn hình ngoài",
+      "value": "3.9 inch Super AMOLED 120Hz"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_05_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T07:37:53.321Z"
+},
+{
+  "_id": "prod_exp_06",
+  "id": "prod_exp_06",
+  "name": "Xiaomi 15 Ultra Leica 512GB - Cảm Biến 1-inch LYT-900 (Ống Kính Leica Summilux)",
+  "slug": "xiaomi-15-ultra-leica-512gb---cam-bien-1-inch-lyt-900-ong-kinh-leica-summilux",
+  "description": "Đỉnh cao nhiếp ảnh di động hợp tác cùng Leica danh tiếng từ Đức, chất lượng thấu kính quang học đỉnh cao tái tạo màu sắc điện ảnh chân thực.",
+  "price": 28990000,
+  "originalPrice": 32990000,
+  "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Xiaomi",
+  "badge": "Amazon's Choice",
+  "stock": 45,
+  "sold": 630,
+  "rating": 4.91,
+  "reviewCount": 176,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Camera",
+      "value": "50MP 1-inch Sony LYT-900 + 3 camera tiềm vọng Leica 50MP"
+    },
+    {
+      "label": "Màn hình",
+      "value": "6.73 inch 2K LTPO AMOLED 3000 nits"
+    },
+    {
+      "label": "Sạc",
+      "value": "Sạc nhanh 90W có dây, 80W không dây"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_06_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T06:37:53.321Z"
+},
+{
+  "_id": "prod_exp_07",
+  "id": "prod_exp_07",
+  "name": "Máy Tính Bảng Apple iPad Pro 13 inch M4 (256GB Wi-Fi) - Màn Hình Tandem OLED Ultra Retina XDR",
+  "slug": "may-tinh-bang-apple-ipad-pro-13-inch-m4-256gb-wi-fi---man-hinh-tandem-oled-ultra-retina-xdr",
+  "description": "iPad Pro M4 mỏng nhất từng được tạo ra, hiệu năng tương đương máy trạm chuyên nghiệp phục vụ vẽ đồ họa Procreate và dựng video Final Cut Pro.",
+  "price": 34990000,
+  "originalPrice": 37990000,
+  "image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Apple",
+  "badge": "Amazon's Choice",
+  "stock": 35,
+  "sold": 780,
+  "rating": 4.96,
+  "reviewCount": 218,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Màn hình",
+      "value": "13 inch Tandem OLED Ultra Retina XDR, độ dày chỉ 5.1mm"
+    },
+    {
+      "label": "Vi xử lý",
+      "value": "Apple M4 với bộ tăng tốc đồ họa phần cứng Ray Tracing"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_07_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T05:37:53.321Z"
+},
+{
+  "_id": "prod_exp_08",
+  "id": "prod_exp_08",
+  "name": "Apple MacBook Air 15 inch M3 (16GB RAM / 512GB SSD) - Màu Nửa Đêm Midnight Tuyệt Đẹp",
+  "slug": "apple-macbook-air-15-inch-m3-16gb-ram-512gb-ssd---mau-nua-dem-midnight-tuyet-dep",
+  "description": "Chiếc máy tính xách tay 15 inch mỏng nhẹ nhất thế giới, thiết kế không quạt hoàn toàn yên tĩnh khi làm việc văn phòng và học tập.",
+  "price": 35990000,
+  "originalPrice": 38990000,
+  "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Apple",
+  "badge": "Best Seller",
+  "stock": 60,
+  "sold": 1450,
+  "rating": 4.93,
+  "reviewCount": 406,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Vi xử lý",
+      "value": "Apple M3 (8 nhân CPU, 10 nhân GPU)"
+    },
+    {
+      "label": "Màn hình",
+      "value": "15.3 inch Liquid Retina 500 nits, hiển thị 1 tỷ màu"
+    },
+    {
+      "label": "Pin",
+      "value": "Thời lượng pin 18 giờ bền bỉ"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_08_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T04:37:53.321Z"
+},
+{
+  "_id": "prod_exp_09",
+  "id": "prod_exp_09",
+  "name": "Laptop Dell XPS 16 (2026) 4K OLED Touch - Intel Core Ultra 9 / RTX 4070 (Vỏ Nhôm CNC Nguyên Khối)",
+  "slug": "laptop-dell-xps-16-2026-4k-oled-touch---intel-core-ultra-9-rtx-4070-vo-nhom-cnc-nguyen-khoi",
+  "description": "Biểu tượng laptop doanh nhân cao cấp với bàn phím liền mạch không viền, touchpad kính vô hình phản hồi xúc giác Haptic hiện đại bậc nhất.",
+  "price": 58990000,
+  "originalPrice": 63990000,
+  "image": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Dell",
+  "badge": "Amazon's Choice",
+  "stock": 25,
+  "sold": 340,
+  "rating": 4.88,
+  "reviewCount": 95,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "CPU",
+      "value": "Intel Core Ultra 9 185H (16 nhân, 22 luồng)"
+    },
+    {
+      "label": "GPU",
+      "value": "NVIDIA GeForce RTX 4070 8GB GDDR6"
+    },
+    {
+      "label": "Màn hình",
+      "value": "16.3 inch 4K+ (3840x2400) OLED Cảm ứng, 100% DCI-P3"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_09_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T03:37:53.321Z"
+},
+{
+  "_id": "prod_exp_10",
+  "id": "prod_exp_10",
+  "name": "Màn Hình Cong Gaming Samsung Odyssey OLED G9 49 inch (DQHD 240Hz 0.03ms)",
+  "slug": "man-hinh-cong-gaming-samsung-odyssey-oled-g9-49-inch-dqhd-240hz-003ms",
+  "description": "Màn hình siêu rộng tương đương 2 màn hình 27 inch QHD ghép lại, cho góc nhìn bao quát toàn bộ chiến trường game đỉnh cao.",
+  "price": 32990000,
+  "originalPrice": 39990000,
+  "image": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Samsung",
+  "badge": "Amazon's Choice",
+  "stock": 20,
+  "sold": 260,
+  "rating": 4.95,
+  "reviewCount": 73,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Kích thước & Độ cong",
+      "value": "49 inch Super Ultra-Wide 32:9 cong 1800R"
+    },
+    {
+      "label": "Tấm nền",
+      "value": "OLED tự phát sáng, độ tương phản 1.000.000:1"
+    },
+    {
+      "label": "Tần số quét",
+      "value": "240Hz, thời gian phản hồi siêu tốc 0.03ms (GtG)"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_10_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T02:37:53.321Z"
+},
+{
+  "_id": "prod_exp_11",
+  "id": "prod_exp_11",
+  "name": "Chuột Không Dây Công Thái Học Logitech MX Master 3S - Cảm Biến 8000 DPI Click Yên Tĩnh",
+  "slug": "chuot-khong-day-cong-thai-hoc-logitech-mx-master-3s---cam-bien-8000-dpi-click-yen-tinh",
+  "description": "Chuột văn phòng tốt nhất thế giới được các lập trình viên, designer và chuyên gia tài chính tin dùng tuyệt đối.",
+  "price": 2190000,
+  "originalPrice": 2690000,
+  "image": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Logitech",
+  "badge": "Best Seller",
+  "stock": 150,
+  "sold": 4890,
+  "rating": 4.94,
+  "reviewCount": 1369,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Cảm biến",
+      "value": "Darkfield 8000 DPI lướt trên mọi bề mặt kể cả kính"
+    },
+    {
+      "label": "Con lăn",
+      "value": "Cuộn từ tính MagSpeed 1000 dòng/giây"
+    },
+    {
+      "label": "Pin",
+      "value": "Sạc Type-C dùng 70 ngày sau một lần sạc đầy"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_11_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T01:37:53.321Z"
+},
+{
+  "_id": "prod_exp_12",
+  "id": "prod_exp_12",
+  "name": "Bàn Phím Cơ Không Dây Keychron Q1 Pro QMK/VIA Nhôm CNC Nguyên Khối (Gateron Jupiter Switch)",
+  "slug": "ban-phim-co-khong-day-keychron-q1-pro-qmkvia-nhom-cnc-nguyen-khoi-gateron-jupiter-switch",
+  "description": "Bàn phím cơ layout 75% thiết kế Double-Gasket êm ái, hỗ trợ tùy biến mapping phím qua phần mềm mã nguồn mở QMK/VIA.",
+  "price": 4350000,
+  "originalPrice": 4850000,
+  "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Keychron",
+  "badge": "Amazon's Choice",
+  "stock": 80,
+  "sold": 1420,
+  "rating": 4.92,
+  "reviewCount": 398,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Chất liệu vỏ",
+      "value": "Hợp kim nhôm 6063 CNC nguyên khối sơn Anode cao cấp"
+    },
+    {
+      "label": "Kết nối",
+      "value": "Bluetooth 5.1 kết nối 3 thiết bị + Dây Type-C 1000Hz"
+    },
+    {
+      "label": "Keycap",
+      "value": "PBT Double-shot chống mài mòn chuẩn OSA Profile"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_12_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-30T00:37:53.321Z"
+},
+{
+  "_id": "prod_exp_13",
+  "id": "prod_exp_13",
+  "name": "Apple AirPods Pro 3 (Cổng Sạc USB-C) - Chống Ồn Chủ Động 2X Kèm Âm Thanh Không Gian Cá Nhân Hóa",
+  "slug": "apple-airpods-pro-3-cong-sac-usb-c---chong-on-chu-dong-2x-kem-am-thanh-khong-gian-ca-nhan-hoa",
+  "description": "Chiếc tai nghe in-ear khử ồn số 1 thị trường tương thích hoàn hảo với hệ sinh thái Apple, mang lại trải nghiệm âm thanh sân khấu sống động.",
+  "price": 5990000,
+  "originalPrice": 6790000,
+  "image": "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Apple",
+  "badge": "Best Seller",
+  "stock": 120,
+  "sold": 5200,
+  "rating": 4.96,
+  "reviewCount": 1456,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_02",
+  "shopName": "TechWorld Store",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Chipset",
+      "value": "Apple H2 xử lý âm thanh kỹ thuật số thích ứng"
+    },
+    {
+      "label": "Thời lượng pin",
+      "value": "6 giờ nghe liên tục / 30 giờ kèm hộp sạc MagSafe"
+    },
+    {
+      "label": "Tính năng",
+      "value": "Nhận biết cuộc hội thoại, Âm lượng thích ứng, Kháng bụi nước IP54"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_13_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T23:37:53.321Z"
+},
+{
+  "_id": "prod_exp_14",
+  "id": "prod_exp_14",
+  "name": "Loa Bluetooth Di Động Marshall Stanmore III - Âm Thanh Stereo 80W Chuẩn Vintage Anh Quốc",
+  "slug": "loa-bluetooth-di-dong-marshall-stanmore-iii---am-thanh-stereo-80w-chuan-vintage-anh-quoc",
+  "description": "Biểu tượng âm thanh rock 'n' roll cổ điển, tái tạo dải trầm uy lực và giọng hát ấm áp lan tỏa khắp căn phòng rộng 40m2.",
+  "price": 8990000,
+  "originalPrice": 10500000,
+  "image": "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "Marshall",
+  "badge": "Amazon's Choice",
+  "stock": 40,
+  "sold": 960,
+  "rating": 4.91,
+  "reviewCount": 269,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_10",
+  "shopName": "AudioHiFi Âm Thanh Đẳng Cấp",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Công suất",
+      "value": "80W (1 củ loa woofer 50W + 2 tweeter 15W)"
+    },
+    {
+      "label": "Kết nối",
+      "value": "Bluetooth 5.2 LE Audio, AUX 3.5mm, RCA mạ vàng"
+    },
+    {
+      "label": "Thiết kế",
+      "value": "Bọc da cao cấp, lưới ê-căng cổ điển viền vàng đồng sang trọng"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_14_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T22:37:53.321Z"
+},
+{
+  "_id": "prod_exp_15",
+  "id": "prod_exp_15",
+  "name": "Loa Bluetooth Tiệc Tùng JBL Boombox 3 Wi-Fi - Âm Trầm Quái Vật 180W Kháng Nước IP67",
+  "slug": "loa-bluetooth-tiec-tung-jbl-boombox-3-wi-fi---am-tram-quai-vat-180w-khang-nuoc-ip67",
+  "description": "Vua của những bữa tiệc ngoài trời và bãi biển với âm bass rung chuyển mặt đất cùng khả năng truyền phát nhạc chất lượng cao qua Wi-Fi Dolby Atmos.",
+  "price": 11990000,
+  "originalPrice": 13990000,
+  "image": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800"
+  ],
+  "category": "Điện tử",
+  "brand": "JBL",
+  "badge": "Hot Deal",
+  "stock": 30,
+  "sold": 580,
+  "rating": 4.88,
+  "reviewCount": 162,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_10",
+  "shopName": "AudioHiFi Âm Thanh Đẳng Cấp",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Công suất",
+      "value": "180W RMS khi cắm điện / 136W khi dùng pin"
+    },
+    {
+      "label": "Pin",
+      "value": "24 giờ chơi nhạc liên tục kiêm sạc dự phòng cho điện thoại"
+    },
+    {
+      "label": "Chuẩn kháng nước",
+      "value": "IP67 chống bụi bẩn và chìm trong nước 1 mét"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_15_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T21:37:53.321Z"
+},
+{
+  "_id": "prod_exp_16",
+  "id": "prod_exp_16",
+  "name": "Áo Khoác Nam The North Face 1996 Retro Nuptse Jacket Lông Vũ 700-Fill Chống Rét Âm 15°C",
+  "slug": "ao-khoac-nam-the-north-face-1996-retro-nuptse-jacket-long-vu-700-fill-chong-ret-am-15c",
+  "description": "Chiếc áo phao biểu tượng đường phố kinh điển giữ ấm tuyệt đối trong mùa đông khắc nghiệt hoặc những chuyến du lịch Sa Pa, Đà Lạt, Hàn Quốc.",
+  "price": 6490000,
+  "originalPrice": 7500000,
+  "image": "https://images.unsplash.com/photo-1544923246-77307dd654cb?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1544923246-77307dd654cb?w=800"
+  ],
+  "category": "Thời trang",
+  "brand": "The North Face",
+  "badge": "Amazon's Choice",
+  "stock": 60,
+  "sold": 1380,
+  "rating": 4.94,
+  "reviewCount": 386,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_01",
+  "shopName": "Thời Trang GenZ Official",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Lớp lót",
+      "value": "100% Lông vũ tự nhiên chuẩn RDS 700-fill siêu ấm"
+    },
+    {
+      "label": "Lớp vỏ ngoài",
+      "value": "Vải Ripstop phủ chống thấm nước DWR không chứa PFC"
+    },
+    {
+      "label": "Mũ trùm",
+      "value": "Mũ giấu kín trong cổ áo tiện lợi khi gặp mưa tuyết"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_16_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T20:37:53.321Z"
+},
+{
+  "_id": "prod_exp_17",
+  "id": "prod_exp_17",
+  "name": "Giày Sneaker Adidas Originals Samba OG Leather Classic - Đế Cao Su Tự Nhiên Retro Vintage",
+  "slug": "giay-sneaker-adidas-originals-samba-og-leather-classic---de-cao-su-tu-nhien-retro-vintage",
+  "description": "Đôi giày sneaker hot nhất toàn cầu, dễ phối đồ cùng quần jeans, quần ống rộng hay chân váy tennis mang lại vẻ đẹp cổ điển thanh lịch.",
+  "price": 2790000,
+  "originalPrice": 3200000,
+  "image": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800"
+  ],
+  "category": "Thời trang",
+  "brand": "Adidas",
+  "badge": "Best Seller",
+  "stock": 90,
+  "sold": 3890,
+  "rating": 4.9,
+  "reviewCount": 1089,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_05",
+  "shopName": "SportZone Thể Thao & Dã Ngoại",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Chất liệu thân",
+      "value": "Da cừu mềm mại phối mũi da lộn T-toe hình chữ T"
+    },
+    {
+      "label": "Đế giày",
+      "value": "Cao su gum dẻo dai bám sàn vượt trội phong cách bóng đá trong nhà"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_17_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T19:37:53.321Z"
+},
+{
+  "_id": "prod_exp_18",
+  "id": "prod_exp_18",
+  "name": "Quần Jean Nam Levi's 501 Original Fit Denim Cao Cấp 100% Cotton Bền Đẹp",
+  "slug": "quan-jean-nam-levis-501-original-fit-denim-cao-cap-100-cotton-ben-dep",
+  "description": "Huyền thoại thời trang denim tồn tại hơn 150 năm, form quần tôn dáng đứng form càng mặc càng lên màu wash tự nhiên độc nhất.",
+  "price": 1890000,
+  "originalPrice": 2290000,
+  "image": "https://images.unsplash.com/photo-1542272604-780c96856592?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1542272604-780c96856592?w=800"
+  ],
+  "category": "Thời trang",
+  "brand": "Levi's",
+  "badge": "Amazon's Choice",
+  "stock": 85,
+  "sold": 2150,
+  "rating": 4.87,
+  "reviewCount": 602,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_01",
+  "shopName": "Thời Trang GenZ Official",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Chất liệu",
+      "value": "100% Cotton denim dệt sợi chéo chắc chắn không pha thun"
+    },
+    {
+      "label": "Kiểu dáng",
+      "value": "Ống đứng nguyên bản Regular fit ống suông 19cm"
+    },
+    {
+      "label": "Khuy khóa",
+      "value": "Hàng nút kim loại Button fly truyền thống"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_18_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T18:37:53.321Z"
+},
+{
+  "_id": "prod_exp_19",
+  "id": "prod_exp_19",
+  "name": "Đầm Dạ Hội Nữ Lụa Tơ Tằm Dáng Dài Cổ Yếm Quyến Rũ Thanh Lịch Dự Tiệc Sang Trọng",
+  "slug": "dam-da-hoi-nu-lua-to-tam-dang-dai-co-yem-quyen-ru-thanh-lich-du-tiec-sang-trong",
+  "description": "Thiết kế cao cấp biến quý cô thành tâm điểm của mọi buổi tiệc dạ hội, sự kiện và tiệc cưới trang trọng.",
+  "price": 1450000,
+  "originalPrice": 1950000,
+  "image": "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800"
+  ],
+  "category": "Thời trang",
+  "brand": "Elegance",
+  "badge": "Hot Deal",
+  "stock": 45,
+  "sold": 720,
+  "rating": 4.93,
+  "reviewCount": 202,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_01",
+  "shopName": "Thời Trang GenZ Official",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Chất liệu",
+      "value": "Lụa gấm tơ tằm thiên nhiên ánh ngọc óng ả"
+    },
+    {
+      "label": "Thiết kế",
+      "value": "Cổ yếm khoe lưng trần thon thả, xẻ tà cao tôn chân dài"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_19_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T17:37:53.321Z"
+},
+{
+  "_id": "prod_exp_20",
+  "id": "prod_exp_20",
+  "name": "Kem Dưỡng Phục Hồi Da Đa Năng La Roche-Posay Cicaplast Baume B5+ 100ml Làm Dịu Kích Ứng",
+  "slug": "kem-duong-phuc-hoi-da-da-nang-la-roche-posay-cicaplast-baume-b5-100ml-lam-diu-kich-ung",
+  "description": "Tuýp kem dưỡng cứu cánh cho làn da yếu nhạy cảm, da nhiễm corticoid hay vừa lăn kim, peel da cần tái tạo cấp tốc.",
+  "price": 495000,
+  "originalPrice": 580000,
+  "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800"
+  ],
+  "category": "Sắc đẹp",
+  "brand": "La Roche-Posay",
+  "badge": "Best Seller",
+  "stock": 200,
+  "sold": 9800,
+  "rating": 4.97,
+  "reviewCount": 2744,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_03",
+  "shopName": "Beauty Cosmetics Official",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Thành phần chính",
+      "value": "Panthenol 5% (Vitamin B5), Madecassoside, Tribioma men vi sinh"
+    },
+    {
+      "label": "Công dụng",
+      "value": "Phục hồi hàng rào bảo vệ da sau 1 giờ, làm dịu vết ửng đỏ sau treatment"
+    },
+    {
+      "label": "Dung tích",
+      "value": "100ml dùng cho cả gia đình (trẻ sơ sinh, trẻ nhỏ và người lớn)"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_20_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T16:37:53.321Z"
+},
+{
+  "_id": "prod_exp_21",
+  "id": "prod_exp_21",
+  "name": "Son Kem Lì YSL Rouge Pur Couture The Slim Matte Lipstick - Màu 1966 Đỏ Đất Thời Thượng",
+  "slug": "son-kem-li-ysl-rouge-pur-couture-the-slim-matte-lipstick---mau-1966-do-dat-thoi-thuong",
+  "description": "Thỏi son vuông thanh mảnh trứ danh của Yves Saint Laurent, mang đến vẻ đẹp quyền lực quyến rũ cho mọi cô gái.",
+  "price": 1150000,
+  "originalPrice": 1350000,
+  "image": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800"
+  ],
+  "category": "Sắc đẹp",
+  "brand": "YSL",
+  "badge": "Amazon's Choice",
+  "stock": 75,
+  "sold": 2340,
+  "rating": 4.95,
+  "reviewCount": 655,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_03",
+  "shopName": "Beauty Cosmetics Official",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Chất son",
+      "value": "Matte mịn như nhung không gây khô môi, bám màu 10 giờ"
+    },
+    {
+      "label": "Màu sắc",
+      "value": "Đỏ đất cháy Rouge Libre tôn trắng răng và màu da Châu Á"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_21_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T15:37:53.321Z"
+},
+{
+  "_id": "prod_exp_22",
+  "id": "prod_exp_22",
+  "name": "Nước Thần Dưỡng Da Căng Bóng SK-II Facial Treatment Essence 230ml Tinh Chất Pitera Độc Quyền",
+  "slug": "nuoc-than-duong-da-cang-bong-sk-ii-facial-treatment-essence-230ml-tinh-chat-pitera-doc-quyen",
+  "description": "Nước thần đình đám giúp tái sinh làn da pha lê trong suốt, bí quyết trẻ hóa làn da của phụ nữ Nhật Bản suốt hơn 40 năm qua.",
+  "price": 4290000,
+  "originalPrice": 4890000,
+  "image": "https://images.unsplash.com/photo-1608248597359-5613fe572b9a?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1608248597359-5613fe572b9a?w=800"
+  ],
+  "category": "Sắc đẹp",
+  "brand": "SK-II",
+  "badge": "Best Seller",
+  "stock": 40,
+  "sold": 890,
+  "rating": 4.96,
+  "reviewCount": 249,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_03",
+  "shopName": "Beauty Cosmetics Official",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Thành phần",
+      "value": "Chứa hơn 90% Pitera sinh học tự nhiên giàu vitamin, axit amin"
+    },
+    {
+      "label": "Hiệu quả",
+      "value": "Cải thiện kết cấu da, se khít lỗ chân lông và làm mờ thâm nám"
+    },
+    {
+      "label": "Xuất xứ",
+      "value": "Nhật Bản (Tem bảo hành chính hãng)"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_22_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T14:37:53.321Z"
+},
+{
+  "_id": "prod_exp_23",
+  "id": "prod_exp_23",
+  "name": "Máy Hút Bụi Không Dây Cầm Tay Dyson V15 Detect Extra - Đầu Hút Laser Soi Bụi & Cảm Biến Piezo",
+  "slug": "may-hut-bui-khong-day-cam-tay-dyson-v15-detect-extra---dau-hut-laser-soi-bui-cam-bien-piezo",
+  "description": "Máy hút bụi thông minh mạnh nhất của Dyson với màn hình LCD hiển thị số lượng và kích thước các hạt bụi được hút vào theo thời gian thực.",
+  "price": 23990000,
+  "originalPrice": 27990000,
+  "image": "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=800"
+  ],
+  "category": "Gia dụng",
+  "brand": "Dyson",
+  "badge": "Amazon's Choice",
+  "stock": 35,
+  "sold": 720,
+  "rating": 4.93,
+  "reviewCount": 202,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_04",
+  "shopName": "HomePro Gia Dụng Thông Minh",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Lực hút",
+      "value": "240 AW động cơ Dyson Hyperdymium quay 125.000 vòng/phút"
+    },
+    {
+      "label": "Công nghệ laser",
+      "value": "Đèn tia laser xanh soi rõ bụi mịn vô hình trên sàn nhà"
+    },
+    {
+      "label": "Pin",
+      "value": "Thời lượng 60 phút liên tục, có thể tháo rời pin"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_23_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T13:37:53.321Z"
+},
+{
+  "_id": "prod_exp_24",
+  "id": "prod_exp_24",
+  "name": "Nồi Cơm Điện Cao Tần Cuckoo 1.8L CRP-LHTR1010FB Áp Suất Kép Twin Pressure Nhập Khẩu Hàn Quốc",
+  "slug": "noi-com-dien-cao-tan-cuckoo-18l-crp-lhtr1010fb-ap-suat-kep-twin-pressure-nhap-khau-han-quoc",
+  "description": "Nồi cơm điện số 1 tại Hàn Quốc, hạt gạo chín đều ngọt lịm từ tận lõi với thực đơn đa dạng nấu cháo, súp, cơm ngũ cốc và hấp cách thủy.",
+  "price": 9890000,
+  "originalPrice": 11500000,
+  "image": "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800"
+  ],
+  "category": "Gia dụng",
+  "brand": "Cuckoo",
+  "badge": "Best Seller",
+  "stock": 45,
+  "sold": 1150,
+  "rating": 4.92,
+  "reviewCount": 322,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_04",
+  "shopName": "HomePro Gia Dụng Thông Minh",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Công nghệ nấu",
+      "value": "Áp suất kép 2 atm (nấu cơm dẻo quánh) & Không áp suất (cơm tơi xốp)"
+    },
+    {
+      "label": "Lòng nồi",
+      "value": "Thép không gỉ ECO Stainless phủ men kim cương Xwall Black Shine"
+    },
+    {
+      "label": "Dung tích",
+      "value": "1.8 lít phù hợp gia đình 4 - 8 người"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_24_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T12:37:53.321Z"
+},
+{
+  "_id": "prod_exp_25",
+  "id": "prod_exp_25",
+  "name": "Nồi Chiên Không Dầu Hai Ngăn Philips Dual Basket Airfryer 9L NA352/00 Nướng Hai Món Cùng Lúc",
+  "slug": "noi-chien-khong-dau-hai-ngan-philips-dual-basket-airfryer-9l-na35200-nuong-hai-mon-cung-luc",
+  "description": "Giải pháp nấu nướng tiện lợi cho gia đình bận rộn, thưởng thức bữa ăn nóng hổi vừa có thịt nướng giòn rụm vừa có rau củ nướng thơm ngon.",
+  "price": 4990000,
+  "originalPrice": 6490000,
+  "image": "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800"
+  ],
+  "category": "Gia dụng",
+  "brand": "Philips",
+  "badge": "Hot Deal",
+  "stock": 65,
+  "sold": 1890,
+  "rating": 4.89,
+  "reviewCount": 529,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_04",
+  "shopName": "HomePro Gia Dụng Thông Minh",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Dung tích",
+      "value": "Tổng 9 lít (Ngăn lớn 6L nướng gà nguyên con + Ngăn nhỏ 3L chiên khoai)"
+    },
+    {
+      "label": "Công nghệ",
+      "value": "Rapid Air xoáy không khí nóng giòn đều không cần trở mặt"
+    },
+    {
+      "label": "Đồng bộ thời gian",
+      "value": "Chức năng Time Sync giúp 2 ngăn tự động chín cùng một lúc"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_25_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T11:37:53.321Z"
+},
+{
+  "_id": "prod_exp_26",
+  "id": "prod_exp_26",
+  "name": "Bình Sữa Cổ Rộng Cao Cấp Hegen PCTO 240ml Núm Ti Silicone Chống Sặc Chống Đầy Hơi Cho Bé",
+  "slug": "binh-sua-co-rong-cao-cap-hegen-pcto-240ml-num-ti-silicone-chong-sac-chong-day-hoi-cho-be",
+  "description": "Bình sữa được các mẹ bỉm sữa toàn thế giới tin dùng, dễ cọ rửa và có thể chuyển đổi thành hộp trữ đồ ăn dặm thông minh.",
+  "price": 520000,
+  "originalPrice": 620000,
+  "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800"
+  ],
+  "category": "Mẹ & Bé",
+  "brand": "Hegen",
+  "badge": "Best Seller",
+  "stock": 180,
+  "sold": 6200,
+  "rating": 4.97,
+  "reviewCount": 1736,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_09",
+  "shopName": "BabyCare Siêu Thị Mẹ & Bé",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Chất liệu thân",
+      "value": "Nhựa PPSU cao cấp chịu nhiệt -20°C đến 180°C không chứa BPA"
+    },
+    {
+      "label": "Thiết kế nắp",
+      "value": "Đóng mở 1 tay bằng thao tác ấn đóng - xoay mở (PCTO)"
+    },
+    {
+      "label": "Núm ti",
+      "value": "Thiết kế bất đối xứng mô phỏng bầu ngực mẹ giúp bé bú tự nhiên"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_26_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T10:37:53.321Z"
+},
+{
+  "_id": "prod_exp_27",
+  "id": "prod_exp_27",
+  "name": "Xe Đẩy Em Bé Gấp Gọn Siêu Nhẹ Aprica Karoon Air Nội Địa Nhật Bản Chỉ Nặng 3.9kg",
+  "slug": "xe-day-em-be-gap-gon-sieu-nhe-aprica-karoon-air-noi-dia-nhat-ban-chi-nang-39kg",
+  "description": "Xe đẩy chuẩn y khoa Nhật Bản hỗ trợ tư thế phát triển tự nhiên của cột sống bé, mái che chống tia UV 99% bảo vệ làn da non nớt.",
+  "price": 4890000,
+  "originalPrice": 5690000,
+  "image": "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=800",
+  "images": [
+    "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=800"
+  ],
+  "category": "Mẹ & Bé",
+  "brand": "Aprica",
+  "badge": "Amazon's Choice",
+  "stock": 30,
+  "sold": 520,
+  "rating": 4.92,
+  "reviewCount": 146,
+  "isMall": true,
+  "isFastDelivery": true,
+  "shopId": "shop_09",
+  "shopName": "BabyCare Siêu Thị Mẹ & Bé",
+  "shopRating": 4.95,
+  "shopResponseRate": 99,
+  "variants": {
+    "colors": [
+      "Mặc định"
+    ],
+    "sizes": [
+      "Tiêu chuẩn"
+    ]
+  },
+  "specifications": [
+    {
+      "label": "Trọng lượng",
+      "value": "Siêu nhẹ 3.9 kg, xách bằng một tay dễ dàng"
+    },
+    {
+      "label": "Ghế ngồi",
+      "value": "Cao 52cm cách mặt đất, tránh hơi nóng bốc lên từ mặt đường"
+    },
+    {
+      "label": "Hệ thống giảm xóc",
+      "value": "Khung xe 3D và bánh xe hấp thụ chấn động bảo vệ não bé sơ sinh"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_prod_exp_27_1",
+      "author": "Khách hàng Mini Shopee",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "rating": 5,
+      "date": "28/09/2026",
+      "title": "Sản phẩm chính hãng đóng gói rất cẩn thận",
+      "content": "Hàng nguyên seal chuẩn chỉ, giao hỏa tốc rất nhanh. Rất hài lòng về chất lượng dịch vụ của sàn.",
+      "verifiedPurchase": true
+    }
+  ],
+  "createdAt": "2026-09-29T09:37:53.321Z"
+},
+{
   "_id": "prod_flagship_01",
   "id": "prod_flagship_01",
   "name": "Apple iPhone 18 Pro Max 1TB - Khung Titanium Sa Mạc (Chip A20 Pro 2nm, Camera Tiềm Vọng 200x)",
