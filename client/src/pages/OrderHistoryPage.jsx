@@ -369,6 +369,24 @@ export default function OrderHistoryPage() {
     navigate('/cart');
   };
 
+  const handleConfirmDelivered = (orderId) => {
+    const updated = orders.map((o) => {
+      if (o.orderId !== orderId) return o;
+      return {
+        ...o,
+        status: 'completed',
+        statusText: 'Giao thành công',
+        stepIndex: 4,
+      };
+    });
+    saveOrders(updated);
+    showToast('🎉 Bạn đã xác nhận nhận hàng! Hãy để lại đánh giá để nhận 200 Mini Xu.', 'success');
+    const target = updated.find((o) => o.orderId === orderId);
+    if (target) {
+      setSelectedReviewOrder(target);
+    }
+  };
+
   return (
     <main className="shopee-container" style={{ padding: '28px 16px', maxWidth: '980px' }}>
       <div 
@@ -671,6 +689,24 @@ export default function OrderHistoryPage() {
                           title="Mô phỏng bưu tá giao hàng bước tiếp theo"
                         >
                           ⚡ {t('order_track_simulate_step')}
+                        </button>
+                      )}
+
+                      {ord.status === 'shipping' && (
+                        <button
+                          type="button"
+                          className="shopee-btn"
+                          style={{
+                            fontSize: '12px',
+                            background: '#10b981',
+                            color: '#fff',
+                            border: 'none',
+                            fontWeight: 700,
+                          }}
+                          onClick={() => handleConfirmDelivered(ord.orderId)}
+                          title="Xác nhận bạn đã nhận được gói hàng an toàn"
+                        >
+                          📦 Đã nhận được hàng
                         </button>
                       )}
 
