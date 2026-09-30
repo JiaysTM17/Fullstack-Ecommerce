@@ -87,4 +87,37 @@ export const verifyToken = (token) => {
   }
 };
 
-export default { generateToken, verifyToken };
+const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "30d";
+
+export const generateRefreshToken = (payload) => {
+  const data = {
+    id: payload.id || payload._id,
+    email: payload.email,
+    role: payload.role,
+    shopId: payload.shopId || null,
+    type: "refresh",
+  };
+
+  try {
+    return jwt.sign(data, JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN });
+  } catch {
+    // Native fallback with 30-day expiry
+    const fullPayload = {
+      ...data,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 30 * 24 * 3600,
+    };
+    const encodedHeader = base64UrlEncode(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+    const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload));
+    const signature = crypto
+      .createHmac("sha256", JWT_SECRET)
+      .update(`${encodedHeader}.${encodedPayload}`)
+      .digest("base64")
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+    return `${encodedHeader}.${encodedPayload}.${signature}`;
+  }
+};
+
+export default { generateToken, verifyToken, generateRefreshToken };
