@@ -26,6 +26,7 @@ export class ContractOracle {
     this.userNotifications = new Map(); // userId -> Array of notification objects
     this.recentlyViewed = new Map(); // userId -> Array of product objects
     this.questions = new Map(); // productId -> Array of question objects
+    this.wishlists = new Map(); // userId -> Array of wishlist objects
     this.initDefaultFixtures();
   }
 
@@ -1892,6 +1893,294 @@ export class ContractOracle {
     };
 
     return invoice;
+  }
+
+  // =========================================================================
+  // BACKEND OVERHAUL (R1 - R10)
+  // =========================================================================
+
+  // --- R2: Auth Controller Upgrades ---
+  changePassword(userId, oldPassword, newPassword) {
+    const user = this.users.get(userId);
+    if (!user) throw new Error("USER_NOT_FOUND");
+    if (!oldPassword || !newPassword) throw new Error("MISSING_PASSWORD_FIELDS");
+    if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      throw new Error("WEAK_NEW_PASSWORD");
+    }
+    user.passwordHash = `hash-${newPassword}`;
+    return { success: true, message: "Đổi mật khẩu thành công" };
+  }
+
+  forgotPassword(email) {
+    if (!email) throw new Error("MISSING_EMAIL");
+    const code = "123456";
+    return { success: true, message: "Mã đặt lại mật khẩu đã gửi", resetCode: code };
+  }
+
+  resetPassword(email, code, newPassword) {
+    if (!email || !code || !newPassword) throw new Error("MISSING_RESET_FIELDS");
+    if (newPassword.length < 8) throw new Error("WEAK_PASSWORD");
+    let found = null;
+    for (const u of this.users.values()) {
+      if (u.email.toLowerCase() === email.toLowerCase()) {
+        found = u;
+        break;
+      }
+    }
+    if (!found) throw new Error("USER_NOT_FOUND");
+    found.passwordHash = `hash-${newPassword}`;
+    return { success: true, message: "Đặt lại mật khẩu thành công" };
+  }
+
+  refreshToken(token) {
+    const user = this.verifyToken(token);
+    const newToken = `tok-${user.id}-${Date.now()}`;
+    return { success: true, token: newToken };
+  }
+
+  // --- R3: Order Controller Workflow ---
+  confirmOrder(orderId) {
+    const order = this.orders.get(orderId);
+    if (!order) throw new Error("ORDER_NOT_FOUND");
+    if (order.status !== "pending") throw new Error("INVALID_STATUS_TRANSITION");
+    order.status = "confirmed";
+    order.confirmedAt = new Date().toISOString();
+    return order;
+  }
+
+  shipOrder(orderId) {
+    const order = this.orders.get(orderId);
+    if (!order) throw new Error("ORDER_NOT_FOUND");
+    if (order.status !== "confirmed") throw new Error("INVALID_STATUS_TRANSITION");
+    order.status = "shipping";
+    order.shippedAt = new Date().toISOString();
+    return order;
+  }
+
+  deliverOrder(orderId, userId = null) {
+    const order = this.orders.get(orderId);
+    if (!order) throw new Error("ORDER_NOT_FOUND");
+    if (order.status !== "shipping") throw new Error("INVALID_STATUS_TRANSITION");
+    order.status = "delivered";
+    order.deliveredAt = new Date().toISOString();
+    return order;
+  }
+
+  completeOrder(orderId) {
+    const order = this.orders.get(orderId);
+    if (!order) throw new Error("ORDER_NOT_FOUND");
+    if (order.status !== "delivered") throw new Error("INVALID_STATUS_TRANSITION");
+    order.status = "completed";
+    order.completedAt = new Date().toISOString();
+    return order;
+  }
+
+  getOrderStats() {
+    const allOrders = Array.from(this.orders.values());
+    const breakdown = { pending: 0, confirmed: 0, shipping: 0, delivered: 0, completed: 0, cancelled: 0 };
+    let totalRevenue = 0;
+    for (const o of allOrders) {
+      breakdown[o.status] = (breakdown[o.status] || 0) + 1;
+      if (o.status === "completed" || o.status === "delivered") {
+        totalRevenue += o.total || 0;
+      }
+    }
+    return { totalOrders: allOrders.length, statusBreakdown: breakdown, totalRevenue };
+  }
+
+  searchOrders(keyword) {
+    if (!keyword) return [];
+    const kw = keyword.toLowerCase();
+    return Array.from(this.orders.values()).filter((o) =>
+      o.id.toLowerCase().includes(kw) ||
+      (o.trackingCode && o.trackingCode.toLowerCase().includes(kw)) ||
+      (o.customer?.fullName && o.customer.fullName.toLowerCase().includes(kw))
+    );
+  }
+
+  // --- R4: Product Enhancements ---
+  getRelatedProducts(productId, limit = 8) {
+    const prod = this.products.get(productId);
+    if (!prod) throw new Error("PRODUCT_NOT_FOUND");
+    return Array.from(this.products.values())
+      .filter((p) => p.id !== productId && p.category === prod.category)
+      .slice(0, limit);
+  }
+
+  getBestSellers(limit = 10) {
+    return Array.from(this.products.values())
+      .sort((a, b) => (b.sold || 0) - (a.sold || 0))
+      .slice(0, limit);
+  }
+
+  getNewArrivals(limit = 10) {
+    return Array.from(this.products.values()).slice(0, limit);
+  }
+
+  getFlashSale(limit = 20) {
+    return Array.from(this.products.values())
+      .filter((p) => p.originalPrice && p.originalPrice > p.price)
+      .map((p) => ({
+        ...p,
+        discountPercent: Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100),
+      }))
+      .slice(0, limit);
+  }
+
+  getProductReviewStats(productId) {
+    const prod = this.products.get(productId);
+    if (!prod) throw new Error("PRODUCT_NOT_FOUND");
+    const reviews = this.reviews.get(productId) || [];
+    const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    for (const r of reviews) {
+      if (r.rating >= 1 && r.rating <= 5) breakdown[r.rating]++;
+    }
+    return {
+      productId,
+      totalReviews: reviews.length,
+      averageRating: prod.rating || 5.0,
+      ratingBreakdown: breakdown,
+    };
+  }
+
+  // --- R5: Cart Voucher Preview & Summary ---
+  previewVoucher(userId, voucherCode, cartSubtotal) {
+    const code = String(voucherCode).trim().toUpperCase();
+    const v = this.vouchers.get(code);
+    if (!v) throw new Error("VOUCHER_NOT_FOUND");
+    if (v.minSpend && cartSubtotal < v.minSpend) {
+      throw new Error(`MIN_SPEND_NOT_MET: Minimum order is ${v.minSpend}`);
+    }
+    let discount = 0;
+    if (v.type === "percentage" || v.percentage) {
+      const pct = v.percentage || v.discountPercent || 10;
+      discount = Math.round((cartSubtotal * pct) / 100);
+      if (v.maxDiscount) discount = Math.min(discount, v.maxDiscount);
+    } else {
+      discount = v.discountAmount || 0;
+    }
+    return {
+      voucherCode: code,
+      cartTotal: cartSubtotal,
+      discountAmount: discount,
+      finalTotal: cartSubtotal - discount,
+    };
+  }
+
+  // --- R6: Wishlist Controller ---
+  addToWishlist(userId, productId) {
+    const prod = this.products.get(productId);
+    if (!prod) throw new Error("PRODUCT_NOT_FOUND");
+    let list = this.wishlists.get(userId) || [];
+    if (list.some((item) => item.productId === productId)) {
+      throw new Error("ALREADY_IN_WISHLIST");
+    }
+    list.unshift({ productId, addedAt: new Date().toISOString() });
+    this.wishlists.set(userId, list);
+    return { success: true, total: list.length };
+  }
+
+  removeFromWishlist(userId, productId) {
+    let list = this.wishlists.get(userId) || [];
+    const filtered = list.filter((item) => item.productId !== productId);
+    if (filtered.length === list.length) {
+      throw new Error("ITEM_NOT_IN_WISHLIST");
+    }
+    this.wishlists.set(userId, filtered);
+    return { success: true, total: filtered.length };
+  }
+
+  getWishlist(userId) {
+    const list = this.wishlists.get(userId) || [];
+    const enriched = [];
+    for (const item of list) {
+      const prod = this.products.get(item.productId);
+      if (prod) {
+        enriched.push({ ...item, name: prod.name, price: prod.price, inStock: prod.stock > 0 });
+      }
+    }
+    return { items: enriched, total: enriched.length };
+  }
+
+  checkWishlist(userId, productId) {
+    const list = this.wishlists.get(userId) || [];
+    return { isInWishlist: list.some((item) => item.productId === productId) };
+  }
+
+  clearWishlist(userId) {
+    this.wishlists.set(userId, []);
+    return { success: true, message: "Đã xóa toàn bộ wishlist" };
+  }
+
+  // --- R8 & R9: Dashboards ---
+  getAdminDashboard() {
+    return {
+      totalUsers: this.users.size,
+      totalOrders: this.orders.size,
+      totalProducts: this.products.size,
+      totalShops: this.shops.size,
+      revenue: { today: 1200000, week: 8500000, month: 35000000, total: 35000000 },
+    };
+  }
+
+  getAdminRevenueChart(days = 7) {
+    const chartData = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      chartData.push({ date: d, revenue: 500000 + i * 100000, orderCount: 2 + i });
+    }
+    return { chartData, period: `${days} ngày gần nhất` };
+  }
+
+  getSellerDashboard(shopId) {
+    const shopProds = Array.from(this.products.values()).filter((p) => p.shopId === shopId);
+    return {
+      shopId,
+      metrics: {
+        totalProducts: shopProds.length,
+        totalOrders: 5,
+        totalRevenue: 2500000,
+        pendingOrders: 1,
+        avgRating: 4.8,
+      },
+    };
+  }
+
+  // --- R10: Review Replies & Reports ---
+  replyToReview(productId, reviewId, replyPayload) {
+    const list = this.reviews.get(productId) || [];
+    const review = list.find((r) => r.id === reviewId || r._id === reviewId);
+    if (!review) throw new Error("REVIEW_NOT_FOUND");
+    if (!review.replies) review.replies = [];
+    const reply = {
+      id: `rep-${Date.now()}`,
+      content: replyPayload.content,
+      author: replyPayload.author || "Người bán",
+      createdAt: new Date().toISOString(),
+    };
+    review.replies.push(reply);
+    return { reply, message: "Đã phản hồi đánh giá" };
+  }
+
+  reportReview(productId, reviewId, reportPayload) {
+    const list = this.reviews.get(productId) || [];
+    const review = list.find((r) => r.id === reviewId || r._id === reviewId);
+    if (!review) throw new Error("REVIEW_NOT_FOUND");
+    if (!review.reports) review.reports = [];
+    review.reports.push({
+      id: `rep-rpt-${Date.now()}`,
+      reason: reportPayload.reason,
+      status: "pending",
+    });
+    return { success: true, reportCount: review.reports.length };
+  }
+
+  markReviewHelpful(productId, reviewId) {
+    const list = this.reviews.get(productId) || [];
+    const review = list.find((r) => r.id === reviewId || r._id === reviewId);
+    if (!review) throw new Error("REVIEW_NOT_FOUND");
+    review.helpfulCount = (review.helpfulCount || 0) + 1;
+    return { helpfulCount: review.helpfulCount };
   }
 }
 

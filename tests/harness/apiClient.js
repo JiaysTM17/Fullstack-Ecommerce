@@ -169,6 +169,10 @@ class ApiClient {
     return this.oracle.getStorefrontProducts(filters);
   }
 
+  async getProducts(filters = {}) {
+    return this.getStorefrontProducts(filters);
+  }
+
   async validateImageUpload(file) {
     return this.oracle.validateImageUpload(file);
   }
@@ -323,6 +327,137 @@ class ApiClient {
   async getOrderInvoice(orderId, token = null) {
     if (token) this.oracle.verifyToken(token);
     return this.oracle.getOrderInvoice(orderId);
+  }
+
+  // --- Backend Overhaul (R1 - R10) ---
+  async changePassword(oldPassword, newPassword, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.changePassword(user.id, oldPassword, newPassword);
+  }
+
+  async forgotPassword(email) {
+    return this.oracle.forgotPassword(email);
+  }
+
+  async resetPassword(email, code, newPassword) {
+    return this.oracle.resetPassword(email, code, newPassword);
+  }
+
+  async refreshToken(token) {
+    return this.oracle.refreshToken(token);
+  }
+
+  async confirmOrder(orderId, token = null) {
+    if (token) this.oracle.verifyToken(token);
+    return this.oracle.confirmOrder(orderId);
+  }
+
+  async shipOrder(orderId, token = null) {
+    if (token) this.oracle.verifyToken(token);
+    return this.oracle.shipOrder(orderId);
+  }
+
+  async deliverOrder(orderId, token = null) {
+    let userId = null;
+    if (token) {
+      const u = this.oracle.verifyToken(token);
+      userId = u.id;
+    }
+    return this.oracle.deliverOrder(orderId, userId);
+  }
+
+  async completeOrder(orderId, token = null) {
+    if (token) this.oracle.verifyToken(token);
+    return this.oracle.completeOrder(orderId);
+  }
+
+  async getOrderStats(token = null) {
+    if (token) this.oracle.verifyToken(token);
+    return this.oracle.getOrderStats();
+  }
+
+  async searchOrders(query, token = null) {
+    if (token) this.oracle.verifyToken(token);
+    return this.oracle.searchOrders(query);
+  }
+
+  async getRelatedProducts(productId) {
+    return this.oracle.getRelatedProducts(productId);
+  }
+
+  async getBestSellers(limit = 10) {
+    return this.oracle.getBestSellers(limit);
+  }
+
+  async getNewArrivals(limit = 10) {
+    return this.oracle.getNewArrivals(limit);
+  }
+
+  async getFlashSale(limit = 20) {
+    return this.oracle.getFlashSale(limit);
+  }
+
+  async getProductReviewStats(productId) {
+    return this.oracle.getProductReviewStats(productId);
+  }
+
+  async previewCartVoucher(voucherCode, subtotal, token = null) {
+    const userId = token ? this.oracle.verifyToken(token).id : "guest_user";
+    return this.oracle.previewVoucher(userId, voucherCode, subtotal);
+  }
+
+  async addToWishlist(productId, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.addToWishlist(user.id, productId);
+  }
+
+  async removeFromWishlist(productId, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.removeFromWishlist(user.id, productId);
+  }
+
+  async getWishlist(token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.getWishlist(user.id);
+  }
+
+  async checkWishlist(productId, token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.checkWishlist(user.id, productId);
+  }
+
+  async clearWishlist(token) {
+    const user = this.oracle.verifyToken(token);
+    return this.oracle.clearWishlist(user.id);
+  }
+
+  async getAdminDashboard(token = null) {
+    if (token) this.oracle.verifyToken(token);
+    return this.oracle.getAdminDashboard();
+  }
+
+  async getAdminRevenueChart(days = 7, token = null) {
+    if (token) this.oracle.verifyToken(token);
+    return this.oracle.getAdminRevenueChart(days);
+  }
+
+  async getSellerDashboard(shopId, token = null) {
+    if (token) this.oracle.verifyToken(token);
+    return this.oracle.getSellerDashboard(shopId);
+  }
+
+  async replyToReview(productId, reviewId, payload, token = null) {
+    if (token) this.oracle.verifyToken(token);
+    return this.oracle.replyToReview(productId, reviewId, payload);
+  }
+
+  async reportReview(productId, reviewId, payload, token = null) {
+    if (token) this.oracle.verifyToken(token);
+    return this.oracle.reportReview(productId, reviewId, payload);
+  }
+
+  async markReviewHelpful(productId, reviewId) {
+    return this.oracle.markReviewHelpful(productId, reviewId);
   }
 }
 

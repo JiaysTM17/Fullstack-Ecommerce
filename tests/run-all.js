@@ -15,6 +15,7 @@ import "./tier1_features/sub5_catalog.test.js";
 import "./tier1_features/sub6_quality.test.js";
 import "./tier1_features/sub7_buyer_experience.test.js";
 import "./tier1_features/sub8_buyer_experience_phase2.test.js";
+import "./tier1_features/sub9_backend_overhaul.test.js";
 
 // Import Tier 2 Suites (230 tests across 7 subsystems)
 import "./tier2_boundaries/sub1_rbac_edge.test.js";
