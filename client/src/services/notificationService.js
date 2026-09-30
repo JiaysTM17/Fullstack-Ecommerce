@@ -23,15 +23,18 @@ function saveLocalNotifications(list) {
 }
 
 export async function getNotifications(page = 1, limit = 20, type = "") {
-  try {
-    const query = new URLSearchParams({ page, limit, ...(type ? { type } : {}) }).toString();
-    const res = await apiRequest(`/api/notifications?${query}`);
-    if (res?.data?.notifications) {
-      saveLocalNotifications(res.data.notifications);
-      return res.data;
+  const token = typeof window !== "undefined" ? localStorage.getItem("mini_shopee_token") : null;
+  if (token && !token.startsWith("mock_")) {
+    try {
+      const query = new URLSearchParams({ page, limit, ...(type ? { type } : {}) }).toString();
+      const res = await apiRequest(`/api/notifications?${query}`);
+      if (res?.data?.notifications) {
+        saveLocalNotifications(res.data.notifications);
+        return res.data;
+      }
+    } catch (err) {
+      // offline fallback
     }
-  } catch (err) {
-    // offline fallback
   }
 
   const list = getLocalNotifications();
@@ -45,13 +48,16 @@ export async function getNotifications(page = 1, limit = 20, type = "") {
 }
 
 export async function getUnreadCount() {
-  try {
-    const res = await apiRequest("/api/notifications/unread-count");
-    if (res?.data?.unreadCount !== undefined) {
-      return res.data.unreadCount;
+  const token = typeof window !== "undefined" ? localStorage.getItem("mini_shopee_token") : null;
+  if (token && !token.startsWith("mock_")) {
+    try {
+      const res = await apiRequest("/api/notifications/unread-count");
+      if (res?.data?.unreadCount !== undefined) {
+        return res.data.unreadCount;
+      }
+    } catch (err) {
+      // offline fallback
     }
-  } catch (err) {
-    // offline fallback
   }
 
   const list = getLocalNotifications();
