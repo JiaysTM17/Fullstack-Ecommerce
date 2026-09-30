@@ -505,3 +505,196 @@ export const getOrderInvoice = async (req, res) => {
 };
 
 export default { createOrder, getMyOrders, getOrderById, cancelOrder, getOrderTracking, getOrderInvoice };
+
+// @desc    Confirm order (Seller/Admin)
+// @route   PATCH /api/orders/:id/confirm
+// @access  Private (seller or admin)
+export const confirmOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
+
+    if (order.status !== "pending") {
+      return sendError(res, "Chỉ có thể xác nhận đơn hàng ở trạng thái 'Chờ xác nhận'", 400);
+    }
+
+    order.status = "confirmed";
+    order.confirmedAt = new Date().toISOString();
+    if (Array.isArray(order.timeline)) {
+      order.timeline.push({ time: new Date().toISOString(), text: "Đơn hàng đã được xác nhận bởi người bán" });
+    }
+    await order.save();
+
+    sendSuccess(res, { order, message: "Đã xác nhận đơn hàng" });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Mark order as shipping (Seller/Admin)
+// @route   PATCH /api/orders/:id/ship
+// @access  Private (seller or admin)
+export const shipOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
+
+    if (order.status !== "confirmed") {
+      return sendError(res, "Chỉ có thể chuyển giao đơn hàng đã xác nhận", 400);
+    }
+
+    order.status = "shipping";
+    order.shippedAt = new Date().toISOString();
+    if (Array.isArray(order.timeline)) {
+      order.timeline.push({ time: new Date().toISOString(), text: "Đơn hàng đã được giao cho đơn vị vận chuyển SPX Express" });
+    }
+    await order.save();
+
+    sendSuccess(res, { order, message: "Đơn hàng đang được giao" });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Mark order as delivered (Buyer)
+// @route   PATCH /api/orders/:id/deliver
+// @access  Private
+export const deliverOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
+
+    if (order.status !== "shipping") {
+      return sendError(res, "Chỉ có thể xác nhận nhận hàng khi đơn đang giao", 400);
+    }
+
+    // Check ownership
+    const userId = req.user._id || req.user.id;
+    if (req.user.role !== "admin" && order.userId && order.userId !== userId) {
+      return sendError(res, "Bạn không có quyền xác nhận đơn hàng này", 403);
+    }
+
+    order.status = "delivered";
+    order.deliveredAt = new Date().toISOString();
+    if (Array.isArray(order.timeline)) {
+      order.timeline.push({ time: new Date().toISOString(), text: "Người mua đã xác nhận nhận hàng thành công" });
+    }
+    await order.save();
+
+    sendSuccess(res, { order, message: "Đã xác nhận nhận hàng" });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Complete order (Admin or auto after 7 days)
+// @route   PATCH /api/orders/:id/complete
+// @access  Private (admin)
+export const completeOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
+
+    if (order.status !== "delivered") {
+      return sendError(res, "Chỉ có thể hoàn thành đơn hàng đã giao thành công", 400);
+    }
+
+    order.status = "completed";
+    order.completedAt = new Date().toISOString();
+    if (Array.isArray(order.timeline)) {
+      order.timeline.push({ time: new Date().toISOString(), text: "Đơn hàng đã hoàn thành" });
+    }
+    await order.save();
+
+    sendSuccess(res, { order, message: "Đơn hàng đã hoàn thành" });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Get order statistics
+// @route   GET /api/orders/stats
+// @access  Private (admin or seller)
+export const getOrderStats = async (req, res) => {
+  try {
+    const allOrders = await Order.find({});
+
+    const statusCounts = {};
+    let totalRevenue = 0;
+    let todayRevenue = 0;
+    let todayOrders = 0;
+    const today = new Date().toISOString().slice(0, 10);
+
+    for (const order of allOrders) {
+      const status = order.status || "unknown";
+      statusCounts[status] = (statusCounts[status] || 0) + 1;
+
+      if (order.status === "completed" || order.status === "delivered") {
+        totalRevenue += order.total || 0;
+      }
+
+      const orderDate = (order.createdAt || "").slice(0, 10);
+      if (orderDate === today) {
+        todayOrders++;
+        if (order.status === "completed" || order.status === "delivered") {
+          todayRevenue += order.total || 0;
+        }
+      }
+    }
+
+    sendSuccess(res, {
+      totalOrders: allOrders.length,
+      statusBreakdown: statusCounts,
+      totalRevenue,
+      todayRevenue,
+      todayOrders,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Search orders
+// @route   GET /api/orders/search
+// @access  Private (admin)
+export const searchOrders = async (req, res) => {
+  try {
+    const { q, page = 1, limit = 20 } = req.query;
+    if (!q || !q.trim()) {
+      return sendError(res, "Vui lòng nhập từ khóa tìm kiếm", 400);
+    }
+
+    const keyword = q.trim();
+    const allOrders = await Order.find({});
+
+    const matched = allOrders.filter((order) => {
+      const searchFields = [
+        order._id, order.id, order.trackingCode,
+        order.customer?.fullName, order.customer?.phone,
+        order.customer?.email, order.customer?.address,
+        order.status,
+      ].filter(Boolean).map(String);
+
+      return searchFields.some((field) =>
+        field.toLowerCase().includes(keyword.toLowerCase())
+      );
+    });
+
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+    const start = (pageNum - 1) * limitNum;
+    const paged = matched.slice(start, start + limitNum);
+
+    sendSuccess(res, {
+      orders: paged,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: matched.length,
+        totalPages: Math.ceil(matched.length / limitNum) || 1,
+      },
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
