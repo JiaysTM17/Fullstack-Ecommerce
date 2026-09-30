@@ -7647,6 +7647,408 @@ export const FALLBACK_PRODUCTS = [
       }
     ],
     "reviews": []
+  },
+  {
+    "_id": "prod_110",
+    "id": "prod_110",
+    "name": "Máy Cho Thú Cưng Ăn Tự Động Petkit Fresh Element Solo Kết Nối Wifi App Thông Minh Chống Kẹt Hạt",
+    "slug": "may-cho-thu-cung-an-tu-dong-petkit-fresh-element-solo",
+    "description": "Máy cho thú cưng ăn thông minh dung tích 3L, kết nối Wifi cài đặt lịch cho ăn chính xác qua điện thoại, thiết kế cánh gạt silicon xoay 360 độ chống kẹt hạt tuyệt đối, khay đựng inox 304 kháng khuẩn dễ tháo rửa vệ sinh.",
+    "price": 1190000,
+    "originalPrice": 1750000,
+    "image": "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=800"
+    ],
+    "category": "Thú cưng",
+    "brand": "Petkit",
+    "badge": "Best Seller",
+    "stock": 35,
+    "sold": 420,
+    "rating": 4.95,
+    "reviewCount": 112,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_03",
+    "shopName": "PetParadise Chăm Sóc Thú Cưng",
+    "shopRating": 4.96,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Trắng Sứ Tinh Tế",
+        "Xám Khói Hiện Đại"
+      ],
+      "sizes": [
+        "Dung tích 3L (Hạt 5-12mm)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Dung tích",
+        "value": "3 Lít (~1.5kg hạt khô)"
+      },
+      {
+        "label": "Kết nối",
+        "value": "Wifi 2.4GHz điều khiển qua App Petkit (iOS & Android)"
+      },
+      {
+        "label": "Nguồn điện",
+        "value": "Adapter 6V + Khay 5 pin AAA dự phòng khi mất điện"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_111",
+    "id": "prod_111",
+    "name": "Xe Đẩy Em Bé Gấp Gọn Du Lịch Aprica Karoon Air Siêu Nhẹ 3.9kg Đệm Thoáng Khí Chống Rung Giảm Xóc",
+    "slug": "xe-day-em-be-gap-gon-aprica-karoon-air",
+    "description": "Xe đẩy Aprica Nhật Bản siêu nhẹ chỉ 3.9kg, dễ dàng gấp mở bằng 1 tay trong 1 giây, hệ thống giảm xóc 3D đa hướng trên 4 bánh xe, mái che đa nấc chống tia UV 99%, đệm nằm Silky Air thoáng khí chống hầm lưng cho trẻ sơ sinh đến 36 tháng.",
+    "price": 4290000,
+    "originalPrice": 5800000,
+    "image": "https://images.unsplash.com/photo-1591088398332-8a7791972843?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1591088398332-8a7791972843?w=800"
+    ],
+    "category": "Mẹ & Bé",
+    "brand": "Aprica",
+    "badge": "Mall Chính Hãng",
+    "stock": 18,
+    "sold": 260,
+    "rating": 4.96,
+    "reviewCount": 88,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_02",
+    "shopName": "BabyCare Mẹ & Bé Official",
+    "shopRating": 4.98,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Xanh Navy Cổ Điển",
+        "Xám Ghi Sang Trọng"
+      ],
+      "sizes": [
+        "Bản Tiêu Chuẩn Gấp Gọn"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Trọng lượng",
+        "value": "3.9 kg siêu nhẹ"
+      },
+      {
+        "label": "Độ tuổi sử dụng",
+        "value": "Sơ sinh đến 36 tháng tuổi (tối đa 15kg)"
+      },
+      {
+        "label": "Góc ngả lưng",
+        "value": "121 đến 157 độ linh hoạt"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_112",
+    "id": "prod_112",
+    "name": "Vợt Cầu Lông Yonex Astrox 88D Pro Chính Hãng Khung Carbon Siêu Bền Công Thủ Toàn Diện",
+    "slug": "vot-cau-long-yonex-astrox-88d-pro",
+    "description": "Cây vợt cầu lông huyền thoại dành cho lối đánh tấn công uy lực từ cuối sân, công nghệ Rotational Generator System phân bổ trọng lượng tối ưu, thân vợt Namd gia tăng lực đàn hồi và tốc độ phục hồi sau mỗi cú đập cầu smash.",
+    "price": 3890000,
+    "originalPrice": 4790000,
+    "image": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800"
+    ],
+    "category": "Thể thao",
+    "brand": "Yonex",
+    "badge": "Hot Deal",
+    "stock": 24,
+    "sold": 310,
+    "rating": 4.94,
+    "reviewCount": 94,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_07",
+    "shopName": "SportZone Thiết Bị Thể Thao",
+    "shopRating": 4.94,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Đen Phối Vàng Đồng (Camel Gold)",
+        "Đỏ Đen Huyền Bí"
+      ],
+      "sizes": [
+        "Trọng lượng 4U (83g) - G5",
+        "Trọng lượng 3U (88g) - G5"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Độ dẻo đũa",
+        "value": "Cứng (Stiff) trợ lực đập cầu"
+      },
+      {
+        "label": "Mức căng dây tối đa",
+        "value": "28 lbs (~12.5 kg)"
+      },
+      {
+        "label": "Chất liệu khung",
+        "value": "HM Graphite + Volume Cut Resin + Tungsten"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_113",
+    "id": "prod_113",
+    "name": "Ghế Công Thái Học Ergonomic Sihoo Doro C300 Tự Động Đỡ Thắt Lưng Đệm Lưới Kháng Khuẩn Thoáng Mát",
+    "slug": "ghe-cong-thai-hoc-ergonomic-sihoo-doro-c300",
+    "description": "Thiết kế đệm thắt lưng chuyển động linh hoạt ôm sát đường cong cột sống, tựa lưng đôi phân vùng nâng đỡ chuẩn y khoa, kê tay 6D điều chỉnh đa hướng, đệm ngồi thác nước chống tê mỏi đùi khi ngồi làm việc cả ngày.",
+    "price": 6290000,
+    "originalPrice": 7990000,
+    "image": "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=800"
+    ],
+    "category": "Đời sống",
+    "brand": "Sihoo",
+    "badge": "Best Seller",
+    "stock": 15,
+    "sold": 185,
+    "rating": 4.95,
+    "reviewCount": 67,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_08",
+    "shopName": "HomeDecor & Đời Sống Hiện Đại",
+    "shopRating": 4.93,
+    "shopResponseRate": 98,
+    "variants": {
+      "colors": [
+        "Lưới Đen Sang Trọng (Chân Nhôm)",
+        "Lưới Xám Trắng Hiện Đại"
+      ],
+      "sizes": [
+        "Bản Full Tính Năng Kèm Gác Chân",
+        "Bản Không Gác Chân"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu lưới",
+        "value": "Lưới Cloud Mesh đàn hồi cao kháng khuẩn"
+      },
+      {
+        "label": "Piston nâng hạ",
+        "value": "Class 4 đạt chứng nhận BIFMA/TUV an toàn"
+      },
+      {
+        "label": "Tải trọng tối đa",
+        "value": "150 kg"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_114",
+    "id": "prod_114",
+    "name": "Nồi Chiên Không Dầu Điện Tử Philips XXL HD9650 Công Nghệ Twin TurboStar Dung Tích 7.3L Chiên Gà Nguyên Con",
+    "slug": "noi-chien-khong-dau-dien-tu-philips-xxl-hd9650",
+    "description": "Công nghệ loại bỏ dầu mỡ Twin TurboStar độc quyền giảm đến 90% lượng mỡ thừa trong thực phẩm, lòng nồi dung tích cực lớn 7.3L chiên nướng nguyên con gà 1.4kg hoặc 1.4kg khoai tây giòn rụm bên ngoài mọng nước bên trong.",
+    "price": 5490000,
+    "originalPrice": 7990000,
+    "image": "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800"
+    ],
+    "category": "Gia dụng",
+    "brand": "Philips",
+    "badge": "Mall Chính Hãng",
+    "stock": 22,
+    "sold": 540,
+    "rating": 4.93,
+    "reviewCount": 168,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_06",
+    "shopName": "SmartHome Gia Dụng Thông Minh",
+    "shopRating": 4.96,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Phối Viền Bạc Kim Loại"
+      ],
+      "sizes": [
+        "Dung tích XXL 7.3L (Rổ chiên 1.4kg)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Công suất",
+        "value": "2200W gia nhiệt siêu nhanh không cần làm nóng trước"
+      },
+      {
+        "label": "Dung tích",
+        "value": "7.3 Lít (Chứa vừa gà nguyên con)"
+      },
+      {
+        "label": "Chế độ cài sẵn",
+        "value": "5 chương trình cài đặt một chạm với màn hình LED cảm ứng"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_115",
+    "id": "prod_115",
+    "name": "Kem Chống Nắng Kiểm Soát Dầu La Roche-Posay Anthelios UVMune 400 Oil Control Gel-Cream SPF50+ 50ml",
+    "slug": "kem-chong-nang-la-roche-posay-anthelios-uvmune-400-oil-control",
+    "description": "Màng lọc Mexoryl 400 độc quyền ngăn ngừa tia UVA siêu dài gây lão hóa thâm nám, công nghệ Airlicium kiểm soát bã nhờn dầu thừa suốt 12 giờ cho da ráo mịn tự nhiên, kết cấu gel-cream không gây vệt trắng, kháng nước mồ hôi tối ưu.",
+    "price": 435000,
+    "originalPrice": 575000,
+    "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800"
+    ],
+    "category": "Sắc đẹp",
+    "brand": "La Roche-Posay",
+    "badge": "Top 1 Bán Chạy",
+    "stock": 85,
+    "sold": 1950,
+    "rating": 4.97,
+    "reviewCount": 680,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_05",
+    "shopName": "GlowBeauty Mỹ Phẩm Chính Hãng",
+    "shopRating": 4.97,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Vạch Xanh Lá Kiểm Soát Dầu (Oil Control)",
+        "Vạch Vàng Cho Da Nhạy Cảm (Hydrating)"
+      ],
+      "sizes": [
+        "Tuýp 50ml Tiêu Chuẩn"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chỉ số chống nắng",
+        "value": "SPF 50+ / PA++++ / Màng lọc UVMune 400"
+      },
+      {
+        "label": "Loại da phù hợp",
+        "value": "Da dầu, da hỗn hợp thiên dầu, da mụn nhạy cảm"
+      },
+      {
+        "label": "Xuất xứ",
+        "value": "Pháp (La Roche-Posay Laboratoire Dermatologique)"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_116",
+    "id": "prod_116",
+    "name": "Áo Khoác Gió Nam Nữ The North Face Vải Kháng Nước Chống Gió 2 Lớp Thể Thao Dã Ngoại Khóa Kéo YKK",
+    "slug": "ao-khoac-gio-the-north-face-2-lop",
+    "description": "Áo khoác gió thể thao outdoor với lớp vải DryVent chống nước và cản gió 100%, bên trong lót lưới thoáng khí không bí mồ hôi, mũ áo có dây rút tháo rời linh hoạt, khóa kéo YKK trơn tru bền bỉ đồng hành cùng mọi chuyến trekking du lịch.",
+    "price": 680000,
+    "originalPrice": 1150000,
+    "image": "https://images.unsplash.com/photo-1544441893-675973e31985?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1544441893-675973e31985?w=800"
+    ],
+    "category": "Thời trang",
+    "brand": "The North Face",
+    "badge": "Best Seller",
+    "stock": 40,
+    "sold": 720,
+    "rating": 4.91,
+    "reviewCount": 165,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_04",
+    "shopName": "MenStyle Thời Trang Phái Mạnh",
+    "shopRating": 4.95,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Classic Phối Xám",
+        "Xanh Rêu Quân Đội",
+        "Vàng Đất Phối Đen"
+      ],
+      "sizes": [
+        "M (50-60kg)",
+        "L (60-70kg)",
+        "XL (70-80kg)",
+        "XXL (80-92kg)"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chất liệu",
+        "value": "Polyester 2 lớp tráng màng chống thấm nước DryVent"
+      },
+      {
+        "label": "Tính năng",
+        "value": "Chống gió lạnh, chống mưa nhẹ, thông khí 2 bên nách áo"
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "_id": "prod_117",
+    "id": "prod_117",
+    "name": "Tai Nghe Chụp Tai Chống Ồn Chủ Động Sony WH-1000XM5 Âm Thanh Hi-Res Chống Ồn Đỉnh Cao Pin 30 Giờ",
+    "slug": "tai-nghe-chup-tai-sony-wh-1000xm5",
+    "description": "Đỉnh cao chống ồn chủ động với bộ đôi vi xử lý V1 và QN1 kiểm soát 8 micro thu âm, củ loa 30mm màng sợi carbon tái tạo âm trầm sâu chắc nịch, hỗ trợ codec LDAC chuẩn Hi-Res Audio Wireless, micro tạo chùm tia đàm thoại trong trẻo.",
+    "price": 6990000,
+    "originalPrice": 8990000,
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800"
+    ],
+    "category": "Điện tử",
+    "brand": "Sony",
+    "badge": "Mall Chính Hãng",
+    "stock": 20,
+    "sold": 390,
+    "rating": 4.97,
+    "reviewCount": 148,
+    "isMall": true,
+    "isFastDelivery": true,
+    "shopId": "shop_01",
+    "shopName": "TechWorld Official Store",
+    "shopRating": 4.98,
+    "shopResponseRate": 99,
+    "variants": {
+      "colors": [
+        "Đen Nhám Cổ Điển (Black)",
+        "Bạc Ánh Bạch Kim (Silver)",
+        "Xanh Đêm (Midnight Blue)"
+      ],
+      "sizes": [
+        "Hộp Tiêu Chuẩn Kèm Case Bảo Vệ"
+      ]
+    },
+    "specifications": [
+      {
+        "label": "Chống ồn",
+        "value": "Active Noise Cancelling với 8 micro và bộ xử lý kép V1 + QN1"
+      },
+      {
+        "label": "Thời lượng pin",
+        "value": "Lên đến 30 giờ (bật ANC), sạc nhanh 3 phút nghe 3 giờ"
+      },
+      {
+        "label": "Kết nối",
+        "value": "Bluetooth 5.2 đa điểm kết nối cùng lúc 2 thiết bị"
+      }
+    ],
+    "reviews": []
   }
 ];
 
