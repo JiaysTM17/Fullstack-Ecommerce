@@ -348,20 +348,23 @@ export default function AuthModal() {
                   <label className="shopee-form-label" htmlFor="modal-login-email">
                     Email / Tên đăng nhập *
                   </label>
-                  <input
-                    id="modal-login-email"
-                    type="email"
-                    className="shopee-form-input"
-                    placeholder={
-                      activeRole === 'customer'
-                        ? 'khachhang@shopee.vn'
-                        : activeRole === 'seller'
-                        ? 'shop.genz@shopee.vn'
-                        : 'admin@shopee.vn'
-                    }
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                  />
+                  <div className="shopee-form-input-wrap">
+                    <span className="shopee-input-lead-icon">✉️</span>
+                    <input
+                      id="modal-login-email"
+                      type="email"
+                      className="shopee-form-input"
+                      placeholder={
+                        activeRole === 'customer'
+                          ? 'khachhang@shopee.vn'
+                          : activeRole === 'seller'
+                          ? 'shop.genz@shopee.vn'
+                          : 'admin@shopee.vn'
+                      }
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div className="shopee-form-group">
@@ -369,6 +372,7 @@ export default function AuthModal() {
                     Mật khẩu *
                   </label>
                   <div className="shopee-form-input-wrap">
+                    <span className="shopee-input-lead-icon">🔒</span>
                     <input
                       id="modal-login-password"
                       type={showPassword ? 'text' : 'password'}

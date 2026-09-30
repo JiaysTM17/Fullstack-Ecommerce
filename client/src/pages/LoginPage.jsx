@@ -186,42 +186,22 @@ export default function LoginPage() {
           </div>
 
           {/* Auth Method Switcher: Password vs QR Code */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          <div className="shopee-auth-method-switcher">
             <button
               type="button"
+              className={`shopee-auth-method-tab ${authMethod === 'password' ? 'active' : ''}`}
               onClick={() => setAuthMethod('password')}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                borderRadius: '10px',
-                border: authMethod === 'password' ? '1.5px solid #3b82f6' : '1px solid var(--border-medium, #e2e8f0)',
-                background: authMethod === 'password' ? 'var(--bg-muted, #eff6ff)' : 'transparent',
-                color: authMethod === 'password' ? '#2563eb' : 'var(--text-secondary, #64748b)',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
             >
-              🔑 Mật khẩu & Email
+              <span>🔑</span>
+              <span>Mật khẩu & Email</span>
             </button>
             <button
               type="button"
+              className={`shopee-auth-method-tab ${authMethod === 'qr' ? 'active' : ''}`}
               onClick={() => setAuthMethod('qr')}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                borderRadius: '10px',
-                border: authMethod === 'qr' ? '1.5px solid #3b82f6' : '1px solid var(--border-medium, #e2e8f0)',
-                background: authMethod === 'qr' ? 'var(--bg-muted, #eff6ff)' : 'transparent',
-                color: authMethod === 'qr' ? '#2563eb' : 'var(--text-secondary, #64748b)',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
             >
-              📱 Quét mã QR
+              <span>📱</span>
+              <span>Quét mã QR</span>
             </button>
           </div>
 
@@ -323,20 +303,24 @@ export default function LoginPage() {
 
                 <div className="shopee-form-group">
                   <label className="shopee-form-label" htmlFor="page-email">Email đăng nhập</label>
-                  <input
-                    id="page-email"
-                    type="email"
-                    className="shopee-form-input"
-                    placeholder={activeRole === 'customer' ? 'khachhang@shopee.vn' : activeRole === 'seller' ? 'shop.genz@shopee.vn' : 'admin@shopee.vn'}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="email"
-                  />
+                  <div className="shopee-form-input-wrap">
+                    <span className="shopee-input-lead-icon">✉️</span>
+                    <input
+                      id="page-email"
+                      type="email"
+                      className="shopee-form-input"
+                      placeholder={activeRole === 'customer' ? 'khachhang@shopee.vn' : activeRole === 'seller' ? 'shop.genz@shopee.vn' : 'admin@shopee.vn'}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
+                    />
+                  </div>
                 </div>
 
                 <div className="shopee-form-group">
                   <label className="shopee-form-label" htmlFor="page-password">{t('password', 'Mật khẩu')}</label>
                   <div className="shopee-form-input-wrap">
+                    <span className="shopee-input-lead-icon">🔒</span>
                     <input
                       id="page-password"
                       type={showPassword ? 'text' : 'password'}

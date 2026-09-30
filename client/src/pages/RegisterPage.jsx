@@ -210,71 +210,83 @@ export default function RegisterPage() {
               <label className="shopee-form-label" htmlFor="reg-fullName">
                 {t('full_name', 'Họ và tên')} *
               </label>
-              <input
-                id="reg-fullName"
-                name="fullName"
-                type="text"
-                className="shopee-form-input"
-                placeholder="Ví dụ: Nguyễn Văn An"
-                value={formData.fullName}
-                onChange={handleChange}
-                autoComplete="name"
-              />
+              <div className="shopee-form-input-wrap">
+                <span className="shopee-input-lead-icon">👤</span>
+                <input
+                  id="reg-fullName"
+                  name="fullName"
+                  type="text"
+                  className="shopee-form-input"
+                  placeholder="Ví dụ: Nguyễn Văn An"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  autoComplete="name"
+                />
+              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px' }}>
               <div className="shopee-form-group">
                 <label className="shopee-form-label" htmlFor="reg-email">Email *</label>
-                <input
-                  id="reg-email"
-                  name="email"
-                  type="email"
-                  className="shopee-form-input"
-                  placeholder="an.nguyen@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  autoComplete="email"
-                />
+                <div className="shopee-form-input-wrap">
+                  <span className="shopee-input-lead-icon">✉️</span>
+                  <input
+                    id="reg-email"
+                    name="email"
+                    type="email"
+                    className="shopee-form-input"
+                    placeholder="an.nguyen@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    autoComplete="email"
+                  />
+                </div>
               </div>
 
               <div className="shopee-form-group">
                 <label className="shopee-form-label" htmlFor="reg-phone">{t('phone', 'Số điện thoại')}</label>
-                <input
-                  id="reg-phone"
-                  name="phone"
-                  type="tel"
-                  className="shopee-form-input"
-                  placeholder="0912 345 678"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  autoComplete="tel"
-                />
+                <div className="shopee-form-input-wrap">
+                  <span className="shopee-input-lead-icon">📞</span>
+                  <input
+                    id="reg-phone"
+                    name="phone"
+                    type="tel"
+                    className="shopee-form-input"
+                    placeholder="0912 345 678"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    autoComplete="tel"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Mở rộng nếu là Chủ Shop */}
             {role === 'seller' && (
-              <div style={{ background: 'var(--bg-muted, #f8fafc)', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)', marginBottom: '14px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ background: 'rgba(59, 130, 246, 0.08)', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(59, 130, 246, 0.28)', marginBottom: '16px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#38bdf8', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>🏪</span>
                   <span>THÔNG TIN THIẾT LẬP GIAN HÀNG BÁN HÀNG</span>
                 </div>
-                <div className="shopee-form-group" style={{ marginBottom: '8px' }}>
+                <div className="shopee-form-group" style={{ marginBottom: '10px' }}>
                   <label className="shopee-form-label" htmlFor="reg-shopName">
                     {t('shop_name_label', 'Tên Cửa Hàng / Shop')} *
                   </label>
-                  <input
-                    id="reg-shopName"
-                    name="shopName"
-                    type="text"
-                    className="shopee-form-input"
-                    placeholder="Ví dụ: Thời Trang Trẻ Official Store"
-                    value={formData.shopName}
-                    onChange={handleChange}
-                  />
+                  <div className="shopee-form-input-wrap">
+                    <span className="shopee-input-lead-icon">🏬</span>
+                    <input
+                      id="reg-shopName"
+                      name="shopName"
+                      type="text"
+                      className="shopee-form-input"
+                      placeholder="Ví dụ: Thời Trang Trẻ Official Store"
+                      value={formData.shopName}
+                      onChange={handleChange}
+                    />
+                  </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                   <div className="shopee-form-group" style={{ marginBottom: 0 }}>
                     <label className="shopee-form-label" htmlFor="reg-shopCategory">Ngành hàng chính</label>
                     <select
@@ -283,7 +295,7 @@ export default function RegisterPage() {
                       className="shopee-form-input"
                       value={formData.shopCategory}
                       onChange={handleChange}
-                      style={{ height: '42px', cursor: 'pointer' }}
+                      style={{ height: '42px', cursor: 'pointer', paddingLeft: '14px' }}
                     >
                       <option value="Thời trang">Thời trang & Phụ kiện</option>
                       <option value="Công nghệ">Điện tử & Công nghệ</option>
@@ -293,15 +305,18 @@ export default function RegisterPage() {
                   </div>
                   <div className="shopee-form-group" style={{ marginBottom: 0 }}>
                     <label className="shopee-form-label" htmlFor="reg-shopAddress">Kho lấy hàng</label>
-                    <input
-                      id="reg-shopAddress"
-                      name="shopAddress"
-                      type="text"
-                      className="shopee-form-input"
-                      placeholder="Quận/Huyện, Tỉnh/TP"
-                      value={formData.shopAddress}
-                      onChange={handleChange}
-                    />
+                    <div className="shopee-form-input-wrap">
+                      <span className="shopee-input-lead-icon">📍</span>
+                      <input
+                        id="reg-shopAddress"
+                        name="shopAddress"
+                        type="text"
+                        className="shopee-form-input"
+                        placeholder="Quận/Huyện, Tỉnh/TP"
+                        value={formData.shopAddress}
+                        onChange={handleChange}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -313,6 +328,7 @@ export default function RegisterPage() {
                   {t('password', 'Mật khẩu')} *
                 </label>
                 <div className="shopee-form-input-wrap">
+                  <span className="shopee-input-lead-icon">🔒</span>
                   <input
                     id="reg-password"
                     name="password"
@@ -338,16 +354,19 @@ export default function RegisterPage() {
                 <label className="shopee-form-label" htmlFor="reg-confirmPassword">
                   {t('confirm_password', 'Xác nhận mật khẩu')} *
                 </label>
-                <input
-                  id="reg-confirmPassword"
-                  name="confirmPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  className="shopee-form-input"
-                  placeholder={t('confirm_password_placeholder', 'Nhập lại mật khẩu')}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                />
+                <div className="shopee-form-input-wrap">
+                  <span className="shopee-input-lead-icon">🛡️</span>
+                  <input
+                    id="reg-confirmPassword"
+                    name="confirmPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    className="shopee-form-input"
+                    placeholder={t('confirm_password_placeholder', 'Nhập lại mật khẩu')}
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    autoComplete="new-password"
+                  />
+                </div>
               </div>
             </div>
 
