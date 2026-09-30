@@ -417,7 +417,7 @@ export default function ProductDetailPage() {
             <button
               type="button"
               className="shopee-btn shopee-btn-secondary"
-              style={{ width: "100%", marginTop: "8px", fontWeight: 700, fontSize: "13px" }}
+              style={{ width: "100%", marginTop: "8px", fontWeight: 700, fontSize: "13px", borderRadius: "8px", padding: "9px" }}
               onClick={() => addToCompare(product)}
             >
               {isCompared(productId) ? "⚖️ Đã thêm vào so sánh" : "⚖️ So sánh với sản phẩm khác"}
@@ -426,7 +426,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 className="shopee-btn shopee-btn-secondary"
-                style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px" }}
+                style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px" }}
                 onClick={handleCopyLink}
               >
                 📋 Sao Chép Link
@@ -434,7 +434,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 className="shopee-btn shopee-btn-secondary"
-                style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px" }}
+                style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px" }}
                 onClick={() => setShowShareModal(true)}
               >
                 🔗 Chia Sẻ & QR

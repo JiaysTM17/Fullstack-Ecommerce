@@ -247,40 +247,40 @@
 .amazon-buy-box {
   background: var(--bg-card, #ffffff);
   border: 1px solid var(--border-medium, #e2e8f0);
-  border-radius: var(--radius-md, 8px);
-  padding: 20px;
+  border-radius: 16px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   height: fit-content;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   color: var(--text-primary, #0f172a);
 }
 
 .amazon-buy-box-price {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
-  color: var(--primary-color, #ea580c);
+  color: #ee4d2d;
 }
 
 .amazon-stock-status {
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 700;
   color: var(--color-success, #10b981);
 }
 
 .amazon-stock-status.low {
-  color: var(--primary-color, #ea580c);
+  color: #ee4d2d;
 }
 
 .amazon-delivery-info {
   font-size: 13px;
-  color: var(--text-primary, #0f172a);
+  color: #1e293b;
   line-height: 1.5;
-  background: var(--bg-muted, #f1f5f9);
-  border-left: 3px solid var(--secondary-color, #0284c7);
-  padding: 8px 12px;
-  border-radius: 4px;
+  background: #f0fdf4;
+  border-left: 3.5px solid #16a34a;
+  padding: 10px 14px;
+  border-radius: 8px;
 }
 
 .amazon-buy-box-actions {
@@ -291,15 +291,15 @@
 }
 
 .amazon-btn-add-cart {
-  background: #ffd814;
-  border: 1px solid #fcd200;
-  color: #0f1111;
+  background: #fff5f1;
+  border: 1.5px solid #ee4d2d;
+  color: #ee4d2d;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 14.5px;
   padding: 12px;
-  border-radius: 20px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -307,26 +307,30 @@
 }
 
 .amazon-btn-add-cart:hover {
-  background: #f7ca00;
+  background: #ffede8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
 }
 
 .amazon-btn-buy-now {
-  background: var(--primary-color, #ea580c);
-  border: 1px solid var(--primary-hover, #c2410c);
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff5722 100%);
+  border: none;
   color: #ffffff;
-  font-weight: 700;
-  font-size: 14px;
-  padding: 12px;
-  border-radius: 20px;
+  font-weight: 800;
+  font-size: 15px;
+  padding: 13px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 14px rgba(238, 77, 45, 0.35);
 }
 
 .amazon-btn-buy-now:hover {
-  background: var(--primary-hover, #c2410c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(238, 77, 45, 0.45);
 }
 
 .amazon-btn-wishlist {
@@ -335,17 +339,20 @@
   color: var(--text-primary, #0f172a);
   font-weight: 600;
   font-size: 13px;
-  padding: 8px;
-  border-radius: 6px;
+  padding: 9px;
+  border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  transition: all 0.15s ease;
 }
 
 .amazon-btn-wishlist:hover {
-  background: var(--bg-muted, #f1f5f9);
+  background: #fff1f2;
+  border-color: #fda4af;
+  color: #e11d48;
 }
 
 .amazon-guarantees {
