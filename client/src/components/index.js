@@ -23,3 +23,6 @@ export { default as ProductQASection } from './ProductQASection';
 export { default as ToastContainer } from './ToastContainer';
 export { default as CategoryShowcase } from './CategoryShowcase';
 export { default as AuthModal } from './AuthModal';
+export { default as SecuritySliderCaptcha } from './SecuritySliderCaptcha';
+export { default as OtpVerificationModal } from './OtpVerificationModal';
+export { default as ForgotPasswordModal } from './ForgotPasswordModal';

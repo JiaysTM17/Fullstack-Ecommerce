@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuthModal } from '../context/AuthModalContext';
+import ForgotPasswordModal from './ForgotPasswordModal';
 import '../styles/auth.css';
 
 export default function AuthModal() {
@@ -17,6 +18,7 @@ export default function AuthModal() {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   // Login Form
   const [loginEmail, setLoginEmail] = useState('');
@@ -419,12 +421,7 @@ export default function AuthModal() {
                   </label>
 
                   <span
-                    onClick={() =>
-                      showToast(
-                        'Vui lòng liên hệ CSKH 1900 6868 hoặc dùng đăng nhập 1-Click để kiểm tra tài khoản!',
-                        'info'
-                      )
-                    }
+                    onClick={() => setShowForgotModal(true)}
                     style={{ color: '#3b82f6', cursor: 'pointer', fontWeight: 600 }}
                   >
                     Quên mật khẩu?
@@ -588,6 +585,17 @@ export default function AuthModal() {
           </form>
         )}
       </div>
+
+      {/* Forgot Password Recovery Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotModal}
+        onClose={() => setShowForgotModal(false)}
+        onResetSuccess={(em) => {
+          setLoginEmail(em);
+          setShowForgotModal(false);
+          showToast('Mật khẩu đã đặt lại thành công! Vui lòng đăng nhập với mật khẩu mới.', 'success');
+        }}
+      />
     </div>
   );
 }

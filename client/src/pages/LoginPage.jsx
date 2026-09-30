@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
+import { SecuritySliderCaptcha, ForgotPasswordModal } from '../components';
 import '../styles/auth.css';
 
 export default function LoginPage() {
@@ -21,6 +22,28 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Enterprise Security & Rate Limiting States
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [sliderVerified, setSliderVerified] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockoutTimer, setLockoutTimer] = useState(0);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+
+  // Lockout countdown timer
+  useEffect(() => {
+    if (!isLocked || lockoutTimer <= 0) {
+      if (isLocked && lockoutTimer <= 0) {
+        setIsLocked(false);
+        setFailedAttempts(2); // Relax to required slider state
+      }
+      return;
+    }
+    const timer = setInterval(() => {
+      setLockoutTimer((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isLocked, lockoutTimer]);
+
   const redirectAfterLogin = (role) => {
     if (role === 'admin') navigate('/admin/dashboard');
     else if (role === 'seller') navigate('/seller/dashboard');
@@ -34,7 +57,7 @@ export default function LoginPage() {
       const u = await loginAsDemo(roleKey);
       if (u) {
         showToast(
-          t('auth_demo_success', `Đăng nhập thành công với vai trò ${u.role === 'admin' ? 'Quản Trị Viên' : u.role === 'seller' ? 'Chủ Shop' : 'Khách Mua Hàng'}!`),
+          t('auth_demo_success', `Đăng nhập an toàn thành công với vai trò ${u.role === 'admin' ? 'Quản Trị Viên' : u.role === 'seller' ? 'Chủ Shop' : 'Khách Mua Hàng'}!`),
           'success'
         );
         redirectAfterLogin(u.role);
@@ -48,20 +71,54 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLocked) {
+      setError(`Hệ thống đang tạm khóa để bảo vệ an ninh. Vui lòng chờ ${lockoutTimer} giây nữa.`);
+      return;
+    }
     if (!email || !password) {
       setError(t('auth_error_required', 'Vui lòng nhập đầy đủ email và mật khẩu'));
       return;
     }
+    if (failedAttempts >= 3 && !sliderVerified) {
+      setError('Vui lòng kéo thanh trượt bảo mật để xác minh chống dò mật khẩu');
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
       const res = await login(email, password, activeRole);
       if (res.success) {
-        showToast(t('auth_login_success', 'Đăng nhập thành công! Chào mừng bạn quay lại.'), 'success');
+        setFailedAttempts(0);
+        const currentTime = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        showToast(`Đăng nhập bảo mật thành công! Phiên hoạt động ghi nhận lúc ${currentTime}`, 'success');
         redirectAfterLogin(res.user.role);
+      } else {
+        const nextAttempts = failedAttempts + 1;
+        setFailedAttempts(nextAttempts);
+        setSliderVerified(false);
+
+        if (nextAttempts >= 5) {
+          setIsLocked(true);
+          setLockoutTimer(30);
+          setError('Phát hiện 5 lần nhập sai liên tiếp. Để bảo vệ an toàn tài khoản, hệ thống tạm khóa 30 giây.');
+        } else if (nextAttempts >= 3) {
+          setError('Email hoặc mật khẩu chưa chính xác. Vui lòng kéo thanh trượt bảo mật để tiếp tục thử.');
+        } else {
+          setError(res.error || t('auth_error_failed', 'Email hoặc mật khẩu không chính xác'));
+        }
       }
     } catch (err) {
-      setError(err.message || t('auth_error_failed', 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.'));
+      const nextAttempts = failedAttempts + 1;
+      setFailedAttempts(nextAttempts);
+      setSliderVerified(false);
+      if (nextAttempts >= 5) {
+        setIsLocked(true);
+        setLockoutTimer(30);
+        setError('Phát hiện 5 lần nhập sai liên tiếp. Tạm khóa 30 giây để bảo vệ an toàn.');
+      } else {
+        setError(err.message || t('auth_error_failed', 'Đăng nhập không thành công. Vui lòng kiểm tra lại.'));
+      }
     } finally {
       setLoading(false);
     }
@@ -341,6 +398,46 @@ export default function LoginPage() {
                   </div>
                 </div>
 
+                {/* Lockout Warning Banner */}
+                {isLocked && (
+                  <div
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      border: '1.5px solid #ef4444',
+                      borderRadius: '12px',
+                      padding: '12px 14px',
+                      color: '#b91c1c',
+                      fontSize: '12.5px',
+                      marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                    }}
+                  >
+                    <span style={{ fontSize: '20px' }}>⏳</span>
+                    <div>
+                      <strong>Tạm khóa đăng nhập an toàn!</strong>
+                      <div>Hệ thống phát hiện nhiều lần nhập sai. Thử lại sau <strong>{lockoutTimer}s</strong>.</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Anti-Bot Security Slider (shown after 3 failed attempts) */}
+                {failedAttempts >= 3 && !isLocked && !sliderVerified && (
+                  <div style={{ marginBottom: '14px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#dc2626', marginBottom: '4px' }}>
+                      ⚠️ Yêu cầu kiểm tra an ninh (Lần thử {failedAttempts}/5):
+                    </div>
+                    <SecuritySliderCaptcha onSuccess={() => setSliderVerified(true)} />
+                  </div>
+                )}
+
+                {failedAttempts >= 3 && sliderVerified && (
+                  <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span>✓</span> Xác minh an ninh hoàn tất!
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', fontSize: '12.5px' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                     <input
@@ -349,11 +446,11 @@ export default function LoginPage() {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       style={{ accentColor: 'var(--primary-color, #3b82f6)' }}
                     />
-                    <span>{t('remember_me', 'Ghi nhớ đăng nhập')}</span>
+                    <span>{t('remember_me', 'Ghi nhớ đăng nhập (30 ngày)')}</span>
                   </label>
                   <span
-                    onClick={() => showToast('Vui lòng liên hệ CSKH qua Live Chat hoặc Hotline 1900 6868 để đặt lại mật khẩu!', 'info')}
-                    style={{ color: '#3b82f6', cursor: 'pointer', fontWeight: 600 }}
+                    onClick={() => setShowForgotModal(true)}
+                    style={{ color: '#2563eb', cursor: 'pointer', fontWeight: 700 }}
                   >
                     {t('forgot_password', 'Quên mật khẩu?')}
                   </span>
@@ -362,9 +459,13 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   className="shopee-auth-submit-btn"
-                  disabled={loading}
+                  disabled={loading || isLocked}
                 >
-                  {loading ? t('authenticating', 'Đang xác thực...') : `${t('login', 'Đăng Nhập')} (${activeRole === 'customer' ? t('role_customer', 'Người Mua') : activeRole === 'seller' ? t('role_seller', 'Chủ Shop') : t('role_admin', 'Admin')})`}
+                  {loading
+                    ? t('authenticating', 'Đang xác thực an toàn...')
+                    : isLocked
+                    ? `Đang khóa tạm thời (${lockoutTimer}s)`
+                    : `${t('login', 'Đăng Nhập An Toàn')} (${activeRole === 'customer' ? t('role_customer', 'Người Mua') : activeRole === 'seller' ? t('role_seller', 'Chủ Shop') : t('role_admin', 'Admin')})`}
                 </button>
               </form>
 
@@ -421,6 +522,17 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotModal}
+        onClose={() => setShowForgotModal(false)}
+        onResetSuccess={(em) => {
+          setEmail(em);
+          setShowForgotModal(false);
+          showToast(t('reset_pwd_success_prompt', 'Mật khẩu đã đặt lại thành công! Vui lòng đăng nhập.'), 'success');
+        }}
+      />
     </div>
   );
 }

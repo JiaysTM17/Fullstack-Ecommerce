@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
+import { SecuritySliderCaptcha, OtpVerificationModal } from '../components';
 import '../styles/auth.css';
 
 export default function RegisterPage() {
@@ -27,8 +28,20 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Security & 2FA states
+  const [sliderVerified, setSliderVerified] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  // Password rules checklist
+  const passwordChecks = {
+    length: (formData.password || '').length >= 8,
+    hasUpper: /[A-Z]/.test(formData.password || ''),
+    hasNumber: /[0-9]/.test(formData.password || ''),
+    hasSpecial: /[^A-Za-z0-9]/.test(formData.password || '')
   };
 
   // Calculate password strength
@@ -48,7 +61,7 @@ export default function RegisterPage() {
 
   const pwdStrength = getPasswordStrength(formData.password);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.fullName || !formData.email || !formData.password) {
       setError(t('auth_error_required_fields', 'Vui lòng điền đầy đủ các trường bắt buộc'));
@@ -70,7 +83,16 @@ export default function RegisterPage() {
       setError('Bạn cần đồng ý với Điều khoản dịch vụ và Chính sách bảo mật');
       return;
     }
+    if (!sliderVerified) {
+      setError('Vui lòng kéo thanh trượt xác minh bảo mật bên dưới trước khi tiếp tục');
+      return;
+    }
 
+    setError('');
+    setShowOtpModal(true);
+  };
+
+  const handleOtpVerified = async () => {
     setLoading(true);
     setError('');
     try {
@@ -78,13 +100,22 @@ export default function RegisterPage() {
         ...formData,
         role
       });
-      if (res.success) {
+      if (res && res.success) {
+        // Tặng thưởng onboarding: +1.000 Xu bonus & Voucher tân thủ 50K
+        if (res.user?.id) {
+          const coinKey = `mini_shopee_user_coins_customer_${res.user.id}`;
+          const current = localStorage.getItem(coinKey);
+          const newAmount = (current !== null ? Number(current) : 25000) + 1000;
+          localStorage.setItem(coinKey, String(newAmount));
+        }
+
         showToast(
           role === 'seller'
-            ? t('auth_register_seller_success', 'Chào mừng chủ shop mới! Gian hàng của bạn đã sẵn sàng kinh doanh.')
-            : t('auth_register_customer_success', 'Đăng ký thành công! Bắt đầu mua sắm ngay với ưu đãi 50.000đ.'),
+            ? t('auth_register_seller_success', 'Chào mừng chủ shop mới! Gian hàng của bạn đã sẵn sàng kinh doanh cùng mã định danh chính thức.')
+            : 'Đăng ký bảo mật thành công! Bạn nhận được 1.000 Xu tích lũy và Voucher tân thủ 50.000đ.',
           'success'
         );
+        setShowOtpModal(false);
         if (role === 'seller') {
           navigate('/seller/dashboard');
         } else {
@@ -93,6 +124,7 @@ export default function RegisterPage() {
       }
     } catch (err) {
       setError(err.message || t('auth_error_register_failed', 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.'));
+      setShowOtpModal(false);
     } finally {
       setLoading(false);
     }
@@ -370,19 +402,45 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Password strength meter */}
+            {/* Password strength meter & live security checklist */}
             {formData.password && (
-              <div className="shopee-pwd-strength" style={{ marginBottom: '14px', marginTop: '-4px' }}>
-                <div className="shopee-pwd-bars">
-                  <div className={`shopee-pwd-bar ${pwdStrength.score >= 1 ? pwdStrength.colorClass : ''}`} />
-                  <div className={`shopee-pwd-bar ${pwdStrength.score >= 2 ? pwdStrength.colorClass : ''}`} />
-                  <div className={`shopee-pwd-bar ${pwdStrength.score >= 3 ? pwdStrength.colorClass : ''}`} />
+              <div style={{ marginBottom: '14px', background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <div className="shopee-pwd-strength" style={{ marginBottom: '8px', marginTop: 0 }}>
+                  <div className="shopee-pwd-bars">
+                    <div className={`shopee-pwd-bar ${pwdStrength.score >= 1 ? pwdStrength.colorClass : ''}`} />
+                    <div className={`shopee-pwd-bar ${pwdStrength.score >= 2 ? pwdStrength.colorClass : ''}`} />
+                    <div className={`shopee-pwd-bar ${pwdStrength.score >= 3 ? pwdStrength.colorClass : ''}`} />
+                  </div>
+                  <span className="shopee-pwd-text">
+                    Độ mạnh: <strong>{pwdStrength.text}</strong>
+                  </span>
                 </div>
-                <span className="shopee-pwd-text">
-                  Độ mạnh: <strong>{pwdStrength.text}</strong>
-                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11px' }}>
+                  <div style={{ color: passwordChecks.length ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ fontWeight: 800 }}>{passwordChecks.length ? '✓' : '○'}</span> Tối thiểu 8 ký tự
+                  </div>
+                  <div style={{ color: passwordChecks.hasUpper ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ fontWeight: 800 }}>{passwordChecks.hasUpper ? '✓' : '○'}</span> Có chữ in hoa (A-Z)
+                  </div>
+                  <div style={{ color: passwordChecks.hasNumber ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ fontWeight: 800 }}>{passwordChecks.hasNumber ? '✓' : '○'}</span> Có chữ số (0-9)
+                  </div>
+                  <div style={{ color: passwordChecks.hasSpecial ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ fontWeight: 800 }}>{passwordChecks.hasSpecial ? '✓' : '○'}</span> Ký tự đặc biệt (!@#$)
+                  </div>
+                </div>
               </div>
             )}
+
+            {/* Anti-Bot Security Slider */}
+            <div style={{ marginBottom: '14px' }}>
+              <SecuritySliderCaptcha
+                onVerified={() => {
+                  setSliderVerified(true);
+                  setError('');
+                }}
+              />
+            </div>
 
             <div style={{ marginBottom: '18px', fontSize: '12px', color: 'var(--text-secondary)' }}>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
@@ -406,10 +464,10 @@ export default function RegisterPage() {
               disabled={loading}
             >
               {loading 
-                ? t('creating_account', 'Đang tạo tài khoản...') 
+                ? t('creating_account', 'Đang thiết lập tài khoản...') 
                 : role === 'seller' 
-                  ? t('create_seller_account', 'Tạo Gian Hàng & Bắt Đầu Bán Hàng') 
-                  : t('create_customer_account', 'Đăng Ký Tài Khoản Khách Hàng')}
+                  ? 'Tiếp tục xác thực OTP mở gian hàng' 
+                  : 'Tiếp tục xác thực OTP tạo tài khoản'}
             </button>
           </form>
 
@@ -419,6 +477,14 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
+
+      {/* 2-Step Registration OTP Verification Modal */}
+      <OtpVerificationModal
+        isOpen={showOtpModal}
+        email={formData.email}
+        onClose={() => setShowOtpModal(false)}
+        onVerifySuccess={handleOtpVerified}
+      />
     </div>
   );
 }
