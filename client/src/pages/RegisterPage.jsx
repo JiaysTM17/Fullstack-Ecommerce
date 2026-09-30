@@ -163,66 +163,170 @@ export default function RegisterPage() {
         <div className="shopee-auth-hero-col">
           <div className="shopee-auth-hero-brand">
             <div className="shopee-auth-hero-badge">
-              <span>🎁</span>
-              <span>GIA NHẬP CỘNG ĐỒNG HÔM NAY</span>
+              <span>{role === 'seller' ? '🚀' : '🎁'}</span>
+              <span>{role === 'seller' ? 'GIA NHẬP HỆ THỐNG ĐỐI TÁC BÁN HÀNG' : 'GIA NHẬP CỘNG ĐỒNG NGƯỜI MUA'}</span>
             </div>
             <h1 className="shopee-auth-hero-title">
-              Mở khóa đặc quyền <span>hấp dẫn hàng đầu</span>
+              {role === 'seller' ? (
+                <>Khởi tạo gian hàng <span>bứt phá doanh thu</span></>
+              ) : (
+                <>Mở khóa đặc quyền <span>hấp dẫn hàng đầu</span></>
+              )}
             </h1>
             <p className="shopee-auth-hero-desc">
-              Tạo tài khoản chỉ trong 30 giây để tận hưởng trọn vẹn ưu đãi độc quyền dành cho khách hàng và nhà bán hàng.
+              {role === 'seller'
+                ? 'Thiết lập gian hàng chính thức trong 30 giây, hưởng 0% phí sàn tháng đầu và tiếp cận 50.000+ khách hàng tiềm năng.'
+                : 'Tạo tài khoản chỉ trong 30 giây để tận hưởng trọn vẹn ưu đãi mã giảm 50K, 1.000 Xu tích lũy và Freeship toàn quốc.'}
             </p>
           </div>
 
-          {/* Perks list */}
+          {/* Role-specific Perks list */}
           <div className="shopee-auth-hero-features">
-            <div className="shopee-auth-hero-feat-item">
-              <div className="shopee-auth-hero-feat-icon">🎉</div>
-              <div className="shopee-auth-hero-feat-text">
-                <strong>Gói voucher tân thủ 500.000đ</strong>
-                <span>Tặng ngay mã giảm 50K cho đơn hàng đầu tiên</span>
-              </div>
-            </div>
+            {role === 'seller' ? (
+              <>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">💰</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>0% Phí Sàn Tháng Đầu Tiên</strong>
+                    <span>Tối ưu hóa 100% doanh thu và lợi nhuận bán lẻ</span>
+                  </div>
+                </div>
 
-            <div className="shopee-auth-hero-feat-item">
-              <div className="shopee-auth-hero-feat-icon">🪙</div>
-              <div className="shopee-auth-hero-feat-text">
-                <strong>Tặng 1.000 Xu tích lũy khởi điểm</strong>
-                <span>Dùng trừ tiền trực tiếp vào hóa đơn thanh toán</span>
-              </div>
-            </div>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">📈</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Tiếp Cận 50.000+ Khách Hàng Tiềm Năng</strong>
+                    <span>Thuật toán AI tự động gợi ý sản phẩm lên đầu trang</span>
+                  </div>
+                </div>
 
-            <div className="shopee-auth-hero-feat-item">
-              <div className="shopee-auth-hero-feat-icon">🏪</div>
-              <div className="shopee-auth-hero-feat-text">
-                <strong>Dành cho Người Bán: 0% Phí sàn tháng đầu</strong>
-                <span>Tiếp cận 50.000+ người mua tiềm năng tức thì</span>
-              </div>
-            </div>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">📦</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Tạo & In Vận Đơn Tự Động 1-Click</strong>
+                    <span>Tích hợp đồng bộ SPX Express, Giao Hàng Nhanh, Viettel Post</span>
+                  </div>
+                </div>
 
-            <div className="shopee-auth-hero-feat-item">
-              <div className="shopee-auth-hero-feat-icon">🚚</div>
-              <div className="shopee-auth-hero-feat-text">
-                <strong>Freeship Xtra Không Giới Hạn</strong>
-                <span>Miễn phí vận chuyển toàn quốc cho mọi đơn hàng</span>
-              </div>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">💳</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Rút Tiền Doanh Thu Ví Shop 24/7</strong>
+                    <span>Tiền chuyển thẳng tài khoản ngân hàng tức thì miễn phí</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🤖</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Trợ Lý Báo Cáo Doanh Thu AI Thông Minh</strong>
+                    <span>Phân tích biểu đồ lãi lỗ, kiểm soát tồn kho tức thời</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🎯</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Tặng Gói QC Flash Sale Độc Quyền</strong>
+                    <span>Hỗ trợ đẩy top từ khóa gian hàng ngay tuần mở bán</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🎉</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Gói Voucher Tân Thủ 500.000đ</strong>
+                    <span>Tặng ngay mã giảm 50K cho đơn hàng đầu tiên</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🪙</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Tặng 1.000 Xu Tích Lũy Vào Ví</strong>
+                    <span>Dùng trừ tiền trực tiếp vào hóa đơn thanh toán</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🚚</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Freeship Xtra Không Giới Hạn</strong>
+                    <span>Miễn phí vận chuyển toàn quốc cho mọi đơn hàng</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🛡️</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Cam Kết 100% Hàng Chính Hãng</strong>
+                    <span>Đền bù 200% nếu phát hiện sản phẩm giả mạo</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🔄</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Đổi Trả Dễ Dàng Trong 30 Ngày</strong>
+                    <span>Shipper thu hồi tận nơi, hoàn tiền tức thì qua Ví</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">⚡</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Giao Siêu Tốc Trong 2 Giờ (2H)</strong>
+                    <span>Nhận hàng ngay trong ngày tại TP.HCM & Hà Nội</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Live Activity & Security Trust Ticker */}
+          <div className="shopee-auth-live-ticker">
+            <div className="shopee-auth-live-pulse-dot" />
+            <div className="shopee-auth-live-text">
+              <span>Hơn <strong>1.480+</strong> người dùng & đối tác đang trực tuyến</span>
+              <small>🛡️ Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)</small>
             </div>
           </div>
 
           {/* Hero Statistics */}
           <div className="shopee-auth-hero-stats">
-            <div className="shopee-auth-hero-stat-card">
-              <strong>100%</strong>
-              <span>Bảo mật</span>
-            </div>
-            <div className="shopee-auth-hero-stat-card">
-              <strong>30s</strong>
-              <span>Đăng ký nhanh</span>
-            </div>
-            <div className="shopee-auth-hero-stat-card">
-              <strong>24/7</strong>
-              <span>Hỗ trợ tận tâm</span>
-            </div>
+            {role === 'seller' ? (
+              <>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>0%</strong>
+                  <span>Phí sàn tháng đầu</span>
+                </div>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>24/7</strong>
+                  <span>Rút tiền ví shop</span>
+                </div>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>Top 1</strong>
+                  <span>Tăng trưởng</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>100%</strong>
+                  <span>Bảo mật</span>
+                </div>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>30s</strong>
+                  <span>Đăng ký nhanh</span>
+                </div>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>0đ</strong>
+                  <span>Phí thành viên</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -610,7 +714,10 @@ export default function RegisterPage() {
       <OtpVerificationModal
         isOpen={showOtpModal}
         email={formData.email}
+        targetEmail={formData.email}
+        targetPhone={formData.phone}
         onClose={() => setShowOtpModal(false)}
+        onVerify={handleOtpVerified}
         onVerifySuccess={handleOtpVerified}
       />
 

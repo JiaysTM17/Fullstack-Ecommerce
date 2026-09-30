@@ -3,9 +3,12 @@ import React, { useState, useEffect, useRef } from 'react';
 export default function OtpVerificationModal({
   isOpen,
   targetEmail,
+  email,
   targetPhone,
+  phone,
   expectedOtp = '889966',
   onVerify,
+  onVerifySuccess,
   onResend,
   onClose,
   title = 'Xác Thực Bảo Mật 2 Bước (2FA)',
@@ -17,6 +20,9 @@ export default function OtpVerificationModal({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
+
+  const displayEmail = targetEmail || email;
+  const displayPhone = targetPhone || phone;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -110,7 +116,8 @@ export default function OtpVerificationModal({
         setLoading(false);
         return;
       }
-      if (onVerify) await onVerify(code);
+      if (typeof onVerify === 'function') await onVerify(code);
+      if (typeof onVerifySuccess === 'function') await onVerifySuccess(code);
     } catch (err) {
       setError(err.message || 'Xác thực không thành công');
     } finally {
@@ -172,9 +179,9 @@ export default function OtpVerificationModal({
         </h3>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary, #64748b)', margin: '0 0 20px', lineHeight: 1.5 }}>
           {subtitle}
-          {targetEmail && (
+          {displayEmail && (
             <span style={{ display: 'block', fontWeight: 700, color: '#3b82f6', marginTop: '4px' }}>
-              {targetEmail} {targetPhone ? `· ${targetPhone}` : ''}
+              {displayEmail} {displayPhone ? `· ${displayPhone}` : ''}
             </span>
           )}
         </p>

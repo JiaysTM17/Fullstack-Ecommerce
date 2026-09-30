@@ -131,66 +131,245 @@ export default function LoginPage() {
         <div className="shopee-auth-hero-col">
           <div className="shopee-auth-hero-brand">
             <div className="shopee-auth-hero-badge">
-              <span>🛡️</span>
-              <span>ENTERPRISE E-COMMERCE PLATFORM</span>
+              <span>{activeRole === 'admin' ? '🛡️' : activeRole === 'seller' ? '🏪' : '✨'}</span>
+              <span>
+                {activeRole === 'admin'
+                  ? 'QUẢN TRỊ VIÊN HỆ THỐNG'
+                  : activeRole === 'seller'
+                  ? 'KÊNH NGƯỜI BÁN CHUYÊN NGHIỆP'
+                  : 'KHÁCH HÀNG THÂN THIẾT'}
+              </span>
             </div>
             <h1 className="shopee-auth-hero-title">
-              Trải nghiệm mua sắm & kinh doanh <span>chuẩn Quốc Tế</span>
+              {activeRole === 'admin' ? (
+                <>Trung tâm kiểm soát <span>toàn diện nền tảng</span></>
+              ) : activeRole === 'seller' ? (
+                <>Quản lý gian hàng <span>chuẩn thương mại</span></>
+              ) : (
+                <>Trải nghiệm mua sắm <span>tiện lợi & an toàn</span></>
+              )}
             </h1>
             <p className="shopee-auth-hero-desc">
-              Hệ sinh thái thương mại điện tử đồng bộ đa phân hệ, tối ưu tốc độ và an toàn giao dịch hàng đầu.
+              {activeRole === 'admin'
+                ? 'Giám sát điều hành hệ sinh thái thương mại điện tử, phân quyền RBAC và an ninh bảo mật cao cấp.'
+                : activeRole === 'seller'
+                ? 'Tối ưu hóa quy trình bán hàng, xử lý đơn hàng đa kênh và rút tiền về tài khoản tức thì 24/7.'
+                : 'Khám phá hàng triệu sản phẩm chính hãng, tận hưởng voucher độc quyền và bảo vệ giao dịch toàn diện.'}
             </p>
           </div>
 
-          {/* Feature highlights */}
+          {/* Role-adaptive Feature highlights */}
           <div className="shopee-auth-hero-features">
-            <div className="shopee-auth-hero-feat-item">
-              <div className="shopee-auth-hero-feat-icon">⚡</div>
-              <div className="shopee-auth-hero-feat-text">
-                <strong>Giao siêu tốc 2H & Hỏa tốc</strong>
-                <span>Nhận hàng tận tay cùng bảo hiểm toàn diện đơn hàng</span>
-              </div>
-            </div>
+            {activeRole === 'admin' ? (
+              <>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🔐</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Phân Quyền RBAC Đa Cấp Nghiêm Ngặt</strong>
+                    <span>Bảo vệ quyền truy cập và dữ liệu nhạy cảm cấp doanh nghiệp</span>
+                  </div>
+                </div>
 
-            <div className="shopee-auth-hero-feat-item">
-              <div className="shopee-auth-hero-feat-icon">💎</div>
-              <div className="shopee-auth-hero-feat-text">
-                <strong>100% Chính Hãng Cam Kết</strong>
-                <span>Hoàn tiền 200% nếu phát hiện hàng không chuẩn</span>
-              </div>
-            </div>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">📊</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Dashboard Thống Kê Real-Time</strong>
+                    <span>Theo dõi biến động dòng tiền, đơn hàng và lượng truy cập</span>
+                  </div>
+                </div>
 
-            <div className="shopee-auth-hero-feat-item">
-              <div className="shopee-auth-hero-feat-icon">🔄</div>
-              <div className="shopee-auth-hero-feat-text">
-                <strong>Đổi trả 30 ngày tiện lợi</strong>
-                <span>Miễn phí lấy hàng tận nhà, hoàn tiền tức thì qua Ví</span>
-              </div>
-            </div>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">⚡</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Giám Sát Sức Khỏe Toàn Sàn</strong>
+                    <span>Tự động phát hiện tấn công DDoS, brute-force & quét bất thường</span>
+                  </div>
+                </div>
 
-            <div className="shopee-auth-hero-feat-item">
-              <div className="shopee-auth-hero-feat-icon">🎁</div>
-              <div className="shopee-auth-hero-feat-text">
-                <strong>Voucher & Ví Xu thưởng</strong>
-                <span>Tích luỹ xu hoàn tiền không giới hạn mỗi lần chốt đơn</span>
-              </div>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🏷️</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Quản Trị Chiến Dịch Flash Sale</strong>
+                    <span>Phê duyệt sản phẩm, mã khuyến mại và ban hành chính sách</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">💳</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Kiểm Soát Đối Soát & Luân Chuyển Dòng Tiền</strong>
+                    <span>Minh bạch số dư ví, phí sàn và doanh thu người bán</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🛡️</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Nhật Ký Kiểm Toán Audit Log</strong>
+                    <span>Lưu vết mọi hành vi thay đổi dữ liệu đảm bảo tính an toàn</span>
+                  </div>
+                </div>
+              </>
+            ) : activeRole === 'seller' ? (
+              <>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">📦</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Xử Lý & In Vận Đơn 1-Click</strong>
+                    <span>Tự động liên kết SPX Express, GHN, Viettel Post</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">💰</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Ví Doanh Thu Shop Rút Tiền 24/7</strong>
+                    <span>Tiền về tài khoản ngân hàng tức thì không giới hạn số lần</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">📈</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Phân Tích Dữ Liệu Tăng Trưởng AI</strong>
+                    <span>Dự báo nhu cầu tồn kho và cảnh báo sản phẩm bán chạy</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🏷️</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Tạo Flash Sale & Voucher Gian Hàng</strong>
+                    <span>Tự do thiết kế ưu đãi thu hút thêm hàng ngàn khách mới</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">💬</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Chat CSKH Trực Tuyến Tức Thì</strong>
+                    <span>Tương tác nhanh với người mua để nâng cao tỷ lệ chuyển đổi</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🤖</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Tối Ưu Hóa Bài Đăng Sản Phẩm</strong>
+                    <span>Gợi ý từ khóa SEO giúp sản phẩm lọt top kết quả tìm kiếm</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">⚡</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Giao Siêu Tốc 2H & Hỏa Tốc</strong>
+                    <span>Nhận hàng tận tay cùng bảo hiểm toàn diện đơn hàng</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">💎</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>100% Chính Hãng Cam Kết</strong>
+                    <span>Hoàn tiền 200% nếu phát hiện sản phẩm giả mạo</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🔄</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Đổi Trả Dễ Dàng Trong 30 Ngày</strong>
+                    <span>Shipper thu hồi tận nơi, hoàn tiền tức thì qua Ví</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🎁</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Voucher & Ví Xu Thưởng</strong>
+                    <span>Tích lũy xu hoàn tiền trừ thẳng vào hóa đơn thanh toán</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🚚</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Freeship Xtra Toàn Quốc</strong>
+                    <span>Miễn phí vận chuyển cho hàng triệu sản phẩm mỗi ngày</span>
+                  </div>
+                </div>
+
+                <div className="shopee-auth-hero-feat-item">
+                  <div className="shopee-auth-hero-feat-icon">🛡️</div>
+                  <div className="shopee-auth-hero-feat-text">
+                    <strong>Bảo Vệ Người Mua Tuyệt Đối</strong>
+                    <span>Tiền chỉ chuyển cho người bán khi bạn xác nhận hài lòng</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Live Activity & Security Trust Ticker */}
+          <div className="shopee-auth-live-ticker">
+            <div className="shopee-auth-live-pulse-dot" />
+            <div className="shopee-auth-live-text">
+              <span>Hơn <strong>1.480+</strong> người dùng & đối tác đang trực tuyến</span>
+              <small>🛡️ Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)</small>
             </div>
           </div>
 
           {/* Hero Statistics */}
           <div className="shopee-auth-hero-stats">
-            <div className="shopee-auth-hero-stat-card">
-              <strong>50.000+</strong>
-              <span>Khách hàng</span>
-            </div>
-            <div className="shopee-auth-hero-stat-card">
-              <strong>1.200+</strong>
-              <span>Chủ gian hàng</span>
-            </div>
-            <div className="shopee-auth-hero-stat-card">
-              <strong>99.9%</strong>
-              <span>Hài lòng</span>
-            </div>
+            {activeRole === 'admin' ? (
+              <>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>99.99%</strong>
+                  <span>Uptime SLA</span>
+                </div>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>256-Bit</strong>
+                  <span>Mã hóa SSL</span>
+                </div>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>0s</strong>
+                  <span>Độ trễ cảnh báo</span>
+                </div>
+              </>
+            ) : activeRole === 'seller' ? (
+              <>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>0%</strong>
+                  <span>Phí mở shop</span>
+                </div>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>24/7</strong>
+                  <span>Rút tiền tức thì</span>
+                </div>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>1-Click</strong>
+                  <span>In vận đơn</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>50.000+</strong>
+                  <span>Khách hàng</span>
+                </div>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>1.200+</strong>
+                  <span>Chủ gian hàng</span>
+                </div>
+                <div className="shopee-auth-hero-stat-card">
+                  <strong>99.9%</strong>
+                  <span>Hài lòng</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
