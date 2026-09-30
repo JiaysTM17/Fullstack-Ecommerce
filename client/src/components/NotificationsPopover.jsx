@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import {
+  getNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+} from '../services/notificationService';
 
 const INITIAL_NOTIFICATIONS = [
   {
@@ -45,7 +51,7 @@ const INITIAL_NOTIFICATIONS = [
   },
 ];
 
-const NOTIFS_STORAGE_KEY = 'mini_shopee_notifications';
+const NOTIFS_STORAGE_KEY = 'mini_shopee_buyer_notifications';
 
 export default function NotificationsPopover() {
   const navigate = useNavigate();
@@ -56,7 +62,7 @@ export default function NotificationsPopover() {
 
   const [notifications, setNotifications] = useState(() => {
     try {
-      const saved = localStorage.getItem(NOTIFS_STORAGE_KEY);
+      const saved = localStorage.getItem(NOTIFS_STORAGE_KEY) || localStorage.getItem('mini_shopee_notifications');
       if (saved) return JSON.parse(saved);
     } catch {
       // fallback
@@ -68,6 +74,7 @@ export default function NotificationsPopover() {
     setNotifications(newNotifs);
     try {
       localStorage.setItem(NOTIFS_STORAGE_KEY, JSON.stringify(newNotifs));
+      window.dispatchEvent(new CustomEvent('mini_shopee_notifications_updated', { detail: { list: newNotifs } }));
     } catch {
       // ignore
     }
@@ -78,17 +85,33 @@ export default function NotificationsPopover() {
   const voucherCount = notifications.filter((n) => n.type === 'voucher' || n.type === 'promo').length;
 
   useEffect(() => {
+    let ignore = false;
+    async function fetchServerNotifications() {
+      try {
+        const data = await getNotifications(1, 30);
+        if (!ignore && data?.notifications?.length > 0) {
+          setNotifications(data.notifications);
+        }
+      } catch (err) {
+        // use local
+      }
+    }
+    fetchServerNotifications();
+
     const handleSync = () => {
       try {
-        const saved = localStorage.getItem(NOTIFS_STORAGE_KEY);
+        const saved = localStorage.getItem(NOTIFS_STORAGE_KEY) || localStorage.getItem('mini_shopee_notifications');
         if (saved) setNotifications(JSON.parse(saved));
       } catch {}
     };
     window.addEventListener('storage', handleSync);
     window.addEventListener('mini_shopee_new_notification', handleSync);
+    window.addEventListener('mini_shopee_notifications_updated', handleSync);
     return () => {
+      ignore = true;
       window.removeEventListener('storage', handleSync);
       window.removeEventListener('mini_shopee_new_notification', handleSync);
+      window.removeEventListener('mini_shopee_notifications_updated', handleSync);
     };
   }, []);
 
@@ -102,9 +125,12 @@ export default function NotificationsPopover() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleMarkAllRead = () => {
+  const handleMarkAllRead = async () => {
     const updated = notifications.map((n) => ({ ...n, isRead: true }));
     saveNotifications(updated);
+    try {
+      await markAllNotificationsAsRead();
+    } catch {}
   };
 
   const handleClearRead = () => {
@@ -112,9 +138,12 @@ export default function NotificationsPopover() {
     saveNotifications(updated);
   };
 
-  const handleItemClick = (notif) => {
-    const updated = notifications.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n));
+  const handleItemClick = async (notif) => {
+    const updated = notifications.map((n) => ((n.id || n._id) === (notif.id || notif._id) ? { ...n, isRead: true } : n));
     saveNotifications(updated);
+    try {
+      await markNotificationAsRead(notif.id || notif._id);
+    } catch {}
     setIsOpen(false);
     if (notif.link) {
       navigate(notif.link);
