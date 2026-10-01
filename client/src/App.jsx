@@ -44,6 +44,11 @@ function AppLayout() {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Tự động cuộn lên đầu trang mỗi khi chuyển trang (fix triệt để vấn đề bị cuộn lỡ cỡ)
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [location.pathname]);
+
   useEffect(() => {
     if (location.pathname === "/") {
       setSearchTerm(searchParams.get("keyword") || "");

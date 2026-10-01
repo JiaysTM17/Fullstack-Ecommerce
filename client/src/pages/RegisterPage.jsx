@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -8,6 +8,8 @@ import '../styles/auth.css';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { register } = useAuth();
   const { showToast } = useToast();
   const { t } = useLanguage();
@@ -82,6 +84,20 @@ export default function RegisterPage() {
       setCheckingEmail(false);
     }
   };
+
+  // Tự động cuộn lên đầu trang và đọc params từ URL khi mount hoặc điều hướng
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    const roleParam = searchParams.get('role');
+    const emailParam = searchParams.get('email');
+    if (roleParam === 'seller') {
+      setRole('seller');
+    }
+    if (emailParam) {
+      setFormData((prev) => ({ ...prev, email: emailParam }));
+      verifyEmailUnique(emailParam, roleParam || 'seller');
+    }
+  }, [searchParams, location.pathname]);
 
   // Smart Email Autocomplete Dropdown
   const [showEmailDropdown, setShowEmailDropdown] = useState(false);

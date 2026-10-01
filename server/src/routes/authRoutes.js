@@ -1,7 +1,7 @@
 import express from "express";
 import {
   register, login, me, profile, demo,
-  changePassword, forgotPassword, resetPassword,
+  changePassword, forgotPassword, resetPassword, verifyResetCode,
   refreshToken, logout,
   sendRegistrationOtp, verifyRegistrationOtp,
   checkEmailAvailability,
@@ -16,6 +16,7 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/demo", demo);
 router.post("/forgot-password", forgotPassword);
+router.post("/verify-reset-code", verifyResetCode);
 router.post("/reset-password", resetPassword);
 router.post("/send-registration-otp", sendRegistrationOtp);
 router.post("/verify-registration-otp", verifyRegistrationOtp);

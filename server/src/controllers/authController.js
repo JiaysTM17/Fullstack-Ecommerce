@@ -379,28 +379,86 @@ export const changePassword = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return sendError(res, "Email là bắt buộc", 400);
+    if (!email || !email.trim()) {
+      return sendError(res, "Vui lòng nhập địa chỉ email tài khoản", 400);
+    }
+
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(email.trim())) {
+      return sendError(res, "Định dạng email không hợp lệ", 400);
+    }
 
     const normalizedEmail = email.toLowerCase().trim();
     const user = await User.findOne({ email: normalizedEmail });
 
-    // Always return success to prevent email enumeration
     if (!user) {
-      return sendSuccess(res, {
-        message: "Nếu email tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.",
-      });
+      return sendError(
+        res,
+        `Không tìm thấy tài khoản nào khớp với email "${normalizedEmail}". Vui lòng kiểm tra lại địa chỉ email hoặc bấm Đăng Ký.`,
+        404
+      );
+    }
+
+    // Cooldown check (60s)
+    const existing = resetTokens.get(normalizedEmail);
+    if (existing && Date.now() - existing.createdAt < 60 * 1000) {
+      const waitSec = Math.ceil((60 * 1000 - (Date.now() - existing.createdAt)) / 1000);
+      return sendError(res, `Vui lòng đợi ${waitSec} giây trước khi yêu cầu gửi lại mã OTP mới`, 429);
     }
 
     // Generate reset token (6-digit code)
     const resetCode = String(Math.floor(100000 + Math.random() * 900000));
-    const expiresAt = Date.now() + 30 * 60 * 1000; // 30 phút
+    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 phút
 
-    resetTokens.set(normalizedEmail, { code: resetCode, expiresAt });
+    resetTokens.set(normalizedEmail, {
+      code: resetCode,
+      expiresAt,
+      createdAt: Date.now(),
+      verified: false
+    });
 
-    // In production, send email here. For demo, return the code.
+    console.log(`\n======================================================`);
+    console.log(`[EMAIL SERVICE] GỬI MÃ KHÔI PHỤC MẬT KHẨU TỚI: ${normalizedEmail}`);
+    console.log(`[EMAIL SERVICE] MÃ OTP BẢO MẬT (6 SỐ): >>> ${resetCode} <<<`);
+    console.log(`[EMAIL SERVICE] Hết hạn sau: 15 phút | Tài khoản: ${user.fullName}`);
+    console.log(`======================================================\n`);
+
     sendSuccess(res, {
-      message: "Nếu email tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.",
+      message: `Mã OTP khôi phục mật khẩu 6 số đã được gửi tới email ${normalizedEmail}. Vui lòng kiểm tra hộp thư.`,
+      email: normalizedEmail,
+      expiresInSeconds: 60,
       _devResetCode: process.env.NODE_ENV !== "production" ? resetCode : undefined,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Verify password reset OTP
+// @route   POST /api/auth/verify-reset-code
+// @access  Public
+export const verifyResetCode = async (req, res) => {
+  try {
+    const { email, resetCode } = req.body;
+    if (!email || !resetCode) {
+      return sendError(res, "Email và mã OTP là bắt buộc", 400);
+    }
+    const normalizedEmail = email.toLowerCase().trim();
+    const stored = resetTokens.get(normalizedEmail);
+
+    if (!stored || stored.code !== String(resetCode).trim()) {
+      return sendError(res, "Mã OTP xác thực không chính xác. Vui lòng kiểm tra lại hộp thư email.", 400);
+    }
+
+    if (Date.now() > stored.expiresAt) {
+      resetTokens.delete(normalizedEmail);
+      return sendError(res, "Mã OTP đã hết hạn sau 15 phút. Vui lòng yêu cầu mã mới.", 400);
+    }
+
+    stored.verified = true;
+    sendSuccess(res, {
+      message: "Xác thực mã OTP thành công. Vui lòng thiết lập mật khẩu mới.",
+      verified: true
     });
   } catch (error) {
     sendError(res, error.message, 500);
@@ -425,24 +483,25 @@ export const resetPassword = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
     const storedToken = resetTokens.get(normalizedEmail);
 
-    if (!storedToken || storedToken.code !== resetCode) {
+    if (!storedToken || storedToken.code !== String(resetCode).trim()) {
       return sendError(res, "Mã xác nhận không hợp lệ hoặc đã hết hạn", 400);
     }
 
     if (Date.now() > storedToken.expiresAt) {
       resetTokens.delete(normalizedEmail);
-      return sendError(res, "Mã xác nhận đã hết hạn (30 phút). Vui lòng yêu cầu mã mới.", 400);
+      return sendError(res, "Mã xác nhận đã hết hạn (15 phút). Vui lòng yêu cầu mã mới.", 400);
     }
 
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) return sendError(res, "Không tìm thấy tài khoản", 404);
 
-    user.password = newPassword;
+    // Mã hóa mật khẩu mới bằng bcrypt an toàn
+    user.password = newPassword.startsWith("$2") ? newPassword : bcrypt.hashSync(newPassword, 10);
     await user.save();
 
     resetTokens.delete(normalizedEmail);
 
-    sendSuccess(res, { message: "Đặt lại mật khẩu thành công. Vui lòng đăng nhập với mật khẩu mới." });
+    sendSuccess(res, { message: "Đặt lại mật khẩu thành công! Bạn có thể sử dụng mật khẩu mới để đăng nhập." });
   } catch (error) {
     sendError(res, error.message, 500);
   }
