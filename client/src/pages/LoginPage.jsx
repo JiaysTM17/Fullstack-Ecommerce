@@ -844,6 +844,7 @@ export default function LoginPage() {
       <SocialAuthModal
         isOpen={socialModalConfig.isOpen}
         provider={socialModalConfig.provider}
+        role={activeRole}
         initialEmail={email}
         onClose={() => setSocialModalConfig({ isOpen: false, provider: 'google' })}
         onSuccess={(ssoUser) => {

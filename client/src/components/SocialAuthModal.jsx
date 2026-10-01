@@ -2,72 +2,68 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
-export default function SocialAuthModal({ isOpen, onClose, provider = 'google', initialEmail = '', onSuccess }) {
+/**
+ * Enterprise Social OAuth SSO Modal
+ * Provides 3 distinct brand identities:
+ * 1. Google: Material You Google Account Chooser
+ * 2. Facebook: Meta / Facebook Blue Identity Dialog
+ * 3. Apple: Cupertino Dark / Minimalist Apple ID with "Hide My Email" option
+ * Automatically adopts the current login role (customer / seller) without redundant selection.
+ * Author: Kiệt Trương <truonggiakiet110806@gmail.com>
+ */
+export default function SocialAuthModal({
+  isOpen,
+  onClose,
+  provider = 'google',
+  role = 'customer',
+  initialEmail = '',
+  onSuccess,
+}) {
   const { setUser, setToken } = useAuth();
   const { showToast } = useToast();
 
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState('customer'); // 'customer' | 'seller'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+
+  // Apple specific: Share email vs Hide my email (Private Relay)
+  const [appleEmailOption, setAppleEmailOption] = useState('share'); // 'share' | 'hide'
 
   useEffect(() => {
     if (isOpen) {
       setError('');
-      const defaultMail = initialEmail && initialEmail.trim() ? initialEmail.trim() : 'truonggiakiet110806@gmail.com';
-      setEmail(defaultMail);
-      const nameGuess = defaultMail.split('@')[0].replace(/[._-]/g, ' ');
-      setFullName(nameGuess.charAt(0).toUpperCase() + nameGuess.slice(1));
+      setIsEditingInfo(false);
+      setAppleEmailOption('share');
+
+      let fallbackEmail = 'truonggiakiet110806@gmail.com';
+      if (initialEmail && initialEmail.trim()) {
+        fallbackEmail = initialEmail.trim();
+      } else if (provider === 'apple') {
+        fallbackEmail = 'kiet.truong@icloud.com';
+      }
+
+      setEmail(fallbackEmail);
+      const namePart = fallbackEmail.split('@')[0].replace(/[._-]/g, ' ');
+      setFullName(namePart.charAt(0).toUpperCase() + namePart.slice(1));
     }
-  }, [isOpen, initialEmail]);
+  }, [isOpen, initialEmail, provider]);
 
   if (!isOpen) return null;
 
-  const providerConfig = {
-    google: {
-      name: 'Google',
-      color: '#4285F4',
-      bgLight: '#eff6ff',
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-      ),
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
-    },
-    facebook: {
-      name: 'Facebook',
-      color: '#1877F2',
-      bgLight: '#eef2ff',
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="#1877F2">
-          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-        </svg>
-      ),
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
-    },
-    apple: {
-      name: 'Apple ID',
-      color: '#000000',
-      bgLight: '#f8fafc',
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.62-.75 1.04-1.8 1.01-2.84-.9.04-1.99.6-2.63 1.35-.57.65-1.07 1.72-1.03 2.74 1 .08 2.03-.5 2.65-1.25z"/>
-        </svg>
-      ),
-      avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100',
-    },
-  };
+  const currentRole = role === 'seller' ? 'seller' : 'customer';
+  const roleLabel = currentRole === 'seller' ? 'Chủ Gian Hàng (Người Bán)' : 'Người Mua Hàng';
+  const roleIcon = currentRole === 'seller' ? '🏪' : '🛒';
 
-  const curr = providerConfig[provider] || providerConfig.google;
+  const computedEmail =
+    provider === 'apple' && appleEmailOption === 'hide'
+      ? `relay_${email.split('@')[0]}@privaterelay.appleid.com`
+      : email;
 
   const handleConfirmLogin = async (e) => {
-    e.preventDefault();
-    if (!email || !/^\S+@\S+\.\S+$/.test(email.trim())) {
+    if (e) e.preventDefault();
+    if (!computedEmail || !/^\S+@\S+\.\S+$/.test(computedEmail.trim())) {
       setError('Vui lòng nhập địa chỉ email hợp lệ');
       return;
     }
@@ -76,67 +72,587 @@ export default function SocialAuthModal({ isOpen, onClose, provider = 'google', 
     setError('');
 
     try {
-      // 1. Kiểm tra tài khoản trong database
-      const checkResp = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email.trim())}&role=${role}`);
-      const checkData = await checkResp.json();
-
-      let activeUser = null;
-      let userToken = '';
-
-      // Tự động liên kết SSO tài khoản
+      // SSO User Object synchronized with active role
       const ssoUser = {
         _id: 'user_sso_' + Date.now(),
         id: 'user_sso_' + Date.now(),
-        email: email.trim().toLowerCase(),
-        fullName: fullName.trim() || email.split('@')[0],
+        email: computedEmail.trim().toLowerCase(),
+        fullName: fullName.trim() || computedEmail.split('@')[0],
         phone: '0362217721',
-        role: role,
-        avatar: curr.avatar,
-        coins: role === 'seller' ? 50000 : 25000,
+        role: currentRole,
+        avatar:
+          provider === 'google'
+            ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
+            : provider === 'facebook'
+            ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'
+            : 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100',
+        coins: currentRole === 'seller' ? 50000 : 25000,
         isActive: true,
         status: 'active',
         authProvider: provider,
-        shopId: role === 'seller' ? `shop_sso_${Date.now().toString().slice(-4)}` : null,
-        shopName: role === 'seller' ? `Shop ${fullName || email.split('@')[0]}` : null,
+        shopId: currentRole === 'seller' ? `shop_sso_${Date.now().toString().slice(-4)}` : null,
+        shopName: currentRole === 'seller' ? `Shop ${fullName || computedEmail.split('@')[0]}` : null,
         createdAt: new Date().toISOString(),
       };
 
-      activeUser = ssoUser;
-      userToken = `jwt_sso_${provider}_${Date.now()}`;
+      const userToken = `jwt_sso_${provider}_${Date.now()}`;
 
-      setUser(activeUser);
+      setUser(ssoUser);
       setToken(userToken);
-      localStorage.setItem('mini_shopee_user', JSON.stringify(activeUser));
+      localStorage.setItem('mini_shopee_user', JSON.stringify(ssoUser));
       localStorage.setItem('mini_shopee_token', userToken);
 
+      const brandTitle = provider === 'google' ? 'Google' : provider === 'facebook' ? 'Facebook' : 'Apple ID';
       showToast(
-        `Đăng nhập an toàn thành công qua ${curr.name}! Tài khoản: ${activeUser.fullName} (${activeUser.email})`,
+        `Đăng nhập an toàn thành công qua ${brandTitle}! Vai trò: ${roleLabel}`,
         'success'
       );
 
-      if (onSuccess) onSuccess(activeUser);
+      if (onSuccess) onSuccess(ssoUser);
       onClose();
     } catch (err) {
-      setError(err.message || 'Xác thực đăng nhập mạng xã hội thất bại');
+      setError(err.message || 'Xác thực tài khoản mạng xã hội thất bại');
     } finally {
       setLoading(false);
     }
   };
 
+  // =========================================================================
+  // 1. GOOGLE SIGN-IN DESIGN (Google Material You / Clean White & Pastel)
+  // =========================================================================
+  if (provider === 'google') {
+    return (
+      <div className="shopee-auth-modal-overlay" style={{ zIndex: 10000 }}>
+        <div
+          className="shopee-auth-modal-card"
+          style={{
+            maxWidth: '450px',
+            width: '92%',
+            padding: '32px 28px',
+            borderRadius: '28px',
+            background: '#ffffff',
+            boxShadow: '0 20px 60px rgba(60, 64, 67, 0.25)',
+            border: '1px solid #dadce0',
+            position: 'relative',
+            color: '#202124',
+            fontFamily: 'Google Sans, Roboto, Arial, sans-serif',
+          }}
+        >
+          {/* Close button */}
+          <button
+            type="button"
+            className="shopee-auth-modal-close-btn"
+            onClick={onClose}
+            aria-label="Đóng"
+            style={{
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              background: '#f1f3f4',
+              border: 'none',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              cursor: 'pointer',
+              color: '#5f6368',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            ✕
+          </button>
+
+          {/* Google Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <div>
+              <h3 style={{ fontSize: '19px', fontWeight: 600, margin: 0, color: '#202124' }}>
+                Đăng nhập bằng Google
+              </h3>
+              <div style={{ fontSize: '12px', color: '#5f6368', marginTop: '2px' }}>
+                tiếp tục tới <strong>Fullstack E-Commerce</strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Active Role Indicator (Synchronized with Tab) */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: '#e8f0fe',
+              color: '#1a73e8',
+              padding: '4px 12px',
+              borderRadius: '16px',
+              fontSize: '11.5px',
+              fontWeight: 600,
+              marginBottom: '16px',
+            }}
+          >
+            <span>{roleIcon}</span>
+            <span>Đăng nhập với vai trò: <strong>{roleLabel}</strong></span>
+          </div>
+
+          {error && (
+            <div
+              style={{
+                background: '#fce8e6',
+                border: '1px solid #fad2cf',
+                color: '#c5221f',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                marginBottom: '14px',
+              }}
+            >
+              ⚠️ {error}
+            </div>
+          )}
+
+          {/* Google Account Card */}
+          <div
+            style={{
+              border: '1px solid #dadce0',
+              borderRadius: '16px',
+              padding: '14px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+              background: '#f8fafd',
+              marginBottom: '16px',
+            }}
+          >
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                background: '#1a73e8',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '18px',
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+            >
+              {fullName ? fullName.charAt(0).toUpperCase() : 'G'}
+            </div>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 600, fontSize: '14px', color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {fullName || 'Người dùng Google'}
+              </div>
+              <div style={{ fontSize: '12px', color: '#5f6368', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {email}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsEditingInfo(!isEditingInfo)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#1a73e8',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: '4px 6px',
+              }}
+            >
+              {isEditingInfo ? 'Xong' : 'Đổi'}
+            </button>
+          </div>
+
+          {/* Optional Edit Info Fields */}
+          {isEditingInfo && (
+            <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '12px', marginBottom: '16px', border: '1px dashed #cbd5e1' }}>
+              <div style={{ marginBottom: '8px' }}>
+                <label style={{ fontSize: '11px', fontWeight: 600, color: '#5f6368', display: 'block', marginBottom: '4px' }}>
+                  Địa chỉ Email Google:
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{ width: '100%', padding: '6px 10px', fontSize: '12.5px', borderRadius: '6px', border: '1px solid #dadce0', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 600, color: '#5f6368', display: 'block', marginBottom: '4px' }}>
+                  Tên hiển thị:
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  style={{ width: '100%', padding: '6px 10px', fontSize: '12.5px', borderRadius: '6px', border: '1px solid #dadce0', boxSizing: 'border-box' }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Google Permissions Text */}
+          <div style={{ fontSize: '11.5px', color: '#5f6368', lineHeight: 1.5, marginBottom: '22px' }}>
+            Để tiếp tục, Google sẽ cấp quyền truy cập tên, địa chỉ email và tùy chọn hồ sơ của bạn cho Fullstack E-Commerce. Hãy đảm bảo bạn tin cậy ứng dụng này.
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#1a73e8',
+                fontWeight: 600,
+                fontSize: '13.5px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+                borderRadius: '18px',
+              }}
+            >
+              Hủy bỏ
+            </button>
+
+            <button
+              type="button"
+              onClick={handleConfirmLogin}
+              disabled={loading}
+              style={{
+                background: '#1a73e8',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '20px',
+                padding: '10px 22px',
+                fontWeight: 600,
+                fontSize: '13.5px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                boxShadow: '0 1px 3px rgba(60,64,67,0.3)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              {loading ? 'Đang xác thực...' : `Tiếp tục với tư cách ${fullName.split(' ')[0] || 'Google'}`}
+            </button>
+          </div>
+
+          {/* Google SSO Footer Links */}
+          <div
+            style={{
+              marginTop: '22px',
+              paddingTop: '12px',
+              borderTop: '1px solid #f1f3f4',
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontSize: '11px',
+              color: '#70757a',
+            }}
+          >
+            <span>Tiếng Việt (Việt Nam)</span>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <span>Trợ giúp</span>
+              <span>Bảo mật</span>
+              <span>Điều khoản</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 2. FACEBOOK LOGIN DESIGN (Meta / Facebook Blue Theme)
+  // =========================================================================
+  if (provider === 'facebook') {
+    return (
+      <div className="shopee-auth-modal-overlay" style={{ zIndex: 10000 }}>
+        <div
+          className="shopee-auth-modal-card"
+          style={{
+            maxWidth: '450px',
+            width: '92%',
+            padding: 0,
+            borderRadius: '16px',
+            background: '#ffffff',
+            boxShadow: '0 20px 50px rgba(24, 119, 242, 0.25)',
+            border: '1px solid #ccd0d5',
+            position: 'relative',
+            overflow: 'hidden',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+          }}
+        >
+          {/* Facebook Top Blue Header */}
+          <div
+            style={{
+              background: '#1877F2',
+              color: '#ffffff',
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#1877F2">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+              </div>
+              <span style={{ fontSize: '16px', fontWeight: 700 }}>Đăng nhập bằng Facebook</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '28px',
+                height: '28px',
+                color: '#ffffff',
+                fontSize: '13px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Facebook Body */}
+          <div style={{ padding: '24px 22px' }}>
+            {/* Meta Permission Request Notice */}
+            <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+              <h4 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 4px', color: '#1c1e21' }}>
+                Fullstack E-Commerce
+              </h4>
+              <p style={{ fontSize: '12.5px', color: '#606770', margin: 0 }}>
+                đang yêu cầu quyền truy cập vào thông tin trang cá nhân của bạn
+              </p>
+            </div>
+
+            {/* Active Role Indicator */}
+            <div
+              style={{
+                background: '#e7f3ff',
+                color: '#1877f2',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginBottom: '16px',
+                border: '1px solid #bfdbfe',
+              }}
+            >
+              <span>{roleIcon}</span>
+              <span>Phiên đăng nhập: <strong>{roleLabel}</strong></span>
+            </div>
+
+            {error && (
+              <div
+                style={{
+                  background: '#ffebe8',
+                  border: '1px solid #dd3c10',
+                  color: '#dd3c10',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  marginBottom: '14px',
+                }}
+              >
+                ⚠️ {error}
+              </div>
+            )}
+
+            {/* Profile Row */}
+            <div
+              style={{
+                background: '#f0f2f5',
+                borderRadius: '12px',
+                padding: '12px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '16px',
+              }}
+            >
+              <div
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  background: '#1877F2',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  fontWeight: 700,
+                }}
+              >
+                {fullName ? fullName.charAt(0).toUpperCase() : 'F'}
+              </div>
+
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: '14px', color: '#1c1e21' }}>
+                  {fullName || 'Người dùng Facebook'}
+                </div>
+                <div style={{ fontSize: '12px', color: '#606770' }}>
+                  {email}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsEditingInfo(!isEditingInfo)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#1877F2',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {isEditingInfo ? 'Đóng' : 'Đổi email'}
+              </button>
+            </div>
+
+            {isEditingInfo && (
+              <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', marginBottom: '16px', border: '1px solid #e2e8f0' }}>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Nhập email Facebook của bạn"
+                  style={{ width: '100%', padding: '6px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
+                />
+              </div>
+            )}
+
+            {/* Permissions list */}
+            <div
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e4e6eb',
+                borderRadius: '10px',
+                padding: '10px 14px',
+                fontSize: '12px',
+                color: '#606770',
+                marginBottom: '20px',
+              }}
+            >
+              <div style={{ fontWeight: 600, color: '#1c1e21', marginBottom: '6px' }}>Ứng dụng sẽ nhận được:</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                <span style={{ color: '#1877F2' }}>✓</span> Tên và ảnh trang cá nhân của bạn
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ color: '#1877F2' }}>✓</span> Địa chỉ email ({email})
+              </div>
+            </div>
+
+            {/* Facebook Action Buttons */}
+            <button
+              type="button"
+              onClick={handleConfirmLogin}
+              disabled={loading}
+              style={{
+                width: '100%',
+                height: '42px',
+                background: '#1877F2',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14.5px',
+                fontWeight: 700,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                marginBottom: '10px',
+                boxShadow: '0 2px 6px rgba(24, 119, 242, 0.3)',
+                transition: 'background 0.15s ease',
+              }}
+            >
+              {loading ? 'Đang đăng nhập...' : `Tiếp tục dưới tên ${fullName.split(' ')[0] || 'Facebook'}`}
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                width: '100%',
+                height: '36px',
+                background: '#e4e6eb',
+                color: '#4b4f56',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Hủy bỏ
+            </button>
+
+            {/* Meta Footer */}
+            <div style={{ marginTop: '16px', fontSize: '11px', color: '#8a8d91', textAlign: 'center', lineHeight: 1.4 }}>
+              Thao tác này sẽ không cho phép ứng dụng đăng bài lên Facebook mà không có sự đồng ý của bạn. <br />
+              <span style={{ color: '#1877F2', cursor: 'pointer' }}>Chính sách quyền riêng tư Meta</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 3. APPLE ID SIGN-IN DESIGN (Cupertino Dark / Minimalist Apple ID)
+  // =========================================================================
   return (
-    <div className="shopee-auth-modal-overlay">
+    <div className="shopee-auth-modal-overlay" style={{ zIndex: 10000 }}>
       <div
         className="shopee-auth-modal-card"
         style={{
-          maxWidth: '460px',
-          width: '90%',
+          maxWidth: '440px',
+          width: '92%',
           padding: '30px 24px',
-          borderRadius: '20px',
-          background: '#ffffff',
+          borderRadius: '24px',
+          background: '#1c1c1e',
+          color: '#f5f5f7',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.65)',
+          border: '1px solid #2c2c2e',
           position: 'relative',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
         }}
       >
+        {/* Close button */}
         <button
           type="button"
           className="shopee-auth-modal-close-btn"
@@ -146,13 +662,13 @@ export default function SocialAuthModal({ isOpen, onClose, provider = 'google', 
             position: 'absolute',
             top: '16px',
             right: '16px',
+            background: '#2c2c2e',
+            border: 'none',
+            borderRadius: '50%',
             width: '30px',
             height: '30px',
-            borderRadius: '50%',
-            background: '#f1f5f9',
-            border: 'none',
+            color: '#a1a1a6',
             fontSize: '13px',
-            color: '#64748b',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -162,161 +678,224 @@ export default function SocialAuthModal({ isOpen, onClose, provider = 'google', 
           ✕
         </button>
 
-        <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+        {/* Apple Logo & Header */}
+        <div style={{ textAlign: 'center', marginBottom: '22px' }}>
           <div
             style={{
-              width: '52px',
-              height: '52px',
-              borderRadius: '16px',
-              background: curr.bgLight,
-              border: `1.5px solid ${curr.color}33`,
+              width: '54px',
+              height: '54px',
+              borderRadius: '50%',
+              background: '#000000',
+              border: '1px solid #38383a',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto 10px',
+              margin: '0 auto 12px',
+              fontSize: '28px',
+              color: '#ffffff',
             }}
           >
-            {curr.icon}
+            
           </div>
-          <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a' }}>
-            Đăng Nhập Với {curr.name}
+
+          <h3 style={{ fontSize: '20px', fontWeight: 700, margin: '0 0 6px', color: '#ffffff' }}>
+            Sử dụng Apple ID để Đăng Nhập
           </h3>
-          <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0 }}>
-            Xác thực tài khoản của chính bạn để tiếp tục truy cập sàn Fullstack E-Commerce
-          </p>
+          <div style={{ fontSize: '12.5px', color: '#a1a1a6' }}>
+            Bạn muốn đăng nhập vào <strong>Fullstack E-Commerce</strong>
+          </div>
+        </div>
+
+        {/* Active Role Indicator */}
+        <div
+          style={{
+            background: 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            padding: '6px 12px',
+            borderRadius: '12px',
+            fontSize: '12px',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            marginBottom: '18px',
+            color: '#ffffff',
+          }}
+        >
+          <span>{roleIcon}</span>
+          <span>Phiên làm việc: <strong>{roleLabel}</strong></span>
         </div>
 
         {error && (
           <div
             style={{
-              background: '#fef2f2',
-              border: '1px solid #fecaca',
-              borderRadius: '8px',
+              background: 'rgba(255, 69, 58, 0.15)',
+              border: '1px solid #ff453a',
+              color: '#ff453a',
               padding: '8px 12px',
-              color: '#b91c1c',
+              borderRadius: '10px',
               fontSize: '12px',
-              marginBottom: '14px',
+              marginBottom: '16px',
             }}
           >
             ⚠️ {error}
           </div>
         )}
 
-        <form onSubmit={handleConfirmLogin}>
-          {/* Email to authenticate */}
-          <div className="shopee-form-group" style={{ marginBottom: '12px' }}>
-            <label className="shopee-form-label" style={{ fontSize: '12px' }}>
-              Địa chỉ Email {curr.name} của bạn *
-            </label>
-            <div className="shopee-form-input-wrap">
-              <span className="shopee-input-lead-icon">✉️</span>
-              <input
-                type="email"
-                className="shopee-form-input"
-                placeholder="email.cua.ban@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoFocus
-                required
-              />
-            </div>
-          </div>
-
-          {/* Full Name */}
-          <div className="shopee-form-group" style={{ marginBottom: '12px' }}>
-            <label className="shopee-form-label" style={{ fontSize: '12px' }}>
-              Tên hiển thị hồ sơ *
-            </label>
-            <div className="shopee-form-input-wrap">
-              <span className="shopee-input-lead-icon">👤</span>
-              <input
-                type="text"
-                className="shopee-form-input"
-                placeholder="Tên của bạn"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Role selector */}
-          <div className="shopee-form-group" style={{ marginBottom: '18px' }}>
-            <label className="shopee-form-label" style={{ fontSize: '12px' }}>
-              Chọn vai trò truy cập:
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => setRole('customer')}
-                style={{
-                  padding: '8px 10px',
-                  borderRadius: '10px',
-                  border: role === 'customer' ? '2px solid #2563eb' : '1px solid #cbd5e1',
-                  background: role === 'customer' ? '#eff6ff' : '#ffffff',
-                  color: role === 'customer' ? '#1d4ed8' : '#475569',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                }}
-              >
-                <span>🛒</span>
-                <span>Người Mua Hàng</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('seller')}
-                style={{
-                  padding: '8px 10px',
-                  borderRadius: '10px',
-                  border: role === 'seller' ? '2px solid #2563eb' : '1px solid #cbd5e1',
-                  background: role === 'seller' ? '#eff6ff' : '#ffffff',
-                  color: role === 'seller' ? '#1d4ed8' : '#475569',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                }}
-              >
-                <span>🏪</span>
-                <span>Chủ Gian Hàng</span>
-              </button>
-            </div>
-          </div>
-
+        {/* Apple ID Account Row */}
+        <div
+          style={{
+            background: '#2c2c2e',
+            borderRadius: '14px',
+            padding: '12px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '18px',
+          }}
+        >
           <div
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '10px',
-              padding: '10px 12px',
-              fontSize: '11.5px',
-              color: '#64748b',
-              marginBottom: '18px',
-              lineHeight: 1.4,
+              width: '38px',
+              height: '38px',
+              borderRadius: '50%',
+              background: '#3a3a3c',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '16px',
+              fontWeight: 700,
             }}
           >
-            🔒 Kết nối giao thức OAuth 2.0 an toàn. Thông tin cá nhân của bạn được bảo mật tuyệt đối và chỉ dùng để thiết lập phiên đăng nhập.
+            {fullName ? fullName.charAt(0).toUpperCase() : ''}
           </div>
 
-          <button
-            type="submit"
-            className="shopee-auth-submit-btn"
-            disabled={loading}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#ffffff' }}>
+              {fullName}
+            </div>
+            <div style={{ fontSize: '11.5px', color: '#8e8e93' }}>
+              {email}
+            </div>
+          </div>
+        </div>
+
+        {/* Apple "Hide My Email" Privacy Choice */}
+        <div
+          style={{
+            background: '#2c2c2e',
+            borderRadius: '14px',
+            padding: '6px 14px',
+            marginBottom: '20px',
+          }}
+        >
+          {/* Option 1: Share my email */}
+          <div
+            onClick={() => setAppleEmailOption('share')}
             style={{
-              background: provider === 'facebook' ? '#1877F2' : provider === 'apple' ? '#0f172a' : '#2563eb',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 0',
+              borderBottom: '1px solid #38383a',
+              cursor: 'pointer',
             }}
           >
-            {loading ? 'Đang xác thực bảo mật...' : `Xác Nhận Đăng Nhập Với ${curr.name} ➔`}
-          </button>
-        </form>
+            <div>
+              <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#ffffff' }}>Chia sẻ Email của tôi</div>
+              <div style={{ fontSize: '11px', color: '#8e8e93' }}>{email}</div>
+            </div>
+            <div
+              style={{
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                border: appleEmailOption === 'share' ? '5px solid #0071e3' : '1.5px solid #8e8e93',
+                background: '#ffffff',
+              }}
+            />
+          </div>
+
+          {/* Option 2: Hide my email */}
+          <div
+            onClick={() => setAppleEmailOption('hide')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 0',
+              cursor: 'pointer',
+            }}
+          >
+            <div>
+              <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#ffffff' }}>Ẩn địa chỉ email của tôi</div>
+              <div style={{ fontSize: '11px', color: '#8e8e93' }}>
+                Chuyển tiếp đến: relay_{email.split('@')[0]}@privaterelay.appleid.com
+              </div>
+            </div>
+            <div
+              style={{
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                border: appleEmailOption === 'hide' ? '5px solid #0071e3' : '1.5px solid #8e8e93',
+                background: '#ffffff',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Apple Continue Action Button */}
+        <button
+          type="button"
+          onClick={handleConfirmLogin}
+          disabled={loading}
+          style={{
+            width: '100%',
+            height: '46px',
+            background: '#ffffff',
+            color: '#000000',
+            border: 'none',
+            borderRadius: '12px',
+            fontSize: '14.5px',
+            fontWeight: 700,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            marginBottom: '10px',
+            boxShadow: '0 4px 12px rgba(255, 255, 255, 0.15)',
+            transition: 'opacity 0.15s ease',
+          }}
+        >
+          <span style={{ fontSize: '18px' }}></span>
+          <span>{loading ? 'Đang xử lý Face ID...' : 'Tiếp tục bằng Apple ID'}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            width: '100%',
+            height: '36px',
+            background: 'transparent',
+            color: '#8e8e93',
+            border: 'none',
+            fontSize: '13px',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          Hủy bỏ
+        </button>
+
+        {/* Apple Privacy Notice */}
+        <div style={{ marginTop: '16px', fontSize: '11px', color: '#636366', textAlign: 'center', lineHeight: 1.4 }}>
+          🔒 Tính năng Bảo mật của Apple. Mini Shopee chỉ nhận được mã xác thực an toàn từ Apple ID để cấp quyền truy cập.
+        </div>
       </div>
     </div>
   );
