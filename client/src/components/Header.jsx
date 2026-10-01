@@ -34,44 +34,6 @@ const QUICK_CATEGORY_CHIPS = [
   { label: 'Phụ Kiện', icon: '🎧', query: 'Tai nghe' },
 ];
 
-const TICKER_ITEMS = [
-  {
-    id: 1,
-    icon: '🚚',
-    badge: 'FREESHIP XTRA',
-    text: 'Miễn phí giao hàng toàn quốc đơn từ 0Đ hôm nay!',
-    actionText: 'Nhận Ngay',
-    type: 'link',
-    target: '/?fastDelivery=1'
-  },
-  {
-    id: 2,
-    icon: '⚡',
-    badge: 'FLASH SALE',
-    text: 'Khung giờ vàng 12:00 & 20:00 giảm sốc đến 50%',
-    actionText: 'Săn Deal',
-    type: 'link',
-    target: '/?badge=Hot+Deal'
-  },
-  {
-    id: 3,
-    icon: '🪙',
-    badge: 'ĐIỂM DANH',
-    text: 'Điểm danh nhận 5.000 Xu tích lũy mua sắm mỗi ngày',
-    actionText: 'Vào Ví Xu',
-    type: 'rewards'
-  },
-  {
-    id: 4,
-    icon: '🛡️',
-    badge: 'CAM KẾT 100%',
-    text: 'Hàng chính hãng bảo đảm - Đổi trả miễn phí 15 ngày',
-    actionText: 'Chi Tiết',
-    type: 'link',
-    target: '/'
-  }
-];
-
 const Header = ({
   cartCount = 0,
   searchTerm,
@@ -96,7 +58,6 @@ const Header = ({
   const [orderLookupResult, setOrderLookupResult] = useState(null);
   const [orderLookupLoading, setOrderLookupLoading] = useState(false);
   const [orderLookupError, setOrderLookupError] = useState('');
-  const [tickerIndex, setTickerIndex] = useState(0);
 
   const searchWrapRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -179,14 +140,6 @@ const Header = ({
     // If rendered outside CartProvider
   }
   const { items: cartItems = [], subtotal: cartSubtotal = 0, removeFromCart } = cartData;
-
-  // Auto-rotating Promo Ticker
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTickerIndex((prev) => (prev + 1) % TICKER_ITEMS.length);
-    }, 4500);
-    return () => clearInterval(timer);
-  }, []);
 
   // Global Keyboard Shortcuts (/ and Ctrl+K to search, Esc to close)
   useEffect(() => {
@@ -338,9 +291,44 @@ const Header = ({
     if (onNavigate) onNavigate(path);
   };
 
+  const scrollToTarget = (targetId) => {
+    const el = document.getElementById(targetId);
+    if (el) {
+      const headerWrapper = document.querySelector('.shopee-header-wrapper');
+      const headerHeight = headerWrapper ? headerWrapper.offsetHeight : 100;
+      const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = Math.max(0, elementPosition - headerHeight - 16);
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      return true;
+    }
+    return false;
+  };
+
+  const handleSubnavItemClick = (path, targetId) => {
+    if (onNavigate) {
+      onNavigate(path);
+    }
+    if (targetId) {
+      // Nếu phần tử đã có trong trang thì cuộn ngay lập tức
+      if (!scrollToTarget(targetId)) {
+        // Nếu vừa chuyển từ trang khác sang trang chủ thì đợi DOM tải
+        setTimeout(() => {
+          scrollToTarget(targetId);
+        }, 160);
+      }
+    } else {
+      handleClearSearch();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleGoHome = () => {
     handleClearSearch();
-    navTo('/');
+    handleSubnavItemClick('/', null);
   };
 
   const filteredSuggestions = currentSearch
@@ -358,57 +346,20 @@ const Header = ({
   return (
     <header className="shopee-header-wrapper">
       <div className="shopee-container">
-        {/* Top Mini Bar with Live Rotating Promo Ticker */}
+        {/* Top Mini Utility Bar */}
         <div className="shopee-topbar">
           <div className="shopee-topbar-left">
-            <span className="shopee-topbar-link" style={{ opacity: 0.9 }}>
+            <span className="shopee-topbar-link">
               📱 {t('nav_download_app', 'Tải Ứng Dụng')}
             </span>
             <span className="shopee-topbar-divider" />
-            <span className="shopee-topbar-link" style={{ opacity: 0.9 }}>
+            <span className="shopee-topbar-link">
               📞 Hotline: 1900 6868
             </span>
             <span className="shopee-topbar-divider" />
-            <button
-              type="button"
-              className="shopee-topbar-btn shopee-topbar-tracking-btn"
-              onClick={() => setShowOrderLookupModal(true)}
-              title="Tra cứu nhanh lộ trình đơn hàng & vận đơn SPX"
-            >
-              <span>📦</span>
-              <span>{t('quick_tracking', 'Tra Cứu Đơn Hàng')}</span>
-              <span className="topbar-pulse-dot" />
-            </button>
-            <span className="shopee-topbar-divider" />
-            <span className="shopee-topbar-link" style={{ opacity: 0.9 }}>
-              💬 {t('nav_support', 'CSKH 24/7')}
+            <span className="shopee-topbar-link">
+              💬 {t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}
             </span>
-          </div>
-
-          {/* Smart Live Rotating Promotional Announcement Bar */}
-          <div className="shopee-topbar-center">
-            <div className="topbar-ticker-container" key={TICKER_ITEMS[tickerIndex].id}>
-              <span className="ticker-badge">{TICKER_ITEMS[tickerIndex].badge}</span>
-              <span className="ticker-icon">{TICKER_ITEMS[tickerIndex].icon}</span>
-              <span className="ticker-text">{TICKER_ITEMS[tickerIndex].text}</span>
-              {TICKER_ITEMS[tickerIndex].type === 'rewards' ? (
-                <button
-                  type="button"
-                  className="ticker-action-btn"
-                  onClick={() => setShowRewardsModal(true)}
-                >
-                  {TICKER_ITEMS[tickerIndex].actionText} →
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="ticker-action-btn"
-                  onClick={() => navTo(TICKER_ITEMS[tickerIndex].target)}
-                >
-                  {TICKER_ITEMS[tickerIndex].actionText} →
-                </button>
-              )}
-            </div>
           </div>
 
           <div className="shopee-topbar-right">
@@ -825,6 +776,30 @@ const Header = ({
                       <span>🛍️ Giỏ Hàng Của Bạn</span>
                       <span className="mini-cart-count-badge">{(cartItems.length || cartCount)} món</span>
                     </div>
+
+                    {/* Smart Freeship Progress Indicator */}
+                    {cartItems.length > 0 && (
+                      <div className="mini-cart-freeship-banner">
+                        {cartSubtotal >= 200000 ? (
+                          <div className="freeship-qualified">
+                            <span>🎉 Bạn đã được <strong>Miễn Phí Vận Chuyển 0Đ!</strong></span>
+                          </div>
+                        ) : (
+                          <div className="freeship-needed">
+                            <span>🚚 Mua thêm <strong>{formatCurrency(200000 - cartSubtotal)}</strong> để nhận <strong>Freeship Toàn Quốc!</strong></span>
+                          </div>
+                        )}
+                        <div className="freeship-progress-track">
+                          <div
+                            className="freeship-progress-fill"
+                            style={{
+                              width: `${Math.min(100, Math.round((cartSubtotal / 200000) * 100))}%`,
+                              background: cartSubtotal >= 200000 ? 'linear-gradient(90deg, #10b981, #059669)' : 'linear-gradient(90deg, #3b82f6, #2563eb)'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
                     <span className="mini-cart-tip">Xem nhanh các sản phẩm đã chọn</span>
                   </div>
 
@@ -980,6 +955,22 @@ const Header = ({
 
                       <button
                         type="button"
+                        className="user-dropdown-item lookup-fast"
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          setShowOrderLookupModal(true);
+                        }}
+                      >
+                        <span className="item-icon">🚚</span>
+                        <div className="item-text">
+                          <strong>Tra Cứu Vận Đơn SPX</strong>
+                          <small>Kiểm tra hành trình giao hàng nhanh 1-Click</small>
+                        </div>
+                        <span className="item-badge" style={{ background: '#2563eb', color: '#fff' }}>SPX</span>
+                      </button>
+
+                      <button
+                        type="button"
                         className="user-dropdown-item"
                         onClick={() => {
                           setShowUserDropdown(false);
@@ -1110,64 +1101,87 @@ const Header = ({
           </div>
         </div>
 
-        {/* Mega Subnav Bar Redesign */}
+        {/* Mega Subnav Bar Redesign with Trust Badges */}
         <nav className="shopee-subnav">
-          <button
-            type="button"
-            className="shopee-subnav-cat-btn"
-            onClick={() => setShowCategoryDrawer(true)}
-            title="Mở danh mục ngành hàng"
-          >
-            <span>☰</span>
-            <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
-            <span style={{ fontSize: '9px', opacity: 0.8 }}>▼</span>
-          </button>
+          <div className="shopee-subnav-left">
+            <button
+              type="button"
+              className="shopee-subnav-cat-btn"
+              onClick={() => setShowCategoryDrawer(true)}
+              title="Mở danh mục ngành hàng"
+            >
+              <span>☰</span>
+              <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
+              <span style={{ fontSize: '9px', opacity: 0.8 }}>▼</span>
+            </button>
 
-          <span
-            className="shopee-subnav-link"
-            style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)' }}
-            onClick={handleGoHome}
-            title="Quay lại trang chủ và xem toàn bộ sản phẩm"
-          >
-            🏠 {t('nav_all_products', 'Trang Chủ (Tất Cả)')}
-          </span>
+            <span
+              className="shopee-subnav-link"
+              style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)' }}
+              onClick={() => handleSubnavItemClick('/', null)}
+              title="Quay lại trang chủ và xem toàn bộ sản phẩm"
+            >
+              🏠 {t('nav_all_products', 'Trang Chủ (Tất Cả)')}
+            </span>
 
-          <span
-            className="shopee-subnav-link highlight"
-            onClick={() => navTo('/?badge=Hot+Deal')}
-            title="Săn deal chớp nhoáng"
-          >
-            🔥 {t('nav_flash_deals', 'Flash Deals')}
-          </span>
+            <span
+              className="shopee-subnav-link highlight"
+              onClick={() => handleSubnavItemClick('/?badge=Hot+Deal', 'flash-deals-section')}
+              title="Săn deal chớp nhoáng giờ vàng"
+            >
+              🔥 {t('nav_flash_deals', 'Flash Deals')}
+            </span>
 
-          <span
-            className="shopee-subnav-link"
-            onClick={() => navTo('/?badge=Best+Seller')}
-          >
-            ⭐ {t('nav_best_sellers', 'Bán Chạy Nhất')}
-          </span>
+            <span
+              className="shopee-subnav-link"
+              onClick={() => handleSubnavItemClick('/?badge=Best+Seller', 'catalog-section')}
+              title="Khám phá các sản phẩm bán chạy nhất sàn"
+            >
+              ⭐ {t('nav_best_sellers', 'Bán Chạy Nhất')}
+            </span>
 
-          <span
-            className="shopee-subnav-link"
-            onClick={() => navTo('/?badge=Amazon%27s+Choice')}
-          >
-            ✨ {t('nav_featured_picks', 'Hàng Tuyển Chọn')}
-          </span>
+            <span
+              className="shopee-subnav-link"
+              onClick={() => handleSubnavItemClick('/?badge=Amazon%27s+Choice', 'catalog-section')}
+              title="Top sản phẩm đánh giá cao tuyển chọn"
+            >
+              ✨ {t('nav_featured_picks', 'Hàng Tuyển Chọn')}
+            </span>
 
-          <span
-            className="shopee-subnav-link"
-            onClick={() => navTo('/?fastDelivery=1')}
-          >
-            ⚡ {t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}
-          </span>
+            <span
+              className="shopee-subnav-link"
+              onClick={() => handleSubnavItemClick('/?fastDelivery=1', 'catalog-section')}
+              title="Sản phẩm hỗ trợ giao hàng hỏa tốc trong 2H"
+            >
+              ⚡ {t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}
+            </span>
 
-          <span
-            className="shopee-subnav-link badge-pill"
-            onClick={() => setShowRewardsModal(true)}
-            title="Vào Rewards Hub nhận xu & quay thưởng"
-          >
-            🎁 {t('nav_rewards_hub', 'Săn Xu & Voucher')}
-          </span>
+            <span
+              className="shopee-subnav-link badge-pill"
+              onClick={() => setShowRewardsModal(true)}
+              title="Vào Rewards Hub nhận xu & quay thưởng"
+            >
+              🎁 {t('nav_rewards_hub', 'Săn Xu & Voucher')}
+            </span>
+          </div>
+
+          {/* Right Trust Badges: Cân bằng thanh Subnav và tạo độ tin cậy mua sắm */}
+          <div className="shopee-subnav-right">
+            <div className="subnav-trust-pill" title="Cam kết 100% hàng thật chính hãng">
+              <span className="trust-icon">🛡️</span>
+              <span className="trust-text">100% Chính Hãng</span>
+            </div>
+            <span className="subnav-trust-sep">•</span>
+            <div className="subnav-trust-pill" title="Miễn phí vận chuyển toàn quốc cho đơn hàng đạt chuẩn">
+              <span className="trust-icon">🚚</span>
+              <span className="trust-text">Freeship Mọi Đơn</span>
+            </div>
+            <span className="subnav-trust-sep">•</span>
+            <div className="subnav-trust-pill" title="Đổi trả hàng miễn phí trong vòng 15 ngày">
+              <span className="trust-icon">🔄</span>
+              <span className="trust-text">15 Ngày Đổi Trả</span>
+            </div>
+          </div>
         </nav>
       </div>
 

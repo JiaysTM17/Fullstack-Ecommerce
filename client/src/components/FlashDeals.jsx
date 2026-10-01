@@ -37,7 +37,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
   if (dealProducts.length === 0) return null;
 
   return (
-    <section className="shopee-deals-section">
+    <section id="flash-deals-section" className="shopee-deals-section">
       <div className="shopee-deals-header">
         <div className="shopee-deals-title-area">
           <div className="shopee-deals-badge">

@@ -99,6 +99,37 @@ export default function HomePage() {
     };
   }, [filters, activeTab]);
 
+  // Tự động cuộn mượt xuống section tương ứng khi truy cập link từ Subnav/Banner
+  useEffect(() => {
+    const badge = searchParams.get("badge");
+    const fastDelivery = searchParams.get("fastDelivery");
+
+    if (badge || fastDelivery) {
+      const timer = setTimeout(() => {
+        let targetEl = null;
+        if (badge === "Hot Deal") {
+          targetEl = document.getElementById("flash-deals-section");
+        } else {
+          targetEl = document.getElementById("catalog-section");
+        }
+
+        if (targetEl) {
+          const headerWrapper = document.querySelector('.shopee-header-wrapper');
+          const headerHeight = headerWrapper ? headerWrapper.offsetHeight : 100;
+          const elementPosition = targetEl.getBoundingClientRect().top + window.pageYOffset;
+          const offsetPosition = Math.max(0, elementPosition - headerHeight - 16);
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+          });
+        }
+      }, 150);
+
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
+
   function updateFilter(key, value) {
     const nextParams = new URLSearchParams(searchParams);
 
