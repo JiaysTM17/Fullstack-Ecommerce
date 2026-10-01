@@ -429,7 +429,7 @@ const Header = ({
                 <span>Kênh Người Bán</span>
                 <span style={{ fontSize: '9.5px', background: '#dc2626', color: '#fff', padding: '1px 5px', borderRadius: '8px', fontWeight: 800 }}>MALL</span>
               </button>
-            ) : (
+            ) : user?.role === 'customer' ? (
               <button
                 type="button"
                 className="header-coin-capsule"
@@ -438,6 +438,17 @@ const Header = ({
               >
                 <span>🪙</span>
                 <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
+                <span style={{ fontSize: '10px' }}>✨</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="header-coin-capsule"
+                onClick={() => setShowRewardsModal(true)}
+                title="Khám phá Điểm Thưởng & Săn Xu"
+              >
+                <span>🎁</span>
+                <span>Săn Xu & Thưởng</span>
                 <span style={{ fontSize: '10px' }}>✨</span>
               </button>
             )}

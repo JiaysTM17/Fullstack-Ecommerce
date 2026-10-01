@@ -51,8 +51,8 @@ export function CoinProvider({ children }) {
   // Khởi tạo số dư xu tương ứng với vai trò tài khoản
   const [coins, setCoins] = useState(() => {
     try {
-      // Nếu là admin, mặc định 0 xu
-      if (user?.role === 'admin') return 0;
+      // Nếu chưa đăng nhập hoặc là admin, mặc định 0 xu
+      if (!user || user?.role === 'admin') return 0;
       // Nếu là seller, mặc định 0 xu (chủ shop quản lý doanh thu VND riêng)
       if (user?.role === 'seller') {
         const key = `mini_shopee_user_coins_seller_${user.shopId || user.id}`;
@@ -60,33 +60,39 @@ export function CoinProvider({ children }) {
         return saved !== null ? Number(saved) : 0;
       }
       // Nếu là khách hàng
-      const custKey = `mini_shopee_user_coins_customer_${user?.id || 'user_customer_01'}`;
-      const saved = localStorage.getItem(custKey) || localStorage.getItem(BASE_COINS_STORAGE_KEY);
-      if (saved !== null) return Number(saved);
+      if (user?.role === 'customer') {
+        const custKey = `mini_shopee_user_coins_customer_${user?.id || 'user_customer_01'}`;
+        const saved = localStorage.getItem(custKey);
+        if (saved !== null) return Number(saved);
+        return user?.id === 'user_customer_01' ? 25000 : 10000;
+      }
     } catch {}
-    return user?.role === 'customer' || !user ? 25000 : 0;
+    return 0;
   });
 
   const [coinHistory, setCoinHistory] = useState(() => {
     try {
-      if (user?.role === 'admin') return [];
+      if (!user || user?.role === 'admin') return [];
       if (user?.role === 'seller') {
         const key = `mini_shopee_coin_history_seller_${user.shopId || user.id}`;
         const saved = localStorage.getItem(key);
         return saved ? JSON.parse(saved) : [];
       }
-      const custKey = `mini_shopee_coin_history_customer_${user?.id || 'user_customer_01'}`;
-      const saved = localStorage.getItem(custKey) || localStorage.getItem(BASE_COIN_HISTORY_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (user?.role === 'customer') {
+        const custKey = `mini_shopee_coin_history_customer_${user?.id || 'user_customer_01'}`;
+        const saved = localStorage.getItem(custKey);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+        return INITIAL_HISTORY;
       }
     } catch {}
-    return user?.role === 'customer' || !user ? INITIAL_HISTORY : [];
+    return [];
   });
 
   const [streak, setStreak] = useState(() => {
-    if (user?.role === 'admin' || user?.role === 'seller') return 0;
+    if (!user || user?.role === 'admin' || user?.role === 'seller') return 0;
     try {
       const custKey = `mini_shopee_checkin_streak_customer_${user?.id || 'user_customer_01'}`;
       const saved = localStorage.getItem(custKey) || localStorage.getItem(BASE_STREAK_KEY);
@@ -112,7 +118,7 @@ export function CoinProvider({ children }) {
   });
 
   const [orderSpins, setOrderSpins] = useState(() => {
-    if (user?.role === 'admin' || user?.role === 'seller') return 0;
+    if (!user || user?.role === 'admin' || user?.role === 'seller') return 0;
     try {
       const custKey = `mini_shopee_order_spins_customer_${user?.id || 'user_customer_01'}`;
       const saved = localStorage.getItem(custKey) || localStorage.getItem(BASE_ORDER_SPINS_KEY);
@@ -124,11 +130,10 @@ export function CoinProvider({ children }) {
   // Tự động tải lại đúng dữ liệu độc lập khi chuyển đổi tài khoản (Customer / Seller / Admin)
   useEffect(() => {
     if (!user) {
-      const savedCoins = localStorage.getItem(`${BASE_COINS_STORAGE_KEY}_guest`) || localStorage.getItem(BASE_COINS_STORAGE_KEY);
-      setCoins(savedCoins !== null ? Number(savedCoins) : 25000);
-      setCoinHistory(INITIAL_HISTORY);
-      setStreak(2);
-      setOrderSpins(1);
+      setCoins(0);
+      setCoinHistory([]);
+      setStreak(0);
+      setOrderSpins(0);
       return;
     }
 

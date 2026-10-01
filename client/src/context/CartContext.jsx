@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { validateVoucher } from "../services/voucherService";
+import { useAuth } from "./AuthContext";
 
 const CART_STORAGE_KEY = "cart";
 const LEGACY_CART_STORAGE_KEY = "mini_shopee_cart";
@@ -46,17 +47,54 @@ function clampQuantity(nextQuantity, stock) {
   return stock > 0 ? Math.min(quantity, stock) : quantity;
 }
 
-function loadCartFromStorage() {
+function getCartStorageKey(user) {
+  if (!user) return "mini_shopee_cart_guest";
+  if (user.role === 'admin') return `mini_shopee_cart_admin_${user.id || user._id || 'admin'}`;
+  if (user.role === 'seller') return `mini_shopee_cart_seller_${user.shopId || user.id || 'seller'}`;
+  return `mini_shopee_cart_customer_${user.id || user._id || 'customer'}`;
+}
+
+function loadCartFromStorage(user) {
   try {
     if (typeof window === "undefined") {
       return [];
     }
 
-    const rawCart =
-      localStorage.getItem(CART_STORAGE_KEY) ||
-      localStorage.getItem(LEGACY_CART_STORAGE_KEY);
-    const savedCart = rawCart ? JSON.parse(rawCart) : [];
-    return Array.isArray(savedCart) ? savedCart : [];
+    // Nếu chưa đăng nhập hoặc là admin, mặc định giỏ hàng trống 0 sản phẩm
+    if (!user || user.role === 'admin') {
+      localStorage.removeItem("cart");
+      localStorage.removeItem("mini_shopee_cart");
+      const key = getCartStorageKey(user);
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+      return [];
+    }
+
+    const key = getCartStorageKey(user);
+    const rawCart = localStorage.getItem(key);
+    if (rawCart) {
+      const savedCart = JSON.parse(rawCart);
+      return Array.isArray(savedCart) ? savedCart : [];
+    }
+
+    // Fallback duy nhất cho tài khoản customer đầu tiên nếu có giỏ hàng cũ chưa migrate
+    if (user.role === 'customer') {
+      const legacyCart = localStorage.getItem(CART_STORAGE_KEY) || localStorage.getItem(LEGACY_CART_STORAGE_KEY);
+      if (legacyCart) {
+        const parsed = JSON.parse(legacyCart);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          localStorage.setItem(key, legacyCart);
+          localStorage.removeItem(CART_STORAGE_KEY);
+          localStorage.removeItem(LEGACY_CART_STORAGE_KEY);
+          return parsed;
+        }
+      }
+    }
+
+    return [];
   } catch {
     return [];
   }
@@ -184,20 +222,32 @@ function cartReducer(state, action) {
     case "CLEAR_CART":
       return { items: [] };
 
+    case "SET_CART_ITEMS":
+      return { items: Array.isArray(action.payload) ? action.payload : [] };
+
     default:
       return state;
   }
 }
 
 export function CartProvider({ children }) {
+  const { user } = useAuth();
+
   const [state, dispatch] = useReducer(cartReducer, undefined, () => ({
-    items: loadCartFromStorage(),
+    items: loadCartFromStorage(user),
   }));
 
   // Selected items checkbox state
   const [selectedItemIds, setSelectedItemIds] = useState(() => {
-    return loadCartFromStorage().map((item) => item.productId);
+    return loadCartFromStorage(user).map((item) => item.productId);
   });
+
+  // Tự động đồng bộ giỏ hàng riêng biệt khi chuyển đổi tài khoản (Guest / Customer / Seller / Admin)
+  useEffect(() => {
+    const loadedItems = loadCartFromStorage(user);
+    dispatch({ type: "SET_CART_ITEMS", payload: loadedItems });
+    setSelectedItemIds(loadedItems.map((item) => item.productId));
+  }, [user?.id, user?.role]);
 
   // Saved for later list
   const [savedItems, setSavedItems] = useState(loadSavedFromStorage);
@@ -216,8 +266,12 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items));
+    const key = getCartStorageKey(user);
+    localStorage.setItem(key, JSON.stringify(state.items));
     localStorage.removeItem(LEGACY_CART_STORAGE_KEY);
+    if (!user || user.role === 'admin') {
+      localStorage.removeItem(CART_STORAGE_KEY);
+    }
 
     // Keep selectedItemIds aligned
     setSelectedItemIds((prev) => {
@@ -227,7 +281,7 @@ export function CartProvider({ children }) {
       const remaining = prev.filter((id) => validIds.includes(id));
       return [...remaining, ...newlyAdded];
     });
-  }, [state.items]);
+  }, [state.items, user]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

@@ -215,11 +215,13 @@ export default function HomePage() {
       <HeroBanner onSelectCategory={(cat) => updateFilter("category", cat)} />
 
       {/* 2. 2-Tier Categories Showcase (Shopee / Modern E-Commerce Style) */}
-      <CategoryShowcase
-        onSelectShowcase={handleSelectShowcase}
-        onSelectCategory={(cat) => handleSelectShowcase({ category: cat, keyword: "" })}
-        onSelectKeyword={(kw) => handleSelectShowcase({ category: "", keyword: kw })}
-      />
+      <div id="category-showcase-section">
+        <CategoryShowcase
+          onSelectShowcase={handleSelectShowcase}
+          onSelectCategory={(cat) => handleSelectShowcase({ category: cat, keyword: "" })}
+          onSelectKeyword={(kw) => handleSelectShowcase({ category: "", keyword: kw })}
+        />
+      </div>
 
       {/* 3. Flash Deals Section */}
       <FlashDeals
