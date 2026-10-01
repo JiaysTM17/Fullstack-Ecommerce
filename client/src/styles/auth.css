@@ -5,17 +5,56 @@
    ========================================================================== */
 .shopee-auth-page-wrapper {
   min-height: calc(100vh - 120px);
-  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.04) 0%, transparent 65%), #f8fafc;
+  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.05) 0%, transparent 65%), #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 44px 20px;
   box-sizing: border-box;
   position: relative;
+  overflow: hidden;
+}
+
+.shopee-auth-page-wrapper::before {
+  content: "";
+  position: absolute;
+  top: -120px;
+  left: 10%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(147, 197, 253, 0.04) 50%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: floatOrb1 18s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.shopee-auth-page-wrapper::after {
+  content: "";
+  position: absolute;
+  bottom: -100px;
+  right: 12%;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, rgba(168, 85, 247, 0.05) 50%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: floatOrb2 22s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
 }
 
 [data-theme="dark"] .shopee-auth-page-wrapper {
   background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 65%), #0b0f19;
+}
+
+[data-theme="dark"] .shopee-auth-page-wrapper::before {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+}
+
+[data-theme="dark"] .shopee-auth-page-wrapper::after {
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
 }
 
 .shopee-auth-split-container {
@@ -30,6 +69,8 @@
   grid-template-columns: 1.05fr 1fr;
   overflow: hidden;
   position: relative;
+  z-index: 1;
+  animation: authCardEntry 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 [data-theme="dark"] .shopee-auth-split-container {
@@ -1166,15 +1207,95 @@
   to { opacity: 1; }
 }
 
-@keyframes authModalSlideUp {
+@keyframes authCardEntry {
   from {
     opacity: 0;
-    transform: translateY(24px) scale(0.98);
+    transform: translateY(24px) scale(0.985);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+@keyframes authModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes floatOrb1 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(60px, 40px) scale(1.1); }
+  100% { transform: translate(-30px, 70px) scale(0.95); }
+}
+
+@keyframes floatOrb2 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50px, -40px) scale(1.15); }
+  100% { transform: translate(40px, -60px) scale(0.9); }
+}
+
+@keyframes floatBadge {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+.shopee-auth-hero-badge {
+  animation: floatBadge 3.5s ease-in-out infinite alternate;
+}
+
+/* Submit Button Shimmer Sweep */
+.shopee-auth-submit-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.shopee-auth-submit-btn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 35%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(25deg);
+  animation: btnShimmerSweep 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes btnShimmerSweep {
+  0%, 75% { left: -60%; }
+  100% { left: 140%; }
+}
+
+/* Input Focus Micro-interaction */
+.shopee-form-input-wrap {
+  transition: all 0.2s ease;
+}
+
+.shopee-form-input-wrap:focus-within .shopee-input-lead-icon {
+  transform: scale(1.18);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Social Buttons Interactive Glow */
+.shopee-social-btn {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.shopee-social-btn:hover {
+  transform: translateY(-2.5px) scale(1.02) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
 @keyframes qrLaserScan {

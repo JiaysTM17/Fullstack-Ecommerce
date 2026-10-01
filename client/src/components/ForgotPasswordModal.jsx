@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '../context/ToastContext';
 
 /**
- * Redesigned Forgot Password Modal
+ * Enterprise Redesigned Forgot Password Modal
  * Features:
- * - 3 clean steps: Email -> 6-Digit OTP -> New Secure Password
- * - Segmented Single-Input pattern for 6 OTP boxes (immune to IME bugs, fits perfectly, no overflow)
- * - Subtle test mailbox helper badge for dev/staging environments
- * - Strict password strength analyzer with visual progress and checklist
+ * - High-end modern Glassmorphism & Micro-animations
+ * - Ultra-responsive segmented 6-digit OTP boxes with glowing focus states
+ * - Interactive 4-checkpoint password strength analyzer with pill cards
+ * - Elegant Dev/Test environment toolbox
  * Author: Kiệt Trương <truonggiakiet110806@gmail.com>
  */
 export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, defaultEmail = '' }) {
@@ -120,7 +120,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
     passwordChecks.hasSpecial;
 
   const getPasswordStrength = (pwd) => {
-    if (!pwd) return { score: 0, text: '', color: '#94a3b8' };
+    if (!pwd) return { score: 0, text: 'Chưa nhập', color: '#94a3b8' };
     let score = 0;
     if (pwd.length >= 8) score++;
     if (/[A-Z]/.test(pwd)) score++;
@@ -128,7 +128,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
     if (/[^A-Za-z0-9]/.test(pwd)) score++;
     if (score <= 2) return { score: 1, text: 'Yếu', color: '#ef4444' };
     if (score === 3) return { score: 2, text: 'Trung bình', color: '#f59e0b' };
-    return { score: 3, text: 'Mạnh (Tối ưu)', color: '#10b981' };
+    return { score: 3, text: 'Mạnh (Tối ưu bảo mật)', color: '#10b981' };
   };
 
   const pwdStrength = getPasswordStrength(newPassword);
@@ -137,7 +137,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
   const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
     if (!email || !/^\S+@\S+\.\S+$/.test(email.trim())) {
-      setError('Vui lòng nhập địa chỉ email hợp lệ (ví dụ: an.nguyen@example.com)');
+      setError('Vui lòng nhập địa chỉ email hợp lệ (ví dụ: tenban@gmail.com)');
       return;
     }
 
@@ -220,7 +220,6 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
         showToast('Xác thực mã OTP thành công! Vui lòng thiết lập mật khẩu mới.', 'success');
         setStep(3);
       } else {
-        // Nếu mã khớp devOtp (trường hợp fallback test)
         if (devOtp && otpValue === devOtp) {
           showToast('Xác thực mã OTP thành công! Vui lòng thiết lập mật khẩu mới.', 'success');
           setStep(3);
@@ -229,7 +228,6 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
         }
       }
     } catch {
-      // Local fallback
       if (devOtp && otpValue === devOtp) {
         setStep(3);
       } else {
@@ -315,7 +313,6 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
         setError(data.message || 'Đặt lại mật khẩu thất bại. Vui lòng thử lại.');
       }
     } catch {
-      // Local fallback
       if (onResetSuccess) {
         onResetSuccess(email.trim(), newPassword);
       }
@@ -329,14 +326,15 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
       <div
         className="shopee-auth-modal-card"
         style={{
-          maxWidth: '480px',
-          width: '92%',
-          padding: '32px 26px',
-          borderRadius: '24px',
+          maxWidth: '500px',
+          width: '94%',
+          padding: '34px 28px 26px',
+          borderRadius: '26px',
           background: '#ffffff',
           position: 'relative',
-          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.3)',
-          overflow: 'hidden',
+          boxShadow: '0 28px 70px -15px rgba(15, 23, 42, 0.28), 0 4px 20px rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e2e8f0',
+          animation: 'authModalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         }}
       >
         {/* Close Button */}
@@ -347,8 +345,8 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
           aria-label="Đóng"
           style={{
             position: 'absolute',
-            top: '16px',
-            right: '16px',
+            top: '18px',
+            right: '18px',
             width: '32px',
             height: '32px',
             borderRadius: '50%',
@@ -360,32 +358,43 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            transition: 'background 0.15s ease',
           }}
         >
           ✕
         </button>
 
-        {/* Header Icon & Title */}
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        {/* Modal Header */}
+        <div style={{ textAlign: 'center', marginBottom: '22px' }}>
           <div
             style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '18px',
-              background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(14, 165, 233, 0.15) 100%)',
-              border: '1.5px solid rgba(37, 99, 235, 0.25)',
+              width: '60px',
+              height: '60px',
+              borderRadius: '20px',
+              background:
+                step === 1
+                  ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(14, 165, 233, 0.18) 100%)'
+                  : step === 2
+                  ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.18) 100%)'
+                  : 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(79, 70, 229, 0.18) 100%)',
+              border:
+                step === 1
+                  ? '1.5px solid rgba(37, 99, 235, 0.3)'
+                  : step === 2
+                  ? '1.5px solid rgba(16, 185, 129, 0.3)'
+                  : '1.5px solid rgba(99, 102, 241, 0.3)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '26px',
+              fontSize: '28px',
               margin: '0 auto 12px',
-              boxShadow: '0 8px 20px -6px rgba(37, 99, 235, 0.25)',
+              boxShadow: '0 8px 24px -6px rgba(37, 99, 235, 0.2)',
             }}
           >
             {step === 1 ? '🔐' : step === 2 ? '📬' : '🛡️'}
           </div>
 
-          <h3 style={{ fontSize: '21px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a' }}>
+          <h3 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a', letterSpacing: '-0.3px' }}>
             {step === 1 && 'Khôi Phục Mật Khẩu'}
             {step === 2 && 'Xác Thực Mã OTP 2FA'}
             {step === 3 && 'Thiết Lập Mật Khẩu Mới'}
@@ -393,26 +402,21 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
 
           <p style={{ fontSize: '13px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
             {step === 1 && 'Nhập email tài khoản của bạn để nhận mã xác minh OTP bảo mật'}
-            {step === 2 && (
-              <>
-                Mã xác thực 6 số đã được gửi tới: <br />
-                <strong style={{ color: '#2563eb' }}>{email}</strong>
-              </>
-            )}
-            {step === 3 && 'Tạo mật khẩu mới có độ bảo mật cao để bảo vệ tài khoản'}
+            {step === 2 && 'Nhập dãy 6 số xác minh được gửi tới hộp thư để chứng thực'}
+            {step === 3 && 'Tạo mật khẩu mới đạt tiêu chuẩn an toàn cấp cao cho tài khoản'}
           </p>
         </div>
 
-        {/* 3-Step Breadcrumbs */}
+        {/* 3-Step Modern Stepper Tabs */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '6px',
+            gap: '8px',
             marginBottom: '20px',
             background: '#f8fafc',
-            padding: '8px 10px',
-            borderRadius: '12px',
+            padding: '6px',
+            borderRadius: '14px',
             border: '1px solid #e2e8f0',
           }}
         >
@@ -422,9 +426,14 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px',
-              fontSize: '11px',
+              padding: '7px 8px',
+              borderRadius: '10px',
+              fontSize: '11.5px',
               fontWeight: 700,
-              color: step >= 1 ? '#2563eb' : '#94a3b8',
+              background: step === 1 ? '#ffffff' : 'transparent',
+              color: step === 1 ? '#2563eb' : step > 1 ? '#10b981' : '#94a3b8',
+              boxShadow: step === 1 ? '0 2px 8px rgba(0, 0, 0, 0.06)' : 'none',
+              transition: 'all 0.2s',
             }}
           >
             <span
@@ -432,17 +441,18 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 width: '18px',
                 height: '18px',
                 borderRadius: '50%',
-                background: step >= 1 ? '#2563eb' : '#cbd5e1',
+                background: step === 1 ? '#2563eb' : step > 1 ? '#10b981' : '#cbd5e1',
                 color: '#fff',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '10px',
+                fontWeight: 800,
               }}
             >
-              1
+              {step > 1 ? '✓' : '1'}
             </span>
-            <span>Email</span>
+            <span>Nhập Email</span>
           </div>
 
           <div
@@ -451,9 +461,14 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px',
-              fontSize: '11px',
+              padding: '7px 8px',
+              borderRadius: '10px',
+              fontSize: '11.5px',
               fontWeight: 700,
-              color: step >= 2 ? '#2563eb' : '#94a3b8',
+              background: step === 2 ? '#ffffff' : 'transparent',
+              color: step === 2 ? '#2563eb' : step > 2 ? '#10b981' : '#94a3b8',
+              boxShadow: step === 2 ? '0 2px 8px rgba(0, 0, 0, 0.06)' : 'none',
+              transition: 'all 0.2s',
             }}
           >
             <span
@@ -461,15 +476,16 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 width: '18px',
                 height: '18px',
                 borderRadius: '50%',
-                background: step >= 2 ? '#2563eb' : '#cbd5e1',
+                background: step === 2 ? '#2563eb' : step > 2 ? '#10b981' : '#cbd5e1',
                 color: '#fff',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '10px',
+                fontWeight: 800,
               }}
             >
-              2
+              {step > 2 ? '✓' : '2'}
             </span>
             <span>Nhập OTP</span>
           </div>
@@ -480,9 +496,14 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px',
-              fontSize: '11px',
+              padding: '7px 8px',
+              borderRadius: '10px',
+              fontSize: '11.5px',
               fontWeight: 700,
-              color: step >= 3 ? '#2563eb' : '#94a3b8',
+              background: step === 3 ? '#ffffff' : 'transparent',
+              color: step === 3 ? '#2563eb' : '#94a3b8',
+              boxShadow: step === 3 ? '0 2px 8px rgba(0, 0, 0, 0.06)' : 'none',
+              transition: 'all 0.2s',
             }}
           >
             <span
@@ -490,12 +511,13 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 width: '18px',
                 height: '18px',
                 borderRadius: '50%',
-                background: step >= 3 ? '#2563eb' : '#cbd5e1',
+                background: step === 3 ? '#2563eb' : '#cbd5e1',
                 color: '#fff',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '10px',
+                fontWeight: 800,
               }}
             >
               3
@@ -510,12 +532,12 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
             style={{
               background: '#fef2f2',
               border: '1px solid #fecaca',
-              borderRadius: '10px',
+              borderRadius: '12px',
               padding: '10px 14px',
               color: '#b91c1c',
-              fontSize: '12px',
+              fontSize: '12.5px',
               fontWeight: 600,
-              marginBottom: '16px',
+              marginBottom: '18px',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
@@ -529,9 +551,9 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
         {/* ================= STEP 1: ENTER EMAIL ================= */}
         {step === 1 && (
           <form onSubmit={handleSendOtp}>
-            <div className="shopee-form-group" style={{ marginBottom: '20px' }}>
-              <label className="shopee-form-label" style={{ fontSize: '12.5px' }}>
-                Địa chỉ Email tài khoản *
+            <div className="shopee-form-group" style={{ marginBottom: '22px' }}>
+              <label className="shopee-form-label" style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
+                Địa chỉ Email tài khoản của bạn *
               </label>
 
               <div className="shopee-email-autocomplete-wrap" style={{ position: 'relative' }}>
@@ -567,10 +589,10 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                       zIndex: 20,
                       background: '#ffffff',
                       border: '1px solid #cbd5e1',
-                      borderRadius: '10px',
+                      borderRadius: '12px',
                       marginTop: '4px',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                      maxHeight: '180px',
+                      boxShadow: '0 12px 28px rgba(0,0,0,0.14)',
+                      maxHeight: '190px',
                       overflowY: 'auto',
                     }}
                   >
@@ -580,12 +602,13 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                         className="shopee-email-dropdown-item"
                         onClick={() => handleSelectEmailSuggestion(item.full)}
                         style={{
-                          padding: '8px 12px',
-                          fontSize: '12px',
+                          padding: '10px 14px',
+                          fontSize: '12.5px',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '8px',
+                          transition: 'background 0.15s',
                         }}
                       >
                         <span>📬</span>
@@ -606,15 +629,19 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               disabled={loading}
               style={{
                 width: '100%',
-                height: '46px',
-                fontSize: '14px',
+                height: '48px',
+                fontSize: '14.5px',
                 fontWeight: 700,
-                borderRadius: '12px',
+                borderRadius: '14px',
                 background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
                 color: '#ffffff',
                 border: 'none',
-                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)',
+                boxShadow: '0 4px 16px rgba(37, 99, 235, 0.35)',
                 cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
             >
               {loading ? 'Đang gửi mã bảo mật...' : 'Gửi Mã Xác Thực OTP ➔'}
@@ -622,33 +649,54 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
           </form>
         )}
 
-        {/* ================= STEP 2: ENTER OTP ================= */}
+        {/* ================= STEP 2: ENTER OTP (UPGRADED UI) ================= */}
         {step === 2 && (
           <form onSubmit={handleVerifyOtp}>
+            {/* Modern Dispatch Notice Card */}
             <div
               style={{
-                background: '#eff6ff',
-                border: '1px solid #bfdbfe',
-                borderRadius: '12px',
-                padding: '10px 14px',
-                marginBottom: '16px',
+                background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)',
+                border: '1.5px solid #bfdbfe',
+                borderRadius: '16px',
+                padding: '14px 16px',
+                marginBottom: '20px',
                 display: 'flex',
-                alignItems: 'flex-start',
-                gap: '8px',
+                alignItems: 'center',
+                gap: '12px',
+                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.06)',
               }}
             >
-              <span style={{ fontSize: '16px', lineHeight: 1 }}>🛡️</span>
-              <div style={{ fontSize: '12px', color: '#1e40af', lineHeight: 1.5 }}>
-                Mã xác minh bảo mật 6 số đã được chuyển phát qua dịch vụ thư điện tử tới: <strong>{email}</strong>.
-                Vui lòng kiểm tra hộp thư đến (Inbox) hoặc thư rác (Spam).
+              <div
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  background: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '22px',
+                  boxShadow: '0 2px 6px rgba(37, 99, 235, 0.15)',
+                  flexShrink: 0,
+                }}
+              >
+                📩
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Đã Gửi Mã Xác Minh Bảo Mật
+                </div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {email}
+                </div>
               </div>
             </div>
 
-            {/* Segmented 6-Digit OTP Box Display (Strict No-Overflow Flex) */}
-            <div className="shopee-form-group" style={{ marginBottom: '16px' }}>
-              <label className="shopee-form-label" style={{ textAlign: 'center', display: 'block', fontSize: '12.5px' }}>
+            {/* Glowing Segmented 6-Digit OTP Box Grid */}
+            <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+              <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '12px' }}>
                 Nhập 6 chữ số mã OTP xác minh *
-              </label>
+              </div>
 
               <div
                 onClick={handleBoxClick}
@@ -658,13 +706,13 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   gap: '8px',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  margin: '12px auto',
                   cursor: 'text',
-                  maxWidth: '340px',
+                  maxWidth: '360px',
+                  margin: '0 auto',
                   userSelect: 'none',
                 }}
               >
-                {/* Master Hidden Input: captures all typing and pasting seamlessly */}
+                {/* Master Hidden Input */}
                 <input
                   ref={otpInputRef}
                   type="text"
@@ -694,7 +742,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   }}
                 />
 
-                {/* 6 Visual Segmented Boxes (Exact Compact Dimensions) */}
+                {/* 6 Visual Segmented Boxes */}
                 {[0, 1, 2, 3, 4, 5].map((idx) => {
                   const digit = otpValue[idx] || '';
                   const isActive = isOtpFocused && (otpValue.length === idx || (idx === 5 && otpValue.length === 6));
@@ -702,27 +750,27 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                     <div
                       key={idx}
                       style={{
-                        width: '46px',
-                        height: '52px',
+                        width: '48px',
+                        height: '56px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '22px',
+                        fontSize: '24px',
                         fontWeight: 800,
                         color: '#0f172a',
-                        background: digit ? '#f0fdf4' : '#f8fafc',
+                        background: digit ? '#f0fdf4' : '#ffffff',
                         border: isActive
                           ? '2px solid #2563eb'
                           : digit
                           ? '2px solid #22c55e'
                           : '1.5px solid #cbd5e1',
-                        borderRadius: '12px',
+                        borderRadius: '14px',
                         boxShadow: isActive
-                          ? '0 0 0 3px rgba(37, 99, 235, 0.2)'
+                          ? '0 0 0 4px rgba(37, 99, 235, 0.18)'
                           : digit
-                          ? '0 0 0 3px rgba(34, 197, 94, 0.12)'
-                          : 'none',
-                        transition: 'all 0.15s ease',
+                          ? '0 0 0 3px rgba(34, 197, 94, 0.14)'
+                          : '0 2px 4px rgba(0, 0, 0, 0.02)',
+                        transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
                       }}
                     >
                       {digit}
@@ -732,14 +780,14 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               </div>
             </div>
 
-            {/* Navigation links & Resend */}
+            {/* Navigation links & Resend Pill */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: '18px',
-                fontSize: '12px',
+                marginBottom: '22px',
+                fontSize: '12.5px',
               }}
             >
               <button
@@ -752,15 +800,27 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   cursor: 'pointer',
                   fontWeight: 600,
                   padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
                 }}
               >
-                ← Đổi email khác
+                <span>←</span> Đổi email khác
               </button>
 
               {cooldown > 0 ? (
-                <span style={{ color: '#94a3b8', fontWeight: 600 }}>
-                  Gửi lại mã sau <strong style={{ color: '#2563eb' }}>{cooldown}s</strong>
-                </span>
+                <div
+                  style={{
+                    background: '#f1f5f9',
+                    color: '#64748b',
+                    padding: '4px 10px',
+                    borderRadius: '20px',
+                    fontWeight: 600,
+                    fontSize: '12px',
+                  }}
+                >
+                  ⏳ Gửi lại sau <strong style={{ color: '#2563eb' }}>{cooldown}s</strong>
+                </div>
               ) : (
                 <button
                   type="button"
@@ -787,60 +847,70 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               disabled={loading || otpValue.length < 6}
               style={{
                 width: '100%',
-                height: '46px',
-                fontSize: '14px',
+                height: '48px',
+                fontSize: '14.5px',
                 fontWeight: 700,
-                borderRadius: '12px',
-                background: otpValue.length === 6 ? '#2563eb' : '#94a3b8',
+                borderRadius: '14px',
+                background: otpValue.length === 6 ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)' : '#94a3b8',
                 color: '#ffffff',
                 border: 'none',
                 cursor: otpValue.length === 6 ? 'pointer' : 'not-allowed',
-                boxShadow: otpValue.length === 6 ? '0 4px 14px rgba(37, 99, 235, 0.35)' : 'none',
+                boxShadow: otpValue.length === 6 ? '0 4px 16px rgba(37, 99, 235, 0.35)' : 'none',
                 transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
             >
-              {loading ? 'Đang xác thực bảo mật...' : 'Xác Nhận Mã & Tiếp Tục ➔'}
+              {loading ? 'Đang đối soát an ninh...' : 'Xác Nhận Mã & Tiếp Tục ➔'}
             </button>
 
-            {/* Development Mode Helper Badge - Subtle Test Environment Helper */}
+            {/* Developer Test Mode Helper Toolbar */}
             {devOtp && (
-              <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed #e2e8f0', textAlign: 'center' }}>
-                <span
+              <div
+                style={{
+                  marginTop: '18px',
+                  paddingTop: '14px',
+                  borderTop: '1px dashed #e2e8f0',
+                  textAlign: 'center',
+                }}
+              >
+                <div
                   onClick={() => {
-                    alert(`[Mã Xác Thực 2FA OTP]: ${devOtp}\n(Hệ thống mô phỏng gửi đến email: ${email || 'của bạn'})\nVui lòng tự tay nhập 6 chữ số này vào các ô phía trên để xác thực.`);
+                    alert(`[MÃ KHÔI PHỤC MẬT KHẨU OTP]: ${devOtp}\n\n• Hòm thư mô phỏng: ${email}\n• Vui lòng nhập dãy 6 chữ số này vào các ô phía trên để xác thực.`);
                   }}
                   style={{
-                    fontSize: '11px',
-                    color: '#64748b',
+                    fontSize: '11.5px',
+                    color: '#475569',
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '5px',
-                    userSelect: 'none',
-                    padding: '3px 10px',
-                    borderRadius: '6px',
+                    gap: '6px',
+                    padding: '5px 12px',
+                    borderRadius: '20px',
                     background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid #cbd5e1',
                     fontWeight: 600,
                     transition: 'all 0.15s ease',
                   }}
-                  title="Nhấn để xem mã nếu chưa kết nối hộp thư thực tế"
+                  title="Nhấn để xem mã OTP trong môi trường Test"
                 >
-                  <span>📨</span>
-                  <span>Xem thông điệp hộp thư (Môi trường Test)</span>
-                </span>
+                  <span>🧪</span>
+                  <span>Môi trường thử nghiệm: <strong>Xem mã OTP 2FA</strong></span>
+                </div>
               </div>
             )}
           </form>
         )}
 
-        {/* ================= STEP 3: SET NEW PASSWORD ================= */}
+        {/* ================= STEP 3: SET NEW PASSWORD (UPGRADED UI) ================= */}
         {step === 3 && (
           <form onSubmit={handleSetNewPassword}>
             {/* New Password Input */}
-            <div className="shopee-form-group" style={{ marginBottom: '12px' }}>
-              <label className="shopee-form-label" style={{ fontSize: '12px' }}>
-                Mật khẩu mới *
+            <div className="shopee-form-group" style={{ marginBottom: '14px' }}>
+              <label className="shopee-form-label" style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>
+                Mật khẩu mới của bạn *
               </label>
               <div className="shopee-form-input-wrap">
                 <span className="shopee-input-lead-icon">🔒</span>
@@ -867,57 +937,129 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               </div>
             </div>
 
-            {/* Password Strength Meter */}
-            {newPassword && (
-              <div style={{ marginBottom: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
-                  <span style={{ color: '#64748b' }}>Độ mạnh mật khẩu:</span>
-                  <strong style={{ color: pwdStrength.color }}>{pwdStrength.text}</strong>
-                </div>
-                <div style={{ height: '4px', background: '#e2e8f0', borderRadius: '2px', overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      height: '100%',
-                      width: `${(pwdStrength.score / 3) * 100}%`,
-                      background: pwdStrength.color,
-                      transition: 'all 0.25s ease',
-                    }}
-                  />
-                </div>
+            {/* Segmented Strength Meter */}
+            <div style={{ marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', marginBottom: '6px' }}>
+                <span style={{ color: '#64748b' }}>Độ mạnh mật khẩu:</span>
+                <strong style={{ color: pwdStrength.color }}>{pwdStrength.text}</strong>
               </div>
-            )}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+                <div
+                  style={{
+                    height: '5px',
+                    borderRadius: '3px',
+                    background: pwdStrength.score >= 1 ? pwdStrength.color : '#e2e8f0',
+                    transition: 'all 0.25s',
+                  }}
+                />
+                <div
+                  style={{
+                    height: '5px',
+                    borderRadius: '3px',
+                    background: pwdStrength.score >= 2 ? pwdStrength.color : '#e2e8f0',
+                    transition: 'all 0.25s',
+                  }}
+                />
+                <div
+                  style={{
+                    height: '5px',
+                    borderRadius: '3px',
+                    background: pwdStrength.score >= 3 ? pwdStrength.color : '#e2e8f0',
+                    transition: 'all 0.25s',
+                  }}
+                />
+              </div>
+            </div>
 
-            {/* Password Rules Checklist */}
+            {/* 4 Security Checkpoints (Pill Grid) */}
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: '6px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                padding: '8px 10px',
-                borderRadius: '10px',
-                marginBottom: '12px',
-                fontSize: '11px',
+                gap: '8px',
+                marginBottom: '16px',
               }}
             >
-              <div style={{ color: passwordChecks.length ? '#10b981' : '#64748b' }}>
-                {passwordChecks.length ? '✓' : '○'} Tối thiểu 8 ký tự
+              <div
+                style={{
+                  padding: '8px 10px',
+                  borderRadius: '10px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: passwordChecks.length ? '#ecfdf5' : '#f8fafc',
+                  border: passwordChecks.length ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                  color: passwordChecks.length ? '#047857' : '#64748b',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <span>{passwordChecks.length ? '✓' : '○'}</span>
+                <span>Tối thiểu 8 ký tự</span>
               </div>
-              <div style={{ color: passwordChecks.hasUpper ? '#10b981' : '#64748b' }}>
-                {passwordChecks.hasUpper ? '✓' : '○'} Có chữ hoa (A-Z)
+
+              <div
+                style={{
+                  padding: '8px 10px',
+                  borderRadius: '10px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: passwordChecks.hasUpper ? '#ecfdf5' : '#f8fafc',
+                  border: passwordChecks.hasUpper ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                  color: passwordChecks.hasUpper ? '#047857' : '#64748b',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <span>{passwordChecks.hasUpper ? '✓' : '○'}</span>
+                <span>Chữ viết hoa (A-Z)</span>
               </div>
-              <div style={{ color: passwordChecks.hasNumber ? '#10b981' : '#64748b' }}>
-                {passwordChecks.hasNumber ? '✓' : '○'} Có chữ số (0-9)
+
+              <div
+                style={{
+                  padding: '8px 10px',
+                  borderRadius: '10px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: passwordChecks.hasNumber ? '#ecfdf5' : '#f8fafc',
+                  border: passwordChecks.hasNumber ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                  color: passwordChecks.hasNumber ? '#047857' : '#64748b',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <span>{passwordChecks.hasNumber ? '✓' : '○'}</span>
+                <span>Chữ số (0-9)</span>
               </div>
-              <div style={{ color: passwordChecks.hasSpecial ? '#10b981' : '#64748b' }}>
-                {passwordChecks.hasSpecial ? '✓' : '○'} Ký tự đặc biệt (!@#$)
+
+              <div
+                style={{
+                  padding: '8px 10px',
+                  borderRadius: '10px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: passwordChecks.hasSpecial ? '#ecfdf5' : '#f8fafc',
+                  border: passwordChecks.hasSpecial ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                  color: passwordChecks.hasSpecial ? '#047857' : '#64748b',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <span>{passwordChecks.hasSpecial ? '✓' : '○'}</span>
+                <span>Ký tự đặc biệt (!@#$)</span>
               </div>
             </div>
 
             {/* Confirm Password Input */}
-            <div className="shopee-form-group" style={{ marginBottom: '16px' }}>
-              <label className="shopee-form-label" style={{ fontSize: '12px' }}>
+            <div className="shopee-form-group" style={{ marginBottom: '22px' }}>
+              <label className="shopee-form-label" style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>
                 Xác nhận lại mật khẩu mới *
               </label>
               <div className="shopee-form-input-wrap">
@@ -950,10 +1092,10 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               disabled={loading || !isAllPasswordCriteriaMet || newPassword !== confirmPassword}
               style={{
                 width: '100%',
-                height: '46px',
-                fontSize: '14px',
+                height: '48px',
+                fontSize: '14.5px',
                 fontWeight: 700,
-                borderRadius: '12px',
+                borderRadius: '14px',
                 background:
                   isAllPasswordCriteriaMet && newPassword === confirmPassword
                     ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
@@ -966,8 +1108,12 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                     : 'not-allowed',
                 boxShadow:
                   isAllPasswordCriteriaMet && newPassword === confirmPassword
-                    ? '0 4px 14px rgba(16, 185, 129, 0.35)'
+                    ? '0 4px 16px rgba(16, 185, 129, 0.35)'
                     : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
             >
               {loading ? 'Đang cập nhật mật khẩu...' : 'Lưu Mật Khẩu Mới & Đăng Nhập ➔'}

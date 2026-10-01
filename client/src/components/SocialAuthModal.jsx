@@ -3,12 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 /**
- * Enterprise Social OAuth SSO Modal
- * Provides 3 distinct brand identities:
- * 1. Google: Material You Google Account Chooser
- * 2. Facebook: Meta / Facebook Blue Identity Dialog
- * 3. Apple: Cupertino Dark / Minimalist Apple ID with "Hide My Email" option
- * Automatically adopts the current login role (customer / seller) without redundant selection.
+ * Enterprise Social OAuth SSO Modal (Next-Gen UI/UX Edition)
+ * Distinct world-class designs:
+ * 1. Google: Material You Google Account Identity Chooser
+ * 2. Facebook: Meta Modern Authenticator with permission preview
+ * 3. Apple: Cupertino Dark Elegance with Private Relay toggle
+ * Automatically inherits login tab role (customer/seller) seamlessly.
  * Author: Kiệt Trương <truonggiakiet110806@gmail.com>
  */
 export default function SocialAuthModal({
@@ -72,7 +72,6 @@ export default function SocialAuthModal({
     setError('');
 
     try {
-      // SSO User Object synchronized with active role
       const ssoUser = {
         _id: 'user_sso_' + Date.now(),
         id: 'user_sso_' + Date.now(),
@@ -126,16 +125,17 @@ export default function SocialAuthModal({
         <div
           className="shopee-auth-modal-card"
           style={{
-            maxWidth: '450px',
+            maxWidth: '460px',
             width: '92%',
-            padding: '32px 28px',
+            padding: '36px 30px 24px',
             borderRadius: '28px',
             background: '#ffffff',
-            boxShadow: '0 20px 60px rgba(60, 64, 67, 0.25)',
-            border: '1px solid #dadce0',
+            boxShadow: '0 24px 64px -12px rgba(60, 64, 67, 0.25), 0 8px 24px -4px rgba(60, 64, 67, 0.1)',
+            border: '1px solid #e0e2ec',
             position: 'relative',
-            color: '#202124',
-            fontFamily: 'Google Sans, Roboto, Arial, sans-serif',
+            color: '#1f1f1f',
+            fontFamily: '"Google Sans", Roboto, system-ui, -apple-system, sans-serif',
+            animation: 'authModalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           }}
         >
           {/* Close button */}
@@ -146,59 +146,76 @@ export default function SocialAuthModal({
             aria-label="Đóng"
             style={{
               position: 'absolute',
-              top: '16px',
-              right: '16px',
+              top: '18px',
+              right: '18px',
               background: '#f1f3f4',
               border: 'none',
               borderRadius: '50%',
               width: '32px',
               height: '32px',
               cursor: 'pointer',
-              color: '#5f6368',
+              color: '#444746',
               fontSize: '14px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              transition: 'background 0.2s',
             }}
           >
             ✕
           </button>
 
-          {/* Google Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-            <svg width="28" height="28" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-            <div>
-              <h3 style={{ fontSize: '19px', fontWeight: 600, margin: 0, color: '#202124' }}>
-                Đăng nhập bằng Google
-              </h3>
-              <div style={{ fontSize: '12px', color: '#5f6368', marginTop: '2px' }}>
-                tiếp tục tới <strong>Fullstack E-Commerce</strong>
-              </div>
+          {/* Google Header Logo */}
+          <div style={{ textAlign: 'center', marginBottom: '22px' }}>
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '16px',
+                background: '#ffffff',
+                border: '1.5px solid #e0e2ec',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
+                marginBottom: '12px',
+              }}
+            >
+              <svg width="30" height="30" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+            </div>
+
+            <h3 style={{ fontSize: '21px', fontWeight: 700, margin: '0 0 4px', color: '#1f1f1f', letterSpacing: '-0.2px' }}>
+              Đăng nhập bằng Google
+            </h3>
+            <div style={{ fontSize: '13px', color: '#444746' }}>
+              tiếp tục tới <strong style={{ color: '#0b57d0' }}>Fullstack E-Commerce</strong>
             </div>
           </div>
 
-          {/* Active Role Indicator (Synchronized with Tab) */}
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: '#e8f0fe',
-              color: '#1a73e8',
-              padding: '4px 12px',
-              borderRadius: '16px',
-              fontSize: '11.5px',
-              fontWeight: 600,
-              marginBottom: '16px',
-            }}
-          >
-            <span>{roleIcon}</span>
-            <span>Đăng nhập với vai trò: <strong>{roleLabel}</strong></span>
+          {/* Active Role Smart Chip */}
+          <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: currentRole === 'seller' ? '#fef3c7' : '#e8f0fe',
+                color: currentRole === 'seller' ? '#92400e' : '#0b57d0',
+                border: currentRole === 'seller' ? '1px solid #fde68a' : '1px solid #c2e7ff',
+                padding: '5px 14px',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: 600,
+              }}
+            >
+              <span>{roleIcon}</span>
+              <span>Đăng nhập với vai trò: <strong>{roleLabel}</strong></span>
+            </div>
           </div>
 
           {error && (
@@ -207,52 +224,61 @@ export default function SocialAuthModal({
                 background: '#fce8e6',
                 border: '1px solid #fad2cf',
                 color: '#c5221f',
-                padding: '8px 12px',
-                borderRadius: '8px',
-                fontSize: '12px',
-                marginBottom: '14px',
+                padding: '10px 14px',
+                borderRadius: '12px',
+                fontSize: '12.5px',
+                marginBottom: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
-              ⚠️ {error}
+              <span>⚠️</span>
+              <span>{error}</span>
             </div>
           )}
 
-          {/* Google Account Card */}
+          {/* Google Account Card (Material You) */}
           <div
             style={{
-              border: '1px solid #dadce0',
-              borderRadius: '16px',
+              border: '1.5px solid #e0e2ec',
+              borderRadius: '20px',
               padding: '14px 16px',
               display: 'flex',
               alignItems: 'center',
               gap: '14px',
               background: '#f8fafd',
               marginBottom: '16px',
+              transition: 'border-color 0.2s',
             }}
           >
             <div
               style={{
-                width: '42px',
-                height: '42px',
+                width: '46px',
+                height: '46px',
                 borderRadius: '50%',
-                background: '#1a73e8',
+                background: 'linear-gradient(135deg, #0b57d0 0%, #1a73e8 100%)',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '18px',
+                fontSize: '20px',
                 fontWeight: 700,
                 flexShrink: 0,
+                boxShadow: '0 4px 10px rgba(11, 87, 208, 0.25)',
               }}
             >
               {fullName ? fullName.charAt(0).toUpperCase() : 'G'}
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 600, fontSize: '14px', color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {fullName || 'Người dùng Google'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontWeight: 700, fontSize: '14.5px', color: '#1f1f1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {fullName || 'Người dùng Google'}
+                </span>
+                <span style={{ fontSize: '12px', color: '#0b57d0' }} title="Tài khoản Google chính chủ">✓</span>
               </div>
-              <div style={{ fontSize: '12px', color: '#5f6368', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: '12.5px', color: '#444746', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
                 {email}
               </div>
             </div>
@@ -261,66 +287,83 @@ export default function SocialAuthModal({
               type="button"
               onClick={() => setIsEditingInfo(!isEditingInfo)}
               style={{
-                background: 'none',
+                background: '#e8f0fe',
                 border: 'none',
-                color: '#1a73e8',
+                color: '#0b57d0',
                 fontSize: '12px',
-                fontWeight: 600,
+                fontWeight: 700,
                 cursor: 'pointer',
-                padding: '4px 6px',
+                padding: '6px 10px',
+                borderRadius: '12px',
               }}
             >
-              {isEditingInfo ? 'Xong' : 'Đổi'}
+              {isEditingInfo ? 'Đóng' : 'Đổi'}
             </button>
           </div>
 
-          {/* Optional Edit Info Fields */}
+          {/* Quick Edit Accordion */}
           {isEditingInfo && (
-            <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '12px', marginBottom: '16px', border: '1px dashed #cbd5e1' }}>
-              <div style={{ marginBottom: '8px' }}>
-                <label style={{ fontSize: '11px', fontWeight: 600, color: '#5f6368', display: 'block', marginBottom: '4px' }}>
-                  Địa chỉ Email Google:
+            <div style={{ background: '#f8f9fa', padding: '14px', borderRadius: '16px', marginBottom: '16px', border: '1px solid #e0e2ec' }}>
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ fontSize: '11.5px', fontWeight: 600, color: '#444746', display: 'block', marginBottom: '4px' }}>
+                  Email Google của bạn:
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={{ width: '100%', padding: '6px 10px', fontSize: '12.5px', borderRadius: '6px', border: '1px solid #dadce0', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '8px 12px', fontSize: '13px', borderRadius: '8px', border: '1px solid #c4c7c5', boxSizing: 'border-box' }}
                 />
               </div>
               <div>
-                <label style={{ fontSize: '11px', fontWeight: 600, color: '#5f6368', display: 'block', marginBottom: '4px' }}>
-                  Tên hiển thị:
+                <label style={{ fontSize: '11.5px', fontWeight: 600, color: '#444746', display: 'block', marginBottom: '4px' }}>
+                  Họ và tên:
                 </label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  style={{ width: '100%', padding: '6px 10px', fontSize: '12.5px', borderRadius: '6px', border: '1px solid #dadce0', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '8px 12px', fontSize: '13px', borderRadius: '8px', border: '1px solid #c4c7c5', boxSizing: 'border-box' }}
                 />
               </div>
             </div>
           )}
 
-          {/* Google Permissions Text */}
-          <div style={{ fontSize: '11.5px', color: '#5f6368', lineHeight: 1.5, marginBottom: '22px' }}>
-            Để tiếp tục, Google sẽ cấp quyền truy cập tên, địa chỉ email và tùy chọn hồ sơ của bạn cho Fullstack E-Commerce. Hãy đảm bảo bạn tin cậy ứng dụng này.
+          {/* Google Permissions Box */}
+          <div
+            style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '14px',
+              padding: '12px 14px',
+              fontSize: '11.5px',
+              color: '#475569',
+              lineHeight: 1.5,
+              marginBottom: '22px',
+              display: 'flex',
+              gap: '10px',
+            }}
+          >
+            <span style={{ fontSize: '18px', lineHeight: 1 }}>🛡️</span>
+            <div>
+              Google sẽ chia sẻ tên, địa chỉ email và ảnh hồ sơ cá nhân của bạn với Fullstack E-Commerce để thiết lập phiên đăng nhập an toàn.
+            </div>
           </div>
 
-          {/* Action buttons */}
+          {/* Google Action Buttons */}
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', alignItems: 'center' }}>
             <button
               type="button"
               onClick={onClose}
               style={{
-                background: 'none',
+                background: 'transparent',
                 border: 'none',
-                color: '#1a73e8',
+                color: '#0b57d0',
                 fontWeight: 600,
                 fontSize: '13.5px',
-                padding: '8px 16px',
+                padding: '10px 18px',
                 cursor: 'pointer',
-                borderRadius: '18px',
+                borderRadius: '20px',
               }}
             >
               Hủy bỏ
@@ -331,38 +374,38 @@ export default function SocialAuthModal({
               onClick={handleConfirmLogin}
               disabled={loading}
               style={{
-                background: '#1a73e8',
+                background: 'linear-gradient(135deg, #0b57d0 0%, #1a73e8 100%)',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: '20px',
-                padding: '10px 22px',
-                fontWeight: 600,
+                borderRadius: '22px',
+                padding: '11px 24px',
+                fontWeight: 700,
                 fontSize: '13.5px',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                boxShadow: '0 1px 3px rgba(60,64,67,0.3)',
+                boxShadow: '0 4px 14px rgba(11, 87, 208, 0.35)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
               }}
             >
               {loading ? 'Đang xác thực...' : `Tiếp tục với tư cách ${fullName.split(' ')[0] || 'Google'}`}
             </button>
           </div>
 
-          {/* Google SSO Footer Links */}
+          {/* Google Footer */}
           <div
             style={{
               marginTop: '22px',
-              paddingTop: '12px',
+              paddingTop: '14px',
               borderTop: '1px solid #f1f3f4',
               display: 'flex',
               justifyContent: 'space-between',
               fontSize: '11px',
-              color: '#70757a',
+              color: '#747775',
             }}
           >
             <span>Tiếng Việt (Việt Nam)</span>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '12px' }}>
               <span>Trợ giúp</span>
               <span>Bảo mật</span>
               <span>Điều khoản</span>
@@ -382,46 +425,52 @@ export default function SocialAuthModal({
         <div
           className="shopee-auth-modal-card"
           style={{
-            maxWidth: '450px',
+            maxWidth: '460px',
             width: '92%',
             padding: 0,
-            borderRadius: '16px',
+            borderRadius: '20px',
             background: '#ffffff',
-            boxShadow: '0 20px 50px rgba(24, 119, 242, 0.25)',
+            boxShadow: '0 24px 60px rgba(8, 102, 255, 0.28)',
             border: '1px solid #ccd0d5',
             position: 'relative',
             overflow: 'hidden',
-            fontFamily: 'Helvetica, Arial, sans-serif',
+            fontFamily: 'Segoe UI, Helvetica, Arial, sans-serif',
+            animation: 'authModalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           }}
         >
           {/* Facebook Top Blue Header */}
           <div
             style={{
-              background: '#1877F2',
+              background: 'linear-gradient(135deg, #0866FF 0%, #1877F2 100%)',
               color: '#ffffff',
-              padding: '16px 20px',
+              padding: '18px 22px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              boxShadow: '0 4px 12px rgba(8, 102, 255, 0.2)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div
                 style={{
-                  width: '32px',
-                  height: '32px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
                 }}
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="#1877F2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#0866FF">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </div>
-              <span style={{ fontSize: '16px', fontWeight: 700 }}>Đăng nhập bằng Facebook</span>
+              <div>
+                <span style={{ fontSize: '17px', fontWeight: 800 }}>Đăng nhập bằng Facebook</span>
+                <div style={{ fontSize: '11px', opacity: 0.9 }}>Xác thực an toàn qua Meta</div>
+              </div>
             </div>
 
             <button
@@ -431,8 +480,8 @@ export default function SocialAuthModal({
                 background: 'rgba(255,255,255,0.2)',
                 border: 'none',
                 borderRadius: '50%',
-                width: '28px',
-                height: '28px',
+                width: '30px',
+                height: '30px',
                 color: '#ffffff',
                 fontSize: '13px',
                 cursor: 'pointer',
@@ -446,31 +495,32 @@ export default function SocialAuthModal({
           </div>
 
           {/* Facebook Body */}
-          <div style={{ padding: '24px 22px' }}>
-            {/* Meta Permission Request Notice */}
-            <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 4px', color: '#1c1e21' }}>
+          <div style={{ padding: '26px 24px' }}>
+            {/* Meta Permission Request Title */}
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <h4 style={{ fontSize: '17px', fontWeight: 700, margin: '0 0 4px', color: '#050505' }}>
                 Fullstack E-Commerce
               </h4>
-              <p style={{ fontSize: '12.5px', color: '#606770', margin: 0 }}>
-                đang yêu cầu quyền truy cập vào thông tin trang cá nhân của bạn
+              <p style={{ fontSize: '13px', color: '#65676b', margin: 0 }}>
+                yêu cầu liên kết với thông tin trang cá nhân Facebook của bạn
               </p>
             </div>
 
             {/* Active Role Indicator */}
             <div
               style={{
-                background: '#e7f3ff',
-                color: '#1877f2',
-                padding: '6px 12px',
-                borderRadius: '8px',
+                background: currentRole === 'seller' ? '#fffbeb' : '#edf2ff',
+                color: currentRole === 'seller' ? '#b45309' : '#0866FF',
+                padding: '8px 14px',
+                borderRadius: '10px',
                 fontSize: '12px',
-                fontWeight: 600,
+                fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                marginBottom: '16px',
-                border: '1px solid #bfdbfe',
+                justifyContent: 'center',
+                gap: '8px',
+                marginBottom: '18px',
+                border: currentRole === 'seller' ? '1px solid #fef3c7' : '1px solid #d0e2ff',
               }}
             >
               <span>{roleIcon}</span>
@@ -483,8 +533,8 @@ export default function SocialAuthModal({
                   background: '#ffebe8',
                   border: '1px solid #dd3c10',
                   color: '#dd3c10',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
                   fontSize: '12px',
                   marginBottom: '14px',
                 }}
@@ -497,36 +547,38 @@ export default function SocialAuthModal({
             <div
               style={{
                 background: '#f0f2f5',
-                borderRadius: '12px',
-                padding: '12px 14px',
+                borderRadius: '14px',
+                padding: '14px 16px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                marginBottom: '16px',
+                gap: '14px',
+                marginBottom: '18px',
               }}
             >
               <div
                 style={{
-                  width: '44px',
-                  height: '44px',
+                  width: '48px',
+                  height: '48px',
                   borderRadius: '50%',
-                  background: '#1877F2',
+                  background: 'linear-gradient(135deg, #0866FF 0%, #1877F2 100%)',
                   color: '#fff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '20px',
+                  fontSize: '22px',
                   fontWeight: 700,
+                  boxShadow: '0 4px 10px rgba(8, 102, 255, 0.25)',
                 }}
               >
                 {fullName ? fullName.charAt(0).toUpperCase() : 'F'}
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: '14px', color: '#1c1e21' }}>
-                  {fullName || 'Người dùng Facebook'}
+                <div style={{ fontWeight: 700, fontSize: '15px', color: '#050505', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{fullName || 'Người dùng Facebook'}</span>
+                  <span style={{ color: '#0866FF', fontSize: '13px' }}>●</span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#606770' }}>
+                <div style={{ fontSize: '12.5px', color: '#65676b', marginTop: '2px' }}>
                   {email}
                 </div>
               </div>
@@ -535,12 +587,14 @@ export default function SocialAuthModal({
                 type="button"
                 onClick={() => setIsEditingInfo(!isEditingInfo)}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#1877F2',
+                  background: '#ffffff',
+                  border: '1px solid #ced0d4',
+                  borderRadius: '8px',
+                  color: '#0866FF',
                   fontSize: '12px',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   cursor: 'pointer',
+                  padding: '6px 10px',
                 }}
               >
                 {isEditingInfo ? 'Đóng' : 'Đổi email'}
@@ -548,56 +602,56 @@ export default function SocialAuthModal({
             </div>
 
             {isEditingInfo && (
-              <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', marginBottom: '16px', border: '1px solid #e2e8f0' }}>
+              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', marginBottom: '18px', border: '1px solid #e4e6eb' }}>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Nhập email Facebook của bạn"
-                  style={{ width: '100%', padding: '6px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '8px 12px', fontSize: '13px', borderRadius: '8px', border: '1px solid #ced0d4', boxSizing: 'border-box' }}
                 />
               </div>
             )}
 
-            {/* Permissions list */}
+            {/* Meta Permissions List */}
             <div
               style={{
                 background: '#ffffff',
                 border: '1px solid #e4e6eb',
-                borderRadius: '10px',
-                padding: '10px 14px',
-                fontSize: '12px',
-                color: '#606770',
-                marginBottom: '20px',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                fontSize: '12.5px',
+                color: '#65676b',
+                marginBottom: '22px',
               }}
             >
-              <div style={{ fontWeight: 600, color: '#1c1e21', marginBottom: '6px' }}>Ứng dụng sẽ nhận được:</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                <span style={{ color: '#1877F2' }}>✓</span> Tên và ảnh trang cá nhân của bạn
+              <div style={{ fontWeight: 700, color: '#050505', marginBottom: '8px' }}>Quyền hạn được chia sẻ:</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <span style={{ color: '#0866FF', fontWeight: 800 }}>✓</span> Tên hồ sơ và ảnh đại diện trang cá nhân
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ color: '#1877F2' }}>✓</span> Địa chỉ email ({email})
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: '#0866FF', fontWeight: 800 }}>✓</span> Địa chỉ email ({email})
               </div>
             </div>
 
-            {/* Facebook Action Buttons */}
+            {/* Action Buttons */}
             <button
               type="button"
               onClick={handleConfirmLogin}
               disabled={loading}
               style={{
                 width: '100%',
-                height: '42px',
-                background: '#1877F2',
+                height: '44px',
+                background: 'linear-gradient(135deg, #0866FF 0%, #1877F2 100%)',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: '8px',
-                fontSize: '14.5px',
+                borderRadius: '10px',
+                fontSize: '15px',
                 fontWeight: 700,
                 cursor: loading ? 'not-allowed' : 'pointer',
                 marginBottom: '10px',
-                boxShadow: '0 2px 6px rgba(24, 119, 242, 0.3)',
-                transition: 'background 0.15s ease',
+                boxShadow: '0 4px 14px rgba(8, 102, 255, 0.35)',
+                transition: 'all 0.15s ease',
               }}
             >
               {loading ? 'Đang đăng nhập...' : `Tiếp tục dưới tên ${fullName.split(' ')[0] || 'Facebook'}`}
@@ -608,13 +662,13 @@ export default function SocialAuthModal({
               onClick={onClose}
               style={{
                 width: '100%',
-                height: '36px',
+                height: '38px',
                 background: '#e4e6eb',
-                color: '#4b4f56',
+                color: '#050505',
                 border: 'none',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 600,
+                borderRadius: '10px',
+                fontSize: '13.5px',
+                fontWeight: 700,
                 cursor: 'pointer',
               }}
             >
@@ -622,9 +676,9 @@ export default function SocialAuthModal({
             </button>
 
             {/* Meta Footer */}
-            <div style={{ marginTop: '16px', fontSize: '11px', color: '#8a8d91', textAlign: 'center', lineHeight: 1.4 }}>
-              Thao tác này sẽ không cho phép ứng dụng đăng bài lên Facebook mà không có sự đồng ý của bạn. <br />
-              <span style={{ color: '#1877F2', cursor: 'pointer' }}>Chính sách quyền riêng tư Meta</span>
+            <div style={{ marginTop: '18px', fontSize: '11px', color: '#8a8d91', textAlign: 'center', lineHeight: 1.4 }}>
+              Ứng dụng sẽ không tự ý đăng bài lên Facebook của bạn. <br />
+              <span style={{ color: '#0866FF', cursor: 'pointer' }}>Chính sách quyền riêng tư Meta</span> • <span style={{ color: '#0866FF', cursor: 'pointer' }}>Điều khoản</span>
             </div>
           </div>
         </div>
@@ -640,16 +694,17 @@ export default function SocialAuthModal({
       <div
         className="shopee-auth-modal-card"
         style={{
-          maxWidth: '440px',
+          maxWidth: '450px',
           width: '92%',
-          padding: '30px 24px',
-          borderRadius: '24px',
-          background: '#1c1c1e',
+          padding: '34px 28px',
+          borderRadius: '26px',
+          background: '#161618',
           color: '#f5f5f7',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.65)',
+          boxShadow: '0 30px 80px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.12)',
           border: '1px solid #2c2c2e',
           position: 'relative',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
+          animation: 'authModalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         }}
       >
         {/* Close button */}
@@ -660,15 +715,15 @@ export default function SocialAuthModal({
           aria-label="Đóng"
           style={{
             position: 'absolute',
-            top: '16px',
-            right: '16px',
-            background: '#2c2c2e',
+            top: '18px',
+            right: '18px',
+            background: 'rgba(255, 255, 255, 0.12)',
             border: 'none',
             borderRadius: '50%',
-            width: '30px',
-            height: '30px',
+            width: '32px',
+            height: '32px',
             color: '#a1a1a6',
-            fontSize: '13px',
+            fontSize: '14px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -682,27 +737,28 @@ export default function SocialAuthModal({
         <div style={{ textAlign: 'center', marginBottom: '22px' }}>
           <div
             style={{
-              width: '54px',
-              height: '54px',
+              width: '56px',
+              height: '56px',
               borderRadius: '50%',
               background: '#000000',
-              border: '1px solid #38383a',
+              border: '1.5px solid rgba(255, 255, 255, 0.2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 12px',
-              fontSize: '28px',
+              fontSize: '30px',
               color: '#ffffff',
+              boxShadow: '0 4px 20px rgba(255, 255, 255, 0.1)',
             }}
           >
             
           </div>
 
-          <h3 style={{ fontSize: '20px', fontWeight: 700, margin: '0 0 6px', color: '#ffffff' }}>
+          <h3 style={{ fontSize: '21px', fontWeight: 700, margin: '0 0 6px', color: '#ffffff', letterSpacing: '-0.3px' }}>
             Sử dụng Apple ID để Đăng Nhập
           </h3>
-          <div style={{ fontSize: '12.5px', color: '#a1a1a6' }}>
-            Bạn muốn đăng nhập vào <strong>Fullstack E-Commerce</strong>
+          <div style={{ fontSize: '13px', color: '#86868b' }}>
+            Bạn muốn truy cập vào <strong style={{ color: '#ffffff' }}>Fullstack E-Commerce</strong>
           </div>
         </div>
 
@@ -711,14 +767,14 @@ export default function SocialAuthModal({
           style={{
             background: 'rgba(255, 255, 255, 0.08)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
-            padding: '6px 12px',
-            borderRadius: '12px',
+            padding: '7px 14px',
+            borderRadius: '14px',
             fontSize: '12px',
             fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
+            gap: '8px',
             marginBottom: '18px',
             color: '#ffffff',
           }}
@@ -730,11 +786,11 @@ export default function SocialAuthModal({
         {error && (
           <div
             style={{
-              background: 'rgba(255, 69, 58, 0.15)',
+              background: 'rgba(255, 69, 58, 0.18)',
               border: '1px solid #ff453a',
               color: '#ff453a',
-              padding: '8px 12px',
-              borderRadius: '10px',
+              padding: '10px 14px',
+              borderRadius: '12px',
               fontSize: '12px',
               marginBottom: '16px',
             }}
@@ -746,26 +802,27 @@ export default function SocialAuthModal({
         {/* Apple ID Account Row */}
         <div
           style={{
-            background: '#2c2c2e',
-            borderRadius: '14px',
-            padding: '12px 14px',
+            background: '#242426',
+            borderRadius: '16px',
+            padding: '14px 16px',
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
             marginBottom: '18px',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
           }}
         >
           <div
             style={{
-              width: '38px',
-              height: '38px',
+              width: '42px',
+              height: '42px',
               borderRadius: '50%',
               background: '#3a3a3c',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '16px',
+              fontSize: '18px',
               fontWeight: 700,
             }}
           >
@@ -773,10 +830,10 @@ export default function SocialAuthModal({
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#ffffff' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: '#ffffff' }}>
               {fullName}
             </div>
-            <div style={{ fontSize: '11.5px', color: '#8e8e93' }}>
+            <div style={{ fontSize: '12px', color: '#86868b', marginTop: '2px' }}>
               {email}
             </div>
           </div>
@@ -785,10 +842,11 @@ export default function SocialAuthModal({
         {/* Apple "Hide My Email" Privacy Choice */}
         <div
           style={{
-            background: '#2c2c2e',
-            borderRadius: '14px',
-            padding: '6px 14px',
-            marginBottom: '20px',
+            background: '#242426',
+            borderRadius: '16px',
+            padding: '4px 16px',
+            marginBottom: '22px',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
           }}
         >
           {/* Option 1: Share my email */}
@@ -798,22 +856,23 @@ export default function SocialAuthModal({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '10px 0',
-              borderBottom: '1px solid #38383a',
+              padding: '12px 0',
+              borderBottom: '1px solid #333336',
               cursor: 'pointer',
             }}
           >
             <div>
-              <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#ffffff' }}>Chia sẻ Email của tôi</div>
-              <div style={{ fontSize: '11px', color: '#8e8e93' }}>{email}</div>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: '#ffffff' }}>Chia sẻ Email của tôi</div>
+              <div style={{ fontSize: '11.5px', color: '#86868b', marginTop: '2px' }}>{email}</div>
             </div>
             <div
               style={{
-                width: '18px',
-                height: '18px',
+                width: '20px',
+                height: '20px',
                 borderRadius: '50%',
-                border: appleEmailOption === 'share' ? '5px solid #0071e3' : '1.5px solid #8e8e93',
+                border: appleEmailOption === 'share' ? '6px solid #0071e3' : '1.5px solid #8e8e93',
                 background: '#ffffff',
+                transition: 'all 0.15s ease',
               }}
             />
           </div>
@@ -825,23 +884,24 @@ export default function SocialAuthModal({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '10px 0',
+              padding: '12px 0',
               cursor: 'pointer',
             }}
           >
             <div>
-              <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#ffffff' }}>Ẩn địa chỉ email của tôi</div>
-              <div style={{ fontSize: '11px', color: '#8e8e93' }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: '#ffffff' }}>Ẩn địa chỉ email của tôi</div>
+              <div style={{ fontSize: '11.5px', color: '#86868b', marginTop: '2px' }}>
                 Chuyển tiếp đến: relay_{email.split('@')[0]}@privaterelay.appleid.com
               </div>
             </div>
             <div
               style={{
-                width: '18px',
-                height: '18px',
+                width: '20px',
+                height: '20px',
                 borderRadius: '50%',
-                border: appleEmailOption === 'hide' ? '5px solid #0071e3' : '1.5px solid #8e8e93',
+                border: appleEmailOption === 'hide' ? '6px solid #0071e3' : '1.5px solid #8e8e93',
                 background: '#ffffff',
+                transition: 'all 0.15s ease',
               }}
             />
           </div>
@@ -854,25 +914,25 @@ export default function SocialAuthModal({
           disabled={loading}
           style={{
             width: '100%',
-            height: '46px',
+            height: '48px',
             background: '#ffffff',
             color: '#000000',
             border: 'none',
-            borderRadius: '12px',
-            fontSize: '14.5px',
+            borderRadius: '14px',
+            fontSize: '15px',
             fontWeight: 700,
             cursor: loading ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            marginBottom: '10px',
-            boxShadow: '0 4px 12px rgba(255, 255, 255, 0.15)',
+            marginBottom: '12px',
+            boxShadow: '0 4px 16px rgba(255, 255, 255, 0.2)',
             transition: 'opacity 0.15s ease',
           }}
         >
-          <span style={{ fontSize: '18px' }}></span>
-          <span>{loading ? 'Đang xử lý Face ID...' : 'Tiếp tục bằng Apple ID'}</span>
+          <span style={{ fontSize: '20px', lineHeight: 1 }}></span>
+          <span>{loading ? 'Đang xác thực Face ID...' : 'Tiếp tục bằng Apple ID'}</span>
         </button>
 
         <button
@@ -880,11 +940,11 @@ export default function SocialAuthModal({
           onClick={onClose}
           style={{
             width: '100%',
-            height: '36px',
+            height: '38px',
             background: 'transparent',
-            color: '#8e8e93',
+            color: '#86868b',
             border: 'none',
-            fontSize: '13px',
+            fontSize: '13.5px',
             fontWeight: 600,
             cursor: 'pointer',
           }}
@@ -893,8 +953,8 @@ export default function SocialAuthModal({
         </button>
 
         {/* Apple Privacy Notice */}
-        <div style={{ marginTop: '16px', fontSize: '11px', color: '#636366', textAlign: 'center', lineHeight: 1.4 }}>
-          🔒 Tính năng Bảo mật của Apple. Mini Shopee chỉ nhận được mã xác thực an toàn từ Apple ID để cấp quyền truy cập.
+        <div style={{ marginTop: '18px', fontSize: '11px', color: '#636366', textAlign: 'center', lineHeight: 1.4 }}>
+          🔒 Tính năng Bảo mật của Apple. Mini Shopee chỉ nhận được mã ủy quyền từ Apple ID để cấp quyền truy cập.
         </div>
       </div>
     </div>
