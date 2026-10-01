@@ -28,3 +28,4 @@ export { default as OtpVerificationModal } from './OtpVerificationModal';
 export { default as ForgotPasswordModal } from './ForgotPasswordModal';
 export { default as LegalModal } from './LegalModal';
 export { default as SocialAuthModal } from './SocialAuthModal';
+export { default as OrderDetailModal } from './OrderDetailModal';

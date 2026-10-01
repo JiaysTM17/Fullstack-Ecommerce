@@ -10,6 +10,9 @@ import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
 import ReturnRequestModal from '../components/ReturnRequestModal';
 import DeliveryLiveMapModal from '../components/DeliveryLiveMapModal';
 import ProductReviewModal from '../components/ProductReviewModal';
+import OrderDetailModal from '../components/OrderDetailModal';
+import ShopChatModal from '../components/ShopChatModal';
+import { cancelOrder } from '../services/orderService';
 import { restoreProductStock } from '../services/productService';
 import { pushBuyerNotification } from '../utils/notificationHelper';
 import '../styles/dashboard.css';
@@ -29,6 +32,10 @@ const INITIAL_CUSTOMER_ORDERS = [
       },
     ],
     total: 423000,
+    subtotal: 398000,
+    shippingFee: 25000,
+    voucherDiscount: 0,
+    coinDiscount: 0,
     status: "shipping",
     statusText: "Đang vận chuyển",
     stepIndex: 3, // 1: Placed, 2: Confirmed, 3: In Transit, 4: Delivered
@@ -54,6 +61,10 @@ const INITIAL_CUSTOMER_ORDERS = [
       },
     ],
     total: 675000,
+    subtotal: 650000,
+    shippingFee: 25000,
+    voucherDiscount: 0,
+    coinDiscount: 0,
     status: "completed",
     statusText: "Giao thành công",
     stepIndex: 4,
@@ -72,12 +83,13 @@ const ORDERS_STORAGE_KEY = 'mini_shopee_customer_orders';
 export default function OrderHistoryPage() {
   const { user } = useAuth();
   const { addToCart } = useCart();
-  const { earnCoins } = useCoin();
+  const { earnCoins, grantOrderSpin } = useCoin();
   const { t } = useLanguage();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('all');
+  const [dateRange, setDateRange] = useState('all'); // 'all' | '30days' | '3months' | 'year2026'
   const [orders, setOrders] = useState(() => {
     try {
       const saved = localStorage.getItem(ORDERS_STORAGE_KEY);
@@ -93,6 +105,9 @@ export default function OrderHistoryPage() {
     return INITIAL_CUSTOMER_ORDERS;
   });
 
+  const [selectedDetailOrder, setSelectedDetailOrder] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedChatShop, setSelectedChatShop] = useState(null);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
   const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
@@ -209,6 +224,51 @@ export default function OrderHistoryPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Date parsing utility supporting multiple string formats
+  const parseOrderDate = (dateStr) => {
+    if (!dateStr) return new Date();
+    if (dateStr instanceof Date) return dateStr;
+    const str = String(dateStr).trim();
+
+    // 1. Direct standard Date parsing if ISO or standard format
+    const directDate = new Date(str);
+    if (!isNaN(directDate.getTime()) && str.includes('-')) {
+      return directDate;
+    }
+
+    // 2. DD/MM/YYYY or DD-MM-YYYY HH:mm
+    const dmy = str.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:\s+(\d{2}):(\d{2}))?/);
+    if (dmy) {
+      return new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]), Number(dmy[4] || 0), Number(dmy[5] || 0));
+    }
+
+    // 3. YYYY/MM/DD or YYYY-MM-DD HH:mm
+    const ymd = str.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})(?:\s+(\d{2}):(\d{2}))?/);
+    if (ymd) {
+      return new Date(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]), Number(ymd[4] || 0), Number(ymd[5] || 0));
+    }
+
+    return isNaN(directDate.getTime()) ? new Date() : directDate;
+  };
+
+  const matchesDateRange = (ordDate) => {
+    if (dateRange === 'all') return true;
+    const d = parseOrderDate(ordDate);
+    const now = new Date();
+    const diffDays = (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (dateRange === '30days') {
+      return diffDays >= -1 && diffDays <= 30;
+    }
+    if (dateRange === '3months') {
+      return diffDays >= -1 && diffDays <= 90;
+    }
+    if (dateRange === 'year2026') {
+      return d.getFullYear() === 2026 || String(ordDate).includes('2026');
+    }
+    return true;
+  };
+
   const getTabCount = (tabId) => {
     if (tabId === 'all') return orders.length;
     if (tabId === 'pending') return orders.filter((o) => o.status === 'pending' || o.status === 'confirmed').length;
@@ -223,7 +283,13 @@ export default function OrderHistoryPage() {
       return false;
     }
 
-    // 2. Keyword Search filter
+    // 2. Date Range filter
+    const ordDate = ord.createdAt || ord.orderDate;
+    if (!matchesDateRange(ordDate)) {
+      return false;
+    }
+
+    // 3. Keyword Search filter
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase().trim();
       const matchId = (ord.orderId || '').toLowerCase().includes(term);
@@ -238,7 +304,101 @@ export default function OrderHistoryPage() {
     return true;
   });
 
-  const handleConfirmCancelOrder = () => {
+  // 1-Click Clipboard Copy with Toast Feedback
+  const handleCopy = (text, label) => {
+    if (!text) return;
+    const fallbackCopy = () => {
+      try {
+        const el = document.createElement('textarea');
+        el.value = text;
+        el.style.position = 'fixed';
+        el.style.left = '-9999px';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showToast(`Đã sao chép ${label}: ${text}`, 'success');
+      } catch {
+        showToast(`Đã sao chép: ${text}`, 'info');
+      }
+    };
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => showToast(`Đã sao chép ${label}: ${text}`, 'success'))
+        .catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+  };
+
+  // Export Order History to CSV with UTF-8 BOM
+  const handleExportCSV = () => {
+    if (!filteredOrders || filteredOrders.length === 0) {
+      showToast('Không có đơn hàng nào để xuất báo cáo!', 'warning');
+      return;
+    }
+
+    const headers = [
+      'Mã đơn hàng',
+      'Ngày đặt',
+      'Người nhận',
+      'Số điện thoại',
+      'Địa chỉ',
+      'Sản phẩm',
+      'Tổng thanh toán',
+      'Phương thức thanh toán',
+      'Trạng thái',
+      'Mã vận đơn SPX',
+    ];
+
+    const escapeCSV = (val) => {
+      const s = String(val ?? '').replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const rows = filteredOrders.map((ord) => {
+      const itemsSummary = (ord.items || [])
+        .map((it) => `${it.name} (x${it.quantity || 1})`)
+        .join('; ');
+      const recipient = ord.customerName || ord.customer?.fullName || user?.name || 'Khách Hàng Mini Shopee';
+      const phone = ord.phone || ord.customer?.phone || '0901234567';
+      const address = ord.shippingAddress || ord.address || ord.customer?.address || 'Việt Nam';
+      const total = ord.total || 0;
+      const tracking = ord.trackingCode || (ord.orderId ? `SPX-VN-${ord.orderId}` : '');
+
+      return [
+        escapeCSV(ord.orderId),
+        escapeCSV(ord.createdAt || ''),
+        escapeCSV(recipient),
+        escapeCSV(phone),
+        escapeCSV(address),
+        escapeCSV(itemsSummary),
+        escapeCSV(total),
+        escapeCSV(ord.paymentMethod || 'COD'),
+        escapeCSV(ord.statusText || ord.status),
+        escapeCSV(tracking),
+      ].join(',');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'Lich-Su-Don-Hang-Mini-Shopee.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast('Đã xuất báo cáo lịch sử đơn hàng (CSV) thành công!', 'success');
+  };
+
+  const handlePrintReport = () => {
+    window.print();
+  };
+
+  const handleConfirmCancelOrder = async () => {
     if (!selectedCancelOrder) return;
     const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const updated = orders.map((o) => {
@@ -259,9 +419,37 @@ export default function OrderHistoryPage() {
     });
     saveOrders(updated);
 
+    // Đồng bộ vào mini_shopee_orders nếu có trong localStorage
+    try {
+      const rawAll = localStorage.getItem('mini_shopee_orders');
+      if (rawAll) {
+        const allOrders = JSON.parse(rawAll);
+        const updatedAll = allOrders.map((o) => {
+          if (o.orderId === selectedCancelOrder.orderId || o._id === selectedCancelOrder.orderId) {
+            return {
+              ...o,
+              status: 'cancelled',
+              statusText: 'Đã hủy bởi người mua',
+              cancelReason,
+              cancelNote,
+              stepIndex: 0,
+            };
+          }
+          return o;
+        });
+        localStorage.setItem('mini_shopee_orders', JSON.stringify(updatedAll));
+      }
+    } catch (err) {
+      console.warn('Error syncing mini_shopee_orders on cancel:', err);
+    }
+
     // 1. Hoàn trả tồn kho cho các sản phẩm trong đơn đã hủy
     if (selectedCancelOrder.items && selectedCancelOrder.items.length > 0) {
-      restoreProductStock(selectedCancelOrder.items);
+      try {
+        restoreProductStock(selectedCancelOrder.items);
+      } catch (err) {
+        console.warn('Error restoring product stock on cancel:', err);
+      }
     }
 
     // 2. Đồng bộ trạng thái đơn hủy sang Kênh Quản Lý Người Bán
@@ -269,14 +457,15 @@ export default function OrderHistoryPage() {
       const rawSeller = localStorage.getItem('mini_shopee_seller_orders');
       if (rawSeller) {
         const sellerOrders = JSON.parse(rawSeller);
-        const updatedSeller = sellerOrders.map(so => {
-          if (so.orderId === selectedCancelOrder.orderId) {
+        const updatedSeller = sellerOrders.map((so) => {
+          if (so.orderId === selectedCancelOrder.orderId || so._id === selectedCancelOrder.orderId) {
             return {
               ...so,
               status: 'cancelled',
               statusText: 'Đã hủy bởi người mua',
               cancelReason,
-              cancelNote
+              cancelNote,
+              stepIndex: 0,
             };
           }
           return so;
@@ -284,12 +473,27 @@ export default function OrderHistoryPage() {
         localStorage.setItem('mini_shopee_seller_orders', JSON.stringify(updatedSeller));
         window.dispatchEvent(new Event('storage'));
       }
-    } catch {}
+    } catch (err) {
+      console.warn('Error syncing seller orders on cancel:', err);
+    }
 
     // 3. Hoàn trả xu đã sử dụng khi hủy đơn (nếu có)
-    const coinRefundAmount = Number(selectedCancelOrder.coinUsed || selectedCancelOrder.coinsDeducted || 0);
+    const coinRefundAmount = Number(
+      selectedCancelOrder.coinUsed ||
+      selectedCancelOrder.coinsUsed ||
+      selectedCancelOrder.coinsDeducted ||
+      selectedCancelOrder.coinDiscount ||
+      0
+    );
     if (coinRefundAmount > 0 && earnCoins) {
       earnCoins(coinRefundAmount, `Hoàn xu do hủy đơn hàng #${selectedCancelOrder.orderId}`, selectedCancelOrder.orderId, 'refund');
+    }
+
+    // 4. Gọi backend API hủy đơn trong try/catch
+    try {
+      await cancelOrder(selectedCancelOrder.orderId || selectedCancelOrder._id);
+    } catch (apiErr) {
+      console.warn("Backend order cancellation notice:", apiErr?.message);
     }
 
     pushBuyerNotification({
@@ -356,7 +560,7 @@ export default function OrderHistoryPage() {
 
   const handleBuyAgain = (item) => {
     addToCart(item, 1);
-    showToast(t('buy_again_toast', 'Đã thêm sản phẩm vào giỏ hàng để mua lại!'), 'success');
+    showToast(t('buy_again_toast', `Đã thêm "${item.name}" vào giỏ hàng để mua lại!`), 'success');
     navigate('/cart');
   };
 
@@ -365,22 +569,74 @@ export default function OrderHistoryPage() {
     order.items.forEach((item) => {
       addToCart(item, item.quantity || 1);
     });
-    showToast(`Đã thêm ${order.items.length} sản phẩm từ đơn ${order.orderId} vào giỏ hàng!`, 'success');
+    showToast(`Đã thêm ${order.items.length} sản phẩm từ đơn #${order.orderId} vào giỏ hàng!`, 'success');
     navigate('/cart');
   };
 
   const handleConfirmDelivered = (orderId) => {
+    const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const updated = orders.map((o) => {
       if (o.orderId !== orderId) return o;
+      const nextTimeline = [
+        ...(o.timeline || []),
+        { time: `Hôm nay ${nowStr}`, text: 'Người mua đã xác nhận nhận hàng thành công' }
+      ];
       return {
         ...o,
         status: 'completed',
         statusText: 'Giao thành công',
         stepIndex: 4,
+        timeline: nextTimeline,
       };
     });
     saveOrders(updated);
-    showToast('🎉 Bạn đã xác nhận nhận hàng! Hãy để lại đánh giá để nhận 200 Mini Xu.', 'success');
+
+    // Sync to mini_shopee_orders if exists
+    try {
+      const rawAll = localStorage.getItem('mini_shopee_orders');
+      if (rawAll) {
+        const allOrders = JSON.parse(rawAll);
+        const updatedAll = allOrders.map((o) => {
+          if (o.orderId === orderId || o._id === orderId) {
+            return { ...o, status: 'completed', statusText: 'Giao thành công', stepIndex: 4 };
+          }
+          return o;
+        });
+        localStorage.setItem('mini_shopee_orders', JSON.stringify(updatedAll));
+      }
+    } catch {}
+
+    // Sync to mini_shopee_seller_orders
+    try {
+      const rawSeller = localStorage.getItem('mini_shopee_seller_orders');
+      if (rawSeller) {
+        const sellerOrders = JSON.parse(rawSeller);
+        const updatedSeller = sellerOrders.map((so) => {
+          if (so.orderId === orderId || so._id === orderId) {
+            return {
+              ...so,
+              status: 'completed',
+              statusText: 'Giao thành công',
+              stepIndex: 4,
+            };
+          }
+          return so;
+        });
+        localStorage.setItem('mini_shopee_seller_orders', JSON.stringify(updatedSeller));
+        window.dispatchEvent(new Event('storage'));
+      }
+    } catch (err) {
+      console.warn('Error syncing seller orders on delivered:', err);
+    }
+
+    // Award spin if available
+    if (grantOrderSpin) {
+      try {
+        grantOrderSpin(orderId);
+      } catch {}
+    }
+
+    showToast('🎉 Bạn đã xác nhận nhận hàng! Hãy để lại đánh giá để nhận ngay +200 Mini Xu.', 'success');
     const target = updated.find((o) => o.orderId === orderId);
     if (target) {
       setSelectedReviewOrder(target);
@@ -483,47 +739,101 @@ export default function OrderHistoryPage() {
           </div>
         )}
 
-        {/* Search Order Bar */}
-        <div style={{ marginBottom: '18px', position: 'relative' }}>
-          <input
-            type="text"
-            placeholder="🔍 Tìm kiếm đơn hàng theo Mã đơn, Mã vận đơn hoặc Tên sản phẩm..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '10px 16px 10px 38px',
-              fontSize: '13.5px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-medium, #cbd5e1)',
-              background: 'var(--bg-muted, #f8fafc)',
-              color: 'var(--text-primary, #0f172a)',
-              outline: 'none',
-              transition: 'border-color 0.2s',
-            }}
-            onFocus={(e) => { e.target.style.borderColor = 'var(--primary-color, #ea580c)'; e.target.style.background = '#fff'; }}
-            onBlur={(e) => { e.target.style.borderColor = 'var(--border-medium, #cbd5e1)'; e.target.style.background = 'var(--bg-muted, #f8fafc)'; }}
-          />
-          {searchTerm && (
-            <button
-              type="button"
-              aria-label="Xóa tìm kiếm"
-              onClick={() => setSearchTerm('')}
+        {/* Search and Date Range Filters & Export Bar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
+          {/* Search Order Bar */}
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="🔍 Tìm kiếm đơn hàng theo Mã đơn, Mã vận đơn hoặc Tên sản phẩm..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               style={{
-                position: 'absolute',
-                right: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '14px',
-                color: 'var(--text-muted, #94a3b8)',
+                width: '100%',
+                padding: '10px 16px 10px 38px',
+                fontSize: '13.5px',
+                borderRadius: '8px',
+                border: '1px solid var(--border-medium, #cbd5e1)',
+                background: 'var(--bg-muted, #f8fafc)',
+                color: 'var(--text-primary, #0f172a)',
+                outline: 'none',
+                transition: 'border-color 0.2s',
               }}
-            >
-              ✕
-            </button>
-          )}
+              onFocus={(e) => { e.target.style.borderColor = 'var(--primary-color, #ea580c)'; e.target.style.background = '#fff'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'var(--border-medium, #cbd5e1)'; e.target.style.background = 'var(--bg-muted, #f8fafc)'; }}
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                aria-label="Xóa tìm kiếm"
+                onClick={() => setSearchTerm('')}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  color: 'var(--text-muted, #94a3b8)',
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Date Range Filters & Export Actions Row */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary, #64748b)', marginRight: '4px' }}>
+                📅 Thời gian:
+              </span>
+              {[
+                { id: 'all', label: 'Tất cả' },
+                { id: '30days', label: '30 ngày gần đây' },
+                { id: '3months', label: '3 tháng qua' },
+                { id: 'year2026', label: 'Năm 2026' },
+              ].map((dr) => (
+                <button
+                  key={dr.id}
+                  type="button"
+                  className={`shopee-btn ${dateRange === dr.id ? 'shopee-btn-primary' : 'shopee-btn-secondary'}`}
+                  style={{
+                    fontSize: '12px',
+                    padding: '5px 12px',
+                    borderRadius: '16px',
+                    fontWeight: dateRange === dr.id ? 700 : 500,
+                  }}
+                  onClick={() => setDateRange(dr.id)}
+                >
+                  {dr.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary"
+                style={{ fontSize: '12px', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                onClick={handleExportCSV}
+                title="Xuất danh sách đơn hàng sang file CSV (hỗ trợ Excel)"
+              >
+                📥 Xuất CSV
+              </button>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary"
+                style={{ fontSize: '12px', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                onClick={handlePrintReport}
+                title="In hoặc lưu file PDF báo cáo lịch sử đơn hàng"
+              >
+                🖨 In báo cáo
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Status Tabs with Dynamic Badges */}
@@ -558,122 +868,187 @@ export default function OrderHistoryPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {filteredOrders.map((ord) => (
-              <div
-                key={ord.orderId}
-                style={{
-                  border: '1px solid var(--border-medium, #e0e0e0)',
-                  borderRadius: '10px',
-                  padding: '20px',
-                  background: 'var(--bg-card, #fff)',
-                  boxShadow: 'var(--shadow-sm)',
-                }}
-              >
-                {/* Header Row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light, #f0f0f0)', paddingBottom: '12px', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>
-                      🏪 {ord.shopName}
-                    </span>
-                    <span style={{ color: 'var(--text-muted)' }}>|</span>
-                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                      {t('order_id', 'Mã đơn')}: <strong>{ord.orderId}</strong>
-                    </span>
-                  </div>
+            {filteredOrders.map((ord) => {
+              const itemsSubtotal = ord.subtotal || (ord.items || []).reduce((sum, it) => sum + (Number(it.price) * (Number(it.quantity) || 1)), 0) || 0;
+              const voucherDiscount = Number(ord.voucherDiscount) || 0;
+              const coinDiscount = Number(ord.coinDiscount || ord.coinsUsed || ord.coinsDeducted || ord.coinUsed || 0);
+              const shippingFee = ord.shippingFee !== undefined
+                ? Number(ord.shippingFee)
+                : Math.max(0, Number(ord.total) - itemsSubtotal + voucherDiscount + coinDiscount);
+              const totalPayment = Number(ord.total) || Math.max(0, itemsSubtotal + shippingFee - voucherDiscount - coinDiscount);
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{ord.createdAt}</span>
-                    <span
-                      className={`shopee-status-badge ${
-                        ord.status === 'completed'
-                          ? 'status-completed'
-                          : ord.status === 'shipping'
-                          ? 'status-shipping'
-                          : ord.status === 'returning'
-                          ? 'status-shipping'
-                          : 'status-cancelled'
-                      }`}
-                      style={ord.status === 'returning' ? { background: '#fef3c7', color: '#d97706', border: '1px solid #fde68a' } : {}}
-                    >
-                      {ord.statusText}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Tracking Stepper Progress */}
-                {ord.stepIndex > 0 && (
-                  <div style={{ background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-light, #eee)', borderRadius: '8px', padding: '16px 20px', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-                      {[
-                        { num: 1, label: t('step_order_placed', 'Đã Đặt Hàng') },
-                        { num: 2, label: t('step_confirmed', 'Đã Xác Nhận') },
-                        { num: 3, label: t('step_shipping', 'Đang Vận Chuyển') },
-                        { num: 4, label: t('step_delivered', 'Đã Giao Hàng') },
-                      ].map((step, idx) => (
-                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
-                          <div
-                            style={{
-                              width: '28px',
-                              height: '28px',
-                              borderRadius: '50%',
-                              background: ord.stepIndex >= step.num ? 'var(--color-success, #10b981)' : 'var(--border-dark, #cbd5e1)',
-                              color: '#fff',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '12px',
-                              fontWeight: 700,
-                              marginBottom: '6px',
-                            }}
-                          >
-                            {ord.stepIndex >= step.num ? '✓' : step.num}
-                          </div>
-                          <span style={{ fontSize: '11.5px', fontWeight: ord.stepIndex >= step.num ? 700 : 500, color: ord.stepIndex >= step.num ? 'var(--text-primary)' : 'var(--text-muted)' }}>
-                            {step.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Items */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
-                  {ord.items.map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }}
-                      />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>{item.name}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Số lượng: x{item.quantity}</div>
-                      </div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {formatCurrency(item.price)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Summary Row & Actions */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-light, #f0f0f0)', paddingTop: '14px', flexWrap: 'wrap', gap: '12px' }}>
-                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                    <span>{t('payment_method', 'Thanh toán')}: <strong>{ord.paymentMethod}</strong></span>
-                    {ord.trackingCode && (
-                      <span style={{ marginLeft: '12px' }}>
-                        Mã SPX: <strong style={{ color: 'var(--secondary-color, #0284c7)' }}>{ord.trackingCode}</strong>
+              return (
+                <div key={ord.orderId} className="order-card-tier-layout">
+                  {/* Tier 1: Card Header */}
+                  <div className="order-card-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      <span className="order-card-shop">
+                        🏪 {ord.shopName}
                       </span>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ fontSize: '13px' }}>
-                      {t('total_payment', 'Tổng thanh toán')}: <strong style={{ fontSize: '18px', color: 'var(--primary-color, #ea580c)' }}>{formatCurrency(ord.total)}</strong>
+                      <span style={{ color: 'var(--text-muted)' }}>|</span>
+                      <span
+                        className="order-id-badge"
+                        onClick={() => handleCopy(ord.orderId, 'mã đơn hàng')}
+                        title="Nhấn để sao chép mã đơn hàng"
+                      >
+                        {t('order_id', 'Mã đơn')}: <strong>#{ord.orderId}</strong> 📋
+                      </span>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      <span className="order-date-text">{ord.createdAt}</span>
+                      <span
+                        className={`shopee-status-badge ${
+                          ord.status === 'completed' || ord.status === 'delivered'
+                            ? 'status-completed'
+                            : ord.status === 'shipping' || ord.status === 'delivering'
+                            ? 'status-shipping'
+                            : ord.status === 'returning' || ord.status === 'returned'
+                            ? 'status-shipping'
+                            : 'status-cancelled'
+                        }`}
+                        style={
+                          ord.status === 'returning' || ord.status === 'returned'
+                            ? { background: '#fef3c7', color: '#d97706', border: '1px solid #fde68a' }
+                            : {}
+                        }
+                      >
+                        {ord.statusText}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Tracking Stepper Progress (when active) */}
+                  {ord.stepIndex > 0 && ord.status !== 'cancelled' && (
+                    <div style={{ background: 'var(--bg-muted, #f8fafc)', borderBottom: '1px solid var(--border-light, #eee)', padding: '14px 20px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+                        {[
+                          { num: 1, label: t('step_order_placed', 'Đã Đặt Hàng') },
+                          { num: 2, label: t('step_confirmed', 'Đã Xác Nhận') },
+                          { num: 3, label: t('step_shipping', 'Đang Vận Chuyển') },
+                          { num: 4, label: t('step_delivered', 'Đã Giao Hàng') },
+                        ].map((step, idx) => (
+                          <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
+                            <div
+                              style={{
+                                width: '28px',
+                                height: '28px',
+                                borderRadius: '50%',
+                                background: ord.stepIndex >= step.num ? 'var(--color-success, #10b981)' : 'var(--border-dark, #cbd5e1)',
+                                color: '#fff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                marginBottom: '6px',
+                              }}
+                            >
+                              {ord.stepIndex >= step.num ? '✓' : step.num}
+                            </div>
+                            <span style={{ fontSize: '11.5px', fontWeight: ord.stepIndex >= step.num ? 700 : 500, color: ord.stepIndex >= step.num ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                              {step.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tier 2: Items List */}
+                  <div className="order-card-items">
+                    {(ord.items || []).map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="order-item-row"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '14px',
+                          padding: '8px 0',
+                          borderBottom: idx < ord.items.length - 1 ? '1px dashed var(--border-light, #f1f5f9)' : 'none',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '220px' }}>
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>{item.name}</div>
+                            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                              {item.variant ? `Phân loại: ${item.variant} | ` : ''}Số lượng: x{item.quantity || 1}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+                            {formatCurrency(item.price)}
+                          </div>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary"
+                            style={{ fontSize: '12px', padding: '5px 12px', whiteSpace: 'nowrap' }}
+                            onClick={() => handleBuyAgain(item)}
+                            title="Thêm sản phẩm này vào giỏ hàng để mua lại"
+                          >
+                            🔁 Mua lại
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Tier 3: Dedicated Transparent Fee Breakdown */}
+                  <div className="order-card-fees">
+                    <div className="fee-breakdown-table" style={{ minWidth: '280px', maxWidth: '380px', width: '100%' }}>
+                      <div className="fee-row">
+                        <span className="fee-label">Tiền hàng (tạm tính):</span>
+                        <span className="fee-value">{formatCurrency(itemsSubtotal)}</span>
+                      </div>
+                      <div className="fee-row">
+                        <span className="fee-label">Phí vận chuyển:</span>
+                        <span className="fee-value">+{formatCurrency(shippingFee)}</span>
+                      </div>
+                      {voucherDiscount > 0 && (
+                        <div className="fee-row discount-row">
+                          <span className="fee-label">Giảm giá Voucher:</span>
+                          <span className="fee-value discount">-{formatCurrency(voucherDiscount)}</span>
+                        </div>
+                      )}
+                      {coinDiscount > 0 && (
+                        <div className="fee-row discount-row">
+                          <span className="fee-label">Giảm giá Xu:</span>
+                          <span className="fee-value discount" style={{ color: '#d97706' }}>🪙 -{formatCurrency(coinDiscount)}</span>
+                        </div>
+                      )}
+                      <div className="fee-row total-row">
+                        <span className="fee-label">{t('total_payment', 'Tổng thanh toán')}:</span>
+                        <span className="fee-value total">{formatCurrency(totalPayment)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tier 4: Footer with SPX Code and Stage-Specific Action Buttons */}
+                  <div className="order-card-footer">
+                    <div className="order-card-footer-left">
+                      <span>{t('payment_method', 'Thanh toán')}: <strong>{ord.paymentMethod || 'COD'}</strong></span>
+                      {ord.trackingCode && (
+                        <span
+                          className="copy-pill"
+                          onClick={() => handleCopy(ord.trackingCode, 'mã vận đơn SPX')}
+                          title="Nhấn để sao chép mã vận đơn SPX"
+                        >
+                          🚚 Mã SPX: <strong>{ord.trackingCode}</strong> 📋
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="order-card-footer-actions">
+                      {/* Optional test/simulation step button */}
                       {ord.status !== 'cancelled' && (ord.stepIndex || 1) < 4 && (
                         <button
                           type="button"
@@ -688,131 +1063,204 @@ export default function OrderHistoryPage() {
                           onClick={() => handleSimulateNextStep(ord.orderId)}
                           title="Mô phỏng bưu tá giao hàng bước tiếp theo"
                         >
-                          ⚡ {t('order_track_simulate_step')}
+                          ⚡ {t('order_track_simulate_step', 'Mô phỏng giao')}
                         </button>
                       )}
 
-                      {ord.status === 'shipping' && (
-                        <button
-                          type="button"
-                          className="shopee-btn"
-                          style={{
-                            fontSize: '12px',
-                            background: '#10b981',
-                            color: '#fff',
-                            border: 'none',
-                            fontWeight: 700,
-                          }}
-                          onClick={() => handleConfirmDelivered(ord.orderId)}
-                          title="Xác nhận bạn đã nhận được gói hàng an toàn"
-                        >
-                          📦 Đã nhận được hàng
-                        </button>
-                      )}
-
-                      {ord.status === 'shipping' && (
-                        <button
-                          type="button"
-                          className="shopee-btn shopee-btn-secondary"
-                          style={{ fontSize: '12px', color: '#ef4444', borderColor: '#fca5a5' }}
-                          onClick={() => setSelectedCancelOrder(ord)}
-                        >
-                          ✕ {t('cancel_order', 'Hủy đơn hàng')}
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        className="shopee-btn shopee-btn-secondary"
-                        style={{ fontSize: '12px' }}
-                        onClick={() => setSelectedOrderDetails(ord)}
-                      >
-                        {t('view_tracking_details', 'Xem lịch trình')}
-                      </button>
-
-                      {['shipping', 'delivering'].includes(ord.status) && (
-                        <button
-                          type="button"
-                          className="shopee-btn shopee-btn-secondary"
-                          style={{ fontSize: '12px', color: '#0284c7', borderColor: '#bae6fd' }}
-                          onClick={() => setSelectedLiveMapOrder(ord)}
-                        >
-                          🗺️ Bản đồ Shipper
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        className="shopee-btn shopee-btn-secondary"
-                        style={{ fontSize: '12px' }}
-                        onClick={() => setSelectedInvoiceOrder(ord)}
-                      >
-                        🧾 {t('print_invoice', 'In hóa đơn VAT')}
-                      </button>
-
-                      {ord.status === 'completed' && (
-                        <button
-                          type="button"
-                          className="shopee-btn shopee-btn-secondary"
-                          style={{ fontSize: '12px', color: '#d97706', borderColor: '#fde68a' }}
-                          onClick={() => setSelectedReturnOrder(ord)}
-                        >
-                          🔄 {t('return_refund', 'Trả hàng / Hoàn tiền')}
-                        </button>
-                      )}
-
-                      {ord.status === 'completed' && (
-                        ord.reviewed ? (
-                          <span
-                            className="shopee-badge-success"
-                            style={{
-                              fontSize: '12px',
-                              padding: '6px 12px',
-                              borderRadius: '6px',
-                              background: '#ecfdf5',
-                              color: '#059669',
-                              border: '1px solid #a7f3d0',
-                              fontWeight: 700,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
+                      {/* Giai đoạn 1: Chờ xác nhận (pending, confirmed) */}
+                      {(ord.status === 'pending' || ord.status === 'confirmed') && (
+                        <>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary"
+                            style={{ fontSize: '12px', color: '#ef4444', borderColor: '#fca5a5' }}
+                            onClick={() => setSelectedCancelOrder(ord)}
+                          >
+                            ✕ {t('cancel_order', 'Hủy đơn hàng')}
+                          </button>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary"
+                            style={{ fontSize: '12px', color: '#4f46e5', borderColor: '#c7d2fe' }}
+                            onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
+                          >
+                            💬 Chat với Shop
+                          </button>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-primary"
+                            style={{ fontSize: '12px' }}
+                            onClick={() => {
+                              setSelectedDetailOrder(ord);
+                              setIsDetailModalOpen(true);
                             }}
                           >
-                            ✓ {t('reviewed_badge', 'Đã đánh giá (+200 Xu)')}
-                          </span>
-                        ) : (
+                            👁 {t('view_details', 'Xem chi tiết')}
+                          </button>
+                        </>
+                      )}
+
+                      {/* Giai đoạn 2: Đang giao (shipping, delivering) */}
+                      {(ord.status === 'shipping' || ord.status === 'delivering') && (
+                        <>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary"
+                            style={{ fontSize: '12px', color: '#0284c7', borderColor: '#bae6fd' }}
+                            onClick={() => setSelectedLiveMapOrder(ord)}
+                          >
+                            🚚 {t('shipper_map', 'Bản đồ Shipper SPX')}
+                          </button>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary"
+                            style={{ fontSize: '12px', color: '#64748b', borderColor: '#cbd5e1' }}
+                            onClick={() => {
+                              setSelectedDetailOrder(ord);
+                              setIsDetailModalOpen(true);
+                            }}
+                          >
+                            📍 {t('view_tracking_details', 'Lịch trình')}
+                          </button>
                           <button
                             type="button"
                             className="shopee-btn"
                             style={{
                               fontSize: '12px',
-                              background: '#fffbeb',
-                              color: '#b45309',
-                              border: '1px solid #fde68a',
+                              background: '#10b981',
+                              color: '#fff',
+                              border: 'none',
                               fontWeight: 700,
-                              padding: '6px 12px',
                             }}
-                            onClick={() => setSelectedReviewOrder(ord)}
+                            onClick={() => handleConfirmDelivered(ord.orderId)}
+                            title="Xác nhận bạn đã nhận được gói hàng an toàn"
                           >
-                            ⭐ {t('review_order_btn', 'Đánh giá (+200 Xu)')}
+                            ✓ {t('confirm_delivered', 'Đã nhận hàng')}
                           </button>
-                        )
+                        </>
                       )}
 
-                      <button
-                        type="button"
-                        className="shopee-btn shopee-btn-primary"
-                        style={{ fontSize: '12px' }}
-                        onClick={() => handleReorderWholeOrder(ord)}
-                        title="Mua lại tất cả sản phẩm trong đơn hàng này"
-                      >
-                        🔁 {t('buy_again_whole', 'Mua Lại Đơn')}
-                      </button>
+                      {/* Giai đoạn 3: Hoàn thành (completed, delivered) */}
+                      {(ord.status === 'completed' || ord.status === 'delivered') && (
+                        <>
+                          {ord.reviewed ? (
+                            <span
+                              className="shopee-badge-success"
+                              style={{
+                                fontSize: '12px',
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                background: '#ecfdf5',
+                                color: '#059669',
+                                border: '1px solid #a7f3d0',
+                                fontWeight: 700,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              ✓ {t('reviewed_badge', 'Đã đánh giá (+200 Xu)')}
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              className="shopee-btn"
+                              style={{
+                                fontSize: '12px',
+                                background: '#fffbeb',
+                                color: '#b45309',
+                                border: '1px solid #fde68a',
+                                fontWeight: 700,
+                                padding: '6px 12px',
+                              }}
+                              onClick={() => setSelectedReviewOrder(ord)}
+                            >
+                              ⭐ {t('review_order_btn', 'Đánh giá nhận Xu')}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-primary"
+                            style={{ fontSize: '12px' }}
+                            onClick={() => handleReorderWholeOrder(ord)}
+                            title="Mua lại tất cả sản phẩm trong đơn hàng này"
+                          >
+                            🔄 {t('buy_again_whole', 'Mua lại đơn này')}
+                          </button>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary"
+                            style={{ fontSize: '12px', color: '#d97706', borderColor: '#fde68a' }}
+                            onClick={() => setSelectedReturnOrder(ord)}
+                          >
+                            ↩ {t('return_refund', 'Trả hàng/Hoàn tiền')}
+                          </button>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary"
+                            style={{ fontSize: '12px' }}
+                            onClick={() => setSelectedInvoiceOrder(ord)}
+                          >
+                            🧾 {t('print_invoice', 'In hóa đơn VAT')}
+                          </button>
+                        </>
+                      )}
+
+                      {/* Giai đoạn 4: Đã hủy (cancelled) */}
+                      {ord.status === 'cancelled' && (
+                        <>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-primary"
+                            style={{ fontSize: '12px' }}
+                            onClick={() => handleReorderWholeOrder(ord)}
+                            title="Mua lại tất cả sản phẩm trong đơn hàng này"
+                          >
+                            🔄 {t('buy_again_whole', 'Mua lại đơn này')}
+                          </button>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary"
+                            style={{ fontSize: '12px' }}
+                            onClick={() => {
+                              setSelectedDetailOrder(ord);
+                              setIsDetailModalOpen(true);
+                            }}
+                          >
+                            👁 {t('view_details', 'Xem chi tiết')}
+                          </button>
+                        </>
+                      )}
+
+                      {/* Giai đoạn 5: Đổi trả (returned, returning) */}
+                      {(ord.status === 'returned' || ord.status === 'returning') && (
+                        <>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary"
+                            style={{ fontSize: '12px' }}
+                            onClick={() => {
+                              setSelectedDetailOrder(ord);
+                              setIsDetailModalOpen(true);
+                            }}
+                          >
+                            👁 {t('view_details', 'Xem chi tiết')}
+                          </button>
+                          <button
+                            type="button"
+                            className="shopee-btn shopee-btn-secondary"
+                            style={{ fontSize: '12px', color: '#4f46e5', borderColor: '#c7d2fe' }}
+                            onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
+                          >
+                            💬 Chat với Shop
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -1035,6 +1483,38 @@ export default function OrderHistoryPage() {
           order={selectedReviewOrder}
           onClose={() => setSelectedReviewOrder(null)}
           onSubmitReview={handleReviewSubmit}
+        />
+      )}
+
+      {/* Comprehensive Order Detail Modal (Milestone M2 & M3) */}
+      {isDetailModalOpen && selectedDetailOrder && (
+        <OrderDetailModal
+          order={selectedDetailOrder}
+          isOpen={isDetailModalOpen}
+          onClose={() => {
+            setIsDetailModalOpen(false);
+            setSelectedDetailOrder(null);
+          }}
+          onOpenChat={(order) => {
+            setSelectedChatShop({
+              shop: { name: order?.shopName || 'Shop', id: order?.shopId },
+              currentProduct: order?.items?.[0],
+            });
+          }}
+          onOpenTracking={(order) => setSelectedLiveMapOrder(order)}
+          onOpenLiveMap={(order) => setSelectedLiveMapOrder(order)}
+          onOpenInvoice={(order) => setSelectedInvoiceOrder(order)}
+          onBuyAgainItem={(item) => handleBuyAgain(item)}
+          onReorderWhole={(order) => handleReorderWholeOrder(order)}
+        />
+      )}
+
+      {/* Real-time Shop Seller Chat Modal */}
+      {selectedChatShop && (
+        <ShopChatModal
+          shop={selectedChatShop.shop}
+          currentProduct={selectedChatShop.currentProduct}
+          onClose={() => setSelectedChatShop(null)}
         />
       )}
     </main>

@@ -161,48 +161,111 @@ export const getOrderById = async (req, res) => {
   }
 };
 
-// @desc    Cancel an order (customer can cancel pending orders)
+// @desc    Cancel an order (customer can cancel pending or confirmed orders)
 // @route   PATCH /api/orders/:id/cancel
 // @access  Private
 export const cancelOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const { id } = req.params;
+    let order = null;
+    try {
+      order = await Order.findById(id);
+    } catch {}
+    if (!order) {
+      order = await Order.findOne({
+        $or: [{ _id: id }, { id }, { orderId: id }, { trackingCode: id }],
+      });
+    }
     if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
 
-    const userId = req.user._id || req.user.id;
-    if (order.userId && order.userId !== userId && req.user.role !== "admin") {
+    const userId = req.user ? (req.user._id || req.user.id) : null;
+    if (order.userId && order.userId !== userId && req.user?.role !== "admin") {
       return sendError(res, "Bạn không có quyền hủy đơn hàng này", 403);
     }
 
-    if (order.status !== "pending") {
-      return sendError(res, "Chỉ có thể hủy đơn hàng ở trạng thái 'Chờ xác nhận'", 400);
+    if (!["pending", "confirmed"].includes(order.status)) {
+      return sendError(res, "Chỉ có thể hủy đơn hàng ở trạng thái 'Chờ xác nhận' (pending hoặc confirmed)", 400);
     }
 
-    // Restore stock
+    const { cancelReason, reason, cancelNote, note } = req.body || {};
+    const finalReason = cancelReason || reason || "Người mua yêu cầu hủy đơn";
+    const finalNote = cancelNote || note || "";
+
+    // Restore stock in Product model
     for (const item of order.items || []) {
-      if (item.productId) {
-        const product = await Product.findOne({ _id: item.productId });
+      const prodId = item.productId || item.product || item._id || item.id;
+      if (prodId) {
+        let product = null;
+        try {
+          product = await Product.findOne({
+            $or: [{ _id: prodId }, { id: prodId }],
+          });
+        } catch {}
+        if (!product) {
+          try {
+            product = await Product.findById(prodId);
+          } catch {}
+        }
         if (product) {
-          product.stock = (product.stock || 0) + (item.quantity || 1);
-          product.sold = Math.max(0, (product.sold || 0) - (item.quantity || 1));
+          const qty = Number(item.quantity) || 1;
+          product.stock = (product.stock || 0) + qty;
+          product.sold = Math.max(0, (product.sold || 0) - qty);
+          if (product.soldCount !== undefined) {
+            product.soldCount = Math.max(0, (product.soldCount || 0) - qty);
+          }
           await product.save();
         }
       }
     }
 
-    // Restore coins
-    if (order.userId && order.coinsUsed > 0) {
-      const user = await User.findById(order.userId);
+    // Restore coins to user
+    const coinsToRefund = Number(order.coinsUsed || order.coinUsed || order.coinsDeducted || 0);
+    if (order.userId && coinsToRefund > 0) {
+      let user = null;
+      try {
+        user = await User.findById(order.userId);
+      } catch {}
+      if (!user && memoryStore?.users) {
+        try {
+          user = await memoryStore.users.findById(order.userId);
+        } catch {}
+      }
       if (user) {
-        user.coins = (user.coins || 0) + order.coinsUsed;
+        user.coins = (user.coins || 0) + coinsToRefund;
         await user.save();
       }
     }
 
+    // Update order fields and timeline
     order.status = "cancelled";
-    await order.save();
+    order.statusText = "Đã hủy bởi người mua";
+    order.cancelledAt = new Date().toISOString();
+    order.cancelReason = finalReason;
+    if (finalNote) order.cancelNote = finalNote;
 
-    sendSuccess(res, { order, message: "Đã hủy đơn hàng thành công" });
+    if (Array.isArray(order.items)) {
+      order.items.forEach((it) => {
+        it.status = "cancelled";
+      });
+    }
+
+    if (Array.isArray(order.timeline)) {
+      order.timeline.push({
+        status: "cancelled",
+        description: "Đơn hàng đã được hủy thành công",
+        time: new Date().toISOString(),
+        text: `Đã hủy đơn hàng: ${finalReason}${finalNote ? `. Ghi chú: ${finalNote}` : ""}`,
+      });
+    }
+
+    await order.save();
+    if (memoryStore?.persist) memoryStore.persist();
+
+    res.status(200).json({
+      success: true,
+      data: order,
+      message: "Hủy đơn hàng thành công",
+    });
   } catch (error) {
     sendError(res, error.message, 500);
   }
@@ -561,27 +624,56 @@ export const shipOrder = async (req, res) => {
 // @access  Private
 export const deliverOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const { id } = req.params;
+    let order = null;
+    try {
+      order = await Order.findById(id);
+    } catch {}
+    if (!order) {
+      order = await Order.findOne({
+        $or: [{ _id: id }, { id }, { orderId: id }, { trackingCode: id }],
+      });
+    }
     if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
 
-    if (order.status !== "shipping") {
+    if (!["shipping", "delivering"].includes(order.status)) {
       return sendError(res, "Chỉ có thể xác nhận nhận hàng khi đơn đang giao", 400);
     }
 
     // Check ownership
-    const userId = req.user._id || req.user.id;
-    if (req.user.role !== "admin" && order.userId && order.userId !== userId) {
+    const userId = req.user ? (req.user._id || req.user.id) : null;
+    if (req.user?.role !== "admin" && order.userId && order.userId !== userId) {
       return sendError(res, "Bạn không có quyền xác nhận đơn hàng này", 403);
     }
 
     order.status = "delivered";
+    order.statusText = "Giao hàng thành công";
     order.deliveredAt = new Date().toISOString();
+    if (order.stepIndex !== undefined) order.stepIndex = 4;
+
+    if (Array.isArray(order.items)) {
+      order.items.forEach((it) => {
+        it.status = "delivered";
+      });
+    }
+
     if (Array.isArray(order.timeline)) {
-      order.timeline.push({ time: new Date().toISOString(), text: "Người mua đã xác nhận nhận hàng thành công" });
+      order.timeline.push({
+        status: "delivered",
+        description: "Giao hàng thành công",
+        time: new Date().toISOString(),
+        text: "Người mua đã xác nhận nhận hàng thành công",
+      });
     }
     await order.save();
+    if (memoryStore?.persist) memoryStore.persist();
 
-    sendSuccess(res, { order, message: "Đã xác nhận nhận hàng" });
+    const orderData = order.toObject ? order.toObject() : { ...order };
+    sendSuccess(res, {
+      ...orderData,
+      order,
+      message: "Đã xác nhận nhận hàng",
+    });
   } catch (error) {
     sendError(res, error.message, 500);
   }
@@ -698,3 +790,152 @@ export const searchOrders = async (req, res) => {
     sendError(res, error.message, 500);
   }
 };
+
+// @desc    Repurchase an existing order (validate stock & replenish cart)
+// @route   POST /api/orders/:id/repurchase
+// @access  Private
+export const repurchaseOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let order = null;
+    try {
+      order = await Order.findById(id);
+    } catch {}
+    if (!order) {
+      order = await Order.findOne({
+        $or: [{ _id: id }, { id }, { orderId: id }, { trackingCode: id }],
+      });
+    }
+    if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
+
+    const userId = req.user ? (req.user._id || req.user.id) : null;
+    if (order.userId && order.userId !== userId && req.user?.role !== "admin") {
+      return sendError(res, "Bạn không có quyền thực hiện thao tác trên đơn hàng này", 403);
+    }
+
+    const { itemIds, productId, itemId, addToCart = true } = req.body || {};
+    let targetIds = null;
+    if (Array.isArray(itemIds) && itemIds.length > 0) {
+      targetIds = itemIds.map(String);
+    } else if (productId) {
+      targetIds = [String(productId)];
+    } else if (itemId) {
+      targetIds = [String(itemId)];
+    }
+
+    let itemsToProcess = order.items || [];
+    if (targetIds) {
+      itemsToProcess = itemsToProcess.filter((it) => {
+        const itId = String(it.productId || it.product || it._id || it.id);
+        return targetIds.includes(itId);
+      });
+      if (itemsToProcess.length === 0) {
+        return sendError(res, "Không tìm thấy sản phẩm yêu cầu trong đơn hàng này", 400);
+      }
+    }
+
+    const itemsToReorder = [];
+    const outOfStockItems = [];
+
+    for (const item of itemsToProcess) {
+      const prodId = item.productId || item.product || item._id || item.id;
+      let prod = null;
+      try {
+        prod = await Product.findOne({
+          $or: [{ _id: prodId }, { id: prodId }],
+        });
+      } catch {}
+      if (!prod) {
+        try {
+          prod = await Product.findById(prodId);
+        } catch {}
+      }
+
+      const reqQty = Number(item.quantity) || 1;
+      const isAvailable = prod && prod.isActive !== false && (prod.stock || 0) >= reqQty;
+
+      if (isAvailable) {
+        itemsToReorder.push({
+          productId: prod._id || prod.id,
+          product: prod._id || prod.id,
+          name: prod.name || item.name,
+          price: prod.price !== undefined ? prod.price : item.price,
+          quantity: reqQty,
+          image: prod.image || item.image,
+          shopId: prod.shopId || item.shopId,
+          shopName: prod.shopName || item.shopName,
+          availableStock: prod.stock,
+        });
+      } else {
+        outOfStockItems.push({
+          productId: prodId,
+          name: item.name || (prod ? prod.name : "Sản phẩm"),
+          quantity: reqQty,
+          requestedQuantity: reqQty,
+          availableStock: prod ? (prod.stock || 0) : 0,
+          reason: !prod
+            ? "Sản phẩm không còn tồn tại"
+            : (!prod.isActive
+                ? "Sản phẩm đã ngưng bán"
+                : "Hết hàng hoặc không đủ tồn kho"),
+        });
+      }
+    }
+
+    const canReorderFully = outOfStockItems.length === 0;
+
+    // Replenish user's cart in memoryStore if available and requested
+    if (addToCart && itemsToReorder.length > 0 && userId && memoryStore?.carts) {
+      try {
+        const currentCart = memoryStore.carts.findByUserId(userId);
+        let cartItems = currentCart ? [...currentCart.items] : [];
+        for (const reorderItem of itemsToReorder) {
+          const existingIdx = cartItems.findIndex(
+            (i) => String(i.productId || i.product) === String(reorderItem.productId)
+          );
+          if (existingIdx !== -1) {
+            cartItems[existingIdx].quantity += reorderItem.quantity;
+            if (reorderItem.availableStock !== undefined) {
+              cartItems[existingIdx].quantity = Math.min(
+                cartItems[existingIdx].quantity,
+                reorderItem.availableStock
+              );
+            }
+          } else {
+            cartItems.push({
+              productId: reorderItem.productId,
+              product: reorderItem.productId,
+              quantity: reorderItem.quantity,
+              name: reorderItem.name,
+              price: reorderItem.price,
+              image: reorderItem.image,
+              shopId: reorderItem.shopId,
+              selected: true,
+            });
+          }
+        }
+        memoryStore.carts.upsert(userId, cartItems);
+      } catch (cartErr) {
+        console.warn("[repurchaseOrder] Could not auto-sync cart in memoryStore:", cartErr.message);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        orderId: order._id || order.id || order.orderId,
+        canReorderFully,
+        itemsToReorder,
+        outOfStockItems,
+        message: canReorderFully
+          ? "Đã thêm toàn bộ sản phẩm vào giỏ hàng thành công!"
+          : (itemsToReorder.length > 0
+              ? `Đã thêm ${itemsToReorder.length} sản phẩm vào giỏ hàng. ${outOfStockItems.length} sản phẩm hết hàng hoặc không đủ tồn kho.`
+              : "Tất cả sản phẩm đều đã hết hàng, không thể mua lại."),
+      },
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+

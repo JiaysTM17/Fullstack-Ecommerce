@@ -2,6 +2,8 @@
  * Review Controller — Đánh Giá Nâng Cao
  * Bao gồm: CRUD reviews, seller reply, report, rating stats
  */
+import Order from "../models/Order.js";
+import User from "../models/User.js";
 import memoryStore from "../models/memoryStore.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 
@@ -67,28 +69,83 @@ export const getProductReviews = async (req, res) => {
 export const createReview = async (req, res) => {
   try {
     const userId = req.user._id || req.user.id;
-    const { productId, rating, title, content, images } = req.body;
+    const { orderId, productId, rating, comment, title, content, images, tags } = req.body;
 
     if (!productId || !rating) return sendError(res, "productId và rating là bắt buộc", 400);
-    if (rating < 1 || rating > 5) return sendError(res, "Rating phải từ 1 đến 5", 400);
+    const numRating = Number(rating);
+    if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+      return sendError(res, "Rating phải từ 1 đến 5", 400);
+    }
 
     // Check product exists
-    const product = await memoryStore.products.findOne({ _id: productId });
+    let product = await memoryStore.products.findOne({ _id: productId });
+    if (!product) {
+      try {
+        product = await memoryStore.products.findById(productId);
+      } catch {}
+    }
     if (!product) return sendError(res, "Sản phẩm không tồn tại", 404);
 
-    // Check if already reviewed
-    const existing = await memoryStore.reviews.findOne({ productId, userId });
+    // If orderId is provided, validate order
+    if (orderId) {
+      let order = null;
+      try {
+        order = await Order.findById(orderId);
+      } catch {}
+      if (!order) {
+        try {
+          order = await Order.findOne({
+            $or: [{ _id: orderId }, { id: orderId }, { orderId }],
+          });
+        } catch {}
+      }
+      if (!order && memoryStore?.orders) {
+        try {
+          order = (await memoryStore.orders.findById(orderId)) || (await memoryStore.orders.findOne({
+            $or: [{ _id: orderId }, { id: orderId }, { orderId }],
+          }));
+        } catch {}
+      }
+      if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
+
+      const orderUserId = order.userId || order.customerId;
+      if (orderUserId && String(orderUserId) !== String(userId) && req.user.role !== "admin") {
+        return sendError(res, "Bạn không có quyền đánh giá đơn hàng này", 403);
+      }
+
+      const inOrder = Array.isArray(order.items) && order.items.some((it) => {
+        const pId = it.productId || it.product || it._id || it.id;
+        return String(pId) === String(productId);
+      });
+      if (!inOrder) {
+        return sendError(res, "Sản phẩm không có trong đơn hàng này", 400);
+      }
+
+      if (!["delivered", "completed"].includes(order.status)) {
+        return sendError(res, "Chỉ có thể đánh giá đơn hàng đã giao thành công", 400);
+      }
+    }
+
+    // Check if already reviewed (support orderId in query if provided)
+    const existingQuery = orderId
+      ? { productId, userId, orderId }
+      : { productId, userId };
+    const existing = await memoryStore.reviews.findOne(existingQuery);
     if (existing) return sendError(res, "Bạn đã đánh giá sản phẩm này rồi", 400);
 
     const review = await memoryStore.reviews.create({
+      orderId: orderId || null,
       productId,
       userId,
       author: req.user.fullName || "Khách hàng",
+      authorName: req.user.fullName || "Khách hàng",
       avatar: req.user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
-      rating: Number(rating),
+      rating: numRating,
       title: title || "",
-      content: content || "",
+      content: content || comment || "",
+      comment: comment || content || "",
       images: Array.isArray(images) ? images : [],
+      tags: Array.isArray(tags) ? tags : [],
       verifiedPurchase: true,
       date: new Date().toLocaleDateString("vi-VN"),
       createdAt: new Date().toISOString(),
@@ -97,7 +154,7 @@ export const createReview = async (req, res) => {
       helpfulCount: 0,
     });
 
-    // Update product rating
+    // Update product rating & reviewCount
     const allReviews = await memoryStore.reviews.find({ productId });
     const avgRating = (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length).toFixed(1);
     await memoryStore.products.findByIdAndUpdate(product._id, {
@@ -105,7 +162,32 @@ export const createReview = async (req, res) => {
       reviewCount: allReviews.length,
     });
 
-    sendSuccess(res, review, 201);
+    // Award +200 Mini Xu to buyer
+    let user = null;
+    try {
+      user = await User.findById(userId);
+    } catch {}
+    if (!user && memoryStore?.users) {
+      try {
+        user = await memoryStore.users.findById(userId);
+      } catch {}
+    }
+    if (user) {
+      user.coins = (user.coins || 0) + 200;
+      await user.save();
+    }
+    if (memoryStore?.persist) memoryStore.persist();
+
+    const reviewDoc = review.toObject ? review.toObject() : { ...review };
+    const responseData = {
+      ...reviewDoc,
+      review: reviewDoc,
+      rewardCoins: 200,
+      productRating: Number(avgRating),
+      productReviewCount: allReviews.length,
+    };
+
+    sendSuccess(res, responseData, 201);
   } catch (error) {
     sendError(res, error.message, 500);
   }

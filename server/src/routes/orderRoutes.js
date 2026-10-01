@@ -4,6 +4,7 @@ import {
   getMyOrders,
   getOrderById,
   cancelOrder,
+  repurchaseOrder,
   getOrderTracking,
   getOrderInvoice,
   confirmOrder,
@@ -38,5 +39,7 @@ router.patch("/:id/complete", authenticate, completeOrder);
 router.get("/mine", authenticate, getMyOrders);
 router.get("/:id", authenticate, getOrderById);
 router.patch("/:id/cancel", authenticate, cancelOrder);
+router.post("/:id/repurchase", authenticate, repurchaseOrder);
 
 export default router;
+
