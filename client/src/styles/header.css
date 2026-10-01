@@ -386,56 +386,20 @@
 .shopee-subnav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 4px 0 5px;
+  gap: 10px;
+  padding: 5px 0 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 12px;
   font-weight: 600;
   color: #f8fafc;
-}
-
-.shopee-subnav-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   overflow-x: auto;
   white-space: nowrap;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-.shopee-subnav-left::-webkit-scrollbar {
+.shopee-subnav::-webkit-scrollbar {
   display: none;
-}
-
-.shopee-subnav-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  white-space: nowrap;
-  user-select: none;
-}
-
-.subnav-trust-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: rgba(248, 250, 252, 0.72);
-  font-weight: 500;
-  transition: all 0.2s ease;
-  cursor: default;
-}
-
-.subnav-trust-pill:hover {
-  color: #38bdf8;
-  transform: translateY(-0.5px);
-}
-
-.subnav-trust-sep {
-  color: rgba(255, 255, 255, 0.2);
-  font-size: 9px;
 }
 
 .shopee-subnav-cat-btn {

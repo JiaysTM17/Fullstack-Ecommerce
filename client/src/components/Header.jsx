@@ -1101,87 +1101,67 @@ const Header = ({
           </div>
         </div>
 
-        {/* Mega Subnav Bar Redesign with Trust Badges */}
+        {/* Mega Subnav Bar (Compact Slim Strip) */}
         <nav className="shopee-subnav">
-          <div className="shopee-subnav-left">
-            <button
-              type="button"
-              className="shopee-subnav-cat-btn"
-              onClick={() => setShowCategoryDrawer(true)}
-              title="Mở danh mục ngành hàng"
-            >
-              <span>☰</span>
-              <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
-              <span style={{ fontSize: '9px', opacity: 0.8 }}>▼</span>
-            </button>
+          <button
+            type="button"
+            className="shopee-subnav-cat-btn"
+            onClick={() => setShowCategoryDrawer(true)}
+            title="Mở danh mục ngành hàng"
+          >
+            <span>☰</span>
+            <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
+            <span style={{ fontSize: '9px', opacity: 0.8 }}>▼</span>
+          </button>
 
-            <span
-              className="shopee-subnav-link"
-              style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)' }}
-              onClick={() => handleSubnavItemClick('/', null)}
-              title="Quay lại trang chủ và xem toàn bộ sản phẩm"
-            >
-              🏠 {t('nav_all_products', 'Trang Chủ (Tất Cả)')}
-            </span>
+          <span
+            className="shopee-subnav-link"
+            style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)' }}
+            onClick={() => handleSubnavItemClick('/', null)}
+            title="Quay lại trang chủ và xem toàn bộ sản phẩm"
+          >
+            🏠 {t('nav_all_products', 'Trang Chủ')}
+          </span>
 
-            <span
-              className="shopee-subnav-link highlight"
-              onClick={() => handleSubnavItemClick('/?badge=Hot+Deal', 'flash-deals-section')}
-              title="Săn deal chớp nhoáng giờ vàng"
-            >
-              🔥 {t('nav_flash_deals', 'Flash Deals')}
-            </span>
+          <span
+            className="shopee-subnav-link highlight"
+            onClick={() => handleSubnavItemClick('/?badge=Hot+Deal', 'flash-deals-section')}
+            title="Săn deal chớp nhoáng giờ vàng"
+          >
+            🔥 {t('nav_flash_deals', 'Flash Deals')}
+          </span>
 
-            <span
-              className="shopee-subnav-link"
-              onClick={() => handleSubnavItemClick('/?badge=Best+Seller', 'catalog-section')}
-              title="Khám phá các sản phẩm bán chạy nhất sàn"
-            >
-              ⭐ {t('nav_best_sellers', 'Bán Chạy Nhất')}
-            </span>
+          <span
+            className="shopee-subnav-link"
+            onClick={() => handleSubnavItemClick('/?badge=Best+Seller', 'catalog-section')}
+            title="Khám phá các sản phẩm bán chạy nhất sàn"
+          >
+            ⭐ {t('nav_best_sellers', 'Bán Chạy Nhất')}
+          </span>
 
-            <span
-              className="shopee-subnav-link"
-              onClick={() => handleSubnavItemClick('/?badge=Amazon%27s+Choice', 'catalog-section')}
-              title="Top sản phẩm đánh giá cao tuyển chọn"
-            >
-              ✨ {t('nav_featured_picks', 'Hàng Tuyển Chọn')}
-            </span>
+          <span
+            className="shopee-subnav-link"
+            onClick={() => handleSubnavItemClick('/?badge=Amazon%27s+Choice', 'catalog-section')}
+            title="Top sản phẩm đánh giá cao tuyển chọn"
+          >
+            ✨ {t('nav_featured_picks', 'Hàng Tuyển Chọn')}
+          </span>
 
-            <span
-              className="shopee-subnav-link"
-              onClick={() => handleSubnavItemClick('/?fastDelivery=1', 'catalog-section')}
-              title="Sản phẩm hỗ trợ giao hàng hỏa tốc trong 2H"
-            >
-              ⚡ {t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}
-            </span>
+          <span
+            className="shopee-subnav-link"
+            onClick={() => handleSubnavItemClick('/?fastDelivery=1', 'catalog-section')}
+            title="Sản phẩm hỗ trợ giao hàng hỏa tốc trong 2H"
+          >
+            ⚡ {t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}
+          </span>
 
-            <span
-              className="shopee-subnav-link badge-pill"
-              onClick={() => setShowRewardsModal(true)}
-              title="Vào Rewards Hub nhận xu & quay thưởng"
-            >
-              🎁 {t('nav_rewards_hub', 'Săn Xu & Voucher')}
-            </span>
-          </div>
-
-          {/* Right Trust Badges: Cân bằng thanh Subnav và tạo độ tin cậy mua sắm */}
-          <div className="shopee-subnav-right">
-            <div className="subnav-trust-pill" title="Cam kết 100% hàng thật chính hãng">
-              <span className="trust-icon">🛡️</span>
-              <span className="trust-text">100% Chính Hãng</span>
-            </div>
-            <span className="subnav-trust-sep">•</span>
-            <div className="subnav-trust-pill" title="Miễn phí vận chuyển toàn quốc cho đơn hàng đạt chuẩn">
-              <span className="trust-icon">🚚</span>
-              <span className="trust-text">Freeship Mọi Đơn</span>
-            </div>
-            <span className="subnav-trust-sep">•</span>
-            <div className="subnav-trust-pill" title="Đổi trả hàng miễn phí trong vòng 15 ngày">
-              <span className="trust-icon">🔄</span>
-              <span className="trust-text">15 Ngày Đổi Trả</span>
-            </div>
-          </div>
+          <span
+            className="shopee-subnav-link badge-pill"
+            onClick={() => setShowRewardsModal(true)}
+            title="Vào Rewards Hub nhận xu & quay thưởng"
+          >
+            🎁 {t('nav_rewards_hub', 'Săn Xu & Voucher')}
+          </span>
         </nav>
       </div>
 
