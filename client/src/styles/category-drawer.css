@@ -216,22 +216,28 @@
 
 /* Quick Filter & Search Bar */
 .category-drawer-filter-bar {
-  padding: 10px 24px;
+  padding: 12px 24px 10px;
   background: var(--bg-card, #ffffff);
   border-bottom: 1px solid var(--border-light, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.category-drawer-filter-top-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  flex-shrink: 0;
   flex-wrap: wrap;
 }
 
 .category-drawer-search-wrapper {
   position: relative;
   flex: 1;
-  min-width: 260px;
-  max-width: 480px;
+  min-width: 280px;
+  max-width: 520px;
 }
 
 .category-drawer-search-icon {
@@ -285,14 +291,16 @@
   color: #ef4444;
 }
 
-/* Quick Filter Pills Under/Next to Search */
+/* Quick Filter Pills Under Search (With plenty of vertical padding to prevent clipping on hover) */
 .category-drawer-chips-wrap {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   overflow-x: auto;
   white-space: nowrap;
   scrollbar-width: none;
+  padding: 6px 2px 8px 2px; /* Extra vertical space so hover lift NEVER clips borders */
+  margin: -2px 0 -4px;
 }
 
 .category-drawer-chips-wrap::-webkit-scrollbar {
@@ -300,30 +308,37 @@
 }
 
 .category-drawer-chip {
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 9999px;
   font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
-  border: 1px solid var(--border-medium, #e2e8f0);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid var(--border-medium, #cbd5e1);
   background: var(--bg-muted, #f8fafc);
   color: var(--text-secondary, #475569);
   user-select: none;
   flex-shrink: 0;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .category-drawer-chip:hover {
   border-color: var(--primary-color, #ea580c);
   color: var(--primary-color, #ea580c);
-  transform: translateY(-1px);
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.12);
 }
 
 .category-drawer-chip.active {
-  background: var(--primary-color, #ea580c);
+  background: linear-gradient(135deg, var(--primary-color, #ea580c), #ff6b35);
   border-color: var(--primary-color, #ea580c);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
+  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.35);
+  transform: translateY(-1px);
 }
 
 .category-drawer-count-badge {
@@ -331,7 +346,7 @@
   color: var(--text-muted, #64748b);
   white-space: nowrap;
   flex-shrink: 0;
-  padding: 4px 10px;
+  padding: 4px 12px;
   background: var(--bg-muted, #f1f5f9);
   border-radius: 8px;
   border: 1px solid var(--border-light, #e2e8f0);
@@ -341,32 +356,99 @@
   color: var(--primary-color, #ea580c);
 }
 
-/* Mega Menu Body: Category Cards Grid */
+/* Mega Menu Body: Category Cards Grid with Auto Natural Row Height */
 .category-drawer-body {
   padding: 20px 24px;
   overflow-y: auto;
   flex: 1 1 0%;
   min-height: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-auto-rows: auto;
+  align-content: start;
+  gap: 16px;
   background: var(--bg-muted, #f8fafc);
 }
 
-/* Individual Category Card */
+.category-drawer-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.category-drawer-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.category-drawer-body::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
+}
+
+.category-drawer-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.75);
+}
+
+/* Empty State */
+.category-drawer-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  gap: 12px;
+}
+
+.category-drawer-empty-icon {
+  font-size: 48px;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.category-drawer-empty-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+}
+
+.category-drawer-empty-subtext {
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+}
+
+.category-drawer-reset-btn {
+  margin-top: 8px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  background: var(--primary-color, #ea580c);
+  color: #ffffff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-drawer-reset-btn:hover {
+  background: #c2410c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+}
+
+/* Individual Category Card - Fully Visible Without Clipping */
 .category-drawer-card {
   background: var(--bg-card, #ffffff);
-  border-radius: 14px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 16px 18px;
   border: 1.5px solid var(--border-medium, #e2e8f0);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 220px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   position: relative;
-  overflow: hidden;
   animation: cardFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
@@ -389,7 +471,7 @@
 /* Card Header */
 .category-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 8px;
@@ -397,30 +479,35 @@
 
 .category-card-title-group {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 10px;
   min-width: 0;
   flex: 1;
 }
 
 .category-card-icon {
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
   flex-shrink: 0;
   transition: transform 0.25s ease;
+  margin-top: 1px;
 }
 
 .category-drawer-card:hover .category-card-icon {
   transform: scale(1.2) rotate(4deg);
 }
 
+/* Category Title - Wraps naturally onto 2 lines, NEVER cuts off into '...' */
 .category-card-name {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-primary, #0f172a);
-  white-space: nowrap;
+  line-height: 1.35;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
   min-width: 0;
 }
 

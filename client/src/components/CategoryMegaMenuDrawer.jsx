@@ -304,27 +304,33 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
 
         {/* Quick Filter Search & Chips Bar */}
         <div className="category-drawer-filter-bar">
-          <div className="category-drawer-search-wrapper">
-            <span className="category-drawer-search-icon">🔍</span>
-            <input
-              type="text"
-              autoComplete="off"
-              spellCheck="false"
-              placeholder="Lọc nhanh ngành hàng, sản phẩm (ví dụ: Nồi cơm, Tai nghe, Áo thun)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="category-drawer-search-input"
-            />
-            {searchTerm && (
-              <button
-                type="button"
-                onClick={() => setSearchTerm('')}
-                className="category-drawer-clear-btn"
-                title="Xóa tìm kiếm"
-              >
-                ✕
-              </button>
-            )}
+          <div className="category-drawer-filter-top-row">
+            <div className="category-drawer-search-wrapper">
+              <span className="category-drawer-search-icon">🔍</span>
+              <input
+                type="text"
+                autoComplete="off"
+                spellCheck="false"
+                placeholder="Lọc nhanh ngành hàng, sản phẩm (ví dụ: Nồi cơm, Tai nghe, Áo thun)..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="category-drawer-search-input"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="category-drawer-clear-btn"
+                  title="Xóa tìm kiếm"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <div className="category-drawer-count-badge">
+              Hiển thị <strong>{filteredCategories.length}</strong> / {CATEGORIES_DATA.length} ngành hàng
+            </div>
           </div>
 
           {/* Group Filter Chips */}
@@ -340,15 +346,32 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               </button>
             ))}
           </div>
-
-          <div className="category-drawer-count-badge">
-            Hiển thị <strong>{filteredCategories.length}</strong> / {CATEGORIES_DATA.length} ngành hàng
-          </div>
         </div>
 
         {/* Mega Menu Body: Category Cards in Responsive Grid */}
         <div className="category-drawer-body">
-          {filteredCategories.map((cat, idx) => (
+          {filteredCategories.length === 0 ? (
+            <div className="category-drawer-empty">
+              <div className="category-drawer-empty-icon">🔍</div>
+              <div className="category-drawer-empty-text">
+                Không tìm thấy ngành hàng phù hợp với "{searchTerm}"
+              </div>
+              <div className="category-drawer-empty-subtext">
+                Thử thay đổi từ khóa hoặc chọn nhóm ngành hàng khác
+              </div>
+              <button
+                type="button"
+                className="category-drawer-reset-btn"
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedGroup('all');
+                }}
+              >
+                🔄 Xóa bộ lọc & Xem tất cả
+              </button>
+            </div>
+          ) : (
+            filteredCategories.map((cat, idx) => (
             <div
               key={cat.id}
               onClick={() => handleSelectCategory(cat)}
@@ -436,7 +459,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 </span>
               </div>
             </div>
-          ))}
+          )))}
         </div>
 
         {/* Mega Menu Footer: 12 Mall Shops Strip */}
