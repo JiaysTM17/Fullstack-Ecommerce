@@ -1298,24 +1298,30 @@
 .order-lookup-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(15, 23, 42, 0.78);
   backdrop-filter: blur(8px);
-  z-index: 10000;
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px 16px;
+  overflow-y: auto;
 }
 
 .order-lookup-modal-card {
   background: var(--bg-card, #ffffff);
   width: 100%;
   max-width: 580px;
+  max-height: calc(100vh - 48px);
   border-radius: 20px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
   border: 1px solid var(--border-medium, #e2e8f0);
   overflow: hidden;
   color: var(--text-primary, #0f172a);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .order-lookup-modal-header {

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useTheme } from '../context/ThemeContext';
@@ -942,7 +943,7 @@ const Header = ({
                         <div className="user-dropdown-name">{user.fullName || user.email}</div>
                         <div className="user-dropdown-email">{user.email}</div>
                         <span className={`user-dropdown-role-pill ${user.role}`}>
-                          {user.role === 'admin' ? '⚡ Quản Trị Viên' : user.role === 'seller' ? '🏪 Chủ Gian Hàng' : '✨ Thành Viên Shopee'}
+                          {user.role === 'admin' ? '⚡ Quản Trị Viên' : user.role === 'seller' ? '🏪 Chủ Gian Hàng' : '✨ Thành Viên Thân Thiết'}
                         </span>
                       </div>
                     </div>
@@ -1187,8 +1188,8 @@ const Header = ({
         <RewardsHubModal onClose={() => setShowRewardsModal(false)} />
       )}
 
-      {/* Quick Order Lookup Modal */}
-      {showOrderLookupModal && (
+      {/* Quick Order Lookup Modal (Rendered to body via Portal to avoid header clipping) */}
+      {showOrderLookupModal && typeof document !== 'undefined' && createPortal(
         <div
           className="order-lookup-modal-backdrop anim-modal-fade"
           onClick={() => setShowOrderLookupModal(false)}
@@ -1332,7 +1333,8 @@ const Header = ({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );
