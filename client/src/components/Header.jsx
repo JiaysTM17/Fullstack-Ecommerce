@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -25,6 +26,52 @@ const POPULAR_SEARCHES = [
   "Đồng hồ Smartwatch",
 ];
 
+const QUICK_CATEGORY_CHIPS = [
+  { label: 'Điện Thoại', icon: '📱', query: 'Điện tử' },
+  { label: 'Thời Trang', icon: '👕', query: 'Thời trang' },
+  { label: 'Gia Dụng', icon: '🏠', query: 'Gia dụng' },
+  { label: 'Làm Đẹp', icon: '💄', query: 'Làm đẹp' },
+  { label: 'Phụ Kiện', icon: '🎧', query: 'Tai nghe' },
+];
+
+const TICKER_ITEMS = [
+  {
+    id: 1,
+    icon: '🚚',
+    badge: 'FREESHIP XTRA',
+    text: 'Miễn phí giao hàng toàn quốc đơn từ 0Đ hôm nay!',
+    actionText: 'Nhận Ngay',
+    type: 'link',
+    target: '/?fastDelivery=1'
+  },
+  {
+    id: 2,
+    icon: '⚡',
+    badge: 'FLASH SALE',
+    text: 'Khung giờ vàng 12:00 & 20:00 giảm sốc đến 50%',
+    actionText: 'Săn Deal',
+    type: 'link',
+    target: '/?badge=Hot+Deal'
+  },
+  {
+    id: 3,
+    icon: '🪙',
+    badge: 'ĐIỂM DANH',
+    text: 'Điểm danh nhận 5.000 Xu tích lũy mua sắm mỗi ngày',
+    actionText: 'Vào Ví Xu',
+    type: 'rewards'
+  },
+  {
+    id: 4,
+    icon: '🛡️',
+    badge: 'CAM KẾT 100%',
+    text: 'Hàng chính hãng bảo đảm - Đổi trả miễn phí 15 ngày',
+    actionText: 'Chi Tiết',
+    type: 'link',
+    target: '/'
+  }
+];
+
 const Header = ({
   cartCount = 0,
   searchTerm,
@@ -43,8 +90,20 @@ const Header = ({
   const [showCategoryDrawer, setShowCategoryDrawer] = useState(false);
   const [showRewardsModal, setShowRewardsModal] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showCartPreview, setShowCartPreview] = useState(false);
+  const [showOrderLookupModal, setShowOrderLookupModal] = useState(false);
+  const [orderQuery, setOrderQuery] = useState('');
+  const [orderLookupResult, setOrderLookupResult] = useState(null);
+  const [orderLookupLoading, setOrderLookupLoading] = useState(false);
+  const [orderLookupError, setOrderLookupError] = useState('');
+  const [tickerIndex, setTickerIndex] = useState(0);
+
   const searchWrapRef = useRef(null);
+  const searchInputRef = useRef(null);
   const userMenuRef = useRef(null);
+  const cartWrapRef = useRef(null);
+  const cartPreviewTimerRef = useRef(null);
+
   const { wishlistCount } = useWishlist();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
@@ -103,10 +162,132 @@ const Header = ({
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserDropdown(false);
       }
+      if (cartWrapRef.current && !cartWrapRef.current.contains(event.target)) {
+        setShowCartPreview(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Safely consume useCart
+  let cartData = { items: [], subtotal: 0, removeFromCart: () => {} };
+  try {
+    const c = useCart();
+    if (c) cartData = c;
+  } catch {
+    // If rendered outside CartProvider
+  }
+  const { items: cartItems = [], subtotal: cartSubtotal = 0, removeFromCart } = cartData;
+
+  // Auto-rotating Promo Ticker
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTickerIndex((prev) => (prev + 1) % TICKER_ITEMS.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Global Keyboard Shortcuts (/ and Ctrl+K to search, Esc to close)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const activeTag = document.activeElement?.tagName;
+      const isInputActive = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        setShowSuggestions(true);
+      } else if (e.key === '/' && !isInputActive) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        setShowSuggestions(true);
+      } else if (e.key === 'Escape') {
+        setShowSuggestions(false);
+        setShowCartPreview(false);
+        setShowOrderLookupModal(false);
+        searchInputRef.current?.blur();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleCartMouseEnter = () => {
+    if (cartPreviewTimerRef.current) clearTimeout(cartPreviewTimerRef.current);
+    setShowCartPreview(true);
+  };
+
+  const handleCartMouseLeave = () => {
+    cartPreviewTimerRef.current = setTimeout(() => {
+      setShowCartPreview(false);
+    }, 280);
+  };
+
+  const handleLookupOrder = (codeToLookup) => {
+    const code = (codeToLookup || orderQuery).trim();
+    if (!code) {
+      setOrderLookupError('Vui lòng nhập mã đơn hàng hoặc mã vận đơn');
+      return;
+    }
+    setOrderLookupLoading(true);
+    setOrderLookupError('');
+
+    setTimeout(() => {
+      // Check local storage for real orders if available
+      let foundOrder = null;
+      try {
+        const raw = localStorage.getItem('orders') || localStorage.getItem('mini_shopee_orders');
+        if (raw) {
+          const list = JSON.parse(raw);
+          if (Array.isArray(list)) {
+            foundOrder = list.find(o => (o.id || o._id || o.orderId || '').toLowerCase() === code.toLowerCase());
+          }
+        }
+      } catch {}
+
+      if (foundOrder) {
+        setOrderLookupResult({
+          orderId: foundOrder.id || foundOrder._id || code,
+          trackingNumber: 'SPX-VN-' + Math.floor(10000000 + Math.random() * 90000000),
+          createdAt: foundOrder.createdAt ? new Date(foundOrder.createdAt).toLocaleDateString('vi-VN') : 'Gần đây',
+          estimatedDelivery: 'Dự kiến: 1 - 2 ngày tới',
+          status: foundOrder.status || 'Đang vận chuyển',
+          statusLabel: 'Đang vận chuyển qua SPX Express',
+          carrier: 'SPX Express Siêu Tốc',
+          recipient: foundOrder.shippingAddress?.fullName || user?.fullName || 'Khách hàng',
+          phone: foundOrder.shippingAddress?.phone || '0988 *** ***',
+          steps: [
+            { label: 'Đã xác nhận đơn hàng', time: 'Thành công', done: true },
+            { label: 'Shop đang chuẩn bị kiện hàng', time: 'Đã hoàn tất', done: true },
+            { label: 'SPX Express đang vận chuyển', time: 'Hiện tại', done: true, current: true },
+            { label: 'Giao hàng thành công', time: 'Dự kiến sớm', done: false }
+          ]
+        });
+      } else {
+        // Fallback demo mock
+        setOrderLookupResult({
+          orderId: code.toUpperCase(),
+          trackingNumber: 'SPX-VN-88492015',
+          createdAt: 'Hôm nay lúc 09:15',
+          estimatedDelivery: 'Hôm nay, trước 18:00',
+          status: 'Đang phát hàng',
+          statusLabel: 'Shipper đang trên đường giao đến bạn',
+          carrier: 'SPX Express - Tài xế: Trần Tuấn Hưng (0934.***.789)',
+          recipient: user?.fullName || 'Quý Khách Hàng',
+          phone: '0988 *** 678',
+          steps: [
+            { label: 'Đơn hàng đã được xác nhận', time: '09:15', done: true },
+            { label: 'Rời kho trung chuyển TP.HCM', time: '11:30', done: true },
+            { label: 'Đang giao đến địa chỉ nhận', time: '14:45', done: true, current: true },
+            { label: 'Giao hàng thành công', time: 'Dự kiến 18:00', done: false }
+          ]
+        });
+      }
+      setOrderLookupLoading(false);
+    }, 350);
+  };
 
   const handleInputChange = (e) => {
     const val = e.target.value;
@@ -177,7 +358,7 @@ const Header = ({
   return (
     <header className="shopee-header-wrapper">
       <div className="shopee-container">
-        {/* Top Mini Bar */}
+        {/* Top Mini Bar with Live Rotating Promo Ticker */}
         <div className="shopee-topbar">
           <div className="shopee-topbar-left">
             <span className="shopee-topbar-link" style={{ opacity: 0.9 }}>
@@ -188,9 +369,46 @@ const Header = ({
               📞 Hotline: 1900 6868
             </span>
             <span className="shopee-topbar-divider" />
+            <button
+              type="button"
+              className="shopee-topbar-btn shopee-topbar-tracking-btn"
+              onClick={() => setShowOrderLookupModal(true)}
+              title="Tra cứu nhanh lộ trình đơn hàng & vận đơn SPX"
+            >
+              <span>📦</span>
+              <span>{t('quick_tracking', 'Tra Cứu Đơn Hàng')}</span>
+              <span className="topbar-pulse-dot" />
+            </button>
+            <span className="shopee-topbar-divider" />
             <span className="shopee-topbar-link" style={{ opacity: 0.9 }}>
-              💬 {t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}
+              💬 {t('nav_support', 'CSKH 24/7')}
             </span>
+          </div>
+
+          {/* Smart Live Rotating Promotional Announcement Bar */}
+          <div className="shopee-topbar-center">
+            <div className="topbar-ticker-container" key={TICKER_ITEMS[tickerIndex].id}>
+              <span className="ticker-badge">{TICKER_ITEMS[tickerIndex].badge}</span>
+              <span className="ticker-icon">{TICKER_ITEMS[tickerIndex].icon}</span>
+              <span className="ticker-text">{TICKER_ITEMS[tickerIndex].text}</span>
+              {TICKER_ITEMS[tickerIndex].type === 'rewards' ? (
+                <button
+                  type="button"
+                  className="ticker-action-btn"
+                  onClick={() => setShowRewardsModal(true)}
+                >
+                  {TICKER_ITEMS[tickerIndex].actionText} →
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="ticker-action-btn"
+                  onClick={() => navTo(TICKER_ITEMS[tickerIndex].target)}
+                >
+                  {TICKER_ITEMS[tickerIndex].actionText} →
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="shopee-topbar-right">
@@ -304,6 +522,7 @@ const Header = ({
           <div ref={searchWrapRef} style={{ flex: 1, position: 'relative' }}>
             <form className="shopee-search-form" onSubmit={handleFormSubmit}>
               <input
+                ref={searchInputRef}
                 type="text"
                 className="shopee-search-input"
                 placeholder={t('search_placeholder')}
@@ -311,6 +530,15 @@ const Header = ({
                 onChange={handleInputChange}
                 onFocus={() => setShowSuggestions(true)}
               />
+              {!currentSearch && (
+                <div
+                  className="shopee-search-kbd-badge"
+                  onClick={() => searchInputRef.current?.focus()}
+                  title="Nhấn phím tắt / hoặc Ctrl + K để tìm kiếm"
+                >
+                  <kbd>Ctrl K</kbd>
+                </div>
+              )}
               {currentSearch && (
                 <button
                   type="button"
@@ -332,21 +560,39 @@ const Header = ({
             {/* Autocomplete Dropdown */}
             {showSuggestions && (
               <div
-                className="anim-dropdown"
+                className="anim-dropdown shopee-search-dropdown-menu"
                 style={{
                   position: 'absolute',
                   top: '100%',
                   left: 0,
                   right: 0,
                   background: 'var(--bg-card, #fff)',
-                  borderRadius: '0 0 12px 12px',
-                  boxShadow: 'var(--shadow-modal, 0 10px 25px rgba(0,0,0,0.18))',
+                  borderRadius: '0 0 14px 14px',
+                  boxShadow: 'var(--shadow-modal, 0 12px 30px rgba(0,0,0,0.2))',
                   zIndex: 100,
                   border: '1px solid var(--border-medium, #e2e8f0)',
                   marginTop: '2px',
                   overflow: 'hidden',
                 }}
               >
+                {/* Quick Category Discovery Chips */}
+                <div className="search-quick-chips-wrapper">
+                  <span className="search-quick-chips-label">⚡ Ngành hàng nổi bật:</span>
+                  <div className="search-quick-chips-list">
+                    {QUICK_CATEGORY_CHIPS.map((chip, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        className="search-quick-chip-item"
+                        onClick={() => handleSelectSuggestion(chip.query)}
+                      >
+                        <span>{chip.icon}</span>
+                        <span>{chip.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {!currentSearch.trim() ? (
                   <div>
                     {/* Recent Searches */}
@@ -541,29 +787,138 @@ const Header = ({
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
               </svg>
               {wishlistCount > 0 && (
-                <span className="shopee-action-badge badge-amber">
+                <span className="shopee-action-badge badge-amber anim-badge-bounce">
                   {wishlistCount > 99 ? '99+' : wishlistCount}
                 </span>
               )}
             </button>
 
-            {/* Cart Icon */}
-            <button
-              type="button"
-              className="shopee-header-action-btn"
-              onClick={onCartClick}
-              aria-label={`Giỏ hàng, ${cartCount} sản phẩm`}
-              title={t('cart')}
+            {/* Cart Icon with Interactive Mini Cart Hover Popover */}
+            <div
+              className="header-cart-wrapper"
+              ref={cartWrapRef}
+              onMouseEnter={handleCartMouseEnter}
+              onMouseLeave={handleCartMouseLeave}
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="9" cy="21" r="1" />
-                <circle cx="20" cy="21" r="1" />
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-              </svg>
-              <span className="shopee-action-badge badge-indigo">
-                {cartCount > 99 ? '99+' : cartCount}
-              </span>
-            </button>
+              <button
+                type="button"
+                className="shopee-header-action-btn"
+                onClick={onCartClick}
+                aria-label={`Giỏ hàng, ${cartCount} sản phẩm`}
+                title={t('cart')}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="21" r="1" />
+                  <circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                <span className="shopee-action-badge badge-indigo anim-badge-bounce">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              </button>
+
+              {/* Mini Cart Hover Dropdown Popover */}
+              {showCartPreview && (
+                <div className="header-mini-cart-popover anim-dropdown">
+                  <div className="mini-cart-header">
+                    <div className="mini-cart-title">
+                      <span>🛍️ Giỏ Hàng Của Bạn</span>
+                      <span className="mini-cart-count-badge">{(cartItems.length || cartCount)} món</span>
+                    </div>
+                    <span className="mini-cart-tip">Xem nhanh các sản phẩm đã chọn</span>
+                  </div>
+
+                  {cartItems.length > 0 ? (
+                    <>
+                      <div className="mini-cart-items-list">
+                        {cartItems.slice(-3).reverse().map((item, idx) => (
+                          <div
+                            key={item.productId || idx}
+                            className="mini-cart-item-row"
+                            onClick={() => {
+                              setShowCartPreview(false);
+                              if (item.productId) navTo(`/products/${item.productId}`);
+                            }}
+                          >
+                            <img
+                              src={item.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&q=80'}
+                              alt={item.name}
+                              className="mini-cart-item-img"
+                            />
+                            <div className="mini-cart-item-details">
+                              <div className="mini-cart-item-name">{item.name}</div>
+                              {(item.selectedColor || item.selectedSize) && (
+                                <div className="mini-cart-item-variant">
+                                  {item.selectedColor ? `Màu: ${item.selectedColor}` : ''}
+                                  {item.selectedColor && item.selectedSize ? ' · ' : ''}
+                                  {item.selectedSize ? `Size: ${item.selectedSize}` : ''}
+                                </div>
+                              )}
+                              <div className="mini-cart-item-price-qty">
+                                <span className="mini-cart-qty">SL: {item.quantity}</span>
+                                <span className="mini-cart-price">{formatCurrency(item.price)}</span>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              className="mini-cart-remove-btn"
+                              title="Xóa món này khỏi giỏ"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (removeFromCart) removeFromCart(item.productId);
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {cartItems.length > 3 && (
+                        <div className="mini-cart-more-hint">
+                          + và còn {cartItems.length - 3} sản phẩm khác trong giỏ
+                        </div>
+                      )}
+
+                      <div className="mini-cart-footer">
+                        <div className="mini-cart-subtotal-row">
+                          <span className="mini-cart-subtotal-label">Tổng tiền tạm tính:</span>
+                          <span className="mini-cart-subtotal-value">{formatCurrency(cartSubtotal)}</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="mini-cart-checkout-btn"
+                          onClick={() => {
+                            setShowCartPreview(false);
+                            if (onCartClick) onCartClick();
+                            else navTo('/cart');
+                          }}
+                        >
+                          <span>Xem Chi Tiết Giỏ Hàng & Mua Ngay</span>
+                          <span>➔</span>
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mini-cart-empty">
+                      <div className="mini-cart-empty-icon">🛒</div>
+                      <div className="mini-cart-empty-title">Giỏ hàng của bạn đang trống</div>
+                      <div className="mini-cart-empty-sub">Hãy chọn ngay các sản phẩm ưng ý với giá siêu ưu đãi!</div>
+                      <button
+                        type="button"
+                        className="mini-cart-shop-now-btn"
+                        onClick={() => {
+                          setShowCartPreview(false);
+                          navTo('/');
+                        }}
+                      >
+                        Khám Phá Sản Phẩm Ngay
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             <span className="header-dock-divider" />
 
@@ -825,6 +1180,154 @@ const Header = ({
       {/* Rewards Hub Modal */}
       {showRewardsModal && (
         <RewardsHubModal onClose={() => setShowRewardsModal(false)} />
+      )}
+
+      {/* Quick Order Lookup Modal */}
+      {showOrderLookupModal && (
+        <div
+          className="order-lookup-modal-backdrop anim-modal-fade"
+          onClick={() => setShowOrderLookupModal(false)}
+        >
+          <div
+            className="order-lookup-modal-card anim-modal-pop"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="order-lookup-modal-header">
+              <div className="order-lookup-header-left">
+                <span className="order-lookup-badge-icon">📦</span>
+                <div>
+                  <h3 className="order-lookup-title">Tra Cứu Lộ Trình Đơn Hàng & Vận Đơn</h3>
+                  <p className="order-lookup-desc">Cập nhật hành trình di chuyển thực tế từ hãng vận chuyển SPX Express</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="order-lookup-close-btn"
+                onClick={() => setShowOrderLookupModal(false)}
+                title="Đóng modal"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="order-lookup-modal-body">
+              <div className="order-lookup-search-bar">
+                <input
+                  type="text"
+                  placeholder="Nhập mã đơn hàng (VD: ORD-DEMO-01) hoặc mã vận đơn..."
+                  value={orderQuery}
+                  onChange={(e) => setOrderQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLookupOrder()}
+                  className="order-lookup-search-input"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  className="order-lookup-search-btn"
+                  onClick={() => handleLookupOrder()}
+                  disabled={orderLookupLoading}
+                >
+                  {orderLookupLoading ? 'Đang Tra Cứu...' : 'Tra Cứu Ngay ➔'}
+                </button>
+              </div>
+
+              {orderLookupError && (
+                <div className="order-lookup-error-msg">⚠️ {orderLookupError}</div>
+              )}
+
+              {/* Demo Quick Chips */}
+              <div className="order-lookup-demo-bar">
+                <span className="order-lookup-demo-label">⚡ Tra cứu nhanh mã mẫu:</span>
+                <div className="order-lookup-demo-chips">
+                  <button
+                    type="button"
+                    className="order-lookup-demo-chip"
+                    onClick={() => {
+                      setOrderQuery('ORD-DEMO-01');
+                      handleLookupOrder('ORD-DEMO-01');
+                    }}
+                  >
+                    🚚 ORD-DEMO-01 (Đang Giao Hàng)
+                  </button>
+                  <button
+                    type="button"
+                    className="order-lookup-demo-chip"
+                    onClick={() => {
+                      setOrderQuery('ORD-DEMO-02');
+                      handleLookupOrder('ORD-DEMO-02');
+                    }}
+                  >
+                    📦 ORD-DEMO-02 (Rời Kho Phân Loại)
+                  </button>
+                </div>
+              </div>
+
+              {/* Order Result Card */}
+              {orderLookupResult && (
+                <div className="order-lookup-result-card">
+                  <div className="result-meta-row">
+                    <div className="result-meta-left">
+                      <span className="result-order-id">Đơn hàng: <strong>#{orderLookupResult.orderId}</strong></span>
+                      <span className="result-tracking-num">Vận đơn: <code>{orderLookupResult.trackingNumber}</code></span>
+                    </div>
+                    <div className="result-status-capsule">
+                      <span className="live-status-dot" />
+                      <span>{orderLookupResult.statusLabel}</span>
+                    </div>
+                  </div>
+
+                  <div className="result-carrier-info">
+                    <div className="carrier-badge">
+                      <span>🚚</span>
+                      <span>{orderLookupResult.carrier}</span>
+                    </div>
+                    <div className="delivery-eta">
+                      <span>⏱️</span>
+                      <span>{orderLookupResult.estimatedDelivery}</span>
+                    </div>
+                  </div>
+
+                  {/* Stepper Timeline */}
+                  <div className="order-lookup-timeline">
+                    {orderLookupResult.steps.map((step, idx) => (
+                      <div
+                        key={idx}
+                        className={`timeline-step-row ${step.done ? 'is-done' : ''} ${step.current ? 'is-current' : ''}`}
+                      >
+                        <div className="timeline-step-line-col">
+                          <div className="timeline-step-circle">
+                            {step.done ? '✓' : idx + 1}
+                          </div>
+                          {idx < orderLookupResult.steps.length - 1 && (
+                            <div className="timeline-step-connector" />
+                          )}
+                        </div>
+                        <div className="timeline-step-body">
+                          <div className="timeline-step-name">{step.label}</div>
+                          <div className="timeline-step-time">{step.time}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="order-lookup-footer-actions">
+                    <button
+                      type="button"
+                      className="order-lookup-view-all-btn"
+                      onClick={() => {
+                        setShowOrderLookupModal(false);
+                        navTo('/orders');
+                      }}
+                    >
+                      <span>Xem chi tiết danh sách đơn mua của bạn</span>
+                      <span>➔</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </header>
   );
