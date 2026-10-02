@@ -107,7 +107,6 @@ export default function WishlistPage() {
 
     pushBuyerNotification({
       type: 'order',
-      icon: '🛒',
       title: 'Đã chuyển danh sách yêu thích vào giỏ hàng',
       message: `Bạn vừa thêm ${availableItems.length} sản phẩm từ danh mục Yêu thích vào giỏ hàng thành công.`,
       link: '/cart',

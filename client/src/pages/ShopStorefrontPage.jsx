@@ -16,6 +16,14 @@ import {
   ChatIcon,
   ClockIcon,
   CheckIcon,
+  LayersIcon,
+  SearchIcon,
+  CloseIcon,
+  ShoppingBagIcon,
+  SparklesIcon,
+  ScaleIcon,
+  PlusIcon,
+  ChevronRightIcon,
 } from '../components/OrdersIcons';
 
 // Hàm phân loại chuyên nghiệp cho từng mặt hàng trong gian hàng
@@ -393,9 +401,18 @@ export default function ShopStorefrontPage() {
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', fontSize: '12px', fontWeight: 600 }}>
-            <span>✓ Trả hàng miễn phí 15 ngày</span>
-            <span>✓ Đền bù 200% nếu phát hiện giả</span>
-            <span>✓ Giao hỏa tốc toàn quốc</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <CheckIcon size={12} color="#ffffff" />
+              <span>Trả hàng miễn phí 15 ngày</span>
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <CheckIcon size={12} color="#ffffff" />
+              <span>Đền bù 200% nếu phát hiện giả</span>
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <CheckIcon size={12} color="#ffffff" />
+              <span>Giao hỏa tốc toàn quốc</span>
+            </span>
           </div>
         </div>
 
@@ -480,7 +497,7 @@ export default function ShopStorefrontPage() {
                 }}
                 title="Đã được Shopee Mall xác thực chứng nhận"
               >
-                ✓
+                <CheckIcon size={12} color="#ffffff" />
               </div>
             </div>
 
@@ -551,7 +568,7 @@ export default function ShopStorefrontPage() {
               }}
               onClick={handleToggleFollow}
             >
-              <span>{isFollowing ? '✓' : '＋'}</span>
+              {isFollowing ? <CheckIcon size={14} /> : <PlusIcon size={14} />}
               <span>{isFollowing ? t('shop_following') : 'Theo Dõi Shop'}</span>
             </button>
 
@@ -725,7 +742,9 @@ export default function ShopStorefrontPage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '18px' }}>📑</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--primary-color, #ea580c)' }}>
+              <LayersIcon size={18} />
+            </span>
             <span style={{ fontSize: '13.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-primary)' }}>
               Danh Mục & Phân Loại Hàng Của Shop
             </span>
@@ -737,9 +756,20 @@ export default function ShopStorefrontPage() {
             <button
               type="button"
               onClick={() => setSelectedCategory('all')}
-              style={{ background: 'transparent', border: 'none', color: '#ea580c', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#ea580c',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
             >
-              ✕ Bỏ lọc phân loại (Xem tất cả)
+              <CloseIcon size={11} />
+              <span>Bỏ lọc phân loại (Xem tất cả)</span>
             </button>
           )}
         </div>
@@ -811,7 +841,9 @@ export default function ShopStorefrontPage() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '20px' }}>🛍️</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--primary-color, #ea580c)' }}>
+              <ShoppingBagIcon size={22} />
+            </span>
             <div>
               <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
                 {selectedCategory === 'all'
@@ -837,8 +869,8 @@ export default function ShopStorefrontPage() {
                 onChange={(e) => setShopSearch(e.target.value)}
                 style={{ width: '250px', padding: '8px 14px 8px 34px', fontSize: '13px', borderRadius: '8px' }}
               />
-              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>
-                🔍
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+                <SearchIcon size={14} />
               </span>
             </div>
 
@@ -849,10 +881,10 @@ export default function ShopStorefrontPage() {
               onChange={(e) => setSortBy(e.target.value)}
               style={{ padding: '8px 14px', fontSize: '13px', borderRadius: '8px', fontWeight: 600 }}
             >
-              <option value="featured">✨ Nổi Bật Nhất</option>
-              <option value="best_selling">🔥 Bán Chạy Nhất</option>
-              <option value="price_asc">💵 Giá: Thấp đến Cao</option>
-              <option value="price_desc">💎 Giá: Cao đến Thấp</option>
+              <option value="featured">Nổi Bật Nhất</option>
+              <option value="best_selling">Bán Chạy Nhất</option>
+              <option value="price_asc">Giá: Thấp đến Cao</option>
+              <option value="price_desc">Giá: Cao đến Thấp</option>
             </select>
           </div>
         </div>
@@ -860,7 +892,9 @@ export default function ShopStorefrontPage() {
         {/* Product Grid */}
         {matchingProducts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', background: 'var(--bg-card, #ffffff)', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)', color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
+            <div style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
+              <SearchIcon size={44} />
+            </div>
             <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
               Không tìm thấy sản phẩm nào
             </div>
@@ -907,7 +941,10 @@ export default function ShopStorefrontPage() {
                     }}
                     title={t('compare_btn')}
                   >
-                    ⚖️ {isCompared(id) ? 'Đã so sánh' : 'So sánh'}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <ScaleIcon size={12} />
+                      <span>{isCompared(id) ? 'Đã so sánh' : 'So sánh'}</span>
+                    </span>
                   </button>
                 </div>
               );
@@ -921,7 +958,9 @@ export default function ShopStorefrontPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '22px' }}>💡</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', color: '#f59e0b' }}>
+                    <SparklesIcon size={20} />
+                  </span>
                   <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
                     Gợi Ý Thêm Sản Phẩm Khác Từ Gian Hàng (Bạn Có Thể Cũng Thích)
                   </h3>
@@ -936,7 +975,10 @@ export default function ShopStorefrontPage() {
                 onClick={() => setSelectedCategory('all')}
                 style={{ fontSize: '12.5px', padding: '6px 14px', borderRadius: '8px', fontWeight: 700 }}
               >
-                Xem Toàn Bộ {products.length} Sản Phẩm →
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span>Xem Toàn Bộ {products.length} Sản Phẩm</span>
+                  <ChevronRightIcon size={13} />
+                </span>
               </button>
             </div>
 
@@ -966,7 +1008,10 @@ export default function ShopStorefrontPage() {
                       }}
                       title={t('compare_btn')}
                     >
-                      ⚖️ {isCompared(id) ? 'Đã so sánh' : 'So sánh'}
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <ScaleIcon size={12} />
+                        <span>{isCompared(id) ? 'Đã so sánh' : 'So sánh'}</span>
+                      </span>
                     </button>
                   </div>
                 );
