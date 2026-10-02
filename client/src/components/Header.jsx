@@ -11,6 +11,27 @@ import NotificationsPopover from './NotificationsPopover';
 import RewardsHubModal from './RewardsHubModal';
 import { useCoins } from '../context/CoinContext';
 import { useAuthModal } from '../context/AuthModalContext';
+import {
+  PackageIcon,
+  StoreIcon,
+  ChatIcon,
+  TruckIcon,
+  ShieldIcon,
+  ClockIcon,
+  CoinIcon,
+  PhoneIcon,
+  UserIcon,
+  CreditCardIcon,
+  BoltIcon,
+  SparklesIcon,
+  CartIcon,
+  KeyIcon,
+  HomeIcon,
+  FlameIcon,
+  StarIcon,
+  TicketIcon,
+  AlertCircleIcon,
+} from './OrdersIcons';
 import '../styles/header.css';
 
 const RECENT_SEARCHES_KEY = 'mini_shopee_recent_searches';
@@ -350,16 +371,16 @@ const Header = ({
         {/* Top Mini Utility Bar */}
         <div className="shopee-topbar">
           <div className="shopee-topbar-left">
-            <span className="shopee-topbar-link">
-              📱 {t('nav_download_app', 'Tải Ứng Dụng')}
+            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <PackageIcon size={13} /> {t('nav_download_app', 'Tải Ứng Dụng')}
             </span>
             <span className="shopee-topbar-divider" />
-            <span className="shopee-topbar-link">
-              📞 Hotline: 1900 6868
+            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <PhoneIcon size={13} /> Hotline: 1900 6868
             </span>
             <span className="shopee-topbar-divider" />
-            <span className="shopee-topbar-link">
-              💬 {t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}
+            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <ChatIcon size={13} /> {t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}
             </span>
           </div>
 
@@ -371,7 +392,7 @@ const Header = ({
               onClick={toggleLanguage}
               title={language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
             >
-              {language === 'vi' ? '🇻🇳 VI' : '🇺🇸 EN'}
+              {language === 'vi' ? 'VI' : 'EN'}
             </button>
 
             {/* Dark / Light Theme Toggle */}
@@ -381,7 +402,7 @@ const Header = ({
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Chế độ Sáng' : 'Chế độ Tối'}
             >
-              {theme === 'dark' ? '🌙 Tối' : '☀️ Sáng'}
+              {theme === 'dark' ? 'Tối' : 'Sáng'}
             </button>
 
             {/* Hiển thị Capsule theo từng vai trò: Admin / Seller / Customer */}
@@ -402,7 +423,7 @@ const Header = ({
                   letterSpacing: '0.4px',
                 }}
               >
-                <span>🛡️</span>
+                <ShieldIcon size={13} color="#dc2626" />
                 <span>QUẢN TRỊ VIÊN SÀN</span>
                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a' }}></span>
               </div>
@@ -426,7 +447,7 @@ const Header = ({
                 }}
                 title="Kênh Quản Trị Gian Hàng Của Bạn"
               >
-                <span>🏪</span>
+                <StoreIcon size={14} color="#ea580c" />
                 <span>Kênh Người Bán</span>
                 <span style={{ fontSize: '9.5px', background: '#dc2626', color: '#fff', padding: '1px 5px', borderRadius: '8px', fontWeight: 800 }}>MALL</span>
               </button>
@@ -436,10 +457,11 @@ const Header = ({
                 className="header-coin-capsule"
                 onClick={() => setShowRewardsModal(true)}
                 title="Điểm Thưởng & Săn Xu Hàng Ngày"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
-                <span>🪙</span>
+                <CoinIcon size={14} color="#f59e0b" />
                 <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
-                <span style={{ fontSize: '10px' }}>✨</span>
+                <SparklesIcon size={11} color="#f59e0b" />
               </button>
             ) : (
               <button
@@ -447,10 +469,11 @@ const Header = ({
                 className="header-coin-capsule"
                 onClick={() => setShowRewardsModal(true)}
                 title="Khám phá Điểm Thưởng & Săn Xu"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
-                <span>🎁</span>
+                <CoinIcon size={14} color="#f59e0b" />
                 <span>Săn Xu & Thưởng</span>
-                <span style={{ fontSize: '10px' }}>✨</span>
+                <SparklesIcon size={11} color="#f59e0b" />
               </button>
             )}
           </div>
@@ -575,7 +598,9 @@ const Header = ({
                             alignItems: 'center',
                           }}
                         >
-                          <span>🕒 Lịch Sử Tìm Kiếm Gần Đây</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <ClockIcon size={13} color="var(--text-muted)" /> Lịch Sử Tìm Kiếm Gần Đây
+                          </span>
                           <span
                             onClick={clearRecentSearches}
                             style={{ cursor: 'pointer', textTransform: 'none', color: 'var(--primary-color, #ea580c)', fontWeight: 600 }}
@@ -601,7 +626,7 @@ const Header = ({
                             onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ color: 'var(--text-muted)' }}>🕒</span>
+                              <ClockIcon size={13} color="var(--text-muted)" />
                               <span>{item}</span>
                             </div>
                             <span
@@ -618,8 +643,8 @@ const Header = ({
 
                     {/* Popular Searches */}
                     <div>
-                      <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: recentSearches.length > 0 ? '1px solid var(--border-light, #f0f0f0)' : 'none', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
-                        🔥 {t('suggested_searches', 'Gợi Ý Tìm Kiếm Phổ Biến')}
+                      <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: recentSearches.length > 0 ? '1px solid var(--border-light, #f0f0f0)' : 'none', borderBottom: '1px solid var(--border-light, #f0f0f0)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <SparklesIcon size={13} color="var(--primary-color)" /> {t('suggested_searches', 'Gợi Ý Tìm Kiếm Phổ Biến')}
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '10px 14px' }}>
                         {POPULAR_SEARCHES.slice(0, 6).map((item, idx) => (
@@ -682,8 +707,8 @@ const Header = ({
                     {/* Matching Products with Thumbnail & Price */}
                     {matchingProducts.length > 0 && (
                       <div>
-                        <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: '1px solid var(--border-light, #f0f0f0)', borderBottom: '1px solid var(--border-light, #f0f0f0)' }}>
-                          ✨ Sản Phẩm Trùng Khớp
+                        <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: '1px solid var(--border-light, #f0f0f0)', borderBottom: '1px solid var(--border-light, #f0f0f0)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <SparklesIcon size={13} color="var(--primary-color)" /> Sản Phẩm Trùng Khớp
                         </div>
                         {matchingProducts.map((p) => {
                           const id = p._id || p.id;
@@ -784,8 +809,8 @@ const Header = ({
               {showCartPreview && (
                 <div className="header-mini-cart-popover anim-dropdown">
                   <div className="mini-cart-header">
-                    <div className="mini-cart-title">
-                      <span>🛍️ Giỏ Hàng Của Bạn</span>
+                    <div className="mini-cart-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <CartIcon size={16} /> <span>Giỏ Hàng Của Bạn</span>
                       <span className="mini-cart-count-badge">{(cartItems.length || cartCount)} món</span>
                     </div>
 
@@ -793,12 +818,12 @@ const Header = ({
                     {cartItems.length > 0 && (
                       <div className="mini-cart-freeship-banner">
                         {cartSubtotal >= 200000 ? (
-                          <div className="freeship-qualified">
-                            <span>🎉 Bạn đã được <strong>Miễn Phí Vận Chuyển 0Đ!</strong></span>
+                          <div className="freeship-qualified" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <SparklesIcon size={13} color="#10b981" /> <span>Bạn đã được <strong>Miễn Phí Vận Chuyển 0Đ!</strong></span>
                           </div>
                         ) : (
-                          <div className="freeship-needed">
-                            <span>🚚 Mua thêm <strong>{formatCurrency(200000 - cartSubtotal)}</strong> để nhận <strong>Freeship Toàn Quốc!</strong></span>
+                          <div className="freeship-needed" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <TruckIcon size={13} color="#2563eb" /> <span>Mua thêm <strong>{formatCurrency(200000 - cartSubtotal)}</strong> để nhận <strong>Freeship Toàn Quốc!</strong></span>
                           </div>
                         )}
                         <div className="freeship-progress-track">
@@ -888,7 +913,9 @@ const Header = ({
                     </>
                   ) : (
                     <div className="mini-cart-empty">
-                      <div className="mini-cart-empty-icon">🛒</div>
+                      <div className="mini-cart-empty-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CartIcon size={40} />
+                      </div>
                       <div className="mini-cart-empty-title">Giỏ hàng của bạn đang trống</div>
                       <div className="mini-cart-empty-sub">Hãy chọn ngay các sản phẩm ưng ý với giá siêu ưu đãi!</div>
                       <button
@@ -951,7 +978,7 @@ const Header = ({
                         <div className="user-dropdown-name">{user.fullName || user.email}</div>
                         <div className="user-dropdown-email">{user.email}</div>
                         <span className={`user-dropdown-role-pill ${user.role}`}>
-                          {user.role === 'admin' ? '⚡ Quản Trị Viên' : user.role === 'seller' ? '🏪 Chủ Gian Hàng' : '✨ Thành Viên Thân Thiết'}
+                          {user.role === 'admin' ? 'Quản Trị Viên' : user.role === 'seller' ? 'Chủ Gian Hàng' : 'Thành Viên Thân Thiết'}
                         </span>
                       </div>
                     </div>
@@ -965,7 +992,7 @@ const Header = ({
                           navTo('/orders');
                         }}
                       >
-                        <span className="item-icon">📦</span>
+                        <span className="item-icon"><PackageIcon size={16} /></span>
                         <div className="item-text">
                           <strong>{t('nav_orders', 'Đơn Mua Của Tôi')}</strong>
                           <small>Kiểm tra đơn hàng & trạng thái vận chuyển</small>
@@ -981,7 +1008,7 @@ const Header = ({
                           setShowOrderLookupModal(true);
                         }}
                       >
-                        <span className="item-icon">🚚</span>
+                        <span className="item-icon"><TruckIcon size={16} color="#2563eb" /></span>
                         <div className="item-text">
                           <strong>Tra Cứu Vận Đơn SPX</strong>
                           <small>Kiểm tra hành trình giao hàng nhanh 1-Click</small>
@@ -997,7 +1024,7 @@ const Header = ({
                           navTo('/profile');
                         }}
                       >
-                        <span className="item-icon">👤</span>
+                        <span className="item-icon"><UserIcon size={16} /></span>
                         <div className="item-text">
                           <strong>Hồ Sơ Cá Nhân</strong>
                           <small>Cập nhật số điện thoại, địa chỉ nhận hàng</small>
@@ -1014,7 +1041,7 @@ const Header = ({
                             setShowRewardsModal(true);
                           }}
                         >
-                          <span className="item-icon">🪙</span>
+                          <span className="item-icon"><CoinIcon size={16} color="#f59e0b" /></span>
                           <div className="item-text">
                             <strong>Ví Xu & Điểm Thưởng</strong>
                             <small>{(coins || 0).toLocaleString('vi-VN')} Xu đang có</small>
@@ -1033,7 +1060,7 @@ const Header = ({
                               navTo('/seller/dashboard');
                             }}
                           >
-                            <span className="item-icon">🏪</span>
+                            <span className="item-icon"><StoreIcon size={16} color="#ea580c" /></span>
                             <div className="item-text">
                               <strong>Kênh Quản Lý Gian Hàng</strong>
                               <small>Đơn hàng shop, kho & sản phẩm bán</small>
@@ -1047,7 +1074,7 @@ const Header = ({
                               navTo('/seller/dashboard');
                             }}
                           >
-                            <span className="item-icon">💳</span>
+                            <span className="item-icon"><CreditCardIcon size={16} color="#16a34a" /></span>
                             <div className="item-text">
                               <strong>Ví Doanh Thu & Rút Tiền</strong>
                               <small>Số dư thanh toán đơn hàng shop</small>
@@ -1065,7 +1092,7 @@ const Header = ({
                             navTo('/admin/dashboard');
                           }}
                         >
-                          <span className="item-icon">⚡</span>
+                          <span className="item-icon"><ShieldIcon size={16} color="#dc2626" /></span>
                           <div className="item-text">
                             <strong>Bảng Điều Khiển Quản Trị</strong>
                             <small>Quản lý toàn bộ hệ thống e-commerce</small>
@@ -1083,7 +1110,7 @@ const Header = ({
                           onLogout();
                         }}
                       >
-                        <span className="item-icon">🚪</span>
+                        <span className="item-icon">✕</span>
                         <div className="item-text">
                           <strong style={{ color: '#ef4444' }}>{t('logout', 'Đăng Xuất')}</strong>
                           <small>Thoát khỏi phiên đăng nhập hiện tại</small>
@@ -1102,8 +1129,9 @@ const Header = ({
                     e.preventDefault();
                     navTo('/login');
                   }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                 >
-                  <span>🔑</span>
+                  <KeyIcon size={14} />
                   <span>{t('login', 'Đăng Nhập')}</span>
                 </button>
                 <button
@@ -1136,51 +1164,62 @@ const Header = ({
 
           <span
             className="shopee-subnav-link"
-            style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)' }}
+            style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             onClick={() => handleSubnavItemClick('/', null)}
             title="Quay lại trang chủ và xem toàn bộ sản phẩm"
           >
-            🏠 {t('nav_all_products', 'Trang Chủ')}
+            <HomeIcon size={14} />
+            <span>{t('nav_all_products', 'Trang Chủ')}</span>
           </span>
 
           <span
             className="shopee-subnav-link highlight"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             onClick={() => handleSubnavItemClick('/?badge=Hot+Deal', 'flash-deals-section')}
             title="Săn deal chớp nhoáng giờ vàng"
           >
-            🔥 {t('nav_flash_deals', 'Flash Deals')}
+            <FlameIcon size={14} />
+            <span>{t('nav_flash_deals', 'Flash Deals')}</span>
           </span>
 
           <span
             className="shopee-subnav-link"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             onClick={() => handleSubnavItemClick('/?badge=Best+Seller', 'catalog-section')}
             title="Khám phá các sản phẩm bán chạy nhất sàn"
           >
-            ⭐ {t('nav_best_sellers', 'Bán Chạy Nhất')}
+            <StarIcon size={14} />
+            <span>{t('nav_best_sellers', 'Bán Chạy Nhất')}</span>
           </span>
 
           <span
             className="shopee-subnav-link"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             onClick={() => handleSubnavItemClick('/?badge=Amazon%27s+Choice', 'catalog-section')}
             title="Top sản phẩm đánh giá cao tuyển chọn"
           >
-            ✨ {t('nav_featured_picks', 'Hàng Tuyển Chọn')}
+            <SparklesIcon size={14} />
+            <span>{t('nav_featured_picks', 'Hàng Tuyển Chọn')}</span>
           </span>
 
           <span
             className="shopee-subnav-link"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             onClick={() => handleSubnavItemClick('/?fastDelivery=1', 'catalog-section')}
             title="Sản phẩm hỗ trợ giao hàng hỏa tốc trong 2H"
           >
-            ⚡ {t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}
+            <BoltIcon size={14} />
+            <span>{t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}</span>
           </span>
 
           <span
             className="shopee-subnav-link badge-pill"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             onClick={() => setShowRewardsModal(true)}
             title="Vào Rewards Hub nhận xu & quay thưởng"
           >
-            🎁 {t('nav_rewards_hub', 'Săn Xu & Voucher')}
+            <TicketIcon size={14} />
+            <span>{t('nav_rewards_hub', 'Săn Xu & Voucher')}</span>
           </span>
         </nav>
       </div>
@@ -1208,7 +1247,9 @@ const Header = ({
           >
             <div className="order-lookup-modal-header">
               <div className="order-lookup-header-left">
-                <span className="order-lookup-badge-icon">📦</span>
+                <span className="order-lookup-badge-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PackageIcon size={20} />
+                </span>
                 <div>
                   <h3 className="order-lookup-title">Tra Cứu Lộ Trình Đơn Hàng & Vận Đơn</h3>
                   <p className="order-lookup-desc">Cập nhật hành trình di chuyển thực tế từ hãng vận chuyển SPX Express</p>
@@ -1246,12 +1287,18 @@ const Header = ({
               </div>
 
               {orderLookupError && (
-                <div className="order-lookup-error-msg">⚠️ {orderLookupError}</div>
+                <div className="order-lookup-error-msg" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <AlertCircleIcon size={15} />
+                  <span>{orderLookupError}</span>
+                </div>
               )}
 
               {/* Demo Quick Chips */}
               <div className="order-lookup-demo-bar">
-                <span className="order-lookup-demo-label">⚡ Tra cứu nhanh mã mẫu:</span>
+                <span className="order-lookup-demo-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <BoltIcon size={13} />
+                  <span>Tra cứu nhanh mã mẫu:</span>
+                </span>
                 <div className="order-lookup-demo-chips">
                   <button
                     type="button"
@@ -1260,8 +1307,10 @@ const Header = ({
                       setOrderQuery('ORD-DEMO-01');
                       handleLookupOrder('ORD-DEMO-01');
                     }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                   >
-                    🚚 ORD-DEMO-01 (Đang Giao Hàng)
+                    <TruckIcon size={13} />
+                    <span>ORD-DEMO-01 (Đang Giao Hàng)</span>
                   </button>
                   <button
                     type="button"
@@ -1270,8 +1319,10 @@ const Header = ({
                       setOrderQuery('ORD-DEMO-02');
                       handleLookupOrder('ORD-DEMO-02');
                     }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                   >
-                    📦 ORD-DEMO-02 (Rời Kho Phân Loại)
+                    <PackageIcon size={13} />
+                    <span>ORD-DEMO-02 (Rời Kho Phân Loại)</span>
                   </button>
                 </div>
               </div>
@@ -1291,12 +1342,12 @@ const Header = ({
                   </div>
 
                   <div className="result-carrier-info">
-                    <div className="carrier-badge">
-                      <span>🚚</span>
+                    <div className="carrier-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                      <TruckIcon size={14} />
                       <span>{orderLookupResult.carrier}</span>
                     </div>
-                    <div className="delivery-eta">
-                      <span>⏱️</span>
+                    <div className="delivery-eta" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                      <ClockIcon size={14} />
                       <span>{orderLookupResult.estimatedDelivery}</span>
                     </div>
                   </div>
