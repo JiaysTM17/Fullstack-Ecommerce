@@ -8,7 +8,19 @@ import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { formatCurrency } from "../utils/formatCurrency";
 import { previewVoucherDiscount } from "../services/voucherService";
-import { TicketIcon } from "../components/OrdersIcons";
+import {
+  TicketIcon,
+  TruckIcon,
+  StoreIcon,
+  PackageIcon,
+  HeartIcon,
+  CartIcon,
+  TrashIcon,
+  TagIcon,
+  CloseIcon,
+  SparklesIcon,
+  PencilIcon,
+} from "../components/OrdersIcons";
 
 const FREE_SHIPPING_THRESHOLD = 300000;
 
@@ -192,12 +204,12 @@ export default function CartPage() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
               <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
                 {hasFreeShipping ? (
-                  <span style={{ color: "var(--color-success, #10b981)" }}>
-                    🎉 {t('freeship_qualified', 'Chúc mừng! Bạn đã đủ điều kiện nhận MIỄN PHÍ VẬN CHUYỂN!')}
+                  <span style={{ color: "var(--color-success, #10b981)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <SparklesIcon size={16} color="#10b981" /> {t('freeship_qualified', 'Chúc mừng! Bạn đã đủ điều kiện nhận MIỄN PHÍ VẬN CHUYỂN!')}
                   </span>
                 ) : (
-                  <span>
-                    🚚 {t('freeship_needed', 'Mua thêm')} <strong style={{ color: "var(--primary-color)" }}>{formatCurrency(neededAmount)}</strong> {t('freeship_to_qualify', 'để được MIỄN PHÍ VẬN CHUYỂN toàn quốc!')}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <TruckIcon size={16} /> {t('freeship_needed', 'Mua thêm')} <strong style={{ color: "var(--primary-color)" }}>{formatCurrency(neededAmount)}</strong> {t('freeship_to_qualify', 'để được MIỄN PHÍ VẬN CHUYỂN toàn quốc!')}
                   </span>
                 )}
               </span>
@@ -257,7 +269,7 @@ export default function CartPage() {
                     padding: 0,
                   }}
                 >
-                  🗑️ Xóa đã chọn ({selectedItemIds.length})
+                  <TrashIcon size={14} /> Xóa đã chọn ({selectedItemIds.length})
                 </button>
               )}
 
@@ -299,7 +311,7 @@ export default function CartPage() {
                     onChange={() => toggleSelectShop(shopGroup.items.map((it) => it.productId))}
                     style={{ width: "16px", height: "16px", cursor: "pointer" }}
                   />
-                  <span style={{ fontSize: "16px" }}>🏪</span>
+                  <StoreIcon size={16} />
                   <strong style={{ fontSize: "14px", color: "var(--text-primary, #0f172a)" }}>
                     {shopGroup.shopName}
                   </strong>
@@ -362,18 +374,18 @@ export default function CartPage() {
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", marginTop: "10px", paddingLeft: "100px", fontSize: "13px" }}>
                         <button
                           type="button"
-                          style={{ background: "none", border: "none", color: "var(--secondary-color, #0284c7)", cursor: "pointer", fontWeight: 600, padding: 0 }}
+                          style={{ background: "none", border: "none", color: "var(--secondary-color, #0284c7)", cursor: "pointer", fontWeight: 600, padding: 0, display: "inline-flex", alignItems: "center", gap: "4px" }}
                           onClick={() => saveForLater(item.productId)}
                         >
-                          📦 Để dành mua sau
+                          <PackageIcon size={13} /> Để dành mua sau
                         </button>
                         <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
                         <button
                           type="button"
-                          style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", cursor: "pointer", fontWeight: 600, padding: 0 }}
+                          style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", cursor: "pointer", fontWeight: 600, padding: 0, display: "inline-flex", alignItems: "center", gap: "4px" }}
                           onClick={() => handleMoveToWishlist(item)}
                         >
-                          ❤️ Chuyển vào Yêu thích
+                          <HeartIcon size={13} /> Chuyển vào Yêu thích
                         </button>
                         <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
                         <button
@@ -403,8 +415,8 @@ export default function CartPage() {
                   flexWrap: "wrap",
                 }}
               >
-                <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary, #475569)", whiteSpace: "nowrap" }}>
-                  ✍️ Lời nhắn cho Người bán:
+                <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary, #475569)", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <PencilIcon size={13} /> Lời nhắn cho Người bán:
                 </span>
                 <input
                   type="text"
@@ -421,8 +433,8 @@ export default function CartPage() {
           {/* Save For Later Section (Amazon style) */}
           {savedItems.length > 0 && (
             <div style={{ marginTop: "36px", background: "var(--bg-card, #ffffff)", borderRadius: "8px", padding: "20px", border: "1px solid var(--border-medium, #e2e8f0)", boxShadow: "var(--shadow-sm)" }}>
-              <h3 style={{ fontSize: "17px", fontWeight: 800, margin: "0 0 16px", color: "var(--text-primary, #0f172a)" }}>
-                📦 Để Dành Mua Sau ({savedItems.length} sản phẩm)
+              <h3 style={{ fontSize: "17px", fontWeight: 800, margin: "0 0 16px", color: "var(--text-primary, #0f172a)", display: "flex", alignItems: "center", gap: "8px" }}>
+                <PackageIcon size={18} /> Để Dành Mua Sau ({savedItems.length} sản phẩm)
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 {savedItems.map((saved) => (
@@ -456,10 +468,10 @@ export default function CartPage() {
                       <button
                         type="button"
                         className="shopee-btn shopee-btn-secondary"
-                        style={{ fontSize: "12px" }}
+                        style={{ fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "6px" }}
                         onClick={() => moveToCartFromSaved(saved)}
                       >
-                        🛒 Chuyển Vào Giỏ Hàng
+                        <CartIcon size={13} /> {t('move_to_cart', 'Chuyển Vào Giỏ Hàng')}
                       </button>
                       <button
                         type="button"
@@ -483,8 +495,8 @@ export default function CartPage() {
           {/* Voucher Section with Picker & Input */}
           <div style={{ marginBottom: "18px", borderBottom: "1px solid var(--border-medium, #eee)", paddingBottom: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-              <span style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
-                🎟️ {t('voucher_code', 'Mã Giảm Giá / Voucher')}:
+              <span style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                <TicketIcon size={16} /> {t('voucher_code', 'Mã Giảm Giá / Voucher')}:
               </span>
               <button
                 type="button"
@@ -511,8 +523,8 @@ export default function CartPage() {
               {appliedShippingVoucher && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f0f9ff", padding: "8px 12px", borderRadius: "8px", border: "1px solid #0284c7" }}>
                   <div>
-                    <span style={{ fontWeight: 800, color: "#0284c7", fontSize: "13px" }}>
-                      🚚 {appliedShippingVoucher.code}
+                    <span style={{ fontWeight: 800, color: "#0284c7", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <TruckIcon size={14} /> {appliedShippingVoucher.code}
                     </span>
                     <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
                       (-{formatCurrency(shippingDiscount)} ship)
@@ -521,9 +533,9 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={removeShippingVoucher}
-                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px" }}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "3px" }}
                   >
-                    ✕ {t('remove', 'Gỡ')}
+                    <CloseIcon size={12} /> {t('remove', 'Gỡ')}
                   </button>
                 </div>
               )}
@@ -531,8 +543,8 @@ export default function CartPage() {
               {appliedDiscountVoucher && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--primary-color, #ea580c)" }}>
                   <div>
-                    <span style={{ fontWeight: 800, color: "var(--primary-color, #ea580c)", fontSize: "13px" }}>
-                      🏷️ {appliedDiscountVoucher.code}
+                    <span style={{ fontWeight: 800, color: "var(--primary-color, #ea580c)", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <TagIcon size={14} /> {appliedDiscountVoucher.code}
                     </span>
                     <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
                       (-{formatCurrency(voucherDiscount)})
@@ -541,9 +553,9 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={removeDiscountVoucher}
-                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px" }}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "3px" }}
                   >
-                    ✕ {t('remove', 'Gỡ')}
+                    <CloseIcon size={12} /> {t('remove', 'Gỡ')}
                   </button>
                 </div>
               )}
@@ -604,7 +616,9 @@ export default function CartPage() {
                   justifyContent: "space-between",
                 }}
               >
-                <span>✨ <strong>{voucherLivePreview.voucherCode}</strong>: Giảm xem trước</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                  <SparklesIcon size={13} color="#047857" /> <strong>{voucherLivePreview.voucherCode}</strong>: Giảm xem trước
+                </span>
                 <strong style={{ color: "#059669" }}>-{formatCurrency(voucherLivePreview.discountAmount)}</strong>
               </div>
             )}
