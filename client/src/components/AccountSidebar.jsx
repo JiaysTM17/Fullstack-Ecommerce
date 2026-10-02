@@ -78,7 +78,7 @@ export default function AccountSidebar({
               ? '🛡️ Super Admin'
               : user?.role === 'seller'
               ? '🏪 Chủ Gian Hàng'
-              : '✨ Thành Viên Shopee'}
+              : '✨ Thành Viên Thân Thiết'}
           </span>
           <Link to="/profile?tab=profile" className="account-sidebar-edit-link">
             <span>✏️ Sửa thông tin</span>
@@ -264,7 +264,7 @@ export default function AccountSidebar({
               className={`account-sidebar-link ${activeSection === 'vouchers' ? 'active' : ''}`}
             >
               <span className="sidebar-bullet-icon">🎟️</span>
-              <span className="sidebar-menu-label">Kho Voucher Shopee</span>
+              <span className="sidebar-menu-label">Kho Voucher Giảm Giá</span>
             </Link>
 
             <Link
@@ -273,7 +273,7 @@ export default function AccountSidebar({
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span className="sidebar-bullet-icon">🪙</span>
-                <span className="sidebar-menu-label">Shopee Xu tích lũy</span>
+                <span className="sidebar-menu-label">Điểm Xu tích lũy</span>
               </div>
               <span className="account-sidebar-coins-pill">
                 {(coins || 0).toLocaleString('vi-VN')} Xu
@@ -300,7 +300,7 @@ export default function AccountSidebar({
             <div className="account-sidebar-group-content">
               <Link to="/seller/dashboard" className="account-sidebar-link seller-portal-link">
                 <span className="sidebar-bullet-icon">🏪</span>
-                <span className="sidebar-menu-label">Kênh Người Bán Shopee</span>
+                <span className="sidebar-menu-label">Kênh Người Bán Hàng</span>
                 <span className="link-arrow">→</span>
               </Link>
             </div>
