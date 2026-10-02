@@ -10,6 +10,7 @@ import {
   ClockIcon,
   CheckIcon,
   ReturnIcon,
+  CloseIcon,
 } from './OrdersIcons';
 
 // Vector SVG Icons for Pixel-Perfect Navigation (Zero Emojis)
@@ -123,7 +124,7 @@ export default function AccountSidebar({
     { id: 'shipping', label: 'Đang vận chuyển', count: orderCounts.shipping, icon: <TruckIcon size={14} /> },
     { id: 'completed', label: 'Hoàn thành', count: orderCounts.completed, icon: <CheckIcon size={14} /> },
     { id: 'returning', label: 'Đổi trả / Hoàn tiền', count: orderCounts.returning, icon: <ReturnIcon size={14} /> },
-    { id: 'cancelled', label: 'Đã hủy', count: orderCounts.cancelled, icon: <span style={{ fontSize: '12px', fontWeight: 700, lineHeight: 1 }}>✕</span> },
+    { id: 'cancelled', label: 'Đã hủy', count: orderCounts.cancelled, icon: <CloseIcon size={14} /> },
   ];
 
   return (

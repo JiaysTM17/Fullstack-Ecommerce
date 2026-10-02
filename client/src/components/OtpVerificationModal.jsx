@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { KeyIcon, MailIcon, PhoneIcon } from './OrdersIcons';
+import { KeyIcon, MailIcon, PhoneIcon, CloseIcon, AlertCircleIcon, ChevronRightIcon, CheckIcon } from './OrdersIcons';
 
 /**
  * Enterprise 2FA OTP Verification Modal
@@ -144,7 +144,7 @@ export default function OtpVerificationModal({
     setActiveOtp(freshOtp);
 
     const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setResendNotice(`✓ Mã xác thực OTP mới đã được gửi lại vào hòm thư lúc ${timeStr}!`);
+    setResendNotice(`Mã xác thực OTP mới đã được gửi lại vào hòm thư lúc ${timeStr}!`);
 
     if (inputRef.current) {
       inputRef.current.focus();
@@ -189,7 +189,7 @@ export default function OtpVerificationModal({
               justifyContent: 'center',
             }}
           >
-            ✕
+            <CloseIcon size={16} />
           </button>
         )}
 
@@ -284,7 +284,7 @@ export default function OtpVerificationModal({
               gap: '6px',
             }}
           >
-            <span>⚠️</span>
+            <AlertCircleIcon size={15} />
             <span>{error}</span>
           </div>
         )}
@@ -394,7 +394,7 @@ export default function OtpVerificationModal({
           ) : (
             <>
               <span>Xác Nhận & Kích Hoạt Tài Khoản</span>
-              <span>➔</span>
+              <ChevronRightIcon size={14} />
             </>
           )}
         </button>

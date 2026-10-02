@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { StoreIcon, CartIcon, ShieldIcon, LockIcon } from './OrdersIcons';
+import { StoreIcon, CartIcon, ShieldIcon, LockIcon, CloseIcon, AlertCircleIcon, CheckIcon } from './OrdersIcons';
 
 /**
  * Enterprise Social OAuth SSO Modal (Next-Gen UI/UX Edition)
@@ -163,7 +163,7 @@ export default function SocialAuthModal({
               transition: 'background 0.2s',
             }}
           >
-            ✕
+            <CloseIcon size={16} />
           </button>
 
           {/* Google Header Logo */}
@@ -234,7 +234,7 @@ export default function SocialAuthModal({
                 gap: '8px',
               }}
             >
-              <span>⚠️</span>
+              <AlertCircleIcon size={15} />
               <span>{error}</span>
             </div>
           )}
@@ -277,7 +277,9 @@ export default function SocialAuthModal({
                 <span style={{ fontWeight: 700, fontSize: '14.5px', color: '#1f1f1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {fullName || 'Người dùng Google'}
                 </span>
-                <span style={{ fontSize: '12px', color: '#0b57d0' }} title="Tài khoản Google chính chủ">✓</span>
+                <span style={{ color: '#0b57d0', display: 'inline-flex', alignItems: 'center' }} title="Tài khoản Google chính chủ">
+                  <CheckIcon size={13} />
+                </span>
               </div>
               <div style={{ fontSize: '12.5px', color: '#444746', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
                 {email}
@@ -486,14 +488,13 @@ export default function SocialAuthModal({
                 width: '30px',
                 height: '30px',
                 color: '#ffffff',
-                fontSize: '13px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              ✕
+              <CloseIcon size={16} />
             </button>
           </div>
 
@@ -540,9 +541,13 @@ export default function SocialAuthModal({
                   borderRadius: '8px',
                   fontSize: '12px',
                   marginBottom: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
                 }}
               >
-                ⚠️ {error}
+                <AlertCircleIcon size={14} />
+                <span>{error}</span>
               </div>
             )}
 
@@ -630,10 +635,16 @@ export default function SocialAuthModal({
             >
               <div style={{ fontWeight: 700, color: '#050505', marginBottom: '8px' }}>Quyền hạn được chia sẻ:</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <span style={{ color: '#0866FF', fontWeight: 800 }}>✓</span> Tên hồ sơ và ảnh đại diện trang cá nhân
+                <span style={{ color: '#0866FF', display: 'inline-flex', alignItems: 'center' }}>
+                  <CheckIcon size={13} />
+                </span>
+                <span>Tên hồ sơ và ảnh đại diện trang cá nhân</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ color: '#0866FF', fontWeight: 800 }}>✓</span> Địa chỉ email ({email})
+                <span style={{ color: '#0866FF', display: 'inline-flex', alignItems: 'center' }}>
+                  <CheckIcon size={13} />
+                </span>
+                <span>Địa chỉ email ({email})</span>
               </div>
             </div>
 
@@ -726,14 +737,13 @@ export default function SocialAuthModal({
             width: '32px',
             height: '32px',
             color: '#a1a1a6',
-            fontSize: '14px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          ✕
+          <CloseIcon size={16} />
         </button>
 
         {/* Apple Logo & Header */}
@@ -796,9 +806,13 @@ export default function SocialAuthModal({
               borderRadius: '12px',
               fontSize: '12px',
               marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            ⚠️ {error}
+            <AlertCircleIcon size={14} />
+            <span>{error}</span>
           </div>
         )}
 

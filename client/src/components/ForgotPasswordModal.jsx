@@ -8,6 +8,10 @@ import {
   EyeOffIcon,
   SparklesIcon,
   KeyIcon,
+  CloseIcon,
+  CheckIcon,
+  AlertCircleIcon,
+  ChevronRightIcon,
 } from './OrdersIcons';
 
 /**
@@ -370,7 +374,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
             transition: 'background 0.15s ease',
           }}
         >
-          ✕
+          <CloseIcon size={16} />
         </button>
 
         {/* Modal Header */}
@@ -459,7 +463,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 fontWeight: 800,
               }}
             >
-              {step > 1 ? '✓' : '1'}
+              {step > 1 ? <CheckIcon size={11} /> : '1'}
             </span>
             <span>Nhập Email</span>
           </div>
@@ -494,7 +498,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 fontWeight: 800,
               }}
             >
-              {step > 2 ? '✓' : '2'}
+              {step > 2 ? <CheckIcon size={11} /> : '2'}
             </span>
             <span>Nhập OTP</span>
           </div>
@@ -552,7 +556,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               gap: '8px',
             }}
           >
-            <span>⚠️</span>
+            <AlertCircleIcon size={15} />
             <span>{error}</span>
           </div>
         )}
@@ -567,7 +571,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
 
               <div className="shopee-email-autocomplete-wrap" style={{ position: 'relative' }}>
                 <div className="shopee-form-input-wrap">
-                  <span className="shopee-input-lead-icon">✉️</span>
+                  <span className="shopee-input-lead-icon"><MailIcon size={16} /></span>
                   <input
                     ref={emailInputRef}
                     type="email"
@@ -653,7 +657,14 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 gap: '8px',
               }}
             >
-              {loading ? 'Đang gửi mã bảo mật...' : 'Gửi Mã Xác Thực OTP ➔'}
+              {loading ? (
+                'Đang gửi mã bảo mật...'
+              ) : (
+                <>
+                  <span>Gửi Mã Xác Thực OTP</span>
+                  <ChevronRightIcon size={14} />
+                </>
+              )}
             </button>
           </form>
         )}
@@ -872,7 +883,14 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 gap: '8px',
               }}
             >
-              {loading ? 'Đang đối soát an ninh...' : 'Xác Nhận Mã & Tiếp Tục ➔'}
+              {loading ? (
+                'Đang đối soát an ninh...'
+              ) : (
+                <>
+                  <span>Xác Nhận Mã & Tiếp Tục</span>
+                  <ChevronRightIcon size={14} />
+                </>
+              )}
             </button>
 
             {/* Developer Test Mode Helper Toolbar */}
@@ -1004,7 +1022,11 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   transition: 'all 0.2s',
                 }}
               >
-                <span>{passwordChecks.length ? '✓' : '○'}</span>
+                {passwordChecks.length ? (
+                  <CheckIcon size={12} />
+                ) : (
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
+                )}
                 <span>Tối thiểu 8 ký tự</span>
               </div>
 
@@ -1023,7 +1045,11 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   transition: 'all 0.2s',
                 }}
               >
-                <span>{passwordChecks.hasUpper ? '✓' : '○'}</span>
+                {passwordChecks.hasUpper ? (
+                  <CheckIcon size={12} />
+                ) : (
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
+                )}
                 <span>Chữ viết hoa (A-Z)</span>
               </div>
 
@@ -1042,7 +1068,11 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   transition: 'all 0.2s',
                 }}
               >
-                <span>{passwordChecks.hasNumber ? '✓' : '○'}</span>
+                {passwordChecks.hasNumber ? (
+                  <CheckIcon size={12} />
+                ) : (
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
+                )}
                 <span>Chữ số (0-9)</span>
               </div>
 
@@ -1061,7 +1091,11 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   transition: 'all 0.2s',
                 }}
               >
-                <span>{passwordChecks.hasSpecial ? '✓' : '○'}</span>
+                {passwordChecks.hasSpecial ? (
+                  <CheckIcon size={12} />
+                ) : (
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
+                )}
                 <span>Ký tự đặc biệt (!@#$)</span>
               </div>
             </div>
@@ -1125,7 +1159,14 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 gap: '8px',
               }}
             >
-              {loading ? 'Đang cập nhật mật khẩu...' : 'Lưu Mật Khẩu Mới & Đăng Nhập ➔'}
+              {loading ? (
+                'Đang cập nhật mật khẩu...'
+              ) : (
+                <>
+                  <span>Lưu Mật Khẩu Mới & Đăng Nhập</span>
+                  <ChevronRightIcon size={14} />
+                </>
+              )}
             </button>
           </form>
         )}

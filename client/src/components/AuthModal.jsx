@@ -16,6 +16,8 @@ import {
   EyeOffIcon,
   GlobeIcon,
   BoltIcon,
+  CloseIcon,
+  AlertCircleIcon,
 } from './OrdersIcons';
 import '../styles/auth.css';
 
@@ -183,7 +185,7 @@ export default function AuthModal() {
           onClick={closeAuthModal}
           title="Đóng (ESC)"
         >
-          ✕
+          <CloseIcon size={16} />
         </button>
 
         {/* Master Mode Tabs: ĐĂNG NHẬP vs ĐĂNG KÝ */}
@@ -248,7 +250,10 @@ export default function AuthModal() {
         {authTab === 'login' && (
           <div className="shopee-demo-container">
             <div className="shopee-demo-header">
-              <span className="shopee-demo-tag">⚡ Chọn Nhanh Tài Khoản Trải Nghiệm</span>
+              <span className="shopee-demo-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <BoltIcon size={13} />
+                <span>Chọn Nhanh Tài Khoản Trải Nghiệm</span>
+              </span>
             </div>
             <div className="shopee-demo-grid">
               {activeRole === 'customer' && (
@@ -339,8 +344,8 @@ export default function AuthModal() {
 
         {/* Error Message */}
         {error && (
-          <div className="shopee-form-error-msg">
-            <span>⚠️</span>
+          <div className="shopee-form-error-msg" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <AlertCircleIcon size={15} />
             <span>{error}</span>
           </div>
         )}
