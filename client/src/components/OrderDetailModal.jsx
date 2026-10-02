@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -13,6 +13,10 @@ export default function OrderDetailModal({
   onOpenInvoice,
   onBuyAgainItem,
   onReorderWhole,
+  onOpenCancelOrder,
+  onOpenReturnModal,
+  onOpenReviewModal,
+  onSimulateStep,
 }) {
   if (isOpen === false || !order) return null;
 
@@ -74,6 +78,7 @@ export default function OrderDetailModal({
   const trackingCode = order.trackingCode || (orderId ? `SPX-VN-${orderId}` : 'SPX-VN-84729104');
   const carrierName = order.courier?.carrier || order.carrier || 'SPX Express (Shopee Xpress)';
   const hotline = '1900 1221';
+  const transactionId = order.transactionId || (orderId ? `TXN-${orderId}-MPE` : 'TXN-849201934');
 
   // Format Order Date
   const formattedDate = (() => {
@@ -105,6 +110,8 @@ export default function OrderDetailModal({
   };
   const activeStep = getActiveStep();
 
+  const isPending = order.status === 'pending' || activeStep === 1;
+  const isConfirmed = order.status === 'confirmed' || activeStep === 2;
   const isShipping = order.status === 'shipping' || order.status === 'delivering' || activeStep === 3;
   const isCompleted = order.status === 'completed' || order.status === 'delivered' || activeStep === 4;
   const isCancelled = order.status === 'cancelled' || activeStep === 0;
@@ -112,18 +119,18 @@ export default function OrderDetailModal({
   // Status Badge Colors & Labels
   const getStatusBadge = () => {
     if (isCancelled) {
-      return { text: order.statusText || 'Đã hủy', className: 'status-cancelled', bg: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' };
+      return { text: order.statusText || 'Đã hủy', className: 'status-cancelled', bg: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', icon: '✕' };
     }
     if (isCompleted) {
-      return { text: order.statusText || 'Giao thành công', className: 'status-completed', bg: 'rgba(16, 185, 129, 0.15)', color: '#10b981' };
+      return { text: order.statusText || 'Giao thành công', className: 'status-completed', bg: 'rgba(16, 185, 129, 0.12)', color: '#10b981', icon: '✓' };
     }
     if (isShipping) {
-      return { text: order.statusText || 'Đang giao hàng', className: 'status-shipping', bg: 'rgba(2, 132, 199, 0.15)', color: '#0284c7' };
+      return { text: order.statusText || 'Đang giao hàng', className: 'status-shipping', bg: 'rgba(2, 132, 199, 0.12)', color: '#0284c7', icon: '🚚' };
     }
-    if (order.status === 'confirmed') {
-      return { text: order.statusText || 'Đã xác nhận', className: 'status-confirmed', bg: 'rgba(59, 130, 246, 0.15)', color: '#2563eb' };
+    if (isConfirmed) {
+      return { text: order.statusText || 'Đã xác nhận', className: 'status-confirmed', bg: 'rgba(37, 99, 235, 0.12)', color: '#2563eb', icon: '📦' };
     }
-    return { text: order.statusText || 'Chờ xác nhận', className: 'status-pending', bg: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' };
+    return { text: order.statusText || 'Chờ xác nhận', className: 'status-pending', bg: 'rgba(245, 158, 11, 0.12)', color: '#d97706', icon: '⏳' };
   };
   const statusBadge = getStatusBadge();
 
@@ -201,11 +208,23 @@ export default function OrderDetailModal({
 
   // Stepper Stages Definition
   const STEPS = [
-    { step: 1, label: 'Đã đặt hàng', desc: 'Đơn hàng đã được tạo' },
-    { step: 2, label: 'Đã xác nhận', desc: 'Shop đã đóng gói kiện hàng' },
+    { step: 1, label: 'Đã đặt hàng', desc: 'Đơn hàng đã được tạo thành công' },
+    { step: 2, label: 'Đã xác nhận', desc: 'Shop đã đóng gói & in mã vận đơn' },
     { step: 3, label: 'Đang giao hàng', desc: 'SPX Express đang vận chuyển' },
-    { step: 4, label: 'Giao thành công', desc: 'Đã giao tới người nhận' },
+    { step: 4, label: 'Giao thành công', desc: 'Đã giao tới người nhận & ký nhận' },
   ];
+
+  // Timeline events fallback
+  const timelineEvents = Array.isArray(order.timeline) && order.timeline.length > 0
+    ? order.timeline
+    : [
+        { time: formattedDate, text: 'Đơn hàng đã được tạo và chuyển thông tin sang người bán' },
+        ...(activeStep >= 2 ? [{ time: 'Giai đoạn 2', text: 'Người bán đã chuẩn bị kiện hàng và bàn giao cho bưu tá' }] : []),
+        ...(activeStep >= 3 ? [{ time: 'Giai đoạn 3', text: 'Kiện hàng đang được trung chuyển qua bưu cục SPX Express' }] : []),
+        ...(activeStep >= 4 ? [{ time: 'Hoàn thành', text: 'Đã giao hàng thành công đến người nhận' }] : []),
+      ];
+
+  const shopName = order.shopName || 'Mini Shopee Mall Official';
 
   return (
     <div
@@ -218,42 +237,44 @@ export default function OrderDetailModal({
       aria-labelledby="order-detail-title"
     >
       <div className="order-detail-modal-container">
-        {/* Modal Header */}
+        {/* ==========================================================================
+            Modal Header: Order ID, Date, Status Pill, Print & Close Actions
+            ========================================================================== */}
         <div className="order-detail-header">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <h3 id="order-detail-title" style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <h3 id="order-detail-title" style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>
                 📦 {t('order_detail_title', 'Chi Tiết Đơn Hàng')}
               </h3>
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  background: 'var(--bg-muted, #f1f5f9)',
-                  padding: '3px 8px',
-                  borderRadius: '6px',
-                  fontSize: '12.5px',
-                  fontWeight: 700,
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                  border: '1px solid var(--border-medium, #e2e8f0)',
-                }}
+              <button
+                type="button"
+                className="order-id-badge"
                 onClick={() => handleCopy(orderId, 'Mã đơn')}
                 title="Nhấn để sao chép mã đơn"
               >
                 #{orderId}
-                <span style={{ fontSize: '11px', color: 'var(--primary-color, #ea580c)' }}>📋</span>
-              </span>
+                <span style={{ fontSize: '11px', color: 'var(--primary-color, #2563eb)' }}>📋</span>
+              </button>
               <span
                 className={`shopee-status-badge ${statusBadge.className}`}
-                style={{ background: statusBadge.bg, color: statusBadge.color }}
+                style={{
+                  background: statusBadge.bg,
+                  color: statusBadge.color,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontWeight: 700,
+                  padding: '3px 10px',
+                  borderRadius: '999px',
+                  fontSize: '12px'
+                }}
               >
-                {statusBadge.text}
+                <span>{statusBadge.icon}</span>
+                <span>{statusBadge.text}</span>
               </span>
             </div>
-            <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              {t('order_date', 'Ngày đặt')}: <strong>{formattedDate}</strong>
+            <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginTop: '5px' }}>
+              {t('order_date', 'Thời gian đặt hàng')}: <strong style={{ color: 'var(--text-secondary)' }}>{formattedDate}</strong>
             </div>
           </div>
 
@@ -262,8 +283,8 @@ export default function OrderDetailModal({
               type="button"
               className="shopee-btn shopee-btn-secondary shopee-btn-sm"
               onClick={() => window.print()}
-              title="In chi tiết đơn hàng"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              title="In hóa đơn chi tiết đơn hàng"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}
             >
               🖨️ {t('print', 'In')}
             </button>
@@ -279,69 +300,70 @@ export default function OrderDetailModal({
           </div>
         </div>
 
-        {/* Cancelled Notice if Order is Cancelled */}
+        {/* ==========================================================================
+            Cancelled Notice Banner (If order was cancelled)
+            ========================================================================== */}
         {isCancelled && (
           <div
             style={{
               background: 'rgba(239, 68, 68, 0.08)',
               border: '1px solid rgba(239, 68, 68, 0.25)',
-              borderRadius: '8px',
-              padding: '12px 16px',
-              marginBottom: '18px',
+              borderRadius: '12px',
+              padding: '14px 18px',
+              marginBottom: '20px',
               display: 'flex',
               alignItems: 'flex-start',
-              gap: '10px',
+              gap: '12px',
             }}
           >
-            <span style={{ fontSize: '18px' }}>⚠️</span>
-            <div>
-              <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#ef4444' }}>
+            <span style={{ fontSize: '20px' }}>⚠️</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#ef4444' }}>
                 Đơn hàng đã được hủy thành công
               </div>
-              <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                Lý do hủy: {order.cancelReason || 'Người mua yêu cầu hủy đơn'}
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '3px' }}>
+                Lý do hủy: <strong>{order.cancelReason || 'Người mua yêu cầu hủy đơn'}</strong>
                 {order.cancelNote ? ` · Ghi chú: ${order.cancelNote}` : ''}
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Tiền thanh toán (nếu đã trừ) và điểm Mini Xu đã được hoàn về tài khoản của bạn theo chính sách bảo vệ người mua.
               </div>
             </div>
           </div>
         )}
 
-        {/* Real-time SPX Delivery Stepper */}
+        {/* ==========================================================================
+            Logistics & Delivery Stepper Card (Carrier, Code, Cable Progress, Timeline)
+            ========================================================================== */}
         {!isCancelled && (
-          <div className="spx-stepper" style={{ marginBottom: '20px' }}>
+          <div className="order-detail-logistics-box">
             <div
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '14px',
+                marginBottom: '16px',
                 flexWrap: 'wrap',
-                gap: '8px',
+                gap: '10px',
+                paddingBottom: '12px',
+                borderBottom: '1px solid var(--border-light, #f1f5f9)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '16px' }}>🚚</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '18px' }}>🚚</span>
                 <span style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary)' }}>
                   {carrierName}
                 </span>
-                <span
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--primary-color, #ea580c)',
-                    background: 'var(--primary-light, #fff7ed)',
-                    padding: '2px 8px',
-                    borderRadius: '999px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    border: '1px solid var(--primary-border, #fed7aa)',
-                  }}
+                <button
+                  type="button"
+                  className="copy-pill"
                   onClick={() => handleCopy(trackingCode, 'Mã vận đơn SPX')}
                   title="Nhấn để sao chép mã vận đơn"
                 >
                   {trackingCode} 📋
+                </button>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                  · Hotline: <strong>{hotline}</strong> (24/7)
                 </span>
               </div>
 
@@ -350,12 +372,13 @@ export default function OrderDetailModal({
                   type="button"
                   className="shopee-btn shopee-btn-sm"
                   style={{
-                    background: 'var(--secondary-color, #0284c7)',
+                    background: 'var(--primary-color, #2563eb)',
                     color: '#fff',
-                    borderColor: 'var(--secondary-color, #0284c7)',
+                    borderColor: 'var(--primary-color, #2563eb)',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '6px',
+                    fontWeight: 600,
                   }}
                   onClick={() => handleOpenTracking(order)}
                 >
@@ -364,14 +387,14 @@ export default function OrderDetailModal({
               )}
             </div>
 
-            {/* Stepper Progress Bar */}
-            <div className="stepper-track-wrapper" style={{ position: 'relative' }}>
+            {/* Stepper Progress Bar with Continuous Connector Wire */}
+            <div className="stepper-track-wrapper" style={{ position: 'relative', margin: '10px 0 16px' }}>
               <div
                 style={{
                   position: 'absolute',
                   top: '17px',
                   left: '12.5%',
-                  height: '3px',
+                  height: '4px',
                   background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
                   borderRadius: '999px',
                   zIndex: 1,
@@ -381,7 +404,7 @@ export default function OrderDetailModal({
                 }}
               />
               <div className="stepper-stages">
-                {STEPS.map((s, idx) => {
+                {STEPS.map((s) => {
                   const isPassed = activeStep > s.step;
                   const isCurrent = activeStep === s.step;
                   return (
@@ -400,140 +423,266 @@ export default function OrderDetailModal({
               </div>
             </div>
 
-            {/* Timeline Events if present */}
-            {Array.isArray(order.timeline) && order.timeline.length > 0 && (
-              <div
-                style={{
-                  marginTop: '14px',
-                  background: 'var(--bg-muted, #f8fafc)',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  border: '1px solid var(--border-light, #f1f5f9)',
-                  fontSize: '12.5px',
-                  maxHeight: '120px',
-                  overflowY: 'auto',
-                }}
-              >
-                {order.timeline.map((tl, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: 'flex',
-                      gap: '10px',
-                      padding: '4px 0',
-                      borderBottom: index < order.timeline.length - 1 ? '1px dashed var(--border-light, #e2e8f0)' : 'none',
-                    }}
-                  >
-                    <span style={{ color: 'var(--primary-color, #ea580c)', fontWeight: 700, minWidth: '85px' }}>
-                      {tl.time}
-                    </span>
-                    <span style={{ color: 'var(--text-primary)' }}>{tl.text}</span>
-                  </div>
-                ))}
+            {/* Timeline Events Audit Log */}
+            {timelineEvents.length > 0 && (
+              <div className="order-detail-timeline-list">
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>⏱️</span>
+                  <span>Nhật ký hành trình đơn hàng:</span>
+                </div>
+                {timelineEvents.map((tl, index) => {
+                  const isLatest = index === timelineEvents.length - 1;
+                  return (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        gap: '12px',
+                        padding: '6px 0',
+                        borderBottom: index < timelineEvents.length - 1 ? '1px dashed var(--border-light, #e2e8f0)' : 'none',
+                        alignItems: 'baseline',
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: isLatest ? 'var(--primary-color, #2563eb)' : 'var(--text-muted)',
+                          fontWeight: isLatest ? 700 : 600,
+                          minWidth: '95px',
+                          fontSize: '12px',
+                        }}
+                      >
+                        {tl.time}
+                      </span>
+                      <span
+                        style={{
+                          color: isLatest ? 'var(--text-primary)' : 'var(--text-secondary)',
+                          fontWeight: isLatest ? 600 : 400,
+                          fontSize: '12.5px',
+                        }}
+                      >
+                        {isLatest && <span style={{ color: '#10b981', marginRight: '6px' }}>●</span>}
+                        {tl.text}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
         )}
 
-        {/* 2-Column Grid: Recipient Info & Payment Info */}
-        <div
-          className="order-detail-info-grid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '14px',
-            marginBottom: '20px',
-          }}
-        >
-          {/* Recipient Card */}
-          <div className="recipient-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '15px' }}>📍</span>
-              <span style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--text-primary)' }}>
-                {t('shipping_address_title', 'Địa Chỉ Nhận Hàng')}
+        {/* ==========================================================================
+            2-Column Information Grid: Recipient Info & Payment/Invoice Info
+            ========================================================================== */}
+        <div className="order-detail-info-grid">
+          {/* Recipient Information Card */}
+          <div className="order-detail-info-card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <span style={{ fontSize: '16px' }}>📍</span>
+              <span style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary)' }}>
+                {t('shipping_address_title', 'Thông Tin Người Nhận & Địa Chỉ')}
               </span>
             </div>
-            <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>
-              {recipientName}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                {recipientName}
+              </strong>
+              <span
+                style={{
+                  fontSize: '11px',
+                  background: 'var(--primary-light, #eff6ff)',
+                  color: 'var(--primary-color, #2563eb)',
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  fontWeight: 600,
+                }}
+              >
+                Người mua
+              </span>
             </div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-              📞 {recipientPhone}
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>📞 {recipientPhone}</span>
+              <span
+                style={{ cursor: 'pointer', fontSize: '11.5px', color: 'var(--primary-color, #2563eb)' }}
+                onClick={() => handleCopy(recipientPhone, 'SĐT người nhận')}
+                title="Sao chép SĐT"
+              >
+                📋
+              </span>
             </div>
-            <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.4 }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '6px', lineHeight: 1.5 }}>
               {recipientAddress}
             </div>
-            {orderNote && (
+            {orderNote ? (
               <div
                 style={{
                   fontSize: '12px',
                   color: 'var(--text-muted)',
-                  marginTop: '8px',
-                  paddingTop: '6px',
+                  marginTop: '10px',
+                  paddingTop: '8px',
                   borderTop: '1px dashed var(--border-medium, #e2e8f0)',
                   fontStyle: 'italic',
                 }}
               >
-                Ghi chú: {orderNote}
+                📝 Ghi chú đơn: {orderNote}
+              </div>
+            ) : (
+              <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '8px' }}>
+                ⚡ Dịch vụ: Giao hàng tiêu chuẩn SPX Express
               </div>
             )}
           </div>
 
-          {/* Payment Card */}
-          <div className="recipient-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '15px' }}>💳</span>
-              <span style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--text-primary)' }}>
-                {t('payment_info_title', 'Thông Tin Thanh Toán')}
+          {/* Payment & Invoice Information Card */}
+          <div className="order-detail-info-card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <span style={{ fontSize: '16px' }}>💳</span>
+              <span style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary)' }}>
+                {t('payment_info_title', 'Thông Tin Thanh Toán & Hóa Đơn')}
               </span>
             </div>
             <div style={{ fontSize: '13px', color: 'var(--text-primary)' }}>
-              Phương thức: <strong>{paymentMethod}</strong>
+              Hình thức: <strong>{paymentMethod}</strong>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
               <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>Trạng thái:</span>
               <span
                 style={{
-                  fontSize: '11px',
+                  fontSize: '11.5px',
                   padding: '2px 8px',
                   borderRadius: '999px',
                   fontWeight: 700,
-                  background: isPaid ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                  color: isPaid ? '#10b981' : '#f59e0b',
+                  background: isPaid ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+                  color: isPaid ? '#10b981' : '#d97706',
                 }}
               >
                 {paymentStatusText}
               </span>
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px' }}>
-              Tổng tiền cần thanh toán: <strong style={{ color: 'var(--primary-color, #ea580c)' }}>{formatCurrency(finalTotal)}</strong>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>Mã giao dịch: <strong>{transactionId}</strong></span>
+              <span
+                style={{ cursor: 'pointer', fontSize: '11.5px', color: 'var(--primary-color, #2563eb)' }}
+                onClick={() => handleCopy(transactionId, 'Mã giao dịch')}
+                title="Sao chép mã giao dịch"
+              >
+                📋
+              </span>
             </div>
-            <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              Đơn vị vận chuyển: {carrierName} · Hotline: {hotline}
+            <div style={{ fontSize: '11.5px', color: '#166534', background: '#f0fdf4', padding: '4px 8px', borderRadius: '6px', marginTop: '8px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>🛡️</span>
+              <span>Giao dịch an toàn được bảo hộ bởi Mini Shopee SafePay</span>
             </div>
           </div>
         </div>
 
-        {/* Order Items List */}
-        <div style={{ marginBottom: '20px' }}>
+        {/* ==========================================================================
+            Shop / Seller Profile Card (Avatar, Mall Badge, Rating, Chat Button)
+            ========================================================================== */}
+        <div className="order-detail-shop-card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '18px',
+                fontWeight: 800,
+                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
+              }}
+            >
+              🏪
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary)' }}>
+                  {shopName}
+                </span>
+                <span
+                  style={{
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    fontSize: '10.5px',
+                    fontWeight: 800,
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  MALL
+                </span>
+                <span
+                  style={{
+                    background: 'var(--primary-light, #eff6ff)',
+                    color: 'var(--primary-color, #2563eb)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    border: '1px solid var(--primary-border, #bfdbfe)',
+                  }}
+                >
+                  Yêu thích+
+                </span>
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                ⭐ 4.9/5.0 (12.4k đánh giá) · 💬 Phản hồi Chat: 100% trong 5 phút
+              </div>
+            </div>
+          </div>
+
+          <div>
+            {onOpenChat && (
+              <button
+                type="button"
+                className="shopee-order-btn-outline"
+                style={{
+                  borderColor: 'var(--primary-color, #2563eb)',
+                  color: 'var(--primary-color, #2563eb)',
+                  fontWeight: 600,
+                  fontSize: '12.5px',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+                onClick={() => onOpenChat(order)}
+              >
+                💬 {t('chat_with_shop', 'Chat với Shop')}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ==========================================================================
+            Order Items List (Images, Variant SKU, Pricing, Buy Again Item)
+            ========================================================================== */}
+        <div className="order-detail-items-card">
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '10px',
-              paddingBottom: '6px',
+              marginBottom: '12px',
+              paddingBottom: '8px',
               borderBottom: '1px solid var(--border-light, #f1f5f9)',
             }}
           >
-            <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              🏪 {order.shopName || 'Mini Shopee Mall'}
+            <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>
+              Danh Sách Sản Phẩm ({items.length})
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              {items.length} {t('items_count', 'sản phẩm')}
+              🛡️ Đổi trả miễn phí 15 ngày · 100% Chính hãng
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {items.map((item, idx) => {
               const itemPrice = Number(item.price) || 0;
               const itemQty = Number(item.quantity) || 1;
@@ -550,24 +699,24 @@ export default function OrderDetailModal({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '12px',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
+                    gap: '14px',
+                    padding: '12px 14px',
+                    borderRadius: '10px',
                     background: 'var(--bg-muted, #f8fafc)',
-                    border: '1px solid var(--border-light, #f1f5f9)',
+                    border: '1px solid var(--border-medium, #e2e8f0)',
                     flexWrap: 'wrap',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 240px', minWidth: '220px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 260px', minWidth: '220px' }}>
                     <img
                       src={itemImg}
                       alt={item.name}
                       style={{
-                        width: '52px',
-                        height: '52px',
-                        borderRadius: '6px',
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '8px',
                         objectFit: 'cover',
-                        border: '1px solid var(--border-medium, #e2e8f0)',
+                        border: '1px solid var(--border-medium, #cbd5e1)',
                         flexShrink: 0,
                       }}
                       onError={(e) => {
@@ -578,23 +727,43 @@ export default function OrderDetailModal({
                     <div style={{ minWidth: 0 }}>
                       <div
                         style={{
-                          fontSize: '13px',
+                          fontSize: '13.5px',
                           fontWeight: 600,
                           color: 'var(--text-primary)',
-                          lineHeight: 1.3,
+                          lineHeight: 1.35,
                         }}
                       >
                         {item.name}
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                        x{itemQty} · {formatCurrency(itemPrice)}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                        {item.variant ? (
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              background: '#ffffff',
+                              border: '1px solid var(--border-medium, #cbd5e1)',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              color: 'var(--text-secondary)',
+                            }}
+                          >
+                            Phân loại: {item.variant}
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                            Phiên bản tiêu chuẩn
+                          </span>
+                        )}
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                          x{itemQty} · {formatCurrency(itemPrice)}
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      <div style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--text-primary)' }}>
                         {formatCurrency(itemTotal)}
                       </div>
                     </div>
@@ -602,13 +771,13 @@ export default function OrderDetailModal({
                     {onBuyAgainItem && (
                       <button
                         type="button"
-                        className="shopee-btn shopee-btn-sm"
+                        className="shopee-order-btn-outline"
                         style={{
-                          background: 'var(--primary-light, #fff7ed)',
-                          color: 'var(--primary-color, #ea580c)',
-                          borderColor: 'var(--primary-border, #fed7aa)',
-                          fontWeight: 700,
+                          fontSize: '12px',
+                          padding: '5px 12px',
+                          fontWeight: 600,
                           whiteSpace: 'nowrap',
+                          borderRadius: '6px',
                         }}
                         onClick={() => onBuyAgainItem(item)}
                         title="Thêm sản phẩm này vào giỏ hàng"
@@ -623,22 +792,22 @@ export default function OrderDetailModal({
           </div>
         </div>
 
-        {/* Transparent Fee Breakdown */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            marginBottom: '20px',
-          }}
-        >
-          <div className="fee-breakdown-table" style={{ width: '100%', maxWidth: '380px' }}>
+        {/* ==========================================================================
+            Transparent Financial Cost Sheet (Bảng Kê Chi Phí Chi Tiết Minh Bạch)
+            ========================================================================== */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+          <div className="fee-breakdown-table" style={{ width: '100%', maxWidth: '420px', borderRadius: '12px', padding: '16px 20px' }}>
+            <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '10px', paddingBottom: '6px', borderBottom: '1px solid var(--border-light, #e2e8f0)' }}>
+              📊 Bảng Kê Chi Phí Đơn Hàng
+            </div>
+
             <div className="fee-row">
               <span className="fee-label">{t('subtotal', 'Tiền hàng (tạm tính)')}:</span>
               <span className="fee-value">{formatCurrency(itemSubtotal)}</span>
             </div>
 
             <div className="fee-row">
-              <span className="fee-label">{t('shipping_fee', 'Phí vận chuyển')}:</span>
+              <span className="fee-label">{t('shipping_fee', 'Phí vận chuyển tiêu chuẩn')}:</span>
               <span className="fee-value">
                 {shippingFee === 0 ? 'Miễn phí' : `+${formatCurrency(shippingFee)}`}
               </span>
@@ -646,30 +815,73 @@ export default function OrderDetailModal({
 
             {voucherDiscount > 0 && (
               <div className="fee-row discount-row">
-                <span className="fee-label">{t('voucher_discount', 'Giảm giá Voucher')}:</span>
+                <span className="fee-label">🎟️ {t('voucher_discount', 'Giảm giá Voucher Sàn')}:</span>
                 <span className="fee-value discount">-{formatCurrency(voucherDiscount)}</span>
               </div>
             )}
 
             {coinsDiscount > 0 && (
               <div className="fee-row discount-row">
-                <span className="fee-label">🪙 {t('coins_discount', 'Giảm giá Xu')}:</span>
+                <span className="fee-label">🪙 {t('coins_discount', 'Giảm trừ Mini Xu')}:</span>
                 <span className="fee-value discount">-{formatCurrency(coinsDiscount)}</span>
               </div>
             )}
 
-            <div className="fee-row total-row" style={{ marginTop: '8px', paddingTop: '8px', borderTop: '2px solid var(--border-medium, #e2e8f0)' }}>
-              <span className="fee-label" style={{ fontWeight: 800, fontSize: '14.5px' }}>
-                {t('total_payment', 'Tổng thanh toán')}:
-              </span>
-              <span className="fee-value total" style={{ color: 'var(--primary-color, #ea580c)', fontWeight: 800, fontSize: '17px' }}>
+            <div
+              className="fee-row total-row"
+              style={{
+                marginTop: '10px',
+                paddingTop: '10px',
+                borderTop: '2px dashed var(--border-medium, #cbd5e1)',
+              }}
+            >
+              <div>
+                <div className="fee-label" style={{ fontWeight: 800, fontSize: '15px' }}>
+                  {t('total_payment', 'Tổng số tiền thanh toán')}:
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  (Đã bao gồm thuế GTGT và phí vận chuyển)
+                </div>
+              </div>
+              <span
+                className="fee-value total"
+                style={{
+                  color: 'var(--primary-color, #2563eb)',
+                  fontWeight: 800,
+                  fontSize: '20px',
+                  letterSpacing: '-0.3px',
+                }}
+              >
                 {formatCurrency(finalTotal)}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons at Footer */}
+        {/* ==========================================================================
+            Buyer Guarantee & Protection Banner
+            ========================================================================== */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(16, 185, 129, 0.06) 100%)',
+            border: '1px solid var(--primary-border, #bfdbfe)',
+            borderRadius: '10px',
+            padding: '12px 16px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <span style={{ fontSize: '22px' }}>🛡️</span>
+          <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+            <strong style={{ color: 'var(--text-primary)' }}>Mini Shopee Đảm Bảo:</strong> Tiền thanh toán của bạn sẽ được giữ an toàn và chỉ chuyển cho Người bán khi bạn hài lòng với kiện hàng. Đổi trả miễn phí trong vòng 15 ngày nếu có lỗi từ nhà sản xuất.
+          </div>
+        </div>
+
+        {/* ==========================================================================
+            Action Toolbar at Footer (Stage-Specific Buttons)
+            ========================================================================== */}
         <div
           style={{
             display: 'flex',
@@ -681,11 +893,12 @@ export default function OrderDetailModal({
             gap: '10px',
           }}
         >
-          <div>
+          {/* Left actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {onOpenChat && (
               <button
                 type="button"
-                className="shopee-btn shopee-btn-secondary"
+                className="shopee-order-btn-outline"
                 style={{
                   borderColor: '#818cf8',
                   color: '#4f46e5',
@@ -693,19 +906,61 @@ export default function OrderDetailModal({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
+                  borderRadius: '6px',
+                  padding: '7px 14px',
+                  fontSize: '13px',
                 }}
                 onClick={() => onOpenChat(order)}
               >
                 💬 {t('chat_with_shop', 'Chat với Shop')}
               </button>
             )}
+
+            {!isCancelled && activeStep < 4 && onSimulateStep && (
+              <button
+                type="button"
+                className="shopee-btn"
+                style={{
+                  fontSize: '12px',
+                  background: 'var(--primary-light, #eff6ff)',
+                  border: '1px solid var(--primary-border, #bfdbfe)',
+                  color: 'var(--primary-color, #2563eb)',
+                  fontWeight: 700,
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                }}
+                onClick={() => onSimulateStep(orderId)}
+                title="Mô phỏng bưu tá giao hàng bước tiếp theo"
+              >
+                ⚡ {t('order_track_simulate_step', 'Mô phỏng giao')}
+              </button>
+            )}
           </div>
 
+          {/* Right actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* If pending or confirmed: Cancel Order button */}
+            {(isPending || isConfirmed) && onOpenCancelOrder && (
+              <button
+                type="button"
+                className="shopee-order-btn-danger-outline"
+                style={{
+                  borderRadius: '6px',
+                  padding: '7px 14px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                }}
+                onClick={() => onOpenCancelOrder(order)}
+              >
+                ✕ {t('cancel_order', 'Hủy đơn hàng')}
+              </button>
+            )}
+
+            {/* If shipping: Live GPS map button */}
             {isShipping && handleOpenTracking && (
               <button
                 type="button"
-                className="shopee-btn shopee-btn-secondary"
+                className="shopee-order-btn-outline"
                 style={{
                   borderColor: '#38bdf8',
                   color: '#0284c7',
@@ -713,6 +968,9 @@ export default function OrderDetailModal({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
+                  borderRadius: '6px',
+                  padding: '7px 14px',
+                  fontSize: '13px',
                 }}
                 onClick={() => handleOpenTracking(order)}
               >
@@ -720,35 +978,81 @@ export default function OrderDetailModal({
               </button>
             )}
 
-            {isCompleted && onOpenInvoice && (
-              <button
-                type="button"
-                className="shopee-btn shopee-btn-secondary"
-                style={{
-                  borderColor: '#cbd5e1',
-                  color: '#475569',
-                  fontWeight: 600,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                }}
-                onClick={() => onOpenInvoice(order)}
-              >
-                🧾 {t('vat_invoice', 'In hóa đơn VAT')}
-              </button>
+            {/* If completed: Review (+200 coins), Return/Refund, VAT Invoice */}
+            {isCompleted && (
+              <>
+                {onOpenReviewModal && (
+                  <button
+                    type="button"
+                    className="shopee-order-btn-success"
+                    style={{
+                      borderRadius: '6px',
+                      padding: '7px 14px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                    onClick={() => onOpenReviewModal(order)}
+                  >
+                    ⭐ {t('review_order_reward', 'Đánh giá (+200 Xu)')}
+                  </button>
+                )}
+
+                {onOpenReturnModal && (
+                  <button
+                    type="button"
+                    className="shopee-order-btn-outline"
+                    style={{
+                      borderRadius: '6px',
+                      padding: '7px 14px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                    onClick={() => onOpenReturnModal(order)}
+                  >
+                    ↩ {t('return_refund', 'Trả hàng/Hoàn tiền')}
+                  </button>
+                )}
+
+                {onOpenInvoice && (
+                  <button
+                    type="button"
+                    className="shopee-order-btn-outline"
+                    style={{
+                      borderRadius: '6px',
+                      padding: '7px 14px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                    onClick={() => onOpenInvoice(order)}
+                  >
+                    🧾 {t('vat_invoice', 'In hóa đơn VAT')}
+                  </button>
+                )}
+              </>
             )}
 
+            {/* Reorder whole order button */}
             {onReorderWhole && items.length > 0 && (
               <button
                 type="button"
-                className="shopee-btn"
+                className="shopee-order-btn-primary"
                 style={{
-                  background: 'var(--primary-color, #ea580c)',
-                  color: '#ffffff',
                   fontWeight: 700,
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
+                  borderRadius: '6px',
+                  padding: '7px 16px',
+                  fontSize: '13px',
                 }}
                 onClick={() => onReorderWhole(order)}
               >
@@ -758,9 +1062,14 @@ export default function OrderDetailModal({
 
             <button
               type="button"
-              className="shopee-btn shopee-btn-secondary"
+              className="shopee-order-btn-outline"
               onClick={onClose}
-              style={{ fontWeight: 600 }}
+              style={{
+                fontWeight: 600,
+                borderRadius: '6px',
+                padding: '7px 14px',
+                fontSize: '13px',
+              }}
             >
               ✕ {t('close', 'Đóng')}
             </button>

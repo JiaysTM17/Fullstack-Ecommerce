@@ -672,8 +672,8 @@ export default function OrderHistoryPage() {
         {/* Thông báo phân định vai trò Người Bán */}
         {user?.role === 'seller' && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, rgba(208, 1, 27, 0.04) 100%)',
-            border: '1px solid rgba(234, 88, 12, 0.3)',
+            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(14, 165, 233, 0.04) 100%)',
+            border: '1px solid rgba(37, 99, 235, 0.25)',
             borderRadius: '10px',
             padding: '12px 16px',
             marginBottom: '20px',
@@ -1469,6 +1469,10 @@ export default function OrderHistoryPage() {
           onOpenInvoice={(order) => setSelectedInvoiceOrder(order)}
           onBuyAgainItem={(item) => handleBuyAgain(item)}
           onReorderWhole={(order) => handleReorderWholeOrder(order)}
+          onOpenCancelOrder={(order) => setSelectedCancelOrder(order)}
+          onOpenReturnModal={(order) => setSelectedReturnOrder(order)}
+          onOpenReviewModal={(order) => setSelectedReviewOrder(order)}
+          onSimulateStep={(orderId) => handleSimulateNextStep(orderId)}
         />
       )}
 
