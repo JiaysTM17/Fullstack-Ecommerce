@@ -331,6 +331,7 @@
   z-index: 2000;
   padding: 20px;
   box-sizing: border-box;
+  animation: orderModalFadeIn 0.22s ease-out forwards;
 }
 
 .shopee-modal-content {
@@ -345,6 +346,7 @@
   border: 1px solid var(--border-medium, #e2e8f0);
   box-sizing: border-box;
   color: var(--text-primary);
+  animation: orderModalSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .shopee-modal-header {
@@ -369,10 +371,19 @@
   font-size: 20px;
   cursor: pointer;
   color: var(--text-muted);
+  transition: transform 0.2s ease, color 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
 }
 
 .shopee-modal-close:hover {
   color: var(--text-primary);
+  background: #f1f5f9;
+  transform: rotate(90deg);
 }
 
 /* ==========================================================================
@@ -856,11 +867,17 @@
   padding: 2px 5px;
   border-radius: 4px;
   line-height: 1;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .orders-search-clear:hover {
   color: var(--text-primary);
   background: rgba(0, 0, 0, 0.06);
+  transform: translateY(-50%) scale(1.15);
+}
+
+.orders-search-clear:active {
+  transform: translateY(-50%) scale(0.9);
 }
 
 .orders-export-group {
