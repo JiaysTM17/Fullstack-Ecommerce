@@ -25,6 +25,10 @@ import {
   StarIcon,
   TagIcon,
   CheckIcon,
+  CloseIcon,
+  FlameIcon,
+  TruckIcon,
+  GlobeIcon,
 } from "../components/OrdersIcons";
 import "../styles/amazon-pdp.css";
 
@@ -256,7 +260,11 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="amazon-ratings-summary">
-            <span className="amazon-stars">★★★★★</span>
+            <span className="amazon-stars" style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+              {[1, 2, 3, 4, 5].map((s) => (
+                <StarIcon key={s} size={14} color="#ffa41c" />
+              ))}
+            </span>
             <span style={{ fontWeight: 700, color: "#111" }}>{product.rating || 5.0}</span>
             <span>·</span>
             <span className="amazon-ratings-count">
@@ -347,17 +355,32 @@ export default function ProductDetailPage() {
           <div className="amazon-buy-box-price">{formatCurrency(product.price)}</div>
 
           <div className={`amazon-stock-status ${product.stock <= 5 ? "low" : ""}`}>
-            {product.stock > 0
-              ? product.stock <= 5
-                ? `⚡ Chỉ còn ${product.stock} sản phẩm trong kho - Đặt ngay!`
-                : "✓ Còn hàng trong kho"
-              : "✕ Tạm thời hết hàng"}
+            {product.stock > 0 ? (
+              product.stock <= 5 ? (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <BoltIcon size={14} color="#f59e0b" />
+                  <span>Chỉ còn {product.stock} sản phẩm trong kho - Đặt ngay!</span>
+                </span>
+              ) : (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <CheckIcon size={14} color="#16a34a" />
+                  <span>Còn hàng trong kho</span>
+                </span>
+              )
+            ) : (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                <CloseIcon size={14} color="#dc2626" />
+                <span>Tạm thời hết hàng</span>
+              </span>
+            )}
           </div>
 
           {product.stock > 0 && product.stock <= 30 && (
             <div style={{ margin: "10px 0", padding: "10px 12px", background: "#fff7ed", border: "1px solid #ffedd5", borderRadius: "8px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "var(--primary-color, #ea580c)", marginBottom: "6px" }}>
-                <span>🔥 Sắp hết hàng</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                  <FlameIcon size={14} color="#ea580c" /> Sắp hết hàng
+                </span>
                 <span>Chỉ còn {product.stock} sản phẩm</span>
               </div>
               <div style={{ height: "6px", background: "#fed7aa", borderRadius: "3px", overflow: "hidden" }}>
@@ -367,8 +390,9 @@ export default function ProductDetailPage() {
           )}
 
           <div className="amazon-delivery-info">
-            <div style={{ fontWeight: 700, color: "#007185", marginBottom: "4px" }}>
-              🚀 Vận chuyển tiêu chuẩn & Siêu tốc
+            <div style={{ fontWeight: 700, color: "#007185", marginBottom: "4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <TruckIcon size={16} color="#007185" />
+              <span>Vận chuyển tiêu chuẩn & Siêu tốc</span>
             </div>
             <div>Giao hàng tới bạn vào <strong>Ngày mai</strong>. Miễn phí vận chuyển khi dùng mã FREESHIP.</div>
           </div>
@@ -528,7 +552,11 @@ export default function ProductDetailPage() {
               <span style={{ fontSize: "36px", fontWeight: 800, color: "#111" }}>
                 {product.rating || 4.9}
               </span>
-              <span style={{ fontSize: "18px", color: "#ffa41c" }}>★★★★★</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <StarIcon key={s} size={18} color="#ffa41c" />
+                ))}
+              </span>
               <span style={{ fontSize: "13px", color: "#777" }}>trên 5 sao</span>
             </div>
 
@@ -594,24 +622,36 @@ export default function ProductDetailPage() {
                     Số sao đánh giá:
                   </label>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <span
-                        key={star}
-                        style={{
-                          fontSize: "30px",
-                          cursor: "pointer",
-                          color: (hoverStar || reviewRating) >= star ? "#ffa41c" : "var(--border-medium, #cbd5e1)",
-                          transition: "transform 0.15s ease",
-                          transform: (hoverStar || reviewRating) >= star ? "scale(1.1)" : "scale(1)",
-                        }}
-                        onMouseEnter={() => setHoverStar(star)}
-                        onMouseLeave={() => setHoverStar(0)}
-                        onClick={() => setReviewRating(star)}
-                        title={`${star} sao`}
-                      >
-                        ★
-                      </span>
-                    ))}
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const isActive = (hoverStar || reviewRating) >= star;
+                      return (
+                        <button
+                          key={star}
+                          type="button"
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            padding: "2px",
+                            cursor: "pointer",
+                            transition: "transform 0.15s ease",
+                            transform: isActive ? "scale(1.15)" : "scale(1)",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                          onMouseEnter={() => setHoverStar(star)}
+                          onMouseLeave={() => setHoverStar(0)}
+                          onClick={() => setReviewRating(star)}
+                          title={`${star} sao`}
+                        >
+                          <StarIcon
+                            size={24}
+                            color={isActive ? "#ffa41c" : "var(--border-medium, #cbd5e1)"}
+                            fill={isActive ? "#ffa41c" : "none"}
+                          />
+                        </button>
+                      );
+                    })}
                     <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--primary-color, #ea580c)", marginLeft: "10px" }}>
                       {reviewRating === 5 ? "Tuyệt vời (5 sao)" : reviewRating === 4 ? "Hài lòng (4 sao)" : reviewRating === 3 ? "Bình thường (3 sao)" : reviewRating === 2 ? "Không hài lòng (2 sao)" : "Rất tệ (1 sao)"}
                     </span>
@@ -739,16 +779,26 @@ export default function ProductDetailPage() {
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                    <span style={{ color: "#ffa41c", fontSize: "14px" }}>
-                      {"★".repeat(Math.max(0, Math.min(5, Math.round(Number(rev?.rating) || 5))))}
-                      {"☆".repeat(Math.max(0, Math.min(5, 5 - Math.round(Number(rev?.rating) || 5))))}
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+                      {[1, 2, 3, 4, 5].map((st) => {
+                        const filled = st <= Math.round(Number(rev?.rating) || 5);
+                        return (
+                          <StarIcon
+                            key={st}
+                            size={14}
+                            color={filled ? "#ffa41c" : "var(--border-medium, #cbd5e1)"}
+                            fill={filled ? "#ffa41c" : "none"}
+                          />
+                        );
+                      })}
                     </span>
                     <span className="amazon-review-title">{rev?.title || "Nhận xét của khách hàng"}</span>
                   </div>
 
                   {rev.verifiedPurchase && (
-                    <div className="amazon-review-verified">
-                      ✓ Đã chứng nhận mua hàng chính hãng tại Fullstack E-Commerce
+                    <div className="amazon-review-verified" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <CheckIcon size={12} color="#16a34a" />
+                      <span>Đã chứng nhận mua hàng chính hãng tại Fullstack E-Commerce</span>
                     </div>
                   )}
 
@@ -874,15 +924,15 @@ export default function ProductDetailPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-                🔗 Chia Sẻ Sản Phẩm
+              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <GlobeIcon size={18} color="var(--primary-color, #ea580c)" /> Chia Sẻ Sản Phẩm
               </h3>
               <button
                 type="button"
                 onClick={() => setShowShareModal(false)}
-                style={{ background: 'transparent', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-primary)' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                ✕
+                <CloseIcon size={16} />
               </button>
             </div>
 
@@ -910,13 +960,14 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 className="shopee-btn shopee-btn-primary"
-                style={{ fontSize: '13px', padding: '8px 14px', whiteSpace: 'nowrap', fontWeight: 700 }}
+                style={{ fontSize: '13px', padding: '8px 14px', whiteSpace: 'nowrap', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                 onClick={() => {
                   navigator.clipboard?.writeText(window.location.href);
                   showToast('Đã sao chép liên kết sản phẩm vào bộ nhớ tạm!', 'success');
                 }}
               >
-                📋 Sao chép
+                <CopyIcon size={13} />
+                <span>Sao chép</span>
               </button>
             </div>
 
