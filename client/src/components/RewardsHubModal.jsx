@@ -15,6 +15,7 @@ import {
   TargetIcon,
   GiftIcon,
   ClockIcon,
+  CloseIcon,
 } from './OrdersIcons';
 
 export default function RewardsHubModal({ onClose }) {
@@ -207,13 +208,15 @@ export default function RewardsHubModal({ onClose }) {
             style={{
               background: 'none',
               border: 'none',
-              fontSize: '20px',
               cursor: 'pointer',
               color: 'var(--text-muted)',
-              padding: '4px 8px',
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            ✕
+            <CloseIcon size={18} />
           </button>
         </div>
 
@@ -328,8 +331,15 @@ export default function RewardsHubModal({ onClose }) {
                   <TargetIcon size={15} />
                   <span>Lượt quay khả dụng: <strong>{totalSpins} lượt</strong></span>
                 </div>
-                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                  {dailySpinsRemaining > 0 ? '✓ 1 lượt miễn phí hôm nay' : '• Đã dùng lượt miễn phí hôm nay'}
+                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {dailySpinsRemaining > 0 ? (
+                    <>
+                      <CheckIcon size={12} color="#059669" />
+                      <span>1 lượt miễn phí hôm nay</span>
+                    </>
+                  ) : (
+                    <span>• Đã dùng lượt miễn phí hôm nay</span>
+                  )}
                   {orderSpins > 0 ? ` · + ${orderSpins} lượt thưởng đơn hàng` : ''}
                 </div>
               </div>
@@ -415,9 +425,13 @@ export default function RewardsHubModal({ onClose }) {
                 })}
                 {/* Center Hub */}
                 <circle cx="135" cy="135" r="32" fill="#ffffff" stroke="#f59e0b" strokeWidth="4" />
-                <text x="135" y="142" textAnchor="middle" fontSize="22">
-                  🎁
-                </text>
+                <g transform="translate(123, 123)">
+                  <rect x="2" y="7" width="20" height="5" fill="none" stroke="#ea580c" strokeWidth="2" />
+                  <polyline points="20 12 20 22 4 22 4 12" fill="none" stroke="#ea580c" strokeWidth="2" />
+                  <line x1="12" y1="22" x2="12" y2="7" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" fill="none" stroke="#ea580c" strokeWidth="2" />
+                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" fill="none" stroke="#ea580c" strokeWidth="2" />
+                </g>
               </svg>
             </div>
 

@@ -32,6 +32,12 @@ import {
   TicketIcon,
   AlertCircleIcon,
   ChevronRightIcon,
+  SmartphoneIcon,
+  ShirtIcon,
+  SearchIcon,
+  CloseIcon,
+  CheckIcon,
+  LayersIcon,
 } from './OrdersIcons';
 import '../styles/header.css';
 
@@ -50,11 +56,11 @@ const POPULAR_SEARCHES = [
 ];
 
 const QUICK_CATEGORY_CHIPS = [
-  { label: 'Điện Thoại', icon: '📱', query: 'Điện tử' },
-  { label: 'Thời Trang', icon: '👕', query: 'Thời trang' },
-  { label: 'Gia Dụng', icon: '🏠', query: 'Gia dụng' },
-  { label: 'Làm Đẹp', icon: '💄', query: 'Làm đẹp' },
-  { label: 'Phụ Kiện', icon: '🎧', query: 'Tai nghe' },
+  { label: 'Điện Thoại', icon: <SmartphoneIcon size={14} />, query: 'Điện tử' },
+  { label: 'Thời Trang', icon: <ShirtIcon size={14} />, query: 'Thời trang' },
+  { label: 'Gia Dụng', icon: <HomeIcon size={14} />, query: 'Gia dụng' },
+  { label: 'Làm Đẹp', icon: <SparklesIcon size={14} />, query: 'Làm đẹp' },
+  { label: 'Phụ Kiện', icon: <BoltIcon size={14} />, query: 'Tai nghe' },
 ];
 
 const Header = ({
@@ -532,8 +538,9 @@ const Header = ({
                   className="shopee-search-clear"
                   onClick={handleClearSearch}
                   aria-label={t('clear_search', 'Xóa từ khóa')}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  ✕
+                  <CloseIcon size={12} />
                 </button>
               )}
               <button type="submit" className="shopee-search-btn" aria-label={t('search', 'Tìm kiếm')}>
@@ -564,7 +571,10 @@ const Header = ({
               >
                 {/* Quick Category Discovery Chips */}
                 <div className="search-quick-chips-wrapper">
-                  <span className="search-quick-chips-label">⚡ Ngành hàng nổi bật:</span>
+                  <span className="search-quick-chips-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <BoltIcon size={13} />
+                    <span>Ngành hàng nổi bật:</span>
+                  </span>
                   <div className="search-quick-chips-list">
                     {QUICK_CATEGORY_CHIPS.map((chip, idx) => (
                       <button
@@ -632,10 +642,10 @@ const Header = ({
                             </div>
                             <span
                               onClick={(e) => removeRecentSearch(e, item)}
-                              style={{ color: 'var(--text-muted)', fontSize: '12px', padding: '2px 6px', cursor: 'pointer' }}
+                              style={{ color: 'var(--text-muted)', fontSize: '12px', padding: '2px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                               title="Xóa mục này"
                             >
-                              ✕
+                              <CloseIcon size={11} />
                             </span>
                           </div>
                         ))}
@@ -666,7 +676,7 @@ const Header = ({
                               gap: '4px',
                             }}
                           >
-                            <span>🔍</span>
+                            <SearchIcon size={11} />
                             <span>{item}</span>
                           </button>
                         ))}
@@ -698,7 +708,7 @@ const Header = ({
                             onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
                             onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                           >
-                            <span style={{ color: 'var(--primary-color, #ea580c)' }}>🔍</span>
+                            <span style={{ color: 'var(--primary-color, #ea580c)', display: 'flex', alignItems: 'center' }}><SearchIcon size={12} /></span>
                             <span>{item}</span>
                           </div>
                         ))}
@@ -880,8 +890,9 @@ const Header = ({
                                 e.stopPropagation();
                                 if (removeFromCart) removeFromCart(item.productId);
                               }}
+                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
-                              ✕
+                              <CloseIcon size={11} />
                             </button>
                           </div>
                         ))}
@@ -906,9 +917,10 @@ const Header = ({
                             if (onCartClick) onCartClick();
                             else navTo('/cart');
                           }}
+                          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
                           <span>Xem Chi Tiết Giỏ Hàng & Mua Ngay</span>
-                          <span>➔</span>
+                          <ChevronRightIcon size={14} />
                         </button>
                       </div>
                     </>
@@ -1111,7 +1123,7 @@ const Header = ({
                           onLogout();
                         }}
                       >
-                        <span className="item-icon">✕</span>
+                        <span className="item-icon" style={{ display: 'flex', alignItems: 'center' }}><CloseIcon size={13} /></span>
                         <div className="item-text">
                           <strong style={{ color: '#ef4444' }}>{t('logout', 'Đăng Xuất')}</strong>
                           <small>Thoát khỏi phiên đăng nhập hiện tại</small>
@@ -1157,8 +1169,9 @@ const Header = ({
             className="shopee-subnav-cat-btn"
             onClick={() => setShowCategoryDrawer(true)}
             title="Mở danh mục ngành hàng"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <span>☰</span>
+            <LayersIcon size={14} />
             <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
             <span style={{ fontSize: '9px', opacity: 0.8 }}>▼</span>
           </button>
@@ -1261,8 +1274,9 @@ const Header = ({
                 className="order-lookup-close-btn"
                 onClick={() => setShowOrderLookupModal(false)}
                 title="Đóng modal"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                ✕
+                <CloseIcon size={16} />
               </button>
             </div>
 
@@ -1282,8 +1296,14 @@ const Header = ({
                   className="order-lookup-search-btn"
                   onClick={() => handleLookupOrder()}
                   disabled={orderLookupLoading}
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                 >
-                  {orderLookupLoading ? 'Đang Tra Cứu...' : 'Tra Cứu Ngay ➔'}
+                  {orderLookupLoading ? 'Đang Tra Cứu...' : (
+                    <>
+                      <span>Tra Cứu Ngay</span>
+                      <ChevronRightIcon size={14} />
+                    </>
+                  )}
                 </button>
               </div>
 
@@ -1362,7 +1382,7 @@ const Header = ({
                       >
                         <div className="timeline-step-line-col">
                           <div className="timeline-step-circle">
-                            {step.done ? '✓' : idx + 1}
+                            {step.done ? <CheckIcon size={11} /> : idx + 1}
                           </div>
                           {idx < orderLookupResult.steps.length - 1 && (
                             <div className="timeline-step-connector" />

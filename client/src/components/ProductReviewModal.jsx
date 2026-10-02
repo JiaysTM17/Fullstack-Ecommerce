@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { StarIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon } from './OrdersIcons';
+import { StarIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon, CloseIcon } from './OrdersIcons';
 
 const QUICK_TAGS = [
   'Đúng với mô tả',
@@ -216,11 +216,10 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '13px',
               borderRadius: '6px',
             }}
           >
-            ✕
+            <CloseIcon size={14} />
           </button>
         </div>
 
@@ -368,16 +367,17 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                       setRating(star);
                       setErrorMsg('');
                     }}
-                    style={{
-                      color: isLit ? '#f59e0b' : '#cbd5e1',
-                      transition: 'transform 0.12s ease, color 0.12s ease',
-                      transform: isLit ? 'scale(1.15)' : 'scale(1)',
-                      userSelect: 'none',
-                      lineHeight: 1,
-                    }}
                     title={`${star} sao`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      transform: isLit ? 'scale(1.15)' : 'scale(1)',
+                      transition: 'transform 0.12s ease',
+                      color: isLit ? '#f59e0b' : '#cbd5e1',
+                    }}
                   >
-                    ★
+                    <StarIcon size={26} color={isLit ? '#f59e0b' : '#cbd5e1'} />
                   </span>
                 );
               })}
@@ -417,9 +417,13 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                       color: active ? '#2563eb' : '#64748b',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
                     }}
                   >
-                    {active ? '✓ ' : '+ '} {tag}
+                    {active ? <CheckIcon size={11} /> : '+ '}
+                    <span>{tag}</span>
                   </button>
                 );
               })}
@@ -437,11 +441,19 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                   fontSize: '11px',
                   fontWeight: 600,
                   color: comment.trim().length >= 10 ? '#16a34a' : comment.trim().length > 0 ? '#d97706' : '#64748b',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
                 }}
               >
-                {comment.trim().length >= 10
-                  ? `✓ Đạt yêu cầu (${comment.trim().length} ký tự)`
-                  : `${comment.trim().length}/10 ký tự`}
+                {comment.trim().length >= 10 ? (
+                  <>
+                    <CheckIcon size={11} />
+                    <span>Đạt yêu cầu ({comment.trim().length} ký tự)</span>
+                  </>
+                ) : (
+                  `${comment.trim().length}/10 ký tự`
+                )}
               </span>
             </div>
             <textarea
@@ -509,9 +521,10 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      padding: 0,
                     }}
                   >
-                    ✕
+                    <CloseIcon size={10} />
                   </button>
                 </div>
               ))}

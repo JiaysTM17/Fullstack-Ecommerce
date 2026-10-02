@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { ReturnIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon } from './OrdersIcons';
+import { ReturnIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon, CloseIcon } from './OrdersIcons';
 
 const RETURN_REASONS = [
   'Hàng bị lỗi kỹ thuật / Không hoạt động được',
@@ -186,17 +186,16 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
             className="shopee-order-btn-outline"
             onClick={onClose}
             style={{
-              borderRadius: '8px',
               width: '28px',
               height: '28px',
               padding: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '13px',
+              borderRadius: '6px',
             }}
           >
-            ✕
+            <CloseIcon size={14} />
           </button>
         </div>
 
@@ -505,8 +504,15 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
                 Mô tả chi tiết tình trạng sản phẩm <span style={{ color: '#ef4444' }}>*</span>:
               </label>
-              <span style={{ fontSize: '11px', color: note.trim().length >= 10 ? '#059669' : '#64748b' }}>
-                {note.trim().length >= 10 ? `✓ Đạt yêu cầu (${note.trim().length} ký tự)` : `Tối thiểu 10 ký tự (${note.trim().length}/10)`}
+              <span style={{ fontSize: '11px', color: note.trim().length >= 10 ? '#059669' : '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                {note.trim().length >= 10 ? (
+                  <>
+                    <CheckIcon size={11} />
+                    <span>Đạt yêu cầu ({note.trim().length} ký tự)</span>
+                  </>
+                ) : (
+                  `Tối thiểu 10 ký tự (${note.trim().length}/10)`
+                )}
               </span>
             </div>
             <textarea
@@ -593,9 +599,10 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        padding: 0,
                       }}
                     >
-                      ✕
+                      <CloseIcon size={10} />
                     </button>
                     <div
                       style={{

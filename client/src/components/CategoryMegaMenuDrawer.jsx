@@ -55,7 +55,6 @@ const CATEGORIES_DATA = [
   {
     id: 'thoi-trang',
     name: 'Thời Trang & May Mặc',
-    icon: '👗',
     categoryParam: 'Thời trang',
     group: 'fashion',
     badge: '13 Sản phẩm',
@@ -68,7 +67,6 @@ const CATEGORIES_DATA = [
   {
     id: 'dien-tu',
     name: 'Thiết Bị Điện Tử & Công Nghệ',
-    icon: '💻',
     categoryParam: 'Điện tử',
     group: 'tech',
     badge: '14 Sản phẩm',
@@ -81,7 +79,6 @@ const CATEGORIES_DATA = [
   {
     id: 'sac-dep',
     name: 'Sắc Đẹp & Dược Mỹ Phẩm',
-    icon: '💄',
     categoryParam: 'Sắc đẹp',
     group: 'beauty',
     badge: '10 Sản phẩm',
@@ -94,7 +91,6 @@ const CATEGORIES_DATA = [
   {
     id: 'gia-dung',
     name: 'Gia Dụng & Đời Sống Thông Minh',
-    icon: '🍳',
     categoryParam: 'Gia dụng',
     group: 'home',
     badge: '10 Sản phẩm',
@@ -107,7 +103,6 @@ const CATEGORIES_DATA = [
   {
     id: 'the-thao',
     name: 'Thể Thao & Dã Ngoại',
-    icon: '⚽',
     categoryParam: 'Thể thao',
     group: 'life',
     badge: '3 Sản phẩm',
@@ -120,7 +115,6 @@ const CATEGORIES_DATA = [
   {
     id: 'doi-song',
     name: 'Đời Sống & Tiện Ích Văn Phòng',
-    icon: '🌿',
     categoryParam: 'Đời sống',
     group: 'life',
     badge: '2 Sản phẩm',
@@ -133,7 +127,6 @@ const CATEGORIES_DATA = [
   {
     id: 'am-thanh',
     name: 'Thiết Bị Âm Thanh & Tai Nghe',
-    icon: '🎧',
     filterType: 'keyword',
     keywordParam: 'Tai nghe',
     group: 'tech',
@@ -147,7 +140,6 @@ const CATEGORIES_DATA = [
   {
     id: 'dong-ho',
     name: 'Đồng Hồ Thông Minh & Smartwatch',
-    icon: '⌚',
     filterType: 'keyword',
     keywordParam: 'Đồng hồ',
     group: 'tech',
@@ -161,7 +153,6 @@ const CATEGORIES_DATA = [
   {
     id: 'balo-vi',
     name: 'Balo, Ví Da & Phụ Kiện',
-    icon: '🎒',
     filterType: 'keyword',
     keywordParam: 'da bò',
     group: 'fashion',
@@ -175,7 +166,6 @@ const CATEGORIES_DATA = [
   {
     id: 'gaming-gear',
     name: 'Gaming Gear & Phụ Kiện PC',
-    icon: '🎮',
     filterType: 'keyword',
     keywordParam: 'Bàn phím',
     group: 'tech',
@@ -189,7 +179,6 @@ const CATEGORIES_DATA = [
   {
     id: 'me-be',
     name: 'Mẹ & Bé - Đồ Chơi Trẻ Em',
-    icon: '🍼',
     filterType: 'keyword',
     keywordParam: 'bé',
     group: 'life',
@@ -203,7 +192,6 @@ const CATEGORIES_DATA = [
   {
     id: 'sach-vpp',
     name: 'Sách & Văn Phòng Phẩm',
-    icon: '📚',
     filterType: 'keyword',
     keywordParam: 'sách',
     group: 'life',
