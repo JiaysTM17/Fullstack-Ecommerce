@@ -13,6 +13,28 @@ import {
   lookupCustomerOrders,
 } from '../services/chatAiEngine';
 import { FALLBACK_PRODUCTS } from '../services/productService';
+import {
+  SparklesIcon,
+  Volume2Icon,
+  VolumeXIcon,
+  MicIcon,
+  SendIcon,
+  TrashIcon,
+  ShoppingBagIcon,
+  PackageIcon,
+  TicketIcon,
+  StoreIcon,
+  UserIcon,
+  ShieldIcon,
+  RefreshIcon,
+  CartIcon,
+  BoltIcon,
+  CheckIcon,
+  TruckIcon,
+  CoinIcon,
+  CalendarIcon,
+  ChatIcon,
+} from './OrdersIcons';
 
 const CHAT_STORAGE_KEY = 'mini_shopee_live_chat_history_v2';
 const SOUND_SETTING_KEY = 'mini_shopee_chat_sound_enabled';
@@ -820,7 +842,7 @@ export default function LiveChatWidget() {
                   }}
                   title="Chuyển sang Chuyên viên tư vấn trực tiếp"
                 >
-                  <span>👨‍💼</span>
+                  <span><UserIcon size={12} /></span>
                   <span style={{ display: isExpanded ? 'inline' : 'none' }}>Gặp CSKH</span>
                 </button>
               ) : (
@@ -843,7 +865,7 @@ export default function LiveChatWidget() {
                   }}
                   title="Quay lại Trợ lý AI"
                 >
-                  <span>✨</span>
+                  <span><SparklesIcon size={12} /></span>
                   <span style={{ display: isExpanded ? 'inline' : 'none' }}>Về AI</span>
                 </button>
               )}
@@ -855,7 +877,7 @@ export default function LiveChatWidget() {
                   const nextVal = !soundEnabled;
                   setSoundEnabled(nextVal);
                   showToast(
-                    nextVal ? '🔊 Đã bật âm thanh' : '🔇 Đã tắt âm thanh',
+                    nextVal ? 'Đã bật âm thanh' : 'Đã tắt âm thanh',
                     'info'
                   );
                 }}
@@ -865,12 +887,14 @@ export default function LiveChatWidget() {
                   color: soundEnabled ? '#cbd5e1' : '#fca5a5',
                   cursor: 'pointer',
                   padding: '4px 6px',
-                  fontSize: '11px',
                   borderRadius: '5px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
                 title={soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
               >
-                {soundEnabled ? '🔊' : '🔇'}
+                {soundEnabled ? <Volume2Icon size={13} /> : <VolumeXIcon size={13} />}
               </button>
 
               {/* Phóng to / Thu nhỏ kích thước chat */}
@@ -901,12 +925,14 @@ export default function LiveChatWidget() {
                   color: '#cbd5e1',
                   cursor: 'pointer',
                   padding: '4px 6px',
-                  fontSize: '11px',
                   borderRadius: '5px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
                 title="Làm mới lịch sử chat"
               >
-                🗑️
+                <TrashIcon size={12} />
               </button>
 
               {/* Thu nhỏ / Đóng */}
@@ -1040,10 +1066,10 @@ export default function LiveChatWidget() {
           >
             {chatMode === 'human' ? (
               [
-                { label: '📦 Tiến độ đơn hàng', text: 'Nhờ em kiểm tra tiến độ đơn hàng gần nhất của anh/chị' },
-                { label: '🔄 Đổi trả / Hoàn tiền', text: 'Anh/chị cần hỗ trợ hoàn tiền hoặc đổi sản phẩm' },
-                { label: '🛡️ Bảo hành chính hãng', text: 'Chính sách bảo hành sản phẩm thực hiện thế nào em?' },
-                { label: '✨ Về Trợ lý AI', text: 'Quay lại Trợ lý AI' },
+                { label: 'Tiến độ đơn hàng', text: 'Nhờ em kiểm tra tiến độ đơn hàng gần nhất của anh/chị', icon: <PackageIcon size={12} /> },
+                { label: 'Đổi trả / Hoàn tiền', text: 'Anh/chị cần hỗ trợ hoàn tiền hoặc đổi sản phẩm', icon: <RefreshIcon size={12} /> },
+                { label: 'Bảo hành chính hãng', text: 'Chính sách bảo hành sản phẩm thực hiện thế nào em?', icon: <ShieldIcon size={12} /> },
+                { label: 'Về Trợ lý AI', text: 'Quay lại Trợ lý AI', icon: <SparklesIcon size={12} /> },
               ].map((chip, idx) => (
                 <button
                   key={idx}
@@ -1059,20 +1085,24 @@ export default function LiveChatWidget() {
                     fontWeight: 600,
                     cursor: 'pointer',
                     flexShrink: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}
                 >
-                  {chip.label}
+                  {chip.icon}
+                  <span>{chip.label}</span>
                 </button>
               ))
             ) : (
               [
-                { label: '🤖 Tư Vấn AI', text: 'Bạn có thể giúp gì cho tôi?' },
-                { label: '🛍️ Gợi Ý Hot', text: 'Gợi ý sản phẩm bán chạy nhất hiện nay' },
-                { label: '📦 Tra Cứu Đơn', text: 'Kiểm tra đơn hàng của tôi' },
-                { label: '🎟️ Săn Voucher', text: 'Cho tôi xin mã giảm giá và freeship' },
-                { label: '🎡 Vòng Quay & Xu', text: 'Vòng quay may mắn và xu thưởng' },
-                { label: '🏪 12 Mall Shop', text: 'Khám phá các gian hàng chính hãng' },
-                { label: '👨‍💼 Gặp CSKH', text: 'Cho tôi gặp nhân viên trực CSKH' },
+                { label: 'Tư Vấn AI', text: 'Bạn có thể giúp gì cho tôi?', icon: <SparklesIcon size={12} /> },
+                { label: 'Gợi Ý Hot', text: 'Gợi ý sản phẩm bán chạy nhất hiện nay', icon: <ShoppingBagIcon size={12} /> },
+                { label: 'Tra Cứu Đơn', text: 'Kiểm tra đơn hàng của tôi', icon: <PackageIcon size={12} /> },
+                { label: 'Săn Voucher', text: 'Cho tôi xin mã giảm giá và freeship', icon: <TicketIcon size={12} /> },
+                { label: 'Vòng Quay & Xu', text: 'Vòng quay may mắn và xu thưởng', icon: <CoinIcon size={12} /> },
+                { label: '12 Mall Shop', text: 'Khám phá các gian hàng chính hãng', icon: <StoreIcon size={12} /> },
+                { label: 'Gặp CSKH', text: 'Cho tôi gặp nhân viên trực CSKH', icon: <UserIcon size={12} /> },
               ].map((chip, idx) => (
                 <button
                   key={idx}
@@ -1094,9 +1124,13 @@ export default function LiveChatWidget() {
                     fontWeight: idx === 6 ? 700 : 600,
                     cursor: 'pointer',
                     flexShrink: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}
                 >
-                  {chip.label}
+                  {chip.icon}
+                  <span>{chip.label}</span>
                 </button>
               ))
             )}
@@ -2021,14 +2055,13 @@ export default function LiveChatWidget() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '15px',
                 transition: 'all 0.2s ease',
                 boxShadow: isListening ? '0 0 10px rgba(239, 68, 68, 0.7)' : 'none',
                 animation: isListening ? 'soundWave 1.2s infinite' : 'none',
               }}
               title={isListening ? 'Dừng lắng nghe' : 'Nói bằng giọng nói'}
             >
-              🎙️
+              <MicIcon size={16} />
             </button>
 
             {/* Nút Gửi Tin Nhắn */}
@@ -2050,7 +2083,6 @@ export default function LiveChatWidget() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '14px',
                 transition: 'all 0.2s ease',
                 boxShadow: inputMessage.trim()
                   ? chatMode === 'human'
@@ -2060,7 +2092,7 @@ export default function LiveChatWidget() {
               }}
               title="Gửi tin nhắn"
             >
-              ➤
+              <SendIcon size={15} />
             </button>
           </form>
         </div>
