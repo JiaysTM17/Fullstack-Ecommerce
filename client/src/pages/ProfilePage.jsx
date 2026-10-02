@@ -337,7 +337,7 @@ export default function ProfilePage() {
     try {
       localStorage.setItem(bonusClaimKey, 'true');
     } catch {}
-    showToast('🎉 Chúc mừng bạn đã nhận +500 Mini Xu thưởng hoàn thiện hồ sơ!', 'success');
+    showToast('🎉 Chúc mừng bạn đã nhận +500 Shopee Xu thưởng hoàn thiện hồ sơ!', 'success');
   };
 
   // Load Vouchers
@@ -829,7 +829,7 @@ export default function ProfilePage() {
 
             <div className="profile-stat-box" onClick={() => setActiveTab('coins')}>
               <div className="profile-stat-label">
-                <span>🪙</span> Số Dư Mini Xu
+                <span>🪙</span> Số Dư Shopee Xu
               </div>
               <div className="profile-stat-value" style={{ color: '#fde047' }}>
                 {(coins || 0).toLocaleString('vi-VN')} Xu
@@ -920,7 +920,7 @@ export default function ProfilePage() {
               onClick={() => setActiveTab('coins')}
             >
               <span>🪙</span>
-              <span>Ví Mini Xu</span>
+              <span>Ví Shopee Xu</span>
             </button>
 
             {/* The sliding indicator bar smoothly follows the active tab */}
@@ -957,7 +957,7 @@ export default function ProfilePage() {
                   <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>
                     {profileCompleteness.isComplete
                       ? 'Hồ sơ đã đạt 100%! Bạn nhận được độ uy tín tối đa và ưu đãi tốt nhất.'
-                      : 'Hoàn tất đủ các thông tin bên dưới để nhận ngay phần thưởng +500 Mini Xu!'}
+                      : 'Hoàn tất đủ các thông tin bên dưới để nhận ngay phần thưởng +500 Shopee Xu!'}
                   </div>
                 </div>
 
@@ -977,7 +977,7 @@ export default function ProfilePage() {
                       boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)',
                     }}
                   >
-                    🎁 Nhận +500 Mini Xu
+                    🎁 Nhận +500 Shopee Xu
                   </button>
                 )}
 
@@ -1790,7 +1790,7 @@ export default function ProfilePage() {
               ⚙️ Cài Đặt Thông Báo & Quyền Riêng Tư
             </h3>
             <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 24px' }}>
-              Tùy chỉnh trải nghiệm nhận tin và bảo mật hiển thị thông tin khi mua sắm tại Mini Shopee.
+              Tùy chỉnh trải nghiệm nhận tin và bảo mật hiển thị thông tin khi mua sắm tại Shopee.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -1858,7 +1858,7 @@ export default function ProfilePage() {
               <div className="profile-setting-row">
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'block', marginBottom: '2px' }}>
-                    🪙 Nhắc nhở điểm danh nhận Mini Xu mỗi ngày
+                    🪙 Nhắc nhở điểm danh nhận Shopee Xu mỗi ngày
                   </strong>
                   <span style={{ fontSize: '12.5px', color: '#64748b' }}>
                     Giữ vững chuỗi streak 7 ngày để không bỏ lỡ phần quà giá trị nhất.
@@ -2118,7 +2118,7 @@ export default function ProfilePage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                   <span style={{ fontSize: '28px' }}>🪙</span>
                   <span style={{ fontSize: '13.5px', textTransform: 'uppercase', letterSpacing: '1px', color: '#fde047', fontWeight: 800 }}>
-                    Ví Mini Xu Tích Lũy
+                    Ví Shopee Xu Tích Lũy
                   </span>
                 </div>
                 <div style={{ fontSize: '38px', fontWeight: 900, color: '#fbbf24', letterSpacing: '-0.5px' }}>
@@ -2274,7 +2274,7 @@ export default function ProfilePage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                 <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
-                  📜 Lịch Sử Biến Động Mini Xu
+                  📜 Lịch Sử Biến Động Shopee Xu
                 </h4>
 
                 <div style={{ display: 'flex', gap: '6px' }}>
@@ -2320,7 +2320,7 @@ export default function ProfilePage() {
                     .slice(0, 15)
                     .map((record) => {
                       const isPlus = record.type === 'plus' || record.type === 'credit' || record.isCredit;
-                      const desc = record.desc || record.description || 'Giao dịch Mini Xu';
+                      const desc = record.desc || record.description || 'Giao dịch Shopee Xu';
                       const time = record.date || record.timestamp || '';
                       const getIcon = () => {
                         if (record.category === 'checkin' || desc.includes('Điểm danh')) return '📅';

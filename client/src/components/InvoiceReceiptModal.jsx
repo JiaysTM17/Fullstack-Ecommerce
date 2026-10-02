@@ -44,7 +44,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
     : new Date().toLocaleDateString('vi-VN');
 
   const buyer = liveInvoice?.buyer || {};
-  const buyerName = buyer.fullName || buyer.name || order.customerName || 'Khách Hàng Mini Shopee';
+  const buyerName = buyer.fullName || buyer.name || order.customerName || 'Khách Hàng';
   const buyerPhone = buyer.phone || order.phone || '0988 123 456';
   const buyerAddress =
     buyer.address ||
@@ -57,7 +57,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
       ? liveInvoice.items
       : order.items || [
           {
-            name: order.productName || 'Sản phẩm mua sắm tại Mini Shopee',
+            name: order.productName || 'Sản phẩm mua sắm tại Shopee',
             price: order.total || 0,
             quantity: 1,
           },
@@ -456,7 +456,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
           }}
         >
           Hóa đơn điện tử khởi tạo có mã của cơ quan thuế theo Nghị định số 123/2020/NĐ-CP & Thông tư số 78/2021/TT-BTC.<br />
-          Cảm ơn bạn đã tin tưởng mua sắm tại <strong>Mini Shopee</strong>!
+          Cảm ơn bạn đã tin tưởng mua sắm tại <strong>Shopee</strong>!
         </div>
       </div>
 

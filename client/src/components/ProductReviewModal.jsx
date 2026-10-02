@@ -136,11 +136,11 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
-          {/* Shopee Xu Reward Banner */}
+          {/* Shopee Xu Reward Banner - Warm Gold Theme */}
           <div
             style={{
-              background: '#eff6ff',
-              border: '1px solid #bfdbfe',
+              background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+              border: '1px solid #fde68a',
               borderRadius: '12px',
               padding: '12px 16px',
               display: 'flex',
@@ -155,20 +155,20 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                 height: '36px',
                 borderRadius: '50%',
                 background: '#fef08a',
-                border: '2px solid #eab308',
+                border: '2px solid #f59e0b',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
               }}
             >
-              <StarIcon size={18} color="#ca8a04" filled />
+              <StarIcon size={18} color="#d97706" filled />
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '14px', color: '#1e40af' }}>
-                Thưởng Ngay +200 Mini Xu!
+              <div style={{ fontWeight: 800, fontSize: '14px', color: '#92400e' }}>
+                Thưởng Ngay +200 Shopee Xu!
               </div>
-              <div style={{ fontSize: '12px', color: '#3b82f6' }}>
+              <div style={{ fontSize: '12px', color: '#b45309' }}>
                 Đánh giá chất lượng giúp cộng đồng người mua và nhận xu giảm giá trực tiếp vào đơn sau.
               </div>
             </div>
@@ -187,8 +187,8 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                     type="button"
                     onClick={() => setSelectedItemIndex(idx)}
                     style={{
-                      border: selectedItemIndex === idx ? '2px solid #2563eb' : '1px solid #cbd5e1',
-                      background: selectedItemIndex === idx ? '#eff6ff' : 'transparent',
+                      border: selectedItemIndex === idx ? '2px solid #ee4d2d' : '1px solid #cbd5e1',
+                      background: selectedItemIndex === idx ? '#fff7ed' : 'transparent',
                       borderRadius: '8px',
                       padding: '6px 10px',
                       display: 'flex',
@@ -197,7 +197,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                       cursor: 'pointer',
                       fontSize: '12px',
                       fontWeight: selectedItemIndex === idx ? 700 : 500,
-                      color: selectedItemIndex === idx ? '#2563eb' : '#475569',
+                      color: selectedItemIndex === idx ? '#ee4d2d' : '#475569',
                     }}
                   >
                     <img src={item.image} alt={item.name} style={{ width: '28px', height: '28px', objectFit: 'cover', borderRadius: '4px' }} />
@@ -356,15 +356,15 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                 border: 'none',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
+                background: 'linear-gradient(135deg, #ff5722 0%, #ee4d2d 100%)',
+                boxShadow: '0 4px 12px rgba(238, 77, 45, 0.28)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
               }}
             >
               <StarIcon size={14} color="#fef08a" filled />
-              {isSubmitting ? 'Đang gửi đánh giá...' : 'Gửi Đánh Giá (+200 Xu)'}
+              {isSubmitting ? 'Đang gửi đánh giá...' : 'Gửi Đánh Giá (+200 Shopee Xu)'}
             </button>
           </div>
         </form>

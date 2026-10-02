@@ -22,7 +22,7 @@ const SLIDES = [
   },
   {
     id: 3,
-    badge: "Chính Hãng 100% Mini Mall",
+    badge: "Chính Hãng 100% Shopee Mall",
     title: "Không Gian Sống Tiện Nghi & Thông Minh",
     description: "Đèn bàn bảo vệ thị lực chuẩn y khoa, bình giữ nhiệt hiển thị nhiệt độ thông minh.",
     buttonText: "Xem Ưu Đãi",

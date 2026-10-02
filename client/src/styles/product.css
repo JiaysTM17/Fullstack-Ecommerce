@@ -170,7 +170,7 @@
   text-transform: uppercase;
 }
 
-.shopee-mall-badge {
+.product-card .shopee-mall-badge {
   position: absolute;
   top: 8px;
   left: 0;

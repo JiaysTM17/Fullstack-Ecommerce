@@ -179,7 +179,7 @@ const DEFAULT_WELCOME_MESSAGES = [
       '🔍 Gợi ý đồ công nghệ hot',
       '📦 Tra cứu đơn hàng của tôi',
       '🎟️ Lấy voucher 15% & Freeship',
-      '🎡 Vòng quay & Mini Xu',
+      '🎡 Vòng quay & Shopee Xu',
       '👨‍💼 Gặp nhân viên tư vấn trực',
     ],
   },
@@ -340,13 +340,13 @@ export default function LiveChatWidget() {
     navigate('/checkout');
   };
 
-  // Điểm danh nhận Mini Xu
+  // Điểm danh nhận Shopee Xu
   const handleQuickCheckIn = () => {
     if (typeof checkInToday === 'function') {
       const res = checkInToday();
       playAudioChime('voucher', soundEnabled);
       if (res && res.success) {
-        showToast(res.message || '🎉 Điểm danh thành công! Đã cộng Mini Xu.', 'success');
+        showToast(res.message || '🎉 Điểm danh thành công! Đã cộng Shopee Xu.', 'success');
       } else {
         showToast(res?.message || 'Bạn đã điểm danh hôm nay rồi!', 'info');
       }

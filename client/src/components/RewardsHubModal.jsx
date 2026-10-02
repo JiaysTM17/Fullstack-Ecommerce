@@ -179,9 +179,9 @@ export default function RewardsHubModal({ onClose }) {
             </div>
             <div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Số Dư Mini Xu Của Bạn
+                Số Dư Shopee Xu Của Bạn
               </div>
-              <div style={{ fontSize: '19px', fontWeight: 900, color: 'var(--primary-color, #ea580c)' }}>
+              <div style={{ fontSize: '19px', fontWeight: 900, color: 'var(--primary-color, #2563eb)' }}>
                 {coins.toLocaleString('vi-VN')} Xu <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600 }}>(= {formatCurrency(coins)})</span>
               </div>
             </div>
@@ -494,7 +494,7 @@ export default function RewardsHubModal({ onClose }) {
                 Chuỗi Điểm Danh: {streak}/7 Ngày
               </h4>
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>
-                Điểm danh liên tục mỗi ngày để nhận tới <strong>+5.000 Mini Xu</strong> vào ngày thứ 7!
+                Điểm danh liên tục mỗi ngày để nhận tới <strong>+5.000 Shopee Xu</strong> vào ngày thứ 7!
               </p>
             </div>
 
@@ -590,7 +590,7 @@ export default function RewardsHubModal({ onClose }) {
               ) : (
                 coinHistory.map((tx) => {
                   const isPlus = tx.type === 'plus' || tx.type === 'credit' || tx.isCredit;
-                  const label = tx.desc || tx.description || 'Giao dịch Mini Xu';
+                  const label = tx.desc || tx.description || 'Giao dịch Shopee Xu';
                   const dateStr = tx.date || tx.timestamp || '';
                   return (
                     <div

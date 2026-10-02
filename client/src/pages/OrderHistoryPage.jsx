@@ -31,7 +31,9 @@ import {
   ClockIcon,
   CheckIcon,
   ReturnIcon,
-  StarIcon
+  StarIcon,
+  ShoppingBagIcon,
+  ChevronRightIcon
 } from '../components/OrdersIcons';
 import '../styles/dashboard.css';
 
@@ -439,7 +441,7 @@ export default function OrderHistoryPage() {
       const itemsSummary = (ord.items || [])
         .map((it) => `${it.name} (x${it.quantity || 1})`)
         .join('; ');
-      const recipient = ord.customerName || ord.customer?.fullName || user?.name || 'Khách Hàng Mini Shopee';
+      const recipient = ord.customerName || ord.customer?.fullName || user?.name || 'Khách Hàng';
       const phone = ord.phone || ord.customer?.phone || '0901234567';
       const address = ord.shippingAddress || ord.address || ord.customer?.address || 'Việt Nam';
       const total = ord.total || 0;
@@ -464,7 +466,7 @@ export default function OrderHistoryPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'Lich-Su-Don-Hang-Mini-Shopee.csv');
+    link.setAttribute('download', 'Lich-Su-Don-Hang-Shopee.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -607,7 +609,7 @@ export default function OrderHistoryPage() {
       const prevReviews = rawPrev ? JSON.parse(rawPrev) : [];
       const newRev = {
         id: `rev_${Date.now()}`,
-        userName: user?.name || 'Khách hàng Mini Shopee',
+        userName: user?.name || 'Khách hàng',
         rating: reviewData.rating,
         date: new Date().toLocaleDateString('vi-VN'),
         title: reviewData.tags?.[0] || 'Đánh giá sản phẩm',
@@ -619,7 +621,7 @@ export default function OrderHistoryPage() {
       window.dispatchEvent(new Event('storage'));
     } catch {}
 
-    // Thưởng 200 Mini Xu cho khách hàng
+    // Thưởng 200 Shopee Xu cho khách hàng
     if (earnCoins) {
       earnCoins(200, `Thưởng đánh giá sản phẩm đơn hàng #${reviewData.orderId}`, reviewData.orderId, 'review');
     }
@@ -627,13 +629,13 @@ export default function OrderHistoryPage() {
     pushBuyerNotification({
       type: 'voucher',
       icon: '🪙',
-      title: `Nhận +200 Mini Xu thưởng`,
-      message: `Bạn nhận được 200 Mini Xu thưởng nhờ đánh giá sản phẩm cho đơn #${reviewData.orderId}!`,
+      title: `Nhận +200 Shopee Xu thưởng`,
+      message: `Bạn nhận được 200 Shopee Xu thưởng nhờ đánh giá sản phẩm cho đơn #${reviewData.orderId}!`,
       link: '/profile',
     });
 
     setSelectedReviewOrder(null);
-    showToast('🎉 Cảm ơn bạn! Đã gửi đánh giá thành công và nhận thưởng +200 Mini Xu!', 'success');
+    showToast('🎉 Cảm ơn bạn! Đã gửi đánh giá thành công và nhận thưởng +200 Shopee Xu!', 'success');
   };
 
   const handleBuyAgain = (item) => {
@@ -714,7 +716,7 @@ export default function OrderHistoryPage() {
       } catch {}
     }
 
-    showToast('🎉 Bạn đã xác nhận nhận hàng! Hãy để lại đánh giá để nhận ngay +200 Mini Xu.', 'success');
+    showToast('🎉 Bạn đã xác nhận nhận hàng! Hãy để lại đánh giá để nhận ngay +200 Shopee Xu.', 'success');
     const target = updated.find((o) => o.orderId === orderId);
     if (target) {
       setSelectedReviewOrder(target);
@@ -735,7 +737,7 @@ export default function OrderHistoryPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <PackageIcon size={24} />
+              <span style={{ fontSize: '26px', lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>📦</span>
               <span>{t('my_orders', 'Đơn Hàng Của Tôi')}</span>
             </h1>
             <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '13.5px' }}>
@@ -943,8 +945,8 @@ export default function OrderHistoryPage() {
         {/* Orders List */}
         {filteredOrders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
-              <PackageIcon size={48} />
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', fontSize: '44px', lineHeight: 1 }}>
+              📦
             </div>
             <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-secondary)' }}>
               {t('no_orders_in_tab', 'Không có đơn hàng nào trong mục này.')}
@@ -1017,13 +1019,26 @@ export default function OrderHistoryPage() {
                       <div className="order-stepper-track-wrap">
                         {/* Base Wire / Sợi dây nền */}
                         <div className="order-stepper-cable-base" />
-                        {/* Active Progress Wire / Sợi dây truyền màu xanh lá */}
+                        {/* Active Progress Wire / Sợi dây truyền màu cyan-blue + Máy bay giấy */}
                         <div
                           className="order-stepper-cable-active"
                           style={{
                             width: `${((Math.min(ord.stepIndex || 1, 4) - 1) / 3) * 75}%`,
                           }}
-                        />
+                        >
+                          <div className="order-stepper-plane" title="Đang vận chuyển">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M21.5 2.5L2 10.5L9.5 14L13.5 21.5L21.5 2.5Z" fill="url(#planeGradientBlue)" stroke="#ffffff" strokeWidth="1.2" strokeLinejoin="round"/>
+                              <path d="M9.5 14L21.5 2.5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round"/>
+                              <defs>
+                                <linearGradient id="planeGradientBlue" x1="2" y1="2.5" x2="21.5" y2="21.5" gradientUnits="userSpaceOnUse">
+                                  <stop stopColor="#38bdf8"/>
+                                  <stop offset="1" stopColor="#2563eb"/>
+                                </linearGradient>
+                              </defs>
+                            </svg>
+                          </div>
+                        </div>
 
                         {[
                           { num: 1, label: t('step_order_placed', 'Đã Đặt Hàng') },
@@ -1053,67 +1068,133 @@ export default function OrderHistoryPage() {
 
                   {/* Items List */}
                   <div className="shopee-order-items-list">
-                    {(ord.items || []).map((item, idx) => (
-                      <div key={idx} className="shopee-order-item-card">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="shopee-order-item-img"
-                        />
-                        <div className="shopee-order-item-info">
-                          <div className="shopee-order-item-title">{item.name}</div>
-                          <div className="shopee-order-item-badges-row">
-                            {item.variant && (
-                              <span className="shopee-order-item-variant">
-                                Phân loại: {item.variant}
+                    {(ord.items || []).map((item, idx) => {
+                      const itemQty = Number(item.quantity) || 1;
+                      const itemPrice = Number(item.price) || 0;
+                      const lineTotal = itemPrice * itemQty;
+
+                      return (
+                        <div key={idx} className="shopee-order-item-card">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="shopee-order-item-img"
+                          />
+                          <div className="shopee-order-item-info">
+                            <div className="shopee-order-item-title">{item.name}</div>
+                            <div className="shopee-order-item-badges-row">
+                              {item.variant && (
+                                <span className="shopee-order-item-variant">
+                                  Phân loại: {item.variant}
+                                </span>
+                              )}
+                              <span className="shopee-order-item-qty">
+                                Số lượng: x{itemQty}
                               </span>
+                              <span className="shopee-order-trust-tag">
+                                <ShieldCheckIcon size={12} color="#059669" /> 100% Chính hãng · Đổi trả 15 ngày
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="shopee-order-item-pricing">
+                            <span className="shopee-order-item-price">
+                              {formatCurrency(itemPrice)}
+                            </span>
+                            {itemQty > 1 && (
+                              <div className="shopee-order-item-calc">
+                                <span className="shopee-order-item-qty-tag">x{itemQty}</span>
+                                <span className="shopee-order-item-line-total">{formatCurrency(lineTotal)}</span>
+                              </div>
                             )}
-                            <span className="shopee-order-item-qty">
-                              Số lượng: x{item.quantity || 1}
-                            </span>
-                            <span className="shopee-order-trust-tag">
-                              <ShieldCheckIcon size={12} color="#059669" /> 100% Chính hãng · Đổi trả 15 ngày
-                            </span>
                           </div>
                         </div>
-
-                        <div className="shopee-order-item-pricing">
-                          <span className="shopee-order-item-price">
-                            {formatCurrency(item.price)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
-                  {/* Financial Summary Bar */}
-                  <div className="shopee-order-card-summary-bar">
-                    <div className="shopee-order-summary-left">
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                        <CreditCardIcon size={13} color="#64748b" />
-                        <span>{t('payment_method', 'Thanh toán')}: <strong style={{ color: '#0f172a' }}>{ord.paymentMethod || 'COD'}</strong></span>
-                      </span>
-                      {ord.trackingCode && (
-                        <span
-                          className="copy-pill"
-                          onClick={() => handleCopy(ord.trackingCode, 'mã vận đơn SPX')}
+                  {/* 3 Modern Mid Cards: Shipping, Payment Method, Total Payment */}
+                  <div className="shopee-order-mid-cards-grid">
+                    {/* Card 1: Vận chuyển */}
+                    <div
+                      className="shopee-order-mid-subcard"
+                      onClick={() => {
+                        setSelectedDetailOrder(ord);
+                        setIsDetailModalOpen(true);
+                      }}
+                      title="Xem chi tiết vận chuyển"
+                    >
+                      <div className="shopee-order-mid-subcard-header">
+                        <div className="shopee-order-mid-subcard-title-group">
+                          <TruckIcon size={14} className="subcard-icon-blue" />
+                          <span className="shopee-order-mid-subcard-title">{t('shipping_carrier', 'Vận chuyển')}</span>
+                        </div>
+                        <ChevronRightIcon size={13} className="subcard-chevron" />
+                      </div>
+                      <div className="shopee-order-mid-subcard-body">
+                        <span className="shopee-order-carrier-name">SPX Express</span>
+                        <div
+                          className="shopee-order-tracking-tag"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopy(ord.trackingCode || `SPX-VN-${ord.orderId}`, 'mã vận đơn SPX');
+                          }}
                           title="Nhấn để sao chép mã vận đơn SPX"
                         >
-                          <TruckIcon size={13} color="#2563eb" /> SPX: <strong>{ord.trackingCode}</strong> <CopyIcon size={11} />
-                        </span>
-                      )}
+                          <span>{ord.trackingCode || `SPX-VN-${ord.orderId}`}</span>
+                          <CopyIcon size={10} />
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="shopee-order-summary-right">
-                      <div className="shopee-order-total-row">
-                        <span className="shopee-order-total-label">{t('total_payment', 'Thành tiền')}:</span>
-                        <span className="shopee-order-total-amount">{formatCurrency(totalPayment)}</span>
-                      </div>
-                      {(voucherDiscount > 0 || coinDiscount > 0) && (
-                        <div className="shopee-order-discount-hint">
-                          <CheckIcon size={12} /> {t('saved_from_discounts', 'Tiết kiệm')} {formatCurrency(voucherDiscount + coinDiscount)} {t('from_voucher_coin', 'từ Voucher & Xu')}
+                    {/* Card 2: Phương thức thanh toán */}
+                    <div
+                      className="shopee-order-mid-subcard"
+                      onClick={() => {
+                        setSelectedDetailOrder(ord);
+                        setIsDetailModalOpen(true);
+                      }}
+                      title="Xem chi tiết thanh toán"
+                    >
+                      <div className="shopee-order-mid-subcard-header">
+                        <div className="shopee-order-mid-subcard-title-group">
+                          <CreditCardIcon size={14} className="subcard-icon-sky" />
+                          <span className="shopee-order-mid-subcard-title">{t('payment_method', 'Phương thức thanh toán')}</span>
                         </div>
-                      )}
+                        <ChevronRightIcon size={13} className="subcard-chevron" />
+                      </div>
+                      <div className="shopee-order-mid-subcard-body">
+                        <span className="shopee-order-payment-method">{ord.paymentMethod || 'Thanh toán khi nhận hàng (COD)'}</span>
+                        <span className="shopee-order-subcard-hint">Bảo mật Shopee Guarantee</span>
+                      </div>
+                    </div>
+
+                    {/* Card 3: Tổng thanh toán (Highlighted Container) */}
+                    <div
+                      className="shopee-order-mid-subcard total-highlight"
+                      onClick={() => {
+                        setSelectedDetailOrder(ord);
+                        setIsDetailModalOpen(true);
+                      }}
+                      title="Xem chi tiết thanh toán và hóa đơn"
+                    >
+                      <div className="shopee-order-mid-subcard-header">
+                        <div className="shopee-order-mid-subcard-title-group">
+                          <ShoppingBagIcon size={14} className="subcard-icon-rose" />
+                          <span className="shopee-order-mid-subcard-title rose-text">{t('total_payment', 'Tổng thanh toán')}</span>
+                        </div>
+                        <ChevronRightIcon size={13} className="subcard-chevron rose-chevron" />
+                      </div>
+                      <div className="shopee-order-mid-subcard-body">
+                        <span className="shopee-order-mid-total-price">{formatCurrency(totalPayment)}</span>
+                        {(voucherDiscount > 0 || coinDiscount > 0) ? (
+                          <span className="shopee-order-mid-saving-pill">
+                            Tiết kiệm {formatCurrency(voucherDiscount + coinDiscount)}
+                          </span>
+                        ) : (
+                          <span className="shopee-order-subcard-hint">Đã bao gồm VAT & phí ship</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -1281,11 +1362,10 @@ export default function OrderHistoryPage() {
                           ) : (
                             <button
                               type="button"
-                              className="shopee-order-btn-primary"
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                              className="shopee-order-btn-review"
                               onClick={() => setSelectedReviewOrder(ord)}
                             >
-                              <StarIcon size={13} color="#fde047" filled /> {t('review_order_btn', 'Đánh giá (+200 Xu)')}
+                              <StarIcon size={13} color="#facc15" filled /> {t('review_order_btn', 'Đánh giá (+200 Shopee Xu)')}
                             </button>
                           )}
                         </>
@@ -1562,7 +1642,7 @@ export default function OrderHistoryPage() {
         </div>
       )}
 
-      {/* Modal Đánh Giá Sản Phẩm (+200 Mini Xu) */}
+      {/* Modal Đánh Giá Sản Phẩm (+200 Shopee Xu) */}
       {selectedReviewOrder && (
         <ProductReviewModal
           order={selectedReviewOrder}

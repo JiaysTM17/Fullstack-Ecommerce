@@ -159,7 +159,7 @@ export default function OrderDetailModal({
     order.recipientName ||
     order.customer?.fullName ||
     order.customer?.name ||
-    'Khách Hàng Mini Shopee';
+    'Khách Hàng';
 
   const recipientPhone =
     order.shippingAddress?.phone ||
@@ -242,7 +242,7 @@ export default function OrderDetailModal({
         ...(activeStep >= 4 ? [{ time: 'Hoàn thành', text: 'Đã giao hàng thành công đến người nhận' }] : []),
       ];
 
-  const shopName = order.shopName || 'Mini Shopee Mall Official';
+  const shopName = order.shopName || 'Shopee Mall Official';
 
   return (
     <div
@@ -347,7 +347,7 @@ export default function OrderDetailModal({
                 {order.cancelNote ? ` · Ghi chú: ${order.cancelNote}` : ''}
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Tiền thanh toán (nếu đã trừ) và điểm Mini Xu đã được hoàn về tài khoản của bạn theo chính sách bảo vệ người mua.
+                Tiền thanh toán (nếu đã trừ) và điểm Shopee Xu đã được hoàn về tài khoản của bạn theo chính sách bảo vệ người mua.
               </div>
             </div>
           </div>
@@ -556,7 +556,7 @@ export default function OrderDetailModal({
             </div>
             <div style={{ fontSize: '11.5px', color: '#166534', background: '#f0fdf4', padding: '5px 10px', borderRadius: '6px', marginTop: '10px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <ShieldCheckIcon size={13} />
-              <span>Giao dịch an toàn được bảo hộ bởi Mini Shopee SafePay</span>
+              <span>Giao dịch an toàn được bảo hộ bởi Shopee SafePay</span>
             </div>
           </div>
         </div>
@@ -808,7 +808,7 @@ export default function OrderDetailModal({
 
             {coinsDiscount > 0 && (
               <div className="fee-row discount-row">
-                <span className="fee-label">{t('coins_discount', 'Giảm trừ Mini Xu')}:</span>
+                <span className="fee-label">{t('coins_discount', 'Giảm trừ Shopee Xu')}:</span>
                 <span className="fee-value discount">-{formatCurrency(coinsDiscount)}</span>
               </div>
             )}
@@ -832,10 +832,10 @@ export default function OrderDetailModal({
               <span
                 className="fee-value total"
                 style={{
-                  color: 'var(--primary-color, #2563eb)',
+                  color: 'var(--text-primary, #0f172a)',
                   fontWeight: 800,
                   fontSize: '20px',
-                  letterSpacing: '-0.3px',
+                  letterSpacing: '-0.4px',
                 }}
               >
                 {formatCurrency(finalTotal)}
@@ -863,7 +863,7 @@ export default function OrderDetailModal({
             <ShieldCheckIcon size={20} />
           </span>
           <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-            <strong style={{ color: 'var(--text-primary)' }}>Mini Shopee Đảm Bảo:</strong> Tiền thanh toán của bạn sẽ được giữ an toàn và chỉ chuyển cho Người bán khi bạn hài lòng với kiện hàng. Đổi trả miễn phí trong vòng 15 ngày nếu có lỗi từ nhà sản xuất.
+            <strong style={{ color: 'var(--text-primary)' }}>Shopee Đảm Bảo:</strong> Tiền thanh toán của bạn sẽ được giữ an toàn và chỉ chuyển cho Người bán khi bạn hài lòng với kiện hàng. Đổi trả miễn phí trong vòng 15 ngày nếu có lỗi từ nhà sản xuất.
           </div>
         </div>
 
