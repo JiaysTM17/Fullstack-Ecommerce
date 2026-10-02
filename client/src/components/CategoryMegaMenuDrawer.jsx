@@ -2,6 +2,15 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { getAllShops } from '../services/shopService';
+import {
+  SearchIcon,
+  PackageIcon,
+  ShoppingBagIcon,
+  StoreIcon,
+  RefreshIcon,
+  FlameIcon,
+  BoltIcon,
+} from './OrdersIcons';
 import '../styles/category-drawer.css';
 
 const CATEGORIES_DATA = [
@@ -280,16 +289,20 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               onClick={() => scrollToTargetSection('category-showcase-section')}
               className="category-drawer-btn category-drawer-btn-outline"
               title="Cuộn tới danh mục ngành hàng trên trang chủ"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              📦 Xem Danh Mục Trang Chủ
+              <PackageIcon size={14} />
+              <span>Xem Danh Mục Trang Chủ</span>
             </button>
             <button
               type="button"
               onClick={() => scrollToTargetSection('catalog-section')}
               className="category-drawer-btn category-drawer-btn-primary"
               title="Cuộn tới danh sách toàn bộ sản phẩm trên trang chủ"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              🛍️ Xem Tất Cả Sản Phẩm
+              <ShoppingBagIcon size={14} />
+              <span>Xem Tất Cả Sản Phẩm</span>
             </button>
             <button
               type="button"
@@ -306,7 +319,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         <div className="category-drawer-filter-bar">
           <div className="category-drawer-filter-top-row">
             <div className="category-drawer-search-wrapper">
-              <span className="category-drawer-search-icon">🔍</span>
+              <span className="category-drawer-search-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                <SearchIcon size={16} />
+              </span>
               <input
                 type="text"
                 autoComplete="off"
@@ -352,7 +367,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         <div className="category-drawer-body">
           {filteredCategories.length === 0 ? (
             <div className="category-drawer-empty">
-              <div className="category-drawer-empty-icon">🔍</div>
+              <div className="category-drawer-empty-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <SearchIcon size={36} />
+              </div>
               <div className="category-drawer-empty-text">
                 Không tìm thấy ngành hàng phù hợp với "{searchTerm}"
               </div>
@@ -366,8 +383,10 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   setSearchTerm('');
                   setSelectedGroup('all');
                 }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                🔄 Xóa bộ lọc & Xem tất cả
+                <RefreshIcon size={14} />
+                <span>Xóa bộ lọc & Xem tất cả</span>
               </button>
             </div>
           ) : (
@@ -451,8 +470,10 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   }}
                   className="category-card-shop-name"
                   title={cat.shop}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                 >
-                  🏪 {cat.shop}
+                  <StoreIcon size={13} />
+                  <span>{cat.shop}</span>
                 </span>
                 <span className="category-card-action-link">
                   Xem ngành hàng →
@@ -464,8 +485,8 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
 
         {/* Mega Menu Footer: 12 Mall Shops Strip */}
         <div className="category-drawer-footer">
-          <div className="category-drawer-footer-title">
-            <span>🏪</span>
+          <div className="category-drawer-footer-title" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <StoreIcon size={14} />
             <span>12 Gian Hàng Mall:</span>
           </div>
 
