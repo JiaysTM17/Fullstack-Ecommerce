@@ -242,12 +242,7 @@ export default function HomePage() {
       {/* 3. Main Catalog Section with Sidebar Filters */}
       <div
         id="catalog-section"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "260px 1fr",
-          gap: "24px",
-          alignItems: "start",
-        }}
+        className="shopee-catalog-layout"
       >
         {/* Left Sidebar Filters */}
         <ProductFilters
