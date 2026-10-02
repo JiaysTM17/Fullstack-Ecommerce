@@ -681,7 +681,7 @@ export default function OrderHistoryPage() {
       window.dispatchEvent(new Event('storage'));
     } catch {}
 
-    // Thưởng 200 Shopee Xu cho khách hàng
+    // Thưởng 200 Xu cho khách hàng
     if (earnCoins) {
       earnCoins(200, `Thưởng đánh giá sản phẩm đơn hàng #${reviewData.orderId}`, reviewData.orderId, 'review');
     }
@@ -689,13 +689,13 @@ export default function OrderHistoryPage() {
     pushBuyerNotification({
       type: 'voucher',
       icon: '🪙',
-      title: `Nhận +200 Shopee Xu thưởng`,
-      message: `Bạn nhận được 200 Shopee Xu thưởng nhờ đánh giá sản phẩm cho đơn #${reviewData.orderId}!`,
+      title: `Nhận +200 Xu thưởng`,
+      message: `Bạn nhận được 200 Xu thưởng nhờ đánh giá sản phẩm cho đơn #${reviewData.orderId}!`,
       link: '/profile',
     });
 
     setSelectedReviewOrder(null);
-    showToast('🎉 Cảm ơn bạn! Đã gửi đánh giá thành công và nhận thưởng +200 Shopee Xu!', 'success');
+    showToast('🎉 Cảm ơn bạn! Đã gửi đánh giá thành công và nhận thưởng +200 Xu!', 'success');
   };
 
   const handleBuyAgain = (item) => {
@@ -787,7 +787,7 @@ export default function OrderHistoryPage() {
       } catch {}
     }
 
-    showToast('🎉 Bạn đã xác nhận nhận hàng! Hãy để lại đánh giá để nhận ngay +200 Shopee Xu.', 'success');
+    showToast('🎉 Bạn đã xác nhận nhận hàng! Hãy để lại đánh giá để nhận ngay +200 Xu.', 'success');
     const target = updated.find((o) => o.orderId === orderId);
     if (target) {
       setSelectedReviewOrder(target);
@@ -1293,31 +1293,38 @@ export default function OrderHistoryPage() {
               </div>
             </div>
 
-            <div className="orders-filter-chips-row">
+            <div className="orders-filter-status-row">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--text-secondary, #64748b)', marginRight: '2px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <ClockIcon size={13} />
-                  <span>Khoảng thời gian:</span>
+                <span style={{ fontSize: '12.5px', color: 'var(--text-muted, #64748b)' }}>
+                  Đang hiển thị <strong>{filteredOrders.length}</strong> đơn hàng
                 </span>
-                {[
-                  { id: 'all', label: 'Tất cả' },
-                  { id: '30days', label: '30 ngày gần đây' },
-                  { id: '3months', label: '3 tháng qua' },
-                  { id: 'year2026', label: 'Năm 2026' },
-                ].map((dr) => (
-                  <button
-                    key={dr.id}
-                    type="button"
-                    className={`order-filter-chip ${dateRange === dr.id ? 'active' : ''}`}
-                    onClick={() => setDateRange(dr.id)}
-                  >
-                    {dr.label}
-                  </button>
-                ))}
-              </div>
-
-              <div style={{ fontSize: '12.5px', color: 'var(--text-muted, #64748b)' }}>
-                Đang hiển thị <strong>{filteredOrders.length}</strong> đơn hàng
+                {(searchTerm || dateRange !== 'all') && (
+                  <>
+                    <span className="meta-pipe">|</span>
+                    {searchTerm && (
+                      <span className="orders-active-chip">
+                        Từ khóa: &ldquo;{searchTerm}&rdquo;
+                        <button type="button" onClick={() => setSearchTerm('')} title="Xóa từ khóa">✕</button>
+                      </span>
+                    )}
+                    {dateRange !== 'all' && (
+                      <span className="orders-active-chip">
+                        {dateRange === '30days' ? '30 ngày gần đây' : dateRange === '3months' ? '3 tháng qua' : 'Năm 2026'}
+                        <button type="button" onClick={() => setDateRange('all')} title="Xóa bộ lọc thời gian">✕</button>
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      className="orders-reset-filters-btn"
+                      onClick={() => {
+                        setSearchTerm('');
+                        setDateRange('all');
+                      }}
+                    >
+                      Đặt lại bộ lọc
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -1334,7 +1341,7 @@ export default function OrderHistoryPage() {
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="shopee-orders-list-wrapper">
             {filteredOrders.map((ord) => {
               const itemsSubtotal = ord.subtotal || (ord.items || []).reduce((sum, it) => sum + (Number(it.price) * (Number(it.quantity) || 1)), 0) || 0;
               const voucherDiscount = Number(ord.voucherDiscount) || 0;
@@ -1394,60 +1401,6 @@ export default function OrderHistoryPage() {
                     </div>
                   </div>
 
-                  {/* Tracking Stepper Progress (when active) with Delivery Wire */}
-                  {ord.stepIndex > 0 && ord.status !== 'cancelled' && (
-                    <div className="order-stepper-container">
-                      <div className="order-stepper-track-wrap">
-                        {/* Base Wire / Sợi dây nền */}
-                        <div className="order-stepper-cable-base" />
-                        {/* Active Progress Wire / Sợi dây truyền màu cyan-blue + Máy bay giấy */}
-                        <div
-                          className="order-stepper-cable-active"
-                          style={{
-                            width: `${((Math.min(ord.stepIndex || 1, 4) - 1) / 3) * 75}%`,
-                          }}
-                        >
-                          <div className="order-stepper-plane" title="Đang vận chuyển">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M21.5 2.5L2 10.5L9.5 14L13.5 21.5L21.5 2.5Z" fill="url(#planeGradientBlue)" stroke="#ffffff" strokeWidth="1.2" strokeLinejoin="round"/>
-                              <path d="M9.5 14L21.5 2.5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round"/>
-                              <defs>
-                                <linearGradient id="planeGradientBlue" x1="2" y1="2.5" x2="21.5" y2="21.5" gradientUnits="userSpaceOnUse">
-                                  <stop stopColor="#38bdf8"/>
-                                  <stop offset="1" stopColor="#2563eb"/>
-                                </linearGradient>
-                              </defs>
-                            </svg>
-                          </div>
-                        </div>
-
-                        {[
-                          { num: 1, label: t('step_order_placed', 'Đã Đặt Hàng') },
-                          { num: 2, label: t('step_confirmed', 'Đã Xác Nhận') },
-                          { num: 3, label: t('step_shipping', 'Đang Vận Chuyển') },
-                          { num: 4, label: t('step_delivered', 'Đã Giao Hàng') },
-                        ].map((step, idx) => {
-                          const isCompleted = (ord.stepIndex || 1) >= step.num || ord.status === 'completed' || ord.status === 'delivered';
-                          const isActive = (ord.stepIndex || 1) === step.num && ord.status !== 'completed' && ord.status !== 'delivered';
-                          return (
-                            <div
-                              key={idx}
-                              className={`order-stepper-node ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
-                            >
-                              <div className="order-stepper-circle">
-                                {isCompleted ? <CheckIcon size={11} /> : step.num}
-                              </div>
-                              <span className="order-stepper-label">
-                                {step.label}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Items List */}
                   {/* Items List - Matches Image 1 */}
                   <div className="shopee-order-items-list">
                     {(ord.items || []).map((item, idx) => {
@@ -1538,7 +1491,7 @@ export default function OrderHistoryPage() {
                         <CreditCardIcon size={14} color="#0284c7" />
                         <span className="compact-item-label">{t('payment_method', 'Thanh toán')}:</span>
                         <strong className="compact-item-val">{ord.paymentMethod || 'COD'}</strong>
-                        <span className="compact-guarantee-note">· Bảo mật Shopee Guarantee</span>
+                        <span className="compact-guarantee-note">· Bảo vệ an tâm 100%</span>
                       </div>
                     </div>
 
@@ -1724,7 +1677,7 @@ export default function OrderHistoryPage() {
                               className="shopee-order-btn-review"
                               onClick={() => setSelectedReviewOrder(ord)}
                             >
-                              <StarIcon size={13} color="#facc15" filled /> {t('review_order_btn', 'Đánh giá (+200 Shopee Xu)')}
+                              <StarIcon size={13} color="#facc15" filled /> {t('review_order_btn', 'Đánh giá (+200 Xu)')}
                             </button>
                           )}
                         </>
@@ -1955,7 +1908,7 @@ export default function OrderHistoryPage() {
             </div>
 
             <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px', lineHeight: 1.4 }}>
-              Vui lòng chọn lý do hủy đơn hàng. Số tiền đã thanh toán (nếu có) và Shopee Xu sẽ được hoàn tự động về ví của bạn:
+              Vui lòng chọn lý do hủy đơn hàng. Số tiền đã thanh toán (nếu có) và điểm Xu sẽ được hoàn tự động về ví của bạn:
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
@@ -2044,7 +1997,7 @@ export default function OrderHistoryPage() {
         </div>
       )}
 
-      {/* Modal Đánh Giá Sản Phẩm (+200 Shopee Xu) */}
+      {/* Modal Đánh Giá Sản Phẩm (+200 Xu) */}
       {selectedReviewOrder && (
         <ProductReviewModal
           order={selectedReviewOrder}

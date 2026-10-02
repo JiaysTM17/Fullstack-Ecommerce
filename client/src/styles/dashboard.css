@@ -1544,11 +1544,66 @@
   box-shadow: 0 3px 10px rgba(37, 99, 235, 0.35);
 }
 
+.orders-filter-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.orders-active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2.5px 8px;
+  border-radius: 6px;
+}
+
+.orders-active-chip button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.orders-active-chip button:hover {
+  color: #1d4ed8;
+}
+
+.orders-reset-filters-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 2px 4px;
+  transition: color 0.15s ease;
+}
+
+.orders-reset-filters-btn:hover {
+  color: #ef4444;
+}
+
 /* Shopee Mall Modern Order Card */
 @keyframes orderCardEntrance {
   0% {
     opacity: 0;
-    transform: translateY(12px) scale(0.99);
+    transform: translateY(10px) scale(0.995);
   }
   100% {
     opacity: 1;
@@ -1556,22 +1611,29 @@
   }
 }
 
+.shopee-orders-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
 .shopee-order-card {
   background: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.85);
-  border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 4px 14px -3px rgba(15, 23, 42, 0.04);
-  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 3px 10px -2px rgba(15, 23, 42, 0.04);
+  margin-bottom: 0;
   overflow: hidden;
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
   box-sizing: border-box;
   font-family: var(--font-family);
-  animation: orderCardEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: orderCardEntrance 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .shopee-order-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px -4px rgba(37, 99, 235, 0.07), 0 2px 8px rgba(15, 23, 42, 0.04);
+  transform: translateY(-1.5px);
+  box-shadow: 0 8px 20px -3px rgba(37, 99, 235, 0.07), 0 2px 6px rgba(15, 23, 42, 0.03);
   border-color: #cbd5e1;
 }
 
@@ -1580,7 +1642,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 18px;
+  padding: 11px 16px;
   background: #fbfcfe;
   border-bottom: 1px solid #f1f5f9;
   flex-wrap: wrap;
@@ -1600,17 +1662,17 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
   color: #ffffff !important;
   font-size: 10px !important;
   font-weight: 800 !important;
-  padding: 2.5px 7px !important;
+  padding: 2px 6px !important;
   border-radius: 4px !important;
   letter-spacing: 0.5px;
   line-height: 1.1;
   text-transform: uppercase;
-  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.32) !important;
-  margin-right: 6px !important;
+  box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25) !important;
+  margin-right: 4px !important;
   vertical-align: middle;
   flex-shrink: 0;
 }
@@ -1701,35 +1763,35 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 10px;
   border-radius: 9999px;
   line-height: 1.2;
 }
 
 .shopee-order-status-badge.shipping {
-  background: #f0f9ff !important;
-  color: #0369a1 !important;
-  border: 1px solid #e0f2fe !important;
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #bfdbfe !important;
 }
 
 .shopee-order-status-badge.completed {
   background: #f0fdf4 !important;
-  color: #166534 !important;
-  border: 1px solid #dcfce7 !important;
+  color: #15803d !important;
+  border: 1px solid #bbf7d0 !important;
 }
 
 .shopee-order-status-badge.pending {
-  background: #f8fafc !important;
-  color: #475569 !important;
-  border: 1px solid #e2e8f0 !important;
+  background: #fefce8 !important;
+  color: #a16207 !important;
+  border: 1px solid #fef08a !important;
 }
 
 .shopee-order-status-badge.cancelled {
   background: #fef2f2 !important;
-  color: #dc2626 !important;
-  border: 1px solid #fee2e2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
 }
 
 .shopee-order-item-badges-row {
@@ -1869,11 +1931,12 @@
   width: fit-content;
 }
 
-.shopee-order-item-unit-red {
+.shopee-order-item-unit-red,
+.shopee-order-item-unit {
   font-family: var(--font-family);
-  font-size: 15.5px;
-  font-weight: 700;
-  color: #dc2626;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #64748b;
   line-height: 1.2;
 }
 
@@ -1887,8 +1950,8 @@
 
 .shopee-order-item-line-total {
   font-family: var(--font-family);
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 600;
   color: #0f172a;
   margin-top: 2px;
 }
@@ -2007,9 +2070,9 @@
 .compact-total-price {
   font-family: var(--font-family);
   font-size: 17px;
-  font-weight: 800;
-  color: #dc2626;
-  letter-spacing: -0.3px;
+  font-weight: 700;
+  color: #2563eb;
+  letter-spacing: -0.2px;
 }
 
 .compact-saving-pill {
@@ -2018,10 +2081,10 @@
   gap: 3px;
   font-family: var(--font-family);
   font-size: 11px;
-  font-weight: 700;
-  color: #059669;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  font-weight: 600;
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
   padding: 2px 7px;
   border-radius: 4px;
 }
