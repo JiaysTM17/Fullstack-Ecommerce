@@ -1,5 +1,5 @@
 /**
- * API Service Layer — Trung tâm giao tiếp Frontend ↔ Backend
+ * API Service Layer - Trung tâm giao tiếp Frontend & Backend
  * Auto-injects JWT auth token from localStorage
  */
 

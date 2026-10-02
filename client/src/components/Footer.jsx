@@ -9,6 +9,7 @@ import {
   StarIcon,
   SparklesIcon,
   CheckIcon,
+  AlertCircleIcon,
 } from './OrdersIcons';
 import '../styles/footer.css';
 
@@ -124,7 +125,8 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
           </div>
 
           <div className="footer-attribution-note">
-            ℹ️ <strong>{language === 'en' ? 'Intellectual Property & Professional Ethics Note:' : 'Tuyên Bố Bản Quyền & Tính Chuyên Nghiệp:'}</strong>{' '}
+            <span style={{ display: 'inline-flex', alignItems: 'center', verticalAlign: 'middle', marginRight: '6px', color: '#0284c7' }}><AlertCircleIcon size={15} /></span>
+            <strong>{language === 'en' ? 'Intellectual Property & Professional Ethics Note:' : 'Tuyên Bố Bản Quyền & Tính Chuyên Nghiệp:'}</strong>{' '}
             {language === 'en'
               ? 'This system synthesizes industry-standard UX patterns from world-leading e-commerce platforms. All source code, database architectures, RESTful APIs, and UI designs were custom-engineered independently with clean-room implementation. No proprietary code or assets were duplicated, honoring intellectual property rights and academic integrity.'
               : 'Dự án kế thừa và chắt lọc các quy chuẩn trải nghiệm người dùng (UX best practices) từ các sàn thương mại điện tử hàng đầu thế giới. Toàn bộ mã nguồn React/Node.js, kiến trúc cơ sở dữ liệu, API RESTful và thiết kế giao diện được tự nghiên cứu, thiết kế riêng biệt và lập trình độc quyền (Clean-room Implementation), không sao chép nguyên mẫu, thể hiện tính chuyên nghiệp và tôn trọng bản quyền sở hữu trí tuệ.'}

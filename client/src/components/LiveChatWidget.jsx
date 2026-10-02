@@ -834,7 +834,7 @@ export default function LiveChatWidget() {
                     marginTop: '2px',
                   }}
                 >
-                  <span style={{ color: '#22c55e', fontSize: '9px' }}>●</span>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
                   {chatMode === 'human'
                     ? 'Chuyên viên đang hỗ trợ trực tiếp'
                     : 'Trực tuyến 24/7'}
@@ -2044,7 +2044,7 @@ export default function LiveChatWidget() {
                 >
                   {chatMode === 'human' ? (
                     <>
-                      <span style={{ color: '#10b981', fontWeight: 700 }}>●</span>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
                       Chuyên viên Kim Ngân đang soạn phản hồi...
                     </>
                   ) : (

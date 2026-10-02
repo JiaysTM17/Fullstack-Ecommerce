@@ -1519,8 +1519,9 @@ export default function SellerDashboardPage() {
                 <CheckIcon size={12} color="#ffffff" />
                 <span>SHOPEE MALL</span>
               </span>
-              <span className="seller-badge-pill" style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '3px 8px' }}>
-                ● ĐANG HOẠT ĐỘNG
+              <span className="seller-badge-pill" style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a' }} />
+                <span>ĐANG HOẠT ĐỘNG</span>
               </span>
             </div>
 
@@ -2848,7 +2849,10 @@ export default function SellerDashboardPage() {
                           <img src={currentChat.avatar} alt={currentChat.customerName} style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover' }} />
                           <div>
                             <strong style={{ fontSize: '14px' }}>{currentChat.customerName}</strong>
-                            <div style={{ fontSize: '11px', color: '#16a34a' }}>● Đang trực tuyến</div>
+                            <div style={{ fontSize: '11px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a', display: 'inline-block' }} />
+                              <span>Đang trực tuyến</span>
+                            </div>
                           </div>
                         </div>
 

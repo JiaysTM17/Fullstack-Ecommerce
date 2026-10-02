@@ -972,19 +972,19 @@ export default function RegisterPage() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11.5px' }}>
                   <div style={{ color: passwordChecks.length ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.length ? <CheckIcon size={12} /> : <span style={{ width: '12px', textAlign: 'center', fontWeight: 700 }}>○</span>}
+                    {passwordChecks.length ? <CheckIcon size={12} /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
                     <span>Tối thiểu 8 ký tự</span>
                   </div>
                   <div style={{ color: passwordChecks.hasUpper ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.hasUpper ? <CheckIcon size={12} /> : <span style={{ width: '12px', textAlign: 'center', fontWeight: 700 }}>○</span>}
+                    {passwordChecks.hasUpper ? <CheckIcon size={12} /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
                     <span>Có chữ in hoa (A-Z)</span>
                   </div>
                   <div style={{ color: passwordChecks.hasNumber ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.hasNumber ? <CheckIcon size={12} /> : <span style={{ width: '12px', textAlign: 'center', fontWeight: 700 }}>○</span>}
+                    {passwordChecks.hasNumber ? <CheckIcon size={12} /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
                     <span>Có chữ số (0-9)</span>
                   </div>
                   <div style={{ color: passwordChecks.hasSpecial ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.hasSpecial ? <CheckIcon size={12} /> : <span style={{ width: '12px', textAlign: 'center', fontWeight: 700 }}>○</span>}
+                    {passwordChecks.hasSpecial ? <CheckIcon size={12} /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
                     <span>Ký tự đặc biệt (!@#$)</span>
                   </div>
                 </div>
@@ -1167,7 +1167,7 @@ export default function RegisterPage() {
                 marginBottom: '12px',
               }}
             >
-              <span>●</span>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#d97706', display: 'inline-block' }} />
               <span>HỒ SƠ ĐANG CHỜ PHÊ DUYỆT</span>
             </div>
 

@@ -584,7 +584,7 @@ export default function SocialAuthModal({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, fontSize: '15px', color: '#050505', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>{fullName || 'Người dùng Facebook'}</span>
-                  <span style={{ color: '#0866FF', fontSize: '13px' }}>●</span>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0866FF', display: 'inline-block' }} />
                 </div>
                 <div style={{ fontSize: '12.5px', color: '#65676b', marginTop: '2px' }}>
                   {email}

@@ -144,8 +144,9 @@ export default function LegalModal({
             justifyContent: 'space-between',
           }}
         >
-          <span style={{ fontSize: '12.5px', fontWeight: 700, color: meta.badgeColor }}>
-            ● {meta.badgeText}
+          <span style={{ fontSize: '12.5px', fontWeight: 700, color: meta.badgeColor, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />
+            <span>{meta.badgeText}</span>
           </span>
           <span style={{ fontSize: '11.5px', color: '#64748b' }}>
             Sàn Fullstack E-Commerce • Quy chế 2026

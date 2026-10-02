@@ -38,6 +38,7 @@ import {
   CloseIcon,
   CheckIcon,
   LayersIcon,
+  ChevronDownIcon,
 } from './OrdersIcons';
 import '../styles/header.css';
 
@@ -974,7 +975,9 @@ const Header = ({
                       {user.role === 'admin' ? 'Quản Trị' : user.role === 'seller' ? 'Người Bán' : 'Thành Viên'}
                     </span>
                   </div>
-                  <span className="header-user-caret">▼</span>
+                  <span className="header-user-caret" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    <ChevronDownIcon size={11} />
+                  </span>
                 </button>
 
                 {showUserDropdown && (
@@ -1173,7 +1176,9 @@ const Header = ({
           >
             <LayersIcon size={14} />
             <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
-            <span style={{ fontSize: '9px', opacity: 0.8 }}>▼</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', opacity: 0.8 }}>
+              <ChevronDownIcon size={10} />
+            </span>
           </button>
 
           <span
