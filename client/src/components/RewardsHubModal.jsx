@@ -11,6 +11,10 @@ import {
   TicketIcon,
   CheckIcon,
   ShoppingBagIcon,
+  SparklesIcon,
+  TargetIcon,
+  GiftIcon,
+  ClockIcon,
 } from './OrdersIcons';
 
 export default function RewardsHubModal({ onClose }) {
@@ -294,8 +298,9 @@ export default function RewardsHubModal({ onClose }) {
         {activeTab === 'spin' && (
           <div style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: '12px' }}>
-              <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800 }}>
-                🎡 Vòng Quay May Mắn Fullstack E-Commerce
+              <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                <SparklesIcon size={18} />
+                <span>Vòng Quay May Mắn Fullstack E-Commerce</span>
               </h4>
               <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--text-secondary)' }}>
                 1 lượt/ngày + 1 lượt cho mỗi đơn hàng thành công · 100% trúng quà không tốn xu!
@@ -319,8 +324,9 @@ export default function RewardsHubModal({ onClose }) {
               }}
             >
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 800, color: totalSpins > 0 ? '#059669' : '#ea580c' }}>
-                  🎯 Lượt quay khả dụng: <strong>{totalSpins} lượt</strong>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: totalSpins > 0 ? '#059669' : '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <TargetIcon size={15} />
+                  <span>Lượt quay khả dụng: <strong>{totalSpins} lượt</strong></span>
                 </div>
                 <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                   {dailySpinsRemaining > 0 ? '✓ 1 lượt miễn phí hôm nay' : '• Đã dùng lượt miễn phí hôm nay'}
@@ -332,8 +338,9 @@ export default function RewardsHubModal({ onClose }) {
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
                   Lượt miễn phí tiếp theo:
                 </div>
-                <div style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'monospace' }}>
-                  ⏳ {nextDailyCountdown}
+                <div style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <ClockIcon size={13} />
+                  <span>{nextDailyCountdown}</span>
                 </div>
               </div>
             </div>

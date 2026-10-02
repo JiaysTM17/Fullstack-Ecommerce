@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { StarIcon, CheckIcon, ShieldCheckIcon } from './OrdersIcons';
+import { StarIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon } from './OrdersIcons';
 
 const QUICK_TAGS = [
   'Đúng với mô tả',
@@ -533,7 +533,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                     cursor: 'pointer',
                   }}
                 >
-                  <span style={{ fontSize: '14px' }}>📷</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center' }}><CameraIcon size={16} /></span>
                   <span style={{ fontSize: '10px' }}>+ Ảnh</span>
                   <input
                     type="file"
@@ -574,9 +574,13 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 fontWeight: 600,
                 marginBottom: '12px',
                 lineHeight: 1.4,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              ⚠️ {errorMsg}
+              <AlertCircleIcon size={15} />
+              <span>{errorMsg}</span>
             </div>
           )}
 

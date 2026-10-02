@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { ReturnIcon, CheckIcon, ShieldCheckIcon } from './OrdersIcons';
+import { ReturnIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon } from './OrdersIcons';
 
 const RETURN_REASONS = [
   'Hàng bị lỗi kỹ thuật / Không hoạt động được',
@@ -223,9 +223,13 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 fontWeight: 600,
                 marginBottom: '14px',
                 lineHeight: 1.4,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              ⚠️ {errorMsg}
+              <AlertCircleIcon size={15} />
+              <span>{errorMsg}</span>
             </div>
           )}
 
@@ -632,7 +636,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   transition: 'all 0.15s ease',
                 }}
               >
-                <span style={{ fontSize: '16px' }}>📷</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center' }}><CameraIcon size={18} /></span>
                 <div>
                   <span style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb' }}>
                     {images.length === 0 ? 'Tải lên hình ảnh / video sản phẩm lỗi hoặc hư hỏng *' : '+ Thêm hình ảnh / video khác'}
