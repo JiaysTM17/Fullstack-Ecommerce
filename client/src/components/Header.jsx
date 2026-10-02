@@ -787,7 +787,7 @@ const Header = ({
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
               </svg>
               {wishlistCount > 0 && (
-                <span className="shopee-action-badge badge-amber anim-badge-bounce">
+                <span key={wishlistCount} className="shopee-action-badge badge-amber anim-badge-bounce">
                   {wishlistCount > 99 ? '99+' : wishlistCount}
                 </span>
               )}
@@ -812,7 +812,7 @@ const Header = ({
                   <circle cx="20" cy="21" r="1" />
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                 </svg>
-                <span className="shopee-action-badge badge-indigo anim-badge-bounce">
+                <span key={cartCount} className="shopee-action-badge badge-indigo anim-badge-bounce">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               </button>

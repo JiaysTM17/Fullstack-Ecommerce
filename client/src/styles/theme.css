@@ -351,4 +351,20 @@ body {
   height: 0 !important;
 }
 
+/* QuickView Modal Layout & Responsive Rules */
+.quickview-modal-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 680px) {
+  .quickview-modal-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+
 

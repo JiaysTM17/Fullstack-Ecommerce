@@ -57,6 +57,9 @@ export default function QuickViewModal({ product, onClose }) {
         className="shopee-modal anim-modal-content"
         style={{
           maxWidth: '780px',
+          width: '100%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
           background: 'var(--bg-card, #ffffff)',
           color: 'var(--text-primary, #0f172a)',
           borderRadius: '12px',
@@ -80,13 +83,14 @@ export default function QuickViewModal({ product, onClose }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            zIndex: 10,
           }}
           aria-label="Đóng"
         >
           <CloseIcon size={18} />
         </button>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px', alignItems: 'start' }}>
+        <div className="quickview-modal-grid">
           {/* Gallery */}
           <div>
             <div

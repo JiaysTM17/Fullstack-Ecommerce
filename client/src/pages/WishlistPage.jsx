@@ -9,7 +9,8 @@ import { useToast } from '../context/ToastContext';
 import { FALLBACK_PRODUCTS, getProductById } from '../services/productService';
 import { clearWishlist as clearWishlistService, moveAllWishlistToCart } from '../services/wishlistService';
 import { formatCurrency } from '../utils/formatCurrency';
-import { ShoppingBagIcon } from '../components/OrdersIcons';
+import { ShoppingBagIcon, CheckIcon } from '../components/OrdersIcons';
+import { pushBuyerNotification } from '../utils/notificationHelper';
 
 function TrashIcon({ size = 14, color = 'currentColor' }) {
   return (
@@ -37,6 +38,7 @@ export default function WishlistPage() {
   const [wishlistProducts, setWishlistProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isAddedFeedback, setIsAddedFeedback] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -103,6 +105,8 @@ export default function WishlistPage() {
       await moveAllWishlistToCart();
     } catch {}
 
+    setIsAddedFeedback(true);
+    setTimeout(() => setIsAddedFeedback(false), 2000);
     showToast(`Đã thêm ${availableItems.length} sản phẩm còn hàng vào giỏ!`, 'success');
 
     pushBuyerNotification({
@@ -161,9 +165,28 @@ export default function WishlistPage() {
                       type="button"
                       className="shopee-btn shopee-btn-primary"
                       onClick={handleAddAllToCart}
-                      style={{ fontSize: '12.5px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 14px' }}
+                      style={{
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        height: '34px',
+                        padding: '0 14px',
+                        backgroundColor: isAddedFeedback ? '#10b981' : undefined,
+                        borderColor: isAddedFeedback ? '#10b981' : undefined,
+                        transition: 'all 0.2s ease',
+                      }}
                     >
-                      <ShoppingBagIcon size={14} /> Thêm tất cả vào giỏ
+                      {isAddedFeedback ? (
+                        <>
+                          <CheckIcon size={14} /> Đã thêm vào giỏ!
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBagIcon size={14} /> Thêm tất cả vào giỏ
+                        </>
+                      )}
                     </button>
                     <button
                       type="button"
