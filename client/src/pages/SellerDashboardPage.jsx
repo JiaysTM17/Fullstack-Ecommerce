@@ -8,6 +8,34 @@ import PackingSlipModal from '../components/PackingSlipModal';
 import { FALLBACK_PRODUCTS, restoreProductStock } from '../services/productService';
 import { fetchSellerOrders, updateSellerOrderStatus, createSellerProduct } from '../services/api';
 import '../styles/dashboard.css';
+import {
+  ChartBarIcon,
+  CreditCardIcon,
+  ReceiptIcon,
+  PackageIcon,
+  BoltIcon,
+  TicketIcon,
+  StarIcon,
+  ChatIcon,
+  SettingsIcon,
+  UserIcon,
+  StoreIcon,
+  PhoneIcon,
+  TagIcon,
+  GlobeIcon,
+  ShieldCheckIcon,
+  LockIcon,
+  DownloadIcon,
+  SearchIcon,
+  TruckIcon,
+  PrinterIcon,
+  EyeIcon,
+  MapPinIcon,
+  PencilIcon,
+  AlertCircleIcon,
+  CheckIcon,
+  ClockIcon,
+} from '../components/OrdersIcons';
 
 // 12 Gian hàng mẫu với đầy đủ thông tin chuẩn TMĐT
 const INITIAL_SHOPS = [
@@ -232,7 +260,7 @@ const INITIAL_FLASHSALES = [
   {
     id: "fs_02",
     shopId: "shop_01",
-    title: "🔥 Siêu Sale Khung Giờ Tối 20h",
+    title: "Siêu Sale Khung Giờ Tối 20h",
     timeSlot: "20:00 - 23:59 Tối Nay",
     status: "upcoming",
     discountPercent: 40,
@@ -1326,7 +1354,7 @@ export default function SellerDashboardPage() {
           className={`shopee-nav-item ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
-          <span>📊</span>
+          <ChartBarIcon size={16} />
           <span>Báo Cáo & Phân Tích</span>
         </button>
 
@@ -1337,7 +1365,7 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span>💳</span>
+            <CreditCardIcon size={16} />
             <span>Ví Doanh Thu & Rút Tiền</span>
           </div>
           <span style={{ fontSize: '10px', background: '#ecfdf5', color: '#059669', padding: '1px 6px', borderRadius: '8px', fontWeight: 800 }}>
@@ -1356,7 +1384,7 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span>📑</span>
+            <ReceiptIcon size={16} />
             <span>Đơn Hàng Của Shop</span>
           </div>
           {pendingOrdersCount > 0 && (
@@ -1373,7 +1401,7 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span>📦</span>
+            <PackageIcon size={16} />
             <span>Quản Lý Sản Phẩm</span>
           </div>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
@@ -1392,7 +1420,7 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span>⚡</span>
+            <BoltIcon size={16} />
             <span>Flash Sale Gian Hàng</span>
           </div>
           <span style={{ background: '#f97316', color: '#fff', fontSize: '9.5px', padding: '1px 6px', borderRadius: '10px', fontWeight: 800 }}>
@@ -1405,7 +1433,7 @@ export default function SellerDashboardPage() {
           className={`shopee-nav-item ${activeTab === 'vouchers' ? 'active' : ''}`}
           onClick={() => setActiveTab('vouchers')}
         >
-          <span>🎫</span>
+          <TicketIcon size={16} />
           <span>Mã Giảm Giá (Vouchers)</span>
         </button>
 
@@ -1416,7 +1444,7 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span>⭐</span>
+            <StarIcon size={16} />
             <span>Đánh Giá Của Khách</span>
           </div>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
@@ -1431,7 +1459,7 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span>💬</span>
+            <ChatIcon size={16} />
             <span>Tin Nhắn Khách Hàng</span>
           </div>
           <span style={{ background: '#10b981', color: '#fff', fontSize: '10px', padding: '1px 6px', borderRadius: '10px', fontWeight: 700 }}>
@@ -1448,7 +1476,7 @@ export default function SellerDashboardPage() {
           className={`shopee-nav-item ${activeTab === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveTab('settings')}
         >
-          <span>⚙️</span>
+          <SettingsIcon size={16} />
           <span>Hồ Sơ & Kho Hàng</span>
         </button>
       </aside>
@@ -1489,11 +1517,21 @@ export default function SellerDashboardPage() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px', flexWrap: 'wrap' }}>
               <span className="seller-stat-chip">
-                👤 Chủ sở hữu: <strong>{user?.fullName || 'Trần Thị Chủ Shop (Thời Trang)'}</strong>
+                <UserIcon size={13} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
+                Chủ sở hữu: <strong>{user?.fullName || 'Trần Thị Chủ Shop (Thời Trang)'}</strong>
               </span>
-              <span className="seller-stat-chip">🏢 Kho: {currentShop.address}</span>
-              <span className="seller-stat-chip">📞 Hotline: {currentShop.phone}</span>
-              <span className="seller-stat-chip">🏷️ Ngành hàng: <strong>{currentShop.category}</strong></span>
+              <span className="seller-stat-chip">
+                <StoreIcon size={13} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
+                Kho: {currentShop.address}
+              </span>
+              <span className="seller-stat-chip">
+                <PhoneIcon size={13} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
+                Hotline: {currentShop.phone}
+              </span>
+              <span className="seller-stat-chip">
+                <TagIcon size={13} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
+                Ngành hàng: <strong>{currentShop.category}</strong>
+              </span>
             </div>
           </div>
 
@@ -1519,7 +1557,7 @@ export default function SellerDashboardPage() {
               }}
               title="Xem giao diện công khai người mua nhìn thấy trên sàn Shopee Mall"
             >
-              <span style={{ fontSize: '15px' }}>🌐</span>
+              <GlobeIcon size={15} />
               <span>Xem Gian Hàng Thực Tế</span>
               <span style={{ fontSize: '10px', background: '#fff7ed', color: '#ea580c', padding: '1px 6px', borderRadius: '4px', fontWeight: 800 }}>MALL</span>
             </Link>
@@ -1527,7 +1565,9 @@ export default function SellerDashboardPage() {
             {/* Chỉ hiển thị công cụ chuyển shop cho tài khoản Admin quản trị toàn hệ thống */}
             {user?.role === 'admin' ? (
               <div className="shopee-shop-switcher" style={{ background: 'var(--bg-muted, #f8fafc)', border: '1.5px solid #fed7aa', borderRadius: '8px', padding: '6px 12px' }}>
-                <span style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)', fontSize: '12px' }}>🛡️ Giám Sát Sàn (Admin):</span>
+                <span style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <ShieldCheckIcon size={14} /> Giám Sát Sàn (Admin):
+                </span>
                 <select
                   value={selectedShopId}
                   onChange={(e) => setSelectedShopId(e.target.value)}
@@ -1553,7 +1593,7 @@ export default function SellerDashboardPage() {
                 border: '1px solid rgba(234, 88, 12, 0.25)',
                 fontSize: '12px',
               }}>
-                <span style={{ fontSize: '16px' }}>🔒</span>
+                <LockIcon size={16} />
                 <div>
                   <div style={{ color: 'var(--text-muted)', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Kênh Độc Quyền</div>
                   <strong style={{ color: 'var(--text-primary)' }}>Gian Hàng #{currentShop.id.toUpperCase()}</strong>
@@ -1609,16 +1649,16 @@ export default function SellerDashboardPage() {
             <div className="shopee-table-card" style={{ marginBottom: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>
-                    📊 Biểu Đồ Doanh Số Bán Hàng 7 Ngày Gần Nhất
+                  <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ChartBarIcon size={16} /> Biểu Đồ Doanh Số Bán Hàng 7 Ngày Gần Nhất
                   </h3>
                   <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: 'var(--text-muted)' }}>
                     Tính toán theo doanh thu thực tế của {currentShop.name}
                   </p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span className="seller-stat-chip" style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontWeight: 700 }}>
-                    📈 Tăng trưởng +15.4% tuần này
+                  <span className="seller-stat-chip" style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <StarIcon size={12} /> Tăng trưởng +15.4% tuần này
                   </span>
                   <button
                     type="button"
@@ -1626,7 +1666,7 @@ export default function SellerDashboardPage() {
                     className="shopee-btn shopee-btn-secondary"
                     style={{ fontSize: '12.5px', padding: '6px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
                   >
-                    <span>📥</span>
+                    <DownloadIcon size={14} />
                     <span>Xuất Báo Cáo (CSV)</span>
                   </button>
                 </div>
@@ -1667,8 +1707,8 @@ export default function SellerDashboardPage() {
 
             {/* Top sản phẩm bán chạy nhất của riêng shop này */}
             <div className="shopee-table-card">
-              <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 16px' }}>
-                🏆 Top Mặt Hàng Bán Chạy Nhất Tại {currentShop.name}
+              <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <StarIcon size={16} /> Top Mặt Hàng Bán Chạy Nhất Tại {currentShop.name}
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {shopProducts
@@ -1739,9 +1779,9 @@ export default function SellerDashboardPage() {
                     type="button"
                     onClick={() => setShowWithdrawModal(true)}
                     className="shopee-btn shopee-btn-primary"
-                    style={{ padding: '6px 14px', fontSize: '12px', borderRadius: '6px' }}
+                    style={{ padding: '6px 14px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                   >
-                    💸 Rút Tiền Về Ngân Hàng
+                    <CreditCardIcon size={14} /> Rút Tiền Về Ngân Hàng
                   </button>
                 </div>
               </div>
@@ -1786,15 +1826,15 @@ export default function SellerDashboardPage() {
                 </span>
               </div>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
-                ℹ️ Tiền rút sẽ được chuyển tự động 24/7 qua cổng liên ngân hàng Napas 247 trong vòng 1-5 phút không mất phí dịch vụ.
+                Tiền rút sẽ được chuyển tự động 24/7 qua cổng liên ngân hàng Napas 247 trong vòng 1-5 phút không mất phí dịch vụ.
               </p>
             </div>
 
             {/* Bảng Lịch Sử Giao Dịch & Rút Tiền */}
             <div className="shopee-table-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>
-                  📜 Lịch Sử Giao Dịch Rút Tiền Doanh Thu
+                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ReceiptIcon size={16} /> Lịch Sử Giao Dịch Rút Tiền Doanh Thu
                 </h3>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                   Tổng cộng: {shopWithdrawals.length} giao dịch
@@ -2068,9 +2108,9 @@ export default function SellerDashboardPage() {
                               setReplyInputText(`Dạ ${currentShop.name} xin cảm ơn bạn rất nhiều ạ!`);
                             }}
                             className="shopee-btn shopee-btn-secondary"
-                            style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '6px' }}
+                            style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                           >
-                            💬 Trả Lời Đánh Giá Này
+                            <ChatIcon size={13} /> Trả Lời Đánh Giá Này
                           </button>
                         )}
                       </div>
@@ -2102,7 +2142,7 @@ export default function SellerDashboardPage() {
                 flexWrap: 'wrap'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '24px' }}>⚠️</span>
+                  <AlertCircleIcon size={24} className="text-amber-600" />
                   <div>
                     <div style={{ fontWeight: 800, color: '#c2410c', fontSize: '14px' }}>
                       Cảnh Báo Tồn Kho: Có {lowStockCount} mặt hàng sắp hết hàng hoặc đã hết hàng (&lt; 10 cái)!
@@ -2173,7 +2213,9 @@ export default function SellerDashboardPage() {
                   className={`seller-tab-btn ${productStatusFilter === 'low_stock' ? 'active' : ''}`}
                   onClick={() => setProductStatusFilter('low_stock')}
                 >
-                  ⚠️ Sắp hết hàng ({lowStockCount})
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertCircleIcon size={12} /> Sắp hết hàng ({lowStockCount})
+                  </span>
                 </button>
               </div>
 
@@ -2183,7 +2225,7 @@ export default function SellerDashboardPage() {
                   <input
                     type="text"
                     className="shopee-form-input"
-                    placeholder="🔍 Tìm theo tên sản phẩm, từ khóa..."
+                    placeholder="Tìm theo tên sản phẩm, từ khóa..."
                     value={productSearch}
                     onChange={(e) => setProductSearch(e.target.value)}
                     style={{ padding: '8px 12px', fontSize: '13px' }}
@@ -2313,7 +2355,7 @@ export default function SellerDashboardPage() {
                               }}
                               title="Chỉnh sửa nhanh tồn kho"
                             >
-                              ✏️
+                              <PencilIcon size={11} />
                             </button>
                           </div>
                         </td>
@@ -2395,28 +2437,34 @@ export default function SellerDashboardPage() {
                   className={`seller-tab-btn ${orderStatusFilter === 'pending' ? 'active' : ''}`}
                   onClick={() => setOrderStatusFilter('pending')}
                 >
-                  ⏳ Chờ xác nhận ({shopOrders.filter(o => o.status === 'pending').length})
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <ClockIcon size={12} /> Chờ xác nhận ({shopOrders.filter(o => o.status === 'pending').length})
+                  </span>
                 </button>
                 <button
                   type="button"
                   className={`seller-tab-btn ${orderStatusFilter === 'shipping' ? 'active' : ''}`}
                   onClick={() => setOrderStatusFilter('shipping')}
                 >
-                  🚚 Đang giao hàng ({shopOrders.filter(o => o.status === 'shipping').length})
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <TruckIcon size={12} /> Đang giao hàng ({shopOrders.filter(o => o.status === 'shipping').length})
+                  </span>
                 </button>
                 <button
                   type="button"
                   className={`seller-tab-btn ${orderStatusFilter === 'completed' ? 'active' : ''}`}
                   onClick={() => setOrderStatusFilter('completed')}
                 >
-                  ✅ Đã hoàn thành ({shopOrders.filter(o => o.status === 'completed').length})
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckIcon size={12} /> Đã hoàn thành ({shopOrders.filter(o => o.status === 'completed').length})
+                  </span>
                 </button>
                 <button
                   type="button"
                   className={`seller-tab-btn ${orderStatusFilter === 'cancelled' ? 'active' : ''}`}
                   onClick={() => setOrderStatusFilter('cancelled')}
                 >
-                  ❌ Đã hủy ({shopOrders.filter(o => o.status === 'cancelled').length})
+                  Đã hủy ({shopOrders.filter(o => o.status === 'cancelled').length})
                 </button>
               </div>
 
@@ -2425,7 +2473,7 @@ export default function SellerDashboardPage() {
                 <input
                   type="text"
                   className="shopee-form-input"
-                  placeholder="🔍 Tìm theo mã đơn #ORD, tên khách, số điện thoại..."
+                  placeholder="Tìm theo mã đơn #ORD, tên khách, số điện thoại..."
                   value={orderSearch}
                   onChange={(e) => setOrderSearch(e.target.value)}
                   style={{ padding: '8px 12px', fontSize: '13px' }}
@@ -2476,7 +2524,9 @@ export default function SellerDashboardPage() {
                         </td>
                         <td>
                           <div style={{ fontWeight: 700 }}>{ord.customerName}</div>
-                          <small style={{ color: 'var(--text-muted)' }}>📞 {ord.phone}</small>
+                          <small style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                            <PhoneIcon size={11} /> {ord.phone}
+                          </small>
                         </td>
                         <td>
                           <div style={{ fontSize: '12.5px', maxWidth: '240px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -2507,8 +2557,9 @@ export default function SellerDashboardPage() {
                                 className="shopee-btn shopee-btn-primary shopee-btn-sm"
                                 onClick={() => handleUpdateOrderStatus(ord.orderId, 'shipping', 'Đang giao hàng')}
                                 title="Xác nhận đơn và chuẩn bị giao shipper"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               >
-                                ⚡ Xác nhận đơn
+                                <BoltIcon size={13} /> Xác nhận đơn
                               </button>
                             )}
 
@@ -2517,9 +2568,9 @@ export default function SellerDashboardPage() {
                                 type="button"
                                 className="shopee-btn shopee-btn-secondary shopee-btn-sm"
                                 onClick={() => handleUpdateOrderStatus(ord.orderId, 'completed', 'Đã hoàn thành')}
-                                style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', fontWeight: 700 }}
+                                style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               >
-                                ✓ Giao thành công
+                                <CheckIcon size={13} /> Giao thành công
                               </button>
                             )}
 
@@ -2528,8 +2579,9 @@ export default function SellerDashboardPage() {
                               className="shopee-btn shopee-btn-secondary shopee-btn-sm"
                               onClick={() => setPrintingOrder(ord)}
                               title="In phiếu gửi hàng & Mã vạch SPX"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                             >
-                              🖨️ In Phiếu
+                              <PrinterIcon size={13} /> In Phiếu
                             </button>
 
                             <button
@@ -2537,9 +2589,9 @@ export default function SellerDashboardPage() {
                               className="shopee-btn shopee-btn-secondary shopee-btn-sm"
                               onClick={() => setPackingSlipOrder(ord)}
                               title="In phiếu xuất kho & đóng gói hàng hóa"
-                              style={{ background: '#f8fafc', color: '#1e293b' }}
+                              style={{ background: '#f8fafc', color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                             >
-                              📄 Đóng gói
+                              <ReceiptIcon size={13} /> Đóng gói
                             </button>
 
                             <button
@@ -2547,8 +2599,9 @@ export default function SellerDashboardPage() {
                               className="shopee-btn shopee-btn-secondary shopee-btn-sm"
                               onClick={() => setSelectedOrderDetails(ord)}
                               title="Xem chi tiết đơn hàng"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                             >
-                              👁️ Chi tiết
+                              <EyeIcon size={13} /> Chi tiết
                             </button>
                           </div>
                         </td>
@@ -2667,8 +2720,8 @@ export default function SellerDashboardPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', minHeight: '480px' }}>
               {/* Danh sách hội thoại khách hàng */}
               <div style={{ borderRight: '1px solid var(--border-medium)', background: 'var(--bg-muted, #f8fafc)' }}>
-                <div style={{ padding: '14px', borderBottom: '1px solid var(--border-medium)', fontWeight: 800, fontSize: '15px' }}>
-                  💬 Tin Nhắn Khách Hàng ({shopChats.length})
+                <div style={{ padding: '14px', borderBottom: '1px solid var(--border-medium)', fontWeight: 800, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ChatIcon size={16} /> Tin Nhắn Khách Hàng ({shopChats.length})
                 </div>
                 <div style={{ overflowY: 'auto', maxHeight: '420px' }}>
                   {shopChats.length === 0 ? (
@@ -2758,9 +2811,9 @@ export default function SellerDashboardPage() {
                               key={fIdx}
                               type="button"
                               onClick={() => setChatReplyText(fastText)}
-                              style={{ background: 'var(--bg-card)', border: '1px solid #cbd5e1', padding: '3px 8px', borderRadius: '12px', fontSize: '11px', cursor: 'pointer', flexShrink: 0 }}
+                              style={{ background: 'var(--bg-card)', border: '1px solid #cbd5e1', padding: '3px 8px', borderRadius: '12px', fontSize: '11px', cursor: 'pointer', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '3px' }}
                             >
-                              ⚡ {fastText}
+                              <BoltIcon size={11} /> {fastText}
                             </button>
                           ))}
                         </div>
@@ -2784,7 +2837,7 @@ export default function SellerDashboardPage() {
                   })()
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '14px', padding: '40px' }}>
-                    👈 Chọn một cuộc trò chuyện từ danh sách bên trái để phản hồi khách hàng
+                    Chọn một cuộc trò chuyện từ danh sách bên trái để phản hồi khách hàng
                   </div>
                 )}
               </div>
@@ -2873,8 +2926,8 @@ export default function SellerDashboardPage() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="submit" className="shopee-btn shopee-btn-primary" style={{ padding: '9px 24px', fontWeight: 700 }}>
-                  💾 Lưu Thay Đổi Hồ Sơ
+                <button type="submit" className="shopee-btn shopee-btn-primary" style={{ padding: '9px 24px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <CheckIcon size={14} /> Lưu Thay Đổi Hồ Sơ
                 </button>
               </div>
             </form>
@@ -2897,8 +2950,8 @@ export default function SellerDashboardPage() {
 
               {/* Thông tin người nhận */}
               <div style={{ background: 'var(--bg-muted, #f8fafc)', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', border: '1px solid var(--border-medium)' }}>
-                <div style={{ fontWeight: 800, fontSize: '13px', marginBottom: '6px', color: '#ea580c' }}>
-                  📍 THÔNG TIN GIAO HÀNG & NGƯỜI NHẬN
+                <div style={{ fontWeight: 800, fontSize: '13px', marginBottom: '6px', color: '#ea580c', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <MapPinIcon size={14} /> THÔNG TIN GIAO HÀNG & NGƯỜI NHẬN
                 </div>
                 <div style={{ fontSize: '13px' }}>
                   <strong>{selectedOrderDetails.customerName}</strong> ({selectedOrderDetails.phone})
@@ -2906,8 +2959,8 @@ export default function SellerDashboardPage() {
                 <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                   {selectedOrderDetails.address}
                 </div>
-                <div style={{ fontSize: '12px', color: '#16a34a', marginTop: '4px' }}>
-                  🚚 Đơn vị vận chuyển: <strong>SPX Express</strong> (Mã vận đơn: {selectedOrderDetails.trackingCode})
+                <div style={{ fontSize: '12px', color: '#16a34a', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <TruckIcon size={13} /> Đơn vị vận chuyển: <strong>SPX Express</strong> (Mã vận đơn: {selectedOrderDetails.trackingCode})
                 </div>
               </div>
 
@@ -2957,8 +3010,9 @@ export default function SellerDashboardPage() {
                     setPrintingOrder(selectedOrderDetails);
                     setSelectedOrderDetails(null);
                   }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                 >
-                  🖨️ In Vận Đơn SPX
+                  <PrinterIcon size={13} /> In Vận Đơn SPX
                 </button>
                 <button
                   type="button"
@@ -2967,27 +3021,28 @@ export default function SellerDashboardPage() {
                     setPackingSlipOrder(selectedOrderDetails);
                     setSelectedOrderDetails(null);
                   }}
-                  style={{ background: '#f8fafc', color: '#1e293b' }}
+                  style={{ background: '#f8fafc', color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                 >
-                  📄 Phiếu Đóng Gói
+                  <ReceiptIcon size={13} /> Phiếu Đóng Gói
                 </button>
                 {selectedOrderDetails.status === 'pending' && (
                   <button
                     type="button"
                     className="shopee-btn shopee-btn-primary"
                     onClick={() => handleUpdateOrderStatus(selectedOrderDetails.orderId, 'shipping', 'Đang giao hàng')}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                   >
-                    ⚡ Xác Nhận Đơn Ngay
+                    <BoltIcon size={13} /> Xác Nhận Đơn Ngay
                   </button>
                 )}
                 {selectedOrderDetails.status === 'shipping' && (
                   <button
                     type="button"
                     className="shopee-btn shopee-btn-primary"
-                    style={{ background: '#16a34a' }}
+                    style={{ background: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                     onClick={() => handleUpdateOrderStatus(selectedOrderDetails.orderId, 'completed', 'Đã hoàn thành')}
                   >
-                    ✓ Đã Giao Thành Công
+                    <CheckIcon size={13} /> Đã Giao Thành Công
                   </button>
                 )}
               </div>
@@ -3131,7 +3186,9 @@ export default function SellerDashboardPage() {
                     </select>
                     {productForm.name && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontSize: '11.5px', color: '#16a34a', fontWeight: 600 }}>
-                        <span>🤖 AI Gợi ý phân loại:</span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <SparklesIcon size={14} color="#16a34a" /> AI Gợi ý phân loại:
+                        </span>
                         <span 
                           style={{ background: '#dcfce7', color: '#15803d', padding: '1px 8px', borderRadius: '4px', cursor: 'pointer', border: '1px solid #bbf7d0' }}
                           onClick={() => setProductForm(prev => ({ ...prev, category: autoDetectCategory(prev.name, currentShop.category) }))}
