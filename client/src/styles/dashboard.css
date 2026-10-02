@@ -423,8 +423,10 @@
   color: var(--text-primary, #0f172a);
   border-radius: 14px;
   width: 100%;
-  max-width: 720px;
+  max-width: 760px;
   max-height: 90vh;
+  display: flex !important;
+  flex-direction: column !important;
   overflow: hidden;
   padding: 0 !important;
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.28);
@@ -432,6 +434,33 @@
   box-sizing: border-box;
   position: relative;
   animation: orderModalSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Order Detail Scrollable Body */
+.order-detail-scroll-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: calc(90vh - 110px) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.order-detail-scroll-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.order-detail-scroll-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.order-detail-scroll-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.order-detail-scroll-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Order Detail Header */

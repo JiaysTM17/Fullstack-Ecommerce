@@ -13,6 +13,7 @@ const QUICK_TAGS = [
 ];
 
 const STAR_LABELS = {
+  0: 'Vui lòng chọn số sao',
   5: 'Tuyệt vời (Rất hài lòng)',
   4: 'Hài lòng',
   3: 'Bình thường',
@@ -33,9 +34,11 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
   ];
 
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0); // Initial 0: requires user interaction!
+  const [sellerRating, setSellerRating] = useState(5);
+  const [deliveryRating, setDeliveryRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
-  const [selectedTags, setSelectedTags] = useState(['Đúng với mô tả', 'Chất lượng sản phẩm tuyệt vời']);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [comment, setComment] = useState('');
   const [reviewPhotos, setReviewPhotos] = useState([]);
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -85,17 +88,25 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
     e.preventDefault();
     setErrorMsg('');
 
+    // Strict validation 1: User must select stars (rating > 0)
     if (!rating || rating < 1) {
-      setErrorMsg('Vui lòng chọn số sao để đánh giá sản phẩm.');
+      setErrorMsg('Vui lòng chọn số sao để đánh giá chất lượng sản phẩm (từ 1 đến 5 sao)!');
+      return;
+    }
+
+    // Strict validation 2: User must write meaningful comment (at least 10 characters)
+    const trimmedComment = comment.trim();
+    if (!trimmedComment) {
+      setErrorMsg('Vui lòng nhập nhận xét chi tiết (tối thiểu 10 ký tự) về chất lượng và độ hoàn thiện của sản phẩm!');
+      return;
+    }
+
+    if (trimmedComment.length < 10) {
+      setErrorMsg(`Nội dung nhận xét quá ngắn (${trimmedComment.length}/10 ký tự). Vui lòng nhập tối thiểu 10 ký tự để chia sẻ trải nghiệm thực tế và nhận +200 Shopee Xu!`);
       return;
     }
 
     setIsSubmitting(true);
-
-    const fallbackComment =
-      selectedTags.length > 0
-        ? `Sản phẩm rất tốt: ${selectedTags.join(', ')}.`
-        : 'Sản phẩm rất tốt, đóng gói cẩn thận, giao hàng nhanh!';
 
     const reviewData = {
       orderId: order.orderId || order._id || order.id,
@@ -104,8 +115,10 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
       productImage: currentItem.image,
       shopName: order.shopName || 'Shopee Mall',
       rating,
+      sellerRating,
+      deliveryRating,
       tags: selectedTags,
-      comment: comment.trim() || fallbackComment,
+      comment: trimmedComment,
       photos: reviewPhotos.map((p) => p.name),
       isAnonymous,
       createdAt: new Date().toISOString(),
@@ -126,7 +139,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1250, // Higher than OrderDetailModal (1100) so it's always accessible
+        zIndex: 1250, // Higher than OrderDetailModal (1100)
         background: 'rgba(15, 23, 42, 0.68)',
         backdropFilter: 'blur(6px)',
         display: 'flex',
@@ -220,7 +233,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
             boxSizing: 'border-box',
           }}
         >
-          {/* Shopee Xu Reward Banner - Royal Blue & Amber Accent */}
+          {/* Shopee Xu Reward Banner */}
           <div
             style={{
               background: '#eff6ff',
@@ -253,7 +266,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 Thưởng Ngay +200 Shopee Xu Vào Ví!
               </div>
               <div style={{ fontSize: '11.5px', color: '#475569', marginTop: '1px' }}>
-                Đánh giá chất lượng giúp cộng đồng người mua và nhận ngay 200 Xu trừ tiền trực tiếp.
+                Đánh giá có tâm từ 10 ký tự giúp cộng đồng và nhận ngay 200 Shopee Xu trừ tiền trực tiếp.
               </div>
             </div>
           </div>
@@ -327,12 +340,22 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
             </div>
           </div>
 
-          {/* Star Rating Section */}
-          <div style={{ textAlign: 'center', marginBottom: '14px', padding: '10px', background: '#fafaf9', borderRadius: '8px', border: '1px solid #f5f5f4' }}>
+          {/* Star Rating Section (Mandatory: Rating > 0 required) */}
+          <div
+            style={{
+              textAlign: 'center',
+              marginBottom: '14px',
+              padding: '12px',
+              background: rating === 0 ? '#fefce8' : '#fafaf9',
+              borderRadius: '8px',
+              border: `1.5px solid ${rating === 0 ? '#fde047' : '#f1f5f9'}`,
+              transition: 'all 0.2s ease',
+            }}
+          >
             <div style={{ fontSize: '12.5px', fontWeight: 700, marginBottom: '4px', color: '#0f172a' }}>
-              Chất Lượng Sản Phẩm
+              Chất Lượng Sản Phẩm <span style={{ color: '#ef4444' }}>*</span>
             </div>
-            <div style={{ display: 'inline-flex', gap: '6px', fontSize: '28px', cursor: 'pointer' }}>
+            <div style={{ display: 'inline-flex', gap: '6px', fontSize: '30px', cursor: 'pointer' }}>
               {[1, 2, 3, 4, 5].map((star) => {
                 const isLit = (hoverRating || rating) >= star;
                 return (
@@ -358,7 +381,14 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 );
               })}
             </div>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: '#d97706', marginTop: '4px' }}>
+            <div
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                color: rating === 0 ? '#b45309' : '#d97706',
+                marginTop: '4px',
+              }}
+            >
               {STAR_LABELS[hoverRating || rating]}
             </div>
           </div>
@@ -366,7 +396,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
           {/* Quick Tags Selection */}
           <div style={{ marginBottom: '14px' }}>
             <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>
-              Tiêu chí nổi bật bạn ấn tượng nhất:
+              Tiêu chí nổi bật bạn ấn tượng nhất (Tùy chọn):
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {QUICK_TAGS.map((tag) => {
@@ -393,6 +423,46 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 );
               })}
             </div>
+          </div>
+
+          {/* Comment Textarea (Mandatory: Min 10 chars) */}
+          <div style={{ marginBottom: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                Nhận xét chi tiết sản phẩm <span style={{ color: '#ef4444' }}>* (Tối thiểu 10 ký tự)</span>:
+              </label>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: comment.trim().length >= 10 ? '#16a34a' : comment.trim().length > 0 ? '#d97706' : '#64748b',
+                }}
+              >
+                {comment.trim().length >= 10
+                  ? `✓ Đạt yêu cầu (${comment.trim().length} ký tự)`
+                  : `${comment.trim().length}/10 ký tự`}
+              </span>
+            </div>
+            <textarea
+              rows={3}
+              value={comment}
+              onChange={(e) => {
+                setComment(e.target.value);
+                setErrorMsg('');
+              }}
+              placeholder="Chia sẻ trải nghiệm thực tế về chất lượng vải, đường may, kích thước, hiệu năng sản phẩm để giúp cộng đồng người mua nhé..."
+              style={{
+                width: '100%',
+                padding: '8px 10px',
+                borderRadius: '6px',
+                border: `1px solid ${comment.trim().length > 0 && comment.trim().length < 10 ? '#fca5a5' : '#cbd5e1'}`,
+                fontFamily: 'inherit',
+                fontSize: '12px',
+                resize: 'none',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
           </div>
 
           {/* Review Photos Upload - Fully supports PNG, JPG, JPEG, WEBP */}
@@ -476,38 +546,6 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
             </div>
           </div>
 
-          {/* Comment Textarea */}
-          <div style={{ marginBottom: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>
-                Nhận xét chi tiết:
-              </label>
-              <span style={{ fontSize: '11px', color: '#64748b' }}>
-                {comment.length} ký tự
-              </span>
-            </div>
-            <textarea
-              rows={2}
-              value={comment}
-              onChange={(e) => {
-                setComment(e.target.value);
-                setErrorMsg('');
-              }}
-              placeholder="Chia sẻ trải nghiệm thực tế về chất lượng sản phẩm, độ bền, tốc độ giao hàng SPX..."
-              style={{
-                width: '100%',
-                padding: '8px 10px',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                fontFamily: 'inherit',
-                fontSize: '12px',
-                resize: 'none',
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
           {/* Anonymous toggle */}
           <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <input
@@ -531,9 +569,10 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 color: '#b91c1c',
                 padding: '8px 12px',
                 borderRadius: '6px',
-                fontSize: '11.5px',
+                fontSize: '12px',
                 fontWeight: 600,
                 marginBottom: '12px',
+                lineHeight: 1.4,
               }}
             >
               ⚠️ {errorMsg}

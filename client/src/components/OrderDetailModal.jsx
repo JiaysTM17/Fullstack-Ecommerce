@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -37,6 +37,8 @@ export default function OrderDetailModal({
   onSimulateStep,
 }) {
   if (isOpen === false || !order) return null;
+
+  const [showDetailedTimeline, setShowDetailedTimeline] = useState(true);
 
   // Safe context resolution with fallbacks
   let showToast = () => {};
@@ -209,24 +211,54 @@ export default function OrderDetailModal({
       : 'Thanh toán khi nhận hàng'
   );
 
-  // Fee Breakdown Calculation
+  // Fee Breakdown Calculation - Ultra Thorough & Transparent
   const items = Array.isArray(order.items) && order.items.length > 0 ? order.items : [];
   const itemSubtotal = order.subtotal !== undefined
     ? Number(order.subtotal)
     : items.reduce((sum, it) => sum + (Number(it.price || 0) * (Number(it.quantity) || 1)), 0);
 
-  const voucherDiscount = Number(order.voucherDiscount || order.discount || 0);
-  const coinsDiscount = Number(order.coinsDiscount || order.coinDiscount || order.coinsUsed || order.coinsDeducted || 0);
-
-  const shippingFee = order.shippingFee !== undefined
-    ? Number(order.shippingFee)
-    : Math.max(0, Number(order.total || 0) - itemSubtotal + voucherDiscount + coinsDiscount);
-
-  const finalTotal = order.total !== undefined
+  const rawTotal = order.total !== undefined
     ? Number(order.total)
     : order.finalTotal !== undefined
     ? Number(order.finalTotal)
-    : Math.max(0, itemSubtotal + shippingFee - voucherDiscount - coinsDiscount);
+    : itemSubtotal;
+
+  let voucherDiscount = Number(
+    order.voucherDiscount ||
+    order.discount ||
+    order.discountAmount ||
+    order.voucherAmount ||
+    order.voucher?.discount ||
+    order.voucher?.discountAmount ||
+    order.appliedVoucher?.discount ||
+    order.appliedVoucher?.discountAmount ||
+    0
+  );
+
+  let coinsDiscount = Number(
+    order.coinsDiscount ||
+    order.coinDiscount ||
+    order.coinsUsed ||
+    order.coinsDeducted ||
+    order.usedCoinsDiscount ||
+    0
+  );
+
+  const shippingFee = order.shippingFee !== undefined
+    ? Number(order.shippingFee)
+    : 0;
+
+  // Deduce voucher discount if subtotal + shippingFee exceeds total and no explicit voucher discount was provided
+  const difference = (itemSubtotal + shippingFee) - (rawTotal + coinsDiscount);
+  if (difference > 0 && voucherDiscount === 0) {
+    voucherDiscount = difference;
+  } else if (difference > voucherDiscount) {
+    voucherDiscount = difference;
+  }
+
+  const finalTotal = rawTotal;
+  const totalSavings = Math.max(0, voucherDiscount + coinsDiscount);
+  const voucherCode = order.voucherCode || order.voucher?.code || order.appliedVoucher?.code || (voucherDiscount > 0 ? 'SHOPEEVOUCHER100K' : null);
 
   // Stepper Stages Definition
   const STEPS = [
@@ -237,6 +269,112 @@ export default function OrderDetailModal({
   ];
 
   const shopName = order.shopName || 'Shopee Mall Official';
+
+  // Construct Detailed Tracking Timeline Events Log
+  const getTrackingEvents = () => {
+    const baseDate = order.createdAt ? new Date(order.createdAt) : new Date();
+    const formatEventTime = (offsetHours) => {
+      const d = new Date(baseDate.getTime() + offsetHours * 3600 * 1000);
+      return (
+        d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) +
+        ' ' +
+        d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      );
+    };
+
+    const events = [];
+
+    if (isCancelled) {
+      events.push({
+        time: formatEventTime(2),
+        title: 'Đơn hàng đã hủy',
+        desc: `Đơn hàng đã được hủy thành công. Lý do: ${order.cancelReason || 'Người mua yêu cầu hủy'}. Tiền và Shopee Xu (nếu có) đã hoàn về ví.`,
+        active: true,
+        type: 'danger',
+      });
+      events.push({
+        time: formatEventTime(0),
+        title: 'Đặt hàng thành công',
+        desc: 'Đơn hàng đã được tạo thành công trên hệ thống Shopee.',
+        active: false,
+        type: 'done',
+      });
+      return events;
+    }
+
+    if (isReturning) {
+      events.push({
+        time: formatEventTime(30),
+        title: 'Yêu cầu trả hàng / hoàn tiền đang xử lý',
+        desc: `Hệ thống tiếp nhận yêu cầu khiếu nại trả hàng. Lý do: ${order.returnDetails?.reason || 'Hàng lỗi / hư hỏng'}.`,
+        active: true,
+        type: 'primary',
+      });
+    }
+
+    if (isCompleted) {
+      events.push({
+        time: formatEventTime(28),
+        title: 'Giao hàng thành công',
+        desc: 'Người nhận đã nhận hàng và ký xác nhận kiện hàng nguyên vẹn.',
+        active: true,
+        type: 'success',
+      });
+    }
+
+    if (isShipping || isCompleted) {
+      events.push({
+        time: formatEventTime(24),
+        title: 'Bưu tá đang phát hàng',
+        desc: `Shipper Nguyễn Văn Hùng (${order.courier?.phone || '0908 123 456'}) đang trên đường giao hàng đến địa chỉ người nhận.`,
+        active: isShipping && !isCompleted,
+        type: 'primary',
+      });
+      events.push({
+        time: formatEventTime(18),
+        title: 'Đã đến trạm phân loại đích',
+        desc: 'Kiện hàng đã nhập kho phân loại SPX Tân Bình, TP. Hồ Chí Minh.',
+        active: false,
+        type: 'done',
+      });
+      events.push({
+        time: formatEventTime(10),
+        title: 'Rời kho trung chuyển',
+        desc: 'Kiện hàng đã xuất kho trung chuyển tổng SPX Hub Củ Chi.',
+        active: false,
+        type: 'done',
+      });
+    }
+
+    if (isConfirmed || isShipping || isCompleted) {
+      events.push({
+        time: formatEventTime(4),
+        title: 'Đã bàn giao cho đơn vị vận chuyển',
+        desc: `Shop đã đóng gói hoàn tất và bàn giao cho bưu tá ${carrierName}.`,
+        active: isConfirmed && !isShipping && !isCompleted,
+        type: isConfirmed && !isShipping && !isCompleted ? 'primary' : 'done',
+      });
+      events.push({
+        time: formatEventTime(1),
+        title: 'Shop đã xác nhận đơn hàng',
+        desc: 'Người bán đã chuẩn bị hàng và in phiếu đóng gói.',
+        active: false,
+        type: 'done',
+      });
+    }
+
+    events.push({
+      time: formatEventTime(0),
+      title: 'Đặt hàng thành công',
+      desc: 'Đơn hàng đã được khởi tạo và ghi nhận thành công trên hệ thống Shopee.',
+      active: isPending,
+      type: isPending ? 'primary' : 'done',
+    });
+
+    return events;
+  };
+
+  const trackingEvents = getTrackingEvents();
 
   return (
     <div
@@ -269,7 +407,7 @@ export default function OrderDetailModal({
           color: '#0f172a',
           borderRadius: '14px',
           width: '100%',
-          maxWidth: '720px',
+          maxWidth: '760px',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
@@ -283,7 +421,7 @@ export default function OrderDetailModal({
         }}
       >
         {/* ==========================================================================
-            1. Header: Order ID, Date, Status Pill, Print & Close Actions (Slim 46px)
+            1. Header: Order ID, Date, Status Pill, Print & Close Actions
             ========================================================================== */}
         <div
           className="order-detail-header"
@@ -386,14 +524,16 @@ export default function OrderDetailModal({
         </div>
 
         {/* ==========================================================================
-            2. Scrollable Body: Compact High-Density Content
+            2. Scrollable Body: Fully Expandable, Smooth Scroll, High-Density Details
             ========================================================================== */}
         <div
           className="order-detail-scroll-body"
           style={{
             padding: '14px 18px',
             overflowY: 'auto',
-            flex: 1,
+            flex: '1 1 auto',
+            minHeight: 0,
+            maxHeight: 'calc(90vh - 110px)',
             boxSizing: 'border-box',
             display: 'flex',
             flexDirection: 'column',
@@ -446,17 +586,18 @@ export default function OrderDetailModal({
             </div>
           )}
 
-          {/* Stepper Progress Bar (Slim, Integrated, 42px) */}
+          {/* Logistics & Tracking Stepper + Detailed Event History */}
           {!isCancelled && (
             <div
               style={{
                 background: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
-                padding: '10px 14px 6px',
+                padding: '10px 14px',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              {/* Carrier Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <TruckIcon size={14} color="#2563eb" />
                   <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>
@@ -465,30 +606,62 @@ export default function OrderDetailModal({
                   <span style={{ fontSize: '11px', color: '#64748b' }}>
                     · Mã vận đơn: <strong style={{ color: '#0f172a' }}>{trackingCode}</strong>
                   </span>
-                </div>
-                {isShipping && handleOpenTracking && (
                   <button
                     type="button"
-                    className="shopee-order-btn-outline"
-                    onClick={() => handleOpenTracking(order)}
+                    className="copy-pill"
+                    onClick={() => handleCopy(trackingCode, 'Mã vận đơn')}
+                    title="Sao chép mã vận đơn"
+                    style={{ fontSize: '10.5px', padding: '1px 6px', cursor: 'pointer' }}
+                  >
+                    <CopyIcon size={10} />
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowDetailedTimeline((prev) => !prev)}
                     style={{
-                      height: '24px',
-                      padding: '0 8px',
-                      fontSize: '11px',
-                      borderRadius: '4px',
+                      border: 'none',
+                      background: 'transparent',
                       color: '#2563eb',
-                      borderColor: '#bfdbfe',
-                      background: '#eff6ff',
-                      fontWeight: 700,
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '2px 4px',
                     }}
                   >
-                    <MapPinIcon size={11} /> {t('spx_live_tracking', 'Bản đồ Shipper SPX')}
+                    <ClockIcon size={11} />
+                    {showDetailedTimeline ? 'Thu gọn lịch trình' : 'Xem lịch trình chi tiết'}
                   </button>
-                )}
+
+                  {isShipping && handleOpenTracking && (
+                    <button
+                      type="button"
+                      className="shopee-order-btn-outline"
+                      onClick={() => handleOpenTracking(order)}
+                      style={{
+                        height: '24px',
+                        padding: '0 8px',
+                        fontSize: '11px',
+                        borderRadius: '4px',
+                        color: '#2563eb',
+                        borderColor: '#bfdbfe',
+                        background: '#eff6ff',
+                        fontWeight: 700,
+                      }}
+                    >
+                      <MapPinIcon size={11} /> {t('spx_live_tracking', 'Bản đồ Shipper SPX')}
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Horizontal Stepper */}
-              <div style={{ position: 'relative', width: '100%', margin: '4px 0 6px' }}>
+              {/* Horizontal Stepper Progress */}
+              <div style={{ position: 'relative', width: '100%', margin: '6px 0 8px' }}>
                 <div
                   style={{
                     position: 'absolute',
@@ -560,10 +733,64 @@ export default function OrderDetailModal({
                   })}
                 </div>
               </div>
+
+              {/* Detailed Logistics Timeline Events Log */}
+              {showDetailedTimeline && (
+                <div
+                  style={{
+                    marginTop: '10px',
+                    paddingTop: '8px',
+                    borderTop: '1px dashed #cbd5e1',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}
+                >
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                    Nhật ký hành trình bưu kiện ({trackingEvents.length} mốc thời gian)
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '140px', overflowY: 'auto' }}>
+                    {trackingEvents.map((evt, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '8px',
+                          fontSize: '11.5px',
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '7px',
+                            height: '7px',
+                            borderRadius: '50%',
+                            background: evt.active ? '#2563eb' : '#94a3b8',
+                            boxShadow: evt.active ? '0 0 0 3px #bfdbfe' : 'none',
+                            marginTop: '5px',
+                            flexShrink: 0,
+                          }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <span style={{ fontWeight: evt.active ? 700 : 600, color: evt.active ? '#2563eb' : '#0f172a' }}>
+                            {evt.title}
+                          </span>
+                          <span style={{ color: '#64748b', margin: '0 4px' }}>·</span>
+                          <span style={{ color: '#64748b', fontSize: '11px' }}>{evt.time}</span>
+                          <div style={{ color: '#475569', fontSize: '11px', marginTop: '1px' }}>
+                            {evt.desc}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* 3. 2-Column Delivery Address & Payment Information Grid (Tight, clean) */}
+          {/* 3. 2-Column Delivery Address & Logistics Profile Grid */}
           <div
             style={{
               display: 'grid',
@@ -611,7 +838,7 @@ export default function OrderDetailModal({
               )}
             </div>
 
-            {/* Payment & Invoice Details Card */}
+            {/* Carrier & Delivery Dispatch Info Card */}
             <div
               style={{
                 background: '#f8fafc',
@@ -626,9 +853,9 @@ export default function OrderDetailModal({
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <CreditCardIcon size={13} color="#2563eb" />
+                    <TruckIcon size={13} color="#2563eb" />
                     <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
-                      {t('payment_info_title', 'Thanh Toán')}
+                      {t('logistics_info_title', 'Thông Tin Giao Nhận')}
                     </span>
                   </div>
                   <span
@@ -637,32 +864,30 @@ export default function OrderDetailModal({
                       fontWeight: 700,
                       padding: '1px 6px',
                       borderRadius: '4px',
-                      background: isPaid ? '#dcfce7' : isCancelled ? '#fee2e2' : '#eff6ff',
-                      color: isPaid ? '#15803d' : isCancelled ? '#b91c1c' : '#1d4ed8',
+                      background: '#eff6ff',
+                      color: '#1d4ed8',
                     }}
                   >
-                    {paymentStatusText}
+                    Tiết Kiệm (SPX)
                   </span>
                 </div>
                 <div style={{ fontSize: '12px', color: '#0f172a', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>Phương thức:</span>
-                  <strong>{paymentMethod}</strong>
+                  <span style={{ color: '#64748b' }}>Đơn vị vận chuyển:</span>
+                  <strong>{carrierName}</strong>
                 </div>
                 <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
-                  <span>Mã giao dịch:</span>
-                  <span
-                    className="copy-pill"
-                    onClick={() => handleCopy(transactionId, 'Mã GD')}
-                    style={{ fontSize: '11px', cursor: 'pointer' }}
-                  >
-                    {transactionId} <CopyIcon size={10} />
-                  </span>
+                  <span>Hotline khiếu nại:</span>
+                  <strong style={{ color: '#0f172a' }}>{hotline}</strong>
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
+                  <span>Thời gian giao dự kiến:</span>
+                  <span style={{ color: '#16a34a', fontWeight: 600 }}>Trong ngày</span>
                 </div>
               </div>
 
-              <div style={{ fontSize: '11px', color: '#1e40af', background: '#eff6ff', padding: '4px 8px', borderRadius: '4px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <ShieldCheckIcon size={12} color="#2563eb" />
-                <span>Bảo hộ bởi Shopee SafePay an toàn</span>
+              <div style={{ fontSize: '11px', color: '#15803d', background: '#f0fdf4', padding: '4px 8px', borderRadius: '4px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <ShieldCheckIcon size={12} color="#16a34a" />
+                <span>Giao hàng an toàn · Cho phép kiểm tra hàng</span>
               </div>
             </div>
           </div>
@@ -790,10 +1015,18 @@ export default function OrderDetailModal({
                         >
                           {item.name}
                         </div>
-                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                          Phân loại: {finalVariant} | Kích thước: {finalSize} | Số lượng: x{itemQty}
+                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                          <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px' }}>
+                            Phân loại: {finalVariant}
+                          </span>
+                          <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px' }}>
+                            Kích thước: {finalSize}
+                          </span>
+                          <span style={{ fontWeight: 600, color: '#0f172a' }}>
+                            x{itemQty}
+                          </span>
                         </div>
-                        <div style={{ fontSize: '10.5px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
+                        <div style={{ fontSize: '10.5px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '3px' }}>
                           <ShieldCheckIcon size={11} color="#16a34a" /> 100% Chính hãng · Đổi trả trong 15 ngày
                         </div>
                       </div>
@@ -829,57 +1062,156 @@ export default function OrderDetailModal({
             </div>
           </div>
 
-          {/* 5. Financial Cost Breakdown (Compact right-aligned panel) */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          {/* 5. Comprehensive Financial Cost Breakdown & Payment Details (2-Column Grid) */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '10px',
+            }}
+          >
+            {/* Payment & Trust Card */}
             <div
               style={{
-                width: '100%',
-                maxWidth: '340px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <CreditCardIcon size={13} color="#2563eb" />
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                      {t('payment_info_title', 'Phương Thức Thanh Toán')}
+                    </span>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '10.5px',
+                      fontWeight: 700,
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      background: isPaid ? '#dcfce7' : isCancelled ? '#fee2e2' : '#eff6ff',
+                      color: isPaid ? '#15803d' : isCancelled ? '#b91c1c' : '#1d4ed8',
+                    }}
+                  >
+                    {paymentStatusText}
+                  </span>
+                </div>
+                <div style={{ fontSize: '12px', color: '#0f172a', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#64748b' }}>Hình thức:</span>
+                  <strong>{paymentMethod}</strong>
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
+                  <span>Mã giao dịch:</span>
+                  <span
+                    className="copy-pill"
+                    onClick={() => handleCopy(transactionId, 'Mã GD')}
+                    style={{ fontSize: '11px', cursor: 'pointer' }}
+                  >
+                    {transactionId} <CopyIcon size={10} />
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ fontSize: '11px', color: '#1e40af', background: '#eff6ff', padding: '6px 8px', borderRadius: '4px', marginTop: '6px', display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: 1.35 }}>
+                <ShieldCheckIcon size={13} color="#2563eb" style={{ flexShrink: 0, marginTop: '1px' }} />
+                <span>Shopee SafePay bảo hộ: Tiền chỉ chuyển cho shop sau khi bạn nhận hàng và hài lòng 100%.</span>
+              </div>
+            </div>
+
+            {/* Financial Cost Breakdown Card */}
+            <div
+              style={{
                 background: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
                 padding: '10px 14px',
                 boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
               }}
             >
-              <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                <span>Tiền hàng (tạm tính):</span>
-                <span style={{ color: '#0f172a', fontWeight: 600 }}>{formatCurrency(itemSubtotal)}</span>
-              </div>
-              <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                <span>Phí vận chuyển:</span>
-                <span style={{ color: '#0f172a', fontWeight: 600 }}>
-                  {shippingFee === 0 ? 'Miễn phí' : formatCurrency(shippingFee)}
-                </span>
-              </div>
-              {voucherDiscount > 0 && (
-                <div style={{ fontSize: '11.5px', color: '#16a34a', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                  <span>Voucher giảm giá:</span>
-                  <strong>-{formatCurrency(voucherDiscount)}</strong>
+              <div>
+                <div style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  Bảng Kê Chi Phí Thanh Toán
                 </div>
-              )}
-              {coinsDiscount > 0 && (
-                <div style={{ fontSize: '11.5px', color: '#16a34a', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                  <span>Shopee Xu trừ:</span>
-                  <strong>-{formatCurrency(coinsDiscount)}</strong>
+                <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                  <span>Tiền hàng (tạm tính):</span>
+                  <span style={{ color: '#0f172a', fontWeight: 600 }}>{formatCurrency(itemSubtotal)}</span>
                 </div>
-              )}
-              <div
-                style={{
-                  marginTop: '6px',
-                  paddingTop: '6px',
-                  borderTop: '1px dashed #cbd5e1',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>
-                  Tổng thanh toán:
-                </span>
-                <span style={{ fontSize: '16px', fontWeight: 800, color: '#2563eb' }}>
-                  {formatCurrency(finalTotal)}
-                </span>
+                <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                  <span>Phí vận chuyển (SPX):</span>
+                  <span style={{ color: '#0f172a', fontWeight: 600 }}>
+                    {shippingFee === 0 ? 'Miễn phí (Freeship Xtra)' : formatCurrency(shippingFee)}
+                  </span>
+                </div>
+                {voucherDiscount > 0 && (
+                  <div style={{ fontSize: '11.5px', color: '#16a34a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>Voucher giảm giá:</span>
+                      {voucherCode && (
+                        <span style={{ fontSize: '10px', background: '#dcfce7', color: '#15803d', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                          #{voucherCode}
+                        </span>
+                      )}
+                    </span>
+                    <strong>-{formatCurrency(voucherDiscount)}</strong>
+                  </div>
+                )}
+                {coinsDiscount > 0 && (
+                  <div style={{ fontSize: '11.5px', color: '#16a34a', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                    <span>Shopee Xu khấu trừ:</span>
+                    <strong>-{formatCurrency(coinsDiscount)}</strong>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    marginTop: '6px',
+                    paddingTop: '6px',
+                    borderTop: '1px dashed #cbd5e1',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                  }}
+                >
+                  <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>
+                    Tổng thanh toán:
+                  </span>
+                  <span style={{ fontSize: '17px', fontWeight: 800, color: '#2563eb' }}>
+                    {formatCurrency(finalTotal)}
+                  </span>
+                </div>
+
+                {totalSavings > 0 && (
+                  <div
+                    style={{
+                      marginTop: '4px',
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: '4px',
+                      padding: '3px 8px',
+                      color: '#15803d',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <span>🎉</span>
+                    <span>Tiết kiệm được {formatCurrency(totalSavings)} cho đơn hàng này</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
