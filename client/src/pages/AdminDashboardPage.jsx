@@ -25,8 +25,48 @@ import {
   CartIcon,
   UserIcon,
   SparklesIcon,
+  CheckIcon,
+  CloseIcon,
+  ClockIcon,
+  ShirtIcon,
+  LaptopIcon,
+  HomeIcon,
+  TargetIcon,
+  PlusIcon,
+  BookOpenIcon,
+  FoodIcon,
 } from '../components/OrdersIcons';
 import '../styles/dashboard.css';
+
+const renderAdminCategoryIcon = (icon) => {
+  switch (icon) {
+    case 'fashion':
+    case 'shirt':
+    case '\u{1F455}':
+      return <ShirtIcon size={20} color="#2563eb" />;
+    case 'electronics':
+    case 'headphones':
+    case 'laptop':
+    case '\u{1F3A7}':
+      return <LaptopIcon size={20} color="#0284c7" />;
+    case 'home':
+    case 'living':
+    case '\u{1F3E0}':
+      return <HomeIcon size={20} color="#0d9488" />;
+    case 'beauty':
+    case '\u{1F484}':
+      return <SparklesIcon size={20} color="#db2777" />;
+    case 'sports':
+    case '\u{26BD}':
+      return <TargetIcon size={20} color="#ea580c" />;
+    case 'book':
+      return <BookOpenIcon size={20} color="#8b5cf6" />;
+    case 'food':
+      return <FoodIcon size={20} color="#f59e0b" />;
+    default:
+      return <PackageIcon size={20} color="#64748b" />;
+  }
+};
 
 const INITIAL_ALL_SHOPS = [
   { id: "shop_01", name: "Thời Trang GenZ Official", ownerName: "Trần Thị Minh Tâm", email: "shop.genz@marketplace.vn", phone: "0912345678", productsCount: 9, totalRevenue: 18450000, status: "active", statusText: "Đang hoạt động" },
@@ -52,11 +92,11 @@ const INITIAL_MODERATION_PRODUCTS = [
 ];
 
 const INITIAL_CATEGORIES = [
-  { id: 'cat_01', name: 'Thời trang', icon: '👕', count: 42, active: true },
-  { id: 'cat_02', name: 'Điện tử & Công nghệ', icon: '🎧', count: 35, active: true },
-  { id: 'cat_03', name: 'Đời sống & Nhà cửa', icon: '🏠', count: 28, active: true },
-  { id: 'cat_04', name: 'Sức khỏe & Làm đẹp', icon: '💄', count: 19, active: true },
-  { id: 'cat_05', name: 'Thể thao & Du lịch', icon: '⚽', count: 14, active: true },
+  { id: 'cat_01', name: 'Thời trang', icon: 'fashion', count: 42, active: true },
+  { id: 'cat_02', name: 'Điện tử & Công nghệ', icon: 'electronics', count: 35, active: true },
+  { id: 'cat_03', name: 'Đời sống & Nhà cửa', icon: 'living', count: 28, active: true },
+  { id: 'cat_04', name: 'Sức khỏe & Làm đẹp', icon: 'beauty', count: 19, active: true },
+  { id: 'cat_05', name: 'Thể thao & Du lịch', icon: 'sports', count: 14, active: true },
 ];
 
 const INITIAL_FINANCE_SETTLEMENTS = [
@@ -95,7 +135,7 @@ export default function AdminDashboardPage() {
   const [moderationProducts, setModerationProducts] = useState(INITIAL_MODERATION_PRODUCTS);
   const [categories, setCategories] = useState(INITIAL_CATEGORIES);
   const [newCatName, setNewCatName] = useState('');
-  const [newCatIcon, setNewCatIcon] = useState('📦');
+  const [newCatIcon, setNewCatIcon] = useState('package');
   const [financeList, setFinanceList] = useState(INITIAL_FINANCE_SETTLEMENTS);
 
   // States cho tính năng Xóa tài khoản & Xóa gian hàng
@@ -406,7 +446,7 @@ export default function AdminDashboardPage() {
     const newCat = {
       id: `cat_${Date.now()}`,
       name: newCatName.trim(),
-      icon: newCatIcon || '📦',
+      icon: newCatIcon || 'package',
       count: 0,
       active: true,
     };
@@ -837,8 +877,19 @@ export default function AdminDashboardPage() {
                 type="button"
                 className="shopee-btn shopee-btn-primary shopee-btn-sm"
                 onClick={() => setShowAddVoucher(prev => !prev)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                {showAddVoucher ? '✕ Đóng form' : '+ Tạo Voucher Mới'}
+                {showAddVoucher ? (
+                  <>
+                    <CloseIcon size={14} />
+                    <span>Đóng form</span>
+                  </>
+                ) : (
+                  <>
+                    <PlusIcon size={14} />
+                    <span>Tạo Voucher Mới</span>
+                  </>
+                )}
               </button>
             </div>
 
@@ -930,8 +981,9 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <button type="submit" className="shopee-btn shopee-btn-primary">
-                    ✓ Phát Hành Voucher Toàn Sàn
+                  <button type="submit" className="shopee-btn shopee-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <CheckIcon size={15} />
+                    <span>Phát Hành Voucher Toàn Sàn</span>
                   </button>
                 </div>
               </form>
@@ -1029,9 +1081,27 @@ export default function AdminDashboardPage() {
                             background: p.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : p.status === 'pending' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(239, 68, 68, 0.1)',
                             color: p.status === 'approved' ? '#059669' : p.status === 'pending' ? '#d97706' : '#dc2626',
                             fontWeight: 700,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
                           }}
                         >
-                          {p.status === 'approved' ? '✓ Đã Duyệt' : p.status === 'pending' ? '⏳ Chờ Duyệt' : '✕ Từ Chối / Gỡ Bỏ'}
+                          {p.status === 'approved' ? (
+                            <>
+                              <CheckIcon size={12} color="#059669" />
+                              <span>Đã Duyệt</span>
+                            </>
+                          ) : p.status === 'pending' ? (
+                            <>
+                              <ClockIcon size={12} color="#d97706" />
+                              <span>Chờ Duyệt</span>
+                            </>
+                          ) : (
+                            <>
+                              <CloseIcon size={12} color="#dc2626" />
+                              <span>Từ Chối / Gỡ Bỏ</span>
+                            </>
+                          )}
                         </span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
@@ -1039,20 +1109,22 @@ export default function AdminDashboardPage() {
                           <button
                             type="button"
                             className="shopee-btn shopee-btn-sm"
-                            style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #10b981', marginRight: '6px' }}
+                            style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #10b981', marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                             onClick={() => handleApproveProduct(p.id)}
                           >
-                            ✓ Duyệt Bán
+                            <CheckIcon size={12} color="#059669" />
+                            <span>Duyệt Bán</span>
                           </button>
                         )}
                         {p.status !== 'rejected' && (
                           <button
                             type="button"
                             className="shopee-btn shopee-btn-sm"
-                            style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #ef4444' }}
+                            style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #ef4444', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                             onClick={() => handleRejectProduct(p.id)}
                           >
-                            ✕ Gỡ Bỏ
+                            <CloseIcon size={12} color="#dc2626" />
+                            <span>Gỡ Bỏ</span>
                           </button>
                         )}
                       </td>
@@ -1080,14 +1152,21 @@ export default function AdminDashboardPage() {
 
             {/* Form thêm danh mục */}
             <form onSubmit={handleAddCategory} style={{ display: 'flex', gap: '10px', margin: '16px 0', padding: '16px', background: 'var(--bg-muted, #f8fafc)', borderRadius: '8px' }}>
-              <input
-                type="text"
-                className="shopee-form-input"
-                placeholder="Nhập biểu tượng Emoji (VD: 📚, 🍔, 🚗)..."
+              <select
+                className="shopee-form-select"
                 value={newCatIcon}
                 onChange={(e) => setNewCatIcon(e.target.value)}
-                style={{ width: '140px' }}
-              />
+                style={{ width: '170px' }}
+              >
+                <option value="package">Mặc định (Kiện hàng)</option>
+                <option value="fashion">Thời trang</option>
+                <option value="electronics">Điện tử & CN</option>
+                <option value="living">Đời sống & Nhà cửa</option>
+                <option value="beauty">Sắc đẹp & Sức khỏe</option>
+                <option value="sports">Thể thao & Dã ngoại</option>
+                <option value="book">Sách & Văn phòng</option>
+                <option value="food">Ẩm thực & Bách hóa</option>
+              </select>
               <input
                 type="text"
                 required
@@ -1097,8 +1176,9 @@ export default function AdminDashboardPage() {
                 onChange={(e) => setNewCatName(e.target.value)}
                 style={{ flex: 1 }}
               />
-              <button type="submit" className="shopee-btn shopee-btn-primary" style={{ whiteSpace: 'nowrap' }}>
-                + Thêm Danh Mục
+              <button type="submit" className="shopee-btn shopee-btn-primary" style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <PlusIcon size={14} />
+                <span>Thêm Danh Mục</span>
               </button>
             </form>
 
@@ -1116,7 +1196,11 @@ export default function AdminDashboardPage() {
                 <tbody>
                   {categories.map((c) => (
                     <tr key={c.id}>
-                      <td style={{ fontSize: '20px' }}>{c.icon}</td>
+                      <td>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '6px', background: '#f1f5f9' }}>
+                          {renderAdminCategoryIcon(c.icon)}
+                        </span>
+                      </td>
                       <td><strong>{c.name}</strong></td>
                       <td>{c.count} sản phẩm</td>
                       <td>
@@ -1223,7 +1307,8 @@ export default function AdminDashboardPage() {
                           </button>
                         ) : (
                           <span style={{ fontSize: '12px', color: 'var(--color-success)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <span>✓</span> Đã Giải Ngân Thành Công
+                            <CheckIcon size={14} color="var(--color-success)" />
+                            <span>Đã Giải Ngân Thành Công</span>
                           </span>
                         )}
                       </td>
