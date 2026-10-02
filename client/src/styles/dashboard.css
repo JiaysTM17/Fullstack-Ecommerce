@@ -2238,9 +2238,21 @@
     display: none !important;
   }
 
-  /* When invoice modal is present in print, completely hide order detail modal */
+  /* When invoice modal is present in print, completely hide everything else */
+  body:has(.invoice-printable-container) > *:not(:has(.invoice-printable-container)),
+  body:has(.invoice-printable-container) .shopee-container,
+  body:has(.invoice-printable-container) .orders-dashboard-wrapper,
+  body:has(.invoice-printable-container) .account-portal-layout,
   body:has(.invoice-printable-container) .order-detail-modal-overlay,
   body:has(.invoice-printable-container) .order-detail-modal-container {
+    display: none !important;
+  }
+
+  /* When order detail modal is present in print, hide background page */
+  body:has(.order-detail-modal-container) > *:not(:has(.order-detail-modal-container)),
+  body:has(.order-detail-modal-container) .shopee-container,
+  body:has(.order-detail-modal-container) .orders-dashboard-wrapper,
+  body:has(.order-detail-modal-container) .account-portal-layout {
     display: none !important;
   }
 
@@ -2303,3 +2315,450 @@
     color: #000000 !important;
   }
 }
+
+/* ==========================================================================
+   Standard E-Commerce 2-Column Account Portal Layout & Sticky Left Sidebar
+   ========================================================================== */
+
+.account-portal-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  max-width: 1240px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 992px) {
+  .account-portal-layout {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+/* Sticky Left Sidebar Container */
+.shopee-account-sidebar-container {
+  width: 270px;
+  min-width: 270px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+  align-self: flex-start;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  background: var(--bg-card, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--border-medium, #e2e8f0);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+  padding: 14px;
+  box-sizing: border-box;
+  font-family: var(--font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  z-index: 10;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.shopee-account-sidebar-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.shopee-account-sidebar-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+@media (max-width: 992px) {
+  .shopee-account-sidebar-container {
+    width: 100%;
+    min-width: 100%;
+    position: static;
+    max-height: none;
+  }
+}
+
+/* Profile Card inside Sidebar */
+.account-sidebar-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 6px 14px;
+  border-bottom: 1px solid var(--border-light, #f1f5f9);
+  margin-bottom: 12px;
+}
+
+.account-sidebar-avatar-wrapper {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+}
+
+.account-sidebar-avatar-img,
+.account-sidebar-avatar-fallback {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 800;
+  font-size: 19px;
+  border: 2px solid #bfdbfe;
+}
+
+.account-sidebar-online-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  background: #22c55e;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+}
+
+.account-sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.account-sidebar-user-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.account-sidebar-role-badge {
+  font-size: 11px;
+  color: #2563eb;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.account-sidebar-edit-link {
+  font-size: 11.5px;
+  color: #64748b;
+  text-decoration: none;
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: color 0.15s ease;
+}
+
+.account-sidebar-edit-link:hover {
+  color: #2563eb;
+}
+
+/* Sidebar Navigation Groups */
+.account-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.account-sidebar-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 4px 6px;
+}
+
+.account-sidebar-group-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.account-sidebar-menu-btn,
+.account-sidebar-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.account-sidebar-menu-btn:hover,
+.account-sidebar-link:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.account-sidebar-menu-btn.active,
+.account-sidebar-link.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.sidebar-bullet-icon {
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sidebar-menu-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-sidebar-total-badge {
+  font-size: 11px;
+  font-weight: 700;
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  border: 1px solid #bfdbfe;
+}
+
+.account-sidebar-live-tag {
+  font-size: 10px;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #15803d;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.2px;
+}
+
+.account-sidebar-coins-pill {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ca8a04;
+  background: #fefce8;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* Status Filter Sublist */
+.account-sidebar-status-sublist {
+  padding-left: 8px;
+  margin: 2px 0 6px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 2px solid #e2e8f0;
+}
+
+.account-sidebar-subitem-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 5px 8px;
+  border-radius: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s ease;
+}
+
+.account-sidebar-subitem-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.account-sidebar-subitem-btn.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.subitem-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
+  color: inherit;
+}
+
+.subitem-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subitem-count-badge {
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.subitem-count-badge.active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+/* Date Filter Box inside Sidebar */
+.account-sidebar-date-filter-box {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.date-filter-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.date-filter-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.date-pill-btn {
+  text-align: left;
+  font-size: 11.5px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.date-pill-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.date-pill-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  font-weight: 700;
+}
+
+/* Sidebar Quick Actions */
+.account-sidebar-quick-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.sidebar-quick-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sidebar-quick-btn:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.seller-portal-link {
+  color: #2563eb !important;
+  background: #eff6ff !important;
+}
+
+.admin-portal-link {
+  color: #dc2626 !important;
+  background: #fef2f2 !important;
+}
+
+.link-arrow {
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+/* Right Side Content Container */
+.account-portal-main-content {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Floating Scroll-to-Top Button */
+.shopee-scroll-top-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 99;
+  transition: all 0.2s ease;
+  opacity: 0.9;
+}
+
+.shopee-scroll-top-btn:hover {
+  transform: translateY(-2px);
+  opacity: 1;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+}
+

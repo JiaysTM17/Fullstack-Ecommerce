@@ -260,16 +260,19 @@ export default function OrderDetailModal({
     0
   );
 
-  const shippingFee = order.shippingFee !== undefined
-    ? Number(order.shippingFee)
-    : 0;
+  let shippingFee = 0;
+  if (order.shippingFee !== undefined && order.shippingFee !== null) {
+    shippingFee = Number(order.shippingFee);
+  } else if (rawTotal > itemSubtotal) {
+    shippingFee = rawTotal - itemSubtotal;
+  }
 
   // Deduce voucher discount if subtotal + shippingFee exceeds total and no explicit voucher discount was provided
-  const difference = (itemSubtotal + shippingFee) - (rawTotal + coinsDiscount);
-  if (difference > 0 && voucherDiscount === 0) {
-    voucherDiscount = difference;
-  } else if (difference > voucherDiscount) {
-    voucherDiscount = difference;
+  const netDue = (itemSubtotal + shippingFee) - (rawTotal + coinsDiscount);
+  if (netDue > 0 && voucherDiscount === 0) {
+    voucherDiscount = netDue;
+  } else if (netDue > voucherDiscount) {
+    voucherDiscount = netDue;
   }
 
   const finalTotal = rawTotal;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import AccountSidebar from '../components/AccountSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -44,10 +45,19 @@ export default function ProfilePage() {
   const { showToast } = useToast();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { coins, streak, hasCheckedInToday, checkInToday, coinHistory, addCoins } = useCoins();
 
   // Navigation & Sliding Tab Indicator State
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'addresses' | 'payments' | 'security' | 'settings' | 'vouchers' | 'coins'
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'profile'); // 'profile' | 'addresses' | 'payments' | 'security' | 'settings' | 'vouchers' | 'coins'
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['profile', 'addresses', 'payments', 'security', 'settings', 'vouchers', 'coins'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const tabRefs = useRef({});
   const fileInputRef = useRef(null);
@@ -717,8 +727,26 @@ export default function ProfilePage() {
   const initialLetter = (user.fullName || user.email || 'U').charAt(0).toUpperCase();
 
   return (
-    <main className="profile-page-wrapper">
-      <div className="profile-hub-card">
+    <main className="profile-page-wrapper" style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 16px' }}>
+      <div className="account-portal-layout">
+        {/* Left Sticky Navigation & Filter Sidebar */}
+        <AccountSidebar
+          activeSection={activeTab}
+          onSelectTrackingView={() => navigate('/orders?view=tracking')}
+          onSelectStatusTab={(tabId) => navigate(`/orders?tab=${tabId}`)}
+          orderCounts={{
+            all: ordersSummary.total,
+            pending: 0,
+            shipping: ordersSummary.processing,
+            completed: ordersSummary.completed,
+            returning: 0,
+            cancelled: 0,
+          }}
+        />
+
+        {/* Right Main Content Area */}
+        <div className="account-portal-main-content">
+          <div className="profile-hub-card">
         {/* ============================================================
             HEADER PROFILE HERO BANNER
             ============================================================ */}
@@ -2386,6 +2414,8 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+          </div>
+        </div>
       </div>
 
       {/* Rewards Hub Modal (Spin Wheel & Rewards) */}

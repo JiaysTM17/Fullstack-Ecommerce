@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import AccountSidebar from '../components/AccountSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useCoin } from '../context/CoinContext';
@@ -109,6 +110,27 @@ export default function OrderHistoryPage() {
   const { t } = useLanguage();
   const { showToast } = useToast();
   const navigate = useNavigate();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isTrackingView, setIsTrackingView] = useState(() => searchParams.get('view') === 'tracking');
+  const [trackingSearchCode, setTrackingSearchCode] = useState(() => searchParams.get('code') || '');
+  const [selectedTrackingOrder, setSelectedTrackingOrder] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const isTrack = searchParams.get('view') === 'tracking';
+    setIsTrackingView(isTrack);
+    const code = searchParams.get('code');
+    if (code) setTrackingSearchCode(code);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const [activeTab, setActiveTab] = useState('all');
   const [dateRange, setDateRange] = useState('all'); // 'all' | '30days' | '3months' | 'year2026'
@@ -773,31 +795,341 @@ export default function OrderHistoryPage() {
   };
 
   return (
-    <main className="shopee-container" style={{ padding: '28px 16px', maxWidth: '980px' }}>
-      <div 
-        style={{ 
-          background: 'var(--bg-card, #ffffff)', 
-          borderRadius: 'var(--radius-lg, 12px)', 
-          padding: '24px', 
-          border: '1px solid var(--border-medium, #e2e8f0)',
-          boxShadow: 'var(--shadow-sm)'
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-          <div>
-            <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '26px', lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>📦</span>
-              <span>{t('my_orders', 'Đơn Hàng Của Tôi')}</span>
-            </h1>
-            <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '13.5px' }}>
-              {t('orders_subtitle', 'Theo dõi chi tiết tiến độ vận chuyển và lịch sử mua sắm.')}
-            </p>
-          </div>
+    <main className="shopee-container" style={{ padding: '24px 16px', maxWidth: '1240px' }}>
+      <div className="account-portal-layout">
+        {/* Sticky Left Navigation & Filters Sidebar */}
+        <AccountSidebar
+          activeSection={isTrackingView ? 'tracking' : 'orders'}
+          isTrackingView={isTrackingView}
+          onSelectTrackingView={(showTracking) => {
+            setIsTrackingView(showTracking);
+            if (showTracking) {
+              setSearchParams({ view: 'tracking' });
+            } else {
+              const next = new URLSearchParams(searchParams);
+              next.delete('view');
+              setSearchParams(next);
+            }
+          }}
+          orderCounts={{
+            all: orders.length,
+            pending: getTabCount('pending'),
+            shipping: getTabCount('shipping'),
+            completed: getTabCount('completed'),
+            returning: getTabCount('returning'),
+            cancelled: getTabCount('cancelled'),
+          }}
+          activeStatusTab={activeTab}
+          onSelectStatusTab={(tabId) => {
+            setIsTrackingView(false);
+            setActiveTab(tabId);
+            const next = new URLSearchParams(searchParams);
+            next.delete('view');
+            setSearchParams(next);
+          }}
+          dateRange={dateRange}
+          onSelectDateRange={setDateRange}
+          onExportCSV={handleExportCSV}
+          onPrintReport={handlePrintReport}
+        />
 
-          <Link to="/" className="shopee-btn shopee-btn-secondary" style={{ fontSize: '13px' }}>
-            ← {t('continue_shopping', 'Tiếp tục mua sắm')}
-          </Link>
-        </div>
+        {/* Right Main Content Area */}
+        <div className="account-portal-main-content">
+          <div 
+            style={{ 
+              background: 'var(--bg-card, #ffffff)', 
+              borderRadius: 'var(--radius-lg, 12px)', 
+              padding: '20px 24px', 
+              border: '1px solid var(--border-medium, #e2e8f0)',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+          >
+            {isTrackingView ? (
+              <div className="spx-tracking-portal-view">
+                {/* Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>🚚</span>
+                      <span>Tra Cứu Vận Đơn SPX Express</span>
+                    </h1>
+                    <p style={{ margin: '3px 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                      Kiểm tra tiến độ giao hàng bưu kiện, lịch trình trung chuyển và vị trí tài xế thời gian thực.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-secondary"
+                    onClick={() => {
+                      setIsTrackingView(false);
+                      const next = new URLSearchParams(searchParams);
+                      next.delete('view');
+                      setSearchParams(next);
+                    }}
+                    style={{ fontSize: '12.5px' }}
+                  >
+                    ← Quay lại Đơn Mua
+                  </button>
+                </div>
+
+                {/* Tracking Search Input Form */}
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '16px',
+                  marginBottom: '20px'
+                }}>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
+                    Nhập mã vận đơn hoặc chọn nhanh từ đơn hàng của bạn:
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      value={trackingSearchCode}
+                      onChange={(e) => setTrackingSearchCode(e.target.value)}
+                      placeholder="Nhập mã vận đơn SPX (ví dụ: SPX-VN-84729104)..."
+                      style={{
+                        flex: 1,
+                        minWidth: '240px',
+                        padding: '10px 14px',
+                        fontSize: '13.5px',
+                        border: '1.5px solid #cbd5e1',
+                        borderRadius: '8px',
+                        outline: 'none',
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="shopee-btn shopee-btn-primary"
+                      style={{ padding: '10px 20px', fontWeight: 700, fontSize: '13px' }}
+                      onClick={() => {
+                        const trimmed = trackingSearchCode.trim().toUpperCase();
+                        if (!trimmed) {
+                          showToast('Vui lòng nhập mã vận đơn để tra cứu!', 'warning');
+                          return;
+                        }
+                        const found = orders.find(
+                          (o) => (o.trackingCode && o.trackingCode.toUpperCase().includes(trimmed)) || (o.orderId && o.orderId.toUpperCase().includes(trimmed))
+                        );
+                        if (found) {
+                          setSelectedTrackingOrder(found);
+                          showToast(`Tìm thấy bưu kiện cho đơn hàng #${found.orderId}!`, 'success');
+                        } else {
+                          showToast('Không tìm thấy thông tin cho mã vận đơn này!', 'error');
+                        }
+                      }}
+                    >
+                      🔍 Tra Cứu Vận Đơn
+                    </button>
+                  </div>
+
+                  {/* Quick Select Pills from user's current shipping orders */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '12px' }}>
+                    <span style={{ fontSize: '11.5px', color: '#64748b' }}>Đơn hàng khả dụng:</span>
+                    {orders.filter(o => o.trackingCode).slice(0, 4).map((o) => (
+                      <button
+                        key={o.orderId}
+                        type="button"
+                        className="copy-pill"
+                        style={{
+                          fontSize: '11px',
+                          padding: '3px 8px',
+                          cursor: 'pointer',
+                          background: (selectedTrackingOrder?.orderId === o.orderId || trackingSearchCode === o.trackingCode) ? '#eff6ff' : '#ffffff',
+                          borderColor: (selectedTrackingOrder?.orderId === o.orderId || trackingSearchCode === o.trackingCode) ? '#2563eb' : '#cbd5e1',
+                          color: (selectedTrackingOrder?.orderId === o.orderId || trackingSearchCode === o.trackingCode) ? '#2563eb' : '#334155',
+                          fontWeight: 600,
+                        }}
+                        onClick={() => {
+                          setTrackingSearchCode(o.trackingCode);
+                          setSelectedTrackingOrder(o);
+                        }}
+                      >
+                        🚚 {o.trackingCode} (#{o.orderId})
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Display Tracking Result Card */}
+                {(() => {
+                  const activeTrackingOrder = selectedTrackingOrder || orders.find(o => o.status === 'shipping') || orders[0];
+                  if (!activeTrackingOrder) {
+                    return (
+                      <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                        Bạn chưa có bưu kiện nào để tra cứu.
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden', background: '#ffffff' }}>
+                      {/* Tracking Card Header */}
+                      <div style={{ background: '#f8fafc', padding: '14px 18px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
+                              Mã Vận Đơn: {activeTrackingOrder.trackingCode || 'SPX-VN-84729104'}
+                            </span>
+                            <span
+                              className="copy-pill"
+                              onClick={() => {
+                                navigator.clipboard.writeText(activeTrackingOrder.trackingCode || 'SPX-VN-84729104');
+                                showToast('Đã sao chép mã vận đơn!', 'success');
+                              }}
+                              style={{ cursor: 'pointer', fontSize: '11px' }}
+                            >
+                              <CopyIcon size={11} /> Sao chép
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                            Đơn hàng: #{activeTrackingOrder.orderId} · Đơn vị: SPX Express Tiết Kiệm
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{
+                            fontSize: '11.5px',
+                            fontWeight: 700,
+                            padding: '4px 10px',
+                            borderRadius: '9999px',
+                            background: activeTrackingOrder.status === 'completed' ? '#dcfce7' : '#eff6ff',
+                            color: activeTrackingOrder.status === 'completed' ? '#15803d' : '#1d4ed8',
+                          }}>
+                            {activeTrackingOrder.statusText || 'Đang vận chuyển'}
+                          </span>
+                          <button
+                            type="button"
+                            className="shopee-order-btn-primary"
+                            onClick={() => setSelectedLiveMapOrder(activeTrackingOrder)}
+                            style={{ fontSize: '11.5px', height: '28px', padding: '0 10px' }}
+                          >
+                            🗺️ Xem Bản Đồ Shipper
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Stepper Progress Bar */}
+                      <div style={{ padding: '20px 18px', borderBottom: '1px solid #f1f5f9' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
+                          {[
+                            { step: 1, label: 'Đặt Hàng', sub: 'Thành công' },
+                            { step: 2, label: 'Người Bán', sub: 'Đã đóng gói' },
+                            { step: 3, label: 'SPX Express', sub: 'Đã nhận kiện' },
+                            { step: 4, label: 'Đang Giao', sub: 'Shipper giao' },
+                            { step: 5, label: 'Thành Công', sub: 'Đã ký nhận' },
+                          ].map((s) => {
+                            const stepIdx = activeTrackingOrder.stepIndex || (activeTrackingOrder.status === 'completed' ? 5 : 4);
+                            const isPassed = s.step <= stepIdx;
+                            const isCurrent = s.step === stepIdx;
+                            return (
+                              <div key={s.step} style={{ textAlign: 'center', flex: 1, position: 'relative', zIndex: 1 }}>
+                                <div style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  borderRadius: '50%',
+                                  background: isPassed ? '#2563eb' : '#f1f5f9',
+                                  color: isPassed ? '#ffffff' : '#94a3b8',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '12px',
+                                  fontWeight: 700,
+                                  margin: '0 auto 6px',
+                                  boxShadow: isCurrent ? '0 0 0 4px rgba(37, 99, 235, 0.2)' : 'none',
+                                }}>
+                                  {isPassed ? '✓' : s.step}
+                                </div>
+                                <div style={{ fontSize: '12px', fontWeight: isPassed ? 700 : 500, color: isPassed ? '#0f172a' : '#64748b' }}>
+                                  {s.label}
+                                </div>
+                                <div style={{ fontSize: '10.5px', color: '#94a3b8' }}>{s.sub}</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Shipper & Delivery Details */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', padding: '16px 18px', background: '#fafafa' }}>
+                        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+                          <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
+                            Thông Tin Tài Xế Giao Hàng (SPX)
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
+                              🛵
+                            </div>
+                            <div>
+                              <strong style={{ fontSize: '13px', color: '#0f172a' }}>Nguyễn Văn Tài</strong>
+                              <div style={{ fontSize: '11.5px', color: '#64748b' }}>SPX Đội Phát Tân Bình · Xe: 59-P1 982.34</div>
+                              <div style={{ fontSize: '11.5px', color: '#2563eb', marginTop: '2px', fontWeight: 600 }}>
+                                📞 Hotline: 1900 1221 (Phím 1)
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+                          <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
+                            Địa Chỉ Nhận Hàng
+                          </div>
+                          <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}>
+                            {activeTrackingOrder.customerName || 'Khách Hàng'} · {activeTrackingOrder.phone || '0901234567'}
+                          </div>
+                          <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '3px', lineHeight: 1.4 }}>
+                            {activeTrackingOrder.shippingAddress?.address || (typeof activeTrackingOrder.shippingAddress === 'string' ? activeTrackingOrder.shippingAddress : 'Số 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh')}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Timeline History Log */}
+                      <div style={{ padding: '16px 18px' }}>
+                        <div style={{ fontSize: '12.5px', fontWeight: 800, color: '#0f172a', marginBottom: '12px' }}>
+                          Chi Tiết Hành Trình Vận Chuyển:
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {(activeTrackingOrder.timeline || [
+                            { time: 'Hôm nay 08:30', text: 'Đang trên đường giao đến bạn (Dự kiến trước 18h)' },
+                            { time: 'Hôm qua 18:00', text: 'Đơn hàng đã xuất kho trung chuyển Tân Bình' },
+                            { time: 'Hôm qua 14:00', text: 'Đơn hàng đã bàn giao cho SPX Express' },
+                            { time: '2 ngày trước', text: 'Người bán đã chuẩn bị kiện hàng' },
+                          ]).map((t, idx) => (
+                            <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', fontSize: '12px' }}>
+                              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: idx === 0 ? '#2563eb' : '#cbd5e1', marginTop: '5px', flexShrink: 0 }} />
+                              <div style={{ minWidth: '110px', fontWeight: 600, color: idx === 0 ? '#2563eb' : '#64748b' }}>
+                                {t.time}
+                              </div>
+                              <div style={{ color: idx === 0 ? '#0f172a' : '#475569', fontWeight: idx === 0 ? 600 : 400 }}>
+                                {t.text}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '24px', lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>📦</span>
+                      <span>{t('my_orders', 'Đơn Hàng Của Tôi')}</span>
+                    </h1>
+                    <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                      {t('orders_subtitle', 'Theo dõi chi tiết tiến độ vận chuyển và lịch sử mua sắm.')}
+                    </p>
+                  </div>
+
+                  <Link to="/" className="shopee-btn shopee-btn-secondary" style={{ fontSize: '13px' }}>
+                    ← {t('continue_shopping', 'Tiếp tục mua sắm')}
+                  </Link>
+                </div>
 
         {/* Thông báo phân định vai trò Người Bán */}
         {user?.role === 'seller' && (
@@ -1455,7 +1787,24 @@ export default function OrderHistoryPage() {
             })}
           </div>
         )}
+            </>
+          )}
+          </div>
+        </div>
       </div>
+
+      {/* Floating Scroll-to-Top Button */}
+      {showScrollTop && (
+        <button
+          type="button"
+          className="shopee-scroll-top-btn"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Cuộn lên đầu trang"
+          title="Cuộn lên đầu trang"
+        >
+          ↑
+        </button>
+      )}
 
       {/* Modal Detailed Timeline */}
       {selectedOrderDetails && (
