@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getAllShops } from '../services/shopService';
 import { useLanguage } from '../context/LanguageContext';
+import {
+  PackageIcon,
+  TagIcon,
+  StoreIcon,
+  BoltIcon,
+  SparklesIcon,
+  StarIcon,
+} from './OrdersIcons';
 import '../styles/filters.css';
 
 const CATEGORIES = ["Tất cả", "Thời trang", "Điện tử", "Sắc đẹp", "Gia dụng", "Thể thao", "Đời sống"];
@@ -75,7 +83,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
               }`}
               onClick={() => onFilterChange("category", cat === "Tất cả" ? "" : cat)}
             >
-              <span>{cat === "Tất cả" ? `📦 ${t('all_categories', 'Tất cả danh mục')}` : `• ${cat}`}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {cat === "Tất cả" ? <PackageIcon size={14} /> : null}
+                <span>{cat === "Tất cả" ? t('all_categories', 'Tất cả danh mục') : `• ${cat}`}</span>
+              </span>
             </div>
           ))}
         </div>
@@ -89,7 +100,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             className={`shopee-filter-item ${!filters.brand ? "active" : ""}`}
             onClick={() => onFilterChange("brand", "")}
           >
-            <span>🏷️ {t('all_brands', 'Tất cả thương hiệu')}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <TagIcon size={14} />
+              <span>{t('all_brands', 'Tất cả thương hiệu')}</span>
+            </span>
           </div>
           {["Apple", "Samsung", "Sony", "Xiaomi", "Asus", "Dell", "Nike", "Adidas", "Lock&Lock", "Dyson", "Shopee Basic", "Elegance"].map((b) => (
             <div
@@ -111,14 +125,12 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             className={`shopee-filter-item ${!filters.shopId ? "active" : ""}`}
             onClick={() => onFilterChange("shopId", "")}
           >
-            <span>🏪 {t('all_shops', 'Tất cả gian hàng')} ({allShops.length})</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <StoreIcon size={14} />
+              <span>{t('all_shops', 'Tất cả gian hàng')} ({allShops.length})</span>
+            </span>
           </div>
           {allShops.map((s) => {
-            const icons = {
-              shop_01: '👗', shop_02: '🎧', shop_03: '💄', shop_04: '🏡',
-              shop_05: '⚽', shop_06: '🌿', shop_07: '📚', shop_08: '🚗',
-              shop_09: '🍼', shop_10: '🎵', shop_11: '🐾', shop_12: '⌚'
-            };
             return (
               <div
                 key={s.id}
@@ -126,7 +138,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
                 onClick={() => onFilterChange("shopId", filters.shopId === s.id ? "" : s.id)}
                 title={s.description}
               >
-                <span>{icons[s.id] || '🏪'} {s.name}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <StoreIcon size={13} />
+                  <span>{s.name}</span>
+                </span>
               </div>
             );
           })}
@@ -142,7 +157,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             checked={Boolean(filters.fastDelivery)}
             onChange={(e) => onFilterChange("fastDelivery", e.target.checked ? "1" : "")}
           />
-          <span className="shopee-fast-delivery-badge">⚡ {t('fast_delivery_2h', 'Giao Nhanh 2H')}</span>
+          <span className="shopee-fast-delivery-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <BoltIcon size={12} />
+            <span>{t('fast_delivery_2h', 'Giao Nhanh 2H')}</span>
+          </span>
         </label>
       </div>
 
@@ -214,7 +232,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
               onFilterChange("badge", e.target.checked ? "Amazon's Choice" : "")
             }
           />
-          <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>✨ {t('featured_picks', 'Hàng Tuyển Chọn')}</span>
+          <span style={{ fontWeight: 600, color: "var(--text-primary)", display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <SparklesIcon size={13} />
+            <span>{t('featured_picks', 'Hàng Tuyển Chọn')}</span>
+          </span>
         </label>
         <label className="shopee-filter-item">
           <input
