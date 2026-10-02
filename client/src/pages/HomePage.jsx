@@ -15,6 +15,14 @@ import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
 import { getProducts, getFlashSale, getBestSellers, getNewArrivals } from "../services/productService";
 import { formatCurrency } from "../utils/formatCurrency";
+import {
+  TruckIcon,
+  ShoppingBagIcon,
+  BoltIcon,
+  StarIcon,
+  CoinIcon,
+  StoreIcon,
+} from "../components/OrdersIcons";
 
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -267,7 +275,7 @@ export default function HomePage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ fontSize: "18px" }}>🚚</span>
+              <TruckIcon size={18} />
               <span><strong>FREESHIP MAX:</strong> Miễn phí vận chuyển toàn quốc cho đơn hàng từ <strong>300.000₫</strong></span>
             </div>
             <span style={{ background: "rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: "12px", fontSize: "12px" }}>
@@ -278,10 +286,10 @@ export default function HomePage() {
           {/* Discovery Tabs */}
           <div style={{ display: "flex", gap: "8px", marginBottom: "16px", overflowX: "auto", paddingBottom: "4px" }}>
             {[
-              { id: "all", label: "Tất cả sản phẩm", icon: "🛍️" },
-              { id: "best_sellers", label: "Bán chạy nhất", icon: "🔥" },
-              { id: "new_arrivals", label: "Hàng mới về", icon: "✨" },
-              { id: "flash_sale", label: "Ưu đãi Flash Sale", icon: "⚡" },
+              { id: "all", label: "Tất cả sản phẩm", icon: <ShoppingBagIcon size={15} /> },
+              { id: "best_sellers", label: "Bán chạy nhất", icon: <BoltIcon size={15} /> },
+              { id: "new_arrivals", label: "Hàng mới về", icon: <StarIcon size={15} /> },
+              { id: "flash_sale", label: "Ưu đãi Flash Sale", icon: <BoltIcon size={15} /> },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -345,7 +353,7 @@ export default function HomePage() {
               )}
               {filters.shopId && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  🏪 Shop: {filters.shopId}
+                  <StoreIcon size={13} /> Shop: {filters.shopId}
                   <button type="button" onClick={() => updateFilter("shopId", "")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "inherit", padding: 0 }}>✕</button>
                 </span>
               )}
@@ -357,19 +365,19 @@ export default function HomePage() {
               )}
               {filters.fastDelivery && (
                 <span className="shopee-filter-chip" style={{ background: "var(--primary-light, #ffedd5)", color: "var(--primary-color, #ea580c)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  ⚡ {t('nav_fast_delivery', 'Giao siêu tốc 2H')}
+                  <BoltIcon size={13} /> {t('nav_fast_delivery', 'Giao siêu tốc 2H')}
                   <button type="button" onClick={() => updateFilter("fastDelivery", "")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "inherit", padding: 0 }}>✕</button>
                 </span>
               )}
               {filters.minRating && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  ⭐ Từ {filters.minRating} sao
+                  <StarIcon size={13} /> Từ {filters.minRating} sao
                   <button type="button" onClick={() => updateFilter("minRating", "")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "inherit", padding: 0 }}>✕</button>
                 </span>
               )}
               {(filters.minPrice || filters.maxPrice) && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  💰 {filters.minPrice && filters.maxPrice
+                  <CoinIcon size={13} /> {filters.minPrice && filters.maxPrice
                     ? `${formatCurrency(Number(filters.minPrice))} - ${formatCurrency(Number(filters.maxPrice))}`
                     : filters.minPrice
                     ? `≥ ${formatCurrency(Number(filters.minPrice))}`
