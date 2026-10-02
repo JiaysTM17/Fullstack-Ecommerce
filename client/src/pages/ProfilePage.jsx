@@ -27,6 +27,22 @@ import {
   getDistrictsByProvince,
   getWardsByDistrict,
 } from '../data/vietnamLocations';
+import {
+  PackageIcon,
+  TruckIcon,
+  CreditCardIcon,
+  MapPinIcon,
+  LockIcon,
+  TicketIcon,
+  CoinIcon,
+  HeartIcon,
+  PencilIcon,
+  ShieldIcon,
+  StoreIcon,
+  CheckIcon,
+  ShieldCheckIcon,
+  ShoppingBagIcon,
+} from '../components/OrdersIcons';
 import '../styles/auth.css';
 import '../styles/profile.css';
 
@@ -813,7 +829,7 @@ export default function ProfilePage() {
                 }}
                 onClick={() => navigate('/orders')}
               >
-                <span>📦</span> Đơn Mua ({ordersSummary.total})
+                <PackageIcon size={15} /> Đơn Mua ({ordersSummary.total})
               </button>
               <button
                 type="button"
@@ -834,7 +850,7 @@ export default function ProfilePage() {
                 }}
                 onClick={() => navigate('/wishlist')}
               >
-                <span>❤️</span> Yêu Thích
+                <HeartIcon size={15} /> Yêu Thích
               </button>
             </div>
           </div>
@@ -843,21 +859,21 @@ export default function ProfilePage() {
           <div className="profile-stats-grid">
             <div className="profile-stat-box" onClick={() => navigate('/orders')}>
               <div className="profile-stat-label">
-                <span>📦</span> Tổng Đơn Hàng
+                <PackageIcon size={14} /> Tổng Đơn Hàng
               </div>
               <div className="profile-stat-value">{ordersSummary.total} đơn</div>
             </div>
 
             <div className="profile-stat-box" onClick={() => navigate('/orders')}>
               <div className="profile-stat-label">
-                <span>🚚</span> Đang Vận Chuyển
+                <TruckIcon size={14} /> Đang Vận Chuyển
               </div>
               <div className="profile-stat-value">{ordersSummary.processing} đơn</div>
             </div>
 
             <div className="profile-stat-box" onClick={() => setActiveTab('coins')}>
               <div className="profile-stat-label">
-                <span>🪙</span> Số Dư Shopee Xu
+                <CoinIcon size={14} /> Số Dư Shopee Xu
               </div>
               <div className="profile-stat-value" style={{ color: '#fde047' }}>
                 {(coins || 0).toLocaleString('vi-VN')} Xu
@@ -866,7 +882,7 @@ export default function ProfilePage() {
 
             <div className="profile-stat-box" onClick={() => setActiveTab('vouchers')}>
               <div className="profile-stat-label">
-                <span>🎟️</span> Ví Voucher
+                <TicketIcon size={14} /> Ví Voucher
               </div>
               <div className="profile-stat-value">{vouchersList.length || 5} mã</div>
             </div>
@@ -884,7 +900,7 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'profile' ? 'active' : ''}`}
               onClick={() => setActiveTab('profile')}
             >
-              <span>👤</span>
+              <PencilIcon size={15} />
               <span>Thông Tin Cá Nhân</span>
             </button>
 
@@ -894,7 +910,7 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'addresses' ? 'active' : ''}`}
               onClick={() => setActiveTab('addresses')}
             >
-              <span>📍</span>
+              <MapPinIcon size={15} />
               <span>Sổ Địa Chỉ</span>
               <span className="profile-tab-badge">{addresses.length}</span>
             </button>
@@ -905,7 +921,7 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'payments' ? 'active' : ''}`}
               onClick={() => setActiveTab('payments')}
             >
-              <span>💳</span>
+              <CreditCardIcon size={15} />
               <span>Thanh Toán & Ngân Hàng</span>
               <span className="profile-tab-badge">{paymentMethods.length}</span>
             </button>
@@ -916,7 +932,7 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'security' ? 'active' : ''}`}
               onClick={() => setActiveTab('security')}
             >
-              <span>🔒</span>
+              <LockIcon size={15} />
               <span>Bảo Mật & Mật Khẩu</span>
             </button>
 
@@ -926,7 +942,7 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'settings' ? 'active' : ''}`}
               onClick={() => setActiveTab('settings')}
             >
-              <span>⚙️</span>
+              <ShieldIcon size={15} />
               <span>Cài Đặt & Quyền Riêng Tư</span>
             </button>
 
@@ -936,7 +952,7 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'vouchers' ? 'active' : ''}`}
               onClick={() => setActiveTab('vouchers')}
             >
-              <span>🎟️</span>
+              <TicketIcon size={15} />
               <span>Ví Voucher</span>
               <span className="profile-tab-badge">{vouchersList.length || 5}</span>
             </button>
@@ -947,7 +963,7 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'coins' ? 'active' : ''}`}
               onClick={() => setActiveTab('coins')}
             >
-              <span>🪙</span>
+              <CoinIcon size={15} />
               <span>Ví Shopee Xu</span>
             </button>
 
