@@ -8,6 +8,15 @@ import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import ProductCard from '../components/ProductCard';
+import {
+  StarIcon,
+  PackageIcon,
+  TicketIcon,
+  MapPinIcon,
+  ChatIcon,
+  ClockIcon,
+  CheckIcon,
+} from '../components/OrdersIcons';
 
 // Hàm phân loại chuyên nghiệp cho từng mặt hàng trong gian hàng
 function getProductClassification(product) {
@@ -15,47 +24,47 @@ function getProductClassification(product) {
 
   // 1. Quần các loại
   if (/(quần|jean|jeans|short|kaki|jogger|tây âu|quần dài|quần đùi)/i.test(name)) {
-    return { key: 'quan', label: '👖 Quần Các Loại', group: 'quần' };
+    return { key: 'quan', label: 'Quần Các Loại', group: 'quần' };
   }
   // 2. Áo các loại
   if (/(áo|thun|sơ mi|polo|hoodie|khoác|jacket|blazer|cardigan|sweater|t-shirt)/i.test(name)) {
-    return { key: 'ao', label: '👕 Áo Các Loại', group: 'áo' };
+    return { key: 'ao', label: 'Áo Các Loại', group: 'áo' };
   }
   // 3. Váy & Đầm
   if (/(váy|đầm|chân váy|skirt|dress|yếm)/i.test(name)) {
-    return { key: 'vay', label: '👗 Váy & Đầm Nữ', group: 'váy đầm' };
+    return { key: 'vay', label: 'Váy & Đầm Nữ', group: 'váy đầm' };
   }
   // 4. Tai nghe & Âm thanh
   if (/(tai nghe|headphone|earphone|airpods|tws|anc|soundbar|loa|speaker)/i.test(name)) {
-    return { key: 'audio', label: '🎧 Tai Nghe & Loa', group: 'tai nghe & loa' };
+    return { key: 'audio', label: 'Tai Nghe & Loa', group: 'tai nghe & loa' };
   }
   // 5. Bàn phím & Chuột
   if (/(bàn phím|keyboard|chuột|mouse|lót chuột|keycap)/i.test(name)) {
-    return { key: 'gear', label: '⌨️ Bàn Phím & Chuột', group: 'bàn phím & chuột' };
+    return { key: 'gear', label: 'Bàn Phím & Chuột', group: 'bàn phím & chuột' };
   }
   // 6. Mỹ phẩm / Dưỡng da
   if (/(serum|kem dưỡng|tinh chất|toner|nước hoa hồng|essence|ampoule)/i.test(name)) {
-    return { key: 'duongda', label: '✨ Serum & Dưỡng Da', group: 'serum & dưỡng da' };
+    return { key: 'duongda', label: 'Serum & Dưỡng Da', group: 'serum & dưỡng da' };
   }
   if (/(sữa rửa mặt|tẩy trang|cleanser|mặt nạ|tẩy tế bào)/i.test(name)) {
-    return { key: 'lamchuyen', label: '🧼 Làm Sạch & Chăm Sóc', group: 'sữa rửa mặt' };
+    return { key: 'lamchuyen', label: 'Làm Sạch & Chăm Sóc', group: 'sữa rửa mặt' };
   }
   if (/(son|lipstick|phấn|mascara|eyeliner|cushion|bb cream)/i.test(name)) {
-    return { key: 'trangdiem', label: '💄 Son Môi & Trang Điểm', group: 'son môi & trang điểm' };
+    return { key: 'trangdiem', label: 'Son Môi & Trang Điểm', group: 'son môi & trang điểm' };
   }
   // 7. Đồ gia dụng
   if (/(nồi|chảo|nồi chiên|nồi cơm|bếp|chống dính|nấu ăn)/i.test(name)) {
-    return { key: 'nhabep', label: '🍳 Nồi Chiên & Nhà Bếp', group: 'nồi chiên & bếp' };
+    return { key: 'nhabep', label: 'Nồi Chiên & Nhà Bếp', group: 'nồi chiên & bếp' };
   }
   if (/(robot|máy hút bụi|lọc không khí|máy lọc nước|hút bụi)/i.test(name)) {
-    return { key: 'thietbi', label: '🤖 Robot & Hút Bụi', group: 'thiết bị gia dụng' };
+    return { key: 'thietbi', label: 'Robot & Hút Bụi', group: 'thiết bị gia dụng' };
   }
 
   // Fallback theo Category gốc
   if (product?.category) {
-    return { key: product.category.toLowerCase().replace(/\s+/g, '_'), label: `📦 ${product.category}`, group: product.category };
+    return { key: product.category.toLowerCase().replace(/\s+/g, '_'), label: product.category, group: product.category };
   }
-  return { key: 'khac', label: '🎒 Phụ Kiện & Khác', group: 'phụ kiện' };
+  return { key: 'khac', label: 'Phụ Kiện & Khác', group: 'phụ kiện' };
 }
 
 export default function ShopStorefrontPage() {
@@ -507,11 +516,15 @@ export default function ShopStorefrontPage() {
               </div>
 
               <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <span>📍 {shop.location}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <MapPinIcon size={13} color="#ea580c" /> {shop.location}
+                </span>
                 <span>•</span>
-                <span>📅 Hoạt động {shop.joinedDate}</span>
+                <span>Hoạt động {shop.joinedDate}</span>
                 <span>•</span>
-                <span style={{ color: '#ea580c', fontWeight: 600 }}>⏰ Mở cửa: 08:00 - 21:00 hàng ngày</span>
+                <span style={{ color: '#ea580c', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <ClockIcon size={13} color="#ea580c" /> Mở cửa: 08:00 - 21:00 hàng ngày
+                </span>
               </p>
             </div>
           </div>
@@ -562,7 +575,7 @@ export default function ShopStorefrontPage() {
               }}
               onClick={handleOpenShopChat}
             >
-              <span style={{ fontSize: '15px' }}>💬</span>
+              <ChatIcon size={14} color="#ea580c" />
               <span>Chat Với Shop</span>
             </button>
           </div>
@@ -581,7 +594,7 @@ export default function ShopStorefrontPage() {
         >
           <div className="mall-metric-card">
             <div className="mall-metric-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
-              ⭐
+              <StarIcon size={20} color="#d97706" filled />
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Đánh Giá Gian Hàng</div>
@@ -593,7 +606,7 @@ export default function ShopStorefrontPage() {
 
           <div className="mall-metric-card">
             <div className="mall-metric-icon" style={{ background: '#fee2e2', color: '#dc2626' }}>
-              👥
+              <CheckIcon size={20} color="#dc2626" />
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Người Theo Dõi</div>
@@ -605,7 +618,7 @@ export default function ShopStorefrontPage() {
 
           <div className="mall-metric-card">
             <div className="mall-metric-icon" style={{ background: '#dcfce7', color: '#15803d' }}>
-              ⚡
+              <ClockIcon size={20} color="#15803d" />
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Tỉ Lệ Phản Hồi Chat</div>
@@ -617,7 +630,7 @@ export default function ShopStorefrontPage() {
 
           <div className="mall-metric-card">
             <div className="mall-metric-icon" style={{ background: '#e0e7ff', color: '#4338ca' }}>
-              📦
+              <PackageIcon size={20} color="#4338ca" />
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Sản Phẩm Phân Phối</div>
@@ -634,7 +647,9 @@ export default function ShopStorefrontPage() {
         <section style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '22px' }}>🎟️</span>
+              <span style={{ color: '#ea580c', display: 'flex', alignItems: 'center' }}>
+                <TicketIcon size={24} />
+              </span>
               <div>
                 <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
                   {t('shop_vouchers_title')}
