@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { AlertCircleIcon, RefreshIcon, HomeIcon } from './OrdersIcons';
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -32,7 +33,9 @@ export class ErrorBoundary extends React.Component {
             boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
             border: "1px solid var(--border-medium, #e2e8f0)"
           }}>
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>⚠️</div>
+            <div style={{ display: "inline-flex", justifyContent: "center", marginBottom: "16px", color: "#f59e0b" }}>
+              <AlertCircleIcon size={48} />
+            </div>
             <h2 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "12px", color: "var(--text-primary, #1e293b)" }}>
               Đã xảy ra sự cố khi tải trang
             </h2>
@@ -44,17 +47,19 @@ export class ErrorBoundary extends React.Component {
                 type="button"
                 className="shopee-btn shopee-btn-primary"
                 onClick={this.handleReload}
-                style={{ padding: "10px 20px", fontWeight: 600 }}
+                style={{ padding: "10px 20px", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "6px" }}
               >
-                🔄 Tải Lại Trang
+                <RefreshIcon size={16} />
+                <span>Tải Lại Trang</span>
               </button>
               <Link
                 to="/"
                 className="shopee-btn shopee-btn-secondary"
                 onClick={() => this.setState({ hasError: false, error: null })}
-                style={{ padding: "10px 20px", fontWeight: 600, textDecoration: "none" }}
+                style={{ padding: "10px 20px", fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}
               >
-                🏠 Về Trang Chủ
+                <HomeIcon size={16} />
+                <span>Về Trang Chủ</span>
               </Link>
             </div>
           </div>

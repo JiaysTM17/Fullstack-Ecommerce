@@ -3,6 +3,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import { useCompare } from '../context/CompareContext';
+import { ScaleIcon, BoltIcon } from './OrdersIcons';
 import '../styles/product.css';
 
 const defaultFormatCurrency = (value) => {
@@ -167,7 +168,7 @@ const ProductCard = ({
             transition: 'all 0.2s',
           }}
         >
-          ⚖️
+          <ScaleIcon size={14} />
         </button>
 
         {/* Quick View Button */}
@@ -255,8 +256,9 @@ const ProductCard = ({
         {/* Fast Delivery Badge */}
         {isFastDelivery && (
           <div style={{ margin: '6px 0 2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '11px', color: 'var(--secondary-color, #0284c7)', fontWeight: 700, background: 'var(--primary-light, #f0f9ff)', padding: '1px 6px', borderRadius: '3px' }}>
-              ⚡ {t('nav_fast_delivery', 'Giao 2H')}
+            <span style={{ fontSize: '11px', color: 'var(--secondary-color, #0284c7)', fontWeight: 700, background: 'var(--primary-light, #f0f9ff)', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <BoltIcon size={11} />
+              <span>{t('nav_fast_delivery', 'Giao 2H')}</span>
             </span>
           </div>
         )}

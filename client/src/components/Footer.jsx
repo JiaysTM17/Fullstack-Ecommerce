@@ -1,5 +1,14 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import {
+  CartIcon,
+  LayersIcon,
+  ShoppingBagIcon,
+  PackageIcon,
+  StoreIcon,
+  StarIcon,
+  SparklesIcon,
+} from './OrdersIcons';
 import '../styles/footer.css';
 
 /**
@@ -18,7 +27,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
         {/* 1. Shopee-style SEO Marketplace Introduction Section */}
         <section className="footer-seo-section">
           <div className="footer-seo-title">
-            <span>🛒</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}><CartIcon size={18} /></span>
             <span>{language === 'en' ? 'ABOUT FULLSTACK E-COMMERCE SMART MARKETPLACE' : 'VỀ SÀN THƯƠNG MẠI ĐIỆN TỬ FULLSTACK E-COMMERCE'}</span>
           </div>
           <p className="footer-seo-text">
@@ -42,7 +51,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
         <section className="footer-attribution-section">
           <div className="footer-attribution-header">
             <div className="footer-attribution-title">
-              <span>🏛️</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center' }}><LayersIcon size={18} /></span>
               <span>{language === 'en' ? 'DESIGN INSPIRATIONS & ARCHITECTURAL REFERENCES' : 'NGUỒN CẢM HỨNG THIẾT KẾ & TIÊU CHUẨN KIẾN TRÚC'}</span>
             </div>
             <span style={{ fontSize: '11.5px', color: '#16a34a', background: 'rgba(22, 163, 74, 0.1)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
@@ -52,7 +61,10 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
 
           <div className="footer-attribution-grid">
             <div className="footer-attribution-card">
-              <strong>🛍️ Shopee VN (SEA)</strong>
+              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <ShoppingBagIcon size={15} />
+                <span>Shopee VN (SEA)</span>
+              </strong>
               <span>
                 {language === 'en'
                   ? 'Referenced 2-tier Category carousel, Dual Voucher Stacking, and Gamification Xu rewards.'
@@ -61,7 +73,10 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             </div>
 
             <div className="footer-attribution-card">
-              <strong>📦 Tiki (Vietnam)</strong>
+              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <PackageIcon size={15} />
+                <span>Tiki (Vietnam)</span>
+              </strong>
               <span>
                 {language === 'en'
                   ? 'Referenced 100% Authentic Mall Guarantee, Fast Delivery 2H, and transparent logistics tracking.'
@@ -70,7 +85,10 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             </div>
 
             <div className="footer-attribution-card">
-              <strong>🏬 Lazada (Alibaba Group)</strong>
+              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <StoreIcon size={15} />
+                <span>Lazada (Alibaba Group)</span>
+              </strong>
               <span>
                 {language === 'en'
                   ? 'Referenced multi-level Category Mega Menu and official brand flagship store discovery.'
@@ -79,7 +97,10 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             </div>
 
             <div className="footer-attribution-card">
-              <strong>⭐ Amazon (Global)</strong>
+              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <StarIcon size={15} />
+                <span>Amazon (Global)</span>
+              </strong>
               <span>
                 {language === 'en'
                   ? 'Referenced Amazon\'s Choice badge, faceted multi-attribute filters, and structured review stars.'
@@ -88,7 +109,10 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             </div>
 
             <div className="footer-attribution-card">
-              <strong>🎨 Apple & Vercel Systems</strong>
+              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <SparklesIcon size={15} />
+                <span>Apple & Vercel Systems</span>
+              </strong>
               <span>
                 {language === 'en'
                   ? 'Referenced typography contrast (WCAG 2.1 AAA), Dark/Light mode, and micro-interactions.'

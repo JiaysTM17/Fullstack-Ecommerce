@@ -1,4 +1,5 @@
 import React from 'react';
+import { PrinterIcon } from './OrdersIcons';
 
 export default function ShippingLabelModal({ order, shopName = "Thời Trang GenZ", onClose }) {
   if (!order) return null;
@@ -89,8 +90,10 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             type="button"
             className="shopee-btn shopee-btn-primary"
             onClick={() => window.print()}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            🖨️ In Vận Đơn Ngay
+            <PrinterIcon size={15} />
+            <span>In Vận Đơn Ngay</span>
           </button>
         </div>
       </div>
