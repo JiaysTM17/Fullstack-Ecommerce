@@ -13,6 +13,19 @@ import ShopChatModal from "../components/ShopChatModal";
 import { addProductReview, getProductById, getProducts, getRelatedProducts, getProductReviewStats } from "../services/productService";
 import { addToWishlist as apiAddToWishlist, removeFromWishlist as apiRemoveFromWishlist } from "../services/wishlistService";
 import { formatCurrency } from "../utils/formatCurrency";
+import {
+  ShoppingBagIcon,
+  BoltIcon,
+  HeartIcon,
+  CopyIcon,
+  ShieldIcon,
+  ChatIcon,
+  StoreIcon,
+  PencilIcon,
+  StarIcon,
+  TagIcon,
+  CheckIcon,
+} from "../components/OrdersIcons";
 import "../styles/amazon-pdp.css";
 
 export default function ProductDetailPage() {
@@ -396,23 +409,27 @@ export default function ProductDetailPage() {
             <button
               type="button"
               className="amazon-btn-add-cart"
+              style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
               onClick={handleAddToCart}
             >
-              🛒 Thêm Vào Giỏ Hàng
+              <ShoppingBagIcon size={16} /> Thêm Vào Giỏ Hàng
             </button>
             <button
               type="button"
               className="amazon-btn-buy-now"
+              style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
               onClick={handleBuyNow}
             >
-              ⚡ Mua Ngay
+              <BoltIcon size={16} /> Mua Ngay
             </button>
             <button
               type="button"
               className="amazon-btn-wishlist"
+              style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
               onClick={() => toggleWishlist(productId)}
             >
-              {wishlisted ? "❤️ Đã lưu vào Yêu thích" : "🤍 Thêm vào Yêu thích"}
+              <HeartIcon size={16} className={wishlisted ? "fill-current text-rose-500" : ""} />
+              {wishlisted ? "Đã lưu vào Yêu thích" : "Thêm vào Yêu thích"}
             </button>
             <button
               type="button"
@@ -420,33 +437,42 @@ export default function ProductDetailPage() {
               style={{ width: "100%", marginTop: "8px", fontWeight: 700, fontSize: "13px", borderRadius: "8px", padding: "9px" }}
               onClick={() => addToCompare(product)}
             >
-              {isCompared(productId) ? "⚖️ Đã thêm vào so sánh" : "⚖️ So sánh với sản phẩm khác"}
+              {isCompared(productId) ? "Đã thêm vào so sánh" : "So sánh với sản phẩm khác"}
             </button>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "8px" }}>
               <button
                 type="button"
                 className="shopee-btn shopee-btn-secondary"
-                style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px" }}
+                style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 onClick={handleCopyLink}
               >
-                📋 Sao Chép Link
+                <CopyIcon size={13} /> Sao Chép Link
               </button>
               <button
                 type="button"
                 className="shopee-btn shopee-btn-secondary"
-                style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px" }}
+                style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 onClick={() => setShowShareModal(true)}
               >
-                🔗 Chia Sẻ & QR
+                Chia Sẻ & QR
               </button>
             </div>
           </div>
 
           {/* Guarantees */}
           <div className="amazon-guarantees">
-            <div>🛡️ <strong>Chính hãng 100%:</strong> Bồi thường gấp đôi nếu phát hiện hàng giả.</div>
-            <div>🔄 <strong>Đổi trả 30 ngày:</strong> Miễn phí hoàn hàng tận nơi.</div>
-            <div>🔒 <strong>Thanh toán bảo mật:</strong> Mã hóa SSL chuẩn quốc tế.</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <ShieldIcon size={14} className="text-emerald-600" />
+              <span><strong>Chính hãng 100%:</strong> Bồi thường gấp đôi nếu phát hiện hàng giả.</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <CheckIcon size={14} className="text-sky-600" />
+              <span><strong>Đổi trả 30 ngày:</strong> Miễn phí hoàn hàng tận nơi.</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <ShieldIcon size={14} className="text-indigo-600" />
+              <span><strong>Thanh toán bảo mật:</strong> Mã hóa SSL chuẩn quốc tế.</span>
+            </div>
           </div>
         </aside>
       </div>
@@ -473,16 +499,18 @@ export default function ProductDetailPage() {
           <button
             type="button"
             className="shopee-btn shopee-btn-secondary"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             onClick={() => setShowShopChat(true)}
           >
-            💬 Chat Ngay
+            <ChatIcon size={14} /> Chat Ngay
           </button>
           <button
             type="button"
             className="shopee-btn shopee-btn-primary"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             onClick={() => navigate(`/shop/${product.shopId || "shop_01"}`)}
           >
-            🏪 Xem Gian Hàng
+            <StoreIcon size={14} /> Xem Gian Hàng
           </button>
         </div>
       </section>
@@ -525,10 +553,10 @@ export default function ProductDetailPage() {
             <button
               type="button"
               className="shopee-btn shopee-btn-secondary"
-              style={{ width: "100%", marginTop: "18px", fontSize: "13px" }}
+              style={{ width: "100%", marginTop: "18px", fontSize: "13px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
               onClick={() => setShowReviewForm((prev) => !prev)}
             >
-              ✍️ Viết Đánh Giá Của Bạn
+              <PencilIcon size={14} /> Viết Đánh Giá Của Bạn
             </button>
           </div>
 
@@ -543,7 +571,7 @@ export default function ProductDetailPage() {
 
                 {reviewSuccess && (
                   <div style={{ background: "#e8f5e9", color: "#2e7d32", padding: "10px", borderRadius: "6px", marginBottom: "12px", fontSize: "13px" }}>
-                    ✓ Cảm ơn bạn! Đánh giá đã được đăng thành công.
+                    Cảm ơn bạn! Đánh giá đã được đăng thành công.
                   </div>
                 )}
 
@@ -596,7 +624,7 @@ export default function ProductDetailPage() {
                     Nhấp để thêm nhanh cảm nhận:
                   </label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                    {["📦 Giao hàng siêu nhanh", "✨ Đúng như mô tả", "💎 Chất lượng tuyệt vời", "👍 Đóng gói rất kỹ", "💯 Sẽ ủng hộ tiếp"].map((chip) => (
+                    {["Giao hàng siêu nhanh", "Đúng như mô tả", "Chất lượng tuyệt vời", "Đóng gói rất kỹ", "Sẽ ủng hộ tiếp"].map((chip) => (
                       <button
                         key={chip}
                         type="button"
@@ -737,9 +765,12 @@ export default function ProductDetailPage() {
                             padding: "2px 8px",
                             borderRadius: "12px",
                             fontWeight: 600,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
                           }}
                         >
-                          🏷️ {tag}
+                          <TagIcon size={11} /> {tag}
                         </span>
                       ))}
                     </div>
