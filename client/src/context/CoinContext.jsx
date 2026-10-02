@@ -284,13 +284,13 @@ export function CoinProvider({ children }) {
       }
     } catch {}
 
-    addTransaction(reward, 'plus', `Điểm danh ngày ${nextStreak}/7 (+${reward} Mini Xu)`, null, 'checkin');
+    addTransaction(reward, 'plus', `Điểm danh ngày ${nextStreak}/7 (+${reward} Shopee Xu)`, null, 'checkin');
 
     return {
       success: true,
       reward,
       streak: nextStreak,
-      message: `🎉 Chúc mừng! Bạn nhận được ${reward.toLocaleString('vi-VN')} Mini Xu từ điểm danh ngày ${nextStreak}!`,
+      message: `🎉 Chúc mừng! Bạn nhận được ${reward.toLocaleString('vi-VN')} Shopee Xu từ điểm danh ngày ${nextStreak}!`,
     };
   };
 
@@ -365,12 +365,12 @@ export function CoinProvider({ children }) {
     }
 
     const PRIZES = [
-      { id: 1, text: '500 Mini Xu', type: 'coins', value: 500, icon: '🪙', color: '#ea580c', badge: '+500 Xu' },
-      { id: 2, text: 'Voucher Giảm 10%', type: 'voucher', code: 'MINI10', value: '10%', icon: '🎟️', color: '#d97706', badge: 'Mã Giảm 10%' },
-      { id: 3, text: '1.000 Mini Xu', type: 'coins', value: 1000, icon: '🪙', color: '#0284c7', badge: '+1.000 Xu' },
+      { id: 1, text: '500 Shopee Xu', type: 'coins', value: 500, icon: '🪙', color: '#2563eb', badge: '+500 Xu' },
+      { id: 2, text: 'Voucher Giảm 10%', type: 'voucher', code: 'MINI10', value: '10%', icon: '🎟️', color: '#0284c7', badge: 'Mã Giảm 10%' },
+      { id: 3, text: '1.000 Shopee Xu', type: 'coins', value: 1000, icon: '🪙', color: '#0284c7', badge: '+1.000 Xu' },
       { id: 4, text: 'Freeship 30.000₫', type: 'voucher', code: 'FREESHIP', value: '30.000₫', icon: '🚚', color: '#059669', badge: 'Freeship 30k' },
-      { id: 5, text: '2.000 Mini Xu', type: 'coins', value: 2000, icon: '🪙', color: '#7c3aed', badge: '+2.000 Xu' },
-      { id: 6, text: '5.000 Mini Xu Siêu Cấp', type: 'coins', value: 5000, icon: '💎', color: '#db2777', badge: '+5.000 Xu' },
+      { id: 5, text: '2.000 Shopee Xu', type: 'coins', value: 2000, icon: '🪙', color: '#7c3aed', badge: '+2.000 Xu' },
+      { id: 6, text: '5.000 Shopee Xu Siêu Cấp', type: 'coins', value: 5000, icon: '💎', color: '#db2777', badge: '+5.000 Xu' },
     ];
 
     const randomPrize = PRIZES[Math.floor(Math.random() * PRIZES.length)];

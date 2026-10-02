@@ -1067,6 +1067,7 @@ export default function OrderHistoryPage() {
                   )}
 
                   {/* Items List */}
+                  {/* Items List - Matches Image 1 */}
                   <div className="shopee-order-items-list">
                     {(ord.items || []).map((item, idx) => {
                       const itemQty = Number(item.quantity) || 1;
@@ -1082,119 +1083,79 @@ export default function OrderHistoryPage() {
                           />
                           <div className="shopee-order-item-info">
                             <div className="shopee-order-item-title">{item.name}</div>
-                            <div className="shopee-order-item-badges-row">
-                              {item.variant && (
-                                <span className="shopee-order-item-variant">
-                                  Phân loại: {item.variant}
-                                </span>
-                              )}
-                              <span className="shopee-order-item-qty">
-                                Số lượng: x{itemQty}
-                              </span>
-                              <span className="shopee-order-trust-tag">
-                                <ShieldCheckIcon size={12} color="#059669" /> 100% Chính hãng · Đổi trả 15 ngày
-                              </span>
+                            <div className="shopee-order-item-meta-line">
+                              {item.variant && <span>Phân loại: {item.variant}</span>}
+                              {item.variant && <span className="meta-pipe"> | </span>}
+                              {item.size && <span>Kích thước: {item.size}</span>}
+                              {item.size && <span className="meta-pipe"> | </span>}
+                              <span>Số lượng: x{itemQty}</span>
+                            </div>
+                            <div className="shopee-order-trust-tag">
+                              <CheckIcon size={12} color="#059669" />
+                              <span>100% Chính hãng · Đổi trả trong 15 ngày</span>
                             </div>
                           </div>
 
                           <div className="shopee-order-item-pricing">
-                            <span className="shopee-order-item-price">
+                            <span className="shopee-order-item-unit-red">
                               {formatCurrency(itemPrice)}
                             </span>
-                            {itemQty > 1 && (
-                              <div className="shopee-order-item-calc">
-                                <span className="shopee-order-item-qty-tag">x{itemQty}</span>
-                                <span className="shopee-order-item-line-total">{formatCurrency(lineTotal)}</span>
-                              </div>
-                            )}
+                            <span className="shopee-order-item-qty-sub">
+                              x{itemQty}
+                            </span>
+                            <span className="shopee-order-item-line-total">
+                              {formatCurrency(lineTotal)}
+                            </span>
                           </div>
                         </div>
                       );
                     })}
                   </div>
 
-                  {/* 3 Modern Mid Cards: Shipping, Payment Method, Total Payment */}
-                  <div className="shopee-order-mid-cards-grid">
-                    {/* Card 1: Vận chuyển */}
-                    <div
-                      className="shopee-order-mid-subcard"
-                      onClick={() => {
-                        setSelectedDetailOrder(ord);
-                        setIsDetailModalOpen(true);
-                      }}
-                      title="Xem chi tiết vận chuyển"
-                    >
-                      <div className="shopee-order-mid-subcard-header">
-                        <div className="shopee-order-mid-subcard-title-group">
-                          <TruckIcon size={14} className="subcard-icon-blue" />
-                          <span className="shopee-order-mid-subcard-title">{t('shipping_carrier', 'Vận chuyển')}</span>
-                        </div>
-                        <ChevronRightIcon size={13} className="subcard-chevron" />
-                      </div>
-                      <div className="shopee-order-mid-subcard-body">
-                        <span className="shopee-order-carrier-name">SPX Express</span>
-                        <div
-                          className="shopee-order-tracking-tag"
+                  {/* Sleek Compact Logistics & Financial Summary Bar - Replaces Bulky Cards */}
+                  <div className="shopee-order-compact-bar">
+                    <div className="shopee-order-compact-left">
+                      {/* Vận chuyển */}
+                      <div className="shopee-order-compact-item">
+                        <TruckIcon size={14} color="#2563eb" />
+                        <span className="compact-item-label">{t('shipping_carrier', 'Vận chuyển')}:</span>
+                        <strong className="compact-item-val">SPX Express</strong>
+                        <span
+                          className="compact-tracking-tag"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCopy(ord.trackingCode || `SPX-VN-${ord.orderId}`, 'mã vận đơn SPX');
                           }}
                           title="Nhấn để sao chép mã vận đơn SPX"
                         >
-                          <span>{ord.trackingCode || `SPX-VN-${ord.orderId}`}</span>
+                          {ord.trackingCode || `SPX-VN-${ord.orderId}`}
                           <CopyIcon size={10} />
-                        </div>
+                        </span>
+                      </div>
+
+                      <span className="compact-bar-divider">|</span>
+
+                      {/* Phương thức thanh toán */}
+                      <div className="shopee-order-compact-item">
+                        <CreditCardIcon size={14} color="#0284c7" />
+                        <span className="compact-item-label">{t('payment_method', 'Thanh toán')}:</span>
+                        <strong className="compact-item-val">{ord.paymentMethod || 'COD'}</strong>
+                        <span className="compact-guarantee-note">· Bảo mật Shopee Guarantee</span>
                       </div>
                     </div>
 
-                    {/* Card 2: Phương thức thanh toán */}
-                    <div
-                      className="shopee-order-mid-subcard"
-                      onClick={() => {
-                        setSelectedDetailOrder(ord);
-                        setIsDetailModalOpen(true);
-                      }}
-                      title="Xem chi tiết thanh toán"
-                    >
-                      <div className="shopee-order-mid-subcard-header">
-                        <div className="shopee-order-mid-subcard-title-group">
-                          <CreditCardIcon size={14} className="subcard-icon-sky" />
-                          <span className="shopee-order-mid-subcard-title">{t('payment_method', 'Phương thức thanh toán')}</span>
-                        </div>
-                        <ChevronRightIcon size={13} className="subcard-chevron" />
+                    <div className="shopee-order-compact-right">
+                      <div className="shopee-order-compact-total-group">
+                        <span className="compact-total-label">{t('total_payment', 'Tổng thanh toán')}:</span>
+                        <span className="compact-total-price">{formatCurrency(totalPayment)}</span>
                       </div>
-                      <div className="shopee-order-mid-subcard-body">
-                        <span className="shopee-order-payment-method">{ord.paymentMethod || 'Thanh toán khi nhận hàng (COD)'}</span>
-                        <span className="shopee-order-subcard-hint">Bảo mật Shopee Guarantee</span>
-                      </div>
-                    </div>
-
-                    {/* Card 3: Tổng thanh toán (Highlighted Container) */}
-                    <div
-                      className="shopee-order-mid-subcard total-highlight"
-                      onClick={() => {
-                        setSelectedDetailOrder(ord);
-                        setIsDetailModalOpen(true);
-                      }}
-                      title="Xem chi tiết thanh toán và hóa đơn"
-                    >
-                      <div className="shopee-order-mid-subcard-header">
-                        <div className="shopee-order-mid-subcard-title-group">
-                          <ShoppingBagIcon size={14} className="subcard-icon-rose" />
-                          <span className="shopee-order-mid-subcard-title rose-text">{t('total_payment', 'Tổng thanh toán')}</span>
-                        </div>
-                        <ChevronRightIcon size={13} className="subcard-chevron rose-chevron" />
-                      </div>
-                      <div className="shopee-order-mid-subcard-body">
-                        <span className="shopee-order-mid-total-price">{formatCurrency(totalPayment)}</span>
-                        {(voucherDiscount > 0 || coinDiscount > 0) ? (
-                          <span className="shopee-order-mid-saving-pill">
-                            Tiết kiệm {formatCurrency(voucherDiscount + coinDiscount)}
-                          </span>
-                        ) : (
-                          <span className="shopee-order-subcard-hint">Đã bao gồm VAT & phí ship</span>
-                        )}
-                      </div>
+                      {(voucherDiscount > 0 || coinDiscount > 0) ? (
+                        <span className="compact-saving-pill">
+                          Tiết kiệm {formatCurrency(voucherDiscount + coinDiscount)}
+                        </span>
+                      ) : (
+                        <span className="compact-sub-hint">Đã bao gồm VAT & phí ship</span>
+                      )}
                     </div>
                   </div>
 

@@ -316,7 +316,7 @@ export default function CheckoutPage() {
         return {
           orderId: generatedOrderId,
           shopId: sId,
-          customerName: fullName || "Khách Hàng Mini Shopee",
+          customerName: fullName || "Khách Hàng",
           phone: phone || "0901234567",
           address: address || "TP. Hồ Chí Minh / Hà Nội",
           productName: shopItems.map((it) => `${it.name} (x${it.quantity})`).join(", "),
