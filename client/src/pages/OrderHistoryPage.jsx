@@ -45,14 +45,16 @@ const INITIAL_CUSTOMER_ORDERS = [
     shopName: "Thời Trang GenZ Official",
     items: [
       {
-        name: "Áo thun nam basic cotton 100% thoáng mát dệt sợi tự nhiên",
-        price: 199000,
+        name: "Áo sơ mi nữ công sở lụa satin cao cấp chống nhăn thanh lịch",
+        price: 259000,
         quantity: 2,
+        variant: "Xanh dương",
+        size: "Freesize",
         image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200",
       },
     ],
-    total: 423000,
-    subtotal: 398000,
+    total: 543000,
+    subtotal: 518000,
     shippingFee: 25000,
     voucherDiscount: 0,
     coinDiscount: 0,
@@ -1083,13 +1085,27 @@ export default function OrderHistoryPage() {
                           />
                           <div className="shopee-order-item-info">
                             <div className="shopee-order-item-title">{item.name}</div>
-                            <div className="shopee-order-item-meta-line">
-                              {item.variant && <span>Phân loại: {item.variant}</span>}
-                              {item.variant && <span className="meta-pipe"> | </span>}
-                              {item.size && <span>Kích thước: {item.size}</span>}
-                              {item.size && <span className="meta-pipe"> | </span>}
-                              <span>Số lượng: x{itemQty}</span>
-                            </div>
+                            {(() => {
+                              let variantText = item.variant || item.color;
+                              let sizeText = item.size;
+                              if (variantText && variantText.includes(',') && !sizeText) {
+                                const parts = variantText.split(',').map((s) => s.trim());
+                                variantText = parts[0];
+                                sizeText = parts[1];
+                              }
+                              const finalVariant = variantText || (item.name?.toLowerCase().includes('giày') ? 'Đỏ Trắng' : item.name?.toLowerCase().includes('áo') ? 'Xanh dương' : 'Tiêu chuẩn');
+                              const finalSize = sizeText || (item.name?.toLowerCase().includes('giày') ? 'Size 42' : item.name?.toLowerCase().includes('áo') ? 'Freesize' : 'Tiêu chuẩn');
+
+                              return (
+                                <div className="shopee-order-item-meta-line">
+                                  <span>Phân loại: {finalVariant}</span>
+                                  <span className="meta-pipe"> | </span>
+                                  <span>Kích thước: {finalSize}</span>
+                                  <span className="meta-pipe"> | </span>
+                                  <span>Số lượng: x{itemQty}</span>
+                                </div>
+                              );
+                            })()}
                             <div className="shopee-order-trust-tag">
                               <CheckIcon size={12} color="#059669" />
                               <span>100% Chính hãng · Đổi trả trong 15 ngày</span>
@@ -1231,7 +1247,7 @@ export default function OrderHistoryPage() {
                           </button>
                           <button
                             type="button"
-                            className="shopee-order-btn-primary"
+                            className="shopee-order-btn-outline"
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => {
                               setSelectedDetailOrder(ord);
@@ -1267,7 +1283,7 @@ export default function OrderHistoryPage() {
                           </button>
                           <button
                             type="button"
-                            className="shopee-order-btn-success"
+                            className="shopee-order-btn-outline"
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => handleConfirmDelivered(ord.orderId)}
                             title="Xác nhận bạn đã nhận được gói hàng an toàn"
@@ -1294,7 +1310,7 @@ export default function OrderHistoryPage() {
 
                           <button
                             type="button"
-                            className={ord.reviewed ? 'shopee-order-btn-primary' : 'shopee-order-btn-outline'}
+                            className="shopee-order-btn-outline"
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => handleReorderWholeOrder(ord)}
                             title="Mua lại tất cả sản phẩm trong đơn hàng này"
@@ -1307,11 +1323,11 @@ export default function OrderHistoryPage() {
                               className="shopee-badge-success"
                               style={{
                                 fontSize: '12px',
-                                padding: '7px 14px',
+                                padding: '6px 13px',
                                 borderRadius: '6px',
-                                background: '#ecfdf5',
+                                background: '#f8fafc',
                                 color: '#059669',
-                                border: '1px solid #a7f3d0',
+                                border: '1px solid #e2e8f0',
                                 fontWeight: 700,
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -1337,7 +1353,7 @@ export default function OrderHistoryPage() {
                         <>
                           <button
                             type="button"
-                            className="shopee-order-btn-primary"
+                            className="shopee-order-btn-outline"
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => handleReorderWholeOrder(ord)}
                             title="Mua lại tất cả sản phẩm trong đơn hàng này"
