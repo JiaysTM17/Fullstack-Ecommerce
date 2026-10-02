@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -90,6 +90,40 @@ export default function OrderHistoryPage() {
 
   const [activeTab, setActiveTab] = useState('all');
   const [dateRange, setDateRange] = useState('all'); // 'all' | '30days' | '3months' | 'year2026'
+
+  // Ref tracking for sliding animated tab indicator
+  const tabRefs = useRef({});
+  const tabNavRef = useRef(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
+
+  // Update sliding indicator position & width to center precisely under active tab text
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeEl = tabRefs.current[activeTab];
+      if (activeEl) {
+        const textSpan = activeEl.querySelector('.shopee-order-tab-text') || activeEl;
+        const textWidth = textSpan.offsetWidth || 60;
+        const textOffsetLeft = textSpan.offsetLeft || 0;
+        // Indicator width proportional to text, centered directly under the text span
+        const targetWidth = Math.max(36, textWidth + 8);
+        const targetLeft = activeEl.offsetLeft + textOffsetLeft + (textWidth - targetWidth) / 2;
+
+        setIndicatorStyle({
+          left: Math.round(targetLeft),
+          width: Math.round(targetWidth),
+          opacity: 1,
+        });
+      }
+    };
+
+    updateIndicator();
+    const timer = setTimeout(updateIndicator, 50);
+    window.addEventListener('resize', updateIndicator);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateIndicator);
+    };
+  }, [activeTab]);
   const [orders, setOrders] = useState(() => {
     try {
       const saved = localStorage.getItem(ORDERS_STORAGE_KEY);
@@ -741,8 +775,8 @@ export default function OrderHistoryPage() {
 
         {/* Shopee Mall Unified Hub: Seamless Tabs + Search & Filters in 1 Card */}
         <div className="shopee-mall-orders-hub">
-          {/* Top Bar: Nav Tabs with vibrant Shopee Orange underline */}
-          <div className="shopee-order-tabs-nav">
+          {/* Top Bar: Nav Tabs with animated sliding Royal Blue indicator */}
+          <div className="shopee-order-tabs-nav" ref={tabNavRef}>
             {[
               { id: 'all', label: t('all_orders', 'Tất cả đơn') },
               { id: 'pending', label: 'Chờ xác nhận' },
@@ -756,16 +790,25 @@ export default function OrderHistoryPage() {
               return (
                 <button
                   key={tab.id}
+                  ref={(el) => (tabRefs.current[tab.id] = el)}
                   type="button"
                   className={`shopee-order-tab-item ${isActive ? 'active' : ''}`}
                   onClick={() => setActiveTab(tab.id)}
                 >
-                  <span>{tab.label}</span>
+                  <span className="shopee-order-tab-text">{tab.label}</span>
                   {count > 0 && <span className="shopee-order-tab-badge">{count}</span>}
-                  {isActive && <div className="shopee-order-tab-indicator" />}
                 </button>
               );
             })}
+            {/* Sliding Animated Indicator directly centered under the active tab's text */}
+            <div
+              className="shopee-order-sliding-indicator"
+              style={{
+                transform: `translateX(${indicatorStyle.left}px)`,
+                width: `${indicatorStyle.width}px`,
+                opacity: indicatorStyle.opacity,
+              }}
+            />
           </div>
 
           {/* Bottom Bar: Search Box & Date Range Filter Toolbar */}
