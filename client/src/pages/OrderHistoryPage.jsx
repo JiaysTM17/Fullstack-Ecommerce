@@ -739,116 +739,107 @@ export default function OrderHistoryPage() {
           </div>
         )}
 
-        {/* Shopee Mall Modern Nav Tabs with Orange Underline */}
-        <div className="shopee-order-tabs-nav">
-          {[
-            { id: 'all', label: t('all_orders', 'Tất cả đơn') },
-            { id: 'pending', label: 'Chờ xác nhận' },
-            { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển') },
-            { id: 'completed', label: t('status_completed', 'Hoàn thành') },
-            { id: 'returning', label: t('status_returning', 'Đổi trả / Hoàn tiền') },
-            { id: 'cancelled', label: t('status_cancelled', 'Đã hủy') },
-          ].map((tab) => {
-            const count = getTabCount(tab.id);
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                className={`shopee-order-tab-item ${isActive ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <span>{tab.label}</span>
-                {count > 0 && <span className="shopee-order-tab-badge">{count}</span>}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Unified Orders Control Hub: Search & Filter Tools */}
-        <div className="orders-control-hub">
-          {/* Row 1: Search Box & Export Group */}
-          <div className="orders-search-row">
-            <div className="orders-search-box">
-              <span className="orders-search-icon">🔍</span>
-              <input
-                type="text"
-                placeholder={t('search_orders_placeholder', 'Tìm kiếm đơn hàng theo Mã đơn, Mã vận đơn hoặc Tên sản phẩm...')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="orders-search-input"
-              />
-              {searchTerm && (
+        {/* Shopee Mall Unified Hub: Seamless Tabs + Search & Filters in 1 Card */}
+        <div className="shopee-mall-orders-hub">
+          {/* Top Bar: Nav Tabs with vibrant Shopee Orange underline */}
+          <div className="shopee-order-tabs-nav">
+            {[
+              { id: 'all', label: t('all_orders', 'Tất cả đơn') },
+              { id: 'pending', label: 'Chờ xác nhận' },
+              { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển') },
+              { id: 'completed', label: t('status_completed', 'Hoàn thành') },
+              { id: 'returning', label: t('status_returning', 'Đổi trả / Hoàn tiền') },
+              { id: 'cancelled', label: t('status_cancelled', 'Đã hủy') },
+            ].map((tab) => {
+              const count = getTabCount(tab.id);
+              const isActive = activeTab === tab.id;
+              return (
                 <button
+                  key={tab.id}
                   type="button"
-                  aria-label="Xóa tìm kiếm"
-                  onClick={() => setSearchTerm('')}
-                  className="orders-search-clear"
-                  title="Xóa tìm kiếm"
+                  className={`shopee-order-tab-item ${isActive ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
                 >
-                  ✕
+                  <span>{tab.label}</span>
+                  {count > 0 && <span className="shopee-order-tab-badge">{count}</span>}
+                  {isActive && <div className="shopee-order-tab-indicator" />}
                 </button>
-              )}
-            </div>
-
-            <div className="orders-export-group">
-              <button
-                type="button"
-                className="shopee-btn shopee-btn-secondary"
-                style={{ fontSize: '12px', padding: '7px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '8px' }}
-                onClick={handleExportCSV}
-                title="Xuất danh sách đơn hàng sang file CSV (hỗ trợ Excel)"
-              >
-                📥 Xuất CSV
-              </button>
-              <button
-                type="button"
-                className="shopee-btn shopee-btn-secondary"
-                style={{ fontSize: '12px', padding: '7px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '8px' }}
-                onClick={handlePrintReport}
-                title="In hoặc lưu file PDF báo cáo lịch sử đơn hàng"
-              >
-                🖨 In báo cáo
-              </button>
-            </div>
+              );
+            })}
           </div>
 
-          {/* Row 2: Compact Date Range Filter Chips & Results Count */}
-          <div className="orders-filter-chips-row">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--text-secondary, #64748b)', marginRight: '2px' }}>
-                📅 Lọc theo thời gian:
-              </span>
-              {[
-                { id: 'all', label: 'Tất cả' },
-                { id: '30days', label: '30 ngày gần đây' },
-                { id: '3months', label: '3 tháng qua' },
-                { id: 'year2026', label: 'Năm 2026' },
-              ].map((dr) => (
+          {/* Bottom Bar: Search Box & Date Range Filter Toolbar */}
+          <div className="shopee-order-toolbar-inner">
+            <div className="orders-search-row">
+              <div className="orders-search-box">
+                <span className="orders-search-icon">🔍</span>
+                <input
+                  type="text"
+                  placeholder={t('search_orders_placeholder', 'Tìm kiếm theo Tên Shop, ID đơn hàng hoặc Tên sản phẩm...')}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="orders-search-input"
+                />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    aria-label="Xóa tìm kiếm"
+                    onClick={() => setSearchTerm('')}
+                    className="orders-search-clear"
+                    title="Xóa tìm kiếm"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              <div className="orders-export-group">
                 <button
-                  key={dr.id}
                   type="button"
-                  style={{
-                    fontSize: '12px',
-                    padding: '4px 12px',
-                    borderRadius: '16px',
-                    border: '1px solid',
-                    borderColor: dateRange === dr.id ? 'var(--primary-color, #ea580c)' : 'var(--border-medium, #cbd5e1)',
-                    background: dateRange === dr.id ? 'var(--primary-color, #ea580c)' : 'var(--bg-card, #ffffff)',
-                    color: dateRange === dr.id ? '#ffffff' : 'var(--text-secondary, #475569)',
-                    fontWeight: dateRange === dr.id ? 700 : 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onClick={() => setDateRange(dr.id)}
+                  className="shopee-order-btn-outline"
+                  style={{ fontSize: '12px', padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  onClick={handleExportCSV}
+                  title="Xuất danh sách đơn hàng sang file CSV (hỗ trợ Excel)"
                 >
-                  {dr.label}
+                  📥 Xuất CSV
                 </button>
-              ))}
+                <button
+                  type="button"
+                  className="shopee-order-btn-outline"
+                  style={{ fontSize: '12px', padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  onClick={handlePrintReport}
+                  title="In hoặc lưu file PDF báo cáo lịch sử đơn hàng"
+                >
+                  🖨 In báo cáo
+                </button>
+              </div>
             </div>
 
-            <div style={{ fontSize: '12.5px', color: 'var(--text-muted, #64748b)' }}>
-              Đang hiển thị <strong>{filteredOrders.length}</strong> đơn hàng
+            <div className="orders-filter-chips-row">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--text-secondary, #64748b)', marginRight: '2px' }}>
+                  📅 Khoảng thời gian:
+                </span>
+                {[
+                  { id: 'all', label: 'Tất cả' },
+                  { id: '30days', label: '30 ngày gần đây' },
+                  { id: '3months', label: '3 tháng qua' },
+                  { id: 'year2026', label: 'Năm 2026' },
+                ].map((dr) => (
+                  <button
+                    key={dr.id}
+                    type="button"
+                    className={`order-filter-chip ${dateRange === dr.id ? 'active' : ''}`}
+                    onClick={() => setDateRange(dr.id)}
+                  >
+                    {dr.label}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ fontSize: '12.5px', color: 'var(--text-muted, #64748b)' }}>
+                Đang hiển thị <strong>{filteredOrders.length}</strong> đơn hàng
+              </div>
             </div>
           </div>
         </div>
@@ -1092,7 +1083,6 @@ export default function OrderHistoryPage() {
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
-                            style={{ color: '#0284c7', borderColor: '#bae6fd' }}
                             onClick={() => setSelectedLiveMapOrder(ord)}
                           >
                             🚚 {t('shipper_map', 'Bản đồ Shipper SPX')}
@@ -1127,11 +1117,11 @@ export default function OrderHistoryPage() {
                               style={{
                                 fontSize: '12px',
                                 padding: '6px 12px',
-                                borderRadius: '8px',
+                                borderRadius: '6px',
                                 background: '#ecfdf5',
                                 color: '#059669',
                                 border: '1px solid #a7f3d0',
-                                fontWeight: 700,
+                                fontWeight: 600,
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '4px',
@@ -1143,7 +1133,6 @@ export default function OrderHistoryPage() {
                             <button
                               type="button"
                               className="shopee-order-btn-primary"
-                              style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
                               onClick={() => setSelectedReviewOrder(ord)}
                             >
                               ⭐ {t('review_order_btn', 'Đánh giá (+200 Xu)')}
@@ -1151,7 +1140,7 @@ export default function OrderHistoryPage() {
                           )}
                           <button
                             type="button"
-                            className="shopee-order-btn-primary"
+                            className={ord.reviewed ? 'shopee-order-btn-primary' : 'shopee-order-btn-outline'}
                             onClick={() => handleReorderWholeOrder(ord)}
                             title="Mua lại tất cả sản phẩm trong đơn hàng này"
                           >
@@ -1160,7 +1149,6 @@ export default function OrderHistoryPage() {
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
-                            style={{ color: '#d97706', borderColor: '#fde68a' }}
                             onClick={() => setSelectedReturnOrder(ord)}
                           >
                             ↩ {t('return_refund', 'Trả hàng/Hoàn tiền')}
