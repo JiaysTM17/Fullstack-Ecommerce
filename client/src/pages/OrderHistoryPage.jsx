@@ -34,7 +34,10 @@ import {
   ReturnIcon,
   StarIcon,
   ShoppingBagIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  CloseIcon,
+  PhoneIcon,
+  CoinIcon
 } from '../components/OrdersIcons';
 import '../styles/dashboard.css';
 
@@ -631,7 +634,6 @@ export default function OrderHistoryPage() {
 
     pushBuyerNotification({
       type: 'order',
-      icon: '⚠️',
       title: `Đã hủy đơn hàng #${selectedCancelOrder.orderId}`,
       message: `Đơn hàng đã được hủy thành công. Tồn kho và ${coinRefundAmount > 0 ? `${coinRefundAmount} xu` : 'dữ liệu'} đã được hoàn trả.`,
       link: '/orders',
@@ -688,14 +690,13 @@ export default function OrderHistoryPage() {
 
     pushBuyerNotification({
       type: 'voucher',
-      icon: '🪙',
       title: `Nhận +200 Xu thưởng`,
       message: `Bạn nhận được 200 Xu thưởng nhờ đánh giá sản phẩm cho đơn #${reviewData.orderId}!`,
       link: '/profile',
     });
 
     setSelectedReviewOrder(null);
-    showToast('🎉 Cảm ơn bạn! Đã gửi đánh giá thành công và nhận thưởng +200 Xu!', 'success');
+    showToast('Cảm ơn bạn! Đã gửi đánh giá thành công và nhận thưởng +200 Xu!', 'success');
   };
 
   const handleBuyAgain = (item) => {
@@ -787,7 +788,7 @@ export default function OrderHistoryPage() {
       } catch {}
     }
 
-    showToast('🎉 Bạn đã xác nhận nhận hàng! Hãy để lại đánh giá để nhận ngay +200 Xu.', 'success');
+    showToast('Bạn đã xác nhận nhận hàng! Hãy để lại đánh giá để nhận ngay +200 Xu.', 'success');
     const target = updated.find((o) => o.orderId === orderId);
     if (target) {
       setSelectedReviewOrder(target);
@@ -851,7 +852,7 @@ export default function OrderHistoryPage() {
             ← Quay lại
           </button>
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>✕</span>
+            <CloseIcon size={16} />
             <span>Hủy Đơn Hàng: #{selectedCancelOrder.orderId}</span>
           </h3>
         </div>
@@ -1291,7 +1292,7 @@ export default function OrderHistoryPage() {
                                   margin: '0 auto 6px',
                                   boxShadow: isCurrent ? '0 0 0 4px rgba(37, 99, 235, 0.2)' : 'none',
                                 }}>
-                                  {isPassed ? '✓' : s.step}
+                                  {isPassed ? <CheckIcon size={12} color="#ffffff" /> : s.step}
                                 </div>
                                 <div style={{ fontSize: '12px', fontWeight: isPassed ? 700 : 500, color: isPassed ? '#0f172a' : '#64748b' }}>
                                   {s.label}
@@ -1316,8 +1317,8 @@ export default function OrderHistoryPage() {
                             <div>
                               <strong style={{ fontSize: '13px', color: '#0f172a' }}>Nguyễn Văn Tài</strong>
                               <div style={{ fontSize: '11.5px', color: '#64748b' }}>SPX Đội Phát Tân Bình · Xe: 59-P1 982.34</div>
-                              <div style={{ fontSize: '11.5px', color: '#2563eb', marginTop: '2px', fontWeight: 600 }}>
-                                📞 Hotline: 1900 1221 (Phím 1)
+                              <div style={{ fontSize: '11.5px', color: '#2563eb', marginTop: '2px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <PhoneIcon size={12} /> Hotline: 1900 1221 (Phím 1)
                               </div>
                             </div>
                           </div>
@@ -1520,8 +1521,9 @@ export default function OrderHistoryPage() {
                     onClick={() => setSearchTerm('')}
                     className="orders-search-clear"
                     title="Xóa tìm kiếm"
+                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    ✕
+                    <CloseIcon size={12} />
                   </button>
                 )}
               </div>
@@ -1559,13 +1561,13 @@ export default function OrderHistoryPage() {
                     {searchTerm && (
                       <span className="orders-active-chip">
                         Từ khóa: &ldquo;{searchTerm}&rdquo;
-                        <button type="button" onClick={() => setSearchTerm('')} title="Xóa từ khóa">✕</button>
+                        <button type="button" onClick={() => setSearchTerm('')} title="Xóa từ khóa" style={{ display: 'inline-flex', alignItems: 'center' }}><CloseIcon size={10} /></button>
                       </span>
                     )}
                     {dateRange !== 'all' && (
                       <span className="orders-active-chip">
                         {dateRange === '30days' ? '30 ngày gần đây' : dateRange === '3months' ? '3 tháng qua' : 'Năm 2026'}
-                        <button type="button" onClick={() => setDateRange('all')} title="Xóa bộ lọc thời gian">✕</button>
+                        <button type="button" onClick={() => setDateRange('all')} title="Xóa bộ lọc thời gian" style={{ display: 'inline-flex', alignItems: 'center' }}><CloseIcon size={10} /></button>
                       </span>
                     )}
                     <button
@@ -1828,8 +1830,10 @@ export default function OrderHistoryPage() {
                           className="shopee-order-cancel-link"
                           onClick={() => setSelectedCancelOrder(ord)}
                           title="Yêu cầu hủy đơn hàng này"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                         >
-                          ✕ {t('cancel_order', 'Yêu cầu hủy đơn')}
+                          <CloseIcon size={11} />
+                          <span>{t('cancel_order', 'Yêu cầu hủy đơn')}</span>
                         </button>
                       )}
                       {ord.status !== 'cancelled' && (ord.stepIndex || 1) < 4 && (
