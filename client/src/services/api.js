@@ -369,6 +369,17 @@ export async function updateProfileAPI(data) {
   return result?.data || result;
 }
 
+/**
+ * Change password
+ */
+export async function changePasswordAPI(oldPassword, newPassword) {
+  const result = await apiRequest("/api/auth/change-password", {
+    method: "PUT",
+    body: JSON.stringify({ oldPassword, newPassword }),
+  });
+  return result?.data || result;
+}
+
 // ============================================================
 // SELLER API
 // ============================================================

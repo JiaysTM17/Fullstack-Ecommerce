@@ -919,8 +919,12 @@ const Header = ({
                   aria-expanded={showUserDropdown}
                   title="Tài khoản của tôi"
                 >
-                  <div className="header-user-avatar-circle">
-                    {(user.fullName || user.email || 'U').charAt(0).toUpperCase()}
+                  <div className="header-user-avatar-circle" style={{ overflow: 'hidden' }}>
+                    {user.avatar ? (
+                      <img src={user.avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      (user.fullName || user.email || 'U').charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div className="header-user-dock-info">
                     <span className="header-user-dock-name">
@@ -936,8 +940,12 @@ const Header = ({
                 {showUserDropdown && (
                   <div className="header-user-dropdown-card">
                     <div className="user-dropdown-header">
-                      <div className="user-dropdown-avatar-large">
-                        {(user.fullName || user.email || 'U').charAt(0).toUpperCase()}
+                      <div className="user-dropdown-avatar-large" style={{ overflow: 'hidden' }}>
+                        {user.avatar ? (
+                          <img src={user.avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          (user.fullName || user.email || 'U').charAt(0).toUpperCase()
+                        )}
                       </div>
                       <div className="user-dropdown-info">
                         <div className="user-dropdown-name">{user.fullName || user.email}</div>

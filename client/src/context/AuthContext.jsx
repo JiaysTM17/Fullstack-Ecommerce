@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { loginAPI, registerAPI, demoLoginAPI, fetchCurrentUser, updateProfileAPI, API_BASE_URL } from '../services/api';
+import { loginAPI, registerAPI, demoLoginAPI, fetchCurrentUser, updateProfileAPI, changePasswordAPI, API_BASE_URL } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -197,6 +197,16 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
+  // === CHANGE PASSWORD ===
+  const changePassword = useCallback(async (oldPassword, newPassword) => {
+    try {
+      const res = await changePasswordAPI(oldPassword, newPassword);
+      return { success: true, message: res?.message || 'Đổi mật khẩu thành công!' };
+    } catch (err) {
+      return { success: false, error: err.message || 'Đổi mật khẩu thất bại' };
+    }
+  }, []);
+
   const isCustomer = user?.role === 'customer';
   const isSeller = user?.role === 'seller';
   const isAdmin = user?.role === 'admin';
@@ -207,7 +217,7 @@ export const AuthProvider = ({ children }) => {
         user, token,
         isAuthenticated: !!user,
         isCustomer, isSeller, isAdmin,
-        login, loginAsDemo, register, logout, updateProfile
+        login, loginAsDemo, register, logout, updateProfile, changePassword
       }}
     >
       {children}

@@ -262,12 +262,15 @@ export const profile = async (req, res) => {
       return sendError(res, "Không tìm thấy người dùng", 404);
     }
 
-    const { fullName, phone, address, avatar, savedAddresses, shopName, shopLogo, shopAddress } = req.body;
+    const { fullName, phone, address, avatar, savedAddresses, shopName, shopLogo, shopAddress, gender, birthday, bio } = req.body;
 
     if (fullName) user.fullName = fullName.trim();
     if (phone !== undefined) user.phone = phone.trim();
     if (address !== undefined) user.address = address.trim();
     if (avatar) user.avatar = avatar;
+    if (gender !== undefined) user.gender = gender;
+    if (birthday !== undefined) user.birthday = birthday;
+    if (bio !== undefined) user.bio = bio;
     if (Array.isArray(savedAddresses)) user.savedAddresses = savedAddresses;
 
     // Allowed for sellers only
