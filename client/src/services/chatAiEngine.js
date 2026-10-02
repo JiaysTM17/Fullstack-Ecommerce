@@ -263,7 +263,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     return {
       intent: 'HANDOVER_TRIGGER',
       handoverTriggered: true,
-      replyText: `🔄 **Đang kết nối Chuyên Viên CSKH Kim Ngân (#CSKH-8821)!**\n\n• Toàn bộ lịch sử trao đổi của bạn đã được chuyển giao an toàn.\n• Chuyên viên sẽ trực tiếp giải quyết khiếu nại, hỗ trợ đổi trả và áp mã độc quyền ngay lập tức.`,
+      replyText: `**[KẾT NỐI] Đang kết nối Chuyên Viên CSKH Kim Ngân (#CSKH-8821)!**\n\n• Toàn bộ lịch sử trao đổi của bạn đã được chuyển giao an toàn.\n• Chuyên viên sẽ trực tiếp giải quyết khiếu nại, hỗ trợ đổi trả và áp mã độc quyền ngay lập tức.`,
       suggestions: ['Kiểm tra tiến độ đơn hàng gấp', 'Yêu cầu đổi hàng / hoàn tiền', 'Tư vấn bảo hành sản phẩm'],
     };
   }
@@ -276,7 +276,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       return {
         intent: 'SWITCH_BACK_AI',
         switchBackAi: true,
-        replyText: `✨ Dạ em Kim Ngân xin chào tạm biệt anh/chị ạ! Quyền hỗ trợ đã được chuyển lại cho Trợ Lý AI Fullstack 24/7. Chúc anh/chị mua sắm vui vẻ!`,
+        replyText: `Dạ em Kim Ngân xin chào tạm biệt anh/chị ạ! Quyền hỗ trợ đã được chuyển lại cho Trợ Lý AI Fullstack 24/7. Chúc anh/chị mua sắm vui vẻ!`,
         suggestions: ['Gợi ý hàng bán chạy', 'Săn mã giảm giá', 'Tra cứu đơn hàng'],
       };
     }
@@ -325,10 +325,10 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     const foundProds = searchSmartProducts(lower);
     return {
       intent: 'COMPOUND_PRODUCT_VOUCHER',
-      replyText: `🎯 **Đã tìm thấy sản phẩm phù hợp & tặng kèm mã giảm giá kép cho bạn:**\n\n• Áp dụng mã \`MINI10\` (Giảm 10%) hoặc \`SUPERDEAL\` (Giảm 15%).\n• Xếp chồng cùng lúc mã \`FREESHIP\` (Giảm 30.000₫ vận chuyển).\n\nNhấn **[🛒 Thêm giỏ]** hoặc **[⚡ Mua ngay]** bên dưới:`,
+      replyText: `**[GỢI Ý] Đã tìm thấy sản phẩm phù hợp & tặng kèm mã giảm giá kép cho bạn:**\n\n• Áp dụng mã \`MINI10\` (Giảm 10%) hoặc \`SUPERDEAL\` (Giảm 15%).\n• Xếp chồng cùng lúc mã \`FREESHIP\` (Giảm 30.000₫ vận chuyển).\n\nNhấn **[Thêm giỏ]** hoặc **[Mua ngay]** bên dưới:`,
       products: foundProds,
       vouchers: VOUCHER_KNOWLEDGE.slice(0, 3),
-      suggestions: ['Áp mã vào giỏ hàng', 'Xem hàng giao hỏa tốc 2H', '👨‍💼 Kết nối nhân viên trực'],
+      suggestions: ['Áp mã vào giỏ hàng', 'Xem hàng giao hỏa tốc 2H', 'Kết nối nhân viên trực'],
     };
   }
 
@@ -339,7 +339,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     const shopProds = searchSmartProducts(lower).filter(p => p.shopName?.toLowerCase().includes(currentShop.name.toLowerCase()) || true).slice(0, 3);
     return {
       intent: 'SHOP_PRODUCT_QUERY',
-      replyText: `🏪 **Gian hàng chính hãng: ${currentShop.name}**\n\n• Danh mục: ${currentShop.category} (Đánh giá: ⭐ ${currentShop.rating})\n• 100% hàng chính hãng đầy đủ hóa đơn VAT, hỗ trợ bảo hành từ 12-24 tháng.\n• Dưới đây là sản phẩm nổi bật của gian hàng:`,
+      replyText: `**[GIAN HÀNG] Gian hàng chính hãng: ${currentShop.name}**\n\n• Danh mục: ${currentShop.category} (Đánh giá: ${currentShop.rating} / 5 sao)\n• 100% hàng chính hãng đầy đủ hóa đơn VAT, hỗ trợ bảo hành từ 12-24 tháng.\n• Dưới đây là sản phẩm nổi bật của gian hàng:`,
       products: shopProds,
       suggestions: [`Xem toàn bộ hàng ${currentShop.name}`, 'Lấy mã giảm giá shop', 'Chính sách bảo hành'],
     };
@@ -352,7 +352,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   ) {
     return {
       intent: 'DUAL_VOUCHER_EXPLAIN',
-      replyText: `💡 **HƯỚNG DẪN ÁP DỤNG ĐỒNG THỜI DUAL VOUCHER & MINI XU:**\n\n1. **Bước 1 (Mã Đơn Hàng):** Chọn 1 mã giảm giá sản phẩm (\`MINI10\` giảm 10% hoặc \`SUPERDEAL\` giảm 15%).\n2. **Bước 2 (Mã Vận Chuyển):** Chọn thêm 1 mã \`FREESHIP\` để trừ 30.000₫ cước vận chuyển.\n3. **Bước 3 (Khấu Trừ Mini Xu):** Gạt công tắc "Dùng Mini Xu" tại trang thanh toán để cấn trừ thêm tới **50% giá trị đơn hàng** (1 Xu = 1 VNĐ).\n\n✨ Cả 3 ưu đãi này được tự động cộng dồn giúp bạn tiết kiệm tối đa!`,
+      replyText: `**HƯỚNG DẪN ÁP DỤNG ĐỒNG THỜI DUAL VOUCHER & MINI XU:**\n\n1. **Bước 1 (Mã Đơn Hàng):** Chọn 1 mã giảm giá sản phẩm (\`MINI10\` giảm 10% hoặc \`SUPERDEAL\` giảm 15%).\n2. **Bước 2 (Mã Vận Chuyển):** Chọn thêm 1 mã \`FREESHIP\` để trừ 30.000₫ cước vận chuyển.\n3. **Bước 3 (Khấu Trừ Mini Xu):** Gạt công tắc "Dùng Mini Xu" tại trang thanh toán để cấn trừ thêm tới **50% giá trị đơn hàng** (1 Xu = 1 VNĐ).\n\nCả 3 ưu đãi này được tự động cộng dồn giúp bạn tiết kiệm tối đa!`,
       vouchers: VOUCHER_KNOWLEDGE.slice(0, 3),
       suggestions: ['Xem giỏ hàng của tôi', 'Săn thêm mã giảm giá', 'Mở vòng quay nhận xu'],
     };
@@ -366,9 +366,9 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     if (orders.length > 0) {
       return {
         intent: 'ORDER_TRACKING',
-        replyText: `📦 **TÌNH TRẠNG VẬN ĐƠN THỜI GIAN THỰC (SPX EXPRESS)**\n\n• Hệ thống ghi nhận **${orders.length} đơn hàng** gần nhất của bạn.\n• Trạng thái: **Đang luân chuyển trên mạng lưới SPX** và dự kiến phát hàng thành công trong ngày hôm nay.`,
+        replyText: `**[VẬN ĐƠN] TÌNH TRẠNG VẬN ĐƠN THỜI GIAN THỰC (SPX EXPRESS)**\n\n• Hệ thống ghi nhận **${orders.length} đơn hàng** gần nhất của bạn.\n• Trạng thái: **Đang luân chuyển trên mạng lưới SPX** và dự kiến phát hàng thành công trong ngày hôm nay.`,
         orders,
-        suggestions: ['Xem tất cả đơn hàng', 'Yêu cầu giao hỏa tốc', '👨‍💼 Kết nối nhân viên trực'],
+        suggestions: ['Xem tất cả đơn hàng', 'Yêu cầu giao hỏa tốc', 'Kết nối nhân viên trực'],
       };
     }
     return {
@@ -384,8 +384,8 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   if (/hủy đơn|hủy hàng|đổi trả|hoàn tiền|trả hàng|bảo hành|lỗi/i.test(lower)) {
     return {
       intent: 'RETURN_REFUND_POLICY',
-      replyText: `🛡️ **CHÍNH SÁCH ĐỔI TRẢ & HOÀN TIỀN 100% MIỄN PHÍ:**\n\n• **Thời hạn:** Miễn phí đổi trả trong vòng **7 ngày** kể từ khi nhận hàng.\n• **Quy trình:** Shipper SPX đến tận nhà thu hồi hàng, tiền hoàn về tài khoản trong **24 giờ**.\n• **Hủy đơn:** Nếu đơn ở trạng thái *Chờ xác nhận*, bạn có thể bấm Hủy ngay trong mục Đơn Mua.\n• **Bảo hành:** Cam kết bảo hành chính hãng từ 12 - 24 tháng đối với thiết bị điện tử.`,
-      suggestions: ['👨‍💼 Gặp Chuyên viên Kim Ngân hỗ trợ đổi trả', 'Xem lịch sử đơn mua', 'Tiếp tục mua sắm'],
+      replyText: `**[CHÍNH SÁCH] ĐỔI TRẢ & HOÀN TIỀN 100% MIỄN PHÍ:**\n\n• **Thời hạn:** Miễn phí đổi trả trong vòng **7 ngày** kể từ khi nhận hàng.\n• **Quy trình:** Shipper SPX đến tận nhà thu hồi hàng, tiền hoàn về tài khoản trong **24 giờ**.\n• **Hủy đơn:** Nếu đơn ở trạng thái *Chờ xác nhận*, bạn có thể bấm Hủy ngay trong mục Đơn Mua.\n• **Bảo hành:** Cam kết bảo hành chính hãng từ 12 - 24 tháng đối với thiết bị điện tử.`,
+      suggestions: ['Gặp Chuyên viên Kim Ngân hỗ trợ đổi trả', 'Xem lịch sử đơn mua', 'Tiếp tục mua sắm'],
     };
   }
 
@@ -395,7 +395,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   if (/vòng quay|quay thưởng|lượt quay|mini xu|xu|điểm danh|thưởng/i.test(lower)) {
     return {
       intent: 'GAMIFICATION_INFO',
-      replyText: `🎡 **QUY TẮC VÒNG QUAY MAY MẮN & MINI XU CHUẨN XÁC:**\n\n• **Hoàn toàn miễn phí, TUYỆT ĐỐI KHÔNG trừ xu khi quay** (Xu được giữ để giảm giá khi mua sắm).\n• **1 lượt quay miễn phí mỗi ngày** (làm mới tự động vào 00:00 nửa đêm).\n• **Tặng thêm +1 lượt quay cho MỖI ĐƠN HÀNG đặt thành công**!\n• 100% cơ hội trúng quà: Xu thưởng khủng tới 5.000 Xu, Voucher 10%, Freeship 30k.\n\n🎯 **Số dư của bạn:** **${userCoins.toLocaleString('vi-VN')} Xu** | **Lượt quay:** **${totalSpins} lượt**`,
+      replyText: `**[ĐẶC QUYỀN] QUY TẮC VÒNG QUAY MAY MẮN & MINI XU CHUẨN XÁC:**\n\n• **Hoàn toàn miễn phí, TUYỆT ĐỐI KHÔNG trừ xu khi quay** (Xu được giữ để giảm giá khi mua sắm).\n• **1 lượt quay miễn phí mỗi ngày** (làm mới tự động vào 00:00 nửa đêm).\n• **Tặng thêm +1 lượt quay cho MỖI ĐƠN HÀNG đặt thành công**!\n• 100% cơ hội trúng quà: Xu thưởng khủng tới 5.000 Xu, Voucher 10%, Freeship 30k.\n\n**Số dư của bạn:** **${userCoins.toLocaleString('vi-VN')} Xu** | **Lượt quay:** **${totalSpins} lượt**`,
       rewardsInfo: {
         coins: userCoins,
         totalSpins,
@@ -410,7 +410,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   if (/giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
-      replyText: `⚡ **DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• 🚀 **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• 🚚 **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• 🆓 **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
+      replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
       vouchers: VOUCHER_KNOWLEDGE.filter(v => v.type === 'shipping'),
       suggestions: ['Lấy mã FREESHIP', 'Xem sản phẩm giao 2H', 'Tra cứu đơn hàng'],
     };
@@ -422,7 +422,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   if (/thanh toán|chuyển khoản|vietqr|momo|zalopay|thẻ|visa|cod|đồng kiểm/i.test(lower)) {
     return {
       intent: 'PAYMENT_INFO',
-      replyText: `💳 **PHƯƠNG THỨC THANH TOÁN TIỆN LỢI & AN TOÀN:**\n\n1. 📲 **VietQR Ngân Hàng:** Quét mã QR tự động điền tiền & nội dung, xác nhận sau 3 giây.\n2. 👛 **Ví MoMo & ZaloPay:** Thanh toán 1-chạm cực nhanh.\n3. 💳 **Thẻ Quốc Tế Visa/MasterCard:** Bảo mật chuẩn PCI-DSS.\n4. 💵 **Thanh toán khi nhận hàng (COD):** Được **đồng kiểm ngoại quan** cùng shipper trước khi thanh toán.`,
+      replyText: `**[THANH TOÁN] PHƯƠNG THỨC THANH TOÁN TIỆN LỢI & AN TOÀN:**\n\n1. **VietQR Ngân Hàng:** Quét mã QR tự động điền tiền & nội dung, xác nhận sau 3 giây.\n2. **Ví MoMo & ZaloPay:** Thanh toán 1-chạm cực nhanh.\n3. **Thẻ Quốc Tế Visa/MasterCard:** Bảo mật chuẩn PCI-DSS.\n4. **Thanh toán khi nhận hàng (COD):** Được **đồng kiểm ngoại quan** cùng shipper trước khi thanh toán.`,
       suggestions: ['Xem giỏ hàng của tôi', 'Săn mã giảm giá', 'Tiếp tục mua sắm'],
     };
   }
@@ -433,7 +433,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   if (/gian hàng|shop|cửa hàng|mall|chính hãng|hãng/i.test(lower)) {
     return {
       intent: 'MALL_STORES',
-      replyText: `🏪 **12 GIAN HÀNG CHÍNH HÃNG SHOPEE MALL ĐỘC QUYỀN:**\n\n100% hàng chính hãng, hóa đơn VAT đầy đủ, chính sách đổi trả 7 ngày tận nhà. Dưới đây là các gian hàng uy tín nhất:`,
+      replyText: `**[SHOPEE MALL] 12 GIAN HÀNG CHÍNH HÃNG ĐỘC QUYỀN:**\n\n100% hàng chính hãng, hóa đơn VAT đầy đủ, chính sách đổi trả 7 ngày tận nhà. Dưới đây là các gian hàng uy tín nhất:`,
       stores: MALL_STORES_KNOWLEDGE.slice(0, 6),
       suggestions: ['Xem TechWorld', 'Xem ChicLady', 'Xem HomeMaster'],
     };
@@ -445,7 +445,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   if (/voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
-      replyText: `🎁 **KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[⚡ Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
+      replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
       vouchers: VOUCHER_KNOWLEDGE.slice(0, 4),
       suggestions: ['Hướng dẫn dùng 2 voucher', 'Gợi ý hàng bán chạy', 'Mở vòng quay nhận quà'],
     };
@@ -461,9 +461,9 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     const hasPriceConstraint = /dưới|khoảng|từ|giá|rẻ/i.test(lower);
     return {
       intent: 'PRODUCT_RECOMMENDATION',
-      replyText: `✨ **Gợi ý sản phẩm ${hasPriceConstraint ? 'theo mức giá phù hợp' : 'nổi bật nhất'} dành cho bạn:**\n\nNhấn **[🛒 Thêm giỏ]** hoặc **[⚡ Mua ngay]** để nhận ưu đãi tốt nhất:`,
+      replyText: `**[GỢI Ý] Sản phẩm ${hasPriceConstraint ? 'theo mức giá phù hợp' : 'nổi bật nhất'} dành cho bạn:**\n\nNhấn **[Thêm giỏ]** hoặc **[Mua ngay]** để nhận ưu đãi tốt nhất:`,
       products: matchingProducts,
-      suggestions: ['Xem thêm hàng khác', 'Lấy mã giảm giá', '👨‍💼 Kết nối nhân viên trực'],
+      suggestions: ['Xem thêm hàng khác', 'Lấy mã giảm giá', 'Kết nối nhân viên trực'],
     };
   }
 
@@ -472,12 +472,12 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   return {
     intent: 'GENERAL_GREETING',
-    replyText: `Xin chào! Tôi là **Trợ Lý Mua Sắm & CSKH AI 24/7** 🛍️.\n\nTôi sẵn sàng giải đáp ngay mọi câu hỏi của bạn:\n• 🔍 **Gợi ý sản phẩm:** Tìm theo tên, ngân sách, thương hiệu.\n• 📦 **Tra cứu đơn hàng:** Kiểm tra tiến độ SPX Express thời gian thực.\n• 🎟️ **Kho Voucher:** Nhận mã giảm 15% & Freeship 30k.\n• 🎡 **Vòng quay may mắn:** Quay miễn phí & nhận Mini Xu.\n• 👨‍💼 **Gặp CSKH:** Chuyển ngay sang Chuyên viên Kim Ngân khi cần!`,
+    replyText: `Xin chào! Tôi là **Trợ Lý Mua Sắm & CSKH AI 24/7**.\n\nTôi sẵn sàng giải đáp ngay mọi câu hỏi của bạn:\n• **Gợi ý sản phẩm:** Tìm theo tên, ngân sách, thương hiệu.\n• **Tra cứu đơn hàng:** Kiểm tra tiến độ SPX Express thời gian thực.\n• **Kho Voucher:** Nhận mã giảm 15% & Freeship 30k.\n• **Vòng quay may mắn:** Quay miễn phí & nhận Mini Xu.\n• **Gặp CSKH:** Chuyển ngay sang Chuyên viên Kim Ngân khi cần!`,
     suggestions: [
       'Gợi ý đồ công nghệ hot',
       'Tra cứu đơn hàng của tôi',
       'Lấy mã giảm giá 15% & Freeship',
-      '👨‍💼 Gặp nhân viên tư vấn trực'
+      'Gặp nhân viên tư vấn trực'
     ],
   };
 }

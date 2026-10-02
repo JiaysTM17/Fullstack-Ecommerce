@@ -36,6 +36,7 @@ import {
   ChatIcon,
   CloseIcon,
   ClockIcon,
+  StarIcon,
 } from './OrdersIcons';
 
 const CHAT_STORAGE_KEY = 'mini_shopee_live_chat_history_v2';
@@ -301,7 +302,7 @@ export default function LiveChatWidget() {
             sender: 'agent',
             agentName: detail.shopName,
             avatar: detail.shopAvatar || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=100',
-            text: `Dạ chào bạn! Đây là kênh chat chính thức của gian hàng ${detail.shopName} ✨. Gian hàng sẵn sàng tư vấn mẫu mã, kiểm tra còn hàng và gửi tặng ưu đãi cho bạn ạ!`,
+            text: `Dạ chào bạn! Đây là kênh chat chính thức của gian hàng ${detail.shopName}. Gian hàng sẵn sàng tư vấn mẫu mã, kiểm tra còn hàng và gửi tặng ưu đãi cho bạn ạ!`,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             suggestions: ['Xem sản phẩm của shop', 'Shop có mã giảm giá không?', 'Thời gian giao hàng'],
           },
@@ -319,7 +320,7 @@ export default function LiveChatWidget() {
     navigator.clipboard.writeText(code).then(() => {
       setCopiedCode(code);
       playAudioChime('voucher', soundEnabled);
-      showToast(`✓ Đã sao chép mã "${code}" vào bộ nhớ tạm!`, 'success');
+      showToast(`Đã sao chép mã "${code}" vào bộ nhớ tạm!`, 'success');
       setTimeout(() => setCopiedCode(null), 2500);
     });
   };
@@ -332,7 +333,7 @@ export default function LiveChatWidget() {
         const res = await applyVoucher(code);
         playAudioChime('voucher', soundEnabled);
         if (res && res.success) {
-          showToast(`✓ Đã áp dụng mã "${code}" thành công vào đơn hàng!`, 'success');
+          showToast(`Đã áp dụng mã "${code}" thành công vào đơn hàng!`, 'success');
           return;
         } else if (res && res.message) {
           showToast(res.message, 'info');
@@ -340,7 +341,7 @@ export default function LiveChatWidget() {
         }
       }
       playAudioChime('voucher', soundEnabled);
-      showToast(`✓ Đã lưu mã "${code}" vào giỏ hàng!`, 'success');
+      showToast(`Đã lưu mã "${code}" vào giỏ hàng!`, 'success');
     } catch {
       handleCopyVoucher(voucher.code || voucher);
     }
@@ -351,7 +352,7 @@ export default function LiveChatWidget() {
     if (!product) return;
     addToCart(product, 1);
     playAudioChime('cart', soundEnabled);
-    showToast(`🛒 Đã thêm "${product.name}" vào giỏ hàng thành công!`, 'success');
+    showToast(`Đã thêm "${product.name}" vào giỏ hàng thành công!`, 'success');
   };
 
   // Mua ngay trực tiếp: thêm vào giỏ và chuyển đến trang thanh toán
@@ -359,7 +360,7 @@ export default function LiveChatWidget() {
     if (!product) return;
     addToCart(product, 1);
     playAudioChime('cart', soundEnabled);
-    showToast(`⚡ Đang chuyển bạn đến đơn hàng với "${product.name}"...`, 'success');
+    showToast(`Đang chuyển bạn đến đơn hàng với "${product.name}"...`, 'success');
     setIsOpen(false);
     navigate('/checkout');
   };
@@ -370,12 +371,12 @@ export default function LiveChatWidget() {
       const res = checkInToday();
       playAudioChime('voucher', soundEnabled);
       if (res && res.success) {
-        showToast(res.message || '🎉 Điểm danh thành công! Đã cộng Shopee Xu.', 'success');
+        showToast(res.message || 'Điểm danh thành công! Đã cộng Shopee Xu.', 'success');
       } else {
         showToast(res?.message || 'Bạn đã điểm danh hôm nay rồi!', 'info');
       }
     } else {
-      showToast('🎉 Đã nhận xu thưởng điểm danh hôm nay!', 'success');
+      showToast('Đã nhận xu thưởng điểm danh hôm nay!', 'success');
     }
   };
 
@@ -403,7 +404,7 @@ export default function LiveChatWidget() {
 
       recognition.onstart = () => {
         setIsListening(true);
-        showToast('🎙️ Đang lắng nghe giọng nói của bạn...', 'info');
+        showToast('Đang lắng nghe giọng nói của bạn...', 'info');
       };
 
       recognition.onresult = (event) => {
@@ -436,7 +437,7 @@ export default function LiveChatWidget() {
     const sysMsg = {
       id: `msg_sys_${Date.now()}`,
       sender: 'system',
-      text: '🔄 [HỆ THỐNG] Đang chuyển giao cuộc trò chuyện sang Chuyên Viên CSKH Kim Ngân (#CSKH-8821)... Lịch sử trao đổi đã được đồng bộ.',
+      text: '[HỆ THỐNG] Đang chuyển giao cuộc trò chuyện sang Chuyên Viên CSKH Kim Ngân (#CSKH-8821)... Lịch sử trao đổi đã được đồng bộ.',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     setMessages((prev) => [...prev, sysMsg]);
@@ -469,7 +470,7 @@ export default function LiveChatWidget() {
     const returnMsg = {
       id: `msg_sys_${Date.now()}`,
       sender: 'system',
-      text: '✨ [HỆ THỐNG] Đã kết thúc phiên hỗ trợ nhân viên trực. Quyền hỗ trợ đã được chuyển lại cho Trợ Lý AI 24/7.',
+      text: '[HỆ THỐNG] Đã kết thúc phiên hỗ trợ nhân viên trực. Quyền hỗ trợ đã được chuyển lại cho Trợ Lý AI 24/7.',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     setMessages((prev) => [...prev, returnMsg]);
@@ -1370,9 +1371,13 @@ export default function LiveChatWidget() {
                                         fontSize: '10.5px',
                                         color: '#f59e0b',
                                         fontWeight: 600,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '3px',
                                       }}
                                     >
-                                      ⭐ {prod.rating}
+                                      <StarIcon size={11} fill="#f59e0b" color="#f59e0b" />
+                                      <span>{prod.rating}</span>
                                     </span>
                                   )}
                                 </div>
@@ -1850,9 +1855,14 @@ export default function LiveChatWidget() {
                                     fontSize: '10px',
                                     color: 'var(--text-muted, #64748b)',
                                     marginTop: '2px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
                                   }}
                                 >
-                                  {st.category} • ⭐ {st.rating}
+                                  <span>{st.category} •</span>
+                                  <StarIcon size={10} fill="#f59e0b" color="#f59e0b" />
+                                  <span>{st.rating}</span>
                                 </div>
                               </div>
                               <button
@@ -1890,10 +1900,16 @@ export default function LiveChatWidget() {
                             border: '1px solid rgba(16, 185, 129, 0.25)',
                           }}
                         >
-                          <div style={{ fontSize: '10.5px', color: '#065f46', fontWeight: 600 }}>
-                            {agentRating
-                              ? `Cảm ơn bạn đã đánh giá ${agentRating}⭐ cho Kim Ngân!`
-                              : 'Đánh giá chất lượng hỗ trợ của Kim Ngân:'}
+                          <div style={{ fontSize: '10.5px', color: '#065f46', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            {agentRating ? (
+                              <>
+                                <span>Cảm ơn bạn đã đánh giá {agentRating}</span>
+                                <StarIcon size={12} fill="#f59e0b" color="#f59e0b" />
+                                <span>cho Kim Ngân!</span>
+                              </>
+                            ) : (
+                              'Đánh giá chất lượng hỗ trợ của Kim Ngân:'
+                            )}
                           </div>
                           {!agentRating && (
                             <div style={{ display: 'flex', gap: '5px', marginTop: '3px' }}>
@@ -1905,7 +1921,7 @@ export default function LiveChatWidget() {
                                     setAgentRating(star);
                                     playAudioChime('voucher', soundEnabled);
                                     showToast(
-                                      `Cảm ơn bạn đã đánh giá ${star}⭐ cho Chuyên viên Kim Ngân!`,
+                                      `Cảm ơn bạn đã đánh giá ${star} sao cho Chuyên viên Kim Ngân!`,
                                       'success'
                                     );
                                   }}
@@ -1913,11 +1929,13 @@ export default function LiveChatWidget() {
                                     background: 'transparent',
                                     border: 'none',
                                     cursor: 'pointer',
-                                    fontSize: '15px',
+                                    padding: '2px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
                                   }}
                                   title={`${star} sao`}
                                 >
-                                  ⭐
+                                  <StarIcon size={16} fill="#f59e0b" color="#f59e0b" />
                                 </button>
                               ))}
                             </div>

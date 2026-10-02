@@ -119,7 +119,7 @@ export function pushNotification(payload) {
     title: payload.title || "Thông báo",
     message: payload.message || "",
     type: payload.type || "system", // 'order' | 'promotion' | 'voucher' | 'system'
-    icon: payload.icon || "🔔",
+    icon: payload.icon || "bell",
     link: payload.link || null,
     isRead: false,
     createdAt: new Date().toISOString(),

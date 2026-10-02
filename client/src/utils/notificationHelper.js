@@ -6,7 +6,7 @@ const NOTIFS_STORAGE_KEY = 'mini_shopee_notifications';
 
 export function pushBuyerNotification({
   type = 'order',
-  icon = '📦',
+  icon = 'package',
   title,
   message,
   link = '/orders',

@@ -22,7 +22,7 @@ export function getDefaultPaymentMethods(user) {
       branch: 'Chi nhánh Bến Thành, TP.HCM',
       isDefault: true,
       color: '#006241',
-      icon: '🏛️'
+      icon: 'bank'
     },
     {
       id: 'pay_visa_02',
@@ -34,7 +34,7 @@ export function getDefaultPaymentMethods(user) {
       expiry: '12/28',
       isDefault: false,
       color: '#1a1f71',
-      icon: '💳'
+      icon: 'card'
     },
     {
       id: 'pay_momo_03',
@@ -45,7 +45,7 @@ export function getDefaultPaymentMethods(user) {
       accountName: user?.fullName || 'Nguyễn Văn Khách',
       isDefault: false,
       color: '#a50064',
-      icon: '👛'
+      icon: 'wallet'
     }
   ];
 }

@@ -18,6 +18,44 @@ import {
   CloseIcon,
 } from './OrdersIcons';
 
+const renderWheelSectorIcon = (type) => {
+  switch (type) {
+    case 'coin':
+      return (
+        <g transform="translate(125, 23)" stroke="#ffffff" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="10" cy="10" r="9" fill="rgba(255,255,255,0.22)" />
+          <path d="M10 5v10M8 7.5h4a1.2 1.2 0 0 1 0 2.5H8a1.2 1.2 0 0 0 0 2.5h4" stroke="#ffffff" strokeWidth="1.8" />
+        </g>
+      );
+    case 'voucher':
+      return (
+        <g transform="translate(125, 23)" stroke="#ffffff" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 7a2.5 2.5 0 0 1 0 5v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2a2.5 2.5 0 0 1 0-5V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" fill="rgba(255,255,255,0.22)" />
+          <line x1="11" y1="4" x2="11" y2="16" strokeDasharray="2 2" />
+        </g>
+      );
+    case 'shipping':
+      return (
+        <g transform="translate(124, 23)" stroke="#ffffff" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="4" width="11" height="9" fill="rgba(255,255,255,0.22)" />
+          <polygon points="13 7 16 7 19 10 19 13 13 13 7" fill="rgba(255,255,255,0.22)" />
+          <circle cx="5.5" cy="15" r="2" fill="#ffffff" />
+          <circle cx="15.5" cy="15" r="2" fill="#ffffff" />
+        </g>
+      );
+    case 'diamond':
+      return (
+        <g transform="translate(125, 23)" stroke="#ffffff" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="5 3 15 3 19 8 10 18 1 8" fill="rgba(255,255,255,0.25)" />
+          <line x1="1" y1="8" x2="19" y2="8" />
+          <polyline points="6 8 10 18 14 8" />
+        </g>
+      );
+    default:
+      return null;
+  }
+};
+
 export default function RewardsHubModal({ onClose }) {
   const {
     coins,
@@ -377,14 +415,14 @@ export default function RewardsHubModal({ onClose }) {
                     <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3" />
                   </filter>
                 </defs>
-                {/* 6 Sectors with Distinct Colors & Icons */}
+                {/* 6 Sectors with Distinct Colors & Vector Icons */}
                 {[
-                  { label: '500 Xu', icon: '🪙', color: '#ea580c' },
-                  { label: 'Voucher 10%', icon: '🎟️', color: '#d97706' },
-                  { label: '1.000 Xu', icon: '🪙', color: '#0284c7' },
-                  { label: 'Freeship 30k', icon: '🚚', color: '#059669' },
-                  { label: '2.000 Xu', icon: '🪙', color: '#7c3aed' },
-                  { label: '5.000 Xu', icon: '💎', color: '#db2777' },
+                  { label: '500 Xu', iconType: 'coin', color: '#ea580c' },
+                  { label: 'Voucher 10%', iconType: 'voucher', color: '#d97706' },
+                  { label: '1.000 Xu', iconType: 'coin', color: '#0284c7' },
+                  { label: 'Freeship 30k', iconType: 'shipping', color: '#059669' },
+                  { label: '2.000 Xu', iconType: 'coin', color: '#7c3aed' },
+                  { label: '5.000 Xu', iconType: 'diamond', color: '#db2777' },
                 ].map((sec, idx) => {
                   const startA = ((idx * 60 - 90) * Math.PI) / 180;
                   const endA = (((idx + 1) * 60 - 90) * Math.PI) / 180;
@@ -399,15 +437,7 @@ export default function RewardsHubModal({ onClose }) {
                     <g key={sec.label}>
                       <path d={pathData} fill={sec.color} stroke="#ffffff" strokeWidth="2.5" />
                       <g transform={`rotate(${midAngle}, 135, 135)`}>
-                        <text
-                          x="135"
-                          y="42"
-                          textAnchor="middle"
-                          fontSize="21"
-                          style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }}
-                        >
-                          {sec.icon}
-                        </text>
+                        {renderWheelSectorIcon(sec.iconType)}
                         <text
                           x="135"
                           y="62"
