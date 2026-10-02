@@ -10,25 +10,101 @@ import {
   ClockIcon,
   CheckIcon,
   ReturnIcon,
-  ReceiptIcon,
-  PrinterIcon,
 } from './OrdersIcons';
+
+// Vector SVG Icons for Pixel-Perfect Navigation (Zero Emojis)
+function UserIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+function MapPinIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function CreditCardIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+      <line x1="1" y1="10" x2="23" y2="10" />
+    </svg>
+  );
+}
+
+function LockIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+function TicketIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" />
+      <line x1="9" y1="9" x2="9.01" y2="9" />
+      <line x1="15" y1="15" x2="15.01" y2="15" />
+    </svg>
+  );
+}
+
+function CoinIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v10" />
+      <path d="M15 9.5a2.5 2.5 0 0 0-5 0c0 3 5 2 5 5a2.5 2.5 0 0 1-5 0" />
+    </svg>
+  );
+}
+
+function HeartIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  );
+}
+
+function PencilIcon({ size = 12, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  );
+}
+
+function ShieldIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  );
+}
 
 /**
  * AccountSidebar
- * Standard E-Commerce 2-Column Left Sticky Navigation & Filter Sidebar
- * Keeps user navigation, status filters, date range filters and account links
- * persistently anchored on the left during long scrolls.
+ * Master-Grade E-Commerce Sticky Navigation & Status Filter Sidebar
+ * Rebuilt from scratch: Zero emojis, 100% precision SVG vector icons,
+ * perfect vertical/horizontal alignment, and harmonized neutral aesthetic.
  */
 export default function AccountSidebar({
   activeSection = 'orders', // 'orders' | 'tracking' | 'profile' | 'addresses' | 'payments' | 'security' | 'vouchers' | 'coins' | 'wishlist'
   orderCounts = { all: 0, pending: 0, shipping: 0, completed: 0, returning: 0, cancelled: 0 },
   activeStatusTab = 'all',
   onSelectStatusTab,
-  dateRange = 'all',
-  onSelectDateRange,
-  onExportCSV,
-  onPrintReport,
   onSelectTrackingView,
   isTrackingView = false,
 }) {
@@ -37,7 +113,8 @@ export default function AccountSidebar({
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  const initialLetter = (user?.name || user?.fullName || user?.email || 'U').charAt(0).toUpperCase();
+  const displayName = user?.name || user?.fullName || (user?.email ? user.email.split('@')[0] : 'Khách Hàng');
+  const initialLetter = displayName.charAt(0).toUpperCase();
   const avatarUrl = user?.avatar;
 
   const STATUS_ITEMS = [
@@ -46,57 +123,50 @@ export default function AccountSidebar({
     { id: 'shipping', label: 'Đang vận chuyển', count: orderCounts.shipping, icon: <TruckIcon size={14} /> },
     { id: 'completed', label: 'Hoàn thành', count: orderCounts.completed, icon: <CheckIcon size={14} /> },
     { id: 'returning', label: 'Đổi trả / Hoàn tiền', count: orderCounts.returning, icon: <ReturnIcon size={14} /> },
-    { id: 'cancelled', label: 'Đã hủy', count: orderCounts.cancelled, icon: <span style={{ fontSize: '13px', lineHeight: 1 }}>✕</span> },
-  ];
-
-  const DATE_OPTIONS = [
-    { id: 'all', label: 'Tất cả thời gian' },
-    { id: '30days', label: '30 ngày gần đây' },
-    { id: '3months', label: '3 tháng qua' },
-    { id: 'year2026', label: 'Năm 2026' },
+    { id: 'cancelled', label: 'Đã hủy', count: orderCounts.cancelled, icon: <span style={{ fontSize: '12px', fontWeight: 700, lineHeight: 1 }}>✕</span> },
   ];
 
   return (
-    <aside className="shopee-account-sidebar-container">
-      {/* 1. Quick User Profile Header */}
+    <aside className="shopee-account-sidebar-container" aria-label="Thanh điều hướng tài khoản">
+      {/* 1. User Profile Header */}
       <div className="account-sidebar-profile-card">
         <div className="account-sidebar-avatar-wrapper">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="Avatar" className="account-sidebar-avatar-img" />
+            <img src={avatarUrl} alt={displayName} className="account-sidebar-avatar-img" />
           ) : (
             <div className="account-sidebar-avatar-fallback">{initialLetter}</div>
           )}
-          <span className="account-sidebar-online-dot" title="Tài khoản đang hoạt động" />
+          <span className="account-sidebar-online-dot" title="Tài khoản trực tuyến" />
         </div>
 
         <div className="account-sidebar-user-info">
-          <strong className="account-sidebar-user-name">
-            {user?.name || user?.fullName || (user?.email ? user.email.split('@')[0] : 'Khách Hàng')}
+          <strong className="account-sidebar-user-name" title={displayName}>
+            {displayName}
           </strong>
           <span className="account-sidebar-role-badge">
             {user?.role === 'admin'
-              ? '🛡️ Super Admin'
+              ? 'Super Admin'
               : user?.role === 'seller'
-              ? '🏪 Chủ Gian Hàng'
-              : '✨ Thành Viên Thân Thiết'}
+              ? 'Chủ Gian Hàng'
+              : 'Thành Viên Thân Thiết'}
           </span>
           <Link to="/profile?tab=profile" className="account-sidebar-edit-link">
-            <span>✏️ Sửa thông tin</span>
+            <PencilIcon size={11} />
+            <span>Sửa hồ sơ</span>
           </Link>
         </div>
       </div>
 
       {/* 2. Primary Navigation Tree */}
-      <nav className="account-sidebar-nav" aria-label="Điều hướng tài khoản">
-        {/* SECTION: ĐƠN MUA */}
+      <nav className="account-sidebar-nav" aria-label="Điều hướng chính">
+        {/* GROUP 1: ĐƠN HÀNG & VẬN CHUYỂN */}
         <div className="account-sidebar-group">
           <div className="account-sidebar-group-title">
-            <span style={{ color: '#64748b' }}><PackageIcon size={15} /></span>
-            <span>ĐƠN HÀNG CỦA TÔI</span>
+            <span>ĐƠN HÀNG & VẬN CHUYỂN</span>
           </div>
 
           <div className="account-sidebar-group-content">
-            {/* Main Orders Navigation Item */}
+            {/* Main Orders Navigation Button */}
             <button
               type="button"
               className={`account-sidebar-menu-btn ${activeSection === 'orders' && !isTrackingView ? 'active' : ''}`}
@@ -107,16 +177,16 @@ export default function AccountSidebar({
                 navigate('/orders');
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="sidebar-bullet-icon">📦</span>
+              <div className="sidebar-btn-left">
+                <span className="sidebar-icon-cell"><PackageIcon size={16} /></span>
                 <span className="sidebar-menu-label">Lịch sử đơn mua</span>
               </div>
               {orderCounts.all > 0 && (
-                <span className="account-sidebar-total-badge">{orderCounts.all}</span>
+                <span className="account-sidebar-badge-count">{orderCounts.all}</span>
               )}
             </button>
 
-            {/* Persistent Sticky Order Status Filter Pills (Expanded when in Orders view) */}
+            {/* Quick Status Sub-Filter Tree */}
             {activeSection === 'orders' && !isTrackingView && (
               <div className="account-sidebar-status-sublist">
                 {STATUS_ITEMS.map((item) => {
@@ -128,8 +198,10 @@ export default function AccountSidebar({
                       className={`account-sidebar-subitem-btn ${isActive ? 'active' : ''}`}
                       onClick={() => onSelectStatusTab && onSelectStatusTab(item.id)}
                     >
-                      <span className="subitem-icon">{item.icon}</span>
-                      <span className="subitem-label">{item.label}</span>
+                      <div className="sidebar-subitem-left">
+                        <span className="subitem-icon-cell">{item.icon}</span>
+                        <span className="subitem-label">{item.label}</span>
+                      </div>
                       {item.count > 0 && (
                         <span className={`subitem-count-badge ${isActive ? 'active' : ''}`}>
                           {item.count}
@@ -138,59 +210,10 @@ export default function AccountSidebar({
                     </button>
                   );
                 })}
-
-                {/* Quick Date Range Filter Inside Sticky Sidebar */}
-                {onSelectDateRange && (
-                  <div className="account-sidebar-date-filter-box">
-                    <div className="date-filter-label">
-                      <span>🕒</span> <span>Khoảng thời gian:</span>
-                    </div>
-                    <div className="account-sidebar-select-wrap">
-                      <select
-                        value={dateRange}
-                        onChange={(e) => onSelectDateRange(e.target.value)}
-                        className="account-sidebar-select"
-                        aria-label="Chọn khoảng thời gian lọc đơn hàng"
-                      >
-                        {DATE_OPTIONS.map((opt) => (
-                          <option key={opt.id} value={opt.id}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                {/* Quick Export & Print Actions inside Sticky Sidebar */}
-                {(onExportCSV || onPrintReport) && (
-                  <div className="account-sidebar-quick-actions">
-                    {onExportCSV && (
-                      <button
-                        type="button"
-                        className="sidebar-quick-btn"
-                        onClick={onExportCSV}
-                        title="Xuất lịch sử đơn hàng dạng file CSV"
-                      >
-                        <ReceiptIcon size={12} /> Xuất CSV
-                      </button>
-                    )}
-                    {onPrintReport && (
-                      <button
-                        type="button"
-                        className="sidebar-quick-btn"
-                        onClick={onPrintReport}
-                        title="In bảng thống kê đơn hàng"
-                      >
-                        <PrinterIcon size={12} /> In Báo Cáo
-                      </button>
-                    )}
-                  </div>
-                )}
               </div>
             )}
 
-            {/* SPX Express Tracking Dedicated Navigation Item */}
+            {/* SPX Express Tracking Button */}
             <button
               type="button"
               className={`account-sidebar-menu-btn ${activeSection === 'tracking' || isTrackingView ? 'active' : ''}`}
@@ -202,19 +225,18 @@ export default function AccountSidebar({
                 }
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="sidebar-bullet-icon">🚚</span>
+              <div className="sidebar-btn-left">
+                <span className="sidebar-icon-cell"><TruckIcon size={16} /></span>
                 <span className="sidebar-menu-label">Tra cứu vận đơn SPX</span>
               </div>
-              <span className="account-sidebar-live-tag">Trực tiếp</span>
+              <span className="account-sidebar-badge-spx">Trực tiếp</span>
             </button>
           </div>
         </div>
 
-        {/* SECTION: TÀI KHOẢN CỦA TÔI */}
+        {/* GROUP 2: TÀI KHOẢN CỦA TÔI */}
         <div className="account-sidebar-group">
           <div className="account-sidebar-group-title">
-            <span style={{ color: '#64748b' }}>👤</span>
             <span>TÀI KHOẢN CỦA TÔI</span>
           </div>
 
@@ -223,40 +245,47 @@ export default function AccountSidebar({
               to="/profile?tab=profile"
               className={`account-sidebar-link ${activeSection === 'profile' ? 'active' : ''}`}
             >
-              <span className="sidebar-bullet-icon">📝</span>
-              <span className="sidebar-menu-label">Hồ sơ cá nhân</span>
+              <div className="sidebar-btn-left">
+                <span className="sidebar-icon-cell"><UserIcon size={16} /></span>
+                <span className="sidebar-menu-label">Hồ sơ cá nhân</span>
+              </div>
             </Link>
 
             <Link
               to="/profile?tab=addresses"
               className={`account-sidebar-link ${activeSection === 'addresses' ? 'active' : ''}`}
             >
-              <span className="sidebar-bullet-icon">📍</span>
-              <span className="sidebar-menu-label">Sổ địa chỉ nhận hàng</span>
+              <div className="sidebar-btn-left">
+                <span className="sidebar-icon-cell"><MapPinIcon size={16} /></span>
+                <span className="sidebar-menu-label">Sổ địa chỉ nhận hàng</span>
+              </div>
             </Link>
 
             <Link
               to="/profile?tab=payments"
               className={`account-sidebar-link ${activeSection === 'payments' ? 'active' : ''}`}
             >
-              <span className="sidebar-bullet-icon">💳</span>
-              <span className="sidebar-menu-label">Ngân hàng & Thẻ liên kết</span>
+              <div className="sidebar-btn-left">
+                <span className="sidebar-icon-cell"><CreditCardIcon size={16} /></span>
+                <span className="sidebar-menu-label">Ngân hàng & Thẻ liên kết</span>
+              </div>
             </Link>
 
             <Link
               to="/profile?tab=security"
               className={`account-sidebar-link ${activeSection === 'security' ? 'active' : ''}`}
             >
-              <span className="sidebar-bullet-icon">🔒</span>
-              <span className="sidebar-menu-label">Đổi mật khẩu & Bảo mật</span>
+              <div className="sidebar-btn-left">
+                <span className="sidebar-icon-cell"><LockIcon size={16} /></span>
+                <span className="sidebar-menu-label">Đổi mật khẩu & Bảo mật</span>
+              </div>
             </Link>
           </div>
         </div>
 
-        {/* SECTION: ƯU ĐÃI & THƯỞNG */}
+        {/* GROUP 3: ƯU ĐÃI & ĐIỂM THƯỞNG */}
         <div className="account-sidebar-group">
           <div className="account-sidebar-group-title">
-            <span style={{ color: '#64748b' }}>🎁</span>
             <span>ƯU ĐÃI & ĐIỂM THƯỞNG</span>
           </div>
 
@@ -265,19 +294,21 @@ export default function AccountSidebar({
               to="/profile?tab=vouchers"
               className={`account-sidebar-link ${activeSection === 'vouchers' ? 'active' : ''}`}
             >
-              <span className="sidebar-bullet-icon">🎟️</span>
-              <span className="sidebar-menu-label">Kho Voucher Giảm Giá</span>
+              <div className="sidebar-btn-left">
+                <span className="sidebar-icon-cell"><TicketIcon size={16} /></span>
+                <span className="sidebar-menu-label">Kho Voucher Giảm Giá</span>
+              </div>
             </Link>
 
             <Link
               to="/profile?tab=coins"
               className={`account-sidebar-link ${activeSection === 'coins' ? 'active' : ''}`}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="sidebar-bullet-icon">🪙</span>
+              <div className="sidebar-btn-left">
+                <span className="sidebar-icon-cell"><CoinIcon size={16} /></span>
                 <span className="sidebar-menu-label">Điểm Xu tích lũy</span>
               </div>
-              <span className="account-sidebar-coins-pill">
+              <span className="account-sidebar-badge-coins">
                 {(coins || 0).toLocaleString('vi-VN')} Xu
               </span>
             </Link>
@@ -286,23 +317,26 @@ export default function AccountSidebar({
               to="/wishlist"
               className={`account-sidebar-link ${activeSection === 'wishlist' ? 'active' : ''}`}
             >
-              <span className="sidebar-bullet-icon">❤️</span>
-              <span className="sidebar-menu-label">Sản phẩm Yêu thích</span>
+              <div className="sidebar-btn-left">
+                <span className="sidebar-icon-cell"><HeartIcon size={16} /></span>
+                <span className="sidebar-menu-label">Sản phẩm Yêu thích</span>
+              </div>
             </Link>
           </div>
         </div>
 
-        {/* SECTION: KÊNH QUẢN TRỊ / KÊNH SHOP */}
+        {/* GROUP 4: KÊNH QUẢN TRỊ / KÊNH BÁN HÀNG */}
         {user?.role === 'seller' && (
           <div className="account-sidebar-group">
             <div className="account-sidebar-group-title">
-              <span style={{ color: '#64748b' }}><StoreIcon size={14} /></span>
               <span>KÊNH BÁN HÀNG</span>
             </div>
             <div className="account-sidebar-group-content">
               <Link to="/seller/dashboard" className="account-sidebar-link seller-portal-link">
-                <span className="sidebar-bullet-icon">🏪</span>
-                <span className="sidebar-menu-label">Kênh Người Bán Hàng</span>
+                <div className="sidebar-btn-left">
+                  <span className="sidebar-icon-cell"><StoreIcon size={16} /></span>
+                  <span className="sidebar-menu-label">Kênh Người Bán Hàng</span>
+                </div>
                 <span className="link-arrow">→</span>
               </Link>
             </div>
@@ -311,14 +345,15 @@ export default function AccountSidebar({
 
         {user?.role === 'admin' && (
           <div className="account-sidebar-group">
-            <div className="account-sidebar-group-title">
-              <span style={{ color: '#dc2626' }}>⚡</span>
-              <span style={{ color: '#dc2626' }}>QUẢN TRỊ VIÊN SÀN</span>
+            <div className="account-sidebar-group-title admin-title">
+              <span>QUẢN TRỊ VIÊN SÀN</span>
             </div>
             <div className="account-sidebar-group-content">
               <Link to="/admin/dashboard" className="account-sidebar-link admin-portal-link">
-                <span className="sidebar-bullet-icon">🛡️</span>
-                <span className="sidebar-menu-label">Bảng Quản Trị Toàn Sàn</span>
+                <div className="sidebar-btn-left">
+                  <span className="sidebar-icon-cell"><ShieldIcon size={16} /></span>
+                  <span className="sidebar-menu-label">Bảng Quản Trị Toàn Sàn</span>
+                </div>
                 <span className="link-arrow">→</span>
               </Link>
             </div>
