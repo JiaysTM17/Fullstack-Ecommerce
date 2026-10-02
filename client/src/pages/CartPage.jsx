@@ -20,6 +20,8 @@ import {
   CloseIcon,
   SparklesIcon,
   PencilIcon,
+  ChevronRightIcon,
+  ArrowLeftIcon,
 } from "../components/OrdersIcons";
 
 const FREE_SHIPPING_THRESHOLD = 300000;
@@ -676,9 +678,10 @@ export default function CartPage() {
               className="shopee-btn shopee-btn-primary"
               to="/checkout"
               state={{ shopNotes }}
-              style={{ display: "block", textAlign: "center", padding: "14px", fontSize: "16px", fontWeight: 700 }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "14px", fontSize: "16px", fontWeight: 700 }}
             >
-              {t('proceed_to_checkout', 'Tiến Hành Thanh Toán')} ({selectedItems.length}) →
+              <span>{t('proceed_to_checkout', 'Tiến Hành Thanh Toán')} ({selectedItems.length})</span>
+              <ChevronRightIcon size={18} />
             </Link>
           ) : (
             <button
@@ -692,8 +695,9 @@ export default function CartPage() {
           )}
 
           <div style={{ textAlign: "center", marginTop: "14px" }}>
-            <Link to="/" style={{ fontSize: "13px", color: "var(--secondary-color, #007185)", textDecoration: "none" }}>
-              ← {t('continue_shopping', 'Tiếp tục chọn thêm sản phẩm')}
+            <Link to="/" style={{ fontSize: "13px", color: "var(--secondary-color, #007185)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <ArrowLeftIcon size={14} />
+              <span>{t('continue_shopping', 'Tiếp tục chọn thêm sản phẩm')}</span>
             </Link>
           </div>
         </aside>

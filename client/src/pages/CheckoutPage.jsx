@@ -36,6 +36,8 @@ import {
   StoreIcon,
   HomeIcon,
   BoltIcon,
+  ChevronRightIcon,
+  ArrowLeftIcon,
 } from "../components/OrdersIcons";
 import "../styles/checkout-multistep.css";
 
@@ -451,19 +453,25 @@ export default function CheckoutPage() {
           <div className="checkout-step-number">{currentStep > 1 ? <CheckIcon size={12} /> : "1"}</div>
           <span>1. Địa Chỉ Nhận Hàng</span>
         </div>
-        <span style={{ color: "#ccc" }}>→</span>
+        <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
+          <ChevronRightIcon size={14} />
+        </span>
 
         <div className={`checkout-step-item ${currentStep === 2 ? "active" : currentStep > 2 ? "completed" : ""}`}>
           <div className="checkout-step-number">{currentStep > 2 ? <CheckIcon size={12} /> : "2"}</div>
           <span>2. Vận Chuyển</span>
         </div>
-        <span style={{ color: "#ccc" }}>→</span>
+        <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
+          <ChevronRightIcon size={14} />
+        </span>
 
         <div className={`checkout-step-item ${currentStep === 3 ? "active" : currentStep > 3 ? "completed" : ""}`}>
           <div className="checkout-step-number">{currentStep > 3 ? <CheckIcon size={12} /> : "3"}</div>
           <span>3. Phương Thức Thanh Toán</span>
         </div>
-        <span style={{ color: "#ccc" }}>→</span>
+        <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
+          <ChevronRightIcon size={14} />
+        </span>
 
         <div className={`checkout-step-item ${currentStep === 4 ? "active" : ""}`}>
           <div className="checkout-step-number">4</div>
@@ -639,8 +647,10 @@ export default function CheckoutPage() {
                   type="button"
                   className="shopee-btn shopee-btn-primary"
                   onClick={() => setCurrentStep(2)}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
-                  Tiếp Tục: Chọn Vận Chuyển →
+                  <span>Tiếp Tục: Chọn Vận Chuyển</span>
+                  <ChevronRightIcon size={16} />
                 </button>
               </div>
             </div>
@@ -676,15 +686,19 @@ export default function CheckoutPage() {
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setCurrentStep(1)}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
-                  ← Quay Lại Địa Chỉ
+                  <ArrowLeftIcon size={14} />
+                  <span>Quay Lại Địa Chỉ</span>
                 </button>
                 <button
                   type="button"
                   className="shopee-btn shopee-btn-primary"
                   onClick={() => setCurrentStep(3)}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
-                  Tiếp Tục: Chọn Thanh Toán →
+                  <span>Tiếp Tục: Chọn Thanh Toán</span>
+                  <ChevronRightIcon size={16} />
                 </button>
               </div>
             </div>
@@ -845,15 +859,19 @@ export default function CheckoutPage() {
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setCurrentStep(2)}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
-                  ← Quay Lại Vận Chuyển
+                  <ArrowLeftIcon size={14} />
+                  <span>Quay Lại Vận Chuyển</span>
                 </button>
                 <button
                   type="button"
                   className="shopee-btn shopee-btn-primary"
                   onClick={() => setCurrentStep(4)}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
-                  Tiếp Tục: Xem Lại Đơn Hàng →
+                  <span>Tiếp Tục: Xem Lại Đơn Hàng</span>
+                  <ChevronRightIcon size={16} />
                 </button>
               </div>
             </div>
@@ -1032,8 +1050,10 @@ export default function CheckoutPage() {
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setCurrentStep(3)}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
-                  ← Sửa Phương Thức
+                  <ArrowLeftIcon size={14} />
+                  <span>Sửa Phương Thức</span>
                 </button>
                 <button
                   type="button"

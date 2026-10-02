@@ -37,7 +37,9 @@ import {
   ChevronRightIcon,
   CloseIcon,
   PhoneIcon,
-  CoinIcon
+  CoinIcon,
+  ArrowLeftIcon,
+  ChevronUpIcon,
 } from '../components/OrdersIcons';
 import '../styles/dashboard.css';
 
@@ -845,11 +847,12 @@ export default function OrderHistoryPage() {
               height: '28px',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '5px',
               marginRight: '6px',
             }}
           >
-            ← Quay lại
+            <ArrowLeftIcon size={12} />
+            <span>Quay lại</span>
           </button>
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <CloseIcon size={16} />
@@ -1116,9 +1119,10 @@ export default function OrderHistoryPage() {
                       next.delete('view');
                       setSearchParams(next);
                     }}
-                    style={{ fontSize: '12.5px' }}
+                    style={{ fontSize: '12.5px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
-                    ← Quay lại Đơn Mua
+                    <ArrowLeftIcon size={12} />
+                    <span>Quay lại Đơn Mua</span>
                   </button>
                 </div>
 
@@ -1380,8 +1384,9 @@ export default function OrderHistoryPage() {
                     </p>
                   </div>
 
-                  <Link to="/" className="shopee-btn shopee-btn-secondary" style={{ fontSize: '13px' }}>
-                    ← {t('continue_shopping', 'Tiếp tục mua sắm')}
+                  <Link to="/" className="shopee-btn shopee-btn-secondary" style={{ fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <ArrowLeftIcon size={14} />
+                    <span>{t('continue_shopping', 'Tiếp tục mua sắm')}</span>
                   </Link>
                 </div>
 
@@ -1415,9 +1420,10 @@ export default function OrderHistoryPage() {
             <Link
               to="/seller/dashboard"
               className="shopee-btn shopee-btn-primary"
-              style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none' }}
+              style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              Vào Kênh Quản Lý Shop →
+              <span>Vào Kênh Quản Lý Shop</span>
+              <ChevronRightIcon size={14} />
             </Link>
           </div>
         )}
@@ -1452,9 +1458,10 @@ export default function OrderHistoryPage() {
             <Link
               to="/admin/dashboard"
               className="shopee-btn"
-              style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', background: '#dc2626', color: '#fff' }}
+              style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', background: '#dc2626', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              Bảng Quản Trị Toàn Sàn →
+              <span>Bảng Quản Trị Toàn Sàn</span>
+              <ChevronRightIcon size={14} />
             </Link>
           </div>
         )}
@@ -2066,8 +2073,9 @@ export default function OrderHistoryPage() {
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           aria-label="Cuộn lên đầu trang"
           title="Cuộn lên đầu trang"
+          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          ↑
+          <ChevronUpIcon size={18} />
         </button>
       )}
     </main>

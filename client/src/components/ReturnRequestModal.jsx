@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { ReturnIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon, CloseIcon } from './OrdersIcons';
+import { ReturnIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon, CloseIcon, ArrowLeftIcon } from './OrdersIcons';
 
 const RETURN_REASONS = [
   'Hàng bị lỗi kỹ thuật / Không hoạt động được',
@@ -155,11 +155,12 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 height: '28px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '5px',
                 marginRight: '6px',
               }}
             >
-              ← Quay lại
+              <ArrowLeftIcon size={12} />
+              <span>Quay lại</span>
             </button>
           )}
           <ReturnIcon size={18} color="#2563eb" />

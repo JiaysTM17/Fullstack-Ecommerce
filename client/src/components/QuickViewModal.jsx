@@ -5,7 +5,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
-import { CloseIcon } from './OrdersIcons';
+import { CloseIcon, ChevronRightIcon } from './OrdersIcons';
 
 export default function QuickViewModal({ product, onClose }) {
   const navigate = useNavigate();
@@ -232,10 +232,11 @@ export default function QuickViewModal({ product, onClose }) {
               <button
                 type="button"
                 className="shopee-btn shopee-btn-secondary"
-                style={{ padding: '10px 14px', fontSize: '13px' }}
+                style={{ padding: '10px 14px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 onClick={handleFullDetail}
               >
-                Xem chi tiết đầy đủ →
+                <span>Xem chi tiết đầy đủ</span>
+                <ChevronRightIcon size={14} />
               </button>
             </div>
           </div>

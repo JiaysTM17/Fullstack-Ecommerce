@@ -38,6 +38,7 @@ import {
   CloseIcon,
   PlusIcon,
   SparklesIcon,
+  ChevronRightIcon,
 } from '../components/OrdersIcons';
 
 // 12 Gian hàng mẫu với đầy đủ thông tin chuẩn TMĐT
@@ -2206,10 +2207,11 @@ export default function SellerDashboardPage() {
                 <button
                   type="button"
                   className="shopee-btn shopee-btn-sm"
-                  style={{ background: '#ea580c', color: '#fff', fontWeight: 700, border: 'none', padding: '6px 14px', borderRadius: '6px' }}
+                  style={{ background: '#ea580c', color: '#fff', fontWeight: 700, border: 'none', padding: '6px 14px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   onClick={() => setProductStatusFilter('low_stock')}
                 >
-                  Xem {lowStockCount} mặt hàng cần nhập →
+                  <span>Xem {lowStockCount} mặt hàng cần nhập</span>
+                  <ChevronRightIcon size={14} />
                 </button>
               </div>
             )}
@@ -2599,8 +2601,9 @@ export default function SellerDashboardPage() {
                           <div style={{ fontSize: '12.5px', maxWidth: '240px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {ord.productName}
                           </div>
-                          <small style={{ color: '#4f46e5', cursor: 'pointer' }} onClick={() => setSelectedOrderDetails(ord)}>
-                            Xem chi tiết kiện hàng →
+                          <small style={{ color: '#4f46e5', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }} onClick={() => setSelectedOrderDetails(ord)}>
+                            <span>Xem chi tiết kiện hàng</span>
+                            <ChevronRightIcon size={12} />
                           </small>
                         </td>
                         <td>
