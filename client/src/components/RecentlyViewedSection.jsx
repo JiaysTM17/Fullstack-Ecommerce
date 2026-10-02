@@ -5,6 +5,7 @@ import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { formatCurrency } from "../utils/formatCurrency";
 import { getRecentlyViewed, clearRecentlyViewed } from "../services/recentlyViewedService";
+import { EyeIcon, TrashIcon, CartIcon } from "./OrdersIcons";
 
 export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = true, onProductClick }) {
   const [recentItems, setRecentItems] = useState([]);
@@ -112,7 +113,9 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontSize: "20px" }}>👁️</span>
+          <span style={{ display: "inline-flex", alignItems: "center", color: "var(--primary-color, #ea580c)" }}>
+            <EyeIcon size={20} />
+          </span>
           <div>
             <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
               {t("recently_viewed", "Sản phẩm bạn vừa xem")}
@@ -132,9 +135,9 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
             fontSize: "12.5px",
             color: "var(--text-muted, #94a3b8)",
             cursor: "pointer",
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
-            gap: "4px",
+            gap: "5px",
             padding: "4px 8px",
             borderRadius: "6px",
             transition: "all 0.15s ease",
@@ -148,7 +151,8 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
             e.currentTarget.style.background = "none";
           }}
         >
-          🗑️ {t("clear_history", "Xóa lịch sử")}
+          <TrashIcon size={14} />
+          <span>{t("clear_history", "Xóa lịch sử")}</span>
         </button>
       </div>
 
@@ -395,7 +399,8 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
                           e.currentTarget.style.color = "var(--primary-color, #ea580c)";
                         }}
                       >
-                        🛒 Thêm nhanh
+                        <CartIcon size={13} />
+                        <span>Thêm nhanh</span>
                       </button>
                     </div>
                   </Link>

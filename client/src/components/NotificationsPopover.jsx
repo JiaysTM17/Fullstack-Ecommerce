@@ -7,6 +7,15 @@ import {
   markAllNotificationsAsRead,
   deleteNotification,
 } from '../services/notificationService';
+import {
+  BellIcon,
+  PackageIcon,
+  TicketIcon,
+  BoltIcon,
+  CheckIcon,
+  SparklesIcon,
+  TrashIcon,
+} from './OrdersIcons';
 
 const INITIAL_NOTIFICATIONS = [
   {
@@ -209,8 +218,9 @@ export default function NotificationsPopover() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary, #0f172a)' }}>
-                🔔 Thông Báo Mới
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 800, fontSize: '15px', color: 'var(--text-primary, #0f172a)' }}>
+                <BellIcon size={16} />
+                <span>Thông Báo Mới</span>
               </span>
               {unreadCount > 0 && (
                 <span
@@ -260,10 +270,10 @@ export default function NotificationsPopover() {
             }}
           >
             {[
-              { id: 'all', label: `Tất cả (${notifications.length})` },
-              { id: 'order', label: `📦 Đơn hàng (${orderCount})` },
-              { id: 'voucher', label: `🎟️ Ưu đãi (${voucherCount})` },
-              { id: 'unread', label: `Chưa đọc (${unreadCount})` },
+              { id: 'all', label: `Tất cả (${notifications.length})`, icon: null },
+              { id: 'order', label: `Đơn hàng (${orderCount})`, icon: <PackageIcon size={12} /> },
+              { id: 'voucher', label: `Ưu đãi (${voucherCount})`, icon: <TicketIcon size={12} /> },
+              { id: 'unread', label: `Chưa đọc (${unreadCount})`, icon: null },
             ].map((tab) => {
               const active = activeTab === tab.id;
               return (
@@ -282,9 +292,13 @@ export default function NotificationsPopover() {
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                     transition: 'all 0.15s ease',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}
                 >
-                  {tab.label}
+                  {tab.icon}
+                  <span>{tab.label}</span>
                 </button>
               );
             })}
@@ -294,7 +308,10 @@ export default function NotificationsPopover() {
           <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
             {filteredNotifs.length === 0 ? (
               <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-muted, #94a3b8)', fontSize: '13px' }}>
-                🎉 Bạn không có thông báo nào chưa đọc!
+                <span style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '8px', color: 'var(--primary-color, #ea580c)' }}>
+                  <SparklesIcon size={24} />
+                </span>
+                <p style={{ margin: 0 }}>Bạn không có thông báo nào chưa đọc!</p>
               </div>
             ) : (
               filteredNotifs.map((item) => (
@@ -328,11 +345,17 @@ export default function NotificationsPopover() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '18px',
+                      fontSize: '16px',
                       flexShrink: 0,
                     }}
                   >
-                    {item.icon}
+                    {item.type === 'order' ? (
+                      <PackageIcon size={18} />
+                    ) : item.type === 'voucher' ? (
+                      <TicketIcon size={18} />
+                    ) : (
+                      <BoltIcon size={18} />
+                    )}
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -416,10 +439,14 @@ export default function NotificationsPopover() {
                   color: 'var(--text-muted, #94a3b8)',
                   fontSize: '11.5px',
                   cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
                 }}
                 title="Xóa các thông báo đã đọc"
               >
-                🗑️ Dọn dẹp
+                <TrashIcon size={12} />
+                <span>Dọn dẹp</span>
               </button>
             )}
           </div>

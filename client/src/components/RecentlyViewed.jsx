@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FALLBACK_PRODUCTS, getProductById } from '../services/productService';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useLanguage } from '../context/LanguageContext';
+import { ClockIcon } from './OrdersIcons';
 
 const RECENT_STORAGE_KEY = 'mini_shopee_recent_views';
 
@@ -57,9 +58,13 @@ export function RecentlyViewed({ currentProductId }) {
           fontWeight: 800,
           margin: '0 0 16px',
           color: 'var(--text-primary, #0f172a)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
         }}
       >
-        🕒 {t('recently_viewed')}
+        <ClockIcon size={18} />
+        <span>{t('recently_viewed')}</span>
       </h3>
 
       <div

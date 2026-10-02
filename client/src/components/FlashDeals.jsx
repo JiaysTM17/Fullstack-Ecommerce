@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BoltIcon, FlameIcon } from './OrdersIcons';
 import '../styles/deals.css';
 
 export default function FlashDeals({ products = [], onProductClick, formatCurrency }) {
@@ -40,8 +41,9 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
     <section id="flash-deals-section" className="shopee-deals-section">
       <div className="shopee-deals-header">
         <div className="shopee-deals-title-area">
-          <div className="shopee-deals-badge">
-            ⚡ FLASH DEALS / GIỜ VÀNG
+          <div className="shopee-deals-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <BoltIcon size={16} />
+            <span>FLASH DEALS / GIỜ VÀNG</span>
           </div>
           <div className="shopee-countdown-box">
             <span>KẾT THÚC TRONG</span>
@@ -112,8 +114,9 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                   className="shopee-progress-bar-fill"
                   style={{ width: `${percentSold}%` }}
                 />
-                <span className="shopee-progress-bar-text">
-                  🔥 ĐÃ BÁN {percentSold}%
+                <span className="shopee-progress-bar-text" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                  <FlameIcon size={12} />
+                  <span>ĐÃ BÁN {percentSold}%</span>
                 </span>
               </div>
             </div>

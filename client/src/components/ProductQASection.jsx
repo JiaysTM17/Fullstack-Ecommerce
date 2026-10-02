@@ -8,6 +8,7 @@ import {
   voteProductQuestion,
   answerProductQuestion,
 } from "../services/productService";
+import { ChatIcon, LightbulbIcon, ThumbsUpIcon, StoreIcon } from "./OrdersIcons";
 
 const LOCAL_QA_KEY_PREFIX = "mini_shopee_qa_";
 const VOTED_QA_KEY = "mini_shopee_qa_voted_questions";
@@ -293,7 +294,9 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontSize: "22px" }}>💬</span>
+          <span style={{ display: "inline-flex", alignItems: "center", color: "var(--primary-color, #ea580c)" }}>
+            <ChatIcon size={22} />
+          </span>
           <div>
             <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
               {t("qa_title", "Hỏi & Đáp về sản phẩm")} ({questions.length})
@@ -380,7 +383,9 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
         </div>
       ) : questions.length === 0 ? (
         <div style={{ textAlign: "center", padding: "30px 0", color: "var(--text-muted, #94a3b8)" }}>
-          <span style={{ fontSize: "32px", display: "block", marginBottom: "8px" }}>💡</span>
+          <span style={{ display: "inline-flex", justifyContent: "center", marginBottom: "8px", color: "var(--primary-color, #ea580c)" }}>
+            <LightbulbIcon size={32} />
+          </span>
           <p style={{ margin: 0, fontSize: "14px" }}>Chưa có câu hỏi nào. Hãy là người đầu tiên đặt câu hỏi cho sản phẩm này!</p>
         </div>
       ) : (
@@ -436,20 +441,21 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                       background: voted ? "rgba(234, 88, 12, 0.1)" : "none",
                       border: voted ? "1px solid #ea580c" : "1px solid var(--border-medium, #cbd5e1)",
                       borderRadius: "16px",
-                      padding: "3px 10px",
+                      padding: "4px 10px",
                       fontSize: "12px",
                       color: voted ? "#ea580c" : "var(--text-secondary, #64748b)",
                       cursor: "pointer",
-                      display: "flex",
+                      display: "inline-flex",
                       alignItems: "center",
-                      gap: "4px",
+                      gap: "5px",
                       whiteSpace: "nowrap",
                       fontWeight: voted ? 700 : 500,
                       transition: "all 0.15s ease",
                     }}
                     title={voted ? "Bạn đã bình chọn hữu ích cho câu hỏi này" : "Bình chọn câu hỏi hữu ích"}
                   >
-                    👍 Hữu ích ({votes})
+                    <ThumbsUpIcon size={13} />
+                    <span>Hữu ích ({votes})</span>
                   </button>
                 </div>
 
@@ -478,7 +484,9 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           }}
                         >
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                            <span style={{ fontSize: "13px" }}>{isShop ? "🏪" : "💬"}</span>
+                            <span style={{ display: "inline-flex", alignItems: "center", color: isShop ? "#ea580c" : "var(--text-secondary)" }}>
+                              {isShop ? <StoreIcon size={14} /> : <ChatIcon size={13} />}
+                            </span>
                             <strong style={{ fontSize: "13px", color: isShop ? "#ea580c" : "inherit" }}>
                               {ansAuthor}
                             </strong>
@@ -491,9 +499,13 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                                   fontWeight: 700,
                                   padding: "2px 6px",
                                   borderRadius: "4px",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "4px",
                                 }}
                               >
-                                🏪 Người bán
+                                <StoreIcon size={11} />
+                                <span>Người bán</span>
                               </span>
                             )}
                             <span style={{ fontSize: "11px", color: "#94a3b8", marginLeft: "auto" }}>
@@ -576,9 +588,13 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                         fontWeight: 600,
                         cursor: "pointer",
                         padding: 0,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
                       }}
                     >
-                      💬 Trả lời câu hỏi này
+                      <ChatIcon size={12} />
+                      <span>Trả lời câu hỏi này</span>
                     </button>
                   )}
                 </div>
