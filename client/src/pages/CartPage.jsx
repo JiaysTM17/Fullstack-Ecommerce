@@ -8,6 +8,7 @@ import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { formatCurrency } from "../utils/formatCurrency";
 import { previewVoucherDiscount } from "../services/voucherService";
+import { TicketIcon } from "../components/OrdersIcons";
 
 const FREE_SHIPPING_THRESHOLD = 300000;
 
@@ -565,8 +566,9 @@ export default function CartPage() {
                     background: "var(--primary-light, rgba(234, 88, 12, 0.03))"
                   }}
                 >
-                  <span>
-                    🎟️ {appliedDiscountVoucher || appliedShippingVoucher ? "+ Chọn thêm mã còn lại" : "Nhấn để chọn mã giảm giá & Freeship"}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <TicketIcon size={14} />
+                    <span>{appliedDiscountVoucher || appliedShippingVoucher ? "+ Chọn thêm mã còn lại" : "Nhấn để chọn mã giảm giá & Freeship"}</span>
                   </span>
                   <span style={{ fontSize: "14px", fontWeight: 700 }}>›</span>
                 </button>
