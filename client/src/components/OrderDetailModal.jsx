@@ -388,25 +388,25 @@ export default function OrderDetailModal({
             </div>
 
             {/* Stepper Progress Bar with Continuous Connector Wire */}
-            <div className="stepper-track-wrapper" style={{ position: 'relative', margin: '10px 0 16px' }}>
+            <div className="stepper-track-wrapper" style={{ position: 'relative', margin: '12px 0 16px' }}>
               <div
                 style={{
                   position: 'absolute',
-                  top: '17px',
+                  top: '14px',
                   left: '12.5%',
-                  height: '4px',
+                  height: '3px',
                   background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
                   borderRadius: '999px',
                   zIndex: 1,
                   width: `${((Math.min(activeStep || 1, 4) - 1) / 3) * 75}%`,
                   transition: 'width 0.4s ease',
-                  boxShadow: '0 0 8px rgba(16, 185, 129, 0.5)',
+                  boxShadow: '0 0 6px rgba(16, 185, 129, 0.45)',
                 }}
               />
               <div className="stepper-stages">
                 {STEPS.map((s) => {
-                  const isPassed = activeStep > s.step;
-                  const isCurrent = activeStep === s.step;
+                  const isPassed = activeStep > s.step || (activeStep === 4 && s.step === 4);
+                  const isCurrent = activeStep === s.step && activeStep !== 4;
                   return (
                     <div
                       key={s.step}
@@ -423,49 +423,30 @@ export default function OrderDetailModal({
               </div>
             </div>
 
-            {/* Timeline Events Audit Log */}
+            {/* Timeline Events Audit Log (Vertical Logistics Stepper) */}
             {timelineEvents.length > 0 && (
-              <div className="order-detail-timeline-list">
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div className="order-detail-timeline-container">
+                <div className="order-detail-timeline-title">
                   <span>⏱️</span>
                   <span>Nhật ký hành trình đơn hàng:</span>
                 </div>
-                {timelineEvents.map((tl, index) => {
-                  const isLatest = index === timelineEvents.length - 1;
-                  return (
-                    <div
-                      key={index}
-                      style={{
-                        display: 'flex',
-                        gap: '12px',
-                        padding: '6px 0',
-                        borderBottom: index < timelineEvents.length - 1 ? '1px dashed var(--border-light, #e2e8f0)' : 'none',
-                        alignItems: 'baseline',
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: isLatest ? 'var(--primary-color, #2563eb)' : 'var(--text-muted)',
-                          fontWeight: isLatest ? 700 : 600,
-                          minWidth: '95px',
-                          fontSize: '12px',
-                        }}
-                      >
-                        {tl.time}
-                      </span>
-                      <span
-                        style={{
-                          color: isLatest ? 'var(--text-primary)' : 'var(--text-secondary)',
-                          fontWeight: isLatest ? 600 : 400,
-                          fontSize: '12.5px',
-                        }}
-                      >
-                        {isLatest && <span style={{ color: '#10b981', marginRight: '6px' }}>●</span>}
-                        {tl.text}
-                      </span>
-                    </div>
-                  );
-                })}
+                <div className="order-vertical-timeline">
+                  {timelineEvents.map((tl, index) => {
+                    const isLatest = index === timelineEvents.length - 1;
+                    return (
+                      <div key={index} className={`vertical-timeline-item ${isLatest ? 'latest' : ''}`}>
+                        <div className="timeline-dot-wrap">
+                          <div className="timeline-dot" />
+                          {index < timelineEvents.length - 1 && <div className="timeline-connector-line" />}
+                        </div>
+                        <div className="timeline-content">
+                          <div className="timeline-time">{tl.time}</div>
+                          <div className="timeline-text">{tl.text}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -477,41 +458,32 @@ export default function OrderDetailModal({
         <div className="order-detail-info-grid">
           {/* Recipient Information Card */}
           <div className="order-detail-info-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <span style={{ fontSize: '16px' }}>📍</span>
-              <span style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary)' }}>
-                {t('shipping_address_title', 'Thông Tin Người Nhận & Địa Chỉ')}
-              </span>
+            <div className="info-card-header">
+              <div className="info-card-title-group">
+                <span style={{ fontSize: '15px' }}>📍</span>
+                <span className="info-card-heading">
+                  {t('shipping_address_title', 'THÔNG TIN NGƯỜI NHẬN')}
+                </span>
+              </div>
+              <span className="info-card-tag">Người mua</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+              <strong style={{ fontSize: '14.5px', color: 'var(--text-primary)', fontWeight: 700 }}>
                 {recipientName}
               </strong>
-              <span
-                style={{
-                  fontSize: '11px',
-                  background: 'var(--primary-light, #eff6ff)',
-                  color: 'var(--primary-color, #2563eb)',
-                  padding: '1px 6px',
-                  borderRadius: '4px',
-                  fontWeight: 600,
-                }}
+              <button
+                type="button"
+                className="copy-pill"
+                onClick={() => handleCopy(recipientPhone, 'Số điện thoại')}
+                title="Sao chép số điện thoại"
+                style={{ fontSize: '12px' }}
               >
-                Người mua
-              </span>
+                📞 {recipientPhone} 📋
+              </button>
             </div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>📞 {recipientPhone}</span>
-              <span
-                style={{ cursor: 'pointer', fontSize: '11.5px', color: 'var(--primary-color, #2563eb)' }}
-                onClick={() => handleCopy(recipientPhone, 'SĐT người nhận')}
-                title="Sao chép SĐT"
-              >
-                📋
-              </span>
-            </div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '6px', lineHeight: 1.5 }}>
-              {recipientAddress}
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '6px', lineHeight: 1.5, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+              <span style={{ fontSize: '14px', flexShrink: 0, marginTop: '2px' }}>🏠</span>
+              <span>{recipientAddress}</span>
             </div>
             {orderNote ? (
               <div
@@ -527,49 +499,42 @@ export default function OrderDetailModal({
                 📝 Ghi chú đơn: {orderNote}
               </div>
             ) : (
-              <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '8px' }}>
-                ⚡ Dịch vụ: Giao hàng tiêu chuẩn SPX Express
+              <div style={{ fontSize: '11.5px', color: '#10b981', marginTop: '8px', fontWeight: 600 }}>
+                ✓ Giao hàng tiêu chuẩn SPX Express an toàn
               </div>
             )}
           </div>
 
           {/* Payment & Invoice Information Card */}
           <div className="order-detail-info-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <span style={{ fontSize: '16px' }}>💳</span>
-              <span style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary)' }}>
-                {t('payment_info_title', 'Thông Tin Thanh Toán & Hóa Đơn')}
-              </span>
-            </div>
-            <div style={{ fontSize: '13px', color: 'var(--text-primary)' }}>
-              Hình thức: <strong>{paymentMethod}</strong>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
-              <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>Trạng thái:</span>
-              <span
-                style={{
-                  fontSize: '11.5px',
-                  padding: '2px 8px',
-                  borderRadius: '999px',
-                  fontWeight: 700,
-                  background: isPaid ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)',
-                  color: isPaid ? '#10b981' : '#d97706',
-                }}
-              >
+            <div className="info-card-header">
+              <div className="info-card-title-group">
+                <span style={{ fontSize: '15px' }}>💳</span>
+                <span className="info-card-heading">
+                  {t('payment_info_title', 'THÔNG TIN THANH TOÁN')}
+                </span>
+              </div>
+              <span className={`payment-status-badge ${isPaid ? 'paid' : isCancelled ? 'cancelled' : 'cod'}`}>
                 {paymentStatusText}
               </span>
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>Mã giao dịch: <strong>{transactionId}</strong></span>
-              <span
-                style={{ cursor: 'pointer', fontSize: '11.5px', color: 'var(--primary-color, #2563eb)' }}
+            <div style={{ fontSize: '13px', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: 'var(--text-secondary)' }}>Hình thức:</span>
+              <strong style={{ fontWeight: 700 }}>{paymentMethod}</strong>
+            </div>
+            <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Mã giao dịch:</span>
+              <button
+                type="button"
+                className="copy-pill"
                 onClick={() => handleCopy(transactionId, 'Mã giao dịch')}
                 title="Sao chép mã giao dịch"
+                style={{ fontSize: '11.5px' }}
               >
-                📋
-              </span>
+                {transactionId} 📋
+              </button>
             </div>
-            <div style={{ fontSize: '11.5px', color: '#166534', background: '#f0fdf4', padding: '4px 8px', borderRadius: '6px', marginTop: '8px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '11.5px', color: '#166534', background: '#f0fdf4', padding: '5px 10px', borderRadius: '6px', marginTop: '10px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>🛡️</span>
               <span>Giao dịch an toàn được bảo hộ bởi Mini Shopee SafePay</span>
             </div>

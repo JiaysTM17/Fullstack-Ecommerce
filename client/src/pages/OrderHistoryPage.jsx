@@ -989,8 +989,8 @@ export default function OrderHistoryPage() {
                           { num: 3, label: t('step_shipping', 'Đang Vận Chuyển') },
                           { num: 4, label: t('step_delivered', 'Đã Giao Hàng') },
                         ].map((step, idx) => {
-                          const isCompleted = (ord.stepIndex || 1) >= step.num;
-                          const isActive = (ord.stepIndex || 1) === step.num && ord.status !== 'completed';
+                          const isCompleted = (ord.stepIndex || 1) >= step.num || ord.status === 'completed' || ord.status === 'delivered';
+                          const isActive = (ord.stepIndex || 1) === step.num && ord.status !== 'completed' && ord.status !== 'delivered';
                           return (
                             <div
                               key={idx}
@@ -1078,8 +1078,18 @@ export default function OrderHistoryPage() {
 
                   {/* Actions Bar */}
                   <div className="shopee-order-card-actions-bar">
-                    {/* Left: Simulation button if in testing mode */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {/* Left: Cancellation text link or testing simulation */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {(ord.status === 'pending' || ord.status === 'confirmed') && (
+                        <button
+                          type="button"
+                          className="shopee-order-cancel-link"
+                          onClick={() => setSelectedCancelOrder(ord)}
+                          title="Yêu cầu hủy đơn hàng này"
+                        >
+                          ✕ {t('cancel_order', 'Yêu cầu hủy đơn')}
+                        </button>
+                      )}
                       {ord.status !== 'cancelled' && (ord.stepIndex || 1) < 4 && (
                         <button
                           type="button"
@@ -1090,7 +1100,7 @@ export default function OrderHistoryPage() {
                             border: '1px solid var(--primary-border, #bfdbfe)',
                             color: 'var(--primary-color, #2563eb)',
                             fontWeight: 700,
-                            padding: '5px 10px',
+                            padding: '4px 10px',
                             borderRadius: '6px',
                           }}
                           onClick={() => handleSimulateNextStep(ord.orderId)}
@@ -1106,13 +1116,6 @@ export default function OrderHistoryPage() {
                       {/* Giai đoạn 1: Chờ xác nhận (pending, confirmed) */}
                       {(ord.status === 'pending' || ord.status === 'confirmed') && (
                         <>
-                          <button
-                            type="button"
-                            className="shopee-order-btn-danger-outline"
-                            onClick={() => setSelectedCancelOrder(ord)}
-                          >
-                            ✕ {t('cancel_order', 'Hủy đơn hàng')}
-                          </button>
                           <button
                             type="button"
                             className="shopee-order-btn-outline"

@@ -555,9 +555,9 @@
 .stepper-stages::before {
   content: '';
   position: absolute;
-  top: 17px;
-  left: 30px;
-  right: 30px;
+  top: 14px;
+  left: 12.5%;
+  right: 12.5%;
   height: 3px;
   background: var(--border-medium, #e2e8f0);
   z-index: 1;
@@ -576,47 +576,203 @@
 }
 
 .stepper-circle {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--bg-card, #ffffff);
-  border: 2.5px solid var(--border-medium, #cbd5e1);
+  border: 2px solid var(--border-medium, #cbd5e1);
   color: var(--text-secondary, #64748b);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 11.5px;
+  font-weight: 700;
   transition: all 0.25s ease;
   box-shadow: 0 0 0 3px var(--bg-card, #ffffff);
 }
 
 .stepper-node.active .stepper-circle {
-  background: var(--primary-color, #2563eb);
-  border-color: var(--primary-color, #2563eb);
+  background: #2563eb;
+  border-color: #2563eb;
   color: #ffffff;
-  box-shadow: 0 0 0 4px var(--primary-light, #eff6ff);
+  box-shadow: 0 0 0 4px #eff6ff;
+  animation: stepperPulseGlow 2s infinite;
 }
 
 .stepper-node.completed .stepper-circle {
-  background: var(--color-success, #10b981);
-  border-color: var(--color-success, #10b981);
+  background: #10b981;
+  border-color: #10b981;
   color: #ffffff;
+  box-shadow: 0 0 0 3px var(--bg-card, #ffffff), 0 2px 6px rgba(16, 185, 129, 0.35);
 }
 
 .stepper-label {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--text-primary);
-  margin-top: 8px;
+  margin-top: 6px;
   line-height: 1.3;
 }
 
 .stepper-desc {
   font-size: 11px;
   color: var(--text-muted, #64748b);
-  margin-top: 3px;
+  margin-top: 2px;
   line-height: 1.25;
+}
+
+/* Vertical Logistics Timeline */
+.order-detail-timeline-container {
+  margin-top: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 14px 18px;
+  border: 1px solid #f1f5f9;
+}
+
+.order-detail-timeline-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.order-vertical-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.vertical-timeline-item {
+  display: flex;
+  gap: 12px;
+  position: relative;
+}
+
+.timeline-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 16px;
+  flex-shrink: 0;
+}
+
+.timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  margin-top: 5px;
+  transition: all 0.2s ease;
+}
+
+.vertical-timeline-item.latest .timeline-dot {
+  background: #10b981;
+  width: 10px;
+  height: 10px;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+}
+
+.timeline-connector-line {
+  width: 2px;
+  flex: 1;
+  min-height: 24px;
+  background: #e2e8f0;
+  margin: 3px 0;
+}
+
+.timeline-content {
+  flex: 1;
+  padding-bottom: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.timeline-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  min-width: 95px;
+  flex-shrink: 0;
+}
+
+.vertical-timeline-item.latest .timeline-time {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.timeline-text {
+  font-size: 12.5px;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.vertical-timeline-item.latest .timeline-text {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* 2-Column Fintech Info Cards */
+.info-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.info-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-card-heading {
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.info-card-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 1px 7px;
+  border-radius: 9999px;
+}
+
+.payment-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.payment-status-badge.paid {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.payment-status-badge.cod {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.payment-status-badge.cancelled {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
 }
 
 /* Transparent Fee Breakdown Table */
@@ -673,13 +829,15 @@
 }
 
 /* ==========================================================================
-   Delivery Stepper Cable / Wire (Đường truyền kết nối như sợi dây)
+   Micro Delivery Stepper (Thanh tiến trình 20px thanh mảnh, đồng bộ)
    ========================================================================== */
 
 .order-stepper-container {
-  background: #fafbfe;
-  border-bottom: 1px solid #f1f5f9;
-  padding: 12px 24px 14px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  padding: 10px 16px 12px;
+  margin: 10px 20px 12px;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
@@ -696,10 +854,10 @@
 /* Sợi dây xám kết nối nền chạy ngang qua 4 điểm mốc */
 .order-stepper-cable-base {
   position: absolute;
-  top: 11px;
+  top: 9px;
   left: 12.5%;
   width: 75%;
-  height: 2.5px;
+  height: 2px;
   background: #e2e8f0;
   border-radius: 9999px;
   z-index: 1;
@@ -708,16 +866,16 @@
 /* Sợi dây truyền màu xanh lá chuyển động hiển thị tiến trình thực tế */
 .order-stepper-cable-active {
   position: absolute;
-  top: 11px;
+  top: 9px;
   left: 12.5%;
-  height: 2.5px;
+  height: 2px;
   background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #059669 100%);
   background-size: 200% 100%;
   animation: cableShimmer 3s ease infinite;
   border-radius: 9999px;
   z-index: 1;
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.45);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.45);
 }
 
 @keyframes cableShimmer {
@@ -737,55 +895,65 @@
 }
 
 .order-stepper-circle {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #ffffff;
-  border: 2px solid #cbd5e1;
+  border: 1.5px solid #cbd5e1;
   color: #94a3b8;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   transition: all 0.25s ease;
-  box-shadow: 0 0 0 3px #fafbfe;
+  box-shadow: 0 0 0 2.5px #f8fafc;
 }
 
 .order-stepper-node.completed .order-stepper-circle {
   background: #10b981;
   border-color: #10b981;
   color: #ffffff;
-  box-shadow: 0 0 0 3px #fafbfe, 0 1px 4px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 0 2.5px #f8fafc, 0 1px 4px rgba(16, 185, 129, 0.3);
 }
 
 .order-stepper-node.active .order-stepper-circle {
-  background: #10b981;
-  border-color: #10b981;
+  background: #2563eb;
+  border-color: #2563eb;
   color: #ffffff;
+  box-shadow: 0 0 0 2.5px #f8fafc, 0 0 0 4px rgba(37, 99, 235, 0.25);
   animation: stepperPulseGlow 2s infinite;
 }
 
 @keyframes stepperPulseGlow {
   0% {
-    box-shadow: 0 0 0 3px #fafbfe, 0 0 0 4px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 0 2.5px #f8fafc, 0 0 0 3px rgba(37, 99, 235, 0.3);
   }
   50% {
-    box-shadow: 0 0 0 3px #fafbfe, 0 0 0 7px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 0 2.5px #f8fafc, 0 0 0 6px rgba(37, 99, 235, 0.1);
   }
   100% {
-    box-shadow: 0 0 0 3px #fafbfe, 0 0 0 4px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 0 2.5px #f8fafc, 0 0 0 3px rgba(37, 99, 235, 0.3);
   }
 }
 
 .order-stepper-label {
   font-family: var(--font-family);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   color: #64748b;
-  margin-top: 6px;
-  line-height: 1.25;
+  margin-top: 5px;
+  line-height: 1.2;
   transition: color 0.2s ease;
+}
+
+.order-stepper-node.completed .order-stepper-label {
+  color: #0f172a;
+}
+
+.order-stepper-node.active .order-stepper-label {
+  color: #2563eb;
+  font-weight: 700;
 }
 
 .order-stepper-node.completed .order-stepper-label,
@@ -1672,6 +1840,30 @@
   gap: 8px;
   flex-wrap: wrap;
   margin-left: auto;
+}
+
+.shopee-order-cancel-link {
+  font-family: var(--font-family);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #ef4444;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shopee-order-cancel-link:hover {
+  color: #dc2626;
+  background: #fef2f2;
+  border-radius: 4px;
+  text-decoration: none;
 }
 
 /* Button styles */
