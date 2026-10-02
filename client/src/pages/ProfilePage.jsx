@@ -15,6 +15,17 @@ import {
   deleteAddress,
   setDefaultAddress,
 } from '../services/addressService';
+import {
+  getSavedPaymentMethods,
+  addPaymentMethod,
+  deletePaymentMethod,
+  setDefaultPaymentMethod,
+} from '../services/paymentMethodService';
+import {
+  VIETNAM_PROVINCES,
+  getDistrictsByProvince,
+  getWardsByDistrict,
+} from '../data/vietnamLocations';
 import '../styles/auth.css';
 import '../styles/profile.css';
 
@@ -33,10 +44,10 @@ export default function ProfilePage() {
   const { showToast } = useToast();
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { coins, streak, hasCheckedInToday, checkInToday, coinHistory } = useCoins();
+  const { coins, streak, hasCheckedInToday, checkInToday, coinHistory, addCoins } = useCoins();
 
   // Navigation & Sliding Tab Indicator State
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'addresses' | 'security' | 'vouchers' | 'coins'
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'addresses' | 'payments' | 'security' | 'settings' | 'vouchers' | 'coins'
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const tabRefs = useRef({});
   const fileInputRef = useRef(null);
@@ -84,7 +95,10 @@ export default function ProfilePage() {
   const [newAddressForm, setNewAddressForm] = useState({
     name: '',
     phone: '',
-    address: '',
+    province: 'TP. Hồ Chí Minh',
+    district: 'Quận 1',
+    ward: 'Phường Bến Nghé',
+    street: '',
     tag: 'Nhà riêng',
     isDefault: false,
   });
@@ -94,7 +108,10 @@ export default function ProfilePage() {
   const [editAddressForm, setEditAddressForm] = useState({
     name: '',
     phone: '',
-    address: '',
+    province: 'TP. Hồ Chí Minh',
+    district: 'Quận 1',
+    ward: 'Phường Bến Nghé',
+    street: '',
     tag: 'Nhà riêng',
     isDefault: false,
   });
@@ -116,7 +133,36 @@ export default function ProfilePage() {
     };
   }, [user]);
 
-  // Tab 3: Security & Password Change State
+  // Tab 3: Payment Methods State
+  const [paymentMethods, setPaymentMethods] = useState(() => getSavedPaymentMethods(user));
+  const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
+  const [newPaymentForm, setNewPaymentForm] = useState({
+    type: 'bank',
+    provider: 'Vietcombank',
+    accountNumber: '',
+    accountName: '',
+    expiry: '',
+    phone: '',
+    isDefault: false,
+  });
+
+  useEffect(() => {
+    setPaymentMethods(getSavedPaymentMethods(user));
+  }, [user]);
+
+  useEffect(() => {
+    const handleSyncPayments = () => {
+      setPaymentMethods(getSavedPaymentMethods(user));
+    };
+    window.addEventListener('storage', handleSyncPayments);
+    window.addEventListener('mini_shopee_payment_updated', handleSyncPayments);
+    return () => {
+      window.removeEventListener('storage', handleSyncPayments);
+      window.removeEventListener('mini_shopee_payment_updated', handleSyncPayments);
+    };
+  }, [user]);
+
+  // Tab 4: Security & Password Change State
   const [passwordForm, setPasswordForm] = useState({
     oldPassword: '',
     newPassword: '',
@@ -136,7 +182,48 @@ export default function ProfilePage() {
     }
   });
 
-  // Tab 4: Voucher Wallet State
+  // Tab 5: Settings & Privacy State
+  const [settings, setSettings] = useState(() => {
+    const key = `mini_shopee_settings_${user?.id || user?._id || 'guest'}`;
+    try {
+      const saved = localStorage.getItem(key);
+      return saved
+        ? JSON.parse(saved)
+        : {
+            notifyOrderWeb: true,
+            notifyOrderEmail: true,
+            notifyDeliverySMS: true,
+            notifyPromotions: true,
+            notifyDailyCheckin: true,
+            anonymousReview: false,
+            personalizedAds: true,
+          };
+    } catch {
+      return {
+        notifyOrderWeb: true,
+        notifyOrderEmail: true,
+        notifyDeliverySMS: true,
+        notifyPromotions: true,
+        notifyDailyCheckin: true,
+        anonymousReview: false,
+        personalizedAds: true,
+      };
+    }
+  });
+
+  const handleUpdateSetting = (key, value) => {
+    setSettings((prev) => {
+      const next = { ...prev, [key]: value };
+      const storageKey = `mini_shopee_settings_${user?.id || user?._id || 'guest'}`;
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch {}
+      showToast('Đã lưu tùy chọn cài đặt thành công!', 'success');
+      return next;
+    });
+  };
+
+  // Tab 6: Voucher Wallet State
   const [vouchersList, setVouchersList] = useState([]);
   const [savedVoucherCodes, setSavedVoucherCodes] = useState(() => {
     try {
@@ -148,7 +235,7 @@ export default function ProfilePage() {
   });
   const [voucherFilterTab, setVoucherFilterTab] = useState('all');
 
-  // Tab 5: Coin History Filter
+  // Tab 7: Coin History Filter
   const [coinFilter, setCoinFilter] = useState('all'); // 'all' | 'in' | 'out'
 
   // User Orders Summary & Loyalty Rank
@@ -206,6 +293,53 @@ export default function ProfilePage() {
     return { name: 'Thành viên Đồng', icon: '🥉', color: '#f59e0b' };
   }, [ordersSummary]);
 
+  // Profile Completeness Meter Calculation
+  const profileCompleteness = useMemo(() => {
+    const tasks = [
+      { id: 'name_email', label: 'Họ tên & Email', isDone: Boolean(formData.fullName?.trim() && formData.email) },
+      { id: 'phone', label: 'Số điện thoại', isDone: Boolean(formData.phone?.trim()) },
+      { id: 'birthday_gender', label: 'Ngày sinh & Giới tính', isDone: Boolean(formData.birthday && formData.gender !== 'other') },
+      { id: 'address', label: 'Địa chỉ giao hàng', isDone: addresses.length > 0 },
+      { id: 'payment', label: 'Phương thức thanh toán', isDone: paymentMethods.length > 0 },
+    ];
+
+    const completedCount = tasks.filter((t) => t.isDone).length;
+    const percentage = Math.round((completedCount / tasks.length) * 100);
+
+    const bonusClaimKey = `mini_shopee_profile_bonus_claimed_${user?.id || user?._id}`;
+    let isBonusClaimed = false;
+    try {
+      isBonusClaimed = localStorage.getItem(bonusClaimKey) === 'true';
+    } catch {}
+
+    return {
+      percentage,
+      tasks,
+      isComplete: percentage === 100,
+      isBonusClaimed,
+    };
+  }, [formData, addresses.length, paymentMethods.length, user]);
+
+  const handleClaimProfileBonus = () => {
+    if (!profileCompleteness.isComplete) {
+      showToast('Vui lòng hoàn thành 100% hồ sơ để nhận quà!', 'error');
+      return;
+    }
+    if (profileCompleteness.isBonusClaimed) {
+      showToast('Bạn đã nhận phần thưởng này rồi!', 'info');
+      return;
+    }
+
+    if (addCoins) {
+      addCoins(500, 'Thưởng hoàn thiện 100% hồ sơ cá nhân');
+    }
+    const bonusClaimKey = `mini_shopee_profile_bonus_claimed_${user?.id || user?._id}`;
+    try {
+      localStorage.setItem(bonusClaimKey, 'true');
+    } catch {}
+    showToast('🎉 Chúc mừng bạn đã nhận +500 Mini Xu thưởng hoàn thiện hồ sơ!', 'success');
+  };
+
   // Load Vouchers
   useEffect(() => {
     let active = true;
@@ -242,7 +376,7 @@ export default function ProfilePage() {
       window.removeEventListener('resize', updateIndicator);
       clearTimeout(timer);
     };
-  }, [activeTab, addresses.length, vouchersList.length]);
+  }, [activeTab, addresses.length, paymentMethods.length, vouchersList.length]);
 
   // Password validation metrics
   const passwordMetrics = useMemo(() => {
@@ -352,7 +486,7 @@ export default function ProfilePage() {
     }
   };
 
-  // Address Handlers
+  // Address Handlers with Cascading Locations
   const handleSetDefaultAddress = (addrId) => {
     const updated = setDefaultAddress(addrId, user);
     setAddresses(updated);
@@ -369,16 +503,34 @@ export default function ProfilePage() {
 
   const handleAddAddressSubmit = (e) => {
     e.preventDefault();
-    if (!newAddressForm.name.trim() || !newAddressForm.phone.trim() || !newAddressForm.address.trim()) {
-      showToast('Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ!', 'error');
+    if (!newAddressForm.name.trim() || !newAddressForm.phone.trim() || !newAddressForm.street.trim()) {
+      showToast('Vui lòng điền đầy đủ họ tên, số điện thoại và số nhà/đường!', 'error');
       return;
     }
 
-    const updated = addAddress(newAddressForm, user);
+    const fullFormattedAddress = `${newAddressForm.street.trim()}, ${newAddressForm.ward}, ${newAddressForm.district}, ${newAddressForm.province}`;
+    const payload = {
+      name: newAddressForm.name.trim(),
+      phone: newAddressForm.phone.trim(),
+      address: fullFormattedAddress,
+      tag: newAddressForm.tag,
+      isDefault: newAddressForm.isDefault,
+    };
+
+    const updated = addAddress(payload, user);
     setAddresses(updated);
     setShowAddAddressModal(false);
-    setNewAddressForm({ name: '', phone: '', address: '', tag: 'Nhà riêng', isDefault: false });
-    showToast('Đã thêm địa chỉ giao hàng mới thành công!', 'success');
+    setNewAddressForm({
+      name: '',
+      phone: '',
+      province: 'TP. Hồ Chí Minh',
+      district: 'Quận 1',
+      ward: 'Phường Bến Nghé',
+      street: '',
+      tag: 'Nhà riêng',
+      isDefault: false,
+    });
+    showToast('Đã thêm địa chỉ giao hàng mới chuẩn xác thành công!', 'success');
   };
 
   const handleOpenEditModal = (addr) => {
@@ -386,7 +538,10 @@ export default function ProfilePage() {
     setEditAddressForm({
       name: addr.name || addr.fullName || '',
       phone: addr.phone || '',
-      address: addr.address || '',
+      province: 'TP. Hồ Chí Minh',
+      district: 'Quận 1',
+      ward: 'Phường Bến Nghé',
+      street: addr.address || '',
       tag: addr.tag || 'Nhà riêng',
       isDefault: Boolean(addr.isDefault),
     });
@@ -396,16 +551,100 @@ export default function ProfilePage() {
   const handleEditAddressSubmit = (e) => {
     e.preventDefault();
     if (!editingAddress) return;
-    if (!editAddressForm.name.trim() || !editAddressForm.phone.trim() || !editAddressForm.address.trim()) {
+    if (!editAddressForm.name.trim() || !editAddressForm.phone.trim() || !editAddressForm.street.trim()) {
       showToast('Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ!', 'error');
       return;
     }
 
-    const updated = updateAddress(editingAddress.id, editAddressForm, user);
+    const fullFormattedAddress = editAddressForm.street.includes(editAddressForm.province)
+      ? editAddressForm.street.trim()
+      : `${editAddressForm.street.trim()}, ${editAddressForm.ward}, ${editAddressForm.district}, ${editAddressForm.province}`;
+
+    const payload = {
+      name: editAddressForm.name.trim(),
+      phone: editAddressForm.phone.trim(),
+      address: fullFormattedAddress,
+      tag: editAddressForm.tag,
+      isDefault: editAddressForm.isDefault,
+    };
+
+    const updated = updateAddress(editingAddress.id, payload, user);
     setAddresses(updated);
     setShowEditAddressModal(false);
     setEditingAddress(null);
     showToast('Đã cập nhật địa chỉ giao hàng thành công!', 'success');
+  };
+
+  // Payment Methods Handlers
+  const handleAddPaymentSubmit = (e) => {
+    e.preventDefault();
+    if (newPaymentForm.type === 'bank' && !newPaymentForm.accountNumber.trim()) {
+      showToast('Vui lòng nhập số tài khoản ngân hàng!', 'error');
+      return;
+    }
+    if (newPaymentForm.type === 'card' && !newPaymentForm.accountNumber.trim()) {
+      showToast('Vui lòng nhập số thẻ thanh toán!', 'error');
+      return;
+    }
+    if (newPaymentForm.type === 'wallet' && !newPaymentForm.phone.trim()) {
+      showToast('Vui lòng nhập số điện thoại đăng ký ví!', 'error');
+      return;
+    }
+
+    const payload = {
+      type: newPaymentForm.type,
+      provider: newPaymentForm.provider,
+      isDefault: newPaymentForm.isDefault,
+      accountName: (newPaymentForm.accountName || user?.fullName || 'CHỦ TÀI KHOẢN').toUpperCase(),
+    };
+
+    if (newPaymentForm.type === 'bank') {
+      payload.bankName = `Ngân hàng TMCP ${newPaymentForm.provider}`;
+      const rawNum = newPaymentForm.accountNumber.replace(/\s+/g, '');
+      payload.accountNumber = `**** **** ${rawNum.slice(-4) || '8899'}`;
+      payload.icon = '🏛️';
+      payload.color = '#006241';
+    } else if (newPaymentForm.type === 'card') {
+      payload.cardBrand = `${newPaymentForm.provider} Card`;
+      const rawNum = newPaymentForm.accountNumber.replace(/\s+/g, '');
+      payload.cardNumber = `**** **** **** ${rawNum.slice(-4) || '4242'}`;
+      payload.expiry = newPaymentForm.expiry || '12/28';
+      payload.icon = '💳';
+      payload.color = '#1a1f71';
+    } else {
+      payload.walletName = `Ví ${newPaymentForm.provider} Pay`;
+      payload.phone = newPaymentForm.phone || user?.phone || '0909 123 456';
+      payload.icon = '👛';
+      payload.color = '#a50064';
+    }
+
+    const updated = addPaymentMethod(payload, user);
+    setPaymentMethods(updated);
+    setShowAddPaymentModal(false);
+    setNewPaymentForm({
+      type: 'bank',
+      provider: 'Vietcombank',
+      accountNumber: '',
+      accountName: '',
+      expiry: '',
+      phone: '',
+      isDefault: false,
+    });
+    showToast('Đã liên kết phương thức thanh toán mới thành công!', 'success');
+  };
+
+  const handleSetDefaultPayment = (payId) => {
+    const updated = setDefaultPaymentMethod(payId, user);
+    setPaymentMethods(updated);
+    showToast('Đã đặt làm phương thức thanh toán mặc định!', 'success');
+  };
+
+  const handleDeletePayment = (payId) => {
+    if (window.confirm('Bạn có chắc chắn muốn hủy liên kết phương thức thanh toán này?')) {
+      const updated = deletePaymentMethod(payId, user);
+      setPaymentMethods(updated);
+      showToast('Đã xóa phương thức thanh toán thành công', 'info');
+    }
   };
 
   // Change Password Handler
@@ -633,6 +872,17 @@ export default function ProfilePage() {
             </button>
 
             <button
+              ref={(el) => (tabRefs.current['payments'] = el)}
+              type="button"
+              className={`profile-tab-button ${activeTab === 'payments' ? 'active' : ''}`}
+              onClick={() => setActiveTab('payments')}
+            >
+              <span>💳</span>
+              <span>Thanh Toán & Ngân Hàng</span>
+              <span className="profile-tab-badge">{paymentMethods.length}</span>
+            </button>
+
+            <button
               ref={(el) => (tabRefs.current['security'] = el)}
               type="button"
               className={`profile-tab-button ${activeTab === 'security' ? 'active' : ''}`}
@@ -640,6 +890,16 @@ export default function ProfilePage() {
             >
               <span>🔒</span>
               <span>Bảo Mật & Mật Khẩu</span>
+            </button>
+
+            <button
+              ref={(el) => (tabRefs.current['settings'] = el)}
+              type="button"
+              className={`profile-tab-button ${activeTab === 'settings' ? 'active' : ''}`}
+              onClick={() => setActiveTab('settings')}
+            >
+              <span>⚙️</span>
+              <span>Cài Đặt & Quyền Riêng Tư</span>
             </button>
 
             <button
@@ -679,6 +939,82 @@ export default function ProfilePage() {
             ============================================================ */}
         {activeTab === 'profile' && (
           <div className="profile-tab-content-pane">
+            {/* Profile Completeness Meter Card */}
+            <div className="profile-completeness-card">
+              <div className="profile-completeness-header">
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '18px' }}>🏆</span>
+                    <strong style={{ fontSize: '15px', color: '#0f172a' }}>
+                      Mức Độ Hoàn Thiện Hồ Sơ: {profileCompleteness.percentage}%
+                    </strong>
+                    {profileCompleteness.isComplete && (
+                      <span style={{ background: '#dcfce7', color: '#15803d', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px' }}>
+                        ✓ HOÀN HẢO
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>
+                    {profileCompleteness.isComplete
+                      ? 'Hồ sơ đã đạt 100%! Bạn nhận được độ uy tín tối đa và ưu đãi tốt nhất.'
+                      : 'Hoàn tất đủ các thông tin bên dưới để nhận ngay phần thưởng +500 Mini Xu!'}
+                  </div>
+                </div>
+
+                {profileCompleteness.isComplete && !profileCompleteness.isBonusClaimed && (
+                  <button
+                    type="button"
+                    onClick={handleClaimProfileBonus}
+                    style={{
+                      background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '8px 16px',
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)',
+                    }}
+                  >
+                    🎁 Nhận +500 Mini Xu
+                  </button>
+                )}
+
+                {profileCompleteness.isBonusClaimed && (
+                  <span style={{ fontSize: '12.5px', color: '#059669', fontWeight: 700 }}>
+                    ✨ Đã nhận thưởng +500 Xu
+                  </span>
+                )}
+              </div>
+
+              {/* Progress Bar */}
+              <div className="profile-completeness-bar-bg">
+                <div
+                  className={`profile-completeness-bar-fill ${profileCompleteness.isComplete ? 'complete' : ''}`}
+                  style={{ width: `${profileCompleteness.percentage}%` }}
+                />
+              </div>
+
+              {/* Task Milestones Chips */}
+              <div className="profile-completeness-tasks">
+                {profileCompleteness.tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className={`profile-completeness-chip ${task.isDone ? 'done' : ''}`}
+                    onClick={() => {
+                      if (task.id === 'address') setActiveTab('addresses');
+                      else if (task.id === 'payment') setActiveTab('payments');
+                    }}
+                    style={{ cursor: task.id === 'address' || task.id === 'payment' ? 'pointer' : 'default' }}
+                  >
+                    <span>{task.isDone ? '✓' : '○'}</span>
+                    <span>{task.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Avatar Studio Box */}
             <div className="profile-avatar-studio-box">
               <div className="profile-studio-preview-col">
@@ -956,7 +1292,7 @@ export default function ProfilePage() {
         )}
 
         {/* ============================================================
-            TAB 2: ADDRESS BOOK
+            TAB 2: ADDRESS BOOK (WITH CASCADING LOCATIONS)
             ============================================================ */}
         {activeTab === 'addresses' && (
           <div className="profile-tab-content-pane">
@@ -1067,7 +1403,90 @@ export default function ProfilePage() {
         )}
 
         {/* ============================================================
-            TAB 3: SECURITY & PASSWORD CHANGE (SECURITY HUB)
+            TAB 3: PAYMENT METHODS & BANK ACCOUNTS HUB
+            ============================================================ */}
+        {activeTab === 'payments' && (
+          <div className="profile-tab-content-pane">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a' }}>
+                  💳 Tài Khoản Ngân Hàng & Thẻ Thanh Toán ({paymentMethods.length})
+                </h3>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+                  Liên kết an toàn để thanh toán 1-chạm hoặc nhận tiền hoàn khi có yêu cầu trả hàng.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-primary"
+                style={{ fontSize: '13px', padding: '9px 18px', fontWeight: 700, borderRadius: '10px' }}
+                onClick={() => setShowAddPaymentModal(true)}
+              >
+                + Thêm Thẻ / Tài Khoản Mới
+              </button>
+            </div>
+
+            {/* Payment Methods Grid */}
+            <div className="profile-payment-grid">
+              {paymentMethods.map((pm) => (
+                <div
+                  key={pm.id}
+                  className={`profile-payment-card ${pm.isDefault ? 'is-default' : ''}`}
+                >
+                  <div>
+                    <div className="profile-payment-card-banner">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '20px' }}>{pm.icon || '💳'}</span>
+                        <strong style={{ fontSize: '15px', color: '#0f172a' }}>
+                          {pm.provider || pm.bankName || pm.cardBrand}
+                        </strong>
+                      </div>
+                      <div className="profile-payment-card-chip">CHIP</div>
+                    </div>
+
+                    <div className="profile-payment-card-number">
+                      {pm.accountNumber || pm.cardNumber || pm.phone}
+                    </div>
+
+                    <div style={{ fontSize: '12.5px', color: '#475569', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {pm.accountName || pm.cardHolder}
+                    </div>
+                  </div>
+
+                  <div className="profile-payment-card-footer">
+                    <div>
+                      {pm.isDefault ? (
+                        <span className="profile-address-default-badge">✓ MẶC ĐỊNH</span>
+                      ) : (
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-secondary"
+                          style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '6px' }}
+                          onClick={() => handleSetDefaultPayment(pm.id)}
+                        >
+                          Đặt làm mặc định
+                        </button>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '14px', cursor: 'pointer', padding: '4px' }}
+                      onClick={() => handleDeletePayment(pm.id)}
+                      title="Xóa phương thức thanh toán"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================
+            TAB 4: SECURITY & PASSWORD CHANGE (SECURITY HUB)
             ============================================================ */}
         {activeTab === 'security' && (
           <div className="profile-tab-content-pane">
@@ -1363,7 +1782,123 @@ export default function ProfilePage() {
         )}
 
         {/* ============================================================
-            TAB 4: VOUCHER WALLET
+            TAB 5: SETTINGS & PRIVACY
+            ============================================================ */}
+        {activeTab === 'settings' && (
+          <div className="profile-tab-content-pane">
+            <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a' }}>
+              ⚙️ Cài Đặt Thông Báo & Quyền Riêng Tư
+            </h3>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 24px' }}>
+              Tùy chỉnh trải nghiệm nhận tin và bảo mật hiển thị thông tin khi mua sắm tại Mini Shopee.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Setting 1: Order Web Notifications */}
+              <div className="profile-setting-row">
+                <div>
+                  <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'block', marginBottom: '2px' }}>
+                    🔔 Thông báo đơn hàng trực tiếp trên Web
+                  </strong>
+                  <span style={{ fontSize: '12.5px', color: '#64748b' }}>
+                    Nhận thông báo nổi ngay khi người bán chuẩn bị hàng và giao cho Shipper.
+                  </span>
+                </div>
+                <label className="profile-switch-toggle">
+                  <input
+                    type="checkbox"
+                    checked={settings.notifyOrderWeb}
+                    onChange={(e) => handleUpdateSetting('notifyOrderWeb', e.target.checked)}
+                  />
+                  <span className="profile-switch-slider" />
+                </label>
+              </div>
+
+              {/* Setting 2: Email Updates */}
+              <div className="profile-setting-row">
+                <div>
+                  <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'block', marginBottom: '2px' }}>
+                    ✉️ Cập nhật hóa đơn và đơn hàng qua Email
+                  </strong>
+                  <span style={{ fontSize: '12.5px', color: '#64748b' }}>
+                    Gửi hóa đơn điện tử VAT và mã vận đơn chi tiết vào hòm thư cá nhân.
+                  </span>
+                </div>
+                <label className="profile-switch-toggle">
+                  <input
+                    type="checkbox"
+                    checked={settings.notifyOrderEmail}
+                    onChange={(e) => handleUpdateSetting('notifyOrderEmail', e.target.checked)}
+                  />
+                  <span className="profile-switch-slider" />
+                </label>
+              </div>
+
+              {/* Setting 3: SMS Delivery */}
+              <div className="profile-setting-row">
+                <div>
+                  <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'block', marginBottom: '2px' }}>
+                    📱 Tin nhắn SMS khi Shipper đến giao
+                  </strong>
+                  <span style={{ fontSize: '12.5px', color: '#64748b' }}>
+                    Nhận tin nhắn kèm số điện thoại tài xế SPX khi đơn bắt đầu phát.
+                  </span>
+                </div>
+                <label className="profile-switch-toggle">
+                  <input
+                    type="checkbox"
+                    checked={settings.notifyDeliverySMS}
+                    onChange={(e) => handleUpdateSetting('notifyDeliverySMS', e.target.checked)}
+                  />
+                  <span className="profile-switch-slider" />
+                </label>
+              </div>
+
+              {/* Setting 4: Daily Checkin Reminder */}
+              <div className="profile-setting-row">
+                <div>
+                  <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'block', marginBottom: '2px' }}>
+                    🪙 Nhắc nhở điểm danh nhận Mini Xu mỗi ngày
+                  </strong>
+                  <span style={{ fontSize: '12.5px', color: '#64748b' }}>
+                    Giữ vững chuỗi streak 7 ngày để không bỏ lỡ phần quà giá trị nhất.
+                  </span>
+                </div>
+                <label className="profile-switch-toggle">
+                  <input
+                    type="checkbox"
+                    checked={settings.notifyDailyCheckin}
+                    onChange={(e) => handleUpdateSetting('notifyDailyCheckin', e.target.checked)}
+                  />
+                  <span className="profile-switch-slider" />
+                </label>
+              </div>
+
+              {/* Setting 5: Anonymous Review */}
+              <div className="profile-setting-row" style={{ borderLeft: '4px solid #2563eb' }}>
+                <div>
+                  <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'block', marginBottom: '2px' }}>
+                    🕵️ Ẩn danh họ tên khi viết đánh giá sản phẩm
+                  </strong>
+                  <span style={{ fontSize: '12.5px', color: '#64748b' }}>
+                    Bảo vệ sự riêng tư: Tên của bạn sẽ hiển thị dạng viết tắt (ví dụ: <code style={{ color: '#2563eb' }}>n***a</code>) trên trang chi tiết sản phẩm.
+                  </span>
+                </div>
+                <label className="profile-switch-toggle">
+                  <input
+                    type="checkbox"
+                    checked={settings.anonymousReview}
+                    onChange={(e) => handleUpdateSetting('anonymousReview', e.target.checked)}
+                  />
+                  <span className="profile-switch-slider" />
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================
+            TAB 6: VOUCHER WALLET
             ============================================================ */}
         {activeTab === 'vouchers' && (
           <div className="profile-tab-content-pane">
@@ -1556,7 +2091,7 @@ export default function ProfilePage() {
         )}
 
         {/* ============================================================
-            TAB 5: MINI XU & REWARDS HUB
+            TAB 7: MINI XU & REWARDS HUB
             ============================================================ */}
         {activeTab === 'coins' && (
           <div className="profile-tab-content-pane">
@@ -1859,11 +2394,11 @@ export default function ProfilePage() {
       )}
 
       {/* ============================================================
-          MODAL: ADD NEW ADDRESS
+          MODAL: ADD NEW ADDRESS (CASCADING PROVINCE/DISTRICT/WARD)
           ============================================================ */}
       {showAddAddressModal && (
         <div className="profile-modal-backdrop" onClick={() => setShowAddAddressModal(false)}>
-          <div className="profile-modal-window" onClick={(e) => e.stopPropagation()}>
+          <div className="profile-modal-window" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
             <div className="profile-modal-header">
               <h3 className="profile-modal-title">Thêm Địa Chỉ Giao Hàng Mới</h3>
               <button
@@ -1877,39 +2412,107 @@ export default function ProfilePage() {
 
             <form onSubmit={handleAddAddressSubmit}>
               <div className="profile-modal-body">
+                <div className="profile-grid-2col">
+                  <div className="profile-form-group">
+                    <label className="profile-form-label">Tên Người Nhận <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input
+                      type="text"
+                      required
+                      className="profile-form-input"
+                      placeholder="Ví dụ: Nguyễn Văn A"
+                      value={newAddressForm.name}
+                      onChange={(e) => setNewAddressForm((prev) => ({ ...prev, name: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="profile-form-group">
+                    <label className="profile-form-label">Số Điện Thoại <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input
+                      type="tel"
+                      required
+                      className="profile-form-input"
+                      placeholder="Ví dụ: 0909 123 456"
+                      value={newAddressForm.phone}
+                      onChange={(e) => setNewAddressForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                {/* Cascading 3-col Location Selectors */}
                 <div className="profile-form-group">
-                  <label className="profile-form-label">Tên Người Nhận <span style={{ color: '#ef4444' }}>*</span></label>
+                  <label className="profile-form-label">Khu Vực Hành Chính (Tỉnh / Huyện / Xã) <span style={{ color: '#ef4444' }}>*</span></label>
+                  <div className="profile-location-grid">
+                    {/* Province Selector */}
+                    <div>
+                      <select
+                        className="profile-form-select"
+                        value={newAddressForm.province}
+                        onChange={(e) => {
+                          const provName = e.target.value;
+                          const districts = getDistrictsByProvince(provName);
+                          const firstDist = districts[0]?.name || '';
+                          const wards = getWardsByDistrict(provName, firstDist);
+                          const firstWard = wards[0] || '';
+                          setNewAddressForm((prev) => ({
+                            ...prev,
+                            province: provName,
+                            district: firstDist,
+                            ward: firstWard,
+                          }));
+                        }}
+                      >
+                        {VIETNAM_PROVINCES.map((p) => (
+                          <option key={p.id} value={p.name}>{p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* District Selector */}
+                    <div>
+                      <select
+                        className="profile-form-select"
+                        value={newAddressForm.district}
+                        onChange={(e) => {
+                          const distName = e.target.value;
+                          const wards = getWardsByDistrict(newAddressForm.province, distName);
+                          setNewAddressForm((prev) => ({
+                            ...prev,
+                            district: distName,
+                            ward: wards[0] || '',
+                          }));
+                        }}
+                      >
+                        {getDistrictsByProvince(newAddressForm.province).map((d) => (
+                          <option key={d.id} value={d.name}>{d.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Ward Selector */}
+                    <div>
+                      <select
+                        className="profile-form-select"
+                        value={newAddressForm.ward}
+                        onChange={(e) => setNewAddressForm((prev) => ({ ...prev, ward: e.target.value }))}
+                      >
+                        {getWardsByDistrict(newAddressForm.province, newAddressForm.district).map((w) => (
+                          <option key={w} value={w}>{w}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Street Address */}
+                <div className="profile-form-group">
+                  <label className="profile-form-label">Số Nhà & Tên Đường <span style={{ color: '#ef4444' }}>*</span></label>
                   <input
                     type="text"
                     required
                     className="profile-form-input"
-                    placeholder="Ví dụ: Nguyễn Văn A"
-                    value={newAddressForm.name}
-                    onChange={(e) => setNewAddressForm((prev) => ({ ...prev, name: e.target.value }))}
-                  />
-                </div>
-
-                <div className="profile-form-group">
-                  <label className="profile-form-label">Số Điện Thoại <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input
-                    type="tel"
-                    required
-                    className="profile-form-input"
-                    placeholder="Ví dụ: 0909 123 456"
-                    value={newAddressForm.phone}
-                    onChange={(e) => setNewAddressForm((prev) => ({ ...prev, phone: e.target.value }))}
-                  />
-                </div>
-
-                <div className="profile-form-group">
-                  <label className="profile-form-label">Địa Chỉ Chi Tiết <span style={{ color: '#ef4444' }}>*</span></label>
-                  <textarea
-                    required
-                    rows="3"
-                    className="profile-form-textarea"
-                    placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố"
-                    value={newAddressForm.address}
-                    onChange={(e) => setNewAddressForm((prev) => ({ ...prev, address: e.target.value }))}
+                    placeholder="Ví dụ: Số 45 Lê Lợi hoặc Tòa nhà Landmark 81"
+                    value={newAddressForm.street}
+                    onChange={(e) => setNewAddressForm((prev) => ({ ...prev, street: e.target.value }))}
                   />
                 </div>
 
@@ -1922,6 +2525,7 @@ export default function ProfilePage() {
                   >
                     <option value="Nhà riêng">Nhà riêng</option>
                     <option value="Văn phòng">Văn phòng</option>
+                    <option value="Kho hàng">Kho hàng</option>
                     <option value="Khác">Khác</option>
                   </select>
                 </div>
@@ -1961,7 +2565,7 @@ export default function ProfilePage() {
           ============================================================ */}
       {showEditAddressModal && editingAddress && (
         <div className="profile-modal-backdrop" onClick={() => { setShowEditAddressModal(false); setEditingAddress(null); }}>
-          <div className="profile-modal-window" onClick={(e) => e.stopPropagation()}>
+          <div className="profile-modal-window" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
             <div className="profile-modal-header">
               <h3 className="profile-modal-title">Chỉnh Sửa Địa Chỉ Giao Hàng</h3>
               <button
@@ -1978,26 +2582,28 @@ export default function ProfilePage() {
 
             <form onSubmit={handleEditAddressSubmit}>
               <div className="profile-modal-body">
-                <div className="profile-form-group">
-                  <label className="profile-form-label">Tên Người Nhận <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input
-                    type="text"
-                    required
-                    className="profile-form-input"
-                    value={editAddressForm.name}
-                    onChange={(e) => setEditAddressForm((prev) => ({ ...prev, name: e.target.value }))}
-                  />
-                </div>
+                <div className="profile-grid-2col">
+                  <div className="profile-form-group">
+                    <label className="profile-form-label">Tên Người Nhận <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input
+                      type="text"
+                      required
+                      className="profile-form-input"
+                      value={editAddressForm.name}
+                      onChange={(e) => setEditAddressForm((prev) => ({ ...prev, name: e.target.value }))}
+                    />
+                  </div>
 
-                <div className="profile-form-group">
-                  <label className="profile-form-label">Số Điện Thoại <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input
-                    type="tel"
-                    required
-                    className="profile-form-input"
-                    value={editAddressForm.phone}
-                    onChange={(e) => setEditAddressForm((prev) => ({ ...prev, phone: e.target.value }))}
-                  />
+                  <div className="profile-form-group">
+                    <label className="profile-form-label">Số Điện Thoại <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input
+                      type="tel"
+                      required
+                      className="profile-form-input"
+                      value={editAddressForm.phone}
+                      onChange={(e) => setEditAddressForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    />
+                  </div>
                 </div>
 
                 <div className="profile-form-group">
@@ -2006,8 +2612,8 @@ export default function ProfilePage() {
                     required
                     rows="3"
                     className="profile-form-textarea"
-                    value={editAddressForm.address}
-                    onChange={(e) => setEditAddressForm((prev) => ({ ...prev, address: e.target.value }))}
+                    value={editAddressForm.street}
+                    onChange={(e) => setEditAddressForm((prev) => ({ ...prev, street: e.target.value }))}
                   />
                 </div>
 
@@ -2020,6 +2626,7 @@ export default function ProfilePage() {
                   >
                     <option value="Nhà riêng">Nhà riêng</option>
                     <option value="Văn phòng">Văn phòng</option>
+                    <option value="Kho hàng">Kho hàng</option>
                     <option value="Khác">Khác</option>
                   </select>
                 </div>
@@ -2050,6 +2657,167 @@ export default function ProfilePage() {
                 </button>
                 <button type="submit" className="shopee-btn shopee-btn-primary">
                   Lưu Thay Đổi
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================
+          MODAL: ADD PAYMENT METHOD (BANK / CARD / WALLET)
+          ============================================================ */}
+      {showAddPaymentModal && (
+        <div className="profile-modal-backdrop" onClick={() => setShowAddPaymentModal(false)}>
+          <div className="profile-modal-window" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="profile-modal-header">
+              <h3 className="profile-modal-title">Liên Kết Phương Thức Thanh Toán</h3>
+              <button
+                type="button"
+                className="profile-modal-close-btn"
+                onClick={() => setShowAddPaymentModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddPaymentSubmit}>
+              <div className="profile-modal-body">
+                {/* Method Type Selection */}
+                <div className="profile-form-group">
+                  <label className="profile-form-label">Loại Phương Thức</label>
+                  <div className="profile-gender-group">
+                    {[
+                      { id: 'bank', label: 'Ngân Hàng', icon: '🏛️' },
+                      { id: 'card', label: 'Thẻ Quốc Tế', icon: '💳' },
+                      { id: 'wallet', label: 'Ví Điện Tử', icon: '👛' },
+                    ].map((m) => (
+                      <div
+                        key={m.id}
+                        className={`profile-gender-option ${newPaymentForm.type === m.id ? 'selected' : ''}`}
+                        onClick={() => setNewPaymentForm((prev) => ({ ...prev, type: m.id }))}
+                      >
+                        <span>{m.icon}</span>
+                        <span>{m.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bank / Card Provider Selector */}
+                <div className="profile-form-group">
+                  <label className="profile-form-label">Đơn Vị Cung Cấp</label>
+                  <select
+                    className="profile-form-select"
+                    value={newPaymentForm.provider}
+                    onChange={(e) => setNewPaymentForm((prev) => ({ ...prev, provider: e.target.value }))}
+                  >
+                    {newPaymentForm.type === 'bank' && (
+                      <>
+                        <option value="Vietcombank">Vietcombank (Ngoại Thương)</option>
+                        <option value="MB Bank">MB Bank (Quân Đội)</option>
+                        <option value="Techcombank">Techcombank (Kỹ Thương)</option>
+                        <option value="ACB">ACB (Á Châu)</option>
+                        <option value="VPBank">VPBank (Việt Nam Thịnh Vượng)</option>
+                        <option value="BIDV">BIDV (Đầu Tư & Phát Triển)</option>
+                      </>
+                    )}
+                    {newPaymentForm.type === 'card' && (
+                      <>
+                        <option value="Visa">Visa (Thẻ Tín Dụng / Ghi Nợ)</option>
+                        <option value="Mastercard">Mastercard</option>
+                        <option value="JCB">JCB International</option>
+                      </>
+                    )}
+                    {newPaymentForm.type === 'wallet' && (
+                      <>
+                        <option value="MoMo">Ví MoMo Pay</option>
+                        <option value="ShopeePay">Ví ShopeePay</option>
+                        <option value="ZaloPay">Ví ZaloPay</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+
+                {/* Account / Card / Phone Input */}
+                {newPaymentForm.type !== 'wallet' ? (
+                  <div className="profile-form-group">
+                    <label className="profile-form-label">
+                      {newPaymentForm.type === 'bank' ? 'Số Tài Khoản Ngân Hàng' : 'Số Thẻ (16 chữ số)'} <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="profile-form-input"
+                      placeholder={newPaymentForm.type === 'bank' ? 'Ví dụ: 0071000123456' : 'Ví dụ: 4111 2222 3333 4444'}
+                      value={newPaymentForm.accountNumber}
+                      onChange={(e) => setNewPaymentForm((prev) => ({ ...prev, accountNumber: e.target.value }))}
+                    />
+                  </div>
+                ) : (
+                  <div className="profile-form-group">
+                    <label className="profile-form-label">Số Điện Thoại Ví <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input
+                      type="tel"
+                      required
+                      className="profile-form-input"
+                      placeholder="Ví dụ: 0909 123 456"
+                      value={newPaymentForm.phone}
+                      onChange={(e) => setNewPaymentForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    />
+                  </div>
+                )}
+
+                {/* Account Name */}
+                <div className="profile-form-group">
+                  <label className="profile-form-label">Tên Chủ Tài Khoản / Thẻ <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input
+                    type="text"
+                    required
+                    className="profile-form-input"
+                    placeholder="Ví dụ: NGUYEN VAN A (viết hoa không dấu)"
+                    value={newPaymentForm.accountName}
+                    onChange={(e) => setNewPaymentForm((prev) => ({ ...prev, accountName: e.target.value.toUpperCase() }))}
+                  />
+                </div>
+
+                {/* Card Expiry */}
+                {newPaymentForm.type === 'card' && (
+                  <div className="profile-form-group">
+                    <label className="profile-form-label">Ngày Hết Hạn (MM/YY)</label>
+                    <input
+                      type="text"
+                      className="profile-form-input"
+                      placeholder="Ví dụ: 12/28"
+                      value={newPaymentForm.expiry}
+                      onChange={(e) => setNewPaymentForm((prev) => ({ ...prev, expiry: e.target.value }))}
+                    />
+                  </div>
+                )}
+
+                <div className="profile-form-group" style={{ marginTop: '12px' }}>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13.5px' }}>
+                    <input
+                      type="checkbox"
+                      checked={newPaymentForm.isDefault}
+                      onChange={(e) => setNewPaymentForm((prev) => ({ ...prev, isDefault: e.target.checked }))}
+                      style={{ width: '16px', height: '16px', accentColor: '#2563eb' }}
+                    />
+                    <span style={{ fontWeight: 600, color: '#0f172a' }}>Đặt làm phương thức thanh toán mặc định</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="profile-modal-footer">
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => setShowAddPaymentModal(false)}
+                >
+                  Hủy
+                </button>
+                <button type="submit" className="shopee-btn shopee-btn-primary">
+                  Liên Kết Ngay
                 </button>
               </div>
             </form>
