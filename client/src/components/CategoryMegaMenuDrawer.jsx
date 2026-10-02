@@ -20,6 +20,7 @@ import {
   SportIcon,
   SmartphoneIcon,
   BookOpenIcon,
+  ChevronLeftIcon,
   ChevronRightIcon,
 } from './OrdersIcons';
 import '../styles/category-drawer.css';
@@ -533,7 +534,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             className="category-drawer-scroll-arrow"
             title="Cuộn sang trái"
           >
-            ‹
+            <ChevronLeftIcon size={14} />
           </button>
 
           <div ref={shopsScrollRef} className="category-drawer-mall-pills-row">
@@ -556,7 +557,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             className="category-drawer-scroll-arrow"
             title="Cuộn sang phải"
           >
-            ›
+            <ChevronRightIcon size={14} />
           </button>
         </div>
       </div>

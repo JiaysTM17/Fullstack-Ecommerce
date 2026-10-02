@@ -365,14 +365,27 @@ export default function ShopStorefrontPage() {
           background: var(--bg-page, #f8fafc);
           border-left: 1.5px dashed var(--primary-color, #ea580c);
         }
+        @media (max-width: 640px) {
+          .mall-official-ribbon {
+            padding: 8px 14px;
+          }
+          .shop-header-info-row {
+            padding: 0 16px 20px !important;
+            margin-top: -40px !important;
+          }
+          .shop-avatar-img {
+            width: 80px !important;
+            height: 80px !important;
+          }
+        }
       `}</style>
 
       {/* Breadcrumb Navigation */}
       <nav style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <Link to="/" style={{ color: 'var(--primary-color, #ea580c)', textDecoration: 'none', fontWeight: 600 }}>Trang chủ</Link>
-        <span>›</span>
+        <ChevronRightIcon size={11} color="#94a3b8" />
         <span style={{ color: 'var(--text-muted)' }}>Gian hàng chính hãng</span>
-        <span>›</span>
+        <ChevronRightIcon size={11} color="#94a3b8" />
         <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{shop.name}</span>
       </nav>
 
@@ -449,6 +462,7 @@ export default function ShopStorefrontPage() {
 
         {/* Shop Info Row */}
         <div
+          className="shop-header-info-row"
           style={{
             padding: '0 28px 24px',
             display: 'flex',
@@ -466,6 +480,7 @@ export default function ShopStorefrontPage() {
               <img
                 src={shop.avatar}
                 alt={shop.name}
+                className="shop-avatar-img"
                 style={{
                   width: '110px',
                   height: '110px',

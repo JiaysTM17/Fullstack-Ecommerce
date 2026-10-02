@@ -612,7 +612,7 @@ export default function CartPage() {
                     <TicketIcon size={14} />
                     <span>{appliedDiscountVoucher || appliedShippingVoucher ? "+ Chọn thêm mã còn lại" : "Nhấn để chọn mã giảm giá & Freeship"}</span>
                   </span>
-                  <span style={{ fontSize: "14px", fontWeight: 700 }}>›</span>
+                  <ChevronRightIcon size={14} color="var(--primary-color, #ea580c)" />
                 </button>
               )}
             </div>

@@ -5,7 +5,7 @@ import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { formatCurrency } from "../utils/formatCurrency";
 import { getRecentlyViewed, clearRecentlyViewed } from "../services/recentlyViewedService";
-import { EyeIcon, TrashIcon, CartIcon } from "./OrdersIcons";
+import { EyeIcon, TrashIcon, CartIcon, ChevronLeftIcon, ChevronRightIcon } from "./OrdersIcons";
 
 export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = true, onProductClick }) {
   const [recentItems, setRecentItems] = useState([]);
@@ -204,7 +204,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               e.currentTarget.style.borderColor = "#cbd5e1";
             }}
           >
-            ‹
+            <ChevronLeftIcon size={16} />
           </button>
 
           {/* Right Scroll Navigation Button */}
@@ -232,8 +232,6 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               alignItems: "center",
               justifyContent: "center",
               color: "#1e293b",
-              fontSize: "20px",
-              fontWeight: 800,
               transition: "all 0.2s ease",
             }}
             onMouseOver={(e) => {
@@ -249,7 +247,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               e.currentTarget.style.borderColor = "#cbd5e1";
             }}
           >
-            ›
+            <ChevronRightIcon size={16} />
           </button>
 
           {/* Scrollable Horizontal Carousel Container */}
