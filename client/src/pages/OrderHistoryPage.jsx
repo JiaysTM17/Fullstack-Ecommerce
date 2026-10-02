@@ -739,56 +739,91 @@ export default function OrderHistoryPage() {
           </div>
         )}
 
-        {/* Search and Date Range Filters & Export Bar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
-          {/* Search Order Bar */}
-          <div style={{ position: 'relative' }}>
-            <input
-              type="text"
-              placeholder="🔍 Tìm kiếm đơn hàng theo Mã đơn, Mã vận đơn hoặc Tên sản phẩm..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 16px 10px 38px',
-                fontSize: '13.5px',
-                borderRadius: '8px',
-                border: '1px solid var(--border-medium, #cbd5e1)',
-                background: 'var(--bg-muted, #f8fafc)',
-                color: 'var(--text-primary, #0f172a)',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-              }}
-              onFocus={(e) => { e.target.style.borderColor = 'var(--primary-color, #ea580c)'; e.target.style.background = '#fff'; }}
-              onBlur={(e) => { e.target.style.borderColor = 'var(--border-medium, #cbd5e1)'; e.target.style.background = 'var(--bg-muted, #f8fafc)'; }}
-            />
-            {searchTerm && (
+        {/* Unified Orders Control Hub */}
+        <div className="orders-control-hub">
+          {/* Row 1: Search Box & Export Group */}
+          <div className="orders-search-row">
+            <div className="orders-search-box">
+              <span className="orders-search-icon">🔍</span>
+              <input
+                type="text"
+                placeholder={t('search_orders_placeholder', 'Tìm kiếm đơn hàng theo Mã đơn, Mã vận đơn hoặc Tên sản phẩm...')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="orders-search-input"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  aria-label="Xóa tìm kiếm"
+                  onClick={() => setSearchTerm('')}
+                  className="orders-search-clear"
+                  title="Xóa tìm kiếm"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <div className="orders-export-group">
               <button
                 type="button"
-                aria-label="Xóa tìm kiếm"
-                onClick={() => setSearchTerm('')}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: 'var(--text-muted, #94a3b8)',
-                }}
+                className="shopee-btn shopee-btn-secondary"
+                style={{ fontSize: '12px', padding: '7px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                onClick={handleExportCSV}
+                title="Xuất danh sách đơn hàng sang file CSV (hỗ trợ Excel)"
               >
-                ✕
+                📥 Xuất CSV
               </button>
-            )}
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-secondary"
+                style={{ fontSize: '12px', padding: '7px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                onClick={handlePrintReport}
+                title="In hoặc lưu file PDF báo cáo lịch sử đơn hàng"
+              >
+                🖨 In báo cáo
+              </button>
+            </div>
           </div>
 
-          {/* Date Range Filters & Export Actions Row */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          {/* Row 2: Status Tabs with Modern Badges */}
+          <div className="orders-status-tabs-row">
+            {[
+              { id: 'all', label: t('all_orders', 'Tất cả đơn') },
+              { id: 'pending', label: 'Chờ xác nhận' },
+              { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển') },
+              { id: 'completed', label: t('status_completed', 'Hoàn thành') },
+              { id: 'returning', label: t('status_returning', 'Đổi trả / Hoàn tiền') },
+              { id: 'cancelled', label: t('status_cancelled', 'Đã hủy') },
+            ].map((tab) => {
+              const count = getTabCount(tab.id);
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`shopee-btn ${isActive ? 'shopee-btn-primary' : 'shopee-btn-secondary'}`}
+                  style={{
+                    fontSize: '12.5px',
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    whiteSpace: 'nowrap',
+                    fontWeight: isActive ? 700 : 500,
+                  }}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label} {count > 0 && <span style={{ opacity: isActive ? 0.95 : 0.75, fontWeight: 700 }}>({count})</span>}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Row 3: Compact Date Range Filter Chips & Results Count */}
+          <div className="orders-filter-chips-row">
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary, #64748b)', marginRight: '4px' }}>
-                📅 Thời gian:
+              <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary, #64748b)', marginRight: '4px' }}>
+                📅 Lọc theo thời gian:
               </span>
               {[
                 { id: 'all', label: 'Tất cả' },
@@ -799,12 +834,17 @@ export default function OrderHistoryPage() {
                 <button
                   key={dr.id}
                   type="button"
-                  className={`shopee-btn ${dateRange === dr.id ? 'shopee-btn-primary' : 'shopee-btn-secondary'}`}
                   style={{
-                    fontSize: '12px',
-                    padding: '5px 12px',
-                    borderRadius: '16px',
+                    fontSize: '11.5px',
+                    padding: '3px 10px',
+                    borderRadius: '12px',
+                    border: '1px solid',
+                    borderColor: dateRange === dr.id ? 'var(--primary-color, #ea580c)' : 'var(--border-medium, #cbd5e1)',
+                    background: dateRange === dr.id ? 'var(--primary-color, #ea580c)' : 'var(--bg-card, #ffffff)',
+                    color: dateRange === dr.id ? '#ffffff' : 'var(--text-secondary, #475569)',
                     fontWeight: dateRange === dr.id ? 700 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
                   }}
                   onClick={() => setDateRange(dr.id)}
                 >
@@ -813,52 +853,10 @@ export default function OrderHistoryPage() {
               ))}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                type="button"
-                className="shopee-btn shopee-btn-secondary"
-                style={{ fontSize: '12px', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                onClick={handleExportCSV}
-                title="Xuất danh sách đơn hàng sang file CSV (hỗ trợ Excel)"
-              >
-                📥 Xuất CSV
-              </button>
-              <button
-                type="button"
-                className="shopee-btn shopee-btn-secondary"
-                style={{ fontSize: '12px', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                onClick={handlePrintReport}
-                title="In hoặc lưu file PDF báo cáo lịch sử đơn hàng"
-              >
-                🖨 In báo cáo
-              </button>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)' }}>
+              Đang hiển thị <strong>{filteredOrders.length}</strong> đơn hàng
             </div>
           </div>
-        </div>
-
-        {/* Status Tabs with Dynamic Badges */}
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-medium, #e0e0e0)', paddingBottom: '14px', marginBottom: '22px', overflowX: 'auto' }}>
-          {[
-            { id: 'all', label: t('all_orders', 'Tất cả đơn') },
-            { id: 'pending', label: 'Chờ xác nhận' },
-            { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển') },
-            { id: 'completed', label: t('status_completed', 'Hoàn thành') },
-            { id: 'returning', label: t('status_returning', 'Đổi trả / Hoàn tiền') },
-            { id: 'cancelled', label: t('status_cancelled', 'Đã hủy') },
-          ].map((tab) => {
-            const count = getTabCount(tab.id);
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                className={`shopee-btn ${activeTab === tab.id ? 'shopee-btn-primary' : 'shopee-btn-secondary'}`}
-                style={{ fontSize: '13px', padding: '7px 16px', borderRadius: '20px', whiteSpace: 'nowrap' }}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label} {count > 0 && `(${count})`}
-              </button>
-            );
-          })}
         </div>
 
         {/* Orders List */}
@@ -918,39 +916,42 @@ export default function OrderHistoryPage() {
                     </div>
                   </div>
 
-                  {/* Tracking Stepper Progress (when active) */}
+                  {/* Tracking Stepper Progress (when active) with Delivery Wire */}
                   {ord.stepIndex > 0 && ord.status !== 'cancelled' && (
-                    <div style={{ background: 'var(--bg-muted, #f8fafc)', borderBottom: '1px solid var(--border-light, #eee)', padding: '14px 20px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+                    <div className="order-stepper-container">
+                      <div className="order-stepper-track-wrap">
+                        {/* Base Wire / Sợi dây nền */}
+                        <div className="order-stepper-cable-base" />
+                        {/* Active Progress Wire / Sợi dây truyền màu xanh lá */}
+                        <div
+                          className="order-stepper-cable-active"
+                          style={{
+                            width: `${((Math.min(ord.stepIndex || 1, 4) - 1) / 3) * 75}%`,
+                          }}
+                        />
+
                         {[
                           { num: 1, label: t('step_order_placed', 'Đã Đặt Hàng') },
                           { num: 2, label: t('step_confirmed', 'Đã Xác Nhận') },
                           { num: 3, label: t('step_shipping', 'Đang Vận Chuyển') },
                           { num: 4, label: t('step_delivered', 'Đã Giao Hàng') },
-                        ].map((step, idx) => (
-                          <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
+                        ].map((step, idx) => {
+                          const isCompleted = (ord.stepIndex || 1) >= step.num;
+                          const isActive = (ord.stepIndex || 1) === step.num && ord.status !== 'completed';
+                          return (
                             <div
-                              style={{
-                                width: '28px',
-                                height: '28px',
-                                borderRadius: '50%',
-                                background: ord.stepIndex >= step.num ? 'var(--color-success, #10b981)' : 'var(--border-dark, #cbd5e1)',
-                                color: '#fff',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '12px',
-                                fontWeight: 700,
-                                marginBottom: '6px',
-                              }}
+                              key={idx}
+                              className={`order-stepper-node ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
                             >
-                              {ord.stepIndex >= step.num ? '✓' : step.num}
+                              <div className="order-stepper-circle">
+                                {isCompleted ? '✓' : step.num}
+                              </div>
+                              <span className="order-stepper-label">
+                                {step.label}
+                              </span>
                             </div>
-                            <span style={{ fontSize: '11.5px', fontWeight: ord.stepIndex >= step.num ? 700 : 500, color: ord.stepIndex >= step.num ? 'var(--text-primary)' : 'var(--text-muted)' }}>
-                              {step.label}
-                            </span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -1004,7 +1005,7 @@ export default function OrderHistoryPage() {
 
                   {/* Tier 3: Dedicated Transparent Fee Breakdown */}
                   <div className="order-card-fees">
-                    <div className="fee-breakdown-table" style={{ minWidth: '280px', maxWidth: '380px', width: '100%' }}>
+                    <div className="fee-breakdown-table" style={{ maxWidth: '360px', width: '100%' }}>
                       <div className="fee-row">
                         <span className="fee-label">Tiền hàng (tạm tính):</span>
                         <span className="fee-value">{formatCurrency(itemsSubtotal)}</span>

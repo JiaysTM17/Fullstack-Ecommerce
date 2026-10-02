@@ -365,7 +365,21 @@ export default function OrderDetailModal({
             </div>
 
             {/* Stepper Progress Bar */}
-            <div className="stepper-track-wrapper">
+            <div className="stepper-track-wrapper" style={{ position: 'relative' }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '17px',
+                  left: '12.5%',
+                  height: '3px',
+                  background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
+                  borderRadius: '999px',
+                  zIndex: 1,
+                  width: `${((Math.min(activeStep || 1, 4) - 1) / 3) * 75}%`,
+                  transition: 'width 0.4s ease',
+                  boxShadow: '0 0 8px rgba(16, 185, 129, 0.5)',
+                }}
+              />
               <div className="stepper-stages">
                 {STEPS.map((s, idx) => {
                   const isPassed = activeStep > s.step;
