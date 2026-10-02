@@ -1,4 +1,5 @@
 import React from 'react';
+import { StoreIcon, ShieldIcon, ReceiptIcon, LockIcon } from './OrdersIcons';
 
 /**
  * Enterprise Legal & Privacy Policy Modal
@@ -23,7 +24,7 @@ export default function LegalModal({
     if (isSeller) {
       if (isTerms) {
         return {
-          icon: '🏪',
+          icon: <StoreIcon size={24} color="#b45309" />,
           title: 'Điều Khoản Dịch Vụ Đối Tác Gian Hàng (Seller Terms)',
           subtitle: 'Quy chuẩn thương mại, đăng bán sản phẩm và quy trình phê duyệt gian hàng',
           badgeText: 'Dành Riêng Cho Người Bán / Chủ Shop',
@@ -33,7 +34,7 @@ export default function LegalModal({
         };
       }
       return {
-        icon: '🛡️',
+        icon: <ShieldIcon size={24} color="#4338ca" />,
         title: 'Chính Sách Bảo Mật & An Ninh Dữ Liệu Gian Hàng',
         subtitle: 'Quy chuẩn bảo vệ dữ liệu khách hàng, mã hóa API và bảo vệ ví doanh thu',
         badgeText: 'An Ninh & Bảo Mật Shop',
@@ -46,7 +47,7 @@ export default function LegalModal({
     // Customer
     if (isTerms) {
       return {
-        icon: '📋',
+        icon: <ReceiptIcon size={24} color="#1d4ed8" />,
         title: 'Điều Khoản Dịch Vụ Khách Hàng (Customer Terms)',
         subtitle: 'Quy chế giao dịch, chính sách bảo vệ người mua và cam kết hàng chính hãng',
         badgeText: 'Dành Riêng Cho Khách Mua Hàng',
@@ -56,7 +57,7 @@ export default function LegalModal({
       };
     }
     return {
-      icon: '🔒',
+      icon: <LockIcon size={24} color="#047857" />,
       title: 'Chính Sách Bảo Mật Dữ Liệu Khách Hàng (Privacy Policy)',
       subtitle: 'Tuân thủ Nghị định 13/2023/NĐ-CP • Bảo mật thông tin cá nhân và thanh toán',
       badgeText: 'Bảo Vệ Quyền Riêng Tư',
@@ -97,7 +98,7 @@ export default function LegalModal({
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '26px' }}>{meta.icon}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{meta.icon}</span>
             <div>
               <h3 style={{ margin: 0, fontSize: '17.5px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                 {meta.title}

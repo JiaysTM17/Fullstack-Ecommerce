@@ -3,6 +3,7 @@ import { useCompare } from '../context/CompareContext';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
+import { CartIcon, TruckIcon } from './OrdersIcons';
 
 export default function ProductCompareModal() {
   const { comparedProducts, removeFromCompare, clearCompare, isModalOpen, setIsModalOpen } = useCompare();
@@ -222,10 +223,11 @@ export default function ProductCompareModal() {
                             <button
                               type="button"
                               className="shopee-btn shopee-btn-primary"
-                              style={{ width: '100%', padding: '8px 12px', fontSize: '12.5px', marginTop: '6px' }}
+                              style={{ width: '100%', padding: '8px 12px', fontSize: '12.5px', marginTop: '6px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                               onClick={() => addToCart(p, 1)}
                             >
-                              🛒 Thêm vào giỏ
+                              <CartIcon size={14} />
+                              <span>Thêm vào giỏ</span>
                             </button>
                           </div>
                         </td>
@@ -300,8 +302,8 @@ export default function ProductCompareModal() {
                     {comparedProducts.map((p) => (
                       <td key={p._id || p.id} style={{ padding: '12px 14px' }}>
                         <span style={{ color: '#16a34a', fontWeight: 700 }}>✓ Còn {p.stock || 50} sản phẩm</span>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                          🚀 Giao nhanh SPX 24h
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <TruckIcon size={13} color="var(--primary-color)" /> Giao nhanh SPX 24h
                         </div>
                       </td>
                     ))}

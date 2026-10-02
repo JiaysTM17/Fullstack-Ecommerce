@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '../context/ToastContext';
+import {
+  LockIcon,
+  MailIcon,
+  ShieldIcon,
+  EyeIcon,
+  EyeOffIcon,
+  SparklesIcon,
+  KeyIcon,
+} from './OrdersIcons';
 
 /**
  * Enterprise Redesigned Forgot Password Modal
@@ -391,7 +400,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               boxShadow: '0 8px 24px -6px rgba(37, 99, 235, 0.2)',
             }}
           >
-            {step === 1 ? '🔐' : step === 2 ? '📬' : '🛡️'}
+            {step === 1 ? <KeyIcon size={24} color="#2563eb" /> : step === 2 ? <MailIcon size={24} color="#10b981" /> : <ShieldIcon size={24} color="#6366f1" />}
           </div>
 
           <h3 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a', letterSpacing: '-0.3px' }}>
@@ -611,7 +620,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                           transition: 'background 0.15s',
                         }}
                       >
-                        <span>📬</span>
+                        <MailIcon size={14} color="#64748b" />
                         <span>
                           <span style={{ fontWeight: 600, color: '#0f172a' }}>{item.prefix}</span>
                           <span style={{ color: '#2563eb', fontWeight: 700 }}>{item.domain}</span>
@@ -680,7 +689,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   flexShrink: 0,
                 }}
               >
-                📩
+                <MailIcon size={20} color="#2563eb" />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '11px', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -896,7 +905,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   }}
                   title="Nhấn để xem mã OTP trong môi trường Test"
                 >
-                  <span>🧪</span>
+                  <SparklesIcon size={14} color="#0284c7" />
                   <span>Môi trường thử nghiệm: <strong>Xem mã OTP 2FA</strong></span>
                 </div>
               </div>
@@ -913,7 +922,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 Mật khẩu mới của bạn *
               </label>
               <div className="shopee-form-input-wrap">
-                <span className="shopee-input-lead-icon">🔒</span>
+                <span className="shopee-input-lead-icon"><LockIcon size={14} /></span>
                 <input
                   type={showNewPassword ? 'text' : 'password'}
                   className="shopee-form-input"
@@ -932,7 +941,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   onClick={() => setShowNewPassword(!showNewPassword)}
                   tabIndex={-1}
                 >
-                  {showNewPassword ? '👁️' : '👁️‍🗨️'}
+                  {showNewPassword ? <EyeOffIcon size={14} /> : <EyeIcon size={14} />}
                 </button>
               </div>
             </div>
@@ -1063,7 +1072,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 Xác nhận lại mật khẩu mới *
               </label>
               <div className="shopee-form-input-wrap">
-                <span className="shopee-input-lead-icon">🔐</span>
+                <span className="shopee-input-lead-icon"><KeyIcon size={14} /></span>
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   className="shopee-form-input"
@@ -1081,7 +1090,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   tabIndex={-1}
                 >
-                  {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                  {showConfirmPassword ? <EyeOffIcon size={14} /> : <EyeIcon size={14} />}
                 </button>
               </div>
             </div>

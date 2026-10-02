@@ -19,6 +19,7 @@ import {
   CheckIcon,
   ReturnIcon,
   StarIcon,
+  SparklesIcon,
 } from './OrdersIcons';
 
 // Safe date parsing supporting multiple formats: ISO, DD/MM/YYYY, HH:mm DD/MM/YYYY
@@ -1258,7 +1259,7 @@ export default function OrderDetailModal({
                       gap: '4px',
                     }}
                   >
-                    <span>🎉</span>
+                    <SparklesIcon size={13} color="#15803d" />
                     <span>Tiết kiệm được {formatCurrency(totalSavings)} cho đơn hàng này</span>
                   </div>
                 )}

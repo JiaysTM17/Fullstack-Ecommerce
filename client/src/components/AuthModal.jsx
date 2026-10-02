@@ -5,6 +5,18 @@ import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuthModal } from '../context/AuthModalContext';
 import ForgotPasswordModal from './ForgotPasswordModal';
+import {
+  KeyIcon,
+  CartIcon,
+  StoreIcon,
+  ShieldIcon,
+  QrCodeIcon,
+  LockIcon,
+  EyeIcon,
+  EyeOffIcon,
+  GlobeIcon,
+  BoltIcon,
+} from './OrdersIcons';
 import '../styles/auth.css';
 
 export default function AuthModal() {
@@ -183,8 +195,10 @@ export default function AuthModal() {
               setAuthTab('login');
               setError('');
             }}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
           >
-            🔑 Đăng Nhập
+            <KeyIcon size={14} />
+            <span>Đăng Nhập</span>
           </button>
           <button
             type="button"
@@ -193,8 +207,10 @@ export default function AuthModal() {
               setAuthTab('register');
               setError('');
             }}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
           >
-            ✨ Đăng Ký Tài Khoản
+            <BoltIcon size={14} />
+            <span>Đăng Ký Tài Khoản</span>
           </button>
         </div>
 
@@ -204,7 +220,7 @@ export default function AuthModal() {
             className={`shopee-role-card ${activeRole === 'customer' ? 'active' : ''}`}
             onClick={() => setActiveRole('customer')}
           >
-            <span className="shopee-role-card-icon">🛒</span>
+            <span className="shopee-role-card-icon"><CartIcon size={20} /></span>
             <span className="shopee-role-card-title">Người Mua</span>
             <span className="shopee-role-card-sub">Mua sắm & Săn xu</span>
           </div>
@@ -213,7 +229,7 @@ export default function AuthModal() {
             className={`shopee-role-card ${activeRole === 'seller' ? 'active' : ''}`}
             onClick={() => setActiveRole('seller')}
           >
-            <span className="shopee-role-card-icon">🏪</span>
+            <span className="shopee-role-card-icon"><StoreIcon size={20} /></span>
             <span className="shopee-role-card-title">Chủ Shop</span>
             <span className="shopee-role-card-sub">Quản lý gian hàng</span>
           </div>
@@ -222,7 +238,7 @@ export default function AuthModal() {
             className={`shopee-role-card ${activeRole === 'admin' ? 'active' : ''}`}
             onClick={() => setActiveRole('admin')}
           >
-            <span className="shopee-role-card-icon">🛡️</span>
+            <span className="shopee-role-card-icon"><ShieldIcon size={20} /></span>
             <span className="shopee-role-card-title">Quản Trị</span>
             <span className="shopee-role-card-sub">Tổng vận hành</span>
           </div>
@@ -336,8 +352,13 @@ export default function AuthModal() {
               <span
                 className="shopee-auth-method-link"
                 onClick={() => setAuthMethod(authMethod === 'password' ? 'qr' : 'password')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                {authMethod === 'password' ? '📱 Quét mã QR đăng nhập' : '🔒 Đăng nhập bằng mật khẩu'}
+                {authMethod === 'password' ? (
+                  <><QrCodeIcon size={14} /> Quét mã QR đăng nhập</>
+                ) : (
+                  <><LockIcon size={14} /> Đăng nhập bằng mật khẩu</>
+                )}
               </span>
             </div>
 
@@ -362,7 +383,7 @@ export default function AuthModal() {
                     Email / Tên đăng nhập *
                   </label>
                   <div className="shopee-form-input-wrap">
-                    <span className="shopee-input-lead-icon">✉️</span>
+                    <span className="shopee-input-lead-icon"><MailIcon size={14} /></span>
                     <input
                       id="modal-login-email"
                       type="email"
@@ -385,7 +406,7 @@ export default function AuthModal() {
                     Mật khẩu *
                   </label>
                   <div className="shopee-form-input-wrap">
-                    <span className="shopee-input-lead-icon">🔒</span>
+                    <span className="shopee-input-lead-icon"><LockIcon size={14} /></span>
                     <input
                       id="modal-login-password"
                       type={showPassword ? 'text' : 'password'}
@@ -399,7 +420,7 @@ export default function AuthModal() {
                       className="shopee-password-toggle"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? '🙈' : '👁️'}
+                      {showPassword ? <EyeOffIcon size={14} /> : <EyeIcon size={14} />}
                     </button>
                   </div>
                 </div>
@@ -454,22 +475,25 @@ export default function AuthModal() {
                 type="button"
                 className="shopee-social-btn"
                 onClick={() => handleQuickDemoLogin('customer')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span>🌐</span> Google
+                <GlobeIcon size={14} /> Google
               </button>
               <button
                 type="button"
                 className="shopee-social-btn"
                 onClick={() => handleQuickDemoLogin('customer')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span>📘</span> Facebook
+                <GlobeIcon size={14} /> Facebook
               </button>
               <button
                 type="button"
                 className="shopee-social-btn"
                 onClick={() => handleQuickDemoLogin('customer')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span>🍏</span> Apple
+                <GlobeIcon size={14} /> Apple
               </button>
             </div>
           </div>
@@ -551,7 +575,7 @@ export default function AuthModal() {
                   className="shopee-password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  {showPassword ? <EyeOffIcon size={14} /> : <EyeIcon size={14} />}
                 </button>
               </div>
 

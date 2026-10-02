@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { KeyIcon, MailIcon, PhoneIcon } from './OrdersIcons';
 
 /**
  * Enterprise 2FA OTP Verification Modal
@@ -203,12 +204,11 @@ export default function OtpVerificationModal({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '30px',
             margin: '0 auto 16px',
             boxShadow: '0 8px 20px -6px rgba(37, 99, 235, 0.25)',
           }}
         >
-          🔐
+          <KeyIcon size={28} color="#2563eb" />
         </div>
 
         {/* Title & Email Destination Notice */}
@@ -236,9 +236,13 @@ export default function OtpVerificationModal({
               marginBottom: '16px',
             }}
           >
-            <span>📧</span>
+            <MailIcon size={14} color="#1d4ed8" />
             <span>{displayEmail}</span>
-            {displayPhone && <span style={{ color: '#93c5fd' }}>• 📞 {displayPhone}</span>}
+            {displayPhone && (
+              <span style={{ color: '#93c5fd', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                • <PhoneIcon size={12} color="#1d4ed8" /> {displayPhone}
+              </span>
+            )}
           </div>
         )}
 
@@ -438,7 +442,7 @@ export default function OtpVerificationModal({
               }}
               title="Nhấn để xem mã nếu chưa kết nối hòm thư thực tế"
             >
-              <span>📨</span>
+              <MailIcon size={13} color="#64748b" />
               <span>Xem thông điệp mã hộp thư (Môi trường Test)</span>
             </span>
           </div>

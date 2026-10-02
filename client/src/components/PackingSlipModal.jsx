@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
+import { StoreIcon, MapPinIcon, PackageIcon, ChatIcon, PrinterIcon } from './OrdersIcons';
 
 export default function PackingSlipModal({ order, shop, onClose }) {
   if (!order) return null;
@@ -57,8 +58,8 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         {/* Thông tin Shop & Khách hàng */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px', fontSize: '13px' }}>
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', marginBottom: '6px' }}>
-              🏪 ĐƠN VỊ XUẤT HÀNG (SHOP)
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <StoreIcon size={13} color="#ea580c" /> ĐƠN VỊ XUẤT HÀNG (SHOP)
             </div>
             <div style={{ fontWeight: 800, fontSize: '14px', color: '#0f172a' }}>{shopName}</div>
             <div style={{ color: '#475569', marginTop: '2px' }}>Kho: {shopAddress}</div>
@@ -66,8 +67,8 @@ export default function PackingSlipModal({ order, shop, onClose }) {
           </div>
 
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', marginBottom: '6px' }}>
-              📍 NGƯỜI NHẬN HÀNG (KHÁCH)
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <MapPinIcon size={13} color="#2563eb" /> NGƯỜI NHẬN HÀNG (KHÁCH)
             </div>
             <div style={{ fontWeight: 800, fontSize: '14px', color: '#0f172a' }}>
               {order.customerName || order.customer?.fullName || 'Khách Hàng Mini Shopee'}
@@ -84,8 +85,8 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         {/* Bảng Danh Sách Sản Phẩm Cần Nhặt & Kiểm Hàng */}
         <div style={{ marginBottom: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <strong style={{ fontSize: '13.5px', color: '#0f172a' }}>
-              📦 DANH SÁCH MẶT HÀNG KIỂM TRA ({order.items?.length || 1} sản phẩm):
+            <strong style={{ fontSize: '13.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <PackageIcon size={15} color="#ea580c" /> DANH SÁCH MẶT HÀNG KIỂM TRA ({order.items?.length || 1} sản phẩm):
             </strong>
             <span style={{ fontSize: '11.5px', color: '#16a34a', fontWeight: 700 }}>
               ✓ Tích chọn kiểm hàng trước khi dán tem
@@ -137,8 +138,8 @@ export default function PackingSlipModal({ order, shop, onClose }) {
               Mã vận đơn bưu cục: <strong style={{ color: '#ea580c' }}>{trackingCode}</strong>
             </div>
             {order.note && (
-              <div style={{ fontSize: '12px', color: '#d97706', marginTop: '6px', background: '#fef3c7', padding: '4px 8px', borderRadius: '4px', border: '1px solid #fde68a' }}>
-                💬 <strong>Ghi chú của khách:</strong> {order.note}
+              <div style={{ fontSize: '12px', color: '#d97706', marginTop: '6px', background: '#fef3c7', padding: '4px 8px', borderRadius: '4px', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <ChatIcon size={13} color="#d97706" /> <span><strong>Ghi chú của khách:</strong> {order.note}</span>
               </div>
             )}
           </div>
@@ -194,7 +195,7 @@ export default function PackingSlipModal({ order, shop, onClose }) {
             onClick={handlePrint}
             style={{ padding: '8px 22px', fontSize: '13px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <span>🖨️</span>
+            <PrinterIcon size={14} />
             <span>In Phiếu Đóng Gói (A4)</span>
           </button>
         </div>

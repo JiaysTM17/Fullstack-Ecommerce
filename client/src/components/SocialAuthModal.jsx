@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { StoreIcon, CartIcon, ShieldIcon, LockIcon } from './OrdersIcons';
 
 /**
  * Enterprise Social OAuth SSO Modal (Next-Gen UI/UX Edition)
@@ -54,7 +55,7 @@ export default function SocialAuthModal({
 
   const currentRole = role === 'seller' ? 'seller' : 'customer';
   const roleLabel = currentRole === 'seller' ? 'Chủ Gian Hàng (Người Bán)' : 'Người Mua Hàng';
-  const roleIcon = currentRole === 'seller' ? '🏪' : '🛒';
+  const roleIcon = currentRole === 'seller' ? <StoreIcon size={14} color="#ea580c" /> : <CartIcon size={14} color="#16a34a" />;
 
   const computedEmail =
     provider === 'apple' && appleEmailOption === 'hide'
@@ -344,7 +345,9 @@ export default function SocialAuthModal({
               gap: '10px',
             }}
           >
-            <span style={{ fontSize: '18px', lineHeight: 1 }}>🛡️</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ShieldIcon size={18} color="#0284c7" />
+            </span>
             <div>
               Google sẽ chia sẻ tên, địa chỉ email và ảnh hồ sơ cá nhân của bạn với Fullstack E-Commerce để thiết lập phiên đăng nhập an toàn.
             </div>
@@ -953,8 +956,8 @@ export default function SocialAuthModal({
         </button>
 
         {/* Apple Privacy Notice */}
-        <div style={{ marginTop: '18px', fontSize: '11px', color: '#636366', textAlign: 'center', lineHeight: 1.4 }}>
-          🔒 Tính năng Bảo mật của Apple. Mini Shopee chỉ nhận được mã ủy quyền từ Apple ID để cấp quyền truy cập.
+        <div style={{ marginTop: '18px', fontSize: '11px', color: '#636366', textAlign: 'center', lineHeight: 1.4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+          <LockIcon size={12} color="#636366" /> <span>Tính năng Bảo mật của Apple. Mini Shopee chỉ nhận được mã ủy quyền từ Apple ID để cấp quyền truy cập.</span>
         </div>
       </div>
     </div>
