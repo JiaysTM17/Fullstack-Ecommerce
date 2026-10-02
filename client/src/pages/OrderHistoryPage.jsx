@@ -237,6 +237,14 @@ export default function OrderHistoryPage() {
     });
 
     saveOrders(updated);
+    if (selectedDetailOrder && (selectedDetailOrder.orderId === orderId || selectedDetailOrder._id === orderId)) {
+      setSelectedDetailOrder((prev) => ({
+        ...prev,
+        status: 'returning',
+        statusText: 'Đang xử lý đổi trả',
+        returnDetails: { reason, refundMethod, note, refundAmount },
+      }));
+    }
     setSelectedReturnOrder(null);
     showToast('Đã gửi yêu cầu trả hàng / hoàn tiền thành công! Shop sẽ phản hồi trong 24h.', 'success');
   };
@@ -593,7 +601,7 @@ export default function OrderHistoryPage() {
 
   const handleReviewSubmit = (reviewData) => {
     const updated = orders.map((o) => {
-      if (o.orderId === reviewData.orderId) {
+      if (o.orderId === reviewData.orderId || o._id === reviewData.orderId) {
         return {
           ...o,
           reviewed: true,
@@ -603,6 +611,13 @@ export default function OrderHistoryPage() {
       return o;
     });
     saveOrders(updated);
+    if (selectedDetailOrder && (selectedDetailOrder.orderId === reviewData.orderId || selectedDetailOrder._id === reviewData.orderId)) {
+      setSelectedDetailOrder((prev) => ({
+        ...prev,
+        reviewed: true,
+        reviewData,
+      }));
+    }
 
     // Lưu đánh giá vào bộ nhớ sản phẩm để hiển thị ngay trên PDP
     try {

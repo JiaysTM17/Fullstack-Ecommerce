@@ -20,7 +20,7 @@ const STAR_LABELS = {
   1: 'Rất tệ',
 };
 
-export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
+export default function ProductReviewModal({ order, onClose, onSubmitReview, onSubmit }) {
   if (!order) return null;
 
   const items = Array.isArray(order.items) && order.items.length > 0 ? order.items : [
@@ -53,12 +53,28 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
   const handleAddPhoto = (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    const newPhotos = files.map((file, idx) => ({
-      id: `${Date.now()}-${idx}`,
+    setErrorMsg('');
+
+    // Accept both mime-types and file extensions for robust PNG/JPG support
+    const validFiles = files.filter(
+      (f) => f.type.startsWith('image/') || /\.(png|jpe?g|webp|gif)$/i.test(f.name)
+    );
+
+    if (validFiles.length === 0) {
+      setErrorMsg('Vui lòng chọn tệp hình ảnh hợp lệ (PNG, JPG, JPEG, WEBP).');
+      return;
+    }
+
+    const newPhotos = validFiles.map((file, idx) => ({
+      id: `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
       name: file.name,
       url: URL.createObjectURL(file),
+      file,
     }));
+
     setReviewPhotos((prev) => [...prev, ...newPhotos].slice(0, 5));
+    // Clear input value so same file can be re-selected if removed
+    e.target.value = '';
   };
 
   const handleRemovePhoto = (id) => {
@@ -67,26 +83,29 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (rating < 1) {
-      setErrorMsg('Vui lòng chọn số sao đánh giá sản phẩm.');
-      return;
-    }
+    setErrorMsg('');
 
-    if (comment.trim() && comment.trim().length < 5) {
-      setErrorMsg('Nhận xét vui lòng nhập tối thiểu 5 ký tự.');
+    if (!rating || rating < 1) {
+      setErrorMsg('Vui lòng chọn số sao để đánh giá sản phẩm.');
       return;
     }
 
     setIsSubmitting(true);
+
+    const fallbackComment =
+      selectedTags.length > 0
+        ? `Sản phẩm rất tốt: ${selectedTags.join(', ')}.`
+        : 'Sản phẩm rất tốt, đóng gói cẩn thận, giao hàng nhanh!';
+
     const reviewData = {
-      orderId: order.orderId,
+      orderId: order.orderId || order._id || order.id,
       productId: currentItem.productId || currentItem.id || 'prod_default',
       productName: currentItem.name || currentItem.title,
       productImage: currentItem.image,
-      shopName: order.shopName,
+      shopName: order.shopName || 'Shopee Mall',
       rating,
       tags: selectedTags,
-      comment: comment.trim() || 'Sản phẩm rất tốt, giao hàng nhanh, đúng như mô tả!',
+      comment: comment.trim() || fallbackComment,
       photos: reviewPhotos.map((p) => p.name),
       isAnonymous,
       createdAt: new Date().toISOString(),
@@ -94,10 +113,11 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
       coinsRewarded: 200,
     };
 
-    setTimeout(() => {
-      onSubmitReview(reviewData);
-      setIsSubmitting(false);
-    }, 280);
+    const submitCallback = onSubmitReview || onSubmit;
+    if (typeof submitCallback === 'function') {
+      submitCallback(reviewData);
+    }
+    setIsSubmitting(false);
   };
 
   return (
@@ -106,13 +126,13 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1100,
-        background: 'rgba(15, 23, 42, 0.65)',
+        zIndex: 1250, // Higher than OrderDetailModal (1100) so it's always accessible
+        background: 'rgba(15, 23, 42, 0.68)',
         backdropFilter: 'blur(6px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '32px 16px',
+        padding: '20px 14px',
         overflowY: 'auto',
         boxSizing: 'border-box',
         animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
@@ -126,10 +146,10 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
         style={{
           background: '#ffffff',
           color: '#0f172a',
-          borderRadius: '16px',
+          borderRadius: '14px',
           width: '100%',
-          maxWidth: '580px',
-          maxHeight: '86vh',
+          maxWidth: '540px',
+          maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
@@ -143,44 +163,47 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
         {/* Header */}
         <div
           style={{
-            padding: '18px 24px',
-            borderBottom: '1px solid var(--border-light, #f1f5f9)',
+            padding: '14px 20px',
+            borderBottom: '1px solid #f1f5f9',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: 'var(--bg-muted, #f8fafc)',
+            background: '#f8fafc',
             flexShrink: 0,
           }}
         >
-          <div>
-            <h3
-              style={{
-                margin: 0,
-                fontSize: '18px',
-                fontWeight: 800,
-                color: '#0f172a',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <StarIcon size={20} color="#f59e0b" filled /> Đánh Giá Sản Phẩm
-            </h3>
-            <span style={{ fontSize: '12.5px', color: '#64748b' }}>
-              Đơn hàng: <strong>#{order.orderId}</strong> · Shop: {order.shopName || 'Shopee Mall'}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <StarIcon size={18} color="#f59e0b" filled />
+            <div>
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '15px',
+                  fontWeight: 800,
+                  color: '#0f172a',
+                  letterSpacing: '-0.2px',
+                }}
+              >
+                Đánh Giá Sản Phẩm
+              </h3>
+              <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+                Đơn hàng: <strong style={{ color: '#0f172a' }}>#{order.orderId || order._id}</strong> · Shop: {order.shopName || 'Shopee Mall'}
+              </div>
+            </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="shopee-modal-close"
+            className="shopee-order-btn-outline"
             style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '20px',
-              cursor: 'pointer',
-              color: '#64748b',
-              lineHeight: 1,
+              width: '28px',
+              height: '28px',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '13px',
+              borderRadius: '6px',
             }}
           >
             ✕
@@ -191,102 +214,83 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
         <form
           onSubmit={handleSubmit}
           style={{
-            padding: '20px 24px',
+            padding: '16px 20px',
             overflowY: 'auto',
             flex: 1,
             boxSizing: 'border-box',
           }}
         >
-          {errorMsg && (
-            <div
-              style={{
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                color: '#b91c1c',
-                padding: '10px 14px',
-                borderRadius: '8px',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                marginBottom: '14px',
-              }}
-            >
-              {errorMsg}
-            </div>
-          )}
-
           {/* Shopee Xu Reward Banner - Royal Blue & Amber Accent */}
           <div
             style={{
-              background: 'linear-gradient(135deg, #eff6ff 0%, #fef3c7 100%)',
+              background: '#eff6ff',
               border: '1px solid #bfdbfe',
-              borderRadius: '12px',
-              padding: '12px 16px',
+              borderRadius: '10px',
+              padding: '10px 14px',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
-              marginBottom: '18px',
+              gap: '10px',
+              marginBottom: '14px',
             }}
           >
             <div
               style={{
-                width: '38px',
-                height: '38px',
+                width: '32px',
+                height: '32px',
                 borderRadius: '50%',
                 background: '#fef08a',
-                border: '2px solid #f59e0b',
+                border: '1.5px solid #f59e0b',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
-                boxShadow: '0 2px 6px rgba(245, 158, 11, 0.3)',
               }}
             >
-              <StarIcon size={20} color="#d97706" filled />
+              <StarIcon size={16} color="#d97706" filled />
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '13.5px', color: '#1e3a8a' }}>
+              <div style={{ fontWeight: 800, fontSize: '13px', color: '#1e3a8a' }}>
                 Thưởng Ngay +200 Shopee Xu Vào Ví!
               </div>
-              <div style={{ fontSize: '12px', color: '#475569', marginTop: '1px' }}>
-                Đánh giá chất lượng giúp cộng đồng người mua và nhận ngay 200 Xu dùng trừ tiền trực tiếp cho đơn hàng tiếp theo.
+              <div style={{ fontSize: '11.5px', color: '#475569', marginTop: '1px' }}>
+                Đánh giá chất lượng giúp cộng đồng người mua và nhận ngay 200 Xu trừ tiền trực tiếp.
               </div>
             </div>
           </div>
 
           {/* Item Selector if multi-item */}
           {items.length > 1 && (
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#475569', marginBottom: '8px', display: 'block' }}>
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>
                 Chọn sản phẩm muốn đánh giá:
               </label>
-              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '6px' }}>
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {items.map((item, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => setSelectedItemIndex(idx)}
                     style={{
-                      border: selectedItemIndex === idx ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                      border: selectedItemIndex === idx ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
                       background: selectedItemIndex === idx ? '#eff6ff' : '#ffffff',
-                      borderRadius: '8px',
-                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      padding: '4px 8px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
+                      gap: '6px',
                       cursor: 'pointer',
-                      fontSize: '12px',
+                      fontSize: '11.5px',
                       fontWeight: selectedItemIndex === idx ? 700 : 500,
                       color: selectedItemIndex === idx ? '#2563eb' : '#475569',
-                      transition: 'all 0.15s ease',
                       flexShrink: 0,
                     }}
                   >
                     <img
                       src={item.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100'}
                       alt={item.name}
-                      style={{ width: '28px', height: '28px', objectFit: 'cover', borderRadius: '4px' }}
+                      style={{ width: '22px', height: '22px', objectFit: 'cover', borderRadius: '4px' }}
                     />
-                    <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {item.name}
                     </span>
                   </button>
@@ -299,11 +303,11 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
           <div
             style={{
               display: 'flex',
-              gap: '12px',
-              padding: '12px',
-              background: 'var(--bg-muted, #f8fafc)',
-              borderRadius: '10px',
-              marginBottom: '18px',
+              gap: '10px',
+              padding: '10px 12px',
+              background: '#f8fafc',
+              borderRadius: '8px',
+              marginBottom: '14px',
               alignItems: 'center',
               border: '1px solid #e2e8f0',
             }}
@@ -311,24 +315,24 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
             <img
               src={currentItem.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200'}
               alt={currentItem.name}
-              style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #cbd5e1', flexShrink: 0 }}
+              style={{ width: '42px', height: '42px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #cbd5e1', flexShrink: 0 }}
             />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {currentItem.name || currentItem.title}
               </div>
-              <div style={{ fontSize: '12.5px', color: '#2563eb', fontWeight: 700, marginTop: '2px' }}>
+              <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 700, marginTop: '2px' }}>
                 {formatCurrency(currentItem.price || 0)} · <span style={{ color: '#64748b', fontWeight: 500 }}>Số lượng: x{currentItem.quantity || 1}</span>
               </div>
             </div>
           </div>
 
           {/* Star Rating Section */}
-          <div style={{ textAlign: 'center', marginBottom: '20px', padding: '12px', background: '#fafaf9', borderRadius: '10px', border: '1px solid #f5f5f4' }}>
-            <div style={{ fontSize: '13.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--text-primary)' }}>
+          <div style={{ textAlign: 'center', marginBottom: '14px', padding: '10px', background: '#fafaf9', borderRadius: '8px', border: '1px solid #f5f5f4' }}>
+            <div style={{ fontSize: '12.5px', fontWeight: 700, marginBottom: '4px', color: '#0f172a' }}>
               Chất Lượng Sản Phẩm
             </div>
-            <div style={{ display: 'inline-flex', gap: '8px', fontSize: '34px', cursor: 'pointer' }}>
+            <div style={{ display: 'inline-flex', gap: '6px', fontSize: '28px', cursor: 'pointer' }}>
               {[1, 2, 3, 4, 5].map((star) => {
                 const isLit = (hoverRating || rating) >= star;
                 return (
@@ -354,17 +358,17 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                 );
               })}
             </div>
-            <div style={{ fontSize: '13px', fontWeight: 800, color: '#d97706', marginTop: '6px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#d97706', marginTop: '4px' }}>
               {STAR_LABELS[hoverRating || rating]}
             </div>
           </div>
 
           {/* Quick Tags Selection */}
-          <div style={{ marginBottom: '18px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '8px', display: 'block' }}>
+          <div style={{ marginBottom: '14px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>
               Tiêu chí nổi bật bạn ấn tượng nhất:
             </label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {QUICK_TAGS.map((tag) => {
                 const active = selectedTags.includes(tag);
                 return (
@@ -373,9 +377,9 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                     type="button"
                     onClick={() => handleToggleTag(tag)}
                     style={{
-                      padding: '6px 12px',
-                      borderRadius: '20px',
-                      fontSize: '12px',
+                      padding: '4px 10px',
+                      borderRadius: '16px',
+                      fontSize: '11.5px',
                       fontWeight: active ? 700 : 500,
                       border: active ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
                       background: active ? '#eff6ff' : '#ffffff',
@@ -391,20 +395,25 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
             </div>
           </div>
 
-          {/* Review Photos Upload */}
-          <div style={{ marginBottom: '18px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px', display: 'block' }}>
-              Hình ảnh thực tế khi nhận hàng (Tùy chọn):
-            </label>
+          {/* Review Photos Upload - Fully supports PNG, JPG, JPEG, WEBP */}
+          <div style={{ marginBottom: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>
+                Hình ảnh thực tế khi nhận hàng (Tùy chọn):
+              </label>
+              <span style={{ fontSize: '11px', color: '#64748b' }}>
+                Hỗ trợ PNG, JPG, WEBP ({reviewPhotos.length}/5)
+              </span>
+            </div>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
               {reviewPhotos.map((photo) => (
                 <div
                   key={photo.id}
                   style={{
                     position: 'relative',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '8px',
+                    width: '54px',
+                    height: '54px',
+                    borderRadius: '6px',
                     overflow: 'hidden',
                     border: '1px solid #cbd5e1',
                   }}
@@ -413,11 +422,12 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                   <button
                     type="button"
                     onClick={() => handleRemovePhoto(photo.id)}
+                    title="Xóa ảnh"
                     style={{
                       position: 'absolute',
                       top: '2px',
                       right: '2px',
-                      background: 'rgba(0,0,0,0.6)',
+                      background: 'rgba(15, 23, 42, 0.75)',
                       color: '#fff',
                       border: 'none',
                       borderRadius: '50%',
@@ -437,10 +447,10 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
               {reviewPhotos.length < 5 && (
                 <label
                   style={{
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '8px',
-                    border: '1px dashed #2563eb',
+                    width: '54px',
+                    height: '54px',
+                    borderRadius: '6px',
+                    border: '1.5px dashed #2563eb',
                     background: '#eff6ff',
                     color: '#2563eb',
                     display: 'flex',
@@ -452,41 +462,46 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                     cursor: 'pointer',
                   }}
                 >
-                  <span>📷</span>
-                  <span>+ Ảnh</span>
-                  <input type="file" multiple accept="image/*" style={{ display: 'none' }} onChange={handleAddPhoto} />
+                  <span style={{ fontSize: '14px' }}>📷</span>
+                  <span style={{ fontSize: '10px' }}>+ Ảnh</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/png,image/jpeg,image/jpg,image/webp,image/*,.png,.jpg,.jpeg,.webp"
+                    style={{ display: 'none' }}
+                    onChange={handleAddPhoto}
+                  />
                 </label>
               )}
             </div>
           </div>
 
           {/* Comment Textarea */}
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '13px', fontWeight: 700, color: '#475569' }}>
+          <div style={{ marginBottom: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>
                 Nhận xét chi tiết:
               </label>
-              <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+              <span style={{ fontSize: '11px', color: '#64748b' }}>
                 {comment.length} ký tự
               </span>
             </div>
             <textarea
-              className="shopee-form-input"
-              rows={3}
+              rows={2}
               value={comment}
               onChange={(e) => {
                 setComment(e.target.value);
                 setErrorMsg('');
               }}
-              placeholder="Chia sẻ trải nghiệm thực tế về chất lượng sản phẩm, độ bền, tốc độ giao hàng SPX để giúp người mua khác nhé..."
+              placeholder="Chia sẻ trải nghiệm thực tế về chất lượng sản phẩm, độ bền, tốc độ giao hàng SPX..."
               style={{
                 width: '100%',
-                padding: '10px 12px',
-                borderRadius: '8px',
+                padding: '8px 10px',
+                borderRadius: '6px',
                 border: '1px solid #cbd5e1',
                 fontFamily: 'inherit',
-                fontSize: '13px',
-                resize: 'vertical',
+                fontSize: '12px',
+                resize: 'none',
                 outline: 'none',
                 boxSizing: 'border-box',
               }}
@@ -494,7 +509,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
           </div>
 
           {/* Anonymous toggle */}
-          <div style={{ marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <input
               type="checkbox"
               id="anonymousReview"
@@ -502,23 +517,42 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
               onChange={(e) => setIsAnonymous(e.target.checked)}
               style={{ cursor: 'pointer', accentColor: '#2563eb' }}
             />
-            <label htmlFor="anonymousReview" style={{ fontSize: '12.5px', color: '#475569', cursor: 'pointer' }}>
+            <label htmlFor="anonymousReview" style={{ fontSize: '11.5px', color: '#475569', cursor: 'pointer' }}>
               Đánh giá ẩn danh (Tên tài khoản sẽ hiển thị dạng n*****a trên trang sản phẩm)
             </label>
           </div>
 
+          {/* Inline Validation Error Banner right above submit button */}
+          {errorMsg && (
+            <div
+              style={{
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                color: '#b91c1c',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                marginBottom: '12px',
+              }}
+            >
+              ⚠️ {errorMsg}
+            </div>
+          )}
+
           {/* Modal Actions */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '14px', borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
             <button
               type="button"
               className="shopee-order-btn-outline"
               onClick={onClose}
               disabled={isSubmitting}
               style={{
-                padding: '7px 18px',
-                fontSize: '12.5px',
-                borderRadius: '8px',
+                padding: '6px 14px',
+                fontSize: '12px',
+                borderRadius: '6px',
                 fontWeight: 600,
+                height: '32px',
               }}
             >
               Hủy Bỏ
@@ -528,17 +562,18 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
               className="shopee-order-btn-primary"
               disabled={isSubmitting}
               style={{
-                padding: '7px 22px',
-                fontSize: '12.5px',
-                borderRadius: '8px',
+                padding: '6px 18px',
+                fontSize: '12px',
+                borderRadius: '6px',
                 fontWeight: 700,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '5px',
+                height: '32px',
               }}
             >
-              <StarIcon size={14} color="#fef08a" filled />
-              {isSubmitting ? 'Đang gửi đánh giá...' : 'Gửi Đánh Giá (+200 Shopee Xu)'}
+              <StarIcon size={13} color="#fef08a" filled />
+              {isSubmitting ? 'Đang gửi...' : 'Gửi Đánh Giá (+200 Shopee Xu)'}
             </button>
           </div>
         </form>
