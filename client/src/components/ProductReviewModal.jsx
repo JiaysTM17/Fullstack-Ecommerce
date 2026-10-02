@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
+import { StarIcon } from './OrdersIcons';
 
 const QUICK_TAGS = [
   'Đúng với mô tả',
@@ -110,10 +111,10 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
           }}
         >
           <div>
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
-              ⭐ Đánh Giá Sản Phẩm
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <StarIcon size={20} color="#eab308" filled /> Đánh Giá Sản Phẩm
             </h3>
-            <span style={{ fontSize: '13px', color: 'var(--text-muted, #64748b)' }}>
+            <span style={{ fontSize: '13px', color: '#64748b' }}>
               Đơn hàng: <strong>{order.orderId}</strong> · {order.shopName}
             </span>
           </div>
@@ -126,7 +127,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
               border: 'none',
               fontSize: '22px',
               cursor: 'pointer',
-              color: 'var(--text-muted, #64748b)',
+              color: '#64748b',
             }}
           >
             ✕
@@ -138,8 +139,8 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
           {/* Shopee Xu Reward Banner */}
           <div
             style={{
-              background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
-              border: '1px solid #fed7aa',
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
               borderRadius: '12px',
               padding: '12px 16px',
               display: 'flex',
@@ -148,12 +149,26 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
               marginBottom: '20px',
             }}
           >
-            <span style={{ fontSize: '28px' }}>🪙</span>
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: '#fef08a',
+                border: '2px solid #eab308',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <StarIcon size={18} color="#ca8a04" filled />
+            </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '14px', color: '#c2410c' }}>
+              <div style={{ fontWeight: 800, fontSize: '14px', color: '#1e40af' }}>
                 Thưởng Ngay +200 Mini Xu!
               </div>
-              <div style={{ fontSize: '12px', color: '#9a3412' }}>
+              <div style={{ fontSize: '12px', color: '#3b82f6' }}>
                 Đánh giá chất lượng giúp cộng đồng người mua và nhận xu giảm giá trực tiếp vào đơn sau.
               </div>
             </div>
@@ -162,7 +177,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
           {/* Item Selector if multi-item */}
           {items.length > 1 && (
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '8px', display: 'block' }}>
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '8px', display: 'block' }}>
                 Chọn sản phẩm muốn đánh giá:
               </label>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '6px' }}>
@@ -172,8 +187,8 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                     type="button"
                     onClick={() => setSelectedItemIndex(idx)}
                     style={{
-                      border: selectedItemIndex === idx ? '2px solid var(--primary-color, #ea580c)' : '1px solid var(--border-medium, #cbd5e1)',
-                      background: selectedItemIndex === idx ? 'var(--primary-light, #fff7ed)' : 'transparent',
+                      border: selectedItemIndex === idx ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                      background: selectedItemIndex === idx ? '#eff6ff' : 'transparent',
                       borderRadius: '8px',
                       padding: '6px 10px',
                       display: 'flex',
@@ -182,6 +197,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                       cursor: 'pointer',
                       fontSize: '12px',
                       fontWeight: selectedItemIndex === idx ? 700 : 500,
+                      color: selectedItemIndex === idx ? '#2563eb' : '#475569',
                     }}
                   >
                     <img src={item.image} alt={item.name} style={{ width: '28px', height: '28px', objectFit: 'cover', borderRadius: '4px' }} />
@@ -267,13 +283,13 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                     type="button"
                     onClick={() => handleToggleTag(tag)}
                     style={{
-                      padding: '6px 12px',
+                      padding: '6px 14px',
                       borderRadius: '20px',
                       fontSize: '12px',
                       fontWeight: active ? 700 : 500,
-                      border: active ? '1.5px solid var(--primary-color, #ea580c)' : '1px solid var(--border-medium, #cbd5e1)',
-                      background: active ? 'var(--primary-light, #fff7ed)' : 'var(--bg-card, #ffffff)',
-                      color: active ? 'var(--primary-color, #ea580c)' : 'var(--text-secondary, #64748b)',
+                      border: active ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
+                      background: active ? '#eff6ff' : '#ffffff',
+                      color: active ? '#2563eb' : '#64748b',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease',
                     }}
@@ -287,7 +303,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
 
           {/* Comment Textarea */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '8px', display: 'block' }}>
+            <label style={{ fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '8px', display: 'block' }}>
               Nhận xét chi tiết:
             </label>
             <textarea
@@ -300,38 +316,55 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview }) {
                 width: '100%',
                 padding: '12px',
                 borderRadius: '8px',
-                border: '1px solid var(--border-medium, #cbd5e1)',
+                border: '1px solid #cbd5e1',
                 fontFamily: 'inherit',
                 fontSize: '13.5px',
                 resize: 'vertical',
+                outline: 'none',
               }}
             />
           </div>
 
           {/* Modal Actions */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-light, #f1f5f9)' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
             <button
               type="button"
               className="shopee-btn shopee-btn-secondary"
               onClick={onClose}
               disabled={isSubmitting}
-              style={{ padding: '10px 20px', fontSize: '13px' }}
+              style={{
+                padding: '10px 20px',
+                fontSize: '13px',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#475569',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
             >
               Hủy Bỏ
             </button>
             <button
               type="submit"
-              className="shopee-btn shopee-btn-primary"
               disabled={isSubmitting}
               style={{
                 padding: '10px 24px',
                 fontSize: '13px',
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
-                boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
-              {isSubmitting ? 'Đang gửi đánh giá...' : '⭐ Gửi Đánh Giá (+200 Xu)'}
+              <StarIcon size={14} color="#fef08a" filled />
+              {isSubmitting ? 'Đang gửi đánh giá...' : 'Gửi Đánh Giá (+200 Xu)'}
             </button>
           </div>
         </form>

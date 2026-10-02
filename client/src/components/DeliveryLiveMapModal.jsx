@@ -1,6 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../context/ToastContext';
 import { getOrderTracking } from '../services/orderService';
+import {
+  PackageIcon,
+  StoreIcon,
+  ChatIcon,
+  CopyIcon,
+  TruckIcon,
+  MapPinIcon,
+  CreditCardIcon,
+  ShieldCheckIcon,
+  PrinterIcon,
+  ReceiptIcon,
+  EyeIcon,
+  RefreshIcon,
+  ClockIcon,
+  CheckIcon,
+  ReturnIcon,
+  StarIcon,
+} from './OrdersIcons';
 
 export default function DeliveryLiveMapModal({ order, onClose }) {
   const { showToast } = useToast();
@@ -119,14 +137,17 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '18px' }}>🗺️</span>
+              <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
+                <MapPinIcon size={18} />
+              </span>
               <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>
                 Theo Dõi Vị Trí Shipper Trực Tiếp
               </h3>
               <span
                 style={{
-                  background: '#ffedd5',
-                  color: '#ea580c',
+                  background: '#eff6ff',
+                  color: '#2563eb',
+                  border: '1px solid #bfdbfe',
                   padding: '2px 8px',
                   borderRadius: '12px',
                   fontSize: '11px',
@@ -136,7 +157,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                 {carrier}
               </span>
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
               Mã vận đơn: <strong>{trackingCode}</strong> · Trạng thái: <strong>{liveTracking?.statusText || 'Đang giao hàng'}</strong>
             </div>
           </div>
@@ -192,7 +213,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             <path
               d="M 60 180 Q 200 40 320 140 T 560 70"
               fill="none"
-              stroke="#ea580c"
+              stroke="#2563eb"
               strokeWidth="6"
               strokeLinecap="round"
               strokeDasharray="600"
@@ -207,8 +228,9 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               position: 'absolute',
               left: '32px',
               top: '160px',
-              background: '#0284c7',
+              background: '#0f172a',
               color: '#fff',
+              border: '1px solid #334155',
               padding: '4px 8px',
               borderRadius: '6px',
               fontSize: '11px',
@@ -216,10 +238,11 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
               display: 'flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '5px',
             }}
           >
-            🏢 {hubs[1]?.name || 'Kho Tân Bình'}
+            <StoreIcon size={12} />
+            <span>{hubs[1]?.name || 'Kho Tân Bình'}</span>
           </div>
 
           {/* Node 2: Customer Destination */}
@@ -228,7 +251,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               position: 'absolute',
               right: '20px',
               top: '50px',
-              background: '#10b981',
+              background: '#059669',
               color: '#fff',
               padding: '4px 8px',
               borderRadius: '6px',
@@ -237,10 +260,11 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
               display: 'flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '5px',
             }}
           >
-            🏠 Nhà của bạn
+            <MapPinIcon size={12} />
+            <span>Nhà của bạn</span>
           </div>
 
           {/* Moving Shipper Marker */}
@@ -259,7 +283,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
           >
             <div
               style={{
-                background: '#ea580c',
+                background: '#2563eb',
                 color: '#fff',
                 fontSize: '10px',
                 fontWeight: 800,
@@ -270,7 +294,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                 marginBottom: '4px',
               }}
             >
-              🛵 Shipper đang di chuyển ({Math.round(progress)}%)
+              Shipper đang di chuyển ({Math.round(progress)}%)
             </div>
             <div
               style={{
@@ -278,16 +302,16 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                 height: '38px',
                 borderRadius: '50%',
                 background: '#ffffff',
-                border: '3px solid #ea580c',
+                border: '3px solid #2563eb',
+                color: '#2563eb',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '20px',
-                boxShadow: '0 4px 12px rgba(234, 88, 12, 0.6)',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.5)',
                 animation: 'pulse-glow 1.5s infinite',
               }}
             >
-              🛵
+              <TruckIcon size={18} />
             </div>
           </div>
 
@@ -310,7 +334,10 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               flexWrap: 'wrap',
             }}
           >
-            <span>⏱️ Dự kiến giao: <strong style={{ color: '#f59e0b' }}>{etaMinutes} phút nữa</strong></span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <ClockIcon size={12} />
+              <span>Dự kiến giao: <strong style={{ color: '#38bdf8' }}>{etaMinutes} phút nữa</strong></span>
+            </span>
             <span>·</span>
             <span>Cách bạn ~{currentLocation.distanceRemainingKm || 1.2} km</span>
             <span>·</span>
@@ -335,8 +362,9 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             gap: '6px',
           }}
         >
-          <div>
-            📍 <strong>Vị trí hiện tại:</strong> {currentLocation.label || currentLocation.address}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <MapPinIcon size={12} />
+            <span><strong>Vị trí hiện tại:</strong> {currentLocation.label || currentLocation.address}</span>
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
             <span>Tọa độ: <strong>{typeof currentLocation.lat === 'number' ? currentLocation.lat.toFixed(4) : currentLocation.lat}, {typeof currentLocation.lng === 'number' ? currentLocation.lng.toFixed(4) : currentLocation.lng}</strong></span>
@@ -366,9 +394,10 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             }}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>📦</span> Tiến Trình Luân Chuyển 3 Hub SPX Express
+              <PackageIcon size={14} />
+              <span>Tiến Trình Luân Chuyển 3 Hub SPX Express</span>
             </span>
-            <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>
+            <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>
               {hubs.filter((h) => h.completed).length}/{hubs.length} trạm hoàn tất
             </span>
           </div>
@@ -385,14 +414,14 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                 key={idx}
                 style={{
                   background: hub.completed
-                    ? 'rgba(34, 197, 94, 0.08)'
+                    ? 'rgba(5, 150, 105, 0.08)'
                     : idx === 1
-                    ? 'rgba(234, 88, 12, 0.08)'
+                    ? 'rgba(37, 99, 235, 0.08)'
                     : 'var(--bg-muted, #f8fafc)',
                   border: hub.completed
-                    ? '1px solid #86efac'
+                    ? '1px solid #a7f3d0'
                     : idx === 1
-                    ? '1px solid #fdba74'
+                    ? '1px solid #bfdbfe'
                     : '1px solid var(--border-light, #e2e8f0)',
                   borderRadius: '8px',
                   padding: '8px 10px',
@@ -407,7 +436,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                       width: '18px',
                       height: '18px',
                       borderRadius: '50%',
-                      background: hub.completed ? '#16a34a' : idx === 1 ? '#ea580c' : '#94a3b8',
+                      background: hub.completed ? '#059669' : idx === 1 ? '#2563eb' : '#94a3b8',
                       color: '#ffffff',
                       fontSize: '10px',
                       fontWeight: 800,
@@ -426,7 +455,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                   {hub.name}
                 </div>
                 <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                  {hub.completed ? '✓ Đã hoàn tất' : idx === 1 ? '🚚 Đang luân chuyển' : '⏳ Chờ tiếp nhận'}
+                  {hub.completed ? '✓ Đã hoàn tất' : idx === 1 ? 'Đang luân chuyển' : 'Chờ tiếp nhận'}
                 </div>
               </div>
             ))}
@@ -457,18 +486,18 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                 height: '46px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                border: '2px solid var(--primary-color, #ea580c)',
+                border: '2px solid #2563eb',
               }}
             />
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                {courier.name}{' '}
-                <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>
-                  ✓ Bưu tá chính thức SPX
+              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>{courier.name}</span>
+                <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                  <CheckIcon size={11} /> Bưu tá chính thức SPX
                 </span>
               </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                Biển số:{' '}
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
+                <span>Biển số:</span>
                 <strong
                   style={{
                     background: '#e2e8f0',
@@ -479,8 +508,9 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                   }}
                 >
                   {courier.licensePlate || '59-P1 839.22'}
-                </strong>{' '}
-                ({courier.vehicle || 'Xe máy'}) · Đánh giá: ⭐{' '}
+                </strong>
+                <span>({courier.vehicle || 'Xe máy'}) · Đánh giá:</span>
+                <StarIcon size={12} className="text-amber-500" />
                 <strong>{courier.rating || 4.95}</strong>/5.0
               </div>
             </div>
@@ -492,15 +522,19 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               onClick={handleCallShipper}
               className="shopee-btn"
               style={{
-                background: 'var(--primary-color, #ea580c)',
+                background: '#2563eb',
                 color: '#fff',
                 padding: '8px 14px',
                 fontSize: '12px',
                 fontWeight: 700,
                 borderRadius: '8px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
               }}
             >
-              📞 Gọi ({courier.phone || '0908 123 456'})
+              <CopyIcon size={12} />
+              <span>Gọi ({courier.phone || '0908 123 456'})</span>
             </button>
             <button
               type="button"
@@ -511,22 +545,30 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                 fontSize: '12px',
                 fontWeight: 700,
                 borderRadius: '8px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
               }}
             >
-              💬 Nhắn Tin
+              <ChatIcon size={13} />
+              <span>Nhắn Tin</span>
             </button>
           </div>
         </div>
 
         {/* Destination & Safety Info */}
         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-          📍 <strong>Địa chỉ giao tới:</strong> {customerAddress}
-          <br />
-          🛡️{' '}
-          <em>
-            Đơn hàng được bảo hiểm 100% bởi Fullstack E-Commerce Care & {carrier}. Vui lòng kiểm tra
-            kiện hàng còn nguyên tem phong niêm phong trước khi nhận.
-          </em>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <MapPinIcon size={13} />
+            <span><strong>Địa chỉ giao tới:</strong> {customerAddress}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginTop: '4px' }}>
+            <ShieldCheckIcon size={13} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <em>
+              Đơn hàng được bảo hiểm 100% bởi Fullstack E-Commerce Care & {carrier}. Vui lòng kiểm tra
+              kiện hàng còn nguyên tem phong niêm phong trước khi nhận.
+            </em>
+          </div>
         </div>
       </div>
     </div>

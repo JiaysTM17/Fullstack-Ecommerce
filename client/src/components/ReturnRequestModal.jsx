@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
+import { ReturnIcon, CheckIcon } from './OrdersIcons';
 
 const RETURN_REASONS = [
   'Hàng bị lỗi kỹ thuật / Không hoạt động',
@@ -78,10 +79,10 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
           }}
         >
           <div>
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              🔄 Yêu Cầu Trả Hàng & Hoàn Tiền
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ReturnIcon size={20} color="#2563eb" /> Yêu Cầu Trả Hàng & Hoàn Tiền
             </h3>
-            <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+            <span style={{ fontSize: '12.5px', color: '#64748b' }}>
               Mã đơn hàng: <strong>{order.orderId}</strong> · Shop: {order.shopName}
             </span>
           </div>
@@ -94,7 +95,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
               border: 'none',
               fontSize: '18px',
               cursor: 'pointer',
-              color: 'var(--text-muted)',
+              color: '#64748b',
             }}
           >
             ✕
@@ -105,27 +106,27 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
           {/* Order Item Brief */}
           <div
             style={{
-              background: 'var(--bg-muted, #f8fafc)',
+              background: '#f8fafc',
               borderRadius: '8px',
               padding: '12px 16px',
               marginBottom: '18px',
-              border: '1px solid var(--border-light, #e2e8f0)',
+              border: '1px solid #e2e8f0',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
             }}
           >
             <div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
                 {order.items?.[0]?.name || 'Sản phẩm mua sắm'}
               </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              <div style={{ fontSize: '12px', color: '#64748b' }}>
                 Số lượng: {order.items?.[0]?.quantity || 1}
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Số tiền hoàn dự kiến:</div>
-              <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--primary-color, #ea580c)' }}>
+              <div style={{ fontSize: '11px', color: '#64748b' }}>Số tiền hoàn dự kiến:</div>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#2563eb' }}>
                 {formatCurrency(order.total)}
               </div>
             </div>
@@ -166,8 +167,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <label
                 style={{
-                  border: `2px solid ${refundMethod === 'wallet' ? 'var(--primary-color, #ea580c)' : 'var(--border-medium, #cbd5e1)'}`,
-                  background: refundMethod === 'wallet' ? 'var(--primary-light, #fff7ed)' : 'var(--bg-card)',
+                  border: `2px solid ${refundMethod === 'wallet' ? '#2563eb' : '#cbd5e1'}`,
+                  background: refundMethod === 'wallet' ? '#eff6ff' : '#ffffff',
                   padding: '10px 12px',
                   borderRadius: '8px',
                   cursor: 'pointer',
@@ -176,6 +177,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
                   gap: '8px',
                   fontSize: '13px',
                   fontWeight: 600,
+                  color: refundMethod === 'wallet' ? '#2563eb' : '#334155',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <input
@@ -190,8 +193,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
 
               <label
                 style={{
-                  border: `2px solid ${refundMethod === 'bank' ? 'var(--primary-color, #ea580c)' : 'var(--border-medium, #cbd5e1)'}`,
-                  background: refundMethod === 'bank' ? 'var(--primary-light, #fff7ed)' : 'var(--bg-card)',
+                  border: `2px solid ${refundMethod === 'bank' ? '#2563eb' : '#cbd5e1'}`,
+                  background: refundMethod === 'bank' ? '#eff6ff' : '#ffffff',
                   padding: '10px 12px',
                   borderRadius: '8px',
                   cursor: 'pointer',
@@ -200,6 +203,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
                   gap: '8px',
                   fontSize: '13px',
                   fontWeight: 600,
+                  color: refundMethod === 'bank' ? '#2563eb' : '#334155',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <input
@@ -351,9 +356,9 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
               ))}
               <label
                 style={{
-                  background: 'var(--bg-card)',
-                  border: '1px dashed var(--primary-color, #ea580c)',
-                  color: 'var(--primary-color, #ea580c)',
+                  background: '#ffffff',
+                  border: '1px dashed #2563eb',
+                  color: '#2563eb',
                   borderRadius: '6px',
                   padding: '6px 12px',
                   fontSize: '12px',
@@ -377,20 +382,42 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
           </div>
 
           {/* Submit & Cancel */}
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
             <button
               type="button"
               className="shopee-btn shopee-btn-secondary"
               onClick={onClose}
+              style={{
+                padding: '10px 20px',
+                fontSize: '13px',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#475569',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
             >
               Hủy bỏ
             </button>
             <button
               type="submit"
-              className="shopee-btn shopee-btn-primary"
-              style={{ fontWeight: 700 }}
+              style={{
+                fontWeight: 700,
+                padding: '10px 24px',
+                fontSize: '13px',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
             >
-              ✓ Xác Nhận Gửi Yêu Cầu
+              <CheckIcon size={14} color="#ffffff" /> Xác Nhận Gửi Yêu Cầu
             </button>
           </div>
         </form>

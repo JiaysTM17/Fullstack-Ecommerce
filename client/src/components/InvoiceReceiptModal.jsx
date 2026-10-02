@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
 import { getOrderInvoice } from '../services/orderService';
+import { ReceiptIcon, PrinterIcon, ShieldCheckIcon } from './OrdersIcons';
 
 export default function InvoiceReceiptModal({ order, onClose }) {
   if (!order) return null;
@@ -139,7 +140,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '18px' }}>🧾</span>
+            <ReceiptIcon size={20} color="#2563eb" />
             <span style={{ fontWeight: 800, fontSize: '15px', color: '#0f172a' }}>
               HÓA ĐƠN ĐIỆN TỬ & BIÊN LAI GIAO HÀNG
             </span>
@@ -150,7 +151,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
               type="button"
               onClick={handlePrint}
               style={{
-                background: '#ea580c',
+                background: '#2563eb',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
@@ -160,10 +161,12 @@ export default function InvoiceReceiptModal({ order, onClose }) {
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
+                boxShadow: '0 1px 2px rgba(37, 99, 235, 0.2)',
+                transition: 'all 0.15s ease',
               }}
             >
-              🖨️ In Hóa Đơn / Lưu PDF
+              <PrinterIcon size={14} color="#ffffff" /> In Hóa Đơn / Lưu PDF
             </button>
             <button
               type="button"
@@ -199,7 +202,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
               <div
                 style={{
-                  background: '#ea580c',
+                  background: '#2563eb',
                   color: '#fff',
                   width: '32px',
                   height: '32px',
@@ -225,7 +228,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
           </div>
 
           <div style={{ textAlign: 'right', minWidth: '220px' }}>
-            <div style={{ fontSize: '16px', fontWeight: 900, color: '#ea580c', marginBottom: '4px' }}>
+            <div style={{ fontSize: '16px', fontWeight: 900, color: '#2563eb', marginBottom: '4px' }}>
               HÓA ĐƠN GIÁ TRỊ GIA TĂNG (VAT)
             </div>
             <div style={{ fontSize: '12px', color: '#475569', marginBottom: '2px' }}>
@@ -329,7 +332,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
                   <td style={{ padding: '8px 10px', textAlign: 'right', color: '#475569' }}>
                     {formatCurrency(unitPriceNet)}
                   </td>
-                  <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#ea580c' }}>
+                  <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#2563eb' }}>
                     {item.vatRate || vatRate}
                   </td>
                   <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>
@@ -383,8 +386,8 @@ export default function InvoiceReceiptModal({ order, onClose }) {
                 color: '#334155',
               }}
             >
-              <div style={{ fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span>🔒</span> ĐÃ KÝ ĐIỆN TỬ BỞI {companyName}
+              <div style={{ fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ShieldCheckIcon size={14} color="#15803d" /> ĐÃ KÝ ĐIỆN TỬ BỞI {companyName}
               </div>
               <div style={{ fontSize: '10px', color: '#64748b', wordBreak: 'break-all', marginTop: '2px' }}>
                 Mã chữ ký: {signatureDigest}
@@ -402,7 +405,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
               <strong>{formatCurrency(netSubtotal)}</strong>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ea580c' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#2563eb' }}>
               <span>Thuế suất GTGT (VAT):</span>
               <strong>{vatRate}</strong>
             </div>
@@ -436,7 +439,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
               }}
             >
               <span>Tổng thanh toán (Đã có VAT):</span>
-              <span style={{ color: '#ea580c' }}>{formatCurrency(totalPayment)}</span>
+              <span style={{ color: '#2563eb' }}>{formatCurrency(totalPayment)}</span>
             </div>
           </div>
         </div>
