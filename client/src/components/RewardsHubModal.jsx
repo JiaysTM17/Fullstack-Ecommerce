@@ -3,6 +3,15 @@ import { createPortal } from 'react-dom';
 import { useCoins } from '../context/CoinContext';
 import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
+import {
+  CoinIcon,
+  BoltIcon,
+  CalendarIcon,
+  ReceiptIcon,
+  TicketIcon,
+  CheckIcon,
+  ShoppingBagIcon,
+} from './OrdersIcons';
 
 export default function RewardsHubModal({ onClose }) {
   const {
@@ -91,7 +100,7 @@ export default function RewardsHubModal({ onClose }) {
       if (res && res.success !== false) {
         setWonPrize(res);
         const sourceNotice = res.wasDailyFree ? '(Lượt quay ngày)' : '(Thưởng từ đơn hàng)';
-        showToast(`🎉 Xin chúc mừng! Bạn đã quay trúng: ${res.text} ${sourceNotice}!`, 'success');
+        showToast(`Xin chúc mừng! Bạn đã quay trúng: ${res.text} ${sourceNotice}!`, 'success');
       } else {
         showToast(res?.message || 'Không thể quay thưởng, vui lòng thử lại!', 'error');
       }
@@ -168,14 +177,13 @@ export default function RewardsHubModal({ onClose }) {
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                 color: '#fff',
-                fontSize: '22px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
               }}
             >
-              🪙
+              <CoinIcon size={22} />
             </div>
             <div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -230,9 +238,13 @@ export default function RewardsHubModal({ onClose }) {
               background: activeTab === 'spin' ? 'var(--bg-card, #fff)' : 'transparent',
               color: activeTab === 'spin' ? 'var(--primary-color, #ea580c)' : 'var(--text-secondary)',
               boxShadow: activeTab === 'spin' ? 'var(--shadow-sm)' : 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
             }}
           >
-            🎡 Vòng Quay ({totalSpins})
+            <BoltIcon size={14} /> Vòng Quay ({totalSpins})
           </button>
           <button
             type="button"
@@ -247,9 +259,13 @@ export default function RewardsHubModal({ onClose }) {
               background: activeTab === 'checkin' ? 'var(--bg-card, #fff)' : 'transparent',
               color: activeTab === 'checkin' ? 'var(--primary-color, #ea580c)' : 'var(--text-secondary)',
               boxShadow: activeTab === 'checkin' ? 'var(--shadow-sm)' : 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
             }}
           >
-            📅 Điểm Danh 7 Ngày
+            <CalendarIcon size={14} /> Điểm Danh 7 Ngày
           </button>
           <button
             type="button"
@@ -264,9 +280,13 @@ export default function RewardsHubModal({ onClose }) {
               background: activeTab === 'history' ? 'var(--bg-card, #fff)' : 'transparent',
               color: activeTab === 'history' ? 'var(--primary-color, #ea580c)' : 'var(--text-secondary)',
               boxShadow: activeTab === 'history' ? 'var(--shadow-sm)' : 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
             }}
           >
-            📜 Lịch Sử Xu
+            <ReceiptIcon size={14} /> Lịch Sử Xu
           </button>
         </div>
 
@@ -423,16 +443,16 @@ export default function RewardsHubModal({ onClose }) {
                 }}
               >
                 <div style={{ fontSize: '15px', fontWeight: 900 }}>
-                  🎉 Chúc mừng bạn đã trúng: {wonPrize.text}!
+                  Chúc mừng bạn đã trúng: {wonPrize.text}!
                 </div>
                 {wonPrize.type === 'voucher' && (
-                  <div style={{ fontSize: '12px', color: '#059669', fontWeight: 700, marginTop: '4px' }}>
-                    🎟️ Mã <strong>{wonPrize.code}</strong> đã được thêm vào Kho Voucher của bạn!
+                  <div style={{ fontSize: '12px', color: '#059669', fontWeight: 700, marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                    <TicketIcon size={13} /> Mã <strong>{wonPrize.code}</strong> đã được thêm vào Kho Voucher của bạn!
                   </div>
                 )}
                 {wonPrize.type === 'coins' && (
-                  <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, marginTop: '4px' }}>
-                    🪙 Đã tự động cộng +{wonPrize.value.toLocaleString('vi-VN')} Xu vào ví của bạn!
+                  <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                    <CoinIcon size={13} /> Đã tự động cộng +{wonPrize.value.toLocaleString('vi-VN')} Xu vào ví của bạn!
                   </div>
                 )}
               </div>
@@ -455,13 +475,23 @@ export default function RewardsHubModal({ onClose }) {
                   cursor: totalSpins <= 0 ? 'not-allowed' : 'pointer',
                   boxShadow: totalSpins > 0 ? '0 4px 14px rgba(234, 88, 12, 0.35)' : 'none',
                   transition: 'all 0.2s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
                 }}
               >
-                {isSpinning
-                  ? `🎡 ĐANG QUAY THƯỞNG... (${spinCountdown}s)`
-                  : totalSpins > 0
-                  ? `🎁 QUAY NGAY (${totalSpins} lượt khả dụng)`
-                  : '🔒 ĐÃ HẾT LƯỢT QUAY HÔM NAY'}
+                {isSpinning ? (
+                  <>
+                    <BoltIcon size={16} /> ĐANG QUAY THƯỞNG... ({spinCountdown}s)
+                  </>
+                ) : totalSpins > 0 ? (
+                  <>
+                    <BoltIcon size={16} /> QUAY NGAY ({totalSpins} lượt khả dụng)
+                  </>
+                ) : (
+                  'ĐÃ HẾT LƯỢT QUAY HÔM NAY'
+                )}
               </button>
 
               {totalSpins <= 0 && (
@@ -477,9 +507,13 @@ export default function RewardsHubModal({ onClose }) {
                     fontSize: '13px',
                     fontWeight: 700,
                     cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
                   }}
                 >
-                  🛍️ Đặt hàng ngay để nhận thêm +1 lượt quay!
+                  <ShoppingBagIcon size={14} /> Đặt hàng ngay để nhận thêm +1 lượt quay!
                 </button>
               )}
             </div>
@@ -542,7 +576,9 @@ export default function RewardsHubModal({ onClose }) {
                     <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>
                       N{dayNum}
                     </span>
-                    <span style={{ fontSize: '18px' }}>{isClaimed ? '✓' : '🪙'}</span>
+                    <span style={{ fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {isClaimed ? <CheckIcon size={16} className="text-emerald-600" /> : <CoinIcon size={16} className="text-amber-500" />}
+                    </span>
                     <span
                       style={{
                         fontSize: '11px',
@@ -570,11 +606,21 @@ export default function RewardsHubModal({ onClose }) {
                 fontWeight: 800,
                 borderRadius: '10px',
                 opacity: hasCheckedInToday ? 0.7 : 1,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
             >
-              {hasCheckedInToday
-                ? '✓ Bạn đã điểm danh hôm nay rồi!'
-                : `🎁 Điểm Danh Ngay (+${streakRewards[streak % 7]?.toLocaleString('vi-VN')} Xu)`}
+              {hasCheckedInToday ? (
+                <>
+                  <CheckIcon size={16} /> Bạn đã điểm danh hôm nay rồi!
+                </>
+              ) : (
+                <>
+                  <CoinIcon size={16} /> Điểm Danh Ngay (+{streakRewards[streak % 7]?.toLocaleString('vi-VN')} Xu)
+                </>
+              )}
             </button>
           </div>
         )}
