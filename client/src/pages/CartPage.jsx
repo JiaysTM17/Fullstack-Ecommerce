@@ -242,44 +242,71 @@ export default function CartPage() {
             </div>
           </div>
 
-          <div style={{ background: "var(--bg-card, #fff)", borderRadius: "8px", padding: "16px 20px", marginBottom: "16px", border: "1px solid var(--border-medium, #e0e0e0)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: 700, cursor: "pointer", color: "var(--text-primary)" }}>
-              <input
-                type="checkbox"
-                checked={allSelected}
-                onChange={() => (allSelected ? unselectAllItems() : selectAllItems())}
-                style={{ width: "18px", height: "18px" }}
-              />
-              <span>{t('select_all', 'CHỌN TẤT CẢ')} ({items.length} {t('products_count', 'sản phẩm')})</span>
-            </label>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              {selectedItemIds.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleBulkRemoveSelected}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "var(--color-error, #ef4444)",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    padding: 0,
-                  }}
-                >
-                  <TrashIcon size={14} /> Xóa đã chọn ({selectedItemIds.length})
-                </button>
-              )}
-
-              <span style={{ fontSize: "13px", color: "var(--text-secondary, #666)" }}>
-                {t('selected_items', 'Đã chọn')} <strong>{selectedItems.length}</strong> {t('products_count', 'sản phẩm')}
-              </span>
+          {items.length === 0 ? (
+            <div
+              style={{
+                background: "var(--bg-card, #fff)",
+                borderRadius: "8px",
+                padding: "24px 20px",
+                marginBottom: "16px",
+                border: "1px solid var(--border-medium, #e0e0e0)",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)" }}>
+                {t('empty_cart_title', 'Giỏ hàng chính hiện đang trống')}
+              </div>
+              <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "6px 0 14px" }}>
+                Các sản phẩm bạn đã lưu để dành mua sau đang nằm ở danh sách phía dưới.
+              </p>
+              <Link
+                to="/"
+                className="shopee-btn shopee-btn-secondary"
+                style={{ padding: "6px 16px", fontSize: "13px", textDecoration: "none", display: "inline-block" }}
+              >
+                {t('start_shopping', 'Tiếp tục mua sắm')}
+              </Link>
             </div>
-          </div>
+          ) : (
+            <div style={{ background: "var(--bg-card, #fff)", borderRadius: "8px", padding: "16px 20px", marginBottom: "16px", border: "1px solid var(--border-medium, #e0e0e0)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: 700, cursor: "pointer", color: "var(--text-primary)" }}>
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={() => (allSelected ? unselectAllItems() : selectAllItems())}
+                  style={{ width: "18px", height: "18px" }}
+                />
+                <span>{t('select_all', 'CHỌN TẤT CẢ')} ({items.length} {t('products_count', 'sản phẩm')})</span>
+              </label>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                {selectedItemIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleBulkRemoveSelected}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--color-error, #ef4444)",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: 0,
+                    }}
+                  >
+                    <TrashIcon size={14} /> Xóa đã chọn ({selectedItemIds.length})
+                  </button>
+                )}
+
+                <span style={{ fontSize: "13px", color: "var(--text-secondary, #666)" }}>
+                  {t('selected_items', 'Đã chọn')} <strong>{selectedItems.length}</strong> {t('products_count', 'sản phẩm')}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Cart Item Cards Grouped by Shop */}
           {cartItemsByShop.map((shopGroup) => (
