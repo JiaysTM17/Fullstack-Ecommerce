@@ -5,6 +5,13 @@ import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
 import RewardsHubModal from '../components/RewardsHubModal';
+import {
+  CheckIcon,
+  CopyIcon,
+  TruckIcon,
+  ReceiptIcon,
+  BoltIcon,
+} from '../components/OrdersIcons';
 
 export default function OrderSuccessPage() {
   const location = useLocation();
@@ -65,7 +72,6 @@ export default function OrderSuccessPage() {
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #10b981, #059669)',
             color: '#ffffff',
-            fontSize: '36px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -73,7 +79,7 @@ export default function OrderSuccessPage() {
             boxShadow: '0 8px 24px rgba(16, 185, 129, 0.35)',
           }}
         >
-          ✓
+          <CheckIcon size={36} />
         </div>
 
         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
@@ -112,9 +118,12 @@ export default function OrderSuccessPage() {
                   fontWeight: 600,
                   cursor: 'pointer',
                   color: 'var(--text-primary)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
                 }}
               >
-                📋 Sao chép
+                <CopyIcon size={12} /> Sao chép
               </button>
             </div>
           </div>
@@ -135,8 +144,8 @@ export default function OrderSuccessPage() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Đơn vị vận chuyển:</span>
-            <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#16a34a' }}>
-              🚀 SPX Express (Giao hàng dự kiến 24H)
+            <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <TruckIcon size={16} /> SPX Express (Giao hàng dự kiến 24H)
             </span>
           </div>
         </div>
@@ -157,7 +166,9 @@ export default function OrderSuccessPage() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{ fontSize: '32px' }}>🎡</div>
+            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#ffedd5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c' }}>
+              <BoltIcon size={24} />
+            </div>
             <div>
               <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#ea580c' }}>
                 Tặng +1 Lượt Quay Vòng Quay May Mắn!
@@ -181,9 +192,12 @@ export default function OrderSuccessPage() {
               cursor: 'pointer',
               whiteSpace: 'nowrap',
               boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            Quay Ngay 🎁
+            Quay Ngay
           </button>
         </div>
 
@@ -192,19 +206,19 @@ export default function OrderSuccessPage() {
           <button
             type="button"
             className="shopee-btn shopee-btn-primary"
-            style={{ padding: '12px 24px', fontSize: '15px', fontWeight: 800, width: '100%', borderRadius: '10px' }}
+            style={{ padding: '12px 24px', fontSize: '15px', fontWeight: 800, width: '100%', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             onClick={() => navigate('/orders')}
           >
-            {t('order_view_tracking_btn', 'Theo dõi vận chuyển đơn hàng')}
+            <TruckIcon size={16} /> {t('order_view_tracking_btn', 'Theo dõi vận chuyển đơn hàng')}
           </button>
 
           <button
             type="button"
             className="shopee-btn shopee-btn-secondary"
-            style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', borderRadius: '10px' }}
+            style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             onClick={() => setShowInvoiceModal(true)}
           >
-            🧾 In Hóa Đơn / Xem Biên Lai VAT
+            <ReceiptIcon size={16} /> In Hóa Đơn / Xem Biên Lai VAT
           </button>
 
           <Link
