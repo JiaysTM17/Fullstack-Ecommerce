@@ -1030,9 +1030,9 @@ export default function OrderHistoryPage() {
                           className="shopee-btn"
                           style={{
                             fontSize: '11.5px',
-                            background: 'var(--primary-light, #fff7ed)',
-                            border: '1px solid var(--primary-border, #fed7aa)',
-                            color: 'var(--primary-color, #ea580c)',
+                            background: 'var(--primary-light, #eff6ff)',
+                            border: '1px solid var(--primary-border, #bfdbfe)',
+                            color: 'var(--primary-color, #2563eb)',
                             fontWeight: 700,
                             padding: '5px 10px',
                             borderRadius: '6px',
@@ -1248,7 +1248,7 @@ export default function OrderHistoryPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
               {(selectedOrderDetails.timeline || []).map((tl, idx) => (
                 <div key={idx} style={{ display: 'flex', gap: '12px', fontSize: '13px' }}>
-                  <div style={{ color: 'var(--primary-color, #ea580c)', fontWeight: 700, minWidth: '85px' }}>{tl.time}</div>
+                  <div style={{ color: 'var(--primary-color, #2563eb)', fontWeight: 700, minWidth: '85px' }}>{tl.time}</div>
                   <div style={{ color: 'var(--text-primary)' }}>{tl.text}</div>
                 </div>
               ))}
@@ -1260,9 +1260,9 @@ export default function OrderHistoryPage() {
                   type="button"
                   className="shopee-btn"
                   style={{
-                    background: 'var(--primary-light, #fff7ed)',
-                    border: '1px solid var(--primary-border, #fed7aa)',
-                    color: 'var(--primary-color, #ea580c)',
+                    background: 'var(--primary-light, #eff6ff)',
+                    border: '1px solid var(--primary-border, #bfdbfe)',
+                    color: 'var(--primary-color, #2563eb)',
                     fontWeight: 700,
                     fontSize: '12.5px',
                   }}

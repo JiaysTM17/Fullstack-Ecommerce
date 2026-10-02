@@ -1115,11 +1115,11 @@
 }
 
 .shopee-order-tab-item:hover {
-  color: #ee4d2d;
+  color: #2563eb;
 }
 
 .shopee-order-tab-item.active {
-  color: #ee4d2d;
+  color: #2563eb;
   font-weight: 700;
 }
 
@@ -1129,9 +1129,9 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: #ee4d2d;
+  background: #2563eb;
   border-radius: 3px 3px 0 0;
-  box-shadow: 0 -1px 6px rgba(238, 77, 45, 0.4);
+  box-shadow: 0 -1px 6px rgba(37, 99, 235, 0.4);
 }
 
 .shopee-order-tab-badge {
@@ -1147,8 +1147,9 @@
 }
 
 .shopee-order-tab-item.active .shopee-order-tab-badge {
-  background: #fee2e2;
-  color: #ee4d2d;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
 }
 
 .shopee-order-toolbar-inner {
@@ -1174,16 +1175,16 @@
 }
 
 .order-filter-chip:hover {
-  border-color: #ee4d2d;
-  color: #ee4d2d;
+  border-color: #2563eb;
+  color: #2563eb;
 }
 
 .order-filter-chip.active {
-  background: #ee4d2d !important;
+  background: #2563eb !important;
   color: #ffffff !important;
-  border-color: #ee4d2d !important;
+  border-color: #2563eb !important;
   font-weight: 700 !important;
-  box-shadow: 0 2px 6px rgba(238, 77, 45, 0.3) !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
 }
 
 /* Shopee Mall Modern Order Card */
@@ -1226,7 +1227,7 @@
 }
 
 .shopee-mall-badge {
-  background: #ee4d2d !important;
+  background: #ef4444 !important;
   color: #ffffff !important;
   font-size: 11px !important;
   font-weight: 800 !important;
@@ -1252,16 +1253,16 @@
 }
 
 .shopee-order-shop-name:hover {
-  color: #ee4d2d;
+  color: #2563eb;
 }
 
 .shopee-order-chat-btn {
   font-family: var(--font-family);
   font-size: 12px;
   font-weight: 600;
-  color: #ee4d2d;
-  background: #fff5f2;
-  border: 1px solid #ffd8cf;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
   border-radius: 6px;
   padding: 3px 10px;
   cursor: pointer;
@@ -1272,9 +1273,9 @@
 }
 
 .shopee-order-chat-btn:hover {
-  background: #ee4d2d;
+  background: #2563eb;
   color: #ffffff;
-  border-color: #ee4d2d;
+  border-color: #2563eb;
 }
 
 .shopee-order-id-chip {
@@ -1294,9 +1295,9 @@
 }
 
 .shopee-order-id-chip:hover {
-  border-color: #ee4d2d;
-  color: #ee4d2d;
-  background: #fff7ed;
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #eff6ff;
 }
 
 .shopee-order-header-status {
@@ -1548,7 +1549,7 @@
   font-family: var(--font-family);
   font-size: 20px !important;
   font-weight: 800 !important;
-  color: #ee4d2d !important;
+  color: #2563eb !important;
   letter-spacing: -0.3px;
 }
 
@@ -1585,24 +1586,24 @@
 
 /* Button styles */
 .shopee-order-btn-primary {
-  background: #ee4d2d !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
   color: #ffffff !important;
-  border: 1px solid #ee4d2d !important;
+  border: 1px solid #2563eb !important;
   font-family: var(--font-family) !important;
   font-weight: 600 !important;
   padding: 7px 16px !important;
   border-radius: 6px !important;
   font-size: 12.5px !important;
-  box-shadow: 0 1px 4px rgba(238, 77, 45, 0.25) !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.28) !important;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .shopee-order-btn-primary:hover {
-  background: #d73211 !important;
-  border-color: #d73211 !important;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  border-color: #1d4ed8 !important;
   transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(238, 77, 45, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.42) !important;
 }
 
 .shopee-order-btn-success {
@@ -1640,9 +1641,9 @@
 }
 
 .shopee-order-btn-outline:hover {
-  border-color: #ee4d2d !important;
-  color: #ee4d2d !important;
-  background: #fff5f2 !important;
+  border-color: #2563eb !important;
+  color: #2563eb !important;
+  background: #eff6ff !important;
   transform: translateY(-1px);
 }
 

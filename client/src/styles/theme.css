@@ -3,14 +3,14 @@
 :root,
 [data-theme="light"],
 .theme-light {
-  /* Modern Luxury Tech Marketplace - Shopee Mall Orange Theme */
-  --primary-color: #ea580c;
-  --primary-hover: #c2410c;
-  --primary-light: #fff7ed;
-  --primary-border: #fed7aa;
+  /* Modern Luxury Tech Marketplace - Royal Tech Blue */
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --primary-border: #bfdbfe;
   
-  --secondary-color: #f97316;
-  --secondary-hover: #ea580c;
+  --secondary-color: #0ea5e9;
+  --secondary-hover: #0284c7;
   
   --header-bg: #090d16;
   --header-bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 60%, #171c38 100%);
