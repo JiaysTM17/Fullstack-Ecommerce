@@ -17,7 +17,7 @@ const QUICK_QUESTIONS = [
   'Sản phẩm có được bảo hành chính hãng không?'
 ];
 
-export default function ShopChatModal({ shop, currentProduct, onClose }) {
+export default function ShopChatModal({ shop, currentProduct, onClose, inline = false }) {
   const [messages, setMessages] = useState(DEFAULT_MESSAGES);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -72,23 +72,23 @@ export default function ShopChatModal({ shop, currentProduct, onClose }) {
 
   return (
     <div
-      className="anim-chat-box"
+      className={inline ? 'shop-chat-inline-container' : 'anim-chat-box'}
       style={{
-        position: 'fixed',
-        bottom: '24px',
-        right: '24px',
-        width: '380px',
-        maxWidth: '92vw',
-        height: '520px',
+        position: inline ? 'relative' : 'fixed',
+        bottom: inline ? 'auto' : '24px',
+        right: inline ? 'auto' : '24px',
+        width: '100%',
+        maxWidth: inline ? '100%' : '380px',
+        height: inline ? '620px' : '520px',
         background: 'var(--bg-card, #ffffff)',
-        borderRadius: '16px',
-        boxShadow: '0 12px 36px rgba(0,0,0,0.22)',
+        borderRadius: inline ? '12px' : '16px',
+        boxShadow: inline ? 'none' : '0 12px 36px rgba(0,0,0,0.22)',
         border: '1px solid var(--border-medium, #e2e8f0)',
         display: 'flex',
         flexDirection: 'column',
-        zIndex: 9999,
+        zIndex: inline ? 10 : 9999,
         overflow: 'hidden',
-        animation: 'chatPopUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+        animation: inline ? 'fadeIn 0.25s ease-out' : 'chatPopUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards'
       }}
     >
       {/* Chat Header */}
@@ -104,6 +104,25 @@ export default function ShopChatModal({ shop, currentProduct, onClose }) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {inline && (
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff',
+                borderRadius: '6px',
+                padding: '4px 10px',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginRight: '4px',
+              }}
+            >
+              ← Quay lại
+            </button>
+          )}
           <img
             src={shop?.logo || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=80'}
             alt={shop?.name || 'Shop'}

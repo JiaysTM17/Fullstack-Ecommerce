@@ -3,7 +3,7 @@ import { formatCurrency } from '../utils/formatCurrency';
 import { getOrderInvoice } from '../services/orderService';
 import { ReceiptIcon, PrinterIcon, ShieldCheckIcon } from './OrdersIcons';
 
-export default function InvoiceReceiptModal({ order, onClose }) {
+export default function InvoiceReceiptModal({ order, onClose, inline = false }) {
   if (!order) return null;
 
   const [liveInvoice, setLiveInvoice] = useState(null);
@@ -92,112 +92,113 @@ export default function InvoiceReceiptModal({ order, onClose }) {
       : liveInvoice?.xmlPayloadDigest ||
         'SHA256:SHOPEE-E-INVOICE-0318924019-VALIDATED-SECURE';
 
-  return (
+  const invoiceContent = (
     <div
-      className="shopee-modal-overlay invoice-modal-overlay"
+      className={`invoice-printable-container ${inline ? 'invoice-inline-container' : 'anim-modal-content'}`}
       style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1400,
-        background: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(6px)',
+        background: '#ffffff',
+        color: '#0f172a',
+        borderRadius: inline ? '12px' : '16px',
+        width: '100%',
+        maxWidth: inline ? '100%' : '740px',
+        maxHeight: inline ? 'none' : '90vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px 16px',
-        overflowY: 'auto',
+        flexDirection: 'column',
+        boxShadow: inline ? 'none' : '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
+        border: inline ? 'none' : '1px solid #e2e8f0',
+        position: 'relative',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         boxSizing: 'border-box',
-        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        overflow: inline ? 'visible' : 'hidden',
+        margin: inline ? '0' : 'auto',
       }}
     >
+      {/* Navigation & Actions Top Bar (hidden in print) */}
       <div
-        className="invoice-printable-container anim-modal-content"
+        className="no-print"
         style={{
-          background: '#ffffff',
-          color: '#0f172a',
-          borderRadius: '16px',
-          width: '100%',
-          maxWidth: '740px',
-          maxHeight: '90vh',
           display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
-          border: '1px solid #e2e8f0',
-          position: 'relative',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          boxSizing: 'border-box',
-          overflow: 'hidden',
-          margin: 'auto',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: inline ? '14px 18px' : '12px 20px',
+          borderBottom: '1px solid #f1f5f9',
+          background: '#f8fafc',
+          borderRadius: inline ? '12px 12px 0 0' : 0,
+          flexShrink: 0,
         }}
       >
-        {/* Navigation & Actions Top Bar (hidden in print) */}
-        <div
-          className="no-print"
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '12px 20px',
-            borderBottom: '1px solid #f1f5f9',
-            background: '#f8fafc',
-            flexShrink: 0,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ReceiptIcon size={16} color="#2563eb" />
-            <span style={{ fontWeight: 800, fontSize: '13.5px', color: '#0f172a', letterSpacing: '-0.2px' }}>
-              Hóa Đơn Điện Tử & Biên Lai VAT
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              className="shopee-order-btn-primary"
-              onClick={handlePrint}
-              style={{
-                borderRadius: '8px',
-                padding: '6px 14px',
-                fontWeight: 700,
-                fontSize: '12px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                height: '32px',
-              }}
-            >
-              <PrinterIcon size={13} color="#ffffff" /> In Hóa Đơn / Lưu PDF
-            </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {inline && (
             <button
               type="button"
               className="shopee-order-btn-outline"
               onClick={onClose}
               style={{
-                borderRadius: '8px',
-                padding: '6px 12px',
+                borderRadius: '6px',
+                padding: '0 10px',
                 fontWeight: 600,
-                fontSize: '12px',
-                height: '32px',
+                fontSize: '11.5px',
+                height: '28px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                marginRight: '6px',
               }}
             >
-              ✕ Đóng
+              ← Quay lại
             </button>
-          </div>
+          )}
+          <ReceiptIcon size={16} color="#2563eb" />
+          <span style={{ fontWeight: 800, fontSize: '13.5px', color: '#0f172a', letterSpacing: '-0.2px' }}>
+            Hóa Đơn Điện Tử & Biên Lai VAT
+          </span>
         </div>
 
-        {/* Scrollable invoice document paper - Compact A4 Layout without Horizontal Overflow */}
-        <div
-          className="invoice-scroll-body"
-          style={{
-            padding: '20px 24px',
-            overflowY: 'auto',
-            flex: 1,
-            boxSizing: 'border-box',
-          }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            className="shopee-order-btn-primary"
+            onClick={handlePrint}
+            style={{
+              borderRadius: '8px',
+              padding: '6px 14px',
+              fontWeight: 700,
+              fontSize: '12px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              height: '32px',
+            }}
+          >
+            <PrinterIcon size={13} color="#ffffff" /> In Hóa Đơn / Lưu PDF
+          </button>
+          <button
+            type="button"
+            className="shopee-order-btn-outline"
+            onClick={onClose}
+            style={{
+              borderRadius: '8px',
+              padding: '6px 12px',
+              fontWeight: 600,
+              fontSize: '12px',
+              height: '32px',
+            }}
+          >
+            {inline ? '← Quay lại' : '✕ Đóng'}
+          </button>
+        </div>
+      </div>
+
+      {/* Scrollable invoice document paper - Compact A4 Layout without Horizontal Overflow */}
+      <div
+        className="invoice-scroll-body"
+        style={{
+          padding: inline ? '18px 0' : '20px 24px',
+          overflowY: inline ? 'visible' : 'auto',
+          flex: inline ? 'initial' : 1,
+          boxSizing: 'border-box',
+        }}
+      >
           {/* Invoice Header */}
           <div
             style={{
@@ -479,36 +480,71 @@ export default function InvoiceReceiptModal({ order, onClose }) {
           </div>
         </div>
       </div>
+  );
 
-      {/* Embedded print style */}
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          .invoice-modal-overlay,
-          .invoice-printable-container,
-          .invoice-printable-container * {
-            visibility: visible;
-          }
-          .invoice-modal-overlay {
-            position: absolute !important;
-            inset: 0 !important;
-            background: #ffffff !important;
-            padding: 0 !important;
-          }
-          .invoice-printable-container {
-            box-shadow: none !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            border: none !important;
-            padding: 20px !important;
-          }
-          .no-print {
-            display: none !important;
-          }
+  const printStyle = (
+    <style>{`
+      @media print {
+        body * {
+          visibility: hidden;
         }
-      `}</style>
+        .invoice-modal-overlay,
+        .invoice-printable-container,
+        .invoice-printable-container * {
+          visibility: visible;
+        }
+        .invoice-modal-overlay {
+          position: absolute !important;
+          inset: 0 !important;
+          background: #ffffff !important;
+          padding: 0 !important;
+        }
+        .invoice-printable-container {
+          box-shadow: none !important;
+          max-width: 100% !important;
+          width: 100% !important;
+          border: none !important;
+          padding: 20px !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+      }
+    `}</style>
+  );
+
+  if (inline) {
+    return (
+      <div style={{ width: '100%', animation: 'fadeIn 0.25s ease-out' }}>
+        {invoiceContent}
+        {printStyle}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="shopee-modal-overlay invoice-modal-overlay"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1400,
+        background: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(6px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px 16px',
+        overflowY: 'auto',
+        boxSizing: 'border-box',
+        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      {invoiceContent}
+      {printStyle}
     </div>
   );
 }

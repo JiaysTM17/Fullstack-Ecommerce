@@ -794,6 +794,161 @@ export default function OrderHistoryPage() {
     }
   };
 
+  useEffect(() => {
+    if (
+      selectedInvoiceOrder ||
+      selectedReturnOrder ||
+      selectedLiveMapOrder ||
+      selectedReviewOrder ||
+      selectedCancelOrder ||
+      selectedChatShop ||
+      (isDetailModalOpen && selectedDetailOrder)
+    ) {
+      window.scrollTo({ top: 80, behavior: 'smooth' });
+    }
+  }, [
+    selectedInvoiceOrder,
+    selectedReturnOrder,
+    selectedLiveMapOrder,
+    selectedReviewOrder,
+    selectedCancelOrder,
+    selectedChatShop,
+    isDetailModalOpen,
+    selectedDetailOrder,
+  ]);
+
+  const renderInlineCancelOrder = () => (
+    <div
+      className="cancel-order-inline-container"
+      style={{
+        background: '#ffffff',
+        borderRadius: '12px',
+        padding: '24px',
+        border: '1px solid #e2e8f0',
+        animation: 'fadeIn 0.25s ease-out',
+        width: '100%',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            className="shopee-order-btn-outline"
+            onClick={() => handleCloseChildModal(() => setSelectedCancelOrder(null))}
+            style={{
+              borderRadius: '6px',
+              padding: '0 10px',
+              fontWeight: 600,
+              fontSize: '11.5px',
+              height: '28px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              marginRight: '6px',
+            }}
+          >
+            ← Quay lại
+          </button>
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>✕</span>
+            <span>Hủy Đơn Hàng: #{selectedCancelOrder.orderId}</span>
+          </h3>
+        </div>
+      </div>
+
+      <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px', lineHeight: 1.5 }}>
+        Vui lòng chọn lý do bạn muốn hủy đơn hàng. Số tiền đã thanh toán (nếu có) và điểm Xu sẽ được tự động hoàn trả đầy đủ vào tài khoản của bạn:
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+        {CANCEL_REASONS.map((r, idx) => (
+          <label
+            key={idx}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontSize: '13px',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              background: cancelReason === r ? '#eff6ff' : '#f8fafc',
+              border: `1.5px solid ${cancelReason === r ? '#2563eb' : '#e2e8f0'}`,
+              color: cancelReason === r ? '#2563eb' : '#0f172a',
+              fontWeight: cancelReason === r ? 700 : 500,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <input
+              type="radio"
+              name="cancel_reason"
+              checked={cancelReason === r}
+              onChange={() => setCancelReason(r)}
+              style={{ accentColor: '#2563eb' }}
+            />
+            <span>{r}</span>
+          </label>
+        ))}
+      </div>
+
+      <div style={{ marginBottom: '18px' }}>
+        <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, marginBottom: '6px', color: '#334155' }}>
+          Ghi chú thêm (không bắt buộc):
+        </label>
+        <textarea
+          value={cancelNote}
+          onChange={(e) => setCancelNote(e.target.value)}
+          placeholder="Nhập chi tiết lý do bạn muốn hủy đơn để người bán rút kinh nghiệm..."
+          rows={3}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: '8px',
+            border: '1px solid #cbd5e1',
+            background: '#ffffff',
+            color: '#0f172a',
+            fontSize: '12.5px',
+            fontFamily: 'inherit',
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
+        />
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+        <button
+          type="button"
+          className="shopee-order-btn-outline"
+          onClick={() => handleCloseChildModal(() => setSelectedCancelOrder(null))}
+          style={{ padding: '7px 18px', fontSize: '12.5px', borderRadius: '8px', fontWeight: 600 }}
+        >
+          Giữ Lại Đơn
+        </button>
+        <button
+          type="button"
+          className="shopee-order-btn-danger-outline"
+          style={{
+            background: '#dc2626',
+            color: '#ffffff',
+            border: '1px solid #dc2626',
+            padding: '7px 20px',
+            fontSize: '12.5px',
+            fontWeight: 700,
+            borderRadius: '8px',
+            cursor: 'pointer',
+          }}
+          onClick={() => {
+            handleConfirmCancelOrder();
+            handleCloseChildModal(() => setSelectedCancelOrder(null));
+          }}
+        >
+          Xác Nhận Hủy Đơn
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <main className="shopee-container" style={{ padding: '24px 16px', maxWidth: '1240px' }}>
       <div className="account-portal-layout">
@@ -802,6 +957,14 @@ export default function OrderHistoryPage() {
           activeSection={isTrackingView ? 'tracking' : 'orders'}
           isTrackingView={isTrackingView}
           onSelectTrackingView={(showTracking) => {
+            setSelectedDetailOrder(null);
+            setIsDetailModalOpen(false);
+            setSelectedInvoiceOrder(null);
+            setSelectedReturnOrder(null);
+            setSelectedLiveMapOrder(null);
+            setSelectedCancelOrder(null);
+            setSelectedReviewOrder(null);
+            setSelectedChatShop(null);
             setIsTrackingView(showTracking);
             if (showTracking) {
               setSearchParams({ view: 'tracking' });
@@ -821,6 +984,14 @@ export default function OrderHistoryPage() {
           }}
           activeStatusTab={activeTab}
           onSelectStatusTab={(tabId) => {
+            setSelectedDetailOrder(null);
+            setIsDetailModalOpen(false);
+            setSelectedInvoiceOrder(null);
+            setSelectedReturnOrder(null);
+            setSelectedLiveMapOrder(null);
+            setSelectedCancelOrder(null);
+            setSelectedReviewOrder(null);
+            setSelectedChatShop(null);
             setIsTrackingView(false);
             setActiveTab(tabId);
             const next = new URLSearchParams(searchParams);
@@ -837,14 +1008,89 @@ export default function OrderHistoryPage() {
         <div className="account-portal-main-content">
           <div 
             style={{ 
-              background: 'var(--bg-card, #ffffff)', 
+              background: (selectedInvoiceOrder || selectedReturnOrder || selectedLiveMapOrder || selectedReviewOrder || selectedChatShop || selectedCancelOrder || (isDetailModalOpen && selectedDetailOrder)) ? 'transparent' : 'var(--bg-card, #ffffff)', 
               borderRadius: 'var(--radius-lg, 12px)', 
-              padding: '20px 24px', 
-              border: '1px solid var(--border-medium, #e2e8f0)',
-              boxShadow: 'var(--shadow-sm)'
+              padding: (selectedInvoiceOrder || selectedReturnOrder || selectedLiveMapOrder || selectedReviewOrder || selectedChatShop || selectedCancelOrder || (isDetailModalOpen && selectedDetailOrder)) ? '0' : '20px 24px', 
+              border: (selectedInvoiceOrder || selectedReturnOrder || selectedLiveMapOrder || selectedReviewOrder || selectedChatShop || selectedCancelOrder || (isDetailModalOpen && selectedDetailOrder)) ? 'none' : '1px solid var(--border-medium, #e2e8f0)',
+              boxShadow: (selectedInvoiceOrder || selectedReturnOrder || selectedLiveMapOrder || selectedReviewOrder || selectedChatShop || selectedCancelOrder || (isDetailModalOpen && selectedDetailOrder)) ? 'none' : 'var(--shadow-sm)'
             }}
           >
-            {isTrackingView ? (
+            {selectedInvoiceOrder ? (
+              <InvoiceReceiptModal
+                order={selectedInvoiceOrder}
+                inline={true}
+                onClose={() => handleCloseChildModal(() => setSelectedInvoiceOrder(null))}
+              />
+            ) : selectedReturnOrder ? (
+              <ReturnRequestModal
+                order={selectedReturnOrder}
+                inline={true}
+                onClose={() => handleCloseChildModal(() => setSelectedReturnOrder(null))}
+                onSubmit={(data) => {
+                  handleReturnSubmit(data);
+                  handleCloseChildModal(() => setSelectedReturnOrder(null));
+                }}
+              />
+            ) : selectedLiveMapOrder ? (
+              <DeliveryLiveMapModal
+                order={selectedLiveMapOrder}
+                inline={true}
+                onClose={() => handleCloseChildModal(() => setSelectedLiveMapOrder(null))}
+              />
+            ) : selectedReviewOrder ? (
+              <ProductReviewModal
+                order={selectedReviewOrder}
+                inline={true}
+                onClose={() => handleCloseChildModal(() => setSelectedReviewOrder(null))}
+                onSubmitReview={(data) => {
+                  handleReviewSubmit(data);
+                  handleCloseChildModal(() => setSelectedReviewOrder(null));
+                }}
+                onSubmit={(data) => {
+                  handleReviewSubmit(data);
+                  handleCloseChildModal(() => setSelectedReviewOrder(null));
+                }}
+              />
+            ) : selectedChatShop ? (
+              <ShopChatModal
+                shop={selectedChatShop.shop}
+                currentProduct={selectedChatShop.currentProduct}
+                inline={true}
+                onClose={() => handleCloseChildModal(() => setSelectedChatShop(null))}
+              />
+            ) : selectedCancelOrder ? (
+              renderInlineCancelOrder()
+            ) : isDetailModalOpen && selectedDetailOrder ? (
+              <OrderDetailModal
+                order={selectedDetailOrder}
+                isOpen={isDetailModalOpen}
+                inline={true}
+                onClose={() => {
+                  setIsDetailModalOpen(false);
+                  setSelectedDetailOrder(null);
+                  setReturnToDetailOrder(null);
+                }}
+                onOpenChat={(order) => {
+                  handleOpenFromDetail(
+                    (ord) =>
+                      setSelectedChatShop({
+                        shop: { name: ord?.shopName || 'Shop', id: ord?.shopId },
+                        currentProduct: ord?.items?.[0],
+                      }),
+                    order
+                  );
+                }}
+                onOpenTracking={(order) => handleOpenFromDetail(setSelectedLiveMapOrder, order)}
+                onOpenLiveMap={(order) => handleOpenFromDetail(setSelectedLiveMapOrder, order)}
+                onOpenInvoice={(order) => handleOpenFromDetail(setSelectedInvoiceOrder, order)}
+                onBuyAgainItem={(item) => handleBuyAgain(item)}
+                onReorderWhole={(order) => handleReorderWholeOrder(order)}
+                onOpenCancelOrder={(order) => handleOpenFromDetail(setSelectedCancelOrder, order)}
+                onOpenReturnModal={(order) => handleOpenFromDetail(setSelectedReturnOrder, order)}
+                onOpenReviewModal={(order) => handleOpenFromDetail(setSelectedReviewOrder, order)}
+                onSimulateStep={(orderId) => handleSimulateNextStep(orderId)}
+              />
+            ) : isTrackingView ? (
               <div className="spx-tracking-portal-view">
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
@@ -1757,301 +2003,6 @@ export default function OrderHistoryPage() {
         >
           ↑
         </button>
-      )}
-
-      {/* Modal Detailed Timeline */}
-      {selectedOrderDetails && (
-        <div className="shopee-modal-overlay">
-          <div className="shopee-modal-content" style={{ maxWidth: '500px' }}>
-            <div className="shopee-modal-header">
-              <h3>
-                {t('order_timeline_title', 'Hành Trình Đơn Hàng')}: {selectedOrderDetails.orderId}
-              </h3>
-              <button
-                type="button"
-                className="shopee-modal-close"
-                onClick={() => setSelectedOrderDetails(null)}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
-              {(selectedOrderDetails.timeline || []).map((tl, idx) => (
-                <div key={idx} style={{ display: 'flex', gap: '12px', fontSize: '13px' }}>
-                  <div style={{ color: 'var(--primary-color, #2563eb)', fontWeight: 700, minWidth: '85px' }}>{tl.time}</div>
-                  <div style={{ color: 'var(--text-primary)' }}>{tl.text}</div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              {selectedOrderDetails.status !== 'cancelled' && (selectedOrderDetails.stepIndex || 1) < 4 && (
-                <button
-                  type="button"
-                  className="shopee-btn"
-                  style={{
-                    background: 'var(--primary-light, #eff6ff)',
-                    border: '1px solid var(--primary-border, #bfdbfe)',
-                    color: 'var(--primary-color, #2563eb)',
-                    fontWeight: 700,
-                    fontSize: '12.5px',
-                  }}
-                  onClick={() => handleSimulateNextStep(selectedOrderDetails.orderId)}
-                >
-                  {t('order_track_simulate_step')}
-                </button>
-              )}
-
-              <button
-                type="button"
-                className="shopee-btn shopee-btn-primary"
-                onClick={() => setSelectedOrderDetails(null)}
-                style={{ marginLeft: 'auto' }}
-              >
-                {t('close', 'Đã hiểu')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Printable Invoice & VAT Receipt Modal */}
-      {selectedInvoiceOrder && (
-        <InvoiceReceiptModal
-          order={selectedInvoiceOrder}
-          onClose={() => handleCloseChildModal(() => setSelectedInvoiceOrder(null))}
-        />
-      )}
-
-      {/* Return & Refund Request Modal */}
-      {selectedReturnOrder && (
-        <ReturnRequestModal
-          order={selectedReturnOrder}
-          onClose={() => handleCloseChildModal(() => setSelectedReturnOrder(null))}
-          onSubmit={(data) => {
-            handleReturnSubmit(data);
-            handleCloseChildModal(() => setSelectedReturnOrder(null));
-          }}
-        />
-      )}
-
-      {/* Live Driver & GPS Map Modal */}
-      {selectedLiveMapOrder && (
-        <DeliveryLiveMapModal
-          order={selectedLiveMapOrder}
-          onClose={() => handleCloseChildModal(() => setSelectedLiveMapOrder(null))}
-        />
-      )}
-
-      {/* Cancellation Reason Modal */}
-      {selectedCancelOrder && (
-        <div
-          className="shopee-modal-overlay"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1400,
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(6px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '32px 16px',
-            overflowY: 'auto',
-            boxSizing: 'border-box',
-            animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) handleCloseChildModal(() => setSelectedCancelOrder(null));
-          }}
-        >
-          <div
-            className="anim-modal-content"
-            style={{
-              background: '#ffffff',
-              color: '#0f172a',
-              borderRadius: '16px',
-              width: '100%',
-              maxWidth: '480px',
-              padding: '24px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
-              border: '1px solid #e2e8f0',
-              margin: 'auto',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>✕</span>
-                <span>Hủy Đơn Hàng: #{selectedCancelOrder.orderId}</span>
-              </h3>
-              <button
-                type="button"
-                onClick={() => handleCloseChildModal(() => setSelectedCancelOrder(null))}
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '8px',
-                  width: '28px',
-                  height: '28px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  color: '#64748b',
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px', lineHeight: 1.4 }}>
-              Vui lòng chọn lý do hủy đơn hàng. Số tiền đã thanh toán (nếu có) và điểm Xu sẽ được hoàn tự động về ví của bạn:
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-              {CANCEL_REASONS.map((r, idx) => (
-                <label
-                  key={idx}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    fontSize: '13px',
-                    padding: '9px 12px',
-                    borderRadius: '8px',
-                    background: cancelReason === r ? '#eff6ff' : '#f8fafc',
-                    border: `1.5px solid ${cancelReason === r ? '#2563eb' : '#e2e8f0'}`,
-                    color: cancelReason === r ? '#2563eb' : '#0f172a',
-                    fontWeight: cancelReason === r ? 700 : 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="cancel_reason"
-                    checked={cancelReason === r}
-                    onChange={() => setCancelReason(r)}
-                    style={{ accentColor: '#2563eb' }}
-                  />
-                  <span>{r}</span>
-                </label>
-              ))}
-            </div>
-
-            <div style={{ marginBottom: '18px' }}>
-              <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, marginBottom: '6px', color: '#334155' }}>
-                Ghi chú thêm (không bắt buộc):
-              </label>
-              <textarea
-                value={cancelNote}
-                onChange={(e) => setCancelNote(e.target.value)}
-                placeholder="Nhập chi tiết lý do bạn muốn hủy đơn để người bán rút kinh nghiệm..."
-                rows={3}
-                style={{
-                  width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#0f172a',
-                  fontSize: '12.5px',
-                  fontFamily: 'inherit',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button
-                type="button"
-                className="shopee-order-btn-outline"
-                onClick={() => handleCloseChildModal(() => setSelectedCancelOrder(null))}
-                style={{ padding: '7px 16px', fontSize: '12.5px', borderRadius: '8px', fontWeight: 600 }}
-              >
-                Giữ Lại Đơn
-              </button>
-              <button
-                type="button"
-                className="shopee-order-btn-danger-outline"
-                style={{
-                  background: '#dc2626',
-                  color: '#ffffff',
-                  border: '1px solid #dc2626',
-                  padding: '7px 20px',
-                  fontSize: '12.5px',
-                  fontWeight: 700,
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                }}
-                onClick={handleConfirmCancelOrder}
-              >
-                Xác Nhận Hủy Đơn
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Đánh Giá Sản Phẩm (+200 Xu) */}
-      {selectedReviewOrder && (
-        <ProductReviewModal
-          order={selectedReviewOrder}
-          onClose={() => handleCloseChildModal(() => setSelectedReviewOrder(null))}
-          onSubmitReview={(data) => {
-            handleReviewSubmit(data);
-            handleCloseChildModal(() => setSelectedReviewOrder(null));
-          }}
-          onSubmit={(data) => {
-            handleReviewSubmit(data);
-            handleCloseChildModal(() => setSelectedReviewOrder(null));
-          }}
-        />
-      )}
-
-      {/* Comprehensive Order Detail Modal (Milestone M2 & M3) */}
-      {isDetailModalOpen && selectedDetailOrder && !selectedInvoiceOrder && !selectedReturnOrder && !selectedLiveMapOrder && !selectedCancelOrder && !selectedReviewOrder && !selectedChatShop && (
-        <OrderDetailModal
-          order={selectedDetailOrder}
-          isOpen={isDetailModalOpen}
-          onClose={() => {
-            setIsDetailModalOpen(false);
-            setSelectedDetailOrder(null);
-            setReturnToDetailOrder(null);
-          }}
-          onOpenChat={(order) => {
-            handleOpenFromDetail(
-              (ord) =>
-                setSelectedChatShop({
-                  shop: { name: ord?.shopName || 'Shop', id: ord?.shopId },
-                  currentProduct: ord?.items?.[0],
-                }),
-              order
-            );
-          }}
-          onOpenTracking={(order) => handleOpenFromDetail(setSelectedLiveMapOrder, order)}
-          onOpenLiveMap={(order) => handleOpenFromDetail(setSelectedLiveMapOrder, order)}
-          onOpenInvoice={(order) => handleOpenFromDetail(setSelectedInvoiceOrder, order)}
-          onBuyAgainItem={(item) => handleBuyAgain(item)}
-          onReorderWhole={(order) => handleReorderWholeOrder(order)}
-          onOpenCancelOrder={(order) => handleOpenFromDetail(setSelectedCancelOrder, order)}
-          onOpenReturnModal={(order) => handleOpenFromDetail(setSelectedReturnOrder, order)}
-          onOpenReviewModal={(order) => handleOpenFromDetail(setSelectedReviewOrder, order)}
-          onSimulateStep={(orderId) => handleSimulateNextStep(orderId)}
-        />
-      )}
-
-      {/* Real-time Shop Seller Chat Modal */}
-      {selectedChatShop && (
-        <ShopChatModal
-          shop={selectedChatShop.shop}
-          currentProduct={selectedChatShop.currentProduct}
-          onClose={() => handleCloseChildModal(() => setSelectedChatShop(null))}
-        />
       )}
     </main>
   );

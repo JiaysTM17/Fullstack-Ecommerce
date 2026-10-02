@@ -24,7 +24,7 @@ const VIETNAM_BANKS = [
   { code: 'TPBank', name: 'TPBank - Tiên Phong' },
 ];
 
-export default function ReturnRequestModal({ order, onClose, onSubmit }) {
+export default function ReturnRequestModal({ order, onClose, onSubmit, inline = false }) {
   if (!order) return null;
 
   const [reason, setReason] = useState(RETURN_REASONS[0]);
@@ -108,60 +108,61 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
     });
   };
 
-  return (
+  const returnContent = (
     <div
-      className="shopee-modal-overlay"
+      className={inline ? 'return-req-inline-container' : 'anim-modal-content'}
       style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1400,
-        background: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(6px)',
+        background: '#ffffff',
+        color: '#0f172a',
+        borderRadius: inline ? '12px' : '16px',
+        width: '100%',
+        maxWidth: inline ? '100%' : '560px',
+        maxHeight: inline ? 'none' : '88vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px 16px',
-        overflowY: 'auto',
-        boxSizing: 'border-box',
-        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        flexDirection: 'column',
+        boxShadow: inline ? 'none' : '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
+        border: inline ? 'none' : '1px solid #e2e8f0',
+        position: 'relative',
+        overflow: inline ? 'visible' : 'hidden',
+        margin: inline ? '0' : 'auto',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
+      {/* Header */}
       <div
-        className="anim-modal-content"
         style={{
-          background: '#ffffff',
-          color: '#0f172a',
-          borderRadius: '16px',
-          width: '100%',
-          maxWidth: '560px',
-          maxHeight: '88vh',
+          padding: inline ? '14px 18px' : '14px 20px',
+          borderBottom: '1px solid #f1f5f9',
           display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
-          border: '1px solid #e2e8f0',
-          position: 'relative',
-          overflow: 'hidden',
-          margin: 'auto',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          background: '#f8fafc',
+          borderRadius: inline ? '12px 12px 0 0' : 0,
+          flexShrink: 0,
         }}
       >
-        {/* Header */}
-        <div
-          style={{
-            padding: '14px 20px',
-            borderBottom: '1px solid #f1f5f9',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: '#f8fafc',
-            flexShrink: 0,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ReturnIcon size={18} color="#2563eb" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {inline && (
+            <button
+              type="button"
+              className="shopee-order-btn-outline"
+              onClick={onClose}
+              style={{
+                borderRadius: '6px',
+                padding: '0 10px',
+                fontWeight: 600,
+                fontSize: '11.5px',
+                height: '28px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                marginRight: '6px',
+              }}
+            >
+              ← Quay lại
+            </button>
+          )}
+          <ReturnIcon size={18} color="#2563eb" />
             <div>
               <h3
                 style={{
@@ -694,6 +695,38 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
           </div>
         </form>
       </div>
+  );
+
+  if (inline) {
+    return (
+      <div style={{ width: '100%', animation: 'fadeIn 0.25s ease-out' }}>
+        {returnContent}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="shopee-modal-overlay"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1400,
+        background: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(6px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px 16px',
+        overflowY: 'auto',
+        boxSizing: 'border-box',
+        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      {returnContent}
     </div>
   );
 }

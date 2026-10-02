@@ -20,7 +20,7 @@ import {
   StarIcon,
 } from './OrdersIcons';
 
-export default function DeliveryLiveMapModal({ order, onClose }) {
+export default function DeliveryLiveMapModal({ order, onClose, inline = false }) {
   const { showToast } = useToast();
   const [progress, setProgress] = useState(65); // percent of transit completed
   const [etaMinutes, setEtaMinutes] = useState(18);
@@ -90,84 +90,85 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
     showToast(`💬 Đã mở khung chat với Shipper ${carrier}!`, 'success');
   };
 
-  return (
+  const mapContent = (
     <div
-      className="shopee-modal-overlay"
+      className={inline ? 'delivery-map-inline-container' : 'anim-modal-content'}
       style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1400,
-        background: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(6px)',
+        background: '#ffffff',
+        color: '#0f172a',
+        borderRadius: inline ? '12px' : '16px',
+        width: '100%',
+        maxWidth: inline ? '100%' : '640px',
+        maxHeight: inline ? 'none' : '86vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '32px 16px',
-        overflowY: 'auto',
-        boxSizing: 'border-box',
-        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        flexDirection: 'column',
+        boxShadow: inline ? 'none' : '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
+        border: inline ? 'none' : '1px solid #e2e8f0',
+        position: 'relative',
+        overflow: inline ? 'visible' : 'hidden',
+        margin: inline ? '0' : 'auto',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
+      {/* Header */}
       <div
-        className="anim-modal-content"
         style={{
-          background: '#ffffff',
-          color: '#0f172a',
-          borderRadius: '16px',
-          width: '100%',
-          maxWidth: '640px',
-          maxHeight: '86vh',
           display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
-          border: '1px solid #e2e8f0',
-          position: 'relative',
-          overflow: 'hidden',
-          margin: 'auto',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: inline ? '14px 18px' : '16px 22px',
+          borderBottom: '1px solid #f1f5f9',
+          background: '#f8fafc',
+          borderRadius: inline ? '12px 12px 0 0' : 0,
+          flexShrink: 0,
         }}
       >
-        {/* Header */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '16px 22px',
-            borderBottom: '1px solid #f1f5f9',
-            background: '#f8fafc',
-            flexShrink: 0,
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
-                <MapPinIcon size={18} />
-              </span>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
-                Theo Dõi Vị Trí Shipper Trực Tiếp
-              </h3>
-              <span
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {inline && (
+              <button
+                type="button"
+                className="shopee-order-btn-outline"
+                onClick={onClose}
                 style={{
-                  background: '#eff6ff',
-                  color: '#2563eb',
-                  border: '1px solid #bfdbfe',
-                  padding: '2px 8px',
-                  borderRadius: '12px',
-                  fontSize: '11px',
-                  fontWeight: 700,
+                  borderRadius: '6px',
+                  padding: '0 10px',
+                  fontWeight: 600,
+                  fontSize: '11.5px',
+                  height: '28px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  marginRight: '6px',
                 }}
               >
-                {carrier}
-              </span>
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
-              Mã vận đơn: <strong style={{ color: '#0f172a' }}>{trackingCode}</strong> · Trạng thái: <strong>{liveTracking?.statusText || 'Đang giao hàng'}</strong>
-            </div>
+                ← Quay lại
+              </button>
+            )}
+            <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
+              <MapPinIcon size={18} />
+            </span>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
+              Theo Dõi Vị Trí Shipper Trực Tiếp
+            </h3>
+            <span
+              style={{
+                background: '#eff6ff',
+                color: '#2563eb',
+                border: '1px solid #bfdbfe',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                fontSize: '11px',
+                fontWeight: 700,
+              }}
+            >
+              {carrier}
+            </span>
           </div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+            Mã vận đơn: <strong style={{ color: '#0f172a' }}>{trackingCode}</strong> · Trạng thái: <strong>{liveTracking?.statusText || 'Đang giao hàng'}</strong>
+          </div>
+        </div>
 
           <button
             type="button"
@@ -594,6 +595,38 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
         </div>
         </div>
       </div>
+  );
+
+  if (inline) {
+    return (
+      <div style={{ width: '100%', animation: 'fadeIn 0.25s ease-out' }}>
+        {mapContent}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="shopee-modal-overlay"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1400,
+        background: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(6px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '32px 16px',
+        overflowY: 'auto',
+        boxSizing: 'border-box',
+        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      {mapContent}
     </div>
   );
 }

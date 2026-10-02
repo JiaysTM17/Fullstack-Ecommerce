@@ -65,6 +65,7 @@ export default function OrderDetailModal({
   onOpenReturnModal,
   onOpenReviewModal,
   onSimulateStep,
+  inline = false,
 }) {
   if (isOpen === false || !order) return null;
 
@@ -228,7 +229,25 @@ export default function OrderDetailModal({
   );
 
   // Fee Breakdown Calculation - Ultra Thorough & Transparent
-  const items = Array.isArray(order.items) && order.items.length > 0 ? order.items : [];
+  let items = Array.isArray(order.items) && order.items.length > 0
+    ? order.items
+    : Array.isArray(order.products) && order.products.length > 0
+    ? order.products
+    : Array.isArray(order.orderItems) && order.orderItems.length > 0
+    ? order.orderItems
+    : [];
+
+  if (items.length === 0) {
+    items = [{
+      name: order.productName || order.name || (order.shopName?.toLowerCase().includes('tech') ? 'Tai nghe Bluetooth True Wireless chống ồn chủ động Hybrid ANC SoundPeak Pro' : 'Áo sơ mi nữ công sở lụa satin cao cấp chống nhăn thanh lịch'),
+      price: Math.max(0, order.price || order.subtotal || order.total || 259000),
+      quantity: order.quantity || 2,
+      variant: order.variant || order.color || 'Xanh dương',
+      size: order.size || 'Freesize',
+      image: order.image || order.thumbnail || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200',
+    }];
+  }
+
   const itemSubtotal = order.subtotal !== undefined
     ? Number(order.subtotal)
     : items.reduce((sum, it) => sum + (Number(it.price || 0) * (Number(it.quantity) || 1)), 0);
@@ -391,50 +410,27 @@ export default function OrderDetailModal({
 
   const trackingEvents = getTrackingEvents();
 
-  return (
+  const modalInner = (
     <div
-      className="shopee-modal-overlay order-detail-modal-overlay"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && onClose) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="order-detail-title"
+      className={`order-detail-modal-container ${inline ? 'order-detail-inline-container' : 'anim-modal-content'}`}
       style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1100,
-        background: 'rgba(15, 23, 42, 0.68)',
-        backdropFilter: 'blur(5px)',
+        background: '#ffffff',
+        color: '#0f172a',
+        borderRadius: inline ? '12px' : '14px',
+        width: '100%',
+        maxWidth: inline ? '100%' : '760px',
+        maxHeight: inline ? 'none' : '90vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px 14px',
-        overflowY: 'auto',
-        boxSizing: 'border-box',
-        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
+        flexDirection: 'column',
+        boxShadow: inline ? 'none' : '0 20px 40px -10px rgba(0, 0, 0, 0.28)',
+        border: inline ? 'none' : '1px solid #e2e8f0',
+        position: 'relative',
+        overflow: inline ? 'visible' : 'hidden',
+        padding: 0,
+        margin: inline ? '0' : 'auto',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
-      <div
-        className="order-detail-modal-container anim-modal-content"
-        style={{
-          background: '#ffffff',
-          color: '#0f172a',
-          borderRadius: '14px',
-          width: '100%',
-          maxWidth: '760px',
-          maxHeight: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.28)',
-          border: '1px solid #e2e8f0',
-          position: 'relative',
-          overflow: 'hidden',
-          padding: 0,
-          margin: 'auto',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        }}
-      >
         {/* ==========================================================================
             1. Header: Order ID, Date, Status Pill, Print & Close Actions
             ========================================================================== */}
@@ -453,6 +449,26 @@ export default function OrderDetailModal({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {inline && (
+              <button
+                type="button"
+                className="shopee-order-btn-outline"
+                onClick={onClose}
+                style={{
+                  borderRadius: '6px',
+                  padding: '0 10px',
+                  fontWeight: 600,
+                  fontSize: '11.5px',
+                  height: '28px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  marginRight: '4px',
+                }}
+              >
+                ← Quay lại danh sách
+              </button>
+            )}
             <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
               <PackageIcon size={17} />
             </span>
@@ -517,38 +533,58 @@ export default function OrderDetailModal({
             >
               <PrinterIcon size={12} /> {t('print', 'In')}
             </button>
-            <button
-              type="button"
-              className="shopee-order-btn-outline"
-              onClick={onClose}
-              aria-label="Đóng chi tiết đơn hàng"
-              style={{
-                width: '28px',
-                height: '28px',
-                padding: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '12px',
-                borderRadius: '6px',
-              }}
-            >
-              ✕
-            </button>
+            {inline ? (
+              <button
+                type="button"
+                className="shopee-order-btn-outline"
+                onClick={onClose}
+                style={{
+                  height: '28px',
+                  padding: '0 12px',
+                  fontSize: '11.5px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontWeight: 600,
+                }}
+              >
+                ← Quay lại danh sách
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="shopee-order-btn-outline"
+                onClick={onClose}
+                aria-label="Đóng chi tiết đơn hàng"
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  borderRadius: '6px',
+                }}
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
 
         {/* ==========================================================================
-            2. Scrollable Body: Clear Layout, Smooth Scroll, High Information Density
+            2. Scrollable Body: Natural height in inline mode
             ========================================================================== */}
         <div
           className="order-detail-scroll-body"
           style={{
-            padding: '14px 18px',
-            overflowY: 'auto',
-            flex: '1 1 auto',
+            padding: inline ? '16px 0' : '14px 18px',
+            overflowY: inline ? 'visible' : 'auto',
+            flex: inline ? 'initial' : '1 1 auto',
             minHeight: 0,
-            maxHeight: 'calc(90vh - 110px)',
+            maxHeight: inline ? 'none' : 'calc(90vh - 110px)',
             boxSizing: 'border-box',
             display: 'flex',
             flexDirection: 'column',
@@ -1428,6 +1464,37 @@ export default function OrderDetailModal({
           </div>
         </div>
       </div>
+  );
+
+  if (inline) {
+    return modalInner;
+  }
+
+  return (
+    <div
+      className="shopee-modal-overlay order-detail-modal-overlay"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onClose) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="order-detail-title"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1100,
+        background: 'rgba(15, 23, 42, 0.68)',
+        backdropFilter: 'blur(5px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px 14px',
+        overflowY: 'auto',
+        boxSizing: 'border-box',
+        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
+      }}
+    >
+      {modalInner}
     </div>
   );
 }
