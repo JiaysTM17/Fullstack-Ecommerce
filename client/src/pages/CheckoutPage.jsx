@@ -27,6 +27,15 @@ import {
   StarIcon,
   TicketIcon,
   ShieldCheckIcon,
+  CoinIcon,
+  CloseIcon,
+  CopyIcon,
+  LockIcon,
+  PackageIcon,
+  TagIcon,
+  StoreIcon,
+  HomeIcon,
+  BoltIcon,
 } from "../components/OrdersIcons";
 import "../styles/checkout-multistep.css";
 
@@ -163,7 +172,7 @@ export default function CheckoutPage() {
     setAddress(newAddressForm.address.trim());
     setShowAddAddressModal(false);
     setNewAddressForm({ name: '', phone: '', address: '', tag: 'Nhà riêng', isDefault: false });
-    showToast('✓ Đã thêm và tự động áp dụng địa chỉ giao hàng mới!', 'success');
+    showToast('Đã thêm và tự động áp dụng địa chỉ giao hàng mới!', 'success');
   };
 
   const handleSetDefaultAddress = (addrId, e) => {
@@ -400,7 +409,6 @@ export default function CheckoutPage() {
       // Phát thông báo tức thời tới Notification Center của Người Mua
       pushBuyerNotification({
         type: 'order',
-        icon: '📦',
         title: `Đặt hàng thành công #${generatedOrderId}`,
         message: `Đơn hàng trị giá ${formatCurrency(finalOrderTotal)} đã được ghi nhận. Bạn được tặng +1 lượt quay may mắn!`,
         link: '/orders',
@@ -440,19 +448,19 @@ export default function CheckoutPage() {
       {/* 4-Step Progress Indicator */}
       <nav className="checkout-steps-nav">
         <div className={`checkout-step-item ${currentStep === 1 ? "active" : currentStep > 1 ? "completed" : ""}`}>
-          <div className="checkout-step-number">{currentStep > 1 ? "✓" : "1"}</div>
+          <div className="checkout-step-number">{currentStep > 1 ? <CheckIcon size={12} /> : "1"}</div>
           <span>1. Địa Chỉ Nhận Hàng</span>
         </div>
         <span style={{ color: "#ccc" }}>→</span>
 
         <div className={`checkout-step-item ${currentStep === 2 ? "active" : currentStep > 2 ? "completed" : ""}`}>
-          <div className="checkout-step-number">{currentStep > 2 ? "✓" : "2"}</div>
+          <div className="checkout-step-number">{currentStep > 2 ? <CheckIcon size={12} /> : "2"}</div>
           <span>2. Vận Chuyển</span>
         </div>
         <span style={{ color: "#ccc" }}>→</span>
 
         <div className={`checkout-step-item ${currentStep === 3 ? "active" : currentStep > 3 ? "completed" : ""}`}>
-          <div className="checkout-step-number">{currentStep > 3 ? "✓" : "3"}</div>
+          <div className="checkout-step-number">{currentStep > 3 ? <CheckIcon size={12} /> : "3"}</div>
           <span>3. Phương Thức Thanh Toán</span>
         </div>
         <span style={{ color: "#ccc" }}>→</span>
@@ -470,8 +478,8 @@ export default function CheckoutPage() {
           {currentStep === 1 && (
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
-                <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0 }}>
-                  📍 Bước 1: Chọn Địa Chỉ Giao Hàng
+                <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                  <MapPinIcon size={18} color="var(--primary-color, #ea580c)" /> Bước 1: Chọn Địa Chỉ Giao Hàng
                 </h2>
                 <button
                   type="button"
@@ -503,7 +511,9 @@ export default function CheckoutPage() {
                             {addr.name || addr.fullName} ({addr.phone}) · <span style={{ fontSize: "11px", color: "var(--text-muted)", background: "var(--bg-muted, #f1f5f9)", padding: "1px 6px", borderRadius: "4px" }}>{addr.tag}</span>
                           </div>
                           {addr.isDefault && (
-                            <span className="address-default-badge">✓ MẶC ĐỊNH</span>
+                            <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                              <CheckIcon size={11} /> MẶC ĐỊNH
+                            </span>
                           )}
                         </div>
                         <div style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.4", display: "flex", alignItems: "flex-start", gap: "6px" }}>
@@ -580,7 +590,9 @@ export default function CheckoutPage() {
                   })
                 ) : (
                   <div className="address-card selected">
-                    <span className="address-default-badge">✓ MẶC ĐỊNH</span>
+                    <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <CheckIcon size={11} /> MẶC ĐỊNH
+                    </span>
                     <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px" }}>{fullName} ({phone})</div>
                     <div style={{ color: "var(--text-secondary)", fontSize: "13.5px", lineHeight: "1.5" }}>{address}</div>
                   </div>
@@ -637,8 +649,8 @@ export default function CheckoutPage() {
           {/* STEP 2: Shipping */}
           {currentStep === 2 && (
             <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px" }}>
-                🚀 Bước 2: Tốc Độ & Phương Thức Vận Chuyển
+              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                <TruckIcon size={18} color="var(--primary-color, #ea580c)" /> Bước 2: Tốc Độ & Phương Thức Vận Chuyển
               </h2>
 
               <div className="shipping-options-list">
@@ -681,8 +693,8 @@ export default function CheckoutPage() {
           {/* STEP 3: Payment */}
           {currentStep === 3 && (
             <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px" }}>
-                💳 Bước 3: Phương Thức Thanh Toán
+              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                <CreditCardIcon size={18} color="var(--primary-color, #ea580c)" /> Bước 3: Phương Thức Thanh Toán
               </h2>
 
               <div className="payment-methods-grid">
@@ -692,7 +704,9 @@ export default function CheckoutPage() {
                   onClick={() => setPaymentMethod("COD")}
                 >
                   <div className="payment-card-content">
-                    <span className="payment-method-icon">💵</span>
+                    <span className="payment-method-icon" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                      <StoreIcon size={22} color="#059669" />
+                    </span>
                     <div>
                       <div style={{ fontWeight: 700 }}>Thanh toán khi nhận hàng (COD)</div>
                       <div style={{ fontSize: "12px", color: "#666" }}>Nhận hàng kiểm tra xong mới trả tiền mặt cho shipper</div>
@@ -706,7 +720,9 @@ export default function CheckoutPage() {
                   onClick={() => setPaymentMethod("CARD")}
                 >
                   <div className="payment-card-content">
-                    <span className="payment-method-icon">💳</span>
+                    <span className="payment-method-icon" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                      <CreditCardIcon size={22} color="#2563eb" />
+                    </span>
                     <div>
                       <div style={{ fontWeight: 700 }}>Thẻ Tín Dụng / Ghi Nợ Quốc Tế (Visa, MasterCard)</div>
                       <div style={{ fontSize: "12px", color: "#666" }}>Bảo mật mã hóa quốc tế 3D-Secure 256-bit</div>
@@ -754,7 +770,9 @@ export default function CheckoutPage() {
                   onClick={() => setPaymentMethod("MOMO")}
                 >
                   <div className="payment-card-content">
-                    <span className="payment-method-icon">👛</span>
+                    <span className="payment-method-icon" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                      <TicketIcon size={22} color="#d946ef" />
+                    </span>
                     <div>
                       <div style={{ fontWeight: 700 }}>Ví Điện Tử MoMo / ZaloPay</div>
                       <div style={{ fontSize: "12px", color: "#666" }}>Quét mã QR trên ứng dụng ví để thanh toán tức thì</div>
@@ -768,7 +786,9 @@ export default function CheckoutPage() {
                   onClick={() => setPaymentMethod("BANK")}
                 >
                   <div className="payment-card-content">
-                    <span className="payment-method-icon">🏦</span>
+                    <span className="payment-method-icon" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                      <ShieldCheckIcon size={22} color="#0284c7" />
+                    </span>
                     <div>
                       <div style={{ fontWeight: 700 }}>Chuyển Khoản Ngân Hàng (VietQR Tự Động)</div>
                       <div style={{ fontSize: "12px", color: "#666" }}>Miễn phí chuyển khoản qua mọi App ngân hàng tại VN</div>
@@ -803,9 +823,12 @@ export default function CheckoutPage() {
                             fontSize: "11px",
                             fontWeight: 600,
                             cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
                           }}
                         >
-                          📋 {t('copy', 'Sao chép')}
+                          <CopyIcon size={12} /> {t('copy', 'Sao chép')}
                         </button>
                       </div>
                       <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>Chủ TK: CONG TY TNHH FULLSTACK ECOMMERCE</div>
@@ -839,8 +862,8 @@ export default function CheckoutPage() {
           {/* STEP 4: Review and Place Order */}
           {currentStep === 4 && (
             <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px" }}>
-                📋 Bước 4: Kiểm Tra & Đặt Hàng
+              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                <ShieldCheckIcon size={18} color="var(--primary-color, #ea580c)" /> Bước 4: Kiểm Tra & Đặt Hàng
               </h2>
 
               {submitError && (
@@ -867,17 +890,19 @@ export default function CheckoutPage() {
               {/* Voucher status banner in Step 4 */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-page, #f8fafc)", border: "1px solid var(--border-medium, #e2e8f0)", borderRadius: "8px", padding: "12px 16px", marginBottom: "12px", fontSize: "13.5px", flexWrap: "wrap", gap: "8px" }}>
                 <div>
-                  <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>🎟️ Voucher Áp Dụng: </span>
+                  <span style={{ fontWeight: 700, color: "var(--text-primary)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <TicketIcon size={15} color="var(--primary-color, #ea580c)" /> Voucher Áp Dụng:
+                  </span>
                   {(appliedDiscountVoucher || appliedShippingVoucher) ? (
                     <span style={{ marginLeft: "4px" }}>
                       {appliedShippingVoucher && (
-                        <strong style={{ color: "#0284c7", marginRight: "8px" }}>
-                          🚚 {appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)})
+                        <strong style={{ color: "#0284c7", marginRight: "8px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                          <TruckIcon size={13} color="#0284c7" /> {appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)})
                         </strong>
                       )}
                       {appliedDiscountVoucher && (
-                        <strong style={{ color: "var(--primary-color, #ea580c)" }}>
-                          🏷️ {appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})
+                        <strong style={{ color: "var(--primary-color, #ea580c)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                          <TagIcon size={13} color="var(--primary-color, #ea580c)" /> {appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})
                         </strong>
                       )}
                     </span>
@@ -910,7 +935,7 @@ export default function CheckoutPage() {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span style={{ fontSize: "22px" }}>🪙</span>
+                  <CoinIcon size={22} color="#f59e0b" />
                   <div>
                     <div style={{ fontWeight: 700, color: "var(--text-primary)" }}>
                       Dùng Mini Xu để thanh toán
@@ -1017,7 +1042,11 @@ export default function CheckoutPage() {
                   disabled={submitting}
                   onClick={handleFinalPlaceOrder}
                 >
-                  {submitting ? "Đang xử lý đơn hàng..." : `✓ Xác Nhận Đặt Hàng (${formatCurrency(finalOrderTotal)})`}
+                  {submitting ? "Đang xử lý đơn hàng..." : (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <CheckIcon size={16} /> Xác Nhận Đặt Hàng ({formatCurrency(finalOrderTotal)})
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -1037,7 +1066,9 @@ export default function CheckoutPage() {
             {/* Interactive Dual Voucher Section in Checkout summary */}
             <div style={{ borderTop: "1px dashed var(--border-medium, #ddd)", borderBottom: "1px dashed var(--border-medium, #ddd)", padding: "10px 0", margin: "4px 0" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: (appliedDiscountVoucher || appliedShippingVoucher) ? "8px" : "0" }}>
-                <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>🎟️ Voucher / Giảm giá:</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
+                  <TicketIcon size={15} color="var(--primary-color, #ea580c)" /> Voucher / Giảm giá:
+                </span>
                 <button
                   type="button"
                   onClick={() => setShowVoucherModal(true)}
@@ -1049,30 +1080,30 @@ export default function CheckoutPage() {
 
               {appliedShippingVoucher && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", background: "#f0f9ff", padding: "6px 10px", borderRadius: "6px", border: "1px solid #0284c7" }}>
-                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#0284c7" }}>
-                    🚚 {appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)} ship)
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 800, color: "#0284c7" }}>
+                    <TruckIcon size={13} color="#0284c7" /> {appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)} ship)
                   </span>
                   <button
                     type="button"
                     onClick={removeShippingVoucher}
-                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px" }}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px", display: "inline-flex", alignItems: "center", gap: "3px" }}
                   >
-                    ✕ Gỡ
+                    <CloseIcon size={11} /> Gỡ
                   </button>
                 </div>
               )}
 
               {appliedDiscountVoucher && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "6px 10px", borderRadius: "6px", border: "1px solid var(--primary-color, #ea580c)" }}>
-                  <span style={{ fontSize: "12px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
-                    🏷️ {appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
+                    <TagIcon size={13} color="var(--primary-color, #ea580c)" /> {appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})
                   </span>
                   <button
                     type="button"
                     onClick={removeDiscountVoucher}
-                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px" }}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px", display: "inline-flex", alignItems: "center", gap: "3px" }}
                   >
-                    ✕ Gỡ
+                    <CloseIcon size={11} /> Gỡ
                   </button>
                 </div>
               )}
@@ -1091,8 +1122,8 @@ export default function CheckoutPage() {
             {/* Interactive Mini Xu Section in Checkout summary */}
             <div style={{ borderBottom: "1px dashed var(--border-medium, #ddd)", padding: "10px 0", margin: "2px 0" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                  🪙 Mini Xu [{(coins || 0).toLocaleString("vi-VN")}]:
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
+                  <CoinIcon size={15} color="#f59e0b" /> Mini Xu [{(coins || 0).toLocaleString("vi-VN")}]:
                 </span>
                 <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: maxCoinsUsable > 0 ? "pointer" : "not-allowed" }}>
                   <input
@@ -1145,8 +1176,9 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div style={{ fontSize: "12px", color: "var(--text-muted, #777)", lineHeight: "1.5", borderTop: "1px solid var(--border-light, #eee)", paddingTop: "12px" }}>
-            🔒 Nhấn "Xác Nhận Đặt Hàng" đồng nghĩa bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Fullstack E-Commerce.
+          <div style={{ fontSize: "12px", color: "var(--text-muted, #777)", lineHeight: "1.5", borderTop: "1px solid var(--border-light, #eee)", paddingTop: "12px", display: "inline-flex", alignItems: "flex-start", gap: "6px" }}>
+            <LockIcon size={14} color="var(--text-muted, #777)" style={{ flexShrink: 0, marginTop: "2px" }} />
+            <span>Nhấn &quot;Xác Nhận Đặt Hàng&quot; đồng nghĩa bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Fullstack E-Commerce.</span>
           </div>
         </aside>
       </div>
@@ -1201,16 +1233,16 @@ export default function CheckoutPage() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                📍 Thêm Địa Chỉ Giao Hàng Mới
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <MapPinIcon size={18} color="var(--primary-color, #ea580c)" /> Thêm Địa Chỉ Giao Hàng Mới
               </h3>
               <button
                 type="button"
                 className="shopee-modal-close"
                 onClick={() => setShowAddAddressModal(false)}
-                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#64748b' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                ✕
+                <CloseIcon size={16} />
               </button>
             </div>
 
@@ -1267,9 +1299,9 @@ export default function CheckoutPage() {
                   value={newAddressForm.tag}
                   onChange={(e) => setNewAddressForm((prev) => ({ ...prev, tag: e.target.value }))}
                 >
-                  <option value="Nhà riêng">🏠 Nhà riêng</option>
-                  <option value="Văn phòng">🏢 Văn phòng / Cơ quan</option>
-                  <option value="Khác">📍 Khác</option>
+                  <option value="Nhà riêng">Nhà riêng</option>
+                  <option value="Văn phòng">Văn phòng / Cơ quan</option>
+                  <option value="Khác">Khác</option>
                 </select>
               </div>
 
@@ -1343,8 +1375,8 @@ export default function CheckoutPage() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                ✏️ Chỉnh Sửa Địa Chỉ Giao Hàng
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <PencilIcon size={18} color="var(--primary-color, #ea580c)" /> Chỉnh Sửa Địa Chỉ Giao Hàng
               </h3>
               <button
                 type="button"
@@ -1353,9 +1385,9 @@ export default function CheckoutPage() {
                   setShowEditAddressModal(false);
                   setEditingAddress(null);
                 }}
-                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#64748b' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                ✕
+                <CloseIcon size={16} />
               </button>
             </div>
 
@@ -1409,9 +1441,9 @@ export default function CheckoutPage() {
                   value={editAddressForm.tag}
                   onChange={(e) => setEditAddressForm((prev) => ({ ...prev, tag: e.target.value }))}
                 >
-                  <option value="Nhà riêng">🏠 Nhà riêng</option>
-                  <option value="Văn phòng">🏢 Văn phòng / Cơ quan</option>
-                  <option value="Khác">📍 Khác</option>
+                  <option value="Nhà riêng">Nhà riêng</option>
+                  <option value="Văn phòng">Văn phòng / Cơ quan</option>
+                  <option value="Khác">Khác</option>
                 </select>
               </div>
 
