@@ -15,6 +15,24 @@ import ShopChatModal from '../components/ShopChatModal';
 import { cancelOrder } from '../services/orderService';
 import { restoreProductStock } from '../services/productService';
 import { pushBuyerNotification } from '../utils/notificationHelper';
+import {
+  PackageIcon,
+  StoreIcon,
+  ChatIcon,
+  CopyIcon,
+  TruckIcon,
+  MapPinIcon,
+  CreditCardIcon,
+  ShieldCheckIcon,
+  PrinterIcon,
+  ReceiptIcon,
+  EyeIcon,
+  RefreshIcon,
+  ClockIcon,
+  CheckIcon,
+  ReturnIcon,
+  StarIcon
+} from '../components/OrdersIcons';
 import '../styles/dashboard.css';
 
 const INITIAL_CUSTOMER_ORDERS = [
@@ -700,8 +718,9 @@ export default function OrderHistoryPage() {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-              📦 {t('my_orders', 'Đơn Hàng Của Tôi')}
+            <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <PackageIcon size={24} />
+              <span>{t('my_orders', 'Đơn Hàng Của Tôi')}</span>
             </h1>
             <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '13.5px' }}>
               {t('orders_subtitle', 'Theo dõi chi tiết tiến độ vận chuyển và lịch sử mua sắm.')}
@@ -728,7 +747,9 @@ export default function OrderHistoryPage() {
             gap: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '22px' }}>🏪</span>
+              <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
+                <StoreIcon size={22} />
+              </span>
               <div>
                 <strong style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
                   Bạn đang ở mục Đơn Mua Cá Nhân
@@ -858,7 +879,7 @@ export default function OrderHistoryPage() {
                   onClick={handleExportCSV}
                   title="Xuất danh sách đơn hàng sang file CSV (hỗ trợ Excel)"
                 >
-                  <span style={{ fontSize: '13px' }}>📥</span>
+                  <ReceiptIcon size={14} />
                   <span>Xuất CSV</span>
                 </button>
                 <button
@@ -867,7 +888,7 @@ export default function OrderHistoryPage() {
                   onClick={handlePrintReport}
                   title="In hoặc lưu file PDF báo cáo lịch sử đơn hàng"
                 >
-                  <span style={{ fontSize: '13px' }}>🖨️</span>
+                  <PrinterIcon size={14} />
                   <span>In báo cáo</span>
                 </button>
               </div>
@@ -875,8 +896,9 @@ export default function OrderHistoryPage() {
 
             <div className="orders-filter-chips-row">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--text-secondary, #64748b)', marginRight: '2px' }}>
-                  📅 Khoảng thời gian:
+                <span style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--text-secondary, #64748b)', marginRight: '2px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <ClockIcon size={13} />
+                  <span>Khoảng thời gian:</span>
                 </span>
                 {[
                   { id: 'all', label: 'Tất cả' },
@@ -905,7 +927,9 @@ export default function OrderHistoryPage() {
         {/* Orders List */}
         {filteredOrders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: '48px', marginBottom: '12px' }}>📦</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
+              <PackageIcon size={48} />
+            </div>
             <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-secondary)' }}>
               {t('no_orders_in_tab', 'Không có đơn hàng nào trong mục này.')}
             </p>
@@ -932,7 +956,7 @@ export default function OrderHistoryPage() {
                         onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
                         title="Xem shop và trò chuyện"
                       >
-                        🏪 {ord.shopName}
+                        <StoreIcon size={14} /> {ord.shopName}
                       </span>
                       <button
                         type="button"
@@ -940,14 +964,14 @@ export default function OrderHistoryPage() {
                         onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
                         title="Chat ngay với người bán"
                       >
-                        💬 Chat ngay
+                        <ChatIcon size={13} /> {t('chat_now', 'Chat ngay')}
                       </button>
                       <span
                         className="shopee-order-id-chip"
                         onClick={() => handleCopy(ord.orderId, 'mã đơn hàng')}
                         title="Nhấn để sao chép mã đơn hàng"
                       >
-                        #{ord.orderId} 📋
+                        #{ord.orderId} <CopyIcon size={11} />
                       </span>
                     </div>
 
@@ -997,7 +1021,7 @@ export default function OrderHistoryPage() {
                               className={`order-stepper-node ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
                             >
                               <div className="order-stepper-circle">
-                                {isCompleted ? '✓' : step.num}
+                                {isCompleted ? <CheckIcon size={11} /> : step.num}
                               </div>
                               <span className="order-stepper-label">
                                 {step.label}
@@ -1037,11 +1061,11 @@ export default function OrderHistoryPage() {
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
-                            style={{ fontSize: '11.5px', padding: '4px 10px' }}
+                            style={{ fontSize: '11.5px', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                             onClick={() => handleBuyAgain(item)}
                             title="Thêm sản phẩm này vào giỏ hàng để mua lại"
                           >
-                            🔁 Mua lại
+                            <RefreshIcon size={12} /> {t('buy_again', 'Mua lại')}
                           </button>
                         </div>
                       </div>
@@ -1058,7 +1082,7 @@ export default function OrderHistoryPage() {
                           onClick={() => handleCopy(ord.trackingCode, 'mã vận đơn SPX')}
                           title="Nhấn để sao chép mã vận đơn SPX"
                         >
-                          🚚 SPX: <strong>{ord.trackingCode}</strong> 📋
+                          <TruckIcon size={13} /> SPX: <strong>{ord.trackingCode}</strong> <CopyIcon size={11} />
                         </span>
                       )}
                     </div>
@@ -1070,7 +1094,7 @@ export default function OrderHistoryPage() {
                       </div>
                       {(voucherDiscount > 0 || coinDiscount > 0) && (
                         <div className="shopee-order-discount-hint">
-                          ✨ Tiết kiệm {formatCurrency(voucherDiscount + coinDiscount)} từ Voucher & Xu
+                          <CheckIcon size={12} /> {t('saved_from_discounts', 'Tiết kiệm')} {formatCurrency(voucherDiscount + coinDiscount)} {t('from_voucher_coin', 'từ Voucher & Xu')}
                         </div>
                       )}
                     </div>
@@ -1106,7 +1130,7 @@ export default function OrderHistoryPage() {
                           onClick={() => handleSimulateNextStep(ord.orderId)}
                           title="Mô phỏng bưu tá giao hàng bước tiếp theo"
                         >
-                          ⚡ {t('order_track_simulate_step', 'Mô phỏng giao')}
+                          {t('order_track_simulate_step', 'Mô phỏng giao')}
                         </button>
                       )}
                     </div>
@@ -1119,19 +1143,21 @@ export default function OrderHistoryPage() {
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
                           >
-                            💬 Chat với Shop
+                            <ChatIcon size={13} /> {t('chat_with_shop', 'Chat với Shop')}
                           </button>
                           <button
                             type="button"
                             className="shopee-order-btn-primary"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => {
                               setSelectedDetailOrder(ord);
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            👁 {t('view_details', 'Xem chi tiết')}
+                            <EyeIcon size={13} /> {t('view_details', 'Xem chi tiết')}
                           </button>
                         </>
                       )}
@@ -1142,27 +1168,30 @@ export default function OrderHistoryPage() {
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => setSelectedLiveMapOrder(ord)}
                           >
-                            🚚 {t('shipper_map', 'Bản đồ Shipper SPX')}
+                            <TruckIcon size={13} /> {t('shipper_map', 'Bản đồ Shipper SPX')}
                           </button>
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => {
                               setSelectedDetailOrder(ord);
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            📍 {t('view_tracking_details', 'Lịch trình')}
+                            <MapPinIcon size={13} /> {t('view_tracking_details', 'Lịch trình')}
                           </button>
                           <button
                             type="button"
                             className="shopee-order-btn-success"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => handleConfirmDelivered(ord.orderId)}
                             title="Xác nhận bạn đã nhận được gói hàng an toàn"
                           >
-                            ✓ {t('confirm_delivered', 'Đã nhận hàng')}
+                            <CheckIcon size={12} /> {t('confirm_delivered', 'Đã nhận hàng')}
                           </button>
                         </>
                       )}
@@ -1183,51 +1212,56 @@ export default function OrderHistoryPage() {
                                 fontWeight: 600,
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '4px',
+                                gap: '5px',
                               }}
                             >
-                              ✓ {t('reviewed_badge', 'Đã đánh giá (+200 Xu)')}
+                              <CheckIcon size={12} /> {t('reviewed_badge', 'Đã đánh giá (+200 Xu)')}
                             </span>
                           ) : (
                             <button
                               type="button"
                               className="shopee-order-btn-primary"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                               onClick={() => setSelectedReviewOrder(ord)}
                             >
-                              ⭐ {t('review_order_btn', 'Đánh giá (+200 Xu)')}
+                              <StarIcon size={13} /> {t('review_order_btn', 'Đánh giá (+200 Xu)')}
                             </button>
                           )}
                           <button
                             type="button"
                             className={ord.reviewed ? 'shopee-order-btn-primary' : 'shopee-order-btn-outline'}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => handleReorderWholeOrder(ord)}
                             title="Mua lại tất cả sản phẩm trong đơn hàng này"
                           >
-                            🔄 {t('buy_again_whole', 'Mua lại đơn này')}
+                            <RefreshIcon size={13} /> {t('buy_again_whole', 'Mua lại đơn này')}
                           </button>
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => setSelectedReturnOrder(ord)}
                           >
-                            ↩ {t('return_refund', 'Trả hàng/Hoàn tiền')}
+                            <ReturnIcon size={13} /> {t('return_refund', 'Trả hàng/Hoàn tiền')}
                           </button>
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => setSelectedInvoiceOrder(ord)}
                           >
-                            🧾 {t('print_invoice', 'In hóa đơn VAT')}
+                            <ReceiptIcon size={13} /> {t('print_invoice', 'In hóa đơn VAT')}
                           </button>
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => {
                               setSelectedDetailOrder(ord);
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            👁 {t('view_details', 'Xem chi tiết')}
+                            <EyeIcon size={13} /> {t('view_details', 'Xem chi tiết')}
                           </button>
                         </>
                       )}
@@ -1238,20 +1272,22 @@ export default function OrderHistoryPage() {
                           <button
                             type="button"
                             className="shopee-order-btn-primary"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => handleReorderWholeOrder(ord)}
                             title="Mua lại tất cả sản phẩm trong đơn hàng này"
                           >
-                            🔄 {t('buy_again_whole', 'Mua lại đơn này')}
+                            <RefreshIcon size={13} /> {t('buy_again_whole', 'Mua lại đơn này')}
                           </button>
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => {
                               setSelectedDetailOrder(ord);
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            👁 {t('view_details', 'Xem chi tiết')}
+                            <EyeIcon size={13} /> {t('view_details', 'Xem chi tiết')}
                           </button>
                         </>
                       )}
@@ -1262,19 +1298,21 @@ export default function OrderHistoryPage() {
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => {
                               setSelectedDetailOrder(ord);
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            👁 {t('view_details', 'Xem chi tiết')}
+                            <EyeIcon size={13} /> {t('view_details', 'Xem chi tiết')}
                           </button>
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
                           >
-                            💬 Chat với Shop
+                            <ChatIcon size={13} /> {t('chat_with_shop', 'Chat với Shop')}
                           </button>
                         </>
                       )}
@@ -1327,7 +1365,7 @@ export default function OrderHistoryPage() {
                   }}
                   onClick={() => handleSimulateNextStep(selectedOrderDetails.orderId)}
                 >
-                  ⚡ {t('order_track_simulate_step')}
+                  {t('order_track_simulate_step')}
                 </button>
               )}
 
