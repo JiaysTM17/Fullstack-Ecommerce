@@ -3,7 +3,7 @@ import { getVouchers, validateVoucher } from "../services/voucherService";
 import { formatCurrency } from "../utils/formatCurrency";
 import { useLanguage } from "../context/LanguageContext";
 import { useToast } from "../context/ToastContext";
-import { TicketIcon, TruckIcon, TagIcon, StarIcon, BoltIcon, CheckIcon, CoinIcon } from "./OrdersIcons";
+import { TicketIcon, TruckIcon, TagIcon, StarIcon, BoltIcon, CheckIcon, CoinIcon, CloseIcon } from "./OrdersIcons";
 import "../styles/voucher-modal.css";
 
 export default function VoucherPickerModal({
@@ -353,8 +353,9 @@ export default function VoucherPickerModal({
             className="voucher-modal-close"
             onClick={onClose}
             aria-label="Đóng"
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            ✕
+            <CloseIcon size={16} />
           </button>
         </div>
 
@@ -544,9 +545,13 @@ export default function VoucherPickerModal({
                       fontSize: "12px",
                       fontWeight: 700,
                       cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
                     }}
                   >
-                    ✕ Bỏ chọn ({selectedShipping.code})
+                    <CloseIcon size={12} />
+                    <span>Bỏ chọn ({selectedShipping.code})</span>
                   </button>
                 )}
               </div>
@@ -629,7 +634,10 @@ export default function VoucherPickerModal({
                         <div className="voucher-ticket-footer">
                           <div className="voucher-condition-tag">
                             {isEligible ? (
-                              <span className="eligible">✓ Đủ điều kiện</span>
+                              <span className="eligible" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                <CheckIcon size={11} />
+                                <span>Đủ điều kiện</span>
+                              </span>
                             ) : (
                               <span className="ineligible">
                                 Mua thêm {formatCurrency(missingAmount)}
@@ -654,17 +662,26 @@ export default function VoucherPickerModal({
                                 : isEligible
                                   ? undefined
                                   : undefined,
+                              display: isSelected ? 'inline-flex' : undefined,
+                              alignItems: isSelected ? 'center' : undefined,
+                              justifyContent: isSelected ? 'center' : undefined,
+                              gap: isSelected ? '4px' : undefined,
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleToggleShipping(v);
                             }}
                           >
-                            {isSelected
-                              ? "✓ Đã chọn"
-                              : isEligible
-                                ? "Chọn mã"
-                                : "Chưa đủ ĐK"}
+                            {isSelected ? (
+                              <>
+                                <CheckIcon size={11} />
+                                <span>Đã chọn</span>
+                              </>
+                            ) : isEligible ? (
+                              "Chọn mã"
+                            ) : (
+                              "Chưa đủ ĐK"
+                            )}
                           </button>
                         </div>
                       </div>
@@ -729,9 +746,13 @@ export default function VoucherPickerModal({
                       fontSize: "12px",
                       fontWeight: 700,
                       cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
                     }}
                   >
-                    ✕ Bỏ chọn ({selectedDiscount.code})
+                    <CloseIcon size={12} />
+                    <span>Bỏ chọn ({selectedDiscount.code})</span>
                   </button>
                 )}
               </div>
@@ -823,7 +844,10 @@ export default function VoucherPickerModal({
                         <div className="voucher-ticket-footer">
                           <div className="voucher-condition-tag">
                             {isEligible ? (
-                              <span className="eligible">✓ Đủ điều kiện</span>
+                              <span className="eligible" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                <CheckIcon size={11} />
+                                <span>Đủ điều kiện</span>
+                              </span>
                             ) : (
                               <span className="ineligible">
                                 Mua thêm {formatCurrency(missingAmount)}
@@ -842,16 +866,27 @@ export default function VoucherPickerModal({
                           <button
                             type="button"
                             className={`voucher-apply-btn ${isSelected ? "applied" : isEligible ? "select" : "disabled"}`}
+                            style={{
+                              display: isSelected ? 'inline-flex' : undefined,
+                              alignItems: isSelected ? 'center' : undefined,
+                              justifyContent: isSelected ? 'center' : undefined,
+                              gap: isSelected ? '4px' : undefined,
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleToggleDiscount(v);
                             }}
                           >
-                            {isSelected
-                              ? "✓ Đã chọn"
-                              : isEligible
-                                ? "Chọn mã"
-                                : "Chưa đủ ĐK"}
+                            {isSelected ? (
+                              <>
+                                <CheckIcon size={11} />
+                                <span>Đã chọn</span>
+                              </>
+                            ) : isEligible ? (
+                              "Chọn mã"
+                            ) : (
+                              "Chưa đủ ĐK"
+                            )}
                           </button>
                         </div>
                       </div>

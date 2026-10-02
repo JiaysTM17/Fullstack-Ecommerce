@@ -10,8 +10,46 @@ import {
   RefreshIcon,
   FlameIcon,
   BoltIcon,
+  CloseIcon,
+  LayersIcon,
+  DressIcon,
+  LaptopIcon,
+  BeautyIcon,
+  CookingIcon,
+  BabyIcon,
+  SportIcon,
+  SmartphoneIcon,
+  BookOpenIcon,
 } from './OrdersIcons';
 import '../styles/category-drawer.css';
+
+const getDrawerCategoryIcon = (id, size = 22) => {
+  switch (id) {
+    case 'thoi-trang':
+      return <DressIcon size={size} />;
+    case 'dien-tu':
+      return <LaptopIcon size={size} />;
+    case 'sac-dep':
+      return <BeautyIcon size={size} />;
+    case 'gia-dung':
+      return <CookingIcon size={size} />;
+    case 'the-thao':
+      return <SportIcon size={size} />;
+    case 'doi-song':
+    case 'me-va-be':
+      return <BabyIcon size={size} />;
+    case 'phu-kien-cong-nghe':
+      return <SmartphoneIcon size={size} />;
+    case 'balo-tui-xach':
+      return <ShoppingBagIcon size={size} />;
+    case 'gaming-gear':
+      return <BoltIcon size={size} />;
+    case 'sach-van-phong-pham':
+      return <BookOpenIcon size={size} />;
+    default:
+      return <PackageIcon size={size} />;
+  }
+};
 
 const CATEGORIES_DATA = [
   {
@@ -179,12 +217,12 @@ const CATEGORIES_DATA = [
 ];
 
 const FILTER_CHIPS = [
-  { id: 'all', label: '🔥 Tất Cả' },
-  { id: 'fashion', label: '👗 Thời Trang & Phụ Kiện' },
-  { id: 'tech', label: '💻 Công Nghệ & Điện Tử' },
-  { id: 'beauty', label: '💄 Sắc Đẹp Mỹ Phẩm' },
-  { id: 'home', label: '🍳 Gia Dụng Thông Minh' },
-  { id: 'life', label: '🌿 Đời Sống & Mẹ Bé' },
+  { id: 'all', label: 'Tất Cả', icon: <FlameIcon size={13} /> },
+  { id: 'fashion', label: 'Thời Trang & Phụ Kiện', icon: <DressIcon size={13} /> },
+  { id: 'tech', label: 'Công Nghệ & Điện Tử', icon: <LaptopIcon size={13} /> },
+  { id: 'beauty', label: 'Sắc Đẹp Mỹ Phẩm', icon: <BeautyIcon size={13} /> },
+  { id: 'home', label: 'Gia Dụng Thông Minh', icon: <CookingIcon size={13} /> },
+  { id: 'life', label: 'Đời Sống & Mẹ Bé', icon: <BabyIcon size={13} /> },
 ];
 
 export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
@@ -271,7 +309,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         {/* Mega Menu Top Banner Header */}
         <div className="category-drawer-header">
           <div className="category-drawer-header-left">
-            <div className="category-drawer-logo-icon">☰</div>
+            <div className="category-drawer-logo-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <LayersIcon size={20} />
+            </div>
             <div className="category-drawer-title-wrap">
               <h2 className="category-drawer-title">
                 Tất Cả Ngành Hàng & Danh Mục Sản Phẩm
@@ -309,8 +349,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               onClick={onClose}
               className="category-drawer-close-btn"
               title="Đóng bảng ngành hàng"
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              ✕
+              <CloseIcon size={16} />
             </button>
           </div>
         </div>
@@ -337,8 +378,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   onClick={() => setSearchTerm('')}
                   className="category-drawer-clear-btn"
                   title="Xóa tìm kiếm"
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  ✕
+                  <CloseIcon size={12} />
                 </button>
               )}
             </div>
@@ -357,7 +399,10 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 className={`category-drawer-chip ${selectedGroup === chip.id ? 'active' : ''}`}
                 onClick={() => setSelectedGroup(chip.id)}
               >
-                {chip.label}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  {chip.icon}
+                  <span>{chip.label}</span>
+                </span>
               </button>
             ))}
           </div>
@@ -411,7 +456,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 {/* Header row of card: Icon + Name (strictly no squish) + Badge */}
                 <div className="category-card-header">
                   <div className="category-card-title-group">
-                    <span className="category-card-icon">{cat.icon}</span>
+                    <span className="category-card-icon" style={{ display: 'inline-flex', alignItems: 'center', color: cat.color }}>
+                      {getDrawerCategoryIcon(cat.id, 22)}
+                    </span>
                     <strong className="category-card-name" title={cat.name}>
                       {cat.name}
                     </strong>
