@@ -20,6 +20,7 @@ import {
   SportIcon,
   SmartphoneIcon,
   BookOpenIcon,
+  ChevronRightIcon,
 } from './OrdersIcons';
 import '../styles/category-drawer.css';
 
@@ -510,8 +511,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   <StoreIcon size={13} />
                   <span>{cat.shop}</span>
                 </span>
-                <span className="category-card-action-link">
-                  Xem ngành hàng →
+                <span className="category-card-action-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                  <span>Xem ngành hàng</span>
+                  <ChevronRightIcon size={12} />
                 </span>
               </div>
             </div>

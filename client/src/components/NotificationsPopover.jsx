@@ -15,6 +15,7 @@ import {
   CheckIcon,
   SparklesIcon,
   TrashIcon,
+  ChevronRightIcon,
 } from './OrdersIcons';
 
 const INITIAL_NOTIFICATIONS = [
@@ -422,7 +423,10 @@ export default function NotificationsPopover() {
                 cursor: 'pointer',
               }}
             >
-              Xem tất cả đơn hàng →
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span>Xem tất cả đơn hàng</span>
+                <ChevronRightIcon size={12} />
+              </span>
             </button>
 
             {notifications.some((n) => n.isRead) && (

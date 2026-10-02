@@ -11,6 +11,7 @@ import {
   CheckIcon,
   ReturnIcon,
   CloseIcon,
+  ChevronRightIcon,
 } from './OrdersIcons';
 
 // Vector SVG Icons for Pixel-Perfect Navigation (Zero Emojis)
@@ -338,7 +339,7 @@ export default function AccountSidebar({
                   <span className="sidebar-icon-cell"><StoreIcon size={16} /></span>
                   <span className="sidebar-menu-label">Kênh Người Bán Hàng</span>
                 </div>
-                <span className="link-arrow">→</span>
+                <span className="link-arrow" style={{ display: 'inline-flex', alignItems: 'center' }}><ChevronRightIcon size={13} /></span>
               </Link>
             </div>
           </div>
@@ -355,7 +356,7 @@ export default function AccountSidebar({
                   <span className="sidebar-icon-cell"><ShieldIcon size={16} /></span>
                   <span className="sidebar-menu-label">Bảng Quản Trị Toàn Sàn</span>
                 </div>
-                <span className="link-arrow">→</span>
+                <span className="link-arrow" style={{ display: 'inline-flex', alignItems: 'center' }}><ChevronRightIcon size={13} /></span>
               </Link>
             </div>
           </div>

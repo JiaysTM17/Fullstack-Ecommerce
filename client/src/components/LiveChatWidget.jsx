@@ -37,6 +37,7 @@ import {
   CloseIcon,
   ClockIcon,
   StarIcon,
+  ChevronRightIcon,
 } from './OrdersIcons';
 
 const CHAT_STORAGE_KEY = 'mini_shopee_live_chat_history_v2';
@@ -1448,7 +1449,10 @@ export default function LiveChatWidget() {
                                       cursor: 'pointer',
                                     }}
                                   >
-                                    Chi tiết →
+                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                                      <span>Chi tiết</span>
+                                      <ChevronRightIcon size={10} />
+                                    </span>
                                   </button>
                                 </div>
                               </div>
@@ -1654,9 +1658,9 @@ export default function LiveChatWidget() {
                                   }}
                                 >
                                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckIcon size={11} /> Đặt hàng</span>
-                                  <span>→</span>
+                                  <ChevronRightIcon size={11} color="#94a3b8" />
                                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckIcon size={11} /> Đóng gói</span>
-                                  <span>→</span>
+                                  <ChevronRightIcon size={11} color="#94a3b8" />
                                   <span style={{ fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><TruckIcon size={12} /> Đang giao</span>
                                 </div>
                                 <div
@@ -1882,7 +1886,10 @@ export default function LiveChatWidget() {
                                   cursor: 'pointer',
                                 }}
                               >
-                                Xem Shop →
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                                  <span>Xem Shop</span>
+                                  <ChevronRightIcon size={10} />
+                                </span>
                               </button>
                             </div>
                           ))}

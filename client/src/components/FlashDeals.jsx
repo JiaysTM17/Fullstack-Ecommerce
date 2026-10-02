@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BoltIcon, FlameIcon } from './OrdersIcons';
+import { BoltIcon, FlameIcon, ChevronRightIcon } from './OrdersIcons';
 import '../styles/deals.css';
 
 export default function FlashDeals({ products = [], onProductClick, formatCurrency }) {
@@ -55,8 +55,9 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
           </div>
         </div>
 
-        <span style={{ fontSize: '13px', color: 'var(--primary-color, #ea580c)', fontWeight: 600 }}>
-          Xem tất cả deal sốc →
+        <span style={{ fontSize: '13px', color: 'var(--primary-color, #ea580c)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <span>Xem tất cả deal sốc</span>
+          <ChevronRightIcon size={13} />
         </span>
       </div>
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { StarIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon, CloseIcon } from './OrdersIcons';
+import { StarIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon, CloseIcon, ArrowLeftIcon } from './OrdersIcons';
 
 const QUICK_TAGS = [
   'Đúng với mô tả',
@@ -184,7 +184,8 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 marginRight: '6px',
               }}
             >
-              ← Quay lại
+              <ArrowLeftIcon size={13} />
+              <span>Quay lại</span>
             </button>
           )}
           <StarIcon size={18} color="#f59e0b" filled />

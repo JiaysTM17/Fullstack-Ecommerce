@@ -21,6 +21,7 @@ import {
   StarIcon,
   SparklesIcon,
   CloseIcon,
+  ArrowLeftIcon,
 } from './OrdersIcons';
 
 // Safe date parsing supporting multiple formats: ISO, DD/MM/YYYY, HH:mm DD/MM/YYYY
@@ -485,7 +486,8 @@ export default function OrderDetailModal({
                   marginRight: '4px',
                 }}
               >
-                ← Quay lại danh sách
+                <ArrowLeftIcon size={13} />
+                <span>Quay lại danh sách</span>
               </button>
             )}
             <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>

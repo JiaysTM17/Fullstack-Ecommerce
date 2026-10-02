@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon } from './OrdersIcons';
 import '../styles/banner.css';
 
 const SLIDES = [
@@ -70,8 +71,10 @@ export default function HeroBanner({ onSelectCategory }) {
                 type="button"
                 className="shopee-hero-btn"
                 onClick={() => onSelectCategory && onSelectCategory(slide.category)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                {slide.buttonText} →
+                <span>{slide.buttonText}</span>
+                <ChevronRightIcon size={16} />
               </button>
             </div>
           </div>
@@ -85,7 +88,7 @@ export default function HeroBanner({ onSelectCategory }) {
         onClick={prevSlide}
         aria-label="Slide trước"
       >
-        ‹
+        <ChevronLeftIcon size={20} />
       </button>
       <button
         type="button"
@@ -93,7 +96,7 @@ export default function HeroBanner({ onSelectCategory }) {
         onClick={nextSlide}
         aria-label="Slide kế tiếp"
       >
-        ›
+        <ChevronRightIcon size={20} />
       </button>
 
       {/* Pagination Dots */}

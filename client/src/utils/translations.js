@@ -54,7 +54,7 @@ export const TRANSLATIONS = {
     banner_cta_3: "Xem Ưu Đãi",
     flash_deals_title: "FLASH DEALS / GIỜ VÀNG",
     flash_deals_ends_in: "KẾT THÚC TRONG",
-    flash_deals_view_all: "Xem tất cả deal sốc →",
+    flash_deals_view_all: "Xem tất cả deal sốc",
     deal_sold: "ĐÃ BÁN",
 
     // Filters
@@ -296,7 +296,7 @@ export const TRANSLATIONS = {
     banner_cta_3: "View Deals",
     flash_deals_title: "TODAY'S FLASH DEALS",
     flash_deals_ends_in: "ENDING IN",
-    flash_deals_view_all: "View all deals →",
+    flash_deals_view_all: "View all deals",
     deal_sold: "CLAIMED",
 
     // Filters

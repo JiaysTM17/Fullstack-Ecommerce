@@ -13,6 +13,7 @@ import {
   AlertCircleIcon,
   ChevronRightIcon,
   ClockIcon,
+  ArrowLeftIcon,
 } from './OrdersIcons';
 
 /**
@@ -826,7 +827,8 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   gap: '4px',
                 }}
               >
-                <span>←</span> Đổi email khác
+                <ArrowLeftIcon size={14} />
+                <span>Đổi email khác</span>
               </button>
 
               {cooldown > 0 ? (

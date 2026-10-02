@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
 import { getOrderInvoice } from '../services/orderService';
-import { ReceiptIcon, PrinterIcon, ShieldCheckIcon, CloseIcon, CheckIcon } from './OrdersIcons';
+import { ReceiptIcon, PrinterIcon, ShieldCheckIcon, CloseIcon, CheckIcon, ArrowLeftIcon } from './OrdersIcons';
 
 export default function InvoiceReceiptModal({ order, onClose, inline = false }) {
   if (!order) return null;
@@ -145,7 +145,8 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 marginRight: '6px',
               }}
             >
-              ← Quay lại
+              <ArrowLeftIcon size={13} />
+              <span>Quay lại</span>
             </button>
           )}
           <ReceiptIcon size={16} color="#2563eb" />
