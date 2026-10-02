@@ -3,6 +3,7 @@ import { getVouchers, validateVoucher } from "../services/voucherService";
 import { formatCurrency } from "../utils/formatCurrency";
 import { useLanguage } from "../context/LanguageContext";
 import { useToast } from "../context/ToastContext";
+import { TicketIcon, TruckIcon, TagIcon, StarIcon, BoltIcon, CheckIcon, CoinIcon } from "./OrdersIcons";
 import "../styles/voucher-modal.css";
 
 export default function VoucherPickerModal({
@@ -164,7 +165,7 @@ export default function VoucherPickerModal({
     if (bestShippingVoucher) setSelectedShipping(bestShippingVoucher);
     if (bestDiscountVoucher) setSelectedDiscount(bestDiscountVoucher);
     showToast(
-      `✓ Đã tự động chọn gói Voucher tốt nhất! Tiết kiệm: ${formatCurrency(bestComboSavings)}`,
+      `Đã tự động chọn gói Voucher tốt nhất! Tiết kiệm: ${formatCurrency(bestComboSavings)}`,
       "success",
     );
   };
@@ -210,10 +211,10 @@ export default function VoucherPickerModal({
     setErrorMessage("");
     if (res.voucher.type === "shipping") {
       setSelectedShipping(res.voucher);
-      showToast(`✓ Đã chọn mã Freeship "${res.voucher.code}"`, "success");
+      showToast(`Đã chọn mã Freeship "${res.voucher.code}"`, "success");
     } else {
       setSelectedDiscount(res.voucher);
-      showToast(`✓ Đã chọn mã giảm giá "${res.voucher.code}"`, "success");
+      showToast(`Đã chọn mã giảm giá "${res.voucher.code}"`, "success");
     }
     setCustomCode("");
   };
@@ -299,12 +300,12 @@ export default function VoucherPickerModal({
     const appliedCount = (selectedDiscount ? 1 : 0) + (selectedShipping ? 1 : 0);
     if (appliedCount === 2) {
       showToast(
-        `✓ Đã áp dụng 2 Voucher: ${selectedDiscount.code} & ${selectedShipping.code}!`,
+        `Đã áp dụng 2 Voucher: ${selectedDiscount.code} & ${selectedShipping.code}!`,
         "success",
       );
     } else if (appliedCount === 1) {
       const single = selectedDiscount || selectedShipping;
-      showToast(`✓ Đã áp dụng voucher ${single.code}!`, "success");
+      showToast(`Đã áp dụng voucher ${single.code}!`, "success");
     } else {
       showToast("Đã gỡ tất cả mã giảm giá", "info");
     }
@@ -333,7 +334,7 @@ export default function VoucherPickerModal({
         <div className="voucher-modal-header">
           <div>
             <h3 className="voucher-modal-title">
-              <span>🎟️</span>
+              <TicketIcon size={20} className="text-orange-500" />
               <span>{t("select_voucher_title", "Chọn Shopee Voucher")}</span>
             </h3>
             <p
@@ -391,7 +392,7 @@ export default function VoucherPickerModal({
               fontWeight: 600,
             }}
           >
-            ⚠️ {errorMessage}
+            {errorMessage}
           </div>
         )}
 
@@ -399,14 +400,24 @@ export default function VoucherPickerModal({
         {bestComboSavings > 0 && (
           <div className="voucher-smart-recommendation-hero">
             <div className="voucher-smart-hero-left">
-              <span className="voucher-smart-tag">⭐ GỢI Ý TỐI ƯU NHẤT CHO BẠN</span>
+              <span className="voucher-smart-tag">
+                <StarIcon size={12} /> GỢI Ý TỐI ƯU NHẤT CHO BẠN
+              </span>
               <div className="voucher-smart-hero-title">
                 Tiết kiệm tối đa: <span style={{ color: "#ea580c" }}>-{formatCurrency(bestComboSavings)}</span>
               </div>
               <div className="voucher-smart-hero-desc">
-                {bestShippingVoucher && <span>🚚 {bestShippingVoucher.code} (-{formatCurrency(getVoucherSavings(bestShippingVoucher))})</span>}
+                {bestShippingVoucher && (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    <TruckIcon size={13} /> {bestShippingVoucher.code} (-{formatCurrency(getVoucherSavings(bestShippingVoucher))})
+                  </span>
+                )}
                 {bestShippingVoucher && bestDiscountVoucher && <span> + </span>}
-                {bestDiscountVoucher && <span>🏷️ {bestDiscountVoucher.code} (-{formatCurrency(getVoucherSavings(bestDiscountVoucher))})</span>}
+                {bestDiscountVoucher && (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    <TagIcon size={13} /> {bestDiscountVoucher.code} (-{formatCurrency(getVoucherSavings(bestDiscountVoucher))})
+                  </span>
+                )}
               </div>
             </div>
             <button
@@ -414,7 +425,7 @@ export default function VoucherPickerModal({
               className="btn-apply-best-combo"
               onClick={handleAutoApplyBestCombo}
             >
-              ⚡ Áp Dụng Ngay
+              <BoltIcon size={14} /> Áp Dụng Ngay
             </button>
           </div>
         )}
@@ -433,7 +444,7 @@ export default function VoucherPickerModal({
             className={`voucher-tab-btn ${activeTab === "shipping" ? "active" : ""}`}
             onClick={() => setActiveTab("shipping")}
           >
-            🚚 {t("shipping_voucher", "Miễn Phí Vận Chuyển")} (
+            <TruckIcon size={14} /> {t("shipping_voucher", "Miễn Phí Vận Chuyển")} (
             {shippingVouchers.length})
             {selectedShipping && (
               <span
@@ -455,7 +466,7 @@ export default function VoucherPickerModal({
             className={`voucher-tab-btn ${activeTab === "discount" ? "active" : ""}`}
             onClick={() => setActiveTab("discount")}
           >
-            🏷️ {t("order_discount", "Giảm Giá Đơn Hàng")} (
+            <TagIcon size={14} /> {t("order_discount", "Giảm Giá Đơn Hàng")} (
             {discountVouchers.length})
             {selectedDiscount && (
               <span
@@ -499,7 +510,7 @@ export default function VoucherPickerModal({
                     gap: "8px",
                   }}
                 >
-                  <span style={{ fontSize: "18px" }}>🚚</span>
+                  <TruckIcon size={18} className="text-sky-600" />
                   <span
                     style={{
                       fontSize: "14px",
@@ -574,7 +585,9 @@ export default function VoucherPickerModal({
                       }}
                     >
                       <div className="voucher-ticket-left shipping">
-                        <span className="voucher-stub-icon">🚚</span>
+                        <span className="voucher-stub-icon">
+                          <TruckIcon size={24} />
+                        </span>
                         <span className="voucher-stub-tag">FREESHIP</span>
                         <span className="voucher-stub-sub">Toàn sàn</span>
                       </div>
@@ -586,14 +599,14 @@ export default function VoucherPickerModal({
                               <h4 className="voucher-title">{v.name}</h4>
                               {isBest && (
                                 <span className="voucher-best-badge">
-                                  👑 TỐT NHẤT CHO BẠN
+                                  <StarIcon size={11} /> TỐT NHẤT CHO BẠN
                                 </span>
                               )}
                             </div>
                             <span className="voucher-code-badge">{v.code}</span>
                             {isEligible && saving > 0 && (
                               <div className="voucher-saving-highlight">
-                                ⚡ Tiết kiệm: -{formatCurrency(saving)}
+                                <BoltIcon size={12} /> Tiết kiệm: -{formatCurrency(saving)}
                               </div>
                             )}
                           </div>
@@ -682,7 +695,7 @@ export default function VoucherPickerModal({
                     gap: "8px",
                   }}
                 >
-                  <span style={{ fontSize: "18px" }}>🏷️</span>
+                  <TagIcon size={18} className="text-orange-500" />
                   <span
                     style={{
                       fontSize: "14px",
@@ -744,15 +757,15 @@ export default function VoucherPickerModal({
                   const isBest = bestDiscountVoucher?.code === v.code;
 
                   let stubText = "";
-                  let stubIcon = "🏷️";
+                  let stubIcon = <TagIcon size={22} />;
                   let stubClass = "discount";
 
                   if (v.type === "percent") {
                     stubText = `GIẢM ${v.value}%`;
-                    stubIcon = "⚡";
+                    stubIcon = <BoltIcon size={22} />;
                   } else {
                     stubText = `GIẢM ${formatCurrency(v.value)}`;
-                    stubIcon = "💰";
+                    stubIcon = <CoinIcon size={22} />;
                     stubClass = "fixed";
                   }
 
@@ -780,14 +793,14 @@ export default function VoucherPickerModal({
                               <h4 className="voucher-title">{v.name}</h4>
                               {isBest && (
                                 <span className="voucher-best-badge">
-                                  👑 TỐT NHẤT CHO BẠN
+                                  <StarIcon size={11} /> TỐT NHẤT CHO BẠN
                                 </span>
                               )}
                             </div>
                             <span className="voucher-code-badge">{v.code}</span>
                             {isEligible && saving > 0 && (
                               <div className="voucher-saving-highlight">
-                                ⚡ Tiết kiệm: -{formatCurrency(saving)}
+                                <BoltIcon size={12} /> Tiết kiệm: -{formatCurrency(saving)}
                               </div>
                             )}
                           </div>
@@ -874,16 +887,16 @@ export default function VoucherPickerModal({
                 flexWrap: "wrap",
               }}
             >
-              <span>
-                🚚 Ship:{" "}
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                <TruckIcon size={13} className="text-sky-600" /> Ship:{" "}
                 <strong style={{ color: "#0284c7" }}>
                   {selectedShipping
                     ? `-${formatCurrency(previewShippingDiscount)} (${selectedShipping.code})`
                     : "0₫"}
                 </strong>
               </span>
-              <span>
-                🏷️ Đơn:{" "}
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                <TagIcon size={13} className="text-orange-500" /> Đơn:{" "}
                 <strong style={{ color: "var(--primary-color, #ea580c)" }}>
                   {selectedDiscount
                     ? `-${formatCurrency(previewOrderDiscount)} (${selectedDiscount.code})`
