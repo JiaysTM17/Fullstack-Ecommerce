@@ -1500,13 +1500,15 @@ export default function OrderHistoryPage() {
             position: 'fixed',
             inset: 0,
             zIndex: 1100,
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(4px)',
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '16px',
-            animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
+            padding: '32px 16px',
+            overflowY: 'auto',
+            boxSizing: 'border-box',
+            animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setSelectedCancelOrder(null);
@@ -1515,35 +1517,49 @@ export default function OrderHistoryPage() {
           <div
             className="anim-modal-content"
             style={{
-              background: 'var(--bg-card, #ffffff)',
-              color: 'var(--text-primary, #0f172a)',
+              background: '#ffffff',
+              color: '#0f172a',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '480px',
               padding: '24px',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.25)',
-              border: '1px solid var(--border-medium, #cbd5e1)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
+              border: '1px solid #e2e8f0',
+              margin: 'auto',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-light, #e2e8f0)', paddingBottom: '12px' }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span>✕</span>
-                <span>Hủy Đơn Hàng: {selectedCancelOrder.orderId}</span>
+                <span>Hủy Đơn Hàng: #{selectedCancelOrder.orderId}</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setSelectedCancelOrder(null)}
-                style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: 'var(--text-muted)' }}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '8px',
+                  width: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                }}
               >
                 ✕
               </button>
             </div>
 
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-              Vui lòng chọn lý do hủy đơn hàng để giúp sàn và nhà bán nâng cao chất lượng phục vụ:
+            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px', lineHeight: 1.4 }}>
+              Vui lòng chọn lý do hủy đơn hàng. Số tiền đã thanh toán (nếu có) và Shopee Xu sẽ được hoàn tự động về ví của bạn:
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
               {CANCEL_REASONS.map((r, idx) => (
                 <label
                   key={idx}
@@ -1551,11 +1567,13 @@ export default function OrderHistoryPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px',
-                    fontSize: '13.5px',
-                    padding: '8px 12px',
+                    fontSize: '13px',
+                    padding: '9px 12px',
                     borderRadius: '8px',
-                    background: cancelReason === r ? 'rgba(79, 70, 229, 0.08)' : 'var(--bg-muted, #f8fafc)',
-                    border: `1px solid ${cancelReason === r ? 'var(--primary-color, #4f46e5)' : 'var(--border-light, #e2e8f0)'}`,
+                    background: cancelReason === r ? '#eff6ff' : '#f8fafc',
+                    border: `1.5px solid ${cancelReason === r ? '#2563eb' : '#e2e8f0'}`,
+                    color: cancelReason === r ? '#2563eb' : '#0f172a',
+                    fontWeight: cancelReason === r ? 700 : 500,
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
                   }}
@@ -1565,6 +1583,7 @@ export default function OrderHistoryPage() {
                     name="cancel_reason"
                     checked={cancelReason === r}
                     onChange={() => setCancelReason(r)}
+                    style={{ accentColor: '#2563eb' }}
                   />
                   <span>{r}</span>
                 </label>
@@ -1572,24 +1591,25 @@ export default function OrderHistoryPage() {
             </div>
 
             <div style={{ marginBottom: '18px' }}>
-              <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary)' }}>
+              <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, marginBottom: '6px', color: '#334155' }}>
                 Ghi chú thêm (không bắt buộc):
               </label>
               <textarea
                 value={cancelNote}
                 onChange={(e) => setCancelNote(e.target.value)}
-                placeholder="Nhập chi tiết lý do bạn muốn hủy đơn..."
+                placeholder="Nhập chi tiết lý do bạn muốn hủy đơn để người bán rút kinh nghiệm..."
                 rows={3}
                 style={{
                   width: '100%',
-                  padding: '8px 12px',
+                  padding: '9px 12px',
                   borderRadius: '8px',
-                  border: '1px solid var(--border-medium, #cbd5e1)',
-                  background: 'var(--bg-card, #ffffff)',
-                  color: 'var(--text-primary)',
-                  fontSize: '13px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#0f172a',
+                  fontSize: '12.5px',
                   fontFamily: 'inherit',
                   outline: 'none',
+                  boxSizing: 'border-box',
                 }}
               />
             </div>
@@ -1597,21 +1617,24 @@ export default function OrderHistoryPage() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button
                 type="button"
-                className="shopee-btn shopee-btn-secondary"
+                className="shopee-order-btn-outline"
                 onClick={() => setSelectedCancelOrder(null)}
-                style={{ fontSize: '13px' }}
+                style={{ padding: '7px 16px', fontSize: '12.5px', borderRadius: '8px', fontWeight: 600 }}
               >
                 Giữ Lại Đơn
               </button>
               <button
                 type="button"
-                className="shopee-btn"
+                className="shopee-order-btn-danger-outline"
                 style={{
-                  background: '#ef4444',
+                  background: '#dc2626',
                   color: '#ffffff',
-                  border: 'none',
-                  fontSize: '13px',
+                  border: '1px solid #dc2626',
+                  padding: '7px 20px',
+                  fontSize: '12.5px',
                   fontWeight: 700,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
                 }}
                 onClick={handleConfirmCancelOrder}
               >

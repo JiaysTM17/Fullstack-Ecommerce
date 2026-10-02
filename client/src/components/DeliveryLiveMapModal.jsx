@@ -97,14 +97,15 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
         position: 'fixed',
         inset: 0,
         zIndex: 1200,
-        background: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(5px)',
+        background: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(6px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '16px',
+        padding: '32px 16px',
         overflowY: 'auto',
-        animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
+        boxSizing: 'border-box',
+        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -113,15 +114,20 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
       <div
         className="anim-modal-content"
         style={{
-          background: 'var(--bg-card, #ffffff)',
-          color: 'var(--text-primary, #0f172a)',
+          background: '#ffffff',
+          color: '#0f172a',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '640px',
-          padding: '24px',
-          boxShadow: 'var(--shadow-modal, 0 20px 40px rgba(0,0,0,0.3))',
-          border: '1px solid var(--border-medium, #e2e8f0)',
+          maxHeight: '86vh',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
+          border: '1px solid #e2e8f0',
           position: 'relative',
+          overflow: 'hidden',
+          margin: 'auto',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         }}
       >
         {/* Header */}
@@ -130,9 +136,10 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '16px',
-            paddingBottom: '12px',
-            borderBottom: '1px solid var(--border-light, #f1f5f9)',
+            padding: '16px 22px',
+            borderBottom: '1px solid #f1f5f9',
+            background: '#f8fafc',
+            flexShrink: 0,
           }}
         >
           <div>
@@ -140,7 +147,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
               <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
                 <MapPinIcon size={18} />
               </span>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
                 Theo Dõi Vị Trí Shipper Trực Tiếp
               </h3>
               <span
@@ -157,8 +164,8 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
                 {carrier}
               </span>
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              Mã vận đơn: <strong>{trackingCode}</strong> · Trạng thái: <strong>{liveTracking?.statusText || 'Đang giao hàng'}</strong>
+            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+              Mã vận đơn: <strong style={{ color: '#0f172a' }}>{trackingCode}</strong> · Trạng thái: <strong>{liveTracking?.statusText || 'Đang giao hàng'}</strong>
             </div>
           </div>
 
@@ -166,16 +173,33 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             type="button"
             onClick={onClose}
             style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '20px',
+              background: '#ffffff',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              width: '30px',
+              height: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
               cursor: 'pointer',
-              color: 'var(--text-muted)',
+              color: '#64748b',
+              transition: 'all 0.15s ease',
             }}
           >
             ✕
           </button>
         </div>
+
+        {/* Scrollable Map Body */}
+        <div
+          style={{
+            padding: '20px 22px',
+            overflowY: 'auto',
+            flex: 1,
+            boxSizing: 'border-box',
+          }}
+        >
 
         {/* Live GPS Map Simulation Container */}
         <div
@@ -520,14 +544,12 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             <button
               type="button"
               onClick={handleCallShipper}
-              className="shopee-btn"
+              className="shopee-order-btn-primary"
               style={{
-                background: '#2563eb',
-                color: '#fff',
-                padding: '8px 14px',
                 fontSize: '12px',
                 fontWeight: 700,
                 borderRadius: '8px',
+                padding: '6px 14px',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
@@ -539,11 +561,11 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
             <button
               type="button"
               onClick={handleChatShipper}
-              className="shopee-btn shopee-btn-secondary"
+              className="shopee-order-btn-outline"
               style={{
-                padding: '8px 14px',
+                padding: '6px 14px',
                 fontSize: '12px',
-                fontWeight: 700,
+                fontWeight: 600,
                 borderRadius: '8px',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -557,18 +579,19 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
         </div>
 
         {/* Destination & Safety Info */}
-        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+        <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <MapPinIcon size={13} />
+            <MapPinIcon size={13} color="#2563eb" />
             <span><strong>Địa chỉ giao tới:</strong> {customerAddress}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginTop: '4px' }}>
-            <ShieldCheckIcon size={13} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <ShieldCheckIcon size={13} color="#15803d" style={{ flexShrink: 0, marginTop: '2px' }} />
             <em>
-              Đơn hàng được bảo hiểm 100% bởi Fullstack E-Commerce Care & {carrier}. Vui lòng kiểm tra
+              Đơn hàng được bảo hiểm 100% bởi Shopee Care & {carrier}. Vui lòng kiểm tra
               kiện hàng còn nguyên tem phong niêm phong trước khi nhận.
             </em>
           </div>
+        </div>
         </div>
       </div>
     </div>

@@ -1,14 +1,27 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { ReturnIcon, CheckIcon } from './OrdersIcons';
+import { ReturnIcon, CheckIcon, ShieldCheckIcon, PackageIcon } from './OrdersIcons';
 
 const RETURN_REASONS = [
-  'Hàng bị lỗi kỹ thuật / Không hoạt động',
-  'Hàng bị bể vỡ, móp méo trong quá trình giao',
-  'Giao sai sản phẩm / sai phân loại (màu sắc, kích thước)',
-  'Sản phẩm khác xa so với hình ảnh & mô tả',
+  'Hàng bị lỗi kỹ thuật / Không hoạt động được',
+  'Hàng bị bể vỡ, móp méo hoặc hư hỏng do vận chuyển',
+  'Giao sai sản phẩm / sai phân loại (màu sắc, kích thước, dung lượng)',
+  'Sản phẩm khác xa so với hình ảnh & mô tả thực tế của Shop',
+  'Thiếu linh kiện, phụ kiện hoặc quà tặng đi kèm',
   'Nghi ngờ hàng giả, hàng nhái kém chất lượng',
-  'Đổi ý, không còn nhu cầu sử dụng sản phẩm',
+  'Hàng đã qua sử dụng, có dấu hiệu bóc tem niêm phong',
+  'Đổi ý, không còn nhu cầu sử dụng (Sản phẩm còn nguyên seal)',
+];
+
+const VIETNAM_BANKS = [
+  { code: 'Vietcombank', name: 'Vietcombank - Ngân hàng Ngoại Thương VN' },
+  { code: 'MBBank', name: 'MBBank - Ngân hàng Quân Đội' },
+  { code: 'Techcombank', name: 'Techcombank - Kỹ Thương VN' },
+  { code: 'VPBank', name: 'VPBank - Việt Nam Thịnh Vượng' },
+  { code: 'ACB', name: 'ACB - Ngân hàng Á Châu' },
+  { code: 'BIDV', name: 'BIDV - Đầu Tư & Phát Triển VN' },
+  { code: 'VietinBank', name: 'VietinBank - Công Thương VN' },
+  { code: 'TPBank', name: 'TPBank - Tiên Phong' },
 ];
 
 export default function ReturnRequestModal({ order, onClose, onSubmit }) {
@@ -20,16 +33,78 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
   const [note, setNote] = useState('');
-  const [filesMock, setFilesMock] = useState(['anh_san_pham_loi_1.jpg']);
+  const [images, setImages] = useState([]);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const firstItem = order.items?.[0] || {
+    name: order.productName || 'Sản phẩm mua sắm tại Shopee',
+    quantity: 1,
+    image: order.productImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200',
+  };
+
+  const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    setErrorMsg('');
+    const newItems = files.map((file, idx) => ({
+      id: `${Date.now()}-${idx}`,
+      name: file.name,
+      size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+      url: URL.createObjectURL(file),
+      file,
+    }));
+
+    setImages((prev) => [...prev, ...newItems].slice(0, 5));
+  };
+
+  const handleRemoveImage = (idToRemove) => {
+    setImages((prev) => prev.filter((item) => item.id !== idToRemove));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setErrorMsg('');
+
+    // Ràng buộc 1: Mô tả chi tiết không được trống và tối thiểu 10 ký tự
+    if (!note.trim()) {
+      setErrorMsg('⚠️ Vui lòng nhập mô tả chi tiết tình trạng sản phẩm gặp sự cố!');
+      return;
+    }
+
+    if (note.trim().length < 10) {
+      setErrorMsg(`⚠️ Mô tả quá ngắn (${note.trim().length}/10 ký tự). Vui lòng nhập tối thiểu 10 ký tự để Shopee xử lý nhanh chóng!`);
+      return;
+    }
+
+    // Ràng buộc 2: Bắt buộc cung cấp ít nhất 1 hình ảnh hoặc video bằng chứng
+    if (images.length === 0) {
+      setErrorMsg('⚠️ Bắt buộc tải lên ít nhất 1 hình ảnh hoặc video bằng chứng thực tế về tình trạng lỗi/hư hỏng của sản phẩm!');
+      return;
+    }
+
+    // Ràng buộc 3: Nếu chọn hoàn qua ngân hàng, phải điền số tài khoản và chủ tài khoản
+    if (refundMethod === 'bank') {
+      if (!accountNumber.trim()) {
+        setErrorMsg('⚠️ Vui lòng nhập số tài khoản ngân hàng nhận tiền hoàn!');
+        return;
+      }
+      if (!accountName.trim()) {
+        setErrorMsg('⚠️ Vui lòng nhập tên chủ tài khoản ngân hàng (không dấu)!');
+        return;
+      }
+    }
+
     onSubmit({
       orderId: order.orderId,
       reason,
-      refundMethod: refundMethod === 'wallet' ? 'Ví điện tử Fullstack E-Commerce' : `Ngân hàng ${bankName} (${accountNumber})`,
-      note,
+      refundMethod:
+        refundMethod === 'wallet'
+          ? 'Ví ShopeePay (Hoàn tức thì)'
+          : `Ngân hàng ${bankName} (${accountNumber} - ${accountName.toUpperCase()})`,
+      note: note.trim(),
       refundAmount: order.total,
+      images: images.map((img) => img.name),
     });
   };
 
@@ -40,14 +115,15 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
         position: 'fixed',
         inset: 0,
         zIndex: 1100,
-        background: 'rgba(0, 0, 0, 0.7)',
-        backdropFilter: 'blur(4px)',
+        background: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(6px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '16px',
+        padding: '32px 16px',
         overflowY: 'auto',
-        animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
+        boxSizing: 'border-box',
+        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -56,98 +132,211 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
       <div
         className="anim-modal-content"
         style={{
-          background: 'var(--bg-card, #ffffff)',
-          color: 'var(--text-primary, #0f172a)',
+          background: '#ffffff',
+          color: '#0f172a',
           borderRadius: '16px',
           width: '100%',
-          maxWidth: '540px',
-          padding: '28px 24px',
-          boxShadow: 'var(--shadow-modal, 0 20px 40px rgba(0,0,0,0.25))',
-          border: '1px solid var(--border-medium, #e2e8f0)',
+          maxWidth: '580px',
+          maxHeight: '86vh',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
+          border: '1px solid #e2e8f0',
           position: 'relative',
+          overflow: 'hidden',
+          margin: 'auto',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         }}
       >
         {/* Header */}
         <div
           style={{
+            padding: '16px 22px',
+            borderBottom: '1px solid #f1f5f9',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '20px',
-            paddingBottom: '14px',
-            borderBottom: '1px solid var(--border-light, #f1f5f9)',
+            background: '#f8fafc',
+            flexShrink: 0,
           }}
         >
-          <div>
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ReturnIcon size={20} color="#2563eb" /> Yêu Cầu Trả Hàng & Hoàn Tiền
-            </h3>
-            <span style={{ fontSize: '12.5px', color: '#64748b' }}>
-              Mã đơn hàng: <strong>{order.orderId}</strong> · Shop: {order.shopName}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: '#eff6ff',
+                color: '#2563eb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <ReturnIcon size={18} color="#2563eb" />
+            </div>
+            <div>
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '16px',
+                  fontWeight: 800,
+                  color: '#0f172a',
+                  letterSpacing: '-0.2px',
+                }}
+              >
+                Yêu Cầu Trả Hàng & Hoàn Tiền
+              </h3>
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '1px' }}>
+                Mã đơn hàng: <strong style={{ color: '#0f172a' }}>#{order.orderId}</strong> · Shop: {order.shopName || 'Shopee Mall'}
+              </div>
+            </div>
           </div>
 
           <button
             type="button"
             onClick={onClose}
             style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '18px',
+              background: '#ffffff',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              width: '30px',
+              height: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
               cursor: 'pointer',
               color: '#64748b',
+              transition: 'all 0.15s ease',
             }}
           >
             ✕
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          {/* Order Item Brief */}
+        {/* Scrollable Form Body */}
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            padding: '22px 24px',
+            overflowY: 'auto',
+            flex: 1,
+            boxSizing: 'border-box',
+          }}
+        >
+          {/* Validation Error Banner */}
+          {errorMsg && (
+            <div
+              style={{
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                color: '#b91c1c',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                marginBottom: '16px',
+                lineHeight: 1.4,
+              }}
+            >
+              {errorMsg}
+            </div>
+          )}
+
+          {/* Product Summary Box - Styled like outside order card */}
           <div
             style={{
               background: '#f8fafc',
-              borderRadius: '8px',
-              padding: '12px 16px',
-              marginBottom: '18px',
+              borderRadius: '10px',
+              padding: '12px 14px',
+              marginBottom: '16px',
               border: '1px solid #e2e8f0',
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
             }}
           >
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
-                {order.items?.[0]?.name || 'Sản phẩm mua sắm'}
-              </div>
-              <div style={{ fontSize: '12px', color: '#64748b' }}>
-                Số lượng: {order.items?.[0]?.quantity || 1}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+              <img
+                src={firstItem.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200'}
+                alt={firstItem.name}
+                style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '8px',
+                  objectFit: 'cover',
+                  border: '1px solid #cbd5e1',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {firstItem.name}
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px' }}>
+                  {firstItem.variant ? `Phân loại: ${firstItem.variant} · ` : ''}
+                  Số lượng: x{firstItem.quantity || 1}
+                </div>
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '11px', color: '#64748b' }}>Số tiền hoàn dự kiến:</div>
+
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontSize: '11px', color: '#64748b' }}>Tiền hoàn dự kiến:</div>
               <div style={{ fontSize: '15px', fontWeight: 800, color: '#2563eb' }}>
                 {formatCurrency(order.total)}
               </div>
             </div>
           </div>
 
+          {/* Shopee Guarantee Notice */}
+          <div
+            style={{
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: '8px',
+              padding: '10px 12px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <ShieldCheckIcon size={16} color="#15803d" style={{ flexShrink: 0 }} />
+            <div style={{ fontSize: '11.5px', color: '#166534', lineHeight: 1.4 }}>
+              <strong>Shopee Đảm Bảo:</strong> Miễn phí 100% cước thu hồi hàng tại nhà bởi SPX Express. Yêu cầu của bạn được bảo vệ minh bạch.
+            </div>
+          </div>
+
           {/* Reason Select */}
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>
-              Lý do bạn muốn trả hàng:
+            <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, marginBottom: '6px', color: '#334155' }}>
+              Lý do bạn muốn trả hàng / hoàn tiền <span style={{ color: '#ef4444' }}>*</span>:
             </label>
             <select
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={(e) => {
+                setReason(e.target.value);
+                setErrorMsg('');
+              }}
               style={{
                 width: '100%',
-                padding: '10px 12px',
+                padding: '9px 12px',
                 borderRadius: '8px',
-                border: '1px solid var(--border-medium, #cbd5e1)',
-                background: 'var(--bg-card, #ffffff)',
-                color: 'var(--text-primary, #0f172a)',
-                fontSize: '13.5px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#0f172a',
+                fontSize: '13px',
                 outline: 'none',
               }}
             >
@@ -161,21 +350,21 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
 
           {/* Refund Method Radio */}
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>
-              Phương thức nhận tiền hoàn:
+            <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, marginBottom: '6px', color: '#334155' }}>
+              Phương thức nhận tiền hoàn <span style={{ color: '#ef4444' }}>*</span>:
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <label
                 style={{
-                  border: `2px solid ${refundMethod === 'wallet' ? '#2563eb' : '#cbd5e1'}`,
+                  border: `1.5px solid ${refundMethod === 'wallet' ? '#2563eb' : '#cbd5e1'}`,
                   background: refundMethod === 'wallet' ? '#eff6ff' : '#ffffff',
-                  padding: '10px 12px',
+                  padding: '9px 12px',
                   borderRadius: '8px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  fontSize: '13px',
+                  fontSize: '12.5px',
                   fontWeight: 600,
                   color: refundMethod === 'wallet' ? '#2563eb' : '#334155',
                   transition: 'all 0.15s ease',
@@ -186,22 +375,26 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
                   name="refundMethod"
                   value="wallet"
                   checked={refundMethod === 'wallet'}
-                  onChange={() => setRefundMethod('wallet')}
+                  onChange={() => {
+                    setRefundMethod('wallet');
+                    setErrorMsg('');
+                  }}
+                  style={{ accentColor: '#2563eb' }}
                 />
-                <span>Ví Fullstack E-Commerce (Tức thì)</span>
+                <span>Ví ShopeePay (Tức thì)</span>
               </label>
 
               <label
                 style={{
-                  border: `2px solid ${refundMethod === 'bank' ? '#2563eb' : '#cbd5e1'}`,
+                  border: `1.5px solid ${refundMethod === 'bank' ? '#2563eb' : '#cbd5e1'}`,
                   background: refundMethod === 'bank' ? '#eff6ff' : '#ffffff',
-                  padding: '10px 12px',
+                  padding: '9px 12px',
                   borderRadius: '8px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  fontSize: '13px',
+                  fontSize: '12.5px',
                   fontWeight: 600,
                   color: refundMethod === 'bank' ? '#2563eb' : '#334155',
                   transition: 'all 0.15s ease',
@@ -212,7 +405,11 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
                   name="refundMethod"
                   value="bank"
                   checked={refundMethod === 'bank'}
-                  onChange={() => setRefundMethod('bank')}
+                  onChange={() => {
+                    setRefundMethod('bank');
+                    setErrorMsg('');
+                  }}
+                  style={{ accentColor: '#2563eb' }}
                 />
                 <span>Tài khoản Ngân hàng</span>
               </label>
@@ -223,18 +420,18 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
           {refundMethod === 'bank' && (
             <div
               style={{
-                background: 'var(--bg-muted, #f8fafc)',
-                padding: '14px',
+                background: '#f8fafc',
+                padding: '12px 14px',
                 borderRadius: '8px',
-                border: '1px solid var(--border-light, #e2e8f0)',
+                border: '1px solid #e2e8f0',
                 marginBottom: '16px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '10px',
+                gap: '8px',
               }}
             >
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, marginBottom: '4px', color: '#475569' }}>
                   Ngân hàng thụ hưởng:
                 </label>
                 <select
@@ -242,25 +439,25 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
                   onChange={(e) => setBankName(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '8px',
+                    padding: '7px 10px',
                     borderRadius: '6px',
-                    border: '1px solid var(--border-medium)',
-                    background: 'var(--bg-card)',
-                    color: 'var(--text-primary)',
-                    fontSize: '13px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#0f172a',
+                    fontSize: '12.5px',
                   }}
                 >
-                  <option value="Vietcombank">Vietcombank - Ngân hàng Ngoại Thương</option>
-                  <option value="MBBank">MBBank - Ngân hàng Quân Đội</option>
-                  <option value="Techcombank">Techcombank - Kỹ Thương</option>
-                  <option value="VPBank">VPBank - Việt Nam Thịnh Vượng</option>
-                  <option value="ACB">ACB - Á Châu</option>
+                  {VIETNAM_BANKS.map((b) => (
+                    <option key={b.code} value={b.code}>
+                      {b.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, marginBottom: '4px', color: '#475569' }}>
                     Số tài khoản:
                   </label>
                   <input
@@ -268,37 +465,43 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
                     required
                     placeholder="Ví dụ: 1029384756"
                     value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
+                    onChange={(e) => {
+                      setAccountNumber(e.target.value);
+                      setErrorMsg('');
+                    }}
                     style={{
                       width: '100%',
-                      padding: '8px',
+                      padding: '7px 10px',
                       borderRadius: '6px',
-                      border: '1px solid var(--border-medium)',
-                      background: 'var(--bg-card)',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px',
-                      boxBox: 'border-box',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#0f172a',
+                      fontSize: '12.5px',
+                      boxSizing: 'border-box',
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>
-                    Chủ tài khoản:
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, marginBottom: '4px', color: '#475569' }}>
+                    Chủ tài khoản (Không dấu):
                   </label>
                   <input
                     type="text"
                     required
                     placeholder="NGUYEN VAN A"
                     value={accountName}
-                    onChange={(e) => setAccountName(e.target.value.toUpperCase())}
+                    onChange={(e) => {
+                      setAccountName(e.target.value.toUpperCase());
+                      setErrorMsg('');
+                    }}
                     style={{
                       width: '100%',
-                      padding: '8px',
+                      padding: '7px 10px',
                       borderRadius: '6px',
-                      border: '1px solid var(--border-medium)',
-                      background: 'var(--bg-card)',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#0f172a',
+                      fontSize: '12.5px',
                       boxSizing: 'border-box',
                     }}
                   />
@@ -307,94 +510,193 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
             </div>
           )}
 
-          {/* Description */}
+          {/* Description Textarea with strict character count */}
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '4px' }}>
-              Mô tả chi tiết tình trạng sản phẩm:
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>
+                Mô tả chi tiết tình trạng sản phẩm <span style={{ color: '#ef4444' }}>*</span>:
+              </label>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: note.trim().length >= 10 ? '#059669' : '#e11d48',
+                }}
+              >
+                {note.trim().length >= 10 ? '✓ Đạt yêu cầu' : `Tối thiểu 10 ký tự (${note.trim().length}/10)`}
+              </span>
+            </div>
             <textarea
-              rows="3"
-              required
-              placeholder="Vui lòng cung cấp chi tiết tình trạng lỗi hoặc vấn đề của sản phẩm..."
+              rows={3}
+              placeholder="Vui lòng mô tả cụ thể tình trạng lỗi, bao bì, mã vận đơn để Shop và Shopee xử lý khiếu nại nhanh nhất..."
               value={note}
-              onChange={(e) => setNote(e.target.value)}
+              onChange={(e) => {
+                setNote(e.target.value);
+                setErrorMsg('');
+              }}
               style={{
                 width: '100%',
-                padding: '10px 12px',
+                padding: '9px 12px',
                 borderRadius: '8px',
-                border: '1px solid var(--border-medium, #cbd5e1)',
-                background: 'var(--bg-card, #ffffff)',
-                color: 'var(--text-primary, #0f172a)',
-                fontSize: '13px',
+                border: `1px solid ${note.trim().length > 0 && note.trim().length < 10 ? '#fca5a5' : '#cbd5e1'}`,
+                background: '#ffffff',
+                color: '#0f172a',
+                fontSize: '12.5px',
                 boxSizing: 'border-box',
+                outline: 'none',
               }}
             />
           </div>
 
-          {/* Evidence Attachments */}
-          <div style={{ marginBottom: '22px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>
-              Hình ảnh / Video bằng chứng:
-            </label>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              {filesMock.map((file, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    background: 'var(--bg-muted, #f1f5f9)',
-                    border: '1px solid var(--border-medium, #cbd5e1)',
-                    borderRadius: '6px',
-                    padding: '6px 10px',
-                    fontSize: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
-                >
-                  <span>📷 {file}</span>
-                </div>
-              ))}
-              <label
+          {/* Image & Video Evidence (Mandatory - Ràng buộc cấp hình ảnh) */}
+          <div style={{ marginBottom: '18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>
+                Hình ảnh / Video bằng chứng thực tế <span style={{ color: '#ef4444' }}>* (Bắt buộc)</span>:
+              </label>
+              <span
                 style={{
-                  background: '#ffffff',
-                  border: '1px dashed #2563eb',
-                  color: '#2563eb',
-                  borderRadius: '6px',
-                  padding: '6px 12px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'inline-block',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: images.length >= 1 ? '#059669' : '#e11d48',
                 }}
               >
-                + Thêm ảnh
+                {images.length >= 1 ? `✓ Đã đính kèm ${images.length}/5 ảnh` : 'Chưa có ảnh bằng chứng'}
+              </span>
+            </div>
+
+            {/* Thumbnail preview list */}
+            {images.length > 0 && (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
+                  gap: '8px',
+                  marginBottom: '8px',
+                }}
+              >
+                {images.map((img) => (
+                  <div
+                    key={img.id}
+                    style={{
+                      position: 'relative',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      height: '76px',
+                      background: '#f8fafc',
+                    }}
+                  >
+                    <img
+                      src={img.url}
+                      alt={img.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(img.id)}
+                      title="Xóa ảnh này"
+                      style={{
+                        position: 'absolute',
+                        top: '3px',
+                        right: '3px',
+                        background: 'rgba(239, 68, 68, 0.9)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '18px',
+                        height: '18px',
+                        fontSize: '10px',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      ✕
+                    </button>
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        insetInline: 0,
+                        background: 'rgba(15, 23, 42, 0.7)',
+                        color: '#fff',
+                        fontSize: '9px',
+                        padding: '1px 3px',
+                        textAlign: 'center',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {img.size}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Upload Action Button */}
+            {images.length < 5 && (
+              <label
+                style={{
+                  border: `1.5px dashed ${images.length === 0 ? '#ef4444' : '#2563eb'}`,
+                  background: images.length === 0 ? '#fff1f2' : '#eff6ff',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <span style={{ fontSize: '18px' }}>📷</span>
+                <div>
+                  <span style={{ fontSize: '12.5px', fontWeight: 700, color: images.length === 0 ? '#be123c' : '#1d4ed8' }}>
+                    {images.length === 0 ? 'Tải lên hình ảnh bằng chứng khuyết tật *' : '+ Thêm hình ảnh / video khác'}
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#64748b', marginLeft: '6px' }}>
+                    (Tối đa 5 ảnh, định dạng JPG, PNG)
+                  </span>
+                </div>
                 <input
                   type="file"
+                  multiple
+                  accept="image/*,video/*"
                   style={{ display: 'none' }}
-                  onChange={(e) => {
-                    if (e.target.files?.[0]) {
-                      setFilesMock((prev) => [...prev, e.target.files[0].name]);
-                    }
-                  }}
+                  onChange={handleFileUpload}
                 />
               </label>
-            </div>
+            )}
           </div>
 
-          {/* Submit & Cancel */}
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+          {/* Action buttons at footer */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              justifyContent: 'flex-end',
+              paddingTop: '14px',
+              borderTop: '1px solid #f1f5f9',
+            }}
+          >
             <button
               type="button"
-              className="shopee-btn shopee-btn-secondary"
+              className="shopee-order-btn-outline"
               onClick={onClose}
               style={{
-                padding: '10px 20px',
-                fontSize: '13px',
-                background: '#f8fafc',
-                border: '1px solid #cbd5e1',
-                color: '#475569',
+                padding: '7px 18px',
+                fontSize: '12.5px',
                 borderRadius: '8px',
-                cursor: 'pointer',
                 fontWeight: 600,
               }}
             >
@@ -402,22 +704,18 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
             </button>
             <button
               type="submit"
+              className="shopee-order-btn-primary"
               style={{
-                fontWeight: 700,
-                padding: '10px 24px',
-                fontSize: '13px',
-                color: '#ffffff',
-                border: 'none',
+                padding: '7px 22px',
+                fontSize: '12.5px',
                 borderRadius: '8px',
-                cursor: 'pointer',
-                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
-                display: 'flex',
+                fontWeight: 700,
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '6px',
               }}
             >
-              <CheckIcon size={14} color="#ffffff" /> Xác Nhận Gửi Yêu Cầu
+              <CheckIcon size={13} color="#ffffff" /> Xác Nhận Gửi Yêu Cầu
             </button>
           </div>
         </form>

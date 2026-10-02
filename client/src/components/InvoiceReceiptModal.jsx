@@ -13,9 +13,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
     if (orderId) {
       getOrderInvoice(orderId)
         .then((data) => {
-          if (data) {
-            setLiveInvoice(data);
-          }
+          if (data) setLiveInvoice(data);
         })
         .catch((err) => {
           console.warn('Could not load live invoice:', err);
@@ -28,10 +26,10 @@ export default function InvoiceReceiptModal({ order, onClose }) {
   };
 
   const company = liveInvoice?.company || liveInvoice?.seller || {};
-  const companyName = company.legalName || company.companyName || 'CÔNG TY TNHH MINI SHOPEE VIỆT NAM';
+  const companyName = company.legalName || company.companyName || 'CÔNG TY TNHH SHOPEE VIỆT NAM';
   const taxCode = company.taxCode || '0318924019';
   const templateCode = liveInvoice?.templateCode || '01GTKT0/001';
-  const invoiceSerial = liveInvoice?.invoiceSerial || '1C26MMS';
+  const invoiceSerial = liveInvoice?.invoiceSerial || '1C26MS';
 
   const orderIdStr = String(order.orderId || order._id || order.id || '999999');
   const invoiceNo =
@@ -44,7 +42,8 @@ export default function InvoiceReceiptModal({ order, onClose }) {
     : new Date().toLocaleDateString('vi-VN');
 
   const buyer = liveInvoice?.buyer || {};
-  const buyerName = buyer.fullName || buyer.name || order.customerName || 'Khách Hàng';
+  const rawBuyerName = buyer.fullName || buyer.name || order.customerName || order.recipientName || 'Khách Hàng Shopee';
+  const buyerName = rawBuyerName.replace(/Mini\s*Shopee/gi, 'Shopee');
   const buyerPhone = buyer.phone || order.phone || '0988 123 456';
   const buyerAddress =
     buyer.address ||
@@ -84,14 +83,13 @@ export default function InvoiceReceiptModal({ order, onClose }) {
   const qrUrl =
     liveInvoice?.qrCodeUrl ||
     liveInvoice?.qrCodeString ||
-    `https://minishopee.vn/invoice/verify?id=${orderIdStr}&serial=${invoiceSerial}&mst=${taxCode}`;
+    `https://shopee.vn/invoice/verify?id=${orderIdStr}&serial=${invoiceSerial}&mst=${taxCode}`;
 
   const signatureDigest =
     typeof liveInvoice?.digitalSignature === 'string'
       ? liveInvoice.digitalSignature
       : liveInvoice?.xmlPayloadDigest ||
-        'SHA256:MINI-SHOPEE-E-INVOICE-0318924019-VALIDATED-SECURE';
-
+        'SHA256:SHOPEE-E-INVOICE-0318924019-VALIDATED-SECURE';
 
   return (
     <div
@@ -100,14 +98,15 @@ export default function InvoiceReceiptModal({ order, onClose }) {
         position: 'fixed',
         inset: 0,
         zIndex: 1050,
-        background: 'rgba(0, 0, 0, 0.7)',
-        backdropFilter: 'blur(5px)',
+        background: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(6px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '16px',
+        padding: '32px 16px',
         overflowY: 'auto',
-        animation: 'modalOverlayFadeIn 0.22s ease-out forwards',
+        boxSizing: 'border-box',
+        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -117,69 +116,77 @@ export default function InvoiceReceiptModal({ order, onClose }) {
         className="invoice-printable-container anim-modal-content"
         style={{
           background: '#ffffff',
-          color: '#1e293b',
-          borderRadius: '12px',
+          color: '#0f172a',
+          borderRadius: '16px',
           width: '100%',
           maxWidth: '680px',
-          padding: '36px 32px',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.25)',
+          maxHeight: '86vh',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
+          border: '1px solid #e2e8f0',
           position: 'relative',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          boxSizing: 'border-box',
+          overflow: 'hidden',
+          margin: 'auto',
         }}
       >
-        {/* Actions bar (hidden in print) */}
+        {/* Navigation & Actions Top Bar (hidden in print) */}
         <div
           className="no-print"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '24px',
-            paddingBottom: '16px',
-            borderBottom: '1px solid #e2e8f0',
+            padding: '14px 22px',
+            borderBottom: '1px solid #f1f5f9',
+            background: '#f8fafc',
+            flexShrink: 0,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ReceiptIcon size={20} color="#2563eb" />
-            <span style={{ fontWeight: 800, fontSize: '15px', color: '#0f172a' }}>
-              HÓA ĐƠN ĐIỆN TỬ & BIÊN LAI GIAO HÀNG
+            <ReceiptIcon size={18} color="#2563eb" />
+            <span style={{ fontWeight: 800, fontSize: '14px', color: '#0f172a', letterSpacing: '-0.2px' }}>
+              Hóa Đơn Điện Tử & Biên Lai VAT
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               type="button"
               onClick={handlePrint}
               style={{
-                background: '#2563eb',
+                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: '6px',
-                padding: '8px 16px',
+                borderRadius: '8px',
+                padding: '7px 15px',
                 fontWeight: 700,
-                fontSize: '13px',
+                fontSize: '12.5px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 1px 2px rgba(37, 99, 235, 0.2)',
+                gap: '6px',
+                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
                 transition: 'all 0.15s ease',
               }}
             >
-              <PrinterIcon size={14} color="#ffffff" /> In Hóa Đơn / Lưu PDF
+              <PrinterIcon size={13} color="#ffffff" /> In Hóa Đơn / Lưu PDF
             </button>
             <button
               type="button"
               onClick={onClose}
               style={{
-                background: '#f1f5f9',
+                background: '#ffffff',
                 color: '#475569',
                 border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                padding: '8px 14px',
+                borderRadius: '8px',
+                padding: '7px 14px',
                 fontWeight: 600,
-                fontSize: '13px',
+                fontSize: '12.5px',
                 cursor: 'pointer',
+                transition: 'all 0.15s ease',
               }}
             >
               ✕ Đóng
@@ -187,276 +194,301 @@ export default function InvoiceReceiptModal({ order, onClose }) {
           </div>
         </div>
 
-        {/* Invoice Header */}
+        {/* Scrollable invoice document paper with comfortable breathing room */}
         <div
+          className="invoice-scroll-body"
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginBottom: '24px',
-            gap: '16px',
-            flexWrap: 'wrap',
+            padding: '24px 28px',
+            overflowY: 'auto',
+            flex: 1,
+            boxSizing: 'border-box',
           }}
         >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <div
+          {/* Invoice Header */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginBottom: '20px',
+              paddingBottom: '16px',
+              borderBottom: '2px solid #f1f5f9',
+              gap: '16px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <div
+                  style={{
+                    background: '#2563eb',
+                    color: '#fff',
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 900,
+                    fontSize: '16px',
+                  }}
+                >
+                  S
+                </div>
+                <span style={{ fontSize: '16px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.4px' }}>
+                  {companyName}
+                </span>
+              </div>
+              <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
+                Mã số thuế (MST): <strong style={{ color: '#0f172a' }}>{taxCode}</strong><br />
+                Địa chỉ: {company.address || 'Tòa nhà Capital Tower, 109 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội'}<br />
+                Hotline: 1900-1221 · {company.email || 'vat-invoice@shopee.enterprise.vn'}
+              </div>
+            </div>
+
+            <div style={{ textAlign: 'right', minWidth: '200px' }}>
+              <div style={{ fontSize: '15px', fontWeight: 900, color: '#2563eb', marginBottom: '4px' }}>
+                HÓA ĐƠN GIÁ TRỊ GIA TĂNG (VAT)
+              </div>
+              <div style={{ fontSize: '12px', color: '#475569', marginBottom: '2px' }}>
+                Mẫu số: <strong>{templateCode}</strong> · Ký hiệu: <strong>{invoiceSerial}</strong>
+              </div>
+              <div style={{ fontSize: '12px', color: '#0f172a', marginBottom: '2px' }}>
+                Số hóa đơn: <strong>{invoiceNo}</strong>
+              </div>
+              <div style={{ fontSize: '11.5px', color: '#64748b', marginBottom: '6px' }}>
+                Ngày lập: {invoiceDate}
+              </div>
+              <span
                 style={{
-                  background: '#2563eb',
-                  color: '#fff',
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 900,
-                  fontSize: '18px',
+                  gap: '4px',
+                  background: '#f0fdf4',
+                  color: '#15803d',
+                  border: '1px solid #bbf7d0',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '4px',
                 }}
               >
-                S
-              </div>
-              <span style={{ fontSize: '17px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px' }}>
-                {companyName}
+                ✓ ĐÃ KÝ ĐIỆN TỬ
               </span>
             </div>
-            <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.6' }}>
-              Mã số thuế (MST): <strong style={{ color: '#0f172a' }}>{taxCode}</strong><br />
-              Địa chỉ: {company.address || 'Tòa nhà Capital Tower, 109 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội'}<br />
-              Hotline: 1900-1221 · {company.email || 'vat-invoice@shopee.enterprise.vn'}
+          </div>
+
+          {/* Customer & Order Metadata */}
+          <div
+            style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              padding: '14px 16px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '14px',
+              marginBottom: '18px',
+              fontSize: '12px',
+            }}
+          >
+            <div>
+              <div style={{ color: '#64748b', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
+                Đơn Vị Mua Hàng (Buyer)
+              </div>
+              <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '2px', fontSize: '13px' }}>{buyerName}</div>
+              <div style={{ color: '#475569', marginBottom: '2px' }}>Điện thoại: {buyerPhone}</div>
+              <div style={{ color: '#475569', marginBottom: '2px' }}>Địa chỉ: {buyerAddress}</div>
+              <div style={{ color: '#475569' }}>MST: {buyerTaxCode}</div>
+            </div>
+
+            <div>
+              <div style={{ color: '#64748b', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
+                Giao Nhận & Thanh Toán
+              </div>
+              <div style={{ color: '#0f172a', marginBottom: '2px' }}>
+                Hình thức: <strong>{order.paymentMethod || 'Thanh toán khi nhận hàng (COD)'}</strong>
+              </div>
+              <div style={{ color: '#0f172a', marginBottom: '2px' }}>
+                Vận chuyển: <strong>SPX Express</strong>
+              </div>
+              <div style={{ color: '#0f172a' }}>
+                Mã vận đơn SPX: <strong>{order.trackingCode || `SPX-VN-${orderIdStr.slice(-8).toUpperCase()}`}</strong>
+              </div>
             </div>
           </div>
 
-          <div style={{ textAlign: 'right', minWidth: '220px' }}>
-            <div style={{ fontSize: '16px', fontWeight: 900, color: '#2563eb', marginBottom: '4px' }}>
-              HÓA ĐƠN GIÁ TRỊ GIA TĂNG (VAT)
-            </div>
-            <div style={{ fontSize: '12px', color: '#475569', marginBottom: '2px' }}>
-              Mẫu số: <strong>{templateCode}</strong> · Ký hiệu: <strong>{invoiceSerial}</strong>
-            </div>
-            <div style={{ fontSize: '12.5px', color: '#0f172a', marginBottom: '2px' }}>
-              Số hóa đơn: <strong>{invoiceNo}</strong>
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px' }}>
-              Ngày lập: {invoiceDate}
-            </div>
-            <span
+          {/* 8% VAT Itemized Table with horizontal scrolling protection */}
+          <div
+            style={{
+              width: '100%',
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              marginBottom: '18px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+            }}
+          >
+            <table
               style={{
-                display: 'inline-block',
-                background: '#dcfce7',
-                color: '#15803d',
-                fontSize: '11px',
-                fontWeight: 700,
-                padding: '2px 8px',
-                borderRadius: '4px',
+                width: '100%',
+                minWidth: '560px',
+                borderCollapse: 'collapse',
+                fontSize: '12px',
               }}
             >
-              ✓ ĐÃ KÝ ĐIỆN TỬ
-            </span>
-          </div>
-        </div>
-
-        {/* Customer & Order Metadata */}
-        <div
-          style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            padding: '14px 18px',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '16px',
-            marginBottom: '20px',
-            fontSize: '12.5px',
-          }}
-        >
-          <div>
-            <div style={{ color: '#64748b', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
-              Đơn Vị Mua Hàng (Buyer)
-            </div>
-            <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>{buyerName}</div>
-            <div style={{ color: '#475569' }}>Điện thoại: {buyerPhone}</div>
-            <div style={{ color: '#475569' }}>Địa chỉ: {buyerAddress}</div>
-            <div style={{ color: '#475569' }}>MST người mua: {buyerTaxCode}</div>
-          </div>
-
-          <div>
-            <div style={{ color: '#64748b', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
-              Thông Tin Giao Nhận & Thanh Toán
-            </div>
-            <div style={{ color: '#0f172a', marginBottom: '2px' }}>
-              Hình thức thanh toán: <strong>{order.paymentMethod || 'Thanh toán khi nhận hàng (COD)'}</strong>
-            </div>
-            <div style={{ color: '#0f172a', marginBottom: '2px' }}>
-              Đơn vị vận chuyển: <strong>SPX Express</strong>
-            </div>
-            <div style={{ color: '#0f172a' }}>
-              Mã vận đơn SPX: <strong>{order.trackingCode || `SPX-VN-${orderIdStr.slice(-8).toUpperCase()}`}</strong>
-            </div>
-          </div>
-        </div>
-
-        {/* 8% VAT Itemized Table */}
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            marginBottom: '20px',
-            fontSize: '12.5px',
-          }}
-        >
-          <thead>
-            <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
-              <th style={{ padding: '8px 10px', fontWeight: 700, width: '36px' }}>STT</th>
-              <th style={{ padding: '8px 10px', fontWeight: 700 }}>Tên Hàng Hóa, Dịch Vụ</th>
-              <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'center', width: '48px' }}>ĐVT</th>
-              <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'center', width: '48px' }}>SL</th>
-              <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'right', width: '105px' }}>Đơn Giá (Chưa VAT)</th>
-              <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'center', width: '60px' }}>Thuế Suất</th>
-              <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'right', width: '115px' }}>Thành Tiền</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item, idx) => {
-              const qty = item.quantity || 1;
-              const unitPriceNet = item.unitPrice || Math.round((item.price || item.rawPrice || 0) / 1.08);
-              const lineTotalNet = item.amount || (unitPriceNet * qty);
-              return (
-                <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '8px 10px', color: '#64748b' }}>{idx + 1}</td>
-                  <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>
-                    {item.name}
-                  </td>
-                  <td style={{ padding: '8px 10px', textAlign: 'center', color: '#64748b' }}>Cái</td>
-                  <td style={{ padding: '8px 10px', textAlign: 'center', color: '#0f172a' }}>{qty}</td>
-                  <td style={{ padding: '8px 10px', textAlign: 'right', color: '#475569' }}>
-                    {formatCurrency(unitPriceNet)}
-                  </td>
-                  <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#2563eb' }}>
-                    {item.vatRate || vatRate}
-                  </td>
-                  <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>
-                    {formatCurrency(lineTotalNet)}
-                  </td>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
+                  <th style={{ padding: '8px 10px', fontWeight: 700, width: '36px' }}>STT</th>
+                  <th style={{ padding: '8px 10px', fontWeight: 700 }}>Tên Hàng Hóa, Dịch Vụ</th>
+                  <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'center', width: '48px' }}>ĐVT</th>
+                  <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'center', width: '48px' }}>SL</th>
+                  <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'right', width: '105px' }}>Đơn Giá (Chưa VAT)</th>
+                  <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'center', width: '60px' }}>Thuế Suất</th>
+                  <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'right', width: '115px' }}>Thành Tiền</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {items.map((item, idx) => {
+                  const qty = item.quantity || 1;
+                  const unitPriceNet = item.unitPrice || Math.round((item.price || item.rawPrice || 0) / 1.08);
+                  const lineTotalNet = item.amount || (unitPriceNet * qty);
+                  return (
+                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '8px 10px', color: '#64748b' }}>{idx + 1}</td>
+                      <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>
+                        {item.name}
+                      </td>
+                      <td style={{ padding: '8px 10px', textAlign: 'center', color: '#64748b' }}>Cái</td>
+                      <td style={{ padding: '8px 10px', textAlign: 'center', color: '#0f172a' }}>{qty}</td>
+                      <td style={{ padding: '8px 10px', textAlign: 'right', color: '#475569' }}>
+                        {formatCurrency(unitPriceNet)}
+                      </td>
+                      <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#2563eb' }}>
+                        {item.vatRate || vatRate}
+                      </td>
+                      <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>
+                        {formatCurrency(lineTotalNet)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Calculation Summary & QR / Signature */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginBottom: '20px',
-            gap: '16px',
-            flexWrap: 'wrap',
-          }}
-        >
-          {/* QR Verification Code & Digital Signature */}
-          <div style={{ maxWidth: '330px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(qrUrl)}`}
-                alt="QR Tra Cứu Hóa Đơn VAT"
+          {/* Calculation Summary & QR / Signature */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginBottom: '18px',
+              gap: '16px',
+              flexWrap: 'wrap',
+            }}
+          >
+            {/* QR Verification Code & Digital Signature */}
+            <div style={{ maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(qrUrl)}`}
+                  alt="QR Tra Cứu Hóa Đơn VAT"
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '3px',
+                    background: '#fff',
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.4' }}>
+                  Quét mã QR để đối soát hóa đơn điện tử theo Nghị định 123/2020/NĐ-CP & Thông tư 78/2021/TT-BTC của Tổng Cục Thuế.
+                </div>
+              </div>
+
+              {/* Digital Signature Badge */}
+              <div
                 style={{
-                  width: '84px',
-                  height: '84px',
-                  border: '1px solid #cbd5e1',
+                  background: '#f8fafc',
+                  border: '1px dashed #94a3b8',
                   borderRadius: '6px',
-                  padding: '3px',
-                  background: '#fff',
+                  padding: '7px 10px',
+                  fontSize: '11px',
+                  color: '#334155',
                 }}
-              />
-              <div style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.4' }}>
-                Quét mã QR để tra cứu và đối soát hóa đơn điện tử theo Nghị định 123/2020/NĐ-CP của Tổng Cục Thuế.
+              >
+                <div style={{ fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <ShieldCheckIcon size={13} color="#15803d" /> ĐÃ KÝ ĐIỆN TỬ BỞI {companyName}
+                </div>
+                <div style={{ fontSize: '9.5px', color: '#64748b', wordBreak: 'break-all', marginTop: '2px' }}>
+                  Mã xác thực: {signatureDigest}
+                </div>
               </div>
             </div>
 
-            {/* Digital Signature Badge */}
-            <div
-              style={{
-                background: '#f8fafc',
-                border: '1px dashed #94a3b8',
-                borderRadius: '6px',
-                padding: '8px 10px',
-                fontSize: '11px',
-                color: '#334155',
-              }}
-            >
-              <div style={{ fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ShieldCheckIcon size={14} color="#15803d" /> ĐÃ KÝ ĐIỆN TỬ BỞI {companyName}
+            {/* VAT Totals Breakdown */}
+            <div style={{ width: '270px', display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
+                <span>Cộng tiền hàng (chưa VAT):</span>
+                <strong>{formatCurrency(netSubtotal)}</strong>
               </div>
-              <div style={{ fontSize: '10px', color: '#64748b', wordBreak: 'break-all', marginTop: '2px' }}>
-                Mã chữ ký: {signatureDigest}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#2563eb' }}>
+                <span>Thuế suất GTGT (VAT):</span>
+                <strong>{vatRate}</strong>
               </div>
-              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
-                Thời gian ký: {invoiceDate}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
+                <span>Tiền thuế GTGT (8%):</span>
+                <strong>{formatCurrency(vatAmount)}</strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
+                <span>Phí vận chuyển:</span>
+                <span>{shippingFee === 0 ? 'Miễn phí (0đ)' : formatCurrency(shippingFee)}</span>
+              </div>
+
+              {discount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#16a34a', fontWeight: 600 }}>
+                  <span>Giảm giá / Voucher:</span>
+                  <span>-{formatCurrency(discount)}</span>
+                </div>
+              )}
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  paddingTop: '8px',
+                  borderTop: '2px solid #cbd5e1',
+                  fontSize: '14px',
+                  fontWeight: 900,
+                  color: '#0f172a',
+                }}
+              >
+                <span>Tổng thanh toán:</span>
+                <span style={{ color: '#2563eb' }}>{formatCurrency(totalPayment)}</span>
               </div>
             </div>
           </div>
 
-          {/* VAT Totals Breakdown */}
-          <div style={{ width: '270px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12.5px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
-              <span>Cộng tiền hàng (chưa VAT):</span>
-              <strong>{formatCurrency(netSubtotal)}</strong>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#2563eb' }}>
-              <span>Thuế suất GTGT (VAT):</span>
-              <strong>{vatRate}</strong>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
-              <span>Tiền thuế GTGT (8%):</span>
-              <strong>{formatCurrency(vatAmount)}</strong>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
-              <span>Phí vận chuyển:</span>
-              <span>{shippingFee === 0 ? 'Miễn phí (0đ)' : formatCurrency(shippingFee)}</span>
-            </div>
-
-            {discount > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#16a34a', fontWeight: 600 }}>
-                <span>Giảm giá / Voucher:</span>
-                <span>-{formatCurrency(discount)}</span>
-              </div>
-            )}
-
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                paddingTop: '8px',
-                borderTop: '2px solid #cbd5e1',
-                fontSize: '14.5px',
-                fontWeight: 900,
-                color: '#0f172a',
-              }}
-            >
-              <span>Tổng thanh toán (Đã có VAT):</span>
-              <span style={{ color: '#2563eb' }}>{formatCurrency(totalPayment)}</span>
-            </div>
+          {/* Legal Disclaimer & Footer */}
+          <div
+            style={{
+              borderTop: '1px dashed #cbd5e1',
+              paddingTop: '12px',
+              textAlign: 'center',
+              fontSize: '11px',
+              color: '#64748b',
+              lineHeight: '1.4',
+            }}
+          >
+            Hóa đơn điện tử khởi tạo có mã của cơ quan thuế theo Nghị định số 123/2020/NĐ-CP & Thông tư số 78/2021/TT-BTC.<br />
+            Cảm ơn quý khách đã tin tưởng mua sắm tại <strong>Shopee</strong>!
           </div>
-        </div>
-
-        {/* Legal Disclaimer & Footer */}
-        <div
-          style={{
-            borderTop: '1px dashed #cbd5e1',
-            paddingTop: '14px',
-            textAlign: 'center',
-            fontSize: '11px',
-            color: '#64748b',
-            lineHeight: '1.5',
-          }}
-        >
-          Hóa đơn điện tử khởi tạo có mã của cơ quan thuế theo Nghị định số 123/2020/NĐ-CP & Thông tư số 78/2021/TT-BTC.<br />
-          Cảm ơn bạn đã tin tưởng mua sắm tại <strong>Shopee</strong>!
         </div>
       </div>
 

@@ -253,12 +253,57 @@ export default function OrderDetailModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="order-detail-title"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1100,
+        background: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(6px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '32px 16px',
+        overflowY: 'auto',
+        boxSizing: 'border-box',
+        animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
+      }}
     >
-      <div className="order-detail-modal-container">
+      <div
+        className="order-detail-modal-container"
+        style={{
+          background: '#ffffff',
+          color: '#0f172a',
+          borderRadius: '16px',
+          width: '100%',
+          maxWidth: '780px',
+          maxHeight: '86vh',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
+          border: '1px solid #e2e8f0',
+          position: 'relative',
+          overflow: 'hidden',
+          padding: 0,
+          margin: 'auto',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        }}
+      >
         {/* ==========================================================================
             Modal Header: Order ID, Date, Status Pill, Print & Close Actions
             ========================================================================== */}
-        <div className="order-detail-header">
+        <div
+          className="order-detail-header"
+          style={{
+            padding: '16px 24px',
+            borderBottom: '1px solid #f1f5f9',
+            background: '#f8fafc',
+            flexShrink: 0,
+            margin: 0,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <h3 id="order-detail-title" style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
@@ -318,6 +363,17 @@ export default function OrderDetailModal({
             </button>
           </div>
         </div>
+
+        {/* Scrollable Modal Content */}
+        <div
+          className="order-detail-scroll-body"
+          style={{
+            padding: '24px',
+            overflowY: 'auto',
+            flex: 1,
+            boxSizing: 'border-box',
+          }}
+        >
 
         {/* ==========================================================================
             Cancelled Notice Banner (If order was cancelled)
@@ -866,19 +922,24 @@ export default function OrderDetailModal({
             <strong style={{ color: 'var(--text-primary)' }}>Shopee Đảm Bảo:</strong> Tiền thanh toán của bạn sẽ được giữ an toàn và chỉ chuyển cho Người bán khi bạn hài lòng với kiện hàng. Đổi trả miễn phí trong vòng 15 ngày nếu có lỗi từ nhà sản xuất.
           </div>
         </div>
+        </div>
 
         {/* ==========================================================================
             Action Toolbar at Footer (Stage-Specific Buttons)
             ========================================================================== */}
         <div
+          className="order-detail-footer-bar"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            paddingTop: '16px',
-            borderTop: '1px solid var(--border-light, #f1f5f9)',
+            padding: '14px 24px',
+            borderTop: '1px solid #f1f5f9',
+            background: '#f8fafc',
+            flexShrink: 0,
             flexWrap: 'wrap',
             gap: '10px',
+            margin: 0,
           }}
         >
           {/* Left actions */}
