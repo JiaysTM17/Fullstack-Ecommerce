@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
 import { getOrderInvoice } from '../services/orderService';
-import { ReceiptIcon, PrinterIcon, ShieldCheckIcon } from './OrdersIcons';
+import { ReceiptIcon, PrinterIcon, ShieldCheckIcon, CloseIcon, CheckIcon } from './OrdersIcons';
 
 export default function InvoiceReceiptModal({ order, onClose, inline = false }) {
   if (!order) return null;
@@ -183,9 +183,13 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 fontWeight: 600,
                 fontSize: '12px',
                 height: '32px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
               }}
             >
-              ✕ Đóng
+              <CloseIcon size={12} />
+              <span>Đóng</span>
             </button>
           )}
         </div>
@@ -265,7 +269,8 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                   borderRadius: '4px',
                 }}
               >
-                ✓ ĐÃ KÝ ĐIỆN TỬ
+                <CheckIcon size={11} />
+                <span>ĐÃ KÝ ĐIỆN TỬ</span>
               </span>
             </div>
           </div>

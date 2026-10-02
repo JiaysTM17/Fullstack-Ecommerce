@@ -5,6 +5,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
+import { CloseIcon } from './OrdersIcons';
 
 export default function QuickViewModal({ product, onClose }) {
   const navigate = useNavigate();
@@ -73,13 +74,16 @@ export default function QuickViewModal({ product, onClose }) {
             right: '16px',
             background: 'none',
             border: 'none',
-            fontSize: '20px',
             color: 'var(--text-secondary, #64748b)',
             cursor: 'pointer',
+            padding: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
           aria-label="Đóng"
         >
-          ✕
+          <CloseIcon size={18} />
         </button>
 
         <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px', alignItems: 'start' }}>

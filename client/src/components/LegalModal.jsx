@@ -1,5 +1,5 @@
 import React from 'react';
-import { StoreIcon, ShieldIcon, ReceiptIcon, LockIcon } from './OrdersIcons';
+import { StoreIcon, ShieldIcon, ReceiptIcon, LockIcon, CloseIcon } from './OrdersIcons';
 
 /**
  * Enterprise Legal & Privacy Policy Modal
@@ -127,7 +127,7 @@ export default function LegalModal({
             }}
             aria-label="Đóng"
           >
-            ✕
+            <CloseIcon size={16} />
           </button>
         </div>
 

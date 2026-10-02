@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { StoreIcon, MapPinIcon, PackageIcon, ChatIcon, PrinterIcon } from './OrdersIcons';
+import { StoreIcon, MapPinIcon, PackageIcon, ChatIcon, PrinterIcon, CheckIcon } from './OrdersIcons';
 
 export default function PackingSlipModal({ order, shop, onClose }) {
   if (!order) return null;
@@ -88,8 +88,9 @@ export default function PackingSlipModal({ order, shop, onClose }) {
             <strong style={{ fontSize: '13.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <PackageIcon size={15} color="#ea580c" /> DANH SÁCH MẶT HÀNG KIỂM TRA ({order.items?.length || 1} sản phẩm):
             </strong>
-            <span style={{ fontSize: '11.5px', color: '#16a34a', fontWeight: 700 }}>
-              ✓ Tích chọn kiểm hàng trước khi dán tem
+            <span style={{ fontSize: '11.5px', color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <CheckIcon size={12} />
+              <span>Tích chọn kiểm hàng trước khi dán tem</span>
             </span>
           </div>
 

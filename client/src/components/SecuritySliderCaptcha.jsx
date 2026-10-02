@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { ShieldCheckIcon, CheckIcon, LockIcon, ChevronRightIcon } from './OrdersIcons';
 
 /**
  * Enterprise Security Slider Captcha Component
@@ -164,17 +165,20 @@ export default function SecuritySliderCaptcha({
         >
           {isVerified ? (
             <>
-              <span style={{ fontSize: '15px', color: '#10b981' }}>✓</span>
+              <CheckIcon size={16} />
               <span>Đã xác minh bảo mật thành công</span>
             </>
           ) : disabled ? (
             <>
-              <span style={{ fontSize: '13px', opacity: 0.7 }}>🛡️</span>
+              <ShieldCheckIcon size={15} />
               <span>{disabledMessage}</span>
             </>
           ) : (
             <>
-              <span style={{ fontSize: '14px', color: '#2563eb' }}>❯❯</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', color: '#2563eb' }}>
+                <ChevronRightIcon size={14} />
+                <ChevronRightIcon size={14} style={{ marginLeft: '-8px' }} />
+              </span>
               <span>Kéo thanh trượt sang phải để xác nhận</span>
             </>
           )}
@@ -210,7 +214,7 @@ export default function SecuritySliderCaptcha({
             fontWeight: 700,
           }}
         >
-          {isVerified ? '✓' : disabled ? '🔒' : '➔'}
+          {isVerified ? <CheckIcon size={18} /> : disabled ? <LockIcon size={16} /> : <ChevronRightIcon size={18} />}
         </div>
       </div>
     </div>

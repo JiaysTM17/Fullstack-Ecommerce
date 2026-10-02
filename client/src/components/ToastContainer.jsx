@@ -1,5 +1,6 @@
 import React from 'react';
 import { useToast } from '../context/ToastContext';
+import { CloseIcon, CheckIcon, AlertCircleIcon } from './OrdersIcons';
 
 export default function ToastContainer() {
   const { toasts, removeToast } = useToast();
@@ -26,7 +27,7 @@ export default function ToastContainer() {
         const isInfo = toast.type === 'info';
 
         const borderColor = isSuccess ? '#10b981' : isError ? '#ef4444' : '#3b82f6';
-        const icon = isSuccess ? '✓' : isError ? '✕' : 'ℹ';
+        const iconElement = isSuccess ? <CheckIcon size={12} /> : isError ? <CloseIcon size={11} /> : <AlertCircleIcon size={13} />;
 
         return (
           <div
@@ -58,12 +59,10 @@ export default function ToastContainer() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '11px',
-                  fontWeight: 800,
                   flexShrink: 0,
                 }}
               >
-                {icon}
+                {iconElement}
               </span>
               <span style={{ fontWeight: 500, lineHeight: 1.4 }}>{toast.message}</span>
             </div>
@@ -96,13 +95,15 @@ export default function ToastContainer() {
                   background: 'none',
                   border: 'none',
                   color: '#94a3b8',
-                  fontSize: '14px',
                   cursor: 'pointer',
-                  padding: '2px',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
                 aria-label="Đóng thông báo"
               >
-                ✕
+                <CloseIcon size={14} />
               </button>
             </div>
           </div>
