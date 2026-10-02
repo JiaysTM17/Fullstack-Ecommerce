@@ -12,6 +12,7 @@ import {
   CheckIcon,
   AlertCircleIcon,
   ChevronRightIcon,
+  ClockIcon,
 } from './OrdersIcons';
 
 /**
@@ -837,9 +838,13 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                     borderRadius: '20px',
                     fontWeight: 600,
                     fontSize: '12px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}
                 >
-                  ⏳ Gửi lại sau <strong style={{ color: '#2563eb' }}>{cooldown}s</strong>
+                  <ClockIcon size={12} />
+                  <span>Gửi lại sau <strong style={{ color: '#2563eb' }}>{cooldown}s</strong></span>
                 </div>
               ) : (
                 <button

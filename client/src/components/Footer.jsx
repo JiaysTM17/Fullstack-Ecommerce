@@ -8,6 +8,7 @@ import {
   StoreIcon,
   StarIcon,
   SparklesIcon,
+  CheckIcon,
 } from './OrdersIcons';
 import '../styles/footer.css';
 
@@ -54,8 +55,9 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
               <span style={{ display: 'inline-flex', alignItems: 'center' }}><LayersIcon size={18} /></span>
               <span>{language === 'en' ? 'DESIGN INSPIRATIONS & ARCHITECTURAL REFERENCES' : 'NGUỒN CẢM HỨNG THIẾT KẾ & TIÊU CHUẨN KIẾN TRÚC'}</span>
             </div>
-            <span style={{ fontSize: '11.5px', color: '#16a34a', background: 'rgba(22, 163, 74, 0.1)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
-              ✓ Ethical Software Engineering
+            <span style={{ fontSize: '11.5px', color: '#16a34a', background: 'rgba(22, 163, 74, 0.1)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <CheckIcon size={12} />
+              <span>Ethical Software Engineering</span>
             </span>
           </div>
 

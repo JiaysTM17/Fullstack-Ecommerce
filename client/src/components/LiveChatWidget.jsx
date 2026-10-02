@@ -34,6 +34,8 @@ import {
   CoinIcon,
   CalendarIcon,
   ChatIcon,
+  CloseIcon,
+  ClockIcon,
 } from './OrdersIcons';
 
 const CHAT_STORAGE_KEY = 'mini_shopee_live_chat_history_v2';
@@ -195,14 +197,14 @@ const DEFAULT_WELCOME_MESSAGES = [
     sender: 'agent',
     agentName: 'Trợ Lý Mua Sắm & CSKH AI 24/7',
     avatar: null,
-    text: 'Xin chào! Tôi là Trợ Lý Mua Sắm & CSKH AI 🛍️.\n\nTôi hỗ trợ bạn tìm nhanh 100+ sản phẩm theo tầm giá, áp mã giảm giá kép (Dual Voucher), kiểm tra vận đơn SPX Express, nhận lượt quay may mắn và kết nối Chuyên viên tư vấn trực tiếp bất cứ lúc nào!',
+    text: 'Xin chào! Tôi là Trợ Lý Mua Sắm & CSKH AI.\n\nTôi hỗ trợ bạn tìm nhanh 100+ sản phẩm theo tầm giá, áp mã giảm giá kép (Dual Voucher), kiểm tra vận đơn SPX Express, nhận lượt quay may mắn và kết nối Chuyên viên tư vấn trực tiếp bất cứ lúc nào!',
     time: 'Vừa xong',
     suggestions: [
-      '🔍 Gợi ý đồ công nghệ hot',
-      '📦 Tra cứu đơn hàng của tôi',
-      '🎟️ Lấy voucher 15% & Freeship',
-      '🎡 Vòng quay & Shopee Xu',
-      '👨‍💼 Gặp nhân viên tư vấn trực',
+      'Gợi ý đồ công nghệ hot',
+      'Tra cứu đơn hàng của tôi',
+      'Lấy voucher 15% & Freeship',
+      'Vòng quay & Shopee Xu',
+      'Gặp nhân viên tư vấn trực',
     ],
   },
 ];
@@ -972,12 +974,10 @@ export default function LiveChatWidget() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '13px',
-                  fontWeight: 700,
                 }}
                 title="Đóng chat"
               >
-                ✕
+                <CloseIcon size={14} />
               </button>
             </div>
           </div>
@@ -1044,8 +1044,8 @@ export default function LiveChatWidget() {
                 fontWeight: 600,
               }}
             >
-              <span style={{ animation: 'spin 1.2s linear infinite', display: 'inline-block' }}>
-                ⏳
+              <span style={{ animation: 'spin 1.2s linear infinite', display: 'inline-flex', alignItems: 'center' }}>
+                <ClockIcon size={12} />
               </span>
               Đang điều phối Chuyên viên CSKH trực tuyến...
             </div>
@@ -1403,7 +1403,8 @@ export default function LiveChatWidget() {
                                     }}
                                     title="Thêm vào giỏ hàng"
                                   >
-                                    🛒 Thêm giỏ
+                                    <CartIcon size={11} />
+                                    <span>Thêm giỏ</span>
                                   </button>
                                   <button
                                     type="button"
@@ -1423,7 +1424,8 @@ export default function LiveChatWidget() {
                                     }}
                                     title="Mua ngay lập tức và chuyển đến thanh toán"
                                   >
-                                    ⚡ Mua ngay
+                                    <BoltIcon size={11} />
+                                    <span>Mua ngay</span>
                                   </button>
                                   <button
                                     type="button"
@@ -1532,7 +1534,8 @@ export default function LiveChatWidget() {
                                   }}
                                   title="Áp dụng mã này trực tiếp vào giỏ hàng"
                                 >
-                                  ⚡ Dùng ngay
+                                  <BoltIcon size={11} />
+                                  <span>Dùng ngay</span>
                                 </button>
                                 <button
                                   type="button"
@@ -1555,7 +1558,7 @@ export default function LiveChatWidget() {
                                     transition: 'background 0.2s',
                                   }}
                                 >
-                                  {copiedCode === vc.code ? '✓' : 'Copy'}
+                                  {copiedCode === vc.code ? <CheckIcon size={12} /> : 'Copy'}
                                 </button>
                               </div>
                             </div>
@@ -1645,11 +1648,11 @@ export default function LiveChatWidget() {
                                     fontWeight: 600,
                                   }}
                                 >
-                                  <span>✓ Đặt hàng</span>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckIcon size={11} /> Đặt hàng</span>
                                   <span>→</span>
-                                  <span>✓ Đóng gói</span>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckIcon size={11} /> Đóng gói</span>
                                   <span>→</span>
-                                  <span style={{ fontWeight: 800 }}>🚚 Đang giao</span>
+                                  <span style={{ fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><TruckIcon size={12} /> Đang giao</span>
                                 </div>
                                 <div
                                   style={{
@@ -1675,11 +1678,15 @@ export default function LiveChatWidget() {
                               fontSize: '11px',
                               fontWeight: 700,
                               cursor: 'pointer',
-                              textAlign: 'center',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '5px',
                               marginTop: '2px',
                             }}
                           >
-                            📦 Xem toàn bộ lịch sử đơn mua
+                            <PackageIcon size={13} />
+                            <span>Xem toàn bộ lịch sử đơn mua</span>
                           </button>
                         </div>
                       )}
@@ -1704,7 +1711,9 @@ export default function LiveChatWidget() {
                             }}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ fontSize: '20px' }}>🪙</span>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', color: '#d97706' }}>
+                                <CoinIcon size={20} />
+                              </span>
                               <div>
                                 <div style={{ fontSize: '10.5px', color: '#b45309', fontWeight: 600 }}>
                                   Mini Xu khả dụng:
@@ -1756,14 +1765,14 @@ export default function LiveChatWidget() {
                                 fontSize: '11px',
                                 fontWeight: 700,
                                 cursor: 'pointer',
-                                display: 'flex',
+                                display: 'inline-flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 gap: '4px',
                                 boxShadow: '0 2px 6px rgba(217, 119, 6, 0.35)',
                               }}
                             >
-                              <span>🎡</span>
+                              <SparklesIcon size={12} color="#ffffff" />
                               <span>Mở Vòng Quay May Mắn</span>
                             </button>
 
@@ -1779,10 +1788,14 @@ export default function LiveChatWidget() {
                                 fontSize: '10.5px',
                                 fontWeight: 700,
                                 cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
                               }}
                               title="Điểm danh nhận xu 7 ngày liên tiếp"
                             >
-                              📅 Điểm danh
+                              <CalendarIcon size={11} />
+                              <span>Điểm danh</span>
                             </button>
                           </div>
                         </div>
@@ -1941,9 +1954,13 @@ export default function LiveChatWidget() {
                               fontWeight: 600,
                               cursor: 'pointer',
                               transition: 'all 0.15s',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
                             }}
                           >
-                            💬 {sug}
+                            <ChatIcon size={10} />
+                            <span>{sug}</span>
                           </button>
                         ))}
                       </div>
@@ -1988,8 +2005,8 @@ export default function LiveChatWidget() {
                     </>
                   ) : (
                     <>
-                      <span style={{ display: 'inline-block', animation: 'spin 1.5s linear infinite' }}>
-                        ✨
+                      <span style={{ display: 'inline-flex', alignItems: 'center', animation: 'spin 1.5s linear infinite', color: '#ea580c' }}>
+                        <SparklesIcon size={13} color="#ea580c" />
                       </span>
                       Trợ lý Mua Sắm đang tìm giải pháp tối ưu...
                     </>
@@ -2020,7 +2037,7 @@ export default function LiveChatWidget() {
               className="shopee-form-input"
               placeholder={
                 isListening
-                  ? '🎙️ Đang nghe giọng nói...'
+                  ? 'Đang lắng nghe giọng nói của bạn...'
                   : chatMode === 'human'
                   ? 'Nhắn tin trực tiếp với Kim Ngân...'
                   : 'Hỏi sản phẩm, tra đơn, xin voucher, quay thưởng...'
