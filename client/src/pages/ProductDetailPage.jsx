@@ -29,6 +29,7 @@ import {
   FlameIcon,
   TruckIcon,
   GlobeIcon,
+  ChevronRightIcon,
 } from "../components/OrdersIcons";
 import "../styles/amazon-pdp.css";
 
@@ -62,6 +63,7 @@ export default function ProductDetailPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showShopChat, setShowShopChat] = useState(false);
   const [selectedStarFilter, setSelectedStarFilter] = useState("all");
+  const [isAddedFeedback, setIsAddedFeedback] = useState(false);
 
   const reviewsList = useMemo(() => (Array.isArray(product?.reviews) ? product.reviews : []), [product?.reviews]);
   const filteredReviews = useMemo(() => {
@@ -142,6 +144,8 @@ export default function ProductDetailPage() {
       },
       quantity
     );
+    setIsAddedFeedback(true);
+    setTimeout(() => setIsAddedFeedback(false), 1800);
     showToast(t('add_to_cart_success', 'Đã thêm sản phẩm vào giỏ hàng!'), 'success');
   }
 
@@ -216,12 +220,12 @@ export default function ProductDetailPage() {
   return (
     <main className="shopee-container" style={{ padding: "20px 0" }}>
       {/* Breadcrumb Navigation */}
-      <nav style={{ fontSize: "13px", color: "#777", marginBottom: "16px" }}>
-        <Link to="/" style={{ color: "#007185", textDecoration: "none" }}>Trang chủ</Link>
-        {" > "}
-        <span style={{ color: "#007185" }}>{product.category || "Danh mục"}</span>
-        {" > "}
-        <span style={{ color: "#333", fontWeight: 600 }}>{product.name}</span>
+      <nav style={{ fontSize: "13px", color: "var(--text-secondary, #64748b)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+        <Link to="/" style={{ color: "var(--secondary-color, #0284c7)", textDecoration: "none" }}>Trang chủ</Link>
+        <ChevronRightIcon size={11} color="#94a3b8" />
+        <span style={{ color: "var(--secondary-color, #0284c7)" }}>{product.category || "Danh mục"}</span>
+        <ChevronRightIcon size={11} color="#94a3b8" />
+        <span style={{ color: "var(--text-primary, #0f172a)", fontWeight: 600 }}>{product.name}</span>
       </nav>
 
       {/* Main 3-Column PDP Container */}
@@ -433,10 +437,29 @@ export default function ProductDetailPage() {
             <button
               type="button"
               className="amazon-btn-add-cart"
-              style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                backgroundColor: isAddedFeedback ? "#ecfdf5" : undefined,
+                borderColor: isAddedFeedback ? "#10b981" : undefined,
+                color: isAddedFeedback ? "#059669" : undefined,
+                transition: "all 0.2s ease",
+              }}
               onClick={handleAddToCart}
             >
-              <ShoppingBagIcon size={16} /> Thêm Vào Giỏ Hàng
+              {isAddedFeedback ? (
+                <>
+                  <CheckIcon size={16} />
+                  <span>Đã Thêm Vào Giỏ!</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingBagIcon size={16} />
+                  <span>Thêm Vào Giỏ Hàng</span>
+                </>
+              )}
             </button>
             <button
               type="button"
@@ -566,9 +589,24 @@ export default function ProductDetailPage() {
               return [5, 4, 3, 2, 1].map((star) => {
                 const count = breakdown[star] || 0;
                 const pct = Math.round((count / totalRev) * 100);
+                const isSelected = selectedStarFilter === String(star);
                 return (
-                  <div key={star} className="amazon-breakdown-bar-row">
-                    <span>{star} sao</span>
+                  <div
+                    key={star}
+                    className="amazon-breakdown-bar-row"
+                    onClick={() => setSelectedStarFilter(isSelected ? "all" : String(star))}
+                    style={{
+                      cursor: "pointer",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                      backgroundColor: isSelected ? "rgba(234, 88, 12, 0.08)" : "transparent",
+                      transition: "background-color 0.15s ease",
+                    }}
+                    title={`Lọc đánh giá ${star} sao`}
+                  >
+                    <span style={{ fontWeight: isSelected ? 700 : 400, color: isSelected ? "var(--primary-color, #ea580c)" : undefined }}>
+                      {star} sao
+                    </span>
                     <div className="amazon-breakdown-bar-bg">
                       <div className="amazon-breakdown-bar-fill" style={{ width: `${pct}%` }} />
                     </div>
@@ -1035,10 +1073,24 @@ export default function ProductDetailPage() {
           <button
             type="button"
             className="mobile-btn-cart"
+            style={{
+              backgroundColor: isAddedFeedback ? "#ecfdf5" : undefined,
+              color: isAddedFeedback ? "#059669" : undefined,
+              borderColor: isAddedFeedback ? "#10b981" : undefined,
+            }}
             onClick={handleAddToCart}
           >
-            <ShoppingBagIcon size={15} />
-            <span>Thêm giỏ</span>
+            {isAddedFeedback ? (
+              <>
+                <CheckIcon size={15} />
+                <span>Đã thêm!</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBagIcon size={15} />
+                <span>Thêm giỏ</span>
+              </>
+            )}
           </button>
           <button
             type="button"
