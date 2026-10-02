@@ -1,5 +1,74 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ShirtIcon,
+  SmartphoneIcon,
+  TvIcon,
+  LaptopIcon,
+  CameraIcon,
+  WatchIcon,
+  FootwearIcon,
+  CookingIcon,
+  SportIcon,
+  BikeIcon,
+  DressIcon,
+  BabyIcon,
+  HomeIcon,
+  BeautyIcon,
+  PillIcon,
+  BagIcon,
+  SparklesIcon,
+  FoodIcon,
+  BookOpenIcon,
+} from './OrdersIcons';
+
+const getCategoryFallbackIcon = (id, size = 28) => {
+  switch (id) {
+    case 'men-clothes':
+      return <ShirtIcon size={size} />;
+    case 'mobile-gadgets':
+      return <SmartphoneIcon size={size} />;
+    case 'consumer-electronics':
+      return <TvIcon size={size} />;
+    case 'computer-accessories':
+      return <LaptopIcon size={size} />;
+    case 'cameras':
+      return <CameraIcon size={size} />;
+    case 'watches':
+      return <WatchIcon size={size} />;
+    case 'men-shoes':
+    case 'women-shoes':
+      return <FootwearIcon size={size} />;
+    case 'home-appliances':
+      return <CookingIcon size={size} />;
+    case 'sport-outdoor':
+      return <SportIcon size={size} />;
+    case 'automotive':
+      return <BikeIcon size={size} />;
+    case 'women-clothes':
+      return <DressIcon size={size} />;
+    case 'moms-babies':
+      return <BabyIcon size={size} />;
+    case 'home-living':
+      return <HomeIcon size={size} />;
+    case 'beauty':
+      return <BeautyIcon size={size} />;
+    case 'health':
+      return <PillIcon size={size} />;
+    case 'women-bags':
+      return <BagIcon size={size} />;
+    case 'fashion-accessories':
+      return <SparklesIcon size={size} />;
+    case 'grocery':
+      return <FoodIcon size={size} />;
+    case 'books-stationery':
+      return <BookOpenIcon size={size} />;
+    default:
+      return <SparklesIcon size={size} />;
+  }
+};
 
 const CATEGORIES_SHOWCASE = [
   // Row 1
@@ -376,10 +445,10 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               height: '100%',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '30px',
+              color: item.color || '#475569',
             }}
           >
-            {item.icon}
+            {getCategoryFallbackIcon(item.id, 28)}
           </div>
         </div>
 
@@ -504,7 +573,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
-            ‹
+            <ChevronLeftIcon size={18} />
           </button>
         )}
 
@@ -552,8 +621,6 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               border: '1px solid var(--border-medium, #cbd5e1)',
               boxShadow: '0 4px 14px rgba(0, 0, 0, 0.12)',
               color: 'var(--text-primary, #0f172a)',
-              fontSize: '20px',
-              fontWeight: 800,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -574,7 +641,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
-            ›
+            <ChevronRightIcon size={18} />
           </button>
         )}
       </div>

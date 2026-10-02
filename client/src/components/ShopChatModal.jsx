@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
+import { SendIcon, ArrowLeftIcon, CloseIcon } from './OrdersIcons';
 
 const DEFAULT_MESSAGES = [
   {
@@ -117,10 +118,13 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
                 fontSize: '11.5px',
                 fontWeight: 600,
                 cursor: 'pointer',
-                marginRight: '4px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
               }}
             >
-              ← Quay lại
+              <ArrowLeftIcon size={12} />
+              <span>Quay lại</span>
             </button>
           )}
           <img
@@ -153,14 +157,13 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
             height: '28px',
             borderRadius: '50%',
             cursor: 'pointer',
-            fontSize: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}
           title="Đóng chat"
         >
-          ✕
+          <CloseIcon size={14} />
         </button>
       </div>
 
@@ -338,11 +341,10 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '14px',
             transition: 'background 0.2s ease'
           }}
         >
-          ➤
+          <SendIcon size={15} />
         </button>
       </form>
     </div>

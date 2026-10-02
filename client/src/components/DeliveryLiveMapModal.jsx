@@ -18,6 +18,9 @@ import {
   CheckIcon,
   ReturnIcon,
   StarIcon,
+  PhoneIcon,
+  ArrowLeftIcon,
+  CloseIcon,
 } from './OrdersIcons';
 
 export default function DeliveryLiveMapModal({ order, onClose, inline = false }) {
@@ -83,11 +86,11 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
   const customerAddress = order?.shippingAddress || 'Số 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh';
 
   const handleCallShipper = () => {
-    showToast(`📞 Đang kết nối cuộc gọi tới Shipper ${courier.name} (${courier.phone})...`, 'info');
+    showToast(`Đang kết nối cuộc gọi tới Shipper ${courier.name} (${courier.phone})...`, 'info');
   };
 
   const handleChatShipper = () => {
-    showToast(`💬 Đã mở khung chat với Shipper ${carrier}!`, 'success');
+    showToast(`Đã mở khung chat với Shipper ${carrier}!`, 'success');
   };
 
   const mapContent = (
@@ -126,7 +129,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {inline && (
-              <button
+                <button
                 type="button"
                 className="shopee-order-btn-outline"
                 onClick={onClose}
@@ -142,7 +145,8 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                   marginRight: '6px',
                 }}
               >
-                ← Quay lại
+                <ArrowLeftIcon size={12} />
+                <span>Quay lại</span>
               </button>
             )}
             <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
@@ -182,13 +186,12 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '14px',
               cursor: 'pointer',
               color: '#64748b',
               transition: 'all 0.15s ease',
             }}
           >
-            ✕
+            <CloseIcon size={14} />
           </button>
         </div>
 
@@ -470,7 +473,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                       justifyContent: 'center',
                     }}
                   >
-                    {hub.completed ? '✓' : idx + 1}
+                    {hub.completed ? <CheckIcon size={10} /> : idx + 1}
                   </span>
                   <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>
                     {hub.time || '--:--'}
@@ -480,7 +483,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                   {hub.name}
                 </div>
                 <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                  {hub.completed ? '✓ Đã hoàn tất' : idx === 1 ? 'Đang luân chuyển' : 'Chờ tiếp nhận'}
+                  {hub.completed ? 'Đã hoàn tất' : idx === 1 ? 'Đang luân chuyển' : 'Chờ tiếp nhận'}
                 </div>
               </div>
             ))}
@@ -556,7 +559,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                 gap: '5px',
               }}
             >
-              <CopyIcon size={12} />
+              <PhoneIcon size={13} />
               <span>Gọi ({courier.phone || '0908 123 456'})</span>
             </button>
             <button
