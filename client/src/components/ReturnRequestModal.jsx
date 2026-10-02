@@ -114,7 +114,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit }) {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1100,
+        zIndex: 1400,
         background: 'rgba(15, 23, 42, 0.65)',
         backdropFilter: 'blur(6px)',
         display: 'flex',

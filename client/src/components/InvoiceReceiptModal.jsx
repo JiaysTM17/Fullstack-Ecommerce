@@ -98,7 +98,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1050,
+        zIndex: 1400,
         background: 'rgba(15, 23, 42, 0.65)',
         backdropFilter: 'blur(6px)',
         display: 'flex',

@@ -96,7 +96,7 @@ export default function DeliveryLiveMapModal({ order, onClose }) {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1200,
+        zIndex: 1400,
         background: 'rgba(15, 23, 42, 0.65)',
         backdropFilter: 'blur(6px)',
         display: 'flex',

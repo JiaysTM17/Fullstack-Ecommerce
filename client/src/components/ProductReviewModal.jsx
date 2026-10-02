@@ -139,7 +139,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1250, // Higher than OrderDetailModal (1100)
+        zIndex: 1400, // Higher than OrderDetailModal (1100)
         background: 'rgba(15, 23, 42, 0.68)',
         backdropFilter: 'blur(6px)',
         display: 'flex',

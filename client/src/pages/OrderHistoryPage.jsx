@@ -173,6 +173,7 @@ export default function OrderHistoryPage() {
 
   const [selectedDetailOrder, setSelectedDetailOrder] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [returnToDetailOrder, setReturnToDetailOrder] = useState(null);
   const [selectedChatShop, setSelectedChatShop] = useState(null);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
@@ -182,6 +183,26 @@ export default function OrderHistoryPage() {
   const [selectedReviewOrder, setSelectedReviewOrder] = useState(null);
   const [cancelReason, setCancelReason] = useState('Tôi muốn thay đổi địa chỉ nhận hàng');
   const [cancelNote, setCancelNote] = useState('');
+
+  // Seamless transition from OrderDetailModal to child modal (prevents modal overlap)
+  const handleOpenFromDetail = (setterFn, order) => {
+    setReturnToDetailOrder(order || selectedDetailOrder);
+    setIsDetailModalOpen(false);
+    setterFn(order);
+  };
+
+  // Restores OrderDetailModal cleanly when child modal is closed
+  const handleCloseChildModal = (resetFn) => {
+    resetFn();
+    if (returnToDetailOrder) {
+      const refreshed = orders.find(
+        (o) => (o.orderId || o._id || o.id) === (returnToDetailOrder.orderId || returnToDetailOrder._id || returnToDetailOrder.id)
+      ) || returnToDetailOrder;
+      setSelectedDetailOrder(refreshed);
+      setIsDetailModalOpen(true);
+      setReturnToDetailOrder(null);
+    }
+  };
 
   const CANCEL_REASONS = [
     'Tôi muốn thay đổi địa chỉ nhận hàng',
@@ -656,17 +677,28 @@ export default function OrderHistoryPage() {
   };
 
   const handleBuyAgain = (item) => {
+    setIsDetailModalOpen(false);
+    setSelectedDetailOrder(null);
+    setReturnToDetailOrder(null);
+
     addToCart(item, 1);
-    showToast(t('buy_again_toast', `Đã thêm "${item.name}" vào giỏ hàng để mua lại!`), 'success');
+    showToast(t('buy_again_toast', `Đã thêm "${item.name || 'sản phẩm'}" vào giỏ hàng thành công! Đang chuyển đến giỏ hàng...`), 'success');
     navigate('/cart');
   };
 
   const handleReorderWholeOrder = (order) => {
-    if (!order || !order.items || order.items.length === 0) return;
+    if (!order || !order.items || order.items.length === 0) {
+      showToast('Đơn hàng không có sản phẩm để mua lại', 'warning');
+      return;
+    }
+    setIsDetailModalOpen(false);
+    setSelectedDetailOrder(null);
+    setReturnToDetailOrder(null);
+
     order.items.forEach((item) => {
       addToCart(item, item.quantity || 1);
     });
-    showToast(`Đã thêm ${order.items.length} sản phẩm từ đơn #${order.orderId} vào giỏ hàng!`, 'success');
+    showToast(`Đã thêm ${order.items.length} sản phẩm vào giỏ hàng thành công! Đang chuyển đến giỏ hàng...`, 'success');
     navigate('/cart');
   };
 
@@ -1486,7 +1518,7 @@ export default function OrderHistoryPage() {
       {selectedInvoiceOrder && (
         <InvoiceReceiptModal
           order={selectedInvoiceOrder}
-          onClose={() => setSelectedInvoiceOrder(null)}
+          onClose={() => handleCloseChildModal(() => setSelectedInvoiceOrder(null))}
         />
       )}
 
@@ -1494,8 +1526,11 @@ export default function OrderHistoryPage() {
       {selectedReturnOrder && (
         <ReturnRequestModal
           order={selectedReturnOrder}
-          onClose={() => setSelectedReturnOrder(null)}
-          onSubmit={handleReturnSubmit}
+          onClose={() => handleCloseChildModal(() => setSelectedReturnOrder(null))}
+          onSubmit={(data) => {
+            handleReturnSubmit(data);
+            handleCloseChildModal(() => setSelectedReturnOrder(null));
+          }}
         />
       )}
 
@@ -1503,7 +1538,7 @@ export default function OrderHistoryPage() {
       {selectedLiveMapOrder && (
         <DeliveryLiveMapModal
           order={selectedLiveMapOrder}
-          onClose={() => setSelectedLiveMapOrder(null)}
+          onClose={() => handleCloseChildModal(() => setSelectedLiveMapOrder(null))}
         />
       )}
 
@@ -1514,7 +1549,7 @@ export default function OrderHistoryPage() {
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 1100,
+            zIndex: 1400,
             background: 'rgba(15, 23, 42, 0.65)',
             backdropFilter: 'blur(6px)',
             display: 'flex',
@@ -1526,7 +1561,7 @@ export default function OrderHistoryPage() {
             animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
           }}
           onClick={(e) => {
-            if (e.target === e.currentTarget) setSelectedCancelOrder(null);
+            if (e.target === e.currentTarget) handleCloseChildModal(() => setSelectedCancelOrder(null));
           }}
         >
           <div
@@ -1551,7 +1586,7 @@ export default function OrderHistoryPage() {
               </h3>
               <button
                 type="button"
-                onClick={() => setSelectedCancelOrder(null)}
+                onClick={() => handleCloseChildModal(() => setSelectedCancelOrder(null))}
                 style={{
                   background: '#ffffff',
                   border: '1px solid #cbd5e1',
@@ -1633,7 +1668,7 @@ export default function OrderHistoryPage() {
               <button
                 type="button"
                 className="shopee-order-btn-outline"
-                onClick={() => setSelectedCancelOrder(null)}
+                onClick={() => handleCloseChildModal(() => setSelectedCancelOrder(null))}
                 style={{ padding: '7px 16px', fontSize: '12.5px', borderRadius: '8px', fontWeight: 600 }}
               >
                 Giữ Lại Đơn
@@ -1664,34 +1699,46 @@ export default function OrderHistoryPage() {
       {selectedReviewOrder && (
         <ProductReviewModal
           order={selectedReviewOrder}
-          onClose={() => setSelectedReviewOrder(null)}
-          onSubmitReview={handleReviewSubmit}
+          onClose={() => handleCloseChildModal(() => setSelectedReviewOrder(null))}
+          onSubmitReview={(data) => {
+            handleReviewSubmit(data);
+            handleCloseChildModal(() => setSelectedReviewOrder(null));
+          }}
+          onSubmit={(data) => {
+            handleReviewSubmit(data);
+            handleCloseChildModal(() => setSelectedReviewOrder(null));
+          }}
         />
       )}
 
       {/* Comprehensive Order Detail Modal (Milestone M2 & M3) */}
-      {isDetailModalOpen && selectedDetailOrder && (
+      {isDetailModalOpen && selectedDetailOrder && !selectedInvoiceOrder && !selectedReturnOrder && !selectedLiveMapOrder && !selectedCancelOrder && !selectedReviewOrder && !selectedChatShop && (
         <OrderDetailModal
           order={selectedDetailOrder}
           isOpen={isDetailModalOpen}
           onClose={() => {
             setIsDetailModalOpen(false);
             setSelectedDetailOrder(null);
+            setReturnToDetailOrder(null);
           }}
           onOpenChat={(order) => {
-            setSelectedChatShop({
-              shop: { name: order?.shopName || 'Shop', id: order?.shopId },
-              currentProduct: order?.items?.[0],
-            });
+            handleOpenFromDetail(
+              (ord) =>
+                setSelectedChatShop({
+                  shop: { name: ord?.shopName || 'Shop', id: ord?.shopId },
+                  currentProduct: ord?.items?.[0],
+                }),
+              order
+            );
           }}
-          onOpenTracking={(order) => setSelectedLiveMapOrder(order)}
-          onOpenLiveMap={(order) => setSelectedLiveMapOrder(order)}
-          onOpenInvoice={(order) => setSelectedInvoiceOrder(order)}
+          onOpenTracking={(order) => handleOpenFromDetail(setSelectedLiveMapOrder, order)}
+          onOpenLiveMap={(order) => handleOpenFromDetail(setSelectedLiveMapOrder, order)}
+          onOpenInvoice={(order) => handleOpenFromDetail(setSelectedInvoiceOrder, order)}
           onBuyAgainItem={(item) => handleBuyAgain(item)}
           onReorderWhole={(order) => handleReorderWholeOrder(order)}
-          onOpenCancelOrder={(order) => setSelectedCancelOrder(order)}
-          onOpenReturnModal={(order) => setSelectedReturnOrder(order)}
-          onOpenReviewModal={(order) => setSelectedReviewOrder(order)}
+          onOpenCancelOrder={(order) => handleOpenFromDetail(setSelectedCancelOrder, order)}
+          onOpenReturnModal={(order) => handleOpenFromDetail(setSelectedReturnOrder, order)}
+          onOpenReviewModal={(order) => handleOpenFromDetail(setSelectedReviewOrder, order)}
           onSimulateStep={(orderId) => handleSimulateNextStep(orderId)}
         />
       )}
@@ -1701,7 +1748,7 @@ export default function OrderHistoryPage() {
         <ShopChatModal
           shop={selectedChatShop.shop}
           currentProduct={selectedChatShop.currentProduct}
-          onClose={() => setSelectedChatShop(null)}
+          onClose={() => handleCloseChildModal(() => setSelectedChatShop(null))}
         />
       )}
     </main>

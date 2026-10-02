@@ -21,6 +21,36 @@ import {
   StarIcon,
 } from './OrdersIcons';
 
+// Safe date parsing supporting multiple formats: ISO, DD/MM/YYYY, HH:mm DD/MM/YYYY
+const parseDateSafe = (val) => {
+  if (!val) return new Date();
+  if (val instanceof Date && !isNaN(val.getTime())) return val;
+  const s = String(val).trim();
+  const d1 = new Date(s);
+  if (!isNaN(d1.getTime())) return d1;
+  // Regex matching "HH:mm DD/MM/YYYY" or "DD/MM/YYYY HH:mm" or "DD/MM/YYYY"
+  const m = s.match(/(?:(\d{1,2}):(\d{2})(?::(\d{2}))?\s+)?(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) {
+    const [, hh, mm, ss, day, mon, yr] = m;
+    const d2 = new Date(Number(yr), Number(mon) - 1, Number(day), Number(hh || 12), Number(mm || 0), Number(ss || 0));
+    if (!isNaN(d2.getTime())) return d2;
+  }
+  return new Date();
+};
+
+const formatDateTime = (d) => {
+  try {
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const mon = String(d.getMonth() + 1).padStart(2, '0');
+    const yr = d.getFullYear();
+    return `${hh}:${mm} ${day}/${mon}/${yr}`;
+  } catch {
+    return 'Hôm nay';
+  }
+};
+
 export default function OrderDetailModal({
   order,
   isOpen = true,
@@ -38,7 +68,8 @@ export default function OrderDetailModal({
 }) {
   if (isOpen === false || !order) return null;
 
-  const [showDetailedTimeline, setShowDetailedTimeline] = useState(true);
+  // Timeline collapsed by default so products & payments are immediately visible without long scroll
+  const [showDetailedTimeline, setShowDetailedTimeline] = useState(false);
 
   // Safe context resolution with fallbacks
   let showToast = () => {};
@@ -100,24 +131,9 @@ export default function OrderDetailModal({
   const hotline = '1900 1221';
   const transactionId = order.transactionId || (orderId ? `TXN-${orderId}-MPE` : 'TXN-849201934');
 
-  // Format Order Date
-  const formattedDate = (() => {
-    const raw = order.createdAt || order.orderDate;
-    if (!raw) return 'Hôm nay';
-    try {
-      const d = new Date(raw);
-      if (!isNaN(d.getTime())) {
-        return d.toLocaleString('vi-VN', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-        });
-      }
-    } catch {}
-    return String(raw);
-  })();
+  // Format Order Date robustly
+  const orderDateObj = parseDateSafe(order.createdAt || order.orderDate);
+  const formattedDate = formatDateTime(orderDateObj);
 
   // Lifecycle Stage Resolution
   const getActiveStep = () => {
@@ -270,16 +286,12 @@ export default function OrderDetailModal({
 
   const shopName = order.shopName || 'Shopee Mall Official';
 
-  // Construct Detailed Tracking Timeline Events Log
+  // Construct Detailed Tracking Timeline Events Log with Robust Time Formatting
   const getTrackingEvents = () => {
-    const baseDate = order.createdAt ? new Date(order.createdAt) : new Date();
+    const baseDate = orderDateObj;
     const formatEventTime = (offsetHours) => {
       const d = new Date(baseDate.getTime() + offsetHours * 3600 * 1000);
-      return (
-        d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) +
-        ' ' +
-        d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      );
+      return formatDateTime(d);
     };
 
     const events = [];
@@ -524,7 +536,7 @@ export default function OrderDetailModal({
         </div>
 
         {/* ==========================================================================
-            2. Scrollable Body: Fully Expandable, Smooth Scroll, High-Density Details
+            2. Scrollable Body: Clear Layout, Smooth Scroll, High Information Density
             ========================================================================== */}
         <div
           className="order-detail-scroll-body"
@@ -1242,7 +1254,7 @@ export default function OrderDetailModal({
                 type="button"
                 className="shopee-order-btn-outline"
                 onClick={() => onOpenInvoice(order)}
-                style={{ height: '32px', fontSize: '12px', borderRadius: '6px' }}
+                style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
                 <ReceiptIcon size={12} /> {t('vat_invoice', 'In hóa đơn VAT')}
               </button>
@@ -1347,9 +1359,20 @@ export default function OrderDetailModal({
                       type="button"
                       className="shopee-order-btn-review"
                       onClick={() => onOpenReviewModal(order)}
-                      style={{ height: '32px', fontSize: '12px', borderRadius: '6px' }}
+                      style={{
+                        height: '32px',
+                        fontSize: '12px',
+                        borderRadius: '6px',
+                        background: '#2563eb',
+                        borderColor: '#2563eb',
+                        color: '#ffffff',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        fontWeight: 700,
+                      }}
                     >
-                      <StarIcon size={12} color="#facc15" filled /> {t('review_order_reward', 'Đánh giá (+200 Xu)')}
+                      <StarIcon size={13} color="#facc15" filled /> {t('review_order_reward', 'Đánh giá (+200 Xu)')}
                     </button>
                   )
                 )}
@@ -1359,7 +1382,7 @@ export default function OrderDetailModal({
                     type="button"
                     className="shopee-order-btn-outline"
                     onClick={() => onOpenReturnModal(order)}
-                    style={{ height: '32px', fontSize: '12px', borderRadius: '6px' }}
+                    style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                   >
                     <ReturnIcon size={12} /> {t('return_refund', 'Trả hàng / Hoàn tiền')}
                   </button>
@@ -1367,15 +1390,27 @@ export default function OrderDetailModal({
               </>
             )}
 
-            {/* Reorder whole order button */}
+            {/* Reorder button - Clear, friendly Shopee action */}
             {onReorderWhole && items.length > 0 && (
               <button
                 type="button"
-                className="shopee-order-btn-primary"
+                className="shopee-order-btn-outline"
                 onClick={() => onReorderWhole(order)}
-                style={{ height: '32px', fontSize: '12px', borderRadius: '6px' }}
+                title="Thêm các sản phẩm của đơn hàng này vào giỏ hàng"
+                style={{
+                  height: '32px',
+                  fontSize: '12px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  borderColor: '#bfdbfe',
+                  color: '#2563eb',
+                  background: '#eff6ff',
+                  fontWeight: 600,
+                }}
               >
-                <RefreshIcon size={12} /> {t('buy_again_whole', 'Mua lại cả đơn')}
+                <RefreshIcon size={12} /> {t('buy_again', 'Mua lại')}
               </button>
             )}
 

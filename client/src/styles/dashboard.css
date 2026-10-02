@@ -2177,15 +2177,15 @@
 }
 
 .shopee-order-btn-review {
-  background: #0f172a !important;
+  background: #2563eb !important;
   color: #ffffff !important;
-  border: 1px solid #0f172a !important;
+  border: 1px solid #2563eb !important;
   font-family: var(--font-family) !important;
   font-weight: 700 !important;
   padding: 6px 14px !important;
   border-radius: 6px !important;
   font-size: 12px !important;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.15) !important;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.25) !important;
   cursor: pointer;
   transition: all 0.15s ease;
   display: inline-flex !important;
@@ -2196,10 +2196,10 @@
 }
 
 .shopee-order-btn-review:hover {
-  background: #1e293b !important;
-  border-color: #1e293b !important;
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35) !important;
 }
 
 /* Button Micro-Interactions: tactile press-down feedback */
@@ -2226,6 +2226,7 @@
   }
 
   /* Hide navigation, toolbars, buttons, and popups */
+  .no-print,
   .shopee-sidebar,
   .shopee-header,
   .shopee-footer,
@@ -2235,6 +2236,31 @@
   .shopee-btn,
   button {
     display: none !important;
+  }
+
+  /* When invoice modal is present in print, completely hide order detail modal */
+  body:has(.invoice-printable-container) .order-detail-modal-overlay,
+  body:has(.invoice-printable-container) .order-detail-modal-container {
+    display: none !important;
+  }
+
+  .invoice-modal-overlay {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    display: block !important;
+    backdrop-filter: none !important;
+    z-index: auto !important;
+  }
+
+  .invoice-printable-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
   }
 
   /* Reset modal overlay for paper output */
