@@ -32,6 +32,9 @@ import {
   PackageIcon,
   CreditCardIcon,
   RefreshIcon,
+  SparklesIcon,
+  ChevronRightIcon,
+  CloseIcon,
 } from '../components/OrdersIcons';
 import '../styles/auth.css';
 
@@ -607,7 +610,7 @@ export default function RegisterPage() {
         <div className="shopee-auth-form-col">
           <div className="shopee-auth-header" style={{ marginBottom: '14px' }}>
             <div className="shopee-auth-brand-badge">
-              <span>✨</span>
+              <SparklesIcon size={14} color="#ea580c" />
               <span>TẠO TÀI KHOẢN MỚI</span>
             </div>
             <h2 className="shopee-auth-title" style={{ fontSize: '24px' }}>
@@ -686,7 +689,8 @@ export default function RegisterPage() {
                     }}
                   >
                     <KeyIcon size={14} />
-                    <span>Đăng Nhập Ngay Với Email Này ➔</span>
+                    <span>Đăng Nhập Ngay Với Email Này</span>
+                    <ChevronRightIcon size={14} />
                   </Link>
                 )}
               </div>
@@ -760,10 +764,14 @@ export default function RegisterPage() {
                           color: '#2563eb',
                           fontWeight: 700,
                           textDecoration: 'underline',
-                          whiteSpace: 'nowrap'
+                          whiteSpace: 'nowrap',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '2px',
                         }}
                       >
-                        Đăng nhập ➔
+                        <span>Đăng nhập</span>
+                        <ChevronRightIcon size={12} />
                       </Link>
                     </div>
                   )}
@@ -934,9 +942,15 @@ export default function RegisterPage() {
                 {formData.confirmPassword && (
                   <div style={{ marginTop: '4px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     {formData.password === formData.confirmPassword ? (
-                      <span style={{ color: '#10b981', fontWeight: 600 }}>✓ Mật khẩu xác nhận hoàn toàn trùng khớp</span>
+                      <span style={{ color: '#10b981', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <CheckIcon size={11} />
+                        <span>Mật khẩu xác nhận hoàn toàn trùng khớp</span>
+                      </span>
                     ) : (
-                      <span style={{ color: '#ef4444', fontWeight: 600 }}>✕ Mật khẩu xác nhận chưa khớp</span>
+                      <span style={{ color: '#ef4444', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <CloseIcon size={11} />
+                        <span>Mật khẩu xác nhận chưa khớp</span>
+                      </span>
                     )}
                   </div>
                 )}
@@ -958,16 +972,20 @@ export default function RegisterPage() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11.5px' }}>
                   <div style={{ color: passwordChecks.length ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <span style={{ fontWeight: 800 }}>{passwordChecks.length ? '✓' : '○'}</span> Tối thiểu 8 ký tự
+                    {passwordChecks.length ? <CheckIcon size={12} /> : <span style={{ width: '12px', textAlign: 'center', fontWeight: 700 }}>○</span>}
+                    <span>Tối thiểu 8 ký tự</span>
                   </div>
                   <div style={{ color: passwordChecks.hasUpper ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <span style={{ fontWeight: 800 }}>{passwordChecks.hasUpper ? '✓' : '○'}</span> Có chữ in hoa (A-Z)
+                    {passwordChecks.hasUpper ? <CheckIcon size={12} /> : <span style={{ width: '12px', textAlign: 'center', fontWeight: 700 }}>○</span>}
+                    <span>Có chữ in hoa (A-Z)</span>
                   </div>
                   <div style={{ color: passwordChecks.hasNumber ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <span style={{ fontWeight: 800 }}>{passwordChecks.hasNumber ? '✓' : '○'}</span> Có chữ số (0-9)
+                    {passwordChecks.hasNumber ? <CheckIcon size={12} /> : <span style={{ width: '12px', textAlign: 'center', fontWeight: 700 }}>○</span>}
+                    <span>Có chữ số (0-9)</span>
                   </div>
                   <div style={{ color: passwordChecks.hasSpecial ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <span style={{ fontWeight: 800 }}>{passwordChecks.hasSpecial ? '✓' : '○'}</span> Ký tự đặc biệt (!@#$)
+                    {passwordChecks.hasSpecial ? <CheckIcon size={12} /> : <span style={{ width: '12px', textAlign: 'center', fontWeight: 700 }}>○</span>}
+                    <span>Ký tự đặc biệt (!@#$)</span>
                   </div>
                 </div>
               </div>
@@ -1129,11 +1147,10 @@ export default function RegisterPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '32px',
                 margin: '0 auto 16px',
               }}
             >
-              ⏳
+              <ClockIcon size={32} color="#f59e0b" />
             </div>
 
             <div
