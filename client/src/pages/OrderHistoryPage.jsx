@@ -1107,8 +1107,11 @@ export default function OrderHistoryPage() {
                               );
                             })()}
                             <div className="shopee-order-trust-tag">
-                              <CheckIcon size={12} color="#059669" />
-                              <span>100% Chính hãng · Đổi trả trong 15 ngày</span>
+                              <ShieldCheckIcon size={13} color="#059669" />
+                              <span>100% Chính hãng</span>
+                              <span className="trust-dot">·</span>
+                              <ReturnIcon size={12} color="#059669" />
+                              <span>Đổi trả trong 15 ngày</span>
                             </div>
                           </div>
 
@@ -1283,7 +1286,7 @@ export default function OrderHistoryPage() {
                           </button>
                           <button
                             type="button"
-                            className="shopee-order-btn-outline"
+                            className="shopee-order-btn-primary"
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => handleConfirmDelivered(ord.orderId)}
                             title="Xác nhận bạn đã nhận được gói hàng an toàn"
