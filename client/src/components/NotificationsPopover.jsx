@@ -21,7 +21,6 @@ const INITIAL_NOTIFICATIONS = [
   {
     id: 'notif_01',
     type: 'order',
-    icon: '📦',
     title: 'Đơn hàng SPX-VN-84729104 đang giao',
     message: 'Bưu tá SPX Express đang di chuyển giao hàng đến bạn. Dự kiến trước 18h hôm nay!',
     time: '15 phút trước',
@@ -31,7 +30,6 @@ const INITIAL_NOTIFICATIONS = [
   {
     id: 'notif_02',
     type: 'voucher',
-    icon: '🎟️',
     title: 'Quà tặng độc quyền: Voucher 50.000₫',
     message: 'Fullstack E-Commerce gửi tặng bạn mã WELCOME50 giảm 50.000₫ cho đơn từ 100k. Dùng ngay kẻo hết hạn!',
     time: '2 giờ trước',
@@ -41,7 +39,6 @@ const INITIAL_NOTIFICATIONS = [
   {
     id: 'notif_03',
     type: 'promo',
-    icon: '⚡',
     title: 'Flash Sale Giờ Vàng đang bùng nổ',
     message: 'Giảm sốc tới 50% tai nghe chống ồn SoundPeak Pro & Bàn phím cơ RGB chỉ trong 2 giờ.',
     time: '5 giờ trước',
@@ -51,7 +48,6 @@ const INITIAL_NOTIFICATIONS = [
   {
     id: 'notif_04',
     type: 'order',
-    icon: '✓',
     title: 'Giao hàng thành công: Đơn ORD827103',
     message: 'Kiện hàng từ TechWorld Store đã được ký nhận thành công. Hãy chia sẻ đánh giá 5 sao nhé!',
     time: '1 ngày trước',

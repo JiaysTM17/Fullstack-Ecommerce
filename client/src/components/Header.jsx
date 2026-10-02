@@ -31,6 +31,7 @@ import {
   StarIcon,
   TicketIcon,
   AlertCircleIcon,
+  ChevronRightIcon,
 } from './OrdersIcons';
 import '../styles/header.css';
 
@@ -1383,9 +1384,10 @@ const Header = ({
                         setShowOrderLookupModal(false);
                         navTo('/orders');
                       }}
+                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                     >
                       <span>Xem chi tiết danh sách đơn mua của bạn</span>
-                      <span>➔</span>
+                      <ChevronRightIcon size={14} />
                     </button>
                   </div>
                 </div>

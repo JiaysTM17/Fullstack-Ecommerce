@@ -8,6 +8,7 @@ import {
   BoltIcon,
   SparklesIcon,
   StarIcon,
+  CloseIcon,
 } from './OrdersIcons';
 import '../styles/filters.css';
 
@@ -209,14 +210,19 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
           className={`shopee-rating-filter-row ${filters.minRating === "4" ? "active" : ""}`}
           onClick={() => onFilterChange("minRating", filters.minRating === "4" ? "" : "4")}
         >
-          <span className="shopee-rating-stars">★★★★☆</span>
+          <span className="shopee-rating-stars" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', color: '#f59e0b' }}>
+            <StarIcon size={13} /><StarIcon size={13} /><StarIcon size={13} /><StarIcon size={13} />
+            <StarIcon size={13} style={{ opacity: 0.25 }} />
+          </span>
           <span>{t('rating_4_up', 'Từ 4 sao trở lên')}</span>
         </div>
         <div
           className={`shopee-rating-filter-row ${filters.minRating === "4.8" ? "active" : ""}`}
           onClick={() => onFilterChange("minRating", filters.minRating === "4.8" ? "" : "4.8")}
         >
-          <span className="shopee-rating-stars">★★★★★</span>
+          <span className="shopee-rating-stars" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', color: '#f59e0b' }}>
+            <StarIcon size={13} /><StarIcon size={13} /><StarIcon size={13} /><StarIcon size={13} /><StarIcon size={13} />
+          </span>
           <span>{t('rating_48_up', 'Từ 4.8 sao (Xuất sắc)')}</span>
         </div>
       </div>
@@ -253,8 +259,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
           type="button"
           className="shopee-clear-filters-btn"
           onClick={onResetFilters}
+          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
         >
-          ✕ {t('clear_all_filters', 'Xóa tất cả bộ lọc')}
+          <CloseIcon size={13} />
+          <span>{t('clear_all_filters', 'Xóa tất cả bộ lọc')}</span>
         </button>
       )}
     </aside>

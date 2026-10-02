@@ -20,6 +20,7 @@ import {
   ReturnIcon,
   StarIcon,
   SparklesIcon,
+  CloseIcon,
 } from './OrdersIcons';
 
 // Safe date parsing supporting multiple formats: ISO, DD/MM/YYYY, HH:mm DD/MM/YYYY
@@ -564,11 +565,10 @@ export default function OrderDetailModal({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '12px',
                   borderRadius: '6px',
                 }}
               >
-                ✕
+                <CloseIcon size={14} />
               </button>
             )}
           </div>
@@ -979,8 +979,8 @@ export default function OrderDetailModal({
                 <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
                   {shopName}
                 </span>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>
-                  · 4.9★ (12k đánh giá)
+                <span style={{ fontSize: '11px', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                  · 4.9 <StarIcon size={11} color="#f59e0b" /> (12k đánh giá)
                 </span>
               </div>
 
@@ -1332,9 +1332,9 @@ export default function OrderDetailModal({
                 type="button"
                 className="shopee-order-btn-danger-outline"
                 onClick={() => onOpenCancelOrder(order)}
-                style={{ height: '32px', fontSize: '12px', borderRadius: '6px' }}
+                style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
-                ✕ {t('cancel_order', 'Hủy đơn hàng')}
+                <CloseIcon size={12} /> {t('cancel_order', 'Hủy đơn hàng')}
               </button>
             )}
 
@@ -1457,9 +1457,9 @@ export default function OrderDetailModal({
               type="button"
               className="shopee-order-btn-outline"
               onClick={onClose}
-              style={{ height: '32px', fontSize: '12px', borderRadius: '6px' }}
+              style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             >
-              ✕ {t('close', 'Đóng')}
+              <CloseIcon size={12} /> {t('close', 'Đóng')}
             </button>
           </div>
         </div>
