@@ -133,11 +133,15 @@ export default function OrderDetailModal({
   const isShipping = order.status === 'shipping' || order.status === 'delivering' || activeStep === 3;
   const isCompleted = order.status === 'completed' || order.status === 'delivered' || activeStep === 4;
   const isCancelled = order.status === 'cancelled' || activeStep === 0;
+  const isReturning = order.status === 'returning' || order.status === 'return_processing' || order.status === 'returned';
 
   // Status Badge Colors & Labels
   const getStatusBadge = () => {
     if (isCancelled) {
       return { text: order.statusText || 'Đã hủy', className: 'status-cancelled', bg: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', icon: <ReturnIcon size={12} /> };
+    }
+    if (isReturning) {
+      return { text: order.statusText || 'Đang xử lý đổi trả', className: 'status-returning', bg: 'rgba(37, 99, 235, 0.12)', color: '#2563eb', icon: <ReturnIcon size={12} /> };
     }
     if (isCompleted) {
       return { text: order.statusText || 'Giao thành công', className: 'status-completed', bg: 'rgba(16, 185, 129, 0.12)', color: '#059669', icon: <CheckIcon size={12} /> };
@@ -410,6 +414,40 @@ export default function OrderDetailModal({
         )}
 
         {/* ==========================================================================
+            Return / Refund Processing Notice Banner
+            ========================================================================== */}
+        {isReturning && (
+          <div
+            style={{
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '12px',
+              padding: '14px 18px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+            }}
+          >
+            <span style={{ color: '#2563eb', flexShrink: 0, marginTop: '2px' }}>
+              <ReturnIcon size={20} />
+            </span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#1d4ed8' }}>
+                Yêu cầu Trả hàng / Hoàn tiền đang được xử lý
+              </div>
+              <div style={{ fontSize: '13px', color: '#334155', marginTop: '3px' }}>
+                Lý do: <strong>{order.returnDetails?.reason || 'Sản phẩm lỗi hoặc hư hỏng'}</strong>
+                {order.returnDetails?.refundAmount ? ` · Số tiền hoàn dự kiến: ${formatCurrency(order.returnDetails.refundAmount)}` : ''}
+              </div>
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                Hệ thống Shopee và Người bán đang xử lý khiếu nại. Nhân viên SPX Express sẽ liên hệ thu hồi sản phẩm miễn phí tại địa chỉ của bạn.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ==========================================================================
             Logistics & Delivery Stepper Card (Carrier, Code, Cable Progress, Timeline)
             ========================================================================== */}
         {!isCancelled && (
@@ -472,12 +510,12 @@ export default function OrderDetailModal({
                   top: '14px',
                   left: '12.5%',
                   height: '3px',
-                  background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
+                  background: 'linear-gradient(90deg, #38bdf8 0%, #2563eb 100%)',
                   borderRadius: '999px',
                   zIndex: 1,
                   width: `${((Math.min(activeStep || 1, 4) - 1) / 3) * 75}%`,
                   transition: 'width 0.4s ease',
-                  boxShadow: '0 0 6px rgba(16, 185, 129, 0.45)',
+                  boxShadow: '0 0 6px rgba(37, 99, 235, 0.35)',
                 }}
               />
               <div className="stepper-stages">
@@ -610,8 +648,8 @@ export default function OrderDetailModal({
                 {transactionId} <CopyIcon size={11} />
               </button>
             </div>
-            <div style={{ fontSize: '11.5px', color: '#166534', background: '#f0fdf4', padding: '5px 10px', borderRadius: '6px', marginTop: '10px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ShieldCheckIcon size={13} />
+            <div style={{ fontSize: '11.5px', color: '#1e40af', background: '#eff6ff', padding: '6px 10px', borderRadius: '6px', marginTop: '10px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldCheckIcon size={13} color="#2563eb" />
               <span>Giao dịch an toàn được bảo hộ bởi Shopee SafePay</span>
             </div>
           </div>
@@ -773,28 +811,33 @@ export default function OrderDetailModal({
                       >
                         {item.name}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-                        {item.variant ? (
-                          <span
-                            style={{
-                              fontSize: '11px',
-                              background: '#ffffff',
-                              border: '1px solid var(--border-medium, #cbd5e1)',
-                              padding: '1px 6px',
-                              borderRadius: '4px',
-                              color: 'var(--text-secondary)',
-                            }}
-                          >
-                            Phân loại: {item.variant}
-                          </span>
-                        ) : (
-                          <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
-                            Phiên bản tiêu chuẩn
-                          </span>
-                        )}
-                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                          x{itemQty} · {formatCurrency(itemPrice)}
-                        </span>
+                      {(() => {
+                        let variantText = item.variant || item.color;
+                        let sizeText = item.size;
+                        if (variantText && variantText.includes(',') && !sizeText) {
+                          const parts = variantText.split(',').map((s) => s.trim());
+                          variantText = parts[0];
+                          sizeText = parts[1];
+                        }
+                        const finalVariant = variantText || (item.name?.toLowerCase().includes('giày') ? 'Đỏ Trắng' : item.name?.toLowerCase().includes('áo') ? 'Xanh dương' : 'Tiêu chuẩn');
+                        const finalSize = sizeText || (item.name?.toLowerCase().includes('giày') ? 'Size 42' : item.name?.toLowerCase().includes('áo') ? 'Freesize' : 'Tiêu chuẩn');
+
+                        return (
+                          <div className="shopee-order-item-meta-line" style={{ marginTop: '4px' }}>
+                            <span>Phân loại: {finalVariant}</span>
+                            <span className="meta-pipe"> | </span>
+                            <span>Kích thước: {finalSize}</span>
+                            <span className="meta-pipe"> | </span>
+                            <span>Số lượng: x{itemQty}</span>
+                          </div>
+                        );
+                      })()}
+                      <div className="shopee-order-trust-tag" style={{ marginTop: '4px' }}>
+                        <ShieldCheckIcon size={13} color="#2563eb" />
+                        <span>100% Chính hãng</span>
+                        <span className="trust-dot">·</span>
+                        <ReturnIcon size={12} color="#2563eb" />
+                        <span>Đổi trả trong 15 ngày</span>
                       </div>
                     </div>
                   </div>
@@ -903,10 +946,13 @@ export default function OrderDetailModal({
         {/* ==========================================================================
             Buyer Guarantee & Protection Banner
             ========================================================================== */}
+        {/* ==========================================================================
+            Buyer Guarantee & Protection Banner
+            ========================================================================== */}
         <div
           style={{
-            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(16, 185, 129, 0.06) 100%)',
-            border: '1px solid var(--primary-border, #bfdbfe)',
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
             borderRadius: '10px',
             padding: '12px 16px',
             marginBottom: '20px',
@@ -918,8 +964,8 @@ export default function OrderDetailModal({
           <span style={{ color: '#2563eb', flexShrink: 0 }}>
             <ShieldCheckIcon size={20} />
           </span>
-          <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-            <strong style={{ color: 'var(--text-primary)' }}>Shopee Đảm Bảo:</strong> Tiền thanh toán của bạn sẽ được giữ an toàn và chỉ chuyển cho Người bán khi bạn hài lòng với kiện hàng. Đổi trả miễn phí trong vòng 15 ngày nếu có lỗi từ nhà sản xuất.
+          <div style={{ fontSize: '12.5px', color: '#475569', lineHeight: 1.4 }}>
+            <strong style={{ color: '#0f172a' }}>Shopee Đảm Bảo:</strong> Tiền thanh toán của bạn sẽ được giữ an toàn và chỉ chuyển cho Người bán khi bạn hài lòng với kiện hàng. Đổi trả miễn phí trong vòng 15 ngày nếu có lỗi từ nhà sản xuất.
           </div>
         </div>
         </div>
@@ -933,12 +979,12 @@ export default function OrderDetailModal({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '14px 24px',
+            padding: '12px 20px',
             borderTop: '1px solid #f1f5f9',
             background: '#f8fafc',
             flexShrink: 0,
             flexWrap: 'wrap',
-            gap: '10px',
+            gap: '8px',
             margin: 0,
           }}
         >
@@ -948,22 +994,13 @@ export default function OrderDetailModal({
               <button
                 type="button"
                 className="shopee-order-btn-outline"
-                style={{
-                  fontWeight: 600,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  borderRadius: '6px',
-                  padding: '7px 14px',
-                  fontSize: '13px',
-                }}
                 onClick={() => onOpenChat(order)}
               >
                 <ChatIcon size={13} /> {t('chat_with_shop', 'Chat với Shop')}
               </button>
             )}
 
-            {!isCancelled && activeStep < 4 && onSimulateStep && (
+            {!isCancelled && !isReturning && activeStep < 4 && onSimulateStep && (
               <button
                 type="button"
                 className="shopee-btn"
@@ -978,6 +1015,7 @@ export default function OrderDetailModal({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
+                  height: '32px',
                 }}
                 onClick={() => onSimulateStep(orderId)}
                 title="Mô phỏng bưu tá giao hàng bước tiếp theo"
@@ -990,16 +1028,10 @@ export default function OrderDetailModal({
           {/* Right actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             {/* If pending or confirmed: Cancel Order button */}
-            {(isPending || isConfirmed) && onOpenCancelOrder && (
+            {(isPending || isConfirmed) && !isReturning && onOpenCancelOrder && (
               <button
                 type="button"
                 className="shopee-order-btn-danger-outline"
-                style={{
-                  borderRadius: '6px',
-                  padding: '7px 14px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                }}
                 onClick={() => onOpenCancelOrder(order)}
               >
                 ✕ {t('cancel_order', 'Hủy đơn hàng')}
@@ -1007,44 +1039,58 @@ export default function OrderDetailModal({
             )}
 
             {/* If shipping: Live GPS map button */}
-            {isShipping && handleOpenTracking && (
+            {isShipping && !isReturning && handleOpenTracking && (
               <button
                 type="button"
                 className="shopee-order-btn-outline"
-                style={{
-                  fontWeight: 600,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  borderRadius: '6px',
-                  padding: '7px 14px',
-                  fontSize: '13px',
-                }}
                 onClick={() => handleOpenTracking(order)}
               >
                 <TruckIcon size={13} /> {t('spx_live_tracking', 'Bản đồ Shipper SPX')}
               </button>
             )}
 
+            {/* If returning: show processing status tag & VAT invoice */}
+            {isReturning && (
+              <>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    background: '#eff6ff',
+                    color: '#2563eb',
+                    border: '1px solid #bfdbfe',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    height: '32px',
+                  }}
+                >
+                  <ReturnIcon size={13} /> {t('return_processing_status', 'Đang xử lý đổi trả')}
+                </span>
+                {onOpenInvoice && (
+                  <button
+                    type="button"
+                    className="shopee-order-btn-outline"
+                    onClick={() => onOpenInvoice(order)}
+                  >
+                    <ReceiptIcon size={13} /> {t('vat_invoice', 'In hóa đơn VAT')}
+                  </button>
+                )}
+              </>
+            )}
+
             {/* If completed: Review (+200 coins), Return/Refund, VAT Invoice */}
-            {isCompleted && (
+            {isCompleted && !isReturning && (
               <>
                 {onOpenReviewModal && (
                   <button
                     type="button"
-                    className="shopee-order-btn-success"
-                    style={{
-                      borderRadius: '6px',
-                      padding: '7px 14px',
-                      fontSize: '13px',
-                      fontWeight: 700,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}
+                    className="shopee-order-btn-review"
                     onClick={() => onOpenReviewModal(order)}
                   >
-                    <StarIcon size={13} /> {t('review_order_reward', 'Đánh giá (+200 Xu)')}
+                    <StarIcon size={13} color="#facc15" filled /> {t('review_order_reward', 'Đánh giá (+200 Xu)')}
                   </button>
                 )}
 
@@ -1052,18 +1098,9 @@ export default function OrderDetailModal({
                   <button
                     type="button"
                     className="shopee-order-btn-outline"
-                    style={{
-                      borderRadius: '6px',
-                      padding: '7px 14px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}
                     onClick={() => onOpenReturnModal(order)}
                   >
-                    <ReturnIcon size={13} /> {t('return_refund', 'Trả hàng/Hoàn tiền')}
+                    <ReturnIcon size={13} /> {t('return_refund', 'Trả hàng / Hoàn tiền')}
                   </button>
                 )}
 
@@ -1071,15 +1108,6 @@ export default function OrderDetailModal({
                   <button
                     type="button"
                     className="shopee-order-btn-outline"
-                    style={{
-                      borderRadius: '6px',
-                      padding: '7px 14px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                    }}
                     onClick={() => onOpenInvoice(order)}
                   >
                     <ReceiptIcon size={13} /> {t('vat_invoice', 'In hóa đơn VAT')}
@@ -1093,15 +1121,6 @@ export default function OrderDetailModal({
               <button
                 type="button"
                 className="shopee-order-btn-primary"
-                style={{
-                  fontWeight: 700,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  borderRadius: '6px',
-                  padding: '7px 16px',
-                  fontSize: '13px',
-                }}
                 onClick={() => onReorderWhole(order)}
               >
                 <RefreshIcon size={13} /> {t('buy_again_whole', 'Mua lại cả đơn')}
@@ -1112,12 +1131,6 @@ export default function OrderDetailModal({
               type="button"
               className="shopee-order-btn-outline"
               onClick={onClose}
-              style={{
-                fontWeight: 600,
-                borderRadius: '6px',
-                padding: '7px 14px',
-                fontSize: '13px',
-              }}
             >
               ✕ {t('close', 'Đóng')}
             </button>

@@ -26,7 +26,8 @@ export default function InvoiceReceiptModal({ order, onClose }) {
   };
 
   const company = liveInvoice?.company || liveInvoice?.seller || {};
-  const companyName = company.legalName || company.companyName || 'CÔNG TY TNHH SHOPEE VIỆT NAM';
+  const rawCompanyName = company.legalName || company.companyName || 'CÔNG TY TNHH SHOPEE VIỆT NAM';
+  const companyName = rawCompanyName.replace(/Mini\s*Shopee/gi, 'Shopee');
   const taxCode = company.taxCode || '0318924019';
   const templateCode = liveInvoice?.templateCode || '01GTKT0/001';
   const invoiceSerial = liveInvoice?.invoiceSerial || '1C26MS';
@@ -103,7 +104,7 @@ export default function InvoiceReceiptModal({ order, onClose }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '32px 16px',
+        padding: '24px 16px',
         overflowY: 'auto',
         boxSizing: 'border-box',
         animation: 'modalOverlayFadeIn 0.2s ease-out forwards',
@@ -119,8 +120,8 @@ export default function InvoiceReceiptModal({ order, onClose }) {
           color: '#0f172a',
           borderRadius: '16px',
           width: '100%',
-          maxWidth: '680px',
-          maxHeight: '86vh',
+          maxWidth: '740px',
+          maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
@@ -139,15 +140,15 @@ export default function InvoiceReceiptModal({ order, onClose }) {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '14px 22px',
+            padding: '12px 20px',
             borderBottom: '1px solid #f1f5f9',
             background: '#f8fafc',
             flexShrink: 0,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ReceiptIcon size={18} color="#2563eb" />
-            <span style={{ fontWeight: 800, fontSize: '14px', color: '#0f172a', letterSpacing: '-0.2px' }}>
+            <ReceiptIcon size={16} color="#2563eb" />
+            <span style={{ fontWeight: 800, fontSize: '13.5px', color: '#0f172a', letterSpacing: '-0.2px' }}>
               Hóa Đơn Điện Tử & Biên Lai VAT
             </span>
           </div>
@@ -155,38 +156,31 @@ export default function InvoiceReceiptModal({ order, onClose }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               type="button"
+              className="shopee-order-btn-primary"
               onClick={handlePrint}
               style={{
-                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                color: '#ffffff',
-                border: 'none',
                 borderRadius: '8px',
-                padding: '7px 15px',
+                padding: '6px 14px',
                 fontWeight: 700,
-                fontSize: '12.5px',
-                cursor: 'pointer',
-                display: 'flex',
+                fontSize: '12px',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
-                transition: 'all 0.15s ease',
+                height: '32px',
               }}
             >
               <PrinterIcon size={13} color="#ffffff" /> In Hóa Đơn / Lưu PDF
             </button>
             <button
               type="button"
+              className="shopee-order-btn-outline"
               onClick={onClose}
               style={{
-                background: '#ffffff',
-                color: '#475569',
-                border: '1px solid #cbd5e1',
                 borderRadius: '8px',
-                padding: '7px 14px',
+                padding: '6px 12px',
                 fontWeight: 600,
-                fontSize: '12.5px',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
+                fontSize: '12px',
+                height: '32px',
               }}
             >
               ✕ Đóng
@@ -194,11 +188,11 @@ export default function InvoiceReceiptModal({ order, onClose }) {
           </div>
         </div>
 
-        {/* Scrollable invoice document paper with comfortable breathing room */}
+        {/* Scrollable invoice document paper - Compact A4 Layout without Horizontal Overflow */}
         <div
           className="invoice-scroll-body"
           style={{
-            padding: '24px 28px',
+            padding: '20px 24px',
             overflowY: 'auto',
             flex: 1,
             boxSizing: 'border-box',
@@ -210,54 +204,50 @@ export default function InvoiceReceiptModal({ order, onClose }) {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-start',
-              marginBottom: '20px',
-              paddingBottom: '16px',
-              borderBottom: '2px solid #f1f5f9',
+              marginBottom: '16px',
+              paddingBottom: '14px',
+              borderBottom: '1.5px solid #e2e8f0',
               gap: '16px',
-              flexWrap: 'wrap',
             }}
           >
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <div
                   style={{
                     background: '#2563eb',
                     color: '#fff',
-                    width: '30px',
-                    height: '30px',
-                    borderRadius: '8px',
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '6px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 900,
-                    fontSize: '16px',
+                    fontSize: '14px',
+                    flexShrink: 0,
                   }}
                 >
                   S
                 </div>
-                <span style={{ fontSize: '16px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.4px' }}>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
                   {companyName}
                 </span>
               </div>
-              <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
-                Mã số thuế (MST): <strong style={{ color: '#0f172a' }}>{taxCode}</strong><br />
-                Địa chỉ: {company.address || 'Tòa nhà Capital Tower, 109 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội'}<br />
-                Hotline: 1900-1221 · {company.email || 'vat-invoice@shopee.enterprise.vn'}
+              <div style={{ fontSize: '11.5px', color: '#64748b', lineHeight: '1.45' }}>
+                Mã số thuế: <strong style={{ color: '#0f172a' }}>{taxCode}</strong> · Hotline: 1900 1221<br />
+                Địa chỉ: {company.address || 'Tòa nhà Capital Tower, 109 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội'}
               </div>
             </div>
 
-            <div style={{ textAlign: 'right', minWidth: '200px' }}>
-              <div style={{ fontSize: '15px', fontWeight: 900, color: '#2563eb', marginBottom: '4px' }}>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#2563eb', marginBottom: '3px' }}>
                 HÓA ĐƠN GIÁ TRỊ GIA TĂNG (VAT)
               </div>
-              <div style={{ fontSize: '12px', color: '#475569', marginBottom: '2px' }}>
+              <div style={{ fontSize: '11.5px', color: '#475569', marginBottom: '2px' }}>
                 Mẫu số: <strong>{templateCode}</strong> · Ký hiệu: <strong>{invoiceSerial}</strong>
               </div>
               <div style={{ fontSize: '12px', color: '#0f172a', marginBottom: '2px' }}>
-                Số hóa đơn: <strong>{invoiceNo}</strong>
-              </div>
-              <div style={{ fontSize: '11.5px', color: '#64748b', marginBottom: '6px' }}>
-                Ngày lập: {invoiceDate}
+                Số HĐ: <strong>{invoiceNo}</strong> · Ngày: {invoiceDate}
               </div>
               <span
                 style={{
@@ -267,9 +257,9 @@ export default function InvoiceReceiptModal({ order, onClose }) {
                   background: '#f0fdf4',
                   color: '#15803d',
                   border: '1px solid #bbf7d0',
-                  fontSize: '11px',
+                  fontSize: '10.5px',
                   fontWeight: 700,
-                  padding: '2px 8px',
+                  padding: '2px 7px',
                   borderRadius: '4px',
                 }}
               >
@@ -278,32 +268,32 @@ export default function InvoiceReceiptModal({ order, onClose }) {
             </div>
           </div>
 
-          {/* Customer & Order Metadata */}
+          {/* Customer & Order Metadata Grid */}
           <div
             style={{
               background: '#f8fafc',
               border: '1px solid #e2e8f0',
-              borderRadius: '10px',
-              padding: '14px 16px',
+              borderRadius: '8px',
+              padding: '10px 14px',
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: '14px',
-              marginBottom: '18px',
-              fontSize: '12px',
+              gridTemplateColumns: '1.2fr 1fr',
+              gap: '12px',
+              marginBottom: '14px',
+              fontSize: '11.5px',
             }}
           >
             <div>
-              <div style={{ color: '#64748b', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
+              <div style={{ color: '#64748b', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '3px' }}>
                 Đơn Vị Mua Hàng (Buyer)
               </div>
-              <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '2px', fontSize: '13px' }}>{buyerName}</div>
-              <div style={{ color: '#475569', marginBottom: '2px' }}>Điện thoại: {buyerPhone}</div>
-              <div style={{ color: '#475569', marginBottom: '2px' }}>Địa chỉ: {buyerAddress}</div>
+              <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '1px', fontSize: '12.5px' }}>{buyerName}</div>
+              <div style={{ color: '#475569' }}>Điện thoại: {buyerPhone}</div>
+              <div style={{ color: '#475569' }}>Địa chỉ: {buyerAddress}</div>
               <div style={{ color: '#475569' }}>MST: {buyerTaxCode}</div>
             </div>
 
             <div>
-              <div style={{ color: '#64748b', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
+              <div style={{ color: '#64748b', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '3px' }}>
                 Giao Nhận & Thanh Toán
               </div>
               <div style={{ color: '#0f172a', marginBottom: '2px' }}>
@@ -318,34 +308,33 @@ export default function InvoiceReceiptModal({ order, onClose }) {
             </div>
           </div>
 
-          {/* 8% VAT Itemized Table with horizontal scrolling protection */}
+          {/* 8% VAT Itemized Table - Fully Responsive with 0 Horizontal Overflow */}
           <div
             style={{
               width: '100%',
-              overflowX: 'auto',
-              WebkitOverflowScrolling: 'touch',
-              marginBottom: '18px',
+              marginBottom: '14px',
               border: '1px solid #e2e8f0',
               borderRadius: '8px',
+              overflow: 'hidden',
             }}
           >
             <table
               style={{
                 width: '100%',
-                minWidth: '560px',
+                tableLayout: 'fixed',
                 borderCollapse: 'collapse',
-                fontSize: '12px',
+                fontSize: '11.5px',
               }}
             >
               <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
-                  <th style={{ padding: '8px 10px', fontWeight: 700, width: '36px' }}>STT</th>
-                  <th style={{ padding: '8px 10px', fontWeight: 700 }}>Tên Hàng Hóa, Dịch Vụ</th>
-                  <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'center', width: '48px' }}>ĐVT</th>
-                  <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'center', width: '48px' }}>SL</th>
-                  <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'right', width: '105px' }}>Đơn Giá (Chưa VAT)</th>
-                  <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'center', width: '60px' }}>Thuế Suất</th>
-                  <th style={{ padding: '8px 10px', fontWeight: 700, textAlign: 'right', width: '115px' }}>Thành Tiền</th>
+                <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #cbd5e1', textAlign: 'left' }}>
+                  <th style={{ padding: '7px 8px', fontWeight: 700, width: '32px', textAlign: 'center' }}>STT</th>
+                  <th style={{ padding: '7px 8px', fontWeight: 700 }}>Tên Hàng Hóa, Dịch Vụ</th>
+                  <th style={{ padding: '7px 8px', fontWeight: 700, textAlign: 'center', width: '38px' }}>ĐVT</th>
+                  <th style={{ padding: '7px 8px', fontWeight: 700, textAlign: 'center', width: '32px' }}>SL</th>
+                  <th style={{ padding: '7px 8px', fontWeight: 700, textAlign: 'right', width: '85px' }}>Đơn Giá (Net)</th>
+                  <th style={{ padding: '7px 8px', fontWeight: 700, textAlign: 'center', width: '42px' }}>Thuế</th>
+                  <th style={{ padding: '7px 8px', fontWeight: 700, textAlign: 'right', width: '92px' }}>Thành Tiền</th>
                 </tr>
               </thead>
               <tbody>
@@ -355,19 +344,19 @@ export default function InvoiceReceiptModal({ order, onClose }) {
                   const lineTotalNet = item.amount || (unitPriceNet * qty);
                   return (
                     <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '8px 10px', color: '#64748b' }}>{idx + 1}</td>
-                      <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>
+                      <td style={{ padding: '7px 8px', color: '#64748b', textAlign: 'center' }}>{idx + 1}</td>
+                      <td style={{ padding: '7px 8px', fontWeight: 600, color: '#0f172a', wordBreak: 'break-word', lineHeight: '1.35' }}>
                         {item.name}
                       </td>
-                      <td style={{ padding: '8px 10px', textAlign: 'center', color: '#64748b' }}>Cái</td>
-                      <td style={{ padding: '8px 10px', textAlign: 'center', color: '#0f172a' }}>{qty}</td>
-                      <td style={{ padding: '8px 10px', textAlign: 'right', color: '#475569' }}>
+                      <td style={{ padding: '7px 8px', textAlign: 'center', color: '#64748b' }}>Cái</td>
+                      <td style={{ padding: '7px 8px', textAlign: 'center', color: '#0f172a', fontWeight: 600 }}>{qty}</td>
+                      <td style={{ padding: '7px 8px', textAlign: 'right', color: '#475569' }}>
                         {formatCurrency(unitPriceNet)}
                       </td>
-                      <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#2563eb' }}>
+                      <td style={{ padding: '7px 8px', textAlign: 'center', fontWeight: 700, color: '#2563eb' }}>
                         {item.vatRate || vatRate}
                       </td>
-                      <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>
+                      <td style={{ padding: '7px 8px', textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>
                         {formatCurrency(lineTotalNet)}
                       </td>
                     </tr>
@@ -383,29 +372,28 @@ export default function InvoiceReceiptModal({ order, onClose }) {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-start',
-              marginBottom: '18px',
+              marginBottom: '14px',
               gap: '16px',
-              flexWrap: 'wrap',
             }}
           >
             {/* QR Verification Code & Digital Signature */}
-            <div style={{ maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ flex: 1, maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(qrUrl)}`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=72x72&data=${encodeURIComponent(qrUrl)}`}
                   alt="QR Tra Cứu Hóa Đơn VAT"
                   style={{
-                    width: '80px',
-                    height: '80px',
+                    width: '68px',
+                    height: '68px',
                     border: '1px solid #cbd5e1',
                     borderRadius: '6px',
-                    padding: '3px',
+                    padding: '2px',
                     background: '#fff',
                     flexShrink: 0,
                   }}
                 />
-                <div style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.4' }}>
-                  Quét mã QR để đối soát hóa đơn điện tử theo Nghị định 123/2020/NĐ-CP & Thông tư 78/2021/TT-BTC của Tổng Cục Thuế.
+                <div style={{ fontSize: '10.5px', color: '#64748b', lineHeight: '1.35' }}>
+                  Quét mã QR để đối soát hóa đơn điện tử theo NĐ 123/2020/NĐ-CP & TT 78/2021/TT-BTC Tổng Cục Thuế.
                 </div>
               </div>
 
@@ -413,24 +401,24 @@ export default function InvoiceReceiptModal({ order, onClose }) {
               <div
                 style={{
                   background: '#f8fafc',
-                  border: '1px dashed #94a3b8',
+                  border: '1px dashed #cbd5e1',
                   borderRadius: '6px',
-                  padding: '7px 10px',
-                  fontSize: '11px',
+                  padding: '6px 8px',
+                  fontSize: '10.5px',
                   color: '#334155',
                 }}
               >
                 <div style={{ fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <ShieldCheckIcon size={13} color="#15803d" /> ĐÃ KÝ ĐIỆN TỬ BỞI {companyName}
+                  <ShieldCheckIcon size={12} color="#15803d" /> ĐÃ KÝ SỐ BỞI {companyName}
                 </div>
-                <div style={{ fontSize: '9.5px', color: '#64748b', wordBreak: 'break-all', marginTop: '2px' }}>
+                <div style={{ fontSize: '9px', color: '#64748b', wordBreak: 'break-all', marginTop: '2px' }}>
                   Mã xác thực: {signatureDigest}
                 </div>
               </div>
             </div>
 
             {/* VAT Totals Breakdown */}
-            <div style={{ width: '270px', display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '12px' }}>
+            <div style={{ width: '250px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11.5px', flexShrink: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
                 <span>Cộng tiền hàng (chưa VAT):</span>
                 <strong>{formatCurrency(netSubtotal)}</strong>
@@ -462,9 +450,9 @@ export default function InvoiceReceiptModal({ order, onClose }) {
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  paddingTop: '8px',
-                  borderTop: '2px solid #cbd5e1',
-                  fontSize: '14px',
+                  paddingTop: '6px',
+                  borderTop: '1.5px solid #cbd5e1',
+                  fontSize: '13.5px',
                   fontWeight: 900,
                   color: '#0f172a',
                 }}
@@ -479,9 +467,9 @@ export default function InvoiceReceiptModal({ order, onClose }) {
           <div
             style={{
               borderTop: '1px dashed #cbd5e1',
-              paddingTop: '12px',
+              paddingTop: '10px',
               textAlign: 'center',
-              fontSize: '11px',
+              fontSize: '10.5px',
               color: '#64748b',
               lineHeight: '1.4',
             }}
