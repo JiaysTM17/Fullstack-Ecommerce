@@ -18,6 +18,16 @@ import {
   setDefaultAddress,
   getDefaultAddress,
 } from "../services/addressService";
+import {
+  MapPinIcon,
+  TruckIcon,
+  CreditCardIcon,
+  CheckIcon,
+  PencilIcon,
+  StarIcon,
+  TicketIcon,
+  ShieldCheckIcon,
+} from "../components/OrdersIcons";
 import "../styles/checkout-multistep.css";
 
 const SHIPPING_OPTIONS = [
@@ -496,8 +506,9 @@ export default function CheckoutPage() {
                             <span className="address-default-badge">✓ MẶC ĐỊNH</span>
                           )}
                         </div>
-                        <div style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.5" }}>
-                          📍 {addr.address}
+                        <div style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.4", display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                          <MapPinIcon size={14} style={{ flexShrink: 0, marginTop: "2px", color: "#2563eb" }} />
+                          <span>{addr.address}</span>
                         </div>
 
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px", paddingTop: "8px", borderTop: "1px dashed var(--border-light, #e2e8f0)" }}>
@@ -514,13 +525,16 @@ export default function CheckoutPage() {
                                   fontWeight: 700,
                                   cursor: "pointer",
                                   padding: "2px 0",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "4px",
                                 }}
                               >
-                                ⭐ Đặt mặc định
+                                <StarIcon size={12} color="#ea580c" /> Đặt mặc định
                               </button>
                             )}
                           </div>
-                          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                             <button
                               type="button"
                               onClick={(e) => handleOpenEditAddress(addr, e)}
@@ -532,10 +546,13 @@ export default function CheckoutPage() {
                                 fontWeight: 600,
                                 cursor: "pointer",
                                 padding: "2px 4px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "3px",
                               }}
                               title="Sửa địa chỉ"
                             >
-                              ✏️ Sửa
+                              <PencilIcon size={12} /> Sửa
                             </button>
                             <button
                               type="button"
@@ -544,13 +561,17 @@ export default function CheckoutPage() {
                                 background: "none",
                                 border: "none",
                                 color: "#ef4444",
-                                fontSize: "12px",
+                                fontSize: "11.5px",
                                 cursor: "pointer",
                                 padding: "2px 4px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "3px",
+                                fontWeight: 600,
                               }}
                               title="Xóa địa chỉ"
                             >
-                              🗑️
+                              Xóa
                             </button>
                           </div>
                         </div>
