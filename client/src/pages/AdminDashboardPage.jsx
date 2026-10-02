@@ -11,6 +11,21 @@ import {
   deleteAdminShop,
   updateAdminShopStatus,
 } from '../services/adminService';
+import {
+  ShieldIcon,
+  ChartBarIcon,
+  StoreIcon,
+  PackageIcon,
+  UsersIcon,
+  LayersIcon,
+  TicketIcon,
+  CreditCardIcon,
+  RefreshIcon,
+  TrashIcon,
+  CartIcon,
+  UserIcon,
+  SparklesIcon,
+} from '../components/OrdersIcons';
 import '../styles/dashboard.css';
 
 const INITIAL_ALL_SHOPS = [
@@ -419,8 +434,8 @@ export default function AdminDashboardPage() {
       {/* Sidebar Super Admin */}
       <aside className="shopee-sidebar">
         <div className="shopee-sidebar-brand">
-          <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--primary-color), var(--primary-hover))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-            🛡️
+          <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--primary-color), var(--primary-hover))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ShieldIcon size={20} />
           </div>
           <div className="shopee-sidebar-info">
             <h3>Super Admin</h3>
@@ -434,56 +449,70 @@ export default function AdminDashboardPage() {
           type="button"
           className={`shopee-nav-item ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          📊 Tổng Quan Sàn & GMV
+          <ChartBarIcon size={16} />
+          <span>Tổng Quan Sàn & GMV</span>
         </button>
 
         <button
           type="button"
           className={`shopee-nav-item ${activeTab === 'shops' ? 'active' : ''}`}
           onClick={() => setActiveTab('shops')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          🏪 Quản Lý Cửa Hàng ({shops.length})
+          <StoreIcon size={16} />
+          <span>Quản Lý Cửa Hàng ({shops.length})</span>
         </button>
 
         <button
           type="button"
           className={`shopee-nav-item ${activeTab === 'products' ? 'active' : ''}`}
           onClick={() => setActiveTab('products')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          📦 Kiểm Duyệt Sản Phẩm ({moderationProducts.length})
+          <PackageIcon size={16} />
+          <span>Kiểm Duyệt Sản Phẩm ({moderationProducts.length})</span>
         </button>
 
         <button
           type="button"
           className={`shopee-nav-item ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          👥 Quản Lý Người Dùng ({users.length})
+          <UsersIcon size={16} />
+          <span>Quản Lý Người Dùng ({users.length})</span>
         </button>
 
         <button
           type="button"
           className={`shopee-nav-item ${activeTab === 'categories' ? 'active' : ''}`}
           onClick={() => setActiveTab('categories')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          📑 Quản Lý Danh Mục ({categories.length})
+          <LayersIcon size={16} />
+          <span>Quản Lý Danh Mục ({categories.length})</span>
         </button>
 
         <button
           type="button"
           className={`shopee-nav-item ${activeTab === 'vouchers' ? 'active' : ''}`}
           onClick={() => setActiveTab('vouchers')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          🎟️ Quản Lý Voucher Sàn ({vouchers.length})
+          <TicketIcon size={16} />
+          <span>Quản Lý Voucher Sàn ({vouchers.length})</span>
         </button>
 
         <button
           type="button"
           className={`shopee-nav-item ${activeTab === 'finance' ? 'active' : ''}`}
           onClick={() => setActiveTab('finance')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          💰 Đối Soát & Tài Chính
+          <CreditCardIcon size={16} />
+          <span>Đối Soát & Tài Chính</span>
         </button>
       </aside>
 
@@ -583,7 +612,8 @@ export default function AdminDashboardPage() {
                 onClick={() => refreshShopData(true)}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px' }}
               >
-                🔄 Đồng Bộ / Làm Mới
+                <RefreshIcon size={14} />
+                <span>Đồng Bộ / Làm Mới</span>
               </button>
             </div>
             <div className="shopee-table-responsive">
@@ -621,7 +651,7 @@ export default function AdminDashboardPage() {
                               borderRadius: '6px',
                             }}
                           >
-                            ⏳ Chờ phê duyệt
+                            Chờ phê duyệt
                           </span>
                         ) : (
                           <span className={`shopee-status-badge ${s.status === 'active' ? 'status-active' : 'status-hidden'}`}>
@@ -646,7 +676,7 @@ export default function AdminDashboardPage() {
                               }}
                               onClick={() => handleApproveShop(s.id)}
                             >
-                              ✓ Duyệt
+                              Duyệt
                             </button>
                             <button
                               type="button"
@@ -654,16 +684,17 @@ export default function AdminDashboardPage() {
                               style={{ color: '#ef4444', padding: '4px 8px', borderRadius: '6px' }}
                               onClick={() => handleRejectShop(s.id)}
                             >
-                              ✕ Từ chối
+                              Từ chối
                             </button>
                             <button
                               type="button"
                               className="shopee-btn shopee-btn-sm"
-                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
+                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               onClick={() => setShopToDelete(s)}
                               title="Xóa gian hàng này"
                             >
-                              🗑️ Xóa
+                              <TrashIcon size={12} />
+                              <span>Xóa</span>
                             </button>
                           </div>
                         ) : (
@@ -679,11 +710,12 @@ export default function AdminDashboardPage() {
                             <button
                               type="button"
                               className="shopee-btn shopee-btn-sm"
-                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
+                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               onClick={() => setShopToDelete(s)}
                               title="Xóa gian hàng này"
                             >
-                              🗑️ Xóa
+                              <TrashIcon size={12} />
+                              <span>Xóa</span>
                             </button>
                           </div>
                         )}
@@ -709,7 +741,8 @@ export default function AdminDashboardPage() {
                 onClick={() => refreshUserData(true)}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px' }}
               >
-                🔄 Đồng Bộ / Làm Mới
+                <RefreshIcon size={14} />
+                <span>Đồng Bộ / Làm Mới</span>
               </button>
             </div>
             <div className="shopee-table-responsive">
@@ -731,8 +764,14 @@ export default function AdminDashboardPage() {
                       <td><strong>{u.fullName}</strong></td>
                       <td>{u.email}</td>
                       <td>
-                        <span className="shopee-sidebar-badge">
-                          {u.role === 'admin' ? '🛡️ Admin' : u.role === 'seller' ? '🏪 Seller (Người bán)' : '🛒 Customer (Người mua)'}
+                        <span className="shopee-sidebar-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          {u.role === 'admin' ? (
+                            <><ShieldIcon size={13} color="var(--primary-color)" /> Admin</>
+                          ) : u.role === 'seller' ? (
+                            <><StoreIcon size={13} color="#0284c7" /> Seller (Người bán)</>
+                          ) : (
+                            <><CartIcon size={13} color="#16a34a" /> Customer (Người mua)</>
+                          )}
                         </span>
                       </td>
                       <td>
@@ -769,12 +808,13 @@ export default function AdminDashboardPage() {
                               onClick={() => setUserToDelete(u)}
                               title="Xóa tài khoản vĩnh viễn để test đăng ký lại"
                             >
-                              🗑️ Xóa
+                              <TrashIcon size={12} />
+                              <span>Xóa</span>
                             </button>
                           </div>
                         ) : (
-                          <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic', fontWeight: 600 }}>
-                            🛡️ Bảo vệ Admin
+                          <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <ShieldIcon size={12} /> Bảo vệ Admin
                           </span>
                         )}
                       </td>
@@ -1176,12 +1216,14 @@ export default function AdminDashboardPage() {
                             type="button"
                             className="shopee-btn shopee-btn-primary shopee-btn-sm"
                             onClick={() => handleSettlePayout(f.id)}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                           >
-                            💳 Chuyển Khoản & Quyết Toán
+                            <CreditCardIcon size={14} />
+                            <span>Chuyển Khoản & Quyết Toán</span>
                           </button>
                         ) : (
-                          <span style={{ fontSize: '12px', color: 'var(--color-success)', fontWeight: 700 }}>
-                            ✓ Đã Giải Ngân Thành Công
+                          <span style={{ fontSize: '12px', color: 'var(--color-success)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <span>✓</span> Đã Giải Ngân Thành Công
                           </span>
                         )}
                       </td>
@@ -1235,10 +1277,9 @@ export default function AdminDashboardPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '20px',
                   flexShrink: 0
                 }}>
-                  ⚠️
+                  <TrashIcon size={20} />
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#991b1b' }}>
@@ -1284,9 +1325,16 @@ export default function AdminDashboardPage() {
                       padding: '2px 8px',
                       borderRadius: '999px',
                       background: userToDelete.role === 'seller' ? '#e0f2fe' : '#f1f5f9',
-                      color: userToDelete.role === 'seller' ? '#0369a1' : '#475569'
+                      color: userToDelete.role === 'seller' ? '#0369a1' : '#475569',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
                     }}>
-                      {userToDelete.role === 'seller' ? '🏪 Người bán (Seller)' : '🛒 Người mua (Customer)'}
+                      {userToDelete.role === 'seller' ? (
+                        <><StoreIcon size={12} /> Người bán (Seller)</>
+                      ) : (
+                        <><CartIcon size={12} /> Người mua (Customer)</>
+                      )}
                     </span>
                   </div>
                   {userToDelete.role === 'seller' && (
@@ -1298,7 +1346,7 @@ export default function AdminDashboardPage() {
                       fontSize: '12px',
                       lineHeight: 1.5
                     }}>
-                      🏬 <strong>Gian hàng đi kèm:</strong> Hệ thống sẽ tự động dọn sạch gian hàng của người bán này và các mặt hàng niêm yết để giải phóng hoàn toàn tên shop.
+                      <strong>Gian hàng đi kèm:</strong> Hệ thống sẽ tự động dọn sạch gian hàng của người bán này và các mặt hàng niêm yết để giải phóng hoàn toàn tên shop.
                     </div>
                   )}
                 </div>
@@ -1314,7 +1362,7 @@ export default function AdminDashboardPage() {
                   gap: '8px',
                   alignItems: 'center'
                 }}>
-                  <span>💡</span>
+                  <SparklesIcon size={15} color="#16a34a" />
                   <span><strong>Mục đích kiểm thử:</strong> Sau khi xóa, bạn có thể nhập lại email này trên trang Đăng ký để test lại toàn bộ luồng từ đầu.</span>
                 </div>
               </div>
@@ -1356,7 +1404,8 @@ export default function AdminDashboardPage() {
                     gap: '6px'
                   }}
                 >
-                  {isDeleting ? 'Đang Xóa...' : '🗑️ Xác Nhận Xóa Vĩnh Viễn'}
+                  <TrashIcon size={14} />
+                  <span>{isDeleting ? 'Đang Xóa...' : 'Xác Nhận Xóa Vĩnh Viễn'}</span>
                 </button>
               </div>
             </div>
@@ -1404,10 +1453,9 @@ export default function AdminDashboardPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '20px',
                   flexShrink: 0
                 }}>
-                  🏪
+                  <StoreIcon size={20} />
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#991b1b' }}>
@@ -1448,8 +1496,9 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
 
-                <p style={{ margin: 0, fontSize: '12px', color: '#dc2626' }}>
-                  ⚠️ Cảnh báo: Thao tác này sẽ xóa vĩnh viễn gian hàng và toàn bộ sản phẩm của gian hàng này.
+                <p style={{ margin: 0, fontSize: '12px', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <TrashIcon size={13} />
+                  <span>Cảnh báo: Thao tác này sẽ xóa vĩnh viễn gian hàng và toàn bộ sản phẩm của gian hàng này.</span>
                 </p>
               </div>
 
@@ -1489,7 +1538,8 @@ export default function AdminDashboardPage() {
                     gap: '6px'
                   }}
                 >
-                  {isDeleting ? 'Đang Xóa...' : '🗑️ Xác Nhận Xóa Gian Hàng'}
+                  <TrashIcon size={14} />
+                  <span>{isDeleting ? 'Đang Xóa...' : 'Xác Nhận Xóa Gian Hàng'}</span>
                 </button>
               </div>
             </div>
