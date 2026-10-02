@@ -189,7 +189,7 @@ export default function CartPage() {
 
   return (
     <main className="shopee-container" style={{ padding: "24px 0" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "28px", alignItems: "start" }}>
+      <div className="shopee-cart-page" style={{ gap: "28px" }}>
         {/* Left Column: Cart Items & Save For Later */}
         <section>
           {/* Free Shipping Progress Bar */}
@@ -516,7 +516,8 @@ export default function CartPage() {
                   padding: "2px 4px",
                 }}
               >
-                {appliedVoucher ? "Đổi mã khác >" : "Chọn mã có sẵn >"}
+                <span>{appliedVoucher ? "Đổi mã khác" : "Chọn mã có sẵn"}</span>
+                <ChevronRightIcon size={12} />
               </button>
             </div>
 

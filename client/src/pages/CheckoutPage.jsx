@@ -931,9 +931,10 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setShowVoucherModal(true)}
-                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}
+                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
                 >
-                  {(appliedDiscountVoucher || appliedShippingVoucher) ? "Đổi mã khác >" : "+ Chọn mã giảm giá >"}
+                  <span>{(appliedDiscountVoucher || appliedShippingVoucher) ? "Đổi mã khác" : "Chọn mã giảm giá"}</span>
+                  <ChevronRightIcon size={12} />
                 </button>
               </div>
 
@@ -1092,9 +1093,10 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setShowVoucherModal(true)}
-                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}
+                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
                 >
-                  {(appliedDiscountVoucher && appliedShippingVoucher) ? "Đổi mã >" : "Chọn mã >"}
+                  <span>{(appliedDiscountVoucher && appliedShippingVoucher) ? "Đổi mã" : "Chọn mã"}</span>
+                  <ChevronRightIcon size={12} />
                 </button>
               </div>
 
