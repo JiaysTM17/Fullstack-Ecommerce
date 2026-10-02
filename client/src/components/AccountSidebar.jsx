@@ -91,7 +91,7 @@ export default function AccountSidebar({
         {/* SECTION: ĐƠN MUA */}
         <div className="account-sidebar-group">
           <div className="account-sidebar-group-title">
-            <span style={{ color: '#2563eb' }}><PackageIcon size={16} /></span>
+            <span style={{ color: '#64748b' }}><PackageIcon size={15} /></span>
             <span>ĐƠN HÀNG CỦA TÔI</span>
           </div>
 
@@ -145,17 +145,19 @@ export default function AccountSidebar({
                     <div className="date-filter-label">
                       <span>🕒</span> <span>Khoảng thời gian:</span>
                     </div>
-                    <div className="date-filter-pills">
-                      {DATE_OPTIONS.map((opt) => (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          className={`date-pill-btn ${dateRange === opt.id ? 'active' : ''}`}
-                          onClick={() => onSelectDateRange(opt.id)}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
+                    <div className="account-sidebar-select-wrap">
+                      <select
+                        value={dateRange}
+                        onChange={(e) => onSelectDateRange(e.target.value)}
+                        className="account-sidebar-select"
+                        aria-label="Chọn khoảng thời gian lọc đơn hàng"
+                      >
+                        {DATE_OPTIONS.map((opt) => (
+                          <option key={opt.id} value={opt.id}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 )}
@@ -212,7 +214,7 @@ export default function AccountSidebar({
         {/* SECTION: TÀI KHOẢN CỦA TÔI */}
         <div className="account-sidebar-group">
           <div className="account-sidebar-group-title">
-            <span style={{ color: '#2563eb' }}>👤</span>
+            <span style={{ color: '#64748b' }}>👤</span>
             <span>TÀI KHOẢN CỦA TÔI</span>
           </div>
 
@@ -254,7 +256,7 @@ export default function AccountSidebar({
         {/* SECTION: ƯU ĐÃI & THƯỞNG */}
         <div className="account-sidebar-group">
           <div className="account-sidebar-group-title">
-            <span style={{ color: '#2563eb' }}>🎁</span>
+            <span style={{ color: '#64748b' }}>🎁</span>
             <span>ƯU ĐÃI & ĐIỂM THƯỞNG</span>
           </div>
 
@@ -294,7 +296,7 @@ export default function AccountSidebar({
         {user?.role === 'seller' && (
           <div className="account-sidebar-group">
             <div className="account-sidebar-group-title">
-              <span style={{ color: '#2563eb' }}><StoreIcon size={14} /></span>
+              <span style={{ color: '#64748b' }}><StoreIcon size={14} /></span>
               <span>KÊNH BÁN HÀNG</span>
             </div>
             <div className="account-sidebar-group-content">

@@ -172,20 +172,22 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
           >
             <PrinterIcon size={13} color="#ffffff" /> In Hóa Đơn / Lưu PDF
           </button>
-          <button
-            type="button"
-            className="shopee-order-btn-outline"
-            onClick={onClose}
-            style={{
-              borderRadius: '8px',
-              padding: '6px 12px',
-              fontWeight: 600,
-              fontSize: '12px',
-              height: '32px',
-            }}
-          >
-            {inline ? '← Quay lại' : '✕ Đóng'}
-          </button>
+          {!inline && (
+            <button
+              type="button"
+              className="shopee-order-btn-outline"
+              onClick={onClose}
+              style={{
+                borderRadius: '8px',
+                padding: '6px 12px',
+                fontWeight: 600,
+                fontSize: '12px',
+                height: '32px',
+              }}
+            >
+              ✕ Đóng
+            </button>
+          )}
         </div>
       </div>
 
@@ -215,20 +217,19 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <div
                   style={{
-                    background: '#2563eb',
-                    color: '#fff',
+                    background: 'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
+                    color: '#ffffff',
                     width: '26px',
                     height: '26px',
                     borderRadius: '6px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontWeight: 900,
-                    fontSize: '14px',
                     flexShrink: 0,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                   }}
                 >
-                  S
+                  <ReceiptIcon size={14} color="#ffffff" />
                 </div>
                 <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
                   {companyName}
@@ -241,7 +242,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
             </div>
 
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#2563eb', marginBottom: '3px' }}>
+              <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#0f172a', marginBottom: '3px' }}>
                 HÓA ĐƠN GIÁ TRỊ GIA TĂNG (VAT)
               </div>
               <div style={{ fontSize: '11.5px', color: '#475569', marginBottom: '2px' }}>

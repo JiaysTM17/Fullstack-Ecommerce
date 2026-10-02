@@ -2589,8 +2589,8 @@
 
 .account-sidebar-menu-btn.active,
 .account-sidebar-link.active {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #f1f5f9;
+  color: #0f172a;
   font-weight: 700;
 }
 
@@ -2610,11 +2610,11 @@
 .account-sidebar-total-badge {
   font-size: 11px;
   font-weight: 700;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #f1f5f9;
+  color: #475569;
   padding: 1px 7px;
   border-radius: 9999px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #e2e8f0;
 }
 
 .account-sidebar-live-tag {
@@ -2651,7 +2651,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 5px 8px;
+  padding: 5.5px 8px;
   border-radius: 6px;
   color: #475569;
   font-size: 12px;
@@ -2669,8 +2669,8 @@
 }
 
 .account-sidebar-subitem-btn.active {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #f1f5f9;
+  color: #0f172a;
   font-weight: 700;
 }
 
@@ -2698,7 +2698,7 @@
 }
 
 .subitem-count-badge.active {
-  background: #2563eb;
+  background: #0f172a;
   color: #ffffff;
 }
 
@@ -2719,35 +2719,29 @@
   gap: 4px;
 }
 
-.date-filter-pills {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+.account-sidebar-select-wrap {
+  width: 100%;
 }
 
-.date-pill-btn {
-  text-align: left;
-  font-size: 11.5px;
-  padding: 4.5px 9px;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
+.account-sidebar-select {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
   background: #f8fafc;
-  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
 }
 
-.date-pill-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #0f172a;
-}
-
-.date-pill-btn.active {
-  background: #eff6ff;
-  color: #2563eb;
-  border-color: #bfdbfe;
-  font-weight: 700;
+.account-sidebar-select:hover,
+.account-sidebar-select:focus {
+  border-color: #94a3b8;
+  background: #ffffff;
 }
 
 /* Sidebar Quick Actions */
@@ -2767,17 +2761,17 @@
   font-size: 11px;
   font-weight: 600;
   border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
   background: #ffffff;
-  color: #334155;
+  color: #475569;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .sidebar-quick-btn:hover {
-  background: #eff6ff;
-  border-color: #2563eb;
-  color: #2563eb;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
 }
 
 .seller-portal-link {

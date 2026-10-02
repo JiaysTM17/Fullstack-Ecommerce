@@ -1647,7 +1647,60 @@ export default function OrderHistoryPage() {
                     </div>
                   </div>
 
-                  {/* Items List - Matches Image 1 */}
+                  {/* Delivery Stepper Progress Wire ("Thanh 4 cục đường dẫn") with Animated Paper Plane */}
+                  {ord.stepIndex > 0 && ord.status !== 'cancelled' && (
+                    <div className="order-stepper-container">
+                      <div className="order-stepper-track-wrap">
+                        {/* Base Wire / Sợi dây nền */}
+                        <div className="order-stepper-cable-base" />
+                        {/* Active Progress Wire / Sợi dây truyền màu cyan-blue + Máy bay giấy */}
+                        <div
+                          className="order-stepper-cable-active"
+                          style={{
+                            width: `${((Math.min(ord.stepIndex || 1, 4) - 1) / 3) * 75}%`,
+                          }}
+                        >
+                          <div className="order-stepper-plane" title="Đang vận chuyển">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M21.5 2.5L2 10.5L9.5 14L13.5 21.5L21.5 2.5Z" fill="url(#planeGradientBlue)" stroke="#ffffff" strokeWidth="1.2" strokeLinejoin="round"/>
+                              <path d="M9.5 14L21.5 2.5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round"/>
+                              <defs>
+                                <linearGradient id="planeGradientBlue" x1="2" y1="2.5" x2="21.5" y2="21.5" gradientUnits="userSpaceOnUse">
+                                  <stop stopColor="#38bdf8" />
+                                  <stop offset="1" stopColor="#2563eb" />
+                                </linearGradient>
+                              </defs>
+                            </svg>
+                          </div>
+                        </div>
+
+                        {[
+                          { num: 1, label: t('step_order_placed', 'Đã Đặt Hàng') },
+                          { num: 2, label: t('step_confirmed', 'Đã Xác Nhận') },
+                          { num: 3, label: t('step_shipping', 'Đang Vận Chuyển') },
+                          { num: 4, label: t('step_delivered', 'Đã Giao Hàng') },
+                        ].map((step, idx) => {
+                          const isCompleted = (ord.stepIndex || 1) >= step.num || ord.status === 'completed' || ord.status === 'delivered';
+                          const isActive = (ord.stepIndex || 1) === step.num && ord.status !== 'completed' && ord.status !== 'delivered';
+                          return (
+                            <div
+                              key={idx}
+                              className={`order-stepper-node ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
+                            >
+                              <div className="order-stepper-circle">
+                                {isCompleted ? <CheckIcon size={11} color="#ffffff" /> : step.num}
+                              </div>
+                              <span className="order-stepper-label">
+                                {step.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Items List - Matches Image 4 */}
                   <div className="shopee-order-items-list">
                     {(ord.items || []).map((item, idx) => {
                       const itemQty = Number(item.quantity) || 1;

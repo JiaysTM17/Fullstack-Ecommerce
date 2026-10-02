@@ -229,7 +229,7 @@ export default function OrderDetailModal({
   );
 
   // Fee Breakdown Calculation - Ultra Thorough & Transparent
-  let items = Array.isArray(order.items) && order.items.length > 0
+  let rawItems = Array.isArray(order.items) && order.items.length > 0
     ? order.items
     : Array.isArray(order.products) && order.products.length > 0
     ? order.products
@@ -237,8 +237,8 @@ export default function OrderDetailModal({
     ? order.orderItems
     : [];
 
-  if (items.length === 0) {
-    items = [{
+  if (rawItems.length === 0) {
+    rawItems = [{
       name: order.productName || order.name || (order.shopName?.toLowerCase().includes('tech') ? 'Tai nghe Bluetooth True Wireless chống ồn chủ động Hybrid ANC SoundPeak Pro' : 'Áo sơ mi nữ công sở lụa satin cao cấp chống nhăn thanh lịch'),
       price: Math.max(0, order.price || order.subtotal || order.total || 259000),
       quantity: order.quantity || 2,
@@ -247,6 +247,23 @@ export default function OrderDetailModal({
       image: order.image || order.thumbnail || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200',
     }];
   }
+
+  // Deep sanitize each item to guarantee proper display without collapsing
+  const items = rawItems.map((it, idx) => {
+    const rawName = it?.name || it?.title || it?.productName || order.productName || order.name;
+    const defaultName = order.shopName?.toLowerCase().includes('tech')
+      ? 'Tai nghe Bluetooth True Wireless chống ồn chủ động Hybrid ANC SoundPeak Pro'
+      : 'Áo sơ mi nữ công sở lụa satin cao cấp chống nhăn thanh lịch';
+    return {
+      _id: it?._id || it?.id || `item-${idx}`,
+      name: rawName || defaultName,
+      price: Number(it?.price) || Number(order.price) || (rawItems.length === 1 ? Number(order.subtotal) || Number(order.total) || 259000 : 259000),
+      quantity: Number(it?.quantity) || Number(order.quantity) || 1,
+      variant: it?.variant || it?.color || 'Xanh dương',
+      size: it?.size || 'Freesize',
+      image: it?.image || it?.thumbnail || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200',
+    };
+  });
 
   const itemSubtotal = order.subtotal !== undefined
     ? Number(order.subtotal)
@@ -533,25 +550,7 @@ export default function OrderDetailModal({
             >
               <PrinterIcon size={12} /> {t('print', 'In')}
             </button>
-            {inline ? (
-              <button
-                type="button"
-                className="shopee-order-btn-outline"
-                onClick={onClose}
-                style={{
-                  height: '28px',
-                  padding: '0 12px',
-                  fontSize: '11.5px',
-                  borderRadius: '6px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  fontWeight: 600,
-                }}
-              >
-                ← Quay lại danh sách
-              </button>
-            ) : (
+            {!inline && (
               <button
                 type="button"
                 className="shopee-order-btn-outline"
