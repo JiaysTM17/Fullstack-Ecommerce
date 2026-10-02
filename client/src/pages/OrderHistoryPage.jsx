@@ -100,27 +100,37 @@ export default function OrderHistoryPage() {
   useEffect(() => {
     const updateIndicator = () => {
       const activeEl = tabRefs.current[activeTab];
-      if (activeEl) {
+      const navEl = tabNavRef.current;
+      if (activeEl && navEl) {
         const textSpan = activeEl.querySelector('.shopee-order-tab-text') || activeEl;
-        const textWidth = textSpan.offsetWidth || 60;
-        const textOffsetLeft = textSpan.offsetLeft || 0;
-        // Indicator width proportional to text, centered directly under the text span
-        const targetWidth = Math.max(36, textWidth + 8);
-        const targetLeft = activeEl.offsetLeft + textOffsetLeft + (textWidth - targetWidth) / 2;
+        const navRect = navEl.getBoundingClientRect();
+        const textRect = textSpan.getBoundingClientRect();
+
+        const targetWidth = Math.max(36, Math.round(textRect.width + 10));
+        // Distance from left edge of nav container to center of text span, accounting for scrollLeft
+        const textCenterInNav = (textRect.left - navRect.left) + navEl.scrollLeft + textRect.width / 2;
+        const targetLeft = Math.round(textCenterInNav - targetWidth / 2);
 
         setIndicatorStyle({
-          left: Math.round(targetLeft),
-          width: Math.round(targetWidth),
+          left: targetLeft,
+          width: targetWidth,
           opacity: 1,
         });
       }
     };
 
     updateIndicator();
-    const timer = setTimeout(updateIndicator, 50);
+    const rafId = requestAnimationFrame(updateIndicator);
+    const timer = setTimeout(updateIndicator, 60);
+    const timer2 = setTimeout(updateIndicator, 200);
     window.addEventListener('resize', updateIndicator);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(updateIndicator);
+    }
     return () => {
+      cancelAnimationFrame(rafId);
       clearTimeout(timer);
+      clearTimeout(timer2);
       window.removeEventListener('resize', updateIndicator);
     };
   }, [activeTab]);
