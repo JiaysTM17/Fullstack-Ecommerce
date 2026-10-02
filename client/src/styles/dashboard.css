@@ -833,11 +833,11 @@
    ========================================================================== */
 
 .order-stepper-container {
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
-  border-radius: 10px;
-  padding: 10px 16px 12px;
-  margin: 10px 20px 12px;
+  background: #fbfcfe;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 14px 28px 12px;
+  margin: 0;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
@@ -854,7 +854,7 @@
 /* Sợi dây xám kết nối nền chạy ngang qua 4 điểm mốc */
 .order-stepper-cable-base {
   position: absolute;
-  top: 9px;
+  top: 10px;
   left: 12.5%;
   width: 75%;
   height: 2px;
@@ -863,19 +863,17 @@
   z-index: 1;
 }
 
-/* Sợi dây truyền màu xanh lá chuyển động hiển thị tiến trình thực tế */
+/* Sợi dây truyền màu chuyển động hiển thị tiến trình thực tế */
 .order-stepper-cable-active {
   position: absolute;
-  top: 9px;
+  top: 10px;
   left: 12.5%;
   height: 2px;
-  background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #059669 100%);
-  background-size: 200% 100%;
-  animation: cableShimmer 3s ease infinite;
+  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 50%, #059669 100%);
   border-radius: 9999px;
   z-index: 1;
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.45);
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.35);
 }
 
 @keyframes cableShimmer {
@@ -895,8 +893,8 @@
 }
 
 .order-stepper-circle {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #ffffff;
   border: 1.5px solid #cbd5e1;
@@ -904,46 +902,46 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
   transition: all 0.25s ease;
-  box-shadow: 0 0 0 2.5px #f8fafc;
+  box-shadow: 0 0 0 3px #fbfcfe;
 }
 
 .order-stepper-node.completed .order-stepper-circle {
-  background: #10b981;
-  border-color: #10b981;
+  background: #059669;
+  border-color: #059669;
   color: #ffffff;
-  box-shadow: 0 0 0 2.5px #f8fafc, 0 1px 4px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 0 3px #fbfcfe, 0 1px 4px rgba(5, 150, 105, 0.25);
 }
 
 .order-stepper-node.active .order-stepper-circle {
   background: #2563eb;
   border-color: #2563eb;
   color: #ffffff;
-  box-shadow: 0 0 0 2.5px #f8fafc, 0 0 0 4px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 0 0 3px #fbfcfe, 0 0 0 5px rgba(37, 99, 235, 0.2);
   animation: stepperPulseGlow 2s infinite;
 }
 
 @keyframes stepperPulseGlow {
   0% {
-    box-shadow: 0 0 0 2.5px #f8fafc, 0 0 0 3px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 0 0 3px #fbfcfe, 0 0 0 3px rgba(37, 99, 235, 0.3);
   }
   50% {
-    box-shadow: 0 0 0 2.5px #f8fafc, 0 0 0 6px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px #fbfcfe, 0 0 0 6px rgba(37, 99, 235, 0.1);
   }
   100% {
-    box-shadow: 0 0 0 2.5px #f8fafc, 0 0 0 3px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 0 0 3px #fbfcfe, 0 0 0 3px rgba(37, 99, 235, 0.3);
   }
 }
 
 .order-stepper-label {
   font-family: var(--font-family);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
   color: #64748b;
-  margin-top: 5px;
-  line-height: 1.2;
+  margin-top: 6px;
+  line-height: 1.25;
   transition: color 0.2s ease;
 }
 
@@ -1554,29 +1552,30 @@
 }
 
 .shopee-mall-badge {
-  background: #ef4444 !important;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
   color: #ffffff !important;
-  font-size: 11px !important;
+  font-size: 10.5px !important;
   font-weight: 800 !important;
-  padding: 2px 7px !important;
+  padding: 2.5px 7.5px !important;
   border-radius: 4px !important;
   letter-spacing: 0.5px;
-  line-height: 1.2;
+  line-height: 1.1;
   text-transform: uppercase;
   display: inline-flex;
   align-items: center;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.22);
 }
 
 .shopee-order-shop-name {
   font-family: var(--font-family);
   font-size: 14px;
   font-weight: 700;
-  color: #1e293b;
+  color: #0f172a;
   cursor: pointer;
   transition: color 0.15s ease;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 .shopee-order-shop-name:hover {
@@ -1587,11 +1586,11 @@
   font-family: var(--font-family);
   font-size: 12px;
   font-weight: 600;
-  color: #2563eb;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
   border-radius: 6px;
-  padding: 3px 10px;
+  padding: 4px 10px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1600,9 +1599,9 @@
 }
 
 .shopee-order-chat-btn:hover {
-  background: #2563eb;
-  color: #ffffff;
-  border-color: #2563eb;
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
 }
 
 .shopee-order-id-chip {
@@ -1630,8 +1629,23 @@
 .shopee-order-header-status {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-size: 12.5px;
+}
+
+.order-date-text {
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.order-header-divider {
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 700;
+  user-select: none;
 }
 
 .shopee-order-status-badge {
@@ -1667,6 +1681,29 @@
   background: #fef2f2 !important;
   color: #dc2626 !important;
   border: 1px solid #fecaca !important;
+}
+
+.shopee-order-item-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.shopee-order-trust-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-family);
+  font-size: 11px;
+  font-weight: 600;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 2px 7px;
+  border-radius: 4px;
+  line-height: 1.2;
 }
 
 /* Product Items Area */
@@ -1868,13 +1905,13 @@
 
 /* Button styles */
 .shopee-order-btn-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
   color: #ffffff !important;
-  border: 1px solid #2563eb !important;
+  border: 1px solid #1d4ed8 !important;
   font-family: var(--font-family) !important;
-  font-weight: 600 !important;
-  padding: 7px 16px !important;
-  border-radius: 6px !important;
+  font-weight: 700 !important;
+  padding: 8px 18px !important;
+  border-radius: 8px !important;
   font-size: 12.5px !important;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.28) !important;
   cursor: pointer;
@@ -1882,31 +1919,31 @@
 }
 
 .shopee-order-btn-primary:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-  border-color: #1d4ed8 !important;
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+  border-color: #1e40af !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.42) !important;
 }
 
 .shopee-order-btn-success {
-  background: #10b981 !important;
+  background: #059669 !important;
   color: #ffffff !important;
-  border: 1px solid #10b981 !important;
+  border: 1px solid #059669 !important;
   font-family: var(--font-family) !important;
-  font-weight: 600 !important;
-  padding: 7px 16px !important;
-  border-radius: 6px !important;
+  font-weight: 700 !important;
+  padding: 8px 18px !important;
+  border-radius: 8px !important;
   font-size: 12.5px !important;
-  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.25) !important;
+  box-shadow: 0 1px 4px rgba(5, 150, 105, 0.25) !important;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .shopee-order-btn-success:hover {
-  background: #059669 !important;
-  border-color: #059669 !important;
+  background: #047857 !important;
+  border-color: #047857 !important;
   transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 3px 8px rgba(5, 150, 105, 0.35) !important;
 }
 
 .shopee-order-btn-outline {
@@ -1914,9 +1951,9 @@
   color: #334155 !important;
   border: 1px solid #cbd5e1 !important;
   font-family: var(--font-family) !important;
-  font-weight: 500 !important;
-  padding: 7px 14px !important;
-  border-radius: 6px !important;
+  font-weight: 600 !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
   font-size: 12.5px !important;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1934,9 +1971,9 @@
   color: #ef4444 !important;
   border: 1px solid #fca5a5 !important;
   font-family: var(--font-family) !important;
-  font-weight: 500 !important;
-  padding: 7px 14px !important;
-  border-radius: 6px !important;
+  font-weight: 600 !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
   font-size: 12.5px !important;
   cursor: pointer;
   transition: all 0.15s ease;
