@@ -616,12 +616,31 @@ export default function LiveChatWidget() {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.15); }
         }
+        @media (max-width: 768px) {
+          .live-chat-floating-btn {
+            bottom: 76px !important;
+            right: 14px !important;
+            width: 48px !important;
+            height: 48px !important;
+          }
+          .live-chat-window-box {
+            bottom: 8px !important;
+            right: 8px !important;
+            left: 8px !important;
+            width: auto !important;
+            max-width: calc(100vw - 16px) !important;
+            height: calc(100vh - 80px) !important;
+            max-height: 90vh !important;
+            border-radius: 16px !important;
+          }
+        }
       `}</style>
 
       {/* Nút bấm Floating Trigger mở Chatbot: Biểu tượng Trợ lý Mua sắm Robot CSKH */}
       {!isOpen && (
         <button
           type="button"
+          className="live-chat-floating-btn"
           onClick={() => setIsOpen(true)}
           style={{
             position: 'fixed',
@@ -670,7 +689,7 @@ export default function LiveChatWidget() {
       {/* Cửa sổ Chatbot: Kích thước vừa vặn (385px x 500px), không tròng lên thanh Header */}
       {isOpen && (
         <div
-          className="anim-chat-box"
+          className="anim-chat-box live-chat-window-box"
           style={{
             position: 'fixed',
             bottom: '20px',

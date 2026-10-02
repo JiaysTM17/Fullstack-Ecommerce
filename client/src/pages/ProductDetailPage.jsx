@@ -1009,6 +1009,47 @@ export default function ProductDetailPage() {
           onClose={() => setShowShopChat(false)}
         />
       )}
+
+      {/* Mobile Sticky Action Bar */}
+      <div className="amazon-mobile-sticky-bar">
+        <div className="mobile-action-left">
+          <Link
+            to={product.shopId ? `/shop/${product.shopId}` : '/'}
+            className="mobile-icon-btn"
+            title="Xem Shop"
+          >
+            <StoreIcon size={18} />
+            <span>Shop</span>
+          </Link>
+          <button
+            type="button"
+            className="mobile-icon-btn"
+            onClick={() => toggleWishlist(productId)}
+            title="Yêu thích"
+          >
+            <HeartIcon size={18} className={wishlisted ? "fill-current text-rose-500" : ""} />
+            <span>{wishlisted ? "Đã lưu" : "Thích"}</span>
+          </button>
+        </div>
+        <div className="mobile-action-right">
+          <button
+            type="button"
+            className="mobile-btn-cart"
+            onClick={handleAddToCart}
+          >
+            <ShoppingBagIcon size={15} />
+            <span>Thêm giỏ</span>
+          </button>
+          <button
+            type="button"
+            className="mobile-btn-buy"
+            onClick={handleBuyNow}
+          >
+            <BoltIcon size={15} />
+            <span>Mua Ngay</span>
+          </button>
+        </div>
+      </div>
     </main>
   );
 }
