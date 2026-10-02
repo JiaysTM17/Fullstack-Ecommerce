@@ -772,7 +772,12 @@ export default function OrderHistoryPage() {
           <div className="shopee-order-toolbar-inner">
             <div className="orders-search-row">
               <div className="orders-search-box">
-                <span className="orders-search-icon">🔍</span>
+                <span className="orders-search-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </span>
                 <input
                   type="text"
                   placeholder={t('search_orders_placeholder', 'Tìm kiếm theo Tên Shop, ID đơn hàng hoặc Tên sản phẩm...')}
@@ -796,21 +801,21 @@ export default function OrderHistoryPage() {
               <div className="orders-export-group">
                 <button
                   type="button"
-                  className="shopee-order-btn-outline"
-                  style={{ fontSize: '12px', padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  className="orders-toolbar-btn"
                   onClick={handleExportCSV}
                   title="Xuất danh sách đơn hàng sang file CSV (hỗ trợ Excel)"
                 >
-                  📥 Xuất CSV
+                  <span style={{ fontSize: '13px' }}>📥</span>
+                  <span>Xuất CSV</span>
                 </button>
                 <button
                   type="button"
-                  className="shopee-order-btn-outline"
-                  style={{ fontSize: '12px', padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  className="orders-toolbar-btn"
                   onClick={handlePrintReport}
                   title="In hoặc lưu file PDF báo cáo lịch sử đơn hàng"
                 >
-                  🖨 In báo cáo
+                  <span style={{ fontSize: '13px' }}>🖨️</span>
+                  <span>In báo cáo</span>
                 </button>
               </div>
             </div>
@@ -913,42 +918,40 @@ export default function OrderHistoryPage() {
 
                   {/* Tracking Stepper Progress (when active) with Delivery Wire */}
                   {ord.stepIndex > 0 && ord.status !== 'cancelled' && (
-                    <div className="shopee-order-stepper-wrap">
-                      <div className="order-stepper-container" style={{ margin: 0 }}>
-                        <div className="order-stepper-track-wrap">
-                          {/* Base Wire / Sợi dây nền */}
-                          <div className="order-stepper-cable-base" />
-                          {/* Active Progress Wire / Sợi dây truyền màu xanh lá */}
-                          <div
-                            className="order-stepper-cable-active"
-                            style={{
-                              width: `${((Math.min(ord.stepIndex || 1, 4) - 1) / 3) * 75}%`,
-                            }}
-                          />
+                    <div className="order-stepper-container">
+                      <div className="order-stepper-track-wrap">
+                        {/* Base Wire / Sợi dây nền */}
+                        <div className="order-stepper-cable-base" />
+                        {/* Active Progress Wire / Sợi dây truyền màu xanh lá */}
+                        <div
+                          className="order-stepper-cable-active"
+                          style={{
+                            width: `${((Math.min(ord.stepIndex || 1, 4) - 1) / 3) * 75}%`,
+                          }}
+                        />
 
-                          {[
-                            { num: 1, label: t('step_order_placed', 'Đã Đặt Hàng') },
-                            { num: 2, label: t('step_confirmed', 'Đã Xác Nhận') },
-                            { num: 3, label: t('step_shipping', 'Đang Vận Chuyển') },
-                            { num: 4, label: t('step_delivered', 'Đã Giao Hàng') },
-                          ].map((step, idx) => {
-                            const isCompleted = (ord.stepIndex || 1) >= step.num;
-                            const isActive = (ord.stepIndex || 1) === step.num && ord.status !== 'completed';
-                            return (
-                              <div
-                                key={idx}
-                                className={`order-stepper-node ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
-                              >
-                                <div className="order-stepper-circle">
-                                  {isCompleted ? '✓' : step.num}
-                                </div>
-                                <span className="order-stepper-label">
-                                  {step.label}
-                                </span>
+                        {[
+                          { num: 1, label: t('step_order_placed', 'Đã Đặt Hàng') },
+                          { num: 2, label: t('step_confirmed', 'Đã Xác Nhận') },
+                          { num: 3, label: t('step_shipping', 'Đang Vận Chuyển') },
+                          { num: 4, label: t('step_delivered', 'Đã Giao Hàng') },
+                        ].map((step, idx) => {
+                          const isCompleted = (ord.stepIndex || 1) >= step.num;
+                          const isActive = (ord.stepIndex || 1) === step.num && ord.status !== 'completed';
+                          return (
+                            <div
+                              key={idx}
+                              className={`order-stepper-node ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
+                            >
+                              <div className="order-stepper-circle">
+                                {isCompleted ? '✓' : step.num}
                               </div>
-                            );
-                          })}
-                        </div>
+                              <span className="order-stepper-label">
+                                {step.label}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
