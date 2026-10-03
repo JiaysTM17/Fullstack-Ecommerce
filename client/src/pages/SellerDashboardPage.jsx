@@ -2364,9 +2364,12 @@ export default function SellerDashboardPage() {
                     <button
                       type="button"
                       onClick={() => setProductSearch('')}
-                      style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center' }}
+                      style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                      aria-label="Xóa tìm kiếm sản phẩm"
                     >
-                      <CloseIcon size={12} />
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CloseIcon size={10} color="#ef4444" />
+                      </span>
                     </button>
                   )}
                 </div>
@@ -2631,9 +2634,12 @@ export default function SellerDashboardPage() {
                     <button
                       type="button"
                       onClick={() => setOrderSearch('')}
-                      style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center' }}
+                      style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                      aria-label="Xóa tìm kiếm đơn hàng"
                     >
-                      <CloseIcon size={12} />
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CloseIcon size={10} color="#ef4444" />
+                      </span>
                     </button>
                   )}
                 </div>
