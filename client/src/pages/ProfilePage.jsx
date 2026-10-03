@@ -2587,8 +2587,12 @@ export default function ProfilePage() {
                 type="button"
                 className="profile-modal-close-btn"
                 onClick={() => setShowAddAddressModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Đóng modal"
               >
-                <CloseIcon size={14} color="#64748b" />
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CloseIcon size={14} color="#ef4444" />
+                </span>
               </button>
             </div>
 
@@ -2757,8 +2761,12 @@ export default function ProfilePage() {
                   setShowEditAddressModal(false);
                   setEditingAddress(null);
                 }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Đóng modal"
               >
-                <CloseIcon size={14} color="#64748b" />
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CloseIcon size={14} color="#ef4444" />
+                </span>
               </button>
             </div>
 
@@ -2858,8 +2866,12 @@ export default function ProfilePage() {
                 type="button"
                 className="profile-modal-close-btn"
                 onClick={() => setShowAddPaymentModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Đóng modal"
               >
-                <CloseIcon size={14} color="#64748b" />
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CloseIcon size={14} color="#ef4444" />
+                </span>
               </button>
             </div>
 

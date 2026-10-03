@@ -1018,9 +1018,12 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={() => setShowShareModal(false)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Đóng modal chia sẻ"
               >
-                <CloseIcon size={16} color="#64748b" />
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CloseIcon size={14} color="#ef4444" />
+                </span>
               </button>
             </div>
 

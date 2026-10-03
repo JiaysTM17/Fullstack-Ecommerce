@@ -1162,9 +1162,12 @@ export default function AdminDashboardPage() {
                   <button
                     type="button"
                     onClick={() => setProductSearch('')}
-                    style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center' }}
+                    style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    title="Xóa tìm kiếm"
                   >
-                    <CloseIcon size={11} color="#94a3b8" />
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={10} color="#ef4444" />
+                    </span>
                   </button>
                 )}
               </div>
