@@ -518,15 +518,22 @@ export default function OrderDetailModal({
               style={{
                 fontSize: '11.5px',
                 padding: '2px 8px',
-                borderRadius: '4px',
+                borderRadius: '6px',
                 fontWeight: 600,
-                background: '#ffffff',
+                background: '#f8fafc',
                 border: '1px solid #cbd5e1',
                 color: '#0f172a',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
               }}
             >
               #{orderId}
-              <CopyIcon size={10} color="#2563eb" />
+              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CopyIcon size={9} color="#2563eb" />
+              </span>
             </button>
             <span
               style={{
