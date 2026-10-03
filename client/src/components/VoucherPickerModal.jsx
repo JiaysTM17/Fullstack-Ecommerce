@@ -332,21 +332,37 @@ export default function VoucherPickerModal({
       >
         {/* Header */}
         <div className="voucher-modal-header">
-          <div>
-            <h3 className="voucher-modal-title">
-              <TicketIcon size={20} color="#ea580c" />
-              <span>{t("select_voucher_title", "Chọn Shopee Voucher")}</span>
-            </h3>
-            <p
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
               style={{
-                fontSize: "12px",
-                color: "var(--text-muted, #64748b)",
-                margin: "4px 0 0",
+                width: '38px',
+                height: '38px',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 3px 8px rgba(234, 88, 12, 0.3)',
+                flexShrink: 0,
               }}
             >
-              Áp dụng tối đa <strong>1 Mã Miễn Phí Vận Chuyển</strong> &{" "}
-              <strong>1 Mã Giảm Giá Đơn Hàng</strong> cùng lúc
-            </p>
+              <TicketIcon size={20} color="#ffffff" />
+            </div>
+            <div>
+              <h3 className="voucher-modal-title" style={{ margin: 0 }}>
+                <span>{t("select_voucher_title", "Chọn Shopee Voucher")}</span>
+              </h3>
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "var(--text-muted, #64748b)",
+                  margin: "3px 0 0",
+                }}
+              >
+                Áp dụng tối đa <strong>1 Mã Miễn Phí Vận Chuyển</strong> &{" "}
+                <strong>1 Mã Giảm Giá Đơn Hàng</strong> cùng lúc
+              </p>
+            </div>
           </div>
           <button
             type="button"
@@ -438,7 +454,8 @@ export default function VoucherPickerModal({
             className={`voucher-tab-btn ${activeTab === "all" ? "active" : ""}`}
             onClick={() => setActiveTab("all")}
           >
-            {t("all_vouchers", "Tất Cả")} ({vouchers.length})
+            <TicketIcon size={14} color="#ea580c" />
+            <span>{t("all_vouchers", "Tất Cả")} ({vouchers.length})</span>
           </button>
           <button
             type="button"
