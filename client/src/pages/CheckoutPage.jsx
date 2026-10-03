@@ -570,16 +570,19 @@ export default function CheckoutPage() {
                                   background: "none",
                                   border: "none",
                                   color: "var(--primary-color, #ea580c)",
-                                  fontSize: "11px",
+                                  fontSize: "11.5px",
                                   fontWeight: 700,
                                   cursor: "pointer",
                                   padding: "2px 0",
                                   display: "inline-flex",
                                   alignItems: "center",
-                                  gap: "4px",
+                                  gap: "6px",
                                 }}
                               >
-                                <StarIcon size={12} color="#ea580c" /> Đặt mặc định
+                                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <StarIcon size={10} color="#ea580c" />
+                                </span>
+                                <span>Đặt mặc định</span>
                               </button>
                             )}
                           </div>
@@ -597,11 +600,14 @@ export default function CheckoutPage() {
                                 padding: "2px 4px",
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: "3px",
+                                gap: "5px",
                               }}
                               title="Sửa địa chỉ"
                             >
-                              <PencilIcon size={12} color="#64748b" /> Sửa
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <PencilIcon size={10} color="#64748b" />
+                              </span>
+                              <span>Sửa</span>
                             </button>
                             <button
                               type="button"
@@ -615,12 +621,14 @@ export default function CheckoutPage() {
                                 padding: "2px 4px",
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: "3px",
+                                gap: "5px",
                                 fontWeight: 600,
                               }}
                               title="Xóa địa chỉ"
                             >
-                              <TrashIcon size={12} color="#ef4444" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <TrashIcon size={10} color="#ef4444" />
+                              </span>
                               <span>Xóa</span>
                             </button>
                           </div>
@@ -679,10 +687,12 @@ export default function CheckoutPage() {
                   type="button"
                   className="shopee-btn shopee-btn-primary"
                   onClick={() => setCurrentStep(2)}
-                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
                 >
                   <span>Tiếp Tục: Chọn Vận Chuyển</span>
-                  <ChevronRightIcon size={16} color="#ffffff" />
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ChevronRightIcon size={13} color="#ffffff" />
+                  </span>
                 </button>
               </div>
             </div>
@@ -760,19 +770,23 @@ export default function CheckoutPage() {
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setCurrentStep(1)}
-                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
                 >
-                  <ArrowLeftIcon size={14} color="#64748b" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ArrowLeftIcon size={11} color="#64748b" />
+                  </span>
                   <span>Quay Lại Địa Chỉ</span>
                 </button>
                 <button
                   type="button"
                   className="shopee-btn shopee-btn-primary"
                   onClick={() => setCurrentStep(3)}
-                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
                 >
                   <span>Tiếp Tục: Chọn Thanh Toán</span>
-                  <ChevronRightIcon size={16} color="#ffffff" />
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ChevronRightIcon size={13} color="#ffffff" />
+                  </span>
                 </button>
               </div>
             </div>
@@ -1093,19 +1107,23 @@ export default function CheckoutPage() {
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setCurrentStep(2)}
-                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
                 >
-                  <ArrowLeftIcon size={14} color="#64748b" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ArrowLeftIcon size={11} color="#64748b" />
+                  </span>
                   <span>Quay Lại Vận Chuyển</span>
                 </button>
                 <button
                   type="button"
                   className="shopee-btn shopee-btn-primary"
                   onClick={() => setCurrentStep(4)}
-                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
                 >
                   <span>Tiếp Tục: Xem Lại Đơn Hàng</span>
-                  <ChevronRightIcon size={16} color="#ffffff" />
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ChevronRightIcon size={13} color="#ffffff" />
+                  </span>
                 </button>
               </div>
             </div>
@@ -1288,9 +1306,11 @@ export default function CheckoutPage() {
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setCurrentStep(3)}
-                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
                 >
-                  <ArrowLeftIcon size={14} color="#64748b" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ArrowLeftIcon size={11} color="#64748b" />
+                  </span>
                   <span>Sửa Phương Thức</span>
                 </button>
                 <button
@@ -1301,8 +1321,11 @@ export default function CheckoutPage() {
                   onClick={handleFinalPlaceOrder}
                 >
                   {submitting ? "Đang xử lý đơn hàng..." : (
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <CheckIcon size={16} color="#ffffff" /> Xác Nhận Đặt Hàng ({formatCurrency(finalOrderTotal)})
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={13} color="#ffffff" />
+                      </span>
+                      <span>Xác Nhận Đặt Hàng ({formatCurrency(finalOrderTotal)})</span>
                     </span>
                   )}
                 </button>
@@ -1345,9 +1368,12 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={removeShippingVoucher}
-                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px", display: "inline-flex", alignItems: "center", gap: "3px" }}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px", display: "inline-flex", alignItems: "center", gap: "4px" }}
                   >
-                    <CloseIcon size={11} color="#ef4444" /> Gỡ
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={9} color="#ef4444" />
+                    </span>
+                    <span>Gỡ</span>
                   </button>
                 </div>
               )}
@@ -1360,9 +1386,12 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={removeDiscountVoucher}
-                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px", display: "inline-flex", alignItems: "center", gap: "3px" }}
+                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px", display: "inline-flex", alignItems: "center", gap: "4px" }}
                   >
-                    <CloseIcon size={11} color="#ef4444" /> Gỡ
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={9} color="#ef4444" />
+                    </span>
+                    <span>Gỡ</span>
                   </button>
                 </div>
               )}
