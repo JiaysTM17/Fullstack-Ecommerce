@@ -397,7 +397,9 @@ export default function OtpVerificationModal({
             'Đang đối soát an ninh...'
           ) : (
             <>
-              <CheckIcon size={16} color="#ffffff" />
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={12} color="#ffffff" />
+              </span>
               <span>Xác Nhận & Kích Hoạt Tài Khoản</span>
             </>
           )}
@@ -447,7 +449,7 @@ export default function OtpVerificationModal({
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '6px',
                 userSelect: 'none',
                 padding: '4px 10px',
                 borderRadius: '8px',
@@ -457,7 +459,9 @@ export default function OtpVerificationModal({
               }}
               title="Nhấn để xem mã nếu chưa kết nối hòm thư thực tế"
             >
-              <MailIcon size={13} color="#2563eb" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MailIcon size={11} color="#2563eb" />
+              </span>
               <span>Xem thông điệp mã hộp thư (Môi trường Test)</span>
             </span>
           </div>
