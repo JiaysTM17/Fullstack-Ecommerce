@@ -14,6 +14,7 @@ import {
   ChevronRightIcon,
   ClockIcon,
   ArrowLeftIcon,
+  RefreshIcon,
 } from './OrdersIcons';
 
 /**
@@ -383,30 +384,28 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
         <div style={{ textAlign: 'center', marginBottom: '22px' }}>
           <div
             style={{
-              width: '60px',
-              height: '60px',
+              width: '62px',
+              height: '62px',
               borderRadius: '20px',
               background:
                 step === 1
-                  ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(14, 165, 233, 0.18) 100%)'
+                  ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
                   : step === 2
-                  ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.18) 100%)'
-                  : 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(79, 70, 229, 0.18) 100%)',
-              border:
-                step === 1
-                  ? '1.5px solid rgba(37, 99, 235, 0.3)'
-                  : step === 2
-                  ? '1.5px solid rgba(16, 185, 129, 0.3)'
-                  : '1.5px solid rgba(99, 102, 241, 0.3)',
+                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                  : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '28px',
               margin: '0 auto 12px',
-              boxShadow: '0 8px 24px -6px rgba(37, 99, 235, 0.2)',
+              boxShadow:
+                step === 1
+                  ? '0 8px 24px -4px rgba(37, 99, 235, 0.45)'
+                  : step === 2
+                  ? '0 8px 24px -4px rgba(16, 185, 129, 0.45)'
+                  : '0 8px 24px -4px rgba(99, 102, 241, 0.45)',
             }}
           >
-            {step === 1 ? <KeyIcon size={24} color="#2563eb" /> : step === 2 ? <MailIcon size={24} color="#10b981" /> : <ShieldIcon size={24} color="#6366f1" />}
+            {step === 1 ? <KeyIcon size={26} color="#ffffff" /> : step === 2 ? <MailIcon size={26} color="#ffffff" /> : <ShieldIcon size={26} color="#ffffff" />}
           </div>
 
           <h3 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a', letterSpacing: '-0.3px' }}>
@@ -860,9 +859,13 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                     fontWeight: 700,
                     textDecoration: 'underline',
                     padding: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}
                 >
-                  Gửi lại mã OTP mới
+                  <RefreshIcon size={12} color="#2563eb" />
+                  <span>Gửi lại mã OTP mới</span>
                 </button>
               )}
             </div>
