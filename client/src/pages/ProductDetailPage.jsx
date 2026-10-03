@@ -457,12 +457,16 @@ export default function ProductDetailPage() {
             >
               {isAddedFeedback ? (
                 <>
-                  <CheckIcon size={16} color="#059669" />
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CheckIcon size={14} color="#059669" />
+                  </span>
                   <span>Đã Thêm Vào Giỏ!</span>
                 </>
               ) : (
                 <>
-                  <ShoppingBagIcon size={16} color="#ffffff" />
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ShoppingBagIcon size={14} color="#ffffff" />
+                  </span>
                   <span>Thêm Vào Giỏ Hàng</span>
                 </>
               )}
@@ -473,7 +477,10 @@ export default function ProductDetailPage() {
               style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
               onClick={handleBuyNow}
             >
-              <BoltIcon size={16} color="#ffffff" /> Mua Ngay
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <BoltIcon size={14} color="#ffffff" />
+              </span>
+              <span>Mua Ngay</span>
             </button>
             <button
               type="button"
@@ -481,8 +488,10 @@ export default function ProductDetailPage() {
               style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
               onClick={() => toggleWishlist(productId)}
             >
-              <HeartIcon size={16} color={wishlisted ? "#f43f5e" : "#64748b"} fill={wishlisted ? "#f43f5e" : "none"} />
-              {wishlisted ? "Đã lưu vào Yêu thích" : "Thêm vào Yêu thích"}
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: wishlisted ? '#fee2e2' : '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <HeartIcon size={14} color={wishlisted ? "#f43f5e" : "#64748b"} fill={wishlisted ? "#f43f5e" : "none"} />
+              </span>
+              <span>{wishlisted ? "Đã lưu vào Yêu thích" : "Thêm vào Yêu thích"}</span>
             </button>
             <button
               type="button"
@@ -497,11 +506,13 @@ export default function ProductDetailPage() {
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "6px",
+                gap: "8px",
               }}
               onClick={() => addToCompare(product)}
             >
-              <ScaleIcon size={14} color={isCompared(productId) ? "var(--primary-color, #ea580c)" : "#2563eb"} />
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: isCompared(productId) ? 'rgba(234, 88, 12, 0.12)' : 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <ScaleIcon size={12} color={isCompared(productId) ? "var(--primary-color, #ea580c)" : "#2563eb"} />
+              </span>
               <span>{isCompared(productId) ? "Đã thêm vào so sánh" : "So sánh với sản phẩm khác"}</span>
             </button>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "8px" }}>
@@ -511,7 +522,10 @@ export default function ProductDetailPage() {
                 style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 onClick={handleCopyLink}
               >
-                <CopyIcon size={13} color="#2563eb" /> Sao Chép Link
+                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CopyIcon size={11} color="#2563eb" />
+                </span>
+                <span>Sao Chép Link</span>
               </button>
               <button
                 type="button"
@@ -519,7 +533,9 @@ export default function ProductDetailPage() {
                 style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 onClick={() => setShowShareModal(true)}
               >
-                <QrCodeIcon size={13} color="#8b5cf6" />
+                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(139, 92, 246, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <QrCodeIcon size={11} color="#8b5cf6" />
+                </span>
                 <span>Chia Sẻ & QR</span>
               </button>
             </div>
@@ -574,7 +590,10 @@ export default function ProductDetailPage() {
             style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             onClick={() => setShowShopChat(true)}
           >
-            <ChatIcon size={14} color="#2563eb" /> Chat Ngay
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ChatIcon size={12} color="#2563eb" />
+            </span>
+            <span>Chat Ngay</span>
           </button>
           <button
             type="button"
@@ -582,7 +601,10 @@ export default function ProductDetailPage() {
             style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             onClick={() => navigate(`/shop/${product.shopId || "shop_01"}`)}
           >
-            <StoreIcon size={14} color="#ffffff" /> Xem Gian Hàng
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <StoreIcon size={12} color="#ffffff" />
+            </span>
+            <span>Xem Gian Hàng</span>
           </button>
         </div>
       </section>
