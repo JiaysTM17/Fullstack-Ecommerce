@@ -9,6 +9,8 @@ import {
   SparklesIcon,
   StarIcon,
   CloseIcon,
+  TruckIcon,
+  CoinIcon,
 } from './OrdersIcons';
 import '../styles/filters.css';
 
@@ -72,7 +74,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
     <aside className="shopee-filter-sidebar">
       {/* 1. Category */}
       <div className="shopee-filter-section">
-        <h4 className="shopee-filter-title">{t('filter_categories', 'Danh Mục')}</h4>
+        <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <PackageIcon size={14} color="#ea580c" />
+          <span>{t('filter_categories', 'Danh Mục')}</span>
+        </h4>
         <div className="shopee-filter-list">
           {CATEGORIES.map((cat) => (
             <div
@@ -95,7 +100,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
 
       {/* 2. Brand Filter (Hãng / Thương hiệu) */}
       <div className="shopee-filter-section">
-        <h4 className="shopee-filter-title">{t('filter_brands', 'Thương Hiệu / Hãng')}</h4>
+        <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <TagIcon size={14} color="#2563eb" />
+          <span>{t('filter_brands', 'Thương Hiệu / Hãng')}</span>
+        </h4>
         <div className="shopee-filter-list" style={{ maxHeight: '200px', overflowY: 'auto' }}>
           <div
             className={`shopee-filter-item ${!filters.brand ? "active" : ""}`}
@@ -120,7 +128,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
 
       {/* 3. Shop Filter */}
       <div className="shopee-filter-section">
-        <h4 className="shopee-filter-title">{t('filter_official_shops', 'Cửa Hàng (Shop Chính Hãng)')}</h4>
+        <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <StoreIcon size={14} color="#dc2626" />
+          <span>{t('filter_official_shops', 'Cửa Hàng (Shop Chính Hãng)')}</span>
+        </h4>
         <div className="shopee-filter-list" style={{ maxHeight: '240px', overflowY: 'auto' }}>
           <div
             className={`shopee-filter-item ${!filters.shopId ? "active" : ""}`}
@@ -151,7 +162,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
 
       {/* 4. Fast Delivery */}
       <div className="shopee-filter-section">
-        <h4 className="shopee-filter-title">{t('filter_shipping', 'Vận Chuyển')}</h4>
+        <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <TruckIcon size={14} color="#059669" />
+          <span>{t('filter_shipping', 'Vận Chuyển')}</span>
+        </h4>
         <label className="shopee-filter-item">
           <input
             type="checkbox"
@@ -165,9 +179,12 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
         </label>
       </div>
 
-      {/* 4. Price Filter */}
+      {/* 5. Price Filter */}
       <div className="shopee-filter-section">
-        <h4 className="shopee-filter-title">{t('filter_price_range', 'Khoảng Giá')}</h4>
+        <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <CoinIcon size={14} color="#f59e0b" />
+          <span>{t('filter_price_range', 'Khoảng Giá')}</span>
+        </h4>
         <div className="shopee-price-presets">
           {PRICE_PRESETS.map((p) => (
             <button
@@ -203,9 +220,12 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
         </form>
       </div>
 
-      {/* 5. Rating Filter */}
+      {/* 6. Rating Filter */}
       <div className="shopee-filter-section">
-        <h4 className="shopee-filter-title">{t('filter_rating', 'Đánh Giá Khách Hàng')}</h4>
+        <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <StarIcon size={14} color="#f59e0b" fill="#f59e0b" />
+          <span>{t('filter_rating', 'Đánh Giá Khách Hàng')}</span>
+        </h4>
         <div
           className={`shopee-rating-filter-row ${filters.minRating === "4" ? "active" : ""}`}
           onClick={() => onFilterChange("minRating", filters.minRating === "4" ? "" : "4")}
@@ -227,9 +247,12 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
         </div>
       </div>
 
-      {/* 6. Special Badges */}
+      {/* 7. Special Badges */}
       <div className="shopee-filter-section">
-        <h4 className="shopee-filter-title">{t('filter_certifications', 'Chứng Nhận Sàn')}</h4>
+        <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <SparklesIcon size={14} color="#8b5cf6" />
+          <span>{t('filter_certifications', 'Chứng Nhận Sàn')}</span>
+        </h4>
         <label className="shopee-filter-item">
           <input
             type="checkbox"
