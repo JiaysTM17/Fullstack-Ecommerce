@@ -865,7 +865,7 @@ export default function LiveChatWidget() {
                   }}
                   title="Chuyển sang Chuyên viên tư vấn trực tiếp"
                 >
-                  <span><UserIcon size={12} color="#ffffff" /></span>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><UserIcon size={11} color="#ffffff" /></span>
                   <span style={{ display: isExpanded ? 'inline' : 'none' }}>Gặp CSKH</span>
                 </button>
               ) : (
@@ -888,7 +888,7 @@ export default function LiveChatWidget() {
                   }}
                   title="Quay lại Trợ lý AI"
                 >
-                  <span><SparklesIcon size={12} color="#ffffff" /></span>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><SparklesIcon size={11} color="#ffffff" /></span>
                   <span style={{ display: isExpanded ? 'inline' : 'none' }}>Về AI</span>
                 </button>
               )}
@@ -998,7 +998,7 @@ export default function LiveChatWidget() {
                 }}
                 title="Đóng chat"
               >
-                <CloseIcon size={14} color="#64748b" />
+                <CloseIcon size={14} color="#ffffff" />
               </button>
             </div>
           </div>
