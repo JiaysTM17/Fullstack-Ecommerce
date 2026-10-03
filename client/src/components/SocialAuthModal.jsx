@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { StoreIcon, CartIcon, ShieldIcon, LockIcon, CloseIcon, AlertCircleIcon, CheckIcon } from './OrdersIcons';
+import { StoreIcon, CartIcon, ShieldIcon, LockIcon, CloseIcon, AlertCircleIcon, CheckIcon, RefreshIcon } from './OrdersIcons';
 
 /**
  * Enterprise Social OAuth SSO Modal (Next-Gen UI/UX Edition)
@@ -420,10 +420,20 @@ export default function SocialAuthModal({
                 boxShadow: '0 4px 14px rgba(11, 87, 208, 0.35)',
                 display: 'inline-flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '8px',
               }}
             >
-              {loading ? 'Đang xác thực...' : `Tiếp tục với tư cách ${fullName.split(' ')[0] || 'Google'}`}
+              {loading ? (
+                <>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <RefreshIcon size={12} color="#ffffff" className="spin-animation" />
+                  </span>
+                  <span>Đang xác thực...</span>
+                </>
+              ) : (
+                `Tiếp tục với tư cách ${fullName.split(' ')[0] || 'Google'}`
+              )}
             </button>
           </div>
 
@@ -696,9 +706,22 @@ export default function SocialAuthModal({
                 marginBottom: '10px',
                 boxShadow: '0 4px 14px rgba(8, 102, 255, 0.35)',
                 transition: 'all 0.15s ease',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
             >
-              {loading ? 'Đang đăng nhập...' : `Tiếp tục dưới tên ${fullName.split(' ')[0] || 'Facebook'}`}
+              {loading ? (
+                <>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <RefreshIcon size={12} color="#ffffff" className="spin-animation" />
+                  </span>
+                  <span>Đang đăng nhập...</span>
+                </>
+              ) : (
+                `Tiếp tục dưới tên ${fullName.split(' ')[0] || 'Facebook'}`
+              )}
             </button>
 
             <button
@@ -978,8 +1001,19 @@ export default function SocialAuthModal({
             transition: 'opacity 0.15s ease',
           }}
         >
-          <span style={{ fontSize: '20px', lineHeight: 1 }}></span>
-          <span>{loading ? 'Đang xác thực Face ID...' : 'Tiếp tục bằng Apple ID'}</span>
+          {loading ? (
+            <>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(0,0,0,0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <RefreshIcon size={13} color="#000000" className="spin-animation" />
+              </span>
+              <span>Đang xác thực Face ID...</span>
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: '20px', lineHeight: 1 }}></span>
+              <span>Tiếp tục bằng Apple ID</span>
+            </>
+          )}
         </button>
 
         <button
