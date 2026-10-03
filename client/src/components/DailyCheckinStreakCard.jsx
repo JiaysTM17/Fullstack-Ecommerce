@@ -7,6 +7,8 @@ import {
   BoltIcon,
   StarIcon,
   ChevronRightIcon,
+  SparklesIcon,
+  FlameIcon,
 } from './OrdersIcons';
 
 export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
@@ -97,8 +99,9 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '16px', fontWeight: 800, color: '#92400e' }}>
-                Mini Xu Thưởng Hàng Ngày
+              <span style={{ fontSize: '16px', fontWeight: 800, color: '#92400e', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <SparklesIcon size={16} color="#d97706" />
+                <span>Mini Xu Thưởng Hàng Ngày</span>
               </span>
               <span
                 style={{
@@ -238,9 +241,14 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                     padding: '1px 5px',
                     whiteSpace: 'nowrap',
                     letterSpacing: '0.2px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '2px',
+                    boxShadow: '0 2px 4px rgba(220, 38, 38, 0.3)',
                   }}
                 >
-                  JACKPOT
+                  <FlameIcon size={9} color="#ffffff" />
+                  <span>JACKPOT</span>
                 </div>
               )}
 
