@@ -1415,7 +1415,9 @@ export default function SellerDashboardPage() {
           className={`shopee-nav-item ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
-          <ChartBarIcon size={16} color="#6366f1" />
+          <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: activeTab === 'overview' ? 'rgba(99, 102, 241, 0.18)' : 'rgba(99, 102, 241, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <ChartBarIcon size={14} color="#6366f1" />
+          </span>
           <span>Báo Cáo & Phân Tích</span>
         </button>
 
@@ -1426,7 +1428,9 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <CreditCardIcon size={16} color="#2563eb" />
+            <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: activeTab === 'wallet' ? 'rgba(37, 99, 235, 0.18)' : 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <CreditCardIcon size={14} color="#2563eb" />
+            </span>
             <span>Ví Doanh Thu & Rút Tiền</span>
           </div>
           <span style={{ fontSize: '10px', background: '#ecfdf5', color: '#059669', padding: '1px 6px', borderRadius: '8px', fontWeight: 800 }}>
@@ -1445,7 +1449,9 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <ReceiptIcon size={16} color="#0284c7" />
+            <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: activeTab === 'orders' ? 'rgba(2, 132, 199, 0.18)' : 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ReceiptIcon size={14} color="#0284c7" />
+            </span>
             <span>Đơn Hàng Của Shop</span>
           </div>
           {pendingOrdersCount > 0 && (
@@ -1462,7 +1468,9 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <PackageIcon size={16} color="#2563eb" />
+            <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: activeTab === 'products' ? 'rgba(37, 99, 235, 0.18)' : 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <PackageIcon size={14} color="#2563eb" />
+            </span>
             <span>Quản Lý Sản Phẩm</span>
           </div>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
@@ -1481,7 +1489,9 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <BoltIcon size={16} color="#ea580c" />
+            <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: activeTab === 'flashsale' ? 'rgba(234, 88, 12, 0.18)' : 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <BoltIcon size={14} color="#ea580c" />
+            </span>
             <span>Flash Sale Gian Hàng</span>
           </div>
           <span style={{ background: '#f97316', color: '#fff', fontSize: '9.5px', padding: '1px 6px', borderRadius: '10px', fontWeight: 800 }}>
@@ -1494,7 +1504,9 @@ export default function SellerDashboardPage() {
           className={`shopee-nav-item ${activeTab === 'vouchers' ? 'active' : ''}`}
           onClick={() => setActiveTab('vouchers')}
         >
-          <TicketIcon size={16} color="#f59e0b" />
+          <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: activeTab === 'vouchers' ? 'rgba(245, 158, 11, 0.18)' : 'rgba(245, 158, 11, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <TicketIcon size={14} color="#f59e0b" />
+          </span>
           <span>Mã Giảm Giá (Vouchers)</span>
         </button>
 
@@ -1505,7 +1517,9 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <StarIcon size={16} color="#f59e0b" />
+            <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: activeTab === 'reviews' ? 'rgba(245, 158, 11, 0.18)' : 'rgba(245, 158, 11, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <StarIcon size={14} color="#f59e0b" />
+            </span>
             <span>Đánh Giá Của Khách</span>
           </div>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
@@ -1520,7 +1534,9 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <ChatIcon size={16} color="#06b6d4" />
+            <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: activeTab === 'chats' ? 'rgba(6, 182, 212, 0.18)' : 'rgba(6, 182, 212, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ChatIcon size={14} color="#06b6d4" />
+            </span>
             <span>Tin Nhắn Khách Hàng</span>
           </div>
           <span style={{ background: '#10b981', color: '#fff', fontSize: '10px', padding: '1px 6px', borderRadius: '10px', fontWeight: 700 }}>
@@ -1537,7 +1553,9 @@ export default function SellerDashboardPage() {
           className={`shopee-nav-item ${activeTab === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveTab('settings')}
         >
-          <SettingsIcon size={16} color="#64748b" />
+          <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: activeTab === 'settings' ? 'rgba(100, 116, 139, 0.18)' : 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <SettingsIcon size={14} color="#64748b" />
+          </span>
           <span>Hồ Sơ & Kho Hàng</span>
         </button>
       </aside>
