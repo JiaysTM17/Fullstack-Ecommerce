@@ -5,7 +5,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
-import { CloseIcon, ChevronRightIcon } from './OrdersIcons';
+import { CloseIcon, ChevronRightIcon, MinusIcon, PlusIcon, CartIcon, CheckIcon } from './OrdersIcons';
 
 export default function QuickViewModal({ product, onClose }) {
   const navigate = useNavigate();
@@ -200,8 +200,9 @@ export default function QuickViewModal({ product, onClose }) {
                   disabled={quantity <= 1}
                   type="button"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  aria-label="Giảm số lượng"
                 >
-                  -
+                  <MinusIcon size={11} color={quantity <= 1 ? "#cbd5e1" : "#475569"} />
                 </button>
                 <input
                   className="shopee-qty-input"
@@ -214,12 +215,14 @@ export default function QuickViewModal({ product, onClose }) {
                   disabled={quantity >= (product.stock || 50)}
                   type="button"
                   onClick={() => setQuantity(quantity + 1)}
+                  aria-label="Tăng số lượng"
                 >
-                  +
+                  <PlusIcon size={11} color={quantity >= (product.stock || 50) ? "#cbd5e1" : "#ea580c"} />
                 </button>
               </div>
-              <span style={{ fontSize: '12px', color: '#10b981', fontWeight: 600 }}>
-                {t('pdp_in_stock')}
+              <span style={{ fontSize: '12px', color: '#10b981', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <CheckIcon size={12} color="#10b981" />
+                <span>{t('pdp_in_stock')}</span>
               </span>
             </div>
 
@@ -231,7 +234,7 @@ export default function QuickViewModal({ product, onClose }) {
                 style={{ flex: 1, padding: '10px', fontSize: '14px', fontWeight: 700 }}
                 onClick={handleAddToCart}
               >
-                {t('card_add_to_cart')}
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><CartIcon size={15} color="#ffffff" /> <span>{t('card_add_to_cart')}</span></span>
               </button>
               <button
                 type="button"
@@ -240,7 +243,7 @@ export default function QuickViewModal({ product, onClose }) {
                 onClick={handleFullDetail}
               >
                 <span>Xem chi tiết đầy đủ</span>
-                <ChevronRightIcon size={14} color="var(--text-secondary, #64748b)" />
+                <ChevronRightIcon size={14} color="#2563eb" />
               </button>
             </div>
           </div>

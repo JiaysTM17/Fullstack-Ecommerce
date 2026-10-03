@@ -28,6 +28,8 @@ import {
   CloseIcon,
   FlameIcon,
   TruckIcon,
+  MinusIcon,
+  PlusIcon,
   GlobeIcon,
   ChevronRightIcon,
 } from "../components/OrdersIcons";
@@ -410,8 +412,9 @@ export default function ProductDetailPage() {
                 disabled={quantity <= 1}
                 type="button"
                 onClick={() => updateQuantity(quantity - 1)}
+                aria-label="Giảm số lượng"
               >
-                -
+                <MinusIcon size={11} color={quantity <= 1 ? "#cbd5e1" : "#475569"} />
               </button>
               <input
                 className="shopee-qty-input"
@@ -426,8 +429,9 @@ export default function ProductDetailPage() {
                 disabled={quantity >= product.stock}
                 type="button"
                 onClick={() => updateQuantity(quantity + 1)}
+                aria-label="Tăng số lượng"
               >
-                +
+                <PlusIcon size={11} color={quantity >= product.stock ? "#cbd5e1" : "#ea580c"} />
               </button>
             </div>
           </div>
