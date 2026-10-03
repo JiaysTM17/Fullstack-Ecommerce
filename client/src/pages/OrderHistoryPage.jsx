@@ -1237,7 +1237,7 @@ export default function OrderHistoryPage() {
                               }}
                               style={{ cursor: 'pointer', fontSize: '11px' }}
                             >
-                              <CopyIcon size={11} /> Sao chép
+                              <CopyIcon size={11} color="#2563eb" /> Sao chép
                             </span>
                           </div>
                           <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
@@ -1262,7 +1262,7 @@ export default function OrderHistoryPage() {
                             onClick={() => setSelectedLiveMapOrder(activeTrackingOrder)}
                             style={{ fontSize: '11.5px', height: '28px', padding: '0 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                           >
-                            <MapPinIcon size={12} /> Xem Bản Đồ Shipper
+                            <MapPinIcon size={12} color="#ffffff" /> Xem Bản Đồ Shipper
                           </button>
                         </div>
                       </div>
@@ -1322,7 +1322,7 @@ export default function OrderHistoryPage() {
                               <strong style={{ fontSize: '13px', color: '#0f172a' }}>Nguyễn Văn Tài</strong>
                               <div style={{ fontSize: '11.5px', color: '#64748b' }}>SPX Đội Phát Tân Bình · Xe: 59-P1 982.34</div>
                               <div style={{ fontSize: '11.5px', color: '#2563eb', marginTop: '2px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                <PhoneIcon size={12} /> Hotline: 1900 1221 (Phím 1)
+                                <PhoneIcon size={12} color="#2563eb" /> Hotline: 1900 1221 (Phím 1)
                               </div>
                             </div>
                           </div>
@@ -1515,8 +1515,8 @@ export default function OrderHistoryPage() {
               <div className="orders-search-box">
                 <span className="orders-search-icon">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <circle cx="11" cy="11" r="8" stroke="#2563eb"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="#2563eb"></line>
                   </svg>
                 </span>
                 <input
@@ -1547,7 +1547,7 @@ export default function OrderHistoryPage() {
                   onClick={handleExportCSV}
                   title="Xuất danh sách đơn hàng sang file CSV (hỗ trợ Excel)"
                 >
-                  <ReceiptIcon size={14} />
+                  <ReceiptIcon size={14} color="#0284c7" />
                   <span>Xuất CSV</span>
                 </button>
                 <button
@@ -1556,7 +1556,7 @@ export default function OrderHistoryPage() {
                   onClick={handlePrintReport}
                   title="In hoặc lưu file PDF báo cáo lịch sử đơn hàng"
                 >
-                  <PrinterIcon size={14} />
+                  <PrinterIcon size={14} color="#475569" />
                   <span>In báo cáo</span>
                 </button>
               </div>
@@ -1573,13 +1573,13 @@ export default function OrderHistoryPage() {
                     {searchTerm && (
                       <span className="orders-active-chip">
                         Từ khóa: &ldquo;{searchTerm}&rdquo;
-                        <button type="button" onClick={() => setSearchTerm('')} title="Xóa từ khóa" style={{ display: 'inline-flex', alignItems: 'center' }}><CloseIcon size={10} /></button>
+                        <button type="button" onClick={() => setSearchTerm('')} title="Xóa từ khóa" style={{ display: 'inline-flex', alignItems: 'center' }}><CloseIcon size={10} color="#ef4444" /></button>
                       </span>
                     )}
                     {dateRange !== 'all' && (
                       <span className="orders-active-chip">
                         {dateRange === '30days' ? '30 ngày gần đây' : dateRange === '3months' ? '3 tháng qua' : 'Năm 2026'}
-                        <button type="button" onClick={() => setDateRange('all')} title="Xóa bộ lọc thời gian" style={{ display: 'inline-flex', alignItems: 'center' }}><CloseIcon size={10} /></button>
+                        <button type="button" onClick={() => setDateRange('all')} title="Xóa bộ lọc thời gian" style={{ display: 'inline-flex', alignItems: 'center' }}><CloseIcon size={10} color="#ef4444" /></button>
                       </span>
                     )}
                     <button
@@ -1647,7 +1647,7 @@ export default function OrderHistoryPage() {
                         onClick={() => handleCopy(ord.orderId, 'mã đơn hàng')}
                         title="Nhấn để sao chép mã đơn hàng"
                       >
-                        #{ord.orderId} <CopyIcon size={11} />
+                        #{ord.orderId} <CopyIcon size={11} color="#3b82f6" />
                       </span>
                     </div>
 
@@ -1817,7 +1817,7 @@ export default function OrderHistoryPage() {
                           title="Nhấn để sao chép mã vận đơn SPX"
                         >
                           {ord.trackingCode || `SPX-VN-${ord.orderId}`}
-                          <CopyIcon size={10} />
+                          <CopyIcon size={10} color="#2563eb" />
                         </span>
                       </div>
 
@@ -2060,7 +2060,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <EyeIcon size={13} /> {t('view_details', 'Xem chi tiết')}
+                            <EyeIcon size={13} color="#475569" /> {t('view_details', 'Xem chi tiết')}
                           </button>
                           <button
                             type="button"
@@ -2068,7 +2068,7 @@ export default function OrderHistoryPage() {
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
                           >
-                            <ChatIcon size={13} /> {t('chat_with_shop', 'Chat với Shop')}
+                            <ChatIcon size={13} color="#2563eb" /> {t('chat_with_shop', 'Chat với Shop')}
                           </button>
                         </>
                       )}
@@ -2095,7 +2095,7 @@ export default function OrderHistoryPage() {
           title="Cuộn lên đầu trang"
           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <ChevronUpIcon size={18} />
+          <ChevronUpIcon size={18} color="#2563eb" />
         </button>
       )}
     </main>
