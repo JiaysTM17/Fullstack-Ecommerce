@@ -5,7 +5,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
-import { CloseIcon, ChevronRightIcon, MinusIcon, PlusIcon, CartIcon, CheckIcon } from './OrdersIcons';
+import { CloseIcon, ChevronRightIcon, MinusIcon, PlusIcon, CartIcon, CheckIcon, HeartIcon, ShieldCheckIcon, TruckIcon, TagIcon } from './OrdersIcons';
 
 export default function QuickViewModal({ product, onClose }) {
   const navigate = useNavigate();
@@ -134,8 +134,33 @@ export default function QuickViewModal({ product, onClose }) {
 
           {/* Info & Buy Box */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ fontSize: '12px', color: '#0284c7', fontWeight: 600 }}>
-              {product.brand || 'Chính Hãng'} · {product.category}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+              <div style={{ fontSize: '12px', color: '#0284c7', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <TagIcon size={12} color="#0284c7" />
+                <span>{product.brand || 'Chính Hãng'} · {product.category}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => toggleWishlist(product)}
+                style={{
+                  background: wishlisted ? '#fef2f2' : 'var(--bg-muted, #f1f5f9)',
+                  border: '1px solid ' + (wishlisted ? '#fecaca' : 'var(--border-color, #e2e8f0)'),
+                  borderRadius: '6px',
+                  padding: '3px 8px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '11.5px',
+                  color: wishlisted ? '#dc2626' : 'var(--text-secondary, #64748b)',
+                  fontWeight: 600,
+                  transition: 'all 0.15s ease',
+                }}
+                title={wishlisted ? 'Đã yêu thích' : 'Thêm vào yêu thích'}
+              >
+                <HeartIcon size={13} color={wishlisted ? '#ef4444' : '#64748b'} fill={wishlisted ? '#ef4444' : 'none'} />
+                <span>{wishlisted ? 'Đã thích' : 'Yêu thích'}</span>
+              </button>
             </div>
 
             <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, lineHeight: 1.3 }}>
@@ -224,6 +249,18 @@ export default function QuickViewModal({ product, onClose }) {
                 <CheckIcon size={12} color="#10b981" />
                 <span>{t('pdp_in_stock')}</span>
               </span>
+            </div>
+
+            {/* Trust Badges */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '8px 12px', background: 'var(--bg-muted, #f8fafc)', borderRadius: '8px', border: '1px solid var(--border-light, #e2e8f0)', fontSize: '11.5px', color: 'var(--text-secondary, #475569)' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <TruckIcon size={13} color="#16a34a" />
+                <span style={{ fontWeight: 600 }}>SPX Giao Nhanh 24H</span>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <ShieldCheckIcon size={13} color="#2563eb" />
+                <span style={{ fontWeight: 600 }}>100% Chính Hãng</span>
+              </div>
             </div>
 
             {/* Actions */}
