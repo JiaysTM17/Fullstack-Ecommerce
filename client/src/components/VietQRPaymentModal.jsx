@@ -12,6 +12,7 @@ import {
   QrCodeIcon,
   AlertCircleIcon,
   CreditCardIcon,
+  TagIcon,
 } from './OrdersIcons';
 
 const SUPPORTED_BANKS = [
@@ -179,17 +180,18 @@ export default function VietQRPaymentModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div
               style={{
-                width: '36px',
-                height: '36px',
+                width: '38px',
+                height: '38px',
                 borderRadius: '10px',
-                background: '#eff6ff',
+                background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '1px solid #bfdbfe',
+                boxShadow: '0 3px 8px rgba(37, 99, 235, 0.3)',
+                flexShrink: 0,
               }}
             >
-              <QrCodeIcon size={20} color="#2563eb" />
+              <QrCodeIcon size={20} color="#ffffff" />
             </div>
             <div>
               <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -434,7 +436,10 @@ export default function VietQRPaymentModal({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', justifyContent: 'center' }}>
                   {/* Account Number */}
                   <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 600 }}>SỐ TÀI KHOẢN:</div>
+                    <div style={{ fontSize: '10.5px', color: '#2563eb', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <CreditCardIcon size={12} color="#2563eb" />
+                      <span>SỐ TÀI KHOẢN:</span>
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
                       <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.5px' }}>
                         {selectedBank.accountNo}
@@ -464,7 +469,10 @@ export default function VietQRPaymentModal({
 
                   {/* Account Name */}
                   <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 600 }}>CHỦ TÀI KHOẢN:</div>
+                    <div style={{ fontSize: '10.5px', color: '#16a34a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <ShieldCheckIcon size={12} color="#16a34a" />
+                      <span>CHỦ TÀI KHOẢN:</span>
+                    </div>
                     <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
                       {selectedBank.accountName}
                     </div>
@@ -472,7 +480,10 @@ export default function VietQRPaymentModal({
 
                   {/* Amount */}
                   <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 600 }}>SỐ TIỀN CẦN CHUYỂN:</div>
+                    <div style={{ fontSize: '10.5px', color: '#ea580c', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <TagIcon size={12} color="#ea580c" />
+                      <span>SỐ TIỀN CẦN CHUYỂN:</span>
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
                       <span style={{ fontSize: '16px', fontWeight: 800, color: '#ea580c' }}>
                         {formatCurrency(amount)}
