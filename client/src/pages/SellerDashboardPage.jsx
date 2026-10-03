@@ -1067,6 +1067,62 @@ export default function SellerDashboardPage() {
     }
   };
 
+  // Xác nhận hàng loạt toàn bộ đơn hàng Chờ xác nhận
+  const handleBulkConfirmPendingOrders = () => {
+    const pendingOrders = shopOrders.filter(o => o.status === 'pending');
+    if (pendingOrders.length === 0) {
+      toast.info('Không có đơn hàng nào ở trạng thái Chờ xác nhận');
+      return;
+    }
+    const updated = orders.map((o) => {
+      if (o.shopId === selectedShopId && o.status === 'pending') {
+        return {
+          ...o,
+          status: 'shipping',
+          statusText: 'Đang giao hàng',
+          trackingCode: o.trackingCode || `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`,
+        };
+      }
+      return o;
+    });
+    setOrders(updated);
+    try {
+      localStorage.setItem('mini_shopee_seller_orders', JSON.stringify(updated));
+      window.dispatchEvent(new Event('storage'));
+    } catch {}
+    toast.success(`Đã chuẩn bị và bàn giao ${pendingOrders.length} đơn hàng cho SPX Express thành công!`);
+  };
+
+  // Xuất báo cáo danh sách đơn hàng ra file CSV
+  const handleExportOrdersCSV = () => {
+    if (filteredOrders.length === 0) {
+      toast.error('Không có đơn hàng để xuất dữ liệu');
+      return;
+    }
+    const headers = ['Mã đơn hàng', 'Thời gian', 'Khách hàng', 'Số điện thoại', 'Địa chỉ', 'Mặt hàng', 'Tổng tiền (VND)', 'Phương thức TT', 'Trạng thái'];
+    const rows = filteredOrders.map(o => [
+      o.orderId || o.id || '',
+      o.createdAt || '',
+      `"${(o.customerName || '').replace(/"/g, '""')}"`,
+      `"${(o.phone || '').replace(/"/g, '""')}"`,
+      `"${(o.address || '').replace(/"/g, '""')}"`,
+      `"${(o.productName || o.items?.[0]?.name || '').replace(/"/g, '""')}"`,
+      o.total || 0,
+      `"${(o.paymentMethod || 'COD').replace(/"/g, '""')}"`,
+      `"${(o.statusText || o.status || '').replace(/"/g, '""')}"`,
+    ]);
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Bao_Cao_Don_Hang_${selectedShopId}_${Date.now()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Đã xuất báo cáo ${filteredOrders.length} đơn hàng ra file CSV thành công!`);
+  };
+
   // Tạo voucher mới cho Shop
   const handleCreateShopVoucher = (e) => {
     e.preventDefault();
@@ -2212,7 +2268,7 @@ export default function SellerDashboardPage() {
                   onClick={() => setProductStatusFilter('low_stock')}
                 >
                   <span>Xem {lowStockCount} mặt hàng cần nhập</span>
-                  <ChevronRightIcon size={14} color="#ea580c" />
+                  <ChevronRightIcon size={14} color="#ffffff" />
                 </button>
               </div>
             )}
@@ -2234,7 +2290,7 @@ export default function SellerDashboardPage() {
                   onClick={handleOpenAddModal}
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
                 >
-                  <span>+</span>
+                  <PlusIcon size={14} color="#ffffff" />
                   <span>Đăng Bán Sản Phẩm Mới</span>
                 </button>
               </div>
@@ -2538,25 +2594,52 @@ export default function SellerDashboardPage() {
                 </button>
               </div>
 
-              {/* Thanh tìm kiếm đơn hàng */}
-              <div style={{ maxWidth: '380px', position: 'relative' }}>
-                <input
-                  type="text"
-                  className="shopee-form-input"
-                  placeholder="Tìm theo mã đơn #ORD, tên khách, số điện thoại..."
-                  value={orderSearch}
-                  onChange={(e) => setOrderSearch(e.target.value)}
-                  style={{ padding: '8px 12px', fontSize: '13px' }}
-                />
-                {orderSearch && (
+              {/* Thanh công cụ tìm kiếm và thao tác đơn hàng */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 280px', maxWidth: '380px', position: 'relative' }}>
+                  <input
+                    type="text"
+                    className="shopee-form-input"
+                    placeholder="Tìm theo mã đơn #ORD, tên khách, số điện thoại..."
+                    value={orderSearch}
+                    onChange={(e) => setOrderSearch(e.target.value)}
+                    style={{ padding: '8px 12px', fontSize: '13px' }}
+                  />
+                  {orderSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setOrderSearch('')}
+                      style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center' }}
+                    >
+                      <CloseIcon size={12} />
+                    </button>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  {shopOrders.some(o => o.status === 'pending') && (
+                    <button
+                      type="button"
+                      className="shopee-btn shopee-btn-primary shopee-btn-sm"
+                      onClick={handleBulkConfirmPendingOrders}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
+                      title="Bàn giao tất cả đơn Chờ xác nhận cho SPX Express"
+                    >
+                      <TruckIcon size={14} color="#ffffff" />
+                      <span>Xác nhận giao tất cả ({shopOrders.filter(o => o.status === 'pending').length} đơn)</span>
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={() => setOrderSearch('')}
-                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center' }}
+                    className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                    onClick={handleExportOrdersCSV}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}
+                    title="Xuất danh sách đơn hàng lọc được ra file CSV"
                   >
-                    <CloseIcon size={12} />
+                    <DownloadIcon size={14} color="#2563eb" />
+                    <span>Xuất Excel/CSV</span>
                   </button>
-                )}
+                </div>
               </div>
             </div>
 

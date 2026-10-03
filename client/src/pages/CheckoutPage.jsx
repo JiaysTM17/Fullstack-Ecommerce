@@ -1531,6 +1531,8 @@ export default function CheckoutPage() {
             </form>
           </div>
         </div>
+      )}
+
       {showVietQRModal && (
         <VietQRPaymentModal
           isOpen={showVietQRModal}
