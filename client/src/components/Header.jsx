@@ -1025,7 +1025,7 @@ const Header = ({
                           navTo('/orders');
                         }}
                       >
-                        <span className="item-icon"><PackageIcon size={16} color="#0284c7" /></span>
+                        <span className="item-icon" style={{ background: '#e0f2fe', borderColor: '#bae6fd' }}><PackageIcon size={16} color="#0284c7" /></span>
                         <div className="item-text">
                           <strong>{t('nav_orders', 'Đơn Mua Của Tôi')}</strong>
                           <small>Kiểm tra đơn hàng & trạng thái vận chuyển</small>
@@ -1041,7 +1041,7 @@ const Header = ({
                           setShowOrderLookupModal(true);
                         }}
                       >
-                        <span className="item-icon"><TruckIcon size={16} color="#2563eb" /></span>
+                        <span className="item-icon" style={{ background: '#dbeafe', borderColor: '#bfdbfe' }}><TruckIcon size={16} color="#2563eb" /></span>
                         <div className="item-text">
                           <strong>Tra Cứu Vận Đơn SPX</strong>
                           <small>Kiểm tra hành trình giao hàng nhanh 1-Click</small>
@@ -1057,7 +1057,7 @@ const Header = ({
                           navTo('/profile');
                         }}
                       >
-                        <span className="item-icon"><UserIcon size={16} color="#2563eb" /></span>
+                        <span className="item-icon" style={{ background: '#ede9fe', borderColor: '#ddd6fe' }}><UserIcon size={16} color="#7c3aed" /></span>
                         <div className="item-text">
                           <strong>Hồ Sơ Cá Nhân</strong>
                           <small>Cập nhật số điện thoại, địa chỉ nhận hàng</small>
@@ -1074,7 +1074,7 @@ const Header = ({
                             setShowRewardsModal(true);
                           }}
                         >
-                          <span className="item-icon"><CoinIcon size={16} color="#f59e0b" /></span>
+                          <span className="item-icon" style={{ background: '#fef3c7', borderColor: '#fde68a' }}><CoinIcon size={16} color="#d97706" /></span>
                           <div className="item-text">
                             <strong>Ví Xu & Điểm Thưởng</strong>
                             <small>{(coins || 0).toLocaleString('vi-VN')} Xu đang có</small>
@@ -1093,7 +1093,7 @@ const Header = ({
                               navTo('/seller/dashboard');
                             }}
                           >
-                            <span className="item-icon"><StoreIcon size={16} color="#ea580c" /></span>
+                            <span className="item-icon" style={{ background: '#ffedd5', borderColor: '#fed7aa' }}><StoreIcon size={16} color="#ea580c" /></span>
                             <div className="item-text">
                               <strong>Kênh Quản Lý Gian Hàng</strong>
                               <small>Đơn hàng shop, kho & sản phẩm bán</small>
@@ -1107,7 +1107,7 @@ const Header = ({
                               navTo('/seller/dashboard');
                             }}
                           >
-                            <span className="item-icon"><CreditCardIcon size={16} color="#16a34a" /></span>
+                            <span className="item-icon" style={{ background: '#dcfce7', borderColor: '#bbf7d0' }}><CreditCardIcon size={16} color="#16a34a" /></span>
                             <div className="item-text">
                               <strong>Ví Doanh Thu & Rút Tiền</strong>
                               <small>Số dư thanh toán đơn hàng shop</small>
@@ -1125,7 +1125,7 @@ const Header = ({
                             navTo('/admin/dashboard');
                           }}
                         >
-                          <span className="item-icon"><ShieldIcon size={16} color="#dc2626" /></span>
+                          <span className="item-icon" style={{ background: '#fee2e2', borderColor: '#fecaca' }}><ShieldIcon size={16} color="#dc2626" /></span>
                           <div className="item-text">
                             <strong>Bảng Điều Khiển Quản Trị</strong>
                             <small>Quản lý toàn bộ hệ thống e-commerce</small>
@@ -1143,7 +1143,7 @@ const Header = ({
                           onLogout();
                         }}
                       >
-                        <span className="item-icon" style={{ display: 'flex', alignItems: 'center' }}><CloseIcon size={13} color="#ef4444" /></span>
+                        <span className="item-icon" style={{ background: '#fee2e2', borderColor: '#fca5a5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CloseIcon size={13} color="#ef4444" /></span>
                         <div className="item-text">
                           <strong style={{ color: '#ef4444' }}>{t('logout', 'Đăng Xuất')}</strong>
                           <small>Thoát khỏi phiên đăng nhập hiện tại</small>
