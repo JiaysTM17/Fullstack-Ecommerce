@@ -795,18 +795,22 @@ export default function ShopStorefrontPage() {
               type="button"
               onClick={() => setSelectedCategory('all')}
               style={{
-                background: 'transparent',
-                border: 'none',
+                background: '#ffedd5',
+                border: '1px solid #fed7aa',
                 color: '#ea580c',
                 fontSize: '12px',
                 fontWeight: 700,
+                borderRadius: '6px',
+                padding: '4px 10px',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '6px',
               }}
             >
-              <CloseIcon size={11} color="#ea580c" />
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#fdba74', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={10} color="#7c2d12" />
+              </span>
               <span>Bỏ lọc phân loại (Xem tất cả)</span>
             </button>
           )}
@@ -878,9 +882,9 @@ export default function ShopStorefrontPage() {
             boxShadow: 'var(--shadow-sm)'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--primary-color, #ea580c)' }}>
-              <ShoppingBagIcon size={22} color="var(--primary-color, #ea580c)" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ShoppingBagIcon size={20} color="var(--primary-color, #ea580c)" />
             </span>
             <div>
               <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
@@ -905,11 +909,21 @@ export default function ShopStorefrontPage() {
                 className="shopee-form-input"
                 value={shopSearch}
                 onChange={(e) => setShopSearch(e.target.value)}
-                style={{ width: '250px', padding: '8px 14px 8px 34px', fontSize: '13px', borderRadius: '8px' }}
+                style={{ width: '250px', padding: shopSearch ? '8px 32px 8px 34px' : '8px 14px 8px 34px', fontSize: '13px', borderRadius: '8px' }}
               />
               <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
                 <SearchIcon size={14} color="#94a3b8" />
               </span>
+              {shopSearch && (
+                <button
+                  type="button"
+                  onClick={() => setShopSearch('')}
+                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '18px', height: '18px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                  title="Xóa tìm kiếm"
+                >
+                  <CloseIcon size={10} color="#64748b" />
+                </button>
+              )}
             </div>
 
             {/* Sort */}
