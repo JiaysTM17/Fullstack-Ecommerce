@@ -664,3 +664,31 @@ export const confirmSellerOrder = async (req, res) => {
     sendError(res, error.message, 500);
   }
 };
+
+// @desc    Lấy thông tin ví và lịch sử giao dịch ví của gian hàng
+// @route   GET /api/seller/wallet
+// @access  Private (Seller only)
+export const getSellerWallet = async (req, res) => {
+  try {
+    const shopId = req.user.shopId;
+    if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+    const shop = await Shop.findOne({ shopId });
+    if (!shop) return sendError(res, "Không tìm thấy gian hàng", 404);
+
+    const balance = shop.walletBalance || 0;
+    const transactions = Array.isArray(shop.walletTransactions) ? shop.walletTransactions : [];
+
+    sendSuccess(res, {
+      shopId,
+      shopName: shop.name,
+      balance,
+      walletBalance: balance,
+      transactions,
+      bankAccount: shop.bankAccount || null,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+

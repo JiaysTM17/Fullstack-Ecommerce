@@ -15,6 +15,7 @@ import {
   getSellerRevenue,
   getSellerPendingOrders,
   confirmSellerOrder,
+  getSellerWallet,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -34,6 +35,7 @@ router.route("/shop")
   .put(updateMySellerShop);
 
 router.get("/stats", getSellerStats);
+router.get("/wallet", getSellerWallet);
 
 router.route("/products")
   .get(getSellerProducts)
