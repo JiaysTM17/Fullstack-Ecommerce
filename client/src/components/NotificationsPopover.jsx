@@ -211,10 +211,24 @@ export default function NotificationsPopover() {
               background: 'var(--bg-muted, #f8fafc)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 800, fontSize: '15px', color: 'var(--text-primary, #0f172a)' }}>
-                <BellIcon size={16} color="#ea580c" />
-                <span>Thông Báo Mới</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '6px',
+                  background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 6px rgba(234, 88, 12, 0.3)',
+                  flexShrink: 0,
+                }}
+              >
+                <BellIcon size={14} color="#ffffff" />
+              </div>
+              <span style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary, #0f172a)' }}>
+                Thông Báo Mới
               </span>
               {unreadCount > 0 && (
                 <span
