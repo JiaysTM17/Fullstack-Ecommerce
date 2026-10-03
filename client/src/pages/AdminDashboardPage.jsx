@@ -779,11 +779,13 @@ export default function AdminDashboardPage() {
                             <button
                               type="button"
                               className="shopee-btn shopee-btn-sm"
-                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                               onClick={() => setShopToDelete(s)}
                               title="Xóa gian hàng này"
                             >
-                              <TrashIcon size={12} color="#dc2626" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <TrashIcon size={11} color="#dc2626" />
+                              </span>
                               <span>Xóa</span>
                             </button>
                           </div>
@@ -800,11 +802,13 @@ export default function AdminDashboardPage() {
                             <button
                               type="button"
                               className="shopee-btn shopee-btn-sm"
-                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                               onClick={() => setShopToDelete(s)}
                               title="Xóa gian hàng này"
                             >
-                              <TrashIcon size={12} color="#dc2626" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <TrashIcon size={11} color="#dc2626" />
+                              </span>
                               <span>Xóa</span>
                             </button>
                           </div>
@@ -895,12 +899,14 @@ export default function AdminDashboardPage() {
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '4px'
+                                gap: '6px'
                               }}
                               onClick={() => setUserToDelete(u)}
                               title="Xóa tài khoản vĩnh viễn để test đăng ký lại"
                             >
-                              <TrashIcon size={12} color="#dc2626" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <TrashIcon size={11} color="#dc2626" />
+                              </span>
                               <span>Xóa</span>
                             </button>
                           </div>
