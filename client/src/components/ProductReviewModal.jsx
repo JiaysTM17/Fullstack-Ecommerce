@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { StarIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon, CloseIcon, ArrowLeftIcon } from './OrdersIcons';
+import { StarIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon, CloseIcon, ArrowLeftIcon, PlusIcon } from './OrdersIcons';
 
 const QUICK_TAGS = [
   'Đúng với mô tả',
@@ -423,7 +423,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                       gap: '4px',
                     }}
                   >
-                    {active ? <CheckIcon size={11} color="#2563eb" /> : '+ '}
+                    {active ? <CheckIcon size={11} color="#2563eb" /> : <PlusIcon size={11} color="#64748b" />}
                     <span>{tag}</span>
                   </button>
                 );
@@ -525,7 +525,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                       padding: 0,
                     }}
                   >
-                    <CloseIcon size={10} />
+                    <CloseIcon size={10} color="#ffffff" />
                   </button>
                 </div>
               ))}
@@ -547,7 +547,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                     cursor: 'pointer',
                   }}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center' }}><CameraIcon size={16} /></span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center' }}><CameraIcon size={16} color="#2563eb" /></span>
                   <span style={{ fontSize: '10px' }}>+ Ảnh</span>
                   <input
                     type="file"
@@ -593,7 +593,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 gap: '6px',
               }}
             >
-              <AlertCircleIcon size={15} />
+              <AlertCircleIcon size={15} color="#dc2626" />
               <span>{errorMsg}</span>
             </div>
           )}

@@ -127,7 +127,7 @@ export default function LegalModal({
             }}
             aria-label="Đóng"
           >
-            <CloseIcon size={16} />
+            <CloseIcon size={16} color="#64748b" />
           </button>
         </div>
 
