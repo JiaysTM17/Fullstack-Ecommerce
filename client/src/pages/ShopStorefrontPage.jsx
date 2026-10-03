@@ -24,6 +24,7 @@ import {
   ScaleIcon,
   PlusIcon,
   ChevronRightIcon,
+  ShieldCheckIcon,
 } from '../components/OrdersIcons';
 
 // Hàm phân loại chuyên nghiệp cho từng mặt hàng trong gian hàng
@@ -407,9 +408,7 @@ export default function ShopStorefrontPage() {
         <div className="mall-official-ribbon">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span className="mall-badge-brand">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#dc2626" style={{ marginRight: '2px' }}>
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-              </svg>
+              <ShieldCheckIcon size={14} color="#dc2626" />
               SHOPEE MALL
             </span>
             <span style={{ fontSize: '12.5px', fontWeight: 700, letterSpacing: '0.4px' }}>
@@ -527,9 +526,7 @@ export default function ShopStorefrontPage() {
                 
                 {/* Shopee Mall / TikTok Official Luxury Badge */}
                 <span className="mall-title-badge">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="#ffffff">
-                    <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-                  </svg>
+                  <ShieldCheckIcon size={13} color="#ffffff" />
                   SHOPEE MALL
                 </span>
 
