@@ -40,13 +40,38 @@ import {
   ChevronRightIcon,
   ArrowLeftIcon,
   QrCodeIcon,
+  TrashIcon,
 } from "../components/OrdersIcons";
 import "../styles/checkout-multistep.css";
 
 const SHIPPING_OPTIONS = [
-  { id: "standard", name: "Giao Tiêu Chuẩn (2-3 ngày)", fee: 25000, desc: "Đơn vị vận chuyển SPX Express an toàn, tiết kiệm" },
-  { id: "express", name: "Giao Hỏa Tốc 2H (Prime Express)", fee: 45000, desc: "Nhận hàng trong vòng 2 giờ kể từ khi shop xác nhận" },
-  { id: "economy", name: "Giao Tiết Kiệm (4-5 ngày)", fee: 15000, desc: "Tối ưu chi phí cho các đơn hàng cồng kềnh" },
+  {
+    id: "standard",
+    name: "Giao Tiêu Chuẩn (2-3 ngày)",
+    fee: 25000,
+    desc: "Đơn vị vận chuyển SPX Express an toàn, tiết kiệm",
+    icon: TruckIcon,
+    iconColor: "#2563eb",
+    iconBg: "rgba(37, 99, 235, 0.1)",
+  },
+  {
+    id: "express",
+    name: "Giao Hỏa Tốc 2H (Prime Express)",
+    fee: 45000,
+    desc: "Nhận hàng trong vòng 2 giờ kể từ khi shop xác nhận",
+    icon: BoltIcon,
+    iconColor: "#ea580c",
+    iconBg: "rgba(234, 88, 12, 0.1)",
+  },
+  {
+    id: "economy",
+    name: "Giao Tiết Kiệm (4-5 ngày)",
+    fee: 15000,
+    desc: "Tối ưu chi phí cho các đơn hàng cồng kềnh",
+    icon: PackageIcon,
+    iconColor: "#16a34a",
+    iconBg: "rgba(22, 163, 74, 0.1)",
+  },
 ];
 
 export default function CheckoutPage() {
@@ -592,7 +617,8 @@ export default function CheckoutPage() {
                               }}
                               title="Xóa địa chỉ"
                             >
-                              Xóa
+                              <TrashIcon size={12} color="#ef4444" />
+                              <span>Xóa</span>
                             </button>
                           </div>
                         </div>
@@ -667,21 +693,60 @@ export default function CheckoutPage() {
               </h2>
 
               <div className="shipping-options-list">
-                {SHIPPING_OPTIONS.map((opt) => (
-                  <div
-                    key={opt.id}
-                    className={`shipping-option-card ${selectedShipping === opt.id ? "selected" : ""}`}
-                    onClick={() => setSelectedShipping(opt.id)}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px" }}>{opt.name}</div>
-                      <div style={{ color: "#666", fontSize: "13px" }}>{opt.desc}</div>
+                {SHIPPING_OPTIONS.map((opt) => {
+                  const IconComponent = opt.icon || TruckIcon;
+                  const isSelected = selectedShipping === opt.id;
+                  return (
+                    <div
+                      key={opt.id}
+                      className={`shipping-option-card ${isSelected ? "selected" : ""}`}
+                      onClick={() => setSelectedShipping(opt.id)}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                        <div
+                          style={{
+                            width: "42px",
+                            height: "42px",
+                            borderRadius: "10px",
+                            background: opt.iconBg || "rgba(37, 99, 235, 0.1)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <IconComponent size={22} color={opt.iconColor || "#2563eb"} />
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span>{opt.name}</span>
+                            {isSelected && (
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "4px",
+                                  background: "var(--primary-color, #ea580c)",
+                                  color: "#ffffff",
+                                  fontSize: "11px",
+                                  fontWeight: 700,
+                                  padding: "2px 8px",
+                                  borderRadius: "12px",
+                                }}
+                              >
+                                <CheckIcon size={12} color="#ffffff" /> Đã chọn
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ color: "#64748b", fontSize: "13px" }}>{opt.desc}</div>
+                        </div>
+                      </div>
+                      <div className="shipping-price-tag">
+                        {appliedVoucher?.type === "shipping" ? "MIỄN PHÍ" : formatCurrency(opt.fee)}
+                      </div>
                     </div>
-                    <div className="shipping-price-tag">
-                      {appliedVoucher?.type === "shipping" ? "MIỄN PHÍ" : formatCurrency(opt.fee)}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: "24px" }}>
@@ -720,13 +785,46 @@ export default function CheckoutPage() {
                   className={`payment-method-card ${paymentMethod === "COD" ? "selected" : ""}`}
                   onClick={() => setPaymentMethod("COD")}
                 >
-                  <div className="payment-card-content">
-                    <span className="payment-method-icon" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                      <StoreIcon size={22} color="#059669" />
-                    </span>
-                    <div>
-                      <div style={{ fontWeight: 700 }}>Thanh toán khi nhận hàng (COD)</div>
-                      <div style={{ fontSize: "12px", color: "#666" }}>Nhận hàng kiểm tra xong mới trả tiền mặt cho shipper</div>
+                  <div className="payment-card-content" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                      <span
+                        className="payment-method-icon"
+                        style={{
+                          width: "42px",
+                          height: "42px",
+                          borderRadius: "10px",
+                          background: "rgba(16, 185, 129, 0.12)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <HomeIcon size={22} color="#10b981" />
+                      </span>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span>Thanh toán khi nhận hàng (COD)</span>
+                          {paymentMethod === "COD" && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                background: "var(--primary-color, #ea580c)",
+                                color: "#ffffff",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                padding: "2px 8px",
+                                borderRadius: "12px",
+                              }}
+                            >
+                              <CheckIcon size={12} color="#ffffff" /> Đã chọn
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: "13px", color: "#64748b" }}>Nhận hàng kiểm tra xong mới trả tiền mặt cho shipper</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -736,13 +834,46 @@ export default function CheckoutPage() {
                   className={`payment-method-card ${paymentMethod === "CARD" ? "selected" : ""}`}
                   onClick={() => setPaymentMethod("CARD")}
                 >
-                  <div className="payment-card-content">
-                    <span className="payment-method-icon" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                      <CreditCardIcon size={22} color="#2563eb" />
-                    </span>
-                    <div>
-                      <div style={{ fontWeight: 700 }}>Thẻ Tín Dụng / Ghi Nợ Quốc Tế (Visa, MasterCard)</div>
-                      <div style={{ fontSize: "12px", color: "#666" }}>Bảo mật mã hóa quốc tế 3D-Secure 256-bit</div>
+                  <div className="payment-card-content" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                      <span
+                        className="payment-method-icon"
+                        style={{
+                          width: "42px",
+                          height: "42px",
+                          borderRadius: "10px",
+                          background: "rgba(37, 99, 235, 0.12)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <CreditCardIcon size={22} color="#2563eb" />
+                      </span>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span>Thẻ Tín Dụng / Ghi Nợ Quốc Tế (Visa, MasterCard)</span>
+                          {paymentMethod === "CARD" && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                background: "var(--primary-color, #ea580c)",
+                                color: "#ffffff",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                padding: "2px 8px",
+                                borderRadius: "12px",
+                              }}
+                            >
+                              <CheckIcon size={12} color="#ffffff" /> Đã chọn
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: "13px", color: "#64748b" }}>Bảo mật mã hóa quốc tế 3D-Secure 256-bit</div>
+                      </div>
                     </div>
                   </div>
 
@@ -786,13 +917,46 @@ export default function CheckoutPage() {
                   className={`payment-method-card ${paymentMethod === "MOMO" ? "selected" : ""}`}
                   onClick={() => setPaymentMethod("MOMO")}
                 >
-                  <div className="payment-card-content">
-                    <span className="payment-method-icon" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                      <TicketIcon size={22} color="#d946ef" />
-                    </span>
-                    <div>
-                      <div style={{ fontWeight: 700 }}>Ví Điện Tử MoMo / ZaloPay</div>
-                      <div style={{ fontSize: "12px", color: "#666" }}>Quét mã QR trên ứng dụng ví để thanh toán tức thì</div>
+                  <div className="payment-card-content" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                      <span
+                        className="payment-method-icon"
+                        style={{
+                          width: "42px",
+                          height: "42px",
+                          borderRadius: "10px",
+                          background: "rgba(217, 70, 239, 0.12)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <QrCodeIcon size={22} color="#d946ef" />
+                      </span>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span>Ví Điện Tử MoMo / ZaloPay</span>
+                          {paymentMethod === "MOMO" && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                background: "var(--primary-color, #ea580c)",
+                                color: "#ffffff",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                padding: "2px 8px",
+                                borderRadius: "12px",
+                              }}
+                            >
+                              <CheckIcon size={12} color="#ffffff" /> Đã chọn
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: "13px", color: "#64748b" }}>Quét mã QR trên ứng dụng ví để thanh toán tức thì</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -802,13 +966,46 @@ export default function CheckoutPage() {
                   className={`payment-method-card ${paymentMethod === "BANK" ? "selected" : ""}`}
                   onClick={() => setPaymentMethod("BANK")}
                 >
-                  <div className="payment-card-content">
-                    <span className="payment-method-icon" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                      <ShieldCheckIcon size={22} color="#0284c7" />
-                    </span>
-                    <div>
-                      <div style={{ fontWeight: 700 }}>Chuyển Khoản Ngân Hàng (VietQR Tự Động)</div>
-                      <div style={{ fontSize: "12px", color: "#666" }}>Miễn phí chuyển khoản qua mọi App ngân hàng tại VN</div>
+                  <div className="payment-card-content" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                      <span
+                        className="payment-method-icon"
+                        style={{
+                          width: "42px",
+                          height: "42px",
+                          borderRadius: "10px",
+                          background: "rgba(2, 132, 199, 0.12)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <ShieldCheckIcon size={22} color="#0284c7" />
+                      </span>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span>Chuyển Khoản Ngân Hàng (VietQR Tự Động)</span>
+                          {paymentMethod === "BANK" && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                background: "var(--primary-color, #ea580c)",
+                                color: "#ffffff",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                padding: "2px 8px",
+                                borderRadius: "12px",
+                              }}
+                            >
+                              <CheckIcon size={12} color="#ffffff" /> Đã chọn
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: "13px", color: "#64748b" }}>Miễn phí chuyển khoản qua mọi App ngân hàng tại VN</div>
+                      </div>
                     </div>
                   </div>
 
