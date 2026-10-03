@@ -9,25 +9,15 @@ import { useToast } from '../context/ToastContext';
 import { FALLBACK_PRODUCTS, getProductById } from '../services/productService';
 import { clearWishlist as clearWishlistService, moveAllWishlistToCart } from '../services/wishlistService';
 import { formatCurrency } from '../utils/formatCurrency';
-import { ShoppingBagIcon, CheckIcon } from '../components/OrdersIcons';
+import {
+  ShoppingBagIcon,
+  CheckIcon,
+  HeartIcon,
+  TrashIcon,
+  SearchIcon,
+  CloseIcon,
+} from '../components/OrdersIcons';
 import { pushBuyerNotification } from '../utils/notificationHelper';
-
-function TrashIcon({ size = 14, color = 'currentColor' }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-    </svg>
-  );
-}
-
-function HeartSvgIcon({ size = 22, color = 'currentColor' }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  );
-}
 
 export default function WishlistPage() {
   const { wishlistIds, clearWishlist } = useWishlist();
@@ -38,6 +28,7 @@ export default function WishlistPage() {
   const [wishlistProducts, setWishlistProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [wishlistSearch, setWishlistSearch] = useState('');
   const [isAddedFeedback, setIsAddedFeedback] = useState(false);
 
   useEffect(() => {
@@ -76,9 +67,20 @@ export default function WishlistPage() {
   }, [wishlistProducts]);
 
   const displayedProducts = useMemo(() => {
-    if (selectedCategory === 'all') return wishlistProducts;
-    return wishlistProducts.filter((p) => p.category === selectedCategory);
-  }, [wishlistProducts, selectedCategory]);
+    let list = wishlistProducts;
+    if (selectedCategory !== 'all') {
+      list = list.filter((p) => p.category === selectedCategory);
+    }
+    if (wishlistSearch.trim()) {
+      const q = wishlistSearch.toLowerCase().trim();
+      list = list.filter((p) => (p.name || '').toLowerCase().includes(q));
+    }
+    return list;
+  }, [wishlistProducts, selectedCategory, wishlistSearch]);
+
+  const availableCount = useMemo(() => {
+    return wishlistProducts.filter((p) => (Number(p.stock) || 0) > 0).length;
+  }, [wishlistProducts]);
 
   const handleClear = async () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa toàn bộ sản phẩm khỏi danh sách yêu thích?')) {
@@ -147,20 +149,49 @@ export default function WishlistPage() {
               />
             ) : (
               <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
                   <div>
                     <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                        <HeartSvgIcon size={24} color="#ef4444" fill="#ef4444" />
+                        <HeartIcon size={24} color="#ef4444" fill="#ef4444" />
                       </span>
                       <span>{t('wishlist_title', 'Sản Phẩm Yêu Thích')} ({wishlistProducts.length})</span>
                     </h1>
                     <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>
                       {t('wishlist_subtitle', 'Các sản phẩm bạn đã lưu để theo dõi giá và khuyến mãi.')}
+                      <span style={{ marginLeft: '6px', color: '#16a34a', fontWeight: 600 }}>
+                        • {availableCount} sản phẩm sẵn sàng giao ngay
+                      </span>
                     </p>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* Search inside wishlist */}
+                    {wishlistProducts.length > 2 && (
+                      <div style={{ position: 'relative', width: '220px' }}>
+                        <input
+                          type="text"
+                          className="shopee-form-input"
+                          placeholder="Tìm sản phẩm đã lưu..."
+                          value={wishlistSearch}
+                          onChange={(e) => setWishlistSearch(e.target.value)}
+                          style={{ padding: '6px 12px 6px 30px', fontSize: '12.5px', borderRadius: '6px', height: '34px' }}
+                        />
+                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+                          <SearchIcon size={13} color="#94a3b8" />
+                        </span>
+                        {wishlistSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setWishlistSearch('')}
+                            style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center' }}
+                          >
+                            <CloseIcon size={11} color="#94a3b8" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+
                     <button
                       type="button"
                       className="shopee-btn shopee-btn-primary"
@@ -180,11 +211,13 @@ export default function WishlistPage() {
                     >
                       {isAddedFeedback ? (
                         <>
-                          <CheckIcon size={14} color="#ffffff" /> Đã thêm vào giỏ!
+                          <CheckIcon size={14} color="#ffffff" />
+                          <span>Đã thêm vào giỏ!</span>
                         </>
                       ) : (
                         <>
-                          <ShoppingBagIcon size={14} color="#ffffff" /> Thêm tất cả vào giỏ
+                          <ShoppingBagIcon size={14} color="#ffffff" />
+                          <span>Thêm tất cả vào giỏ</span>
                         </>
                       )}
                     </button>
@@ -194,7 +227,8 @@ export default function WishlistPage() {
                       onClick={handleClear}
                       style={{ fontSize: '12.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 12px' }}
                     >
-                      <TrashIcon size={13} color="#ef4444" /> {t('clear_all_wishlist', 'Xóa toàn bộ')}
+                      <TrashIcon size={13} color="#ef4444" />
+                      <span>{t('clear_all_wishlist', 'Xóa toàn bộ')}</span>
                     </button>
                   </div>
                 </div>
@@ -227,27 +261,47 @@ export default function WishlistPage() {
                   </div>
                 )}
 
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
-                    gap: '16px',
-                  }}
-                >
-                  {displayedProducts.map((product) => (
-                    <div key={product._id || product.id} style={{ display: 'flex', flexDirection: 'column' }}>
-                      <ProductCard
-                        product={product}
-                        formatCurrency={formatCurrency}
-                        onAddToCart={(p) => {
-                          addToCart(p, 1);
-                          showToast(t('add_to_cart_success', 'Đã thêm sản phẩm vào giỏ hàng!'), 'success');
-                        }}
-                        onViewDetail={(p) => navigate(`/products/${p._id || p.id}`)}
-                      />
-                    </div>
-                  ))}
-                </div>
+                {displayedProducts.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-secondary)' }}>
+                    <SearchIcon size={36} color="#cbd5e1" />
+                    <p style={{ margin: '8px 0 0', fontSize: '14px', fontWeight: 600 }}>
+                      Không tìm thấy sản phẩm yêu thích nào khớp với từ khóa "{wishlistSearch}"
+                    </p>
+                    <button
+                      type="button"
+                      className="shopee-btn shopee-btn-secondary"
+                      onClick={() => {
+                        setWishlistSearch('');
+                        setSelectedCategory('all');
+                      }}
+                      style={{ marginTop: '12px', fontSize: '12.5px' }}
+                    >
+                      Xóa bộ lọc
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+                      gap: '16px',
+                    }}
+                  >
+                    {displayedProducts.map((product) => (
+                      <div key={product._id || product.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                        <ProductCard
+                          product={product}
+                          formatCurrency={formatCurrency}
+                          onAddToCart={(p) => {
+                            addToCart(p, 1);
+                            showToast(t('add_to_cart_success', 'Đã thêm sản phẩm vào giỏ hàng!'), 'success');
+                          }}
+                          onViewDetail={(p) => navigate(`/products/${p._id || p.id}`)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </>
             )}
           </div>
