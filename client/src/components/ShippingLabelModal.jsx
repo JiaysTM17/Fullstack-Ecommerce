@@ -49,8 +49,10 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
         {/* Sender and Receiver */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '14px', borderRadius: '10px', marginBottom: '16px', fontSize: '13px' }}>
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <StoreIcon size={13} color="#ea580c" />
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '6px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <StoreIcon size={12} color="#ea580c" />
+              </span>
               <span>NGƯỜI GỬI (SHOP):</span>
             </div>
             <div style={{ fontWeight: 700, color: '#0f172a' }}>{shopName}</div>
@@ -58,8 +60,10 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             <div style={{ color: '#475569', fontSize: '12px' }}>Hotline: 1900 6868</div>
           </div>
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <MapPinIcon size={13} color="#2563eb" />
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '6px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MapPinIcon size={12} color="#2563eb" />
+              </span>
               <span>NGƯỜI NHẬN (KHÁCH):</span>
             </div>
             <div style={{ fontWeight: 700, color: '#0f172a' }}>{order.customer?.fullName || 'Khách hàng'}</div>
@@ -70,8 +74,10 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
 
         {/* Items */}
         <div style={{ marginBottom: '16px' }}>
-          <strong style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px', color: '#0f172a' }}>
-            <PackageIcon size={14} color="#ea580c" />
+          <strong style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', color: '#0f172a' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '6px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PackageIcon size={12} color="#ea580c" />
+            </span>
             <span>CHI TIẾT HÀNG HÓA ({order.items?.length || 1} sản phẩm):</span>
           </strong>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
@@ -106,8 +112,10 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ letterSpacing: '4px', fontFamily: 'monospace', fontWeight: 700, fontSize: '14px', color: '#0f172a' }}>||||||||||||||||||||||||||||</div>
-            <small style={{ fontSize: '10.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: '2px' }}>
-              <QrCodeIcon size={11} color="#64748b" />
+            <small style={{ fontSize: '10.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center', marginTop: '3px' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <QrCodeIcon size={10} color="#475569" />
+              </span>
               <span>MÃ BARCODE: {trackingCode}</span>
             </small>
           </div>
