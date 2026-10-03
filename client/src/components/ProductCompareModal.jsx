@@ -35,10 +35,22 @@ export default function ProductCompareModal() {
             animation: 'slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', color: '#2563eb' }}>
-              <ScaleIcon size={18} color="#2563eb" />
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
+                flexShrink: 0,
+              }}
+            >
+              <ScaleIcon size={16} color="#ffffff" />
+            </div>
             <div>
               <strong style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
                 {t('compare_drawer_title')} ({comparedProducts.length}/3):
@@ -96,10 +108,11 @@ export default function ProductCompareModal() {
           <button
             type="button"
             className="shopee-btn shopee-btn-primary"
-            style={{ padding: '8px 16px', fontSize: '13px', fontWeight: 700 }}
+            style={{ padding: '8px 16px', fontSize: '13px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onClick={() => setIsModalOpen(true)}
           >
-            {t('compare_view_btn')}
+            <ScaleIcon size={14} color="#ffffff" />
+            <span>{t('compare_view_btn')}</span>
           </button>
 
           <button
@@ -157,10 +170,22 @@ export default function ProductCompareModal() {
           >
             {/* Modal Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', color: '#2563eb' }}>
-                  <ScaleIcon size={24} color="#2563eb" />
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)',
+                    flexShrink: 0,
+                  }}
+                >
+                  <ScaleIcon size={22} color="#ffffff" />
+                </div>
                 <div>
                   <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
                     {t('compare_title')}
