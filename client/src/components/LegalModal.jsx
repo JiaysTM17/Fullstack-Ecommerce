@@ -293,9 +293,15 @@ export default function LegalModal({
                 color: '#475569',
                 border: 'none',
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              Đóng
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e2e8f0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={11} color="#475569" />
+              </span>
+              <span>Đóng</span>
             </button>
             <button
               type="button"
@@ -315,7 +321,9 @@ export default function LegalModal({
                 gap: '6px',
               }}
             >
-              <CheckIcon size={14} color="#ffffff" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={12} color="#ffffff" />
+              </span>
               <span>Tôi Đã Đọc & Đồng Ý</span>
             </button>
           </div>
