@@ -403,7 +403,7 @@ export default function HomePage() {
                   onMouseOver={(e) => { e.currentTarget.style.background = "var(--primary-color, #ea580c)"; e.currentTarget.style.color = "#fff"; }}
                   onMouseOut={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--primary-color, #ea580c)"; }}
                 >
-                  <CloseIcon size={11} />
+                  <CloseIcon size={11} color="currentColor" />
                   <span>Xóa tất cả</span>
                 </button>
               )}

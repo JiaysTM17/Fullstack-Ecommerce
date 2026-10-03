@@ -176,8 +176,8 @@ export default function SecuritySliderCaptcha({
           ) : (
             <>
               <span style={{ display: 'inline-flex', alignItems: 'center', color: '#2563eb' }}>
-                <ChevronRightIcon size={14} />
-                <ChevronRightIcon size={14} style={{ marginLeft: '-8px' }} />
+                <ChevronRightIcon size={14} color="#2563eb" />
+                <ChevronRightIcon size={14} color="#2563eb" style={{ marginLeft: '-8px' }} />
               </span>
               <span>Kéo thanh trượt sang phải để xác nhận</span>
             </>

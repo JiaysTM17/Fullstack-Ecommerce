@@ -462,7 +462,7 @@ export default function ProfilePage() {
       <main className="profile-page-wrapper" style={{ textAlign: 'center', padding: '80px 16px' }}>
         <div style={{ maxWidth: '440px', margin: '0 auto', background: '#fff', padding: '40px 32px', borderRadius: '18px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-            <UserIcon size={28} />
+            <UserIcon size={28} color="#2563eb" />
           </div>
           <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', margin: '0 0 8px' }}>
             {t('please_login_profile', 'Vui lòng đăng nhập để xem thông tin')}
@@ -810,7 +810,7 @@ export default function ProfilePage() {
                 )}
                 <div className="profile-avatar-online-dot" title="Tài khoản đang hoạt động" />
                 <div className="profile-avatar-edit-overlay">
-                  <CameraIcon size={16} />
+                  <CameraIcon size={16} color="#ffffff" />
                 </div>
               </div>
 
@@ -1489,7 +1489,7 @@ export default function ProfilePage() {
                         onClick={() => handleDeleteAddress(addr.id)}
                         title="Xóa địa chỉ"
                       >
-                        <TrashIcon size={14} />
+                        <TrashIcon size={14} color="#ef4444" />
                       </button>
                     </div>
                   </div>
@@ -1536,11 +1536,11 @@ export default function ProfilePage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', color: '#2563eb' }}>
                           {pm.type === 'bank' || pm.iconType === 'bank' ? (
-                            <StoreIcon size={18} />
+                            <StoreIcon size={18} color="#2563eb" />
                           ) : pm.type === 'wallet' || pm.iconType === 'wallet' ? (
-                            <TicketIcon size={18} />
+                            <TicketIcon size={18} color="#ea580c" />
                           ) : (
-                            <CreditCardIcon size={18} />
+                            <CreditCardIcon size={18} color="#0d9488" />
                           )}
                         </span>
                         <strong style={{ fontSize: '15px', color: '#0f172a' }}>
@@ -1563,7 +1563,7 @@ export default function ProfilePage() {
                     <div>
                       {pm.isDefault ? (
                         <span className="profile-address-default-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <CheckIcon size={11} /> MẶC ĐỊNH
+                          <CheckIcon size={11} color="#059669" /> MẶC ĐỊNH
                         </span>
                       ) : (
                         <button
@@ -1583,7 +1583,7 @@ export default function ProfilePage() {
                       onClick={() => handleDeletePayment(pm.id)}
                       title="Xóa phương thức thanh toán"
                     >
-                      <TrashIcon size={14} />
+                      <TrashIcon size={14} color="#ef4444" />
                     </button>
                   </div>
                 </div>
@@ -1641,7 +1641,7 @@ export default function ProfilePage() {
                         justifyContent: 'center',
                       }}
                     >
-                      {showOldPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+                      {showOldPassword ? <EyeOffIcon size={16} color="#64748b" /> : <EyeIcon size={16} color="#64748b" />}
                     </button>
                   </div>
                 </div>
@@ -1681,7 +1681,7 @@ export default function ProfilePage() {
                           justifyContent: 'center',
                         }}
                       >
-                        {showNewPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+                        {showNewPassword ? <EyeOffIcon size={16} color="#64748b" /> : <EyeIcon size={16} color="#64748b" />}
                       </button>
                     </div>
 
@@ -1748,7 +1748,7 @@ export default function ProfilePage() {
                           justifyContent: 'center',
                         }}
                       >
-                        {showConfirmPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+                        {showConfirmPassword ? <EyeOffIcon size={16} color="#64748b" /> : <EyeIcon size={16} color="#64748b" />}
                       </button>
                     </div>
                   </div>
@@ -2259,7 +2259,7 @@ export default function ProfilePage() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', color: '#fbbf24' }}>
-                    <CoinIcon size={28} />
+                    <CoinIcon size={28} color="#fbbf24" />
                   </span>
                   <span style={{ fontSize: '13.5px', textTransform: 'uppercase', letterSpacing: '1px', color: '#fde047', fontWeight: 800 }}>
                     Ví Shopee Xu Tích Lũy
@@ -2552,7 +2552,7 @@ export default function ProfilePage() {
                 className="profile-modal-close-btn"
                 onClick={() => setShowAddAddressModal(false)}
               >
-                <CloseIcon size={14} />
+                <CloseIcon size={14} color="#64748b" />
               </button>
             </div>
 
@@ -2722,7 +2722,7 @@ export default function ProfilePage() {
                   setEditingAddress(null);
                 }}
               >
-                <CloseIcon size={14} />
+                <CloseIcon size={14} color="#64748b" />
               </button>
             </div>
 
@@ -2823,7 +2823,7 @@ export default function ProfilePage() {
                 className="profile-modal-close-btn"
                 onClick={() => setShowAddPaymentModal(false)}
               >
-                <CloseIcon size={14} />
+                <CloseIcon size={14} color="#64748b" />
               </button>
             </div>
 

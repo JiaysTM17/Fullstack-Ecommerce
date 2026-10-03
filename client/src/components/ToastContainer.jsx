@@ -103,7 +103,7 @@ export default function ToastContainer() {
                 }}
                 aria-label="Đóng thông báo"
               >
-                <CloseIcon size={14} />
+                <CloseIcon size={14} color="#94a3b8" />
               </button>
             </div>
           </div>

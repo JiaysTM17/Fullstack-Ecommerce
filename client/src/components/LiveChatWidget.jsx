@@ -998,7 +998,7 @@ export default function LiveChatWidget() {
                 }}
                 title="Đóng chat"
               >
-                <CloseIcon size={14} />
+                <CloseIcon size={14} color="#64748b" />
               </button>
             </div>
           </div>
@@ -1066,7 +1066,7 @@ export default function LiveChatWidget() {
               }}
             >
               <span style={{ animation: 'spin 1.2s linear infinite', display: 'inline-flex', alignItems: 'center' }}>
-                <ClockIcon size={12} />
+                <ClockIcon size={12} color="#ea580c" />
               </span>
               Đang điều phối Chuyên viên CSKH trực tuyến...
             </div>
@@ -1251,7 +1251,7 @@ export default function LiveChatWidget() {
                           marginTop: '2px',
                         }}
                       >
-                        <ShoppingBotIcon size={20} />
+                        <ShoppingBotIcon size={20} color="#ea580c" />
                       </div>
                     ))}
 
@@ -1822,7 +1822,7 @@ export default function LiveChatWidget() {
                               }}
                               title="Điểm danh nhận xu 7 ngày liên tiếp"
                             >
-                              <CalendarIcon size={11} />
+                              <CalendarIcon size={11} color="#2563eb" />
                               <span>Điểm danh</span>
                             </button>
                           </div>
@@ -1907,7 +1907,7 @@ export default function LiveChatWidget() {
                               >
                                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
                                   <span>Xem Shop</span>
-                                  <ChevronRightIcon size={10} />
+                                  <ChevronRightIcon size={10} color="#ea580c" />
                                 </span>
                               </button>
                             </div>
@@ -2003,7 +2003,7 @@ export default function LiveChatWidget() {
                               gap: '4px',
                             }}
                           >
-                            <ChatIcon size={10} />
+                            <ChatIcon size={10} color="#2563eb" />
                             <span>{sug}</span>
                           </button>
                         ))}

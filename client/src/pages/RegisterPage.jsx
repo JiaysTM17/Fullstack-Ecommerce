@@ -688,9 +688,9 @@ export default function RegisterPage() {
                       boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
                     }}
                   >
-                    <KeyIcon size={14} />
+                    <KeyIcon size={14} color="#6366f1" />
                     <span>Đăng Nhập Ngay Với Email Này</span>
-                    <ChevronRightIcon size={14} />
+                    <ChevronRightIcon size={14} color="#ffffff" />
                   </Link>
                 )}
               </div>
@@ -771,7 +771,7 @@ export default function RegisterPage() {
                         }}
                       >
                         <span>Đăng nhập</span>
-                        <ChevronRightIcon size={12} />
+                        <ChevronRightIcon size={12} color="#2563eb" />
                       </Link>
                     </div>
                   )}
@@ -785,7 +785,7 @@ export default function RegisterPage() {
                           className="shopee-email-dropdown-item"
                           onClick={() => handleSelectEmailSuggestion(item.full)}
                         >
-                          <MailIcon size={14} />
+                          <MailIcon size={14} color="#2563eb" />
                           <span>
                             <span className="email-prefix">{item.prefix}</span>
                             <span className="email-domain">{item.domain}</span>
@@ -943,12 +943,12 @@ export default function RegisterPage() {
                   <div style={{ marginTop: '4px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     {formData.password === formData.confirmPassword ? (
                       <span style={{ color: '#10b981', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <CheckIcon size={11} />
+                        <CheckIcon size={11} color="#10b981" />
                         <span>Mật khẩu xác nhận hoàn toàn trùng khớp</span>
                       </span>
                     ) : (
                       <span style={{ color: '#ef4444', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <CloseIcon size={11} />
+                        <CloseIcon size={11} color="#ef4444" />
                         <span>Mật khẩu xác nhận chưa khớp</span>
                       </span>
                     )}

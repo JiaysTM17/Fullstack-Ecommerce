@@ -733,7 +733,7 @@ export default function AdminDashboardPage() {
                               onClick={() => setShopToDelete(s)}
                               title="Xóa gian hàng này"
                             >
-                              <TrashIcon size={12} />
+                              <TrashIcon size={12} color="#dc2626" />
                               <span>Xóa</span>
                             </button>
                           </div>
@@ -754,7 +754,7 @@ export default function AdminDashboardPage() {
                               onClick={() => setShopToDelete(s)}
                               title="Xóa gian hàng này"
                             >
-                              <TrashIcon size={12} />
+                              <TrashIcon size={12} color="#dc2626" />
                               <span>Xóa</span>
                             </button>
                           </div>
@@ -781,7 +781,7 @@ export default function AdminDashboardPage() {
                 onClick={() => refreshUserData(true)}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px' }}
               >
-                <RefreshIcon size={14} />
+                <RefreshIcon size={14} color="#2563eb" />
                 <span>Đồng Bộ / Làm Mới</span>
               </button>
             </div>
@@ -848,7 +848,7 @@ export default function AdminDashboardPage() {
                               onClick={() => setUserToDelete(u)}
                               title="Xóa tài khoản vĩnh viễn để test đăng ký lại"
                             >
-                              <TrashIcon size={12} />
+                              <TrashIcon size={12} color="#dc2626" />
                               <span>Xóa</span>
                             </button>
                           </div>
@@ -1302,7 +1302,7 @@ export default function AdminDashboardPage() {
                             onClick={() => handleSettlePayout(f.id)}
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                           >
-                            <CreditCardIcon size={14} />
+                            <CreditCardIcon size={14} color="#ffffff" />
                             <span>Chuyển Khoản & Quyết Toán</span>
                           </button>
                         ) : (
@@ -1364,7 +1364,7 @@ export default function AdminDashboardPage() {
                   justifyContent: 'center',
                   flexShrink: 0
                 }}>
-                  <TrashIcon size={20} />
+                  <TrashIcon size={20} color="#ffffff" />
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#991b1b' }}>
@@ -1489,7 +1489,7 @@ export default function AdminDashboardPage() {
                     gap: '6px'
                   }}
                 >
-                  <TrashIcon size={14} />
+                  <TrashIcon size={14} color="#ffffff" />
                   <span>{isDeleting ? 'Đang Xóa...' : 'Xác Nhận Xóa Vĩnh Viễn'}</span>
                 </button>
               </div>
@@ -1540,7 +1540,7 @@ export default function AdminDashboardPage() {
                   justifyContent: 'center',
                   flexShrink: 0
                 }}>
-                  <StoreIcon size={20} />
+                  <StoreIcon size={20} color="#ffffff" />
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#991b1b' }}>
@@ -1582,7 +1582,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <p style={{ margin: 0, fontSize: '12px', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <TrashIcon size={13} />
+                  <TrashIcon size={13} color="#dc2626" />
                   <span>Cảnh báo: Thao tác này sẽ xóa vĩnh viễn gian hàng và toàn bộ sản phẩm của gian hàng này.</span>
                 </p>
               </div>
@@ -1623,7 +1623,7 @@ export default function AdminDashboardPage() {
                     gap: '6px'
                   }}
                 >
-                  <TrashIcon size={14} />
+                  <TrashIcon size={14} color="#ffffff" />
                   <span>{isDeleting ? 'Đang Xóa...' : 'Xác Nhận Xóa Gian Hàng'}</span>
                 </button>
               </div>

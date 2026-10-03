@@ -494,7 +494,7 @@ export default function SocialAuthModal({
                 justifyContent: 'center',
               }}
             >
-              <CloseIcon size={16} />
+              <CloseIcon size={16} color="#ffffff" />
             </button>
           </div>
 
@@ -743,7 +743,7 @@ export default function SocialAuthModal({
             justifyContent: 'center',
           }}
         >
-          <CloseIcon size={16} />
+          <CloseIcon size={16} color="#86868b" />
         </button>
 
         {/* Apple Logo & Header */}
@@ -811,7 +811,7 @@ export default function SocialAuthModal({
               gap: '6px',
             }}
           >
-            <AlertCircleIcon size={14} />
+            <AlertCircleIcon size={14} color="#ff453a" />
             <span>{error}</span>
           </div>
         )}
