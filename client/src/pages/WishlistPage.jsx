@@ -187,8 +187,8 @@ export default function WishlistPage() {
                             style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
                             title="Xóa tìm kiếm"
                           >
-                            <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <CloseIcon size={9} color="#64748b" />
+                            <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <CloseIcon size={9} color="#ef4444" />
                             </span>
                           </button>
                         )}

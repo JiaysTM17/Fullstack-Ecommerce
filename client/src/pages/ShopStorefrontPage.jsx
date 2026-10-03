@@ -918,10 +918,12 @@ export default function ShopStorefrontPage() {
                 <button
                   type="button"
                   onClick={() => setShopSearch('')}
-                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '18px', height: '18px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                   title="Xóa tìm kiếm"
                 >
-                  <CloseIcon size={10} color="#64748b" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
                 </button>
               )}
             </div>
