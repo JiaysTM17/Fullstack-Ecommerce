@@ -26,8 +26,23 @@ export default function ToastContainer() {
         const isError = toast.type === 'error';
         const isInfo = toast.type === 'info';
 
-        const borderColor = isSuccess ? '#10b981' : isError ? '#ef4444' : '#3b82f6';
-        const iconElement = isSuccess ? <CheckIcon size={12} color="#ffffff" /> : isError ? <CloseIcon size={11} color="#ffffff" /> : <AlertCircleIcon size={13} color="#ffffff" />;
+        const bgGradient = isSuccess
+          ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+          : isError
+          ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+          : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+        const iconShadow = isSuccess
+          ? '0 2px 8px rgba(16, 185, 129, 0.4)'
+          : isError
+          ? '0 2px 8px rgba(239, 68, 68, 0.4)'
+          : '0 2px 8px rgba(59, 130, 246, 0.4)';
+        const iconElement = isSuccess ? (
+          <CheckIcon size={12} color="#ffffff" />
+        ) : isError ? (
+          <CloseIcon size={11} color="#ffffff" />
+        ) : (
+          <AlertCircleIcon size={13} color="#ffffff" />
+        );
 
         return (
           <div
@@ -38,9 +53,9 @@ export default function ToastContainer() {
               color: 'var(--text-primary, #0f172a)',
               border: `1px solid var(--border-color, #e2e8f0)`,
               borderLeft: `5px solid ${borderColor}`,
-              borderRadius: '8px',
+              borderRadius: '10px',
               padding: '12px 16px',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -51,10 +66,11 @@ export default function ToastContainer() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13.5px' }}>
               <span
                 style={{
-                  width: '22px',
-                  height: '22px',
+                  width: '24px',
+                  height: '24px',
                   borderRadius: '50%',
-                  background: borderColor,
+                  background: bgGradient,
+                  boxShadow: iconShadow,
                   color: '#fff',
                   display: 'flex',
                   alignItems: 'center',
