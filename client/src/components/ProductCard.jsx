@@ -193,7 +193,9 @@ const ProductCard = ({
             }}
             aria-label={t('quick_view_title', 'Xem nhanh')}
           >
-            <EyeIcon size={13} color="#2563eb" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <EyeIcon size={11} color="#2563eb" />
+            </span>
             <span>{t('quick_view_title', 'Xem nhanh')}</span>
           </button>
         )}
@@ -219,8 +221,10 @@ const ProductCard = ({
             {badge === "Amazon's Choice" ? t('nav_featured_picks', 'Tuyển Chọn') : badge}
           </span>
         ) : isMall ? (
-          <span className="shopee-mall-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-            <ShieldCheckIcon size={10} color="#ffffff" />
+          <span className="shopee-mall-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ShieldCheckIcon size={9} color="#ffffff" />
+            </span>
             <span>Mall</span>
           </span>
         ) : null}
@@ -253,7 +257,9 @@ const ProductCard = ({
         {/* Thông tin phụ: Rating, reviewCount và Đã bán */}
         <div className="shopee-card-meta">
           <div className="shopee-card-rating">
-            <StarIcon size={11} color="#f59e0b" fill="#f59e0b" />
+            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <StarIcon size={10} color="#f59e0b" fill="#f59e0b" />
+            </span>
             <span>{Number(rating).toFixed(1)}</span>
             <span style={{ color: 'var(--text-muted, #888)', fontSize: '11px', marginLeft: '2px' }}>({reviewCount})</span>
           </div>
