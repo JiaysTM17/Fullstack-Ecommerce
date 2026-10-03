@@ -2614,13 +2614,12 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: #64748b;
-  transition: color 0.15s ease;
+  transition: transform 0.18s ease;
 }
 
-.account-sidebar-menu-btn.active .sidebar-icon-cell,
-.account-sidebar-link.active .sidebar-icon-cell {
-  color: #0f172a;
+.account-sidebar-menu-btn:hover .sidebar-icon-cell,
+.account-sidebar-link:hover .sidebar-icon-cell {
+  transform: scale(1.12);
 }
 
 .sidebar-menu-label {
@@ -2710,11 +2709,11 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: #64748b;
+  transition: transform 0.18s ease;
 }
 
-.account-sidebar-subitem-btn.active .subitem-icon-cell {
-  color: #0f172a;
+.account-sidebar-subitem-btn:hover .subitem-icon-cell {
+  transform: scale(1.15);
 }
 
 .subitem-label {
