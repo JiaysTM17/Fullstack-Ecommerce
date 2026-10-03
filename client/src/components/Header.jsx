@@ -37,8 +37,9 @@ import {
   SearchIcon,
   CloseIcon,
   CheckIcon,
-  LayersIcon,
   ChevronDownIcon,
+  ShoppingBagIcon,
+  HeartIcon,
 } from './OrdersIcons';
 import '../styles/header.css';
 
@@ -504,11 +505,7 @@ const Header = ({
             onKeyDown={(e) => e.key === 'Enter' && onLogoClick && onLogoClick(e)}
           >
             <div className="shopee-logo-icon-wrap">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <path d="M16 10a4 4 0 0 1-8 0" />
-              </svg>
+              <ShoppingBagIcon size={22} color="#ffffff" />
             </div>
             <div className="shopee-logo-title-group">
               <div className="shopee-logo-title">
@@ -551,10 +548,7 @@ const Header = ({
                 </button>
               )}
               <button type="submit" className="shopee-search-btn" aria-label={t('search', 'Tìm kiếm')}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5">
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
+                <SearchIcon size={18} color="#ffffff" />
               </button>
             </form>
 
@@ -789,9 +783,11 @@ const Header = ({
               aria-label={`Yêu thích, ${wishlistCount} sản phẩm`}
               title={t('wishlist_title')}
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill={wishlistCount > 0 ? "#ef4444" : "none"} stroke={wishlistCount > 0 ? "#ef4444" : "#f43f5e"} strokeWidth="2">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
+              <HeartIcon
+                size={22}
+                fill={wishlistCount > 0 ? "#ef4444" : "none"}
+                color={wishlistCount > 0 ? "#ef4444" : "#f43f5e"}
+              />
               {wishlistCount > 0 && (
                 <span key={wishlistCount} className="shopee-action-badge badge-amber anim-badge-bounce">
                   {wishlistCount > 99 ? '99+' : wishlistCount}
@@ -813,11 +809,7 @@ const Header = ({
                 aria-label={`Giỏ hàng, ${cartCount} sản phẩm`}
                 title={t('cart')}
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="9" cy="21" r="1" />
-                  <circle cx="20" cy="21" r="1" />
-                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                </svg>
+                <CartIcon size={22} color="#2563eb" />
                 <span key={cartCount} className="shopee-action-badge badge-indigo anim-badge-bounce">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
