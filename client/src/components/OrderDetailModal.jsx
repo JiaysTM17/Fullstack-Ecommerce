@@ -666,7 +666,9 @@ export default function OrderDetailModal({
               {/* Carrier Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <TruckIcon size={14} color="#2563eb" />
+                  <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <TruckIcon size={12} color="#2563eb" />
+                  </span>
                   <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>
                     {carrierName}
                   </span>
@@ -878,8 +880,10 @@ export default function OrderDetailModal({
               }}
             >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
-                  <MapPinIcon size={13} color="#2563eb" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <MapPinIcon size={11} color="#2563eb" />
+                  </span>
                   <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
                     {t('shipping_address_title', 'Địa Chỉ Nhận Hàng')}
                   </span>
@@ -919,8 +923,10 @@ export default function OrderDetailModal({
             >
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <TruckIcon size={13} color="#2563eb" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <TruckIcon size={11} color="#ea580c" />
+                    </span>
                     <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
                       {t('logistics_info_title', 'Thông Tin Giao Nhận')}
                     </span>
@@ -1151,8 +1157,10 @@ export default function OrderDetailModal({
             >
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <CreditCardIcon size={13} color="#2563eb" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <CreditCardIcon size={11} color="#2563eb" />
+                    </span>
                     <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
                       {t('payment_info_title', 'Phương Thức Thanh Toán')}
                     </span>
