@@ -666,10 +666,13 @@ export default function ProductDetailPage() {
             <button
               type="button"
               className="shopee-btn shopee-btn-secondary"
-              style={{ width: "100%", marginTop: "18px", fontSize: "13px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+              style={{ width: "100%", marginTop: "18px", fontSize: "13px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", fontWeight: 600 }}
               onClick={() => setShowReviewForm((prev) => !prev)}
             >
-              <PencilIcon size={14} color="#ffffff" /> Viết Đánh Giá Của Bạn
+              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <PencilIcon size={13} color="#2563eb" />
+              </span>
+              <span>Viết Đánh Giá Của Bạn</span>
             </button>
           </div>
 
@@ -1124,17 +1127,25 @@ export default function ProductDetailPage() {
               backgroundColor: isAddedFeedback ? "#ecfdf5" : undefined,
               color: isAddedFeedback ? "#059669" : undefined,
               borderColor: isAddedFeedback ? "#10b981" : undefined,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
             }}
             onClick={handleAddToCart}
           >
             {isAddedFeedback ? (
               <>
-                <CheckIcon size={15} color="#059669" />
+                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#d1fae5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CheckIcon size={12} color="#059669" />
+                </span>
                 <span>Đã thêm!</span>
               </>
             ) : (
               <>
-                <ShoppingBagIcon size={15} color="#ea580c" />
+                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <ShoppingBagIcon size={12} color="#ea580c" />
+                </span>
                 <span>Thêm giỏ</span>
               </>
             )}
@@ -1142,9 +1153,12 @@ export default function ProductDetailPage() {
           <button
             type="button"
             className="mobile-btn-buy"
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
             onClick={handleBuyNow}
           >
-            <BoltIcon size={15} color="#ffffff" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <BoltIcon size={13} color="#ffffff" />
+            </span>
             <span>Mua Ngay</span>
           </button>
         </div>
