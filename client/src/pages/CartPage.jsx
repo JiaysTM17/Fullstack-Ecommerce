@@ -211,7 +211,7 @@ export default function CartPage() {
                   </span>
                 ) : (
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <TruckIcon size={16} /> {t('freeship_needed', 'Mua thêm')} <strong style={{ color: "var(--primary-color)" }}>{formatCurrency(neededAmount)}</strong> {t('freeship_to_qualify', 'để được MIỄN PHÍ VẬN CHUYỂN toàn quốc!')}
+                    <TruckIcon size={16} color="#0284c7" /> {t('freeship_needed', 'Mua thêm')} <strong style={{ color: "var(--primary-color)" }}>{formatCurrency(neededAmount)}</strong> {t('freeship_to_qualify', 'để được MIỄN PHÍ VẬN CHUYỂN toàn quốc!')}
                   </span>
                 )}
               </span>
@@ -297,7 +297,7 @@ export default function CartPage() {
                       padding: 0,
                     }}
                   >
-                    <TrashIcon size={14} /> Xóa đã chọn ({selectedItemIds.length})
+                    <TrashIcon size={14} color="#ef4444" /> Xóa đã chọn ({selectedItemIds.length})
                   </button>
                 )}
 
@@ -340,7 +340,7 @@ export default function CartPage() {
                     onChange={() => toggleSelectShop(shopGroup.items.map((it) => it.productId))}
                     style={{ width: "16px", height: "16px", cursor: "pointer" }}
                   />
-                  <StoreIcon size={16} />
+                  <StoreIcon size={16} color="#ea580c" />
                   <strong style={{ fontSize: "14px", color: "var(--text-primary, #0f172a)" }}>
                     {shopGroup.shopName}
                   </strong>
@@ -406,7 +406,7 @@ export default function CartPage() {
                           style={{ background: "none", border: "none", color: "var(--secondary-color, #0284c7)", cursor: "pointer", fontWeight: 600, padding: 0, display: "inline-flex", alignItems: "center", gap: "4px" }}
                           onClick={() => saveForLater(item.productId)}
                         >
-                          <PackageIcon size={13} /> Để dành mua sau
+                          <PackageIcon size={13} color="#0284c7" /> Để dành mua sau
                         </button>
                         <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
                         <button
@@ -414,7 +414,7 @@ export default function CartPage() {
                           style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", cursor: "pointer", fontWeight: 600, padding: 0, display: "inline-flex", alignItems: "center", gap: "4px" }}
                           onClick={() => handleMoveToWishlist(item)}
                         >
-                          <HeartIcon size={13} /> Chuyển vào Yêu thích
+                          <HeartIcon size={13} color="#ec4899" /> Chuyển vào Yêu thích
                         </button>
                         <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
                         <button
@@ -445,7 +445,7 @@ export default function CartPage() {
                 }}
               >
                 <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary, #475569)", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <PencilIcon size={13} /> Lời nhắn cho Người bán:
+                  <PencilIcon size={13} color="#64748b" /> Lời nhắn cho Người bán:
                 </span>
                 <input
                   type="text"
@@ -463,7 +463,7 @@ export default function CartPage() {
           {savedItems.length > 0 && (
             <div style={{ marginTop: "36px", background: "var(--bg-card, #ffffff)", borderRadius: "8px", padding: "20px", border: "1px solid var(--border-medium, #e2e8f0)", boxShadow: "var(--shadow-sm)" }}>
               <h3 style={{ fontSize: "17px", fontWeight: 800, margin: "0 0 16px", color: "var(--text-primary, #0f172a)", display: "flex", alignItems: "center", gap: "8px" }}>
-                <PackageIcon size={18} /> Để Dành Mua Sau ({savedItems.length} sản phẩm)
+                <PackageIcon size={18} color="#0284c7" /> Để Dành Mua Sau ({savedItems.length} sản phẩm)
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 {savedItems.map((saved) => (
@@ -500,7 +500,7 @@ export default function CartPage() {
                         style={{ fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "6px" }}
                         onClick={() => moveToCartFromSaved(saved)}
                       >
-                        <CartIcon size={13} /> {t('move_to_cart', 'Chuyển Vào Giỏ Hàng')}
+                        <CartIcon size={13} color="#ffffff" /> {t('move_to_cart', 'Chuyển Vào Giỏ Hàng')}
                       </button>
                       <button
                         type="button"
@@ -525,7 +525,7 @@ export default function CartPage() {
           <div style={{ marginBottom: "18px", borderBottom: "1px solid var(--border-medium, #eee)", paddingBottom: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
               <span style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                <TicketIcon size={16} /> {t('voucher_code', 'Mã Giảm Giá / Voucher')}:
+                <TicketIcon size={16} color="#ea580c" /> {t('voucher_code', 'Mã Giảm Giá / Voucher')}:
               </span>
               <button
                 type="button"
@@ -554,7 +554,7 @@ export default function CartPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f0f9ff", padding: "8px 12px", borderRadius: "8px", border: "1px solid #0284c7" }}>
                   <div>
                     <span style={{ fontWeight: 800, color: "#0284c7", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <TruckIcon size={14} /> {appliedShippingVoucher.code}
+                      <TruckIcon size={14} color="#0284c7" /> {appliedShippingVoucher.code}
                     </span>
                     <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
                       (-{formatCurrency(shippingDiscount)} ship)
@@ -565,7 +565,7 @@ export default function CartPage() {
                     onClick={removeShippingVoucher}
                     style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "3px" }}
                   >
-                    <CloseIcon size={12} /> {t('remove', 'Gỡ')}
+                    <CloseIcon size={12} color="#ef4444" /> {t('remove', 'Gỡ')}
                   </button>
                 </div>
               )}
@@ -574,7 +574,7 @@ export default function CartPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--primary-color, #ea580c)" }}>
                   <div>
                     <span style={{ fontWeight: 800, color: "var(--primary-color, #ea580c)", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <TagIcon size={14} /> {appliedDiscountVoucher.code}
+                      <TagIcon size={14} color="#ea580c" /> {appliedDiscountVoucher.code}
                     </span>
                     <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
                       (-{formatCurrency(voucherDiscount)})

@@ -450,7 +450,7 @@ export default function CheckoutPage() {
       {/* 4-Step Progress Indicator */}
       <nav className="checkout-steps-nav">
         <div className={`checkout-step-item ${currentStep === 1 ? "active" : currentStep > 1 ? "completed" : ""}`}>
-          <div className="checkout-step-number">{currentStep > 1 ? <CheckIcon size={12} /> : "1"}</div>
+          <div className="checkout-step-number">{currentStep > 1 ? <CheckIcon size={12} color="#ffffff" /> : "1"}</div>
           <span>1. Địa Chỉ Nhận Hàng</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
@@ -458,7 +458,7 @@ export default function CheckoutPage() {
         </span>
 
         <div className={`checkout-step-item ${currentStep === 2 ? "active" : currentStep > 2 ? "completed" : ""}`}>
-          <div className="checkout-step-number">{currentStep > 2 ? <CheckIcon size={12} /> : "2"}</div>
+          <div className="checkout-step-number">{currentStep > 2 ? <CheckIcon size={12} color="#ffffff" /> : "2"}</div>
           <span>2. Vận Chuyển</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
@@ -466,7 +466,7 @@ export default function CheckoutPage() {
         </span>
 
         <div className={`checkout-step-item ${currentStep === 3 ? "active" : currentStep > 3 ? "completed" : ""}`}>
-          <div className="checkout-step-number">{currentStep > 3 ? <CheckIcon size={12} /> : "3"}</div>
+          <div className="checkout-step-number">{currentStep > 3 ? <CheckIcon size={12} color="#ffffff" /> : "3"}</div>
           <span>3. Phương Thức Thanh Toán</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
@@ -520,7 +520,7 @@ export default function CheckoutPage() {
                           </div>
                           {addr.isDefault && (
                             <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                              <CheckIcon size={11} /> MẶC ĐỊNH
+                              <CheckIcon size={11} color="#ffffff" /> MẶC ĐỊNH
                             </span>
                           )}
                         </div>
@@ -570,7 +570,7 @@ export default function CheckoutPage() {
                               }}
                               title="Sửa địa chỉ"
                             >
-                              <PencilIcon size={12} /> Sửa
+                              <PencilIcon size={12} color="#64748b" /> Sửa
                             </button>
                             <button
                               type="button"
@@ -842,7 +842,7 @@ export default function CheckoutPage() {
                             gap: "4px",
                           }}
                         >
-                          <CopyIcon size={12} /> {t('copy', 'Sao chép')}
+                          <CopyIcon size={12} color="#2563eb" /> {t('copy', 'Sao chép')}
                         </button>
                       </div>
                       <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>Chủ TK: CONG TY TNHH FULLSTACK ECOMMERCE</div>
@@ -1065,7 +1065,7 @@ export default function CheckoutPage() {
                 >
                   {submitting ? "Đang xử lý đơn hàng..." : (
                     <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <CheckIcon size={16} /> Xác Nhận Đặt Hàng ({formatCurrency(finalOrderTotal)})
+                      <CheckIcon size={16} color="#ffffff" /> Xác Nhận Đặt Hàng ({formatCurrency(finalOrderTotal)})
                     </span>
                   )}
                 </button>
@@ -1110,7 +1110,7 @@ export default function CheckoutPage() {
                     onClick={removeShippingVoucher}
                     style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px", display: "inline-flex", alignItems: "center", gap: "3px" }}
                   >
-                    <CloseIcon size={11} /> Gỡ
+                    <CloseIcon size={11} color="#ef4444" /> Gỡ
                   </button>
                 </div>
               )}
@@ -1199,7 +1199,7 @@ export default function CheckoutPage() {
           </div>
 
           <div style={{ fontSize: "12px", color: "var(--text-muted, #777)", lineHeight: "1.5", borderTop: "1px solid var(--border-light, #eee)", paddingTop: "12px", display: "inline-flex", alignItems: "flex-start", gap: "6px" }}>
-            <LockIcon size={14} color="var(--text-muted, #777)" style={{ flexShrink: 0, marginTop: "2px" }} />
+            <LockIcon size={14} color="#16a34a" style={{ flexShrink: 0, marginTop: "2px" }} />
             <span>Nhấn &quot;Xác Nhận Đặt Hàng&quot; đồng nghĩa bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Fullstack E-Commerce.</span>
           </div>
         </aside>
@@ -1264,7 +1264,7 @@ export default function CheckoutPage() {
                 onClick={() => setShowAddAddressModal(false)}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <CloseIcon size={16} />
+                <CloseIcon size={16} color="#64748b" />
               </button>
             </div>
 

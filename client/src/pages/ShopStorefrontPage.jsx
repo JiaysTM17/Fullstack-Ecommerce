@@ -583,7 +583,7 @@ export default function ShopStorefrontPage() {
               }}
               onClick={handleToggleFollow}
             >
-              {isFollowing ? <CheckIcon size={14} /> : <PlusIcon size={14} />}
+              {isFollowing ? <CheckIcon size={14} color="#ffffff" /> : <PlusIcon size={14} color="#ffffff" />}
               <span>{isFollowing ? t('shop_following') : 'Theo Dõi Shop'}</span>
             </button>
 

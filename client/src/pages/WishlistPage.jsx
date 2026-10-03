@@ -180,11 +180,11 @@ export default function WishlistPage() {
                     >
                       {isAddedFeedback ? (
                         <>
-                          <CheckIcon size={14} /> Đã thêm vào giỏ!
+                          <CheckIcon size={14} color="#ffffff" /> Đã thêm vào giỏ!
                         </>
                       ) : (
                         <>
-                          <ShoppingBagIcon size={14} /> Thêm tất cả vào giỏ
+                          <ShoppingBagIcon size={14} color="#ffffff" /> Thêm tất cả vào giỏ
                         </>
                       )}
                     </button>
@@ -194,7 +194,7 @@ export default function WishlistPage() {
                       onClick={handleClear}
                       style={{ fontSize: '12.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 12px' }}
                     >
-                      <TrashIcon size={13} /> {t('clear_all_wishlist', 'Xóa toàn bộ')}
+                      <TrashIcon size={13} color="#ef4444" /> {t('clear_all_wishlist', 'Xóa toàn bộ')}
                     </button>
                   </div>
                 </div>

@@ -79,7 +79,7 @@ export default function OrderSuccessPage() {
             boxShadow: '0 8px 24px rgba(16, 185, 129, 0.35)',
           }}
         >
-          <CheckIcon size={36} />
+          <CheckIcon size={36} color="#ffffff" />
         </div>
 
         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
@@ -123,7 +123,7 @@ export default function OrderSuccessPage() {
                   gap: '4px',
                 }}
               >
-                <CopyIcon size={12} /> Sao chép
+                <CopyIcon size={12} color="#2563eb" /> Sao chép
               </button>
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function OrderSuccessPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Đơn vị vận chuyển:</span>
             <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <TruckIcon size={16} /> SPX Express (Giao hàng dự kiến 24H)
+              <TruckIcon size={16} color="#16a34a" /> SPX Express (Giao hàng dự kiến 24H)
             </span>
           </div>
         </div>
@@ -209,7 +209,7 @@ export default function OrderSuccessPage() {
             style={{ padding: '12px 24px', fontSize: '15px', fontWeight: 800, width: '100%', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             onClick={() => navigate('/orders')}
           >
-            <TruckIcon size={16} /> {t('order_view_tracking_btn', 'Theo dõi vận chuyển đơn hàng')}
+            <TruckIcon size={16} color="#ffffff" /> {t('order_view_tracking_btn', 'Theo dõi vận chuyển đơn hàng')}
           </button>
 
           <button
@@ -218,7 +218,7 @@ export default function OrderSuccessPage() {
             style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             onClick={() => setShowInvoiceModal(true)}
           >
-            <ReceiptIcon size={16} /> In Hóa Đơn / Xem Biên Lai VAT
+            <ReceiptIcon size={16} color="#0284c7" /> In Hóa Đơn / Xem Biên Lai VAT
           </button>
 
           <Link

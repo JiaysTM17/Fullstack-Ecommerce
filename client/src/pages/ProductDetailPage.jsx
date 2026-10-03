@@ -467,7 +467,7 @@ export default function ProductDetailPage() {
               style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
               onClick={handleBuyNow}
             >
-              <BoltIcon size={16} /> Mua Ngay
+              <BoltIcon size={16} color="#ffffff" /> Mua Ngay
             </button>
             <button
               type="button"
@@ -475,7 +475,7 @@ export default function ProductDetailPage() {
               style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
               onClick={() => toggleWishlist(productId)}
             >
-              <HeartIcon size={16} className={wishlisted ? "fill-current text-rose-500" : ""} />
+              <HeartIcon size={16} color={wishlisted ? "#f43f5e" : "#64748b"} fill={wishlisted ? "#f43f5e" : "none"} />
               {wishlisted ? "Đã lưu vào Yêu thích" : "Thêm vào Yêu thích"}
             </button>
             <button
@@ -493,7 +493,7 @@ export default function ProductDetailPage() {
                 style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 onClick={handleCopyLink}
               >
-                <CopyIcon size={13} /> Sao Chép Link
+                <CopyIcon size={13} color="#2563eb" /> Sao Chép Link
               </button>
               <button
                 type="button"
@@ -509,15 +509,15 @@ export default function ProductDetailPage() {
           {/* Guarantees */}
           <div className="amazon-guarantees">
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <ShieldIcon size={14} className="text-emerald-600" />
+              <ShieldIcon size={14} color="#059669" />
               <span><strong>Chính hãng 100%:</strong> Bồi thường gấp đôi nếu phát hiện hàng giả.</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <CheckIcon size={14} className="text-sky-600" />
+              <CheckIcon size={14} color="#0284c7" />
               <span><strong>Đổi trả 30 ngày:</strong> Miễn phí hoàn hàng tận nơi.</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <ShieldIcon size={14} className="text-indigo-600" />
+              <ShieldIcon size={14} color="#6366f1" />
               <span><strong>Thanh toán bảo mật:</strong> Mã hóa SSL chuẩn quốc tế.</span>
             </div>
           </div>
@@ -549,7 +549,7 @@ export default function ProductDetailPage() {
             style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             onClick={() => setShowShopChat(true)}
           >
-            <ChatIcon size={14} /> Chat Ngay
+            <ChatIcon size={14} color="#2563eb" /> Chat Ngay
           </button>
           <button
             type="button"
@@ -557,7 +557,7 @@ export default function ProductDetailPage() {
             style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             onClick={() => navigate(`/shop/${product.shopId || "shop_01"}`)}
           >
-            <StoreIcon size={14} /> Xem Gian Hàng
+            <StoreIcon size={14} color="#ea580c" /> Xem Gian Hàng
           </button>
         </div>
       </section>
@@ -622,7 +622,7 @@ export default function ProductDetailPage() {
               style={{ width: "100%", marginTop: "18px", fontSize: "13px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
               onClick={() => setShowReviewForm((prev) => !prev)}
             >
-              <PencilIcon size={14} /> Viết Đánh Giá Của Bạn
+              <PencilIcon size={14} color="#ffffff" /> Viết Đánh Giá Của Bạn
             </button>
           </div>
 
@@ -1056,7 +1056,7 @@ export default function ProductDetailPage() {
             className="mobile-icon-btn"
             title="Xem Shop"
           >
-            <StoreIcon size={18} />
+            <StoreIcon size={18} color="#ea580c" />
             <span>Shop</span>
           </Link>
           <button
@@ -1065,7 +1065,7 @@ export default function ProductDetailPage() {
             onClick={() => toggleWishlist(productId)}
             title="Yêu thích"
           >
-            <HeartIcon size={18} className={wishlisted ? "fill-current text-rose-500" : ""} />
+            <HeartIcon size={18} color={wishlisted ? "#f43f5e" : "#64748b"} fill={wishlisted ? "#f43f5e" : "none"} />
             <span>{wishlisted ? "Đã lưu" : "Thích"}</span>
           </button>
         </div>
@@ -1087,7 +1087,7 @@ export default function ProductDetailPage() {
               </>
             ) : (
               <>
-                <ShoppingBagIcon size={15} />
+                <ShoppingBagIcon size={15} color="#ea580c" />
                 <span>Thêm giỏ</span>
               </>
             )}
