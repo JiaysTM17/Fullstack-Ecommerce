@@ -75,8 +75,11 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         {/* Thông tin Shop & Khách hàng */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px', fontSize: '13px' }}>
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <StoreIcon size={13} color="#ea580c" /> ĐƠN VỊ XUẤT HÀNG (SHOP)
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <StoreIcon size={11} color="#ea580c" />
+              </span>
+              <span>ĐƠN VỊ XUẤT HÀNG (SHOP)</span>
             </div>
             <div style={{ fontWeight: 800, fontSize: '14px', color: '#0f172a' }}>{shopName}</div>
             <div style={{ color: '#475569', marginTop: '2px' }}>Kho: {shopAddress}</div>
@@ -84,8 +87,11 @@ export default function PackingSlipModal({ order, shop, onClose }) {
           </div>
 
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <MapPinIcon size={13} color="#2563eb" /> NGƯỜI NHẬN HÀNG (KHÁCH)
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MapPinIcon size={11} color="#2563eb" />
+              </span>
+              <span>NGƯỜI NHẬN HÀNG (KHÁCH)</span>
             </div>
             <div style={{ fontWeight: 800, fontSize: '14px', color: '#0f172a' }}>
               {order.customerName || order.customer?.fullName || 'Khách Hàng Mini Shopee'}
@@ -105,8 +111,10 @@ export default function PackingSlipModal({ order, shop, onClose }) {
             <strong style={{ fontSize: '13.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <PackageIcon size={15} color="#ea580c" /> DANH SÁCH MẶT HÀNG KIỂM TRA ({order.items?.length || 1} sản phẩm):
             </strong>
-            <span style={{ fontSize: '11.5px', color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <CheckIcon size={12} color="#16a34a" />
+            <span style={{ fontSize: '11.5px', color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={11} color="#16a34a" />
+              </span>
               <span>Tích chọn kiểm hàng trước khi dán tem</span>
             </span>
           </div>
@@ -149,12 +157,16 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         {/* Thanh toán & Ghi chú */}
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '16px', background: '#f8fafc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
           <div>
-            <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <CreditCardIcon size={13} color="#2563eb" />
+            <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CreditCardIcon size={11} color="#2563eb" />
+              </span>
               <span>Phương thức thanh toán: <strong>{order.paymentMethod || 'VietQR'}</strong></span>
             </div>
-            <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <TruckIcon size={13} color="#ea580c" />
+            <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <TruckIcon size={11} color="#ea580c" />
+              </span>
               <span>Mã vận đơn bưu cục: <strong style={{ color: '#ea580c' }}>{trackingCode}</strong></span>
             </div>
             {order.note && (
