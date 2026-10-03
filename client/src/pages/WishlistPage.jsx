@@ -151,9 +151,9 @@ export default function WishlistPage() {
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
                   <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                        <HeartIcon size={24} color="#ef4444" fill="#ef4444" />
+                    <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <HeartIcon size={20} color="#ef4444" fill="#ef4444" />
                       </span>
                       <span>{t('wishlist_title', 'Sản Phẩm Yêu Thích')} ({wishlistProducts.length})</span>
                     </h1>
@@ -227,7 +227,9 @@ export default function WishlistPage() {
                       onClick={handleClear}
                       style={{ fontSize: '12.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 12px' }}
                     >
-                      <TrashIcon size={13} color="#ef4444" />
+                      <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <TrashIcon size={12} color="#dc2626" />
+                      </span>
                       <span>{t('clear_all_wishlist', 'Xóa toàn bộ')}</span>
                     </button>
                   </div>
