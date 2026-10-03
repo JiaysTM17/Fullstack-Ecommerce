@@ -265,8 +265,10 @@ const ProductCard = ({
         {/* Fast Delivery Badge */}
         {isFastDelivery && (
           <div style={{ margin: '6px 0 2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '11px', color: 'var(--secondary-color, #0284c7)', fontWeight: 700, background: 'var(--primary-light, #f0f9ff)', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <BoltIcon size={11} color="#0284c7" />
+            <span style={{ fontSize: '11px', color: 'var(--secondary-color, #0284c7)', fontWeight: 700, background: 'var(--primary-light, #f0f9ff)', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <BoltIcon size={10} color="#0284c7" />
+              </span>
               <span>{t('nav_fast_delivery', 'Giao 2H')}</span>
             </span>
           </div>
@@ -282,12 +284,16 @@ const ProductCard = ({
           >
             {justAdded ? (
               <>
-                <CheckIcon size={14} color="#ffffff" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckIcon size={11} color="#ffffff" />
+                </span>
                 <span>{t('added_to_cart', 'Đã thêm!')}</span>
               </>
             ) : (
               <>
-                <CartIcon size={14} color="#ffffff" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CartIcon size={11} color="#ffffff" />
+                </span>
                 <span>{t('add_to_cart', 'Thêm vào giỏ')}</span>
               </>
             )}
