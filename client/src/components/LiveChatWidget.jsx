@@ -2122,7 +2122,7 @@ export default function LiveChatWidget() {
               }}
               title={isListening ? 'Dừng lắng nghe' : 'Nói bằng giọng nói'}
             >
-              <MicIcon size={16} color={isListening ? "#ef4444" : "#64748b"} />
+              <MicIcon size={16} color={isListening ? "#ffffff" : "#0284c7"} />
             </button>
 
             {/* Nút Gửi Tin Nhắn */}
