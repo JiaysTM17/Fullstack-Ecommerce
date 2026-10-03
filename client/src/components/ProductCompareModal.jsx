@@ -111,7 +111,9 @@ export default function ProductCompareModal() {
             style={{ padding: '8px 16px', fontSize: '13px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onClick={() => setIsModalOpen(true)}
           >
-            <ScaleIcon size={14} color="#ffffff" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ScaleIcon size={12} color="#ffffff" />
+            </span>
             <span>{t('compare_view_btn')}</span>
           </button>
 
@@ -127,10 +129,12 @@ export default function ProductCompareModal() {
               textDecoration: 'underline',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '6px',
             }}
           >
-            <TrashIcon size={12} color="#dc2626" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <TrashIcon size={10} color="#dc2626" />
+            </span>
             <span>{t('compare_clear_all')}</span>
           </button>
         </div>
@@ -201,17 +205,22 @@ export default function ProductCompareModal() {
                   type="button"
                   onClick={clearCompare}
                   className="shopee-btn shopee-btn-secondary"
-                  style={{ fontSize: '12.5px', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  style={{ fontSize: '12.5px', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <TrashIcon size={13} color="#dc2626" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TrashIcon size={10} color="#dc2626" />
+                  </span>
                   <span>{t('compare_clear_all')}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}
+                  aria-label="Đóng bảng so sánh"
                 >
-                  <CloseIcon size={18} color="var(--text-muted, #64748b)" />
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg-muted, #f1f5f9)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="var(--text-muted, #64748b)" />
+                  </span>
                 </button>
               </div>
             </div>
