@@ -217,7 +217,9 @@ export default function SecuritySliderCaptcha({
             fontWeight: 700,
           }}
         >
-          {isVerified ? <CheckIcon size={18} color="#ffffff" /> : disabled ? <LockIcon size={16} color="#64748b" /> : <ChevronRightIcon size={18} color="#ffffff" />}
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: disabled ? 'transparent' : 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            {isVerified ? <CheckIcon size={16} color="#ffffff" /> : disabled ? <LockIcon size={14} color="#64748b" /> : <ChevronRightIcon size={16} color="#ffffff" />}
+          </span>
         </div>
 
         {/* Reset button when verified */}
@@ -264,8 +266,10 @@ export default function SecuritySliderCaptcha({
           color: '#64748b',
         }}
       >
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-          <ShieldCheckIcon size={13} color={isVerified ? '#16a34a' : '#2563eb'} />
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: isVerified ? '#dcfce7' : '#eff6ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ShieldCheckIcon size={11} color={isVerified ? '#16a34a' : '#2563eb'} />
+          </span>
           <span style={{ fontWeight: 600, color: isVerified ? '#16a34a' : '#475569' }}>
             {isVerified ? 'Đã kích hoạt bảo mật' : 'Bảo mật 2 lớp'}
           </span>
