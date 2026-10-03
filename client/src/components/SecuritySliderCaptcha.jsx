@@ -165,19 +165,22 @@ export default function SecuritySliderCaptcha({
         >
           {isVerified ? (
             <>
-              <CheckIcon size={16} color="#059669" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#d1fae5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={13} color="#059669" />
+              </span>
               <span>Đã xác minh bảo mật thành công</span>
             </>
           ) : disabled ? (
             <>
-              <ShieldCheckIcon size={15} color="#2563eb" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#eff6ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheckIcon size={13} color="#2563eb" />
+              </span>
               <span>{disabledMessage}</span>
             </>
           ) : (
             <>
-              <span style={{ display: 'inline-flex', alignItems: 'center', color: '#2563eb' }}>
-                <ChevronRightIcon size={14} color="#2563eb" />
-                <ChevronRightIcon size={14} color="#2563eb" style={{ marginLeft: '-8px' }} />
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChevronRightIcon size={13} color="#2563eb" />
               </span>
               <span>Kéo thanh trượt sang phải để xác nhận</span>
             </>
