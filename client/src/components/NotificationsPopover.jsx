@@ -261,10 +261,12 @@ export default function NotificationsPopover() {
                   padding: 0,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '5px',
                 }}
               >
-                <CheckIcon size={12} color="#ea580c" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckIcon size={11} color="#ea580c" />
+                </span>
                 <span>Đã đọc tất cả</span>
               </button>
             )}
@@ -438,9 +440,11 @@ export default function NotificationsPopover() {
                 cursor: 'pointer',
               }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                 <span>Xem tất cả đơn hàng</span>
-                <ChevronRightIcon size={12} color="#ea580c" />
+                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ChevronRightIcon size={11} color="#ea580c" />
+                </span>
               </span>
             </button>
 
@@ -456,11 +460,13 @@ export default function NotificationsPopover() {
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '5px',
                 }}
                 title="Xóa các thông báo đã đọc"
               >
-                <TrashIcon size={12} color="#ef4444" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TrashIcon size={11} color="#ef4444" />
+                </span>
                 <span>Dọn dẹp</span>
               </button>
             )}
