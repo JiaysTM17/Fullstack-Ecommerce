@@ -18,6 +18,7 @@ import {
   BoltIcon,
   CloseIcon,
   AlertCircleIcon,
+  MailIcon,
 } from './OrdersIcons';
 import '../styles/auth.css';
 
@@ -197,9 +198,11 @@ export default function AuthModal() {
               setAuthTab('login');
               setError('');
             }}
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
           >
-            <KeyIcon size={14} color="#ea580c" />
+            <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: authTab === 'login' ? '#ffedd5' : '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <KeyIcon size={12} color="#ea580c" />
+            </span>
             <span>Đăng Nhập</span>
           </button>
           <button
@@ -209,9 +212,11 @@ export default function AuthModal() {
               setAuthTab('register');
               setError('');
             }}
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
           >
-            <BoltIcon size={14} color="#ea580c" />
+            <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: authTab === 'register' ? '#ffedd5' : '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BoltIcon size={12} color="#ea580c" />
+            </span>
             <span>Đăng Ký Tài Khoản</span>
           </button>
         </div>
@@ -363,12 +368,22 @@ export default function AuthModal() {
               <span
                 className="shopee-auth-method-link"
                 onClick={() => setAuthMethod(authMethod === 'password' ? 'qr' : 'password')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
               >
                 {authMethod === 'password' ? (
-                  <><QrCodeIcon size={14} color="#2563eb" /> Quét mã QR đăng nhập</>
+                  <>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <QrCodeIcon size={12} color="#2563eb" />
+                    </span>
+                    <span>Quét mã QR đăng nhập</span>
+                  </>
                 ) : (
-                  <><LockIcon size={14} color="#ea580c" /> Đăng nhập bằng mật khẩu</>
+                  <>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <LockIcon size={12} color="#ea580c" />
+                    </span>
+                    <span>Đăng nhập bằng mật khẩu</span>
+                  </>
                 )}
               </span>
             </div>
