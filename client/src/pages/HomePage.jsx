@@ -288,17 +288,17 @@ export default function HomePage() {
           {/* Discovery Tabs */}
           <div style={{ display: "flex", gap: "8px", marginBottom: "16px", overflowX: "auto", paddingBottom: "4px" }}>
             {[
-              { id: "all", label: "Tất cả sản phẩm", icon: <ShoppingBagIcon size={15} color={activeTab === 'all' ? '#ffffff' : '#ea580c'} /> },
-              { id: "best_sellers", label: "Bán chạy nhất", icon: <BoltIcon size={15} color={activeTab === 'best_sellers' ? '#ffffff' : '#ea580c'} /> },
-              { id: "new_arrivals", label: "Hàng mới về", icon: <StarIcon size={15} color={activeTab === 'new_arrivals' ? '#ffffff' : '#f59e0b'} /> },
-              { id: "flash_sale", label: "Ưu đãi Flash Sale", icon: <BoltIcon size={15} color={activeTab === 'flash_sale' ? '#ffffff' : '#ea580c'} /> },
+              { id: "all", label: "Tất cả sản phẩm", icon: <ShoppingBagIcon size={14} color={activeTab === 'all' ? '#ffffff' : '#ea580c'} />, bg: activeTab === 'all' ? 'rgba(255,255,255,0.2)' : '#fff7ed', border: activeTab === 'all' ? 'rgba(255,255,255,0.3)' : '#fed7aa' },
+              { id: "best_sellers", label: "Bán chạy nhất", icon: <BoltIcon size={14} color={activeTab === 'best_sellers' ? '#ffffff' : '#ea580c'} />, bg: activeTab === 'best_sellers' ? 'rgba(255,255,255,0.2)' : '#fff7ed', border: activeTab === 'best_sellers' ? 'rgba(255,255,255,0.3)' : '#fed7aa' },
+              { id: "new_arrivals", label: "Hàng mới về", icon: <StarIcon size={14} color={activeTab === 'new_arrivals' ? '#ffffff' : '#f59e0b'} />, bg: activeTab === 'new_arrivals' ? 'rgba(255,255,255,0.2)' : '#fef3c7', border: activeTab === 'new_arrivals' ? 'rgba(255,255,255,0.3)' : '#fde68a' },
+              { id: "flash_sale", label: "Ưu đãi Flash Sale", icon: <BoltIcon size={14} color={activeTab === 'flash_sale' ? '#ffffff' : '#dc2626'} />, bg: activeTab === 'flash_sale' ? 'rgba(255,255,255,0.2)' : '#fee2e2', border: activeTab === 'flash_sale' ? 'rgba(255,255,255,0.3)' : '#fca5a5' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 style={{
-                  padding: "10px 18px",
+                  padding: "8px 16px",
                   borderRadius: "20px",
                   border: activeTab === tab.id ? "2px solid var(--primary-color, #ea580c)" : "1px solid var(--border-medium, #e2e8f0)",
                   background: activeTab === tab.id ? "var(--primary-color, #ea580c)" : "var(--bg-card, #fff)",
@@ -308,12 +308,14 @@ export default function HomePage() {
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: "6px",
+                  gap: "8px",
                   transition: "all 0.2s ease",
                   whiteSpace: "nowrap",
                 }}
               >
-                <span>{tab.icon}</span>
+                <span style={{ width: "22px", height: "22px", borderRadius: "6px", background: tab.bg, border: `1px solid ${tab.border}`, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {tab.icon}
+                </span>
                 <span>{tab.label}</span>
               </button>
             ))}
