@@ -584,27 +584,47 @@ export default function AdminDashboardPage() {
         {/* 4 Thẻ chỉ số toàn sàn */}
         <div className="shopee-metrics-grid">
           <div className="shopee-metric-card">
-            <span className="shopee-metric-label">Tổng Doanh Số Sàn (GMV)</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span className="shopee-metric-label">Tổng Doanh Số Sàn (GMV)</span>
+              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChartBarIcon size={18} color="#2563eb" />
+              </div>
+            </div>
             <div className="shopee-metric-value">{formatCurrency(totalPlatformRevenue)}</div>
-            <span style={{ fontSize: '11px', color: 'var(--color-success)' }}>+18.4% so với tháng trước</span>
+            <span style={{ fontSize: '11px', color: 'var(--color-success, #16a34a)' }}>+18.4% so với tháng trước</span>
           </div>
 
           <div className="shopee-metric-card">
-            <span className="shopee-metric-label">Hoa Hồng Thu Sàn (5%)</span>
-            <div className="shopee-metric-value" style={{ color: 'var(--color-success)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span className="shopee-metric-label">Hoa Hồng Thu Sàn (5%)</span>
+              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(22, 163, 74, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CreditCardIcon size={18} color="#16a34a" />
+              </div>
+            </div>
+            <div className="shopee-metric-value" style={{ color: 'var(--color-success, #16a34a)' }}>
               {formatCurrency(platformCommission)}
             </div>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Doanh thu thuần của sàn</span>
           </div>
 
           <div className="shopee-metric-card">
-            <span className="shopee-metric-label">Gian Hàng Hoạt Động</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span className="shopee-metric-label">Gian Hàng Hoạt Động</span>
+              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <StoreIcon size={18} color="#ea580c" />
+              </div>
+            </div>
             <div className="shopee-metric-value">{totalActiveShops} / {shops.length}</div>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Tỷ lệ duyệt shop: 95%</span>
           </div>
 
           <div className="shopee-metric-card">
-            <span className="shopee-metric-label">Tổng Thành Viên Sàn</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span className="shopee-metric-label">Tổng Thành Viên Sàn</span>
+              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(147, 51, 234, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <UsersIcon size={18} color="#9333ea" />
+              </div>
+            </div>
             <div className="shopee-metric-value">{users.length}</div>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{totalProducts} mặt hàng niêm yết</span>
           </div>
