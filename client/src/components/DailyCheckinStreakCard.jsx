@@ -140,10 +140,11 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '6px',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
               }}
             >
+              <BoltIcon size={14} color="#ea580c" />
               <span>Vòng Quay ({totalSpins})</span>
               <ChevronRightIcon size={13} color="#b45309" />
             </button>

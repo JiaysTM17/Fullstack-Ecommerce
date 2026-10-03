@@ -684,9 +684,13 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 borderRadius: '8px',
                 fontWeight: 600,
                 height: '32px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
               }}
             >
-              Hủy bỏ
+              <CloseIcon size={12} color="#64748b" />
+              <span>Hủy bỏ</span>
             </button>
             <button
               type="submit"
