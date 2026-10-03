@@ -844,7 +844,9 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                     gap: '4px',
                   }}
                 >
-                  <ClockIcon size={12} color="#d97706" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fef3c7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ClockIcon size={11} color="#d97706" />
+                  </span>
                   <span>Gửi lại sau <strong style={{ color: '#2563eb' }}>{cooldown}s</strong></span>
                 </div>
               ) : (
@@ -864,7 +866,9 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                     gap: '4px',
                   }}
                 >
-                  <RefreshIcon size={12} color="#2563eb" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#eff6ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <RefreshIcon size={11} color="#2563eb" />
+                  </span>
                   <span>Gửi lại mã OTP mới</span>
                 </button>
               )}
