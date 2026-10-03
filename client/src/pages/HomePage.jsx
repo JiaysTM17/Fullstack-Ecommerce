@@ -276,8 +276,10 @@ export default function HomePage() {
               boxShadow: "0 2px 8px rgba(16, 185, 129, 0.2)",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <TruckIcon size={18} color="#ffffff" />
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <TruckIcon size={16} color="#ffffff" />
+              </span>
               <span><strong>FREESHIP MAX:</strong> Miễn phí vận chuyển toàn quốc cho đơn hàng từ <strong>300.000₫</strong></span>
             </div>
             <span style={{ background: "rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: "12px", fontSize: "12px" }}>
@@ -346,37 +348,61 @@ export default function HomePage() {
               {filters.keyword && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                   {t('keyword', 'Từ khóa')}: "{filters.keyword}"
-                  <button type="button" onClick={() => updateFilter("keyword", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} color="#ef4444" /></button>
+                  <button type="button" onClick={() => updateFilter("keyword", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={9} color="#ef4444" />
+                    </span>
+                  </button>
                 </span>
               )}
               {filters.category && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                   {t('category', 'Danh mục')}: {filters.category}
-                  <button type="button" onClick={() => updateFilter("category", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} color="#ef4444" /></button>
+                  <button type="button" onClick={() => updateFilter("category", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={9} color="#ef4444" />
+                    </span>
+                  </button>
                 </span>
               )}
               {filters.shopId && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                   <StoreIcon size={13} color="#ea580c" /> Shop: {filters.shopId}
-                  <button type="button" onClick={() => updateFilter("shopId", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} color="#ef4444" /></button>
+                  <button type="button" onClick={() => updateFilter("shopId", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={9} color="#ef4444" />
+                    </span>
+                  </button>
                 </span>
               )}
               {filters.badge && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                   {filters.badge === "Amazon's Choice" ? t('nav_featured_picks', 'Tuyển chọn') : filters.badge}
-                  <button type="button" onClick={() => updateFilter("badge", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} color="#ef4444" /></button>
+                  <button type="button" onClick={() => updateFilter("badge", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={9} color="#ef4444" />
+                    </span>
+                  </button>
                 </span>
               )}
               {filters.fastDelivery && (
                 <span className="shopee-filter-chip" style={{ background: "var(--primary-light, #ffedd5)", color: "var(--primary-color, #ea580c)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
                   <BoltIcon size={13} color="#ea580c" /> {t('nav_fast_delivery', 'Giao siêu tốc 2H')}
-                  <button type="button" onClick={() => updateFilter("fastDelivery", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} color="#ef4444" /></button>
+                  <button type="button" onClick={() => updateFilter("fastDelivery", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={9} color="#ef4444" />
+                    </span>
+                  </button>
                 </span>
               )}
               {filters.minRating && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                   <StarIcon size={13} color="#f59e0b" /> Từ {filters.minRating} sao
-                  <button type="button" onClick={() => updateFilter("minRating", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} color="#ef4444" /></button>
+                  <button type="button" onClick={() => updateFilter("minRating", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={9} color="#ef4444" />
+                    </span>
+                  </button>
                 </span>
               )}
               {(filters.minPrice || filters.maxPrice) && (
@@ -386,7 +412,11 @@ export default function HomePage() {
                     : filters.minPrice
                     ? `≥ ${formatCurrency(Number(filters.minPrice))}`
                     : `≤ ${formatCurrency(Number(filters.maxPrice))}`}
-                  <button type="button" onClick={() => updateFiltersBatch({ minPrice: "", maxPrice: "" })} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} color="#ef4444" /></button>
+                  <button type="button" onClick={() => updateFiltersBatch({ minPrice: "", maxPrice: "" })} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={9} color="#ef4444" />
+                    </span>
+                  </button>
                 </span>
               )}
 
@@ -405,13 +435,15 @@ export default function HomePage() {
                     cursor: "pointer",
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: "4px",
+                    gap: "6px",
                     transition: "all 0.2s ease"
                   }}
                   onMouseOver={(e) => { e.currentTarget.style.background = "var(--primary-color, #ea580c)"; e.currentTarget.style.color = "#fff"; }}
                   onMouseOut={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--primary-color, #ea580c)"; }}
                 >
-                  <CloseIcon size={11} color="currentColor" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={10} color="currentColor" />
+                  </span>
                   <span>Xóa tất cả</span>
                 </button>
               )}
