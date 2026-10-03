@@ -184,9 +184,12 @@ export default function WishlistPage() {
                           <button
                             type="button"
                             onClick={() => setWishlistSearch('')}
-                            style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center' }}
+                            style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                            title="Xóa tìm kiếm"
                           >
-                            <CloseIcon size={11} color="#94a3b8" />
+                            <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <CloseIcon size={9} color="#64748b" />
+                            </span>
                           </button>
                         )}
                       </div>
@@ -201,7 +204,7 @@ export default function WishlistPage() {
                         fontWeight: 700,
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '6px',
+                        gap: '8px',
                         height: '34px',
                         padding: '0 14px',
                         backgroundColor: isAddedFeedback ? '#10b981' : undefined,
@@ -211,12 +214,16 @@ export default function WishlistPage() {
                     >
                       {isAddedFeedback ? (
                         <>
-                          <CheckIcon size={14} color="#ffffff" />
+                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CheckIcon size={12} color="#ffffff" />
+                          </span>
                           <span>Đã thêm vào giỏ!</span>
                         </>
                       ) : (
                         <>
-                          <ShoppingBagIcon size={14} color="#ffffff" />
+                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ShoppingBagIcon size={12} color="#ffffff" />
+                          </span>
                           <span>Thêm tất cả vào giỏ</span>
                         </>
                       )}
@@ -265,7 +272,9 @@ export default function WishlistPage() {
 
                 {displayedProducts.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-secondary)' }}>
-                    <SearchIcon size={36} color="#cbd5e1" />
+                    <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(203, 213, 225, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                      <SearchIcon size={28} color="#94a3b8" />
+                    </div>
                     <p style={{ margin: '8px 0 0', fontSize: '14px', fontWeight: 600 }}>
                       Không tìm thấy sản phẩm yêu thích nào khớp với từ khóa "{wishlistSearch}"
                     </p>
