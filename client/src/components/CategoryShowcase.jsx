@@ -482,12 +482,19 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div
             style={{
-              width: '4px',
-              height: '20px',
-              background: 'linear-gradient(to bottom, #ee4d2d, #ff5722)',
-              borderRadius: '2px',
+              width: '28px',
+              height: '28px',
+              borderRadius: '6px',
+              background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 6px rgba(234, 88, 12, 0.3)',
+              flexShrink: 0,
             }}
-          />
+          >
+            <LayersIcon size={16} color="#ffffff" />
+          </div>
           <h3
             style={{
               margin: 0,
@@ -501,22 +508,25 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               gap: '8px',
             }}
           >
-            <LayersIcon size={18} color="#ea580c" />
             <span>{t('nav_categories', 'DANH MỤC')}</span>
           </h3>
         </div>
 
         <span
           style={{
-            fontSize: '12.5px',
+            fontSize: '12px',
             color: 'var(--text-secondary, #64748b)',
-            fontWeight: 500,
+            fontWeight: 600,
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
+            background: 'var(--bg-muted, #f8fafc)',
+            padding: '4px 10px',
+            borderRadius: '999px',
+            border: '1px solid var(--border-light, #e2e8f0)',
           }}
         >
-          <TruckIcon size={14} color="#ea580c" />
+          <TruckIcon size={13} color="#059669" />
           <span>{language === 'en' ? '20 Top Categories · Fast Delivery 2H' : '20 Ngành hàng nổi bật · Giao hỏa tốc 2H'}</span>
         </span>
       </div>
