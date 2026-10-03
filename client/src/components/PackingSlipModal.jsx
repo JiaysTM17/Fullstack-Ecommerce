@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { StoreIcon, MapPinIcon, PackageIcon, ChatIcon, PrinterIcon, CheckIcon } from './OrdersIcons';
+import { StoreIcon, MapPinIcon, PackageIcon, ChatIcon, PrinterIcon, CheckIcon, CloseIcon } from './OrdersIcons';
 
 export default function PackingSlipModal({ order, shop, onClose }) {
   if (!order) return null;
@@ -186,9 +186,10 @@ export default function PackingSlipModal({ order, shop, onClose }) {
             type="button"
             className="shopee-btn shopee-btn-secondary"
             onClick={onClose}
-            style={{ padding: '8px 18px', fontSize: '13px' }}
+            style={{ padding: '8px 18px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
-            Đóng
+            <CloseIcon size={13} color="#64748b" />
+            <span>Đóng</span>
           </button>
           <button
             type="button"

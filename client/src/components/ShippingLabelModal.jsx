@@ -1,5 +1,5 @@
 import React from 'react';
-import { PrinterIcon } from './OrdersIcons';
+import { PrinterIcon, CloseIcon } from './OrdersIcons';
 
 export default function ShippingLabelModal({ order, shopName = "Thời Trang GenZ", onClose }) {
   if (!order) return null;
@@ -83,8 +83,10 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             type="button"
             className="shopee-btn shopee-btn-secondary"
             onClick={onClose}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
-            Đóng
+            <CloseIcon size={13} color="#64748b" />
+            <span>Đóng</span>
           </button>
           <button
             type="button"
