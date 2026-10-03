@@ -135,8 +135,9 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
           <div>
             <div style={{ fontWeight: 800, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>{shop?.name || 'Gian Hàng Đối Tác'}</span>
-              <span style={{ fontSize: '10px', background: 'var(--primary-color, #4f46e5)', color: '#fff', padding: '1px 5px', borderRadius: '4px' }}>
-                Mall
+              <span style={{ fontSize: '10px', background: '#dc2626', color: '#fff', padding: '1px 5px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                <ShieldCheckIcon size={10} color="#ffffff" />
+                <span>Mall</span>
               </span>
             </div>
             <div style={{ fontSize: '11px', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
