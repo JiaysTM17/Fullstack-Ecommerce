@@ -1545,9 +1545,12 @@ export default function CheckoutPage() {
                 type="button"
                 className="shopee-modal-close"
                 onClick={() => setShowAddAddressModal(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Đóng modal thêm địa chỉ"
               >
-                <CloseIcon size={16} color="#64748b" />
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CloseIcon size={14} color="#ef4444" />
+                </span>
               </button>
             </div>
 
@@ -1690,9 +1693,12 @@ export default function CheckoutPage() {
                   setShowEditAddressModal(false);
                   setEditingAddress(null);
                 }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Đóng modal sửa địa chỉ"
               >
-                <CloseIcon size={16} color="#64748b" />
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CloseIcon size={14} color="#ef4444" />
+                </span>
               </button>
             </div>
 
