@@ -11,6 +11,7 @@ import {
   StarIcon,
   CheckIcon,
   CartIcon,
+  ShieldCheckIcon,
 } from './OrdersIcons';
 import '../styles/product.css';
 
@@ -218,7 +219,10 @@ const ProductCard = ({
             {badge === "Amazon's Choice" ? t('nav_featured_picks', 'Tuyển Chọn') : badge}
           </span>
         ) : isMall ? (
-          <span className="shopee-mall-badge">Mall</span>
+          <span className="shopee-mall-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+            <ShieldCheckIcon size={10} color="#ffffff" />
+            <span>Mall</span>
+          </span>
         ) : null}
 
         {/* Huy hiệu giảm giá */}
