@@ -559,7 +559,9 @@ const Header = ({
                   aria-label={t('clear_search', 'Xóa từ khóa')}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <CloseIcon size={12} color="#64748b" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
                 </button>
               )}
               <button type="submit" className="shopee-search-btn" aria-label={t('search', 'Tìm kiếm')}>
@@ -908,7 +910,9 @@ const Header = ({
                               }}
                               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
-                              <CloseIcon size={11} />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CloseIcon size={10} color="#ef4444" />
+                              </span>
                             </button>
                           </div>
                         ))}
@@ -1298,7 +1302,9 @@ const Header = ({
                 title="Đóng modal"
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <CloseIcon size={16} color="#64748b" />
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CloseIcon size={14} color="#ef4444" />
+                </span>
               </button>
             </div>
 

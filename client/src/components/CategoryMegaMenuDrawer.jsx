@@ -345,7 +345,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               title="Đóng bảng ngành hàng"
               style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <CloseIcon size={16} color="var(--text-secondary, #64748b)" />
+              <CloseIcon size={16} color="#ffffff" />
             </button>
           </div>
         </div>
@@ -374,7 +374,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   title="Xóa tìm kiếm"
                   style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <CloseIcon size={12} color="var(--text-secondary, #64748b)" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
                 </button>
               )}
             </div>

@@ -300,8 +300,8 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
           onClick={onResetFilters}
           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', flexShrink: 0 }}>
-            <CloseIcon size={11} color="var(--primary-color, #ea580c)" />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', flexShrink: 0 }}>
+            <CloseIcon size={11} color="#ef4444" />
           </span>
           <span>{t('clear_all_filters', 'Xóa tất cả bộ lọc')}</span>
         </button>
