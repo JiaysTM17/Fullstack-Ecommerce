@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { KeyIcon, MailIcon, PhoneIcon, CloseIcon, AlertCircleIcon, ChevronRightIcon, CheckIcon } from './OrdersIcons';
+import { KeyIcon, MailIcon, PhoneIcon, CloseIcon, AlertCircleIcon, ChevronRightIcon, CheckIcon, ClockIcon } from './OrdersIcons';
 
 /**
  * Enterprise 2FA OTP Verification Modal
@@ -393,8 +393,8 @@ export default function OtpVerificationModal({
             'Đang đối soát an ninh...'
           ) : (
             <>
+              <CheckIcon size={16} color="#ffffff" />
               <span>Xác Nhận & Kích Hoạt Tài Khoản</span>
-              <ChevronRightIcon size={14} color="#ffffff" />
             </>
           )}
         </button>
@@ -415,8 +415,9 @@ export default function OtpVerificationModal({
               Gửi lại mã OTP mới
             </span>
           ) : (
-            <span style={{ color: '#94a3b8' }}>
-              Yêu cầu gửi lại sau <strong style={{ color: '#2563eb' }}>{countdown}s</strong>
+            <span style={{ color: '#94a3b8', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <ClockIcon size={13} color="#2563eb" />
+              <span>Yêu cầu gửi lại sau <strong style={{ color: '#2563eb' }}>{countdown}s</strong></span>
             </span>
           )}
         </div>
@@ -430,19 +431,21 @@ export default function OtpVerificationModal({
               }}
               style={{
                 fontSize: '11px',
-                color: '#94a3b8',
+                color: '#1e40af',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '5px',
                 userSelect: 'none',
-                padding: '2px 8px',
-                borderRadius: '6px',
-                background: '#f8fafc'
+                padding: '4px 10px',
+                borderRadius: '8px',
+                background: 'rgba(37, 99, 235, 0.08)',
+                border: '1px solid rgba(37, 99, 235, 0.2)',
+                fontWeight: 600,
               }}
               title="Nhấn để xem mã nếu chưa kết nối hòm thư thực tế"
             >
-              <MailIcon size={13} color="#64748b" />
+              <MailIcon size={13} color="#2563eb" />
               <span>Xem thông điệp mã hộp thư (Môi trường Test)</span>
             </span>
           </div>

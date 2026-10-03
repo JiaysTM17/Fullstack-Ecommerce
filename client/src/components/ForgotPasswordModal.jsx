@@ -663,8 +663,8 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 'Đang gửi mã bảo mật...'
               ) : (
                 <>
+                  <MailIcon size={16} color="#ffffff" />
                   <span>Gửi Mã Xác Thực OTP</span>
-                  <ChevronRightIcon size={14} color="#ffffff" />
                 </>
               )}
             </button>
@@ -894,8 +894,8 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 'Đang đối soát an ninh...'
               ) : (
                 <>
+                  <CheckIcon size={16} color="#ffffff" />
                   <span>Xác Nhận Mã & Tiếp Tục</span>
-                  <ChevronRightIcon size={14} color="#ffffff" />
                 </>
               )}
             </button>
@@ -1170,8 +1170,8 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 'Đang cập nhật mật khẩu...'
               ) : (
                 <>
+                  <CheckIcon size={16} color="#ffffff" />
                   <span>Lưu Mật Khẩu Mới & Đăng Nhập</span>
-                  <ChevronRightIcon size={14} color="#ffffff" />
                 </>
               )}
             </button>
