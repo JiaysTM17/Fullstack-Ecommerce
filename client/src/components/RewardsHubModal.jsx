@@ -226,7 +226,7 @@ export default function RewardsHubModal({ onClose }) {
                 boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
               }}
             >
-              <CoinIcon size={22} />
+              <CoinIcon size={22} color="#ffffff" />
             </div>
             <div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -254,7 +254,7 @@ export default function RewardsHubModal({ onClose }) {
               justifyContent: 'center',
             }}
           >
-            <CloseIcon size={18} />
+            <CloseIcon size={18} color="var(--text-muted, #64748b)" />
           </button>
         </div>
 
@@ -289,7 +289,7 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <BoltIcon size={14} /> Vòng Quay ({totalSpins})
+            <BoltIcon size={14} color={activeTab === 'spin' ? '#ea580c' : '#64748b'} /> Vòng Quay ({totalSpins})
           </button>
           <button
             type="button"
@@ -310,7 +310,7 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <CalendarIcon size={14} /> Điểm Danh 7 Ngày
+            <CalendarIcon size={14} color={activeTab === 'checkin' ? '#ea580c' : '#64748b'} /> Điểm Danh 7 Ngày
           </button>
           <button
             type="button"
@@ -331,7 +331,7 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <ReceiptIcon size={14} /> Lịch Sử Xu
+            <ReceiptIcon size={14} color={activeTab === 'history' ? '#ea580c' : '#64748b'} /> Lịch Sử Xu
           </button>
         </div>
 
@@ -340,7 +340,7 @@ export default function RewardsHubModal({ onClose }) {
           <div style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: '12px' }}>
               <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                <SparklesIcon size={18} />
+                <SparklesIcon size={18} color="#ea580c" />
                 <span>Vòng Quay May Mắn Fullstack E-Commerce</span>
               </h4>
               <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--text-secondary)' }}>
@@ -366,7 +366,7 @@ export default function RewardsHubModal({ onClose }) {
             >
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 800, color: totalSpins > 0 ? '#059669' : '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <TargetIcon size={15} />
+                  <TargetIcon size={15} color={totalSpins > 0 ? '#059669' : '#ea580c'} />
                   <span>Lượt quay khả dụng: <strong>{totalSpins} lượt</strong></span>
                 </div>
                 <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -387,7 +387,7 @@ export default function RewardsHubModal({ onClose }) {
                   Lượt miễn phí tiếp theo:
                 </div>
                 <div style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <ClockIcon size={13} />
+                  <ClockIcon size={13} color="#0284c7" />
                   <span>{nextDailyCountdown}</span>
                 </div>
               </div>
@@ -498,12 +498,12 @@ export default function RewardsHubModal({ onClose }) {
                 </div>
                 {wonPrize.type === 'voucher' && (
                   <div style={{ fontSize: '12px', color: '#059669', fontWeight: 700, marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                    <TicketIcon size={13} /> Mã <strong>{wonPrize.code}</strong> đã được thêm vào Kho Voucher của bạn!
+                    <TicketIcon size={13} color="#059669" /> Mã <strong>{wonPrize.code}</strong> đã được thêm vào Kho Voucher của bạn!
                   </div>
                 )}
                 {wonPrize.type === 'coins' && (
                   <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                    <CoinIcon size={13} /> Đã tự động cộng +{wonPrize.value.toLocaleString('vi-VN')} Xu vào ví của bạn!
+                    <CoinIcon size={13} color="#d97706" /> Đã tự động cộng +{wonPrize.value.toLocaleString('vi-VN')} Xu vào ví của bạn!
                   </div>
                 )}
               </div>
@@ -534,11 +534,11 @@ export default function RewardsHubModal({ onClose }) {
               >
                 {isSpinning ? (
                   <>
-                    <BoltIcon size={16} /> ĐANG QUAY THƯỞNG... ({spinCountdown}s)
+                    <BoltIcon size={16} color="#ffffff" /> ĐANG QUAY THƯỞNG... ({spinCountdown}s)
                   </>
                 ) : totalSpins > 0 ? (
                   <>
-                    <BoltIcon size={16} /> QUAY NGAY ({totalSpins} lượt khả dụng)
+                    <BoltIcon size={16} color="#ffffff" /> QUAY NGAY ({totalSpins} lượt khả dụng)
                   </>
                 ) : (
                   'ĐÃ HẾT LƯỢT QUAY HÔM NAY'
@@ -564,7 +564,7 @@ export default function RewardsHubModal({ onClose }) {
                     gap: '6px',
                   }}
                 >
-                  <ShoppingBagIcon size={14} /> Đặt hàng ngay để nhận thêm +1 lượt quay!
+                  <ShoppingBagIcon size={14} color="#ea580c" /> Đặt hàng ngay để nhận thêm +1 lượt quay!
                 </button>
               )}
             </div>
@@ -628,7 +628,7 @@ export default function RewardsHubModal({ onClose }) {
                       N{dayNum}
                     </span>
                     <span style={{ fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {isClaimed ? <CheckIcon size={16} className="text-emerald-600" /> : <CoinIcon size={16} className="text-amber-500" />}
+                      {isClaimed ? <CheckIcon size={16} color="#059669" /> : <CoinIcon size={16} color="#f59e0b" />}
                     </span>
                     <span
                       style={{
@@ -665,11 +665,11 @@ export default function RewardsHubModal({ onClose }) {
             >
               {hasCheckedInToday ? (
                 <>
-                  <CheckIcon size={16} /> Bạn đã điểm danh hôm nay rồi!
+                  <CheckIcon size={16} color="#ffffff" /> Bạn đã điểm danh hôm nay rồi!
                 </>
               ) : (
                 <>
-                  <CoinIcon size={16} /> Điểm Danh Ngay (+{streakRewards[streak % 7]?.toLocaleString('vi-VN')} Xu)
+                  <CoinIcon size={16} color="#ffffff" /> Điểm Danh Ngay (+{streakRewards[streak % 7]?.toLocaleString('vi-VN')} Xu)
                 </>
               )}
             </button>

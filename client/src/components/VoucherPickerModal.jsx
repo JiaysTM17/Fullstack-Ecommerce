@@ -334,7 +334,7 @@ export default function VoucherPickerModal({
         <div className="voucher-modal-header">
           <div>
             <h3 className="voucher-modal-title">
-              <TicketIcon size={20} className="text-orange-500" />
+              <TicketIcon size={20} color="#ea580c" />
               <span>{t("select_voucher_title", "Chọn Shopee Voucher")}</span>
             </h3>
             <p
@@ -355,7 +355,7 @@ export default function VoucherPickerModal({
             aria-label="Đóng"
             style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <CloseIcon size={16} />
+            <CloseIcon size={16} color="#64748b" />
           </button>
         </div>
 
@@ -402,7 +402,7 @@ export default function VoucherPickerModal({
           <div className="voucher-smart-recommendation-hero">
             <div className="voucher-smart-hero-left">
               <span className="voucher-smart-tag">
-                <StarIcon size={12} /> GỢI Ý TỐI ƯU NHẤT CHO BẠN
+                <StarIcon size={12} color="#f59e0b" filled /> GỢI Ý TỐI ƯU NHẤT CHO BẠN
               </span>
               <div className="voucher-smart-hero-title">
                 Tiết kiệm tối đa: <span style={{ color: "#ea580c" }}>-{formatCurrency(bestComboSavings)}</span>
@@ -410,13 +410,13 @@ export default function VoucherPickerModal({
               <div className="voucher-smart-hero-desc">
                 {bestShippingVoucher && (
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    <TruckIcon size={13} /> {bestShippingVoucher.code} (-{formatCurrency(getVoucherSavings(bestShippingVoucher))})
+                    <TruckIcon size={13} color="#0284c7" /> {bestShippingVoucher.code} (-{formatCurrency(getVoucherSavings(bestShippingVoucher))})
                   </span>
                 )}
                 {bestShippingVoucher && bestDiscountVoucher && <span> + </span>}
                 {bestDiscountVoucher && (
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    <TagIcon size={13} /> {bestDiscountVoucher.code} (-{formatCurrency(getVoucherSavings(bestDiscountVoucher))})
+                    <TagIcon size={13} color="#ea580c" /> {bestDiscountVoucher.code} (-{formatCurrency(getVoucherSavings(bestDiscountVoucher))})
                   </span>
                 )}
               </div>
@@ -426,7 +426,7 @@ export default function VoucherPickerModal({
               className="btn-apply-best-combo"
               onClick={handleAutoApplyBestCombo}
             >
-              <BoltIcon size={14} /> Áp Dụng Ngay
+              <BoltIcon size={14} color="#ffffff" /> Áp Dụng Ngay
             </button>
           </div>
         )}
@@ -445,7 +445,7 @@ export default function VoucherPickerModal({
             className={`voucher-tab-btn ${activeTab === "shipping" ? "active" : ""}`}
             onClick={() => setActiveTab("shipping")}
           >
-            <TruckIcon size={14} /> {t("shipping_voucher", "Miễn Phí Vận Chuyển")} (
+            <TruckIcon size={14} color="#0284c7" /> {t("shipping_voucher", "Miễn Phí Vận Chuyển")} (
             {shippingVouchers.length})
             {selectedShipping && (
               <span
@@ -467,7 +467,7 @@ export default function VoucherPickerModal({
             className={`voucher-tab-btn ${activeTab === "discount" ? "active" : ""}`}
             onClick={() => setActiveTab("discount")}
           >
-            <TagIcon size={14} /> {t("order_discount", "Giảm Giá Đơn Hàng")} (
+            <TagIcon size={14} color="#ea580c" /> {t("order_discount", "Giảm Giá Đơn Hàng")} (
             {discountVouchers.length})
             {selectedDiscount && (
               <span
@@ -511,7 +511,7 @@ export default function VoucherPickerModal({
                     gap: "8px",
                   }}
                 >
-                  <TruckIcon size={18} className="text-sky-600" />
+                  <TruckIcon size={18} color="#0284c7" />
                   <span
                     style={{
                       fontSize: "14px",
@@ -550,7 +550,7 @@ export default function VoucherPickerModal({
                       gap: "4px",
                     }}
                   >
-                    <CloseIcon size={12} />
+                    <CloseIcon size={12} color="#ef4444" />
                     <span>Bỏ chọn ({selectedShipping.code})</span>
                   </button>
                 )}
@@ -591,7 +591,7 @@ export default function VoucherPickerModal({
                     >
                       <div className="voucher-ticket-left shipping">
                         <span className="voucher-stub-icon">
-                          <TruckIcon size={24} />
+                          <TruckIcon size={24} color="#0284c7" />
                         </span>
                         <span className="voucher-stub-tag">FREESHIP</span>
                         <span className="voucher-stub-sub">Toàn sàn</span>
@@ -604,14 +604,14 @@ export default function VoucherPickerModal({
                               <h4 className="voucher-title">{v.name}</h4>
                               {isBest && (
                                 <span className="voucher-best-badge">
-                                  <StarIcon size={11} /> TỐT NHẤT CHO BẠN
+                                  <StarIcon size={11} color="#f59e0b" filled /> TỐT NHẤT CHO BẠN
                                 </span>
                               )}
                             </div>
                             <span className="voucher-code-badge">{v.code}</span>
                             {isEligible && saving > 0 && (
                               <div className="voucher-saving-highlight">
-                                <BoltIcon size={12} /> Tiết kiệm: -{formatCurrency(saving)}
+                                <BoltIcon size={12} color="#0284c7" /> Tiết kiệm: -{formatCurrency(saving)}
                               </div>
                             )}
                           </div>
@@ -635,7 +635,7 @@ export default function VoucherPickerModal({
                           <div className="voucher-condition-tag">
                             {isEligible ? (
                               <span className="eligible" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                <CheckIcon size={11} />
+                                <CheckIcon size={11} color="#059669" />
                                 <span>Đủ điều kiện</span>
                               </span>
                             ) : (
@@ -674,7 +674,7 @@ export default function VoucherPickerModal({
                           >
                             {isSelected ? (
                               <>
-                                <CheckIcon size={11} />
+                                <CheckIcon size={11} color="#ffffff" />
                                 <span>Đã chọn</span>
                               </>
                             ) : isEligible ? (
@@ -712,7 +712,7 @@ export default function VoucherPickerModal({
                     gap: "8px",
                   }}
                 >
-                  <TagIcon size={18} className="text-orange-500" />
+                  <TagIcon size={18} color="#ea580c" />
                   <span
                     style={{
                       fontSize: "14px",
@@ -751,7 +751,7 @@ export default function VoucherPickerModal({
                       gap: "4px",
                     }}
                   >
-                    <CloseIcon size={12} />
+                    <CloseIcon size={12} color="#ef4444" />
                     <span>Bỏ chọn ({selectedDiscount.code})</span>
                   </button>
                 )}
@@ -778,15 +778,15 @@ export default function VoucherPickerModal({
                   const isBest = bestDiscountVoucher?.code === v.code;
 
                   let stubText = "";
-                  let stubIcon = <TagIcon size={22} />;
+                  let stubIcon = <TagIcon size={22} color="#ea580c" />;
                   let stubClass = "discount";
 
                   if (v.type === "percent") {
                     stubText = `GIẢM ${v.value}%`;
-                    stubIcon = <BoltIcon size={22} />;
+                    stubIcon = <BoltIcon size={22} color="#ea580c" />;
                   } else {
                     stubText = `GIẢM ${formatCurrency(v.value)}`;
-                    stubIcon = <CoinIcon size={22} />;
+                    stubIcon = <CoinIcon size={22} color="#f59e0b" />;
                     stubClass = "fixed";
                   }
 
@@ -814,14 +814,14 @@ export default function VoucherPickerModal({
                               <h4 className="voucher-title">{v.name}</h4>
                               {isBest && (
                                 <span className="voucher-best-badge">
-                                  <StarIcon size={11} /> TỐT NHẤT CHO BẠN
+                                  <StarIcon size={11} color="#f59e0b" filled /> TỐT NHẤT CHO BẠN
                                 </span>
                               )}
                             </div>
                             <span className="voucher-code-badge">{v.code}</span>
                             {isEligible && saving > 0 && (
                               <div className="voucher-saving-highlight">
-                                <BoltIcon size={12} /> Tiết kiệm: -{formatCurrency(saving)}
+                                <BoltIcon size={12} color="#ea580c" /> Tiết kiệm: -{formatCurrency(saving)}
                               </div>
                             )}
                           </div>
@@ -845,7 +845,7 @@ export default function VoucherPickerModal({
                           <div className="voucher-condition-tag">
                             {isEligible ? (
                               <span className="eligible" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                <CheckIcon size={11} />
+                                <CheckIcon size={11} color="#059669" />
                                 <span>Đủ điều kiện</span>
                               </span>
                             ) : (
@@ -879,7 +879,7 @@ export default function VoucherPickerModal({
                           >
                             {isSelected ? (
                               <>
-                                <CheckIcon size={11} />
+                                <CheckIcon size={11} color="#ffffff" />
                                 <span>Đã chọn</span>
                               </>
                             ) : isEligible ? (
@@ -923,7 +923,7 @@ export default function VoucherPickerModal({
               }}
             >
               <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                <TruckIcon size={13} className="text-sky-600" /> Ship:{" "}
+                <TruckIcon size={13} color="#0284c7" /> Ship:{" "}
                 <strong style={{ color: "#0284c7" }}>
                   {selectedShipping
                     ? `-${formatCurrency(previewShippingDiscount)} (${selectedShipping.code})`
@@ -931,7 +931,7 @@ export default function VoucherPickerModal({
                 </strong>
               </span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                <TagIcon size={13} className="text-orange-500" /> Đơn:{" "}
+                <TagIcon size={13} color="#ea580c" /> Đơn:{" "}
                 <strong style={{ color: "var(--primary-color, #ea580c)" }}>
                   {selectedDiscount
                     ? `-${formatCurrency(previewOrderDiscount)} (${selectedDiscount.code})`
