@@ -318,12 +318,16 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
               <div style={{ color: '#64748b', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
                 Giao Nhận & Thanh Toán
               </div>
-              <div style={{ color: '#0f172a', marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <CreditCardIcon size={12} color="#2563eb" />
+              <div style={{ color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CreditCardIcon size={11} color="#2563eb" />
+                </span>
                 <span>Hình thức: <strong>{order.paymentMethod || 'Thanh toán khi nhận hàng (COD)'}</strong></span>
               </div>
-              <div style={{ color: '#0f172a', marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <TruckIcon size={12} color="#ea580c" />
+              <div style={{ color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <TruckIcon size={11} color="#ea580c" />
+                </span>
                 <span>Vận chuyển: <strong>SPX Express</strong></span>
               </div>
               <div style={{ color: '#0f172a' }}>
@@ -432,8 +436,11 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                   color: '#334155',
                 }}
               >
-                <div style={{ fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <ShieldCheckIcon size={12} color="#15803d" /> ĐÃ KÝ SỐ BỞI {companyName}
+                <div style={{ fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ShieldCheckIcon size={11} color="#15803d" />
+                  </span>
+                  <span>ĐÃ KÝ SỐ BỞI {companyName}</span>
                 </div>
                 <div style={{ fontSize: '9px', color: '#64748b', wordBreak: 'break-all', marginTop: '2px' }}>
                   Mã xác thực: {signatureDigest}
