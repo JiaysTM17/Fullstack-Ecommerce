@@ -245,9 +245,13 @@ export default function NotificationsPopover() {
                   fontWeight: 600,
                   cursor: 'pointer',
                   padding: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
                 }}
               >
-                Đã đọc tất cả
+                <CheckIcon size={12} color="#ea580c" />
+                <span>Đã đọc tất cả</span>
               </button>
             )}
           </div>
@@ -264,10 +268,10 @@ export default function NotificationsPopover() {
             }}
           >
             {[
-              { id: 'all', label: `Tất cả (${notifications.length})`, icon: null },
+              { id: 'all', label: `Tất cả (${notifications.length})`, icon: <BellIcon size={12} color={activeTab === 'all' ? '#ffffff' : '#f59e0b'} /> },
               { id: 'order', label: `Đơn hàng (${orderCount})`, icon: <PackageIcon size={12} color={activeTab === 'order' ? '#ffffff' : '#0284c7'} /> },
               { id: 'voucher', label: `Ưu đãi (${voucherCount})`, icon: <TicketIcon size={12} color={activeTab === 'voucher' ? '#ffffff' : '#ea580c'} /> },
-              { id: 'unread', label: `Chưa đọc (${unreadCount})`, icon: null },
+              { id: 'unread', label: `Chưa đọc (${unreadCount})`, icon: <SparklesIcon size={12} color={activeTab === 'unread' ? '#ffffff' : '#ef4444'} /> },
             ].map((tab) => {
               const active = activeTab === tab.id;
               return (
@@ -442,7 +446,7 @@ export default function NotificationsPopover() {
                 }}
                 title="Xóa các thông báo đã đọc"
               >
-                <TrashIcon size={12} color="#64748b" />
+                <TrashIcon size={12} color="#ef4444" />
                 <span>Dọn dẹp</span>
               </button>
             )}
