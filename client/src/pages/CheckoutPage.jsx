@@ -514,8 +514,11 @@ export default function CheckoutPage() {
           {currentStep === 1 && (
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
-                <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <MapPinIcon size={18} color="var(--primary-color, #ea580c)" /> Bước 1: Chọn Địa Chỉ Giao Hàng
+                <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0, display: "inline-flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)", border: "1px solid #fed7aa", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <MapPinIcon size={16} color="#ea580c" />
+                  </span>
+                  <span>Bước 1: Chọn Địa Chỉ Giao Hàng</span>
                 </h2>
                 <button
                   type="button"
@@ -688,8 +691,11 @@ export default function CheckoutPage() {
           {/* STEP 2: Shipping */}
           {currentStep === 2 && (
             <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                <TruckIcon size={18} color="var(--primary-color, #ea580c)" /> Bước 2: Tốc Độ & Phương Thức Vận Chuyển
+              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)", border: "1px solid #7dd3fc", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <TruckIcon size={16} color="#0284c7" />
+                </span>
+                <span>Bước 2: Tốc Độ & Phương Thức Vận Chuyển</span>
               </h2>
 
               <div className="shipping-options-list">
@@ -775,8 +781,11 @@ export default function CheckoutPage() {
           {/* STEP 3: Payment */}
           {currentStep === 3 && (
             <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                <CreditCardIcon size={18} color="var(--primary-color, #ea580c)" /> Bước 3: Phương Thức Thanh Toán
+              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)", border: "1px solid #c4b5fd", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <CreditCardIcon size={16} color="#7c3aed" />
+                </span>
+                <span>Bước 3: Phương Thức Thanh Toán</span>
               </h2>
 
               <div className="payment-methods-grid">
@@ -1105,8 +1114,11 @@ export default function CheckoutPage() {
           {/* STEP 4: Review and Place Order */}
           {currentStep === 4 && (
             <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                <ShieldCheckIcon size={18} color="var(--primary-color, #ea580c)" /> Bước 4: Kiểm Tra & Đặt Hàng
+              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)", border: "1px solid #86efac", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ShieldCheckIcon size={16} color="#16a34a" />
+                </span>
+                <span>Bước 4: Kiểm Tra & Đặt Hàng</span>
               </h2>
 
               {submitError && (
