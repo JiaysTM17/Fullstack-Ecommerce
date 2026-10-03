@@ -8,7 +8,7 @@ import {
   voteProductQuestion,
   answerProductQuestion,
 } from "../services/productService";
-import { ChatIcon, LightbulbIcon, ThumbsUpIcon, StoreIcon } from "./OrdersIcons";
+import { ChatIcon, LightbulbIcon, ThumbsUpIcon, StoreIcon, CheckIcon } from "./OrdersIcons";
 
 const LOCAL_QA_KEY_PREFIX = "mini_shopee_qa_";
 const VOTED_QA_KEY = "mini_shopee_qa_voted_questions";
@@ -293,10 +293,22 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
           gap: "10px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", color: "var(--primary-color, #ea580c)" }}>
-            <ChatIcon size={22} color="#0284c7" />
-          </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "10px",
+              background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 3px 8px rgba(37, 99, 235, 0.28)",
+              flexShrink: 0,
+            }}
+          >
+            <ChatIcon size={18} color="#ffffff" />
+          </div>
           <div>
             <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
               {t("qa_title", "Hỏi & Đáp về sản phẩm")} ({questions.length})
@@ -497,19 +509,21 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                             {isShop && (
                               <span
                                 style={{
-                                  background: "#ea580c",
+                                  background: "linear-gradient(135deg, #ea580c, #c2410c)",
                                   color: "#fff",
                                   fontSize: "10.5px",
                                   fontWeight: 700,
-                                  padding: "2px 6px",
+                                  padding: "2px 7px",
                                   borderRadius: "4px",
                                   display: "inline-flex",
                                   alignItems: "center",
                                   gap: "4px",
+                                  boxShadow: "0 1px 3px rgba(234, 88, 12, 0.25)",
                                 }}
                               >
                                 <StoreIcon size={11} color="#ffffff" />
                                 <span>Người bán</span>
+                                <CheckIcon size={10} color="#ffffff" />
                               </span>
                             )}
                             <span style={{ fontSize: "11px", color: "#94a3b8", marginLeft: "auto" }}>
