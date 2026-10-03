@@ -22,6 +22,7 @@ import {
   PencilIcon,
   ChevronRightIcon,
   ArrowLeftIcon,
+  HomeIcon,
 } from "../components/OrdersIcons";
 
 const FREE_SHIPPING_THRESHOLD = 300000;
@@ -422,10 +423,11 @@ export default function CartPage() {
                         <span style={{ color: "var(--border-dark, #cbd5e1)" }}>|</span>
                         <button
                           type="button"
-                          style={{ background: "none", border: "none", color: "var(--color-error, #ef4444)", cursor: "pointer", padding: 0 }}
+                          style={{ background: "none", border: "none", color: "var(--color-error, #ef4444)", cursor: "pointer", padding: 0, display: "inline-flex", alignItems: "center", gap: "4px" }}
                           onClick={() => removeFromCart(item.productId)}
                         >
-                          Xóa khỏi giỏ
+                          <TrashIcon size={13} color="#ef4444" />
+                          <span>Xóa khỏi giỏ</span>
                         </button>
                       </div>
                     </div>
