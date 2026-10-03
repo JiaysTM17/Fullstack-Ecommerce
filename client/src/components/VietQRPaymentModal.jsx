@@ -225,8 +225,8 @@ export default function VietQRPaymentModal({
             onClick={onClose}
             aria-label="Đóng"
             style={{
-              background: '#f1f5f9',
-              border: 'none',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
               borderRadius: '8px',
               width: '32px',
               height: '32px',
@@ -234,11 +234,12 @@ export default function VietQRPaymentModal({
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: '#64748b',
               transition: 'all 0.15s ease',
             }}
           >
-            <CloseIcon size={16} color="#475569" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={12} color="#ef4444" />
+            </span>
           </button>
         </div>
 
@@ -451,8 +452,10 @@ export default function VietQRPaymentModal({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', justifyContent: 'center' }}>
                   {/* Account Number */}
                   <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '10.5px', color: '#2563eb', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <CreditCardIcon size={12} color="#2563eb" />
+                    <div style={{ fontSize: '10.5px', color: '#2563eb', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <CreditCardIcon size={11} color="#2563eb" />
+                      </span>
                       <span>SỐ TÀI KHOẢN:</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
@@ -484,8 +487,10 @@ export default function VietQRPaymentModal({
 
                   {/* Account Name */}
                   <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '10.5px', color: '#16a34a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <ShieldCheckIcon size={12} color="#16a34a" />
+                    <div style={{ fontSize: '10.5px', color: '#16a34a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <ShieldCheckIcon size={11} color="#16a34a" />
+                      </span>
                       <span>CHỦ TÀI KHOẢN:</span>
                     </div>
                     <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
@@ -495,8 +500,10 @@ export default function VietQRPaymentModal({
 
                   {/* Amount */}
                   <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '10.5px', color: '#ea580c', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <TagIcon size={12} color="#ea580c" />
+                    <div style={{ fontSize: '10.5px', color: '#ea580c', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <TagIcon size={11} color="#ea580c" />
+                      </span>
                       <span>SỐ TIỀN CẦN CHUYỂN:</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
@@ -528,8 +535,11 @@ export default function VietQRPaymentModal({
 
                   {/* Memo */}
                   <div style={{ background: '#fffbeb', padding: '8px 10px', borderRadius: '8px', border: '1px solid #fde68a' }}>
-                    <div style={{ fontSize: '10.5px', color: '#92400e', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <AlertCircleIcon size={12} color="#d97706" /> NỘI DUNG CHUYỂN KHOẢN (BẮT BUỘC):
+                    <div style={{ fontSize: '10.5px', color: '#92400e', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <AlertCircleIcon size={11} color="#d97706" />
+                      </span>
+                      <span>NỘI DUNG CHUYỂN KHOẢN (BẮT BUỘC):</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
                       <span style={{ fontSize: '14px', fontWeight: 800, color: '#b45309', fontFamily: 'monospace' }}>
@@ -600,8 +610,8 @@ export default function VietQRPaymentModal({
                     gap: '6px',
                   }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e2e8f0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CloseIcon size={10} color="#64748b" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={10} color="#ef4444" />
                   </span>
                   <span>Đóng & Thanh Toán Sau</span>
                 </button>

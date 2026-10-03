@@ -129,8 +129,8 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             onClick={onClose}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 16px', fontSize: '12.5px' }}
           >
-            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e2e8f0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CloseIcon size={10} color="#64748b" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={10} color="#ef4444" />
             </span>
             <span>Đóng</span>
           </button>

@@ -371,8 +371,8 @@ export default function VoucherPickerModal({
             aria-label="Đóng"
             style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CloseIcon size={14} color="#64748b" />
+            <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={12} color="#ef4444" />
             </span>
           </button>
         </div>
@@ -458,17 +458,23 @@ export default function VoucherPickerModal({
             type="button"
             className={`voucher-tab-btn ${activeTab === "all" ? "active" : ""}`}
             onClick={() => setActiveTab("all")}
+            style={{ display: "inline-flex", alignItems: "center" }}
           >
-            <TicketIcon size={14} color="#ea580c" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '6px' }}>
+              <TicketIcon size={12} color="#ea580c" />
+            </span>
             <span>{t("all_vouchers", "Tất Cả")} ({vouchers.length})</span>
           </button>
           <button
             type="button"
             className={`voucher-tab-btn ${activeTab === "shipping" ? "active" : ""}`}
             onClick={() => setActiveTab("shipping")}
+            style={{ display: "inline-flex", alignItems: "center" }}
           >
-            <TruckIcon size={14} color="#0284c7" /> {t("shipping_voucher", "Miễn Phí Vận Chuyển")} (
-            {shippingVouchers.length})
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '6px' }}>
+              <TruckIcon size={12} color="#0284c7" />
+            </span>
+            <span>{t("shipping_voucher", "Miễn Phí Vận Chuyển")} ({shippingVouchers.length})</span>
             {selectedShipping && (
               <span
                 style={{
@@ -488,9 +494,12 @@ export default function VoucherPickerModal({
             type="button"
             className={`voucher-tab-btn ${activeTab === "discount" ? "active" : ""}`}
             onClick={() => setActiveTab("discount")}
+            style={{ display: "inline-flex", alignItems: "center" }}
           >
-            <TagIcon size={14} color="#ea580c" /> {t("order_discount", "Giảm Giá Đơn Hàng")} (
-            {discountVouchers.length})
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '6px' }}>
+              <TagIcon size={12} color="#ea580c" />
+            </span>
+            <span>{t("order_discount", "Giảm Giá Đơn Hàng")} ({discountVouchers.length})</span>
             {selectedDiscount && (
               <span
                 style={{
@@ -986,8 +995,8 @@ export default function VoucherPickerModal({
                 style={{ fontSize: "13px", padding: "9px 14px", display: "inline-flex", alignItems: "center", gap: "6px" }}
                 onClick={handleClearAll}
               >
-                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(100, 116, 139, 0.08)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  <CloseIcon size={11} color="#64748b" />
+                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(239, 68, 68, 0.1)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <CloseIcon size={10} color="#ef4444" />
                 </span>
                 <span>Bỏ chọn tất cả</span>
               </button>
