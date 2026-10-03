@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { KeyIcon, MailIcon, PhoneIcon, CloseIcon, AlertCircleIcon, ChevronRightIcon, CheckIcon, ClockIcon } from './OrdersIcons';
+import { KeyIcon, MailIcon, PhoneIcon, CloseIcon, AlertCircleIcon, ChevronRightIcon, CheckIcon, ClockIcon, RefreshIcon } from './OrdersIcons';
 
 /**
  * Enterprise 2FA OTP Verification Modal
@@ -199,16 +199,15 @@ export default function OtpVerificationModal({
             width: '64px',
             height: '64px',
             borderRadius: '20px',
-            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(14, 165, 233, 0.15) 100%)',
-            border: '1.5px solid rgba(37, 99, 235, 0.25)',
+            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 16px',
-            boxShadow: '0 8px 20px -6px rgba(37, 99, 235, 0.25)',
+            boxShadow: '0 8px 24px -4px rgba(37, 99, 235, 0.45)',
           }}
         >
-          <KeyIcon size={28} color="#2563eb" />
+          <KeyIcon size={30} color="#ffffff" />
         </div>
 
         {/* Title & Email Destination Notice */}
@@ -410,9 +409,13 @@ export default function OtpVerificationModal({
                 fontWeight: 700,
                 cursor: 'pointer',
                 textDecoration: 'underline',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
               }}
             >
-              Gửi lại mã OTP mới
+              <RefreshIcon size={12} color="#2563eb" />
+              <span>Gửi lại mã OTP mới</span>
             </span>
           ) : (
             <span style={{ color: '#94a3b8', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
