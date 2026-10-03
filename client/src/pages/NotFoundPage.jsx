@@ -54,7 +54,9 @@ export default function NotFoundPage() {
             fontSize: '14px'
           }}
         >
-          <HomeIcon size={16} color="#ffffff" />
+          <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <HomeIcon size={13} color="#ffffff" />
+          </span>
           <span>Về Trang Chủ</span>
         </Link>
 
@@ -75,7 +77,9 @@ export default function NotFoundPage() {
             transition: 'all 0.2s ease'
           }}
         >
-          <PackageIcon size={16} color="#ea580c" />
+          <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <PackageIcon size={13} color="#ea580c" />
+          </span>
           <span>Đơn Hàng Của Tôi</span>
         </Link>
 
@@ -96,7 +100,9 @@ export default function NotFoundPage() {
             transition: 'all 0.2s ease'
           }}
         >
-          <CartIcon size={16} color="#ea580c" />
+          <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CartIcon size={13} color="#ea580c" />
+          </span>
           <span>Xem Giỏ Hàng</span>
         </Link>
       </div>
