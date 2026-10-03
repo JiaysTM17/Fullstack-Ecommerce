@@ -593,7 +593,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                         gap: "5px",
                       }}
                     >
-                      <ChatIcon size={12} />
+                      <ChatIcon size={12} color="#2563eb" />
                       <span>Trả lời câu hỏi này</span>
                     </button>
                   )}

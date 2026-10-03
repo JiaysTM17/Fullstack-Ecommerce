@@ -360,9 +360,9 @@ export default function AuthModal() {
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
                 {authMethod === 'password' ? (
-                  <><QrCodeIcon size={14} /> Quét mã QR đăng nhập</>
+                  <><QrCodeIcon size={14} color="#2563eb" /> Quét mã QR đăng nhập</>
                 ) : (
-                  <><LockIcon size={14} /> Đăng nhập bằng mật khẩu</>
+                  <><LockIcon size={14} color="#ea580c" /> Đăng nhập bằng mật khẩu</>
                 )}
               </span>
             </div>
@@ -425,7 +425,7 @@ export default function AuthModal() {
                       className="shopee-password-toggle"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOffIcon size={14} /> : <EyeIcon size={14} />}
+                      {showPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
                     </button>
                   </div>
                 </div>
@@ -482,7 +482,7 @@ export default function AuthModal() {
                 onClick={() => handleQuickDemoLogin('customer')}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <GlobeIcon size={14} /> Google
+                <GlobeIcon size={14} color="#0b57d0" /> Google
               </button>
               <button
                 type="button"
@@ -490,7 +490,7 @@ export default function AuthModal() {
                 onClick={() => handleQuickDemoLogin('customer')}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <GlobeIcon size={14} /> Facebook
+                <GlobeIcon size={14} color="#0866FF" /> Facebook
               </button>
               <button
                 type="button"
@@ -498,7 +498,7 @@ export default function AuthModal() {
                 onClick={() => handleQuickDemoLogin('customer')}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <GlobeIcon size={14} /> Apple
+                <GlobeIcon size={14} color="#000000" /> Apple
               </button>
             </div>
           </div>
@@ -580,7 +580,7 @@ export default function AuthModal() {
                   className="shopee-password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOffIcon size={14} /> : <EyeIcon size={14} />}
+                  {showPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
                 </button>
               </div>
 

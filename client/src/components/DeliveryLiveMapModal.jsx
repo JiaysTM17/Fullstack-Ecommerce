@@ -473,7 +473,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                       justifyContent: 'center',
                     }}
                   >
-                    {hub.completed ? <CheckIcon size={10} /> : idx + 1}
+                    {hub.completed ? <CheckIcon size={10} color="#ffffff" /> : idx + 1}
                   </span>
                   <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>
                     {hub.time || '--:--'}

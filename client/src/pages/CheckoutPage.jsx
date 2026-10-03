@@ -1053,7 +1053,7 @@ export default function CheckoutPage() {
                   onClick={() => setCurrentStep(3)}
                   style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
-                  <ArrowLeftIcon size={14} />
+                  <ArrowLeftIcon size={14} color="#64748b" />
                   <span>Sửa Phương Thức</span>
                 </button>
                 <button
@@ -1096,7 +1096,7 @@ export default function CheckoutPage() {
                   style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
                 >
                   <span>{(appliedDiscountVoucher && appliedShippingVoucher) ? "Đổi mã" : "Chọn mã"}</span>
-                  <ChevronRightIcon size={12} />
+                  <ChevronRightIcon size={12} color="var(--primary-color, #ea580c)" />
                 </button>
               </div>
 
@@ -1125,7 +1125,7 @@ export default function CheckoutPage() {
                     onClick={removeDiscountVoucher}
                     style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px", display: "inline-flex", alignItems: "center", gap: "3px" }}
                   >
-                    <CloseIcon size={11} /> Gỡ
+                    <CloseIcon size={11} color="#ef4444" /> Gỡ
                   </button>
                 </div>
               )}
@@ -1409,7 +1409,7 @@ export default function CheckoutPage() {
                 }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <CloseIcon size={16} />
+                <CloseIcon size={16} color="#64748b" />
               </button>
             </div>
 

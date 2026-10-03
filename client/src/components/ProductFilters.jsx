@@ -211,8 +211,8 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
           onClick={() => onFilterChange("minRating", filters.minRating === "4" ? "" : "4")}
         >
           <span className="shopee-rating-stars" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', color: '#f59e0b' }}>
-            <StarIcon size={13} /><StarIcon size={13} /><StarIcon size={13} /><StarIcon size={13} />
-            <StarIcon size={13} style={{ opacity: 0.25 }} />
+            <StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" />
+            <StarIcon size={13} color="#cbd5e1" />
           </span>
           <span>{t('rating_4_up', 'Từ 4 sao trở lên')}</span>
         </div>
@@ -221,7 +221,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
           onClick={() => onFilterChange("minRating", filters.minRating === "4.8" ? "" : "4.8")}
         >
           <span className="shopee-rating-stars" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', color: '#f59e0b' }}>
-            <StarIcon size={13} /><StarIcon size={13} /><StarIcon size={13} /><StarIcon size={13} /><StarIcon size={13} />
+            <StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" />
           </span>
           <span>{t('rating_48_up', 'Từ 4.8 sao (Xuất sắc)')}</span>
         </div>

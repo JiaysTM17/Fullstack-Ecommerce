@@ -486,12 +486,12 @@ export default function OrderDetailModal({
                   marginRight: '4px',
                 }}
               >
-                <ArrowLeftIcon size={13} />
+                <ArrowLeftIcon size={13} color="#2563eb" />
                 <span>Quay lại danh sách</span>
               </button>
             )}
             <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
-              <PackageIcon size={17} />
+              <PackageIcon size={17} color="#2563eb" />
             </span>
             <span style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>
               {t('order_detail_title', 'Chi Tiết Đơn Hàng')}
@@ -512,7 +512,7 @@ export default function OrderDetailModal({
               }}
             >
               #{orderId}
-              <CopyIcon size={10} />
+              <CopyIcon size={10} color="#2563eb" />
             </button>
             <span
               style={{

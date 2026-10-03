@@ -376,7 +376,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
             transition: 'background 0.15s ease',
           }}
         >
-          <CloseIcon size={16} />
+          <CloseIcon size={16} color="#64748b" />
         </button>
 
         {/* Modal Header */}
@@ -465,7 +465,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 fontWeight: 800,
               }}
             >
-              {step > 1 ? <CheckIcon size={11} /> : '1'}
+              {step > 1 ? <CheckIcon size={11} color="#ffffff" /> : '1'}
             </span>
             <span>Nhập Email</span>
           </div>
@@ -500,7 +500,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 fontWeight: 800,
               }}
             >
-              {step > 2 ? <CheckIcon size={11} /> : '2'}
+              {step > 2 ? <CheckIcon size={11} color="#ffffff" /> : '2'}
             </span>
             <span>Nhập OTP</span>
           </div>
@@ -558,7 +558,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               gap: '8px',
             }}
           >
-            <AlertCircleIcon size={15} />
+            <AlertCircleIcon size={15} color="#ef4444" />
             <span>{error}</span>
           </div>
         )}
@@ -573,7 +573,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
 
               <div className="shopee-email-autocomplete-wrap" style={{ position: 'relative' }}>
                 <div className="shopee-form-input-wrap">
-                  <span className="shopee-input-lead-icon"><MailIcon size={16} /></span>
+                  <span className="shopee-input-lead-icon"><MailIcon size={16} color="#2563eb" /></span>
                   <input
                     ref={emailInputRef}
                     type="email"
@@ -664,7 +664,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               ) : (
                 <>
                   <span>Gửi Mã Xác Thực OTP</span>
-                  <ChevronRightIcon size={14} />
+                  <ChevronRightIcon size={14} color="#ffffff" />
                 </>
               )}
             </button>
@@ -827,7 +827,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   gap: '4px',
                 }}
               >
-                <ArrowLeftIcon size={14} />
+                <ArrowLeftIcon size={14} color="#64748b" />
                 <span>Đổi email khác</span>
               </button>
 
@@ -845,7 +845,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                     gap: '4px',
                   }}
                 >
-                  <ClockIcon size={12} />
+                  <ClockIcon size={12} color="#d97706" />
                   <span>Gửi lại sau <strong style={{ color: '#2563eb' }}>{cooldown}s</strong></span>
                 </div>
               ) : (
@@ -895,7 +895,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               ) : (
                 <>
                   <span>Xác Nhận Mã & Tiếp Tục</span>
-                  <ChevronRightIcon size={14} />
+                  <ChevronRightIcon size={14} color="#ffffff" />
                 </>
               )}
             </button>
@@ -947,7 +947,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 Mật khẩu mới của bạn *
               </label>
               <div className="shopee-form-input-wrap">
-                <span className="shopee-input-lead-icon"><LockIcon size={14} /></span>
+                <span className="shopee-input-lead-icon"><LockIcon size={14} color="#ea580c" /></span>
                 <input
                   type={showNewPassword ? 'text' : 'password'}
                   className="shopee-form-input"
@@ -966,7 +966,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   onClick={() => setShowNewPassword(!showNewPassword)}
                   tabIndex={-1}
                 >
-                  {showNewPassword ? <EyeOffIcon size={14} /> : <EyeIcon size={14} />}
+                  {showNewPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
                 </button>
               </div>
             </div>
@@ -1030,7 +1030,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 }}
               >
                 {passwordChecks.length ? (
-                  <CheckIcon size={12} />
+                  <CheckIcon size={12} color="#059669" />
                 ) : (
                   <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
                 )}
@@ -1053,7 +1053,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 }}
               >
                 {passwordChecks.hasUpper ? (
-                  <CheckIcon size={12} />
+                  <CheckIcon size={12} color="#059669" />
                 ) : (
                   <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
                 )}
@@ -1076,7 +1076,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 }}
               >
                 {passwordChecks.hasNumber ? (
-                  <CheckIcon size={12} />
+                  <CheckIcon size={12} color="#059669" />
                 ) : (
                   <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
                 )}
@@ -1099,7 +1099,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 }}
               >
                 {passwordChecks.hasSpecial ? (
-                  <CheckIcon size={12} />
+                  <CheckIcon size={12} color="#059669" />
                 ) : (
                   <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
                 )}
@@ -1113,7 +1113,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 Xác nhận lại mật khẩu mới *
               </label>
               <div className="shopee-form-input-wrap">
-                <span className="shopee-input-lead-icon"><KeyIcon size={14} /></span>
+                <span className="shopee-input-lead-icon"><KeyIcon size={14} color="#6366f1" /></span>
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   className="shopee-form-input"
@@ -1131,7 +1131,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   tabIndex={-1}
                 >
-                  {showConfirmPassword ? <EyeOffIcon size={14} /> : <EyeIcon size={14} />}
+                  {showConfirmPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
                 </button>
               </div>
             </div>
@@ -1171,7 +1171,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               ) : (
                 <>
                   <span>Lưu Mật Khẩu Mới & Đăng Nhập</span>
-                  <ChevronRightIcon size={14} />
+                  <ChevronRightIcon size={14} color="#ffffff" />
                 </>
               )}
             </button>

@@ -34,7 +34,7 @@ export class ErrorBoundary extends React.Component {
             border: "1px solid var(--border-medium, #e2e8f0)"
           }}>
             <div style={{ display: "inline-flex", justifyContent: "center", marginBottom: "16px", color: "#f59e0b" }}>
-              <AlertCircleIcon size={48} />
+              <AlertCircleIcon size={48} color="#f59e0b" />
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "12px", color: "var(--text-primary, #1e293b)" }}>
               Đã xảy ra sự cố khi tải trang
@@ -49,7 +49,7 @@ export class ErrorBoundary extends React.Component {
                 onClick={this.handleReload}
                 style={{ padding: "10px 20px", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "6px" }}
               >
-                <RefreshIcon size={16} />
+                <RefreshIcon size={16} color="#ffffff" />
                 <span>Tải Lại Trang</span>
               </button>
               <Link
@@ -58,7 +58,7 @@ export class ErrorBoundary extends React.Component {
                 onClick={() => this.setState({ hasError: false, error: null })}
                 style={{ padding: "10px 20px", fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}
               >
-                <HomeIcon size={16} />
+                <HomeIcon size={16} color="#ea580c" />
                 <span>Về Trang Chủ</span>
               </Link>
             </div>

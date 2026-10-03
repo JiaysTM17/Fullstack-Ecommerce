@@ -851,11 +851,11 @@ export default function OrderHistoryPage() {
               marginRight: '6px',
             }}
           >
-            <ArrowLeftIcon size={12} />
+            <ArrowLeftIcon size={12} color="#64748b" />
             <span>Quay lại</span>
           </button>
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <CloseIcon size={16} />
+            <CloseIcon size={16} color="#dc2626" />
             <span>Hủy Đơn Hàng: #{selectedCancelOrder.orderId}</span>
           </h3>
         </div>
@@ -1101,7 +1101,7 @@ export default function OrderHistoryPage() {
                   <div>
                     <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ color: '#2563eb', display: 'inline-flex', alignItems: 'center' }}>
-                        <TruckIcon size={24} />
+                        <TruckIcon size={24} color="#2563eb" />
                       </span>
                       <span>Tra Cứu Vận Đơn SPX Express</span>
                     </h1>
@@ -1121,7 +1121,7 @@ export default function OrderHistoryPage() {
                     }}
                     style={{ fontSize: '12.5px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
-                    <ArrowLeftIcon size={12} />
+                    <ArrowLeftIcon size={12} color="#2563eb" />
                     <span>Quay lại Đơn Mua</span>
                   </button>
                 </div>
@@ -1174,7 +1174,7 @@ export default function OrderHistoryPage() {
                         }
                       }}
                     >
-                      <TruckIcon size={14} /> Tra Cứu Vận Đơn
+                      <TruckIcon size={14} color="#ffffff" /> Tra Cứu Vận Đơn
                     </button>
                   </div>
 
@@ -1203,7 +1203,7 @@ export default function OrderHistoryPage() {
                           setSelectedTrackingOrder(o);
                         }}
                       >
-                        <TruckIcon size={11} /> {o.trackingCode} (#{o.orderId})
+                        <TruckIcon size={11} color="#059669" /> {o.trackingCode} (#{o.orderId})
                       </button>
                     ))}
                   </div>
@@ -1316,7 +1316,7 @@ export default function OrderHistoryPage() {
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <TruckIcon size={20} />
+                              <TruckIcon size={20} color="#2563eb" />
                             </div>
                             <div>
                               <strong style={{ fontSize: '13px', color: '#0f172a' }}>Nguyễn Văn Tài</strong>
@@ -1385,7 +1385,7 @@ export default function OrderHistoryPage() {
                   </div>
 
                   <Link to="/" className="shopee-btn shopee-btn-secondary" style={{ fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <ArrowLeftIcon size={14} />
+                    <ArrowLeftIcon size={14} color="#2563eb" />
                     <span>{t('continue_shopping', 'Tiếp tục mua sắm')}</span>
                   </Link>
                 </div>
@@ -1406,7 +1406,7 @@ export default function OrderHistoryPage() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
-                <StoreIcon size={22} />
+                <StoreIcon size={22} color="#2563eb" />
               </span>
               <div>
                 <strong style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
@@ -1423,7 +1423,7 @@ export default function OrderHistoryPage() {
               style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
               <span>Vào Kênh Quản Lý Shop</span>
-              <ChevronRightIcon size={14} />
+              <ChevronRightIcon size={14} color="#ffffff" />
             </Link>
           </div>
         )}
@@ -1444,7 +1444,7 @@ export default function OrderHistoryPage() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ color: '#dc2626', display: 'flex', alignItems: 'center' }}>
-                <ShieldCheckIcon size={22} />
+                <ShieldCheckIcon size={22} color="#dc2626" />
               </span>
               <div>
                 <strong style={{ fontSize: '13.5px', color: '#dc2626' }}>
@@ -1461,7 +1461,7 @@ export default function OrderHistoryPage() {
               style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', background: '#dc2626', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
               <span>Bảng Quản Trị Toàn Sàn</span>
-              <ChevronRightIcon size={14} />
+              <ChevronRightIcon size={14} color="#ffffff" />
             </Link>
           </div>
         )}
@@ -1535,7 +1535,7 @@ export default function OrderHistoryPage() {
                     title="Xóa tìm kiếm"
                     style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <CloseIcon size={12} />
+                    <CloseIcon size={12} color="#64748b" />
                   </button>
                 )}
               </div>
@@ -1603,7 +1603,7 @@ export default function OrderHistoryPage() {
         {filteredOrders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
-              <PackageIcon size={48} />
+              <PackageIcon size={48} color="#94a3b8" />
             </div>
             <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-secondary)' }}>
               {t('no_orders_in_tab', 'Không có đơn hàng nào trong mục này.')}
