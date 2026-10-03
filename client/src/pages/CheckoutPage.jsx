@@ -1065,7 +1065,10 @@ export default function CheckoutPage() {
                             gap: "4px",
                           }}
                         >
-                          <CopyIcon size={12} color="#2563eb" /> {t('copy', 'Sao chép')}
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CopyIcon size={11} color="#2563eb" />
+                          </span>
+                          <span>{t('copy', 'Sao chép')}</span>
                         </button>
                       </div>
                       <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>Chủ TK: CONG TY TNHH FULLSTACK ECOMMERCE</div>
@@ -1094,7 +1097,10 @@ export default function CheckoutPage() {
                             boxShadow: "0 2px 6px rgba(2, 132, 199, 0.25)",
                           }}
                         >
-                          <QrCodeIcon size={14} color="#ffffff" /> Mở Chi Tiết VietQR Động & Đếm Ngược
+                          <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <QrCodeIcon size={13} color="#ffffff" />
+                          </span>
+                          <span>Mở Chi Tiết VietQR Động & Đếm Ngược</span>
                         </button>
                       </div>
                     </div>
@@ -1164,18 +1170,27 @@ export default function CheckoutPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-page, #f8fafc)", border: "1px solid var(--border-medium, #e2e8f0)", borderRadius: "8px", padding: "12px 16px", marginBottom: "12px", fontSize: "13.5px", flexWrap: "wrap", gap: "8px" }}>
                 <div>
                   <span style={{ fontWeight: 700, color: "var(--text-primary)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <TicketIcon size={15} color="var(--primary-color, #ea580c)" /> Voucher Áp Dụng:
+                    <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <TicketIcon size={13} color="var(--primary-color, #ea580c)" />
+                    </span>
+                    <span>Voucher Áp Dụng:</span>
                   </span>
                   {(appliedDiscountVoucher || appliedShippingVoucher) ? (
                     <span style={{ marginLeft: "4px" }}>
                       {appliedShippingVoucher && (
                         <strong style={{ color: "#0284c7", marginRight: "8px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                          <TruckIcon size={13} color="#0284c7" /> {appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)})
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TruckIcon size={11} color="#0284c7" />
+                          </span>
+                          <span>{appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)})</span>
                         </strong>
                       )}
                       {appliedDiscountVoucher && (
                         <strong style={{ color: "var(--primary-color, #ea580c)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                          <TagIcon size={13} color="var(--primary-color, #ea580c)" /> {appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TagIcon size={11} color="var(--primary-color, #ea580c)" />
+                          </span>
+                          <span>{appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})</span>
                         </strong>
                       )}
                     </span>
@@ -1209,7 +1224,9 @@ export default function CheckoutPage() {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <CoinIcon size={22} color="#f59e0b" />
+                  <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(245, 158, 11, 0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CoinIcon size={18} color="#f59e0b" />
+                  </span>
                   <div>
                     <div style={{ fontWeight: 700, color: "var(--text-primary)" }}>
                       Dùng Mini Xu để thanh toán
