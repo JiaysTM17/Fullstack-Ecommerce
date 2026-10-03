@@ -207,12 +207,18 @@ export default function CartPage() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
               <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
                 {hasFreeShipping ? (
-                  <span style={{ color: "var(--color-success, #10b981)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <SparklesIcon size={16} color="#10b981" /> {t('freeship_qualified', 'Chúc mừng! Bạn đã đủ điều kiện nhận MIỄN PHÍ VẬN CHUYỂN!')}
+                  <span style={{ color: "var(--color-success, #10b981)", display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#d1fae5", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <SparklesIcon size={15} color="#059669" />
+                    </span>
+                    <span>{t('freeship_qualified', 'Chúc mừng! Bạn đã đủ điều kiện nhận MIỄN PHÍ VẬN CHUYỂN!')}</span>
                   </span>
                 ) : (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <TruckIcon size={16} color="#0284c7" /> {t('freeship_needed', 'Mua thêm')} <strong style={{ color: "var(--primary-color)" }}>{formatCurrency(neededAmount)}</strong> {t('freeship_to_qualify', 'để được MIỄN PHÍ VẬN CHUYỂN toàn quốc!')}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#e0f2fe", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <TruckIcon size={15} color="#0284c7" />
+                    </span>
+                    <span>{t('freeship_needed', 'Mua thêm')} <strong style={{ color: "var(--primary-color)" }}>{formatCurrency(neededAmount)}</strong> {t('freeship_to_qualify', 'để được MIỄN PHÍ VẬN CHUYỂN toàn quốc!')}</span>
                   </span>
                 )}
               </span>
@@ -344,7 +350,9 @@ export default function CartPage() {
                     onChange={() => toggleSelectShop(shopGroup.items.map((it) => it.productId))}
                     style={{ width: "16px", height: "16px", cursor: "pointer" }}
                   />
-                  <StoreIcon size={16} color="#ea580c" />
+                  <span style={{ width: "26px", height: "26px", borderRadius: "6px", background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)", border: "1px solid #fed7aa", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <StoreIcon size={14} color="#ea580c" />
+                  </span>
                   <strong style={{ fontSize: "14px", color: "var(--text-primary, #0f172a)" }}>
                     {shopGroup.shopName}
                   </strong>
@@ -529,8 +537,11 @@ export default function CartPage() {
           {/* Voucher Section with Picker & Input */}
           <div style={{ marginBottom: "18px", borderBottom: "1px solid var(--border-medium, #eee)", paddingBottom: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-              <span style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                <TicketIcon size={16} color="#ea580c" /> {t('voucher_code', 'Mã Giảm Giá / Voucher')}:
+              <span style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)", display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#ffedd5", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <TicketIcon size={14} color="#ea580c" />
+                </span>
+                <span>{t('voucher_code', 'Mã Giảm Giá / Voucher')}:</span>
               </span>
               <button
                 type="button"
@@ -559,7 +570,10 @@ export default function CartPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f0f9ff", padding: "8px 12px", borderRadius: "8px", border: "1px solid #0284c7" }}>
                   <div>
                     <span style={{ fontWeight: 800, color: "#0284c7", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <TruckIcon size={14} color="#0284c7" /> {appliedShippingVoucher.code}
+                      <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "#e0f2fe", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                        <TruckIcon size={12} color="#0284c7" />
+                      </span>
+                      <span>{appliedShippingVoucher.code}</span>
                     </span>
                     <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
                       (-{formatCurrency(shippingDiscount)} ship)
@@ -579,7 +593,10 @@ export default function CartPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--primary-color, #ea580c)" }}>
                   <div>
                     <span style={{ fontWeight: 800, color: "var(--primary-color, #ea580c)", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <TagIcon size={14} color="#ea580c" /> {appliedDiscountVoucher.code}
+                      <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "#ffedd5", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                        <TagIcon size={12} color="#ea580c" />
+                      </span>
+                      <span>{appliedDiscountVoucher.code}</span>
                     </span>
                     <span style={{ fontSize: "12px", color: "var(--color-success, #10b981)", marginLeft: "8px", fontWeight: 700 }}>
                       (-{formatCurrency(voucherDiscount)})
