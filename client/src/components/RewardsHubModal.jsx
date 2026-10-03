@@ -289,7 +289,9 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <BoltIcon size={14} color={activeTab === 'spin' ? '#ea580c' : '#f59e0b'} />
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: activeTab === 'spin' ? '#fff7ed' : 'rgba(245, 158, 11, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BoltIcon size={12} color={activeTab === 'spin' ? '#ea580c' : '#f59e0b'} />
+            </span>
             <span>Vòng Quay ({totalSpins})</span>
           </button>
           <button
@@ -311,7 +313,9 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <CalendarIcon size={14} color={activeTab === 'checkin' ? '#ea580c' : '#16a34a'} />
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: activeTab === 'checkin' ? '#fff7ed' : 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CalendarIcon size={12} color={activeTab === 'checkin' ? '#ea580c' : '#16a34a'} />
+            </span>
             <span>Điểm Danh 7 Ngày</span>
           </button>
           <button
@@ -333,7 +337,9 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <ReceiptIcon size={14} color={activeTab === 'history' ? '#ea580c' : '#0284c7'} />
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: activeTab === 'history' ? '#fff7ed' : 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ReceiptIcon size={12} color={activeTab === 'history' ? '#ea580c' : '#0284c7'} />
+            </span>
             <span>Lịch Sử Xu</span>
           </button>
         </div>
@@ -343,7 +349,9 @@ export default function RewardsHubModal({ onClose }) {
           <div style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: '12px' }}>
               <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                <SparklesIcon size={18} color="#ea580c" />
+                <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(135deg, #fff7ed, #ffedd5)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <SparklesIcon size={14} color="#ea580c" />
+                </span>
                 <span>Vòng Quay May Mắn Fullstack E-Commerce</span>
               </h4>
               <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--text-secondary)' }}>
