@@ -170,35 +170,62 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
           <div className="shopee-footer-col">
             <h4>{t('footer_payment', 'Thanh Toán')}</h4>
             <div className="shopee-footer-badges">
-              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <TruckIcon size={13} color="#ea580c" /> COD
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TruckIcon size={11} color="#ea580c" />
+                </span>
+                <span>COD</span>
               </span>
-              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <QrCodeIcon size={13} color="#2563eb" /> VietQR
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#e0f2fe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <QrCodeIcon size={11} color="#2563eb" />
+                </span>
+                <span>VietQR</span>
               </span>
-              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <CreditCardIcon size={13} color="#16a34a" /> Visa
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CreditCardIcon size={11} color="#16a34a" />
+                </span>
+                <span>Visa</span>
               </span>
-              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <CreditCardIcon size={13} color="#f59e0b" /> MasterCard
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#fef3c7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CreditCardIcon size={11} color="#d97706" />
+                </span>
+                <span>MasterCard</span>
               </span>
-              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <SparklesIcon size={13} color="#d946ef" /> Momo
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#fae8ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <SparklesIcon size={11} color="#c026d3" />
+                </span>
+                <span>Momo</span>
               </span>
-              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <ShieldCheckIcon size={13} color="#0284c7" /> VNPay
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#e0e7ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheckIcon size={11} color="#4338ca" />
+                </span>
+                <span>VNPay</span>
               </span>
             </div>
             <h4 style={{ marginTop: '20px' }}>{t('footer_shipping_units', 'Đơn Vị Vận Chuyển')}</h4>
             <div className="shopee-footer-badges">
-              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <TruckIcon size={13} color="#ea580c" /> SPX Express
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TruckIcon size={11} color="#ea580c" />
+                </span>
+                <span>SPX Express</span>
               </span>
-              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <TruckIcon size={13} color="#0284c7" /> Giao Hàng Nhanh
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#e0f2fe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TruckIcon size={11} color="#0284c7" />
+                </span>
+                <span>Giao Hàng Nhanh</span>
               </span>
-              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <TruckIcon size={13} color="#16a34a" /> Viettel Post
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TruckIcon size={11} color="#16a34a" />
+                </span>
+                <span>Viettel Post</span>
               </span>
             </div>
           </div>
