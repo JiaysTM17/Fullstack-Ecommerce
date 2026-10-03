@@ -1623,7 +1623,9 @@ export default function SellerDashboardPage() {
               }}
               title="Xem giao diện công khai người mua nhìn thấy trên sàn Shopee Mall"
             >
-              <GlobeIcon size={15} color="#06b6d4" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: '#e0f2fe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <GlobeIcon size={13} color="#0284c7" />
+              </span>
               <span>Xem Gian Hàng Thực Tế</span>
               <span style={{ fontSize: '10px', background: '#fff7ed', color: '#ea580c', padding: '1px 6px', borderRadius: '4px', fontWeight: 800 }}>MALL</span>
             </Link>
