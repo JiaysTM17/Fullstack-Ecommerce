@@ -39,6 +39,7 @@ import {
   PlusIcon,
   SparklesIcon,
   ChevronRightIcon,
+  TrashIcon,
 } from '../components/OrdersIcons';
 
 // 12 Gian hàng mẫu với đầy đủ thông tin chuẩn TMĐT
@@ -2537,11 +2538,14 @@ export default function SellerDashboardPage() {
                             <button
                               type="button"
                               className="shopee-btn shopee-btn-sm"
-                              style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }}
+                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
                               onClick={() => handleDeleteProduct(prod._id)}
                               title="Xóa sản phẩm"
                             >
-                              Xóa
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <TrashIcon size={11} color="#dc2626" />
+                              </span>
+                              <span>Xóa</span>
                             </button>
                           </div>
                         </td>
