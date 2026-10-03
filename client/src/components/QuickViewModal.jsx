@@ -135,8 +135,10 @@ export default function QuickViewModal({ product, onClose }) {
           {/* Info & Buy Box */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-              <div style={{ fontSize: '12px', color: '#0284c7', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <TagIcon size={12} color="#0284c7" />
+              <div style={{ fontSize: '12px', color: '#0284c7', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TagIcon size={12} color="#0284c7" />
+                </span>
                 <span>{product.brand || 'Chính Hãng'} · {product.category}</span>
               </div>
               <button
@@ -245,20 +247,26 @@ export default function QuickViewModal({ product, onClose }) {
                   <PlusIcon size={11} color={quantity >= (product.stock || 50) ? "#cbd5e1" : "#ea580c"} />
                 </button>
               </div>
-              <span style={{ fontSize: '12px', color: '#10b981', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <CheckIcon size={12} color="#10b981" />
+              <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckIcon size={11} color="#16a34a" />
+                </span>
                 <span>{t('pdp_in_stock')}</span>
               </span>
             </div>
 
             {/* Trust Badges */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '8px 12px', background: 'var(--bg-muted, #f8fafc)', borderRadius: '8px', border: '1px solid var(--border-light, #e2e8f0)', fontSize: '11.5px', color: 'var(--text-secondary, #475569)' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <TruckIcon size={13} color="#16a34a" />
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TruckIcon size={12} color="#16a34a" />
+                </span>
                 <span style={{ fontWeight: 600 }}>SPX Giao Nhanh 24H</span>
               </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <ShieldCheckIcon size={13} color="#2563eb" />
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheckIcon size={12} color="#2563eb" />
+                </span>
                 <span style={{ fontWeight: 600 }}>100% Chính Hãng</span>
               </div>
             </div>
