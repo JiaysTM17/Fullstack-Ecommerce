@@ -547,23 +547,27 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
               {reviewPhotos.length < 5 && (
                 <label
                   style={{
-                    width: '54px',
-                    height: '54px',
-                    borderRadius: '6px',
-                    border: '1.5px dashed #2563eb',
-                    background: '#eff6ff',
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '8px',
+                    border: '1.5px dashed #3b82f6',
+                    background: 'rgba(59, 130, 246, 0.08)',
                     color: '#2563eb',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '11px',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     cursor: 'pointer',
+                    transition: 'all 0.2s ease',
                   }}
+                  title="Tải thêm ảnh từ thiết bị"
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center' }}><CameraIcon size={16} color="#2563eb" /></span>
-                  <span style={{ fontSize: '10px' }}>+ Ảnh</span>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#ffffff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(37, 99, 235, 0.2)', marginBottom: '2px' }}>
+                    <CameraIcon size={13} color="#2563eb" />
+                  </span>
+                  <span style={{ fontSize: '9.5px', color: '#1d4ed8' }}>+ Thêm ảnh</span>
                   <input
                     type="file"
                     multiple
