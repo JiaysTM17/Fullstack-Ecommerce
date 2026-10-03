@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { ShieldCheckIcon, CheckIcon, LockIcon, ChevronRightIcon } from './OrdersIcons';
+import { ShieldCheckIcon, CheckIcon, LockIcon, ChevronRightIcon, RefreshIcon } from './OrdersIcons';
 
 /**
  * Enterprise Security Slider Captcha Component
@@ -216,6 +216,58 @@ export default function SecuritySliderCaptcha({
         >
           {isVerified ? <CheckIcon size={18} color="#ffffff" /> : disabled ? <LockIcon size={16} color="#64748b" /> : <ChevronRightIcon size={18} color="#ffffff" />}
         </div>
+
+        {/* Reset button when verified */}
+        {isVerified && !disabled && (
+          <button
+            type="button"
+            onClick={handleReset}
+            title="Xác minh lại"
+            style={{
+              position: 'absolute',
+              right: '8px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '26px',
+              height: '26px',
+              borderRadius: '50%',
+              border: '1px solid #a7f3d0',
+              background: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: '#059669',
+              zIndex: 3,
+              padding: 0,
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
+              transition: 'transform 0.15s ease',
+            }}
+          >
+            <RefreshIcon size={13} color="#059669" />
+          </button>
+        )}
+      </div>
+
+      {/* Security trust badge below track */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginTop: '6px',
+          padding: '0 6px',
+          fontSize: '11px',
+          color: '#64748b',
+        }}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <ShieldCheckIcon size={13} color={isVerified ? '#16a34a' : '#2563eb'} />
+          <span style={{ fontWeight: 600, color: isVerified ? '#16a34a' : '#475569' }}>
+            {isVerified ? 'Đã kích hoạt bảo mật' : 'Bảo mật 2 lớp'}
+          </span>
+        </span>
+        <span style={{ fontSize: '10.5px', color: '#94a3b8' }}>Chống bot tự động</span>
       </div>
     </div>
   );
