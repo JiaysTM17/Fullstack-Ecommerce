@@ -121,8 +121,10 @@ const CartItem = ({
             {name}
           </h4>
           {stock && stock < 20 && (
-            <span className="shopee-cart-item-stock-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-              <AlertCircleIcon size={11} color="#ea580c" />
+            <span className="shopee-cart-item-stock-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <AlertCircleIcon size={10} color="#ea580c" />
+              </span>
               <span>Chỉ còn {stock} sản phẩm</span>
             </span>
           )}
@@ -159,8 +161,11 @@ const CartItem = ({
           className="shopee-cart-item-remove-btn"
           onClick={handleRemove}
           aria-label={`Xóa ${name} khỏi giỏ`}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
         >
-          <TrashIcon size={14} color="#ef4444" />
+          <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <TrashIcon size={12} color="#dc2626" />
+          </span>
           <span>Xóa</span>
         </button>
       </div>
