@@ -22,6 +22,8 @@ import {
   SparklesIcon,
   FoodIcon,
   BookOpenIcon,
+  LayersIcon,
+  TruckIcon,
 } from './OrdersIcons';
 
 const getCategoryFallbackIcon = (id, size = 28, color = null) => {
@@ -494,9 +496,13 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               letterSpacing: '0.5px',
               color: 'var(--text-primary, #0f172a)',
               textTransform: 'uppercase',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
             }}
           >
-            {t('nav_categories', 'DANH MỤC')}
+            <LayersIcon size={18} color="#ea580c" />
+            <span>{t('nav_categories', 'DANH MỤC')}</span>
           </h3>
         </div>
 
@@ -505,9 +511,13 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             fontSize: '12.5px',
             color: 'var(--text-secondary, #64748b)',
             fontWeight: 500,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
-          {language === 'en' ? '20 Top Categories · Fast Delivery 2H' : '20 Ngành hàng nổi bật · Giao hỏa tốc 2H'}
+          <TruckIcon size={14} color="#ea580c" />
+          <span>{language === 'en' ? '20 Top Categories · Fast Delivery 2H' : '20 Ngành hàng nổi bật · Giao hỏa tốc 2H'}</span>
         </span>
       </div>
 
