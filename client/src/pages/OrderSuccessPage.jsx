@@ -150,8 +150,11 @@ export default function OrderSuccessPage() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Đơn vị vận chuyển:</span>
-            <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <TruckIcon size={16} color="#16a34a" /> SPX Express (Giao hàng dự kiến 24H)
+            <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <TruckIcon size={13} color="#16a34a" />
+              </span>
+              <span>SPX Express (Giao hàng dự kiến 24H)</span>
             </span>
           </div>
         </div>
@@ -243,8 +246,8 @@ export default function OrderSuccessPage() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#ffedd5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c' }}>
-              <BoltIcon size={24} color="#ea580c" />
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)', flexShrink: 0 }}>
+              <BoltIcon size={22} color="#c2410c" />
             </div>
             <div>
               <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#ea580c' }}>
