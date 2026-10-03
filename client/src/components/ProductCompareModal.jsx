@@ -3,7 +3,7 @@ import { useCompare } from '../context/CompareContext';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
-import { CartIcon, TruckIcon, ScaleIcon, CloseIcon, StarIcon, CheckIcon } from './OrdersIcons';
+import { CartIcon, TruckIcon, ScaleIcon, CloseIcon, StarIcon, CheckIcon, TrashIcon, PackageIcon, TagIcon, ShieldCheckIcon, StoreIcon } from './OrdersIcons';
 
 export default function ProductCompareModal() {
   const { comparedProducts, removeFromCompare, clearCompare, isModalOpen, setIsModalOpen } = useCompare();
@@ -112,9 +112,13 @@ export default function ProductCompareModal() {
               fontSize: '12.5px',
               cursor: 'pointer',
               textDecoration: 'underline',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
             }}
           >
-            {t('compare_clear_all')}
+            <TrashIcon size={12} color="#dc2626" />
+            <span>{t('compare_clear_all')}</span>
           </button>
         </div>
       )}
@@ -172,9 +176,10 @@ export default function ProductCompareModal() {
                   type="button"
                   onClick={clearCompare}
                   className="shopee-btn shopee-btn-secondary"
-                  style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                  style={{ fontSize: '12.5px', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                 >
-                  {t('compare_clear_all')}
+                  <TrashIcon size={13} color="#dc2626" />
+                  <span>{t('compare_clear_all')}</span>
                 </button>
                 <button
                   type="button"
@@ -193,7 +198,10 @@ export default function ProductCompareModal() {
                   {/* Row: Product Head / Card */}
                   <tr style={{ borderBottom: '2px solid var(--border-medium, #cbd5e1)' }}>
                     <th style={{ width: '160px', padding: '14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      Sản phẩm
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <PackageIcon size={14} color="#ea580c" />
+                        <span>Sản phẩm</span>
+                      </div>
                     </th>
                     {comparedProducts.map((p) => {
                       const id = p._id || p.id;
@@ -244,7 +252,10 @@ export default function ProductCompareModal() {
                   {/* Row: Price */}
                   <tr style={{ borderBottom: '1px solid var(--border-light, #e2e8f0)' }}>
                     <th style={{ padding: '12px 14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      {t('compare_price')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <TagIcon size={14} color="#ec4899" />
+                        <span>{t('compare_price')}</span>
+                      </div>
                     </th>
                     {comparedProducts.map((p) => (
                       <td key={p._id || p.id} style={{ padding: '12px 14px' }}>
@@ -263,7 +274,10 @@ export default function ProductCompareModal() {
                   {/* Row: Rating */}
                   <tr style={{ borderBottom: '1px solid var(--border-light, #e2e8f0)' }}>
                     <th style={{ padding: '12px 14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      {t('compare_rating')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <StarIcon size={14} color="#f59e0b" fill="#f59e0b" />
+                        <span>{t('compare_rating')}</span>
+                      </div>
                     </th>
                     {comparedProducts.map((p) => (
                       <td key={p._id || p.id} style={{ padding: '12px 14px' }}>
@@ -281,7 +295,10 @@ export default function ProductCompareModal() {
                   {/* Row: Brand & Category */}
                   <tr style={{ borderBottom: '1px solid var(--border-light, #e2e8f0)' }}>
                     <th style={{ padding: '12px 14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      {t('compare_brand')} / {t('compare_category')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <ShieldCheckIcon size={14} color="#16a34a" />
+                        <span>{t('compare_brand')} / {t('compare_category')}</span>
+                      </div>
                     </th>
                     {comparedProducts.map((p) => (
                       <td key={p._id || p.id} style={{ padding: '12px 14px' }}>
@@ -294,7 +311,10 @@ export default function ProductCompareModal() {
                   {/* Row: Shop */}
                   <tr style={{ borderBottom: '1px solid var(--border-light, #e2e8f0)' }}>
                     <th style={{ padding: '12px 14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      Cửa hàng (Shop)
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <StoreIcon size={14} color="#0d9488" />
+                        <span>Cửa hàng (Shop)</span>
+                      </div>
                     </th>
                     {comparedProducts.map((p) => (
                       <td key={p._id || p.id} style={{ padding: '12px 14px' }}>
@@ -306,7 +326,10 @@ export default function ProductCompareModal() {
                   {/* Row: Stock & Delivery */}
                   <tr>
                     <th style={{ padding: '12px 14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      {t('compare_stock')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <TruckIcon size={14} color="#0284c7" />
+                        <span>{t('compare_stock')}</span>
+                      </div>
                     </th>
                     {comparedProducts.map((p) => (
                       <td key={p._id || p.id} style={{ padding: '12px 14px' }}>
