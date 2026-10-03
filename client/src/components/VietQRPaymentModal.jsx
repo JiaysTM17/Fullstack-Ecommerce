@@ -595,9 +595,15 @@ export default function VietQRPaymentModal({
                     fontWeight: 600,
                     color: '#475569',
                     cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                 >
-                  Đóng & Thanh Toán Sau
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e2e8f0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={10} color="#64748b" />
+                  </span>
+                  <span>Đóng & Thanh Toán Sau</span>
                 </button>
                 <button
                   type="button"
@@ -621,12 +627,16 @@ export default function VietQRPaymentModal({
                 >
                   {isVerifying ? (
                     <>
-                      <RefreshIcon size={14} color="#ffffff" className="spin-animation" />
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <RefreshIcon size={11} color="#ffffff" className="spin-animation" />
+                      </span>
                       <span>Đang Kiểm Tra...</span>
                     </>
                   ) : (
                     <>
-                      <CheckIcon size={14} color="#ffffff" />
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={12} color="#ffffff" />
+                      </span>
                       <span>Tôi Đã Chuyển Khoản</span>
                     </>
                   )}
