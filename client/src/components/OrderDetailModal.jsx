@@ -570,10 +570,13 @@ export default function OrderDetailModal({
                 borderRadius: '6px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '5px',
               }}
             >
-              <PrinterIcon size={12} color="#6366f1" /> {t('print', 'In')}
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PrinterIcon size={11} color="#6366f1" />
+              </span>
+              <span>{t('print', 'In')}</span>
             </button>
             {!inline && (
               <button
@@ -591,7 +594,9 @@ export default function OrderDetailModal({
                   borderRadius: '6px',
                 }}
               >
-                <CloseIcon size={14} color="#64748b" />
+                <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CloseIcon size={12} color="#64748b" />
+                </span>
               </button>
             )}
           </div>
@@ -1364,9 +1369,12 @@ export default function OrderDetailModal({
                 type="button"
                 className="shopee-order-btn-danger-outline"
                 onClick={() => onOpenCancelOrder(order)}
-                style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <CloseIcon size={12} color="#ef4444" /> {t('cancel_order', 'Hủy đơn hàng')}
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CloseIcon size={11} color="#ef4444" />
+                </span>
+                <span>{t('cancel_order', 'Hủy đơn hàng')}</span>
               </button>
             )}
 
@@ -1376,9 +1384,12 @@ export default function OrderDetailModal({
                 type="button"
                 className="shopee-order-btn-outline"
                 onClick={() => handleOpenTracking(order)}
-                style={{ height: '32px', fontSize: '12px', borderRadius: '6px' }}
+                style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <TruckIcon size={12} color="#2563eb" /> {t('spx_live_tracking', 'Bản đồ Shipper SPX')}
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TruckIcon size={11} color="#2563eb" />
+                </span>
+                <span>{t('spx_live_tracking', 'Bản đồ Shipper SPX')}</span>
               </button>
             )}
 
@@ -1439,11 +1450,14 @@ export default function OrderDetailModal({
                         color: '#ffffff',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '5px',
+                        gap: '6px',
                         fontWeight: 700,
                       }}
                     >
-                      <StarIcon size={13} color="#facc15" filled /> {t('review_order_reward', 'Đánh giá (+200 Xu)')}
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <StarIcon size={12} color="#facc15" filled />
+                      </span>
+                      <span>{t('review_order_reward', 'Đánh giá (+200 Xu)')}</span>
                     </button>
                   )
                 )}
@@ -1453,9 +1467,12 @@ export default function OrderDetailModal({
                     type="button"
                     className="shopee-order-btn-outline"
                     onClick={() => onOpenReturnModal(order)}
-                    style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
-                    <ReturnIcon size={12} color="#9333ea" /> {t('return_refund', 'Trả hàng / Hoàn tiền')}
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(147, 51, 234, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ReturnIcon size={11} color="#9333ea" />
+                    </span>
+                    <span>{t('return_refund', 'Trả hàng / Hoàn tiền')}</span>
                   </button>
                 )}
               </>
@@ -1476,13 +1493,16 @@ export default function OrderDetailModal({
                   border: 'none',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '5px',
+                  gap: '6px',
                   fontWeight: 700,
                   cursor: 'pointer',
                   boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)',
                 }}
               >
-                <QrCodeIcon size={13} color="#ffffff" /> Thanh toán VietQR
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <QrCodeIcon size={12} color="#ffffff" />
+                </span>
+                <span>Thanh toán VietQR</span>
               </button>
             )}
 
@@ -1499,14 +1519,17 @@ export default function OrderDetailModal({
                   borderRadius: '6px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '5px',
+                  gap: '6px',
                   borderColor: '#bfdbfe',
                   color: '#2563eb',
                   background: '#eff6ff',
                   fontWeight: 600,
                 }}
               >
-                <RefreshIcon size={12} color="#2563eb" /> {t('buy_again', 'Mua lại')}
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <RefreshIcon size={11} color="#2563eb" />
+                </span>
+                <span>{t('buy_again', 'Mua lại')}</span>
               </button>
             )}
 
@@ -1514,9 +1537,12 @@ export default function OrderDetailModal({
               type="button"
               className="shopee-order-btn-outline"
               onClick={onClose}
-              style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+              style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <CloseIcon size={12} color="#64748b" /> {t('close', 'Đóng')}
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={11} color="#64748b" />
+              </span>
+              <span>{t('close', 'Đóng')}</span>
             </button>
           </div>
         </div>
