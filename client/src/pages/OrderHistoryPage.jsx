@@ -1556,7 +1556,7 @@ export default function OrderHistoryPage() {
                   onClick={handlePrintReport}
                   title="In hoặc lưu file PDF báo cáo lịch sử đơn hàng"
                 >
-                  <PrinterIcon size={14} color="#475569" />
+                  <PrinterIcon size={14} color="#6366f1" />
                   <span>In báo cáo</span>
                 </button>
               </div>
@@ -1928,7 +1928,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <EyeIcon size={13} color="#475569" /> {t('view_details', 'Xem chi tiết')}
+                            <EyeIcon size={13} color="#2563eb" /> {t('view_details', 'Xem chi tiết')}
                           </button>
                         </>
                       )}
@@ -1979,7 +1979,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <EyeIcon size={13} color="#475569" /> {t('view_details', 'Xem chi tiết')}
+                            <EyeIcon size={13} color="#2563eb" /> {t('view_details', 'Xem chi tiết')}
                           </button>
 
                           <button
@@ -2043,7 +2043,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <EyeIcon size={13} color="#475569" /> {t('view_details', 'Xem chi tiết')}
+                            <EyeIcon size={13} color="#2563eb" /> {t('view_details', 'Xem chi tiết')}
                           </button>
                         </>
                       )}
@@ -2060,7 +2060,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <EyeIcon size={13} color="#475569" /> {t('view_details', 'Xem chi tiết')}
+                            <EyeIcon size={13} color="#2563eb" /> {t('view_details', 'Xem chi tiết')}
                           </button>
                           <button
                             type="button"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { SendIcon, ArrowLeftIcon, CloseIcon } from './OrdersIcons';
+import { SendIcon, ArrowLeftIcon, CloseIcon, ChatIcon, PackageIcon, TruckIcon, TicketIcon, ShieldCheckIcon } from './OrdersIcons';
 
 const DEFAULT_MESSAGES = [
   {
@@ -207,7 +207,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
               cursor: 'pointer'
             }}
           >
-            Hỏi sản phẩm
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><ChatIcon size={12} color="#ea580c" /> Hỏi sản phẩm</span>
           </button>
         </div>
       )}
@@ -276,25 +276,35 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
           borderTop: '1px solid var(--border-light, #f1f5f9)'
         }}
       >
-        {QUICK_QUESTIONS.map((q, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => handleSendMessage(q)}
-            style={{
-              background: 'var(--bg-muted, #f8fafc)',
-              border: '1px solid var(--border-medium, #e2e8f0)',
-              borderRadius: '999px',
-              padding: '4px 10px',
-              fontSize: '11px',
-              color: 'var(--text-secondary, #475569)',
-              whiteSpace: 'nowrap',
-              cursor: 'pointer'
-            }}
-          >
-            {q}
-          </button>
-        ))}
+        {QUICK_QUESTIONS.map((q, idx) => {
+          let qIcon = <PackageIcon size={11} color="#ea580c" />;
+          if (idx === 1) qIcon = <TruckIcon size={11} color="#16a34a" />;
+          if (idx === 2) qIcon = <TicketIcon size={11} color="#ea580c" />;
+          if (idx === 3) qIcon = <ShieldCheckIcon size={11} color="#059669" />;
+          return (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => handleSendMessage(q)}
+              style={{
+                background: 'var(--bg-muted, #f8fafc)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
+                borderRadius: '999px',
+                padding: '4px 10px',
+                fontSize: '11px',
+                color: 'var(--text-secondary, #475569)',
+                whiteSpace: 'nowrap',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              {qIcon}
+              <span>{q}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Chat Input Bar */}

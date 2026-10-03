@@ -552,7 +552,7 @@ export default function OrderDetailModal({
                 gap: '4px',
               }}
             >
-              <PrinterIcon size={12} color="#475569" /> {t('print', 'In')}
+              <PrinterIcon size={12} color="#6366f1" /> {t('print', 'In')}
             </button>
             {!inline && (
               <button
@@ -666,7 +666,7 @@ export default function OrderDetailModal({
                     title="Sao chép mã vận đơn"
                     style={{ fontSize: '10.5px', padding: '1px 6px', cursor: 'pointer' }}
                   >
-                    <CopyIcon size={10} color="#64748b" />
+                    <CopyIcon size={10} color="#2563eb" />
                   </button>
                 </div>
 
@@ -877,7 +877,7 @@ export default function OrderDetailModal({
                     onClick={() => handleCopy(recipientPhone, 'SĐT')}
                     style={{ fontSize: '11.5px', color: '#475569', cursor: 'pointer' }}
                   >
-                    {recipientPhone} <CopyIcon size={10} color="#64748b" />
+                    {recipientPhone} <CopyIcon size={10} color="#2563eb" />
                   </span>
                 </div>
                 <div style={{ fontSize: '12px', color: '#475569', marginTop: '3px', lineHeight: 1.4 }}>
@@ -1167,7 +1167,7 @@ export default function OrderDetailModal({
                     onClick={() => handleCopy(transactionId, 'Mã GD')}
                     style={{ fontSize: '11px', cursor: 'pointer' }}
                   >
-                    {transactionId} <CopyIcon size={10} color="#64748b" />
+                    {transactionId} <CopyIcon size={10} color="#2563eb" />
                   </span>
                 </div>
               </div>
