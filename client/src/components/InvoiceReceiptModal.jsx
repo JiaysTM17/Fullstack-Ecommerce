@@ -141,11 +141,13 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 height: '28px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '5px',
                 marginRight: '6px',
               }}
             >
-              <ArrowLeftIcon size={13} color="#2563eb" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ArrowLeftIcon size={11} color="#2563eb" />
+              </span>
               <span>Quay lại</span>
             </button>
           )}
@@ -185,7 +187,10 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
               height: '32px',
             }}
           >
-            <PrinterIcon size={13} color="#ffffff" /> In Hóa Đơn / Lưu PDF
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PrinterIcon size={11} color="#ffffff" />
+            </span>
+            <span>In Hóa Đơn / Lưu PDF</span>
           </button>
           {!inline && (
             <button
@@ -203,7 +208,9 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 gap: '5px',
               }}
             >
-              <CloseIcon size={12} color="#64748b" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e2e8f0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={10} color="#64748b" />
+              </span>
               <span>Đóng</span>
             </button>
           )}
