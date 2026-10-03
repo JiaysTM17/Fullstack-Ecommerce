@@ -110,16 +110,19 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                   background: '#fef3c7',
                   border: '1px solid #fcd34d',
                   borderRadius: '999px',
-                  padding: '1px 8px',
+                  padding: '2px 8px 2px 4px',
                   fontSize: '11px',
                   fontWeight: 700,
                   color: '#b45309',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '3px',
+                  gap: '5px',
                 }}
               >
-                <BoltIcon size={11} color="#d97706" /> Chuỗi {streak}/7 ngày
+                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BoltIcon size={10} color="#d97706" />
+                </span>
+                <span>Chuỗi {streak}/7 ngày</span>
               </span>
             </div>
             <div style={{ fontSize: '13px', color: '#78350f', marginTop: '2px' }}>
@@ -181,12 +184,16 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
           >
             {hasCheckedInToday ? (
               <>
-                <CheckIcon size={14} color="#15803d" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckIcon size={11} color="#15803d" />
+                </span>
                 <span>Đã Điểm Danh Hôm Nay</span>
               </>
             ) : (
               <>
-                <StarIcon size={14} color="#ffffff" fill="#ffffff" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <StarIcon size={11} color="#ffffff" fill="#ffffff" />
+                </span>
                 <span>Điểm Danh (+{todayReward.toLocaleString('vi-VN')} Xu)</span>
               </>
             )}
