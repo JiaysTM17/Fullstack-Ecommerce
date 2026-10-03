@@ -85,7 +85,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
               onClick={() => onFilterChange("category", cat === "Tất cả" ? "" : cat)}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                {cat === "Tất cả" ? <PackageIcon size={14} /> : null}
+                {cat === "Tất cả" ? <PackageIcon size={14} color="#ea580c" /> : null}
                 <span>{cat === "Tất cả" ? t('all_categories', 'Tất cả danh mục') : `• ${cat}`}</span>
               </span>
             </div>
@@ -102,7 +102,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             onClick={() => onFilterChange("brand", "")}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <TagIcon size={14} />
+              <TagIcon size={14} color="#ea580c" />
               <span>{t('all_brands', 'Tất cả thương hiệu')}</span>
             </span>
           </div>
@@ -127,7 +127,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             onClick={() => onFilterChange("shopId", "")}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <StoreIcon size={14} />
+              <StoreIcon size={14} color="#dc2626" />
               <span>{t('all_shops', 'Tất cả gian hàng')} ({allShops.length})</span>
             </span>
           </div>
@@ -140,7 +140,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
                 title={s.description}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <StoreIcon size={13} />
+                  <StoreIcon size={13} color="#ea580c" />
                   <span>{s.name}</span>
                 </span>
               </div>
@@ -159,7 +159,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             onChange={(e) => onFilterChange("fastDelivery", e.target.checked ? "1" : "")}
           />
           <span className="shopee-fast-delivery-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-            <BoltIcon size={12} />
+            <BoltIcon size={12} color="#ffffff" />
             <span>{t('fast_delivery_2h', 'Giao Nhanh 2H')}</span>
           </span>
         </label>
@@ -239,7 +239,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             }
           />
           <span style={{ fontWeight: 600, color: "var(--text-primary)", display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            <SparklesIcon size={13} />
+            <SparklesIcon size={13} color="#ea580c" />
             <span>{t('featured_picks', 'Hàng Tuyển Chọn')}</span>
           </span>
         </label>
@@ -261,7 +261,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
           onClick={onResetFilters}
           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
         >
-          <CloseIcon size={13} />
+          <CloseIcon size={13} color="var(--primary-color, #ea580c)" />
           <span>{t('clear_all_filters', 'Xóa tất cả bộ lọc')}</span>
         </button>
       )}

@@ -37,7 +37,7 @@ export default function ProductCompareModal() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', color: '#2563eb' }}>
-              <ScaleIcon size={18} />
+              <ScaleIcon size={18} color="#2563eb" />
             </span>
             <div>
               <strong style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
@@ -86,7 +86,7 @@ export default function ProductCompareModal() {
                     }}
                     title="Xóa sản phẩm"
                   >
-                    <CloseIcon size={10} />
+                    <CloseIcon size={10} color="#ffffff" />
                   </button>
                 </div>
               );
@@ -155,7 +155,7 @@ export default function ProductCompareModal() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', color: '#2563eb' }}>
-                  <ScaleIcon size={24} />
+                  <ScaleIcon size={24} color="#2563eb" />
                 </span>
                 <div>
                   <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
@@ -181,7 +181,7 @@ export default function ProductCompareModal() {
                   onClick={() => setIsModalOpen(false)}
                   style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <CloseIcon size={18} />
+                  <CloseIcon size={18} color="var(--text-muted, #64748b)" />
                 </button>
               </div>
             </div>
@@ -222,7 +222,7 @@ export default function ProductCompareModal() {
                                 }}
                                 title="Xóa"
                               >
-                                <CloseIcon size={12} />
+                                <CloseIcon size={12} color="#ffffff" />
                               </button>
                             </div>
                             <strong style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: '1.4' }}>{p.name}</strong>
@@ -232,7 +232,7 @@ export default function ProductCompareModal() {
                               style={{ width: '100%', padding: '8px 12px', fontSize: '12.5px', marginTop: '6px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                               onClick={() => addToCart(p, 1)}
                             >
-                              <CartIcon size={14} />
+                              <CartIcon size={14} color="#ffffff" />
                               <span>Thêm vào giỏ</span>
                             </button>
                           </div>
@@ -268,7 +268,7 @@ export default function ProductCompareModal() {
                     {comparedProducts.map((p) => (
                       <td key={p._id || p.id} style={{ padding: '12px 14px' }}>
                         <span style={{ color: '#ffa41c', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                          <StarIcon size={12} className="text-amber-500" />
+                          <StarIcon size={12} color="#f59e0b" fill="#f59e0b" />
                           <span>{p.rating || 4.9}</span>
                         </span>
                         <span style={{ color: 'var(--text-muted)', fontSize: '12px', marginLeft: '6px' }}>
@@ -311,11 +311,11 @@ export default function ProductCompareModal() {
                     {comparedProducts.map((p) => (
                       <td key={p._id || p.id} style={{ padding: '12px 14px' }}>
                         <span style={{ color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <CheckIcon size={12} />
+                          <CheckIcon size={12} color="#16a34a" />
                           <span>Còn {p.stock || 50} sản phẩm</span>
                         </span>
                         <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <TruckIcon size={13} color="var(--primary-color)" /> Giao nhanh SPX 24h
+                          <TruckIcon size={13} color="#0284c7" /> Giao nhanh SPX 24h
                         </div>
                       </td>
                     ))}

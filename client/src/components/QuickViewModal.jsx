@@ -87,7 +87,7 @@ export default function QuickViewModal({ product, onClose }) {
           }}
           aria-label="Đóng"
         >
-          <CloseIcon size={18} />
+          <CloseIcon size={18} color="var(--text-secondary, #64748b)" />
         </button>
 
         <div className="quickview-modal-grid">
@@ -240,7 +240,7 @@ export default function QuickViewModal({ product, onClose }) {
                 onClick={handleFullDetail}
               >
                 <span>Xem chi tiết đầy đủ</span>
-                <ChevronRightIcon size={14} />
+                <ChevronRightIcon size={14} color="var(--text-secondary, #64748b)" />
               </button>
             </div>
           </div>

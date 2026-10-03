@@ -24,49 +24,49 @@ import {
   BookOpenIcon,
 } from './OrdersIcons';
 
-const getCategoryFallbackIcon = (id, size = 28) => {
+const getCategoryFallbackIcon = (id, size = 28, color = null) => {
   switch (id) {
     case 'men-clothes':
-      return <ShirtIcon size={size} />;
+      return <ShirtIcon size={size} color={color || '#2563eb'} />;
     case 'mobile-gadgets':
-      return <SmartphoneIcon size={size} />;
+      return <SmartphoneIcon size={size} color={color || '#16a34a'} />;
     case 'consumer-electronics':
-      return <TvIcon size={size} />;
+      return <TvIcon size={size} color={color || '#9333ea'} />;
     case 'computer-accessories':
-      return <LaptopIcon size={size} />;
+      return <LaptopIcon size={size} color={color || '#0284c7'} />;
     case 'cameras':
-      return <CameraIcon size={size} />;
+      return <CameraIcon size={size} color={color || '#dc2626'} />;
     case 'watches':
-      return <WatchIcon size={size} />;
+      return <WatchIcon size={size} color={color || '#d97706'} />;
     case 'men-shoes':
     case 'women-shoes':
-      return <FootwearIcon size={size} />;
+      return <FootwearIcon size={size} color={color || '#475569'} />;
     case 'home-appliances':
-      return <CookingIcon size={size} />;
+      return <CookingIcon size={size} color={color || '#ea580c'} />;
     case 'sport-outdoor':
-      return <SportIcon size={size} />;
+      return <SportIcon size={size} color={color || '#059669'} />;
     case 'automotive':
-      return <BikeIcon size={size} />;
+      return <BikeIcon size={size} color={color || '#0284c7'} />;
     case 'women-clothes':
-      return <DressIcon size={size} />;
+      return <DressIcon size={size} color={color || '#ec4899'} />;
     case 'moms-babies':
-      return <BabyIcon size={size} />;
+      return <BabyIcon size={size} color={color || '#f97316'} />;
     case 'home-living':
-      return <HomeIcon size={size} />;
+      return <HomeIcon size={size} color={color || '#0d9488'} />;
     case 'beauty':
-      return <BeautyIcon size={size} />;
+      return <BeautyIcon size={size} color={color || '#f43f5e'} />;
     case 'health':
-      return <PillIcon size={size} />;
+      return <PillIcon size={size} color={color || '#10b981'} />;
     case 'women-bags':
-      return <BagIcon size={size} />;
+      return <BagIcon size={size} color={color || '#8b5cf6'} />;
     case 'fashion-accessories':
-      return <SparklesIcon size={size} />;
+      return <SparklesIcon size={size} color={color || '#f59e0b'} />;
     case 'grocery':
-      return <FoodIcon size={size} />;
+      return <FoodIcon size={size} color={color || '#ca8a04'} />;
     case 'books-stationery':
-      return <BookOpenIcon size={size} />;
+      return <BookOpenIcon size={size} color={color || '#0284c7'} />;
     default:
-      return <SparklesIcon size={size} />;
+      return <SparklesIcon size={size} color={color || '#ea580c'} />;
   }
 };
 
@@ -428,7 +428,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               color: item.color || '#475569',
             }}
           >
-            {getCategoryFallbackIcon(item.id, 28)}
+            {getCategoryFallbackIcon(item.id, 28, item.color)}
           </div>
         </div>
 
@@ -553,7 +553,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
-            <ChevronLeftIcon size={18} />
+            <ChevronLeftIcon size={18} color="currentColor" />
           </button>
         )}
 
@@ -621,7 +621,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
-            <ChevronRightIcon size={18} />
+            <ChevronRightIcon size={18} color="currentColor" />
           </button>
         )}
       </div>

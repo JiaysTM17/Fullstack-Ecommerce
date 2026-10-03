@@ -42,7 +42,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
       <div className="shopee-deals-header">
         <div className="shopee-deals-title-area">
           <div className="shopee-deals-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <BoltIcon size={16} />
+            <BoltIcon size={16} color="#ffffff" />
             <span>FLASH DEALS / GIỜ VÀNG</span>
           </div>
           <div className="shopee-countdown-box">
@@ -57,7 +57,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
 
         <span style={{ fontSize: '13px', color: 'var(--primary-color, #ea580c)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
           <span>Xem tất cả deal sốc</span>
-          <ChevronRightIcon size={13} />
+          <ChevronRightIcon size={13} color="var(--primary-color, #ea580c)" />
         </span>
       </div>
 
@@ -116,7 +116,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                   style={{ width: `${percentSold}%` }}
                 />
                 <span className="shopee-progress-bar-text" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
-                  <FlameIcon size={12} />
+                  <FlameIcon size={12} color="#ffffff" />
                   <span>ĐÃ BÁN {percentSold}%</span>
                 </span>
               </div>

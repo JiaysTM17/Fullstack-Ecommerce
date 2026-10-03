@@ -63,7 +63,7 @@ export function RecentlyViewed({ currentProductId }) {
           gap: '8px',
         }}
       >
-        <ClockIcon size={18} />
+        <ClockIcon size={18} color="#0284c7" />
         <span>{t('recently_viewed')}</span>
       </h3>
 

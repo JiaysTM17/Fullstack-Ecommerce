@@ -25,31 +25,31 @@ import {
 } from './OrdersIcons';
 import '../styles/category-drawer.css';
 
-const getDrawerCategoryIcon = (id, size = 22) => {
+const getDrawerCategoryIcon = (id, size = 22, color = null) => {
   switch (id) {
     case 'thoi-trang':
-      return <DressIcon size={size} />;
+      return <DressIcon size={size} color={color || '#ec4899'} />;
     case 'dien-tu':
-      return <LaptopIcon size={size} />;
+      return <LaptopIcon size={size} color={color || '#3b82f6'} />;
     case 'sac-dep':
-      return <BeautyIcon size={size} />;
+      return <BeautyIcon size={size} color={color || '#f43f5e'} />;
     case 'gia-dung':
-      return <CookingIcon size={size} />;
+      return <CookingIcon size={size} color={color || '#f59e0b'} />;
     case 'the-thao':
-      return <SportIcon size={size} />;
+      return <SportIcon size={size} color={color || '#10b981'} />;
     case 'doi-song':
     case 'me-va-be':
-      return <BabyIcon size={size} />;
+      return <BabyIcon size={size} color={color || '#14b8a6'} />;
     case 'phu-kien-cong-nghe':
-      return <SmartphoneIcon size={size} />;
+      return <SmartphoneIcon size={size} color={color || '#6366f1'} />;
     case 'balo-tui-xach':
-      return <ShoppingBagIcon size={size} />;
+      return <ShoppingBagIcon size={size} color={color || '#8b5cf6'} />;
     case 'gaming-gear':
-      return <BoltIcon size={size} />;
+      return <BoltIcon size={size} color={color || '#ef4444'} />;
     case 'sach-van-phong-pham':
-      return <BookOpenIcon size={size} />;
+      return <BookOpenIcon size={size} color={color || '#0284c7'} />;
     default:
-      return <PackageIcon size={size} />;
+      return <PackageIcon size={size} color={color || '#64748b'} />;
   }
 };
 
@@ -207,12 +207,12 @@ const CATEGORIES_DATA = [
 ];
 
 const FILTER_CHIPS = [
-  { id: 'all', label: 'Tất Cả', icon: <FlameIcon size={13} /> },
-  { id: 'fashion', label: 'Thời Trang & Phụ Kiện', icon: <DressIcon size={13} /> },
-  { id: 'tech', label: 'Công Nghệ & Điện Tử', icon: <LaptopIcon size={13} /> },
-  { id: 'beauty', label: 'Sắc Đẹp Mỹ Phẩm', icon: <BeautyIcon size={13} /> },
-  { id: 'home', label: 'Gia Dụng Thông Minh', icon: <CookingIcon size={13} /> },
-  { id: 'life', label: 'Đời Sống & Mẹ Bé', icon: <BabyIcon size={13} /> },
+  { id: 'all', label: 'Tất Cả', icon: <FlameIcon size={13} color="#ea580c" /> },
+  { id: 'fashion', label: 'Thời Trang & Phụ Kiện', icon: <DressIcon size={13} color="#ec4899" /> },
+  { id: 'tech', label: 'Công Nghệ & Điện Tử', icon: <LaptopIcon size={13} color="#3b82f6" /> },
+  { id: 'beauty', label: 'Sắc Đẹp Mỹ Phẩm', icon: <BeautyIcon size={13} color="#f43f5e" /> },
+  { id: 'home', label: 'Gia Dụng Thông Minh', icon: <CookingIcon size={13} color="#f59e0b" /> },
+  { id: 'life', label: 'Đời Sống & Mẹ Bé', icon: <BabyIcon size={13} color="#10b981" /> },
 ];
 
 export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
@@ -300,7 +300,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         <div className="category-drawer-header">
           <div className="category-drawer-header-left">
             <div className="category-drawer-logo-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <LayersIcon size={20} />
+              <LayersIcon size={20} color="#ea580c" />
             </div>
             <div className="category-drawer-title-wrap">
               <h2 className="category-drawer-title">
@@ -321,7 +321,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               title="Cuộn tới danh mục ngành hàng trên trang chủ"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <PackageIcon size={14} />
+              <PackageIcon size={14} color="#0284c7" />
               <span>Xem Danh Mục Trang Chủ</span>
             </button>
             <button
@@ -331,7 +331,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               title="Cuộn tới danh sách toàn bộ sản phẩm trên trang chủ"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <ShoppingBagIcon size={14} />
+              <ShoppingBagIcon size={14} color="#ffffff" />
               <span>Xem Tất Cả Sản Phẩm</span>
             </button>
             <button
@@ -341,7 +341,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               title="Đóng bảng ngành hàng"
               style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <CloseIcon size={16} />
+              <CloseIcon size={16} color="var(--text-secondary, #64748b)" />
             </button>
           </div>
         </div>
@@ -351,7 +351,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
           <div className="category-drawer-filter-top-row">
             <div className="category-drawer-search-wrapper">
               <span className="category-drawer-search-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                <SearchIcon size={16} />
+                <SearchIcon size={16} color="#ea580c" />
               </span>
               <input
                 type="text"
@@ -370,7 +370,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   title="Xóa tìm kiếm"
                   style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <CloseIcon size={12} />
+                  <CloseIcon size={12} color="var(--text-secondary, #64748b)" />
                 </button>
               )}
             </div>
@@ -403,7 +403,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
           {filteredCategories.length === 0 ? (
             <div className="category-drawer-empty">
               <div className="category-drawer-empty-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <SearchIcon size={36} />
+                <SearchIcon size={36} color="#94a3b8" />
               </div>
               <div className="category-drawer-empty-text">
                 Không tìm thấy ngành hàng phù hợp với "{searchTerm}"
@@ -420,7 +420,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 }}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <RefreshIcon size={14} />
+                <RefreshIcon size={14} color="#ea580c" />
                 <span>Xóa bộ lọc & Xem tất cả</span>
               </button>
             </div>
@@ -447,7 +447,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 <div className="category-card-header">
                   <div className="category-card-title-group">
                     <span className="category-card-icon" style={{ display: 'inline-flex', alignItems: 'center', color: cat.color }}>
-                      {getDrawerCategoryIcon(cat.id, 22)}
+                      {getDrawerCategoryIcon(cat.id, 22, cat.color)}
                     </span>
                     <strong className="category-card-name" title={cat.name}>
                       {cat.name}
@@ -509,12 +509,12 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   title={cat.shop}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                 >
-                  <StoreIcon size={13} />
+                  <StoreIcon size={13} color="#ea580c" />
                   <span>{cat.shop}</span>
                 </span>
                 <span className="category-card-action-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                   <span>Xem ngành hàng</span>
-                  <ChevronRightIcon size={12} />
+                  <ChevronRightIcon size={12} color="#ea580c" />
                 </span>
               </div>
             </div>
@@ -524,7 +524,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         {/* Mega Menu Footer: 12 Mall Shops Strip */}
         <div className="category-drawer-footer">
           <div className="category-drawer-footer-title" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <StoreIcon size={14} />
+            <StoreIcon size={14} color="#dc2626" />
             <span>12 Gian Hàng Mall:</span>
           </div>
 
@@ -534,7 +534,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             className="category-drawer-scroll-arrow"
             title="Cuộn sang trái"
           >
-            <ChevronLeftIcon size={14} />
+            <ChevronLeftIcon size={14} color="#64748b" />
           </button>
 
           <div ref={shopsScrollRef} className="category-drawer-mall-pills-row">
@@ -557,7 +557,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             className="category-drawer-scroll-arrow"
             title="Cuộn sang phải"
           >
-            <ChevronRightIcon size={14} />
+            <ChevronRightIcon size={14} color="#64748b" />
           </button>
         </div>
       </div>
