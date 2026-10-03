@@ -171,7 +171,9 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
       {recentItems.length === 0 ? (
         <div style={{ textAlign: "center", color: "var(--text-muted, #94a3b8)", padding: "30px 0" }}>
           <div style={{ marginBottom: "8px", display: "flex", justifyContent: "center" }}>
-            <EyeIcon size={32} color="#cbd5e1" />
+            <span style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <EyeIcon size={24} color="#94a3b8" />
+            </span>
           </div>
           <p style={{ margin: 0, fontSize: "13.5px" }}>Bạn chưa xem sản phẩm nào gần đây.</p>
         </div>
@@ -412,7 +414,9 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
                           e.currentTarget.style.color = "var(--primary-color, #ea580c)";
                         }}
                       >
-                        <CartIcon size={13} color="currentColor" />
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CartIcon size={11} color="currentColor" />
+                        </span>
                         <span>Thêm nhanh</span>
                       </button>
                     </div>
