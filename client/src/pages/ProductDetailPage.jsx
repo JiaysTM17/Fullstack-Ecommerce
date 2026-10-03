@@ -527,16 +527,22 @@ export default function ProductDetailPage() {
 
           {/* Guarantees */}
           <div className="amazon-guarantees">
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <ShieldIcon size={14} color="#059669" />
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ width: "22px", height: "22px", borderRadius: "5px", background: "#d1fae5", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <ShieldIcon size={13} color="#059669" />
+              </span>
               <span><strong>Chính hãng 100%:</strong> Bồi thường gấp đôi nếu phát hiện hàng giả.</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <CheckIcon size={14} color="#0284c7" />
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ width: "22px", height: "22px", borderRadius: "5px", background: "#e0f2fe", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <CheckIcon size={13} color="#0284c7" />
+              </span>
               <span><strong>Đổi trả 30 ngày:</strong> Miễn phí hoàn hàng tận nơi.</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <ShieldIcon size={14} color="#6366f1" />
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ width: "22px", height: "22px", borderRadius: "5px", background: "#ede9fe", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <ShieldIcon size={13} color="#6366f1" />
+              </span>
               <span><strong>Thanh toán bảo mật:</strong> Mã hóa SSL chuẩn quốc tế.</span>
             </div>
           </div>
