@@ -52,12 +52,17 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
       <div className="shopee-deals-header">
         <div className="shopee-deals-title-area">
           <div className="shopee-deals-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <BoltIcon size={16} color="#ffffff" />
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', flexShrink: 0 }}>
+              <BoltIcon size={14} color="#ffffff" />
+            </span>
             <span>FLASH DEALS / GIỜ VÀNG</span>
           </div>
           <div className="shopee-countdown-box">
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600, fontSize: '13px' }}>
-              <ClockIcon size={14} color="#ea580c" /> KẾT THÚC TRONG
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, fontSize: '13px' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.2)', flexShrink: 0 }}>
+                <ClockIcon size={12} color="#ea580c" />
+              </span>
+              <span>KẾT THÚC TRONG</span>
             </span>
             <span className="shopee-timer-unit">{formatUnit(timeLeft.hours)}</span>
             <span className="shopee-timer-colon">:</span>
@@ -74,7 +79,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
             fontWeight: 700,
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '4px',
+            gap: '6px',
             cursor: 'pointer',
           }}
           onClick={() => {
@@ -83,7 +88,9 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
           }}
         >
           <span>Xem tất cả deal sốc</span>
-          <ChevronRightIcon size={13} color="var(--primary-color, #ea580c)" />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', flexShrink: 0 }}>
+            <ChevronRightIcon size={11} color="var(--primary-color, #ea580c)" />
+          </span>
         </span>
       </div>
 
@@ -116,8 +123,12 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                 transition: 'all 0.15s ease',
               }}
             >
-              <div style={{ fontSize: '15px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
-                {isSelected && <FlameIcon size={13} color="#ffffff" />}
+              <div style={{ fontSize: '15px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'center' }}>
+                {isSelected && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', flexShrink: 0 }}>
+                    <FlameIcon size={11} color="#ffffff" />
+                  </span>
+                )}
                 <span>{slot.time}</span>
               </div>
               <div
@@ -191,8 +202,10 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                   className="shopee-progress-bar-fill"
                   style={{ width: `${percentSold}%` }}
                 />
-                <span className="shopee-progress-bar-text" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
-                  <FlameIcon size={12} color="#ffffff" />
+                <span className="shopee-progress-bar-text" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'center' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', flexShrink: 0 }}>
+                    <FlameIcon size={10} color="#ffffff" />
+                  </span>
                   <span>ĐÃ BÁN {percentSold}%</span>
                 </span>
               </div>
