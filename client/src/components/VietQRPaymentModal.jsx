@@ -283,7 +283,10 @@ export default function VietQRPaymentModal({
                   marginBottom: '24px',
                 }}
               >
-                <ShieldCheckIcon size={16} color="#16a34a" /> Giao dịch được bảo hộ 100% qua chuẩn Napas VietQR
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <ShieldCheckIcon size={13} color="#16a34a" />
+                </span>
+                <span>Giao dịch được bảo hộ 100% qua chuẩn Napas VietQR</span>
               </div>
               <div>
                 <button
@@ -313,7 +316,19 @@ export default function VietQRPaymentModal({
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ClockIcon size={16} color={timeLeft < 120 ? '#e11d48' : '#2563eb'} />
+                  <span
+                    style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      background: timeLeft < 120 ? '#ffe4e6' : '#dbeafe',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <ClockIcon size={13} color={timeLeft < 120 ? '#e11d48' : '#2563eb'} />
+                  </span>
                   <span style={{ fontSize: '13px', color: timeLeft < 120 ? '#9f1239' : '#1e40af', fontWeight: 600 }}>
                     Thời gian giữ mã thanh toán:
                   </span>
