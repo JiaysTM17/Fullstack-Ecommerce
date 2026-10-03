@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import QuantityControl from './QuantityControl';
-import { TrashIcon } from './OrdersIcons';
+import { TrashIcon, AlertCircleIcon } from './OrdersIcons';
 import '../styles/cart.css';
 
 /**
@@ -121,8 +121,9 @@ const CartItem = ({
             {name}
           </h4>
           {stock && stock < 20 && (
-            <span className="shopee-cart-item-stock-tag">
-              Chỉ còn {stock} sản phẩm
+            <span className="shopee-cart-item-stock-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+              <AlertCircleIcon size={11} color="#ea580c" />
+              <span>Chỉ còn {stock} sản phẩm</span>
             </span>
           )}
         </div>
