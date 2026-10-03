@@ -55,7 +55,24 @@ export default function SocialAuthModal({
 
   const currentRole = role === 'seller' ? 'seller' : 'customer';
   const roleLabel = currentRole === 'seller' ? 'Chủ Gian Hàng (Người Bán)' : 'Người Mua Hàng';
-  const roleIcon = currentRole === 'seller' ? <StoreIcon size={14} color="#ea580c" /> : <CartIcon size={14} color="#16a34a" />;
+  const roleIcon = (
+    <span
+      style={{
+        width: '22px',
+        height: '22px',
+        borderRadius: '50%',
+        background: currentRole === 'seller' ? 'linear-gradient(135deg, #fff7ed, #ffedd5)' : 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
+        border: currentRole === 'seller' ? '1px solid #fed7aa' : '1px solid #a7f3d0',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+      }}
+    >
+      {currentRole === 'seller' ? <StoreIcon size={12} color="#ea580c" /> : <CartIcon size={12} color="#16a34a" />}
+    </span>
+  );
 
   const computedEmail =
     provider === 'apple' && appleEmailOption === 'hide'
@@ -347,8 +364,21 @@ export default function SocialAuthModal({
               gap: '10px',
             }}
           >
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ShieldIcon size={18} color="#0284c7" />
+            <span
+              style={{
+                width: '26px',
+                height: '26px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #e0f2fe, #bae6fd)',
+                border: '1px solid #7dd3fc',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                boxShadow: '0 1px 3px rgba(2, 132, 199, 0.15)',
+              }}
+            >
+              <ShieldIcon size={14} color="#0284c7" />
             </span>
             <div>
               Google sẽ chia sẻ tên, địa chỉ email và ảnh hồ sơ cá nhân của bạn với Fullstack E-Commerce để thiết lập phiên đăng nhập an toàn.
