@@ -164,7 +164,7 @@ export default function MobileBottomNav() {
                   position: 'absolute',
                   top: '-4px',
                   right: '-8px',
-                  background: '#ef4444',
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                   color: '#ffffff',
                   fontSize: '9.5px',
                   fontWeight: 800,
@@ -176,6 +176,7 @@ export default function MobileBottomNav() {
                   justifyContent: 'center',
                   padding: '0 3px',
                   border: '1.5px solid #ffffff',
+                  boxShadow: '0 1px 4px rgba(220, 38, 38, 0.4)',
                 }}
               >
                 {totalQuantity > 99 ? '99+' : totalQuantity}
