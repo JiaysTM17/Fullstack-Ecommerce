@@ -170,7 +170,7 @@ export default function SecuritySliderCaptcha({
             </>
           ) : disabled ? (
             <>
-              <ShieldCheckIcon size={15} color="#94a3b8" />
+              <ShieldCheckIcon size={15} color="#2563eb" />
               <span>{disabledMessage}</span>
             </>
           ) : (
@@ -214,7 +214,7 @@ export default function SecuritySliderCaptcha({
             fontWeight: 700,
           }}
         >
-          {isVerified ? <CheckIcon size={18} color="#ffffff" /> : disabled ? <LockIcon size={16} color="#94a3b8" /> : <ChevronRightIcon size={18} color="#ffffff" />}
+          {isVerified ? <CheckIcon size={18} color="#ffffff" /> : disabled ? <LockIcon size={16} color="#64748b" /> : <ChevronRightIcon size={18} color="#ffffff" />}
         </div>
       </div>
     </div>

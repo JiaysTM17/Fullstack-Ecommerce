@@ -73,7 +73,7 @@ const QuantityControl = ({
         disabled={disabled || currentVal <= min}
         aria-label="Giảm số lượng"
       >
-        <MinusIcon size={size === 'sm' ? 10 : 12} />
+        <MinusIcon size={size === 'sm' ? 10 : 12} color={disabled || currentVal <= min ? "#cbd5e1" : "#475569"} />
       </button>
 
       <input
@@ -94,7 +94,7 @@ const QuantityControl = ({
         disabled={disabled || currentVal >= max}
         aria-label="Tăng số lượng"
       >
-        <PlusIcon size={size === 'sm' ? 10 : 12} />
+        <PlusIcon size={size === 'sm' ? 10 : 12} color={disabled || currentVal >= max ? "#cbd5e1" : "#ea580c"} />
       </button>
     </div>
   );

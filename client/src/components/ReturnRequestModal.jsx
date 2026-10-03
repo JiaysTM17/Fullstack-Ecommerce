@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { ReturnIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon, CloseIcon, ArrowLeftIcon } from './OrdersIcons';
+import { ReturnIcon, CheckIcon, ShieldCheckIcon, CameraIcon, AlertCircleIcon, CloseIcon, ArrowLeftIcon, CreditCardIcon, QrCodeIcon } from './OrdersIcons';
 
 const RETURN_REASONS = [
   'Hàng bị lỗi kỹ thuật / Không hoạt động được',
@@ -370,7 +370,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   }}
                   style={{ accentColor: '#2563eb' }}
                 />
-                <span>Ví ShopeePay (Tức thì)</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CreditCardIcon size={13} color={refundMethod === 'wallet' ? '#2563eb' : '#ea580c'} /> Ví ShopeePay (Tức thì)</span>
               </label>
 
               <label
@@ -400,7 +400,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   }}
                   style={{ accentColor: '#2563eb' }}
                 />
-                <span>Tài khoản Ngân hàng</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><QrCodeIcon size={13} color={refundMethod === 'bank' ? '#2563eb' : '#0284c7'} /> Tài khoản Ngân hàng</span>
               </label>
             </div>
           </div>
