@@ -134,7 +134,7 @@ const ProductCard = ({
             transition: 'all 0.2s',
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill={wishlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={wishlisted ? "#ef4444" : "none"} stroke={wishlisted ? "#ef4444" : "#f43f5e"} strokeWidth="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
         </button>
@@ -182,7 +182,7 @@ const ProductCard = ({
             }}
             aria-label={t('quick_view_title', 'Xem nhanh')}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
@@ -242,7 +242,7 @@ const ProductCard = ({
         {/* Thông tin phụ: Rating, reviewCount và Đã bán */}
         <div className="shopee-card-meta">
           <div className="shopee-card-rating">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
             <span>{Number(rating).toFixed(1)}</span>
@@ -273,14 +273,14 @@ const ProductCard = ({
           >
             {justAdded ? (
               <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span>{t('added_to_cart', 'Đã thêm!')}</span>
               </>
             ) : (
               <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2">
                   <circle cx="9" cy="21" r="1" />
                   <circle cx="20" cy="21" r="1" />
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />

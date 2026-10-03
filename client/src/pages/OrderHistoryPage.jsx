@@ -1514,7 +1514,7 @@ export default function OrderHistoryPage() {
             <div className="orders-search-row">
               <div className="orders-search-box">
                 <span className="orders-search-icon">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8" stroke="#2563eb"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="#2563eb"></line>
                   </svg>
