@@ -41,16 +41,39 @@ export default function MobileBottomNav() {
             left: 0;
             right: 0;
             height: 56px;
-            background: rgba(255, 255, 255, 0.96);
+            background: var(--bg-card, rgba(255, 255, 255, 0.98));
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-top: 1px solid var(--border-light, #e2e8f0);
+            border-top: 1px solid var(--border-medium, #e2e8f0);
             box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
             z-index: 9998;
             padding-bottom: env(safe-area-inset-bottom, 0px);
           }
           body {
             padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+          }
+          .mobile-nav-item {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            cursor: pointer;
+            padding: 4px 0;
+            transition: all 0.15s ease;
+            position: relative;
+          }
+          .mobile-nav-item:active {
+            transform: scale(0.92);
+          }
+          .mobile-nav-indicator {
+            position: absolute;
+            bottom: 2px;
+            width: 14px;
+            height: 3px;
+            border-radius: 2px;
           }
         }
       `}</style>
@@ -59,19 +82,10 @@ export default function MobileBottomNav() {
         {/* 1. Home */}
         <button
           type="button"
+          className="mobile-nav-item"
           onClick={() => navigate('/')}
           style={{
-            background: 'none',
-            border: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '3px',
-            cursor: 'pointer',
-            padding: '4px 0',
             color: currentPath === '/' ? '#2563eb' : '#64748b',
-            transition: 'transform 0.1s ease',
           }}
         >
           <HomeIcon
@@ -81,24 +95,18 @@ export default function MobileBottomNav() {
           <span style={{ fontSize: '10.5px', fontWeight: currentPath === '/' ? 700 : 500 }}>
             Trang Chủ
           </span>
+          {currentPath === '/' && (
+            <span className="mobile-nav-indicator" style={{ backgroundColor: '#2563eb' }} />
+          )}
         </button>
 
         {/* 2. Categories */}
         <button
           type="button"
+          className="mobile-nav-item"
           onClick={handleOpenCategories}
           style={{
-            background: 'none',
-            border: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '3px',
-            cursor: 'pointer',
-            padding: '4px 0',
             color: '#ea580c',
-            transition: 'transform 0.1s ease',
           }}
         >
           <PackageIcon size={20} color="#ea580c" />
@@ -110,20 +118,10 @@ export default function MobileBottomNav() {
         {/* 3. Live Chat CSKH AI */}
         <button
           type="button"
+          className="mobile-nav-item"
           onClick={handleOpenChat}
           style={{
-            background: 'none',
-            border: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '3px',
-            cursor: 'pointer',
-            padding: '4px 0',
             color: '#0284c7',
-            position: 'relative',
-            transition: 'transform 0.1s ease',
           }}
         >
           <div style={{ position: 'relative' }}>
@@ -149,20 +147,10 @@ export default function MobileBottomNav() {
         {/* 4. Cart */}
         <button
           type="button"
+          className="mobile-nav-item"
           onClick={() => navigate('/cart')}
           style={{
-            background: 'none',
-            border: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '3px',
-            cursor: 'pointer',
-            padding: '4px 0',
             color: currentPath === '/cart' ? '#9333ea' : '#64748b',
-            position: 'relative',
-            transition: 'transform 0.1s ease',
           }}
         >
           <div style={{ position: 'relative' }}>
@@ -197,24 +185,18 @@ export default function MobileBottomNav() {
           <span style={{ fontSize: '10.5px', fontWeight: currentPath === '/cart' ? 700 : 500 }}>
             Giỏ Hàng
           </span>
+          {currentPath === '/cart' && (
+            <span className="mobile-nav-indicator" style={{ backgroundColor: '#9333ea' }} />
+          )}
         </button>
 
         {/* 5. User / Profile */}
         <button
           type="button"
+          className="mobile-nav-item"
           onClick={() => navigate(user ? '/profile' : '/login')}
           style={{
-            background: 'none',
-            border: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '3px',
-            cursor: 'pointer',
-            padding: '4px 0',
             color: (currentPath === '/profile' || currentPath === '/orders' || currentPath === '/login') ? '#10b981' : '#64748b',
-            transition: 'transform 0.1s ease',
           }}
         >
           <UserIcon
@@ -224,6 +206,9 @@ export default function MobileBottomNav() {
           <span style={{ fontSize: '10.5px', fontWeight: (currentPath === '/profile' || currentPath === '/orders') ? 700 : 500 }}>
             {user ? 'Tôi' : 'Tài Khoản'}
           </span>
+          {(currentPath === '/profile' || currentPath === '/orders' || currentPath === '/login') && (
+            <span className="mobile-nav-indicator" style={{ backgroundColor: '#10b981' }} />
+          )}
         </button>
       </nav>
     </>
