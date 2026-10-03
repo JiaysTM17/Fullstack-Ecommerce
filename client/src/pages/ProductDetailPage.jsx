@@ -222,9 +222,9 @@ export default function ProductDetailPage() {
       {/* Breadcrumb Navigation */}
       <nav style={{ fontSize: "13px", color: "var(--text-secondary, #64748b)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
         <Link to="/" style={{ color: "var(--secondary-color, #0284c7)", textDecoration: "none" }}>Trang chủ</Link>
-        <ChevronRightIcon size={11} color="#94a3b8" />
+        <ChevronRightIcon size={11} color="#ea580c" />
         <span style={{ color: "var(--secondary-color, #0284c7)" }}>{product.category || "Danh mục"}</span>
-        <ChevronRightIcon size={11} color="#94a3b8" />
+        <ChevronRightIcon size={11} color="#ea580c" />
         <span style={{ color: "var(--text-primary, #0f172a)", fontWeight: 600 }}>{product.name}</span>
       </nav>
 
@@ -395,7 +395,7 @@ export default function ProductDetailPage() {
 
           <div className="amazon-delivery-info">
             <div style={{ fontWeight: 700, color: "#007185", marginBottom: "4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-              <TruckIcon size={16} color="#007185" />
+              <TruckIcon size={16} color="#16a34a" />
               <span>Vận chuyển tiêu chuẩn & Siêu tốc</span>
             </div>
             <div>Giao hàng tới bạn vào <strong>Ngày mai</strong>. Miễn phí vận chuyển khi dùng mã FREESHIP.</div>

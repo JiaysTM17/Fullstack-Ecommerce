@@ -226,7 +226,7 @@ export default function OrderSuccessPage() {
             className="shopee-btn shopee-btn-secondary"
             style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', textAlign: 'center', borderRadius: '10px', textDecoration: 'none' }}
           >
-            {t('order_continue_shopping_btn', 'Tiếp tục mua sắm')}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><HomeIcon size={15} color="#2563eb" /> {t('order_continue_shopping_btn', 'Tiếp tục mua sắm')}</span>
           </Link>
         </div>
       </div>

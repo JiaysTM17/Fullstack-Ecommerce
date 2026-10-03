@@ -23,10 +23,10 @@ const EmptyState = ({
       <div className="shopee-empty-icon">
         {icon || (
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="20" y="35" width="60" height="45" rx="4" stroke="#d0d0d0" strokeWidth="3" fill="#fcfcfc" />
-            <path d="M15 35L26 18H74L85 35H15Z" stroke="#d0d0d0" strokeWidth="3" fill="#f4f4f4" />
-            <path d="M38 48C38 54.6274 43.3726 60 50 60C56.6274 60 62 54.6274 62 48" stroke="#d0d0d0" strokeWidth="3" strokeLinecap="round" />
-            <line x1="32" y1="26" x2="68" y2="26" stroke="#e0e0e0" strokeWidth="3" strokeLinecap="round" />
+            <rect x="20" y="35" width="60" height="45" rx="4" stroke="#cbd5e1" strokeWidth="3" fill="#f8fafc" />
+            <path d="M15 35L26 18H74L85 35H15Z" stroke="#94a3b8" strokeWidth="3" fill="#eff6ff" />
+            <path d="M38 48C38 54.6274 43.3726 60 50 60C56.6274 60 62 54.6274 62 48" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" />
+            <line x1="32" y1="26" x2="68" y2="26" stroke="#93c5fd" strokeWidth="3" strokeLinecap="round" />
           </svg>
         )}
       </div>

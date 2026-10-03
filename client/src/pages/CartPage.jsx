@@ -253,6 +253,9 @@ export default function CartPage() {
                 textAlign: "center",
               }}
             >
+              <div style={{ marginBottom: "12px", display: "flex", justifyContent: "center" }}>
+                <CartIcon size={44} color="#ea580c" />
+              </div>
               <div style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)" }}>
                 {t('empty_cart_title', 'Giỏ hàng chính hiện đang trống')}
               </div>
@@ -264,7 +267,7 @@ export default function CartPage() {
                 className="shopee-btn shopee-btn-secondary"
                 style={{ padding: "6px 16px", fontSize: "13px", textDecoration: "none", display: "inline-block" }}
               >
-                {t('start_shopping', 'Tiếp tục mua sắm')}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><HomeIcon size={14} color="#2563eb" /> {t('start_shopping', 'Tiếp tục mua sắm')}</span>
               </Link>
             </div>
           ) : (
@@ -445,7 +448,7 @@ export default function CartPage() {
                 }}
               >
                 <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary, #475569)", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <PencilIcon size={13} color="#64748b" /> Lời nhắn cho Người bán:
+                  <PencilIcon size={13} color="#2563eb" /> Lời nhắn cho Người bán:
                 </span>
                 <input
                   type="text"
