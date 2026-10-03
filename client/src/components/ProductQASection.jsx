@@ -368,9 +368,13 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                 cursor: !newQuestionText.trim() ? "not-allowed" : "pointer",
                 transition: "all 0.15s ease",
                 whiteSpace: "nowrap",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
               }}
             >
-              {submitting ? "Đang gửi..." : "Gửi câu hỏi"}
+              <ChatIcon size={14} color={!newQuestionText.trim() ? "#94a3b8" : "#ffffff"} />
+              <span>{submitting ? "Đang gửi..." : "Gửi câu hỏi"}</span>
             </button>
           </div>
         </div>
@@ -553,9 +557,13 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           border: "none",
                           borderRadius: "6px",
                           cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
                         }}
                       >
-                        Gửi
+                        <ChatIcon size={12} color="#ffffff" />
+                        <span>Gửi</span>
                       </button>
                       <button
                         type="button"
@@ -570,6 +578,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           border: "1px solid #cbd5e1",
                           borderRadius: "6px",
                           cursor: "pointer",
+                          color: "#64748b",
                         }}
                       >
                         Hủy
