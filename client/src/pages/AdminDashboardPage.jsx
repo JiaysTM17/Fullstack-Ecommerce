@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -35,6 +35,7 @@ import {
   PlusIcon,
   BookOpenIcon,
   FoodIcon,
+  SearchIcon,
 } from '../components/OrdersIcons';
 import '../styles/dashboard.css';
 
@@ -133,6 +134,8 @@ export default function AdminDashboardPage() {
   });
   const [users, setUsers] = useState(INITIAL_ALL_USERS);
   const [moderationProducts, setModerationProducts] = useState(INITIAL_MODERATION_PRODUCTS);
+  const [productModerationFilter, setProductModerationFilter] = useState('all');
+  const [productSearch, setProductSearch] = useState('');
   const [categories, setCategories] = useState(INITIAL_CATEGORIES);
   const [newCatName, setNewCatName] = useState('');
   const [newCatIcon, setNewCatIcon] = useState('package');
@@ -224,6 +227,17 @@ export default function AdminDashboardPage() {
   const totalActiveShops = shops.filter(s => s.status === 'active').length;
   const totalProducts = shops.reduce((sum, s) => sum + (s.productsCount || 0), 0);
   const platformCommission = Math.round(totalPlatformRevenue * 0.05); // 5% take rate
+
+  const filteredModerationProducts = useMemo(() => {
+    return moderationProducts.filter(p => {
+      if (productModerationFilter !== 'all' && p.status !== productModerationFilter) return false;
+      if (productSearch.trim()) {
+        const q = productSearch.toLowerCase().trim();
+        return (p.name || '').toLowerCase().includes(q) || (p.shopName || '').toLowerCase().includes(q);
+      }
+      return true;
+    });
+  }, [moderationProducts, productModerationFilter, productSearch]);
 
   const handleApproveShop = (shopId) => {
     setShops(prev => {
@@ -1035,7 +1049,7 @@ export default function AdminDashboardPage() {
         {/* TAB: KIỂM DUYỆT SẢN PHẨM TOÀN SÀN */}
         {activeTab === 'products' && (
           <div className="shopee-table-card">
-            <div className="shopee-table-header">
+            <div className="shopee-table-header" style={{ marginBottom: '16px' }}>
               <div>
                 <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 700 }}>
                   Kiểm Duyệt Sản Phẩm Toàn Sàn ({moderationProducts.length})
@@ -1043,6 +1057,72 @@ export default function AdminDashboardPage() {
                 <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
                   Phê duyệt sản phẩm mới đăng của các shop trước khi xuất hiện trên sàn hoặc xử lý sản phẩm vi phạm.
                 </p>
+              </div>
+            </div>
+
+            {/* Toolbar: Filter Tabs & Search */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '16px', borderBottom: '1px solid var(--border-light, #f1f5f9)', paddingBottom: '12px' }}>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className={`seller-tab-btn ${productModerationFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setProductModerationFilter('all')}
+                >
+                  Tất cả ({moderationProducts.length})
+                </button>
+                <button
+                  type="button"
+                  className={`seller-tab-btn ${productModerationFilter === 'pending' ? 'active' : ''}`}
+                  onClick={() => setProductModerationFilter('pending')}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <ClockIcon size={12} color="#d97706" />
+                    <span>Chờ duyệt ({moderationProducts.filter(p => p.status === 'pending').length})</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`seller-tab-btn ${productModerationFilter === 'approved' ? 'active' : ''}`}
+                  onClick={() => setProductModerationFilter('approved')}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckIcon size={12} color="#059669" />
+                    <span>Đã duyệt ({moderationProducts.filter(p => p.status === 'approved').length})</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`seller-tab-btn ${productModerationFilter === 'rejected' ? 'active' : ''}`}
+                  onClick={() => setProductModerationFilter('rejected')}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <CloseIcon size={12} color="#dc2626" />
+                    <span>Từ chối / Gỡ ({moderationProducts.filter(p => p.status === 'rejected').length})</span>
+                  </span>
+                </button>
+              </div>
+
+              <div style={{ position: 'relative', minWidth: '240px' }}>
+                <input
+                  type="text"
+                  className="shopee-form-input"
+                  placeholder="Tìm kiếm sản phẩm, shop..."
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  style={{ padding: '6px 12px 6px 32px', fontSize: '13px', borderRadius: '6px' }}
+                />
+                <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+                  <SearchIcon size={13} color="#94a3b8" />
+                </span>
+                {productSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setProductSearch('')}
+                    style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center' }}
+                  >
+                    <CloseIcon size={11} color="#94a3b8" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1060,76 +1140,84 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {moderationProducts.map((p) => (
-                    <tr key={p.id}>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <img src={p.image} alt={p.name} style={{ width: '38px', height: '38px', borderRadius: '4px', objectFit: 'cover' }} />
-                          <strong style={{ fontSize: '13px' }}>{p.name}</strong>
-                        </div>
-                      </td>
-                      <td>
-                        <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{p.shopName}</span>
-                      </td>
-                      <td>{p.category}</td>
-                      <td style={{ fontWeight: 700 }}>{formatCurrency(p.price)}</td>
-                      <td>{p.stock}</td>
-                      <td>
-                        <span
-                          className="shopee-status-badge"
-                          style={{
-                            background: p.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : p.status === 'pending' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(239, 68, 68, 0.1)',
-                            color: p.status === 'approved' ? '#059669' : p.status === 'pending' ? '#d97706' : '#dc2626',
-                            fontWeight: 700,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                          }}
-                        >
-                          {p.status === 'approved' ? (
-                            <>
-                              <CheckIcon size={12} color="#059669" />
-                              <span>Đã Duyệt</span>
-                            </>
-                          ) : p.status === 'pending' ? (
-                            <>
-                              <ClockIcon size={12} color="#d97706" />
-                              <span>Chờ Duyệt</span>
-                            </>
-                          ) : (
-                            <>
-                              <CloseIcon size={12} color="#dc2626" />
-                              <span>Từ Chối / Gỡ Bỏ</span>
-                            </>
-                          )}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        {p.status !== 'approved' && (
-                          <button
-                            type="button"
-                            className="shopee-btn shopee-btn-sm"
-                            style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #10b981', marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                            onClick={() => handleApproveProduct(p.id)}
-                          >
-                            <CheckIcon size={12} color="#059669" />
-                            <span>Duyệt Bán</span>
-                          </button>
-                        )}
-                        {p.status !== 'rejected' && (
-                          <button
-                            type="button"
-                            className="shopee-btn shopee-btn-sm"
-                            style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #ef4444', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                            onClick={() => handleRejectProduct(p.id)}
-                          >
-                            <CloseIcon size={12} color="#dc2626" />
-                            <span>Gỡ Bỏ</span>
-                          </button>
-                        )}
+                  {filteredModerationProducts.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
+                        Không có sản phẩm nào phù hợp với điều kiện kiểm duyệt.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredModerationProducts.map((p) => (
+                      <tr key={p.id}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <img src={p.image} alt={p.name} style={{ width: '38px', height: '38px', borderRadius: '4px', objectFit: 'cover' }} />
+                            <strong style={{ fontSize: '13px' }}>{p.name}</strong>
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{p.shopName}</span>
+                        </td>
+                        <td>{p.category}</td>
+                        <td style={{ fontWeight: 700 }}>{formatCurrency(p.price)}</td>
+                        <td>{p.stock}</td>
+                        <td>
+                          <span
+                            className="shopee-status-badge"
+                            style={{
+                              background: p.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : p.status === 'pending' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(239, 68, 68, 0.1)',
+                              color: p.status === 'approved' ? '#059669' : p.status === 'pending' ? '#d97706' : '#dc2626',
+                              fontWeight: 700,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
+                          >
+                            {p.status === 'approved' ? (
+                              <>
+                                <CheckIcon size={12} color="#059669" />
+                                <span>Đã Duyệt</span>
+                              </>
+                            ) : p.status === 'pending' ? (
+                              <>
+                                <ClockIcon size={12} color="#d97706" />
+                                <span>Chờ Duyệt</span>
+                              </>
+                            ) : (
+                              <>
+                                <CloseIcon size={12} color="#dc2626" />
+                                <span>Từ Chối / Gỡ Bỏ</span>
+                              </>
+                            )}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          {p.status !== 'approved' && (
+                            <button
+                              type="button"
+                              className="shopee-btn shopee-btn-sm"
+                              style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #10b981', marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              onClick={() => handleApproveProduct(p.id)}
+                            >
+                              <CheckIcon size={12} color="#059669" />
+                              <span>Duyệt Bán</span>
+                            </button>
+                          )}
+                          {p.status !== 'rejected' && (
+                            <button
+                              type="button"
+                              className="shopee-btn shopee-btn-sm"
+                              style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #ef4444', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              onClick={() => handleRejectProduct(p.id)}
+                            >
+                              <CloseIcon size={12} color="#dc2626" />
+                              <span>Gỡ Bỏ</span>
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1177,7 +1265,7 @@ export default function AdminDashboardPage() {
                 style={{ flex: 1 }}
               />
               <button type="submit" className="shopee-btn shopee-btn-primary" style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <PlusIcon size={14} />
+                <PlusIcon size={14} color="#ffffff" />
                 <span>Thêm Danh Mục</span>
               </button>
             </form>
