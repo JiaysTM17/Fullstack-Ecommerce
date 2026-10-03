@@ -321,8 +321,20 @@ const CheckoutForm = ({
                   disabled={loading}
                 />
                 <div>
-                  <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    {method.id === 'COD' ? <TruckIcon size={16} color="#16a34a" /> : method.id === 'BANK_TRANSFER' ? <QrCodeIcon size={16} color="#2563eb" /> : <CreditCardIcon size={16} color="#ec4899" />}
+                  <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    {method.id === 'COD' ? (
+                      <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TruckIcon size={13} color="#16a34a" />
+                      </span>
+                    ) : method.id === 'BANK_TRANSFER' ? (
+                      <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <QrCodeIcon size={13} color="#2563eb" />
+                      </span>
+                    ) : (
+                      <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#fce7f3', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CreditCardIcon size={13} color="#db2777" />
+                      </span>
+                    )}
                     <span>{method.label}</span>
                   </strong>
                   {method.desc && (
@@ -350,7 +362,9 @@ const CheckoutForm = ({
             </>
           ) : (
             <>
-              <ShieldCheckIcon size={16} color="#ffffff" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheckIcon size={14} color="#ffffff" />
+              </span>
               <span>{submitButtonText}</span>
             </>
           )}
