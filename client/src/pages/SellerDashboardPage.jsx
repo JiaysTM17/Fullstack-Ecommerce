@@ -2590,7 +2590,9 @@ export default function SellerDashboardPage() {
                   className={`seller-tab-btn ${orderStatusFilter === 'cancelled' ? 'active' : ''}`}
                   onClick={() => setOrderStatusFilter('cancelled')}
                 >
-                  Đã hủy ({shopOrders.filter(o => o.status === 'cancelled').length})
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <CloseIcon size={12} color="#ef4444" /> Đã hủy ({shopOrders.filter(o => o.status === 'cancelled').length})
+                  </span>
                 </button>
               </div>
 
@@ -2724,7 +2726,7 @@ export default function SellerDashboardPage() {
                                 onClick={() => handleUpdateOrderStatus(ord.orderId, 'completed', 'Đã hoàn thành')}
                                 style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               >
-                                <CheckIcon size={13} color="#ffffff" /> Giao thành công
+                                <CheckIcon size={13} color="#15803d" /> Giao thành công
                               </button>
                             )}
 
