@@ -64,16 +64,19 @@ const QuantityControl = ({
 
   const sizeClass = size === 'sm' ? 'shopee-qty-sm' : size === 'lg' ? 'shopee-qty-lg' : 'shopee-qty-md';
 
+  const isDecDisabled = disabled || currentVal <= min;
+  const isIncDisabled = disabled || currentVal >= max;
+
   return (
     <div className={`shopee-qty-control ${sizeClass}`}>
       <button
         type="button"
-        className="shopee-qty-btn"
+        className="shopee-qty-btn shopee-qty-btn-minus"
         onClick={handleDecrease}
-        disabled={disabled || currentVal <= min}
+        disabled={isDecDisabled}
         aria-label="Giảm số lượng"
       >
-        <MinusIcon size={size === 'sm' ? 10 : 12} color={disabled || currentVal <= min ? "#cbd5e1" : "#475569"} />
+        <MinusIcon size={size === 'sm' ? 10 : 12} color={isDecDisabled ? "#cbd5e1" : "#64748b"} />
       </button>
 
       <input
@@ -89,12 +92,12 @@ const QuantityControl = ({
 
       <button
         type="button"
-        className="shopee-qty-btn"
+        className="shopee-qty-btn shopee-qty-btn-plus"
         onClick={handleIncrease}
-        disabled={disabled || currentVal >= max}
+        disabled={isIncDisabled}
         aria-label="Tăng số lượng"
       >
-        <PlusIcon size={size === 'sm' ? 10 : 12} color={disabled || currentVal >= max ? "#cbd5e1" : "#ea580c"} />
+        <PlusIcon size={size === 'sm' ? 10 : 12} color={isIncDisabled ? "#cbd5e1" : "#ea580c"} />
       </button>
     </div>
   );

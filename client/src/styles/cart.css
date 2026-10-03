@@ -90,11 +90,19 @@
   justify-content: center;
   cursor: pointer;
   padding: 0;
-  transition: background-color var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .shopee-qty-btn:hover:not(:disabled) {
   background-color: var(--bg-hover);
+}
+
+.shopee-qty-btn-plus:hover:not(:disabled) {
+  background-color: rgba(234, 88, 12, 0.08);
+}
+
+.shopee-qty-btn-minus:hover:not(:disabled) {
+  background-color: rgba(100, 116, 139, 0.1);
 }
 
 .shopee-qty-btn:disabled {
