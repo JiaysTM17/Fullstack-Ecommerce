@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  getVouchers, applyVoucher, createVoucher, deleteVoucher,
+  getVouchers, applyVoucher, applyDualVouchers, createVoucher, deleteVoucher,
   validateVoucher, getMyVouchers, getVoucherStats,
 } from "../controllers/voucherController.js";
 import { authenticate, authorize } from "../middlewares/auth.js";
@@ -10,6 +10,7 @@ const router = express.Router();
 // Public
 router.get("/", getVouchers);
 router.post("/apply", applyVoucher);
+router.post("/apply-dual", applyDualVouchers);
 
 // Authenticated
 router.post("/validate", authenticate, validateVoucher);

@@ -282,6 +282,11 @@ const INITIAL_SHOPS = [
   { _id: "shop_12", shopId: "shop_12", slug: "luxetime-dong-ho", name: "LuxeTime Đồng Hồ Cơ Khí", ownerId: "user_seller_02", logo: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=200", banner: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200", phone: "0901999888", address: "Kho Ba Đình, Hà Nội", description: "Đồng hồ cơ automatic, kính sapphire.", bankAccount: { bankName: "Vietcombank", accountNumber: "0071009998881", accountName: "LUXETIME" }, commissionRate: 0.05, status: "active", lockReason: "", rating: 4.98, reviewCount: 1780, followers: 21300, responseRate: 100, responseTime: "Trong 2 phút", isOfficial: true, badges: ["Shopee Mall", "Bảo Hành Thụy Sĩ 5N"], createdAt: new Date().toISOString() },
 ];
 
+INITIAL_SHOPS.forEach(shop => {
+  shop.walletBalance = 0;
+  shop.walletTransactions = [];
+});
+
 // Load 109 products from extracted JSON
 let INITIAL_PRODUCTS = [];
 try {

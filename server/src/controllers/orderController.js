@@ -9,7 +9,11 @@ import { sendSuccess, sendError } from "../utils/response.js";
 // @access  Public (guest checkout) or Private (authenticated)
 export const createOrder = async (req, res) => {
   try {
-    const { customer, items, subtotal, shippingFee, shippingDiscount, voucherCode, voucherDiscount, coinsUsed, coinDiscount, total, paymentMethod } = req.body;
+    const { 
+      customer, items, subtotal, shippingFee, shippingDiscount, 
+      voucherCode, voucherDiscount, shippingVoucherCode, shippingVoucherDiscount, 
+      coinsUsed, coinDiscount, total, paymentMethod 
+    } = req.body;
 
     // Validate required fields
     if (!customer?.fullName || !customer?.phone || !customer?.address) {
@@ -21,6 +25,23 @@ export const createOrder = async (req, res) => {
     if (!total || total <= 0) {
       return sendError(res, "Tổng tiền thanh toán không hợp lệ", 400);
     }
+
+    // === MINI XU CAP (50% of subtotal) ===
+    let effectiveCoinDiscount = Number(coinDiscount) || 0;
+    let effectiveCoinsUsed = Number(coinsUsed) || 0;
+    let coinDiscountOriginal = undefined;
+
+    const maxCoinDiscount = Math.floor((Number(subtotal) || 0) * 0.5);
+    if (effectiveCoinDiscount > maxCoinDiscount) {
+      coinDiscountOriginal = effectiveCoinDiscount;
+      effectiveCoinDiscount = maxCoinDiscount;
+      effectiveCoinsUsed = Math.min(effectiveCoinsUsed, effectiveCoinDiscount);
+    }
+    
+    const calculatedTotal = (Number(subtotal) || 0) + (Number(shippingFee) || 0) 
+      - (Number(shippingDiscount) || 0) - (Number(voucherDiscount) || 0) 
+      - (Number(shippingVoucherDiscount) || 0) - effectiveCoinDiscount;
+    const finalTotal = calculatedTotal > 0 ? calculatedTotal : 0;
 
     // === STOCK DEDUCTION — Decrease product stock for each item ===
     for (const item of items) {
@@ -44,13 +65,21 @@ export const createOrder = async (req, res) => {
         await voucher.save();
       }
     }
+    
+    if (shippingVoucherCode) {
+      const shippingVoucher = await memoryStore.vouchers.findOne({ code: shippingVoucherCode.toUpperCase() });
+      if (shippingVoucher) {
+        shippingVoucher.usedCount = (shippingVoucher.usedCount || 0) + 1;
+        await shippingVoucher.save();
+      }
+    }
 
     // === COINS DEDUCTION — Deduct from user balance ===
     const userId = req.user ? (req.user._id || req.user.id) : null;
-    if (userId && coinsUsed > 0) {
+    if (userId && effectiveCoinsUsed > 0) {
       const user = await User.findById(userId);
       if (user) {
-        user.coins = Math.max(0, (user.coins || 0) - coinsUsed);
+        user.coins = Math.max(0, (user.coins || 0) - effectiveCoinsUsed);
         await user.save();
       }
     }
@@ -78,9 +107,12 @@ export const createOrder = async (req, res) => {
       shippingDiscount: Number(shippingDiscount) || 0,
       voucherCode: voucherCode || "",
       voucherDiscount: Number(voucherDiscount) || 0,
-      coinsUsed: Number(coinsUsed) || 0,
-      coinDiscount: Number(coinDiscount) || 0,
-      total: Number(total),
+      shippingVoucherCode: shippingVoucherCode || "",
+      shippingVoucherDiscount: Number(shippingVoucherDiscount) || 0,
+      coinsUsed: effectiveCoinsUsed,
+      coinDiscount: effectiveCoinDiscount,
+      ...(coinDiscountOriginal !== undefined && { coinDiscountOriginal }),
+      total: finalTotal,
       paymentMethod: paymentMethod || "COD",
       status: "pending",
       trackingCode: `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`,
@@ -696,9 +728,106 @@ export const completeOrder = async (req, res) => {
     if (Array.isArray(order.timeline)) {
       order.timeline.push({ time: new Date().toISOString(), text: "Đơn hàng đã hoàn thành" });
     }
+
+    // ======== AUTO-CREDIT SELLER WALLET ========
+    const shopTotals = {};
+    for (const item of order.items || []) {
+      const sId = item.shopId || "shop_01";
+      if (!shopTotals[sId]) shopTotals[sId] = 0;
+      shopTotals[sId] += (item.price || 0) * (item.quantity || 1);
+    }
+    
+    for (const [shopId, shopRevenue] of Object.entries(shopTotals)) {
+      // Find shop in memoryStore
+      const shop = memoryStore.shops?.data?.find(s => s.shopId === shopId || s._id === shopId || s.id === shopId) 
+                || memoryStore.INITIAL_SHOPS?.find(s => s.shopId === shopId || s._id === shopId || s.id === shopId);
+      
+      // We know memoryStore exports some data. We'll search across all possibilities
+      // In memoryStore.js, shops is often manipulated directly, let's use the find utility or just iterate INITIAL_SHOPS if no dedicated shop model
+      // Looking at earlier memoryStore, memoryStore.shops is an instance of MemoryQuery if accessed? 
+      // Actually, we can just use memoryStore.shops.findOne({ shopId }) or iterate.
+      const shopObj = typeof memoryStore.shops?.findOne === "function" ? await memoryStore.shops.findOne({ $or: [{ shopId }, { _id: shopId }, { id: shopId }] }) : null;
+      if (shopObj) {
+        const commission = Math.round(shopRevenue * (shopObj.commissionRate || 0.05));
+        const netPayout = shopRevenue - commission;
+        shopObj.walletBalance = (shopObj.walletBalance || 0) + netPayout;
+        if (!shopObj.walletTransactions) shopObj.walletTransactions = [];
+        shopObj.walletTransactions.push({
+          type: 'order_completed',
+          orderId: order._id || order.id || order.orderId,
+          amount: netPayout,
+          commission,
+          timestamp: new Date().toISOString()
+        });
+        if (typeof shopObj.save === "function") await shopObj.save();
+      }
+    }
+    // ===========================================
+
     await order.save();
 
     sendSuccess(res, { order, message: "Đơn hàng đã hoàn thành" });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Return an existing order
+// @route   PATCH /api/orders/:id/return
+// @access  Private
+export const returnOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+    if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
+
+    if (!["delivered", "completed"].includes(order.status)) {
+      return sendError(res, "Chỉ có thể trả hàng cho đơn đã giao hoặc đã hoàn thành", 400);
+    }
+
+    const deliveryTime = order.deliveredAt ? new Date(order.deliveredAt).getTime() : new Date(order.updatedAt).getTime();
+    if (Date.now() - deliveryTime > 7 * 24 * 60 * 60 * 1000) {
+      return sendError(res, "Đã quá thời hạn 7 ngày để trả hàng", 400);
+    }
+
+    order.status = "returning";
+    order.returningAt = new Date().toISOString();
+    if (Array.isArray(order.timeline)) {
+      order.timeline.push({ time: new Date().toISOString(), text: "Yêu cầu trả hàng đã được gửi" });
+    }
+
+    // Restore stock
+    const { Product } = await import("../models/Product.js").catch(() => ({}));
+    if (Product) {
+      for (const item of order.items || []) {
+        const prodId = item.productId || item.product || item._id || item.id;
+        if (prodId) {
+          const product = await Product.findOne({ $or: [{ _id: prodId }, { id: prodId }] });
+          if (product) {
+            product.stock = (product.stock || 0) + (item.quantity || 1);
+            product.sold = Math.max(0, (product.sold || 0) - (item.quantity || 1));
+            await product.save();
+          }
+        }
+      }
+    }
+
+    // Refund coins
+    const coinsToRefund = order.coinsUsed || 0;
+    if (coinsToRefund > 0 && order.userId) {
+      const { default: User } = await import("../models/User.js").catch(() => ({}));
+      if (User) {
+        const user = await User.findById(order.userId);
+        if (user) {
+          user.coins = (user.coins || 0) + coinsToRefund;
+          await user.save();
+        }
+      }
+    }
+
+    await order.save();
+
+    sendSuccess(res, { order, message: "Yêu cầu trả hàng thành công" });
   } catch (error) {
     sendError(res, error.message, 500);
   }

@@ -435,7 +435,32 @@ export const updateSellerOrderStatus = async (req, res) => {
     order.status = status;
     if (status === "shipping") order.statusText = "Đang giao hàng";
     else if (status === "completed") order.statusText = "Đã hoàn thành";
-    else if (status === "cancelled") order.statusText = "Đã hủy";
+    else if (status === "cancelled") {
+      order.statusText = "Đã hủy";
+      if (!Array.isArray(order.timeline)) order.timeline = [];
+      order.timeline.push({ time: new Date().toISOString(), text: "Shop đã hủy đơn hàng" });
+      
+      for (const item of order.items || []) {
+        const prodId = item.productId || item.product || item._id || item.id;
+        if (prodId) {
+          const product = await Product.findOne({ $or: [{ _id: prodId }, { id: prodId }] });
+          if (product) {
+            product.stock = (product.stock || 0) + (item.quantity || 1);
+            product.sold = Math.max(0, (product.sold || 0) - (item.quantity || 1));
+            await product.save();
+          }
+        }
+      }
+      
+      const coinsToRefund = order.coinsUsed || 0;
+      if (coinsToRefund > 0 && order.userId) {
+        const user = await User.findById(order.userId);
+        if (user) {
+          user.coins = (user.coins || 0) + coinsToRefund;
+          await user.save();
+        }
+      }
+    }
     else if (status === "confirmed") order.statusText = "Đã xác nhận";
     else if (status === "pending") order.statusText = "Chờ xác nhận";
 

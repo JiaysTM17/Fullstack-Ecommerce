@@ -11,6 +11,7 @@ import {
   shipOrder,
   deliverOrder,
   completeOrder,
+  returnOrder,
   getOrderStats,
   searchOrders,
 } from "../controllers/orderController.js";
@@ -39,6 +40,7 @@ router.patch("/:id/complete", authenticate, completeOrder);
 router.get("/mine", authenticate, getMyOrders);
 router.get("/:id", authenticate, getOrderById);
 router.patch("/:id/cancel", authenticate, cancelOrder);
+router.patch("/:id/return", authenticate, returnOrder);
 router.post("/:id/repurchase", authenticate, repurchaseOrder);
 
 export default router;

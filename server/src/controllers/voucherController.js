@@ -151,7 +151,78 @@ export const deleteVoucher = async (req, res) => {
   }
 };
 
-export default { getVouchers, applyVoucher, createVoucher, deleteVoucher };
+export const applyDualVouchers = async (req, res) => {
+  try {
+    const { shippingVoucherCode, orderVoucherCode, orderSubtotal = 0, shopId } = req.body;
+    
+    let totalDiscount = 0;
+    const result = {
+      shippingVoucher: { valid: false, code: null, discountAmount: 0 },
+      orderVoucher: { valid: false, code: null, discountAmount: 0 },
+      totalDiscount: 0
+    };
+
+    const validateOne = async (code, isShipping) => {
+      if (!code) return { valid: false };
+      const normalized = code.trim().toUpperCase();
+      const voucher = await memoryStore.vouchers.findOne({ code: normalized });
+      
+      if (!voucher) return { valid: false, error: "Mã giảm giá không tồn tại" };
+      if (voucher.expiryDate && new Date(voucher.expiryDate) < new Date()) return { valid: false, error: "Đã hết hạn" };
+      if (voucher.usageLimit && voucher.usedCount >= voucher.usageLimit) return { valid: false, error: "Đã hết lượt sử dụng" };
+      if (!voucher.isGlobal && voucher.shopId && shopId && voucher.shopId !== shopId) return { valid: false, error: "Không áp dụng cho shop này" };
+      if (voucher.minOrderValue > 0 && orderSubtotal > 0 && orderSubtotal < voucher.minOrderValue) return { valid: false, error: "Chưa đạt giá trị tối thiểu" };
+      
+      if (isShipping && voucher.type !== "shipping") return { valid: false, error: "Không phải mã vận chuyển" };
+      if (!isShipping && voucher.type === "shipping") return { valid: false, error: "Không phải mã giảm giá đơn hàng" };
+      
+      let discountAmount = 0;
+      if (voucher.type === "percent" || voucher.type === "percentage") {
+        const base = orderSubtotal > 0 ? orderSubtotal : 100000;
+        discountAmount = Math.round((base * Math.min(100, voucher.value)) / 100);
+        if (voucher.maxDiscount && discountAmount > voucher.maxDiscount) {
+          discountAmount = voucher.maxDiscount;
+        }
+      } else {
+        discountAmount = Number(voucher.value) || 0;
+      }
+      
+      if (orderSubtotal > 0 && discountAmount > orderSubtotal && voucher.type !== "shipping") {
+        discountAmount = orderSubtotal;
+      }
+      
+      return { valid: true, code: voucher.code, discountAmount };
+    };
+
+    if (shippingVoucherCode) {
+      const sv = await validateOne(shippingVoucherCode, true);
+      if (sv.valid) {
+        result.shippingVoucher = { valid: true, code: sv.code, discountAmount: sv.discountAmount };
+        totalDiscount += sv.discountAmount;
+      } else {
+        result.shippingVoucher.error = sv.error;
+      }
+    }
+    
+    if (orderVoucherCode) {
+      const ov = await validateOne(orderVoucherCode, false);
+      if (ov.valid) {
+        result.orderVoucher = { valid: true, code: ov.code, discountAmount: ov.discountAmount };
+        totalDiscount += ov.discountAmount;
+      } else {
+        result.orderVoucher.error = ov.error;
+      }
+    }
+    
+    result.totalDiscount = totalDiscount;
+    
+    sendSuccess(res, result);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+export default { getVouchers, applyVoucher, applyDualVouchers, createVoucher, deleteVoucher };
 
 // @desc    Validate a voucher code without applying
 // @route   POST /api/vouchers/validate
