@@ -76,7 +76,9 @@ const QuantityControl = ({
         disabled={isDecDisabled}
         aria-label="Giảm số lượng"
       >
-        <MinusIcon size={size === 'sm' ? 10 : 12} color={isDecDisabled ? "#cbd5e1" : "#64748b"} />
+        <span style={{ width: size === 'sm' ? '16px' : '18px', height: size === 'sm' ? '16px' : '18px', borderRadius: '4px', background: isDecDisabled ? 'transparent' : '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <MinusIcon size={size === 'sm' ? 10 : 12} color={isDecDisabled ? "#cbd5e1" : "#475569"} />
+        </span>
       </button>
 
       <input
@@ -97,7 +99,9 @@ const QuantityControl = ({
         disabled={isIncDisabled}
         aria-label="Tăng số lượng"
       >
-        <PlusIcon size={size === 'sm' ? 10 : 12} color={isIncDisabled ? "#cbd5e1" : "#ea580c"} />
+        <span style={{ width: size === 'sm' ? '16px' : '18px', height: size === 'sm' ? '16px' : '18px', borderRadius: '4px', background: isIncDisabled ? 'transparent' : '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <PlusIcon size={size === 'sm' ? 10 : 12} color={isIncDisabled ? "#cbd5e1" : "#ea580c"} />
+        </span>
       </button>
     </div>
   );
