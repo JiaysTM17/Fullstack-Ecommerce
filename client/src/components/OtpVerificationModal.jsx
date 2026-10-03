@@ -224,7 +224,7 @@ export default function OtpVerificationModal({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '8px',
               background: '#eff6ff',
               border: '1px solid #bfdbfe',
               padding: '6px 14px',
@@ -235,11 +235,16 @@ export default function OtpVerificationModal({
               marginBottom: '16px',
             }}
           >
-            <MailIcon size={14} color="#1d4ed8" />
+            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MailIcon size={12} color="#1d4ed8" />
+            </span>
             <span>{displayEmail}</span>
             {displayPhone && (
-              <span style={{ color: '#93c5fd', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                • <PhoneIcon size={12} color="#1d4ed8" /> {displayPhone}
+              <span style={{ color: '#93c5fd', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                • <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PhoneIcon size={11} color="#1d4ed8" />
+                </span>
+                <span>{displayPhone}</span>
               </span>
             )}
           </div>
@@ -414,12 +419,16 @@ export default function OtpVerificationModal({
                 gap: '4px',
               }}
             >
-              <RefreshIcon size={12} color="#2563eb" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#eff6ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <RefreshIcon size={11} color="#2563eb" />
+              </span>
               <span>Gửi lại mã OTP mới</span>
             </span>
           ) : (
-            <span style={{ color: '#94a3b8', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <ClockIcon size={13} color="#2563eb" />
+            <span style={{ color: '#94a3b8', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ClockIcon size={11} color="#2563eb" />
+              </span>
               <span>Yêu cầu gửi lại sau <strong style={{ color: '#2563eb' }}>{countdown}s</strong></span>
             </span>
           )}
