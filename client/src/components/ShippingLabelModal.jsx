@@ -122,14 +122,16 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
         </div>
 
         {/* Buttons */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+        <div style={{ display: 'flex', borderTop: '1px solid #e2e8f0', paddingTop: '16px', justifyContent: 'flex-end', gap: '10px' }}>
           <button
             type="button"
             className="shopee-btn shopee-btn-secondary"
             onClick={onClose}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '7px 16px', fontSize: '12.5px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 16px', fontSize: '12.5px' }}
           >
-            <CloseIcon size={13} color="#64748b" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e2e8f0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={10} color="#64748b" />
+            </span>
             <span>Đóng</span>
           </button>
           <button
@@ -138,7 +140,9 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             onClick={() => window.print()}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 20px', fontSize: '12.5px', fontWeight: 700 }}
           >
-            <PrinterIcon size={14} color="#ffffff" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PrinterIcon size={11} color="#ffffff" />
+            </span>
             <span>In Vận Đơn Ngay</span>
           </button>
         </div>
