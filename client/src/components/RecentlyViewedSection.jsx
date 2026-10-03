@@ -5,7 +5,7 @@ import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { formatCurrency } from "../utils/formatCurrency";
 import { getRecentlyViewed, clearRecentlyViewed } from "../services/recentlyViewedService";
-import { EyeIcon, TrashIcon, CartIcon, ChevronLeftIcon, ChevronRightIcon } from "./OrdersIcons";
+import { EyeIcon, TrashIcon, CartIcon, ChevronLeftIcon, ChevronRightIcon, ClockIcon } from "./OrdersIcons";
 
 export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = true, onProductClick }) {
   const [recentItems, setRecentItems] = useState([]);
@@ -112,10 +112,22 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
           borderBottom: "1px solid var(--border-medium, #f1f5f9)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", color: "var(--primary-color, #ea580c)" }}>
-            <EyeIcon size={20} color="#0284c7" />
-          </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "10px",
+              background: "linear-gradient(135deg, #0284c7, #0369a1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 3px 8px rgba(2, 132, 199, 0.28)",
+              flexShrink: 0,
+            }}
+          >
+            <ClockIcon size={18} color="#ffffff" />
+          </div>
           <div>
             <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
               {t("recently_viewed", "Sản phẩm bạn vừa xem")}
@@ -157,9 +169,12 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
       </div>
 
       {recentItems.length === 0 ? (
-        <p style={{ textAlign: "center", color: "var(--text-muted, #94a3b8)", fontSize: "13.5px", margin: "20px 0" }}>
-          Bạn chưa xem sản phẩm nào gần đây.
-        </p>
+        <div style={{ textAlign: "center", color: "var(--text-muted, #94a3b8)", padding: "30px 0" }}>
+          <div style={{ marginBottom: "8px", display: "flex", justifyContent: "center" }}>
+            <EyeIcon size={32} color="#cbd5e1" />
+          </div>
+          <p style={{ margin: 0, fontSize: "13.5px" }}>Bạn chưa xem sản phẩm nào gần đây.</p>
+        </div>
       ) : (
         <div style={{ position: "relative" }}>
           {/* Left Scroll Navigation Button */}
