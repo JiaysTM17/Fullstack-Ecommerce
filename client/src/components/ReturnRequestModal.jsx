@@ -159,11 +159,11 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 marginRight: '6px',
               }}
             >
-              <ArrowLeftIcon size={12} />
+              <ArrowLeftIcon size={12} color="#2563eb" />
               <span>Quay lại</span>
             </button>
           )}
-          <ReturnIcon size={18} color="#2563eb" />
+          <ReturnIcon size={18} color="#9333ea" />
             <div>
               <h3
                 style={{
@@ -196,7 +196,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               borderRadius: '6px',
             }}
           >
-            <CloseIcon size={14} />
+            <CloseIcon size={14} color="#64748b" />
           </button>
         </div>
 
@@ -228,7 +228,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 gap: '6px',
               }}
             >
-              <AlertCircleIcon size={15} />
+              <AlertCircleIcon size={15} color="#ef4444" />
               <span>{errorMsg}</span>
             </div>
           )}
@@ -508,7 +508,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               <span style={{ fontSize: '11px', color: note.trim().length >= 10 ? '#059669' : '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 {note.trim().length >= 10 ? (
                   <>
-                    <CheckIcon size={11} />
+                    <CheckIcon size={11} color="#059669" />
                     <span>Đạt yêu cầu ({note.trim().length} ký tự)</span>
                   </>
                 ) : (
@@ -603,7 +603,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                         padding: 0,
                       }}
                     >
-                      <CloseIcon size={10} />
+                      <CloseIcon size={10} color="#ffffff" />
                     </button>
                     <div
                       style={{
@@ -644,7 +644,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   transition: 'all 0.15s ease',
                 }}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center' }}><CameraIcon size={18} /></span>
+                <span style={{ display: 'inline-flex', alignItems: 'center' }}><CameraIcon size={18} color="#2563eb" /></span>
                 <div>
                   <span style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb' }}>
                     {images.length === 0 ? 'Tải lên hình ảnh / video sản phẩm lỗi hoặc hư hỏng *' : '+ Thêm hình ảnh / video khác'}

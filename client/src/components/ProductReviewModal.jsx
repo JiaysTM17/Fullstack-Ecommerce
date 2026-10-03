@@ -184,7 +184,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 marginRight: '6px',
               }}
             >
-              <ArrowLeftIcon size={13} />
+              <ArrowLeftIcon size={13} color="#2563eb" />
               <span>Quay lại</span>
             </button>
           )}
@@ -220,7 +220,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
               borderRadius: '6px',
             }}
           >
-            <CloseIcon size={14} />
+            <CloseIcon size={14} color="#64748b" />
           </button>
         </div>
 
@@ -423,7 +423,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                       gap: '4px',
                     }}
                   >
-                    {active ? <CheckIcon size={11} /> : '+ '}
+                    {active ? <CheckIcon size={11} color="#2563eb" /> : '+ '}
                     <span>{tag}</span>
                   </button>
                 );
@@ -449,7 +449,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
               >
                 {comment.trim().length >= 10 ? (
                   <>
-                    <CheckIcon size={11} />
+                    <CheckIcon size={11} color="#16a34a" />
                     <span>Đạt yêu cầu ({comment.trim().length} ký tự)</span>
                   </>
                 ) : (

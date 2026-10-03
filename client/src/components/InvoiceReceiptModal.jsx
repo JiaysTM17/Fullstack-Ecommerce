@@ -145,7 +145,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 marginRight: '6px',
               }}
             >
-              <ArrowLeftIcon size={13} />
+              <ArrowLeftIcon size={13} color="#2563eb" />
               <span>Quay lại</span>
             </button>
           )}
@@ -189,7 +189,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 gap: '5px',
               }}
             >
-              <CloseIcon size={12} />
+              <CloseIcon size={12} color="#64748b" />
               <span>Đóng</span>
             </button>
           )}
@@ -270,7 +270,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                   borderRadius: '4px',
                 }}
               >
-                <CheckIcon size={11} />
+                <CheckIcon size={11} color="#15803d" />
                 <span>ĐÃ KÝ ĐIỆN TỬ</span>
               </span>
             </div>

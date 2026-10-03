@@ -123,7 +123,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
                 gap: '4px',
               }}
             >
-              <ArrowLeftIcon size={12} />
+              <ArrowLeftIcon size={12} color="#ffffff" />
               <span>Quay lại</span>
             </button>
           )}
@@ -163,7 +163,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
           }}
           title="Đóng chat"
         >
-          <CloseIcon size={14} />
+          <CloseIcon size={14} color="#ffffff" />
         </button>
       </div>
 
@@ -344,7 +344,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
             transition: 'background 0.2s ease'
           }}
         >
-          <SendIcon size={15} />
+          <SendIcon size={15} color="#ffffff" />
         </button>
       </form>
     </div>
