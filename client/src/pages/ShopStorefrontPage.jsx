@@ -680,7 +680,7 @@ export default function ShopStorefrontPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ color: '#ea580c', display: 'flex', alignItems: 'center' }}>
-                <TicketIcon size={24} />
+                <TicketIcon size={24} color="#ea580c" />
               </span>
               <div>
                 <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
@@ -758,7 +758,7 @@ export default function ShopStorefrontPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--primary-color, #ea580c)' }}>
-              <LayersIcon size={18} />
+              <LayersIcon size={18} color="#ea580c" />
             </span>
             <span style={{ fontSize: '13.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-primary)' }}>
               Danh Mục & Phân Loại Hàng Của Shop
@@ -783,7 +783,7 @@ export default function ShopStorefrontPage() {
                 gap: '4px',
               }}
             >
-              <CloseIcon size={11} />
+              <CloseIcon size={11} color="#ea580c" />
               <span>Bỏ lọc phân loại (Xem tất cả)</span>
             </button>
           )}
@@ -857,7 +857,7 @@ export default function ShopStorefrontPage() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--primary-color, #ea580c)' }}>
-              <ShoppingBagIcon size={22} />
+              <ShoppingBagIcon size={22} color="var(--primary-color, #ea580c)" />
             </span>
             <div>
               <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
@@ -885,7 +885,7 @@ export default function ShopStorefrontPage() {
                 style={{ width: '250px', padding: '8px 14px 8px 34px', fontSize: '13px', borderRadius: '8px' }}
               />
               <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
-                <SearchIcon size={14} />
+                <SearchIcon size={14} color="#94a3b8" />
               </span>
             </div>
 
@@ -908,7 +908,7 @@ export default function ShopStorefrontPage() {
         {matchingProducts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', background: 'var(--bg-card, #ffffff)', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)', color: 'var(--text-muted)' }}>
             <div style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
-              <SearchIcon size={44} />
+              <SearchIcon size={44} color="#cbd5e1" />
             </div>
             <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
               Không tìm thấy sản phẩm nào
@@ -974,7 +974,7 @@ export default function ShopStorefrontPage() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', color: '#f59e0b' }}>
-                    <SparklesIcon size={20} />
+                    <SparklesIcon size={20} color="#f59e0b" />
                   </span>
                   <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
                     Gợi Ý Thêm Sản Phẩm Khác Từ Gian Hàng (Bạn Có Thể Cũng Thích)
@@ -992,7 +992,7 @@ export default function ShopStorefrontPage() {
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   <span>Xem Toàn Bộ {products.length} Sản Phẩm</span>
-                  <ChevronRightIcon size={13} />
+                  <ChevronRightIcon size={13} color="#ea580c" />
                 </span>
               </button>
             </div>

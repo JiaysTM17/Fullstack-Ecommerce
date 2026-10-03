@@ -167,7 +167,7 @@ export default function OrderSuccessPage() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#ffedd5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c' }}>
-              <BoltIcon size={24} />
+              <BoltIcon size={24} color="#ea580c" />
             </div>
             <div>
               <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#ea580c' }}>

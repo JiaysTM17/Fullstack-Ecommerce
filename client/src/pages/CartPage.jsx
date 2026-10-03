@@ -544,7 +544,7 @@ export default function CartPage() {
                 }}
               >
                 <span>{appliedVoucher ? "Đổi mã khác" : "Chọn mã có sẵn"}</span>
-                <ChevronRightIcon size={12} />
+                <ChevronRightIcon size={12} color="var(--primary-color, #ea580c)" />
               </button>
             </div>
 
@@ -585,7 +585,7 @@ export default function CartPage() {
                     onClick={removeDiscountVoucher}
                     style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "3px" }}
                   >
-                    <CloseIcon size={12} /> {t('remove', 'Gỡ')}
+                    <CloseIcon size={12} color="#ef4444" /> {t('remove', 'Gỡ')}
                   </button>
                 </div>
               )}
@@ -609,7 +609,7 @@ export default function CartPage() {
                   }}
                 >
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <TicketIcon size={14} />
+                    <TicketIcon size={14} color="#ea580c" />
                     <span>{appliedDiscountVoucher || appliedShippingVoucher ? "+ Chọn thêm mã còn lại" : "Nhấn để chọn mã giảm giá & Freeship"}</span>
                   </span>
                   <ChevronRightIcon size={14} color="var(--primary-color, #ea580c)" />
@@ -709,7 +709,7 @@ export default function CartPage() {
               style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "14px", fontSize: "16px", fontWeight: 700 }}
             >
               <span>{t('proceed_to_checkout', 'Tiến Hành Thanh Toán')} ({selectedItems.length})</span>
-              <ChevronRightIcon size={18} />
+              <ChevronRightIcon size={18} color="#ffffff" />
             </Link>
           ) : (
             <button
@@ -724,7 +724,7 @@ export default function CartPage() {
 
           <div style={{ textAlign: "center", marginTop: "14px" }}>
             <Link to="/" style={{ fontSize: "13px", color: "var(--secondary-color, #007185)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-              <ArrowLeftIcon size={14} />
+              <ArrowLeftIcon size={14} color="#2563eb" />
               <span>{t('continue_shopping', 'Tiếp tục chọn thêm sản phẩm')}</span>
             </Link>
           </div>

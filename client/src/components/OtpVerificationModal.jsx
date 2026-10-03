@@ -189,7 +189,7 @@ export default function OtpVerificationModal({
               justifyContent: 'center',
             }}
           >
-            <CloseIcon size={16} />
+            <CloseIcon size={16} color="#64748b" />
           </button>
         )}
 
@@ -284,7 +284,7 @@ export default function OtpVerificationModal({
               gap: '6px',
             }}
           >
-            <AlertCircleIcon size={15} />
+            <AlertCircleIcon size={15} color="#ef4444" />
             <span>{error}</span>
           </div>
         )}
@@ -394,7 +394,7 @@ export default function OtpVerificationModal({
           ) : (
             <>
               <span>Xác Nhận & Kích Hoạt Tài Khoản</span>
-              <ChevronRightIcon size={14} />
+              <ChevronRightIcon size={14} color="#ffffff" />
             </>
           )}
         </button>

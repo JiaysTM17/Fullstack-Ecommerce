@@ -454,7 +454,7 @@ export default function CheckoutPage() {
           <span>1. Địa Chỉ Nhận Hàng</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
-          <ChevronRightIcon size={14} />
+          <ChevronRightIcon size={14} color="#94a3b8" />
         </span>
 
         <div className={`checkout-step-item ${currentStep === 2 ? "active" : currentStep > 2 ? "completed" : ""}`}>
@@ -462,7 +462,7 @@ export default function CheckoutPage() {
           <span>2. Vận Chuyển</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
-          <ChevronRightIcon size={14} />
+          <ChevronRightIcon size={14} color="#94a3b8" />
         </span>
 
         <div className={`checkout-step-item ${currentStep === 3 ? "active" : currentStep > 3 ? "completed" : ""}`}>
@@ -470,7 +470,7 @@ export default function CheckoutPage() {
           <span>3. Phương Thức Thanh Toán</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
-          <ChevronRightIcon size={14} />
+          <ChevronRightIcon size={14} color="#94a3b8" />
         </span>
 
         <div className={`checkout-step-item ${currentStep === 4 ? "active" : ""}`}>
@@ -599,7 +599,7 @@ export default function CheckoutPage() {
                 ) : (
                   <div className="address-card selected">
                     <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                      <CheckIcon size={11} /> MẶC ĐỊNH
+                      <CheckIcon size={11} color="#059669" /> MẶC ĐỊNH
                     </span>
                     <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px" }}>{fullName} ({phone})</div>
                     <div style={{ color: "var(--text-secondary)", fontSize: "13.5px", lineHeight: "1.5" }}>{address}</div>
@@ -650,7 +650,7 @@ export default function CheckoutPage() {
                   style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
                   <span>Tiếp Tục: Chọn Vận Chuyển</span>
-                  <ChevronRightIcon size={16} />
+                  <ChevronRightIcon size={16} color="#ffffff" />
                 </button>
               </div>
             </div>
@@ -688,7 +688,7 @@ export default function CheckoutPage() {
                   onClick={() => setCurrentStep(1)}
                   style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
-                  <ArrowLeftIcon size={14} />
+                  <ArrowLeftIcon size={14} color="#64748b" />
                   <span>Quay Lại Địa Chỉ</span>
                 </button>
                 <button
@@ -698,7 +698,7 @@ export default function CheckoutPage() {
                   style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
                   <span>Tiếp Tục: Chọn Thanh Toán</span>
-                  <ChevronRightIcon size={16} />
+                  <ChevronRightIcon size={16} color="#ffffff" />
                 </button>
               </div>
             </div>
@@ -861,7 +861,7 @@ export default function CheckoutPage() {
                   onClick={() => setCurrentStep(2)}
                   style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
-                  <ArrowLeftIcon size={14} />
+                  <ArrowLeftIcon size={14} color="#64748b" />
                   <span>Quay Lại Vận Chuyển</span>
                 </button>
                 <button
@@ -871,7 +871,7 @@ export default function CheckoutPage() {
                   style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
                   <span>Tiếp Tục: Xem Lại Đơn Hàng</span>
-                  <ChevronRightIcon size={16} />
+                  <ChevronRightIcon size={16} color="#ffffff" />
                 </button>
               </div>
             </div>
@@ -934,7 +934,7 @@ export default function CheckoutPage() {
                   style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
                 >
                   <span>{(appliedDiscountVoucher || appliedShippingVoucher) ? "Đổi mã khác" : "Chọn mã giảm giá"}</span>
-                  <ChevronRightIcon size={12} />
+                  <ChevronRightIcon size={12} color="var(--primary-color, #ea580c)" />
                 </button>
               </div>
 

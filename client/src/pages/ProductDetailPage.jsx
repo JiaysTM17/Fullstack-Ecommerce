@@ -451,12 +451,12 @@ export default function ProductDetailPage() {
             >
               {isAddedFeedback ? (
                 <>
-                  <CheckIcon size={16} />
+                  <CheckIcon size={16} color="#059669" />
                   <span>Đã Thêm Vào Giỏ!</span>
                 </>
               ) : (
                 <>
-                  <ShoppingBagIcon size={16} />
+                  <ShoppingBagIcon size={16} color="#ffffff" />
                   <span>Thêm Vào Giỏ Hàng</span>
                 </>
               )}
@@ -858,7 +858,7 @@ export default function ProductDetailPage() {
                             gap: "4px",
                           }}
                         >
-                          <TagIcon size={11} /> {tag}
+                          <TagIcon size={11} color="#2563eb" /> {tag}
                         </span>
                       ))}
                     </div>
@@ -970,7 +970,7 @@ export default function ProductDetailPage() {
                 onClick={() => setShowShareModal(false)}
                 style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <CloseIcon size={16} />
+                <CloseIcon size={16} color="#64748b" />
               </button>
             </div>
 
@@ -1004,7 +1004,7 @@ export default function ProductDetailPage() {
                   showToast('Đã sao chép liên kết sản phẩm vào bộ nhớ tạm!', 'success');
                 }}
               >
-                <CopyIcon size={13} />
+                <CopyIcon size={13} color="#ffffff" />
                 <span>Sao chép</span>
               </button>
             </div>
@@ -1082,7 +1082,7 @@ export default function ProductDetailPage() {
           >
             {isAddedFeedback ? (
               <>
-                <CheckIcon size={15} />
+                <CheckIcon size={15} color="#059669" />
                 <span>Đã thêm!</span>
               </>
             ) : (
@@ -1097,7 +1097,7 @@ export default function ProductDetailPage() {
             className="mobile-btn-buy"
             onClick={handleBuyNow}
           >
-            <BoltIcon size={15} />
+            <BoltIcon size={15} color="#ffffff" />
             <span>Mua Ngay</span>
           </button>
         </div>

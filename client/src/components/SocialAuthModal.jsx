@@ -163,7 +163,7 @@ export default function SocialAuthModal({
               transition: 'background 0.2s',
             }}
           >
-            <CloseIcon size={16} />
+            <CloseIcon size={16} color="#64748b" />
           </button>
 
           {/* Google Header Logo */}
@@ -234,7 +234,7 @@ export default function SocialAuthModal({
                 gap: '8px',
               }}
             >
-              <AlertCircleIcon size={15} />
+              <AlertCircleIcon size={15} color="#ef4444" />
               <span>{error}</span>
             </div>
           )}
@@ -278,7 +278,7 @@ export default function SocialAuthModal({
                   {fullName || 'Người dùng Google'}
                 </span>
                 <span style={{ color: '#0b57d0', display: 'inline-flex', alignItems: 'center' }} title="Tài khoản Google chính chủ">
-                  <CheckIcon size={13} />
+                  <CheckIcon size={13} color="#0b57d0" />
                 </span>
               </div>
               <div style={{ fontSize: '12.5px', color: '#444746', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
@@ -546,7 +546,7 @@ export default function SocialAuthModal({
                   gap: '6px',
                 }}
               >
-                <AlertCircleIcon size={14} />
+                <AlertCircleIcon size={14} color="#ef4444" />
                 <span>{error}</span>
               </div>
             )}
@@ -636,13 +636,13 @@ export default function SocialAuthModal({
               <div style={{ fontWeight: 700, color: '#050505', marginBottom: '8px' }}>Quyền hạn được chia sẻ:</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                 <span style={{ color: '#0866FF', display: 'inline-flex', alignItems: 'center' }}>
-                  <CheckIcon size={13} />
+                  <CheckIcon size={13} color="#0866FF" />
                 </span>
                 <span>Tên hồ sơ và ảnh đại diện trang cá nhân</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ color: '#0866FF', display: 'inline-flex', alignItems: 'center' }}>
-                  <CheckIcon size={13} />
+                  <CheckIcon size={13} color="#0866FF" />
                 </span>
                 <span>Địa chỉ email ({email})</span>
               </div>

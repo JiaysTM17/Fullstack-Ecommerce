@@ -151,7 +151,7 @@ export default function WishlistPage() {
                   <div>
                     <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                        <HeartSvgIcon size={24} />
+                        <HeartSvgIcon size={24} color="#ef4444" fill="#ef4444" />
                       </span>
                       <span>{t('wishlist_title', 'Sản Phẩm Yêu Thích')} ({wishlistProducts.length})</span>
                     </h1>

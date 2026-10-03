@@ -1174,7 +1174,7 @@ const Header = ({
             title="Mở danh mục ngành hàng"
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <LayersIcon size={14} />
+            <LayersIcon size={14} color="#2563eb" />
             <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', opacity: 0.8 }}>
               <ChevronDownIcon size={10} />
@@ -1187,7 +1187,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/', null)}
             title="Quay lại trang chủ và xem toàn bộ sản phẩm"
           >
-            <HomeIcon size={14} />
+            <HomeIcon size={14} color="#ea580c" />
             <span>{t('nav_all_products', 'Trang Chủ')}</span>
           </span>
 
@@ -1197,7 +1197,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Hot+Deal', 'flash-deals-section')}
             title="Săn deal chớp nhoáng giờ vàng"
           >
-            <FlameIcon size={14} />
+            <FlameIcon size={14} color="#ef4444" />
             <span>{t('nav_flash_deals', 'Flash Deals')}</span>
           </span>
 
@@ -1207,7 +1207,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Best+Seller', 'catalog-section')}
             title="Khám phá các sản phẩm bán chạy nhất sàn"
           >
-            <StarIcon size={14} />
+            <StarIcon size={14} color="#f59e0b" fill="#f59e0b" />
             <span>{t('nav_best_sellers', 'Bán Chạy Nhất')}</span>
           </span>
 
@@ -1227,7 +1227,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?fastDelivery=1', 'catalog-section')}
             title="Sản phẩm hỗ trợ giao hàng hỏa tốc trong 2H"
           >
-            <BoltIcon size={14} />
+            <BoltIcon size={14} color="#eab308" />
             <span>{t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}</span>
           </span>
 
@@ -1237,7 +1237,7 @@ const Header = ({
             onClick={() => setShowRewardsModal(true)}
             title="Vào Rewards Hub nhận xu & quay thưởng"
           >
-            <TicketIcon size={14} />
+            <TicketIcon size={14} color="#f97316" />
             <span>{t('nav_rewards_hub', 'Săn Xu & Voucher')}</span>
           </span>
         </nav>
@@ -1267,7 +1267,7 @@ const Header = ({
             <div className="order-lookup-modal-header">
               <div className="order-lookup-header-left">
                 <span className="order-lookup-badge-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <PackageIcon size={20} />
+                  <PackageIcon size={20} color="#2563eb" />
                 </span>
                 <div>
                   <h3 className="order-lookup-title">Tra Cứu Lộ Trình Đơn Hàng & Vận Đơn</h3>
@@ -1306,7 +1306,7 @@ const Header = ({
                   {orderLookupLoading ? 'Đang Tra Cứu...' : (
                     <>
                       <span>Tra Cứu Ngay</span>
-                      <ChevronRightIcon size={14} />
+                      <ChevronRightIcon size={14} color="#ffffff" />
                     </>
                   )}
                 </button>
@@ -1314,7 +1314,7 @@ const Header = ({
 
               {orderLookupError && (
                 <div className="order-lookup-error-msg" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <AlertCircleIcon size={15} />
+                  <AlertCircleIcon size={15} color="#ef4444" />
                   <span>{orderLookupError}</span>
                 </div>
               )}
@@ -1322,7 +1322,7 @@ const Header = ({
               {/* Demo Quick Chips */}
               <div className="order-lookup-demo-bar">
                 <span className="order-lookup-demo-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <BoltIcon size={13} />
+                  <BoltIcon size={13} color="#eab308" />
                   <span>Tra cứu nhanh mã mẫu:</span>
                 </span>
                 <div className="order-lookup-demo-chips">
@@ -1335,7 +1335,7 @@ const Header = ({
                     }}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                   >
-                    <TruckIcon size={13} />
+                    <TruckIcon size={13} color="#059669" />
                     <span>ORD-DEMO-01 (Đang Giao Hàng)</span>
                   </button>
                   <button
@@ -1347,7 +1347,7 @@ const Header = ({
                     }}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                   >
-                    <PackageIcon size={13} />
+                    <PackageIcon size={13} color="#2563eb" />
                     <span>ORD-DEMO-02 (Rời Kho Phân Loại)</span>
                   </button>
                 </div>
@@ -1369,11 +1369,11 @@ const Header = ({
 
                   <div className="result-carrier-info">
                     <div className="carrier-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                      <TruckIcon size={14} />
+                      <TruckIcon size={14} color="#059669" />
                       <span>{orderLookupResult.carrier}</span>
                     </div>
                     <div className="delivery-eta" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                      <ClockIcon size={14} />
+                      <ClockIcon size={14} color="#d97706" />
                       <span>{orderLookupResult.estimatedDelivery}</span>
                     </div>
                   </div>
