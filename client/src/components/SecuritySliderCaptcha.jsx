@@ -165,12 +165,12 @@ export default function SecuritySliderCaptcha({
         >
           {isVerified ? (
             <>
-              <CheckIcon size={16} />
+              <CheckIcon size={16} color="#059669" />
               <span>Đã xác minh bảo mật thành công</span>
             </>
           ) : disabled ? (
             <>
-              <ShieldCheckIcon size={15} />
+              <ShieldCheckIcon size={15} color="#94a3b8" />
               <span>{disabledMessage}</span>
             </>
           ) : (
@@ -214,7 +214,7 @@ export default function SecuritySliderCaptcha({
             fontWeight: 700,
           }}
         >
-          {isVerified ? <CheckIcon size={18} /> : disabled ? <LockIcon size={16} /> : <ChevronRightIcon size={18} />}
+          {isVerified ? <CheckIcon size={18} color="#ffffff" /> : disabled ? <LockIcon size={16} color="#94a3b8" /> : <ChevronRightIcon size={18} color="#ffffff" />}
         </div>
       </div>
     </div>

@@ -1406,7 +1406,7 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <PackageIcon size={16} />
+            <PackageIcon size={16} color="#2563eb" />
             <span>Quản Lý Sản Phẩm</span>
           </div>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
@@ -1425,7 +1425,7 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <BoltIcon size={16} />
+            <BoltIcon size={16} color="#ea580c" />
             <span>Flash Sale Gian Hàng</span>
           </div>
           <span style={{ background: '#f97316', color: '#fff', fontSize: '9.5px', padding: '1px 6px', borderRadius: '10px', fontWeight: 800 }}>
@@ -1438,7 +1438,7 @@ export default function SellerDashboardPage() {
           className={`shopee-nav-item ${activeTab === 'vouchers' ? 'active' : ''}`}
           onClick={() => setActiveTab('vouchers')}
         >
-          <TicketIcon size={16} />
+          <TicketIcon size={16} color="#f59e0b" />
           <span>Mã Giảm Giá (Vouchers)</span>
         </button>
 
@@ -1449,7 +1449,7 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <StarIcon size={16} />
+            <StarIcon size={16} color="#f59e0b" />
             <span>Đánh Giá Của Khách</span>
           </div>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
@@ -1464,7 +1464,7 @@ export default function SellerDashboardPage() {
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <ChatIcon size={16} />
+            <ChatIcon size={16} color="#06b6d4" />
             <span>Tin Nhắn Khách Hàng</span>
           </div>
           <span style={{ background: '#10b981', color: '#fff', fontSize: '10px', padding: '1px 6px', borderRadius: '10px', fontWeight: 700 }}>
@@ -1481,7 +1481,7 @@ export default function SellerDashboardPage() {
           className={`shopee-nav-item ${activeTab === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveTab('settings')}
         >
-          <SettingsIcon size={16} />
+          <SettingsIcon size={16} color="#64748b" />
           <span>Hồ Sơ & Kho Hàng</span>
         </button>
       </aside>
@@ -1527,19 +1527,19 @@ export default function SellerDashboardPage() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px', flexWrap: 'wrap' }}>
               <span className="seller-stat-chip">
-                <UserIcon size={13} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
+                <UserIcon size={13} color="#2563eb" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
                 Chủ sở hữu: <strong>{user?.fullName || 'Trần Thị Chủ Shop (Thời Trang)'}</strong>
               </span>
               <span className="seller-stat-chip">
-                <StoreIcon size={13} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
+                <StoreIcon size={13} color="#ea580c" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
                 Kho: {currentShop.address}
               </span>
               <span className="seller-stat-chip">
-                <PhoneIcon size={13} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
+                <PhoneIcon size={13} color="#16a34a" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
                 Hotline: {currentShop.phone}
               </span>
               <span className="seller-stat-chip">
-                <TagIcon size={13} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
+                <TagIcon size={13} color="#8b5cf6" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
                 Ngành hàng: <strong>{currentShop.category}</strong>
               </span>
             </div>

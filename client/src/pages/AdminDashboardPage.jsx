@@ -475,7 +475,7 @@ export default function AdminDashboardPage() {
       <aside className="shopee-sidebar">
         <div className="shopee-sidebar-brand">
           <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--primary-color), var(--primary-hover))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ShieldIcon size={20} />
+            <ShieldIcon size={20} color="#ffffff" />
           </div>
           <div className="shopee-sidebar-info">
             <h3>Super Admin</h3>
@@ -491,7 +491,7 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('overview')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <ChartBarIcon size={16} />
+          <ChartBarIcon size={16} color="#0284c7" />
           <span>Tổng Quan Sàn & GMV</span>
         </button>
 
@@ -501,7 +501,7 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('shops')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <StoreIcon size={16} />
+          <StoreIcon size={16} color="#ea580c" />
           <span>Quản Lý Cửa Hàng ({shops.length})</span>
         </button>
 
@@ -511,7 +511,7 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('products')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <PackageIcon size={16} />
+          <PackageIcon size={16} color="#2563eb" />
           <span>Kiểm Duyệt Sản Phẩm ({moderationProducts.length})</span>
         </button>
 
@@ -521,7 +521,7 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('users')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <UsersIcon size={16} />
+          <UsersIcon size={16} color="#10b981" />
           <span>Quản Lý Người Dùng ({users.length})</span>
         </button>
 
@@ -531,7 +531,7 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('categories')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <LayersIcon size={16} />
+          <LayersIcon size={16} color="#8b5cf6" />
           <span>Quản Lý Danh Mục ({categories.length})</span>
         </button>
 
@@ -541,7 +541,7 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('vouchers')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <TicketIcon size={16} />
+          <TicketIcon size={16} color="#f59e0b" />
           <span>Quản Lý Voucher Sàn ({vouchers.length})</span>
         </button>
 
@@ -551,7 +551,7 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('finance')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <CreditCardIcon size={16} />
+          <CreditCardIcon size={16} color="#059669" />
           <span>Đối Soát & Tài Chính</span>
         </button>
       </aside>
