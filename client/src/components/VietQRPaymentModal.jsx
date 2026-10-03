@@ -11,6 +11,7 @@ import {
   RefreshIcon,
   QrCodeIcon,
   AlertCircleIcon,
+  CreditCardIcon,
 } from './OrdersIcons';
 
 const SUPPORTED_BANKS = [
@@ -202,9 +203,13 @@ export default function VietQRPaymentModal({
                     padding: '2px 8px',
                     borderRadius: '999px',
                     border: '1px solid #bbf7d0',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}
                 >
-                  Napas 247
+                  <ShieldCheckIcon size={11} color="#16a34a" />
+                  <span>Napas 247</span>
                 </span>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
@@ -351,8 +356,9 @@ export default function VietQRPaymentModal({
                           boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.06)' : 'none',
                         }}
                       >
-                        <div style={{ fontSize: '13px', fontWeight: 800, color: isSelected ? bank.color : 'var(--text-primary)' }}>
-                          {bank.name.split(' ')[0]}
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: isSelected ? bank.color : 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                          <CreditCardIcon size={12} color={isSelected ? bank.color : "#64748b"} />
+                          <span>{bank.name.split(' ')[0]}</span>
                         </div>
                         <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
                           {bank.badge}
