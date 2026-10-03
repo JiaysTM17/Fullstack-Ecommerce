@@ -130,35 +130,45 @@ export default function HeroBanner({ onSelectCategory }) {
       {/* Shopee-style Top Value Propositions Strip */}
       <div className="shopee-hero-features">
         <div className="shopee-hero-feature-item">
-          <ShieldCheckIcon size={22} color="#16a34a" />
+          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(22, 163, 74, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <ShieldCheckIcon size={20} color="#16a34a" />
+          </div>
           <div>
             <strong>100% Chính Hãng</strong>
             <span>Cam kết hoàn tiền</span>
           </div>
         </div>
         <div className="shopee-hero-feature-item">
-          <TruckIcon size={22} color="#ea580c" />
+          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(234, 88, 12, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <TruckIcon size={20} color="#ea580c" />
+          </div>
           <div>
             <strong>Freeship Toàn Quốc</strong>
             <span>Đơn từ 300.000₫</span>
           </div>
         </div>
         <div className="shopee-hero-feature-item">
-          <RefreshIcon size={22} color="#2563eb" />
+          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(37, 99, 235, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <RefreshIcon size={20} color="#2563eb" />
+          </div>
           <div>
             <strong>Đổi Trả 30 Ngày</strong>
             <span>Thủ tục dễ dàng</span>
           </div>
         </div>
         <div className="shopee-hero-feature-item">
-          <CoinIcon size={22} color="#f59e0b" />
+          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <CoinIcon size={20} color="#d97706" />
+          </div>
           <div>
             <strong>Tích Lũy Mini Xu</strong>
             <span>Đổi voucher & quà</span>
           </div>
         </div>
         <div className="shopee-hero-feature-item">
-          <ChatIcon size={22} color="#0284c7" />
+          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(2, 132, 199, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <ChatIcon size={20} color="#0284c7" />
+          </div>
           <div>
             <strong>Hỗ Trợ 24/7</strong>
             <span>AI Copilot & CSKH</span>
