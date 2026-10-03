@@ -271,7 +271,7 @@ export default function HomePage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <TruckIcon size={18} />
+              <TruckIcon size={18} color="#ffffff" />
               <span><strong>FREESHIP MAX:</strong> Miễn phí vận chuyển toàn quốc cho đơn hàng từ <strong>300.000₫</strong></span>
             </div>
             <span style={{ background: "rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: "12px", fontSize: "12px" }}>
@@ -282,10 +282,10 @@ export default function HomePage() {
           {/* Discovery Tabs */}
           <div style={{ display: "flex", gap: "8px", marginBottom: "16px", overflowX: "auto", paddingBottom: "4px" }}>
             {[
-              { id: "all", label: "Tất cả sản phẩm", icon: <ShoppingBagIcon size={15} /> },
-              { id: "best_sellers", label: "Bán chạy nhất", icon: <BoltIcon size={15} /> },
-              { id: "new_arrivals", label: "Hàng mới về", icon: <StarIcon size={15} /> },
-              { id: "flash_sale", label: "Ưu đãi Flash Sale", icon: <BoltIcon size={15} /> },
+              { id: "all", label: "Tất cả sản phẩm", icon: <ShoppingBagIcon size={15} color={activeTab === 'all' ? '#ffffff' : '#ea580c'} /> },
+              { id: "best_sellers", label: "Bán chạy nhất", icon: <BoltIcon size={15} color={activeTab === 'best_sellers' ? '#ffffff' : '#ea580c'} /> },
+              { id: "new_arrivals", label: "Hàng mới về", icon: <StarIcon size={15} color={activeTab === 'new_arrivals' ? '#ffffff' : '#f59e0b'} /> },
+              { id: "flash_sale", label: "Ưu đãi Flash Sale", icon: <BoltIcon size={15} color={activeTab === 'flash_sale' ? '#ffffff' : '#ea580c'} /> },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -338,7 +338,7 @@ export default function HomePage() {
               {filters.keyword && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                   {t('keyword', 'Từ khóa')}: "{filters.keyword}"
-                  <button type="button" onClick={() => updateFilter("keyword", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} /></button>
+                  <button type="button" onClick={() => updateFilter("keyword", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} color="#ef4444" /></button>
                 </span>
               )}
               {filters.category && (
@@ -349,7 +349,7 @@ export default function HomePage() {
               )}
               {filters.shopId && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <StoreIcon size={13} /> Shop: {filters.shopId}
+                  <StoreIcon size={13} color="#ea580c" /> Shop: {filters.shopId}
                   <button type="button" onClick={() => updateFilter("shopId", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} /></button>
                 </span>
               )}
@@ -361,19 +361,19 @@ export default function HomePage() {
               )}
               {filters.fastDelivery && (
                 <span className="shopee-filter-chip" style={{ background: "var(--primary-light, #ffedd5)", color: "var(--primary-color, #ea580c)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <BoltIcon size={13} /> {t('nav_fast_delivery', 'Giao siêu tốc 2H')}
+                  <BoltIcon size={13} color="#ea580c" /> {t('nav_fast_delivery', 'Giao siêu tốc 2H')}
                   <button type="button" onClick={() => updateFilter("fastDelivery", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} /></button>
                 </span>
               )}
               {filters.minRating && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <StarIcon size={13} /> Từ {filters.minRating} sao
+                  <StarIcon size={13} color="#f59e0b" /> Từ {filters.minRating} sao
                   <button type="button" onClick={() => updateFilter("minRating", "")} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", color: "inherit", padding: 0 }}><CloseIcon size={10} /></button>
                 </span>
               )}
               {(filters.minPrice || filters.maxPrice) && (
                 <span className="shopee-filter-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <CoinIcon size={13} /> {filters.minPrice && filters.maxPrice
+                  <CoinIcon size={13} color="#eab308" /> {filters.minPrice && filters.maxPrice
                     ? `${formatCurrency(Number(filters.minPrice))} - ${formatCurrency(Number(filters.maxPrice))}`
                     : filters.minPrice
                     ? `≥ ${formatCurrency(Number(filters.minPrice))}`

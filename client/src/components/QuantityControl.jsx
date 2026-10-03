@@ -1,4 +1,5 @@
 import React from 'react';
+import { PlusIcon, MinusIcon } from './OrdersIcons';
 import '../styles/cart.css';
 
 /**
@@ -72,7 +73,7 @@ const QuantityControl = ({
         disabled={disabled || currentVal <= min}
         aria-label="Giảm số lượng"
       >
-        −
+        <MinusIcon size={size === 'sm' ? 10 : 12} />
       </button>
 
       <input
@@ -93,7 +94,7 @@ const QuantityControl = ({
         disabled={disabled || currentVal >= max}
         aria-label="Tăng số lượng"
       >
-        +
+        <PlusIcon size={size === 'sm' ? 10 : 12} />
       </button>
     </div>
   );

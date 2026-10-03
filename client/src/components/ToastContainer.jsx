@@ -27,7 +27,7 @@ export default function ToastContainer() {
         const isInfo = toast.type === 'info';
 
         const borderColor = isSuccess ? '#10b981' : isError ? '#ef4444' : '#3b82f6';
-        const iconElement = isSuccess ? <CheckIcon size={12} /> : isError ? <CloseIcon size={11} /> : <AlertCircleIcon size={13} />;
+        const iconElement = isSuccess ? <CheckIcon size={12} color="#ffffff" /> : isError ? <CloseIcon size={11} color="#ffffff" /> : <AlertCircleIcon size={13} color="#ffffff" />;
 
         return (
           <div

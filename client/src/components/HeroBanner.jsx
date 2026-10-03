@@ -74,7 +74,7 @@ export default function HeroBanner({ onSelectCategory }) {
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
                 <span>{slide.buttonText}</span>
-                <ChevronRightIcon size={16} />
+                <ChevronRightIcon size={16} color="#ffffff" />
               </button>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function HeroBanner({ onSelectCategory }) {
         onClick={prevSlide}
         aria-label="Slide trước"
       >
-        <ChevronLeftIcon size={20} />
+        <ChevronLeftIcon size={20} color="#ffffff" />
       </button>
       <button
         type="button"
@@ -96,7 +96,7 @@ export default function HeroBanner({ onSelectCategory }) {
         onClick={nextSlide}
         aria-label="Slide kế tiếp"
       >
-        <ChevronRightIcon size={20} />
+        <ChevronRightIcon size={20} color="#ffffff" />
       </button>
 
       {/* Pagination Dots */}

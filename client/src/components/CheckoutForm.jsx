@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MapPinIcon, TruckIcon, QrCodeIcon, CreditCardIcon } from './OrdersIcons';
 import '../styles/checkout.css';
 
 const DEFAULT_PAYMENT_METHODS = [
@@ -163,12 +164,9 @@ const CheckoutForm = ({
 
   return (
     <div className="shopee-checkout-form-card">
-      <div className="shopee-checkout-header">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" strokeWidth="2">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-          <circle cx="12" cy="10" r="3" />
-        </svg>
-        <h3>Thông Tin Giao Hàng</h3>
+      <div className="shopee-checkout-header" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <MapPinIcon size={20} color="#ea580c" />
+        <h3 style={{ margin: 0 }}>Thông Tin Giao Hàng</h3>
       </div>
 
       <form onSubmit={handleSubmit} noValidate>
@@ -292,7 +290,10 @@ const CheckoutForm = ({
                   disabled={loading}
                 />
                 <div>
-                  <strong>{method.label}</strong>
+                  <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    {method.id === 'COD' ? <TruckIcon size={16} color="#16a34a" /> : method.id === 'BANK_TRANSFER' ? <QrCodeIcon size={16} color="#2563eb" /> : <CreditCardIcon size={16} color="#ec4899" />}
+                    <span>{method.label}</span>
+                  </strong>
                   {method.desc && (
                     <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                       {method.desc}
