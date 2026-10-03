@@ -149,7 +149,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
             cursor: "pointer",
             display: "inline-flex",
             alignItems: "center",
-            gap: "5px",
+            gap: "6px",
             padding: "4px 8px",
             borderRadius: "6px",
             transition: "all 0.15s ease",
@@ -163,7 +163,9 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
             e.currentTarget.style.background = "none";
           }}
         >
-          <TrashIcon size={14} color="#ef4444" />
+          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <TrashIcon size={11} color="#ef4444" />
+          </span>
           <span>{t("clear_history", "Xóa lịch sử")}</span>
         </button>
       </div>
@@ -221,7 +223,9 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               e.currentTarget.style.borderColor = "#cbd5e1";
             }}
           >
-            <ChevronLeftIcon size={16} color="#0284c7" />
+            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ChevronLeftIcon size={13} color="#0284c7" />
+            </span>
           </button>
 
           {/* Right Scroll Navigation Button */}
@@ -264,7 +268,9 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               e.currentTarget.style.borderColor = "#cbd5e1";
             }}
           >
-            <ChevronRightIcon size={16} color="#0284c7" />
+            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ChevronRightIcon size={13} color="#0284c7" />
+            </span>
           </button>
 
           {/* Scrollable Horizontal Carousel Container */}
