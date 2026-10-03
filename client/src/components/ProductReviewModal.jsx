@@ -188,24 +188,38 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
               <span>Quay lại</span>
             </button>
           )}
-          <StarIcon size={18} color="#f59e0b" filled />
-            <div>
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: '15px',
-                  fontWeight: 800,
-                  color: '#0f172a',
-                  letterSpacing: '-0.2px',
-                }}
-              >
-                Đánh Giá Sản Phẩm
-              </h3>
-              <div style={{ fontSize: '11.5px', color: '#64748b' }}>
-                Đơn hàng: <strong style={{ color: '#0f172a' }}>#{order.orderId || order._id}</strong> · Shop: {order.shopName || 'Shopee Mall'}
-              </div>
+          <div
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 3px 8px rgba(245, 158, 11, 0.3)',
+              flexShrink: 0,
+            }}
+          >
+            <StarIcon size={18} color="#ffffff" filled />
+          </div>
+          <div>
+            <h3
+              style={{
+                margin: 0,
+                fontSize: '15px',
+                fontWeight: 800,
+                color: '#0f172a',
+                letterSpacing: '-0.2px',
+              }}
+            >
+              Đánh Giá Sản Phẩm
+            </h3>
+            <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+              Đơn hàng: <strong style={{ color: '#0f172a' }}>#{order.orderId || order._id}</strong> · Shop: {order.shopName || 'Shopee Mall'}
             </div>
           </div>
+        </div>
           <button
             type="button"
             onClick={onClose}
