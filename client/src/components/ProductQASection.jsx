@@ -385,7 +385,9 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                 gap: "6px",
               }}
             >
-              <ChatIcon size={14} color={!newQuestionText.trim() ? "#94a3b8" : "#ffffff"} />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: !newQuestionText.trim() ? 'transparent' : 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChatIcon size={11} color={!newQuestionText.trim() ? "#94a3b8" : "#ffffff"} />
+              </span>
               <span>{submitting ? "Đang gửi..." : "Gửi câu hỏi"}</span>
             </button>
           </div>
@@ -627,10 +629,12 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                         padding: 0,
                         display: "inline-flex",
                         alignItems: "center",
-                        gap: "5px",
+                        gap: "6px",
                       }}
                     >
-                      <ChatIcon size={12} color="#2563eb" />
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ChatIcon size={11} color="#2563eb" />
+                      </span>
                       <span>Trả lời câu hỏi này</span>
                     </button>
                   )}
