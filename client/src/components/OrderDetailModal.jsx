@@ -492,9 +492,21 @@ export default function OrderDetailModal({
                 <span>Quay lại danh sách</span>
               </button>
             )}
-            <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
-              <PackageIcon size={17} color="#2563eb" />
-            </span>
+            <div
+              style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
+                flexShrink: 0,
+              }}
+            >
+              <PackageIcon size={16} color="#ffffff" />
+            </div>
             <span style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>
               {t('order_detail_title', 'Chi Tiết Đơn Hàng')}
             </span>
