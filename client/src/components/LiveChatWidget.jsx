@@ -865,7 +865,7 @@ export default function LiveChatWidget() {
                   }}
                   title="Chuyển sang Chuyên viên tư vấn trực tiếp"
                 >
-                  <span><UserIcon size={12} /></span>
+                  <span><UserIcon size={12} color="#ffffff" /></span>
                   <span style={{ display: isExpanded ? 'inline' : 'none' }}>Gặp CSKH</span>
                 </button>
               ) : (
@@ -888,7 +888,7 @@ export default function LiveChatWidget() {
                   }}
                   title="Quay lại Trợ lý AI"
                 >
-                  <span><SparklesIcon size={12} /></span>
+                  <span><SparklesIcon size={12} color="#ffffff" /></span>
                   <span style={{ display: isExpanded ? 'inline' : 'none' }}>Về AI</span>
                 </button>
               )}
@@ -917,7 +917,7 @@ export default function LiveChatWidget() {
                 }}
                 title={soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
               >
-                {soundEnabled ? <Volume2Icon size={13} /> : <VolumeXIcon size={13} />}
+                {soundEnabled ? <Volume2Icon size={13} color="#38bdf8" /> : <VolumeXIcon size={13} color="#f87171" />}
               </button>
 
               {/* Phóng to / Thu nhỏ kích thước chat */}
@@ -955,7 +955,7 @@ export default function LiveChatWidget() {
                 }}
                 title="Làm mới lịch sử chat"
               >
-                <TrashIcon size={12} />
+                <TrashIcon size={12} color="#cbd5e1" />
               </button>
 
               {/* Thu nhỏ / Đóng */}
@@ -1087,10 +1087,10 @@ export default function LiveChatWidget() {
           >
             {chatMode === 'human' ? (
               [
-                { label: 'Tiến độ đơn hàng', text: 'Nhờ em kiểm tra tiến độ đơn hàng gần nhất của anh/chị', icon: <PackageIcon size={12} /> },
-                { label: 'Đổi trả / Hoàn tiền', text: 'Anh/chị cần hỗ trợ hoàn tiền hoặc đổi sản phẩm', icon: <RefreshIcon size={12} /> },
-                { label: 'Bảo hành chính hãng', text: 'Chính sách bảo hành sản phẩm thực hiện thế nào em?', icon: <ShieldIcon size={12} /> },
-                { label: 'Về Trợ lý AI', text: 'Quay lại Trợ lý AI', icon: <SparklesIcon size={12} /> },
+                { label: 'Tiến độ đơn hàng', text: 'Nhờ em kiểm tra tiến độ đơn hàng gần nhất của anh/chị', icon: <PackageIcon size={12} color="#0284c7" /> },
+                { label: 'Đổi trả / Hoàn tiền', text: 'Anh/chị cần hỗ trợ hoàn tiền hoặc đổi sản phẩm', icon: <RefreshIcon size={12} color="#9333ea" /> },
+                { label: 'Bảo hành chính hãng', text: 'Chính sách bảo hành sản phẩm thực hiện thế nào em?', icon: <ShieldIcon size={12} color="#16a34a" /> },
+                { label: 'Về Trợ lý AI', text: 'Quay lại Trợ lý AI', icon: <SparklesIcon size={12} color="#ea580c" /> },
               ].map((chip, idx) => (
                 <button
                   key={idx}
@@ -1117,13 +1117,13 @@ export default function LiveChatWidget() {
               ))
             ) : (
               [
-                { label: 'Tư Vấn AI', text: 'Bạn có thể giúp gì cho tôi?', icon: <SparklesIcon size={12} /> },
-                { label: 'Gợi Ý Hot', text: 'Gợi ý sản phẩm bán chạy nhất hiện nay', icon: <ShoppingBagIcon size={12} /> },
-                { label: 'Tra Cứu Đơn', text: 'Kiểm tra đơn hàng của tôi', icon: <PackageIcon size={12} /> },
-                { label: 'Săn Voucher', text: 'Cho tôi xin mã giảm giá và freeship', icon: <TicketIcon size={12} /> },
-                { label: 'Vòng Quay & Xu', text: 'Vòng quay may mắn và xu thưởng', icon: <CoinIcon size={12} /> },
-                { label: '12 Mall Shop', text: 'Khám phá các gian hàng chính hãng', icon: <StoreIcon size={12} /> },
-                { label: 'Gặp CSKH', text: 'Cho tôi gặp nhân viên trực CSKH', icon: <UserIcon size={12} /> },
+                { label: 'Tư Vấn AI', text: 'Bạn có thể giúp gì cho tôi?', icon: <SparklesIcon size={12} color="#ea580c" /> },
+                { label: 'Gợi Ý Hot', text: 'Gợi ý sản phẩm bán chạy nhất hiện nay', icon: <ShoppingBagIcon size={12} color="#ea580c" /> },
+                { label: 'Tra Cứu Đơn', text: 'Kiểm tra đơn hàng của tôi', icon: <PackageIcon size={12} color="#0284c7" /> },
+                { label: 'Săn Voucher', text: 'Cho tôi xin mã giảm giá và freeship', icon: <TicketIcon size={12} color="#ea580c" /> },
+                { label: 'Vòng Quay & Xu', text: 'Vòng quay may mắn và xu thưởng', icon: <CoinIcon size={12} color="#f59e0b" /> },
+                { label: '12 Mall Shop', text: 'Khám phá các gian hàng chính hãng', icon: <StoreIcon size={12} color="#dc2626" /> },
+                { label: 'Gặp CSKH', text: 'Cho tôi gặp nhân viên trực CSKH', icon: <UserIcon size={12} color="#2563eb" /> },
               ].map((chip, idx) => (
                 <button
                   key={idx}
@@ -1428,7 +1428,7 @@ export default function LiveChatWidget() {
                                     }}
                                     title="Thêm vào giỏ hàng"
                                   >
-                                    <CartIcon size={11} />
+                                    <CartIcon size={11} color="#ea580c" />
                                     <span>Thêm giỏ</span>
                                   </button>
                                   <button
@@ -1449,7 +1449,7 @@ export default function LiveChatWidget() {
                                     }}
                                     title="Mua ngay lập tức và chuyển đến thanh toán"
                                   >
-                                    <BoltIcon size={11} />
+                                    <BoltIcon size={11} color="#ffffff" />
                                     <span>Mua ngay</span>
                                   </button>
                                   <button
@@ -1470,7 +1470,7 @@ export default function LiveChatWidget() {
                                   >
                                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
                                       <span>Chi tiết</span>
-                                      <ChevronRightIcon size={10} />
+                                      <ChevronRightIcon size={10} color="var(--primary-color, #4f46e5)" />
                                     </span>
                                   </button>
                                 </div>
@@ -1562,7 +1562,7 @@ export default function LiveChatWidget() {
                                   }}
                                   title="Áp dụng mã này trực tiếp vào giỏ hàng"
                                 >
-                                  <BoltIcon size={11} />
+                                  <BoltIcon size={11} color="#ea580c" />
                                   <span>Dùng ngay</span>
                                 </button>
                                 <button
@@ -1586,7 +1586,7 @@ export default function LiveChatWidget() {
                                     transition: 'background 0.2s',
                                   }}
                                 >
-                                  {copiedCode === vc.code ? <CheckIcon size={12} /> : 'Copy'}
+                                  {copiedCode === vc.code ? <CheckIcon size={12} color="#ffffff" /> : 'Copy'}
                                 </button>
                               </div>
                             </div>
@@ -1676,11 +1676,11 @@ export default function LiveChatWidget() {
                                     fontWeight: 600,
                                   }}
                                 >
-                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckIcon size={11} /> Đặt hàng</span>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckIcon size={11} color="#16a34a" /> Đặt hàng</span>
                                   <ChevronRightIcon size={11} color="#94a3b8" />
-                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckIcon size={11} /> Đóng gói</span>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckIcon size={11} color="#16a34a" /> Đóng gói</span>
                                   <ChevronRightIcon size={11} color="#94a3b8" />
-                                  <span style={{ fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><TruckIcon size={12} /> Đang giao</span>
+                                  <span style={{ fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><TruckIcon size={12} color="#0284c7" /> Đang giao</span>
                                 </div>
                                 <div
                                   style={{
@@ -1713,7 +1713,7 @@ export default function LiveChatWidget() {
                               marginTop: '2px',
                             }}
                           >
-                            <PackageIcon size={13} />
+                            <PackageIcon size={13} color="#ffffff" />
                             <span>Xem toàn bộ lịch sử đơn mua</span>
                           </button>
                         </div>
@@ -1740,7 +1740,7 @@ export default function LiveChatWidget() {
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <span style={{ display: 'inline-flex', alignItems: 'center', color: '#d97706' }}>
-                                <CoinIcon size={20} />
+                                <CoinIcon size={20} color="#f59e0b" />
                               </span>
                               <div>
                                 <div style={{ fontSize: '10.5px', color: '#b45309', fontWeight: 600 }}>
@@ -2122,7 +2122,7 @@ export default function LiveChatWidget() {
               }}
               title={isListening ? 'Dừng lắng nghe' : 'Nói bằng giọng nói'}
             >
-              <MicIcon size={16} />
+              <MicIcon size={16} color={isListening ? "#ef4444" : "#64748b"} />
             </button>
 
             {/* Nút Gửi Tin Nhắn */}
@@ -2153,7 +2153,7 @@ export default function LiveChatWidget() {
               }}
               title="Gửi tin nhắn"
             >
-              <SendIcon size={15} />
+              <SendIcon size={15} color="#ffffff" />
             </button>
           </form>
         </div>

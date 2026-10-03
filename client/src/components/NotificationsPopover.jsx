@@ -216,7 +216,7 @@ export default function NotificationsPopover() {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 800, fontSize: '15px', color: 'var(--text-primary, #0f172a)' }}>
-                <BellIcon size={16} />
+                <BellIcon size={16} color="#ea580c" />
                 <span>Thông Báo Mới</span>
               </span>
               {unreadCount > 0 && (
@@ -268,8 +268,8 @@ export default function NotificationsPopover() {
           >
             {[
               { id: 'all', label: `Tất cả (${notifications.length})`, icon: null },
-              { id: 'order', label: `Đơn hàng (${orderCount})`, icon: <PackageIcon size={12} /> },
-              { id: 'voucher', label: `Ưu đãi (${voucherCount})`, icon: <TicketIcon size={12} /> },
+              { id: 'order', label: `Đơn hàng (${orderCount})`, icon: <PackageIcon size={12} color={activeTab === 'order' ? '#ffffff' : '#0284c7'} /> },
+              { id: 'voucher', label: `Ưu đãi (${voucherCount})`, icon: <TicketIcon size={12} color={activeTab === 'voucher' ? '#ffffff' : '#ea580c'} /> },
               { id: 'unread', label: `Chưa đọc (${unreadCount})`, icon: null },
             ].map((tab) => {
               const active = activeTab === tab.id;
@@ -306,7 +306,7 @@ export default function NotificationsPopover() {
             {filteredNotifs.length === 0 ? (
               <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-muted, #94a3b8)', fontSize: '13px' }}>
                 <span style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '8px', color: 'var(--primary-color, #ea580c)' }}>
-                  <SparklesIcon size={24} />
+                  <SparklesIcon size={24} color="#ea580c" />
                 </span>
                 <p style={{ margin: 0 }}>Bạn không có thông báo nào chưa đọc!</p>
               </div>
@@ -347,11 +347,11 @@ export default function NotificationsPopover() {
                     }}
                   >
                     {item.type === 'order' ? (
-                      <PackageIcon size={18} />
+                      <PackageIcon size={18} color="#0284c7" />
                     ) : item.type === 'voucher' ? (
-                      <TicketIcon size={18} />
+                      <TicketIcon size={18} color="#d97706" />
                     ) : (
-                      <BoltIcon size={18} />
+                      <BoltIcon size={18} color="#dc2626" />
                     )}
                   </div>
 
@@ -425,7 +425,7 @@ export default function NotificationsPopover() {
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 <span>Xem tất cả đơn hàng</span>
-                <ChevronRightIcon size={12} />
+                <ChevronRightIcon size={12} color="#ea580c" />
               </span>
             </button>
 
@@ -445,7 +445,7 @@ export default function NotificationsPopover() {
                 }}
                 title="Xóa các thông báo đã đọc"
               >
-                <TrashIcon size={12} />
+                <TrashIcon size={12} color="#64748b" />
                 <span>Dọn dẹp</span>
               </button>
             )}
