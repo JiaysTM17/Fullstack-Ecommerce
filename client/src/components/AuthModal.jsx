@@ -222,7 +222,9 @@ export default function AuthModal() {
             className={`shopee-role-card ${activeRole === 'customer' ? 'active' : ''}`}
             onClick={() => setActiveRole('customer')}
           >
-            <span className="shopee-role-card-icon"><CartIcon size={20} color="#16a34a" /></span>
+            <span className="shopee-role-card-icon" style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)', border: '1px solid #86efac', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 6px' }}>
+              <CartIcon size={18} color="#16a34a" />
+            </span>
             <span className="shopee-role-card-title">Người Mua</span>
             <span className="shopee-role-card-sub">Mua sắm & Săn xu</span>
           </div>
@@ -231,7 +233,9 @@ export default function AuthModal() {
             className={`shopee-role-card ${activeRole === 'seller' ? 'active' : ''}`}
             onClick={() => setActiveRole('seller')}
           >
-            <span className="shopee-role-card-icon"><StoreIcon size={20} color="#ea580c" /></span>
+            <span className="shopee-role-card-icon" style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: '1px solid #fed7aa', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 6px' }}>
+              <StoreIcon size={18} color="#ea580c" />
+            </span>
             <span className="shopee-role-card-title">Chủ Shop</span>
             <span className="shopee-role-card-sub">Quản lý gian hàng</span>
           </div>
@@ -240,7 +244,9 @@ export default function AuthModal() {
             className={`shopee-role-card ${activeRole === 'admin' ? 'active' : ''}`}
             onClick={() => setActiveRole('admin')}
           >
-            <span className="shopee-role-card-icon"><ShieldIcon size={20} color="#6366f1" /></span>
+            <span className="shopee-role-card-icon" style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)', border: '1px solid #a5b4fc', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 6px' }}>
+              <ShieldIcon size={18} color="#6366f1" />
+            </span>
             <span className="shopee-role-card-title">Quản Trị</span>
             <span className="shopee-role-card-sub">Tổng vận hành</span>
           </div>
