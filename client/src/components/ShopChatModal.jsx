@@ -130,7 +130,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
           <img
             src={shop?.logo || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=80'}
             alt={shop?.name || 'Shop'}
-            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary-color, #4f46e5)' }}
+            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #ea580c' }}
           />
           <div>
             <div style={{ fontWeight: 800, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -198,7 +198,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
             type="button"
             onClick={() => handleSendMessage(`Tôi đang quan tâm đến sản phẩm "${currentProduct.name}" (${formatCurrency(currentProduct.price)}), shop tư vấn giúp tôi nhé!`)}
             style={{
-              background: 'transparent',
+              background: 'rgba(234, 88, 12, 0.08)',
               border: '1px solid var(--primary-color, #ea580c)',
               color: 'var(--primary-color, #ea580c)',
               fontSize: '11px',
@@ -260,8 +260,9 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
         })}
 
         {isTyping && (
-          <div style={{ alignSelf: 'flex-start', background: 'var(--bg-muted, #f1f5f9)', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
-            Shop đang gõ trả lời...
+          <div style={{ alignSelf: 'flex-start', background: 'var(--bg-muted, #f1f5f9)', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#ea580c' }}></span>
+            <span>Shop đang soạn câu trả lời...</span>
           </div>
         )}
       </div>
