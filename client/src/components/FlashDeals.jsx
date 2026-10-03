@@ -116,7 +116,10 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                 transition: 'all 0.15s ease',
               }}
             >
-              <div style={{ fontSize: '15px', fontWeight: 800 }}>{slot.time}</div>
+              <div style={{ fontSize: '15px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                {isSelected && <FlameIcon size={13} color="#ffffff" />}
+                <span>{slot.time}</span>
+              </div>
               <div
                 style={{
                   fontSize: '11px',
