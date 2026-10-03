@@ -92,7 +92,7 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             onClick={() => window.print()}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <PrinterIcon size={15} />
+            <PrinterIcon size={15} color="#ffffff" />
             <span>In Vận Đơn Ngay</span>
           </button>
         </div>

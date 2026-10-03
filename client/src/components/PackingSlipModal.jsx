@@ -89,7 +89,7 @@ export default function PackingSlipModal({ order, shop, onClose }) {
               <PackageIcon size={15} color="#ea580c" /> DANH SÁCH MẶT HÀNG KIỂM TRA ({order.items?.length || 1} sản phẩm):
             </strong>
             <span style={{ fontSize: '11.5px', color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <CheckIcon size={12} />
+              <CheckIcon size={12} color="#16a34a" />
               <span>Tích chọn kiểm hàng trước khi dán tem</span>
             </span>
           </div>
@@ -196,7 +196,7 @@ export default function PackingSlipModal({ order, shop, onClose }) {
             onClick={handlePrint}
             style={{ padding: '8px 22px', fontSize: '13px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <PrinterIcon size={14} />
+            <PrinterIcon size={14} color="#ffffff" />
             <span>In Phiếu Đóng Gói (A4)</span>
           </button>
         </div>

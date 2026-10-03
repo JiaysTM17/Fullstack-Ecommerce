@@ -168,7 +168,7 @@ const ProductCard = ({
             transition: 'all 0.2s',
           }}
         >
-          <ScaleIcon size={14} />
+          <ScaleIcon size={14} color={isCompared(productId) ? "#ffffff" : "#475569"} />
         </button>
 
         {/* Quick View Button */}
@@ -257,7 +257,7 @@ const ProductCard = ({
         {isFastDelivery && (
           <div style={{ margin: '6px 0 2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span style={{ fontSize: '11px', color: 'var(--secondary-color, #0284c7)', fontWeight: 700, background: 'var(--primary-light, #f0f9ff)', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <BoltIcon size={11} />
+              <BoltIcon size={11} color="#0284c7" />
               <span>{t('nav_fast_delivery', 'Giao 2H')}</span>
             </span>
           </div>
