@@ -164,8 +164,22 @@ const CheckoutForm = ({
 
   return (
     <div className="shopee-checkout-form-card">
-      <div className="shopee-checkout-header" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <MapPinIcon size={20} color="#ea580c" />
+      <div className="shopee-checkout-header" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div
+          style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '8px',
+            background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 6px rgba(234, 88, 12, 0.3)',
+            flexShrink: 0,
+          }}
+        >
+          <MapPinIcon size={18} color="#ffffff" />
+        </div>
         <h3 style={{ margin: 0 }}>Thông Tin Giao Hàng</h3>
       </div>
 
@@ -274,7 +288,24 @@ const CheckoutForm = ({
 
         {/* Phương thức thanh toán */}
         <div className="shopee-payment-methods">
-          <div className="shopee-payment-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><CreditCardIcon size={16} color="#2563eb" /> <span>Phương thức thanh toán</span></div>
+          <div className="shopee-payment-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '6px',
+                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
+                flexShrink: 0,
+              }}
+            >
+              <CreditCardIcon size={14} color="#ffffff" />
+            </div>
+            <span>Phương thức thanh toán</span>
+          </div>
           <div className="shopee-payment-options">
             {paymentMethods.map((method) => (
               <label
@@ -310,6 +341,7 @@ const CheckoutForm = ({
           type="submit"
           className="shopee-btn shopee-btn-primary shopee-checkout-submit-btn"
           disabled={loading}
+          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
         >
           {loading ? (
             <>
@@ -317,7 +349,10 @@ const CheckoutForm = ({
               <span>Đang xử lý đơn hàng...</span>
             </>
           ) : (
-            submitButtonText
+            <>
+              <ShieldCheckIcon size={16} color="#ffffff" />
+              <span>{submitButtonText}</span>
+            </>
           )}
         </button>
       </form>
