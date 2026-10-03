@@ -583,7 +583,9 @@ export default function ShopStorefrontPage() {
               }}
               onClick={handleToggleFollow}
             >
-              {isFollowing ? <CheckIcon size={14} color="#ffffff" /> : <PlusIcon size={14} color="#ffffff" />}
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: isFollowing ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {isFollowing ? <CheckIcon size={12} color={isFollowing ? 'var(--text-primary)' : '#ffffff'} /> : <PlusIcon size={12} color="#ffffff" />}
+              </span>
               <span>{isFollowing ? t('shop_following') : 'Theo Dõi Shop'}</span>
             </button>
 
@@ -607,7 +609,9 @@ export default function ShopStorefrontPage() {
               }}
               onClick={handleOpenShopChat}
             >
-              <ChatIcon size={14} color="#ea580c" />
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <ChatIcon size={12} color="#ea580c" />
+              </span>
               <span>Chat Với Shop</span>
             </button>
           </div>
@@ -739,17 +743,24 @@ export default function ShopStorefrontPage() {
                     boxShadow: claimedVouchers.includes(v.code) ? 'none' : '0 2px 8px rgba(234, 88, 12, 0.3)',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    gap: '6px'
                   }}
                   onClick={() => handleClaimVoucher(v)}
                 >
                   {claimedVouchers.includes(v.code) ? (
                     <>
-                      <CheckIcon size={13} color="#16a34a" />
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <CheckIcon size={11} color="#16a34a" />
+                      </span>
                       <span>Đã Lưu</span>
                     </>
                   ) : (
-                    <span>Lưu Mã</span>
+                    <>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <TicketIcon size={11} color="#ffffff" />
+                      </span>
+                      <span>Lưu Mã</span>
+                    </>
                   )}
                 </button>
               </div>
@@ -769,8 +780,8 @@ export default function ShopStorefrontPage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--primary-color, #ea580c)' }}>
-              <LayersIcon size={18} color="#ea580c" />
+            <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <LayersIcon size={14} color="#ea580c" />
             </span>
             <span style={{ fontSize: '13.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-primary)' }}>
               Danh Mục & Phân Loại Hàng Của Shop
