@@ -156,7 +156,9 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                 <BoltIcon size={12} color="#ea580c" />
               </span>
               <span>Vòng Quay ({totalSpins})</span>
-              <ChevronRightIcon size={13} color="#b45309" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(180, 83, 9, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChevronRightIcon size={11} color="#b45309" />
+              </span>
             </button>
           )}
 
@@ -254,11 +256,13 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                     letterSpacing: '0.2px',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '2px',
+                    gap: '3px',
                     boxShadow: '0 2px 4px rgba(220, 38, 38, 0.3)',
                   }}
                 >
-                  <FlameIcon size={9} color="#ffffff" />
+                  <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FlameIcon size={8} color="#ffffff" />
+                  </span>
                   <span>JACKPOT</span>
                 </div>
               )}
