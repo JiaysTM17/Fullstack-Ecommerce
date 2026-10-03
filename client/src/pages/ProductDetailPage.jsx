@@ -32,6 +32,8 @@ import {
   PlusIcon,
   GlobeIcon,
   ChevronRightIcon,
+  ScaleIcon,
+  QrCodeIcon,
 } from "../components/OrdersIcons";
 import "../styles/amazon-pdp.css";
 
@@ -485,10 +487,22 @@ export default function ProductDetailPage() {
             <button
               type="button"
               className="shopee-btn shopee-btn-secondary"
-              style={{ width: "100%", marginTop: "8px", fontWeight: 700, fontSize: "13px", borderRadius: "8px", padding: "9px" }}
+              style={{
+                width: "100%",
+                marginTop: "8px",
+                fontWeight: 700,
+                fontSize: "13px",
+                borderRadius: "8px",
+                padding: "9px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+              }}
               onClick={() => addToCompare(product)}
             >
-              {isCompared(productId) ? "Đã thêm vào so sánh" : "So sánh với sản phẩm khác"}
+              <ScaleIcon size={14} color={isCompared(productId) ? "var(--primary-color, #ea580c)" : "#2563eb"} />
+              <span>{isCompared(productId) ? "Đã thêm vào so sánh" : "So sánh với sản phẩm khác"}</span>
             </button>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "8px" }}>
               <button
@@ -505,7 +519,8 @@ export default function ProductDetailPage() {
                 style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 onClick={() => setShowShareModal(true)}
               >
-                Chia Sẻ & QR
+                <QrCodeIcon size={13} color="#8b5cf6" />
+                <span>Chia Sẻ & QR</span>
               </button>
             </div>
           </div>
@@ -561,7 +576,7 @@ export default function ProductDetailPage() {
             style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             onClick={() => navigate(`/shop/${product.shopId || "shop_01"}`)}
           >
-            <StoreIcon size={14} color="#ea580c" /> Xem Gian Hàng
+            <StoreIcon size={14} color="#ffffff" /> Xem Gian Hàng
           </button>
         </div>
       </section>
