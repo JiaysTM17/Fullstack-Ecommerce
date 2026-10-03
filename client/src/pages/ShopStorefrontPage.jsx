@@ -92,6 +92,7 @@ export default function ShopStorefrontPage() {
   const [shopSearch, setShopSearch] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [claimedVouchers, setClaimedVouchers] = useState([]);
 
   // Load shop và danh sách sản phẩm theo shopId
   useEffect(() => {
@@ -215,6 +216,8 @@ export default function ShopStorefrontPage() {
   };
 
   const handleClaimVoucher = async (voucher) => {
+    if (!voucher?.code) return;
+    setClaimedVouchers((prev) => (prev.includes(voucher.code) ? prev : [...prev, voucher.code]));
     const res = await applyVoucher(voucher.code);
     if (res?.success) {
       showToast(`Đã áp dụng mã ${voucher.code} của ${shop?.name || 'Shop'} thành công!`, 'success');
@@ -725,7 +728,7 @@ export default function ShopStorefrontPage() {
 
                 <button
                   type="button"
-                  className="shopee-btn shopee-btn-primary"
+                  className={`shopee-btn ${claimedVouchers.includes(v.code) ? 'shopee-btn-secondary' : 'shopee-btn-primary'}`}
                   style={{
                     padding: '8px 16px',
                     fontSize: '12.5px',
@@ -733,12 +736,24 @@ export default function ShopStorefrontPage() {
                     borderRadius: '8px',
                     whiteSpace: 'nowrap',
                     flexShrink: 0,
-                    background: 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)',
-                    boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)'
+                    background: claimedVouchers.includes(v.code) ? '#f0fdf4' : 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)',
+                    color: claimedVouchers.includes(v.code) ? '#16a34a' : '#ffffff',
+                    border: claimedVouchers.includes(v.code) ? '1px solid #86efac' : 'none',
+                    boxShadow: claimedVouchers.includes(v.code) ? 'none' : '0 2px 8px rgba(234, 88, 12, 0.3)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
                   }}
                   onClick={() => handleClaimVoucher(v)}
                 >
-                  Lưu Mã
+                  {claimedVouchers.includes(v.code) ? (
+                    <>
+                      <CheckIcon size={13} color="#16a34a" />
+                      <span>Đã Lưu</span>
+                    </>
+                  ) : (
+                    <span>Lưu Mã</span>
+                  )}
                 </button>
               </div>
             ))}
@@ -957,7 +972,7 @@ export default function ShopStorefrontPage() {
                     title={t('compare_btn')}
                   >
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <ScaleIcon size={12} />
+                      <ScaleIcon size={12} color={isCompared(id) ? "#ffffff" : "#2563eb"} />
                       <span>{isCompared(id) ? 'Đã so sánh' : 'So sánh'}</span>
                     </span>
                   </button>
@@ -1024,7 +1039,7 @@ export default function ShopStorefrontPage() {
                       title={t('compare_btn')}
                     >
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <ScaleIcon size={12} />
+                        <ScaleIcon size={12} color={isCompared(id) ? "#ffffff" : "#2563eb"} />
                         <span>{isCompared(id) ? 'Đã so sánh' : 'So sánh'}</span>
                       </span>
                     </button>
