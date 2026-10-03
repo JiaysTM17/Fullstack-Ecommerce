@@ -683,8 +683,22 @@ export default function CartPage() {
                 onChange={(e) => setVoucherInput(e.target.value)}
                 style={{ fontSize: "12.5px", textTransform: "uppercase" }}
               />
-              <button type="submit" className="shopee-btn shopee-btn-secondary" style={{ whiteSpace: "nowrap", fontSize: "12.5px" }}>
-                {t('apply', 'Áp Dụng')}
+              <button
+                type="submit"
+                className="shopee-btn shopee-btn-secondary"
+                style={{
+                  whiteSpace: "nowrap",
+                  fontSize: "12.5px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontWeight: 600,
+                }}
+              >
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TagIcon size={10} color="#ea580c" />
+                </span>
+                <span>{t('apply', 'Áp Dụng')}</span>
               </button>
             </form>
 
