@@ -384,7 +384,12 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   }}
                   style={{ accentColor: '#2563eb' }}
                 />
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CreditCardIcon size={13} color={refundMethod === 'wallet' ? '#2563eb' : '#ea580c'} /> Ví ShopeePay (Tức thì)</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: refundMethod === 'wallet' ? '#dbeafe' : '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CreditCardIcon size={11} color={refundMethod === 'wallet' ? '#2563eb' : '#ea580c'} />
+                  </span>
+                  <span>Ví ShopeePay (Tức thì)</span>
+                </span>
               </label>
 
               <label
@@ -414,7 +419,12 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   }}
                   style={{ accentColor: '#2563eb' }}
                 />
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><QrCodeIcon size={13} color={refundMethod === 'bank' ? '#2563eb' : '#0284c7'} /> Tài khoản Ngân hàng</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: refundMethod === 'bank' ? '#dbeafe' : '#e0f2fe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <QrCodeIcon size={11} color={refundMethod === 'bank' ? '#2563eb' : '#0284c7'} />
+                  </span>
+                  <span>Tài khoản Ngân hàng</span>
+                </span>
               </label>
             </div>
           </div>
