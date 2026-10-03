@@ -1424,11 +1424,13 @@ export default function LiveChatWidget() {
                                       cursor: 'pointer',
                                       display: 'flex',
                                       alignItems: 'center',
-                                      gap: '2px',
+                                      gap: '4px',
                                     }}
                                     title="Thêm vào giỏ hàng"
                                   >
-                                    <CartIcon size={11} color="#ea580c" />
+                                    <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      <CartIcon size={10} color="#ffffff" />
+                                    </span>
                                     <span>Thêm giỏ</span>
                                   </button>
                                   <button
@@ -1445,11 +1447,13 @@ export default function LiveChatWidget() {
                                       cursor: 'pointer',
                                       display: 'flex',
                                       alignItems: 'center',
-                                      gap: '2px',
+                                      gap: '4px',
                                     }}
                                     title="Mua ngay lập tức và chuyển đến thanh toán"
                                   >
-                                    <BoltIcon size={11} color="#ffffff" />
+                                    <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      <BoltIcon size={10} color="#ffffff" />
+                                    </span>
                                     <span>Mua ngay</span>
                                   </button>
                                   <button
@@ -1559,10 +1563,15 @@ export default function LiveChatWidget() {
                                     fontSize: '10.5px',
                                     fontWeight: 700,
                                     cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
                                   }}
                                   title="Áp dụng mã này trực tiếp vào giỏ hàng"
                                 >
-                                  <BoltIcon size={11} color="#ea580c" />
+                                  <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <BoltIcon size={10} color="#ffffff" />
+                                  </span>
                                   <span>Dùng ngay</span>
                                 </button>
                                 <button
@@ -1702,18 +1711,20 @@ export default function LiveChatWidget() {
                               color: '#fff',
                               border: 'none',
                               borderRadius: '6px',
-                              padding: '6px',
+                              padding: '6px 12px',
                               fontSize: '11px',
                               fontWeight: 700,
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              gap: '5px',
+                              gap: '6px',
                               marginTop: '2px',
                             }}
                           >
-                            <PackageIcon size={13} color="#ffffff" />
+                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <PackageIcon size={11} color="#ffffff" />
+                            </span>
                             <span>Xem toàn bộ lịch sử đơn mua</span>
                           </button>
                         </div>
