@@ -1606,11 +1606,14 @@ export default function ProfilePage() {
 
                     <button
                       type="button"
-                      style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '14px', cursor: 'pointer', padding: '4px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                      style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '14px', cursor: 'pointer', padding: '2px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                       onClick={() => handleDeletePayment(pm.id)}
                       title="Xóa phương thức thanh toán"
+                      aria-label="Xóa phương thức thanh toán"
                     >
-                      <TrashIcon size={14} color="#ef4444" />
+                      <span style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TrashIcon size={12} color="#ef4444" />
+                      </span>
                     </button>
                   </div>
                 </div>
