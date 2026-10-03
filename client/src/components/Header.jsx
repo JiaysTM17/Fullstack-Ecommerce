@@ -57,11 +57,11 @@ const POPULAR_SEARCHES = [
 ];
 
 const QUICK_CATEGORY_CHIPS = [
-  { label: 'Điện Thoại', icon: <SmartphoneIcon size={14} />, query: 'Điện tử' },
-  { label: 'Thời Trang', icon: <ShirtIcon size={14} />, query: 'Thời trang' },
-  { label: 'Gia Dụng', icon: <HomeIcon size={14} />, query: 'Gia dụng' },
-  { label: 'Làm Đẹp', icon: <SparklesIcon size={14} />, query: 'Làm đẹp' },
-  { label: 'Phụ Kiện', icon: <BoltIcon size={14} />, query: 'Tai nghe' },
+  { label: 'Điện Thoại', icon: <SmartphoneIcon size={14} color="#3b82f6" />, query: 'Điện tử' },
+  { label: 'Thời Trang', icon: <ShirtIcon size={14} color="#ec4899" />, query: 'Thời trang' },
+  { label: 'Gia Dụng', icon: <HomeIcon size={14} color="#f59e0b" />, query: 'Gia dụng' },
+  { label: 'Làm Đẹp', icon: <SparklesIcon size={14} color="#f43f5e" />, query: 'Làm đẹp' },
+  { label: 'Phụ Kiện', icon: <BoltIcon size={14} color="#ea580c" />, query: 'Tai nghe' },
 ];
 
 const Header = ({
@@ -380,15 +380,15 @@ const Header = ({
         <div className="shopee-topbar">
           <div className="shopee-topbar-left">
             <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <PackageIcon size={13} /> {t('nav_download_app', 'Tải Ứng Dụng')}
+              <PackageIcon size={13} color="#ea580c" /> {t('nav_download_app', 'Tải Ứng Dụng')}
             </span>
             <span className="shopee-topbar-divider" />
             <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <PhoneIcon size={13} /> Hotline: 1900 6868
+              <PhoneIcon size={13} color="#2563eb" /> Hotline: 1900 6868
             </span>
             <span className="shopee-topbar-divider" />
             <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <ChatIcon size={13} /> {t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}
+              <ChatIcon size={13} color="#16a34a" /> {t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}
             </span>
           </div>
 
@@ -541,7 +541,7 @@ const Header = ({
                   aria-label={t('clear_search', 'Xóa từ khóa')}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <CloseIcon size={12} />
+                  <CloseIcon size={12} color="#64748b" />
                 </button>
               )}
               <button type="submit" className="shopee-search-btn" aria-label={t('search', 'Tìm kiếm')}>
@@ -573,7 +573,7 @@ const Header = ({
                 {/* Quick Category Discovery Chips */}
                 <div className="search-quick-chips-wrapper">
                   <span className="search-quick-chips-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <BoltIcon size={13} />
+                    <BoltIcon size={13} color="#ffffff" />
                     <span>Ngành hàng nổi bật:</span>
                   </span>
                   <div className="search-quick-chips-list">
@@ -646,7 +646,7 @@ const Header = ({
                               style={{ color: 'var(--text-muted)', fontSize: '12px', padding: '2px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                               title="Xóa mục này"
                             >
-                              <CloseIcon size={11} />
+                              <CloseIcon size={11} color="#ef4444" />
                             </span>
                           </div>
                         ))}
@@ -822,7 +822,7 @@ const Header = ({
                 <div className="header-mini-cart-popover anim-dropdown">
                   <div className="mini-cart-header">
                     <div className="mini-cart-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <CartIcon size={16} /> <span>Giỏ Hàng Của Bạn</span>
+                      <CartIcon size={16} color="#ea580c" /> <span>Giỏ Hàng Của Bạn</span>
                       <span className="mini-cart-count-badge">{(cartItems.length || cartCount)} món</span>
                     </div>
 
@@ -921,14 +921,14 @@ const Header = ({
                           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
                           <span>Xem Chi Tiết Giỏ Hàng & Mua Ngay</span>
-                          <ChevronRightIcon size={14} />
+                          <ChevronRightIcon size={14} color="#ffffff" />
                         </button>
                       </div>
                     </>
                   ) : (
                     <div className="mini-cart-empty">
                       <div className="mini-cart-empty-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <CartIcon size={40} />
+                        <CartIcon size={40} color="#cbd5e1" />
                       </div>
                       <div className="mini-cart-empty-title">Giỏ hàng của bạn đang trống</div>
                       <div className="mini-cart-empty-sub">Hãy chọn ngay các sản phẩm ưng ý với giá siêu ưu đãi!</div>
@@ -1008,7 +1008,7 @@ const Header = ({
                           navTo('/orders');
                         }}
                       >
-                        <span className="item-icon"><PackageIcon size={16} /></span>
+                        <span className="item-icon"><PackageIcon size={16} color="#0284c7" /></span>
                         <div className="item-text">
                           <strong>{t('nav_orders', 'Đơn Mua Của Tôi')}</strong>
                           <small>Kiểm tra đơn hàng & trạng thái vận chuyển</small>
@@ -1040,7 +1040,7 @@ const Header = ({
                           navTo('/profile');
                         }}
                       >
-                        <span className="item-icon"><UserIcon size={16} /></span>
+                        <span className="item-icon"><UserIcon size={16} color="#2563eb" /></span>
                         <div className="item-text">
                           <strong>Hồ Sơ Cá Nhân</strong>
                           <small>Cập nhật số điện thoại, địa chỉ nhận hàng</small>
@@ -1126,7 +1126,7 @@ const Header = ({
                           onLogout();
                         }}
                       >
-                        <span className="item-icon" style={{ display: 'flex', alignItems: 'center' }}><CloseIcon size={13} /></span>
+                        <span className="item-icon" style={{ display: 'flex', alignItems: 'center' }}><CloseIcon size={13} color="#ef4444" /></span>
                         <div className="item-text">
                           <strong style={{ color: '#ef4444' }}>{t('logout', 'Đăng Xuất')}</strong>
                           <small>Thoát khỏi phiên đăng nhập hiện tại</small>
@@ -1147,7 +1147,7 @@ const Header = ({
                   }}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                 >
-                  <KeyIcon size={14} />
+                  <KeyIcon size={14} color="#ffffff" />
                   <span>{t('login', 'Đăng Nhập')}</span>
                 </button>
                 <button
@@ -1217,7 +1217,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Amazon%27s+Choice', 'catalog-section')}
             title="Top sản phẩm đánh giá cao tuyển chọn"
           >
-            <SparklesIcon size={14} />
+            <SparklesIcon size={14} color="#8b5cf6" />
             <span>{t('nav_featured_picks', 'Hàng Tuyển Chọn')}</span>
           </span>
 
@@ -1281,7 +1281,7 @@ const Header = ({
                 title="Đóng modal"
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <CloseIcon size={16} />
+                <CloseIcon size={16} color="#64748b" />
               </button>
             </div>
 
@@ -1387,7 +1387,7 @@ const Header = ({
                       >
                         <div className="timeline-step-line-col">
                           <div className="timeline-step-circle">
-                            {step.done ? <CheckIcon size={11} /> : idx + 1}
+                            {step.done ? <CheckIcon size={11} color="#ffffff" /> : idx + 1}
                           </div>
                           {idx < orderLookupResult.steps.length - 1 && (
                             <div className="timeline-step-connector" />
@@ -1412,7 +1412,7 @@ const Header = ({
                       style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                     >
                       <span>Xem chi tiết danh sách đơn mua của bạn</span>
-                      <ChevronRightIcon size={14} />
+                      <ChevronRightIcon size={14} color="#ffffff" />
                     </button>
                   </div>
                 </div>
