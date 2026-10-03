@@ -204,7 +204,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               e.currentTarget.style.borderColor = "#cbd5e1";
             }}
           >
-            <ChevronLeftIcon size={16} color="currentColor" />
+            <ChevronLeftIcon size={16} color="#0284c7" />
           </button>
 
           {/* Right Scroll Navigation Button */}
@@ -247,7 +247,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               e.currentTarget.style.borderColor = "#cbd5e1";
             }}
           >
-            <ChevronRightIcon size={16} color="currentColor" />
+            <ChevronRightIcon size={16} color="#0284c7" />
           </button>
 
           {/* Scrollable Horizontal Carousel Container */}

@@ -553,7 +553,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
-            <ChevronLeftIcon size={18} color="currentColor" />
+            <ChevronLeftIcon size={18} color="#2563eb" />
           </button>
         )}
 
@@ -621,7 +621,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
-            <ChevronRightIcon size={18} color="currentColor" />
+            <ChevronRightIcon size={18} color="#2563eb" />
           </button>
         )}
       </div>

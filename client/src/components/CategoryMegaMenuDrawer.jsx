@@ -534,7 +534,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             className="category-drawer-scroll-arrow"
             title="Cuộn sang trái"
           >
-            <ChevronLeftIcon size={14} color="#64748b" />
+            <ChevronLeftIcon size={14} color="#2563eb" />
           </button>
 
           <div ref={shopsScrollRef} className="category-drawer-mall-pills-row">
@@ -557,7 +557,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             className="category-drawer-scroll-arrow"
             title="Cuộn sang phải"
           >
-            <ChevronRightIcon size={14} color="#64748b" />
+            <ChevronRightIcon size={14} color="#2563eb" />
           </button>
         </div>
       </div>
