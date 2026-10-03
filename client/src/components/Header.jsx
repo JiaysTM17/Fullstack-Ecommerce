@@ -1309,7 +1309,7 @@ const Header = ({
             </div>
 
             <div className="order-lookup-modal-body">
-              <div className="order-lookup-search-bar">
+              <div className="order-lookup-search-bar" style={{ position: 'relative' }}>
                 <input
                   type="text"
                   placeholder="Nhập mã đơn hàng (VD: ORD-DEMO-01) hoặc mã vận đơn..."
@@ -1317,8 +1317,21 @@ const Header = ({
                   onChange={(e) => setOrderQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLookupOrder()}
                   className="order-lookup-search-input"
+                  style={{ paddingRight: orderQuery ? '36px' : undefined }}
                   autoFocus
                 />
+                {orderQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setOrderQuery('')}
+                    style={{ position: 'absolute', right: '140px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                    aria-label="Xóa mã đơn hàng"
+                  >
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={10} color="#ef4444" />
+                    </span>
+                  </button>
+                )}
                 <button
                   type="button"
                   className="order-lookup-search-btn"
