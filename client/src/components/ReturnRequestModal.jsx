@@ -159,7 +159,9 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 marginRight: '6px',
               }}
             >
-              <ArrowLeftIcon size={12} color="#2563eb" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ArrowLeftIcon size={11} color="#2563eb" />
+              </span>
               <span>Quay lại</span>
             </button>
           )}
@@ -210,7 +212,9 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               borderRadius: '6px',
             }}
           >
-            <CloseIcon size={14} color="#64748b" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={12} color="#64748b" />
+            </span>
           </button>
         </div>
 
@@ -719,7 +723,9 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 gap: '5px',
               }}
             >
-              <CloseIcon size={12} color="#64748b" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={11} color="#64748b" />
+              </span>
               <span>Hủy bỏ</span>
             </button>
             <button
@@ -732,11 +738,14 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 fontWeight: 700,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '6px',
                 height: '32px',
               }}
             >
-              <CheckIcon size={12} color="#ffffff" /> Xác Nhận Gửi Yêu Cầu
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={11} color="#ffffff" />
+              </span>
+              <span>Xác Nhận Gửi Yêu Cầu</span>
             </button>
           </div>
         </form>
