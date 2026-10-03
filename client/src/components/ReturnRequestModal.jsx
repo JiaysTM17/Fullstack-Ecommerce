@@ -163,24 +163,38 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               <span>Quay lại</span>
             </button>
           )}
-          <ReturnIcon size={18} color="#9333ea" />
-            <div>
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: '15px',
-                  fontWeight: 800,
-                  color: '#0f172a',
-                  letterSpacing: '-0.2px',
-                }}
-              >
-                Yêu Cầu Trả Hàng & Hoàn Tiền
-              </h3>
-              <div style={{ fontSize: '11.5px', color: '#64748b' }}>
-                Mã đơn: <strong style={{ color: '#0f172a' }}>#{order.orderId}</strong> · Shop: {order.shopName || 'Shopee Mall'}
-              </div>
+          <div
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, #9333ea 0%, #7e22ce 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 3px 8px rgba(147, 51, 234, 0.3)',
+              flexShrink: 0,
+            }}
+          >
+            <ReturnIcon size={18} color="#ffffff" />
+          </div>
+          <div>
+            <h3
+              style={{
+                margin: 0,
+                fontSize: '15px',
+                fontWeight: 800,
+                color: '#0f172a',
+                letterSpacing: '-0.2px',
+              }}
+            >
+              Yêu Cầu Trả Hàng & Hoàn Tiền
+            </h3>
+            <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+              Mã đơn: <strong style={{ color: '#0f172a' }}>#{order.orderId}</strong> · Shop: {order.shopName || 'Shopee Mall'}
             </div>
           </div>
+        </div>
 
           <button
             type="button"
