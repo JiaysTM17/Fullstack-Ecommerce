@@ -180,11 +180,13 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 height: '28px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '5px',
                 marginRight: '6px',
               }}
             >
-              <ArrowLeftIcon size={13} color="#2563eb" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ArrowLeftIcon size={11} color="#2563eb" />
+              </span>
               <span>Quay lại</span>
             </button>
           )}
@@ -234,7 +236,9 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
               borderRadius: '6px',
             }}
           >
-            <CloseIcon size={14} color="#64748b" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={12} color="#64748b" />
+            </span>
           </button>
         </div>
 
@@ -632,9 +636,15 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 borderRadius: '6px',
                 fontWeight: 600,
                 height: '32px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
               }}
             >
-              Hủy Bỏ
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={11} color="#64748b" />
+              </span>
+              <span>Hủy Bỏ</span>
             </button>
             <button
               type="submit"
