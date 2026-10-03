@@ -87,7 +87,9 @@ export default function QuickViewModal({ product, onClose }) {
           }}
           aria-label="Đóng"
         >
-          <CloseIcon size={18} color="var(--text-secondary, #64748b)" />
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CloseIcon size={14} color="var(--text-secondary, #64748b)" />
+          </span>
         </button>
 
         <div className="quickview-modal-grid">
@@ -279,7 +281,12 @@ export default function QuickViewModal({ product, onClose }) {
                 style={{ flex: 1, padding: '10px', fontSize: '14px', fontWeight: 700 }}
                 onClick={handleAddToCart}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><CartIcon size={15} color="#ffffff" /> <span>{t('card_add_to_cart')}</span></span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CartIcon size={13} color="#ffffff" />
+                  </span>
+                  <span>{t('card_add_to_cart')}</span>
+                </span>
               </button>
               <button
                 type="button"
@@ -288,7 +295,9 @@ export default function QuickViewModal({ product, onClose }) {
                 onClick={handleFullDetail}
               >
                 <span>Xem chi tiết đầy đủ</span>
-                <ChevronRightIcon size={14} color="#2563eb" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ChevronRightIcon size={12} color="#2563eb" />
+                </span>
               </button>
             </div>
           </div>
