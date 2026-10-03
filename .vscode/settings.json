@@ -1,0 +1,6 @@
+{
+  "dotnet.server.waitForDebugger": false,
+  "dotnet.defaultSolution": "disable",
+  "liveServer.settings.donotShowInfoMsg": true,
+  "liveServer.settings.port": 5173
+}

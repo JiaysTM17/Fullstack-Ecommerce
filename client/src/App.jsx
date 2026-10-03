@@ -125,7 +125,9 @@ export default function App() {
                   <CompareProvider>
                     <CoinProvider>
                       <CartProvider>
-                        <AppLayout />
+                        <ErrorBoundary>
+                          <AppLayout />
+                        </ErrorBoundary>
                       </CartProvider>
                     </CoinProvider>
                   </CompareProvider>
