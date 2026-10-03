@@ -1126,7 +1126,9 @@ export default function OrderHistoryPage() {
                     }}
                     style={{ fontSize: '12.5px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
-                    <ArrowLeftIcon size={12} color="#2563eb" />
+                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ArrowLeftIcon size={11} color="#2563eb" />
+                    </span>
                     <span>Quay lại Đơn Mua</span>
                   </button>
                 </div>
@@ -1265,9 +1267,12 @@ export default function OrderHistoryPage() {
                             type="button"
                             className="shopee-order-btn-primary"
                             onClick={() => setSelectedLiveMapOrder(activeTrackingOrder)}
-                            style={{ fontSize: '11.5px', height: '28px', padding: '0 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                            style={{ fontSize: '11.5px', height: '28px', padding: '0 10px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                           >
-                            <MapPinIcon size={12} color="#ffffff" /> Xem Bản Đồ Shipper
+                            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <MapPinIcon size={11} color="#ffffff" />
+                            </span>
+                            <span>Xem Bản Đồ Shipper</span>
                           </button>
                         </div>
                       </div>
@@ -1389,8 +1394,10 @@ export default function OrderHistoryPage() {
                     </p>
                   </div>
 
-                  <Link to="/" className="shopee-btn shopee-btn-secondary" style={{ fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <ArrowLeftIcon size={14} color="#2563eb" />
+                  <Link to="/" className="shopee-btn shopee-btn-secondary" style={{ fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ArrowLeftIcon size={12} color="#2563eb" />
+                    </span>
                     <span>{t('continue_shopping', 'Tiếp tục mua sắm')}</span>
                   </Link>
                 </div>
@@ -1883,9 +1890,11 @@ export default function OrderHistoryPage() {
                           className="shopee-order-cancel-link"
                           onClick={() => setSelectedCancelOrder(ord)}
                           title="Yêu cầu hủy đơn hàng này"
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                         >
-                          <CloseIcon size={11} color="#ef4444" />
+                          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CloseIcon size={10} color="#ef4444" />
+                          </span>
                           <span>{t('cancel_order', 'Yêu cầu hủy đơn')}</span>
                         </button>
                       )}
