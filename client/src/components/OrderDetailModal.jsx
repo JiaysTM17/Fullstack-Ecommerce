@@ -1318,12 +1318,13 @@ export default function OrderDetailModal({
                   height: '32px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '5px',
                 }}
                 onClick={() => onSimulateStep(orderId)}
                 title="Mô phỏng bưu tá giao hàng bước tiếp theo"
               >
-                {t('order_track_simulate_step', 'Mô phỏng giao')}
+                <TruckIcon size={12} color="#2563eb" />
+                <span>{t('order_track_simulate_step', 'Mô phỏng giao')}</span>
               </button>
             )}
           </div>
