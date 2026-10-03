@@ -1,5 +1,5 @@
 import React from 'react';
-import { StoreIcon, ShieldIcon, ReceiptIcon, LockIcon, CloseIcon } from './OrdersIcons';
+import { StoreIcon, ShieldIcon, ReceiptIcon, LockIcon, CloseIcon, CheckIcon } from './OrdersIcons';
 
 /**
  * Enterprise Legal & Privacy Policy Modal
@@ -24,7 +24,9 @@ export default function LegalModal({
     if (isSeller) {
       if (isTerms) {
         return {
-          icon: <StoreIcon size={24} color="#ea580c" />,
+          icon: <StoreIcon size={20} color="#ffffff" />,
+          gradient: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+          shadow: 'rgba(234, 88, 12, 0.35)',
           title: 'Điều Khoản Dịch Vụ Đối Tác Gian Hàng (Seller Terms)',
           subtitle: 'Quy chuẩn thương mại, đăng bán sản phẩm và quy trình phê duyệt gian hàng',
           badgeText: 'Dành Riêng Cho Người Bán / Chủ Shop',
@@ -34,7 +36,9 @@ export default function LegalModal({
         };
       }
       return {
-        icon: <ShieldIcon size={24} color="#6366f1" />,
+        icon: <ShieldIcon size={20} color="#ffffff" />,
+        gradient: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+        shadow: 'rgba(99, 102, 241, 0.35)',
         title: 'Chính Sách Bảo Mật & An Ninh Dữ Liệu Gian Hàng',
         subtitle: 'Quy chuẩn bảo vệ dữ liệu khách hàng, mã hóa API và bảo vệ ví doanh thu',
         badgeText: 'An Ninh & Bảo Mật Shop',
@@ -47,7 +51,9 @@ export default function LegalModal({
     // Customer
     if (isTerms) {
       return {
-        icon: <ReceiptIcon size={24} color="#2563eb" />,
+        icon: <ReceiptIcon size={20} color="#ffffff" />,
+        gradient: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+        shadow: 'rgba(37, 99, 235, 0.35)',
         title: 'Điều Khoản Dịch Vụ Khách Hàng (Customer Terms)',
         subtitle: 'Quy chế giao dịch, chính sách bảo vệ người mua và cam kết hàng chính hãng',
         badgeText: 'Dành Riêng Cho Khách Mua Hàng',
@@ -57,7 +63,9 @@ export default function LegalModal({
       };
     }
     return {
-      icon: <LockIcon size={24} color="#16a34a" />,
+      icon: <LockIcon size={20} color="#ffffff" />,
+      gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+      shadow: 'rgba(16, 185, 129, 0.35)',
       title: 'Chính Sách Bảo Mật Dữ Liệu Khách Hàng (Privacy Policy)',
       subtitle: 'Tuân thủ Nghị định 13/2023/NĐ-CP • Bảo mật thông tin cá nhân và thanh toán',
       badgeText: 'Bảo Vệ Quyền Riêng Tư',
@@ -97,8 +105,22 @@ export default function LegalModal({
       >
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{meta.icon}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '10px',
+                background: meta.gradient,
+                boxShadow: `0 4px 12px ${meta.shadow}`,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {meta.icon}
+            </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '17.5px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                 {meta.title}
@@ -288,9 +310,13 @@ export default function LegalModal({
                 color: '#ffffff',
                 border: 'none',
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              Tôi Đã Đọc & Đồng Ý
+              <CheckIcon size={14} color="#ffffff" />
+              <span>Tôi Đã Đọc & Đồng Ý</span>
             </button>
           </div>
         </div>
