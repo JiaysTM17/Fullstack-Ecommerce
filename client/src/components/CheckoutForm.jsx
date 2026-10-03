@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPinIcon, TruckIcon, QrCodeIcon, CreditCardIcon } from './OrdersIcons';
+import { MapPinIcon, TruckIcon, QrCodeIcon, CreditCardIcon, ShieldCheckIcon } from './OrdersIcons';
 import '../styles/checkout.css';
 
 const DEFAULT_PAYMENT_METHODS = [
@@ -274,7 +274,7 @@ const CheckoutForm = ({
 
         {/* Phương thức thanh toán */}
         <div className="shopee-payment-methods">
-          <div className="shopee-payment-title">Phương thức thanh toán</div>
+          <div className="shopee-payment-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><CreditCardIcon size={16} color="#2563eb" /> <span>Phương thức thanh toán</span></div>
           <div className="shopee-payment-options">
             {paymentMethods.map((method) => (
               <label

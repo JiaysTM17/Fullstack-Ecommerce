@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from './OrdersIcons';
+import { ChevronLeftIcon, ChevronRightIcon, SparklesIcon, FlameIcon, ShieldCheckIcon } from './OrdersIcons';
 import '../styles/banner.css';
 
 const SLIDES = [
@@ -56,7 +56,7 @@ export default function HeroBanner({ onSelectCategory }) {
         className="shopee-hero-carousel"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
       >
-        {SLIDES.map((slide) => (
+        {SLIDES.map((slide, idx) => (
           <div
             key={slide.id}
             className="shopee-hero-slide"
@@ -64,7 +64,10 @@ export default function HeroBanner({ onSelectCategory }) {
           >
             <div className="shopee-hero-overlay" />
             <div className="shopee-hero-content">
-              <span className="shopee-hero-badge">{slide.badge}</span>
+              <span className="shopee-hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {idx === 0 ? <SparklesIcon size={12} color="#f59e0b" /> : idx === 1 ? <FlameIcon size={12} color="#ef4444" /> : <ShieldCheckIcon size={12} color="#10b981" />}
+                <span>{slide.badge}</span>
+              </span>
               <h2 className="shopee-hero-title">{slide.title}</h2>
               <p className="shopee-hero-desc">{slide.description}</p>
               <button
