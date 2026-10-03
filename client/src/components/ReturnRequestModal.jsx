@@ -659,22 +659,24 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
             {images.length < 5 && (
               <label
                 style={{
-                  border: '1.5px dashed #cbd5e1',
-                  background: '#f8fafc',
+                  border: '1.5px dashed #93c5fd',
+                  background: 'rgba(239, 246, 255, 0.6)',
                   borderRadius: '8px',
                   padding: '12px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
+                  gap: '10px',
                   cursor: 'pointer',
                   textAlign: 'center',
                   transition: 'all 0.15s ease',
                 }}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center' }}><CameraIcon size={18} color="#2563eb" /></span>
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#ffffff', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(37, 99, 235, 0.15)' }}>
+                  <CameraIcon size={14} color="#2563eb" />
+                </span>
                 <div>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#1d4ed8' }}>
                     {images.length === 0 ? 'Tải lên hình ảnh / video sản phẩm lỗi hoặc hư hỏng *' : '+ Thêm hình ảnh / video khác'}
                   </span>
                   <span style={{ fontSize: '11px', color: '#64748b', marginLeft: '6px' }}>
