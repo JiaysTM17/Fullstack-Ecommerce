@@ -254,8 +254,8 @@ export default function RewardsHubModal({ onClose }) {
               justifyContent: 'center',
             }}
           >
-            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg-muted, #f1f5f9)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CloseIcon size={14} color="var(--text-muted, #64748b)" />
+            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={14} color="#ef4444" />
             </span>
           </button>
         </div>

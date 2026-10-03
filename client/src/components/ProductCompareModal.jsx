@@ -218,8 +218,8 @@ export default function ProductCompareModal() {
                   style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}
                   aria-label="Đóng bảng so sánh"
                 >
-                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg-muted, #f1f5f9)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CloseIcon size={14} color="var(--text-muted, #64748b)" />
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="#ef4444" />
                   </span>
                 </button>
               </div>
@@ -232,8 +232,10 @@ export default function ProductCompareModal() {
                   {/* Row: Product Head / Card */}
                   <tr style={{ borderBottom: '2px solid var(--border-medium, #cbd5e1)' }}>
                     <th style={{ width: '160px', padding: '14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <PackageIcon size={14} color="#ea580c" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <PackageIcon size={13} color="#ea580c" />
+                        </span>
                         <span>Sản phẩm</span>
                       </div>
                     </th>
@@ -288,8 +290,10 @@ export default function ProductCompareModal() {
                   {/* Row: Price */}
                   <tr style={{ borderBottom: '1px solid var(--border-light, #e2e8f0)' }}>
                     <th style={{ padding: '12px 14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <TagIcon size={14} color="#ec4899" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(236, 72, 153, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <TagIcon size={13} color="#ec4899" />
+                        </span>
                         <span>{t('compare_price')}</span>
                       </div>
                     </th>
@@ -310,8 +314,10 @@ export default function ProductCompareModal() {
                   {/* Row: Rating */}
                   <tr style={{ borderBottom: '1px solid var(--border-light, #e2e8f0)' }}>
                     <th style={{ padding: '12px 14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <StarIcon size={14} color="#f59e0b" fill="#f59e0b" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <StarIcon size={13} color="#f59e0b" fill="#f59e0b" />
+                        </span>
                         <span>{t('compare_rating')}</span>
                       </div>
                     </th>
@@ -331,8 +337,10 @@ export default function ProductCompareModal() {
                   {/* Row: Brand & Category */}
                   <tr style={{ borderBottom: '1px solid var(--border-light, #e2e8f0)' }}>
                     <th style={{ padding: '12px 14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <ShieldCheckIcon size={14} color="#16a34a" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ShieldCheckIcon size={13} color="#16a34a" />
+                        </span>
                         <span>{t('compare_brand')} / {t('compare_category')}</span>
                       </div>
                     </th>
@@ -347,8 +355,10 @@ export default function ProductCompareModal() {
                   {/* Row: Shop */}
                   <tr style={{ borderBottom: '1px solid var(--border-light, #e2e8f0)' }}>
                     <th style={{ padding: '12px 14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <StoreIcon size={14} color="#0d9488" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <StoreIcon size={13} color="#0d9488" />
+                        </span>
                         <span>Cửa hàng (Shop)</span>
                       </div>
                     </th>
@@ -362,8 +372,10 @@ export default function ProductCompareModal() {
                   {/* Row: Stock & Delivery */}
                   <tr>
                     <th style={{ padding: '12px 14px', background: 'var(--bg-muted, #f8fafc)', color: 'var(--text-muted)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <TruckIcon size={14} color="#0284c7" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <TruckIcon size={13} color="#0284c7" />
+                        </span>
                         <span>{t('compare_stock')}</span>
                       </div>
                     </th>

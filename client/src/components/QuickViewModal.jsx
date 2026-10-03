@@ -77,7 +77,6 @@ export default function QuickViewModal({ product, onClose }) {
             right: '16px',
             background: 'none',
             border: 'none',
-            color: 'var(--text-secondary, #64748b)',
             cursor: 'pointer',
             padding: '4px',
             display: 'flex',
@@ -87,8 +86,8 @@ export default function QuickViewModal({ product, onClose }) {
           }}
           aria-label="Đóng"
         >
-          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CloseIcon size={14} color="var(--text-secondary, #64748b)" />
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CloseIcon size={14} color="#ef4444" />
           </span>
         </button>
 
