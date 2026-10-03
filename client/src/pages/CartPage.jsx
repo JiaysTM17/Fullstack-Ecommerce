@@ -542,10 +542,14 @@ export default function CartPage() {
                       </button>
                       <button
                         type="button"
-                        style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: "12px" }}
+                        style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px", padding: 0 }}
                         onClick={() => removeFromSaved(saved.productId)}
+                        aria-label="Xóa khỏi danh sách lưu lại mua sau"
                       >
-                        Xóa
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <TrashIcon size={10} color="#ef4444" />
+                        </span>
+                        <span>Xóa</span>
                       </button>
                     </div>
                   </div>
