@@ -263,18 +263,19 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
           >
             <div
               style={{
-                width: '32px',
-                height: '32px',
+                width: '34px',
+                height: '34px',
                 borderRadius: '50%',
-                background: '#fef08a',
+                background: 'linear-gradient(135deg, #fef08a 0%, #fde047 100%)',
                 border: '1.5px solid #f59e0b',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                boxShadow: '0 2px 6px rgba(245, 158, 11, 0.25)',
                 flexShrink: 0,
               }}
             >
-              <CoinIcon size={18} color="#d97706" />
+              <CoinIcon size={18} color="#b45309" />
             </div>
             <div>
               <div style={{ fontWeight: 800, fontSize: '13px', color: '#1e3a8a' }}>
@@ -604,10 +605,12 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 lineHeight: 1.4,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
               }}
             >
-              <AlertCircleIcon size={15} color="#dc2626" />
+              <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <AlertCircleIcon size={13} color="#dc2626" />
+              </span>
               <span>{errorMsg}</span>
             </div>
           )}
@@ -640,11 +643,13 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 fontWeight: 700,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '6px',
                 height: '32px',
               }}
             >
-              <StarIcon size={13} color="#fef08a" filled />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <StarIcon size={12} color="#fef08a" filled />
+              </span>
               {isSubmitting ? 'Đang gửi...' : 'Gửi Đánh Giá (+200 Điểm Xu)'}
             </button>
           </div>
