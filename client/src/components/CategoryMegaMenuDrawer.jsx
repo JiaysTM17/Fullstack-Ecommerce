@@ -300,7 +300,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         <div className="category-drawer-header">
           <div className="category-drawer-header-left">
             <div className="category-drawer-logo-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <LayersIcon size={20} color="#ea580c" />
+              <LayersIcon size={22} color="#ffffff" />
             </div>
             <div className="category-drawer-title-wrap">
               <h2 className="category-drawer-title">
@@ -402,8 +402,8 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         <div className="category-drawer-body">
           {filteredCategories.length === 0 ? (
             <div className="category-drawer-empty">
-              <div className="category-drawer-empty-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <SearchIcon size={36} color="#94a3b8" />
+              <div className="category-drawer-empty-icon" style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                <SearchIcon size={28} color="#64748b" />
               </div>
               <div className="category-drawer-empty-text">
                 Không tìm thấy ngành hàng phù hợp với "{searchTerm}"
