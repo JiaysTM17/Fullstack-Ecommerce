@@ -52,20 +52,33 @@ export function RecentlyViewed({ currentProductId }) {
         border: '1px solid var(--border-color, #e2e8f0)',
       }}
     >
-      <h3
-        style={{
-          fontSize: '17px',
-          fontWeight: 800,
-          margin: '0 0 16px',
-          color: 'var(--text-primary, #0f172a)',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}
-      >
-        <ClockIcon size={18} color="#0284c7" />
-        <span>{t('recently_viewed')}</span>
-      </h3>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+        <div
+          style={{
+            width: '28px',
+            height: '28px',
+            borderRadius: '6px',
+            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)',
+            flexShrink: 0,
+          }}
+        >
+          <ClockIcon size={15} color="#ffffff" />
+        </div>
+        <h3
+          style={{
+            fontSize: '17px',
+            fontWeight: 800,
+            margin: 0,
+            color: 'var(--text-primary, #0f172a)',
+          }}
+        >
+          {t('recently_viewed')}
+        </h3>
+      </div>
 
       <div
         style={{
