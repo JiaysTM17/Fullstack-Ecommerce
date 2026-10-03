@@ -149,9 +149,21 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                 <span>Quay lại</span>
               </button>
             )}
-            <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
-              <MapPinIcon size={18} color="#2563eb" />
-            </span>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)',
+                flexShrink: 0,
+              }}
+            >
+              <MapPinIcon size={18} color="#ffffff" />
+            </div>
             <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
               Theo Dõi Vị Trí Shipper Trực Tiếp
             </h3>
@@ -174,6 +186,39 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
           </div>
         </div>
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            onClick={() => {
+              const orderId = order?.orderId || order?._id || order?.id;
+              if (orderId) {
+                getOrderTracking(orderId).then((data) => {
+                  if (data) {
+                    setLiveTracking(data);
+                    showToast('Đã làm mới dữ liệu hành trình SPX!', 'info');
+                  }
+                });
+              } else {
+                showToast('Đã làm mới dữ liệu vị trí GPS!', 'info');
+              }
+            }}
+            style={{
+              background: '#ffffff',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              width: '30px',
+              height: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: '#64748b',
+              transition: 'all 0.15s ease',
+            }}
+            title="Làm mới tọa độ GPS"
+          >
+            <RefreshIcon size={14} color="#2563eb" />
+          </button>
           <button
             type="button"
             onClick={onClose}
@@ -190,9 +235,11 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               color: '#64748b',
               transition: 'all 0.15s ease',
             }}
+            title="Đóng cửa sổ"
           >
             <CloseIcon size={14} color="#64748b" />
           </button>
+        </div>
         </div>
 
         {/* Scrollable Map Body */}
