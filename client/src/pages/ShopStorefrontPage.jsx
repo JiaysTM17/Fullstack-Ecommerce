@@ -960,9 +960,12 @@ export default function ShopStorefrontPage() {
                 setShopSearch('');
                 setSelectedCategory('all');
               }}
-              style={{ padding: '8px 18px', fontSize: '13px' }}
+              style={{ padding: '8px 18px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              Xóa bộ lọc tìm kiếm
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={10} color="#ef4444" />
+              </span>
+              <span>Xóa bộ lọc tìm kiếm</span>
             </button>
           </div>
         ) : (
