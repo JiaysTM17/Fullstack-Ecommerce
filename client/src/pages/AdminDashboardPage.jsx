@@ -505,7 +505,9 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('overview')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <ChartBarIcon size={16} color="#0284c7" />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'overview' ? '#e0f2fe' : '#f1f5f9', flexShrink: 0 }}>
+            <ChartBarIcon size={16} color="#0284c7" />
+          </span>
           <span>Tổng Quan Sàn & GMV</span>
         </button>
 
@@ -515,7 +517,9 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('shops')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <StoreIcon size={16} color="#ea580c" />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'shops' ? '#ffedd5' : '#f1f5f9', flexShrink: 0 }}>
+            <StoreIcon size={16} color="#ea580c" />
+          </span>
           <span>Quản Lý Cửa Hàng ({shops.length})</span>
         </button>
 
@@ -525,7 +529,9 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('products')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <PackageIcon size={16} color="#2563eb" />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'products' ? '#dbeafe' : '#f1f5f9', flexShrink: 0 }}>
+            <PackageIcon size={16} color="#2563eb" />
+          </span>
           <span>Kiểm Duyệt Sản Phẩm ({moderationProducts.length})</span>
         </button>
 
@@ -535,7 +541,9 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('users')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <UsersIcon size={16} color="#10b981" />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'users' ? '#d1fae5' : '#f1f5f9', flexShrink: 0 }}>
+            <UsersIcon size={16} color="#10b981" />
+          </span>
           <span>Quản Lý Người Dùng ({users.length})</span>
         </button>
 
@@ -545,7 +553,9 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('categories')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <LayersIcon size={16} color="#8b5cf6" />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'categories' ? '#ede9fe' : '#f1f5f9', flexShrink: 0 }}>
+            <LayersIcon size={16} color="#8b5cf6" />
+          </span>
           <span>Quản Lý Danh Mục ({categories.length})</span>
         </button>
 
@@ -555,7 +565,9 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('vouchers')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <TicketIcon size={16} color="#f59e0b" />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'vouchers' ? '#fef3c7' : '#f1f5f9', flexShrink: 0 }}>
+            <TicketIcon size={16} color="#f59e0b" />
+          </span>
           <span>Quản Lý Voucher Sàn ({vouchers.length})</span>
         </button>
 
@@ -565,7 +577,9 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('finance')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <CreditCardIcon size={16} color="#059669" />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'finance' ? '#d1fae5' : '#f1f5f9', flexShrink: 0 }}>
+            <CreditCardIcon size={16} color="#059669" />
+          </span>
           <span>Đối Soát & Tài Chính</span>
         </button>
       </aside>
@@ -686,7 +700,9 @@ export default function AdminDashboardPage() {
                 onClick={() => refreshShopData(true)}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px' }}
               >
-                <RefreshIcon size={14} color="#2563eb" />
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '5px', background: '#dbeafe' }}>
+                  <RefreshIcon size={13} color="#2563eb" />
+                </span>
                 <span>Đồng Bộ / Làm Mới</span>
               </button>
             </div>
@@ -815,7 +831,9 @@ export default function AdminDashboardPage() {
                 onClick={() => refreshUserData(true)}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px' }}
               >
-                <RefreshIcon size={14} color="#2563eb" />
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '5px', background: '#dbeafe' }}>
+                  <RefreshIcon size={13} color="#2563eb" />
+                </span>
                 <span>Đồng Bộ / Làm Mới</span>
               </button>
             </div>
@@ -1095,8 +1113,10 @@ export default function AdminDashboardPage() {
                   className={`seller-tab-btn ${productModerationFilter === 'pending' ? 'active' : ''}`}
                   onClick={() => setProductModerationFilter('pending')}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <ClockIcon size={12} color="#d97706" />
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '16px', height: '16px', borderRadius: '4px', background: '#fef3c7' }}>
+                      <ClockIcon size={11} color="#d97706" />
+                    </span>
                     <span>Chờ duyệt ({moderationProducts.filter(p => p.status === 'pending').length})</span>
                   </span>
                 </button>
@@ -1105,8 +1125,10 @@ export default function AdminDashboardPage() {
                   className={`seller-tab-btn ${productModerationFilter === 'approved' ? 'active' : ''}`}
                   onClick={() => setProductModerationFilter('approved')}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckIcon size={12} color="#059669" />
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '16px', height: '16px', borderRadius: '4px', background: '#dcfce7' }}>
+                      <CheckIcon size={11} color="#059669" />
+                    </span>
                     <span>Đã duyệt ({moderationProducts.filter(p => p.status === 'approved').length})</span>
                   </span>
                 </button>
@@ -1115,8 +1137,10 @@ export default function AdminDashboardPage() {
                   className={`seller-tab-btn ${productModerationFilter === 'rejected' ? 'active' : ''}`}
                   onClick={() => setProductModerationFilter('rejected')}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <CloseIcon size={12} color="#dc2626" />
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '16px', height: '16px', borderRadius: '4px', background: '#fee2e2' }}>
+                      <CloseIcon size={11} color="#dc2626" />
+                    </span>
                     <span>Từ chối / Gỡ ({moderationProducts.filter(p => p.status === 'rejected').length})</span>
                   </span>
                 </button>
