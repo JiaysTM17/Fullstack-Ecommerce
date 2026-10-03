@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import VoucherPickerModal from "../components/VoucherPickerModal";
+import VietQRPaymentModal from "../components/VietQRPaymentModal";
 import { useCoins } from "../context/CoinContext";
 import { createOrder } from "../services/orderService";
 import { deductProductStock } from "../services/productService";
@@ -38,6 +39,7 @@ import {
   BoltIcon,
   ChevronRightIcon,
   ArrowLeftIcon,
+  QrCodeIcon,
 } from "../components/OrdersIcons";
 import "../styles/checkout-multistep.css";
 
@@ -86,6 +88,7 @@ export default function CheckoutPage() {
 
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [useCoinsToggle, setUseCoinsToggle] = useState(false);
+  const [showVietQRModal, setShowVietQRModal] = useState(false);
 
   const handleCopyAccount = () => {
     navigator.clipboard?.writeText("0909123456");
@@ -849,6 +852,31 @@ export default function CheckoutPage() {
                       <div style={{ fontSize: "13px", fontWeight: 800, color: "var(--color-success, #10b981)", marginTop: "4px" }}>
                         Số tiền: {formatCurrency(finalOrderTotal)}
                       </div>
+                      <div style={{ marginTop: "10px" }}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowVietQRModal(true);
+                          }}
+                          style={{
+                            background: "linear-gradient(135deg, #0284c7, #0369a1)",
+                            color: "#ffffff",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "7px 14px",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            boxShadow: "0 2px 6px rgba(2, 132, 199, 0.25)",
+                          }}
+                        >
+                          <QrCodeIcon size={14} color="#ffffff" /> Mở Chi Tiết VietQR Động & Đếm Ngược
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1503,6 +1531,17 @@ export default function CheckoutPage() {
             </form>
           </div>
         </div>
+      {showVietQRModal && (
+        <VietQRPaymentModal
+          isOpen={showVietQRModal}
+          onClose={() => setShowVietQRModal(false)}
+          orderId={`ORD${Math.floor(100000 + Math.random() * 900000)}`}
+          amount={finalOrderTotal}
+          onPaymentSuccess={() => {
+            setShowVietQRModal(false);
+            setCurrentStep(4);
+          }}
+        />
       )}
     </main>
   );

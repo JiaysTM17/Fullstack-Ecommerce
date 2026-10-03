@@ -5,12 +5,16 @@ import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
 import RewardsHubModal from '../components/RewardsHubModal';
+import VietQRPaymentModal from '../components/VietQRPaymentModal';
 import {
   CheckIcon,
   CopyIcon,
   TruckIcon,
   ReceiptIcon,
   BoltIcon,
+  HomeIcon,
+  QrCodeIcon,
+  ShieldCheckIcon,
 } from '../components/OrdersIcons';
 
 export default function OrderSuccessPage() {
@@ -21,6 +25,8 @@ export default function OrderSuccessPage() {
 
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showRewardsModal, setShowRewardsModal] = useState(false);
+  const [showVietQRModal, setShowVietQRModal] = useState(false);
+  const [isVietQRPaid, setIsVietQRPaid] = useState(false);
 
   const orderId = location.state?.orderId || `ORD${Math.floor(100000 + Math.random() * 900000)}`;
   const total = location.state?.total || 0;
@@ -150,6 +156,77 @@ export default function OrderSuccessPage() {
           </div>
         </div>
 
+        {/* VietQR Quick Payment Action for Bank Transfer orders */}
+        {(paymentMethod === 'BANK' || orderData.paymentMethod.includes('VietQR')) && (
+          <div
+            style={{
+              background: isVietQRPaid ? '#f0fdf4' : '#eff6ff',
+              border: `1.5px solid ${isVietQRPaid ? '#bbf7d0' : '#bfdbfe'}`,
+              borderRadius: '12px',
+              padding: '16px 20px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              textAlign: 'left',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: isVietQRPaid ? '#dcfce7' : '#dbeafe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {isVietQRPaid ? (
+                  <CheckIcon size={22} color="#15803d" />
+                ) : (
+                  <QrCodeIcon size={22} color="#2563eb" />
+                )}
+              </div>
+              <div>
+                <div style={{ fontSize: '14.5px', fontWeight: 800, color: isVietQRPaid ? '#166534' : '#1e40af' }}>
+                  {isVietQRPaid ? 'Đã Xác Nhận Thanh Toán VietQR' : 'Thanh Toán VietQR Tự Động'}
+                </div>
+                <div style={{ fontSize: '12px', color: isVietQRPaid ? '#15803d' : '#3b82f6', marginTop: '2px' }}>
+                  {isVietQRPaid
+                    ? 'Giao dịch ngân hàng đã được hệ thống ghi nhận thành công.'
+                    : 'Quét mã QR để hoàn tất thanh toán hoặc xem lại chi tiết tài khoản.'}
+                </div>
+              </div>
+            </div>
+            {!isVietQRPaid && (
+              <button
+                type="button"
+                onClick={() => setShowVietQRModal(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '9px 16px',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <QrCodeIcon size={14} color="#ffffff" /> Quét Mã QR
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Bonus Lucky Spin Award Banner */}
         <div
           style={{
@@ -240,6 +317,19 @@ export default function OrderSuccessPage() {
 
       {showRewardsModal && (
         <RewardsHubModal onClose={() => setShowRewardsModal(false)} />
+      )}
+
+      {showVietQRModal && (
+        <VietQRPaymentModal
+          isOpen={showVietQRModal}
+          onClose={() => setShowVietQRModal(false)}
+          orderId={orderId}
+          amount={total}
+          onPaymentSuccess={() => {
+            setIsVietQRPaid(true);
+            setShowVietQRModal(false);
+          }}
+        />
       )}
     </main>
   );
