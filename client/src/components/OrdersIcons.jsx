@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const PackageIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const PackageIcon = ({ size = 15, className = "", color = "#ea580c" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <line x1="16.5" y1="9.4" x2="7.55" y2="4.24" />
     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -9,7 +9,7 @@ export const PackageIcon = ({ size = 15, className = "", color = "currentColor" 
   </svg>
 );
 
-export const StoreIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const StoreIcon = ({ size = 14, className = "", color = "#0d9488" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7" />
     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -18,7 +18,7 @@ export const StoreIcon = ({ size = 14, className = "", color = "currentColor" })
   </svg>
 );
 
-export const ChatIcon = ({ size = 13, className = "", color = "currentColor" }) => (
+export const ChatIcon = ({ size = 13, className = "", color = "#0284c7" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
@@ -31,7 +31,7 @@ export const CopyIcon = ({ size = 12, className = "", color = "currentColor" }) 
   </svg>
 );
 
-export const TruckIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const TruckIcon = ({ size = 14, className = "", color = "#16a34a" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect x="1" y="3" width="15" height="13" />
     <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
@@ -40,28 +40,28 @@ export const TruckIcon = ({ size = 14, className = "", color = "currentColor" })
   </svg>
 );
 
-export const MapPinIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const MapPinIcon = ({ size = 14, className = "", color = "#ef4444" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
     <circle cx="12" cy="10" r="3" />
   </svg>
 );
 
-export const CreditCardIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const CreditCardIcon = ({ size = 14, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
     <line x1="1" y1="10" x2="23" y2="10" />
   </svg>
 );
 
-export const ShieldCheckIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const ShieldCheckIcon = ({ size = 14, className = "", color = "#16a34a" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     <polyline points="9 12 11 14 15 10" />
   </svg>
 );
 
-export const PrinterIcon = ({ size = 13, className = "", color = "currentColor" }) => (
+export const PrinterIcon = ({ size = 13, className = "", color = "#6366f1" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <polyline points="6 9 6 2 18 2 18 9" />
     <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
@@ -69,7 +69,7 @@ export const PrinterIcon = ({ size = 13, className = "", color = "currentColor" 
   </svg>
 );
 
-export const ReceiptIcon = ({ size = 13, className = "", color = "currentColor" }) => (
+export const ReceiptIcon = ({ size = 13, className = "", color = "#0284c7" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
     <polyline points="14 2 14 8 20 8" />
@@ -79,14 +79,14 @@ export const ReceiptIcon = ({ size = 13, className = "", color = "currentColor" 
   </svg>
 );
 
-export const EyeIcon = ({ size = 13, className = "", color = "currentColor" }) => (
+export const EyeIcon = ({ size = 13, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
 
-export const RefreshIcon = ({ size = 13, className = "", color = "currentColor" }) => (
+export const RefreshIcon = ({ size = 13, className = "", color = "#059669" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <polyline points="23 4 23 10 17 10" />
     <polyline points="1 20 1 14 7 14" />
@@ -94,7 +94,7 @@ export const RefreshIcon = ({ size = 13, className = "", color = "currentColor" 
   </svg>
 );
 
-export const ClockIcon = ({ size = 13, className = "", color = "currentColor" }) => (
+export const ClockIcon = ({ size = 13, className = "", color = "#f59e0b" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="12" r="10" />
     <polyline points="12 6 12 12 16 14" />
@@ -107,20 +107,20 @@ export const CheckIcon = ({ size = 12, className = "", color = "currentColor" })
   </svg>
 );
 
-export const ReturnIcon = ({ size = 13, className = "", color = "currentColor" }) => (
+export const ReturnIcon = ({ size = 13, className = "", color = "#ea580c" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <polyline points="9 14 4 9 9 4" />
     <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
   </svg>
 );
 
-export const StarIcon = ({ size = 13, className = "", color = "currentColor", fill = "currentColor" }) => (
+export const StarIcon = ({ size = 13, className = "", color = "#f59e0b", fill = "#f59e0b" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth="1" className={className}>
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
   </svg>
 );
 
-export const ShoppingBagIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const ShoppingBagIcon = ({ size = 14, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
     <line x1="3" y1="6" x2="21" y2="6" />
@@ -147,14 +147,14 @@ export const PencilIcon = ({ size = 14, className = "", color = "currentColor" }
   </svg>
 );
 
-export const LockIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const LockIcon = ({ size = 15, className = "", color = "#f59e0b" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
   </svg>
 );
 
-export const TicketIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const TicketIcon = ({ size = 15, className = "", color = "#ea580c" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" />
     <line x1="9" y1="9" x2="9.01" y2="9" />
@@ -162,7 +162,7 @@ export const TicketIcon = ({ size = 15, className = "", color = "currentColor" }
   </svg>
 );
 
-export const CoinIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const CoinIcon = ({ size = 15, className = "", color = "#f59e0b" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="12" r="9" />
     <path d="M12 7v10" />
@@ -170,20 +170,20 @@ export const CoinIcon = ({ size = 15, className = "", color = "currentColor" }) 
   </svg>
 );
 
-export const ShieldIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const ShieldIcon = ({ size = 15, className = "", color = "#16a34a" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </svg>
 );
 
-export const TagIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const TagIcon = ({ size = 15, className = "", color = "#ec4899" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
     <line x1="7" y1="7" x2="7.01" y2="7" />
   </svg>
 );
 
-export const PercentIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const PercentIcon = ({ size = 15, className = "", color = "#ea580c" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <line x1="19" y1="5" x2="5" y2="19" />
     <circle cx="6.5" cy="6.5" r="2.5" />
@@ -191,13 +191,13 @@ export const PercentIcon = ({ size = 15, className = "", color = "currentColor" 
   </svg>
 );
 
-export const BoltIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const BoltIcon = ({ size = 15, className = "", color = "#eab308" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
   </svg>
 );
 
-export const CalendarIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const CalendarIcon = ({ size = 14, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
     <line x1="16" y1="2" x2="16" y2="6" />
@@ -206,14 +206,14 @@ export const CalendarIcon = ({ size = 14, className = "", color = "currentColor"
   </svg>
 );
 
-export const MailIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const MailIcon = ({ size = 14, className = "", color = "#0284c7" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
     <polyline points="22,6 12,13 2,6" />
   </svg>
 );
 
-export const UserIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const UserIcon = ({ size = 14, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
     <circle cx="12" cy="7" r="4" />
@@ -227,7 +227,7 @@ export const EyeOffIcon = ({ size = 13, className = "", color = "currentColor" }
   </svg>
 );
 
-export const QrCodeIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const QrCodeIcon = ({ size = 15, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect x="3" y="3" width="7" height="7" />
     <rect x="14" y="3" width="7" height="7" />
@@ -236,7 +236,7 @@ export const QrCodeIcon = ({ size = 15, className = "", color = "currentColor" }
   </svg>
 );
 
-export const KeyIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const KeyIcon = ({ size = 15, className = "", color = "#6366f1" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="7.5" cy="15.5" r="4.5" />
     <path d="m21 3-9.5 9.5" />
@@ -244,7 +244,7 @@ export const KeyIcon = ({ size = 15, className = "", color = "currentColor" }) =
   </svg>
 );
 
-export const AlertCircleIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const AlertCircleIcon = ({ size = 14, className = "", color = "#ef4444" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="12" r="10" />
     <line x1="12" y1="8" x2="12" y2="12" />
@@ -252,7 +252,7 @@ export const AlertCircleIcon = ({ size = 14, className = "", color = "currentCol
   </svg>
 );
 
-export const CartIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const CartIcon = ({ size = 15, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="9" cy="21" r="1" />
     <circle cx="20" cy="21" r="1" />
@@ -260,13 +260,13 @@ export const CartIcon = ({ size = 15, className = "", color = "currentColor" }) 
   </svg>
 );
 
-export const PhoneIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const PhoneIcon = ({ size = 14, className = "", color = "#10b981" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
   </svg>
 );
 
-export const ChartBarIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const ChartBarIcon = ({ size = 15, className = "", color = "#6366f1" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <line x1="18" y1="20" x2="18" y2="10" />
     <line x1="12" y1="20" x2="12" y2="4" />
@@ -274,14 +274,14 @@ export const ChartBarIcon = ({ size = 15, className = "", color = "currentColor"
   </svg>
 );
 
-export const SettingsIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const SettingsIcon = ({ size = 15, className = "", color = "#64748b" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="12" r="3" />
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </svg>
 );
 
-export const GlobeIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const GlobeIcon = ({ size = 15, className = "", color = "#06b6d4" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="12" r="10" />
     <line x1="2" y1="12" x2="22" y2="12" />
@@ -289,7 +289,7 @@ export const GlobeIcon = ({ size = 15, className = "", color = "currentColor" })
   </svg>
 );
 
-export const DownloadIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const DownloadIcon = ({ size = 14, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
     <polyline points="7 10 12 15 17 10" />
@@ -304,7 +304,7 @@ export const SearchIcon = ({ size = 14, className = "", color = "currentColor" }
   </svg>
 );
 
-export const TrashIcon = ({ size = 14, className = "", color = "currentColor" }) => (
+export const TrashIcon = ({ size = 14, className = "", color = "#dc2626" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <polyline points="3 6 5 6 21 6" />
     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -313,7 +313,7 @@ export const TrashIcon = ({ size = 14, className = "", color = "currentColor" })
   </svg>
 );
 
-export const UsersIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const UsersIcon = ({ size = 15, className = "", color = "#6366f1" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
     <circle cx="9" cy="7" r="4" />
@@ -330,7 +330,7 @@ export const LayersIcon = ({ size = 15, className = "", color = "currentColor" }
   </svg>
 );
 
-export const SparklesIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const SparklesIcon = ({ size = 15, className = "", color = "#8b5cf6" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
     <path d="M5 3v4" />
@@ -340,33 +340,33 @@ export const SparklesIcon = ({ size = 15, className = "", color = "currentColor"
   </svg>
 );
 
-export const HomeIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const HomeIcon = ({ size = 15, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
     <polyline points="9 22 9 12 15 12 15 22" />
   </svg>
 );
 
-export const FlameIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const FlameIcon = ({ size = 15, className = "", color = "#ef4444" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z" />
   </svg>
 );
 
-export const BellIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const BellIcon = ({ size = 15, className = "", color = "#f59e0b" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
   </svg>
 );
 
-export const ThumbsUpIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const ThumbsUpIcon = ({ size = 15, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
   </svg>
 );
 
-export const LightbulbIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const LightbulbIcon = ({ size = 15, className = "", color = "#eab308" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M9 18h6" />
     <path d="M10 22h4" />
@@ -374,7 +374,7 @@ export const LightbulbIcon = ({ size = 15, className = "", color = "currentColor
   </svg>
 );
 
-export const ScaleIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const ScaleIcon = ({ size = 15, className = "", color = "#6366f1" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
     <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
@@ -408,7 +408,7 @@ export const MicIcon = ({ size = 15, className = "", color = "currentColor" }) =
   </svg>
 );
 
-export const SendIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const SendIcon = ({ size = 15, className = "", color = "#2563eb" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <line x1="22" y1="2" x2="11" y2="13" />
     <polygon points="22 2 15 22 11 13 2 9 22 2" />
@@ -422,7 +422,7 @@ export const CameraIcon = ({ size = 15, className = "", color = "currentColor" }
   </svg>
 );
 
-export const TargetIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const TargetIcon = ({ size = 15, className = "", color = "#ef4444" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="12" r="10" />
     <circle cx="12" cy="12" r="6" />
@@ -430,7 +430,7 @@ export const TargetIcon = ({ size = 15, className = "", color = "currentColor" }
   </svg>
 );
 
-export const GiftIcon = ({ size = 15, className = "", color = "currentColor" }) => (
+export const GiftIcon = ({ size = 15, className = "", color = "#ec4899" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <polyline points="20 12 20 22 4 22 4 12" />
     <rect x="2" y="7" width="20" height="5" />
@@ -472,34 +472,34 @@ export const ChevronDownIcon = ({ size = 15, className = "", color = "currentCol
   </svg>
 );
 
-export const ShirtIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const ShirtIcon = ({ size = 16, className = "", color = "#3b82f6" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
   </svg>
 );
 
-export const SmartphoneIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const SmartphoneIcon = ({ size = 16, className = "", color = "#0284c7" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
     <path d="M12 18h.01" />
   </svg>
 );
 
-export const TvIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const TvIcon = ({ size = 16, className = "", color = "#6366f1" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect width="20" height="15" x="2" y="7" rx="2" ry="2" />
     <polyline points="17 2 12 7 7 2" />
   </svg>
 );
 
-export const LaptopIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const LaptopIcon = ({ size = 16, className = "", color = "#4f46e5" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M20 16V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v11" />
     <path d="M2 19h20" />
   </svg>
 );
 
-export const WatchIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const WatchIcon = ({ size = 16, className = "", color = "#f59e0b" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="12" r="7" />
     <polyline points="12 9 12 12 13.5 13.5" />
@@ -507,14 +507,14 @@ export const WatchIcon = ({ size = 16, className = "", color = "currentColor" })
   </svg>
 );
 
-export const FootwearIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const FootwearIcon = ({ size = 16, className = "", color = "#ea580c" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M4 17h16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2z" />
     <path d="M4 17V8c0-1.1.9-2 2-2h4l4 5h6a2 2 0 0 1 2 2v4H4z" />
   </svg>
 );
 
-export const CookingIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const CookingIcon = ({ size = 16, className = "", color = "#f97316" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M3 11h18a1 1 0 0 1 1 1v1a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6v-1a1 1 0 0 1 1-1z" />
     <path d="M6 7v4" />
@@ -523,7 +523,7 @@ export const CookingIcon = ({ size = 16, className = "", color = "currentColor" 
   </svg>
 );
 
-export const SportIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const SportIcon = ({ size = 16, className = "", color = "#10b981" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="12" r="10" />
     <path d="m4.93 4.93 4.24 4.24" />
@@ -534,7 +534,7 @@ export const SportIcon = ({ size = 16, className = "", color = "currentColor" })
   </svg>
 );
 
-export const BikeIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const BikeIcon = ({ size = 16, className = "", color = "#06b6d4" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="5.5" cy="17.5" r="3.5" />
     <circle cx="18.5" cy="17.5" r="3.5" />
@@ -543,14 +543,14 @@ export const BikeIcon = ({ size = 16, className = "", color = "currentColor" }) 
   </svg>
 );
 
-export const DressIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const DressIcon = ({ size = 16, className = "", color = "#ec4899" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M9 3h6l2 5-3 1 4 12H6l4-12-3-1 2-5z" />
     <path d="M12 3v6" />
   </svg>
 );
 
-export const BabyIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const BabyIcon = ({ size = 16, className = "", color = "#f43f5e" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M9 12h.01" />
     <path d="M15 12h.01" />
@@ -560,21 +560,21 @@ export const BabyIcon = ({ size = 16, className = "", color = "currentColor" }) 
   </svg>
 );
 
-export const BeautyIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const BeautyIcon = ({ size = 16, className = "", color = "#d946ef" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="m14 2-3 3 2 2-3 3" />
     <path d="m11 5-8 8a2 2 0 0 0 0 2.83l3.17 3.17a2 2 0 0 0 2.83 0l8-8" />
   </svg>
 );
 
-export const PillIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const PillIcon = ({ size = 16, className = "", color = "#14b8a6" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
     <path d="m8.5 8.5 7 7" />
   </svg>
 );
 
-export const BagIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const BagIcon = ({ size = 16, className = "", color = "#8b5cf6" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
     <path d="M3 6h18" />
@@ -582,7 +582,7 @@ export const BagIcon = ({ size = 16, className = "", color = "currentColor" }) =
   </svg>
 );
 
-export const FoodIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const FoodIcon = ({ size = 16, className = "", color = "#84cc16" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect width="18" height="14" x="3" y="5" rx="3" />
     <line x1="9" y1="5" x2="9" y2="19" />
@@ -591,7 +591,7 @@ export const FoodIcon = ({ size = 16, className = "", color = "currentColor" }) 
   </svg>
 );
 
-export const BookOpenIcon = ({ size = 16, className = "", color = "currentColor" }) => (
+export const BookOpenIcon = ({ size = 16, className = "", color = "#3b82f6" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
     <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
