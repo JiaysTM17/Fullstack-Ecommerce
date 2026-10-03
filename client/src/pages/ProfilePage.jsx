@@ -939,7 +939,9 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'profile' ? 'active' : ''}`}
               onClick={() => setActiveTab('profile')}
             >
-              <PencilIcon size={15} color="#2563eb" />
+              <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: activeTab === 'profile' ? 'rgba(37, 99, 235, 0.15)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PencilIcon size={13} color="#2563eb" />
+              </span>
               <span>Thông Tin Cá Nhân</span>
             </button>
 
@@ -949,7 +951,9 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'addresses' ? 'active' : ''}`}
               onClick={() => setActiveTab('addresses')}
             >
-              <MapPinIcon size={15} color="#ea580c" />
+              <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: activeTab === 'addresses' ? 'rgba(234, 88, 12, 0.15)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MapPinIcon size={13} color="#ea580c" />
+              </span>
               <span>Sổ Địa Chỉ</span>
               <span className="profile-tab-badge">{addresses.length}</span>
             </button>
@@ -960,7 +964,9 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'payments' ? 'active' : ''}`}
               onClick={() => setActiveTab('payments')}
             >
-              <CreditCardIcon size={15} color="#0d9488" />
+              <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: activeTab === 'payments' ? 'rgba(13, 148, 136, 0.15)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CreditCardIcon size={13} color="#0d9488" />
+              </span>
               <span>Thanh Toán & Ngân Hàng</span>
               <span className="profile-tab-badge">{paymentMethods.length}</span>
             </button>
@@ -971,7 +977,9 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'security' ? 'active' : ''}`}
               onClick={() => setActiveTab('security')}
             >
-              <LockIcon size={15} color="#6366f1" />
+              <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: activeTab === 'security' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <LockIcon size={13} color="#6366f1" />
+              </span>
               <span>Bảo Mật & Mật Khẩu</span>
             </button>
 
@@ -981,7 +989,9 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'settings' ? 'active' : ''}`}
               onClick={() => setActiveTab('settings')}
             >
-              <ShieldIcon size={15} color="#0284c7" />
+              <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: activeTab === 'settings' ? 'rgba(2, 132, 199, 0.15)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldIcon size={13} color="#0284c7" />
+              </span>
               <span>Cài Đặt & Quyền Riêng Tư</span>
             </button>
 
@@ -991,7 +1001,9 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'vouchers' ? 'active' : ''}`}
               onClick={() => setActiveTab('vouchers')}
             >
-              <TicketIcon size={15} color="#f97316" />
+              <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: activeTab === 'vouchers' ? 'rgba(249, 115, 22, 0.15)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <TicketIcon size={13} color="#f97316" />
+              </span>
               <span>Ví Voucher</span>
               <span className="profile-tab-badge">{vouchersList.length || 5}</span>
             </button>
@@ -1002,7 +1014,9 @@ export default function ProfilePage() {
               className={`profile-tab-button ${activeTab === 'coins' ? 'active' : ''}`}
               onClick={() => setActiveTab('coins')}
             >
-              <CoinIcon size={15} color="#f59e0b" />
+              <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: activeTab === 'coins' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CoinIcon size={13} color="#f59e0b" />
+              </span>
               <span>Ví Shopee Xu</span>
             </button>
 
