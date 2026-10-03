@@ -41,6 +41,7 @@ import {
   ShoppingBagIcon,
   HeartIcon,
   GlobeIcon,
+  LayersIcon,
 } from './OrdersIcons';
 import '../styles/header.css';
 
