@@ -285,9 +285,12 @@ export default function WishlistPage() {
                         setWishlistSearch('');
                         setSelectedCategory('all');
                       }}
-                      style={{ marginTop: '12px', fontSize: '12.5px' }}
+                      style={{ marginTop: '12px', fontSize: '12.5px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
-                      Xóa bộ lọc
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CloseIcon size={10} color="#ef4444" />
+                      </span>
+                      <span>Xóa bộ lọc</span>
                     </button>
                   </div>
                 ) : (
