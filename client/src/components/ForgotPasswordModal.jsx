@@ -662,7 +662,9 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 'Đang gửi mã bảo mật...'
               ) : (
                 <>
-                  <MailIcon size={16} color="#ffffff" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <MailIcon size={12} color="#ffffff" />
+                  </span>
                   <span>Gửi Mã Xác Thực OTP</span>
                 </>
               )}
@@ -901,7 +903,9 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 'Đang đối soát an ninh...'
               ) : (
                 <>
-                  <CheckIcon size={16} color="#ffffff" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={12} color="#ffffff" />
+                  </span>
                   <span>Xác Nhận Mã & Tiếp Tục</span>
                 </>
               )}
@@ -1177,7 +1181,9 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 'Đang cập nhật mật khẩu...'
               ) : (
                 <>
-                  <CheckIcon size={16} color="#ffffff" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={12} color="#ffffff" />
+                  </span>
                   <span>Lưu Mật Khẩu Mới & Đăng Nhập</span>
                 </>
               )}
