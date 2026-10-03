@@ -1,4 +1,5 @@
 import React from 'react';
+import { ShoppingBagIcon } from './OrdersIcons';
 import '../styles/feedback.css';
 
 /**
@@ -9,6 +10,7 @@ import '../styles/feedback.css';
  * @param {string} [props.description='Hiện tại chưa có mục nào để hiển thị.'] - Mô tả chi tiết
  * @param {React.ReactNode} [props.icon] - Icon hoặc hình minh họa tùy chỉnh
  * @param {string} [props.actionText] - Nhãn nút hành động (ví dụ: 'Mua sắm ngay')
+ * @param {React.ReactNode} [props.actionIcon] - Icon tùy chỉnh cho nút hành động
  * @param {function} [props.onAction] - Callback khi click nút hành động
  */
 const EmptyState = ({
@@ -16,6 +18,7 @@ const EmptyState = ({
   description = 'Hiện tại chưa có mục nào để hiển thị.',
   icon,
   actionText,
+  actionIcon,
   onAction
 }) => {
   return (
@@ -23,10 +26,11 @@ const EmptyState = ({
       <div className="shopee-empty-icon">
         {icon || (
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="20" y="35" width="60" height="45" rx="4" stroke="#cbd5e1" strokeWidth="3" fill="#f8fafc" />
-            <path d="M15 35L26 18H74L85 35H15Z" stroke="#94a3b8" strokeWidth="3" fill="#eff6ff" />
-            <path d="M38 48C38 54.6274 43.3726 60 50 60C56.6274 60 62 54.6274 62 48" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" />
-            <line x1="32" y1="26" x2="68" y2="26" stroke="#93c5fd" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="50" cy="50" r="46" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="2" />
+            <rect x="24" y="36" width="52" height="42" rx="6" stroke="#cbd5e1" strokeWidth="2.5" fill="#ffffff" />
+            <path d="M20 36L30 20H70L80 36H20Z" stroke="#94a3b8" strokeWidth="2.5" fill="#eff6ff" />
+            <path d="M38 48C38 54.6274 43.3726 60 50 60C56.6274 60 62 54.6274 62 48" stroke="#ea580c" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="34" y1="27" x2="66" y2="27" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         )}
       </div>
@@ -39,8 +43,10 @@ const EmptyState = ({
           type="button"
           className="shopee-btn shopee-btn-primary shopee-empty-action-btn"
           onClick={onAction}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
         >
-          {actionText}
+          {actionIcon || <ShoppingBagIcon size={14} color="#ffffff" />}
+          <span>{actionText}</span>
         </button>
       )}
     </div>
