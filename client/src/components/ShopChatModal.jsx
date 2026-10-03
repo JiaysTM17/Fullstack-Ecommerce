@@ -208,7 +208,12 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
               cursor: 'pointer'
             }}
           >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><ChatIcon size={12} color="#ea580c" /> Hỏi sản phẩm</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChatIcon size={11} color="#ea580c" />
+              </span>
+              <span>Hỏi sản phẩm</span>
+            </span>
           </button>
         </div>
       )}
@@ -280,9 +285,19 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
       >
         {QUICK_QUESTIONS.map((q, idx) => {
           let qIcon = <PackageIcon size={11} color="#ea580c" />;
-          if (idx === 1) qIcon = <TruckIcon size={11} color="#16a34a" />;
-          if (idx === 2) qIcon = <TicketIcon size={11} color="#ea580c" />;
-          if (idx === 3) qIcon = <ShieldCheckIcon size={11} color="#059669" />;
+          let iconBg = 'rgba(234, 88, 12, 0.1)';
+          if (idx === 1) {
+            qIcon = <TruckIcon size={11} color="#16a34a" />;
+            iconBg = 'rgba(22, 163, 74, 0.1)';
+          }
+          if (idx === 2) {
+            qIcon = <TicketIcon size={11} color="#f59e0b" />;
+            iconBg = 'rgba(245, 158, 11, 0.1)';
+          }
+          if (idx === 3) {
+            qIcon = <ShieldCheckIcon size={11} color="#059669" />;
+            iconBg = 'rgba(5, 150, 105, 0.1)';
+          }
           return (
             <button
               key={idx}
@@ -292,17 +307,19 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
                 background: 'var(--bg-muted, #f8fafc)',
                 border: '1px solid var(--border-medium, #e2e8f0)',
                 borderRadius: '999px',
-                padding: '4px 10px',
+                padding: '3px 10px 3px 4px',
                 fontSize: '11px',
                 color: 'var(--text-secondary, #475569)',
                 whiteSpace: 'nowrap',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px'
+                gap: '6px'
               }}
             >
-              {qIcon}
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: iconBg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {qIcon}
+              </span>
               <span>{q}</span>
             </button>
           );
