@@ -161,6 +161,12 @@ const Header = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleOpenCategoryDrawer = () => setShowCategoryDrawer(true);
+    window.addEventListener('open_category_drawer', handleOpenCategoryDrawer);
+    return () => window.removeEventListener('open_category_drawer', handleOpenCategoryDrawer);
+  }, []);
+
   // Safely consume useCart
   let cartData = { items: [], subtotal: 0, removeFromCart: () => {} };
   try {

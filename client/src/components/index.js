@@ -30,3 +30,4 @@ export { default as LegalModal } from './LegalModal';
 export { default as SocialAuthModal } from './SocialAuthModal';
 export { default as OrderDetailModal } from './OrderDetailModal';
 export { default as VietQRPaymentModal } from './VietQRPaymentModal';
+export { default as MobileBottomNav } from './MobileBottomNav';

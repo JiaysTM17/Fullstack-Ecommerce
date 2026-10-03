@@ -8,7 +8,7 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import { Footer, Header, ToastContainer, AuthModal } from "./components";
+import { Footer, Header, ToastContainer, AuthModal, MobileBottomNav } from "./components";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LiveChatWidget from "./components/LiveChatWidget";
 import ProductCompareModal from "./components/ProductCompareModal";
@@ -104,6 +104,7 @@ function AppLayout() {
         </Routes>
       </ErrorBoundary>
       <Footer />
+      <MobileBottomNav />
       <LiveChatWidget />
       <ProductCompareModal />
       <ToastContainer />
