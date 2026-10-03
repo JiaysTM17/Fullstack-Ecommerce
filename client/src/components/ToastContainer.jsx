@@ -26,6 +26,7 @@ export default function ToastContainer() {
         const isError = toast.type === 'error';
         const isInfo = toast.type === 'info';
 
+        const borderColor = isSuccess ? '#10b981' : isError ? '#ef4444' : '#3b82f6';
         const bgGradient = isSuccess
           ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
           : isError
@@ -108,18 +109,22 @@ export default function ToastContainer() {
                 type="button"
                 onClick={() => removeToast(toast.id)}
                 style={{
-                  background: 'none',
+                  background: '#f1f5f9',
                   border: 'none',
-                  color: '#94a3b8',
+                  borderRadius: '50%',
+                  width: '22px',
+                  height: '22px',
+                  color: '#64748b',
                   cursor: 'pointer',
-                  padding: '4px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  flexShrink: 0,
+                  transition: 'background 0.2s',
                 }}
                 aria-label="Đóng thông báo"
               >
-                <CloseIcon size={14} color="#94a3b8" />
+                <CloseIcon size={11} color="#64748b" />
               </button>
             </div>
           </div>
