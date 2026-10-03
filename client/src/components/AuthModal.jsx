@@ -185,7 +185,7 @@ export default function AuthModal() {
           onClick={closeAuthModal}
           title="Đóng (ESC)"
         >
-          <CloseIcon size={16} />
+          <CloseIcon size={16} color="#64748b" />
         </button>
 
         {/* Master Mode Tabs: ĐĂNG NHẬP vs ĐĂNG KÝ */}
@@ -199,7 +199,7 @@ export default function AuthModal() {
             }}
             style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
           >
-            <KeyIcon size={14} />
+            <KeyIcon size={14} color="#ea580c" />
             <span>Đăng Nhập</span>
           </button>
           <button
@@ -211,7 +211,7 @@ export default function AuthModal() {
             }}
             style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
           >
-            <BoltIcon size={14} />
+            <BoltIcon size={14} color="#ea580c" />
             <span>Đăng Ký Tài Khoản</span>
           </button>
         </div>
@@ -222,7 +222,7 @@ export default function AuthModal() {
             className={`shopee-role-card ${activeRole === 'customer' ? 'active' : ''}`}
             onClick={() => setActiveRole('customer')}
           >
-            <span className="shopee-role-card-icon"><CartIcon size={20} /></span>
+            <span className="shopee-role-card-icon"><CartIcon size={20} color="#16a34a" /></span>
             <span className="shopee-role-card-title">Người Mua</span>
             <span className="shopee-role-card-sub">Mua sắm & Săn xu</span>
           </div>
@@ -231,7 +231,7 @@ export default function AuthModal() {
             className={`shopee-role-card ${activeRole === 'seller' ? 'active' : ''}`}
             onClick={() => setActiveRole('seller')}
           >
-            <span className="shopee-role-card-icon"><StoreIcon size={20} /></span>
+            <span className="shopee-role-card-icon"><StoreIcon size={20} color="#ea580c" /></span>
             <span className="shopee-role-card-title">Chủ Shop</span>
             <span className="shopee-role-card-sub">Quản lý gian hàng</span>
           </div>
@@ -240,7 +240,7 @@ export default function AuthModal() {
             className={`shopee-role-card ${activeRole === 'admin' ? 'active' : ''}`}
             onClick={() => setActiveRole('admin')}
           >
-            <span className="shopee-role-card-icon"><ShieldIcon size={20} /></span>
+            <span className="shopee-role-card-icon"><ShieldIcon size={20} color="#6366f1" /></span>
             <span className="shopee-role-card-title">Quản Trị</span>
             <span className="shopee-role-card-sub">Tổng vận hành</span>
           </div>
@@ -251,7 +251,7 @@ export default function AuthModal() {
           <div className="shopee-demo-container">
             <div className="shopee-demo-header">
               <span className="shopee-demo-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <BoltIcon size={13} />
+                <BoltIcon size={13} color="#ea580c" />
                 <span>Chọn Nhanh Tài Khoản Trải Nghiệm</span>
               </span>
             </div>
@@ -345,7 +345,7 @@ export default function AuthModal() {
         {/* Error Message */}
         {error && (
           <div className="shopee-form-error-msg" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <AlertCircleIcon size={15} />
+            <AlertCircleIcon size={15} color="#ef4444" />
             <span>{error}</span>
           </div>
         )}
@@ -388,7 +388,7 @@ export default function AuthModal() {
                     Email / Tên đăng nhập *
                   </label>
                   <div className="shopee-form-input-wrap">
-                    <span className="shopee-input-lead-icon"><MailIcon size={14} /></span>
+                    <span className="shopee-input-lead-icon"><MailIcon size={14} color="#2563eb" /></span>
                     <input
                       id="modal-login-email"
                       type="email"
@@ -411,7 +411,7 @@ export default function AuthModal() {
                     Mật khẩu *
                   </label>
                   <div className="shopee-form-input-wrap">
-                    <span className="shopee-input-lead-icon"><LockIcon size={14} /></span>
+                    <span className="shopee-input-lead-icon"><LockIcon size={14} color="#ea580c" /></span>
                     <input
                       id="modal-login-password"
                       type={showPassword ? 'text' : 'password'}

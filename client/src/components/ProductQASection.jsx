@@ -295,7 +295,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ display: "inline-flex", alignItems: "center", color: "var(--primary-color, #ea580c)" }}>
-            <ChatIcon size={22} />
+            <ChatIcon size={22} color="#0284c7" />
           </span>
           <div>
             <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
@@ -384,7 +384,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
       ) : questions.length === 0 ? (
         <div style={{ textAlign: "center", padding: "30px 0", color: "var(--text-muted, #94a3b8)" }}>
           <span style={{ display: "inline-flex", justifyContent: "center", marginBottom: "8px", color: "var(--primary-color, #ea580c)" }}>
-            <LightbulbIcon size={32} />
+            <LightbulbIcon size={32} color="#f59e0b" />
           </span>
           <p style={{ margin: 0, fontSize: "14px" }}>Chưa có câu hỏi nào. Hãy là người đầu tiên đặt câu hỏi cho sản phẩm này!</p>
         </div>
@@ -454,7 +454,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                     }}
                     title={voted ? "Bạn đã bình chọn hữu ích cho câu hỏi này" : "Bình chọn câu hỏi hữu ích"}
                   >
-                    <ThumbsUpIcon size={13} />
+                    <ThumbsUpIcon size={13} color={voted ? '#ea580c' : '#2563eb'} />
                     <span>Hữu ích ({votes})</span>
                   </button>
                 </div>
@@ -485,7 +485,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                         >
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
                             <span style={{ display: "inline-flex", alignItems: "center", color: isShop ? "#ea580c" : "var(--text-secondary)" }}>
-                              {isShop ? <StoreIcon size={14} /> : <ChatIcon size={13} />}
+                              {isShop ? <StoreIcon size={14} color="#ea580c" /> : <ChatIcon size={13} color="#0284c7" />}
                             </span>
                             <strong style={{ fontSize: "13px", color: isShop ? "#ea580c" : "inherit" }}>
                               {ansAuthor}
@@ -504,7 +504,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                                   gap: "4px",
                                 }}
                               >
-                                <StoreIcon size={11} />
+                                <StoreIcon size={11} color="#ffffff" />
                                 <span>Người bán</span>
                               </span>
                             )}

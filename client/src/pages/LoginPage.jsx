@@ -247,7 +247,7 @@ export default function LoginPage() {
         <div className="shopee-auth-hero-col">
           <div className="shopee-auth-hero-brand">
             <div className="shopee-auth-hero-badge">
-              <span>{activeRole === 'admin' ? <ShieldIcon size={14} /> : activeRole === 'seller' ? <StoreIcon size={14} /> : <ShoppingBagIcon size={14} />}</span>
+              <span>{activeRole === 'admin' ? <ShieldIcon size={14} color="#6366f1" /> : activeRole === 'seller' ? <StoreIcon size={14} color="#ea580c" /> : <ShoppingBagIcon size={14} color="#ea580c" />}</span>
               <span>
                 {activeRole === 'admin'
                   ? 'QUẢN TRỊ VIÊN HỆ THỐNG'
@@ -280,7 +280,7 @@ export default function LoginPage() {
               {activeRole === 'admin' ? (
                 <>
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><LockIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><LockIcon size={18} color="#6366f1" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Phân Quyền RBAC Đa Cấp Nghiêm Ngặt</strong>
                       <span>Bảo vệ quyền truy cập và dữ liệu nhạy cảm cấp doanh nghiệp</span>
@@ -288,7 +288,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><ReceiptIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><ReceiptIcon size={18} color="#0284c7" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Dashboard Thống Kê Real-Time</strong>
                       <span>Theo dõi biến động dòng tiền, đơn hàng và lượng truy cập</span>
@@ -304,7 +304,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><TagIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><TagIcon size={18} color="#10b981" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Quản Trị Chiến Dịch Flash Sale</strong>
                       <span>Phê duyệt sản phẩm, mã khuyến mại và ban hành chính sách</span>
@@ -312,7 +312,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><CreditCardIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><CreditCardIcon size={18} color="#8b5cf6" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Kiểm Soát Đối Soát & Luân Chuyển Dòng Tiền</strong>
                       <span>Minh bạch số dư ví, phí sàn và doanh thu người bán</span>
@@ -330,7 +330,7 @@ export default function LoginPage() {
               ) : activeRole === 'seller' ? (
                 <>
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><TruckIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><TruckIcon size={18} color="#0284c7" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Xử Lý & In Vận Đơn 1-Click</strong>
                       <span>Tự động liên kết SPX Express, GHN, Viettel Post</span>
@@ -338,7 +338,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><CoinIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><CoinIcon size={18} color="#eab308" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Ví Doanh Thu Shop Rút Tiền 24/7</strong>
                       <span>Tiền về tài khoản ngân hàng tức thì không giới hạn số lần</span>
@@ -346,7 +346,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><StarIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><StarIcon size={18} color="#f59e0b" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Phân Tích Dữ Liệu Tăng Trưởng AI</strong>
                       <span>Dự báo nhu cầu tồn kho và cảnh báo sản phẩm bán chạy</span>
@@ -362,7 +362,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><ChatIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><ChatIcon size={18} color="#2563eb" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Chat CSKH Trực Tuyến Tức Thì</strong>
                       <span>Tương tác nhanh với người mua để nâng cao tỷ lệ chuyển đổi</span>
@@ -370,7 +370,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><StoreIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><StoreIcon size={18} color="#10b981" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Tối Ưu Hóa Bài Đăng Sản Phẩm</strong>
                       <span>Gợi ý từ khóa SEO giúp sản phẩm lọt top kết quả tìm kiếm</span>
@@ -380,7 +380,7 @@ export default function LoginPage() {
               ) : (
                 <>
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><BoltIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><BoltIcon size={18} color="#ea580c" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Giao Siêu Tốc 2H & Hỏa Tốc</strong>
                       <span>Nhận hàng tận tay cùng bảo hiểm toàn diện đơn hàng</span>
@@ -396,7 +396,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><CheckIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><CheckIcon size={18} color="#059669" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Đổi Trả Dễ Dàng Trong 30 Ngày</strong>
                       <span>Shipper thu hồi tận nơi, hoàn tiền tức thì qua Ví</span>
@@ -420,7 +420,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><ShieldIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><ShieldIcon size={18} color="#6366f1" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Bảo Vệ Người Mua Tuyệt Đối</strong>
                       <span>Tiền chỉ chuyển cho người bán khi bạn xác nhận hài lòng</span>
@@ -436,7 +436,7 @@ export default function LoginPage() {
               <div className="shopee-auth-live-text">
                 <span>Hơn <strong>1.480+</strong> người dùng & đối tác đang trực tuyến</span>
                 <small style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <ShieldCheckIcon size={12} /> Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)
+                  <ShieldCheckIcon size={12} color="#16a34a" /> Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)
                 </small>
               </div>
             </div>
@@ -497,7 +497,7 @@ export default function LoginPage() {
         <div className="shopee-auth-form-col">
           <div className="shopee-auth-header" style={{ marginBottom: '16px' }}>
             <div className="shopee-auth-brand-badge">
-              <ShieldCheckIcon size={14} />
+              <ShieldCheckIcon size={14} color="#2563eb" />
               <span>CỔNG TRUY CẬP BẢO MẬT SSL 256-BIT</span>
             </div>
             <h2 className="shopee-auth-title" style={{ fontSize: '24px' }}>
@@ -515,7 +515,7 @@ export default function LoginPage() {
               className={`shopee-role-card ${activeRole === 'customer' ? 'active' : ''}`}
               onClick={() => setActiveRole('customer')}
             >
-              <span className="role-icon"><CartIcon size={20} /></span>
+              <span className="role-icon"><CartIcon size={20} color="#16a34a" /></span>
               <span className="role-name">{t('role_customer', 'Người Mua')}</span>
               <span className="role-desc">Mua sắm & Săn Sale</span>
             </button>
@@ -525,7 +525,7 @@ export default function LoginPage() {
               className={`shopee-role-card ${activeRole === 'seller' ? 'active' : ''}`}
               onClick={() => setActiveRole('seller')}
             >
-              <span className="role-icon"><StoreIcon size={20} /></span>
+              <span className="role-icon"><StoreIcon size={20} color="#ea580c" /></span>
               <span className="role-name">{t('role_seller', 'Kênh Shop')}</span>
               <span className="role-desc">Quản lý gian hàng</span>
             </button>
@@ -535,7 +535,7 @@ export default function LoginPage() {
               className={`shopee-role-card ${activeRole === 'admin' ? 'active' : ''}`}
               onClick={() => setActiveRole('admin')}
             >
-              <span className="role-icon"><ShieldCheckIcon size={20} /></span>
+              <span className="role-icon"><ShieldCheckIcon size={20} color="#6366f1" /></span>
               <span className="role-name">{t('role_admin', 'Quản Trị')}</span>
               <span className="role-desc">Toàn quyền hệ thống</span>
             </button>
@@ -602,7 +602,7 @@ export default function LoginPage() {
               {/* 1-Click Demo Logins */}
               <div className="shopee-demo-section" style={{ marginBottom: '16px' }}>
                 <div className="shopee-demo-title">
-                  <BoltIcon size={14} />
+                  <BoltIcon size={14} color="#ea580c" />
                   <span>{t('demo_quick_access', 'Chọn nhanh tài khoản trải nghiệm:')}</span>
                 </div>
                 <div className="shopee-demo-buttons">
@@ -614,7 +614,7 @@ export default function LoginPage() {
                       disabled={loading}
                     >
                       <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                        <UserIcon size={13} /> Nguyễn Văn Khách (Customer)
+                        <UserIcon size={13} color="#16a34a" /> Nguyễn Văn Khách (Customer)
                       </strong>
                       <span>khachhang@shopee.vn</span>
                     </button>
@@ -628,7 +628,7 @@ export default function LoginPage() {
                         disabled={loading}
                       >
                         <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <StoreIcon size={13} /> Thời Trang GenZ Official (Shop A)
+                          <StoreIcon size={13} color="#ea580c" /> Thời Trang GenZ Official (Shop A)
                         </strong>
                         <span>shop.genz@shopee.vn</span>
                       </button>
@@ -639,7 +639,7 @@ export default function LoginPage() {
                         disabled={loading}
                       >
                         <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <StoreIcon size={13} /> TechWorld Store (Shop B)
+                          <StoreIcon size={13} color="#0284c7" /> TechWorld Store (Shop B)
                         </strong>
                         <span>shop.tech@shopee.vn</span>
                       </button>
@@ -653,7 +653,7 @@ export default function LoginPage() {
                       disabled={loading}
                     >
                       <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                        <ShieldCheckIcon size={13} /> Tổng Quản Trị Viên Sàn (Super Admin)
+                        <ShieldCheckIcon size={13} color="#6366f1" /> Tổng Quản Trị Viên Sàn (Super Admin)
                       </strong>
                       <span>admin@shopee.vn</span>
                     </button>
@@ -669,7 +669,7 @@ export default function LoginPage() {
                   <label className="shopee-form-label" htmlFor="page-email">Email đăng nhập</label>
                   <div className="shopee-email-autocomplete-wrap">
                     <div className="shopee-form-input-wrap">
-                      <span className="shopee-input-lead-icon"><MailIcon size={16} /></span>
+                      <span className="shopee-input-lead-icon"><MailIcon size={16} color="#2563eb" /></span>
                       <input
                         ref={emailInputRef}
                         id="page-email"
@@ -710,7 +710,7 @@ export default function LoginPage() {
                 <div className="shopee-form-group">
                   <label className="shopee-form-label" htmlFor="page-password">{t('password', 'Mật khẩu')}</label>
                   <div className="shopee-form-input-wrap">
-                    <span className="shopee-input-lead-icon"><LockIcon size={16} /></span>
+                    <span className="shopee-input-lead-icon"><LockIcon size={16} color="#ea580c" /></span>
                     <input
                       id="page-password"
                       type={showPassword ? 'text' : 'password'}
@@ -747,7 +747,7 @@ export default function LoginPage() {
                       gap: '10px',
                     }}
                   >
-                    <ClockIcon size={22} />
+                    <ClockIcon size={22} color="#dc2626" />
                     <div>
                       <strong>Tạm khóa đăng nhập an toàn!</strong>
                       <div>Hệ thống phát hiện nhiều lần nhập sai. Thử lại sau <strong>{lockoutTimer}s</strong>.</div>
@@ -759,7 +759,7 @@ export default function LoginPage() {
                 {failedAttempts >= 3 && !isLocked && !sliderVerified && (
                   <div style={{ marginBottom: '14px' }}>
                     <div style={{ fontSize: '12px', fontWeight: 700, color: '#dc2626', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <AlertCircleIcon size={14} /> Yêu cầu kiểm tra an ninh (Lần thử {failedAttempts}/5):
+                      <AlertCircleIcon size={14} color="#dc2626" /> Yêu cầu kiểm tra an ninh (Lần thử {failedAttempts}/5):
                     </div>
                     <SecuritySliderCaptcha
                       isVerified={sliderVerified}
@@ -772,7 +772,7 @@ export default function LoginPage() {
 
                 {failedAttempts >= 3 && sliderVerified && (
                   <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckIcon size={14} /> Xác minh an ninh hoàn tất!
+                    <CheckIcon size={14} color="#16a34a" /> Xác minh an ninh hoàn tất!
                   </div>
                 )}
 

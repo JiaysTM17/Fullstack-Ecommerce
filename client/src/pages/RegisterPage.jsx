@@ -435,7 +435,7 @@ export default function RegisterPage() {
         <div className="shopee-auth-hero-col">
           <div className="shopee-auth-hero-brand">
             <div className="shopee-auth-hero-badge">
-              {role === 'seller' ? <BoltIcon size={14} /> : <TicketIcon size={14} />}
+              {role === 'seller' ? <BoltIcon size={14} color="#ea580c" /> : <TicketIcon size={14} color="#ea580c" />}
               <span>{role === 'seller' ? 'GIA NHẬP HỆ THỐNG ĐỐI TÁC BÁN HÀNG' : 'GIA NHẬP CỘNG ĐỒNG NGƯỜI MUA'}</span>
             </div>
             <h1 className="shopee-auth-hero-title">
@@ -564,7 +564,7 @@ export default function RegisterPage() {
               <div className="shopee-auth-live-text">
                 <span>Hơn <strong>1.480+</strong> người dùng & đối tác đang trực tuyến</span>
                 <small style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <ShieldCheckIcon size={12} /> Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)
+                  <ShieldCheckIcon size={12} color="#16a34a" /> Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)
                 </small>
               </div>
             </div>
@@ -628,7 +628,7 @@ export default function RegisterPage() {
               className={`shopee-role-tab ${role === 'customer' ? 'active' : ''}`}
               onClick={() => handleRoleChange('customer')}
             >
-              <CartIcon size={16} />
+              <CartIcon size={16} color={role === 'customer' ? '#ffffff' : '#16a34a'} />
               <span>{t('register_role_customer', 'Mua Hàng')}</span>
             </button>
             <button
@@ -636,7 +636,7 @@ export default function RegisterPage() {
               className={`shopee-role-tab ${role === 'seller' ? 'active' : ''}`}
               onClick={() => handleRoleChange('seller')}
             >
-              <StoreIcon size={16} />
+              <StoreIcon size={16} color={role === 'seller' ? '#ffffff' : '#ea580c'} />
               <span>{t('register_role_seller', 'Mở Shop Bán Hàng')}</span>
             </button>
           </div>
@@ -701,7 +701,7 @@ export default function RegisterPage() {
                 {t('full_name', 'Họ và tên')} *
               </label>
               <div className="shopee-form-input-wrap">
-                <span className="shopee-input-lead-icon"><UserIcon size={16} /></span>
+                <span className="shopee-input-lead-icon"><UserIcon size={16} color="#0284c7" /></span>
                 <input
                   id="reg-fullName"
                   name="fullName"
@@ -721,7 +721,7 @@ export default function RegisterPage() {
                 <label className="shopee-form-label" htmlFor="reg-email">Email *</label>
                 <div className="shopee-email-autocomplete-wrap">
                   <div className="shopee-form-input-wrap">
-                    <span className="shopee-input-lead-icon"><MailIcon size={16} /></span>
+                    <span className="shopee-input-lead-icon"><MailIcon size={16} color="#2563eb" /></span>
                     <input
                       ref={emailInputRef}
                       id="reg-email"
@@ -805,7 +805,7 @@ export default function RegisterPage() {
                   </span>
                 </label>
                 <div className="shopee-form-input-wrap">
-                  <span className="shopee-input-lead-icon"><PhoneIcon size={16} /></span>
+                  <span className="shopee-input-lead-icon"><PhoneIcon size={16} color="#16a34a" /></span>
                   <input
                     id="reg-phone"
                     name="phone"
@@ -837,7 +837,7 @@ export default function RegisterPage() {
                     {t('shop_name_label', 'Tên Cửa Hàng / Shop')} *
                   </label>
                   <div className="shopee-form-input-wrap">
-                    <span className="shopee-input-lead-icon"><StoreIcon size={16} /></span>
+                    <span className="shopee-input-lead-icon"><StoreIcon size={16} color="#ea580c" /></span>
                     <input
                       id="reg-shopName"
                       name="shopName"
@@ -870,7 +870,7 @@ export default function RegisterPage() {
                   <div className="shopee-form-group" style={{ marginBottom: 0 }}>
                     <label className="shopee-form-label" htmlFor="reg-shopAddress">Kho lấy hàng</label>
                     <div className="shopee-form-input-wrap">
-                      <span className="shopee-input-lead-icon"><MapPinIcon size={16} /></span>
+                      <span className="shopee-input-lead-icon"><MapPinIcon size={16} color="#ea580c" /></span>
                       <input
                         id="reg-shopAddress"
                         name="shopAddress"
@@ -892,7 +892,7 @@ export default function RegisterPage() {
                   {t('password', 'Mật khẩu')} *
                 </label>
                 <div className="shopee-form-input-wrap">
-                  <span className="shopee-input-lead-icon"><LockIcon size={16} /></span>
+                  <span className="shopee-input-lead-icon"><LockIcon size={16} color="#ea580c" /></span>
                   <input
                     id="reg-password"
                     name="password"
@@ -919,7 +919,7 @@ export default function RegisterPage() {
                   {t('confirm_password', 'Xác nhận mật khẩu')} *
                 </label>
                 <div className="shopee-form-input-wrap">
-                  <span className="shopee-input-lead-icon"><ShieldCheckIcon size={16} /></span>
+                  <span className="shopee-input-lead-icon"><ShieldCheckIcon size={16} color="#6366f1" /></span>
                   <input
                     id="reg-confirmPassword"
                     name="confirmPassword"
@@ -972,19 +972,19 @@ export default function RegisterPage() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11.5px' }}>
                   <div style={{ color: passwordChecks.length ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.length ? <CheckIcon size={12} /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
+                    {passwordChecks.length ? <CheckIcon size={12} color="#10b981" /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
                     <span>Tối thiểu 8 ký tự</span>
                   </div>
                   <div style={{ color: passwordChecks.hasUpper ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.hasUpper ? <CheckIcon size={12} /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
+                    {passwordChecks.hasUpper ? <CheckIcon size={12} color="#10b981" /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
                     <span>Có chữ in hoa (A-Z)</span>
                   </div>
                   <div style={{ color: passwordChecks.hasNumber ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.hasNumber ? <CheckIcon size={12} /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
+                    {passwordChecks.hasNumber ? <CheckIcon size={12} color="#10b981" /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
                     <span>Có chữ số (0-9)</span>
                   </div>
                   <div style={{ color: passwordChecks.hasSpecial ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.hasSpecial ? <CheckIcon size={12} /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
+                    {passwordChecks.hasSpecial ? <CheckIcon size={12} color="#10b981" /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
                     <span>Ký tự đặc biệt (!@#$)</span>
                   </div>
                 </div>
@@ -1082,15 +1082,15 @@ export default function RegisterPage() {
             border: '1px solid #e2e8f0',
           }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <LockIcon size={12} /> SSL 256-Bit
+              <LockIcon size={12} color="#64748b" /> SSL 256-Bit
             </span>
             <span>•</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <ShieldCheckIcon size={12} /> Bảo mật 2FA OTP
+              <ShieldCheckIcon size={12} color="#16a34a" /> Bảo mật 2FA OTP
             </span>
             <span>•</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <ShieldIcon size={12} /> 100% Bảo vệ tài khoản
+              <ShieldIcon size={12} color="#2563eb" /> 100% Bảo vệ tài khoản
             </span>
           </div>
 

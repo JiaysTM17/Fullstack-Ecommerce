@@ -114,7 +114,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ display: "inline-flex", alignItems: "center", color: "var(--primary-color, #ea580c)" }}>
-            <EyeIcon size={20} />
+            <EyeIcon size={20} color="#0284c7" />
           </span>
           <div>
             <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
@@ -151,7 +151,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
             e.currentTarget.style.background = "none";
           }}
         >
-          <TrashIcon size={14} />
+          <TrashIcon size={14} color="#ef4444" />
           <span>{t("clear_history", "Xóa lịch sử")}</span>
         </button>
       </div>
@@ -204,7 +204,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               e.currentTarget.style.borderColor = "#cbd5e1";
             }}
           >
-            <ChevronLeftIcon size={16} />
+            <ChevronLeftIcon size={16} color="currentColor" />
           </button>
 
           {/* Right Scroll Navigation Button */}
@@ -247,7 +247,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               e.currentTarget.style.borderColor = "#cbd5e1";
             }}
           >
-            <ChevronRightIcon size={16} />
+            <ChevronRightIcon size={16} color="currentColor" />
           </button>
 
           {/* Scrollable Horizontal Carousel Container */}
@@ -397,7 +397,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
                           e.currentTarget.style.color = "var(--primary-color, #ea580c)";
                         }}
                       >
-                        <CartIcon size={13} />
+                        <CartIcon size={13} color="currentColor" />
                         <span>Thêm nhanh</span>
                       </button>
                     </div>
