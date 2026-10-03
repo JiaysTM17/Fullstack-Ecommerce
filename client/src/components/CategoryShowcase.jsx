@@ -526,7 +526,9 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             border: '1px solid var(--border-light, #e2e8f0)',
           }}
         >
-          <TruckIcon size={13} color="#059669" />
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', flexShrink: 0 }}>
+            <TruckIcon size={12} color="#059669" />
+          </span>
           <span>{language === 'en' ? '20 Top Categories · Fast Delivery 2H' : '20 Ngành hàng nổi bật · Giao hỏa tốc 2H'}</span>
         </span>
       </div>
@@ -550,7 +552,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               background: 'rgba(255, 255, 255, 0.96)',
               border: '1px solid var(--border-medium, #cbd5e1)',
               boxShadow: '0 4px 14px rgba(0, 0, 0, 0.12)',
-              color: 'var(--text-primary, #0f172a)',
+              color: '#2563eb',
               fontSize: '20px',
               fontWeight: 800,
               display: 'flex',
@@ -568,12 +570,14 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'rgba(255, 255, 255, 0.96)';
-              e.currentTarget.style.color = 'var(--text-primary, #0f172a)';
+              e.currentTarget.style.color = '#2563eb';
               e.currentTarget.style.borderColor = 'var(--border-medium, #cbd5e1)';
               e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
-            <ChevronLeftIcon size={18} color="#2563eb" />
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.08)', flexShrink: 0 }}>
+              <ChevronLeftIcon size={16} color="currentColor" />
+            </span>
           </button>
         )}
 
@@ -620,7 +624,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
               background: 'rgba(255, 255, 255, 0.96)',
               border: '1px solid var(--border-medium, #cbd5e1)',
               boxShadow: '0 4px 14px rgba(0, 0, 0, 0.12)',
-              color: 'var(--text-primary, #0f172a)',
+              color: '#2563eb',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -636,12 +640,14 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'rgba(255, 255, 255, 0.96)';
-              e.currentTarget.style.color = 'var(--text-primary, #0f172a)';
+              e.currentTarget.style.color = '#2563eb';
               e.currentTarget.style.borderColor = 'var(--border-medium, #cbd5e1)';
               e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
-            <ChevronRightIcon size={18} color="#2563eb" />
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.08)', flexShrink: 0 }}>
+              <ChevronRightIcon size={16} color="currentColor" />
+            </span>
           </button>
         )}
       </div>
