@@ -628,7 +628,9 @@ export default function RegisterPage() {
               className={`shopee-role-tab ${role === 'customer' ? 'active' : ''}`}
               onClick={() => handleRoleChange('customer')}
             >
-              <CartIcon size={16} color={role === 'customer' ? '#ffffff' : '#16a34a'} />
+              <span style={{ width: "26px", height: "26px", borderRadius: "6px", background: role === 'customer' ? 'rgba(255, 255, 255, 0.2)' : 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)', border: role === 'customer' ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid #86efac', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CartIcon size={14} color={role === 'customer' ? '#ffffff' : '#16a34a'} />
+              </span>
               <span>{t('register_role_customer', 'Mua Hàng')}</span>
             </button>
             <button
@@ -636,7 +638,9 @@ export default function RegisterPage() {
               className={`shopee-role-tab ${role === 'seller' ? 'active' : ''}`}
               onClick={() => handleRoleChange('seller')}
             >
-              <StoreIcon size={16} color={role === 'seller' ? '#ffffff' : '#ea580c'} />
+              <span style={{ width: "26px", height: "26px", borderRadius: "6px", background: role === 'seller' ? 'rgba(255, 255, 255, 0.2)' : 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: role === 'seller' ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid #fed7aa', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <StoreIcon size={14} color={role === 'seller' ? '#ffffff' : '#ea580c'} />
+              </span>
               <span>{t('register_role_seller', 'Mở Shop Bán Hàng')}</span>
             </button>
           </div>
