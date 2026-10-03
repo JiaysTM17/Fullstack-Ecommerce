@@ -226,8 +226,8 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             type="button"
             onClick={onClose}
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: 'none',
               borderRadius: '8px',
               width: '32px',
               height: '32px',
@@ -235,13 +235,13 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: '#64748b',
+              color: '#ef4444',
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
               transition: 'all 0.15s ease',
             }}
             title="Đóng cửa sổ"
           >
-            <CloseIcon size={14} color="#64748b" />
+            <CloseIcon size={14} color="#ef4444" />
           </button>
         </div>
         </div>

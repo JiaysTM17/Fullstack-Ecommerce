@@ -166,13 +166,13 @@ export default function SocialAuthModal({
               position: 'absolute',
               top: '18px',
               right: '18px',
-              background: '#f1f3f4',
+              background: 'rgba(239, 68, 68, 0.1)',
               border: 'none',
               borderRadius: '50%',
               width: '32px',
               height: '32px',
               cursor: 'pointer',
-              color: '#444746',
+              color: '#ef4444',
               fontSize: '14px',
               display: 'flex',
               alignItems: 'center',
@@ -180,7 +180,7 @@ export default function SocialAuthModal({
               transition: 'background 0.2s',
             }}
           >
-            <CloseIcon size={16} color="#64748b" />
+            <CloseIcon size={16} color="#ef4444" />
           </button>
 
           {/* Google Header Logo */}
