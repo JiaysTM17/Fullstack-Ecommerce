@@ -1378,9 +1378,9 @@ export default function OrderHistoryPage() {
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ color: '#2563eb', display: 'inline-flex', alignItems: 'center' }}>
-                        <PackageIcon size={24} />
+                    <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <PackageIcon size={20} color="#2563eb" />
                       </span>
                       <span>{t('my_orders', 'Đơn Hàng Của Tôi')}</span>
                     </h1>
@@ -1410,8 +1410,8 @@ export default function OrderHistoryPage() {
             gap: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
-                <StoreIcon size={22} color="#2563eb" />
+              <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <StoreIcon size={20} color="#2563eb" />
               </span>
               <div>
                 <strong style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
@@ -1448,8 +1448,8 @@ export default function OrderHistoryPage() {
             gap: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ color: '#dc2626', display: 'flex', alignItems: 'center' }}>
-                <ShieldCheckIcon size={22} color="#dc2626" />
+              <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <ShieldCheckIcon size={20} color="#dc2626" />
               </span>
               <div>
                 <strong style={{ fontSize: '13.5px', color: '#dc2626' }}>
