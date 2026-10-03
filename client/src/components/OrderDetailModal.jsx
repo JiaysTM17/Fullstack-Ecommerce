@@ -1329,9 +1329,12 @@ export default function OrderDetailModal({
                 type="button"
                 className="shopee-order-btn-outline"
                 onClick={() => onOpenInvoice(order)}
-                style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <ReceiptIcon size={12} color="#2563eb" /> {t('vat_invoice', 'In hóa đơn VAT')}
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ReceiptIcon size={11} color="#2563eb" />
+                </span>
+                <span>{t('vat_invoice', 'In hóa đơn VAT')}</span>
               </button>
             )}
 
@@ -1350,12 +1353,14 @@ export default function OrderDetailModal({
                   height: '32px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '5px',
+                  gap: '6px',
                 }}
                 onClick={() => onSimulateStep(orderId)}
                 title="Mô phỏng bưu tá giao hàng bước tiếp theo"
               >
-                <TruckIcon size={12} color="#2563eb" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TruckIcon size={11} color="#2563eb" />
+                </span>
                 <span>{t('order_track_simulate_step', 'Mô phỏng giao')}</span>
               </button>
             )}
@@ -1410,7 +1415,10 @@ export default function OrderDetailModal({
                   height: '32px',
                 }}
               >
-                <ReturnIcon size={12} color="#9333ea" /> {t('return_processing_status', 'Đang xử lý đổi trả')}
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(147, 51, 234, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ReturnIcon size={11} color="#9333ea" />
+                </span>
+                <span>{t('return_processing_status', 'Đang xử lý đổi trả')}</span>
               </span>
             )}
 
@@ -1429,11 +1437,14 @@ export default function OrderDetailModal({
                       fontWeight: 700,
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px',
+                      gap: '6px',
                       height: '32px',
                     }}
                   >
-                    <CheckIcon size={12} color="#16a34a" /> Đã đánh giá (+200 Xu)
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CheckIcon size={11} color="#16a34a" />
+                    </span>
+                    <span>Đã đánh giá (+200 Xu)</span>
                   </span>
                 ) : (
                   onOpenReviewModal && (

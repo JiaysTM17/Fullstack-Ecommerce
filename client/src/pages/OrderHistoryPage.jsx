@@ -1911,11 +1911,17 @@ export default function OrderHistoryPage() {
                             padding: '4px 10px',
                             borderRadius: '6px',
                             cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
                           }}
                           onClick={() => handleSimulateNextStep(ord.orderId)}
                           title="Mô phỏng bưu tá giao hàng bước tiếp theo"
                         >
-                          {t('order_track_simulate_step', 'Mô phỏng giao')}
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TruckIcon size={11} color="#2563eb" />
+                          </span>
+                          <span>{t('order_track_simulate_step', 'Mô phỏng giao')}</span>
                         </button>
                       )}
                       {/* Utility Action: In hóa đơn VAT */}
