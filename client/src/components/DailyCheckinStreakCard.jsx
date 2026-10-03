@@ -100,7 +100,9 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '16px', fontWeight: 800, color: '#92400e', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <SparklesIcon size={16} color="#d97706" />
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <SparklesIcon size={13} color="#d97706" />
+                </span>
                 <span>Mini Xu Thưởng Hàng Ngày</span>
               </span>
               <span
@@ -147,7 +149,9 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                 boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
               }}
             >
-              <BoltIcon size={14} color="#ea580c" />
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fff7ed', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <BoltIcon size={12} color="#ea580c" />
+              </span>
               <span>Vòng Quay ({totalSpins})</span>
               <ChevronRightIcon size={13} color="#b45309" />
             </button>
@@ -268,14 +272,19 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                   height: '26px',
                   borderRadius: '50%',
                   background: isDone
-                    ? '#10b981'
+                    ? 'linear-gradient(135deg, #10b981, #059669)'
                     : isCurrentTarget
-                    ? '#ffedd5'
-                    : '#f1f5f9',
+                    ? 'linear-gradient(135deg, #ffedd5, #fed7aa)'
+                    : '#fef3c7',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '6px auto',
+                  boxShadow: isDone
+                    ? '0 2px 4px rgba(16, 185, 129, 0.25)'
+                    : isCurrentTarget
+                    ? '0 2px 6px rgba(234, 88, 12, 0.2)'
+                    : 'none',
                 }}
               >
                 {isDone ? (
@@ -283,7 +292,7 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                 ) : (
                   <CoinIcon
                     size={14}
-                    color={isCurrentTarget ? '#ea580c' : '#94a3b8'}
+                    color={isCurrentTarget ? '#ea580c' : '#d97706'}
                   />
                 )}
               </div>
