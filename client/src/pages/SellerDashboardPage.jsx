@@ -2629,7 +2629,9 @@ export default function SellerDashboardPage() {
                       style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
                       title="Bàn giao tất cả đơn Chờ xác nhận cho SPX Express"
                     >
-                      <TruckIcon size={14} color="#ffffff" />
+                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(255,255,255,0.2)' }}>
+                        <TruckIcon size={13} color="#ffffff" />
+                      </span>
                       <span>Xác nhận giao tất cả ({shopOrders.filter(o => o.status === 'pending').length} đơn)</span>
                     </button>
                   )}
@@ -2640,7 +2642,9 @@ export default function SellerDashboardPage() {
                     style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}
                     title="Xuất danh sách đơn hàng lọc được ra file CSV"
                   >
-                    <DownloadIcon size={14} color="#2563eb" />
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '5px', background: '#dbeafe' }}>
+                      <DownloadIcon size={13} color="#2563eb" />
+                    </span>
                     <span>Xuất Excel/CSV</span>
                   </button>
                 </div>
@@ -2715,9 +2719,12 @@ export default function SellerDashboardPage() {
                                 className="shopee-btn shopee-btn-primary shopee-btn-sm"
                                 onClick={() => handleUpdateOrderStatus(ord.orderId, 'shipping', 'Đang giao hàng')}
                                 title="Xác nhận đơn và chuẩn bị giao shipper"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                               >
-                                <BoltIcon size={13} color="#ffffff" /> Xác nhận đơn
+                                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)' }}>
+                                  <BoltIcon size={12} color="#ffffff" />
+                                </span>
+                                <span>Xác nhận đơn</span>
                               </button>
                             )}
 
@@ -2726,9 +2733,12 @@ export default function SellerDashboardPage() {
                                 type="button"
                                 className="shopee-btn shopee-btn-secondary shopee-btn-sm"
                                 onClick={() => handleUpdateOrderStatus(ord.orderId, 'completed', 'Đã hoàn thành')}
-                                style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                               >
-                                <CheckIcon size={13} color="#15803d" /> Giao thành công
+                                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '4px', background: '#bbf7d0' }}>
+                                  <CheckIcon size={12} color="#15803d" />
+                                </span>
+                                <span>Giao thành công</span>
                               </button>
                             )}
 
@@ -2737,9 +2747,12 @@ export default function SellerDashboardPage() {
                               className="shopee-btn shopee-btn-secondary shopee-btn-sm"
                               onClick={() => setPrintingOrder(ord)}
                               title="In phiếu gửi hàng & Mã vạch SPX"
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             >
-                              <PrinterIcon size={13} color="#0284c7" /> In Phiếu
+                              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '4px', background: '#e0f2fe' }}>
+                                <PrinterIcon size={12} color="#0284c7" />
+                              </span>
+                              <span>In Phiếu</span>
                             </button>
 
                             <button
@@ -2747,9 +2760,12 @@ export default function SellerDashboardPage() {
                               className="shopee-btn shopee-btn-secondary shopee-btn-sm"
                               onClick={() => setPackingSlipOrder(ord)}
                               title="In phiếu xuất kho & đóng gói hàng hóa"
-                              style={{ background: '#f8fafc', color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              style={{ background: '#f8fafc', color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             >
-                              <ReceiptIcon size={13} color="#0284c7" /> Đóng gói
+                              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '4px', background: '#f1f5f9' }}>
+                                <ReceiptIcon size={12} color="#0284c7" />
+                              </span>
+                              <span>Đóng gói</span>
                             </button>
 
                             <button
@@ -2757,9 +2773,12 @@ export default function SellerDashboardPage() {
                               className="shopee-btn shopee-btn-secondary shopee-btn-sm"
                               onClick={() => setSelectedOrderDetails(ord)}
                               title="Xem chi tiết đơn hàng"
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             >
-                              <EyeIcon size={13} color="#2563eb" /> Chi tiết
+                              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '4px', background: '#dbeafe' }}>
+                                <EyeIcon size={12} color="#2563eb" />
+                              </span>
+                              <span>Chi tiết</span>
                             </button>
                           </div>
                         </td>
