@@ -289,7 +289,8 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <BoltIcon size={14} color={activeTab === 'spin' ? '#ea580c' : '#64748b'} /> Vòng Quay ({totalSpins})
+            <BoltIcon size={14} color={activeTab === 'spin' ? '#ea580c' : '#f59e0b'} />
+            <span>Vòng Quay ({totalSpins})</span>
           </button>
           <button
             type="button"
@@ -310,7 +311,8 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <CalendarIcon size={14} color={activeTab === 'checkin' ? '#ea580c' : '#64748b'} /> Điểm Danh 7 Ngày
+            <CalendarIcon size={14} color={activeTab === 'checkin' ? '#ea580c' : '#16a34a'} />
+            <span>Điểm Danh 7 Ngày</span>
           </button>
           <button
             type="button"
@@ -331,7 +333,8 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <ReceiptIcon size={14} color={activeTab === 'history' ? '#ea580c' : '#64748b'} /> Lịch Sử Xu
+            <ReceiptIcon size={14} color={activeTab === 'history' ? '#ea580c' : '#0284c7'} />
+            <span>Lịch Sử Xu</span>
           </button>
         </div>
 
@@ -376,7 +379,10 @@ export default function RewardsHubModal({ onClose }) {
                       <span>1 lượt miễn phí hôm nay</span>
                     </>
                   ) : (
-                    <span>• Đã dùng lượt miễn phí hôm nay</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                      <CheckIcon size={12} color="#94a3b8" />
+                      <span>Đã dùng lượt miễn phí hôm nay</span>
+                    </span>
                   )}
                   {orderSpins > 0 ? ` · + ${orderSpins} lượt thưởng đơn hàng` : ''}
                 </div>
@@ -681,8 +687,11 @@ export default function RewardsHubModal({ onClose }) {
           <div>
             <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
               {!coinHistory || coinHistory.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--text-muted)' }}>
-                  Chưa có giao dịch xu nào.
+                <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
+                  <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
+                    <CoinIcon size={32} color="#cbd5e1" />
+                  </div>
+                  <span>Chưa có giao dịch xu nào.</span>
                 </div>
               ) : (
                 coinHistory.map((tx) => {
@@ -698,14 +707,31 @@ export default function RewardsHubModal({ onClose }) {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
+                        gap: '10px',
                       }}
                     >
-                      <div>
-                        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                          {label}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div
+                          style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '8px',
+                            background: isPlus ? '#ecfdf5' : '#fef2f2',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <CoinIcon size={14} color={isPlus ? '#10b981' : '#ef4444'} />
                         </div>
-                        <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
-                          {dateStr}
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                            {label}
+                          </div>
+                          <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                            {dateStr}
+                          </div>
                         </div>
                       </div>
                       <div
@@ -713,6 +739,7 @@ export default function RewardsHubModal({ onClose }) {
                           fontSize: '14px',
                           fontWeight: 800,
                           color: isPlus ? '#10b981' : '#ef4444',
+                          whiteSpace: 'nowrap',
                         }}
                       >
                         {isPlus ? '+' : '-'}{tx.amount.toLocaleString('vi-VN')} Xu
