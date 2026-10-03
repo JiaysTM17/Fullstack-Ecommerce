@@ -856,13 +856,16 @@ export default function ProfilePage() {
                   fontWeight: 600,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '8px',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
                 onClick={() => navigate('/orders')}
               >
-                <PackageIcon size={15} color="#ffffff" /> Đơn Mua ({ordersSummary.total})
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PackageIcon size={12} color="#ffffff" />
+                </span>
+                <span>Đơn Mua ({ordersSummary.total})</span>
               </button>
               <button
                 type="button"
@@ -877,13 +880,16 @@ export default function ProfilePage() {
                   fontWeight: 600,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '8px',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
                 onClick={() => navigate('/wishlist')}
               >
-                <HeartIcon size={15} color="#ff6b6b" fill="#ff6b6b" /> Yêu Thích
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <HeartIcon size={12} color="#ff6b6b" fill="#ff6b6b" />
+                </span>
+                <span>Yêu Thích</span>
               </button>
             </div>
           </div>
@@ -1371,7 +1377,10 @@ export default function ProfilePage() {
                 >
                   {isSubmittingProfile ? 'Đang Lưu...' : (
                     <>
-                      <CheckIcon size={14} color="#ffffff" /> Lưu Thay Đổi
+                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={12} color="#ffffff" />
+                      </span>
+                      <span>Lưu Thay Đổi</span>
                     </>
                   )}
                 </button>
@@ -1465,11 +1474,14 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         className="shopee-btn shopee-btn-secondary"
-                        style={{ fontSize: '12px', padding: '6px 14px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        style={{ fontSize: '12px', padding: '6px 14px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
                         onClick={() => handleOpenEditModal(addr)}
                         title="Chỉnh sửa địa chỉ"
                       >
-                        <PencilIcon size={12} color="#2563eb" /> Sửa
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <PencilIcon size={10} color="#2563eb" />
+                        </span>
+                        <span>Sửa</span>
                       </button>
                       <button
                         type="button"
@@ -1477,9 +1489,8 @@ export default function ProfilePage() {
                           background: 'transparent',
                           border: 'none',
                           color: '#ef4444',
-                          fontSize: '16px',
                           cursor: 'pointer',
-                          padding: '6px',
+                          padding: '4px',
                           borderRadius: '6px',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -1489,7 +1500,9 @@ export default function ProfilePage() {
                         onClick={() => handleDeleteAddress(addr.id)}
                         title="Xóa địa chỉ"
                       >
-                        <TrashIcon size={14} color="#ef4444" />
+                        <span style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <TrashIcon size={12} color="#ef4444" />
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -2042,10 +2055,13 @@ export default function ProfilePage() {
               <button
                 type="button"
                 className="shopee-btn shopee-btn-secondary"
-                style={{ fontSize: '13px', padding: '8px 16px', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                style={{ fontSize: '13px', padding: '8px 16px', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 onClick={() => navigate('/cart')}
               >
-                <CartIcon size={14} color="#ffffff" /> Mua Sắm Ngay
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CartIcon size={12} color="#ffffff" />
+                </span>
+                <span>Mua Sắm Ngay</span>
               </button>
             </div>
 
@@ -2295,7 +2311,10 @@ export default function ProfilePage() {
                   onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
                   onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
                 >
-                  <SparklesIcon size={16} color="#f59e0b" /> Vòng Quay May Mắn
+                  <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <SparklesIcon size={13} color="#ffffff" />
+                  </span>
+                  <span>Vòng Quay May Mắn</span>
                 </button>
 
                 <button
@@ -2324,7 +2343,10 @@ export default function ProfilePage() {
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  <CalendarIcon size={16} color="#2563eb" /> {hasCheckedInToday ? 'Đã Điểm Danh Hôm Nay' : 'Điểm Danh Nhận Xu'}
+                  <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: hasCheckedInToday ? 'rgba(148, 163, 184, 0.2)' : 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CalendarIcon size={13} color="#ffffff" />
+                  </span>
+                  <span>{hasCheckedInToday ? 'Đã Điểm Danh Hôm Nay' : 'Điểm Danh Nhận Xu'}</span>
                 </button>
               </div>
             </div>
