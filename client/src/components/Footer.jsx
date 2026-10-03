@@ -10,6 +10,13 @@ import {
   SparklesIcon,
   CheckIcon,
   AlertCircleIcon,
+  TruckIcon,
+  CreditCardIcon,
+  QrCodeIcon,
+  PhoneIcon,
+  MailIcon,
+  GlobeIcon,
+  ShieldCheckIcon,
 } from './OrdersIcons';
 import '../styles/footer.css';
 
@@ -163,18 +170,36 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
           <div className="shopee-footer-col">
             <h4>{t('footer_payment', 'Thanh Toán')}</h4>
             <div className="shopee-footer-badges">
-              <span className="shopee-footer-badge">COD</span>
-              <span className="shopee-footer-badge">VietQR</span>
-              <span className="shopee-footer-badge">Visa</span>
-              <span className="shopee-footer-badge">MasterCard</span>
-              <span className="shopee-footer-badge">Momo</span>
-              <span className="shopee-footer-badge">VNPay</span>
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <TruckIcon size={13} color="#ea580c" /> COD
+              </span>
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <QrCodeIcon size={13} color="#2563eb" /> VietQR
+              </span>
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <CreditCardIcon size={13} color="#16a34a" /> Visa
+              </span>
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <CreditCardIcon size={13} color="#f59e0b" /> MasterCard
+              </span>
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <SparklesIcon size={13} color="#d946ef" /> Momo
+              </span>
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <ShieldCheckIcon size={13} color="#0284c7" /> VNPay
+              </span>
             </div>
             <h4 style={{ marginTop: '20px' }}>{t('footer_shipping_units', 'Đơn Vị Vận Chuyển')}</h4>
             <div className="shopee-footer-badges">
-              <span className="shopee-footer-badge">SPX Express</span>
-              <span className="shopee-footer-badge">Giao Hàng Nhanh</span>
-              <span className="shopee-footer-badge">Viettel Post</span>
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <TruckIcon size={13} color="#ea580c" /> SPX Express
+              </span>
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <TruckIcon size={13} color="#0284c7" /> Giao Hàng Nhanh
+              </span>
+              <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <TruckIcon size={13} color="#16a34a" /> Viettel Post
+              </span>
             </div>
           </div>
 
@@ -182,15 +207,49 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
           <div className="shopee-footer-col">
             <h4>{t('footer_connect', 'Kết Nối Với Chúng Tôi')}</h4>
             <ul className="shopee-footer-list">
-              <li className="shopee-footer-item"><span className="shopee-footer-link">GitHub Portfolio</span></li>
-              <li className="shopee-footer-item"><span className="shopee-footer-link">LinkedIn</span></li>
-              <li className="shopee-footer-item"><span className="shopee-footer-link">Facebook</span></li>
+              <li className="shopee-footer-item">
+                <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <GlobeIcon size={13} color="#2563eb" /> GitHub Portfolio
+                </span>
+              </li>
+              <li className="shopee-footer-item">
+                <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <GlobeIcon size={13} color="#0284c7" /> LinkedIn
+                </span>
+              </li>
+              <li className="shopee-footer-item">
+                <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <GlobeIcon size={13} color="#3b82f6" /> Facebook
+                </span>
+              </li>
             </ul>
+            <h4 style={{ marginTop: '20px' }}>{language === 'en' ? 'Hotline & Support' : 'Tổng Đài Hỗ Trợ'}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12.5px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary, #0f172a)' }}>
+                <PhoneIcon size={14} color="#16a34a" />
+                <span style={{ fontWeight: 600 }}>1900 6868</span>
+                <span style={{ fontSize: '11px', color: '#94a3b8' }}>(8:00 - 21:00)</span>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary, #475569)' }}>
+                <MailIcon size={14} color="#ea580c" />
+                <span>support@shopee-mini.vn</span>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Footer bottom */}
         <div className="shopee-footer-bottom">
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '12px' }}>
+            <span className="portfolio-credit-pill" style={{ color: '#16a34a', borderColor: 'rgba(22, 163, 74, 0.25)', background: 'rgba(22, 163, 74, 0.05)' }}>
+              <ShieldCheckIcon size={13} color="#16a34a" />
+              <span>{language === 'en' ? 'Verified Ministry of Industry and Trade' : 'Đã Thông Báo Bộ Công Thương'}</span>
+            </span>
+            <span className="portfolio-credit-pill" style={{ color: '#2563eb', borderColor: 'rgba(37, 99, 235, 0.25)', background: 'rgba(37, 99, 235, 0.05)' }}>
+              <CheckIcon size={12} color="#2563eb" />
+              <span>{language === 'en' ? '100% Secure Checkout SSL' : 'Thanh Toán Chuẩn An Toàn SSL'}</span>
+            </span>
+          </div>
           <p>© {brandYear} {shopName}. {t('footer_rights', 'Tất cả các quyền được bảo lưu.')}</p>
           <p>{t('footer_portfolio_project', 'Dự án Website Thương Mại Điện Tử Mini - Full-stack Portfolio Project.')}</p>
         </div>
