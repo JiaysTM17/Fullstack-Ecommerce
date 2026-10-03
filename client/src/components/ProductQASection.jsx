@@ -470,7 +470,9 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                     }}
                     title={voted ? "Bạn đã bình chọn hữu ích cho câu hỏi này" : "Bình chọn câu hỏi hữu ích"}
                   >
-                    <ThumbsUpIcon size={13} color={voted ? '#ea580c' : '#2563eb'} />
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: voted ? 'rgba(234, 88, 12, 0.15)' : 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ThumbsUpIcon size={11} color={voted ? '#ea580c' : '#2563eb'} />
+                    </span>
                     <span>Hữu ích ({votes})</span>
                   </button>
                 </div>
@@ -500,8 +502,20 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           }}
                         >
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                            <span style={{ display: "inline-flex", alignItems: "center", color: isShop ? "#ea580c" : "var(--text-secondary)" }}>
-                              {isShop ? <StoreIcon size={14} color="#ea580c" /> : <ChatIcon size={13} color="#0284c7" />}
+                            <span
+                              style={{
+                                width: "22px",
+                                height: "22px",
+                                borderRadius: "50%",
+                                background: isShop ? "linear-gradient(135deg, #fff7ed, #ffedd5)" : "linear-gradient(135deg, #e0f2fe, #bae6fd)",
+                                border: isShop ? "1px solid #fed7aa" : "1px solid #7dd3fc",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                              }}
+                            >
+                              {isShop ? <StoreIcon size={12} color="#ea580c" /> : <ChatIcon size={11} color="#0284c7" />}
                             </span>
                             <strong style={{ fontSize: "13px", color: isShop ? "#ea580c" : "inherit" }}>
                               {ansAuthor}
