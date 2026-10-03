@@ -1,4 +1,5 @@
 import React from 'react';
+import { PackageIcon } from './OrdersIcons';
 import '../styles/feedback.css';
 
 /**
@@ -45,10 +46,13 @@ const Loading = ({
     );
   }
 
-  // Spinner xoay tròn mặc định
+  // Spinner xoay tròn mặc định với vector icon trung tâm
   return (
     <div className={`shopee-loading-wrapper ${fullScreen ? 'shopee-loading-fullscreen' : ''}`}>
-      <div className="shopee-spinner" />
+      <div style={{ position: 'relative', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="shopee-spinner" style={{ width: '48px', height: '48px', position: 'absolute', inset: 0 }} />
+        <PackageIcon size={18} color="#ea580c" />
+      </div>
       {message && <div className="shopee-loading-text">{message}</div>}
     </div>
   );
