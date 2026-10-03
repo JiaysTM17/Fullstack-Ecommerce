@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { StoreIcon, MapPinIcon, PackageIcon, ChatIcon, PrinterIcon, CheckIcon, CloseIcon } from './OrdersIcons';
+import { StoreIcon, MapPinIcon, PackageIcon, ChatIcon, PrinterIcon, CheckIcon, CloseIcon, CreditCardIcon, TruckIcon } from './OrdersIcons';
 
 export default function PackingSlipModal({ order, shop, onClose }) {
   if (!order) return null;
@@ -33,22 +33,39 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         }}
       >
         {/* Header Phiếu */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #0f172a', paddingBottom: '16px', marginBottom: '20px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ background: '#ea580c', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 900 }}>
-                SPX EXPRESS
-              </span>
-              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, letterSpacing: '-0.3px' }}>
-                PHIẾU XUẤT KHO & ĐÓNG GÓI
-              </h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #0f172a', paddingBottom: '16px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 10px rgba(234, 88, 12, 0.3)',
+                flexShrink: 0,
+              }}
+            >
+              <PackageIcon size={22} color="#ffffff" />
             </div>
-            <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#64748b' }}>
-              Phiếu kiểm soát đóng gói hàng hóa trước khi bàn giao đơn vị vận chuyển
-            </p>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ background: '#ea580c', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 900 }}>
+                  SPX EXPRESS
+                </span>
+                <h2 style={{ margin: 0, fontSize: '19px', fontWeight: 800, letterSpacing: '-0.3px', color: '#0f172a' }}>
+                  PHIẾU XUẤT KHO & ĐÓNG GÓI
+                </h2>
+              </div>
+              <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#64748b' }}>
+                Phiếu kiểm soát đóng gói hàng hóa trước khi bàn giao đơn vị vận chuyển
+              </p>
+            </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '13px', color: '#64748b' }}>Mã đơn hàng:</div>
+            <div style={{ fontSize: '12px', color: '#64748b' }}>Mã đơn hàng:</div>
             <div style={{ fontSize: '18px', fontWeight: 900, color: '#ea580c', letterSpacing: '0.5px' }}>
               #{orderId}
             </div>
@@ -132,11 +149,13 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         {/* Thanh toán & Ghi chú */}
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '16px', background: '#f8fafc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
           <div>
-            <div style={{ fontSize: '12.5px', marginBottom: '4px' }}>
-              Phương thức thanh toán: <strong>{order.paymentMethod || 'VietQR'}</strong>
+            <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <CreditCardIcon size={13} color="#2563eb" />
+              <span>Phương thức thanh toán: <strong>{order.paymentMethod || 'VietQR'}</strong></span>
             </div>
-            <div style={{ fontSize: '12.5px', marginBottom: '4px' }}>
-              Mã vận đơn bưu cục: <strong style={{ color: '#ea580c' }}>{trackingCode}</strong>
+            <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <TruckIcon size={13} color="#ea580c" />
+              <span>Mã vận đơn bưu cục: <strong style={{ color: '#ea580c' }}>{trackingCode}</strong></span>
             </div>
             {order.note && (
               <div style={{ fontSize: '12px', color: '#d97706', marginTop: '6px', background: '#fef3c7', padding: '4px 8px', borderRadius: '4px', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: '5px' }}>
