@@ -563,7 +563,9 @@ const Header = ({
                 </button>
               )}
               <button type="submit" className="shopee-search-btn" aria-label={t('search', 'Tìm kiếm')}>
-                <SearchIcon size={18} color="#ffffff" />
+                <span style={{ width: '24px', height: '24px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <SearchIcon size={14} color="#ffffff" />
+                </span>
               </button>
             </form>
 
@@ -934,7 +936,9 @@ const Header = ({
                           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
                           <span>Xem Chi Tiết Giỏ Hàng & Mua Ngay</span>
-                          <ChevronRightIcon size={14} color="#ffffff" />
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ChevronRightIcon size={12} color="#ffffff" />
+                          </span>
                         </button>
                       </div>
                     </>
