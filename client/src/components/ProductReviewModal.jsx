@@ -439,10 +439,12 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                       transition: 'all 0.15s ease',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px',
+                      gap: '5px',
                     }}
                   >
-                    {active ? <CheckIcon size={11} color="#2563eb" /> : <PlusIcon size={11} color="#64748b" />}
+                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: active ? 'rgba(37, 99, 235, 0.12)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {active ? <CheckIcon size={10} color="#2563eb" /> : <PlusIcon size={10} color="#64748b" />}
+                    </span>
                     <span>{tag}</span>
                   </button>
                 );
@@ -641,8 +643,8 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 gap: '5px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CloseIcon size={11} color="#64748b" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={10} color="#ef4444" />
               </span>
               <span>Hủy Bỏ</span>
             </button>

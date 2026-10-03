@@ -212,8 +212,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               borderRadius: '6px',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CloseIcon size={12} color="#64748b" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={11} color="#ef4444" />
             </span>
           </button>
         </div>
@@ -723,8 +723,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 gap: '5px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CloseIcon size={11} color="#64748b" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={10} color="#ef4444" />
               </span>
               <span>Hủy bỏ</span>
             </button>

@@ -441,8 +441,10 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             gap: '6px',
           }}
         >
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            <MapPinIcon size={12} color="#2563eb" />
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <MapPinIcon size={11} color="#2563eb" />
+            </span>
             <span><strong>Vị trí hiện tại:</strong> {currentLocation.label || currentLocation.address}</span>
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -472,8 +474,10 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               justifyContent: 'space-between',
             }}
           >
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <PackageIcon size={14} color="#0284c7" />
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <PackageIcon size={12} color="#0284c7" />
+              </span>
               <span>Tiến Trình Luân Chuyển 3 Hub SPX Express</span>
             </span>
             <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>
@@ -639,12 +643,16 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
 
         {/* Destination & Safety Info */}
         <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <MapPinIcon size={13} color="#2563eb" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <MapPinIcon size={11} color="#2563eb" />
+            </span>
             <span><strong>Địa chỉ giao tới:</strong> {customerAddress}</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginTop: '4px' }}>
-            <ShieldCheckIcon size={13} color="#15803d" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', marginTop: '6px' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(21, 128, 61, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
+              <ShieldCheckIcon size={11} color="#15803d" />
+            </span>
             <em>
               Đơn hàng được bảo hiểm 100% bởi Shopee Care & {carrier}. Vui lòng kiểm tra
               kiện hàng còn nguyên tem phong niêm phong trước khi nhận.

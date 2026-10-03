@@ -733,9 +733,15 @@ export default function OrderDetailModal({
                         borderColor: '#bfdbfe',
                         background: '#eff6ff',
                         fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
                       }}
                     >
-                      <MapPinIcon size={11} color="#2563eb" /> {t('spx_live_tracking', 'Bản đồ Shipper SPX')}
+                      <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <MapPinIcon size={10} color="#2563eb" />
+                      </span>
+                      <span>{t('spx_live_tracking', 'Bản đồ Shipper SPX')}</span>
                     </button>
                   )}
                 </div>
@@ -1135,9 +1141,15 @@ export default function OrderDetailModal({
                             fontSize: '11px',
                             borderRadius: '4px',
                             marginTop: '3px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
                           }}
                         >
-                          <RefreshIcon size={10} color="#2563eb" /> Mua lại
+                          <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <RefreshIcon size={10} color="#2563eb" />
+                          </span>
+                          <span>Mua lại</span>
                         </button>
                       )}
                     </div>
