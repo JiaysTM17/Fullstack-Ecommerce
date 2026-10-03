@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
 import { getOrderInvoice } from '../services/orderService';
-import { ReceiptIcon, PrinterIcon, ShieldCheckIcon, CloseIcon, CheckIcon, ArrowLeftIcon } from './OrdersIcons';
+import { ReceiptIcon, PrinterIcon, ShieldCheckIcon, CloseIcon, CheckIcon, ArrowLeftIcon, CreditCardIcon, TruckIcon } from './OrdersIcons';
 
 export default function InvoiceReceiptModal({ order, onClose, inline = false }) {
   if (!order) return null;
@@ -149,7 +149,21 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
               <span>Quay lại</span>
             </button>
           )}
-          <ReceiptIcon size={16} color="#2563eb" />
+          <div
+            style={{
+              width: '30px',
+              height: '30px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
+              flexShrink: 0,
+            }}
+          >
+            <ReceiptIcon size={16} color="#ffffff" />
+          </div>
           <span style={{ fontWeight: 800, fontSize: '13.5px', color: '#0f172a', letterSpacing: '-0.2px' }}>
             Hóa Đơn Điện Tử & Biên Lai VAT
           </span>
@@ -301,14 +315,16 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
             </div>
 
             <div>
-              <div style={{ color: '#64748b', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '3px' }}>
+              <div style={{ color: '#64748b', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
                 Giao Nhận & Thanh Toán
               </div>
-              <div style={{ color: '#0f172a', marginBottom: '2px' }}>
-                Hình thức: <strong>{order.paymentMethod || 'Thanh toán khi nhận hàng (COD)'}</strong>
+              <div style={{ color: '#0f172a', marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <CreditCardIcon size={12} color="#2563eb" />
+                <span>Hình thức: <strong>{order.paymentMethod || 'Thanh toán khi nhận hàng (COD)'}</strong></span>
               </div>
-              <div style={{ color: '#0f172a', marginBottom: '2px' }}>
-                Vận chuyển: <strong>SPX Express</strong>
+              <div style={{ color: '#0f172a', marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <TruckIcon size={12} color="#ea580c" />
+                <span>Vận chuyển: <strong>SPX Express</strong></span>
               </div>
               <div style={{ color: '#0f172a' }}>
                 Mã vận đơn SPX: <strong>{order.trackingCode || `SPX-VN-${orderIdStr.slice(-8).toUpperCase()}`}</strong>
