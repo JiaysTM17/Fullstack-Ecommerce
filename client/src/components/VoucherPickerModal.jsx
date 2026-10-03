@@ -371,7 +371,9 @@ export default function VoucherPickerModal({
             aria-label="Đóng"
             style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <CloseIcon size={16} color="#64748b" />
+            <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={14} color="#64748b" />
+            </span>
           </button>
         </div>
 
@@ -393,9 +395,12 @@ export default function VoucherPickerModal({
           <button
             type="submit"
             className="voucher-apply-btn select"
-            style={{ padding: "0 18px", fontWeight: 700 }}
+            style={{ padding: "0 18px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
-            {t("apply", "Áp Dụng")}
+            <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(255, 255, 255, 0.2)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+              <CheckIcon size={11} color="#ffffff" />
+            </span>
+            <span>{t("apply", "Áp Dụng")}</span>
           </button>
         </form>
 
@@ -978,10 +983,13 @@ export default function VoucherPickerModal({
               <button
                 type="button"
                 className="shopee-btn shopee-btn-secondary"
-                style={{ fontSize: "13px", padding: "9px 14px" }}
+                style={{ fontSize: "13px", padding: "9px 14px", display: "inline-flex", alignItems: "center", gap: "6px" }}
                 onClick={handleClearAll}
               >
-                Bỏ chọn tất cả
+                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(100, 116, 139, 0.08)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <CloseIcon size={11} color="#64748b" />
+                </span>
+                <span>Bỏ chọn tất cả</span>
               </button>
             )}
             <button
@@ -991,15 +999,23 @@ export default function VoucherPickerModal({
                 fontSize: "13.5px",
                 padding: "9px 24px",
                 fontWeight: 800,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
               }}
               onClick={handleConfirmApply}
             >
-              Áp Dụng
-              {selectedDiscount && selectedShipping
-                ? " (2 Voucher)"
-                : selectedDiscount || selectedShipping
-                  ? " (1 Voucher)"
-                  : ""}
+              <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "rgba(255, 255, 255, 0.22)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <CheckIcon size={12} color="#ffffff" />
+              </span>
+              <span>
+                Áp Dụng
+                {selectedDiscount && selectedShipping
+                  ? " (2 Voucher)"
+                  : selectedDiscount || selectedShipping
+                    ? " (1 Voucher)"
+                    : ""}
+              </span>
             </button>
           </div>
         </div>
