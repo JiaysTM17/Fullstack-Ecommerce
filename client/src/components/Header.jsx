@@ -40,6 +40,7 @@ import {
   ChevronDownIcon,
   ShoppingBagIcon,
   HeartIcon,
+  GlobeIcon,
 } from './OrdersIcons';
 import '../styles/header.css';
 
@@ -406,8 +407,10 @@ const Header = ({
               className="header-toggle-btn"
               onClick={toggleLanguage}
               title={language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
             >
-              {language === 'vi' ? 'VI' : 'EN'}
+              <GlobeIcon size={12} color="#2563eb" />
+              <span>{language === 'vi' ? 'VI' : 'EN'}</span>
             </button>
 
             {/* Dark / Light Theme Toggle */}
@@ -416,8 +419,19 @@ const Header = ({
               className="header-toggle-btn"
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Chế độ Sáng' : 'Chế độ Tối'}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
             >
-              {theme === 'dark' ? 'Tối' : 'Sáng'}
+              {theme === 'dark' ? (
+                <>
+                  <SparklesIcon size={12} color="#f59e0b" />
+                  <span>Tối</span>
+                </>
+              ) : (
+                <>
+                  <BoltIcon size={12} color="#ea580c" />
+                  <span>Sáng</span>
+                </>
+              )}
             </button>
 
             {/* Hiển thị Capsule theo từng vai trò: Admin / Seller / Customer */}
