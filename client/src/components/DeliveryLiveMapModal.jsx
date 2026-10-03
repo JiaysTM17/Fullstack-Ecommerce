@@ -141,11 +141,13 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                   height: '28px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '5px',
                   marginRight: '6px',
                 }}
               >
-                <ArrowLeftIcon size={12} color="#2563eb" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowLeftIcon size={11} color="#2563eb" />
+                </span>
                 <span>Quay lại</span>
               </button>
             )}
@@ -605,10 +607,12 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                 padding: '6px 14px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '6px',
               }}
             >
-              <PhoneIcon size={13} color="#ffffff" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PhoneIcon size={11} color="#ffffff" />
+              </span>
               <span>Gọi ({courier.phone || '0908 123 456'})</span>
             </button>
             <button
@@ -622,10 +626,12 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                 borderRadius: '8px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '6px',
               }}
             >
-              <ChatIcon size={13} color="#2563eb" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChatIcon size={11} color="#2563eb" />
+              </span>
               <span>Nhắn Tin</span>
             </button>
           </div>
