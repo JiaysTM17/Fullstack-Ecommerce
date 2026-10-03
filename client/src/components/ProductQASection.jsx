@@ -401,8 +401,10 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
         </div>
       ) : questions.length === 0 ? (
         <div style={{ textAlign: "center", padding: "30px 0", color: "var(--text-muted, #94a3b8)" }}>
-          <span style={{ display: "inline-flex", justifyContent: "center", marginBottom: "8px", color: "var(--primary-color, #ea580c)" }}>
-            <LightbulbIcon size={32} color="#f59e0b" />
+          <span style={{ display: "inline-flex", justifyContent: "center", marginBottom: "8px" }}>
+            <span style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <LightbulbIcon size={28} color="#f59e0b" />
+            </span>
           </span>
           <p style={{ margin: 0, fontSize: "14px" }}>Chưa có câu hỏi nào. Hãy là người đầu tiên đặt câu hỏi cho sản phẩm này!</p>
         </div>
@@ -589,10 +591,12 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           cursor: "pointer",
                           display: "inline-flex",
                           alignItems: "center",
-                          gap: "4px",
+                          gap: "6px",
                         }}
                       >
-                        <ChatIcon size={12} color="#ffffff" />
+                        <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ChatIcon size={11} color="#ffffff" />
+                        </span>
                         <span>Gửi</span>
                       </button>
                       <button
