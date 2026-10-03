@@ -22,6 +22,7 @@ import {
   SparklesIcon,
   CloseIcon,
   ArrowLeftIcon,
+  QrCodeIcon,
 } from './OrdersIcons';
 
 // Safe date parsing supporting multiple formats: ISO, DD/MM/YYYY, HH:mm DD/MM/YYYY
@@ -68,6 +69,7 @@ export default function OrderDetailModal({
   onOpenReturnModal,
   onOpenReviewModal,
   onSimulateStep,
+  onOpenVietQR,
   inline = false,
 }) {
   if (isOpen === false || !order) return null;
@@ -1429,6 +1431,31 @@ export default function OrderDetailModal({
                   </button>
                 )}
               </>
+            )}
+
+            {/* VietQR Instant Payment CTA for pending/confirmed bank transfer orders */}
+            {(order.status === 'pending' || order.status === 'confirmed') && (order.paymentMethod?.includes('VietQR') || order.paymentMethod === 'BANK') && onOpenVietQR && (
+              <button
+                type="button"
+                className="shopee-btn"
+                onClick={() => onOpenVietQR(order)}
+                style={{
+                  height: '32px',
+                  fontSize: '12px',
+                  borderRadius: '6px',
+                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                  color: '#ffffff',
+                  border: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)',
+                }}
+              >
+                <QrCodeIcon size={13} color="#ffffff" /> Thanh toán VietQR
+              </button>
             )}
 
             {/* Reorder button - Clear, friendly Shopee action */}

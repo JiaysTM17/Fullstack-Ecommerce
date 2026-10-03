@@ -13,6 +13,7 @@ import DeliveryLiveMapModal from '../components/DeliveryLiveMapModal';
 import ProductReviewModal from '../components/ProductReviewModal';
 import OrderDetailModal from '../components/OrderDetailModal';
 import ShopChatModal from '../components/ShopChatModal';
+import VietQRPaymentModal from '../components/VietQRPaymentModal';
 import { cancelOrder } from '../services/orderService';
 import { restoreProductStock } from '../services/productService';
 import { pushBuyerNotification } from '../utils/notificationHelper';
@@ -40,6 +41,7 @@ import {
   CoinIcon,
   ArrowLeftIcon,
   ChevronUpIcon,
+  QrCodeIcon,
 } from '../components/OrdersIcons';
 import '../styles/dashboard.css';
 
@@ -208,6 +210,7 @@ export default function OrderHistoryPage() {
   const [selectedLiveMapOrder, setSelectedLiveMapOrder] = useState(null);
   const [selectedCancelOrder, setSelectedCancelOrder] = useState(null);
   const [selectedReviewOrder, setSelectedReviewOrder] = useState(null);
+  const [selectedVietQROrder, setSelectedVietQROrder] = useState(null);
   const [cancelReason, setCancelReason] = useState('Tôi muốn thay đổi địa chỉ nhận hàng');
   const [cancelNote, setCancelNote] = useState('');
 
@@ -1093,6 +1096,7 @@ export default function OrderHistoryPage() {
                 onOpenReturnModal={(order) => handleOpenFromDetail(setSelectedReturnOrder, order)}
                 onOpenReviewModal={(order) => handleOpenFromDetail(setSelectedReviewOrder, order)}
                 onSimulateStep={(orderId) => handleSimulateNextStep(orderId)}
+                onOpenVietQR={(order) => handleOpenFromDetail(setSelectedVietQROrder, order)}
               />
             ) : isTrackingView ? (
               <div className="spx-tracking-portal-view">
@@ -1911,6 +1915,30 @@ export default function OrderHistoryPage() {
                       {/* Giai đoạn 1: Chờ xác nhận (pending, confirmed) */}
                       {(ord.status === 'pending' || ord.status === 'confirmed') && (
                         <>
+                          {(ord.paymentMethod?.includes('VietQR') || ord.paymentMethod === 'BANK') && (
+                            <button
+                              type="button"
+                              className="shopee-btn"
+                              style={{
+                                background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '6px',
+                                padding: '6px 12px',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)',
+                              }}
+                              onClick={() => setSelectedVietQROrder(ord)}
+                            >
+                              <QrCodeIcon size={13} color="#ffffff" />
+                              <span>Thanh toán VietQR</span>
+                            </button>
+                          )}
                           <button
                             type="button"
                             className="shopee-order-btn-outline"
@@ -2097,6 +2125,26 @@ export default function OrderHistoryPage() {
         >
           <ChevronUpIcon size={18} color="#2563eb" />
         </button>
+      )}
+
+      {/* VietQR Payment Modal */}
+      {selectedVietQROrder && (
+        <VietQRPaymentModal
+          isOpen={Boolean(selectedVietQROrder)}
+          onClose={() => handleCloseChildModal(() => setSelectedVietQROrder(null))}
+          orderId={selectedVietQROrder.orderId}
+          amount={selectedVietQROrder.total}
+          onPaymentSuccess={() => {
+            const updated = orders.map((o) =>
+              o.orderId === selectedVietQROrder.orderId
+                ? { ...o, status: 'confirmed', statusText: 'Đã thanh toán VietQR' }
+                : o
+            );
+            saveOrders(updated);
+            showToast(`Đã ghi nhận thanh toán VietQR thành công cho đơn #${selectedVietQROrder.orderId}!`, 'success');
+            setSelectedVietQROrder(null);
+          }}
+        />
       )}
     </main>
   );
