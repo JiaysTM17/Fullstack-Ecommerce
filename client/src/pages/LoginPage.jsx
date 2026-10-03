@@ -296,7 +296,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><BoltIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><BoltIcon size={18} color="#eab308" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Giám Sát Sức Khỏe Toàn Sàn</strong>
                       <span>Tự động phát hiện tấn công DDoS, brute-force & quét bất thường</span>
@@ -320,7 +320,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><ShieldCheckIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><ShieldCheckIcon size={18} color="#16a34a" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Nhật Ký Kiểm Toán Audit Log</strong>
                       <span>Lưu vết mọi hành vi thay đổi dữ liệu đảm bảo tính an toàn</span>
@@ -354,7 +354,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><TicketIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><TicketIcon size={18} color="#ea580c" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Tạo Flash Sale & Voucher Gian Hàng</strong>
                       <span>Tự do thiết kế ưu đãi thu hút thêm hàng ngàn khách mới</span>
@@ -388,7 +388,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><ShieldCheckIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><ShieldCheckIcon size={18} color="#16a34a" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>100% Chính Hãng Cam Kết</strong>
                       <span>Hoàn tiền 200% nếu phát hiện sản phẩm giả mạo</span>
@@ -404,7 +404,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><TicketIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><TicketIcon size={18} color="#ea580c" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Voucher & Ví Xu Thưởng</strong>
                       <span>Tích lũy xu hoàn tiền trừ thẳng vào hóa đơn thanh toán</span>
@@ -412,7 +412,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="shopee-auth-hero-feat-item">
-                    <div className="shopee-auth-hero-feat-icon"><TruckIcon size={18} /></div>
+                    <div className="shopee-auth-hero-feat-icon"><TruckIcon size={18} color="#059669" /></div>
                     <div className="shopee-auth-hero-feat-text">
                       <strong>Freeship Xtra Toàn Quốc</strong>
                       <span>Miễn phí vận chuyển cho hàng triệu sản phẩm mỗi ngày</span>
@@ -548,7 +548,7 @@ export default function LoginPage() {
               className={`shopee-auth-method-tab ${authMethod === 'password' ? 'active' : ''}`}
               onClick={() => setAuthMethod('password')}
             >
-              <KeyIcon size={15} />
+              <KeyIcon size={15} color="#6366f1" />
               <span>Mật khẩu & Email</span>
             </button>
             <button
@@ -556,7 +556,7 @@ export default function LoginPage() {
               className={`shopee-auth-method-tab ${authMethod === 'qr' ? 'active' : ''}`}
               onClick={() => setAuthMethod('qr')}
             >
-              <QrCodeIcon size={15} />
+              <QrCodeIcon size={15} color="#2563eb" />
               <span>Quét mã QR</span>
             </button>
           </div>
@@ -695,7 +695,7 @@ export default function LoginPage() {
                             className="shopee-email-dropdown-item"
                             onClick={() => handleSelectEmailSuggestion(item.full)}
                           >
-                            <MailIcon size={14} />
+                            <MailIcon size={14} color="#2563eb" />
                             <span>
                               <span className="email-prefix">{item.prefix}</span>
                               <span className="email-domain">{item.domain}</span>
@@ -726,7 +726,7 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label="Hiện mật khẩu"
                     >
-                      {showPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+                      {showPassword ? <EyeOffIcon size={16} color="#64748b" /> : <EyeIcon size={16} color="#64748b" />}
                     </button>
                   </div>
                 </div>

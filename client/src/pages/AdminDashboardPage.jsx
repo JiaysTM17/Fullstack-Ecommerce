@@ -652,7 +652,7 @@ export default function AdminDashboardPage() {
                 onClick={() => refreshShopData(true)}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px' }}
               >
-                <RefreshIcon size={14} />
+                <RefreshIcon size={14} color="#2563eb" />
                 <span>Đồng Bộ / Làm Mới</span>
               </button>
             </div>
@@ -854,7 +854,7 @@ export default function AdminDashboardPage() {
                           </div>
                         ) : (
                           <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <ShieldIcon size={12} /> Bảo vệ Admin
+                            <ShieldIcon size={12} color="#dc2626" /> Bảo vệ Admin
                           </span>
                         )}
                       </td>
@@ -881,12 +881,12 @@ export default function AdminDashboardPage() {
               >
                 {showAddVoucher ? (
                   <>
-                    <CloseIcon size={14} />
+                    <CloseIcon size={14} color="#64748b" />
                     <span>Đóng form</span>
                   </>
                 ) : (
                   <>
-                    <PlusIcon size={14} />
+                    <PlusIcon size={14} color="#ffffff" />
                     <span>Tạo Voucher Mới</span>
                   </>
                 )}
@@ -1416,9 +1416,9 @@ export default function AdminDashboardPage() {
                       gap: '4px'
                     }}>
                       {userToDelete.role === 'seller' ? (
-                        <><StoreIcon size={12} /> Người bán (Seller)</>
+                        <><StoreIcon size={12} color="#2563eb" /> Người bán (Seller)</>
                       ) : (
-                        <><CartIcon size={12} /> Người mua (Customer)</>
+                        <><CartIcon size={12} color="#059669" /> Người mua (Customer)</>
                       )}
                     </span>
                   </div>
