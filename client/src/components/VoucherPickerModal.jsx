@@ -528,7 +528,9 @@ export default function VoucherPickerModal({
                     gap: "8px",
                   }}
                 >
-                  <TruckIcon size={18} color="#0284c7" />
+                  <span style={{ width: "26px", height: "26px", borderRadius: "7px", background: "#e0f2fe", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <TruckIcon size={14} color="#0284c7" />
+                  </span>
                   <span
                     style={{
                       fontSize: "14px",
@@ -729,7 +731,9 @@ export default function VoucherPickerModal({
                     gap: "8px",
                   }}
                 >
-                  <TagIcon size={18} color="#ea580c" />
+                  <span style={{ width: "26px", height: "26px", borderRadius: "7px", background: "#ffedd5", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <TagIcon size={14} color="#ea580c" />
+                  </span>
                   <span
                     style={{
                       fontSize: "14px",
