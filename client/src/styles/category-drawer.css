@@ -486,15 +486,21 @@
 }
 
 .category-card-icon {
-  font-size: 24px;
-  line-height: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--bg-muted, #f1f5f9);
+  border: 1px solid var(--border-light, #e2e8f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.25s ease;
-  margin-top: 1px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .category-drawer-card:hover .category-card-icon {
-  transform: scale(1.2) rotate(4deg);
+  transform: scale(1.1) rotate(4deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* Category Title - Wraps naturally onto 2 lines, NEVER cuts off into '...' */
