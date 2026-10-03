@@ -1,5 +1,6 @@
 import React from 'react';
-import { PrinterIcon, CloseIcon } from './OrdersIcons';
+import { formatCurrency } from '../utils/formatCurrency';
+import { TruckIcon, StoreIcon, MapPinIcon, PackageIcon, PrinterIcon, CloseIcon, QrCodeIcon } from './OrdersIcons';
 
 export default function ShippingLabelModal({ order, shopName = "Thời Trang GenZ", onClose }) {
   if (!order) return null;
@@ -7,55 +8,87 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
   const trackingCode = order.trackingCode || `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`;
 
   return (
-    <div className="shopee-modal-overlay" style={{ animation: 'modalOverlayFadeIn 0.22s ease-out forwards' }}>
+    <div className="shopee-modal-overlay" style={{ animation: 'modalOverlayFadeIn 0.22s ease-out forwards', zIndex: 9999 }}>
       <div
         className="shopee-modal anim-modal-content"
-        style={{ maxWidth: '600px', background: '#fff', padding: '24px' }}
+        style={{ maxWidth: '620px', background: '#ffffff', padding: '26px', borderRadius: '16px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)' }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #222', paddingBottom: '12px', marginBottom: '16px' }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800 }}>PHIẾU GIAO HÀNG / VẬN ĐƠN</h2>
-            <small style={{ color: '#666' }}>ĐƠN VỊ VẬN CHUYỂN: SPX EXPRESS VIỆT NAM</small>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #0f172a', paddingBottom: '14px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 10px rgba(234, 88, 12, 0.3)',
+                flexShrink: 0,
+              }}
+            >
+              <TruckIcon size={22} color="#ffffff" />
+            </div>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.2px' }}>
+                PHIẾU GIAO HÀNG / VẬN ĐƠN
+              </h2>
+              <small style={{ color: '#64748b', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                <span>ĐƠN VỊ VẬN CHUYỂN:</span>
+                <strong style={{ color: '#ea580c' }}>SPX EXPRESS VIỆT NAM</strong>
+              </small>
+            </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary-color, #ea580c)' }}>{trackingCode}</span>
+            <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>MÃ VẬN ĐƠN SPX:</div>
+            <span style={{ fontSize: '16px', fontWeight: 800, color: '#ea580c', letterSpacing: '0.5px' }}>{trackingCode}</span>
           </div>
         </div>
 
         {/* Sender and Receiver */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', border: '1px solid #ddd', padding: '12px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '14px', borderRadius: '10px', marginBottom: '16px', fontSize: '13px' }}>
           <div>
-            <strong style={{ color: '#555', display: 'block', marginBottom: '4px' }}>NGƯỜI GỬI (SHOP):</strong>
-            <div style={{ fontWeight: 700 }}>{shopName}</div>
-            <div>Kho tổng Tân Bình, TP. Hồ Chí Minh</div>
-            <div>Hotline: 1900 6868</div>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <StoreIcon size={13} color="#ea580c" />
+              <span>NGƯỜI GỬI (SHOP):</span>
+            </div>
+            <div style={{ fontWeight: 700, color: '#0f172a' }}>{shopName}</div>
+            <div style={{ color: '#475569', fontSize: '12px', marginTop: '2px' }}>Kho tổng Tân Bình, TP. Hồ Chí Minh</div>
+            <div style={{ color: '#475569', fontSize: '12px' }}>Hotline: 1900 6868</div>
           </div>
           <div>
-            <strong style={{ color: '#555', display: 'block', marginBottom: '4px' }}>NGƯỜI NHẬN (KHÁCH):</strong>
-            <div style={{ fontWeight: 700 }}>{order.customer?.fullName || 'Khách hàng'}</div>
-            <div>{order.customer?.phone || '0909xxxxxx'}</div>
-            <div>{order.customer?.address || '123 Đường ABC, Phường 1, Quận 1, TP.HCM'}</div>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <MapPinIcon size={13} color="#2563eb" />
+              <span>NGƯỜI NHẬN (KHÁCH):</span>
+            </div>
+            <div style={{ fontWeight: 700, color: '#0f172a' }}>{order.customer?.fullName || 'Khách hàng'}</div>
+            <div style={{ color: '#475569', fontSize: '12px', marginTop: '2px' }}>{order.customer?.phone || '0909xxxxxx'}</div>
+            <div style={{ color: '#475569', fontSize: '12px' }}>{order.customer?.address || '123 Đường ABC, Phường 1, Quận 1, TP.HCM'}</div>
           </div>
         </div>
 
         {/* Items */}
         <div style={{ marginBottom: '16px' }}>
-          <strong style={{ fontSize: '13px', display: 'block', marginBottom: '6px' }}>CHI TIẾT HÀNG HÓA:</strong>
+          <strong style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px', color: '#0f172a' }}>
+            <PackageIcon size={14} color="#ea580c" />
+            <span>CHI TIẾT HÀNG HÓA ({order.items?.length || 1} sản phẩm):</span>
+          </strong>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
-              <tr style={{ background: '#f5f5f5', borderBottom: '1px solid #ddd', textAlign: 'left' }}>
-                <th style={{ padding: '8px' }}>Tên sản phẩm</th>
-                <th style={{ padding: '8px', textAlign: 'center' }}>SL</th>
-                <th style={{ padding: '8px', textAlign: 'right' }}>Thành tiền</th>
+              <tr style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1', textAlign: 'left', color: '#475569' }}>
+                <th style={{ padding: '8px 10px' }}>Tên sản phẩm</th>
+                <th style={{ padding: '8px 10px', textAlign: 'center', width: '50px' }}>SL</th>
+                <th style={{ padding: '8px 10px', textAlign: 'right', width: '120px' }}>Thành tiền</th>
               </tr>
             </thead>
             <tbody>
               {(order.items || []).map((item, idx) => (
-                <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '8px' }}>{item.name}</td>
-                  <td style={{ padding: '8px', textAlign: 'center' }}>{item.quantity}</td>
-                  <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600 }}>
-                    {(item.price * item.quantity).toLocaleString()}₫
+                <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '8px 10px', color: '#1e293b' }}>{item.name}</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#ea580c' }}>{item.quantity}</td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>
+                    {formatCurrency(item.price * item.quantity)}
                   </td>
                 </tr>
               ))}
@@ -64,16 +97,19 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
         </div>
 
         {/* Total & Barcode mockup */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fafafa', padding: '12px', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
           <div>
-            <div style={{ fontSize: '12px', color: '#666' }}>TIỀN THU HỘ (COD):</div>
-            <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary-color, #ea580c)' }}>
-              {(order.total || order.subtotal || 0).toLocaleString()}₫
+            <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>TIỀN THU HỘ (COD):</div>
+            <div style={{ fontSize: '19px', fontWeight: 900, color: '#ea580c' }}>
+              {formatCurrency(order.total || order.subtotal || 0)}
             </div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ letterSpacing: '4px', fontFamily: 'monospace', fontWeight: 700, fontSize: '14px' }}>||||||||||||||||||||||||||||</div>
-            <small style={{ fontSize: '10px', color: '#888' }}>MÃ BARCODE: {trackingCode}</small>
+            <div style={{ letterSpacing: '4px', fontFamily: 'monospace', fontWeight: 700, fontSize: '14px', color: '#0f172a' }}>||||||||||||||||||||||||||||</div>
+            <small style={{ fontSize: '10.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: '2px' }}>
+              <QrCodeIcon size={11} color="#64748b" />
+              <span>MÃ BARCODE: {trackingCode}</span>
+            </small>
           </div>
         </div>
 
@@ -83,7 +119,7 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             type="button"
             className="shopee-btn shopee-btn-secondary"
             onClick={onClose}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '7px 16px', fontSize: '12.5px' }}
           >
             <CloseIcon size={13} color="#64748b" />
             <span>Đóng</span>
@@ -92,9 +128,9 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             type="button"
             className="shopee-btn shopee-btn-primary"
             onClick={() => window.print()}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 20px', fontSize: '12.5px', fontWeight: 700 }}
           >
-            <PrinterIcon size={15} color="#ffffff" />
+            <PrinterIcon size={14} color="#ffffff" />
             <span>In Vận Đơn Ngay</span>
           </button>
         </div>
