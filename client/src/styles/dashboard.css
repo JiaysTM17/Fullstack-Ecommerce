@@ -2608,18 +2608,23 @@
 }
 
 .sidebar-icon-cell {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.18s ease;
+  transition: all 0.18s ease;
 }
 
 .account-sidebar-menu-btn:hover .sidebar-icon-cell,
 .account-sidebar-link:hover .sidebar-icon-cell {
-  transform: scale(1.12);
+  background: #ffffff;
+  border-color: #cbd5e1;
+  transform: scale(1.08);
 }
 
 .sidebar-menu-label {
