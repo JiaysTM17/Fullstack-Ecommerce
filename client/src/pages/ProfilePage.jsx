@@ -1021,8 +1021,8 @@ export default function ProfilePage() {
               <div className="profile-completeness-header">
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', color: '#f59e0b' }}>
-                      <TargetIcon size={18} color="#2563eb" />
+                    <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)', border: '1px solid #7dd3fc', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <TargetIcon size={15} color="#0284c7" />
                     </span>
                     <strong style={{ fontSize: '15px', color: '#0f172a' }}>
                       Mức Độ Hoàn Thiện Hồ Sơ: {profileCompleteness.percentage}%
