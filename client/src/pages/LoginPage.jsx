@@ -515,7 +515,9 @@ export default function LoginPage() {
               className={`shopee-role-card ${activeRole === 'customer' ? 'active' : ''}`}
               onClick={() => setActiveRole('customer')}
             >
-              <span className="role-icon"><CartIcon size={20} color="#16a34a" /></span>
+              <span className="role-icon" style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)", border: "1px solid #86efac", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
+                <CartIcon size={18} color="#16a34a" />
+              </span>
               <span className="role-name">{t('role_customer', 'Người Mua')}</span>
               <span className="role-desc">Mua sắm & Săn Sale</span>
             </button>
@@ -525,7 +527,9 @@ export default function LoginPage() {
               className={`shopee-role-card ${activeRole === 'seller' ? 'active' : ''}`}
               onClick={() => setActiveRole('seller')}
             >
-              <span className="role-icon"><StoreIcon size={20} color="#ea580c" /></span>
+              <span className="role-icon" style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)", border: "1px solid #fed7aa", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
+                <StoreIcon size={18} color="#ea580c" />
+              </span>
               <span className="role-name">{t('role_seller', 'Kênh Shop')}</span>
               <span className="role-desc">Quản lý gian hàng</span>
             </button>
@@ -535,7 +539,9 @@ export default function LoginPage() {
               className={`shopee-role-card ${activeRole === 'admin' ? 'active' : ''}`}
               onClick={() => setActiveRole('admin')}
             >
-              <span className="role-icon"><ShieldCheckIcon size={20} color="#6366f1" /></span>
+              <span className="role-icon" style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)", border: "1px solid #a5b4fc", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
+                <ShieldCheckIcon size={18} color="#4f46e5" />
+              </span>
               <span className="role-name">{t('role_admin', 'Quản Trị')}</span>
               <span className="role-desc">Toàn quyền hệ thống</span>
             </button>
