@@ -248,13 +248,15 @@ export default function RewardsHubModal({ onClose }) {
               border: 'none',
               cursor: 'pointer',
               color: 'var(--text-muted)',
-              padding: '6px',
+              padding: '4px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <CloseIcon size={18} color="var(--text-muted, #64748b)" />
+            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg-muted, #f1f5f9)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={14} color="var(--text-muted, #64748b)" />
+            </span>
           </button>
         </div>
 
@@ -548,11 +550,17 @@ export default function RewardsHubModal({ onClose }) {
               >
                 {isSpinning ? (
                   <>
-                    <BoltIcon size={16} color="#ffffff" /> ĐANG QUAY THƯỞNG... ({spinCountdown}s)
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <BoltIcon size={13} color="#ffffff" />
+                    </span>
+                    <span>ĐANG QUAY THƯỞNG... ({spinCountdown}s)</span>
                   </>
                 ) : totalSpins > 0 ? (
                   <>
-                    <BoltIcon size={16} color="#ffffff" /> QUAY NGAY ({totalSpins} lượt khả dụng)
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <BoltIcon size={13} color="#ffffff" />
+                    </span>
+                    <span>QUAY NGAY ({totalSpins} lượt khả dụng)</span>
                   </>
                 ) : (
                   'ĐÃ HẾT LƯỢT QUAY HÔM NAY'
@@ -578,7 +586,10 @@ export default function RewardsHubModal({ onClose }) {
                     gap: '6px',
                   }}
                 >
-                  <ShoppingBagIcon size={14} color="#ea580c" /> Đặt hàng ngay để nhận thêm +1 lượt quay!
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ShoppingBagIcon size={12} color="#ea580c" />
+                  </span>
+                  <span>Đặt hàng ngay để nhận thêm +1 lượt quay!</span>
                 </button>
               )}
             </div>
