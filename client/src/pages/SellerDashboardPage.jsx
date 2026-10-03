@@ -3151,8 +3151,16 @@ export default function SellerDashboardPage() {
                   <h3 style={{ margin: 0 }}>Chi Tiết Đơn Hàng #{selectedOrderDetails.orderId}</h3>
                   <small style={{ color: 'var(--text-muted)' }}>Thời gian đặt: {selectedOrderDetails.createdAt}</small>
                 </div>
-                <button type="button" className="shopee-modal-close" onClick={() => setSelectedOrderDetails(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CloseIcon size={14} />
+                <button
+                  type="button"
+                  className="shopee-modal-close"
+                  onClick={() => setSelectedOrderDetails(null)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  aria-label="Đóng chi tiết đơn hàng"
+                >
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="#ef4444" />
+                  </span>
                 </button>
               </div>
 
@@ -3266,8 +3274,16 @@ export default function SellerDashboardPage() {
             <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
               <div className="shopee-modal-header">
                 <h3 style={{ margin: 0, fontSize: '16px' }}>Cập Nhật Số Lượng Kho</h3>
-                <button type="button" className="shopee-modal-close" onClick={() => setQuickStockProduct(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CloseIcon size={14} />
+                <button
+                  type="button"
+                  className="shopee-modal-close"
+                  onClick={() => setQuickStockProduct(null)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  aria-label="Đóng cửa sổ tồn kho"
+                >
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="#ef4444" />
+                  </span>
                 </button>
               </div>
 
@@ -3319,8 +3335,16 @@ export default function SellerDashboardPage() {
             <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="shopee-modal-header">
                 <h3>{editingProduct ? 'Chỉnh Sửa Mặt Hàng' : 'Đăng Bán Mặt Hàng Mới Cho Shop'}</h3>
-                <button type="button" className="shopee-modal-close" onClick={() => setShowProductModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CloseIcon size={14} />
+                <button
+                  type="button"
+                  className="shopee-modal-close"
+                  onClick={() => setShowProductModal(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  aria-label="Đóng cửa sổ sản phẩm"
+                >
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="#ef4444" />
+                  </span>
                 </button>
               </div>
 
@@ -3463,8 +3487,16 @@ export default function SellerDashboardPage() {
             <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
               <div className="shopee-modal-header">
                 <h3>Tạo Mã Giảm Giá Cho {currentShop.name}</h3>
-                <button type="button" className="shopee-modal-close" onClick={() => setShowVoucherModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CloseIcon size={14} />
+                <button
+                  type="button"
+                  className="shopee-modal-close"
+                  onClick={() => setShowVoucherModal(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  aria-label="Đóng cửa sổ tạo voucher"
+                >
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="#ef4444" />
+                  </span>
                 </button>
               </div>
 
@@ -3577,8 +3609,16 @@ export default function SellerDashboardPage() {
                   <h3 style={{ margin: 0, fontSize: '17px' }}>Rút Doanh Thu Về Tài Khoản</h3>
                   <small style={{ color: 'var(--text-muted)' }}>Cửa hàng: {currentShop.name}</small>
                 </div>
-                <button type="button" className="shopee-modal-close" onClick={() => setShowWithdrawModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CloseIcon size={14} />
+                <button
+                  type="button"
+                  className="shopee-modal-close"
+                  onClick={() => setShowWithdrawModal(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  aria-label="Đóng cửa sổ rút tiền"
+                >
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="#ef4444" />
+                  </span>
                 </button>
               </div>
 
@@ -3696,8 +3736,16 @@ export default function SellerDashboardPage() {
                   </h3>
                   <small style={{ color: 'var(--text-muted)' }}>Cửa hàng: {currentShop.name}</small>
                 </div>
-                <button type="button" className="shopee-modal-close" onClick={() => setShowCreateFlashSaleModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CloseIcon size={14} />
+                <button
+                  type="button"
+                  className="shopee-modal-close"
+                  onClick={() => setShowCreateFlashSaleModal(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  aria-label="Đóng cửa sổ tạo Flash Sale"
+                >
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="#ef4444" />
+                  </span>
                 </button>
               </div>
 
