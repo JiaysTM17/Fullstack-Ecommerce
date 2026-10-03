@@ -274,7 +274,9 @@ export default function ProductCompareModal() {
                               style={{ width: '100%', padding: '8px 12px', fontSize: '12.5px', marginTop: '6px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                               onClick={() => addToCart(p, 1)}
                             >
-                              <CartIcon size={14} color="#ffffff" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CartIcon size={12} color="#ffffff" />
+                              </span>
                               <span>Thêm vào giỏ</span>
                             </button>
                           </div>
@@ -371,8 +373,11 @@ export default function ProductCompareModal() {
                           <CheckIcon size={12} color="#16a34a" />
                           <span>Còn {p.stock || 50} sản phẩm</span>
                         </span>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <TruckIcon size={13} color="#0284c7" /> Giao nhanh SPX 24h
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TruckIcon size={11} color="#0284c7" />
+                          </span>
+                          <span>Giao nhanh SPX 24h</span>
                         </div>
                       </td>
                     ))}
