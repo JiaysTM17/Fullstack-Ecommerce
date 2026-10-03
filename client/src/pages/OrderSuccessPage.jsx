@@ -274,7 +274,8 @@ export default function OrderSuccessPage() {
               gap: '6px',
             }}
           >
-            Quay Ngay
+            <BoltIcon size={14} color="#ffffff" />
+            <span>Quay Ngay</span>
           </button>
         </div>
 
