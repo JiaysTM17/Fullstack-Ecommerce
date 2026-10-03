@@ -319,9 +319,11 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               onClick={() => scrollToTargetSection('category-showcase-section')}
               className="category-drawer-btn category-drawer-btn-outline"
               title="Cuộn tới danh mục ngành hàng trên trang chủ"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
-              <PackageIcon size={14} color="#0284c7" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#e0f2fe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PackageIcon size={13} color="#0284c7" />
+              </span>
               <span>Xem Danh Mục Trang Chủ</span>
             </button>
             <button
@@ -329,9 +331,11 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               onClick={() => scrollToTargetSection('catalog-section')}
               className="category-drawer-btn category-drawer-btn-primary"
               title="Cuộn tới danh sách toàn bộ sản phẩm trên trang chủ"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
-              <ShoppingBagIcon size={14} color="#ffffff" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShoppingBagIcon size={13} color="#ffffff" />
+              </span>
               <span>Xem Tất Cả Sản Phẩm</span>
             </button>
             <button
@@ -418,9 +422,11 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   setSearchTerm('');
                   setSelectedGroup('all');
                 }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
               >
-                <RefreshIcon size={14} color="#ea580c" />
+                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <RefreshIcon size={13} color="#ea580c" />
+                </span>
                 <span>Xóa bộ lọc & Xem tất cả</span>
               </button>
             </div>
@@ -523,8 +529,10 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
 
         {/* Mega Menu Footer: 12 Mall Shops Strip */}
         <div className="category-drawer-footer">
-          <div className="category-drawer-footer-title" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <StoreIcon size={14} color="#dc2626" />
+          <div className="category-drawer-footer-title" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <StoreIcon size={13} color="#dc2626" />
+            </span>
             <span>12 Gian Hàng Mall:</span>
           </div>
 
