@@ -109,7 +109,10 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         <div style={{ marginBottom: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <strong style={{ fontSize: '13.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <PackageIcon size={15} color="#ea580c" /> DANH SÁCH MẶT HÀNG KIỂM TRA ({order.items?.length || 1} sản phẩm):
+              <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PackageIcon size={12} color="#ea580c" />
+              </span>
+              <span>DANH SÁCH MẶT HÀNG KIỂM TRA ({order.items?.length || 1} sản phẩm):</span>
             </strong>
             <span style={{ fontSize: '11.5px', color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -170,8 +173,11 @@ export default function PackingSlipModal({ order, shop, onClose }) {
               <span>Mã vận đơn bưu cục: <strong style={{ color: '#ea580c' }}>{trackingCode}</strong></span>
             </div>
             {order.note && (
-              <div style={{ fontSize: '12px', color: '#d97706', marginTop: '6px', background: '#fef3c7', padding: '4px 8px', borderRadius: '4px', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <ChatIcon size={13} color="#d97706" /> <span><strong>Ghi chú của khách:</strong> {order.note}</span>
+              <div style={{ fontSize: '12px', color: '#d97706', marginTop: '6px', background: '#fef3c7', padding: '4px 8px', borderRadius: '4px', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ChatIcon size={11} color="#d97706" />
+                </span>
+                <span><strong>Ghi chú của khách:</strong> {order.note}</span>
               </div>
             )}
           </div>
@@ -212,14 +218,16 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         </div>
 
         {/* Nút hành động */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+        <div style={{ display: 'flex', borderTop: '1px solid #e2e8f0', paddingTop: '16px', justifyContent: 'flex-end', gap: '10px' }}>
           <button
             type="button"
             className="shopee-btn shopee-btn-secondary"
             onClick={onClose}
-            style={{ padding: '8px 18px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            style={{ padding: '8px 18px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <CloseIcon size={13} color="#64748b" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e2e8f0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={10} color="#64748b" />
+            </span>
             <span>Đóng</span>
           </button>
           <button
@@ -228,7 +236,9 @@ export default function PackingSlipModal({ order, shop, onClose }) {
             onClick={handlePrint}
             style={{ padding: '8px 22px', fontSize: '13px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <PrinterIcon size={14} color="#ffffff" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PrinterIcon size={11} color="#ffffff" />
+            </span>
             <span>In Phiếu Đóng Gói (A4)</span>
           </button>
         </div>
