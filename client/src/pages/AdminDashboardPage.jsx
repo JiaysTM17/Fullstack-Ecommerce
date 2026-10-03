@@ -488,7 +488,7 @@ export default function AdminDashboardPage() {
       {/* Sidebar Super Admin */}
       <aside className="shopee-sidebar">
         <div className="shopee-sidebar-brand">
-          <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--primary-color), var(--primary-hover))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)', border: '1px solid #fed7aa', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)' }}>
             <ShieldIcon size={20} color="#ffffff" />
           </div>
           <div className="shopee-sidebar-info">
