@@ -1240,10 +1240,12 @@ export default function AdminDashboardPage() {
                             <button
                               type="button"
                               className="shopee-btn shopee-btn-sm"
-                              style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #10b981', marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #10b981', marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                               onClick={() => handleApproveProduct(p.id)}
                             >
-                              <CheckIcon size={12} color="#059669" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckIcon size={10} color="#059669" />
+                              </span>
                               <span>Duyệt Bán</span>
                             </button>
                           )}
@@ -1251,10 +1253,12 @@ export default function AdminDashboardPage() {
                             <button
                               type="button"
                               className="shopee-btn shopee-btn-sm"
-                              style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #ef4444', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #ef4444', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                               onClick={() => handleRejectProduct(p.id)}
                             >
-                              <CloseIcon size={12} color="#dc2626" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CloseIcon size={10} color="#dc2626" />
+                              </span>
                               <span>Gỡ Bỏ</span>
                             </button>
                           )}
@@ -1308,8 +1312,10 @@ export default function AdminDashboardPage() {
                 onChange={(e) => setNewCatName(e.target.value)}
                 style={{ flex: 1 }}
               />
-              <button type="submit" className="shopee-btn shopee-btn-primary" style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <PlusIcon size={14} color="#ffffff" />
+              <button type="submit" className="shopee-btn shopee-btn-primary" style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PlusIcon size={12} color="#ffffff" />
+                </span>
                 <span>Thêm Danh Mục</span>
               </button>
             </form>
