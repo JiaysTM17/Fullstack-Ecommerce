@@ -9,8 +9,10 @@ import {
   QuickViewModal,
   RecentlyViewed,
   RecentlyViewedSection,
-  CategoryShowcase
+  CategoryShowcase,
+  DailyCheckinStreakCard,
 } from "../components";
+import RewardsHubModal from "../components/RewardsHubModal";
 import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
 import { getProducts, getFlashSale, getBestSellers, getNewArrivals } from "../services/productService";
@@ -36,6 +38,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [showRewardsModal, setShowRewardsModal] = useState(false);
 
   const filters = useMemo(
     () => ({
@@ -223,7 +226,10 @@ export default function HomePage() {
       {/* 1. Hero Banner Carousel */}
       <HeroBanner onSelectCategory={(cat) => updateFilter("category", cat)} />
 
-      {/* 2. 2-Tier Categories Showcase (Shopee / Modern E-Commerce Style) */}
+      {/* 2. Daily Check-in Streak & Mini Xu Rewards Hub */}
+      <DailyCheckinStreakCard onOpenRewardsModal={() => setShowRewardsModal(true)} />
+
+      {/* 3. 2-Tier Categories Showcase (Shopee / Modern E-Commerce Style) */}
       <div id="category-showcase-section">
         <CategoryShowcase
           onSelectShowcase={handleSelectShowcase}
@@ -577,6 +583,11 @@ export default function HomePage() {
         onAddToCart={addToCart}
         onViewDetail={viewProductDetail}
       />
+
+      {/* 6. Rewards Hub Modal */}
+      {showRewardsModal && (
+        <RewardsHubModal onClose={() => setShowRewardsModal(false)} />
+      )}
     </main>
   );
 }
