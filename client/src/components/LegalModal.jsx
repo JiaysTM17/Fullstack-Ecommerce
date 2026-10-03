@@ -134,14 +134,14 @@ export default function LegalModal({
             type="button"
             onClick={onClose}
             style={{
-              background: '#f1f5f9',
+              background: 'rgba(239, 68, 68, 0.1)',
               border: 'none',
               borderRadius: '50%',
               width: '32px',
               height: '32px',
               cursor: 'pointer',
               fontSize: '15px',
-              color: '#64748b',
+              color: '#ef4444',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -149,7 +149,7 @@ export default function LegalModal({
             }}
             aria-label="Đóng"
           >
-            <CloseIcon size={16} color="#64748b" />
+            <CloseIcon size={16} color="#ef4444" />
           </button>
         </div>
 
@@ -298,8 +298,8 @@ export default function LegalModal({
                 gap: '6px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e2e8f0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CloseIcon size={11} color="#475569" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={11} color="#ef4444" />
               </span>
               <span>Đóng</span>
             </button>

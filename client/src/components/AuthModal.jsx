@@ -185,8 +185,23 @@ export default function AuthModal() {
           className="shopee-auth-modal-close-btn"
           onClick={closeAuthModal}
           title="Đóng (ESC)"
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            background: 'none',
+            border: 'none',
+            padding: '4px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10,
+          }}
         >
-          <CloseIcon size={16} color="#64748b" />
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CloseIcon size={14} color="#ef4444" />
+          </span>
         </button>
 
         {/* Master Mode Tabs: ĐĂNG NHẬP vs ĐĂNG KÝ */}

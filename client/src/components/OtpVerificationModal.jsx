@@ -176,20 +176,20 @@ export default function OtpVerificationModal({
               position: 'absolute',
               top: '18px',
               right: '18px',
-              background: '#f1f5f9',
+              background: 'rgba(239, 68, 68, 0.1)',
               border: 'none',
               borderRadius: '50%',
               width: '32px',
               height: '32px',
               cursor: 'pointer',
               fontSize: '15px',
-              color: '#64748b',
+              color: '#ef4444',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <CloseIcon size={16} color="#64748b" />
+            <CloseIcon size={16} color="#ef4444" />
           </button>
         )}
 

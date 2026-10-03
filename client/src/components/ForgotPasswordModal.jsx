@@ -366,10 +366,10 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
             width: '32px',
             height: '32px',
             borderRadius: '50%',
-            background: '#f1f5f9',
+            background: 'rgba(239, 68, 68, 0.1)',
             border: 'none',
             fontSize: '14px',
-            color: '#64748b',
+            color: '#ef4444',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -377,7 +377,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
             transition: 'background 0.15s ease',
           }}
         >
-          <CloseIcon size={16} color="#64748b" />
+          <CloseIcon size={16} color="#ef4444" />
         </button>
 
         {/* Modal Header */}
