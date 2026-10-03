@@ -239,10 +239,12 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 lineHeight: 1.4,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
               }}
             >
-              <AlertCircleIcon size={15} color="#ef4444" />
+              <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <AlertCircleIcon size={13} color="#ef4444" />
+              </span>
               <span>{errorMsg}</span>
             </div>
           )}
@@ -312,10 +314,12 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               marginBottom: '14px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '10px',
             }}
           >
-            <ShieldCheckIcon size={14} color="#15803d" style={{ flexShrink: 0 }} />
+            <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ShieldCheckIcon size={13} color="#15803d" />
+            </span>
             <div style={{ fontSize: '11.5px', color: '#166534', lineHeight: 1.4 }}>
               <strong>Shopee Đảm Bảo:</strong> Miễn phí 100% cước thu hồi hàng tại nhà bởi SPX Express. Yêu cầu của bạn được bảo vệ minh bạch.
             </div>
