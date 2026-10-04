@@ -1088,13 +1088,15 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 className="shopee-btn shopee-btn-primary"
-                style={{ fontSize: '13px', padding: '8px 14px', whiteSpace: 'nowrap', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                style={{ fontSize: '13px', padding: '8px 14px', whiteSpace: 'nowrap', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => {
                   navigator.clipboard?.writeText(window.location.href);
                   showToast('Đã sao chép liên kết sản phẩm vào bộ nhớ tạm!', 'success');
                 }}
               >
-                <CopyIcon size={13} color="#ffffff" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CopyIcon size={11} color="#ffffff" />
+                </span>
                 <span>Sao chép</span>
               </button>
             </div>
