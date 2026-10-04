@@ -898,21 +898,30 @@ export default function ProfilePage() {
           <div className="profile-stats-grid">
             <div className="profile-stat-box" onClick={() => navigate('/orders')}>
               <div className="profile-stat-label">
-                <PackageIcon size={14} color="#60a5fa" /> Tổng Đơn Hàng
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(96, 165, 250, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PackageIcon size={12} color="#60a5fa" />
+                </span>
+                <span>Tổng Đơn Hàng</span>
               </div>
               <div className="profile-stat-value">{ordersSummary.total} đơn</div>
             </div>
 
             <div className="profile-stat-box" onClick={() => navigate('/orders')}>
               <div className="profile-stat-label">
-                <TruckIcon size={14} color="#34d399" /> Đang Vận Chuyển
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(52, 211, 153, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TruckIcon size={12} color="#34d399" />
+                </span>
+                <span>Đang Vận Chuyển</span>
               </div>
               <div className="profile-stat-value">{ordersSummary.processing} đơn</div>
             </div>
 
             <div className="profile-stat-box" onClick={() => setActiveTab('coins')}>
               <div className="profile-stat-label">
-                <CoinIcon size={14} color="#fde047" /> Số Dư Shopee Xu
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(253, 224, 71, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CoinIcon size={12} color="#fde047" />
+                </span>
+                <span>Số Dư Shopee Xu</span>
               </div>
               <div className="profile-stat-value" style={{ color: '#fde047' }}>
                 {(coins || 0).toLocaleString('vi-VN')} Xu
@@ -921,7 +930,10 @@ export default function ProfilePage() {
 
             <div className="profile-stat-box" onClick={() => setActiveTab('vouchers')}>
               <div className="profile-stat-label">
-                <TicketIcon size={14} color="#fb923c" /> Ví Voucher
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(251, 146, 60, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TicketIcon size={12} color="#fb923c" />
+                </span>
+                <span>Ví Voucher</span>
               </div>
               <div className="profile-stat-value">{vouchersList.length || 5} mã</div>
             </div>

@@ -1505,9 +1505,11 @@ export default function AdminDashboardPage() {
                             type="button"
                             className="shopee-btn shopee-btn-primary shopee-btn-sm"
                             onClick={() => handleSettlePayout(f.id)}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                           >
-                            <CreditCardIcon size={14} color="#ffffff" />
+                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <CreditCardIcon size={12} color="#ffffff" />
+                            </span>
                             <span>Chuyển Khoản & Quyết Toán</span>
                           </button>
                         ) : (

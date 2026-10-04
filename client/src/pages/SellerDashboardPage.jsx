@@ -2309,9 +2309,11 @@ export default function SellerDashboardPage() {
                   type="button"
                   className="shopee-btn shopee-btn-primary"
                   onClick={handleOpenAddModal}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}
                 >
-                  <PlusIcon size={14} color="#ffffff" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <PlusIcon size={12} color="#ffffff" />
+                  </span>
                   <span>Đăng Bán Sản Phẩm Mới</span>
                 </button>
               </div>
@@ -2344,8 +2346,11 @@ export default function SellerDashboardPage() {
                   className={`seller-tab-btn ${productStatusFilter === 'low_stock' ? 'active' : ''}`}
                   onClick={() => setProductStatusFilter('low_stock')}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <AlertCircleIcon size={12} color="#dc2626" /> Sắp hết hàng ({lowStockCount})
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <AlertCircleIcon size={10} color="#dc2626" />
+                    </span>
+                    <span>Sắp hết hàng ({lowStockCount})</span>
                   </span>
                 </button>
               </div>

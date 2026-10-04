@@ -911,9 +911,12 @@ export default function OrderDetailModal({
                   <span
                     className="copy-pill"
                     onClick={() => handleCopy(recipientPhone, 'SĐT')}
-                    style={{ fontSize: '11.5px', color: '#475569', cursor: 'pointer' }}
+                    style={{ fontSize: '11.5px', color: '#475569', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                   >
-                    {recipientPhone} <CopyIcon size={10} color="#2563eb" />
+                    <span>{recipientPhone}</span>
+                    <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CopyIcon size={9} color="#2563eb" />
+                    </span>
                   </span>
                 </div>
                 <div style={{ fontSize: '12px', color: '#475569', marginTop: '3px', lineHeight: 1.4 }}>
@@ -1211,9 +1214,12 @@ export default function OrderDetailModal({
                   <span
                     className="copy-pill"
                     onClick={() => handleCopy(transactionId, 'Mã GD')}
-                    style={{ fontSize: '11px', cursor: 'pointer' }}
+                    style={{ fontSize: '11px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                   >
-                    {transactionId} <CopyIcon size={10} color="#2563eb" />
+                    <span>{transactionId}</span>
+                    <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CopyIcon size={9} color="#2563eb" />
+                    </span>
                   </span>
                 </div>
               </div>
