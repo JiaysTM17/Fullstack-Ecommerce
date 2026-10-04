@@ -807,15 +807,46 @@ export default function ProductDetailPage() {
                 </div>
 
                 <div style={{ display: "flex", gap: "10px" }}>
-                  <button type="submit" className="shopee-btn shopee-btn-primary">
-                    Gửi Đánh Giá Ngay
+                  <button
+                    type="submit"
+                    className="shopee-btn shopee-btn-primary"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  >
+                    <span
+                      style={{
+                        width: "18px",
+                        height: "18px",
+                        borderRadius: "4px",
+                        background: "rgba(255, 255, 255, 0.22)",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <CheckIcon size={11} color="#ffffff" />
+                    </span>
+                    <span>Gửi Đánh Giá Ngay</span>
                   </button>
                   <button
                     type="button"
                     className="shopee-btn shopee-btn-secondary"
                     onClick={() => setShowReviewForm(false)}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                   >
-                    Hủy
+                    <span
+                      style={{
+                        width: "18px",
+                        height: "18px",
+                        borderRadius: "50%",
+                        background: "rgba(239, 68, 68, 0.12)",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <CloseIcon size={10} color="#ef4444" />
+                    </span>
+                    <span>Hủy</span>
                   </button>
                 </div>
               </form>

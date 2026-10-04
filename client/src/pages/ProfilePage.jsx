@@ -2737,11 +2737,42 @@ export default function ProfilePage() {
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setShowAddAddressModal(false)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  Hủy
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
+                  <span>Hủy</span>
                 </button>
-                <button type="submit" className="shopee-btn shopee-btn-primary">
-                  Lưu Địa Chỉ
+                <button
+                  type="submit"
+                  className="shopee-btn shopee-btn-primary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '4px',
+                      background: 'rgba(255, 255, 255, 0.22)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CheckIcon size={11} color="#ffffff" />
+                  </span>
+                  <span>Lưu Địa Chỉ</span>
                 </button>
               </div>
             </form>
@@ -2845,11 +2876,42 @@ export default function ProfilePage() {
                     setShowEditAddressModal(false);
                     setEditingAddress(null);
                   }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  Hủy
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
+                  <span>Hủy</span>
                 </button>
-                <button type="submit" className="shopee-btn shopee-btn-primary">
-                  Lưu Thay Đổi
+                <button
+                  type="submit"
+                  className="shopee-btn shopee-btn-primary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '4px',
+                      background: 'rgba(255, 255, 255, 0.22)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CheckIcon size={11} color="#ffffff" />
+                  </span>
+                  <span>Lưu Thay Đổi</span>
                 </button>
               </div>
             </form>
@@ -3011,11 +3073,42 @@ export default function ProfilePage() {
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setShowAddPaymentModal(false)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  Hủy
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
+                  <span>Hủy</span>
                 </button>
-                <button type="submit" className="shopee-btn shopee-btn-primary">
-                  Liên Kết Ngay
+                <button
+                  type="submit"
+                  className="shopee-btn shopee-btn-primary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '4px',
+                      background: 'rgba(255, 255, 255, 0.22)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CheckIcon size={11} color="#ffffff" />
+                  </span>
+                  <span>Liên Kết Ngay</span>
                 </button>
               </div>
             </form>

@@ -8,7 +8,7 @@ import {
   voteProductQuestion,
   answerProductQuestion,
 } from "../services/productService";
-import { ChatIcon, LightbulbIcon, ThumbsUpIcon, StoreIcon, CheckIcon } from "./OrdersIcons";
+import { ChatIcon, LightbulbIcon, ThumbsUpIcon, StoreIcon, CheckIcon, CloseIcon } from "./OrdersIcons";
 
 const LOCAL_QA_KEY_PREFIX = "mini_shopee_qa_";
 const VOTED_QA_KEY = "mini_shopee_qa_voted_questions";
@@ -606,16 +606,32 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           setReplyText("");
                         }}
                         style={{
-                          padding: "6px 10px",
+                          padding: "6px 12px",
                           fontSize: "12px",
                           background: "none",
                           border: "1px solid #cbd5e1",
                           borderRadius: "6px",
                           cursor: "pointer",
                           color: "#64748b",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
                         }}
                       >
-                        Hủy
+                        <span
+                          style={{
+                            width: "16px",
+                            height: "16px",
+                            borderRadius: "50%",
+                            background: "rgba(239, 68, 68, 0.12)",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <CloseIcon size={9} color="#ef4444" />
+                        </span>
+                        <span>Hủy</span>
                       </button>
                     </div>
                   ) : (
