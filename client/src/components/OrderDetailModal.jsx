@@ -1037,9 +1037,15 @@ export default function OrderDetailModal({
                     padding: '0 10px',
                     fontSize: '11.5px',
                     borderRadius: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
                   }}
                 >
-                  <ChatIcon size={11} color="#2563eb" /> {t('chat_with_shop', 'Chat Shop')}
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ChatIcon size={10} color="#2563eb" />
+                  </span>
+                  <span>{t('chat_with_shop', 'Chat Shop')}</span>
                 </button>
               )}
             </div>
@@ -1120,8 +1126,11 @@ export default function OrderDetailModal({
                             x{itemQty}
                           </span>
                         </div>
-                        <div style={{ fontSize: '10.5px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '3px' }}>
-                          <ShieldCheckIcon size={11} color="#16a34a" /> 100% Chính hãng · Đổi trả trong 15 ngày
+                        <div style={{ fontSize: '10.5px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '5px', marginTop: '4px' }}>
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ShieldCheckIcon size={9} color="#16a34a" />
+                          </span>
+                          <span>100% Chính hãng · Đổi trả trong 15 ngày</span>
                         </div>
                       </div>
                     </div>
