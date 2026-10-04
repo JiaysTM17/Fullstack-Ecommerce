@@ -284,10 +284,10 @@ export default function NotificationsPopover() {
             }}
           >
             {[
-              { id: 'all', label: `Tất cả (${notifications.length})`, icon: <BellIcon size={12} color={activeTab === 'all' ? '#ffffff' : '#f59e0b'} /> },
-              { id: 'order', label: `Đơn hàng (${orderCount})`, icon: <PackageIcon size={12} color={activeTab === 'order' ? '#ffffff' : '#0284c7'} /> },
-              { id: 'voucher', label: `Ưu đãi (${voucherCount})`, icon: <TicketIcon size={12} color={activeTab === 'voucher' ? '#ffffff' : '#ea580c'} /> },
-              { id: 'unread', label: `Chưa đọc (${unreadCount})`, icon: <SparklesIcon size={12} color={activeTab === 'unread' ? '#ffffff' : '#ef4444'} /> },
+              { id: 'all', label: `Tất cả (${notifications.length})`, icon: <BellIcon size={12} color={activeTab === 'all' ? '#ffffff' : '#f59e0b'} />, bg: 'rgba(245, 158, 11, 0.12)' },
+              { id: 'order', label: `Đơn hàng (${orderCount})`, icon: <PackageIcon size={12} color={activeTab === 'order' ? '#ffffff' : '#0284c7'} />, bg: 'rgba(2, 132, 199, 0.12)' },
+              { id: 'voucher', label: `Ưu đãi (${voucherCount})`, icon: <TicketIcon size={12} color={activeTab === 'voucher' ? '#ffffff' : '#ea580c'} />, bg: 'rgba(234, 88, 12, 0.12)' },
+              { id: 'unread', label: `Chưa đọc (${unreadCount})`, icon: <SparklesIcon size={12} color={activeTab === 'unread' ? '#ffffff' : '#ef4444'} />, bg: 'rgba(239, 68, 68, 0.12)' },
             ].map((tab) => {
               const active = activeTab === tab.id;
               return (
@@ -300,7 +300,7 @@ export default function NotificationsPopover() {
                     color: active ? '#ffffff' : 'var(--text-secondary, #475569)',
                     border: 'none',
                     borderRadius: '20px',
-                    padding: '4px 10px',
+                    padding: '3px 10px 3px 4px',
                     fontSize: '11.5px',
                     fontWeight: active ? 700 : 500,
                     cursor: 'pointer',
@@ -308,10 +308,12 @@ export default function NotificationsPopover() {
                     transition: 'all 0.15s ease',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '6px',
                   }}
                 >
-                  {tab.icon}
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: active ? 'rgba(255, 255, 255, 0.22)' : tab.bg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {tab.icon}
+                  </span>
                   <span>{tab.label}</span>
                 </button>
               );
@@ -322,8 +324,8 @@ export default function NotificationsPopover() {
           <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
             {filteredNotifs.length === 0 ? (
               <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-muted, #94a3b8)', fontSize: '13px' }}>
-                <span style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '8px', color: 'var(--primary-color, #ea580c)' }}>
-                  <SparklesIcon size={24} color="#ea580c" />
+                <span style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                  <SparklesIcon size={22} color="#ea580c" />
                 </span>
                 <p style={{ margin: 0 }}>Bạn không có thông báo nào chưa đọc!</p>
               </div>
