@@ -151,20 +151,20 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
           type="button"
           onClick={onClose}
           style={{
-            background: 'rgba(255,255,255,0.1)',
+            background: 'none',
             border: 'none',
-            color: '#fff',
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
             cursor: 'pointer',
+            padding: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}
           title="Đóng chat"
+          aria-label="Đóng chat với gian hàng"
         >
-          <CloseIcon size={14} color="#ffffff" />
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CloseIcon size={14} color="#ef4444" />
+          </span>
         </button>
       </div>
 
