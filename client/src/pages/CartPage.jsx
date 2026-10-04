@@ -807,9 +807,12 @@ export default function CartPage() {
               type="button"
               className="shopee-btn shopee-btn-secondary"
               disabled
-              style={{ width: "100%", padding: "14px", fontSize: "14px", opacity: 0.6 }}
+              style={{ width: "100%", padding: "14px", fontSize: "14px", opacity: 0.85, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
             >
-              {t('select_items_warning', 'Vui lòng chọn sản phẩm để thanh toán')}
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <AlertCircleIcon size={12} color="#ea580c" />
+              </span>
+              <span>{t('select_items_warning', 'Vui lòng chọn sản phẩm để thanh toán')}</span>
             </button>
           )}
 
