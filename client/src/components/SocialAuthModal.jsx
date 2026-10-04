@@ -399,9 +399,25 @@ export default function SocialAuthModal({
                 padding: '10px 18px',
                 cursor: 'pointer',
                 borderRadius: '20px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              Hủy bỏ
+              <span
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <CloseIcon size={10} color="#ef4444" />
+              </span>
+              <span>Hủy bỏ</span>
             </button>
 
             <button
@@ -739,9 +755,26 @@ export default function SocialAuthModal({
                 fontSize: '13.5px',
                 fontWeight: 700,
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
             >
-              Hủy bỏ
+              <span
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  background: 'rgba(0, 0, 0, 0.08)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <CloseIcon size={10} color="#4b5563" />
+              </span>
+              <span>Hủy bỏ</span>
             </button>
 
             {/* Meta Footer */}
@@ -1031,9 +1064,26 @@ export default function SocialAuthModal({
             fontSize: '13.5px',
             fontWeight: 600,
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
           }}
         >
-          Hủy bỏ
+          <span
+            style={{
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.08)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <CloseIcon size={10} color="#86868b" />
+          </span>
+          <span>Hủy bỏ</span>
         </button>
 
         {/* Apple Privacy Notice */}
