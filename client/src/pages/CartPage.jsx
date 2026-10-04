@@ -23,6 +23,7 @@ import {
   ChevronRightIcon,
   ArrowLeftIcon,
   HomeIcon,
+  ShieldCheckIcon,
 } from "../components/OrdersIcons";
 
 const FREE_SHIPPING_THRESHOLD = 300000;
@@ -261,7 +262,9 @@ export default function CartPage() {
               }}
             >
               <div style={{ marginBottom: "12px", display: "flex", justifyContent: "center" }}>
-                <CartIcon size={44} color="#ea580c" />
+                <span style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CartIcon size={32} color="#ea580c" />
+                </span>
               </div>
               <div style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)" }}>
                 {t('empty_cart_title', 'Giỏ hàng chính hiện đang trống')}
@@ -370,11 +373,17 @@ export default function CartPage() {
                       color: "#fff",
                       fontSize: "10.5px",
                       fontWeight: 700,
-                      padding: "2px 6px",
+                      padding: "2px 7px",
                       borderRadius: "4px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
                     }}
                   >
-                    Mall
+                    <span style={{ width: '13px', height: '13px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ShieldCheckIcon size={8} color="#ffffff" />
+                    </span>
+                    <span>Mall</span>
                   </span>
                 </div>
                 <span style={{ fontSize: "12.5px", color: "var(--text-secondary, #64748b)" }}>
@@ -735,8 +744,11 @@ export default function CartPage() {
                   justifyContent: "space-between",
                 }}
               >
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                  <SparklesIcon size={13} color="#047857" /> <strong>{voucherLivePreview.voucherCode}</strong>: Giảm xem trước
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <SparklesIcon size={11} color="#047857" />
+                  </span>
+                  <span><strong>{voucherLivePreview.voucherCode}</strong>: Giảm xem trước</span>
                 </span>
                 <strong style={{ color: "#059669" }}>-{formatCurrency(voucherLivePreview.discountAmount)}</strong>
               </div>
