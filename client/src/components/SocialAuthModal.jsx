@@ -180,7 +180,9 @@ export default function SocialAuthModal({
               transition: 'background 0.2s',
             }}
           >
-            <CloseIcon size={16} color="#ef4444" />
+            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={14} color="#ef4444" />
+            </span>
           </button>
 
           {/* Google Header Logo */}
@@ -251,7 +253,9 @@ export default function SocialAuthModal({
                 gap: '8px',
               }}
             >
-              <AlertCircleIcon size={15} color="#ef4444" />
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <AlertCircleIcon size={12} color="#ef4444" />
+              </span>
               <span>{error}</span>
             </div>
           )}
@@ -294,8 +298,8 @@ export default function SocialAuthModal({
                 <span style={{ fontWeight: 700, fontSize: '14.5px', color: '#1f1f1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {fullName || 'Người dùng Google'}
                 </span>
-                <span style={{ color: '#0b57d0', display: 'inline-flex', alignItems: 'center' }} title="Tài khoản Google chính chủ">
-                  <CheckIcon size={13} color="#0b57d0" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(11, 87, 208, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Tài khoản Google chính chủ">
+                  <CheckIcon size={11} color="#0b57d0" />
                 </span>
               </div>
               <div style={{ fontSize: '12.5px', color: '#444746', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
@@ -557,7 +561,9 @@ export default function SocialAuthModal({
               }}
               aria-label="Đóng cửa sổ Meta"
             >
-              <CloseIcon size={14} color="#fee2e2" />
+              <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CloseIcon size={12} color="#ffffff" />
+              </span>
             </button>
           </div>
 
@@ -844,7 +850,9 @@ export default function SocialAuthModal({
             padding: 0,
           }}
         >
-          <CloseIcon size={14} color="#ef4444" />
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CloseIcon size={14} color="#ef4444" />
+          </span>
         </button>
 
         {/* Apple Logo & Header */}
@@ -1101,8 +1109,11 @@ export default function SocialAuthModal({
         </button>
 
         {/* Apple Privacy Notice */}
-        <div style={{ marginTop: '18px', fontSize: '11px', color: '#636366', textAlign: 'center', lineHeight: 1.4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-          <LockIcon size={12} color="#636366" /> <span>Tính năng Bảo mật của Apple. Mini Shopee chỉ nhận được mã ủy quyền từ Apple ID để cấp quyền truy cập.</span>
+        <div style={{ marginTop: '18px', fontSize: '11px', color: '#636366', textAlign: 'center', lineHeight: 1.4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <LockIcon size={11} color="#a1a1aa" />
+          </span>
+          <span>Tính năng Bảo mật của Apple. Mini Shopee chỉ nhận được mã ủy quyền từ Apple ID để cấp quyền truy cập.</span>
         </div>
       </div>
     </div>
