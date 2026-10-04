@@ -1771,7 +1771,9 @@ export default function SellerDashboardPage() {
                     className="shopee-btn shopee-btn-secondary"
                     style={{ fontSize: '12.5px', padding: '6px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
                   >
-                    <DownloadIcon size={14} color="#2563eb" />
+                    <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <DownloadIcon size={12} color="#2563eb" />
+                    </span>
                     <span>Xuất Báo Cáo (CSV)</span>
                   </button>
                 </div>
@@ -1941,8 +1943,11 @@ export default function SellerDashboardPage() {
             {/* Bảng Lịch Sử Giao Dịch & Rút Tiền */}
             <div className="shopee-table-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ReceiptIcon size={16} color="#0284c7" /> Lịch Sử Giao Dịch Rút Tiền Doanh Thu
+                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ReceiptIcon size={14} color="#0284c7" />
+                  </span>
+                  <span>Lịch Sử Giao Dịch Rút Tiền Doanh Thu</span>
                 </h3>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                   Tổng cộng: {shopWithdrawals.length} giao dịch
@@ -2015,9 +2020,11 @@ export default function SellerDashboardPage() {
                   type="button"
                   onClick={() => setShowCreateFlashSaleModal(true)}
                   className="shopee-btn shopee-btn-primary"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontWeight: 700 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', fontWeight: 700 }}
                 >
-                  <PlusIcon size={14} color="#2563eb" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <PlusIcon size={12} color="#ffffff" />
+                  </span>
                   <span>Tạo Chiến Dịch Flash Sale Mới</span>
                 </button>
               </div>
@@ -3213,8 +3220,11 @@ export default function SellerDashboardPage() {
 
               {/* Thông tin người nhận */}
               <div style={{ background: 'var(--bg-muted, #f8fafc)', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', border: '1px solid var(--border-medium)' }}>
-                <div style={{ fontWeight: 800, fontSize: '13px', marginBottom: '6px', color: '#ea580c', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <MapPinIcon size={14} color="#ea580c" /> THÔNG TIN GIAO HÀNG & NGƯỜI NHẬN
+                <div style={{ fontWeight: 800, fontSize: '13px', marginBottom: '6px', color: '#ea580c', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <MapPinIcon size={12} color="#ea580c" />
+                  </span>
+                  <span>THÔNG TIN GIAO HÀNG & NGƯỜI NHẬN</span>
                 </div>
                 <div style={{ fontSize: '13px' }}>
                   <strong>{selectedOrderDetails.customerName}</strong> ({selectedOrderDetails.phone})
@@ -3222,8 +3232,11 @@ export default function SellerDashboardPage() {
                 <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                   {selectedOrderDetails.address}
                 </div>
-                <div style={{ fontSize: '12px', color: '#16a34a', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <TruckIcon size={13} color="#059669" /> Đơn vị vận chuyển: <strong>SPX Express</strong> (Mã vận đơn: {selectedOrderDetails.trackingCode})
+                <div style={{ fontSize: '12px', color: '#16a34a', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TruckIcon size={11} color="#059669" />
+                  </span>
+                  <span>Đơn vị vận chuyển: <strong>SPX Express</strong> (Mã vận đơn: {selectedOrderDetails.trackingCode})</span>
                 </div>
               </div>
 
@@ -3517,8 +3530,11 @@ export default function SellerDashboardPage() {
                     </select>
                     {productForm.name && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontSize: '11.5px', color: '#16a34a', fontWeight: 600 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <SparklesIcon size={14} color="#16a34a" /> AI Gợi ý phân loại:
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <SparklesIcon size={11} color="#16a34a" />
+                          </span>
+                          <span>AI Gợi ý phân loại:</span>
                         </span>
                         <span 
                           style={{ background: '#dcfce7', color: '#15803d', padding: '1px 8px', borderRadius: '4px', cursor: 'pointer', border: '1px solid #bbf7d0' }}
