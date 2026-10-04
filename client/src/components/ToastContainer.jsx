@@ -109,22 +109,23 @@ export default function ToastContainer() {
                 type="button"
                 onClick={() => removeToast(toast.id)}
                 style={{
-                  background: '#f1f5f9',
+                  background: 'rgba(239, 68, 68, 0.1)',
                   border: 'none',
                   borderRadius: '50%',
                   width: '22px',
                   height: '22px',
-                  color: '#64748b',
+                  color: '#ef4444',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
                   transition: 'background 0.2s',
+                  padding: 0,
                 }}
                 aria-label="Đóng thông báo"
               >
-                <CloseIcon size={11} color="#64748b" />
+                <CloseIcon size={10} color="#ef4444" />
               </button>
             </div>
           </div>
