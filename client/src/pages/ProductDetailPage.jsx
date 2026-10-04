@@ -621,8 +621,11 @@ export default function ProductDetailPage() {
 
       {/* Customer Reviews & Ratings Section */}
       <section className="amazon-reviews-section">
-        <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "20px" }}>
-          Đánh Giá Từ Khách Hàng Đã Mua
+        <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "20px", display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <StarIcon size={18} color="#f59e0b" fill="#f59e0b" />
+          </span>
+          <span>Đánh Giá Từ Khách Hàng Đã Mua</span>
         </h2>
 
         <div className="amazon-reviews-grid">
@@ -972,8 +975,11 @@ export default function ProductDetailPage() {
       {/* Frequently Bought Together / Related Products */}
       {relatedProducts.length > 0 && (
         <section style={{ marginTop: "32px" }}>
-          <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "16px" }}>
-            Khách Hàng Cũng Mua Cùng Sản Phẩm Này
+          <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <PackageIcon size={18} color="#ea580c" />
+            </span>
+            <span>Khách Hàng Cũng Mua Cùng Sản Phẩm Này</span>
           </h2>
           <div
             style={{

@@ -118,15 +118,15 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               width: "36px",
               height: "36px",
               borderRadius: "10px",
-              background: "linear-gradient(135deg, #0284c7, #0369a1)",
+              background: "rgba(2, 132, 199, 0.12)",
+              border: "1px solid rgba(2, 132, 199, 0.25)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 3px 8px rgba(2, 132, 199, 0.28)",
               flexShrink: 0,
             }}
           >
-            <ClockIcon size={18} color="#ffffff" />
+            <ClockIcon size={18} color="#0284c7" />
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>

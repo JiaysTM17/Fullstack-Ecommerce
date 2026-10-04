@@ -299,15 +299,15 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
               width: "36px",
               height: "36px",
               borderRadius: "10px",
-              background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+              background: "rgba(37, 99, 235, 0.12)",
+              border: "1px solid rgba(37, 99, 235, 0.25)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 3px 8px rgba(37, 99, 235, 0.28)",
               flexShrink: 0,
             }}
           >
-            <ChatIcon size={18} color="#ffffff" />
+            <ChatIcon size={18} color="#2563eb" />
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
