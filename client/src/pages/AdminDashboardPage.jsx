@@ -1076,10 +1076,23 @@ export default function AdminDashboardPage() {
                         <button
                           type="button"
                           className="shopee-btn shopee-btn-secondary shopee-btn-sm"
-                          style={{ color: 'var(--color-error)' }}
+                          style={{ color: 'var(--color-error)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                           onClick={() => handleDeleteVoucher(v.id)}
                         >
-                          Xóa
+                          <span
+                            style={{
+                              width: '16px',
+                              height: '16px',
+                              borderRadius: '4px',
+                              background: 'rgba(239, 68, 68, 0.12)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <TrashIcon size={10} color="#ef4444" />
+                          </span>
+                          <span>Xóa</span>
                         </button>
                       </td>
                     </tr>
@@ -1630,9 +1643,22 @@ export default function AdminDashboardPage() {
                   disabled={isDeleting}
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setUserToDelete(null)}
-                  style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600 }}
+                  style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  Hủy Bỏ
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
+                  <span>Hủy Bỏ</span>
                 </button>
                 <button
                   type="button"
@@ -1764,9 +1790,22 @@ export default function AdminDashboardPage() {
                   disabled={isDeleting}
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setShopToDelete(null)}
-                  style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600 }}
+                  style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  Hủy Bỏ
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
+                  <span>Hủy Bỏ</span>
                 </button>
                 <button
                   type="button"
