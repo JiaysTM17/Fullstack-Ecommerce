@@ -1421,10 +1421,13 @@ export default function ProfilePage() {
               <button
                 type="button"
                 className="shopee-btn shopee-btn-primary"
-                style={{ fontSize: '13px', padding: '9px 18px', fontWeight: 700, borderRadius: '10px' }}
+                style={{ fontSize: '13px', padding: '9px 18px', fontWeight: 700, borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => setShowAddAddressModal(true)}
               >
-                + Thêm Địa Chỉ Mới
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PlusIcon size={11} color="#ffffff" />
+                </span>
+                <span>Thêm Địa Chỉ Mới</span>
               </button>
             </div>
 
@@ -1544,10 +1547,13 @@ export default function ProfilePage() {
               <button
                 type="button"
                 className="shopee-btn shopee-btn-primary"
-                style={{ fontSize: '13px', padding: '9px 18px', fontWeight: 700, borderRadius: '10px' }}
+                style={{ fontSize: '13px', padding: '9px 18px', fontWeight: 700, borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => setShowAddPaymentModal(true)}
               >
-                + Thêm Thẻ / Tài Khoản Mới
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PlusIcon size={11} color="#ffffff" />
+                </span>
+                <span>Thêm Thẻ / Tài Khoản Mới</span>
               </button>
             </div>
 
