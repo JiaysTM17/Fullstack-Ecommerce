@@ -928,8 +928,10 @@ export default function ProductDetailPage() {
                   </div>
 
                   {rev.verifiedPurchase && (
-                    <div className="amazon-review-verified" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                      <CheckIcon size={12} color="#16a34a" />
+                    <div className="amazon-review-verified" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <CheckIcon size={10} color="#16a34a" />
+                      </span>
                       <span>Đã chứng nhận mua hàng chính hãng tại Fullstack E-Commerce</span>
                     </div>
                   )}
