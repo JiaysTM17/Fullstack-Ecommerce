@@ -33,8 +33,10 @@ export class ErrorBoundary extends React.Component {
             boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
             border: "1px solid var(--border-medium, #e2e8f0)"
           }}>
-            <div style={{ display: "inline-flex", justifyContent: "center", marginBottom: "16px", color: "#f59e0b" }}>
-              <AlertCircleIcon size={48} color="#f59e0b" />
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+              <span style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(245, 158, 11, 0.15)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <AlertCircleIcon size={38} color="#f59e0b" />
+              </span>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "12px", color: "var(--text-primary, #1e293b)" }}>
               Đã xảy ra sự cố khi tải trang

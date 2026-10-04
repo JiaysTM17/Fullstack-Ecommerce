@@ -1683,9 +1683,19 @@ export default function AdminDashboardPage() {
                       gap: '4px'
                     }}>
                       {userToDelete.role === 'seller' ? (
-                        <><StoreIcon size={12} color="#2563eb" /> Người bán (Seller)</>
+                        <>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <StoreIcon size={11} color="#2563eb" />
+                          </span>
+                          <span>Người bán (Seller)</span>
+                        </>
                       ) : (
-                        <><CartIcon size={12} color="#059669" /> Người mua (Customer)</>
+                        <>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CartIcon size={11} color="#059669" />
+                          </span>
+                          <span>Người mua (Customer)</span>
+                        </>
                       )}
                     </span>
                   </div>

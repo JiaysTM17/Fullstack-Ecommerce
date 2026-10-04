@@ -51,7 +51,9 @@ const Loading = ({
     <div className={`shopee-loading-wrapper ${fullScreen ? 'shopee-loading-fullscreen' : ''}`}>
       <div style={{ position: 'relative', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="shopee-spinner" style={{ width: '48px', height: '48px', position: 'absolute', inset: 0 }} />
-        <PackageIcon size={18} color="#ea580c" />
+        <span style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <PackageIcon size={15} color="#ea580c" />
+        </span>
       </div>
       {message && <div className="shopee-loading-text">{message}</div>}
     </div>

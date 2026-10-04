@@ -2281,7 +2281,10 @@ export default function SellerDashboardPage() {
                             className="shopee-btn shopee-btn-secondary"
                             style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                           >
-                            <ChatIcon size={13} color="#2563eb" /> Trả Lời Đánh Giá Này
+                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <ChatIcon size={11} color="#2563eb" />
+                            </span>
+                            <span>Trả Lời Đánh Giá Này</span>
                           </button>
                         )}
                       </div>
@@ -2544,7 +2547,9 @@ export default function SellerDashboardPage() {
                               }}
                               title="Chỉnh sửa nhanh tồn kho"
                             >
-                              <PencilIcon size={11} color="#2563eb" />
+                              <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <PencilIcon size={10} color="#2563eb" />
+                              </span>
                             </button>
                           </div>
                         </td>
@@ -2552,10 +2557,12 @@ export default function SellerDashboardPage() {
                           <strong>{prod.sold || 0}</strong>
                         </td>
                         <td>
-                          <span className={`shopee-status-badge ${prod.isActive ? 'status-active' : 'status-hidden'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <span className={`shopee-status-badge ${prod.isActive ? 'status-active' : 'status-hidden'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                             {prod.isActive ? (
                               <>
-                                <CheckIcon size={11} />
+                                <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <CheckIcon size={9} />
+                                </span>
                                 <span>Đang bán</span>
                               </>
                             ) : (
@@ -2771,17 +2778,22 @@ export default function SellerDashboardPage() {
                         </td>
                         <td>
                           <div style={{ fontWeight: 700 }}>{ord.customerName}</div>
-                          <small style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                            <PhoneIcon size={11} color="#2563eb" /> {ord.phone}
+                          <small style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <PhoneIcon size={9} color="#2563eb" />
+                            </span>
+                            <span>{ord.phone}</span>
                           </small>
                         </td>
                         <td>
                           <div style={{ fontSize: '12.5px', maxWidth: '240px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {ord.productName}
                           </div>
-                          <small style={{ color: '#4f46e5', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }} onClick={() => setSelectedOrderDetails(ord)}>
+                          <small style={{ color: '#4f46e5', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={() => setSelectedOrderDetails(ord)}>
                             <span>Xem chi tiết kiện hàng</span>
-                            <ChevronRightIcon size={12} />
+                            <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(79, 70, 229, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <ChevronRightIcon size={9} color="#4f46e5" />
+                            </span>
                           </small>
                         </td>
                         <td>
