@@ -474,7 +474,9 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
               >
                 {comment.trim().length >= 10 ? (
                   <>
-                    <CheckIcon size={11} color="#16a34a" />
+                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CheckIcon size={9} color="#16a34a" />
+                    </span>
                     <span>Đạt yêu cầu ({comment.trim().length} ký tự)</span>
                   </>
                 ) : (
