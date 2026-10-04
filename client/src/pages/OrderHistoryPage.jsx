@@ -933,9 +933,12 @@ export default function OrderHistoryPage() {
           type="button"
           className="shopee-order-btn-outline"
           onClick={() => handleCloseChildModal(() => setSelectedCancelOrder(null))}
-          style={{ padding: '7px 18px', fontSize: '12.5px', borderRadius: '8px', fontWeight: 600 }}
+          style={{ padding: '7px 18px', fontSize: '12.5px', borderRadius: '8px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
         >
-          Giữ Lại Đơn
+          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ArrowLeftIcon size={11} color="#64748b" />
+          </span>
+          <span>Giữ Lại Đơn</span>
         </button>
         <button
           type="button"

@@ -205,8 +205,8 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               }
             }}
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'rgba(37, 99, 235, 0.08)',
+              border: '1px solid rgba(37, 99, 235, 0.2)',
               borderRadius: '8px',
               width: '32px',
               height: '32px',
@@ -227,7 +227,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             onClick={onClose}
             style={{
               background: 'rgba(239, 68, 68, 0.1)',
-              border: 'none',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
               borderRadius: '8px',
               width: '32px',
               height: '32px',

@@ -367,7 +367,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
             height: '32px',
             borderRadius: '50%',
             background: 'rgba(239, 68, 68, 0.1)',
-            border: 'none',
+            border: '1px solid rgba(239, 68, 68, 0.2)',
             fontSize: '14px',
             color: '#ef4444',
             cursor: 'pointer',
