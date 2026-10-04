@@ -1814,11 +1814,13 @@ export default function LiveChatWidget() {
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '4px',
+                                gap: '5px',
                                 boxShadow: '0 2px 6px rgba(217, 119, 6, 0.35)',
                               }}
                             >
-                              <SparklesIcon size={12} color="#ffffff" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <SparklesIcon size={11} color="#ffffff" />
+                              </span>
                               <span>Mở Vòng Quay May Mắn</span>
                             </button>
 
@@ -1836,11 +1838,13 @@ export default function LiveChatWidget() {
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '4px',
+                                gap: '5px',
                               }}
                               title="Điểm danh nhận xu 7 ngày liên tiếp"
                             >
-                              <CalendarIcon size={11} color="#2563eb" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CalendarIcon size={11} color="#2563eb" />
+                              </span>
                               <span>Điểm danh</span>
                             </button>
                           </div>
@@ -1923,9 +1927,11 @@ export default function LiveChatWidget() {
                                   cursor: 'pointer',
                                 }}
                               >
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                   <span>Xem Shop</span>
-                                  <ChevronRightIcon size={10} color="#ea580c" />
+                                  <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <ChevronRightIcon size={9} color="#ffffff" />
+                                  </span>
                                 </span>
                               </button>
                             </div>
