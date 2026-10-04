@@ -554,7 +554,9 @@ export default function LoginPage() {
               className={`shopee-auth-method-tab ${authMethod === 'password' ? 'active' : ''}`}
               onClick={() => setAuthMethod('password')}
             >
-              <KeyIcon size={15} color="#6366f1" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <KeyIcon size={12} color="#6366f1" />
+              </span>
               <span>Mật khẩu & Email</span>
             </button>
             <button
@@ -562,7 +564,9 @@ export default function LoginPage() {
               className={`shopee-auth-method-tab ${authMethod === 'qr' ? 'active' : ''}`}
               onClick={() => setAuthMethod('qr')}
             >
-              <QrCodeIcon size={15} color="#2563eb" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <QrCodeIcon size={12} color="#2563eb" />
+              </span>
               <span>Quét mã QR</span>
             </button>
           </div>

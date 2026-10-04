@@ -1177,18 +1177,24 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     className="shopee-btn shopee-btn-secondary"
-                    style={{ fontSize: '12.5px', padding: '7px 14px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    style={{ fontSize: '12.5px', padding: '7px 14px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <DownloadIcon size={13} color="#2563eb" /> Tải Ảnh Từ Máy
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <DownloadIcon size={11} color="#2563eb" />
+                    </span>
+                    <span>Tải Ảnh Từ Máy</span>
                   </button>
                   <button
                     type="button"
                     className="shopee-btn shopee-btn-secondary"
-                    style={{ fontSize: '12.5px', padding: '7px 14px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    style={{ fontSize: '12.5px', padding: '7px 14px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     onClick={() => setShowCustomAvatarInput((prev) => !prev)}
                   >
-                    <GlobeIcon size={13} color="#0284c7" /> Nhập URL Ảnh
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <GlobeIcon size={11} color="#0284c7" />
+                    </span>
+                    <span>Nhập URL Ảnh</span>
                   </button>
                   {avatarPreview && (
                     <button

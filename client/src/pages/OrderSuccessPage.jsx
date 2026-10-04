@@ -287,19 +287,25 @@ export default function OrderSuccessPage() {
           <button
             type="button"
             className="shopee-btn shopee-btn-primary"
-            style={{ padding: '12px 24px', fontSize: '15px', fontWeight: 800, width: '100%', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            style={{ padding: '12px 24px', fontSize: '15px', fontWeight: 800, width: '100%', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
             onClick={() => navigate('/orders')}
           >
-            <TruckIcon size={16} color="#ffffff" /> {t('order_view_tracking_btn', 'Theo dõi vận chuyển đơn hàng')}
+            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <TruckIcon size={14} color="#ffffff" />
+            </span>
+            <span>{t('order_view_tracking_btn', 'Theo dõi vận chuyển đơn hàng')}</span>
           </button>
 
           <button
             type="button"
             className="shopee-btn shopee-btn-secondary"
-            style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
             onClick={() => setShowInvoiceModal(true)}
           >
-            <ReceiptIcon size={16} color="#0284c7" /> In Hóa Đơn / Xem Biên Lai VAT
+            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ReceiptIcon size={14} color="#0284c7" />
+            </span>
+            <span>In Hóa Đơn / Xem Biên Lai VAT</span>
           </button>
 
           <Link
@@ -307,7 +313,12 @@ export default function OrderSuccessPage() {
             className="shopee-btn shopee-btn-secondary"
             style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', textAlign: 'center', borderRadius: '10px', textDecoration: 'none' }}
           >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><HomeIcon size={15} color="#2563eb" /> {t('order_continue_shopping_btn', 'Tiếp tục mua sắm')}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <HomeIcon size={13} color="#2563eb" />
+              </span>
+              <span>{t('order_continue_shopping_btn', 'Tiếp tục mua sắm')}</span>
+            </span>
           </Link>
         </div>
       </div>

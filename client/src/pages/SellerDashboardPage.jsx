@@ -3256,9 +3256,12 @@ export default function SellerDashboardPage() {
                     setPrintingOrder(selectedOrderDetails);
                     setSelectedOrderDetails(null);
                   }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 >
-                  <PrinterIcon size={13} color="#0284c7" /> In Vận Đơn SPX
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <PrinterIcon size={12} color="#0284c7" />
+                  </span>
+                  <span>In Vận Đơn SPX</span>
                 </button>
                 <button
                   type="button"
@@ -3267,28 +3270,37 @@ export default function SellerDashboardPage() {
                     setPackingSlipOrder(selectedOrderDetails);
                     setSelectedOrderDetails(null);
                   }}
-                  style={{ background: '#f8fafc', color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  style={{ background: '#f8fafc', color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 >
-                  <ReceiptIcon size={13} color="#475569" /> Phiếu Đóng Gói
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(71, 85, 105, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ReceiptIcon size={12} color="#475569" />
+                  </span>
+                  <span>Phiếu Đóng Gói</span>
                 </button>
                 {selectedOrderDetails.status === 'pending' && (
                   <button
                     type="button"
                     className="shopee-btn shopee-btn-primary"
                     onClick={() => handleUpdateOrderStatus(selectedOrderDetails.orderId, 'shipping', 'Đang giao hàng')}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                   >
-                    <BoltIcon size={13} color="#ffffff" /> Xác Nhận Đơn Ngay
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <BoltIcon size={12} color="#ffffff" />
+                    </span>
+                    <span>Xác Nhận Đơn Ngay</span>
                   </button>
                 )}
                 {selectedOrderDetails.status === 'shipping' && (
                   <button
                     type="button"
                     className="shopee-btn shopee-btn-primary"
-                    style={{ background: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                    style={{ background: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     onClick={() => handleUpdateOrderStatus(selectedOrderDetails.orderId, 'completed', 'Đã hoàn thành')}
                   >
-                    <CheckIcon size={13} color="#ffffff" /> Đã Giao Thành Công
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CheckIcon size={12} color="#ffffff" />
+                    </span>
+                    <span>Đã Giao Thành Công</span>
                   </button>
                 )}
               </div>
