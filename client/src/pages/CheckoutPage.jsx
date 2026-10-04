@@ -523,10 +523,13 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
-                  style={{ fontSize: "12.5px", padding: "6px 14px", fontWeight: 700 }}
+                  style={{ fontSize: "12.5px", padding: "6px 14px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "6px" }}
                   onClick={() => setShowAddAddressModal(true)}
                 >
-                  + Thêm Địa Chỉ Mới
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <PlusIcon size={11} color="#ea580c" />
+                  </span>
+                  <span>Thêm Địa Chỉ Mới</span>
                 </button>
               </div>
 
