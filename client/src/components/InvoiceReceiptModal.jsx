@@ -281,7 +281,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '5px',
                   background: '#f0fdf4',
                   color: '#15803d',
                   border: '1px solid #bbf7d0',
@@ -291,7 +291,9 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                   borderRadius: '4px',
                 }}
               >
-                <CheckIcon size={11} color="#15803d" />
+                <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(21, 128, 61, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckIcon size={10} color="#15803d" />
+                </span>
                 <span>ĐÃ KÝ ĐIỆN TỬ</span>
               </span>
             </div>
