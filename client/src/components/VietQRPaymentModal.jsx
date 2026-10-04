@@ -482,8 +482,16 @@ export default function VietQRPaymentModal({
                           gap: '3px',
                         }}
                       >
-                        {copiedField === 'Số tài khoản' ? <CheckIcon size={12} color="#15803d" /> : <CopyIcon size={12} color="#2563eb" />}
-                        {copiedField === 'Số tài khoản' ? 'Đã chép' : 'Sao chép'}
+                        {copiedField === 'Số tài khoản' ? (
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(21, 128, 61, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CheckIcon size={10} color="#15803d" />
+                          </span>
+                        ) : (
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CopyIcon size={10} color="#2563eb" />
+                          </span>
+                        )}
+                        <span>{copiedField === 'Số tài khoản' ? 'Đã chép' : 'Sao chép'}</span>
                       </button>
                     </div>
                   </div>
@@ -530,8 +538,16 @@ export default function VietQRPaymentModal({
                           gap: '3px',
                         }}
                       >
-                        {copiedField === 'Số tiền' ? <CheckIcon size={12} color="#15803d" /> : <CopyIcon size={12} color="#2563eb" />}
-                        {copiedField === 'Số tiền' ? 'Đã chép' : 'Sao chép'}
+                        {copiedField === 'Số tiền' ? (
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(21, 128, 61, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CheckIcon size={10} color="#15803d" />
+                          </span>
+                        ) : (
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CopyIcon size={10} color="#2563eb" />
+                          </span>
+                        )}
+                        <span>{copiedField === 'Số tiền' ? 'Đã chép' : 'Sao chép'}</span>
                       </button>
                     </div>
                   </div>
@@ -565,8 +581,16 @@ export default function VietQRPaymentModal({
                           gap: '3px',
                         }}
                       >
-                        {copiedField === 'Nội dung' ? <CheckIcon size={12} color="#15803d" /> : <CopyIcon size={12} color="#b45309" />}
-                        {copiedField === 'Nội dung' ? 'Đã chép' : 'Sao chép'}
+                        {copiedField === 'Nội dung' ? (
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(21, 128, 61, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CheckIcon size={10} color="#15803d" />
+                          </span>
+                        ) : (
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(180, 83, 9, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CopyIcon size={10} color="#b45309" />
+                          </span>
+                        )}
+                        <span>{copiedField === 'Nội dung' ? 'Đã chép' : 'Sao chép'}</span>
                       </button>
                     </div>
                   </div>
@@ -586,8 +610,11 @@ export default function VietQRPaymentModal({
                   marginBottom: '20px',
                 }}
               >
-                <div style={{ fontWeight: 700, color: '#1e293b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ShieldCheckIcon size={14} color="#16a34a" /> Hướng dẫn thanh toán nhanh:
+                <div style={{ fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ShieldCheckIcon size={12} color="#16a34a" />
+                  </span>
+                  <span>Hướng dẫn thanh toán nhanh:</span>
                 </div>
                 <div>1. Mở App ngân hàng bất kỳ (MB, Vietcombank, Techcombank, VPBank, TPBank...) hoặc ví điện tử.</div>
                 <div>2. Chọn tính năng <strong>Quét mã QR</strong> và quét hình ảnh trên để hệ thống tự điền thông tin.</div>
