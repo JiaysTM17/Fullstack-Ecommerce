@@ -3343,11 +3343,47 @@ export default function SellerDashboardPage() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <button type="button" className="shopee-btn shopee-btn-secondary" onClick={() => setQuickStockProduct(null)}>
-                  Hủy
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => setQuickStockProduct(null)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
+                  <span>Hủy</span>
                 </button>
-                <button type="button" className="shopee-btn shopee-btn-primary" onClick={handleSaveQuickStock}>
-                  Lưu Tồn Kho
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-primary"
+                  onClick={handleSaveQuickStock}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '4px',
+                      background: 'rgba(255, 255, 255, 0.22)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CheckIcon size={11} color="#ffffff" />
+                  </span>
+                  <span>Lưu Tồn Kho</span>
                 </button>
               </div>
             </div>
@@ -3494,11 +3530,46 @@ export default function SellerDashboardPage() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px' }}>
-                  <button type="button" className="shopee-btn shopee-btn-secondary" onClick={() => setShowProductModal(false)}>
-                    Hủy bỏ
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-secondary"
+                    onClick={() => setShowProductModal(false)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: 'rgba(239, 68, 68, 0.12)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <CloseIcon size={10} color="#ef4444" />
+                    </span>
+                    <span>Hủy bỏ</span>
                   </button>
-                  <button type="submit" className="shopee-btn shopee-btn-primary">
-                    {editingProduct ? 'Cập Nhật Sản Phẩm' : 'Đăng Bán Ngay'}
+                  <button
+                    type="submit"
+                    className="shopee-btn shopee-btn-primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '4px',
+                        background: 'rgba(255, 255, 255, 0.22)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <CheckIcon size={11} color="#ffffff" />
+                    </span>
+                    <span>{editingProduct ? 'Cập Nhật Sản Phẩm' : 'Đăng Bán Ngay'}</span>
                   </button>
                 </div>
               </form>
@@ -3613,11 +3684,46 @@ export default function SellerDashboardPage() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-                  <button type="button" className="shopee-btn shopee-btn-secondary" onClick={() => setShowVoucherModal(false)}>
-                    Hủy bỏ
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-secondary"
+                    onClick={() => setShowVoucherModal(false)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: 'rgba(239, 68, 68, 0.12)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <CloseIcon size={10} color="#ef4444" />
+                    </span>
+                    <span>Hủy bỏ</span>
                   </button>
-                  <button type="submit" className="shopee-btn shopee-btn-primary">
-                    Phát Hành Voucher
+                  <button
+                    type="submit"
+                    className="shopee-btn shopee-btn-primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '4px',
+                        background: 'rgba(255, 255, 255, 0.22)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <CheckIcon size={11} color="#ffffff" />
+                    </span>
+                    <span>Phát Hành Voucher</span>
                   </button>
                 </div>
               </form>
@@ -3737,11 +3843,46 @@ export default function SellerDashboardPage() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <button type="button" className="shopee-btn shopee-btn-secondary" onClick={() => setShowWithdrawModal(false)}>
-                    Hủy Bỏ
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-secondary"
+                    onClick={() => setShowWithdrawModal(false)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: 'rgba(239, 68, 68, 0.12)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <CloseIcon size={10} color="#ef4444" />
+                    </span>
+                    <span>Hủy Bỏ</span>
                   </button>
-                  <button type="submit" className="shopee-btn shopee-btn-primary">
-                    Xác Nhận Rút Tiền
+                  <button
+                    type="submit"
+                    className="shopee-btn shopee-btn-primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '4px',
+                        background: 'rgba(255, 255, 255, 0.22)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <CheckIcon size={11} color="#ffffff" />
+                    </span>
+                    <span>Xác Nhận Rút Tiền</span>
                   </button>
                 </div>
               </form>
@@ -3843,11 +3984,46 @@ export default function SellerDashboardPage() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-                  <button type="button" className="shopee-btn shopee-btn-secondary" onClick={() => setShowCreateFlashSaleModal(false)}>
-                    Hủy Bỏ
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-secondary"
+                    onClick={() => setShowCreateFlashSaleModal(false)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: 'rgba(239, 68, 68, 0.12)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <CloseIcon size={10} color="#ef4444" />
+                    </span>
+                    <span>Hủy Bỏ</span>
                   </button>
-                  <button type="submit" className="shopee-btn shopee-btn-primary">
-                    Kích Hoạt Flash Sale
+                  <button
+                    type="submit"
+                    className="shopee-btn shopee-btn-primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '4px',
+                        background: 'rgba(255, 255, 255, 0.22)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <BoltIcon size={12} color="#ffffff" />
+                    </span>
+                    <span>Kích Hoạt Flash Sale</span>
                   </button>
                 </div>
               </form>
