@@ -247,7 +247,9 @@ export default function LoginPage() {
         <div className="shopee-auth-hero-col">
           <div className="shopee-auth-hero-brand">
             <div className="shopee-auth-hero-badge">
-              <span>{activeRole === 'admin' ? <ShieldIcon size={14} color="#6366f1" /> : activeRole === 'seller' ? <StoreIcon size={14} color="#ea580c" /> : <ShoppingBagIcon size={14} color="#ea580c" />}</span>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                {activeRole === 'admin' ? <ShieldIcon size={13} color="#6366f1" /> : activeRole === 'seller' ? <StoreIcon size={13} color="#ea580c" /> : <ShoppingBagIcon size={13} color="#ea580c" />}
+              </span>
               <span>
                 {activeRole === 'admin'
                   ? 'QUẢN TRỊ VIÊN HỆ THỐNG'
@@ -497,7 +499,9 @@ export default function LoginPage() {
         <div className="shopee-auth-form-col">
           <div className="shopee-auth-header" style={{ marginBottom: '16px' }}>
             <div className="shopee-auth-brand-badge">
-              <ShieldCheckIcon size={14} color="#2563eb" />
+              <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheckIcon size={13} color="#2563eb" />
+              </span>
               <span>CỔNG TRUY CẬP BẢO MẬT SSL 256-BIT</span>
             </div>
             <h2 className="shopee-auth-title" style={{ fontSize: '24px' }}>
@@ -612,7 +616,9 @@ export default function LoginPage() {
               {/* 1-Click Demo Logins */}
               <div className="shopee-demo-section" style={{ marginBottom: '16px' }}>
                 <div className="shopee-demo-title">
-                  <BoltIcon size={14} color="#ea580c" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <BoltIcon size={12} color="#ea580c" />
+                  </span>
                   <span>{t('demo_quick_access', 'Chọn nhanh tài khoản trải nghiệm:')}</span>
                 </div>
                 <div className="shopee-demo-buttons">
@@ -623,8 +629,11 @@ export default function LoginPage() {
                       onClick={() => handleQuickLogin('customer')}
                       disabled={loading}
                     >
-                      <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                        <UserIcon size={13} color="#16a34a" /> Nguyễn Văn Khách (Customer)
+                      <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <UserIcon size={12} color="#16a34a" />
+                        </span>
+                        <span>Nguyễn Văn Khách (Customer)</span>
                       </strong>
                       <span>khachhang@shopee.vn</span>
                     </button>
@@ -637,8 +646,11 @@ export default function LoginPage() {
                         onClick={() => handleQuickLogin('seller_fashion')}
                         disabled={loading}
                       >
-                        <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <StoreIcon size={13} color="#ea580c" /> Thời Trang GenZ Official (Shop A)
+                        <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <StoreIcon size={12} color="#ea580c" />
+                          </span>
+                          <span>Thời Trang GenZ Official (Shop A)</span>
                         </strong>
                         <span>shop.genz@shopee.vn</span>
                       </button>
@@ -648,8 +660,11 @@ export default function LoginPage() {
                         onClick={() => handleQuickLogin('seller_tech')}
                         disabled={loading}
                       >
-                        <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <StoreIcon size={13} color="#0284c7" /> TechWorld Store (Shop B)
+                        <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <StoreIcon size={12} color="#0284c7" />
+                          </span>
+                          <span>TechWorld Store (Shop B)</span>
                         </strong>
                         <span>shop.tech@shopee.vn</span>
                       </button>
@@ -662,8 +677,11 @@ export default function LoginPage() {
                       onClick={() => handleQuickLogin('admin')}
                       disabled={loading}
                     >
-                      <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                        <ShieldCheckIcon size={13} color="#6366f1" /> Tổng Quản Trị Viên Sàn (Super Admin)
+                      <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ShieldCheckIcon size={12} color="#6366f1" />
+                        </span>
+                        <span>Tổng Quản Trị Viên Sàn (Super Admin)</span>
                       </strong>
                       <span>admin@shopee.vn</span>
                     </button>
@@ -768,8 +786,11 @@ export default function LoginPage() {
                 {/* Anti-Bot Security Slider (shown after 3 failed attempts) */}
                 {failedAttempts >= 3 && !isLocked && !sliderVerified && (
                   <div style={{ marginBottom: '14px' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#dc2626', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <AlertCircleIcon size={14} color="#dc2626" /> Yêu cầu kiểm tra an ninh (Lần thử {failedAttempts}/5):
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#dc2626', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <AlertCircleIcon size={12} color="#dc2626" />
+                      </span>
+                      <span>Yêu cầu kiểm tra an ninh (Lần thử {failedAttempts}/5):</span>
                     </div>
                     <SecuritySliderCaptcha
                       isVerified={sliderVerified}
@@ -781,8 +802,11 @@ export default function LoginPage() {
                 )}
 
                 {failedAttempts >= 3 && sliderVerified && (
-                  <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckIcon size={14} color="#16a34a" /> Xác minh an ninh hoàn tất!
+                  <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CheckIcon size={12} color="#16a34a" />
+                    </span>
+                    <span>Xác minh an ninh hoàn tất!</span>
                   </div>
                 )}
 
@@ -808,12 +832,18 @@ export default function LoginPage() {
                   type="submit"
                   className="shopee-auth-submit-btn"
                   disabled={loading || isLocked}
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 >
-                  {loading
-                    ? t('authenticating', 'Đang xác thực an toàn...')
-                    : isLocked
-                    ? `Đang khóa tạm thời (${lockoutTimer}s)`
-                    : `${t('login', 'Đăng Nhập An Toàn')} (${activeRole === 'customer' ? t('role_customer', 'Người Mua') : activeRole === 'seller' ? t('role_seller', 'Chủ Shop') : t('role_admin', 'Admin')})`}
+                  <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <LockIcon size={13} color="#ffffff" />
+                  </span>
+                  <span>
+                    {loading
+                      ? t('authenticating', 'Đang xác thực an toàn...')
+                      : isLocked
+                      ? `Đang khóa tạm thời (${lockoutTimer}s)`
+                      : `${t('login', 'Đăng Nhập An Toàn')} (${activeRole === 'customer' ? t('role_customer', 'Người Mua') : activeRole === 'seller' ? t('role_seller', 'Chủ Shop') : t('role_admin', 'Admin')})`}
+                  </span>
                 </button>
               </form>
 
@@ -828,12 +858,14 @@ export default function LoginPage() {
                   onClick={() => setSocialModalConfig({ isOpen: true, provider: 'google' })}
                   title="Đăng nhập an toàn với tài khoản Google của bạn"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                  </svg>
+                  <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(66, 133, 244, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                  </span>
                   <span>Google</span>
                 </button>
 
@@ -843,9 +875,11 @@ export default function LoginPage() {
                   onClick={() => setSocialModalConfig({ isOpen: true, provider: 'facebook' })}
                   title="Đăng nhập an toàn với tài khoản Facebook của bạn"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
+                  <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(24, 119, 242, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </span>
                   <span>Facebook</span>
                 </button>
 
@@ -855,9 +889,11 @@ export default function LoginPage() {
                   onClick={() => setSocialModalConfig({ isOpen: true, provider: 'apple' })}
                   title="Đăng nhập an toàn với Apple ID của bạn"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#000000">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.62-.75 1.04-1.8 1.01-2.84-.9.04-1.99.6-2.63 1.35-.57.65-1.07 1.72-1.03 2.74 1 .08 2.03-.5 2.65-1.25z"/>
-                  </svg>
+                  <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(0, 0, 0, 0.06)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#000000">
+                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.62-.75 1.04-1.8 1.01-2.84-.9.04-1.99.6-2.63 1.35-.57.65-1.07 1.72-1.03 2.74 1 .08 2.03-.5 2.65-1.25z"/>
+                    </svg>
+                  </span>
                   <span>Apple ID</span>
                 </button>
               </div>

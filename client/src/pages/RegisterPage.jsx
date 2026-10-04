@@ -435,7 +435,9 @@ export default function RegisterPage() {
         <div className="shopee-auth-hero-col">
           <div className="shopee-auth-hero-brand">
             <div className="shopee-auth-hero-badge">
-              {role === 'seller' ? <BoltIcon size={14} color="#ea580c" /> : <TicketIcon size={14} color="#ea580c" />}
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                {role === 'seller' ? <BoltIcon size={13} color="#ea580c" /> : <TicketIcon size={13} color="#ea580c" />}
+              </span>
               <span>{role === 'seller' ? 'GIA NHẬP HỆ THỐNG ĐỐI TÁC BÁN HÀNG' : 'GIA NHẬP CỘNG ĐỒNG NGƯỜI MUA'}</span>
             </div>
             <h1 className="shopee-auth-hero-title">
@@ -610,7 +612,9 @@ export default function RegisterPage() {
         <div className="shopee-auth-form-col">
           <div className="shopee-auth-header" style={{ marginBottom: '14px' }}>
             <div className="shopee-auth-brand-badge">
-              <SparklesIcon size={14} color="#ea580c" />
+              <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <SparklesIcon size={13} color="#ea580c" />
+              </span>
               <span>TẠO TÀI KHOẢN MỚI</span>
             </div>
             <h2 className="shopee-auth-title" style={{ fontSize: '24px' }}>
@@ -1097,12 +1101,18 @@ export default function RegisterPage() {
               type="submit"
               className="shopee-auth-submit-btn"
               disabled={loading}
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
-              {loading 
-                ? t('creating_account', 'Đang thiết lập tài khoản...') 
-                : role === 'seller' 
-                  ? (canUpgradeToSeller ? 'Tiếp tục xác thực OTP kích hoạt mở gian hàng' : 'Tiếp tục xác thực OTP mở gian hàng') 
-                  : 'Tiếp tục xác thực OTP tạo tài khoản'}
+              <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheckIcon size={14} color="#ffffff" />
+              </span>
+              <span>
+                {loading 
+                  ? t('creating_account', 'Đang thiết lập tài khoản...') 
+                  : role === 'seller' 
+                    ? (canUpgradeToSeller ? 'Tiếp tục xác thực OTP kích hoạt mở gian hàng' : 'Tiếp tục xác thực OTP mở gian hàng') 
+                    : 'Tiếp tục xác thực OTP tạo tài khoản'}
+              </span>
             </button>
           </form>
 
@@ -1121,16 +1131,25 @@ export default function RegisterPage() {
             borderRadius: '8px',
             border: '1px solid #e2e8f0',
           }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <LockIcon size={12} color="#64748b" /> SSL 256-Bit
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <LockIcon size={11} color="#64748b" />
+              </span>
+              <span>SSL 256-Bit</span>
             </span>
             <span>•</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <ShieldCheckIcon size={12} color="#16a34a" /> Bảo mật 2FA OTP
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheckIcon size={11} color="#16a34a" />
+              </span>
+              <span>Bảo mật 2FA OTP</span>
             </span>
             <span>•</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <ShieldIcon size={12} color="#2563eb" /> 100% Bảo vệ tài khoản
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#eff6ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldIcon size={11} color="#2563eb" />
+              </span>
+              <span>100% Bảo vệ tài khoản</span>
             </span>
           </div>
 
