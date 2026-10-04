@@ -1221,7 +1221,10 @@ export default function OrderHistoryPage() {
                           setSelectedTrackingOrder(o);
                         }}
                       >
-                        <TruckIcon size={11} color="#059669" /> {o.trackingCode} (#{o.orderId})
+                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <TruckIcon size={9} color="#059669" />
+                        </span>
+                        <span>{o.trackingCode} (#{o.orderId})</span>
                       </button>
                     ))}
                   </div>
@@ -1724,19 +1727,29 @@ export default function OrderHistoryPage() {
                         }`}
                       >
                         {(ord.status === 'completed' || ord.status === 'delivered') && (
-                          <CheckIcon size={12} color="#16a34a" />
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CheckIcon size={10} color="#16a34a" />
+                          </span>
                         )}
                         {(ord.status === 'shipping' || ord.status === 'delivering') && (
-                          <TruckIcon size={12} color="#1d4ed8" />
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(29, 78, 216, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TruckIcon size={10} color="#1d4ed8" />
+                          </span>
                         )}
                         {(ord.status === 'pending' || ord.status === 'confirmed') && (
-                          <ClockIcon size={12} color="#b45309" />
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(180, 83, 9, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ClockIcon size={10} color="#b45309" />
+                          </span>
                         )}
                         {ord.status === 'cancelled' && (
-                          <CloseIcon size={12} color="#dc2626" />
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CloseIcon size={10} color="#dc2626" />
+                          </span>
                         )}
                         {ord.status === 'returning' && (
-                          <ReturnIcon size={12} color="#9333ea" />
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(147, 51, 234, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ReturnIcon size={10} color="#9333ea" />
+                          </span>
                         )}
                         <span>{ord.statusText}</span>
                       </span>
