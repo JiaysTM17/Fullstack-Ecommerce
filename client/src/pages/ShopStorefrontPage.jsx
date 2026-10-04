@@ -416,16 +416,22 @@ export default function ShopStorefrontPage() {
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', fontSize: '12px', fontWeight: 600 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <CheckIcon size={12} color="#ffffff" />
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={10} color="#ffffff" />
+              </span>
               <span>Trả hàng miễn phí 15 ngày</span>
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <CheckIcon size={12} color="#ffffff" />
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={10} color="#ffffff" />
+              </span>
               <span>Đền bù 200% nếu phát hiện giả</span>
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <CheckIcon size={12} color="#ffffff" />
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={10} color="#ffffff" />
+              </span>
               <span>Giao hỏa tốc toàn quốc</span>
             </span>
           </div>
