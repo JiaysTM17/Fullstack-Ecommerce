@@ -826,8 +826,11 @@ export default function RegisterPage() {
                   />
                 </div>
                 {formData.phone && !/(84|0[3|5|7|8|9])+([0-9]{8})\b/.test(formData.phone.replace(/\s+/g, '')) && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '10.5px', color: '#d97706', marginTop: '4px' }}>
-                    <AlertCircleIcon size={12} color="#ef4444" /> Cần đúng 10 số (VD: 0362 217 721)
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '10.5px', color: '#d97706', marginTop: '4px' }}>
+                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <AlertCircleIcon size={10} color="#ef4444" />
+                    </span>
+                    <span>Cần đúng 10 số (VD: 0362 217 721)</span>
                   </span>
                 )}
               </div>
@@ -836,8 +839,10 @@ export default function RegisterPage() {
             {/* Mở rộng nếu là Chủ Shop */}
             {role === 'seller' && (
               <div style={{ background: 'rgba(59, 130, 246, 0.08)', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(59, 130, 246, 0.28)', marginBottom: '16px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: '#38bdf8', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <StoreIcon size={16} />
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#38bdf8', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: 'rgba(56, 189, 248, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <StoreIcon size={12} color="#38bdf8" />
+                  </span>
                   <span>THÔNG TIN THIẾT LẬP GIAN HÀNG BÁN HÀNG</span>
                 </div>
                 <div className="shopee-form-group" style={{ marginBottom: '10px' }}>

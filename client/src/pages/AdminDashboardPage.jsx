@@ -1015,12 +1015,16 @@ export default function AdminDashboardPage() {
               >
                 {showAddVoucher ? (
                   <>
-                    <CloseIcon size={14} color="#64748b" />
+                    <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={12} color="#64748b" />
+                    </span>
                     <span>Đóng form</span>
                   </>
                 ) : (
                   <>
-                    <PlusIcon size={14} color="#ffffff" />
+                    <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <PlusIcon size={12} color="#ffffff" />
+                    </span>
                     <span>Tạo Voucher Mới</span>
                   </>
                 )}
@@ -1567,8 +1571,10 @@ export default function AdminDashboardPage() {
                             <span>Chuyển Khoản & Quyết Toán</span>
                           </button>
                         ) : (
-                          <span style={{ fontSize: '12px', color: 'var(--color-success)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <CheckIcon size={14} color="var(--color-success)" />
+                          <span style={{ fontSize: '12px', color: 'var(--color-success)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <CheckIcon size={12} color="#16a34a" />
+                            </span>
                             <span>Đã Giải Ngân Thành Công</span>
                           </span>
                         )}
@@ -1765,7 +1771,9 @@ export default function AdminDashboardPage() {
                     gap: '6px'
                   }}
                 >
-                  <TrashIcon size={14} color="#ffffff" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TrashIcon size={12} color="#ffffff" />
+                  </span>
                   <span>{isDeleting ? 'Đang Xóa...' : 'Xác Nhận Xóa Vĩnh Viễn'}</span>
                 </button>
               </div>
@@ -1857,8 +1865,10 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
 
-                <p style={{ margin: 0, fontSize: '12px', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <TrashIcon size={13} color="#dc2626" />
+                <p style={{ margin: 0, fontSize: '12px', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(220, 38, 38, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <TrashIcon size={11} color="#dc2626" />
+                  </span>
                   <span>Cảnh báo: Thao tác này sẽ xóa vĩnh viễn gian hàng và toàn bộ sản phẩm của gian hàng này.</span>
                 </p>
               </div>
@@ -1912,7 +1922,9 @@ export default function AdminDashboardPage() {
                     gap: '6px'
                   }}
                 >
-                  <TrashIcon size={14} color="#ffffff" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TrashIcon size={12} color="#ffffff" />
+                  </span>
                   <span>{isDeleting ? 'Đang Xóa...' : 'Xác Nhận Xóa Gian Hàng'}</span>
                 </button>
               </div>

@@ -727,8 +727,10 @@ export default function RewardsHubModal({ onClose }) {
             <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
               {!coinHistory || coinHistory.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
-                  <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
-                    <CoinIcon size={32} color="#cbd5e1" />
+                  <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(203, 213, 225, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CoinIcon size={26} color="#94a3b8" />
+                    </div>
                   </div>
                   <span>Chưa có giao dịch xu nào.</span>
                 </div>

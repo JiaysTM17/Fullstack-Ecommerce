@@ -723,7 +723,9 @@ export default function LoginPage() {
                             className="shopee-email-dropdown-item"
                             onClick={() => handleSelectEmailSuggestion(item.full)}
                           >
-                            <MailIcon size={14} color="#2563eb" />
+                            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <MailIcon size={12} color="#2563eb" />
+                            </span>
                             <span>
                               <span className="email-prefix">{item.prefix}</span>
                               <span className="email-domain">{item.domain}</span>
@@ -775,7 +777,9 @@ export default function LoginPage() {
                       gap: '10px',
                     }}
                   >
-                    <ClockIcon size={22} color="#dc2626" />
+                    <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <ClockIcon size={18} color="#dc2626" />
+                    </div>
                     <div>
                       <strong>Tạm khóa đăng nhập an toàn!</strong>
                       <div>Hệ thống phát hiện nhiều lần nhập sai. Thử lại sau <strong>{lockoutTimer}s</strong>.</div>
