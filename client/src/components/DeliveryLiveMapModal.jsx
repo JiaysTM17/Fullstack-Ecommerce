@@ -413,8 +413,10 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               flexWrap: 'wrap',
             }}
           >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <ClockIcon size={12} color="#38bdf8" />
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ClockIcon size={11} color="#38bdf8" />
+              </span>
               <span>Dự kiến giao: <strong style={{ color: '#38bdf8' }}>{etaMinutes} phút nữa</strong></span>
             </span>
             <span>·</span>
@@ -596,7 +598,9 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                   {courier.licensePlate || '59-P1 839.22'}
                 </strong>
                 <span>({courier.vehicle || 'Xe máy'}) · Đánh giá:</span>
-                <StarIcon size={12} color="#f59e0b" filled />
+                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <StarIcon size={10} color="#f59e0b" filled />
+                </span>
                 <strong>{courier.rating || 4.95}</strong>/5.0
               </div>
             </div>

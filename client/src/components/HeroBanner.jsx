@@ -106,7 +106,9 @@ export default function HeroBanner({ onSelectCategory }) {
           onClick={prevSlide}
           aria-label="Slide trước"
         >
-          <ChevronLeftIcon size={20} color="#ffffff" />
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChevronLeftIcon size={18} color="#ffffff" />
+          </span>
         </button>
         <button
           type="button"
@@ -114,7 +116,9 @@ export default function HeroBanner({ onSelectCategory }) {
           onClick={nextSlide}
           aria-label="Slide kế tiếp"
         >
-          <ChevronRightIcon size={20} color="#ffffff" />
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChevronRightIcon size={18} color="#ffffff" />
+          </span>
         </button>
 
         {/* Pagination Dots */}

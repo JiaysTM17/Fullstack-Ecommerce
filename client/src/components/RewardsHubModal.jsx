@@ -666,8 +666,8 @@ export default function RewardsHubModal({ onClose }) {
                     <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>
                       N{dayNum}
                     </span>
-                    <span style={{ fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {isClaimed ? <CheckIcon size={16} color="#059669" /> : <CoinIcon size={16} color="#f59e0b" />}
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: isClaimed ? 'rgba(5, 150, 105, 0.15)' : 'rgba(245, 158, 11, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {isClaimed ? <CheckIcon size={13} color="#059669" /> : <CoinIcon size={13} color="#f59e0b" />}
                     </span>
                     <span
                       style={{
