@@ -375,7 +375,9 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
             transition: 'background 0.2s ease'
           }}
         >
-          <SendIcon size={15} color="#ffffff" />
+          <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: inputText.trim() ? 'rgba(255, 255, 255, 0.25)' : 'transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <SendIcon size={14} color="#ffffff" />
+          </span>
         </button>
       </form>
     </div>
