@@ -1461,10 +1461,12 @@ const Header = ({
                         setShowOrderLookupModal(false);
                         navTo('/orders');
                       }}
-                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                     >
                       <span>Xem chi tiết danh sách đơn mua của bạn</span>
-                      <ChevronRightIcon size={14} color="#ffffff" />
+                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ChevronRightIcon size={12} color="#ffffff" />
+                      </span>
                     </button>
                   </div>
                 </div>
