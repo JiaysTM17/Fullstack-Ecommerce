@@ -366,18 +366,24 @@ export default function ProductDetailPage() {
             {product.stock > 0 ? (
               product.stock <= 5 ? (
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <BoltIcon size={14} color="#f59e0b" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fef3c7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <BoltIcon size={10} color="#f59e0b" />
+                  </span>
                   <span>Chỉ còn {product.stock} sản phẩm trong kho - Đặt ngay!</span>
                 </span>
               ) : (
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <CheckIcon size={14} color="#16a34a" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={10} color="#16a34a" />
+                  </span>
                   <span>Còn hàng trong kho</span>
                 </span>
               )
             ) : (
               <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                <CloseIcon size={14} color="#dc2626" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CloseIcon size={10} color="#dc2626" />
+                </span>
                 <span>Tạm thời hết hàng</span>
               </span>
             )}

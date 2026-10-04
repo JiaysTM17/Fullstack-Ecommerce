@@ -442,7 +442,7 @@ export default function HomePage() {
                   onMouseOut={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--primary-color, #ea580c)"; }}
                 >
                   <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CloseIcon size={10} color="currentColor" />
+                    <CloseIcon size={10} color="#ea580c" />
                   </span>
                   <span>Xóa tất cả</span>
                 </button>

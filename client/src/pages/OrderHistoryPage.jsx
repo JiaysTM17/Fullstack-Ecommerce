@@ -859,7 +859,9 @@ export default function OrderHistoryPage() {
             <span>Quay lại</span>
           </button>
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <CloseIcon size={16} color="#dc2626" />
+            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={13} color="#dc2626" />
+            </span>
             <span>Hủy Đơn Hàng: #{selectedCancelOrder.orderId}</span>
           </h3>
         </div>
@@ -945,13 +947,19 @@ export default function OrderHistoryPage() {
             fontWeight: 700,
             borderRadius: '8px',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
           onClick={() => {
             handleConfirmCancelOrder();
             handleCloseChildModal(() => setSelectedCancelOrder(null));
           }}
         >
-          Xác Nhận Hủy Đơn
+          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CloseIcon size={11} color="#ffffff" />
+          </span>
+          <span>Xác Nhận Hủy Đơn</span>
         </button>
       </div>
     </div>

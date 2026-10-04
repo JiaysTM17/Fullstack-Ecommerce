@@ -946,13 +946,17 @@ export default function RegisterPage() {
                 {formData.confirmPassword && (
                   <div style={{ marginTop: '4px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     {formData.password === formData.confirmPassword ? (
-                      <span style={{ color: '#10b981', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <CheckIcon size={11} color="#10b981" />
+                      <span style={{ color: '#10b981', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CheckIcon size={10} color="#16a34a" />
+                        </span>
                         <span>Mật khẩu xác nhận hoàn toàn trùng khớp</span>
                       </span>
                     ) : (
-                      <span style={{ color: '#ef4444', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <CloseIcon size={11} color="#ef4444" />
+                      <span style={{ color: '#ef4444', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CloseIcon size={10} color="#ef4444" />
+                        </span>
                         <span>Mật khẩu xác nhận chưa khớp</span>
                       </span>
                     )}
@@ -976,19 +980,51 @@ export default function RegisterPage() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11.5px' }}>
                   <div style={{ color: passwordChecks.length ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.length ? <CheckIcon size={12} color="#10b981" /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
+                    {passwordChecks.length ? (
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={10} color="#16a34a" />
+                      </span>
+                    ) : (
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#94a3b8' }} />
+                      </span>
+                    )}
                     <span>Tối thiểu 8 ký tự</span>
                   </div>
                   <div style={{ color: passwordChecks.hasUpper ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.hasUpper ? <CheckIcon size={12} color="#10b981" /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
+                    {passwordChecks.hasUpper ? (
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={10} color="#16a34a" />
+                      </span>
+                    ) : (
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#94a3b8' }} />
+                      </span>
+                    )}
                     <span>Có chữ in hoa (A-Z)</span>
                   </div>
                   <div style={{ color: passwordChecks.hasNumber ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.hasNumber ? <CheckIcon size={12} color="#10b981" /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
+                    {passwordChecks.hasNumber ? (
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={10} color="#16a34a" />
+                      </span>
+                    ) : (
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#94a3b8' }} />
+                      </span>
+                    )}
                     <span>Có chữ số (0-9)</span>
                   </div>
                   <div style={{ color: passwordChecks.hasSpecial ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    {passwordChecks.hasSpecial ? <CheckIcon size={12} color="#10b981" /> : <span style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1.5px solid #94a3b8', display: 'inline-block', margin: '0 2px' }} />}
+                    {passwordChecks.hasSpecial ? (
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={10} color="#16a34a" />
+                      </span>
+                    ) : (
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#94a3b8' }} />
+                      </span>
+                    )}
                     <span>Ký tự đặc biệt (!@#$)</span>
                   </div>
                 </div>
