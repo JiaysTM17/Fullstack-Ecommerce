@@ -1148,7 +1148,9 @@ export default function ProductDetailPage() {
             className="mobile-icon-btn"
             title="Xem Shop"
           >
-            <StoreIcon size={18} color="#ea580c" />
+            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <StoreIcon size={12} color="#ea580c" />
+            </span>
             <span>Shop</span>
           </Link>
           <button
@@ -1157,7 +1159,9 @@ export default function ProductDetailPage() {
             onClick={() => toggleWishlist(productId)}
             title="Yêu thích"
           >
-            <HeartIcon size={18} color={wishlisted ? "#f43f5e" : "#64748b"} fill={wishlisted ? "#f43f5e" : "none"} />
+            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: wishlisted ? 'rgba(244, 63, 94, 0.15)' : 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <HeartIcon size={12} color={wishlisted ? "#f43f5e" : "#64748b"} fill={wishlisted ? "#f43f5e" : "none"} />
+            </span>
             <span>{wishlisted ? "Đã lưu" : "Thích"}</span>
           </button>
         </div>
