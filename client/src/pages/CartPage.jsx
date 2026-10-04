@@ -576,20 +576,34 @@ export default function CartPage() {
                 type="button"
                 onClick={() => setShowVoucherModal(true)}
                 style={{
-                  background: "none",
-                  border: "none",
+                  background: "rgba(234, 88, 12, 0.08)",
+                  border: "1px solid rgba(234, 88, 12, 0.2)",
+                  borderRadius: "6px",
                   color: "var(--primary-color, #ea580c)",
                   fontWeight: 700,
-                  fontSize: "13px",
+                  fontSize: "12.5px",
                   cursor: "pointer",
-                  display: "flex",
+                  display: "inline-flex",
                   alignItems: "center",
-                  gap: "4px",
-                  padding: "2px 4px",
+                  gap: "6px",
+                  padding: "4px 8px",
+                  transition: "all 0.15s ease",
                 }}
               >
                 <span>{appliedVoucher ? "Đổi mã khác" : "Chọn mã có sẵn"}</span>
-                <ChevronRightIcon size={12} color="var(--primary-color, #ea580c)" />
+                <span
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: '50%',
+                    background: 'rgba(234, 88, 12, 0.15)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ChevronRightIcon size={10} color="#ea580c" />
+                </span>
               </button>
             </div>
 
