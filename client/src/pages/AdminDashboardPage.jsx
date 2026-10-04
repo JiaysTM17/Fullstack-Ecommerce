@@ -1264,22 +1264,28 @@ export default function AdminDashboardPage() {
                               fontWeight: 700,
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '4px',
+                              gap: '6px',
                             }}
                           >
                             {p.status === 'approved' ? (
                               <>
-                                <CheckIcon size={12} color="#059669" />
+                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <CheckIcon size={10} color="#059669" />
+                                </span>
                                 <span>Đã Duyệt</span>
                               </>
                             ) : p.status === 'pending' ? (
                               <>
-                                <ClockIcon size={12} color="#d97706" />
+                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <ClockIcon size={10} color="#d97706" />
+                                </span>
                                 <span>Chờ Duyệt</span>
                               </>
                             ) : (
                               <>
-                                <CloseIcon size={12} color="#dc2626" />
+                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <CloseIcon size={10} color="#dc2626" />
+                                </span>
                                 <span>Từ Chối / Gỡ Bỏ</span>
                               </>
                             )}
@@ -1654,7 +1660,9 @@ export default function AdminDashboardPage() {
                   gap: '8px',
                   alignItems: 'center'
                 }}>
-                  <SparklesIcon size={15} color="#16a34a" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <SparklesIcon size={12} color="#16a34a" />
+                  </span>
                   <span><strong>Mục đích kiểm thử:</strong> Sau khi xóa, bạn có thể nhập lại email này trên trang Đăng ký để test lại toàn bộ luồng từ đầu.</span>
                 </div>
               </div>
