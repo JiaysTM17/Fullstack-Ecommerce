@@ -690,11 +690,17 @@ export default function RewardsHubModal({ onClose }) {
             >
               {hasCheckedInToday ? (
                 <>
-                  <CheckIcon size={16} color="#ffffff" /> Bạn đã điểm danh hôm nay rồi!
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={13} color="#ffffff" />
+                  </span>
+                  <span>Bạn đã điểm danh hôm nay rồi!</span>
                 </>
               ) : (
                 <>
-                  <CoinIcon size={16} color="#ffffff" /> Điểm Danh Ngay (+{streakRewards[streak % 7]?.toLocaleString('vi-VN')} Xu)
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CoinIcon size={14} color="#ffffff" />
+                  </span>
+                  <span>Điểm Danh Ngay (+{streakRewards[streak % 7]?.toLocaleString('vi-VN')} Xu)</span>
                 </>
               )}
             </button>
