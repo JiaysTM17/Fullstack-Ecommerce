@@ -408,9 +408,11 @@ const Header = ({
               className="header-toggle-btn"
               onClick={toggleLanguage}
               title={language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <GlobeIcon size={12} color="#2563eb" />
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <GlobeIcon size={11} color="#2563eb" />
+              </span>
               <span>{language === 'vi' ? 'VI' : 'EN'}</span>
             </button>
 
@@ -420,16 +422,20 @@ const Header = ({
               className="header-toggle-btn"
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Chế độ Sáng' : 'Chế độ Tối'}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
               {theme === 'dark' ? (
                 <>
-                  <SparklesIcon size={12} color="#f59e0b" />
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <SparklesIcon size={10} color="#f59e0b" />
+                  </span>
                   <span>Tối</span>
                 </>
               ) : (
                 <>
-                  <BoltIcon size={12} color="#ea580c" />
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <BoltIcon size={10} color="#ea580c" />
+                  </span>
                   <span>Sáng</span>
                 </>
               )}
@@ -453,7 +459,9 @@ const Header = ({
                   letterSpacing: '0.4px',
                 }}
               >
-                <ShieldIcon size={13} color="#dc2626" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldIcon size={11} color="#dc2626" />
+                </span>
                 <span>QUẢN TRỊ VIÊN SÀN</span>
                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a' }}></span>
               </div>
@@ -477,7 +485,9 @@ const Header = ({
                 }}
                 title="Kênh Quản Trị Gian Hàng Của Bạn"
               >
-                <StoreIcon size={14} color="#ea580c" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <StoreIcon size={11} color="#ea580c" />
+                </span>
                 <span>Kênh Người Bán</span>
                 <span style={{ fontSize: '9.5px', background: '#dc2626', color: '#fff', padding: '1px 5px', borderRadius: '8px', fontWeight: 800 }}>MALL</span>
               </button>
@@ -487,9 +497,11 @@ const Header = ({
                 className="header-coin-capsule"
                 onClick={() => setShowRewardsModal(true)}
                 title="Điểm Thưởng & Săn Xu Hàng Ngày"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <CoinIcon size={14} color="#f59e0b" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CoinIcon size={11} color="#f59e0b" />
+                </span>
                 <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
                 <SparklesIcon size={11} color="#f59e0b" />
               </button>
@@ -499,9 +511,11 @@ const Header = ({
                 className="header-coin-capsule"
                 onClick={() => setShowRewardsModal(true)}
                 title="Khám phá Điểm Thưởng & Săn Xu"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <CoinIcon size={14} color="#f59e0b" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CoinIcon size={11} color="#f59e0b" />
+                </span>
                 <span>Săn Xu & Thưởng</span>
                 <SparklesIcon size={11} color="#f59e0b" />
               </button>
@@ -1209,9 +1223,11 @@ const Header = ({
             className="shopee-subnav-cat-btn"
             onClick={() => setShowCategoryDrawer(true)}
             title="Mở danh mục ngành hàng"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
           >
-            <LayersIcon size={14} color="#2563eb" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <LayersIcon size={12} color="#2563eb" />
+            </span>
             <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', opacity: 0.8 }}>
               <ChevronDownIcon size={10} />
@@ -1220,61 +1236,73 @@ const Header = ({
 
           <span
             className="shopee-subnav-link"
-            style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onClick={() => handleSubnavItemClick('/', null)}
             title="Quay lại trang chủ và xem toàn bộ sản phẩm"
           >
-            <HomeIcon size={14} color="#ea580c" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <HomeIcon size={12} color="#ea580c" />
+            </span>
             <span>{t('nav_all_products', 'Trang Chủ')}</span>
           </span>
 
           <span
             className="shopee-subnav-link highlight"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onClick={() => handleSubnavItemClick('/?badge=Hot+Deal', 'flash-deals-section')}
             title="Săn deal chớp nhoáng giờ vàng"
           >
-            <FlameIcon size={14} color="#ef4444" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <FlameIcon size={12} color="#ef4444" />
+            </span>
             <span>{t('nav_flash_deals', 'Flash Deals')}</span>
           </span>
 
           <span
             className="shopee-subnav-link"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onClick={() => handleSubnavItemClick('/?badge=Best+Seller', 'catalog-section')}
             title="Khám phá các sản phẩm bán chạy nhất sàn"
           >
-            <StarIcon size={14} color="#f59e0b" fill="#f59e0b" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <StarIcon size={12} color="#f59e0b" fill="#f59e0b" />
+            </span>
             <span>{t('nav_best_sellers', 'Bán Chạy Nhất')}</span>
           </span>
 
           <span
             className="shopee-subnav-link"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onClick={() => handleSubnavItemClick('/?badge=Amazon%27s+Choice', 'catalog-section')}
             title="Top sản phẩm đánh giá cao tuyển chọn"
           >
-            <SparklesIcon size={14} color="#8b5cf6" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(139, 92, 246, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <SparklesIcon size={12} color="#8b5cf6" />
+            </span>
             <span>{t('nav_featured_picks', 'Hàng Tuyển Chọn')}</span>
           </span>
 
           <span
             className="shopee-subnav-link"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onClick={() => handleSubnavItemClick('/?fastDelivery=1', 'catalog-section')}
             title="Sản phẩm hỗ trợ giao hàng hỏa tốc trong 2H"
           >
-            <BoltIcon size={14} color="#eab308" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 179, 8, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BoltIcon size={12} color="#eab308" />
+            </span>
             <span>{t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}</span>
           </span>
 
           <span
             className="shopee-subnav-link badge-pill"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onClick={() => setShowRewardsModal(true)}
             title="Vào Rewards Hub nhận xu & quay thưởng"
           >
-            <TicketIcon size={14} color="#f97316" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(249, 115, 22, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <TicketIcon size={12} color="#f97316" />
+            </span>
             <span>{t('nav_rewards_hub', 'Săn Xu & Voucher')}</span>
           </span>
         </nav>
