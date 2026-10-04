@@ -378,19 +378,25 @@ export default function RewardsHubModal({ onClose }) {
               }}
             >
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 800, color: totalSpins > 0 ? '#059669' : '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <TargetIcon size={15} color={totalSpins > 0 ? '#059669' : '#ea580c'} />
+                <div style={{ fontSize: '13px', fontWeight: 800, color: totalSpins > 0 ? '#059669' : '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: totalSpins > 0 ? 'rgba(5, 150, 105, 0.12)' : 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TargetIcon size={13} color={totalSpins > 0 ? '#059669' : '#ea580c'} />
+                  </span>
                   <span>Lượt quay khả dụng: <strong>{totalSpins} lượt</strong></span>
                 </div>
-                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   {dailySpinsRemaining > 0 ? (
                     <>
-                      <CheckIcon size={12} color="#059669" />
+                      <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={9} color="#059669" />
+                      </span>
                       <span>1 lượt miễn phí hôm nay</span>
                     </>
                   ) : (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                      <CheckIcon size={12} color="#94a3b8" />
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={9} color="#94a3b8" />
+                      </span>
                       <span>Đã dùng lượt miễn phí hôm nay</span>
                     </span>
                   )}
@@ -402,8 +408,10 @@ export default function RewardsHubModal({ onClose }) {
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
                   Lượt miễn phí tiếp theo:
                 </div>
-                <div style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <ClockIcon size={13} color="#0284c7" />
+                <div style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ClockIcon size={11} color="#0284c7" />
+                  </span>
                   <span>{nextDailyCountdown}</span>
                 </div>
               </div>
@@ -513,13 +521,19 @@ export default function RewardsHubModal({ onClose }) {
                   Chúc mừng bạn đã trúng: {wonPrize.text}!
                 </div>
                 {wonPrize.type === 'voucher' && (
-                  <div style={{ fontSize: '12px', color: '#059669', fontWeight: 700, marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                    <TicketIcon size={13} color="#059669" /> Mã <strong>{wonPrize.code}</strong> đã được thêm vào Kho Voucher của bạn!
+                  <div style={{ fontSize: '12px', color: '#059669', fontWeight: 700, marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <TicketIcon size={11} color="#059669" />
+                    </span>
+                    <span>Mã <strong>{wonPrize.code}</strong> đã được thêm vào Kho Voucher của bạn!</span>
                   </div>
                 )}
                 {wonPrize.type === 'coins' && (
-                  <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                    <CoinIcon size={13} color="#d97706" /> Đã tự động cộng +{wonPrize.value.toLocaleString('vi-VN')} Xu vào ví của bạn!
+                  <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CoinIcon size={11} color="#d97706" />
+                    </span>
+                    <span>Đã tự động cộng +{wonPrize.value.toLocaleString('vi-VN')} Xu vào ví của bạn!</span>
                   </div>
                 )}
               </div>
