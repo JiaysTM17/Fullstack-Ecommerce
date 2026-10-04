@@ -522,7 +522,7 @@ export default function SocialAuthModal({
               type="button"
               onClick={onClose}
               style={{
-                background: 'rgba(255,255,255,0.2)',
+                background: 'rgba(239, 68, 68, 0.25)',
                 border: 'none',
                 borderRadius: '50%',
                 width: '30px',
@@ -532,9 +532,11 @@ export default function SocialAuthModal({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                padding: 0,
               }}
+              aria-label="Đóng cửa sổ Meta"
             >
-              <CloseIcon size={16} color="#ffffff" />
+              <CloseIcon size={14} color="#fee2e2" />
             </button>
           </div>
 
@@ -784,19 +786,20 @@ export default function SocialAuthModal({
             position: 'absolute',
             top: '18px',
             right: '18px',
-            background: 'rgba(255, 255, 255, 0.12)',
+            background: 'rgba(239, 68, 68, 0.2)',
             border: 'none',
             borderRadius: '50%',
             width: '32px',
             height: '32px',
-            color: '#a1a1a6',
+            color: '#ef4444',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            padding: 0,
           }}
         >
-          <CloseIcon size={16} color="#86868b" />
+          <CloseIcon size={14} color="#ef4444" />
         </button>
 
         {/* Apple Logo & Header */}
