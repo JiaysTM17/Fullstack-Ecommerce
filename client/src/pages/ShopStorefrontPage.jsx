@@ -387,9 +387,13 @@ export default function ShopStorefrontPage() {
       {/* Breadcrumb Navigation */}
       <nav style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <Link to="/" style={{ color: 'var(--primary-color, #ea580c)', textDecoration: 'none', fontWeight: 600 }}>Trang chủ</Link>
-        <ChevronRightIcon size={11} color="#94a3b8" />
+        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ChevronRightIcon size={10} color="#64748b" />
+        </span>
         <span style={{ color: 'var(--text-muted)' }}>Gian hàng chính hãng</span>
-        <ChevronRightIcon size={11} color="#94a3b8" />
+        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ChevronRightIcon size={10} color="#64748b" />
+        </span>
         <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{shop.name}</span>
       </nav>
 

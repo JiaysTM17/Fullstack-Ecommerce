@@ -67,6 +67,7 @@ import {
   CalendarIcon,
   TrashIcon,
   HomeIcon,
+  ChevronRightIcon,
 } from '../components/OrdersIcons';
 import '../styles/auth.css';
 import '../styles/profile.css';
@@ -2424,14 +2425,17 @@ export default function ProfilePage() {
                         <button
                           type="button"
                           className="shopee-btn shopee-btn-primary"
-                          style={{ fontSize: '12.5px', padding: '7px 14px', fontWeight: 700, borderRadius: '8px' }}
+                          style={{ fontSize: '12.5px', padding: '7px 14px', fontWeight: 700, borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                           onClick={() => {
                             navigator.clipboard?.writeText(v.code);
                             showToast(`Đã sao chép mã ${v.code}! Chuyển đến giỏ hàng...`, 'success');
                             navigate('/cart');
                           }}
                         >
-                          Dùng Ngay
+                          <span>Dùng Ngay</span>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ChevronRightIcon size={10} color="#ffffff" />
+                          </span>
                         </button>
                       </div>
                     </div>
@@ -2466,9 +2470,9 @@ export default function ProfilePage() {
               }}
             >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', color: '#fbbf24' }}>
-                    <CoinIcon size={28} color="#fbbf24" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <span style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(251, 191, 36, 0.18)', border: '1px solid rgba(251, 191, 36, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CoinIcon size={22} color="#fbbf24" />
                   </span>
                   <span style={{ fontSize: '13.5px', textTransform: 'uppercase', letterSpacing: '1px', color: '#fde047', fontWeight: 800 }}>
                     Ví Shopee Xu Tích Lũy

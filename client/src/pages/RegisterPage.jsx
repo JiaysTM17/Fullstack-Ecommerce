@@ -565,8 +565,11 @@ export default function RegisterPage() {
               <div className="shopee-auth-live-pulse-dot" />
               <div className="shopee-auth-live-text">
                 <span>Hơn <strong>1.480+</strong> người dùng & đối tác đang trực tuyến</span>
-                <small style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <ShieldCheckIcon size={12} color="#16a34a" /> Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)
+                <small style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ShieldCheckIcon size={10} color="#16a34a" />
+                  </span>
+                  <span>Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)</span>
                 </small>
               </div>
             </div>
@@ -659,9 +662,11 @@ export default function RegisterPage() {
               marginBottom: '16px',
               display: 'flex',
               alignItems: 'flex-start',
-              gap: '10px'
+              gap: '12px'
             }}>
-              <StoreIcon size={20} className="text-blue-600" />
+              <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <StoreIcon size={18} color="#2563eb" />
+              </span>
               <div style={{ fontSize: '13px', color: '#1e40af', lineHeight: 1.5 }}>
                 <strong>Nhận diện tài khoản:</strong> Email <strong>{formData.email}</strong> đã có tài khoản Người Mua{existingUserName ? ` (Chủ tài khoản: ${existingUserName})` : ''}.
                 <br />
@@ -673,8 +678,10 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit}>
             {error && (
               <div className="shopee-form-error-msg" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <AlertCircleIcon size={14} color="#ef4444" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <AlertCircleIcon size={11} color="#ef4444" />
+                  </span>
                   <span>{error}</span>
                 </div>
                 {emailExistsError && (
@@ -684,7 +691,7 @@ export default function RegisterPage() {
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '6px',
+                      gap: '8px',
                       padding: '8px 16px',
                       background: '#2563eb',
                       color: '#ffffff',
@@ -696,9 +703,13 @@ export default function RegisterPage() {
                       boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
                     }}
                   >
-                    <KeyIcon size={14} color="#6366f1" />
+                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <KeyIcon size={11} color="#ffffff" />
+                    </span>
                     <span>Đăng Nhập Ngay Với Email Này</span>
-                    <ChevronRightIcon size={14} color="#ffffff" />
+                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ChevronRightIcon size={11} color="#ffffff" />
+                    </span>
                   </Link>
                 )}
               </div>
@@ -922,7 +933,9 @@ export default function RegisterPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label="Hiện mật khẩu"
                   >
-                    {showPassword ? <EyeOffIcon size={16} color="#64748b" /> : <EyeIcon size={16} color="#64748b" />}
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {showPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -949,7 +962,9 @@ export default function RegisterPage() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     aria-label="Hiện xác nhận mật khẩu"
                   >
-                    {showConfirmPassword ? <EyeOffIcon size={16} color="#64748b" /> : <EyeIcon size={16} color="#64748b" />}
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {showConfirmPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                    </span>
                   </button>
                 </div>
                 {formData.confirmPassword && (

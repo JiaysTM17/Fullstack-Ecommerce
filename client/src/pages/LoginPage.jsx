@@ -437,8 +437,11 @@ export default function LoginPage() {
               <div className="shopee-auth-live-pulse-dot" />
               <div className="shopee-auth-live-text">
                 <span>Hơn <strong>1.480+</strong> người dùng & đối tác đang trực tuyến</span>
-                <small style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <ShieldCheckIcon size={12} color="#16a34a" /> Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)
+                <small style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ShieldCheckIcon size={10} color="#16a34a" />
+                  </span>
+                  <span>Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)</span>
                 </small>
               </div>
             </div>
@@ -756,7 +759,9 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label="Hiện mật khẩu"
                     >
-                      {showPassword ? <EyeOffIcon size={16} color="#64748b" /> : <EyeIcon size={16} color="#64748b" />}
+                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {showPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                      </span>
                     </button>
                   </div>
                 </div>

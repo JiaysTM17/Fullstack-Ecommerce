@@ -25,6 +25,7 @@ import {
   CoinIcon,
   StoreIcon,
   CloseIcon,
+  SparklesIcon,
 } from "../components/OrdersIcons";
 
 export default function HomePage() {
