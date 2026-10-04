@@ -614,8 +614,10 @@ const Header = ({
               >
                 {/* Quick Category Discovery Chips */}
                 <div className="search-quick-chips-wrapper">
-                  <span className="search-quick-chips-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <BoltIcon size={13} color="#ffffff" />
+                  <span className="search-quick-chips-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <BoltIcon size={11} color="#ffffff" />
+                    </span>
                     <span>Ngành hàng nổi bật:</span>
                   </span>
                   <div className="search-quick-chips-list">
@@ -652,8 +654,11 @@ const Header = ({
                             alignItems: 'center',
                           }}
                         >
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                            <ClockIcon size={13} color="var(--text-muted)" /> Lịch Sử Tìm Kiếm Gần Đây
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <ClockIcon size={11} color="var(--text-muted)" />
+                            </span>
+                            <span>Lịch Sử Tìm Kiếm Gần Đây</span>
                           </span>
                           <span
                             onClick={clearRecentSearches}
@@ -680,7 +685,9 @@ const Header = ({
                             onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <ClockIcon size={13} color="var(--text-muted)" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ClockIcon size={11} color="var(--text-muted)" />
+                              </span>
                               <span>{item}</span>
                             </div>
                             <span
@@ -697,8 +704,11 @@ const Header = ({
 
                     {/* Popular Searches */}
                     <div>
-                      <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: recentSearches.length > 0 ? '1px solid var(--border-light, #f0f0f0)' : 'none', borderBottom: '1px solid var(--border-light, #f0f0f0)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <SparklesIcon size={13} color="var(--primary-color)" /> {t('suggested_searches', 'Gợi Ý Tìm Kiếm Phổ Biến')}
+                      <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: recentSearches.length > 0 ? '1px solid var(--border-light, #f0f0f0)' : 'none', borderBottom: '1px solid var(--border-light, #f0f0f0)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <SparklesIcon size={11} color="var(--primary-color)" />
+                        </span>
+                        <span>{t('suggested_searches', 'Gợi Ý Tìm Kiếm Phổ Biến')}</span>
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '10px 14px' }}>
                         {POPULAR_SEARCHES.slice(0, 6).map((item, idx) => (
@@ -1342,7 +1352,7 @@ const Header = ({
           >
             <div className="order-lookup-modal-header">
               <div className="order-lookup-header-left">
-                <span className="order-lookup-badge-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span className="order-lookup-badge-icon" style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PackageIcon size={20} color="#2563eb" />
                 </span>
                 <div>
@@ -1392,12 +1402,14 @@ const Header = ({
                   className="order-lookup-search-btn"
                   onClick={() => handleLookupOrder()}
                   disabled={orderLookupLoading}
-                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 >
                   {orderLookupLoading ? 'Đang Tra Cứu...' : (
                     <>
                       <span>Tra Cứu Ngay</span>
-                      <ChevronRightIcon size={14} color="#ffffff" />
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ChevronRightIcon size={12} color="#ffffff" />
+                      </span>
                     </>
                   )}
                 </button>
@@ -1405,15 +1417,19 @@ const Header = ({
 
               {orderLookupError && (
                 <div className="order-lookup-error-msg" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <AlertCircleIcon size={15} color="#ef4444" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <AlertCircleIcon size={11} color="#ef4444" />
+                  </span>
                   <span>{orderLookupError}</span>
                 </div>
               )}
 
               {/* Demo Quick Chips */}
               <div className="order-lookup-demo-bar">
-                <span className="order-lookup-demo-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <BoltIcon size={13} color="#eab308" />
+                <span className="order-lookup-demo-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 179, 8, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <BoltIcon size={11} color="#eab308" />
+                  </span>
                   <span>Tra cứu nhanh mã mẫu:</span>
                 </span>
                 <div className="order-lookup-demo-chips">
@@ -1424,9 +1440,11 @@ const Header = ({
                       setOrderQuery('ORD-DEMO-01');
                       handleLookupOrder('ORD-DEMO-01');
                     }}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
-                    <TruckIcon size={13} color="#059669" />
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <TruckIcon size={11} color="#059669" />
+                    </span>
                     <span>ORD-DEMO-01 (Đang Giao Hàng)</span>
                   </button>
                   <button
@@ -1436,9 +1454,11 @@ const Header = ({
                       setOrderQuery('ORD-DEMO-02');
                       handleLookupOrder('ORD-DEMO-02');
                     }}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
-                    <PackageIcon size={13} color="#2563eb" />
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <PackageIcon size={11} color="#2563eb" />
+                    </span>
                     <span>ORD-DEMO-02 (Rời Kho Phân Loại)</span>
                   </button>
                 </div>
@@ -1459,12 +1479,16 @@ const Header = ({
                   </div>
 
                   <div className="result-carrier-info">
-                    <div className="carrier-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                      <TruckIcon size={14} color="#059669" />
+                    <div className="carrier-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TruckIcon size={11} color="#059669" />
+                      </span>
                       <span>{orderLookupResult.carrier}</span>
                     </div>
-                    <div className="delivery-eta" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                      <ClockIcon size={14} color="#d97706" />
+                    <div className="delivery-eta" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ClockIcon size={11} color="#d97706" />
+                      </span>
                       <span>{orderLookupResult.estimatedDelivery}</span>
                     </div>
                   </div>

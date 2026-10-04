@@ -851,11 +851,13 @@ export default function OrderHistoryPage() {
               height: '28px',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '5px',
+              gap: '6px',
               marginRight: '6px',
             }}
           >
-            <ArrowLeftIcon size={12} color="#64748b" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ArrowLeftIcon size={10} color="#64748b" />
+            </span>
             <span>Quay lại</span>
           </button>
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1112,9 +1114,9 @@ export default function OrderHistoryPage() {
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ color: '#2563eb', display: 'inline-flex', alignItems: 'center' }}>
-                        <TruckIcon size={24} color="#2563eb" />
+                    <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <TruckIcon size={20} color="#2563eb" />
                       </span>
                       <span>Tra Cứu Vận Đơn SPX Express</span>
                     </h1>
@@ -1348,8 +1350,11 @@ export default function OrderHistoryPage() {
                             <div>
                               <strong style={{ fontSize: '13px', color: '#0f172a' }}>Nguyễn Văn Tài</strong>
                               <div style={{ fontSize: '11.5px', color: '#64748b' }}>SPX Đội Phát Tân Bình · Xe: 59-P1 982.34</div>
-                              <div style={{ fontSize: '11.5px', color: '#2563eb', marginTop: '2px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                <PhoneIcon size={12} color="#2563eb" /> Hotline: 1900 1221 (Phím 1)
+                              <div style={{ fontSize: '11.5px', color: '#2563eb', marginTop: '2px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <PhoneIcon size={10} color="#2563eb" />
+                                </span>
+                                <span>Hotline: 1900 1221 (Phím 1)</span>
                               </div>
                             </div>
                           </div>
@@ -1648,8 +1653,10 @@ export default function OrderHistoryPage() {
         {/* Orders List */}
         {filteredOrders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
-              <PackageIcon size={48} color="#94a3b8" />
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+              <span style={{ width: '64px', height: '64px', borderRadius: '16px', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PackageIcon size={32} color="#94a3b8" />
+              </span>
             </div>
             <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-secondary)' }}>
               {t('no_orders_in_tab', 'Không có đơn hàng nào trong mục này.')}
@@ -1847,10 +1854,14 @@ export default function OrderHistoryPage() {
                               );
                             })()}
                             <div className="shopee-order-trust-tag">
-                              <ShieldCheckIcon size={13} color="#059669" />
+                              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ShieldCheckIcon size={10} color="#059669" />
+                              </span>
                               <span>100% Chính hãng</span>
                               <span className="trust-dot">·</span>
-                              <ReturnIcon size={12} color="#059669" />
+                              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ReturnIcon size={10} color="#059669" />
+                              </span>
                               <span>Đổi trả trong 15 ngày</span>
                             </div>
                           </div>
@@ -1888,9 +1899,12 @@ export default function OrderHistoryPage() {
                             handleCopy(ord.trackingCode || `SPX-VN-${ord.orderId}`, 'mã vận đơn SPX');
                           }}
                           title="Nhấn để sao chép mã vận đơn SPX"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                         >
-                          {ord.trackingCode || `SPX-VN-${ord.orderId}`}
-                          <CopyIcon size={10} color="#2563eb" />
+                          <span>{ord.trackingCode || `SPX-VN-${ord.orderId}`}</span>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CopyIcon size={9} color="#2563eb" />
+                          </span>
                         </span>
                       </div>
 

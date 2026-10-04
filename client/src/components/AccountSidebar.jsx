@@ -268,7 +268,9 @@ export default function AccountSidebar({
                   <span className="sidebar-icon-cell" style={{ background: '#ffedd5', borderColor: '#fed7aa' }}><StoreIcon size={15} color="#ea580c" /></span>
                   <span className="sidebar-menu-label">Kênh Người Bán Hàng</span>
                 </div>
-                <span className="link-arrow" style={{ display: 'inline-flex', alignItems: 'center' }}><ChevronRightIcon size={13} color="#2563eb" /></span>
+                <span className="link-arrow" style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ChevronRightIcon size={11} color="#ea580c" />
+                </span>
               </Link>
             </div>
           </div>
@@ -285,7 +287,9 @@ export default function AccountSidebar({
                   <span className="sidebar-icon-cell" style={{ background: '#fee2e2', borderColor: '#fecaca' }}><ShieldIcon size={15} color="#dc2626" /></span>
                   <span className="sidebar-menu-label">Bảng Quản Trị Toàn Sàn</span>
                 </div>
-                <span className="link-arrow" style={{ display: 'inline-flex', alignItems: 'center' }}><ChevronRightIcon size={13} color="#dc2626" /></span>
+                <span className="link-arrow" style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ChevronRightIcon size={11} color="#dc2626" />
+                </span>
               </Link>
             </div>
           </div>
