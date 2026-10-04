@@ -24,6 +24,7 @@ import {
   ArrowLeftIcon,
   HomeIcon,
   ShieldCheckIcon,
+  AlertCircleIcon,
 } from "../components/OrdersIcons";
 
 const FREE_SHIPPING_THRESHOLD = 300000;
