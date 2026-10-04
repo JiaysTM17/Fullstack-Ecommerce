@@ -12,6 +12,7 @@ import {
   CheckIcon,
   CartIcon,
   ShieldCheckIcon,
+  FlameIcon,
 } from './OrdersIcons';
 import '../styles/product.css';
 
@@ -232,7 +233,10 @@ const ProductCard = ({
         {/* Huy hiệu giảm giá */}
         {hasDiscount && (
           <div className="shopee-discount-badge" style={{ top: badge ? '32px' : '0' }}>
-            <span className="shopee-discount-percent">-{discountPercent}%</span>
+            <span className="shopee-discount-percent" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+              <FlameIcon size={9} color="#ea580c" />
+              <span>-{discountPercent}%</span>
+            </span>
             <span className="shopee-discount-label">{t('sale_off', 'GIẢM')}</span>
           </div>
         )}
