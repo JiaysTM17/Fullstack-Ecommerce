@@ -430,14 +430,20 @@ export default function VoucherPickerModal({
               </div>
               <div className="voucher-smart-hero-desc">
                 {bestShippingVoucher && (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    <TruckIcon size={13} color="#0284c7" /> {bestShippingVoucher.code} (-{formatCurrency(getVoucherSavings(bestShippingVoucher))})
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(2, 132, 199, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                      <TruckIcon size={11} color="#0284c7" />
+                    </span>
+                    <span>{bestShippingVoucher.code} (-{formatCurrency(getVoucherSavings(bestShippingVoucher))})</span>
                   </span>
                 )}
                 {bestShippingVoucher && bestDiscountVoucher && <span> + </span>}
                 {bestDiscountVoucher && (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    <TagIcon size={13} color="#ea580c" /> {bestDiscountVoucher.code} (-{formatCurrency(getVoucherSavings(bestDiscountVoucher))})
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(234, 88, 12, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                      <TagIcon size={11} color="#ea580c" />
+                    </span>
+                    <span>{bestDiscountVoucher.code} (-{formatCurrency(getVoucherSavings(bestDiscountVoucher))})</span>
                   </span>
                 )}
               </div>
@@ -993,21 +999,31 @@ export default function VoucherPickerModal({
                 flexWrap: "wrap",
               }}
             >
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                <TruckIcon size={13} color="#0284c7" /> Ship:{" "}
-                <strong style={{ color: "#0284c7" }}>
-                  {selectedShipping
-                    ? `-${formatCurrency(previewShippingDiscount)} (${selectedShipping.code})`
-                    : "0₫"}
-                </strong>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(2, 132, 199, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <TruckIcon size={11} color="#0284c7" />
+                </span>
+                <span>
+                  Ship:{" "}
+                  <strong style={{ color: "#0284c7" }}>
+                    {selectedShipping
+                      ? `-${formatCurrency(previewShippingDiscount)} (${selectedShipping.code})`
+                      : "0₫"}
+                  </strong>
+                </span>
               </span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                <TagIcon size={13} color="#ea580c" /> Đơn:{" "}
-                <strong style={{ color: "var(--primary-color, #ea580c)" }}>
-                  {selectedDiscount
-                    ? `-${formatCurrency(previewOrderDiscount)} (${selectedDiscount.code})`
-                    : "0₫"}
-                </strong>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(234, 88, 12, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <TagIcon size={11} color="#ea580c" />
+                </span>
+                <span>
+                  Đơn:{" "}
+                  <strong style={{ color: "var(--primary-color, #ea580c)" }}>
+                    {selectedDiscount
+                      ? `-${formatCurrency(previewOrderDiscount)} (${selectedDiscount.code})`
+                      : "0₫"}
+                  </strong>
+                </span>
               </span>
             </div>
             <div style={{ fontSize: "14px", fontWeight: 800 }}>
