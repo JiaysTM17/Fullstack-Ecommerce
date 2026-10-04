@@ -575,8 +575,11 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             <div>
               <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span>{courier.name}</span>
-                <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                  <CheckIcon size={11} color="#059669" /> Bưu tá chính thức SPX
+                <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={9} color="#059669" />
+                  </span>
+                  <span>Bưu tá chính thức SPX</span>
                 </span>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
