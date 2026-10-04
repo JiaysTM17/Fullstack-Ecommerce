@@ -572,18 +572,34 @@ export default function VoucherPickerModal({
                     type="button"
                     onClick={() => setSelectedShipping(null)}
                     style={{
-                      background: "none",
-                      border: "none",
+                      background: "rgba(239, 68, 68, 0.08)",
+                      border: "1px solid rgba(239, 68, 68, 0.2)",
+                      borderRadius: "6px",
+                      padding: "4px 8px",
                       color: "#ef4444",
                       fontSize: "12px",
                       fontWeight: 700,
                       cursor: "pointer",
                       display: "inline-flex",
                       alignItems: "center",
-                      gap: "4px",
+                      gap: "6px",
+                      transition: "all 0.15s ease",
                     }}
                   >
-                    <CloseIcon size={12} color="#ef4444" />
+                    <span
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        borderRadius: "50%",
+                        background: "rgba(239, 68, 68, 0.15)",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <CloseIcon size={10} color="#ef4444" />
+                    </span>
                     <span>Bỏ chọn ({selectedShipping.code})</span>
                   </button>
                 )}
@@ -775,18 +791,34 @@ export default function VoucherPickerModal({
                     type="button"
                     onClick={() => setSelectedDiscount(null)}
                     style={{
-                      background: "none",
-                      border: "none",
+                      background: "rgba(239, 68, 68, 0.08)",
+                      border: "1px solid rgba(239, 68, 68, 0.2)",
+                      borderRadius: "6px",
+                      padding: "4px 8px",
                       color: "#ef4444",
                       fontSize: "12px",
                       fontWeight: 700,
                       cursor: "pointer",
                       display: "inline-flex",
                       alignItems: "center",
-                      gap: "4px",
+                      gap: "6px",
+                      transition: "all 0.15s ease",
                     }}
                   >
-                    <CloseIcon size={12} color="#ef4444" />
+                    <span
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        borderRadius: "50%",
+                        background: "rgba(239, 68, 68, 0.15)",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <CloseIcon size={10} color="#ef4444" />
+                    </span>
                     <span>Bỏ chọn ({selectedDiscount.code})</span>
                   </button>
                 )}

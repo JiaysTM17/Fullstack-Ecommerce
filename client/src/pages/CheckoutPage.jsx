@@ -1630,15 +1630,42 @@ export default function CheckoutPage() {
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
                   onClick={() => setShowAddAddressModal(false)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  Hủy Bỏ
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
+                  <span>Hủy Bỏ</span>
                 </button>
                 <button
                   type="submit"
                   className="shopee-btn shopee-btn-primary"
-                  style={{ fontWeight: 700 }}
+                  style={{ fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  Lưu & Áp Dụng Ngay
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '4px',
+                      background: 'rgba(255, 255, 255, 0.22)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CheckIcon size={11} color="#ffffff" />
+                  </span>
+                  <span>Lưu & Áp Dụng Ngay</span>
                 </button>
               </div>
             </form>
@@ -1778,15 +1805,42 @@ export default function CheckoutPage() {
                     setShowEditAddressModal(false);
                     setEditingAddress(null);
                   }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  Hủy Bỏ
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CloseIcon size={10} color="#ef4444" />
+                  </span>
+                  <span>Hủy Bỏ</span>
                 </button>
                 <button
                   type="submit"
                   className="shopee-btn shopee-btn-primary"
-                  style={{ fontWeight: 700 }}
+                  style={{ fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  Lưu Thay Đổi
+                  <span
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '4px',
+                      background: 'rgba(255, 255, 255, 0.22)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <CheckIcon size={11} color="#ffffff" />
+                  </span>
+                  <span>Lưu Thay Đổi</span>
                 </button>
               </div>
             </form>
