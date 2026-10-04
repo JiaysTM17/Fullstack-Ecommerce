@@ -2218,7 +2218,9 @@ export default function OrderHistoryPage() {
           title="Cuộn lên đầu trang"
           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <ChevronUpIcon size={18} color="#2563eb" />
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChevronUpIcon size={16} color="#2563eb" />
+          </span>
         </button>
       )}
 
