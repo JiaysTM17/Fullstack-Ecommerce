@@ -1377,10 +1377,12 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setShowVoucherModal(true)}
-                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}
                 >
                   <span>{(appliedDiscountVoucher && appliedShippingVoucher) ? "Đổi mã" : "Chọn mã"}</span>
-                  <ChevronRightIcon size={12} color="var(--primary-color, #ea580c)" />
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ChevronRightIcon size={10} color="var(--primary-color, #ea580c)" />
+                  </span>
                 </button>
               </div>
 
@@ -1424,9 +1426,12 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setShowVoucherModal(true)}
-                  style={{ width: "100%", marginTop: "8px", padding: "8px", borderRadius: "6px", border: "1px dashed var(--primary-color, #ea580c)", background: "transparent", color: "var(--primary-color, #ea580c)", fontSize: "12.5px", fontWeight: 600, cursor: "pointer" }}
+                  style={{ width: "100%", marginTop: "8px", padding: "8px", borderRadius: "6px", border: "1px dashed var(--primary-color, #ea580c)", background: "rgba(234, 88, 12, 0.03)", color: "var(--primary-color, #ea580c)", fontSize: "12.5px", fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 >
-                  + Nhấn để chọn mã giảm giá / Freeship
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TicketIcon size={10} color="#ea580c" />
+                  </span>
+                  <span>Nhấn để chọn mã giảm giá / Freeship</span>
                 </button>
               )}
             </div>
