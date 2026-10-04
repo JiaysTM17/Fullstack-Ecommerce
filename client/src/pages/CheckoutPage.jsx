@@ -1371,8 +1371,11 @@ export default function CheckoutPage() {
             {/* Interactive Dual Voucher Section in Checkout summary */}
             <div style={{ borderTop: "1px dashed var(--border-medium, #ddd)", borderBottom: "1px dashed var(--border-medium, #ddd)", padding: "10px 0", margin: "4px 0" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: (appliedDiscountVoucher || appliedShippingVoucher) ? "8px" : "0" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                  <TicketIcon size={15} color="var(--primary-color, #ea580c)" /> Voucher / Giảm giá:
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TicketIcon size={12} color="var(--primary-color, #ea580c)" />
+                  </span>
+                  <span>Voucher / Giảm giá:</span>
                 </span>
                 <button
                   type="button"
@@ -1551,7 +1554,10 @@ export default function CheckoutPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <MapPinIcon size={18} color="var(--primary-color, #ea580c)" /> Thêm Địa Chỉ Giao Hàng Mới
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MapPinIcon size={15} color="var(--primary-color, #ea580c)" />
+                </span>
+                <span>Thêm Địa Chỉ Giao Hàng Mới</span>
               </h3>
               <button
                 type="button"
@@ -1723,7 +1729,10 @@ export default function CheckoutPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <PencilIcon size={18} color="var(--primary-color, #ea580c)" /> Chỉnh Sửa Địa Chỉ Giao Hàng
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PencilIcon size={15} color="var(--primary-color, #ea580c)" />
+                </span>
+                <span>Chỉnh Sửa Địa Chỉ Giao Hàng</span>
               </h3>
               <button
                 type="button"

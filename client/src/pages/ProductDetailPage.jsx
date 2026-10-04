@@ -1050,7 +1050,10 @@ export default function ProductDetailPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <GlobeIcon size={18} color="var(--primary-color, #ea580c)" /> Chia Sẻ Sản Phẩm
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <GlobeIcon size={15} color="var(--primary-color, #ea580c)" />
+                </span>
+                <span>Chia Sẻ Sản Phẩm</span>
               </h3>
               <button
                 type="button"
