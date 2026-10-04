@@ -219,11 +219,22 @@ export default function ProductCompareModal() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    borderRadius: '8px',
+                    width: '32px',
+                    height: '32px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s ease',
+                  }}
                   aria-label="Đóng bảng so sánh"
                 >
-                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CloseIcon size={14} color="#ef4444" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={12} color="#ef4444" />
                   </span>
                 </button>
               </div>
