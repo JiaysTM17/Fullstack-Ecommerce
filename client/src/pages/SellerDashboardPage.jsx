@@ -1660,8 +1660,11 @@ export default function SellerDashboardPage() {
             {/* Chỉ hiển thị công cụ chuyển shop cho tài khoản Admin quản trị toàn hệ thống */}
             {user?.role === 'admin' ? (
               <div className="shopee-shop-switcher" style={{ background: 'var(--bg-muted, #f8fafc)', border: '1.5px solid #fed7aa', borderRadius: '8px', padding: '6px 12px' }}>
-                <span style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <ShieldCheckIcon size={14} color="#16a34a" /> Giám Sát Sàn (Admin):
+                <span style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ShieldCheckIcon size={12} color="#16a34a" />
+                  </span>
+                  <span>Giám Sát Sàn (Admin):</span>
                 </span>
                 <select
                   value={selectedShopId}
@@ -2316,7 +2319,9 @@ export default function SellerDashboardPage() {
                 flexWrap: 'wrap'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <AlertCircleIcon size={24} className="text-amber-600" />
+                  <span style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <AlertCircleIcon size={20} color="#d97706" />
+                  </span>
                   <div>
                     <div style={{ fontWeight: 800, color: '#c2410c', fontSize: '14px' }}>
                       Cảnh Báo Tồn Kho: Có {lowStockCount} mặt hàng sắp hết hàng hoặc đã hết hàng (&lt; 10 cái)!
@@ -2333,7 +2338,9 @@ export default function SellerDashboardPage() {
                   onClick={() => setProductStatusFilter('low_stock')}
                 >
                   <span>Xem {lowStockCount} mặt hàng cần nhập</span>
-                  <ChevronRightIcon size={14} color="#ffffff" />
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ChevronRightIcon size={12} color="#ffffff" />
+                  </span>
                 </button>
               </div>
             )}
@@ -2561,7 +2568,7 @@ export default function SellerDashboardPage() {
                             {prod.isActive ? (
                               <>
                                 <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <CheckIcon size={9} />
+                                  <CheckIcon size={9} color="#16a34a" />
                                 </span>
                                 <span>Đang bán</span>
                               </>
@@ -2953,7 +2960,9 @@ export default function SellerDashboardPage() {
                           <span className={`shopee-status-badge ${v.active ? 'status-delivered' : 'status-cancelled'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                             {v.active ? (
                               <>
-                                <CheckIcon size={11} />
+                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <CheckIcon size={10} color="#16a34a" />
+                                </span>
                                 <span>Đang áp dụng</span>
                               </>
                             ) : (
@@ -3019,8 +3028,11 @@ export default function SellerDashboardPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', minHeight: '480px' }}>
               {/* Danh sách hội thoại khách hàng */}
               <div style={{ borderRight: '1px solid var(--border-medium)', background: 'var(--bg-muted, #f8fafc)' }}>
-                <div style={{ padding: '14px', borderBottom: '1px solid var(--border-medium)', fontWeight: 800, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ChatIcon size={16} color="#2563eb" /> Tin Nhắn Khách Hàng ({shopChats.length})
+                <div style={{ padding: '14px', borderBottom: '1px solid var(--border-medium)', fontWeight: 800, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ChatIcon size={14} color="#2563eb" />
+                  </span>
+                  <span>Tin Nhắn Khách Hàng ({shopChats.length})</span>
                 </div>
                 <div style={{ overflowY: 'auto', maxHeight: '420px' }}>
                   {shopChats.length === 0 ? (
@@ -3113,9 +3125,12 @@ export default function SellerDashboardPage() {
                               key={fIdx}
                               type="button"
                               onClick={() => setChatReplyText(fastText)}
-                              style={{ background: 'var(--bg-card)', border: '1px solid #cbd5e1', padding: '3px 8px', borderRadius: '12px', fontSize: '11px', cursor: 'pointer', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                              style={{ background: 'var(--bg-card)', border: '1px solid #cbd5e1', padding: '3px 8px', borderRadius: '12px', fontSize: '11px', cursor: 'pointer', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             >
-                              <BoltIcon size={11} color="#eab308" /> {fastText}
+                              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 179, 8, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <BoltIcon size={10} color="#ca8a04" />
+                              </span>
+                              <span>{fastText}</span>
                             </button>
                           ))}
                         </div>
@@ -3153,7 +3168,9 @@ export default function SellerDashboardPage() {
         {activeTab === 'settings' && (
           <div className="shopee-table-card" style={{ maxWidth: '720px' }}>
             <h2 style={{ fontSize: '17px', margin: '0 0 16px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <SettingsIcon size={18} color="#64748b" />
+              <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <SettingsIcon size={16} color="#475569" />
+              </span>
               <span>Cài Đặt Thông Tin & Kho Hàng Cửa Hàng</span>
             </h2>
 
@@ -3488,7 +3505,12 @@ export default function SellerDashboardPage() {
           <div className="shopee-modal-overlay" onClick={() => setShowProductModal(false)} style={{ animation: 'modalOverlayFadeIn 0.2s ease-out forwards' }}>
             <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="shopee-modal-header">
-                <h3>{editingProduct ? 'Chỉnh Sửa Mặt Hàng' : 'Đăng Bán Mặt Hàng Mới Cho Shop'}</h3>
+                <h3 style={{ margin: 0, fontSize: '17px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: editingProduct ? 'rgba(37, 99, 235, 0.12)' : 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {editingProduct ? <PencilIcon size={14} color="#2563eb" /> : <PlusIcon size={14} color="#ea580c" />}
+                  </span>
+                  <span>{editingProduct ? 'Chỉnh Sửa Mặt Hàng' : 'Đăng Bán Mặt Hàng Mới Cho Shop'}</span>
+                </h3>
                 <button
                   type="button"
                   className="shopee-modal-close"
@@ -3678,7 +3700,12 @@ export default function SellerDashboardPage() {
           <div className="shopee-modal-overlay" onClick={() => setShowVoucherModal(false)} style={{ animation: 'modalOverlayFadeIn 0.2s ease-out forwards' }}>
             <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
               <div className="shopee-modal-header">
-                <h3>Tạo Mã Giảm Giá Cho {currentShop.name}</h3>
+                <h3 style={{ margin: 0, fontSize: '17px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TicketIcon size={14} color="#f59e0b" />
+                  </span>
+                  <span>Tạo Mã Giảm Giá Cho {currentShop.name}</span>
+                </h3>
                 <button
                   type="button"
                   className="shopee-modal-close"
@@ -3833,7 +3860,12 @@ export default function SellerDashboardPage() {
             <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
               <div className="shopee-modal-header">
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '17px' }}>Rút Doanh Thu Về Tài Khoản</h3>
+                  <h3 style={{ margin: 0, fontSize: '17px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CreditCardIcon size={14} color="#16a34a" />
+                    </span>
+                    <span>Rút Doanh Thu Về Tài Khoản</span>
+                  </h3>
                   <small style={{ color: 'var(--text-muted)' }}>Cửa hàng: {currentShop.name}</small>
                 </div>
                 <button
@@ -3992,8 +4024,10 @@ export default function SellerDashboardPage() {
             <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
               <div className="shopee-modal-header">
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '17px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <BoltIcon size={16} color="#ea580c" />
+                  <h3 style={{ margin: 0, fontSize: '17px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <BoltIcon size={14} color="#ea580c" />
+                    </span>
                     <span>Tạo Flash Sale Mới Cho Shop</span>
                   </h3>
                   <small style={{ color: 'var(--text-muted)' }}>Cửa hàng: {currentShop.name}</small>

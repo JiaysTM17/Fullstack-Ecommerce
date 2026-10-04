@@ -2776,7 +2776,12 @@ export default function ProfilePage() {
         <div className="profile-modal-backdrop" onClick={() => setShowAddAddressModal(false)}>
           <div className="profile-modal-window" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
             <div className="profile-modal-header">
-              <h3 className="profile-modal-title">Thêm Địa Chỉ Giao Hàng Mới</h3>
+              <h3 className="profile-modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MapPinIcon size={14} color="#ea580c" />
+                </span>
+                <span>Thêm Địa Chỉ Giao Hàng Mới</span>
+              </h3>
               <button
                 type="button"
                 className="profile-modal-close-btn"
@@ -2978,7 +2983,12 @@ export default function ProfilePage() {
         <div className="profile-modal-backdrop" onClick={() => { setShowEditAddressModal(false); setEditingAddress(null); }}>
           <div className="profile-modal-window" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
             <div className="profile-modal-header">
-              <h3 className="profile-modal-title">Chỉnh Sửa Địa Chỉ Giao Hàng</h3>
+              <h3 className="profile-modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PencilIcon size={14} color="#2563eb" />
+                </span>
+                <span>Chỉnh Sửa Địa Chỉ Giao Hàng</span>
+              </h3>
               <button
                 type="button"
                 className="profile-modal-close-btn"
@@ -3117,7 +3127,12 @@ export default function ProfilePage() {
         <div className="profile-modal-backdrop" onClick={() => setShowAddPaymentModal(false)}>
           <div className="profile-modal-window" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
             <div className="profile-modal-header">
-              <h3 className="profile-modal-title">Liên Kết Phương Thức Thanh Toán</h3>
+              <h3 className="profile-modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CreditCardIcon size={14} color="#0d9488" />
+                </span>
+                <span>Liên Kết Phương Thức Thanh Toán</span>
+              </h3>
               <button
                 type="button"
                 className="profile-modal-close-btn"
