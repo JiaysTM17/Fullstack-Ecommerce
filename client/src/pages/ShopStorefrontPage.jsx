@@ -1012,8 +1012,10 @@ export default function ShopStorefrontPage() {
                     }}
                     title={t('compare_btn')}
                   >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <ScaleIcon size={12} color={isCompared(id) ? "#ffffff" : "#2563eb"} />
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: isCompared(id) ? 'rgba(255, 255, 255, 0.22)' : 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ScaleIcon size={10} color={isCompared(id) ? "#ffffff" : "#2563eb"} />
+                      </span>
                       <span>{isCompared(id) ? 'Đã so sánh' : 'So sánh'}</span>
                     </span>
                   </button>
@@ -1081,8 +1083,10 @@ export default function ShopStorefrontPage() {
                       }}
                       title={t('compare_btn')}
                     >
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <ScaleIcon size={12} color={isCompared(id) ? "#ffffff" : "#2563eb"} />
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: isCompared(id) ? 'rgba(255, 255, 255, 0.22)' : 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ScaleIcon size={10} color={isCompared(id) ? "#ffffff" : "#2563eb"} />
+                        </span>
                         <span>{isCompared(id) ? 'Đã so sánh' : 'So sánh'}</span>
                       </span>
                     </button>
