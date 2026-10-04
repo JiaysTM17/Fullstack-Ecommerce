@@ -539,9 +539,13 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                                   boxShadow: "0 1px 3px rgba(234, 88, 12, 0.25)",
                                 }}
                               >
-                                <StoreIcon size={11} color="#ffffff" />
+                                <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <StoreIcon size={10} color="#ffffff" />
+                                </span>
                                 <span>Người bán</span>
-                                <CheckIcon size={10} color="#ffffff" />
+                                <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <CheckIcon size={9} color="#ffffff" />
+                                </span>
                               </span>
                             )}
                             <span style={{ fontSize: "11px", color: "#94a3b8", marginLeft: "auto" }}>
