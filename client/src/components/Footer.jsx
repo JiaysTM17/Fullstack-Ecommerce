@@ -274,14 +274,18 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
               </li>
             </ul>
             <h4 style={{ marginTop: '20px' }}>{language === 'en' ? 'Hotline & Support' : 'Tổng Đài Hỗ Trợ'}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12.5px' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary, #0f172a)' }}>
-                <PhoneIcon size={14} color="#16a34a" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12.5px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary, #0f172a)' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PhoneIcon size={12} color="#16a34a" />
+                </span>
                 <span style={{ fontWeight: 600 }}>1900 6868</span>
                 <span style={{ fontSize: '11px', color: '#94a3b8' }}>(8:00 - 21:00)</span>
               </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary, #475569)' }}>
-                <MailIcon size={14} color="#ea580c" />
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary, #475569)' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MailIcon size={12} color="#ea580c" />
+                </span>
                 <span>support@shopee-mini.vn</span>
               </div>
             </div>
