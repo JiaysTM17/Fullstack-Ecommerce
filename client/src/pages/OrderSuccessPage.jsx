@@ -126,10 +126,13 @@ export default function OrderSuccessPage() {
                   color: 'var(--text-primary)',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '5px',
                 }}
               >
-                <CopyIcon size={12} color="#2563eb" /> Sao chép
+                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CopyIcon size={10} color="#2563eb" />
+                </span>
+                <span>Sao chép</span>
               </button>
             </div>
           </div>
@@ -181,7 +184,7 @@ export default function OrderSuccessPage() {
                   width: '42px',
                   height: '42px',
                   borderRadius: '10px',
-                  background: isVietQRPaid ? '#dcfce7' : '#dbeafe',
+                  background: isVietQRPaid ? 'rgba(21, 128, 61, 0.15)' : 'rgba(37, 99, 235, 0.12)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -224,7 +227,10 @@ export default function OrderSuccessPage() {
                   gap: '6px',
                 }}
               >
-                <QrCodeIcon size={14} color="#ffffff" /> Quét Mã QR
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <QrCodeIcon size={12} color="#ffffff" />
+                </span>
+                <span>Quét Mã QR</span>
               </button>
             )}
           </div>
@@ -277,7 +283,9 @@ export default function OrderSuccessPage() {
               gap: '6px',
             }}
           >
-            <BoltIcon size={14} color="#ffffff" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BoltIcon size={12} color="#ffffff" />
+            </span>
             <span>Quay Ngay</span>
           </button>
         </div>
