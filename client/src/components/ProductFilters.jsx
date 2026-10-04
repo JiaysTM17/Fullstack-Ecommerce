@@ -92,7 +92,11 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
               onClick={() => onFilterChange("category", cat === "Tất cả" ? "" : cat)}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                {cat === "Tất cả" ? <PackageIcon size={14} color="#ea580c" /> : null}
+                {cat === "Tất cả" ? (
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <PackageIcon size={12} color="#ea580c" />
+                  </span>
+                ) : null}
                 <span>{cat === "Tất cả" ? t('all_categories', 'Tất cả danh mục') : `• ${cat}`}</span>
               </span>
             </div>
@@ -114,7 +118,9 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             onClick={() => onFilterChange("brand", "")}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <TagIcon size={14} color="#ea580c" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <TagIcon size={12} color="#ea580c" />
+              </span>
               <span>{t('all_brands', 'Tất cả thương hiệu')}</span>
             </span>
           </div>
@@ -144,7 +150,9 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             onClick={() => onFilterChange("shopId", "")}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <StoreIcon size={14} color="#dc2626" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(220, 38, 38, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <StoreIcon size={12} color="#dc2626" />
+              </span>
               <span>{t('all_shops', 'Tất cả gian hàng')} ({allShops.length})</span>
             </span>
           </div>
@@ -157,7 +165,9 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
                 title={s.description}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <StoreIcon size={13} color="#ea580c" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <StoreIcon size={12} color="#ea580c" />
+                  </span>
                   <span>{s.name}</span>
                 </span>
               </div>
@@ -277,8 +287,10 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
               onFilterChange("badge", e.target.checked ? "Amazon's Choice" : "")
             }
           />
-          <span style={{ fontWeight: 600, color: "var(--text-primary)", display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            <SparklesIcon size={13} color="#ea580c" />
+          <span style={{ fontWeight: 600, color: "var(--text-primary)", display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <SparklesIcon size={12} color="#ea580c" />
+            </span>
             <span>{t('featured_picks', 'Hàng Tuyển Chọn')}</span>
           </span>
         </label>

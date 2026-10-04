@@ -422,7 +422,9 @@ export default function ProductDetailPage() {
                 onClick={() => updateQuantity(quantity - 1)}
                 aria-label="Giảm số lượng"
               >
-                <MinusIcon size={11} color={quantity <= 1 ? "#cbd5e1" : "#475569"} />
+                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: quantity <= 1 ? 'transparent' : '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MinusIcon size={10} color={quantity <= 1 ? "#cbd5e1" : "#475569"} />
+                </span>
               </button>
               <input
                 className="shopee-qty-input"
@@ -439,7 +441,9 @@ export default function ProductDetailPage() {
                 onClick={() => updateQuantity(quantity + 1)}
                 aria-label="Tăng số lượng"
               >
-                <PlusIcon size={11} color={quantity >= product.stock ? "#cbd5e1" : "#ea580c"} />
+                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: quantity >= product.stock ? 'transparent' : '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PlusIcon size={10} color={quantity >= product.stock ? "#cbd5e1" : "#ea580c"} />
+                </span>
               </button>
             </div>
           </div>

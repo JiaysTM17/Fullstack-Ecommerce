@@ -153,7 +153,7 @@ export default function QuickViewModal({ product, onClose }) {
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '5px',
                   fontSize: '11.5px',
                   color: wishlisted ? '#dc2626' : 'var(--text-secondary, #64748b)',
                   fontWeight: 600,
@@ -161,7 +161,9 @@ export default function QuickViewModal({ product, onClose }) {
                 }}
                 title={wishlisted ? 'Đã yêu thích' : 'Thêm vào yêu thích'}
               >
-                <HeartIcon size={13} color={wishlisted ? '#ef4444' : '#64748b'} fill={wishlisted ? '#ef4444' : 'none'} />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: wishlisted ? 'rgba(239, 68, 68, 0.15)' : 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <HeartIcon size={11} color={wishlisted ? '#ef4444' : '#64748b'} fill={wishlisted ? '#ef4444' : 'none'} />
+                </span>
                 <span>{wishlisted ? 'Đã thích' : 'Yêu thích'}</span>
               </button>
             </div>
@@ -230,7 +232,9 @@ export default function QuickViewModal({ product, onClose }) {
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   aria-label="Giảm số lượng"
                 >
-                  <MinusIcon size={11} color={quantity <= 1 ? "#cbd5e1" : "#475569"} />
+                  <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: quantity <= 1 ? 'transparent' : '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <MinusIcon size={10} color={quantity <= 1 ? "#cbd5e1" : "#475569"} />
+                  </span>
                 </button>
                 <input
                   className="shopee-qty-input"
@@ -245,7 +249,9 @@ export default function QuickViewModal({ product, onClose }) {
                   onClick={() => setQuantity(quantity + 1)}
                   aria-label="Tăng số lượng"
                 >
-                  <PlusIcon size={11} color={quantity >= (product.stock || 50) ? "#cbd5e1" : "#ea580c"} />
+                  <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: quantity >= (product.stock || 50) ? 'transparent' : '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <PlusIcon size={10} color={quantity >= (product.stock || 50) ? "#cbd5e1" : "#ea580c"} />
+                  </span>
                 </button>
               </div>
               <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>

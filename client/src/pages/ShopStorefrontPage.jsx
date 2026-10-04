@@ -636,7 +636,9 @@ export default function ShopStorefrontPage() {
         >
           <div className="mall-metric-card">
             <div className="mall-metric-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
-              <StarIcon size={20} color="#d97706" filled />
+              <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <StarIcon size={18} color="#d97706" filled />
+              </span>
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Đánh Giá Gian Hàng</div>
@@ -648,7 +650,9 @@ export default function ShopStorefrontPage() {
 
           <div className="mall-metric-card">
             <div className="mall-metric-icon" style={{ background: '#fee2e2', color: '#dc2626' }}>
-              <CheckIcon size={20} color="#dc2626" />
+              <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={18} color="#dc2626" />
+              </span>
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Người Theo Dõi</div>
@@ -660,7 +664,9 @@ export default function ShopStorefrontPage() {
 
           <div className="mall-metric-card">
             <div className="mall-metric-icon" style={{ background: '#dcfce7', color: '#15803d' }}>
-              <ClockIcon size={20} color="#15803d" />
+              <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(21, 128, 61, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ClockIcon size={18} color="#15803d" />
+              </span>
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Tỉ Lệ Phản Hồi Chat</div>
@@ -672,7 +678,9 @@ export default function ShopStorefrontPage() {
 
           <div className="mall-metric-card">
             <div className="mall-metric-icon" style={{ background: '#e0e7ff', color: '#4338ca' }}>
-              <PackageIcon size={20} color="#4338ca" />
+              <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(67, 56, 202, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PackageIcon size={18} color="#4338ca" />
+              </span>
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Sản Phẩm Phân Phối</div>
