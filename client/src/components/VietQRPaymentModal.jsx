@@ -440,11 +440,14 @@ export default function VietQRPaymentModal({
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px',
+                      gap: '5px',
                       transition: 'all 0.15s ease',
                     }}
                   >
-                    <DownloadIcon size={12} color="#2563eb" /> Tải mã QR
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <DownloadIcon size={11} color="#2563eb" />
+                    </span>
+                    <span>Tải mã QR</span>
                   </button>
                 </div>
 
