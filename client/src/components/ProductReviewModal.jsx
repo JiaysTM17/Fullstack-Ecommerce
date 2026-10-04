@@ -531,24 +531,26 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                   <button
                     type="button"
                     onClick={() => handleRemovePhoto(photo.id)}
-                    title="Xóa ảnh"
                     style={{
                       position: 'absolute',
                       top: '2px',
                       right: '2px',
-                      background: 'rgba(15, 23, 42, 0.75)',
+                      background: 'rgba(239, 68, 68, 0.9)',
                       color: '#fff',
                       border: 'none',
                       borderRadius: '50%',
-                      width: '16px',
-                      height: '16px',
+                      width: '18px',
+                      height: '18px',
                       fontSize: '9px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       padding: 0,
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
                     }}
+                    title="Xóa ảnh này"
+                    aria-label="Xóa ảnh đính kèm"
                   >
                     <CloseIcon size={10} color="#ffffff" />
                   </button>

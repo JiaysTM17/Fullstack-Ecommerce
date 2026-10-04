@@ -615,17 +615,16 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                     <button
                       type="button"
                       onClick={() => handleRemoveImage(img.id)}
-                      title="Xóa ảnh này"
                       style={{
                         position: 'absolute',
                         top: '2px',
                         right: '2px',
-                        background: 'rgba(15, 23, 42, 0.75)',
+                        background: 'rgba(239, 68, 68, 0.9)',
                         color: '#fff',
                         border: 'none',
                         borderRadius: '50%',
-                        width: '16px',
-                        height: '16px',
+                        width: '18px',
+                        height: '18px',
                         fontSize: '9px',
                         fontWeight: 900,
                         cursor: 'pointer',
@@ -633,7 +632,10 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: 0,
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
                       }}
+                      title="Xóa minh chứng này"
+                      aria-label="Xóa ảnh/video minh chứng"
                     >
                       <CloseIcon size={10} color="#ffffff" />
                     </button>
