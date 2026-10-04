@@ -2899,20 +2899,37 @@ export default function SellerDashboardPage() {
                               setVouchers(prev => prev.map(item => item.id === v.id ? { ...item, active: !item.active } : item));
                               toast.info(v.active ? `Đã tạm dừng mã ${v.code}` : `Đã kích hoạt mã ${v.code}`);
                             }}
-                            style={{ marginRight: '6px' }}
+                            style={{ marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                           >
-                            {v.active ? 'Tạm Dừng' : 'Kích Hoạt'}
+                            {v.active ? (
+                              <>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <ClockIcon size={10} color="#d97706" />
+                                </span>
+                                <span>Tạm Dừng</span>
+                              </>
+                            ) : (
+                              <>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <CheckIcon size={10} color="#16a34a" />
+                                </span>
+                                <span>Kích Hoạt</span>
+                              </>
+                            )}
                           </button>
                           <button
                             type="button"
                             className="shopee-btn shopee-btn-sm"
-                            style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }}
+                            style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
                             onClick={() => {
                               setVouchers(prev => prev.filter(item => item.id !== v.id));
                               toast.success(`Đã xóa mã ${v.code}`);
                             }}
                           >
-                            Xóa
+                            <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <TrashIcon size={10} color="#dc2626" />
+                            </span>
+                            <span>Xóa</span>
                           </button>
                         </td>
                       </tr>

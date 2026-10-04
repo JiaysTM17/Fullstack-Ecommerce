@@ -943,40 +943,46 @@ export default function LiveChatWidget() {
                 type="button"
                 onClick={handleClearHistory}
                 style={{
-                  background: 'rgba(255,255,255,0.12)',
+                  background: 'rgba(239, 68, 68, 0.15)',
                   border: 'none',
-                  color: '#cbd5e1',
+                  color: '#ef4444',
                   cursor: 'pointer',
-                  padding: '4px 6px',
-                  borderRadius: '5px',
+                  width: '26px',
+                  height: '26px',
+                  borderRadius: '50%',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  padding: 0,
+                  transition: 'all 0.15s ease',
                 }}
-                title="Làm mới lịch sử chat"
+                title="Làm mới / Xóa lịch sử chat"
+                aria-label="Làm mới lịch sử trò chuyện"
               >
-                <TrashIcon size={12} color="#cbd5e1" />
+                <TrashIcon size={12} color="#ef4444" />
               </button>
 
-              {/* Thu nhỏ / Đóng */}
+              {/* Thu nhỏ */}
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
                 style={{
-                  background: 'rgba(255,255,255,0.15)',
+                  background: 'rgba(255, 255, 255, 0.15)',
                   border: 'none',
                   color: '#ffffff',
                   cursor: 'pointer',
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '5px',
+                  width: '26px',
+                  height: '26px',
+                  borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '13px',
                   fontWeight: 700,
+                  padding: 0,
                 }}
                 title="Thu nhỏ"
+                aria-label="Thu nhỏ cửa sổ chat"
               >
                 —
               </button>

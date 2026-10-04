@@ -1360,17 +1360,34 @@ export default function AdminDashboardPage() {
                           type="button"
                           className="shopee-btn shopee-btn-secondary shopee-btn-sm"
                           onClick={() => handleToggleCategory(c.id)}
-                          style={{ marginRight: '6px' }}
+                          style={{ marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                         >
-                          {c.active ? 'Tạm Ẩn' : 'Bật Hiển Thị'}
+                          {c.active ? (
+                            <>
+                              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ClockIcon size={10} color="#d97706" />
+                              </span>
+                              <span>Tạm Ẩn</span>
+                            </>
+                          ) : (
+                            <>
+                              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckIcon size={10} color="#16a34a" />
+                              </span>
+                              <span>Bật Hiển Thị</span>
+                            </>
+                          )}
                         </button>
                         <button
                           type="button"
                           className="shopee-btn shopee-btn-sm"
-                          style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }}
+                          style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
                           onClick={() => handleDeleteCategory(c.id)}
                         >
-                          Xóa
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TrashIcon size={10} color="#dc2626" />
+                          </span>
+                          <span>Xóa</span>
                         </button>
                       </td>
                     </tr>
