@@ -11,6 +11,7 @@ import {
   CloseIcon,
   TruckIcon,
   CoinIcon,
+  CheckIcon,
 } from './OrdersIcons';
 import '../styles/filters.css';
 
@@ -309,7 +310,12 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             checked={Boolean(filters.inStock)}
             onChange={(e) => onFilterChange("inStock", e.target.checked ? "1" : "")}
           />
-          <span>{t('in_stock_only', 'Chỉ xem hàng còn trong kho')}</span>
+          <span style={{ fontWeight: 600, color: "var(--text-primary)", display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CheckIcon size={11} color="#059669" />
+            </span>
+            <span>{t('in_stock_only', 'Chỉ xem hàng còn trong kho')}</span>
+          </span>
         </label>
       </div>
 

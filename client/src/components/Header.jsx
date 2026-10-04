@@ -1247,8 +1247,12 @@ const Header = ({
                     e.preventDefault();
                     navTo('/register');
                   }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  {t('register', 'Đăng Ký')}
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <UserIcon size={11} color="#ea580c" />
+                  </span>
+                  <span>{t('register', 'Đăng Ký')}</span>
                 </button>
               </div>
             )}
