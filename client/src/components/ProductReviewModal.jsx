@@ -233,11 +233,15 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: '6px',
+              borderRadius: '50%',
+              border: 'none',
+              background: 'transparent',
+              cursor: 'pointer',
             }}
+            aria-label="Đóng đánh giá sản phẩm"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CloseIcon size={12} color="#64748b" />
+            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CloseIcon size={13} color="#ef4444" />
             </span>
           </button>
         </div>
