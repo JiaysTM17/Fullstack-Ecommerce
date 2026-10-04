@@ -217,9 +217,19 @@ const ProductCard = ({
               zIndex: 1,
               textTransform: 'uppercase',
               letterSpacing: '0.4px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
             }}
           >
-            {badge === "Amazon's Choice" ? t('nav_featured_picks', 'Tuyển Chọn') : badge}
+            {badge === "Amazon's Choice" ? (
+              <>
+                <StarIcon size={10} color="#f59e0b" fill="#f59e0b" />
+                <span>{t('nav_featured_picks', 'Tuyển Chọn')}</span>
+              </>
+            ) : (
+              <span>{badge}</span>
+            )}
           </span>
         ) : isMall ? (
           <span className="shopee-mall-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
