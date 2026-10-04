@@ -403,7 +403,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 onClick={() => setSelectedGroup(chip.id)}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  {chip.icon}
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: selectedGroup === chip.id ? 'rgba(255, 255, 255, 0.22)' : 'rgba(0, 0, 0, 0.05)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {chip.icon}
+                  </span>
                   <span>{chip.label}</span>
                 </span>
               </button>
@@ -461,8 +463,8 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 {/* Header row of card: Icon + Name (strictly no squish) + Badge */}
                 <div className="category-card-header">
                   <div className="category-card-title-group">
-                    <span className="category-card-icon" style={{ display: 'inline-flex', alignItems: 'center', color: cat.color }}>
-                      {getDrawerCategoryIcon(cat.id, 22, cat.color)}
+                    <span className="category-card-icon" style={{ width: '32px', height: '32px', borderRadius: '8px', background: `${cat.color}15`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {getDrawerCategoryIcon(cat.id, 18, cat.color)}
                     </span>
                     <strong className="category-card-name" title={cat.name}>
                       {cat.name}
@@ -522,14 +524,18 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   }}
                   className="category-card-shop-name"
                   title={cat.shop}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <StoreIcon size={13} color="#ea580c" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <StoreIcon size={11} color="#ea580c" />
+                  </span>
                   <span>{cat.shop}</span>
                 </span>
-                <span className="category-card-action-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                <span className="category-card-action-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   <span>Xem ngành hàng</span>
-                  <ChevronRightIcon size={12} color="#ea580c" />
+                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ChevronRightIcon size={10} color="#ea580c" />
+                  </span>
                 </span>
               </div>
             </div>

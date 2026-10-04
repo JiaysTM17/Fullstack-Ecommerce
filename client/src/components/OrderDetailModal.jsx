@@ -484,11 +484,13 @@ export default function OrderDetailModal({
                   height: '28px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '5px',
                   marginRight: '4px',
                 }}
               >
-                <ArrowLeftIcon size={13} color="#2563eb" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowLeftIcon size={11} color="#2563eb" />
+                </span>
                 <span>Quay lại danh sách</span>
               </button>
             )}
@@ -632,8 +634,8 @@ export default function OrderDetailModal({
                 gap: '8px',
               }}
             >
-              <span style={{ color: '#ef4444', flexShrink: 0, marginTop: '2px' }}>
-                <ReturnIcon size={15} color="#ef4444" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                <ReturnIcon size={13} color="#ef4444" />
               </span>
               <div style={{ flex: 1, fontSize: '12px', color: '#991b1b', lineHeight: 1.4 }}>
                 <strong>Đơn hàng đã được hủy:</strong> {order.cancelReason || 'Người mua yêu cầu hủy đơn'}
@@ -655,8 +657,8 @@ export default function OrderDetailModal({
                 gap: '8px',
               }}
             >
-              <span style={{ color: '#2563eb', flexShrink: 0, marginTop: '2px' }}>
-                <ReturnIcon size={15} color="#9333ea" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(147, 51, 234, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                <ReturnIcon size={13} color="#9333ea" />
               </span>
               <div style={{ flex: 1, fontSize: '12px', color: '#1e40af', lineHeight: 1.4 }}>
                 <strong>Yêu cầu Trả hàng / Hoàn tiền đang được xử lý:</strong> {order.returnDetails?.reason || 'Sản phẩm lỗi hoặc hư hỏng'}
@@ -711,12 +713,14 @@ export default function OrderDetailModal({
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px',
+                      gap: '5px',
                       padding: '2px 4px',
                     }}
                   >
-                    <ClockIcon size={11} color="#2563eb" />
-                    {showDetailedTimeline ? 'Thu gọn lịch trình' : 'Xem lịch trình chi tiết'}
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ClockIcon size={11} color="#2563eb" />
+                    </span>
+                    <span>{showDetailedTimeline ? 'Thu gọn lịch trình' : 'Xem lịch trình chi tiết'}</span>
                   </button>
 
                   {isShipping && handleOpenTracking && (
@@ -979,8 +983,10 @@ export default function OrderDetailModal({
                 </div>
               </div>
 
-              <div style={{ fontSize: '11px', color: '#15803d', background: '#f0fdf4', padding: '4px 8px', borderRadius: '4px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <ShieldCheckIcon size={12} color="#16a34a" />
+              <div style={{ fontSize: '11px', color: '#15803d', background: '#f0fdf4', padding: '4px 8px', borderRadius: '4px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheckIcon size={10} color="#16a34a" />
+                </span>
                 <span>Giao hàng an toàn · Cho phép kiểm tra hàng</span>
               </div>
             </div>
@@ -1022,8 +1028,8 @@ export default function OrderDetailModal({
                 <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
                   {shopName}
                 </span>
-                <span style={{ fontSize: '11px', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                  · 4.9 <StarIcon size={11} color="#f59e0b" /> (12k đánh giá)
+                <span style={{ fontSize: '11px', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  · 4.9 <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StarIcon size={10} color="#f59e0b" filled /></span> (12k đánh giá)
                 </span>
               </div>
 
@@ -1234,7 +1240,9 @@ export default function OrderDetailModal({
               </div>
 
               <div style={{ fontSize: '11px', color: '#1e40af', background: '#eff6ff', padding: '6px 8px', borderRadius: '4px', marginTop: '6px', display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: 1.35 }}>
-                <ShieldCheckIcon size={13} color="#2563eb" style={{ flexShrink: 0, marginTop: '1px' }} />
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
+                  <ShieldCheckIcon size={11} color="#2563eb" />
+                </span>
                 <span>Shopee SafePay bảo hộ: Tiền chỉ chuyển cho shop sau khi bạn nhận hàng và hài lòng 100%.</span>
               </div>
             </div>
@@ -1319,10 +1327,12 @@ export default function OrderDetailModal({
                       fontWeight: 700,
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px',
+                      gap: '5px',
                     }}
                   >
-                    <SparklesIcon size={13} color="#15803d" />
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(21, 128, 61, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <SparklesIcon size={11} color="#15803d" />
+                    </span>
                     <span>Tiết kiệm được {formatCurrency(totalSavings)} cho đơn hàng này</span>
                   </div>
                 )}

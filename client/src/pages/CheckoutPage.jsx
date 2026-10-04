@@ -41,6 +41,7 @@ import {
   ArrowLeftIcon,
   QrCodeIcon,
   TrashIcon,
+  PlusIcon,
 } from "../components/OrdersIcons";
 import "../styles/checkout-multistep.css";
 
@@ -1233,10 +1234,12 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setShowVoucherModal(true)}
-                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
                   <span>{(appliedDiscountVoucher || appliedShippingVoucher) ? "Đổi mã khác" : "Chọn mã giảm giá"}</span>
-                  <ChevronRightIcon size={12} color="var(--primary-color, #ea580c)" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ChevronRightIcon size={10} color="var(--primary-color, #ea580c)" />
+                  </span>
                 </button>
               </div>
 

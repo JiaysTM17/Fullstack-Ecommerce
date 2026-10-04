@@ -422,8 +422,11 @@ export default function VoucherPickerModal({
         {bestComboSavings > 0 && (
           <div className="voucher-smart-recommendation-hero">
             <div className="voucher-smart-hero-left">
-              <span className="voucher-smart-tag">
-                <StarIcon size={12} color="#f59e0b" filled /> GỢI Ý TỐI ƯU NHẤT CHO BẠN
+              <span className="voucher-smart-tag" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(245, 158, 11, 0.2)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <StarIcon size={10} color="#f59e0b" filled />
+                </span>
+                <span>GỢI Ý TỐI ƯU NHẤT CHO BẠN</span>
               </span>
               <div className="voucher-smart-hero-title">
                 Tiết kiệm tối đa: <span style={{ color: "#ea580c" }}>-{formatCurrency(bestComboSavings)}</span>
@@ -662,15 +665,21 @@ export default function VoucherPickerModal({
                             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                               <h4 className="voucher-title">{v.name}</h4>
                               {isBest && (
-                                <span className="voucher-best-badge">
-                                  <StarIcon size={11} color="#f59e0b" filled /> TỐT NHẤT CHO BẠN
+                                <span className="voucher-best-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                  <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(245, 158, 11, 0.2)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                    <StarIcon size={9} color="#f59e0b" filled />
+                                  </span>
+                                  <span>TỐT NHẤT CHO BẠN</span>
                                 </span>
                               )}
                             </div>
                             <span className="voucher-code-badge">{v.code}</span>
                             {isEligible && saving > 0 && (
-                              <div className="voucher-saving-highlight">
-                                <BoltIcon size={12} color="#0284c7" /> Tiết kiệm: -{formatCurrency(saving)}
+                              <div className="voucher-saving-highlight" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                                <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(2, 132, 199, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                  <BoltIcon size={10} color="#0284c7" />
+                                </span>
+                                <span>Tiết kiệm: -{formatCurrency(saving)}</span>
                               </div>
                             )}
                           </div>
@@ -680,7 +689,7 @@ export default function VoucherPickerModal({
                               height: "20px",
                               borderRadius: "50%",
                               border: isSelected
-                                ? "6px solid #0284c7"
+                                ? "#0284c7"
                                 : "2px solid #cbd5e1",
                               background: "#fff",
                               transition: "all 0.15s ease",
@@ -693,8 +702,10 @@ export default function VoucherPickerModal({
                         <div className="voucher-ticket-footer">
                           <div className="voucher-condition-tag">
                             {isEligible ? (
-                              <span className="eligible" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                <CheckIcon size={11} color="#059669" />
+                              <span className="eligible" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                <span style={{ width: "16px", height: "16px", borderRadius: "50%", background: "rgba(5, 150, 105, 0.15)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                  <CheckIcon size={9} color="#059669" />
+                                </span>
                                 <span>Đủ điều kiện</span>
                               </span>
                             ) : (
@@ -890,15 +901,21 @@ export default function VoucherPickerModal({
                             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                               <h4 className="voucher-title">{v.name}</h4>
                               {isBest && (
-                                <span className="voucher-best-badge">
-                                  <StarIcon size={11} color="#f59e0b" filled /> TỐT NHẤT CHO BẠN
+                                <span className="voucher-best-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                  <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(245, 158, 11, 0.2)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                    <StarIcon size={9} color="#f59e0b" filled />
+                                  </span>
+                                  <span>TỐT NHẤT CHO BẠN</span>
                                 </span>
                               )}
                             </div>
                             <span className="voucher-code-badge">{v.code}</span>
                             {isEligible && saving > 0 && (
-                              <div className="voucher-saving-highlight">
-                                <BoltIcon size={12} color="#ea580c" /> Tiết kiệm: -{formatCurrency(saving)}
+                              <div className="voucher-saving-highlight" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                                <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(234, 88, 12, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                  <BoltIcon size={10} color="#ea580c" />
+                                </span>
+                                <span>Tiết kiệm: -{formatCurrency(saving)}</span>
                               </div>
                             )}
                           </div>
@@ -921,8 +938,10 @@ export default function VoucherPickerModal({
                         <div className="voucher-ticket-footer">
                           <div className="voucher-condition-tag">
                             {isEligible ? (
-                              <span className="eligible" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                <CheckIcon size={11} color="#059669" />
+                              <span className="eligible" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                <span style={{ width: "16px", height: "16px", borderRadius: "50%", background: "rgba(5, 150, 105, 0.15)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                  <CheckIcon size={9} color="#059669" />
+                                </span>
                                 <span>Đủ điều kiện</span>
                               </span>
                             ) : (

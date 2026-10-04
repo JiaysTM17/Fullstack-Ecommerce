@@ -294,9 +294,12 @@ export default function VietQRPaymentModal({
                   type="button"
                   className="shopee-btn shopee-btn-primary"
                   onClick={onClose}
-                  style={{ minWidth: '160px', padding: '10px 24px', fontWeight: 700 }}
+                  style={{ minWidth: '160px', padding: '10px 24px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 >
-                  Hoàn Tất & Xem Đơn Hàng
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={12} color="#ffffff" />
+                  </span>
+                  <span>Hoàn Tất & Xem Đơn Hàng</span>
                 </button>
               </div>
             </div>
@@ -374,8 +377,10 @@ export default function VietQRPaymentModal({
                           boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.06)' : 'none',
                         }}
                       >
-                        <div style={{ fontSize: '13px', fontWeight: 800, color: isSelected ? bank.color : 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
-                          <CreditCardIcon size={12} color={isSelected ? bank.color : "#64748b"} />
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: isSelected ? bank.color : 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: isSelected ? `${bank.color}18` : 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CreditCardIcon size={11} color={isSelected ? bank.color : "#64748b"} />
+                          </span>
                           <span>{bank.name.split(' ')[0]}</span>
                         </div>
                         <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
