@@ -483,7 +483,9 @@ export default function CheckoutPage() {
           <span>1. Địa Chỉ Nhận Hàng</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
-          <ChevronRightIcon size={14} color="#94a3b8" />
+          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChevronRightIcon size={10} color="#64748b" />
+          </span>
         </span>
 
         <div className={`checkout-step-item ${currentStep === 2 ? "active" : currentStep > 2 ? "completed" : ""}`}>
@@ -491,7 +493,9 @@ export default function CheckoutPage() {
           <span>2. Vận Chuyển</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
-          <ChevronRightIcon size={14} color="#94a3b8" />
+          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChevronRightIcon size={10} color="#64748b" />
+          </span>
         </span>
 
         <div className={`checkout-step-item ${currentStep === 3 ? "active" : currentStep > 3 ? "completed" : ""}`}>
@@ -499,7 +503,9 @@ export default function CheckoutPage() {
           <span>3. Phương Thức Thanh Toán</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
-          <ChevronRightIcon size={14} color="#94a3b8" />
+          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChevronRightIcon size={10} color="#64748b" />
+          </span>
         </span>
 
         <div className={`checkout-step-item ${currentStep === 4 ? "active" : ""}`}>

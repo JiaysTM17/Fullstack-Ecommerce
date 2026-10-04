@@ -320,7 +320,9 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               gap: '5px',
             }}
           >
-            <StoreIcon size={12} color="#94a3b8" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <StoreIcon size={11} color="#94a3b8" />
+            </span>
             <span>{hubs[1]?.name || 'Kho Tân Bình'}</span>
           </div>
 
@@ -342,7 +344,9 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               gap: '5px',
             }}
           >
-            <MapPinIcon size={12} color="#ffffff" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MapPinIcon size={11} color="#ffffff" />
+            </span>
             <span>Nhà của bạn</span>
           </div>
 

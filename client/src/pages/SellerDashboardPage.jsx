@@ -1688,7 +1688,9 @@ export default function SellerDashboardPage() {
                 border: '1px solid rgba(234, 88, 12, 0.25)',
                 fontSize: '12px',
               }}>
-                <LockIcon size={16} color="#f59e0b" />
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <LockIcon size={14} color="#f59e0b" />
+                </span>
                 <div>
                   <div style={{ color: 'var(--text-muted)', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Kênh Độc Quyền</div>
                   <strong style={{ color: 'var(--text-primary)' }}>Gian Hàng #{currentShop.id.toUpperCase()}</strong>
@@ -1704,7 +1706,9 @@ export default function SellerDashboardPage() {
             <span className="shopee-metric-label">Tổng Doanh Thu Cửa Hàng</span>
             <span className="shopee-metric-value" style={{ color: '#ea580c' }}>{formatCurrency(totalRevenue)}</span>
             <span className="shopee-metric-hint" style={{ color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <CheckIcon size={12} color="#16a34a" />
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={10} color="#16a34a" />
+              </span>
               <span>Đã trừ đơn hủy • Tăng trưởng +15.4%</span>
             </span>
           </div>
@@ -1717,7 +1721,9 @@ export default function SellerDashboardPage() {
             <span className="shopee-metric-hint" style={{ color: pendingOrdersCount > 0 ? '#dc2626' : '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               {pendingOrdersCount > 0 ? (
                 <>
-                  <AlertCircleIcon size={12} color="#dc2626" />
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <AlertCircleIcon size={10} color="#dc2626" />
+                  </span>
                   <span>Cần xác nhận ngay để giao SPX</span>
                 </>
               ) : (
@@ -1732,7 +1738,9 @@ export default function SellerDashboardPage() {
             <span className="shopee-metric-hint" style={{ color: lowStockCount > 0 ? '#ea580c' : '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               {lowStockCount > 0 ? (
                 <>
-                  <AlertCircleIcon size={12} color="#ea580c" />
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <AlertCircleIcon size={10} color="#ea580c" />
+                  </span>
                   <span>Có {lowStockCount} sản phẩm sắp hết hàng</span>
                 </>
               ) : (
@@ -1744,7 +1752,9 @@ export default function SellerDashboardPage() {
           <div className="shopee-metric-card" style={{ borderLeft: '4px solid #10b981' }}>
             <span className="shopee-metric-label">Chỉ Số Vận Hành Shop</span>
             <span className="shopee-metric-value" style={{ color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <StarIcon size={16} color="#059669" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <StarIcon size={13} color="#059669" />
+              </span>
               <span>{currentShop.rating} / 5.0</span>
             </span>
             <span className="shopee-metric-hint" style={{ color: '#64748b' }}>
@@ -1904,9 +1914,12 @@ export default function SellerDashboardPage() {
                     type="button"
                     onClick={() => setShowWithdrawModal(true)}
                     className="shopee-btn shopee-btn-primary"
-                    style={{ padding: '6px 14px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                    style={{ padding: '6px 14px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
-                    <CreditCardIcon size={14} color="#ffffff" /> Rút Tiền Về Ngân Hàng
+                    <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CreditCardIcon size={12} color="#ffffff" />
+                    </span>
+                    <span>Rút Tiền Về Ngân Hàng</span>
                   </button>
                 </div>
               </div>
@@ -1927,7 +1940,9 @@ export default function SellerDashboardPage() {
                   {formatCurrency(totalWithdrawn)}
                 </span>
                 <span className="shopee-metric-hint" style={{ color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <CheckIcon size={12} color="#16a34a" />
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={10} color="#16a34a" />
+                  </span>
                   <span>Đã chuyển khoản an toàn qua hệ thống ngân hàng</span>
                 </span>
               </div>
@@ -1947,8 +1962,10 @@ export default function SellerDashboardPage() {
                     </p>
                   </div>
                 </div>
-                <span className="seller-badge-pill" style={{ background: '#dcfce7', color: '#16a34a', border: '1px solid #bbf7d0', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <CheckIcon size={12} color="#16a34a" />
+                <span className="seller-badge-pill" style={{ background: '#dcfce7', color: '#16a34a', border: '1px solid #bbf7d0', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={10} color="#16a34a" />
+                  </span>
                   <span>ĐÃ XÁC MINH DANH TÍNH</span>
                 </span>
               </div>

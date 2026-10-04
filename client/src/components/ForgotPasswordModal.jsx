@@ -572,7 +572,11 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
 
               <div className="shopee-email-autocomplete-wrap" style={{ position: 'relative' }}>
                 <div className="shopee-form-input-wrap">
-                  <span className="shopee-input-lead-icon"><MailIcon size={16} color="#2563eb" /></span>
+                  <span className="shopee-input-lead-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <MailIcon size={13} color="#2563eb" />
+                    </span>
+                  </span>
                   <input
                     ref={emailInputRef}
                     type="email"
@@ -625,7 +629,9 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                           transition: 'background 0.15s',
                         }}
                       >
-                        <MailIcon size={14} color="#64748b" />
+                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <MailIcon size={12} color="#2563eb" />
+                        </span>
                         <span>
                           <span style={{ fontWeight: 600, color: '#0f172a' }}>{item.prefix}</span>
                           <span style={{ color: '#2563eb', fontWeight: 700 }}>{item.domain}</span>
@@ -960,7 +966,11 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 Mật khẩu mới của bạn *
               </label>
               <div className="shopee-form-input-wrap">
-                <span className="shopee-input-lead-icon"><LockIcon size={14} color="#ea580c" /></span>
+                <span className="shopee-input-lead-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <LockIcon size={12} color="#ea580c" />
+                  </span>
+                </span>
                 <input
                   type={showNewPassword ? 'text' : 'password'}
                   className="shopee-form-input"
@@ -979,7 +989,15 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   onClick={() => setShowNewPassword(!showNewPassword)}
                   tabIndex={-1}
                 >
-                  {showNewPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                  {showNewPassword ? (
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <EyeOffIcon size={12} color="#64748b" />
+                    </span>
+                  ) : (
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <EyeIcon size={12} color="#64748b" />
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -1126,7 +1144,11 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 Xác nhận lại mật khẩu mới *
               </label>
               <div className="shopee-form-input-wrap">
-                <span className="shopee-input-lead-icon"><KeyIcon size={14} color="#6366f1" /></span>
+                <span className="shopee-input-lead-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <KeyIcon size={12} color="#6366f1" />
+                  </span>
+                </span>
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   className="shopee-form-input"
@@ -1144,7 +1166,15 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   tabIndex={-1}
                 >
-                  {showConfirmPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                  {showConfirmPassword ? (
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <EyeOffIcon size={12} color="#64748b" />
+                    </span>
+                  ) : (
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <EyeIcon size={12} color="#64748b" />
+                    </span>
+                  )}
                 </button>
               </div>
             </div>

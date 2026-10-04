@@ -177,8 +177,10 @@ export default function WishlistPage() {
                           onChange={(e) => setWishlistSearch(e.target.value)}
                           style={{ padding: '6px 12px 6px 30px', fontSize: '12.5px', borderRadius: '6px', height: '34px' }}
                         />
-                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
-                          <SearchIcon size={13} color="#94a3b8" />
+                        <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(148, 163, 184, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <SearchIcon size={11} color="#64748b" />
+                          </span>
                         </span>
                         {wishlistSearch && (
                           <button

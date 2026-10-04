@@ -1483,9 +1483,11 @@ export default function LiveChatWidget() {
                                       cursor: 'pointer',
                                     }}
                                   >
-                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                       <span>Chi tiết</span>
-                                      <ChevronRightIcon size={10} color="var(--primary-color, #4f46e5)" />
+                                      <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(79, 70, 229, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <ChevronRightIcon size={9} color="var(--primary-color, #4f46e5)" />
+                                      </span>
                                     </span>
                                   </button>
                                 </div>
@@ -1782,8 +1784,8 @@ export default function LiveChatWidget() {
                             }}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ display: 'inline-flex', alignItems: 'center', color: '#d97706' }}>
-                                <CoinIcon size={20} color="#f59e0b" />
+                              <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <CoinIcon size={18} color="#f59e0b" />
                               </span>
                               <div>
                                 <div style={{ fontSize: '10.5px', color: '#b45309', fontWeight: 600 }}>
@@ -2052,7 +2054,9 @@ export default function LiveChatWidget() {
                               gap: '4px',
                             }}
                           >
-                            <ChatIcon size={10} color="#2563eb" />
+                            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <ChatIcon size={9} color="#2563eb" />
+                            </span>
                             <span>{sug}</span>
                           </button>
                         ))}
@@ -2171,7 +2175,9 @@ export default function LiveChatWidget() {
               }}
               title={isListening ? 'Dừng lắng nghe' : 'Nói bằng giọng nói'}
             >
-              <MicIcon size={16} color={isListening ? "#ffffff" : "#0284c7"} />
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: isListening ? 'rgba(255, 255, 255, 0.25)' : 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MicIcon size={14} color={isListening ? "#ffffff" : "#0284c7"} />
+              </span>
             </button>
 
             {/* Nút Gửi Tin Nhắn */}
@@ -2202,7 +2208,9 @@ export default function LiveChatWidget() {
               }}
               title="Gửi tin nhắn"
             >
-              <SendIcon size={15} color="#ffffff" />
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: inputMessage.trim() ? 'rgba(255, 255, 255, 0.25)' : 'transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <SendIcon size={13} color="#ffffff" />
+              </span>
             </button>
           </form>
         </div>

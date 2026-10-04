@@ -551,7 +551,9 @@ export default function OrderDetailModal({
                 border: `1px solid ${statusBadge.color}30`,
               }}
             >
-              {statusBadge.icon}
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: `${statusBadge.color}20`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                {statusBadge.icon}
+              </span>
               <span>{statusBadge.text}</span>
             </span>
           </div>

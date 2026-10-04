@@ -692,10 +692,12 @@ const Header = ({
                             </div>
                             <span
                               onClick={(e) => removeRecentSearch(e, item)}
-                              style={{ color: 'var(--text-muted)', fontSize: '12px', padding: '2px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                               title="Xóa mục này"
                             >
-                              <CloseIcon size={11} color="#ef4444" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CloseIcon size={9} color="#ef4444" />
+                              </span>
                             </span>
                           </div>
                         ))}
@@ -763,7 +765,9 @@ const Header = ({
                             onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
                             onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                           >
-                            <span style={{ color: 'var(--primary-color, #ea580c)', display: 'flex', alignItems: 'center' }}><SearchIcon size={12} /></span>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <SearchIcon size={10} color="#ea580c" />
+                            </span>
                             <span>{item}</span>
                           </div>
                         ))}
@@ -773,8 +777,11 @@ const Header = ({
                     {/* Matching Products with Thumbnail & Price */}
                     {matchingProducts.length > 0 && (
                       <div>
-                        <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: '1px solid var(--border-light, #f0f0f0)', borderBottom: '1px solid var(--border-light, #f0f0f0)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <SparklesIcon size={13} color="var(--primary-color)" /> Sản Phẩm Trùng Khớp
+                        <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: '1px solid var(--border-light, #f0f0f0)', borderBottom: '1px solid var(--border-light, #f0f0f0)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <SparklesIcon size={11} color="var(--primary-color, #ea580c)" />
+                          </span>
+                          <span>Sản Phẩm Trùng Khớp</span>
                         </div>
                         {matchingProducts.map((p) => {
                           const id = p._id || p.id;
