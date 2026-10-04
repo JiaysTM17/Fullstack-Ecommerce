@@ -1115,10 +1115,12 @@ export default function LiveChatWidget() {
                     flexShrink: 0,
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '6px',
                   }}
                 >
-                  {chip.icon}
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {chip.icon}
+                  </span>
                   <span>{chip.label}</span>
                 </button>
               ))
@@ -1154,10 +1156,12 @@ export default function LiveChatWidget() {
                     flexShrink: 0,
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '6px',
                   }}
                 >
-                  {chip.icon}
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: idx === 6 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(0, 0, 0, 0.04)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {chip.icon}
+                  </span>
                   <span>{chip.label}</span>
                 </button>
               ))

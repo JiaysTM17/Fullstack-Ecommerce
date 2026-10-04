@@ -2590,8 +2590,11 @@ export default function SellerDashboardPage() {
                   className={`seller-tab-btn ${orderStatusFilter === 'pending' ? 'active' : ''}`}
                   onClick={() => setOrderStatusFilter('pending')}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <ClockIcon size={12} color="#d97706" /> Chờ xác nhận ({shopOrders.filter(o => o.status === 'pending').length})
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ClockIcon size={10} color="#d97706" />
+                    </span>
+                    <span>Chờ xác nhận ({shopOrders.filter(o => o.status === 'pending').length})</span>
                   </span>
                 </button>
                 <button
@@ -2599,8 +2602,11 @@ export default function SellerDashboardPage() {
                   className={`seller-tab-btn ${orderStatusFilter === 'shipping' ? 'active' : ''}`}
                   onClick={() => setOrderStatusFilter('shipping')}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <TruckIcon size={12} color="#0284c7" /> Đang giao hàng ({shopOrders.filter(o => o.status === 'shipping').length})
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <TruckIcon size={10} color="#0284c7" />
+                    </span>
+                    <span>Đang giao hàng ({shopOrders.filter(o => o.status === 'shipping').length})</span>
                   </span>
                 </button>
                 <button
@@ -2608,8 +2614,11 @@ export default function SellerDashboardPage() {
                   className={`seller-tab-btn ${orderStatusFilter === 'completed' ? 'active' : ''}`}
                   onClick={() => setOrderStatusFilter('completed')}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckIcon size={12} color="#16a34a" /> Đã hoàn thành ({shopOrders.filter(o => o.status === 'completed').length})
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CheckIcon size={10} color="#16a34a" />
+                    </span>
+                    <span>Đã hoàn thành ({shopOrders.filter(o => o.status === 'completed').length})</span>
                   </span>
                 </button>
                 <button
@@ -2617,8 +2626,11 @@ export default function SellerDashboardPage() {
                   className={`seller-tab-btn ${orderStatusFilter === 'cancelled' ? 'active' : ''}`}
                   onClick={() => setOrderStatusFilter('cancelled')}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <CloseIcon size={12} color="#ef4444" /> Đã hủy ({shopOrders.filter(o => o.status === 'cancelled').length})
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CloseIcon size={10} color="#ef4444" />
+                    </span>
+                    <span>Đã hủy ({shopOrders.filter(o => o.status === 'cancelled').length})</span>
                   </span>
                 </button>
               </div>
