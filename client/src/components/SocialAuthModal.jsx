@@ -448,7 +448,12 @@ export default function SocialAuthModal({
                   <span>Đang xác thực...</span>
                 </>
               ) : (
-                `Tiếp tục với tư cách ${fullName.split(' ')[0] || 'Google'}`
+                <>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={12} color="#ffffff" />
+                  </span>
+                  <span>{`Tiếp tục với tư cách ${fullName.split(' ')[0] || 'Google'}`}</span>
+                </>
               )}
             </button>
           </div>
@@ -738,7 +743,12 @@ export default function SocialAuthModal({
                   <span>Đang đăng nhập...</span>
                 </>
               ) : (
-                `Tiếp tục dưới tên ${fullName.split(' ')[0] || 'Facebook'}`
+                <>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={12} color="#ffffff" />
+                  </span>
+                  <span>{`Tiếp tục dưới tên ${fullName.split(' ')[0] || 'Facebook'}`}</span>
+                </>
               )}
             </button>
 
