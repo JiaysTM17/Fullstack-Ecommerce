@@ -461,7 +461,9 @@ export default function AuthModal() {
                       className="shopee-password-toggle"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {showPassword ? <EyeOffIcon size={13} color="#64748b" /> : <EyeIcon size={13} color="#64748b" />}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -625,7 +627,9 @@ export default function AuthModal() {
                   className="shopee-password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {showPassword ? <EyeOffIcon size={13} color="#64748b" /> : <EyeIcon size={13} color="#64748b" />}
+                  </span>
                 </button>
               </div>
 
