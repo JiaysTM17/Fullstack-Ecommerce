@@ -546,8 +546,12 @@ export default function CheckoutPage() {
                         style={{ cursor: "pointer", position: "relative" }}
                       >
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                          <div style={{ fontWeight: 700, fontSize: "14.5px" }}>
-                            {addr.name || addr.fullName} ({addr.phone}) · <span style={{ fontSize: "11px", color: "var(--text-muted)", background: "var(--bg-muted, #f1f5f9)", padding: "1px 6px", borderRadius: "4px" }}>{addr.tag}</span>
+                          <div style={{ fontWeight: 700, fontSize: "14.5px", display: "inline-flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                            <span>{addr.name || addr.fullName} ({addr.phone})</span>
+                            <span style={{ fontSize: "11px", color: "#2563eb", background: "rgba(37, 99, 235, 0.08)", border: "1px solid rgba(37, 99, 235, 0.2)", padding: "1px 7px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px", fontWeight: 600 }}>
+                              {addr.tag === 'Văn Phòng' ? <StoreIcon size={10} color="#2563eb" /> : <HomeIcon size={10} color="#2563eb" />}
+                              <span>{addr.tag || 'Nhà Riêng'}</span>
+                            </span>
                           </div>
                           {addr.isDefault && (
                             <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>

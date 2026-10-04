@@ -493,8 +493,34 @@ export default function AdminDashboardPage() {
           </div>
           <div className="shopee-sidebar-info">
             <h3>Super Admin</h3>
-            <span className="shopee-sidebar-badge" style={{ background: 'var(--primary-light, rgba(234, 88, 12, 0.1))', color: 'var(--primary-color)' }}>
-              Quản Trị Toàn Sàn
+            <span
+              className="shopee-sidebar-badge"
+              style={{
+                background: 'rgba(234, 88, 12, 0.1)',
+                color: 'var(--primary-color, #ea580c)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                fontSize: '11px',
+                fontWeight: 700,
+              }}
+            >
+              <span
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  borderRadius: '50%',
+                  background: 'rgba(234, 88, 12, 0.2)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ShieldIcon size={9} color="#ea580c" />
+              </span>
+              <span>Quản Trị Toàn Sàn</span>
             </span>
           </div>
         </div>
