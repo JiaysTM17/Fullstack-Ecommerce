@@ -551,19 +551,26 @@ export default function CheckoutPage() {
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                           <div style={{ fontWeight: 700, fontSize: "14.5px", display: "inline-flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                             <span>{addr.name || addr.fullName} ({addr.phone})</span>
-                            <span style={{ fontSize: "11px", color: "#2563eb", background: "rgba(37, 99, 235, 0.08)", border: "1px solid rgba(37, 99, 235, 0.2)", padding: "1px 7px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px", fontWeight: 600 }}>
-                              {addr.tag === 'Văn Phòng' ? <StoreIcon size={10} color="#2563eb" /> : <HomeIcon size={10} color="#2563eb" />}
+                            <span style={{ fontSize: "11px", color: "#2563eb", background: "rgba(37, 99, 235, 0.08)", border: "1px solid rgba(37, 99, 235, 0.2)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "5px", fontWeight: 600 }}>
+                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {addr.tag === 'Văn Phòng' ? <StoreIcon size={9} color="#2563eb" /> : <HomeIcon size={9} color="#2563eb" />}
+                              </span>
                               <span>{addr.tag || 'Nhà Riêng'}</span>
                             </span>
                           </div>
                           {addr.isDefault && (
-                            <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                              <CheckIcon size={11} color="#ffffff" /> MẶC ĐỊNH
+                            <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckIcon size={9} color="#ffffff" />
+                              </span>
+                              <span>MẶC ĐỊNH</span>
                             </span>
                           )}
                         </div>
-                        <div style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.4", display: "flex", alignItems: "flex-start", gap: "6px" }}>
-                          <MapPinIcon size={14} style={{ flexShrink: 0, marginTop: "2px", color: "#2563eb" }} />
+                        <div style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.4", display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: "2px" }}>
+                            <MapPinIcon size={12} color="#2563eb" />
+                          </span>
                           <span>{addr.address}</span>
                         </div>
 
@@ -645,8 +652,11 @@ export default function CheckoutPage() {
                   })
                 ) : (
                   <div className="address-card selected">
-                    <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                      <CheckIcon size={11} color="#059669" /> MẶC ĐỊNH
+                    <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                      <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={9} color="#059669" />
+                      </span>
+                      <span>MẶC ĐỊNH</span>
                     </span>
                     <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px" }}>{fullName} ({phone})</div>
                     <div style={{ color: "var(--text-secondary)", fontSize: "13.5px", lineHeight: "1.5" }}>{address}</div>
@@ -748,7 +758,7 @@ export default function CheckoutPage() {
                                 style={{
                                   display: "inline-flex",
                                   alignItems: "center",
-                                  gap: "4px",
+                                  gap: "5px",
                                   background: "var(--primary-color, #ea580c)",
                                   color: "#ffffff",
                                   fontSize: "11px",
@@ -757,7 +767,10 @@ export default function CheckoutPage() {
                                   borderRadius: "12px",
                                 }}
                               >
-                                <CheckIcon size={12} color="#ffffff" /> Đã chọn
+                                <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <CheckIcon size={9} color="#ffffff" />
+                                </span>
+                                <span>Đã chọn</span>
                               </span>
                             )}
                           </div>
@@ -840,7 +853,7 @@ export default function CheckoutPage() {
                               style={{
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: "4px",
+                                gap: "5px",
                                 background: "var(--primary-color, #ea580c)",
                                 color: "#ffffff",
                                 fontSize: "11px",
@@ -849,7 +862,10 @@ export default function CheckoutPage() {
                                 borderRadius: "12px",
                               }}
                             >
-                              <CheckIcon size={12} color="#ffffff" /> Đã chọn
+                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckIcon size={9} color="#ffffff" />
+                              </span>
+                              <span>Đã chọn</span>
                             </span>
                           )}
                         </div>
@@ -889,7 +905,7 @@ export default function CheckoutPage() {
                               style={{
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: "4px",
+                                gap: "5px",
                                 background: "var(--primary-color, #ea580c)",
                                 color: "#ffffff",
                                 fontSize: "11px",
@@ -898,7 +914,10 @@ export default function CheckoutPage() {
                                 borderRadius: "12px",
                               }}
                             >
-                              <CheckIcon size={12} color="#ffffff" /> Đã chọn
+                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckIcon size={9} color="#ffffff" />
+                              </span>
+                              <span>Đã chọn</span>
                             </span>
                           )}
                         </div>
@@ -972,7 +991,7 @@ export default function CheckoutPage() {
                               style={{
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: "4px",
+                                gap: "5px",
                                 background: "var(--primary-color, #ea580c)",
                                 color: "#ffffff",
                                 fontSize: "11px",
@@ -981,7 +1000,10 @@ export default function CheckoutPage() {
                                 borderRadius: "12px",
                               }}
                             >
-                              <CheckIcon size={12} color="#ffffff" /> Đã chọn
+                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckIcon size={9} color="#ffffff" />
+                              </span>
+                              <span>Đã chọn</span>
                             </span>
                           )}
                         </div>
@@ -1021,7 +1043,7 @@ export default function CheckoutPage() {
                               style={{
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: "4px",
+                                gap: "5px",
                                 background: "var(--primary-color, #ea580c)",
                                 color: "#ffffff",
                                 fontSize: "11px",
@@ -1030,7 +1052,10 @@ export default function CheckoutPage() {
                                 borderRadius: "12px",
                               }}
                             >
-                              <CheckIcon size={12} color="#ffffff" /> Đã chọn
+                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckIcon size={9} color="#ffffff" />
+                              </span>
+                              <span>Đã chọn</span>
                             </span>
                           )}
                         </div>
@@ -1391,8 +1416,11 @@ export default function CheckoutPage() {
 
               {appliedShippingVoucher && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", background: "#f0f9ff", padding: "6px 10px", borderRadius: "6px", border: "1px solid #0284c7" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 800, color: "#0284c7" }}>
-                    <TruckIcon size={13} color="#0284c7" /> {appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)} ship)
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 800, color: "#0284c7" }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <TruckIcon size={11} color="#0284c7" />
+                    </span>
+                    <span>{appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)} ship)</span>
                   </span>
                   <button
                     type="button"
@@ -1409,8 +1437,11 @@ export default function CheckoutPage() {
 
               {appliedDiscountVoucher && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "6px 10px", borderRadius: "6px", border: "1px solid var(--primary-color, #ea580c)" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
-                    <TagIcon size={13} color="var(--primary-color, #ea580c)" /> {appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <TagIcon size={11} color="var(--primary-color, #ea580c)" />
+                    </span>
+                    <span>{appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})</span>
                   </span>
                   <button
                     type="button"
@@ -1442,8 +1473,11 @@ export default function CheckoutPage() {
             {/* Interactive Mini Xu Section in Checkout summary */}
             <div style={{ borderBottom: "1px dashed var(--border-medium, #ddd)", padding: "10px 0", margin: "2px 0" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                  <CoinIcon size={15} color="#f59e0b" /> Mini Xu [{(coins || 0).toLocaleString("vi-VN")}]:
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(245, 158, 11, 0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CoinIcon size={13} color="#f59e0b" />
+                  </span>
+                  <span>Mini Xu [{(coins || 0).toLocaleString("vi-VN")}]:</span>
                 </span>
                 <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: maxCoinsUsable > 0 ? "pointer" : "not-allowed" }}>
                   <input
@@ -1496,8 +1530,10 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div style={{ fontSize: "12px", color: "var(--text-muted, #777)", lineHeight: "1.5", borderTop: "1px solid var(--border-light, #eee)", paddingTop: "12px", display: "inline-flex", alignItems: "flex-start", gap: "6px" }}>
-            <LockIcon size={14} color="#16a34a" style={{ flexShrink: 0, marginTop: "2px" }} />
+          <div style={{ fontSize: "12px", color: "var(--text-muted, #777)", lineHeight: "1.5", borderTop: "1px solid var(--border-light, #eee)", paddingTop: "12px", display: "inline-flex", alignItems: "flex-start", gap: "8px" }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: "2px" }}>
+              <LockIcon size={11} color="#16a34a" />
+            </span>
             <span>Nhấn &quot;Xác Nhận Đặt Hàng&quot; đồng nghĩa bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Fullstack E-Commerce.</span>
           </div>
         </aside>

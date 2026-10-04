@@ -330,8 +330,10 @@ export default function ProductCompareModal() {
                     </th>
                     {comparedProducts.map((p) => (
                       <td key={p._id || p.id} style={{ padding: '12px 14px' }}>
-                        <span style={{ color: '#ffa41c', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                          <StarIcon size={12} color="#f59e0b" fill="#f59e0b" />
+                        <span style={{ color: '#d97706', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <StarIcon size={11} color="#f59e0b" fill="#f59e0b" />
+                          </span>
                           <span>{p.rating || 4.9}</span>
                         </span>
                         <span style={{ color: 'var(--text-muted)', fontSize: '12px', marginLeft: '6px' }}>
@@ -388,8 +390,10 @@ export default function ProductCompareModal() {
                     </th>
                     {comparedProducts.map((p) => (
                       <td key={p._id || p.id} style={{ padding: '12px 14px' }}>
-                        <span style={{ color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <CheckIcon size={12} color="#16a34a" />
+                        <span style={{ color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CheckIcon size={11} color="#16a34a" />
+                          </span>
                           <span>Còn {p.stock || 50} sản phẩm</span>
                         </span>
                         <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
