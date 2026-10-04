@@ -295,12 +295,16 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
         {/* Footer bottom */}
         <div className="shopee-footer-bottom">
           <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '12px' }}>
-            <span className="portfolio-credit-pill" style={{ color: '#16a34a', borderColor: 'rgba(22, 163, 74, 0.25)', background: 'rgba(22, 163, 74, 0.05)' }}>
-              <ShieldCheckIcon size={13} color="#16a34a" />
+            <span className="portfolio-credit-pill" style={{ color: '#16a34a', borderColor: 'rgba(22, 163, 74, 0.25)', background: 'rgba(22, 163, 74, 0.05)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheckIcon size={11} color="#16a34a" />
+              </span>
               <span>{language === 'en' ? 'Verified Ministry of Industry and Trade' : 'Đã Thông Báo Bộ Công Thương'}</span>
             </span>
-            <span className="portfolio-credit-pill" style={{ color: '#2563eb', borderColor: 'rgba(37, 99, 235, 0.25)', background: 'rgba(37, 99, 235, 0.05)' }}>
-              <CheckIcon size={12} color="#2563eb" />
+            <span className="portfolio-credit-pill" style={{ color: '#2563eb', borderColor: 'rgba(37, 99, 235, 0.25)', background: 'rgba(37, 99, 235, 0.05)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckIcon size={11} color="#2563eb" />
+              </span>
               <span>{language === 'en' ? '100% Secure Checkout SSL' : 'Thanh Toán Chuẩn An Toàn SSL'}</span>
             </span>
           </div>

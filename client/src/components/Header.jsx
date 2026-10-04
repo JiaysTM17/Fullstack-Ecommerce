@@ -388,16 +388,25 @@ const Header = ({
         {/* Top Mini Utility Bar */}
         <div className="shopee-topbar">
           <div className="shopee-topbar-left">
-            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <PackageIcon size={13} color="#ea580c" /> {t('nav_download_app', 'Tải Ứng Dụng')}
+            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PackageIcon size={11} color="#ea580c" />
+              </span>
+              <span>{t('nav_download_app', 'Tải Ứng Dụng')}</span>
             </span>
             <span className="shopee-topbar-divider" />
-            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <PhoneIcon size={13} color="#2563eb" /> Hotline: 1900 6868
+            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PhoneIcon size={11} color="#2563eb" />
+              </span>
+              <span>Hotline: 1900 6868</span>
             </span>
             <span className="shopee-topbar-divider" />
-            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <ChatIcon size={13} color="#16a34a" /> {t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}
+            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChatIcon size={11} color="#16a34a" />
+              </span>
+              <span>{t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}</span>
             </span>
           </div>
 
@@ -1196,9 +1205,11 @@ const Header = ({
                     e.preventDefault();
                     navTo('/login');
                   }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <KeyIcon size={14} color="#ffffff" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <KeyIcon size={11} color="#ffffff" />
+                  </span>
                   <span>{t('login', 'Đăng Nhập')}</span>
                 </button>
                 <button
