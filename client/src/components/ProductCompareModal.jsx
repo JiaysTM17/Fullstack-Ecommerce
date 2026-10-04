@@ -84,19 +84,23 @@ export default function ProductCompareModal() {
                     onClick={() => removeFromCompare(id)}
                     style={{
                       position: 'absolute',
-                      top: 0,
-                      right: 0,
-                      background: 'rgba(0,0,0,0.6)',
+                      top: '2px',
+                      right: '2px',
+                      background: 'rgba(239, 68, 68, 0.9)',
                       color: '#fff',
                       border: 'none',
-                      width: '16px',
-                      height: '16px',
+                      borderRadius: '50%',
+                      width: '18px',
+                      height: '18px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
+                      padding: 0,
                     }}
                     title="Xóa sản phẩm"
+                    aria-label="Xóa sản phẩm khỏi so sánh"
                   >
                     <CloseIcon size={10} color="#ffffff" />
                   </button>
@@ -253,7 +257,7 @@ export default function ProductCompareModal() {
                                   position: 'absolute',
                                   top: '6px',
                                   right: '6px',
-                                  background: 'rgba(0,0,0,0.5)',
+                                  background: 'rgba(239, 68, 68, 0.9)',
                                   color: '#fff',
                                   border: 'none',
                                   borderRadius: '50%',
@@ -263,8 +267,11 @@ export default function ProductCompareModal() {
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
+                                  boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
+                                  padding: 0,
                                 }}
-                                title="Xóa"
+                                title="Xóa sản phẩm này khỏi so sánh"
+                                aria-label="Xóa sản phẩm khỏi so sánh"
                               >
                                 <CloseIcon size={12} color="#ffffff" />
                               </button>
