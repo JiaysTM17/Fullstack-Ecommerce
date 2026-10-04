@@ -343,9 +343,16 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               onClick={onClose}
               className="category-drawer-close-btn"
               title="Đóng bảng ngành hàng"
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+              aria-label="Đóng bảng danh mục ngành hàng"
+              style={{
+                background: 'rgba(239, 68, 68, 0.2)',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
-              <CloseIcon size={16} color="#ffffff" />
+              <CloseIcon size={15} color="#ef4444" />
             </button>
           </div>
         </div>
