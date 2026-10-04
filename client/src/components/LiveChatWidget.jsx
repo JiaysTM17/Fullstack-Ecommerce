@@ -1606,7 +1606,13 @@ export default function LiveChatWidget() {
                                     transition: 'background 0.2s',
                                   }}
                                 >
-                                  {copiedCode === vc.code ? <CheckIcon size={12} color="#ffffff" /> : 'Copy'}
+                                  {copiedCode === vc.code ? (
+                                    <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      <CheckIcon size={10} color="#ffffff" />
+                                    </span>
+                                  ) : (
+                                    'Copy'
+                                  )}
                                 </button>
                               </div>
                             </div>
@@ -1696,11 +1702,26 @@ export default function LiveChatWidget() {
                                     fontWeight: 600,
                                   }}
                                 >
-                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckIcon size={11} color="#16a34a" /> Đặt hàng</span>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      <CheckIcon size={9} color="#16a34a" />
+                                    </span>
+                                    <span>Đặt hàng</span>
+                                  </span>
                                   <ChevronRightIcon size={11} color="#94a3b8" />
-                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckIcon size={11} color="#16a34a" /> Đóng gói</span>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      <CheckIcon size={9} color="#16a34a" />
+                                    </span>
+                                    <span>Đóng gói</span>
+                                  </span>
                                   <ChevronRightIcon size={11} color="#94a3b8" />
-                                  <span style={{ fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><TruckIcon size={12} color="#0284c7" /> Đang giao</span>
+                                  <span style={{ fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      <TruckIcon size={10} color="#0284c7" />
+                                    </span>
+                                    <span>Đang giao</span>
+                                  </span>
                                 </div>
                                 <div
                                   style={{
