@@ -540,7 +540,9 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               <span style={{ fontSize: '11px', color: note.trim().length >= 10 ? '#059669' : '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 {note.trim().length >= 10 ? (
                   <>
-                    <CheckIcon size={11} color="#059669" />
+                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CheckIcon size={9} color="#059669" />
+                    </span>
                     <span>Đạt yêu cầu ({note.trim().length} ký tự)</span>
                   </>
                 ) : (
