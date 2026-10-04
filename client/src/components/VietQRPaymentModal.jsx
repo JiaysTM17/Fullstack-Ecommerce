@@ -225,8 +225,8 @@ export default function VietQRPaymentModal({
             onClick={onClose}
             aria-label="Đóng"
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'rgba(239, 68, 68, 0.08)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
               borderRadius: '8px',
               width: '32px',
               height: '32px',

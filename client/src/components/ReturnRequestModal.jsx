@@ -202,14 +202,19 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
             type="button"
             className="shopee-order-btn-outline"
             onClick={onClose}
+            aria-label="Đóng"
             style={{
-              width: '28px',
-              height: '28px',
+              width: '32px',
+              height: '32px',
               padding: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: '6px',
+              borderRadius: '8px',
+              background: 'rgba(239, 68, 68, 0.08)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
             }}
           >
             <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
