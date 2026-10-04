@@ -446,8 +446,12 @@ export default function VoucherPickerModal({
               type="button"
               className="btn-apply-best-combo"
               onClick={handleAutoApplyBestCombo}
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
-              <BoltIcon size={14} color="#ffffff" /> Áp Dụng Ngay
+              <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "rgba(255, 255, 255, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <BoltIcon size={12} color="#ffffff" />
+              </span>
+              <span>Áp Dụng Ngay</span>
             </button>
           </div>
         )}
