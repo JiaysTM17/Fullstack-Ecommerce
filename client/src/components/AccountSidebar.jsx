@@ -80,7 +80,9 @@ export default function AccountSidebar({
               : 'Thành Viên Thân Thiết'}
           </span>
           <Link to="/profile?tab=profile" className="account-sidebar-edit-link">
-            <PencilIcon size={11} color="#2563eb" />
+            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PencilIcon size={10} color="#2563eb" />
+            </span>
             <span>Sửa hồ sơ</span>
           </Link>
         </div>

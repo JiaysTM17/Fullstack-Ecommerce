@@ -3159,8 +3159,11 @@ export default function SellerDashboardPage() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="submit" className="shopee-btn shopee-btn-primary" style={{ padding: '9px 24px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <CheckIcon size={14} color="#ffffff" /> Lưu Thay Đổi Hồ Sơ
+                <button type="submit" className="shopee-btn shopee-btn-primary" style={{ padding: '9px 24px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={13} color="#ffffff" />
+                  </span>
+                  <span>Lưu Thay Đổi Hồ Sơ</span>
                 </button>
               </div>
             </form>

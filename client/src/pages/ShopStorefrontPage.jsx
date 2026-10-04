@@ -548,14 +548,20 @@ export default function ShopStorefrontPage() {
               </div>
 
               <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <MapPinIcon size={13} color="#ea580c" /> {shop.location}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <MapPinIcon size={11} color="#ea580c" />
+                  </span>
+                  <span>{shop.location}</span>
                 </span>
                 <span>•</span>
                 <span>Hoạt động {shop.joinedDate}</span>
                 <span>•</span>
-                <span style={{ color: '#ea580c', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <ClockIcon size={13} color="#ea580c" /> Mở cửa: 08:00 - 21:00 hàng ngày
+                <span style={{ color: '#ea580c', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ClockIcon size={11} color="#ea580c" />
+                  </span>
+                  <span>Mở cửa: 08:00 - 21:00 hàng ngày</span>
                 </span>
               </p>
             </div>
@@ -1032,9 +1038,11 @@ export default function ShopStorefrontPage() {
                 onClick={() => setSelectedCategory('all')}
                 style={{ fontSize: '12.5px', padding: '6px 14px', borderRadius: '8px', fontWeight: 700 }}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <span>Xem Toàn Bộ {products.length} Sản Phẩm</span>
-                  <ChevronRightIcon size={13} color="#ea580c" />
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ChevronRightIcon size={11} color="#ea580c" />
+                  </span>
                 </span>
               </button>
             </div>

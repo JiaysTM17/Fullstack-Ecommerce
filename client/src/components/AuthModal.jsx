@@ -516,25 +516,34 @@ export default function AuthModal() {
                 type="button"
                 className="shopee-social-btn"
                 onClick={() => handleQuickDemoLogin('customer')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
               >
-                <GlobeIcon size={14} color="#0b57d0" /> Google
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(11, 87, 208, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <GlobeIcon size={12} color="#0b57d0" />
+                </span>
+                <span>Google</span>
               </button>
               <button
                 type="button"
                 className="shopee-social-btn"
                 onClick={() => handleQuickDemoLogin('customer')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
               >
-                <GlobeIcon size={14} color="#0866FF" /> Facebook
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(8, 102, 255, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <GlobeIcon size={12} color="#0866FF" />
+                </span>
+                <span>Facebook</span>
               </button>
               <button
                 type="button"
                 className="shopee-social-btn"
                 onClick={() => handleQuickDemoLogin('customer')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
               >
-                <GlobeIcon size={14} color="#000000" /> Apple
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(0, 0, 0, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <GlobeIcon size={12} color="#000000" />
+                </span>
+                <span>Apple</span>
               </button>
             </div>
           </div>

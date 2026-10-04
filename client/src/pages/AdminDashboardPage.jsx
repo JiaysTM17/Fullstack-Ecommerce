@@ -1065,8 +1065,10 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <button type="submit" className="shopee-btn shopee-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <CheckIcon size={15} />
+                  <button type="submit" className="shopee-btn shopee-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CheckIcon size={12} color="#ffffff" />
+                    </span>
                     <span>Phát Hành Voucher Toàn Sàn</span>
                   </button>
                 </div>
