@@ -532,11 +532,11 @@ export default function CartPage() {
                       <button
                         type="button"
                         className="shopee-btn shopee-btn-secondary"
-                        style={{ fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "8px" }}
+                        style={{ fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "8px", borderColor: "rgba(234, 88, 12, 0.3)", color: "var(--primary-color, #ea580c)" }}
                         onClick={() => moveToCartFromSaved(saved)}
                       >
-                        <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <CartIcon size={12} color="#ffffff" />
+                        <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CartIcon size={12} color="#ea580c" />
                         </span>
                         <span>{t('move_to_cart', 'Chuyển Vào Giỏ Hàng')}</span>
                       </button>
