@@ -1050,7 +1050,23 @@ const Header = ({
                           <strong>Tra Cứu Vận Đơn SPX</strong>
                           <small>Kiểm tra hành trình giao hàng nhanh 1-Click</small>
                         </div>
-                        <span className="item-badge" style={{ background: '#2563eb', color: '#fff' }}>SPX</span>
+                        <span
+                          className="item-badge"
+                          style={{
+                            background: '#2563eb',
+                            color: '#fff',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '2px 7px',
+                            borderRadius: '10px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                          }}
+                        >
+                          <TruckIcon size={10} color="#ffffff" />
+                          <span>SPX</span>
+                        </span>
                       </button>
 
                       <button
