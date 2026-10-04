@@ -985,20 +985,21 @@ export default function LiveChatWidget() {
                 type="button"
                 onClick={() => setIsOpen(false)}
                 style={{
-                  background: '#ea580c',
+                  background: 'rgba(239, 68, 68, 0.2)',
                   border: 'none',
-                  color: '#ffffff',
                   cursor: 'pointer',
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '5px',
+                  width: '26px',
+                  height: '26px',
+                  borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  padding: 0,
                 }}
                 title="Đóng chat"
+                aria-label="Đóng cửa sổ chat hỗ trợ"
               >
-                <CloseIcon size={14} color="#ffffff" />
+                <CloseIcon size={13} color="#ef4444" />
               </button>
             </div>
           </div>
