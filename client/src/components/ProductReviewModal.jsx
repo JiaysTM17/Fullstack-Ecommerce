@@ -395,13 +395,18 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '8px',
+                      background: isLit ? 'rgba(245, 158, 11, 0.15)' : 'rgba(203, 213, 225, 0.15)',
                       cursor: 'pointer',
-                      transform: isLit ? 'scale(1.15)' : 'scale(1)',
-                      transition: 'transform 0.12s ease',
+                      transform: isLit ? 'scale(1.12)' : 'scale(1)',
+                      transition: 'all 0.15s ease',
                       color: isLit ? '#f59e0b' : '#cbd5e1',
                     }}
                   >
-                    <StarIcon size={26} color={isLit ? '#f59e0b' : '#cbd5e1'} />
+                    <StarIcon size={22} color={isLit ? '#f59e0b' : '#cbd5e1'} filled={isLit} />
                   </span>
                 );
               })}

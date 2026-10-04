@@ -144,11 +144,13 @@ const ProductCard = ({
             transition: 'all 0.2s',
           }}
         >
-          <HeartIcon
-            size={18}
-            fill={wishlisted ? "#ef4444" : "none"}
-            color={wishlisted ? "#ef4444" : "#f43f5e"}
-          />
+          <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: wishlisted ? 'rgba(239, 68, 68, 0.15)' : 'rgba(244, 63, 94, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <HeartIcon
+              size={16}
+              fill={wishlisted ? "#ef4444" : "none"}
+              color={wishlisted ? "#ef4444" : "#f43f5e"}
+            />
+          </span>
         </button>
 
         {/* Compare Button */}
@@ -180,7 +182,9 @@ const ProductCard = ({
             transition: 'all 0.2s',
           }}
         >
-          <ScaleIcon size={14} color={isCompared(productId) ? "#ffffff" : "#475569"} />
+          <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: isCompared(productId) ? 'rgba(255, 255, 255, 0.25)' : 'rgba(71, 85, 105, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ScaleIcon size={14} color={isCompared(productId) ? "#ffffff" : "#475569"} />
+          </span>
         </button>
 
         {/* Quick View Button */}
@@ -224,7 +228,9 @@ const ProductCard = ({
           >
             {badge === "Amazon's Choice" ? (
               <>
-                <StarIcon size={10} color="#f59e0b" fill="#f59e0b" />
+                <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <StarIcon size={10} color="#f59e0b" fill="#f59e0b" />
+                </span>
                 <span>{t('nav_featured_picks', 'Tuyển Chọn')}</span>
               </>
             ) : (
@@ -244,7 +250,9 @@ const ProductCard = ({
         {hasDiscount && (
           <div className="shopee-discount-badge" style={{ top: badge ? '32px' : '0' }}>
             <span className="shopee-discount-percent" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
-              <FlameIcon size={9} color="#ea580c" />
+              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FlameIcon size={9} color="#ea580c" />
+              </span>
               <span>-{discountPercent}%</span>
             </span>
             <span className="shopee-discount-label">{t('sale_off', 'GIẢM')}</span>

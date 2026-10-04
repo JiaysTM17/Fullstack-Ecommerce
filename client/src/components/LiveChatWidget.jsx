@@ -1094,10 +1094,10 @@ export default function LiveChatWidget() {
           >
             {chatMode === 'human' ? (
               [
-                { label: 'Tiến độ đơn hàng', text: 'Nhờ em kiểm tra tiến độ đơn hàng gần nhất của anh/chị', icon: <PackageIcon size={12} color="#0284c7" /> },
-                { label: 'Đổi trả / Hoàn tiền', text: 'Anh/chị cần hỗ trợ hoàn tiền hoặc đổi sản phẩm', icon: <RefreshIcon size={12} color="#9333ea" /> },
-                { label: 'Bảo hành chính hãng', text: 'Chính sách bảo hành sản phẩm thực hiện thế nào em?', icon: <ShieldIcon size={12} color="#16a34a" /> },
-                { label: 'Về Trợ lý AI', text: 'Quay lại Trợ lý AI', icon: <SparklesIcon size={12} color="#8b5cf6" /> },
+                { label: 'Tiến độ đơn hàng', text: 'Nhờ em kiểm tra tiến độ đơn hàng gần nhất của anh/chị', icon: <PackageIcon size={12} color="#0284c7" />, bg: 'rgba(2, 132, 199, 0.15)' },
+                { label: 'Đổi trả / Hoàn tiền', text: 'Anh/chị cần hỗ trợ hoàn tiền hoặc đổi sản phẩm', icon: <RefreshIcon size={12} color="#9333ea" />, bg: 'rgba(147, 51, 234, 0.15)' },
+                { label: 'Bảo hành chính hãng', text: 'Chính sách bảo hành sản phẩm thực hiện thế nào em?', icon: <ShieldIcon size={12} color="#16a34a" />, bg: 'rgba(22, 163, 74, 0.15)' },
+                { label: 'Về Trợ lý AI', text: 'Quay lại Trợ lý AI', icon: <SparklesIcon size={12} color="#8b5cf6" />, bg: 'rgba(139, 92, 246, 0.15)' },
               ].map((chip, idx) => (
                 <button
                   key={idx}
@@ -1118,7 +1118,7 @@ export default function LiveChatWidget() {
                     gap: '6px',
                   }}
                 >
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: chip.bg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {chip.icon}
                   </span>
                   <span>{chip.label}</span>
@@ -1126,13 +1126,13 @@ export default function LiveChatWidget() {
               ))
             ) : (
               [
-                { label: 'Tư Vấn AI', text: 'Bạn có thể giúp gì cho tôi?', icon: <SparklesIcon size={12} color="#8b5cf6" /> },
-                { label: 'Gợi Ý Hot', text: 'Gợi ý sản phẩm bán chạy nhất hiện nay', icon: <ShoppingBagIcon size={12} color="#ea580c" /> },
-                { label: 'Tra Cứu Đơn', text: 'Kiểm tra đơn hàng của tôi', icon: <PackageIcon size={12} color="#0284c7" /> },
-                { label: 'Săn Voucher', text: 'Cho tôi xin mã giảm giá và freeship', icon: <TicketIcon size={12} color="#ea580c" /> },
-                { label: 'Vòng Quay & Xu', text: 'Vòng quay may mắn và xu thưởng', icon: <CoinIcon size={12} color="#f59e0b" /> },
-                { label: '12 Mall Shop', text: 'Khám phá các gian hàng chính hãng', icon: <StoreIcon size={12} color="#dc2626" /> },
-                { label: 'Gặp CSKH', text: 'Cho tôi gặp nhân viên trực CSKH', icon: <UserIcon size={12} color="#059669" /> },
+                { label: 'Tư Vấn AI', text: 'Bạn có thể giúp gì cho tôi?', icon: <SparklesIcon size={12} color="#8b5cf6" />, bg: 'rgba(139, 92, 246, 0.15)' },
+                { label: 'Gợi Ý Hot', text: 'Gợi ý sản phẩm bán chạy nhất hiện nay', icon: <ShoppingBagIcon size={12} color="#ea580c" />, bg: 'rgba(234, 88, 12, 0.15)' },
+                { label: 'Tra Cứu Đơn', text: 'Kiểm tra đơn hàng của tôi', icon: <PackageIcon size={12} color="#0284c7" />, bg: 'rgba(2, 132, 199, 0.15)' },
+                { label: 'Săn Voucher', text: 'Cho tôi xin mã giảm giá và freeship', icon: <TicketIcon size={12} color="#ea580c" />, bg: 'rgba(234, 88, 12, 0.15)' },
+                { label: 'Vòng Quay & Xu', text: 'Vòng quay may mắn và xu thưởng', icon: <CoinIcon size={12} color="#f59e0b" />, bg: 'rgba(245, 158, 11, 0.18)' },
+                { label: '12 Mall Shop', text: 'Khám phá các gian hàng chính hãng', icon: <StoreIcon size={12} color="#dc2626" />, bg: 'rgba(220, 38, 38, 0.15)' },
+                { label: 'Gặp CSKH', text: 'Cho tôi gặp nhân viên trực CSKH', icon: <UserIcon size={12} color="#059669" />, bg: 'rgba(16, 185, 129, 0.18)' },
               ].map((chip, idx) => (
                 <button
                   key={idx}
@@ -1159,7 +1159,7 @@ export default function LiveChatWidget() {
                     gap: '6px',
                   }}
                 >
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: idx === 6 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(0, 0, 0, 0.04)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: chip.bg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {chip.icon}
                   </span>
                   <span>{chip.label}</span>

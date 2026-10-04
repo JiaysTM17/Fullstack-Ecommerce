@@ -123,7 +123,9 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
                 gap: '4px',
               }}
             >
-              <ArrowLeftIcon size={12} color="#ffffff" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ArrowLeftIcon size={12} color="#ffffff" />
+              </span>
               <span>Quay lại</span>
             </button>
           )}
