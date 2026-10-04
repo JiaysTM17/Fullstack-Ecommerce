@@ -1668,7 +1668,12 @@ export default function OrderHistoryPage() {
                   {/* Card Header: Mall Badge, Shop Name, Chat Button, Order ID chip, Status Badge */}
                   <div className="shopee-order-card-header">
                     <div className="shopee-order-shop-group">
-                      <span className="shopee-mall-badge">Mall</span>
+                      <span className="shopee-mall-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                        <span style={{ width: '13px', height: '13px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ShieldCheckIcon size={9} color="#ffffff" />
+                        </span>
+                        <span>Mall</span>
+                      </span>
                       <span
                         className="shopee-order-shop-name"
                         onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
@@ -1858,7 +1863,9 @@ export default function OrderHistoryPage() {
                     <div className="shopee-order-compact-left">
                       {/* Vận chuyển */}
                       <div className="shopee-order-compact-item">
-                        <TruckIcon size={14} color="#2563eb" />
+                        <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <TruckIcon size={12} color="#2563eb" />
+                        </span>
                         <span className="compact-item-label">{t('shipping_carrier', 'Vận chuyển')}:</span>
                         <strong className="compact-item-val">SPX Express</strong>
                         <span
@@ -1878,7 +1885,9 @@ export default function OrderHistoryPage() {
 
                       {/* Phương thức thanh toán */}
                       <div className="shopee-order-compact-item">
-                        <CreditCardIcon size={14} color="#0284c7" />
+                        <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CreditCardIcon size={12} color="#0284c7" />
+                        </span>
                         <span className="compact-item-label">{t('payment_method', 'Thanh toán')}:</span>
                         <strong className="compact-item-val">{ord.paymentMethod || 'COD'}</strong>
                         <span className="compact-guarantee-note">· Bảo vệ an tâm 100%</span>
