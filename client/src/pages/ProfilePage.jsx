@@ -818,23 +818,53 @@ export default function ProfilePage() {
               <div className="profile-user-details">
                 <div className="profile-user-name-row">
                   <h1 className="profile-user-name">{user.fullName || user.email.split('@')[0]}</h1>
-                  <span className={`profile-role-badge ${user.role || 'customer'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <span className={`profile-role-badge ${user.role || 'customer'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     {user.role === 'admin' ? (
-                      <><ShieldIcon size={13} color="#dc2626" /> Super Admin</>
+                      <>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ShieldIcon size={11} color="#dc2626" />
+                        </span>
+                        <span>Super Admin</span>
+                      </>
                     ) : user.role === 'seller' ? (
-                      <><StoreIcon size={13} color="#2563eb" /> Chủ Gian Hàng</>
+                      <>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <StoreIcon size={11} color="#2563eb" />
+                        </span>
+                        <span>Chủ Gian Hàng</span>
+                      </>
                     ) : (
-                      <><SparklesIcon size={13} color="#f59e0b" /> Thành Viên</>
+                      <>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <SparklesIcon size={11} color="#f59e0b" />
+                        </span>
+                        <span>Thành Viên</span>
+                      </>
                     )}
                   </span>
                 </div>
 
                 <div className="profile-user-meta">
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MailIcon size={13} color="#2563eb" /> {user.email}</span>
-                  {user.phone && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>· <PhoneIcon size={13} color="#16a34a" /> {user.phone}</span>}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <MailIcon size={11} color="#2563eb" />
+                    </span>
+                    <span>{user.email}</span>
+                  </span>
+                  {user.phone && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <span>·</span>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <PhoneIcon size={11} color="#16a34a" />
+                      </span>
+                      <span>{user.phone}</span>
+                    </span>
+                  )}
                   <span>·</span>
-                  <div className="profile-loyalty-tier" style={{ color: loyaltyTier.color, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                    <SparklesIcon size={13} color={loyaltyTier.color} />
+                  <div className="profile-loyalty-tier" style={{ color: loyaltyTier.color, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <SparklesIcon size={11} color={loyaltyTier.color} />
+                    </span>
                     <span>{loyaltyTier.name}</span>
                   </div>
                 </div>
@@ -1060,8 +1090,11 @@ export default function ProfilePage() {
                       Mức Độ Hoàn Thiện Hồ Sơ: {profileCompleteness.percentage}%
                     </strong>
                     {profileCompleteness.isComplete && (
-                      <span style={{ background: '#dcfce7', color: '#15803d', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <CheckIcon size={11} color="#059669" /> HOÀN HẢO
+                      <span style={{ background: '#dcfce7', color: '#15803d', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CheckIcon size={9} color="#059669" />
+                        </span>
+                        <span>HOÀN HẢO</span>
                       </span>
                     )}
                   </div>
@@ -1088,16 +1121,22 @@ export default function ProfilePage() {
                       boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '6px',
+                      gap: '8px',
                     }}
                   >
-                    <GiftIcon size={15} color="#ea580c" /> Nhận +500 Shopee Xu
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <GiftIcon size={12} color="#ffffff" />
+                    </span>
+                    <span>Nhận +500 Shopee Xu</span>
                   </button>
                 )}
 
                 {profileCompleteness.isBonusClaimed && (
-                  <span style={{ fontSize: '12.5px', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                    <SparklesIcon size={14} color="#059669" /> Đã nhận thưởng +500 Xu
+                  <span style={{ fontSize: '12.5px', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <SparklesIcon size={12} color="#059669" />
+                    </span>
+                    <span>Đã nhận thưởng +500 Xu</span>
                   </span>
                 )}
               </div>
@@ -1123,7 +1162,13 @@ export default function ProfilePage() {
                     style={{ cursor: task.id === 'address' || task.id === 'payment' ? 'pointer' : 'default' }}
                   >
                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                      {task.isDone ? <CheckIcon size={12} color="#059669" /> : <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />}
+                      {task.isDone ? (
+                        <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CheckIcon size={9} color="#059669" />
+                        </span>
+                      ) : (
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
+                      )}
                     </span>
                     <span>{task.label}</span>
                   </div>
@@ -1147,8 +1192,11 @@ export default function ProfilePage() {
               </div>
 
               <div style={{ flex: 1 }}>
-                <h4 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <CameraIcon size={16} color="#2563eb" /> Studio Ảnh Đại Diện
+                <h4 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CameraIcon size={14} color="#2563eb" />
+                  </span>
+                  <span>Studio Ảnh Đại Diện</span>
                 </h4>
                 <p style={{ margin: '0 0 14px', fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>
                   Chọn một ảnh đại diện chuyên nghiệp từ bộ sưu tập mẫu, hoặc tải ảnh cá nhân từ thiết bị của bạn.
@@ -1277,10 +1325,13 @@ export default function ProfilePage() {
                         borderRadius: '6px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '6px',
                       }}
                     >
-                      <CheckIcon size={12} color="#059669" /> Đã Xác Thực
+                      <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckIcon size={9} color="#059669" />
+                      </span>
+                      <span>Đã Xác Thực</span>
                     </span>
                   </div>
                 </div>
@@ -1428,8 +1479,11 @@ export default function ProfilePage() {
           <div className="profile-tab-content-pane">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <MapPinIcon size={20} color="#ea580c" /> Sổ Địa Chỉ Giao Hàng ({addresses.length})
+                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <MapPinIcon size={18} color="#ea580c" />
+                  </span>
+                  <span>Sổ Địa Chỉ Giao Hàng ({addresses.length})</span>
                 </h3>
                 <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
                   Địa chỉ giao hàng sẽ được tự động đồng bộ khi bạn tiến hành thanh toán giỏ hàng.
@@ -1484,13 +1538,18 @@ export default function ProfilePage() {
                         <span style={{ fontSize: '13.5px', color: '#64748b' }}>({addr.phone})</span>
                         <span className="profile-address-tag-pill">{addr.tag || 'Nhà riêng'}</span>
                         {addr.isDefault && (
-                          <span className="profile-address-default-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <CheckIcon size={11} color="#059669" /> MẶC ĐỊNH
+                          <span className="profile-address-default-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <CheckIcon size={9} color="#059669" />
+                            </span>
+                            <span>MẶC ĐỊNH</span>
                           </span>
                         )}
                       </div>
-                      <div style={{ fontSize: '13.5px', color: '#334155', lineHeight: '1.5', display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
-                        <MapPinIcon size={15} style={{ marginTop: '2px', flexShrink: 0, color: '#64748b' }} />
+                      <div style={{ fontSize: '13.5px', color: '#334155', lineHeight: '1.5', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                        <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                          <MapPinIcon size={12} color="#64748b" />
+                        </span>
                         <span>{addr.address}</span>
                       </div>
                     </div>
@@ -1554,8 +1613,11 @@ export default function ProfilePage() {
           <div className="profile-tab-content-pane">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <CreditCardIcon size={20} color="#0d9488" /> Tài Khoản Ngân Hàng & Thẻ Thanh Toán ({paymentMethods.length})
+                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CreditCardIcon size={18} color="#0d9488" />
+                  </span>
+                  <span>Tài Khoản Ngân Hàng & Thẻ Thanh Toán ({paymentMethods.length})</span>
                 </h3>
                 <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
                   Liên kết an toàn để thanh toán 1-chạm hoặc nhận tiền hoàn khi có yêu cầu trả hàng.
@@ -1585,13 +1647,13 @@ export default function ProfilePage() {
                   <div>
                     <div className="profile-payment-card-banner">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', color: '#2563eb' }}>
+                        <span style={{ width: '30px', height: '30px', borderRadius: '8px', background: pm.type === 'bank' || pm.iconType === 'bank' ? 'rgba(37, 99, 235, 0.12)' : pm.type === 'wallet' || pm.iconType === 'wallet' ? 'rgba(234, 88, 12, 0.12)' : 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           {pm.type === 'bank' || pm.iconType === 'bank' ? (
-                            <StoreIcon size={18} color="#2563eb" />
+                            <StoreIcon size={16} color="#2563eb" />
                           ) : pm.type === 'wallet' || pm.iconType === 'wallet' ? (
-                            <TicketIcon size={18} color="#ea580c" />
+                            <TicketIcon size={16} color="#ea580c" />
                           ) : (
-                            <CreditCardIcon size={18} color="#0d9488" />
+                            <CreditCardIcon size={16} color="#0d9488" />
                           )}
                         </span>
                         <strong style={{ fontSize: '15px', color: '#0f172a' }}>
@@ -1613,8 +1675,11 @@ export default function ProfilePage() {
                   <div className="profile-payment-card-footer">
                     <div>
                       {pm.isDefault ? (
-                        <span className="profile-address-default-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <CheckIcon size={11} color="#059669" /> MẶC ĐỊNH
+                        <span className="profile-address-default-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CheckIcon size={9} color="#059669" />
+                          </span>
+                          <span>MẶC ĐỊNH</span>
                         </span>
                       ) : (
                         <button
@@ -1653,8 +1718,11 @@ export default function ProfilePage() {
           <div className="profile-tab-content-pane">
             {/* Change Password Card */}
             <div className="profile-security-card">
-              <h3 style={{ fontSize: '17px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <KeyIcon size={18} color="#6366f1" /> Đổi Mật Khẩu Đăng Nhập
+              <h3 style={{ fontSize: '17px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <KeyIcon size={18} color="#6366f1" />
+                </span>
+                <span>Đổi Mật Khẩu Đăng Nhập</span>
               </h3>
               <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px' }}>
                 Để bảo vệ an toàn cho tài khoản và số dư ví, mật khẩu mới nên có độ dài tối thiểu 8 ký tự, bao gồm cả chữ in hoa và chữ số.
@@ -1863,7 +1931,10 @@ export default function ProfilePage() {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <ShieldCheckIcon size={18} color="#16a34a" /> Xác Thực Hai Yếu Tố (2FA)
+                      <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ShieldCheckIcon size={16} color="#16a34a" />
+                      </span>
+                      <span>Xác Thực Hai Yếu Tố (2FA)</span>
                     </h3>
                     <span
                       style={{
@@ -1899,7 +1970,10 @@ export default function ProfilePage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <LaptopIcon size={18} color="#0284c7" /> Thiết Bị Đăng Nhập Hoạt Động
+                    <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <LaptopIcon size={16} color="#0284c7" />
+                    </span>
+                    <span>Thiết Bị Đăng Nhập Hoạt Động</span>
                   </h3>
                   <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
                     Theo dõi danh sách các trình duyệt và thiết bị đang đăng nhập vào tài khoản của bạn.
@@ -1919,8 +1993,8 @@ export default function ProfilePage() {
               {/* Current Session */}
               <div className="profile-session-item" style={{ borderLeft: '4px solid #10b981' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ color: '#2563eb', display: 'flex', alignItems: 'center' }}>
-                    <LaptopIcon size={24} color="#0284c7" />
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(37, 99, 235, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <LaptopIcon size={20} color="#0284c7" />
                   </div>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '14px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1939,8 +2013,8 @@ export default function ProfilePage() {
               {/* Other Session 1 */}
               <div className="profile-session-item">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ color: '#0284c7', display: 'flex', alignItems: 'center' }}>
-                    <SmartphoneIcon size={24} color="#16a34a" />
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(22, 163, 74, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <SmartphoneIcon size={20} color="#16a34a" />
                   </div>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '14px', color: '#0f172a' }}>
@@ -1968,8 +2042,11 @@ export default function ProfilePage() {
             ============================================================ */}
         {activeTab === 'settings' && (
           <div className="profile-tab-content-pane">
-            <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <SettingsIcon size={20} color="#0284c7" /> Cài Đặt Thông Báo & Quyền Riêng Tư
+            <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <SettingsIcon size={18} color="#0284c7" />
+              </span>
+              <span>Cài Đặt Thông Báo & Quyền Riêng Tư</span>
             </h3>
             <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 24px' }}>
               Tùy chỉnh trải nghiệm nhận tin và bảo mật hiển thị thông tin khi mua sắm tại Shopee.
@@ -1980,7 +2057,10 @@ export default function ProfilePage() {
               <div className="profile-setting-row">
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <BellIcon size={16} color="#2563eb" /> Thông báo đơn hàng trực tiếp trên Web
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <BellIcon size={13} color="#2563eb" />
+                    </span>
+                    <span>Thông báo đơn hàng trực tiếp trên Web</span>
                   </strong>
                   <span style={{ fontSize: '12.5px', color: '#64748b' }}>
                     Nhận thông báo nổi ngay khi người bán chuẩn bị hàng và giao cho Shipper.
@@ -2000,7 +2080,10 @@ export default function ProfilePage() {
               <div className="profile-setting-row">
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <MailIcon size={16} color="#0284c7" /> Cập nhật hóa đơn và đơn hàng qua Email
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <MailIcon size={13} color="#0284c7" />
+                    </span>
+                    <span>Cập nhật hóa đơn và đơn hàng qua Email</span>
                   </strong>
                   <span style={{ fontSize: '12.5px', color: '#64748b' }}>
                     Gửi hóa đơn điện tử VAT và mã vận đơn chi tiết vào hòm thư cá nhân.
@@ -2020,7 +2103,10 @@ export default function ProfilePage() {
               <div className="profile-setting-row">
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <SmartphoneIcon size={16} color="#16a34a" /> Tin nhắn SMS khi Shipper đến giao
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <SmartphoneIcon size={13} color="#16a34a" />
+                    </span>
+                    <span>Tin nhắn SMS khi Shipper đến giao</span>
                   </strong>
                   <span style={{ fontSize: '12.5px', color: '#64748b' }}>
                     Nhận tin nhắn kèm số điện thoại tài xế SPX khi đơn bắt đầu phát.
@@ -2040,7 +2126,10 @@ export default function ProfilePage() {
               <div className="profile-setting-row">
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <CoinIcon size={16} color="#f59e0b" /> Nhắc nhở điểm danh nhận Shopee Xu mỗi ngày
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CoinIcon size={13} color="#f59e0b" />
+                    </span>
+                    <span>Nhắc nhở điểm danh nhận Shopee Xu mỗi ngày</span>
                   </strong>
                   <span style={{ fontSize: '12.5px', color: '#64748b' }}>
                     Giữ vững chuỗi streak 7 ngày để không bỏ lỡ phần quà giá trị nhất.
@@ -2060,7 +2149,10 @@ export default function ProfilePage() {
               <div className="profile-setting-row" style={{ borderLeft: '4px solid #2563eb' }}>
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <ShieldIcon size={16} color="#6366f1" /> Ẩn danh họ tên khi viết đánh giá sản phẩm
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ShieldIcon size={13} color="#6366f1" />
+                    </span>
+                    <span>Ẩn danh họ tên khi viết đánh giá sản phẩm</span>
                   </strong>
                   <span style={{ fontSize: '12.5px', color: '#64748b' }}>
                     Bảo vệ sự riêng tư: Tên của bạn sẽ hiển thị dạng viết tắt (ví dụ: <code style={{ color: '#2563eb' }}>n***a</code>) trên trang chi tiết sản phẩm.
@@ -2086,8 +2178,11 @@ export default function ProfilePage() {
           <div className="profile-tab-content-pane">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <TicketIcon size={20} color="#f97316" /> Kho Voucher Của Tôi ({vouchersList.length || 5} mã)
+                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(249, 115, 22, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <TicketIcon size={18} color="#f97316" />
+                  </span>
+                  <span>Kho Voucher Của Tôi ({vouchersList.length || 5} mã)</span>
                 </h3>
                 <span style={{ fontSize: '13px', color: '#64748b' }}>
                   Lưu voucher vào ví để hệ thống tự động gợi ý và áp dụng mức giảm tối đa khi mua hàng.
@@ -2404,8 +2499,11 @@ export default function ProfilePage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
-                  <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <CalendarIcon size={18} color="#2563eb" /> Chuỗi Điểm Danh 7 Ngày Nhận Thưởng
+                  <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <CalendarIcon size={16} color="#2563eb" />
+                    </span>
+                    <span>Chuỗi Điểm Danh 7 Ngày Nhận Thưởng</span>
                   </h4>
                   <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
                     Duy trì điểm danh đều đặn không ngắt quãng để nhận quà giá trị cao nhất (+5,000 Xu) vào ngày thứ 7.
@@ -2480,8 +2578,11 @@ export default function ProfilePage() {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ReceiptIcon size={18} color="#0284c7" /> Lịch Sử Biến Động Shopee Xu
+                <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ReceiptIcon size={16} color="#0284c7" />
+                  </span>
+                  <span>Lịch Sử Biến Động Shopee Xu</span>
                 </h4>
 
                 <div style={{ display: 'flex', gap: '6px' }}>
