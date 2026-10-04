@@ -1401,9 +1401,11 @@ export default function ProfilePage() {
                       key={g.id}
                       className={`profile-gender-option ${formData.gender === g.id ? 'selected' : ''}`}
                       onClick={() => setFormData((prev) => ({ ...prev, gender: g.id }))}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     >
-                      <UserIcon size={14} />
+                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: formData.gender === g.id ? 'rgba(37, 99, 235, 0.12)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <UserIcon size={12} color={formData.gender === g.id ? '#2563eb' : '#64748b'} />
+                      </span>
                       <span>{g.label}</span>
                     </div>
                   ))}
@@ -1750,20 +1752,22 @@ export default function ProfilePage() {
                       onClick={() => setShowOldPassword((prev) => !prev)}
                       style={{
                         position: 'absolute',
-                        right: '12px',
+                        right: '8px',
                         top: '50%',
                         transform: 'translateY(-50%)',
                         background: 'transparent',
                         border: 'none',
-                        color: '#64748b',
                         cursor: 'pointer',
-                        fontSize: '15px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        padding: '4px',
                       }}
+                      title={showOldPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                     >
-                      {showOldPassword ? <EyeOffIcon size={16} color="#64748b" /> : <EyeIcon size={16} color="#64748b" />}
+                      <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {showOldPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -1790,20 +1794,22 @@ export default function ProfilePage() {
                         onClick={() => setShowNewPassword((prev) => !prev)}
                         style={{
                           position: 'absolute',
-                          right: '12px',
+                          right: '8px',
                           top: '50%',
                           transform: 'translateY(-50%)',
                           background: 'transparent',
                           border: 'none',
-                          color: '#64748b',
                           cursor: 'pointer',
-                          fontSize: '15px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          padding: '4px',
                         }}
+                        title={showNewPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                       >
-                        {showNewPassword ? <EyeOffIcon size={16} color="#64748b" /> : <EyeIcon size={16} color="#64748b" />}
+                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {showNewPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                        </span>
                       </button>
                     </div>
 
@@ -1857,20 +1863,22 @@ export default function ProfilePage() {
                         onClick={() => setShowConfirmPassword((prev) => !prev)}
                         style={{
                           position: 'absolute',
-                          right: '12px',
+                          right: '8px',
                           top: '50%',
                           transform: 'translateY(-50%)',
                           background: 'transparent',
                           border: 'none',
-                          color: '#64748b',
                           cursor: 'pointer',
-                          fontSize: '15px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          padding: '4px',
                         }}
+                        title={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                       >
-                        {showConfirmPassword ? <EyeOffIcon size={16} color="#64748b" /> : <EyeIcon size={16} color="#64748b" />}
+                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {showConfirmPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -1880,26 +1888,50 @@ export default function ProfilePage() {
                 <div className="profile-pwd-hints-list">
                   <div className={`profile-pwd-hint-item ${passwordMetrics.hasMinLength ? 'valid' : ''}`}>
                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                      {passwordMetrics.hasMinLength ? <CheckIcon size={12} color="#059669" /> : <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />}
+                      {passwordMetrics.hasMinLength ? (
+                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CheckIcon size={10} color="#059669" />
+                        </span>
+                      ) : (
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
+                      )}
                     </span>
                     <span>Độ dài từ 8 ký tự trở lên</span>
                   </div>
                   <div className={`profile-pwd-hint-item ${passwordMetrics.hasUppercase ? 'valid' : ''}`}>
                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                      {passwordMetrics.hasUppercase ? <CheckIcon size={12} color="#059669" /> : <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />}
+                      {passwordMetrics.hasUppercase ? (
+                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CheckIcon size={10} color="#059669" />
+                        </span>
+                      ) : (
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
+                      )}
                     </span>
                     <span>Có ít nhất 1 chữ hoa (A-Z)</span>
                   </div>
                   <div className={`profile-pwd-hint-item ${passwordMetrics.hasNumber ? 'valid' : ''}`}>
                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                      {passwordMetrics.hasNumber ? <CheckIcon size={12} color="#059669" /> : <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />}
+                      {passwordMetrics.hasNumber ? (
+                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CheckIcon size={10} color="#059669" />
+                        </span>
+                      ) : (
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
+                      )}
                     </span>
                     <span>Có ít nhất 1 chữ số (0-9)</span>
                   </div>
                   {passwordForm.confirmPassword && (
                     <div className={`profile-pwd-hint-item ${passwordMetrics.isMatching ? 'valid' : ''}`}>
                       <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                        {passwordMetrics.isMatching ? <CheckIcon size={12} color="#059669" /> : <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />}
+                        {passwordMetrics.isMatching ? (
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CheckIcon size={10} color="#059669" />
+                          </span>
+                        ) : (
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', display: 'inline-block' }} />
+                        )}
                       </span>
                       <span>Mật khẩu xác nhận trùng khớp</span>
                     </div>
@@ -2205,10 +2237,10 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '20px' }}>
               {[
                 { id: 'all', label: `Tất cả (${vouchersList.length})` },
-                { id: 'shipping', label: `Freeship (${vouchersList.filter((v) => v.type === 'shipping').length})`, icon: <TruckIcon size={13} color="#059669" /> },
-                { id: 'order', label: `Giảm Giá Sàn (${vouchersList.filter((v) => v.type !== 'shipping' && v.isGlobal).length})`, icon: <TagIcon size={13} color="#2563eb" /> },
-                { id: 'shop', label: `Voucher Shop (${vouchersList.filter((v) => !v.isGlobal && v.shopId).length})`, icon: <StoreIcon size={13} color="#ea580c" /> },
-                { id: 'saved', label: `Đã Lưu Trong Ví (${savedVoucherCodes.length})`, icon: <StarIcon size={13} color="#eab308" fill="#eab308" /> },
+                { id: 'shipping', label: `Freeship (${vouchersList.filter((v) => v.type === 'shipping').length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><TruckIcon size={11} color="#059669" /></span> },
+                { id: 'order', label: `Giảm Giá Sàn (${vouchersList.filter((v) => v.type !== 'shipping' && v.isGlobal).length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><TagIcon size={11} color="#2563eb" /></span> },
+                { id: 'shop', label: `Voucher Shop (${vouchersList.filter((v) => !v.isGlobal && v.shopId).length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StoreIcon size={11} color="#ea580c" /></span> },
+                { id: 'saved', label: `Đã Lưu Trong Ví (${savedVoucherCodes.length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 179, 8, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StarIcon size={11} color="#eab308" fill="#eab308" /></span> },
               ].map((tab) => {
                 const isActive = voucherFilterTab === tab.id;
                 return (
@@ -2316,11 +2348,26 @@ export default function ProfilePage() {
                             }}
                           >
                             {isShipping ? (
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><TruckIcon size={11} color="#059669" /> Freeship</span>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <TruckIcon size={10} color="#059669" />
+                                </span>
+                                <span>Freeship</span>
+                              </span>
                             ) : v.shopId ? (
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><StoreIcon size={11} color="#ea580c" /> Voucher Shop</span>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <StoreIcon size={10} color="#ea580c" />
+                                </span>
+                                <span>Voucher Shop</span>
+                              </span>
                             ) : (
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><TagIcon size={11} color="#2563eb" /> Voucher Sàn</span>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <TagIcon size={10} color="#2563eb" />
+                                </span>
+                                <span>Voucher Sàn</span>
+                              </span>
                             )}
                           </span>
                           <strong style={{ fontSize: '15px', color: '#2563eb', letterSpacing: '0.5px' }}>
@@ -2359,9 +2406,19 @@ export default function ProfilePage() {
                           }}
                         >
                           {isSaved ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CheckIcon size={12} color="#059669" /> Đã Lưu</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckIcon size={10} color="#059669" />
+                              </span>
+                              <span>Đã Lưu</span>
+                            </span>
                           ) : (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><DownloadIcon size={12} color="#2563eb" /> Lưu Mã</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <DownloadIcon size={11} color="#2563eb" />
+                              </span>
+                              <span>Lưu Mã</span>
+                            </span>
                           )}
                         </button>
                         <button
@@ -2509,8 +2566,11 @@ export default function ProfilePage() {
                     Duy trì điểm danh đều đặn không ngắt quãng để nhận quà giá trị cao nhất (+5,000 Xu) vào ngày thứ 7.
                   </p>
                 </div>
-                <div style={{ background: '#fef3c7', color: '#92400e', padding: '5px 14px', borderRadius: '20px', fontSize: '12.5px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  Chuỗi hiện tại: {streak}/7 ngày <FlameIcon size={14} color="#ea580c" />
+                <div style={{ background: '#fef3c7', color: '#92400e', padding: '5px 14px', borderRadius: '20px', fontSize: '12.5px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span>Chuỗi hiện tại: {streak}/7 ngày</span>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FlameIcon size={12} color="#ea580c" />
+                  </span>
                 </div>
               </div>
 
@@ -2550,8 +2610,10 @@ export default function ProfilePage() {
                       <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginBottom: '6px' }}>
                         Ngày {item.day}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '26px', marginBottom: '4px' }}>
-                        {isChecked ? <CheckIcon size={18} color="#059669" /> : item.special ? <GiftIcon size={18} color="#d97706" /> : <CoinIcon size={18} color="#f59e0b" />}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
+                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: isChecked ? 'rgba(16, 185, 129, 0.15)' : item.special ? 'rgba(217, 119, 6, 0.15)' : 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {isChecked ? <CheckIcon size={14} color="#059669" /> : item.special ? <GiftIcon size={14} color="#d97706" /> : <CoinIcon size={14} color="#f59e0b" />}
+                        </span>
                       </div>
                       <div
                         style={{
@@ -3072,15 +3134,15 @@ export default function ProfilePage() {
                   <label className="profile-form-label">Loại Phương Thức</label>
                   <div className="profile-gender-group">
                     {[
-                      { id: 'bank', label: 'Ngân Hàng', icon: <StoreIcon size={15} color="#2563eb" /> },
-                      { id: 'card', label: 'Thẻ Quốc Tế', icon: <CreditCardIcon size={15} color="#0d9488" /> },
-                      { id: 'wallet', label: 'Ví Điện Tử', icon: <TicketIcon size={15} color="#f97316" /> },
+                      { id: 'bank', label: 'Ngân Hàng', icon: <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StoreIcon size={13} color="#2563eb" /></span> },
+                      { id: 'card', label: 'Thẻ Quốc Tế', icon: <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><CreditCardIcon size={13} color="#0d9488" /></span> },
+                      { id: 'wallet', label: 'Ví Điện Tử', icon: <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(249, 115, 22, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><TicketIcon size={13} color="#f97316" /></span> },
                     ].map((m) => (
                       <div
                         key={m.id}
                         className={`profile-gender-option ${newPaymentForm.type === m.id ? 'selected' : ''}`}
                         onClick={() => setNewPaymentForm((prev) => ({ ...prev, type: m.id }))}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                       >
                         {m.icon}
                         <span>{m.label}</span>

@@ -44,28 +44,60 @@ const renderAdminCategoryIcon = (icon) => {
     case 'fashion':
     case 'shirt':
     case '\u{1F455}':
-      return <ShirtIcon size={20} color="#2563eb" />;
+      return (
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ShirtIcon size={18} color="#2563eb" />
+        </span>
+      );
     case 'electronics':
     case 'headphones':
     case 'laptop':
     case '\u{1F3A7}':
-      return <LaptopIcon size={20} color="#0284c7" />;
+      return (
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <LaptopIcon size={18} color="#0284c7" />
+        </span>
+      );
     case 'home':
     case 'living':
     case '\u{1F3E0}':
-      return <HomeIcon size={20} color="#0d9488" />;
+      return (
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <HomeIcon size={18} color="#0d9488" />
+        </span>
+      );
     case 'beauty':
     case '\u{1F484}':
-      return <SparklesIcon size={20} color="#db2777" />;
+      return (
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(219, 39, 119, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <SparklesIcon size={18} color="#db2777" />
+        </span>
+      );
     case 'sports':
     case '\u{26BD}':
-      return <TargetIcon size={20} color="#ea580c" />;
+      return (
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <TargetIcon size={18} color="#ea580c" />
+        </span>
+      );
     case 'book':
-      return <BookOpenIcon size={20} color="#8b5cf6" />;
+      return (
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(139, 92, 246, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BookOpenIcon size={18} color="#8b5cf6" />
+        </span>
+      );
     case 'food':
-      return <FoodIcon size={20} color="#f59e0b" />;
+      return (
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <FoodIcon size={18} color="#f59e0b" />
+        </span>
+      );
     default:
-      return <PackageIcon size={20} color="#64748b" />;
+      return (
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <PackageIcon size={18} color="#64748b" />
+        </span>
+      );
   }
 };
 
@@ -886,13 +918,28 @@ export default function AdminDashboardPage() {
                       <td><strong>{u.fullName}</strong></td>
                       <td>{u.email}</td>
                       <td>
-                        <span className="shopee-sidebar-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <span className="shopee-sidebar-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                           {u.role === 'admin' ? (
-                            <><ShieldIcon size={13} color="var(--primary-color)" /> Admin</>
+                            <>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ShieldIcon size={10} color="#ea580c" />
+                              </span>
+                              <span>Admin</span>
+                            </>
                           ) : u.role === 'seller' ? (
-                            <><StoreIcon size={13} color="#0284c7" /> Seller (Người bán)</>
+                            <>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <StoreIcon size={10} color="#0284c7" />
+                              </span>
+                              <span>Seller (Người bán)</span>
+                            </>
                           ) : (
-                            <><CartIcon size={13} color="#16a34a" /> Customer (Người mua)</>
+                            <>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CartIcon size={10} color="#16a34a" />
+                              </span>
+                              <span>Customer (Người mua)</span>
+                            </>
                           )}
                         </span>
                       </td>
@@ -937,8 +984,11 @@ export default function AdminDashboardPage() {
                             </button>
                           </div>
                         ) : (
-                          <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <ShieldIcon size={12} color="#dc2626" /> Bảo vệ Admin
+                          <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <ShieldIcon size={10} color="#dc2626" />
+                            </span>
+                            <span>Bảo vệ Admin</span>
                           </span>
                         )}
                       </td>
@@ -1391,9 +1441,7 @@ export default function AdminDashboardPage() {
                   {categories.map((c) => (
                     <tr key={c.id}>
                       <td>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '6px', background: '#f1f5f9' }}>
-                          {renderAdminCategoryIcon(c.icon)}
-                        </span>
+                        {renderAdminCategoryIcon(c.icon)}
                       </td>
                       <td><strong>{c.name}</strong></td>
                       <td>{c.count} sản phẩm</td>

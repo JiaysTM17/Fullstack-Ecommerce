@@ -1601,21 +1601,29 @@ export default function SellerDashboardPage() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px', flexWrap: 'wrap' }}>
-              <span className="seller-stat-chip">
-                <UserIcon size={13} color="#2563eb" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
-                Chủ sở hữu: <strong>{user?.fullName || 'Trần Thị Chủ Shop (Thời Trang)'}</strong>
+              <span className="seller-stat-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <UserIcon size={11} color="#2563eb" />
+                </span>
+                <span>Chủ sở hữu: <strong>{user?.fullName || 'Trần Thị Chủ Shop (Thời Trang)'}</strong></span>
               </span>
-              <span className="seller-stat-chip">
-                <StoreIcon size={13} color="#ea580c" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
-                Kho: {currentShop.address}
+              <span className="seller-stat-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <StoreIcon size={11} color="#ea580c" />
+                </span>
+                <span>Kho: {currentShop.address}</span>
               </span>
-              <span className="seller-stat-chip">
-                <PhoneIcon size={13} color="#16a34a" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
-                Hotline: {currentShop.phone}
+              <span className="seller-stat-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PhoneIcon size={11} color="#16a34a" />
+                </span>
+                <span>Hotline: {currentShop.phone}</span>
               </span>
-              <span className="seller-stat-chip">
-                <TagIcon size={13} color="#8b5cf6" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '4px' }} />
-                Ngành hàng: <strong>{currentShop.category}</strong>
+              <span className="seller-stat-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(139, 92, 246, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TagIcon size={11} color="#8b5cf6" />
+                </span>
+                <span>Ngành hàng: <strong>{currentShop.category}</strong></span>
               </span>
             </div>
           </div>
@@ -1754,16 +1762,22 @@ export default function SellerDashboardPage() {
             <div className="shopee-table-card" style={{ marginBottom: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <ChartBarIcon size={16} color="#2563eb" /> Biểu Đồ Doanh Số Bán Hàng 7 Ngày Gần Nhất
+                  <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ChartBarIcon size={15} color="#2563eb" />
+                    </span>
+                    <span>Biểu Đồ Doanh Số Bán Hàng 7 Ngày Gần Nhất</span>
                   </h3>
                   <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: 'var(--text-muted)' }}>
                     Tính toán theo doanh thu thực tế của {currentShop.name}
                   </p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span className="seller-stat-chip" style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <StarIcon size={12} color="#f59e0b" fill="#f59e0b" /> Tăng trưởng +15.4% tuần này
+                  <span className="seller-stat-chip" style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <StarIcon size={11} color="#f59e0b" fill="#f59e0b" />
+                    </span>
+                    <span>Tăng trưởng +15.4% tuần này</span>
                   </span>
                   <button
                     type="button"
@@ -1814,8 +1828,11 @@ export default function SellerDashboardPage() {
 
             {/* Top sản phẩm bán chạy nhất của riêng shop này */}
             <div className="shopee-table-card">
-              <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <StarIcon size={16} color="#f59e0b" fill="#f59e0b" /> Top Mặt Hàng Bán Chạy Nhất Tại {currentShop.name}
+              <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <StarIcon size={15} color="#f59e0b" fill="#f59e0b" />
+                </span>
+                <span>Top Mặt Hàng Bán Chạy Nhất Tại {currentShop.name}</span>
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {shopProducts
