@@ -1189,7 +1189,10 @@ export default function OrderHistoryPage() {
                         }
                       }}
                     >
-                      <TruckIcon size={14} color="#ffffff" /> Tra Cứu Vận Đơn
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TruckIcon size={12} color="#ffffff" />
+                      </span>
+                      <span>Tra Cứu Vận Đơn</span>
                     </button>
                   </div>
 
@@ -1250,9 +1253,12 @@ export default function OrderHistoryPage() {
                                 navigator.clipboard.writeText(activeTrackingOrder.trackingCode || 'SPX-VN-84729104');
                                 showToast('Đã sao chép mã vận đơn!', 'success');
                               }}
-                              style={{ cursor: 'pointer', fontSize: '11px' }}
+                              style={{ cursor: 'pointer', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                             >
-                              <CopyIcon size={11} color="#2563eb" /> Sao chép
+                              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CopyIcon size={10} color="#2563eb" />
+                              </span>
+                              <span>Sao chép</span>
                             </span>
                           </div>
                           <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
@@ -1440,10 +1446,12 @@ export default function OrderHistoryPage() {
             <Link
               to="/seller/dashboard"
               className="shopee-btn shopee-btn-primary"
-              style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               <span>Vào Kênh Quản Lý Shop</span>
-              <ChevronRightIcon size={14} color="#ffffff" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChevronRightIcon size={11} color="#ffffff" />
+              </span>
             </Link>
           </div>
         )}
@@ -1478,10 +1486,12 @@ export default function OrderHistoryPage() {
             <Link
               to="/admin/dashboard"
               className="shopee-btn"
-              style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', background: '#dc2626', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', background: '#dc2626', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               <span>Bảng Quản Trị Toàn Sàn</span>
-              <ChevronRightIcon size={14} color="#ffffff" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChevronRightIcon size={11} color="#ffffff" />
+              </span>
             </Link>
           </div>
         )}
@@ -1508,8 +1518,8 @@ export default function OrderHistoryPage() {
                   className={`shopee-order-tab-item ${isActive ? 'active' : ''}`}
                   onClick={() => setActiveTab(tab.id)}
                 >
-                  <span className="shopee-order-tab-text-group" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span className="shopee-order-tab-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <span className="shopee-order-tab-text-group" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="shopee-order-tab-icon" style={{ width: '22px', height: '22px', borderRadius: '50%', background: isActive ? 'rgba(37, 99, 235, 0.12)' : 'rgba(0, 0, 0, 0.04)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease', flexShrink: 0 }}>
                       {tab.icon}
                     </span>
                     <span className="shopee-order-tab-text">{tab.label}</span>

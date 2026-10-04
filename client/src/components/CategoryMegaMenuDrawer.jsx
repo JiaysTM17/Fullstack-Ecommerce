@@ -550,8 +550,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             onClick={() => shopsScrollRef.current?.scrollBy({ left: -220, behavior: 'smooth' })}
             className="category-drawer-scroll-arrow"
             title="Cuộn sang trái"
+            style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0 }}
           >
-            <ChevronLeftIcon size={14} color="#2563eb" />
+            <ChevronLeftIcon size={12} color="#2563eb" />
           </button>
 
           <div ref={shopsScrollRef} className="category-drawer-mall-pills-row">
@@ -573,8 +574,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             onClick={() => shopsScrollRef.current?.scrollBy({ left: 220, behavior: 'smooth' })}
             className="category-drawer-scroll-arrow"
             title="Cuộn sang phải"
+            style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0 }}
           >
-            <ChevronRightIcon size={14} color="#2563eb" />
+            <ChevronRightIcon size={12} color="#2563eb" />
           </button>
         </div>
       </div>
