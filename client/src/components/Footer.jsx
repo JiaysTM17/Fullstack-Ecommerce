@@ -249,18 +249,27 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             <h4>{t('footer_connect', 'Kết Nối Với Chúng Tôi')}</h4>
             <ul className="shopee-footer-list">
               <li className="shopee-footer-item">
-                <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <GlobeIcon size={13} color="#2563eb" /> GitHub Portfolio
+                <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <GlobeIcon size={11} color="#2563eb" />
+                  </span>
+                  <span>GitHub Portfolio</span>
                 </span>
               </li>
               <li className="shopee-footer-item">
-                <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <GlobeIcon size={13} color="#0284c7" /> LinkedIn
+                <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <GlobeIcon size={11} color="#0284c7" />
+                  </span>
+                  <span>LinkedIn</span>
                 </span>
               </li>
               <li className="shopee-footer-item">
-                <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <GlobeIcon size={13} color="#3b82f6" /> Facebook
+                <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <GlobeIcon size={11} color="#3b82f6" />
+                  </span>
+                  <span>Facebook</span>
                 </span>
               </li>
             </ul>
