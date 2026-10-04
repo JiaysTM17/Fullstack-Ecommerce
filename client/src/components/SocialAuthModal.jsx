@@ -606,10 +606,12 @@ export default function SocialAuthModal({
                   marginBottom: '14px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '8px',
                 }}
               >
-                <AlertCircleIcon size={14} color="#ef4444" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(221, 60, 16, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <AlertCircleIcon size={10} color="#dd3c10" />
+                </span>
                 <span>{error}</span>
               </div>
             )}
@@ -698,14 +700,14 @@ export default function SocialAuthModal({
             >
               <div style={{ fontWeight: 700, color: '#050505', marginBottom: '8px' }}>Quyền hạn được chia sẻ:</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <span style={{ color: '#0866FF', display: 'inline-flex', alignItems: 'center' }}>
-                  <CheckIcon size={13} color="#0866FF" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(8, 102, 255, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckIcon size={10} color="#0866FF" />
                 </span>
                 <span>Tên hồ sơ và ảnh đại diện trang cá nhân</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ color: '#0866FF', display: 'inline-flex', alignItems: 'center' }}>
-                  <CheckIcon size={13} color="#0866FF" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(8, 102, 255, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckIcon size={10} color="#0866FF" />
                 </span>
                 <span>Địa chỉ email ({email})</span>
               </div>
@@ -907,10 +909,12 @@ export default function SocialAuthModal({
               marginBottom: '16px',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '8px',
             }}
           >
-            <AlertCircleIcon size={14} color="#ff453a" />
+            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 69, 58, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <AlertCircleIcon size={10} color="#ff453a" />
+            </span>
             <span>{error}</span>
           </div>
         )}

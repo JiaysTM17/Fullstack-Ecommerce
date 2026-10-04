@@ -265,9 +265,16 @@ export default function OtpVerificationModal({
               color: '#047857',
               marginBottom: '18px',
               fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
             }}
           >
-            {resendNotice}
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <CheckIcon size={11} color="#16a34a" />
+            </span>
+            <span>{resendNotice}</span>
           </div>
         )}
 
@@ -285,10 +292,12 @@ export default function OtpVerificationModal({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px',
+              gap: '8px',
             }}
           >
-            <AlertCircleIcon size={15} color="#ef4444" />
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <AlertCircleIcon size={11} color="#ef4444" />
+            </span>
             <span>{error}</span>
           </div>
         )}
