@@ -1509,12 +1509,12 @@ export default function OrderHistoryPage() {
           {/* Top Bar: Nav Tabs with animated sliding Royal Blue indicator */}
           <div className="shopee-order-tabs-nav" ref={tabNavRef}>
             {[
-              { id: 'all', label: t('all_orders', 'Tất cả đơn'), icon: <PackageIcon size={14} color="#2563eb" /> },
-              { id: 'pending', label: 'Chờ xác nhận', icon: <ClockIcon size={14} color="#d97706" /> },
-              { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển'), icon: <TruckIcon size={14} color="#059669" /> },
-              { id: 'completed', label: t('status_completed', 'Hoàn thành'), icon: <CheckIcon size={14} color="#16a34a" /> },
-              { id: 'returning', label: t('status_returning', 'Đổi trả / Hoàn tiền'), icon: <ReturnIcon size={14} color="#9333ea" /> },
-              { id: 'cancelled', label: t('status_cancelled', 'Đã hủy'), icon: <CloseIcon size={14} color="#ef4444" /> },
+              { id: 'all', label: t('all_orders', 'Tất cả đơn'), icon: <PackageIcon size={14} color="#2563eb" />, bg: 'rgba(37, 99, 235, 0.12)' },
+              { id: 'pending', label: 'Chờ xác nhận', icon: <ClockIcon size={14} color="#d97706" />, bg: 'rgba(217, 119, 6, 0.12)' },
+              { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển'), icon: <TruckIcon size={14} color="#059669" />, bg: 'rgba(5, 150, 105, 0.12)' },
+              { id: 'completed', label: t('status_completed', 'Hoàn thành'), icon: <CheckIcon size={14} color="#16a34a" />, bg: 'rgba(22, 163, 74, 0.12)' },
+              { id: 'returning', label: t('status_returning', 'Đổi trả / Hoàn tiền'), icon: <ReturnIcon size={14} color="#9333ea" />, bg: 'rgba(147, 51, 234, 0.12)' },
+              { id: 'cancelled', label: t('status_cancelled', 'Đã hủy'), icon: <CloseIcon size={14} color="#ef4444" />, bg: 'rgba(239, 68, 68, 0.12)' },
             ].map((tab) => {
               const count = getTabCount(tab.id);
               const isActive = activeTab === tab.id;
@@ -1527,7 +1527,7 @@ export default function OrderHistoryPage() {
                   onClick={() => setActiveTab(tab.id)}
                 >
                   <span className="shopee-order-tab-text-group" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="shopee-order-tab-icon" style={{ width: '22px', height: '22px', borderRadius: '50%', background: isActive ? 'rgba(37, 99, 235, 0.12)' : 'rgba(0, 0, 0, 0.04)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease', flexShrink: 0 }}>
+                    <span className="shopee-order-tab-icon" style={{ width: '22px', height: '22px', borderRadius: '50%', background: isActive ? tab.bg : 'rgba(0, 0, 0, 0.04)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease', flexShrink: 0 }}>
                       {tab.icon}
                     </span>
                     <span className="shopee-order-tab-text">{tab.label}</span>

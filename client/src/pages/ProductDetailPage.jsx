@@ -272,7 +272,7 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="amazon-ratings-summary">
-            <span className="amazon-stars" style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+            <span className="amazon-stars" style={{ display: "inline-flex", alignItems: "center", gap: "2px", background: "rgba(245, 158, 11, 0.1)", padding: "2px 6px", borderRadius: "4px" }}>
               {[1, 2, 3, 4, 5].map((s) => (
                 <StarIcon key={s} size={14} color="#ffa41c" />
               ))}
@@ -396,8 +396,11 @@ export default function ProductDetailPage() {
           {product.stock > 0 && product.stock <= 30 && (
             <div style={{ margin: "10px 0", padding: "10px 12px", background: "#fff7ed", border: "1px solid #ffedd5", borderRadius: "8px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "var(--primary-color, #ea580c)", marginBottom: "6px" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                  <FlameIcon size={14} color="#ea580c" /> Sắp hết hàng
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FlameIcon size={12} color="#ea580c" />
+                  </span>
+                  <span>Sắp hết hàng</span>
                 </span>
                 <span>Chỉ còn {product.stock} sản phẩm</span>
               </div>
@@ -641,7 +644,7 @@ export default function ProductDetailPage() {
               <span style={{ fontSize: "36px", fontWeight: 800, color: "#111" }}>
                 {product.rating || 4.9}
               </span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "2px", background: "rgba(245, 158, 11, 0.1)", padding: "3px 8px", borderRadius: "6px" }}>
                 {[1, 2, 3, 4, 5].map((s) => (
                   <StarIcon key={s} size={18} color="#ffa41c" />
                 ))}
@@ -736,12 +739,13 @@ export default function ProductDetailPage() {
                           key={star}
                           type="button"
                           style={{
-                            background: "transparent",
-                            border: "none",
-                            padding: "2px",
+                            background: isActive ? "rgba(245, 158, 11, 0.15)" : "rgba(203, 213, 225, 0.15)",
+                            border: isActive ? "1px solid rgba(245, 158, 11, 0.3)" : "1px solid transparent",
+                            borderRadius: "8px",
+                            padding: "6px",
                             cursor: "pointer",
-                            transition: "transform 0.15s ease",
-                            transform: isActive ? "scale(1.15)" : "scale(1)",
+                            transition: "all 0.15s ease",
+                            transform: isActive ? "scale(1.12)" : "scale(1)",
                             display: "inline-flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -752,7 +756,7 @@ export default function ProductDetailPage() {
                           title={`${star} sao`}
                         >
                           <StarIcon
-                            size={24}
+                            size={22}
                             color={isActive ? "#ffa41c" : "var(--border-medium, #cbd5e1)"}
                             fill={isActive ? "#ffa41c" : "none"}
                           />
@@ -917,7 +921,7 @@ export default function ProductDetailPage() {
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "2px", background: "rgba(245, 158, 11, 0.08)", padding: "2px 6px", borderRadius: "4px" }}>
                       {[1, 2, 3, 4, 5].map((st) => {
                         const filled = st <= Math.round(Number(rev?.rating) || 5);
                         return (
@@ -957,10 +961,13 @@ export default function ProductDetailPage() {
                             fontWeight: 600,
                             display: "inline-flex",
                             alignItems: "center",
-                            gap: "4px",
+                            gap: "5px",
                           }}
                         >
-                          <TagIcon size={11} color="#2563eb" /> {tag}
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TagIcon size={9} color="#2563eb" />
+                          </span>
+                          <span>{tag}</span>
                         </span>
                       ))}
                     </div>

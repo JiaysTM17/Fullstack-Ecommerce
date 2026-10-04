@@ -408,7 +408,9 @@ export default function ShopStorefrontPage() {
         <div className="mall-official-ribbon">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span className="mall-badge-brand">
-              <ShieldCheckIcon size={14} color="#dc2626" />
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(220, 38, 38, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheckIcon size={12} color="#dc2626" />
+              </span>
               SHOPEE MALL
             </span>
             <span style={{ fontSize: '12.5px', fontWeight: 700, letterSpacing: '0.4px' }}>
@@ -532,7 +534,9 @@ export default function ShopStorefrontPage() {
                 
                 {/* Shopee Mall / TikTok Official Luxury Badge */}
                 <span className="mall-title-badge">
-                  <ShieldCheckIcon size={13} color="#ffffff" />
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ShieldCheckIcon size={11} color="#ffffff" />
+                  </span>
                   SHOPEE MALL
                 </span>
 
@@ -929,10 +933,12 @@ export default function ShopStorefrontPage() {
                 className="shopee-form-input"
                 value={shopSearch}
                 onChange={(e) => setShopSearch(e.target.value)}
-                style={{ width: '250px', padding: shopSearch ? '8px 32px 8px 34px' : '8px 14px 8px 34px', fontSize: '13px', borderRadius: '8px' }}
+                style={{ width: '250px', padding: shopSearch ? '8px 32px 8px 38px' : '8px 14px 8px 38px', fontSize: '13px', borderRadius: '8px' }}
               />
-              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
-                <SearchIcon size={14} color="#94a3b8" />
+              <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <SearchIcon size={11} color="#64748b" />
+                </span>
               </span>
               {shopSearch && (
                 <button
@@ -966,8 +972,10 @@ export default function ShopStorefrontPage() {
         {/* Product Grid */}
         {matchingProducts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', background: 'var(--bg-card, #ffffff)', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)', color: 'var(--text-muted)' }}>
-            <div style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
-              <SearchIcon size={44} color="#cbd5e1" />
+            <div style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '14px' }}>
+              <span style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <SearchIcon size={32} color="#94a3b8" />
+              </span>
             </div>
             <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
               Không tìm thấy sản phẩm nào
@@ -1037,8 +1045,8 @@ export default function ShopStorefrontPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', color: '#f59e0b' }}>
-                    <SparklesIcon size={20} color="#f59e0b" />
+                  <span style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <SparklesIcon size={16} color="#f59e0b" />
                   </span>
                   <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
                     Gợi Ý Thêm Sản Phẩm Khác Từ Gian Hàng (Bạn Có Thể Cũng Thích)
