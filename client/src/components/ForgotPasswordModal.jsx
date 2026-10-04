@@ -825,10 +825,12 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   padding: 0,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '6px',
                 }}
               >
-                <ArrowLeftIcon size={14} color="#64748b" />
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowLeftIcon size={11} color="#2563eb" />
+                </span>
                 <span>Đổi email khác</span>
               </button>
 
