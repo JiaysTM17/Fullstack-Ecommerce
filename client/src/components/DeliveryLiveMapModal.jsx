@@ -145,7 +145,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                   marginRight: '6px',
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ArrowLeftIcon size={11} color="#2563eb" />
                 </span>
                 <span>Quay lại</span>
@@ -157,6 +157,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                 height: '32px',
                 borderRadius: '8px',
                 background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                border: '1px solid rgba(37, 99, 235, 0.35)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -206,7 +207,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             }}
             style={{
               background: 'rgba(37, 99, 235, 0.08)',
-              border: '1px solid rgba(37, 99, 235, 0.2)',
+              border: '1px solid rgba(37, 99, 235, 0.22)',
               borderRadius: '8px',
               width: '32px',
               height: '32px',
@@ -227,7 +228,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             onClick={onClose}
             style={{
               background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.22)',
               borderRadius: '8px',
               width: '32px',
               height: '32px',
@@ -320,7 +321,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               gap: '5px',
             }}
           >
-            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.15)', border: '1px solid rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <StoreIcon size={11} color="#94a3b8" />
             </span>
             <span>{hubs[1]?.name || 'Kho Tân Bình'}</span>
@@ -344,7 +345,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               gap: '5px',
             }}
           >
-            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <MapPinIcon size={11} color="#ffffff" />
             </span>
             <span>Nhà của bạn</span>
@@ -418,7 +419,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.2)', border: '1px solid rgba(56, 189, 248, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ClockIcon size={11} color="#38bdf8" />
               </span>
               <span>Dự kiến giao: <strong style={{ color: '#38bdf8' }}>{etaMinutes} phút nữa</strong></span>
@@ -448,7 +449,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
           }}
         >
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <MapPinIcon size={11} color="#2563eb" />
             </span>
             <span><strong>Vị trí hiện tại:</strong> {currentLocation.label || currentLocation.address}</span>
@@ -481,7 +482,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             }}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <PackageIcon size={12} color="#0284c7" />
               </span>
               <span>Tiến Trình Luân Chuyển 3 Hub SPX Express</span>
@@ -526,6 +527,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                       height: '18px',
                       borderRadius: '50%',
                       background: hub.completed ? '#059669' : idx === 1 ? '#2563eb' : '#94a3b8',
+                      border: hub.completed ? '1px solid #047857' : idx === 1 ? '1px solid #1d4ed8' : '1px solid #64748b',
                       color: '#ffffff',
                       fontSize: '10px',
                       fontWeight: 800,
@@ -582,7 +584,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span>{courier.name}</span>
                 <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CheckIcon size={9} color="#059669" />
                   </span>
                   <span>Bưu tá chính thức SPX</span>
@@ -602,7 +604,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                   {courier.licensePlate || '59-P1 839.22'}
                 </strong>
                 <span>({courier.vehicle || 'Xe máy'}) · Đánh giá:</span>
-                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <StarIcon size={10} color="#f59e0b" filled />
                 </span>
                 <strong>{courier.rating || 4.95}</strong>/5.0
@@ -625,7 +627,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                 gap: '6px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <PhoneIcon size={11} color="#ffffff" />
               </span>
               <span>Gọi ({courier.phone || '0908 123 456'})</span>
@@ -644,7 +646,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                 gap: '6px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChatIcon size={11} color="#2563eb" />
               </span>
               <span>Nhắn Tin</span>
@@ -655,13 +657,13 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
         {/* Destination & Safety Info */}
         <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <MapPinIcon size={11} color="#2563eb" />
             </span>
             <span><strong>Địa chỉ giao tới:</strong> {customerAddress}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', marginTop: '6px' }}>
-            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(21, 128, 61, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(21, 128, 61, 0.12)', border: '1px solid rgba(21, 128, 61, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
               <ShieldCheckIcon size={11} color="#15803d" />
             </span>
             <em>
