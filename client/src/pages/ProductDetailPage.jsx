@@ -597,9 +597,24 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="amazon-shop-stats">
-          <div>Đánh giá: <strong>{product.shopRating || "4.9"} / 5.0</strong></div>
-          <div>Tỷ lệ phản hồi: <strong>{product.shopResponseRate || "98"}%</strong></div>
-          <div>Người theo dõi: <strong>12.4k</strong></div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#fef3c7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <StarIcon size={12} color="#d97706" fill="#d97706" />
+            </span>
+            <span>Đánh giá: <strong>{product.shopRating || "4.9"} / 5.0</strong></span>
+          </div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ClockIcon size={12} color="#16a34a" />
+            </span>
+            <span>Tỷ lệ phản hồi: <strong>{product.shopResponseRate || "98"}%</strong></span>
+          </div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#ffe4e6', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <UserIcon size={12} color="#e11d48" />
+            </span>
+            <span>Người theo dõi: <strong>12.4k</strong></span>
+          </div>
         </div>
 
         <div style={{ display: "flex", gap: "10px" }}>
