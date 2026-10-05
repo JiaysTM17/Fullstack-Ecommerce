@@ -1766,8 +1766,8 @@ export default function ProfilePage() {
                       }}
                       title={showOldPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                     >
-                      <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {showOldPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                      <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {showOldPassword ? <EyeOffIcon size={14} color="#6366f1" /> : <EyeIcon size={14} color="#6366f1" />}
                       </span>
                     </button>
                   </div>
@@ -1808,8 +1808,8 @@ export default function ProfilePage() {
                         }}
                         title={showNewPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                       >
-                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {showNewPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {showNewPassword ? <EyeOffIcon size={14} color="#2563eb" /> : <EyeIcon size={14} color="#2563eb" />}
                         </span>
                       </button>
                     </div>
@@ -1877,8 +1877,8 @@ export default function ProfilePage() {
                         }}
                         title={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                       >
-                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {showConfirmPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
+                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {showConfirmPassword ? <EyeOffIcon size={14} color="#10b981" /> : <EyeIcon size={14} color="#10b981" />}
                         </span>
                       </button>
                     </div>
@@ -2060,10 +2060,26 @@ export default function ProfilePage() {
                 </div>
                 <button
                   type="button"
-                  style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '12.5px', cursor: 'pointer', fontWeight: 600 }}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    color: '#dc2626',
+                    fontSize: '12.5px',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    borderRadius: '8px',
+                    padding: '6px 12px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.15s ease',
+                  }}
                   onClick={() => showToast('Đã đăng xuất khỏi iPhone 15 Pro', 'info')}
                 >
-                  Đăng xuất
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <LogOutIcon size={10} color="#dc2626" />
+                  </span>
+                  <span>Đăng xuất</span>
                 </button>
               </div>
             </div>
