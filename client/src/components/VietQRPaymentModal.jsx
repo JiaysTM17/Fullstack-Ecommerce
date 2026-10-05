@@ -184,6 +184,7 @@ export default function VietQRPaymentModal({
                 height: '38px',
                 borderRadius: '10px',
                 background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                border: '1px solid rgba(37, 99, 235, 0.35)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -204,7 +205,7 @@ export default function VietQRPaymentModal({
                     color: '#15803d',
                     padding: '2px 8px',
                     borderRadius: '999px',
-                    border: '1px solid #bbf7d0',
+                    border: '1px solid #86efac',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '4px',
@@ -237,7 +238,7 @@ export default function VietQRPaymentModal({
               transition: 'all 0.15s ease',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CloseIcon size={12} color="#ef4444" />
             </span>
           </button>
@@ -326,6 +327,7 @@ export default function VietQRPaymentModal({
                       height: '22px',
                       borderRadius: '50%',
                       background: timeLeft < 120 ? '#ffe4e6' : '#dbeafe',
+                      border: timeLeft < 120 ? '1px solid rgba(225, 29, 72, 0.25)' : '1px solid rgba(37, 99, 235, 0.25)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -378,7 +380,7 @@ export default function VietQRPaymentModal({
                         }}
                       >
                         <div style={{ fontSize: '13px', fontWeight: 800, color: isSelected ? bank.color : 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: isSelected ? `${bank.color}18` : 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: isSelected ? `${bank.color}18` : 'rgba(100, 116, 139, 0.1)', border: isSelected ? `1px solid ${bank.color}35` : '1px solid rgba(100, 116, 139, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CreditCardIcon size={11} color={isSelected ? bank.color : "#64748b"} />
                           </span>
                           <span>{bank.name.split(' ')[0]}</span>
@@ -449,7 +451,7 @@ export default function VietQRPaymentModal({
                       transition: 'all 0.15s ease',
                     }}
                   >
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <DownloadIcon size={11} color="#2563eb" />
                     </span>
                     <span>Tải mã QR</span>
@@ -461,7 +463,7 @@ export default function VietQRPaymentModal({
                   {/* Account Number */}
                   <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                     <div style={{ fontSize: '10.5px', color: '#2563eb', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <CreditCardIcon size={11} color="#2563eb" />
                       </span>
                       <span>SỐ TÀI KHOẢN:</span>
@@ -488,11 +490,11 @@ export default function VietQRPaymentModal({
                         }}
                       >
                         {copiedField === 'Số tài khoản' ? (
-                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(21, 128, 61, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(21, 128, 61, 0.15)', border: '1px solid rgba(21, 128, 61, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CheckIcon size={10} color="#15803d" />
                           </span>
                         ) : (
-                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CopyIcon size={10} color="#2563eb" />
                           </span>
                         )}
@@ -504,7 +506,7 @@ export default function VietQRPaymentModal({
                   {/* Account Name */}
                   <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                     <div style={{ fontSize: '10.5px', color: '#16a34a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <ShieldCheckIcon size={11} color="#16a34a" />
                       </span>
                       <span>CHỦ TÀI KHOẢN:</span>
@@ -517,7 +519,7 @@ export default function VietQRPaymentModal({
                   {/* Amount */}
                   <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                     <div style={{ fontSize: '10.5px', color: '#ea580c', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <TagIcon size={11} color="#ea580c" />
                       </span>
                       <span>SỐ TIỀN CẦN CHUYỂN:</span>
@@ -560,7 +562,7 @@ export default function VietQRPaymentModal({
                   {/* Memo */}
                   <div style={{ background: '#fffbeb', padding: '8px 10px', borderRadius: '8px', border: '1px solid #fde68a' }}>
                     <div style={{ fontSize: '10.5px', color: '#92400e', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.15)', border: '1px solid rgba(217, 119, 6, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <AlertCircleIcon size={11} color="#d97706" />
                       </span>
                       <span>NỘI DUNG CHUYỂN KHOẢN (BẮT BUỘC):</span>
@@ -587,11 +589,11 @@ export default function VietQRPaymentModal({
                         }}
                       >
                         {copiedField === 'Nội dung' ? (
-                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(21, 128, 61, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(21, 128, 61, 0.15)', border: '1px solid rgba(21, 128, 61, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CheckIcon size={10} color="#15803d" />
                           </span>
                         ) : (
-                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(180, 83, 9, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(180, 83, 9, 0.15)', border: '1px solid rgba(180, 83, 9, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CopyIcon size={10} color="#b45309" />
                           </span>
                         )}
@@ -616,7 +618,7 @@ export default function VietQRPaymentModal({
                 }}
               >
                 <div style={{ fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ShieldCheckIcon size={12} color="#16a34a" />
                   </span>
                   <span>Hướng dẫn thanh toán nhanh:</span>
@@ -645,7 +647,7 @@ export default function VietQRPaymentModal({
                     gap: '6px',
                   }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CloseIcon size={10} color="#ef4444" />
                   </span>
                   <span>Đóng & Thanh Toán Sau</span>
@@ -672,14 +674,14 @@ export default function VietQRPaymentModal({
                 >
                   {isVerifying ? (
                     <>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <RefreshIcon size={11} color="#ffffff" className="spin-animation" />
                       </span>
                       <span>Đang Kiểm Tra...</span>
                     </>
                   ) : (
                     <>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CheckIcon size={12} color="#ffffff" />
                       </span>
                       <span>Tôi Đã Chuyển Khoản</span>
