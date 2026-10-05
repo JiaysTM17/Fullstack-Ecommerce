@@ -554,10 +554,12 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               marginBottom: '18px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '10px',
             }}
           >
-            <AlertCircleIcon size={15} color="#ef4444" />
+            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <AlertCircleIcon size={13} color="#ef4444" />
+            </span>
             <span>{error}</span>
           </div>
         )}

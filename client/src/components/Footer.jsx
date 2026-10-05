@@ -146,7 +146,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
           </div>
 
           <div className="footer-attribution-note">
-            <span style={{ display: 'inline-flex', alignItems: 'center', verticalAlign: 'middle', marginRight: '6px', color: '#0284c7' }}><AlertCircleIcon size={15} color="#0284c7" /></span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', verticalAlign: 'middle', marginRight: '8px', flexShrink: 0 }}><AlertCircleIcon size={14} color="#0284c7" /></span>
             <strong>{language === 'en' ? 'Intellectual Property & Professional Ethics Note:' : 'Tuyên Bố Bản Quyền & Tính Chuyên Nghiệp:'}</strong>{' '}
             {language === 'en'
               ? 'This system synthesizes industry-standard UX patterns from world-leading e-commerce platforms. All source code, database architectures, RESTful APIs, and UI designs were custom-engineered independently with clean-room implementation. No proprietary code or assets were duplicated, honoring intellectual property rights and academic integrity.'
