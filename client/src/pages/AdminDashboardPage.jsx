@@ -563,7 +563,17 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('overview')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'overview' ? '#e0f2fe' : '#f1f5f9', flexShrink: 0 }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '7px',
+            background: activeTab === 'overview' ? 'rgba(2, 132, 199, 0.14)' : 'rgba(100, 116, 139, 0.08)',
+            border: activeTab === 'overview' ? '1px solid rgba(2, 132, 199, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)',
+            flexShrink: 0
+          }}>
             <ChartBarIcon size={16} color="#0284c7" />
           </span>
           <span>Tổng Quan Sàn & GMV</span>
@@ -575,7 +585,17 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('shops')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'shops' ? '#ffedd5' : '#f1f5f9', flexShrink: 0 }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '7px',
+            background: activeTab === 'shops' ? 'rgba(234, 88, 12, 0.14)' : 'rgba(100, 116, 139, 0.08)',
+            border: activeTab === 'shops' ? '1px solid rgba(234, 88, 12, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)',
+            flexShrink: 0
+          }}>
             <StoreIcon size={16} color="#ea580c" />
           </span>
           <span>Quản Lý Cửa Hàng ({shops.length})</span>
@@ -587,7 +607,17 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('products')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'products' ? '#dbeafe' : '#f1f5f9', flexShrink: 0 }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '7px',
+            background: activeTab === 'products' ? 'rgba(37, 99, 235, 0.14)' : 'rgba(100, 116, 139, 0.08)',
+            border: activeTab === 'products' ? '1px solid rgba(37, 99, 235, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)',
+            flexShrink: 0
+          }}>
             <PackageIcon size={16} color="#2563eb" />
           </span>
           <span>Kiểm Duyệt Sản Phẩm ({moderationProducts.length})</span>
@@ -599,7 +629,17 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('users')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'users' ? '#d1fae5' : '#f1f5f9', flexShrink: 0 }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '7px',
+            background: activeTab === 'users' ? 'rgba(16, 185, 129, 0.14)' : 'rgba(100, 116, 139, 0.08)',
+            border: activeTab === 'users' ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)',
+            flexShrink: 0
+          }}>
             <UsersIcon size={16} color="#10b981" />
           </span>
           <span>Quản Lý Người Dùng ({users.length})</span>
@@ -611,7 +651,17 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('categories')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'categories' ? '#ede9fe' : '#f1f5f9', flexShrink: 0 }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '7px',
+            background: activeTab === 'categories' ? 'rgba(139, 92, 246, 0.14)' : 'rgba(100, 116, 139, 0.08)',
+            border: activeTab === 'categories' ? '1px solid rgba(139, 92, 246, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)',
+            flexShrink: 0
+          }}>
             <LayersIcon size={16} color="#8b5cf6" />
           </span>
           <span>Quản Lý Danh Mục ({categories.length})</span>
@@ -623,7 +673,17 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('vouchers')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'vouchers' ? '#fef3c7' : '#f1f5f9', flexShrink: 0 }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '7px',
+            background: activeTab === 'vouchers' ? 'rgba(245, 158, 11, 0.14)' : 'rgba(100, 116, 139, 0.08)',
+            border: activeTab === 'vouchers' ? '1px solid rgba(245, 158, 11, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)',
+            flexShrink: 0
+          }}>
             <TicketIcon size={16} color="#f59e0b" />
           </span>
           <span>Quản Lý Voucher Sàn ({vouchers.length})</span>
@@ -635,7 +695,17 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('finance')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '7px', background: activeTab === 'finance' ? '#d1fae5' : '#f1f5f9', flexShrink: 0 }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '7px',
+            background: activeTab === 'finance' ? 'rgba(5, 150, 105, 0.14)' : 'rgba(100, 116, 139, 0.08)',
+            border: activeTab === 'finance' ? '1px solid rgba(5, 150, 105, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)',
+            flexShrink: 0
+          }}>
             <CreditCardIcon size={16} color="#059669" />
           </span>
           <span>Đối Soát & Tài Chính</span>
@@ -1463,14 +1533,14 @@ export default function AdminDashboardPage() {
                         >
                           {c.active ? (
                             <>
-                              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <ClockIcon size={10} color="#d97706" />
                               </span>
                               <span>Tạm Ẩn</span>
                             </>
                           ) : (
                             <>
-                              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <CheckIcon size={10} color="#16a34a" />
                               </span>
                               <span>Bật Hiển Thị</span>
@@ -1483,7 +1553,7 @@ export default function AdminDashboardPage() {
                           style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 8px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
                           onClick={() => handleDeleteCategory(c.id)}
                         >
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <TrashIcon size={10} color="#dc2626" />
                           </span>
                           <span>Xóa</span>
@@ -1572,7 +1642,7 @@ export default function AdminDashboardPage() {
                           </button>
                         ) : (
                           <span style={{ fontSize: '12px', color: 'var(--color-success)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.14)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <CheckIcon size={12} color="#16a34a" />
                             </span>
                             <span>Đã Giải Ngân Thành Công</span>
