@@ -159,7 +159,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 marginRight: '6px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ArrowLeftIcon size={11} color="#2563eb" />
               </span>
               <span>Quay lại</span>
@@ -217,7 +217,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               transition: 'all 0.15s ease',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CloseIcon size={11} color="#ef4444" />
             </span>
           </button>
@@ -251,7 +251,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 gap: '8px',
               }}
             >
-              <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <AlertCircleIcon size={13} color="#ef4444" />
               </span>
               <span>{errorMsg}</span>
@@ -326,7 +326,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               gap: '10px',
             }}
           >
-            <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(220, 252, 231, 0.9)', border: '1px solid rgba(21, 128, 61, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ShieldCheckIcon size={13} color="#15803d" />
             </span>
             <div style={{ fontSize: '11.5px', color: '#166534', lineHeight: 1.4 }}>
@@ -398,7 +398,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   style={{ accentColor: '#2563eb' }}
                 />
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: refundMethod === 'wallet' ? '#dbeafe' : '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: refundMethod === 'wallet' ? 'rgba(37, 99, 235, 0.12)' : 'rgba(234, 88, 12, 0.1)', border: `1px solid ${refundMethod === 'wallet' ? 'rgba(37, 99, 235, 0.25)' : 'rgba(234, 88, 12, 0.25)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CreditCardIcon size={11} color={refundMethod === 'wallet' ? '#2563eb' : '#ea580c'} />
                   </span>
                   <span>Ví ShopeePay (Tức thì)</span>
@@ -433,7 +433,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   style={{ accentColor: '#2563eb' }}
                 />
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: refundMethod === 'bank' ? '#dbeafe' : '#e0f2fe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: refundMethod === 'bank' ? 'rgba(37, 99, 235, 0.12)' : 'rgba(2, 132, 199, 0.1)', border: `1px solid ${refundMethod === 'bank' ? 'rgba(37, 99, 235, 0.25)' : 'rgba(2, 132, 199, 0.25)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <QrCodeIcon size={11} color={refundMethod === 'bank' ? '#2563eb' : '#0284c7'} />
                   </span>
                   <span>Tài khoản Ngân hàng</span>
@@ -545,7 +545,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               <span style={{ fontSize: '11px', color: note.trim().length >= 10 ? '#059669' : '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 {note.trim().length >= 10 ? (
                   <>
-                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CheckIcon size={9} color="#059669" />
                     </span>
                     <span>Đạt yêu cầu ({note.trim().length} ký tự)</span>
@@ -579,7 +579,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
 
           {/* Image & Video Evidence (Mandatory - Ràng buộc cấp hình ảnh) */}
           <div style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+            <div style={{ display: 'flex', borderBottom: 'none', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
               <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
                 Hình ảnh / Video bằng chứng thực tế <span style={{ color: '#ef4444' }}>* (Bắt buộc)</span>:
               </label>
@@ -628,7 +628,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                         right: '2px',
                         background: 'rgba(239, 68, 68, 0.9)',
                         color: '#fff',
-                        border: 'none',
+                        border: '1px solid rgba(255, 255, 255, 0.4)',
                         borderRadius: '50%',
                         width: '18px',
                         height: '18px',
@@ -685,7 +685,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   transition: 'all 0.15s ease',
                 }}
               >
-                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#ffffff', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(37, 99, 235, 0.15)' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(37, 99, 235, 0.1)' }}>
                   <CameraIcon size={14} color="#2563eb" />
                 </span>
                 <div>
@@ -732,7 +732,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 gap: '5px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CloseIcon size={10} color="#ef4444" />
               </span>
               <span>Hủy bỏ</span>
@@ -751,7 +751,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 height: '32px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CheckIcon size={11} color="#ffffff" />
               </span>
               <span>Xác Nhận Gửi Yêu Cầu</span>
