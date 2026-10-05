@@ -219,6 +219,7 @@ export default function RewardsHubModal({ onClose }) {
                 height: '42px',
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                border: '1px solid rgba(245, 158, 11, 0.4)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
@@ -256,7 +257,7 @@ export default function RewardsHubModal({ onClose }) {
               transition: 'all 0.15s ease',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CloseIcon size={12} color="#ef4444" />
             </span>
           </button>
@@ -293,7 +294,7 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: activeTab === 'spin' ? '#fff7ed' : 'rgba(245, 158, 11, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: activeTab === 'spin' ? '#fff7ed' : 'rgba(245, 158, 11, 0.12)', border: activeTab === 'spin' ? '1px solid rgba(234, 88, 12, 0.25)' : '1px solid rgba(245, 158, 11, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <BoltIcon size={12} color={activeTab === 'spin' ? '#ea580c' : '#f59e0b'} />
             </span>
             <span>Vòng Quay ({totalSpins})</span>
@@ -317,7 +318,7 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: activeTab === 'checkin' ? '#fff7ed' : 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: activeTab === 'checkin' ? '#fff7ed' : 'rgba(22, 163, 74, 0.12)', border: activeTab === 'checkin' ? '1px solid rgba(234, 88, 12, 0.25)' : '1px solid rgba(22, 163, 74, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CalendarIcon size={12} color={activeTab === 'checkin' ? '#ea580c' : '#16a34a'} />
             </span>
             <span>Điểm Danh 7 Ngày</span>
@@ -341,7 +342,7 @@ export default function RewardsHubModal({ onClose }) {
               gap: '6px',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: activeTab === 'history' ? '#fff7ed' : 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: activeTab === 'history' ? '#fff7ed' : 'rgba(2, 132, 199, 0.12)', border: activeTab === 'history' ? '1px solid rgba(234, 88, 12, 0.25)' : '1px solid rgba(2, 132, 199, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <ReceiptIcon size={12} color={activeTab === 'history' ? '#ea580c' : '#0284c7'} />
             </span>
             <span>Lịch Sử Xu</span>
@@ -353,7 +354,7 @@ export default function RewardsHubModal({ onClose }) {
           <div style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: '12px' }}>
               <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(135deg, #fff7ed, #ffedd5)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(135deg, #fff7ed, #ffedd5)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <SparklesIcon size={14} color="#ea580c" />
                 </span>
                 <span>Vòng Quay May Mắn Fullstack E-Commerce</span>
@@ -381,7 +382,7 @@ export default function RewardsHubModal({ onClose }) {
             >
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 800, color: totalSpins > 0 ? '#059669' : '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: totalSpins > 0 ? 'rgba(5, 150, 105, 0.12)' : 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: totalSpins > 0 ? 'rgba(5, 150, 105, 0.12)' : 'rgba(234, 88, 12, 0.12)', border: totalSpins > 0 ? '1px solid rgba(5, 150, 105, 0.25)' : '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <TargetIcon size={13} color={totalSpins > 0 ? '#059669' : '#ea580c'} />
                   </span>
                   <span>Lượt quay khả dụng: <strong>{totalSpins} lượt</strong></span>
@@ -389,14 +390,14 @@ export default function RewardsHubModal({ onClose }) {
                 <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   {dailySpinsRemaining > 0 ? (
                     <>
-                      <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CheckIcon size={9} color="#059669" />
                       </span>
                       <span>1 lượt miễn phí hôm nay</span>
                     </>
                   ) : (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.18)', border: '1px solid rgba(148, 163, 184, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CheckIcon size={9} color="#94a3b8" />
                       </span>
                       <span>Đã dùng lượt miễn phí hôm nay</span>
@@ -411,7 +412,7 @@ export default function RewardsHubModal({ onClose }) {
                   Lượt miễn phí tiếp theo:
                 </div>
                 <div style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'monospace', display: 'inline-flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ClockIcon size={11} color="#0284c7" />
                   </span>
                   <span>{nextDailyCountdown}</span>
@@ -524,7 +525,7 @@ export default function RewardsHubModal({ onClose }) {
                 </div>
                 {wonPrize.type === 'voucher' && (
                   <div style={{ fontSize: '12px', color: '#059669', fontWeight: 700, marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <TicketIcon size={11} color="#059669" />
                     </span>
                     <span>Mã <strong>{wonPrize.code}</strong> đã được thêm vào Kho Voucher của bạn!</span>
@@ -532,7 +533,7 @@ export default function RewardsHubModal({ onClose }) {
                 )}
                 {wonPrize.type === 'coins' && (
                   <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 700, marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', border: '1px solid rgba(217, 119, 6, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CoinIcon size={11} color="#d97706" />
                     </span>
                     <span>Đã tự động cộng +{wonPrize.value.toLocaleString('vi-VN')} Xu vào ví của bạn!</span>
@@ -566,21 +567,21 @@ export default function RewardsHubModal({ onClose }) {
               >
                 {isSpinning ? (
                   <>
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <BoltIcon size={13} color="#ffffff" />
                     </span>
                     <span>ĐANG QUAY THƯỞNG... ({spinCountdown}s)</span>
                   </>
                 ) : totalSpins > 0 ? (
                   <>
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <BoltIcon size={13} color="#ffffff" />
                     </span>
                     <span>QUAY NGAY ({totalSpins} lượt khả dụng)</span>
                   </>
                 ) : (
                   <>
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <ClockIcon size={12} color="#ffffff" />
                     </span>
                     <span>ĐÃ HẾT LƯỢT QUAY HÔM NAY</span>
@@ -607,7 +608,7 @@ export default function RewardsHubModal({ onClose }) {
                     gap: '6px',
                   }}
                 >
-                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ShoppingBagIcon size={12} color="#ea580c" />
                   </span>
                   <span>Đặt hàng ngay để nhận thêm +1 lượt quay!</span>
@@ -673,7 +674,7 @@ export default function RewardsHubModal({ onClose }) {
                     <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>
                       N{dayNum}
                     </span>
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: isClaimed ? 'rgba(5, 150, 105, 0.15)' : 'rgba(245, 158, 11, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: isClaimed ? 'rgba(5, 150, 105, 0.15)' : 'rgba(245, 158, 11, 0.12)', border: isClaimed ? '1px solid rgba(5, 150, 105, 0.25)' : '1px solid rgba(245, 158, 11, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       {isClaimed ? <CheckIcon size={13} color="#059669" /> : <CoinIcon size={13} color="#f59e0b" />}
                     </span>
                     <span
@@ -711,14 +712,14 @@ export default function RewardsHubModal({ onClose }) {
             >
               {hasCheckedInToday ? (
                 <>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CheckIcon size={13} color="#ffffff" />
                   </span>
                   <span>Bạn đã điểm danh hôm nay rồi!</span>
                 </>
               ) : (
                 <>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CoinIcon size={14} color="#ffffff" />
                   </span>
                   <span>Điểm Danh Ngay (+{streakRewards[streak % 7]?.toLocaleString('vi-VN')} Xu)</span>
@@ -735,7 +736,7 @@ export default function RewardsHubModal({ onClose }) {
               {!coinHistory || coinHistory.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
                   <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
-                    <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(203, 213, 225, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(203, 213, 225, 0.25)', border: '1px solid rgba(203, 213, 225, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CoinIcon size={26} color="#94a3b8" />
                     </div>
                   </div>
@@ -765,6 +766,7 @@ export default function RewardsHubModal({ onClose }) {
                             height: '28px',
                             borderRadius: '8px',
                             background: isPlus ? '#ecfdf5' : '#fef2f2',
+                            border: isPlus ? '1px solid #bbf7d0' : '1px solid #fecaca',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
