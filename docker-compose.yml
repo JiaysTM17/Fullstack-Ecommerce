@@ -1,55 +1,57 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  # 1. Cơ sở dữ liệu MongoDB
-  database:
-    image: mongo:6.0
-    container_name: mini_shopee_mongodb
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - shopee_network
-
-  # 2. Máy chủ Backend REST API
+  # Backend API Service
   api:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: mini_shopee_backend
-    restart: always
+    container_name: mini-shopee-api
+    restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
-      - PORT=5000
-      - MONGO_URI=mongodb://database:27017/ecommerce_mini
-      - CLIENT_URL=http://localhost:5173
       - NODE_ENV=production
-      - JWT_SECRET=mini_shopee_jwt_production_docker_secret_2026
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/mini-shopee
+      - CLIENT_URL=http://localhost:5173,http://localhost:3000
+      - JWT_SECRET=mini-shopee-docker-jwt-secret-key-2026-production
+      - JWT_EXPIRES_IN=7d
+      - LOG_LEVEL=INFO
     depends_on:
-      - database
+      mongo:
+        condition: service_healthy
+    volumes:
+      - api-data:/app/data
     networks:
-      - shopee_network
+      - shopee-network
 
-  # 3. Giao diện Frontend React + Nginx
-  web:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    container_name: mini_shopee_frontend
-    restart: always
+  # MongoDB Database Service
+  mongo:
+    image: mongo:7.0-jammy
+    container_name: mini-shopee-mongo
+    restart: unless-stopped
     ports:
-      - "5173:80"
-    depends_on:
-      - api
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=mini-shopee
+    volumes:
+      - mongo-data:/data/db
     networks:
-      - shopee_network
+      - shopee-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
-  mongo_data:
+  api-data:
+    driver: local
+  mongo-data:
+    driver: local
 
 networks:
-  shopee_network:
+  shopee-network:
     driver: bridge

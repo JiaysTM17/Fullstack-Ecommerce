@@ -1,5 +1,8 @@
 node_modules
 npm-debug.log
-.git
 .env
-.env.local
+.git
+.gitignore
+data/*.json
+tests
+coverage
