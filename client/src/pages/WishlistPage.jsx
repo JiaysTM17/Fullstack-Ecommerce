@@ -16,6 +16,7 @@ import {
   TrashIcon,
   SearchIcon,
   CloseIcon,
+  TagIcon,
 } from '../components/OrdersIcons';
 import { pushBuyerNotification } from '../utils/notificationHelper';
 
@@ -247,28 +248,38 @@ export default function WishlistPage() {
                 {/* Category Filter Pills */}
                 {categories.length > 2 && (
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', overflowX: 'auto', paddingBottom: '4px' }}>
-                    {categories.map((cat) => (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => setSelectedCategory(cat)}
-                        style={{
-                          padding: '5px 12px',
-                          borderRadius: '20px',
-                          fontSize: '12.5px',
-                          fontWeight: selectedCategory === cat ? 700 : 500,
-                          border: '1px solid',
-                          borderColor: selectedCategory === cat ? '#2563eb' : '#e2e8f0',
-                          background: selectedCategory === cat ? '#2563eb' : '#ffffff',
-                          color: selectedCategory === cat ? '#ffffff' : '#475569',
-                          cursor: 'pointer',
-                          whiteSpace: 'nowrap',
-                          transition: 'all 0.15s',
-                        }}
-                      >
-                        {cat === 'all' ? 'Tất cả' : cat}
-                      </button>
-                    ))}
+                    {categories.map((cat) => {
+                      const isActive = selectedCategory === cat;
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setSelectedCategory(cat)}
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '20px',
+                            fontSize: '12.5px',
+                            fontWeight: isActive ? 700 : 500,
+                            border: '1px solid',
+                            borderColor: isActive ? 'var(--primary-color, #ea580c)' : '#e2e8f0',
+                            background: isActive ? 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)' : '#ffffff',
+                            color: isActive ? 'var(--primary-color, #ea580c)' : '#475569',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: isActive ? '0 2px 6px rgba(234, 88, 12, 0.15)' : 'none',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: isActive ? 'rgba(234, 88, 12, 0.15)' : 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TagIcon size={9} color={isActive ? '#ea580c' : '#64748b'} />
+                          </span>
+                          <span>{cat === 'all' ? 'Tất cả' : cat}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
 
