@@ -844,11 +844,24 @@ const Header = ({
               aria-label={`Yêu thích, ${wishlistCount} sản phẩm`}
               title={t('wishlist_title')}
             >
-              <HeartIcon
-                size={22}
-                fill={wishlistCount > 0 ? "#ef4444" : "none"}
-                color={wishlistCount > 0 ? "#ef4444" : "#f43f5e"}
-              />
+              <span
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '8px',
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'transform 0.15s ease',
+                }}
+              >
+                <HeartIcon
+                  size={18}
+                  fill={wishlistCount > 0 ? "#ef4444" : "none"}
+                  color={wishlistCount > 0 ? "#ef4444" : "#f43f5e"}
+                />
+              </span>
               {wishlistCount > 0 && (
                 <span key={wishlistCount} className="shopee-action-badge badge-amber anim-badge-bounce">
                   {wishlistCount > 99 ? '99+' : wishlistCount}
@@ -870,7 +883,20 @@ const Header = ({
                 aria-label={`Giỏ hàng, ${cartCount} sản phẩm`}
                 title={t('cart')}
               >
-                <CartIcon size={22} color="#2563eb" />
+                <span
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '8px',
+                    background: 'rgba(37, 99, 235, 0.12)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'transform 0.15s ease',
+                  }}
+                >
+                  <CartIcon size={18} color="#2563eb" />
+                </span>
                 <span key={cartCount} className="shopee-action-badge badge-indigo anim-badge-bounce">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>

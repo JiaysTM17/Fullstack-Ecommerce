@@ -174,7 +174,20 @@ export default function NotificationsPopover() {
         title="Thông báo"
         style={{ position: 'relative' }}
       >
-        <BellIcon size={22} color="#f59e0b" />
+        <span
+          style={{
+            width: '28px',
+            height: '28px',
+            borderRadius: '8px',
+            background: 'rgba(245, 158, 11, 0.15)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'transform 0.15s ease',
+          }}
+        >
+          <BellIcon size={18} color="#f59e0b" />
+        </span>
         {unreadCount > 0 && (
           <span className="shopee-action-badge badge-indigo">
             {unreadCount}
@@ -353,10 +366,11 @@ export default function NotificationsPopover() {
                 >
                   <div
                     style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      background: item.type === 'order' ? '#e0f2fe' : item.type === 'voucher' ? '#fef3c7' : '#fee2e2',
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '10px',
+                      background: item.type === 'order' ? 'rgba(2, 132, 199, 0.12)' : item.type === 'voucher' ? 'rgba(217, 119, 6, 0.12)' : 'rgba(220, 38, 38, 0.12)',
+                      border: item.type === 'order' ? '1px solid rgba(2, 132, 199, 0.25)' : item.type === 'voucher' ? '1px solid rgba(217, 119, 6, 0.25)' : '1px solid rgba(220, 38, 38, 0.25)',
                       color: item.type === 'order' ? '#0284c7' : item.type === 'voucher' ? '#d97706' : '#dc2626',
                       display: 'flex',
                       alignItems: 'center',
@@ -366,11 +380,11 @@ export default function NotificationsPopover() {
                     }}
                   >
                     {item.type === 'order' ? (
-                      <PackageIcon size={18} color="#0284c7" />
+                      <PackageIcon size={19} color="#0284c7" />
                     ) : item.type === 'voucher' ? (
-                      <TicketIcon size={18} color="#d97706" />
+                      <TicketIcon size={19} color="#d97706" />
                     ) : (
-                      <BoltIcon size={18} color="#dc2626" />
+                      <BoltIcon size={19} color="#dc2626" />
                     )}
                   </div>
 

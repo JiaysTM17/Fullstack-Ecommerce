@@ -577,6 +577,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 className="category-drawer-mall-btn"
               >
                 <span className="mall-red-badge">Mall</span>
+                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <StoreIcon size={10} color="#ea580c" />
+                </span>
                 <span>{shop.name}</span>
               </button>
             ))}
