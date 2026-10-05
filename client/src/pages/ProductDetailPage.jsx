@@ -197,8 +197,29 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <main className="shopee-container" style={{ padding: "40px 0", textAlign: "center" }}>
-        <p style={{ fontSize: "16px", color: "var(--text-secondary, #666)" }}>{t('pdp_loading', 'Đang tải thông tin chi tiết sản phẩm...')}</p>
+      <main className="shopee-container" style={{ padding: "80px 20px", textAlign: "center" }}>
+        <div style={{ position: 'relative', width: '56px', height: '56px', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              border: '3px solid rgba(234, 88, 12, 0.15)',
+              borderTopColor: '#ea580c',
+              borderRadius: '50%',
+              animation: 'pdpSpin 0.9s linear infinite',
+            }}
+          />
+          <span style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ShoppingBagIcon size={16} color="#ea580c" />
+          </span>
+        </div>
+        <h3 style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)", margin: '0 0 6px' }}>
+          {t('pdp_loading', 'Đang tải thông tin chi tiết sản phẩm...')}
+        </h3>
+        <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>
+          Vui lòng đợi giây lát trong khi hệ thống xác thực dữ liệu sản phẩm chính hãng.
+        </p>
+        <style>{`@keyframes pdpSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </main>
     );
   }

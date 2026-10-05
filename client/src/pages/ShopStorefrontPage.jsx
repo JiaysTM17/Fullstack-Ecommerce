@@ -11,6 +11,7 @@ import ProductCard from '../components/ProductCard';
 import {
   StarIcon,
   PackageIcon,
+  StoreIcon,
   TicketIcon,
   MapPinIcon,
   ChatIcon,
@@ -232,21 +233,29 @@ export default function ShopStorefrontPage() {
 
   if (loading) {
     return (
-      <main className="shopee-container" style={{ padding: '80px 0', textAlign: 'center' }}>
-        <div style={{
-          display: 'inline-block',
-          width: '40px',
-          height: '40px',
-          border: '4px solid #f3f3f3',
-          borderTop: '4px solid #ea580c',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-          marginBottom: '16px',
-        }} />
-        <h3 style={{ color: 'var(--text-primary)', fontSize: '16px', fontWeight: 600 }}>
+      <main className="shopee-container" style={{ padding: '80px 20px', textAlign: 'center' }}>
+        <div style={{ position: 'relative', width: '56px', height: '56px', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              border: '3px solid rgba(13, 148, 136, 0.15)',
+              borderTopColor: '#0d9488',
+              borderRadius: '50%',
+              animation: 'shopSpin 0.9s linear infinite',
+            }}
+          />
+          <span style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <StoreIcon size={16} color="#0d9488" />
+          </span>
+        </div>
+        <h3 style={{ color: 'var(--text-primary)', fontSize: '15px', fontWeight: 700, margin: '0 0 6px' }}>
           Đang tải thông tin gian hàng...
         </h3>
-        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>
+          Vui lòng đợi giây lát trong khi tải sản phẩm và khuyến mãi từ người bán.
+        </p>
+        <style>{`@keyframes shopSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </main>
     );
   }
