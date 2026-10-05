@@ -34,6 +34,8 @@ import {
   ChevronRightIcon,
   ScaleIcon,
   QrCodeIcon,
+  HomeIcon,
+  AlertCircleIcon,
 } from "../components/OrdersIcons";
 import "../styles/amazon-pdp.css";
 
@@ -203,12 +205,52 @@ export default function ProductDetailPage() {
 
   if (error || !product) {
     return (
-      <main className="shopee-container shopee-empty-state" style={{ padding: "40px 0" }}>
-        <h1>Không tìm thấy sản phẩm</h1>
-        <p>{error || "Sản phẩm không tồn tại hoặc đã ngừng kinh doanh."}</p>
-        <Link className="shopee-btn shopee-btn-primary" to="/">
-          Về trang chủ
-        </Link>
+      <main className="shopee-container shopee-empty-state" style={{ padding: "80px 20px", textAlign: "center" }}>
+        <div style={{ display: "inline-flex", justifyContent: "center", marginBottom: "18px" }}>
+          <span style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.1)", border: "1.5px solid rgba(239, 68, 68, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px rgba(239, 68, 68, 0.12)" }}>
+            <AlertCircleIcon size={34} color="#ef4444" />
+          </span>
+        </div>
+        <h1 style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary)", margin: "0 0 10px 0" }}>
+          Không tìm thấy sản phẩm
+        </h1>
+        <p style={{ maxWidth: "460px", color: "var(--text-secondary)", fontSize: "14px", lineHeight: 1.6, margin: "0 auto 24px" }}>
+          {error || "Sản phẩm không tồn tại, đã bị gỡ khỏi sàn hoặc tạm thời ngừng kinh doanh."}
+        </p>
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+          <Link
+            className="shopee-btn shopee-btn-primary"
+            to="/"
+            style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 22px", borderRadius: "8px", textDecoration: "none", fontWeight: 700, fontSize: "14px" }}
+          >
+            <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(255, 255, 255, 0.22)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+              <HomeIcon size={13} color="#ffffff" />
+            </span>
+            <span>Về trang chủ</span>
+          </Link>
+          <Link
+            to="/cart"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 20px",
+              borderRadius: "8px",
+              border: "1.5px solid #cbd5e1",
+              background: "#ffffff",
+              color: "#1e293b",
+              textDecoration: "none",
+              fontWeight: 700,
+              fontSize: "14px",
+              transition: "all 0.2s ease"
+            }}
+          >
+            <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(37, 99, 235, 0.12)", border: "1px solid rgba(37, 99, 235, 0.22)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+              <ShoppingBagIcon size={12} color="#2563eb" />
+            </span>
+            <span>Xem Giỏ Hàng</span>
+          </Link>
+        </div>
       </main>
     );
   }
