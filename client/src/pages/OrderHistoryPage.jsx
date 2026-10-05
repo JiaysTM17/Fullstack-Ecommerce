@@ -2206,7 +2206,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <EyeIcon size={11} color="#2563eb" />
                             </span>
                             <span>{t('view_details', 'Xem chi tiết')}</span>
@@ -2226,7 +2226,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <EyeIcon size={11} color="#2563eb" />
                             </span>
                             <span>{t('view_details', 'Xem chi tiết')}</span>
@@ -2237,8 +2237,8 @@ export default function OrderHistoryPage() {
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                             onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <ChatIcon size={11} color="#2563eb" />
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(147, 51, 234, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <ChatIcon size={11} color="#9333ea" />
                             </span>
                             <span>{t('chat_with_shop', 'Chat với Shop')}</span>
                           </button>
