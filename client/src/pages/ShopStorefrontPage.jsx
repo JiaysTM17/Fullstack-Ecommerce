@@ -674,9 +674,9 @@ export default function ShopStorefrontPage() {
           }}
         >
           <div className="mall-metric-card">
-            <div className="mall-metric-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
+            <div className="mall-metric-icon" style={{ background: 'rgba(217, 119, 6, 0.12)', border: '1px solid rgba(217, 119, 6, 0.22)' }}>
               <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <StarIcon size={18} color="#d97706" filled />
+                <StarIcon size={18} color="#d97706" fill="#d97706" />
               </span>
             </div>
             <div>
@@ -688,7 +688,7 @@ export default function ShopStorefrontPage() {
           </div>
 
           <div className="mall-metric-card">
-            <div className="mall-metric-icon" style={{ background: '#ffe4e6', color: '#e11d48' }}>
+            <div className="mall-metric-icon" style={{ background: 'rgba(225, 29, 72, 0.12)', border: '1px solid rgba(225, 29, 72, 0.22)' }}>
               <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(225, 29, 72, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <UserIcon size={18} color="#e11d48" />
               </span>
@@ -702,7 +702,7 @@ export default function ShopStorefrontPage() {
           </div>
 
           <div className="mall-metric-card">
-            <div className="mall-metric-icon" style={{ background: '#dcfce7', color: '#15803d' }}>
+            <div className="mall-metric-icon" style={{ background: 'rgba(21, 128, 61, 0.12)', border: '1px solid rgba(21, 128, 61, 0.22)' }}>
               <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(21, 128, 61, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ClockIcon size={18} color="#15803d" />
               </span>
@@ -716,7 +716,7 @@ export default function ShopStorefrontPage() {
           </div>
 
           <div className="mall-metric-card">
-            <div className="mall-metric-icon" style={{ background: '#e0e7ff', color: '#4338ca' }}>
+            <div className="mall-metric-icon" style={{ background: 'rgba(67, 56, 202, 0.12)', border: '1px solid rgba(67, 56, 202, 0.22)' }}>
               <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(67, 56, 202, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <PackageIcon size={18} color="#4338ca" />
               </span>

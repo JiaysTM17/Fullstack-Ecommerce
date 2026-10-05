@@ -36,6 +36,8 @@ import {
   QrCodeIcon,
   HomeIcon,
   AlertCircleIcon,
+  ClockIcon,
+  UserIcon,
 } from "../components/OrdersIcons";
 import "../styles/amazon-pdp.css";
 
@@ -661,19 +663,19 @@ export default function ProductDetailPage() {
 
         <div className="amazon-shop-stats">
           <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#fef3c7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(217, 119, 6, 0.12)', border: '1px solid rgba(217, 119, 6, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <StarIcon size={12} color="#d97706" fill="#d97706" />
             </span>
             <span>Đánh giá: <strong>{product.shopRating || "4.9"} / 5.0</strong></span>
           </div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <ClockIcon size={12} color="#16a34a" />
             </span>
             <span>Tỷ lệ phản hồi: <strong>{product.shopResponseRate || "98"}%</strong></span>
           </div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#ffe4e6', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(225, 29, 72, 0.12)', border: '1px solid rgba(225, 29, 72, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <UserIcon size={12} color="#e11d48" />
             </span>
             <span>Người theo dõi: <strong>12.4k</strong></span>
@@ -687,7 +689,7 @@ export default function ProductDetailPage() {
             style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             onClick={() => setShowShopChat(true)}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ChatIcon size={12} color="#2563eb" />
             </span>
             <span>Chat Ngay</span>
@@ -1265,7 +1267,7 @@ export default function ProductDetailPage() {
             className="mobile-icon-btn"
             title="Xem Shop"
           >
-            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <StoreIcon size={12} color="#ea580c" />
             </span>
             <span>Shop</span>
@@ -1276,7 +1278,7 @@ export default function ProductDetailPage() {
             onClick={() => toggleWishlist(productId)}
             title="Yêu thích"
           >
-            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: wishlisted ? 'rgba(244, 63, 94, 0.15)' : 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: wishlisted ? 'rgba(244, 63, 94, 0.15)' : 'rgba(100, 116, 139, 0.12)', border: wishlisted ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid rgba(100, 116, 139, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <HeartIcon size={12} color={wishlisted ? "#f43f5e" : "#64748b"} fill={wishlisted ? "#f43f5e" : "none"} />
             </span>
             <span>{wishlisted ? "Đã lưu" : "Thích"}</span>
