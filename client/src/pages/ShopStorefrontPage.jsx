@@ -25,6 +25,7 @@ import {
   PlusIcon,
   ChevronRightIcon,
   ShieldCheckIcon,
+  UserIcon,
 } from '../components/OrdersIcons';
 
 // Hàm phân loại chuyên nghiệp cho từng mặt hàng trong gian hàng
@@ -663,9 +664,9 @@ export default function ShopStorefrontPage() {
           </div>
 
           <div className="mall-metric-card">
-            <div className="mall-metric-icon" style={{ background: '#fee2e2', color: '#dc2626' }}>
-              <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CheckIcon size={18} color="#dc2626" />
+            <div className="mall-metric-icon" style={{ background: '#ffe4e6', color: '#e11d48' }}>
+              <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(225, 29, 72, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <UserIcon size={18} color="#e11d48" />
               </span>
             </div>
             <div>
@@ -740,8 +741,14 @@ export default function ShopStorefrontPage() {
                       borderRadius: '4px',
                       fontWeight: 800,
                       fontSize: '11px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
                     }}>
-                      MÃ SHOP
+                      <span style={{ width: '14px', height: '14px', borderRadius: '3px', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TicketIcon size={9} color="#dc2626" />
+                      </span>
+                      <span>MÃ SHOP</span>
                     </span>
                     <strong style={{ fontSize: '15px', color: '#ea580c', letterSpacing: '0.5px' }}>
                       {v.code}

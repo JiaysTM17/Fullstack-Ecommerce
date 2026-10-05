@@ -479,7 +479,16 @@ export default function CheckoutPage() {
       {/* 4-Step Progress Indicator */}
       <nav className="checkout-steps-nav">
         <div className={`checkout-step-item ${currentStep === 1 ? "active" : currentStep > 1 ? "completed" : ""}`}>
-          <div className="checkout-step-number">{currentStep > 1 ? <CheckIcon size={12} color="#ffffff" /> : "1"}</div>
+          <div
+            className="checkout-step-number"
+            style={{
+              background: currentStep > 1 ? "#10b981" : currentStep === 1 ? "#ea580c" : "rgba(234, 88, 12, 0.12)",
+              color: currentStep >= 1 ? "#ffffff" : "#ea580c",
+              border: currentStep === 1 ? "none" : currentStep > 1 ? "none" : "1px solid rgba(234, 88, 12, 0.25)",
+            }}
+          >
+            {currentStep > 1 ? <CheckIcon size={13} color="#ffffff" /> : <MapPinIcon size={13} color={currentStep === 1 ? "#ffffff" : "#ea580c"} />}
+          </div>
           <span>1. Địa Chỉ Nhận Hàng</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
@@ -489,7 +498,16 @@ export default function CheckoutPage() {
         </span>
 
         <div className={`checkout-step-item ${currentStep === 2 ? "active" : currentStep > 2 ? "completed" : ""}`}>
-          <div className="checkout-step-number">{currentStep > 2 ? <CheckIcon size={12} color="#ffffff" /> : "2"}</div>
+          <div
+            className="checkout-step-number"
+            style={{
+              background: currentStep > 2 ? "#10b981" : currentStep === 2 ? "#0284c7" : "rgba(2, 132, 199, 0.12)",
+              color: currentStep >= 2 ? "#ffffff" : "#0284c7",
+              border: currentStep === 2 ? "none" : currentStep > 2 ? "none" : "1px solid rgba(2, 132, 199, 0.25)",
+            }}
+          >
+            {currentStep > 2 ? <CheckIcon size={13} color="#ffffff" /> : <TruckIcon size={13} color={currentStep === 2 ? "#ffffff" : "#0284c7"} />}
+          </div>
           <span>2. Vận Chuyển</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
@@ -499,7 +517,16 @@ export default function CheckoutPage() {
         </span>
 
         <div className={`checkout-step-item ${currentStep === 3 ? "active" : currentStep > 3 ? "completed" : ""}`}>
-          <div className="checkout-step-number">{currentStep > 3 ? <CheckIcon size={12} color="#ffffff" /> : "3"}</div>
+          <div
+            className="checkout-step-number"
+            style={{
+              background: currentStep > 3 ? "#10b981" : currentStep === 3 ? "#7c3aed" : "rgba(124, 58, 237, 0.12)",
+              color: currentStep >= 3 ? "#ffffff" : "#7c3aed",
+              border: currentStep === 3 ? "none" : currentStep > 3 ? "none" : "1px solid rgba(124, 58, 237, 0.25)",
+            }}
+          >
+            {currentStep > 3 ? <CheckIcon size={13} color="#ffffff" /> : <CreditCardIcon size={13} color={currentStep === 3 ? "#ffffff" : "#7c3aed"} />}
+          </div>
           <span>3. Phương Thức Thanh Toán</span>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", color: "#94a3b8" }}>
@@ -509,7 +536,16 @@ export default function CheckoutPage() {
         </span>
 
         <div className={`checkout-step-item ${currentStep === 4 ? "active" : ""}`}>
-          <div className="checkout-step-number">4</div>
+          <div
+            className="checkout-step-number"
+            style={{
+              background: currentStep === 4 ? "#16a34a" : "rgba(22, 163, 74, 0.12)",
+              color: currentStep === 4 ? "#ffffff" : "#16a34a",
+              border: currentStep === 4 ? "none" : "1px solid rgba(22, 163, 74, 0.25)",
+            }}
+          >
+            <ShieldCheckIcon size={13} color={currentStep === 4 ? "#ffffff" : "#16a34a"} />
+          </div>
           <span>4. Xác Nhận & Đặt Hàng</span>
         </div>
       </nav>
