@@ -1,6 +1,7 @@
 /**
  * Request Validator Middleware — Validation helpers tập trung
  * Cung cấp các hàm validate phổ biến cho toàn bộ API
+ * Upgrade: Thêm middleware factory cho route-level validation
  */
 
 /**
@@ -110,6 +111,108 @@ export const validatePagination = (query) => {
   return { page, limit };
 };
 
+// ============================================================
+// MIDDLEWARE FACTORIES — Route-level validation (Upgrade)
+// ============================================================
+
+/**
+ * Middleware: requireFields — Trả 400 nếu thiếu fields bắt buộc
+ * @param {string[]} fields - Danh sách field bắt buộc trong req.body
+ * @returns {Function} Express middleware
+ *
+ * @example
+ *   router.post("/register", requireFields(["email", "password", "fullName"]), register);
+ */
+export const requireFields = (fields) => {
+  return (req, res, next) => {
+    const { valid, missing } = validateRequired(req.body, fields);
+    if (!valid) {
+      return res.status(400).json({
+        success: false,
+        code: "MISSING_FIELDS",
+        message: `Vui lòng điền đầy đủ: ${missing.join(", ")}`,
+        missingFields: missing,
+      });
+    }
+    next();
+  };
+};
+
+/**
+ * Middleware: validateBody — Validate body với custom rules
+ * @param {Object} rules - { fieldName: { type, required, min, max, pattern, message } }
+ * @returns {Function} Express middleware
+ *
+ * @example
+ *   router.post("/products", validateBody({
+ *     name: { type: "string", required: true, min: 2 },
+ *     price: { type: "number", required: true, min: 0 },
+ *   }), createProduct);
+ */
+export const validateBody = (rules) => {
+  return (req, res, next) => {
+    const errors = [];
+
+    for (const [field, rule] of Object.entries(rules)) {
+      const value = req.body[field];
+
+      // Required check
+      if (rule.required && (value === undefined || value === null || value === "")) {
+        errors.push(`${field}: Trường này là bắt buộc`);
+        continue;
+      }
+
+      // Skip optional empty fields
+      if (value === undefined || value === null) continue;
+
+      // Type check
+      if (rule.type === "string" && typeof value !== "string") {
+        errors.push(`${field}: Phải là chuỗi ký tự`);
+      } else if (rule.type === "number" && (typeof value !== "number" || isNaN(value))) {
+        errors.push(`${field}: Phải là số hợp lệ`);
+      } else if (rule.type === "boolean" && typeof value !== "boolean") {
+        errors.push(`${field}: Phải là true hoặc false`);
+      } else if (rule.type === "email" && !isValidEmail(value)) {
+        errors.push(`${field}: Email không hợp lệ`);
+      } else if (rule.type === "phone" && !isValidVietnamesePhone(value)) {
+        errors.push(`${field}: Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)`);
+      }
+
+      // Min/Max for strings (length) and numbers (value)
+      if (rule.min !== undefined) {
+        if (typeof value === "string" && value.length < rule.min) {
+          errors.push(`${field}: Tối thiểu ${rule.min} ký tự`);
+        } else if (typeof value === "number" && value < rule.min) {
+          errors.push(`${field}: Giá trị tối thiểu là ${rule.min}`);
+        }
+      }
+      if (rule.max !== undefined) {
+        if (typeof value === "string" && value.length > rule.max) {
+          errors.push(`${field}: Tối đa ${rule.max} ký tự`);
+        } else if (typeof value === "number" && value > rule.max) {
+          errors.push(`${field}: Giá trị tối đa là ${rule.max}`);
+        }
+      }
+
+      // Pattern check
+      if (rule.pattern && typeof value === "string" && !rule.pattern.test(value)) {
+        errors.push(rule.message || `${field}: Không đúng định dạng yêu cầu`);
+      }
+    }
+
+    if (errors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        code: "VALIDATION_ERROR",
+        message: errors[0],
+        errors,
+      });
+    }
+
+    next();
+  };
+};
+
 export default {
   isValidEmail,
   isValidVietnamesePhone,
@@ -119,4 +222,6 @@ export default {
   validateStrongPassword,
   validateRequired,
   validatePagination,
+  requireFields,
+  validateBody,
 };

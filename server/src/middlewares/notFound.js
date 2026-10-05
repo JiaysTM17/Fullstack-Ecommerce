@@ -1,7 +1,10 @@
 /**
  * Not Found Middleware — Xử lý route không tồn tại
- * Gợi ý các route hợp lệ để hỗ trợ developer debug
+ * Upgrade: Sử dụng structured logger, cập nhật endpoint list
  */
+
+import logger from "../utils/logger.js";
+
 const AVAILABLE_ENDPOINTS = [
   "GET    /api/health",
   "POST   /api/auth/register",
@@ -30,6 +33,7 @@ const AVAILABLE_ENDPOINTS = [
   "PATCH  /api/orders/:id/deliver",
   "PATCH  /api/orders/:id/complete",
   "PATCH  /api/orders/:id/cancel",
+  "POST   /api/orders/:id/repurchase",
   "GET    /api/cart",
   "GET    /api/cart/summary",
   "POST   /api/cart/apply-voucher",
@@ -44,16 +48,41 @@ const AVAILABLE_ENDPOINTS = [
   "POST   /api/wishlist/:productId",
   "GET    /api/notifications",
   "GET    /api/notifications/unread-count",
+  "GET    /api/shops",
+  "GET    /api/shops/:id",
+  "GET    /api/seller/shop",
   "GET    /api/seller/dashboard",
+  "GET    /api/seller/stats",
+  "GET    /api/seller/products",
+  "GET    /api/seller/orders",
+  "GET    /api/seller/revenue",
+  "GET    /api/seller/wallet",
   "GET    /api/admin/dashboard",
+  "GET    /api/admin/overview",
+  "GET    /api/admin/shops",
+  "GET    /api/admin/users",
+  "GET    /api/admin/finance",
+  "GET    /api/admin/revenue-chart",
+  "GET    /api/admin/top-products",
+  "GET    /api/admin/top-shops",
+  "GET    /api/admin/recent-orders",
 ];
 
 const notFound = (req, res, next) => {
+  logger.warn(`Route not found: ${req.method} ${req.originalUrl}`, {
+    requestId: req.requestId,
+    method: req.method,
+    url: req.originalUrl,
+    ip: req.ip,
+  });
+
   res.status(404).json({
     success: false,
+    code: "NOT_FOUND",
     message: `Route không tồn tại: ${req.method} ${req.originalUrl}`,
     suggestion: "Kiểm tra lại đường dẫn API. Danh sách endpoints hợp lệ bên dưới.",
     availableEndpoints: AVAILABLE_ENDPOINTS,
+    requestId: req.requestId,
   });
 };
 

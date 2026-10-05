@@ -1,7 +1,10 @@
 /**
  * Enhanced Error Handler Middleware — Phân loại lỗi theo type
  * Hỗ trợ: ValidationError, CastError, DuplicateKeyError, JWT errors, AppError
+ * Upgrade: Sử dụng structured logger thay vì console.error
  */
+
+import logger from "../utils/logger.js";
 
 /**
  * Custom AppError class — Lỗi nghiệp vụ tùy chỉnh
@@ -70,10 +73,24 @@ const errorHandler = (err, req, res, next) => {
     message = "Dữ liệu JSON không hợp lệ";
   }
 
-  // Log lỗi server-side
+  // Structured logging thay vì console.error
   const requestId = req.requestId || "no-id";
   if (statusCode >= 500) {
-    console.error(`[ERROR][${requestId}] ${err.stack || err.message}`);
+    logger.error(`${code}: ${err.message}`, {
+      requestId,
+      statusCode,
+      stack: err.stack,
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+    });
+  } else if (statusCode >= 400) {
+    logger.warn(`${code}: ${message}`, {
+      requestId,
+      statusCode,
+      method: req.method,
+      url: req.originalUrl,
+    });
   }
 
   res.status(statusCode).json({
