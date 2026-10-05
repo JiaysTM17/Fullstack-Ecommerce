@@ -210,14 +210,14 @@ export default function CartPage() {
               <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
                 {hasFreeShipping ? (
                   <span style={{ color: "var(--color-success, #10b981)", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#d1fae5", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "rgba(5, 150, 105, 0.12)", border: "1px solid rgba(5, 150, 105, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <SparklesIcon size={15} color="#059669" />
                     </span>
                     <span>{t('freeship_qualified', 'Chúc mừng! Bạn đã đủ điều kiện nhận MIỄN PHÍ VẬN CHUYỂN!')}</span>
                   </span>
                 ) : (
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#e0f2fe", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "rgba(2, 132, 199, 0.12)", border: "1px solid rgba(2, 132, 199, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <TruckIcon size={15} color="#0284c7" />
                     </span>
                     <span>{t('freeship_needed', 'Mua thêm')} <strong style={{ color: "var(--primary-color)" }}>{formatCurrency(neededAmount)}</strong> {t('freeship_to_qualify', 'để được MIỄN PHÍ VẬN CHUYỂN toàn quốc!')}</span>
@@ -577,7 +577,7 @@ export default function CartPage() {
           <div style={{ marginBottom: "18px", borderBottom: "1px solid var(--border-medium, #eee)", paddingBottom: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
               <span style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#ffedd5", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "rgba(234, 88, 12, 0.12)", border: "1px solid rgba(234, 88, 12, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <TicketIcon size={14} color="#ea580c" />
                 </span>
                 <span>{t('voucher_code', 'Mã Giảm Giá / Voucher')}:</span>
@@ -607,6 +607,7 @@ export default function CartPage() {
                     height: '16px',
                     borderRadius: '50%',
                     background: 'rgba(234, 88, 12, 0.15)',
+                    border: '1px solid rgba(234, 88, 12, 0.25)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -623,7 +624,7 @@ export default function CartPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f0f9ff", padding: "8px 12px", borderRadius: "8px", border: "1px solid #0284c7" }}>
                   <div>
                     <span style={{ fontWeight: 800, color: "#0284c7", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "#e0f2fe", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                      <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "rgba(2, 132, 199, 0.12)", border: "1px solid rgba(2, 132, 199, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                         <TruckIcon size={12} color="#0284c7" />
                       </span>
                       <span>{appliedShippingVoucher.code}</span>
@@ -637,7 +638,7 @@ export default function CartPage() {
                     onClick={removeShippingVoucher}
                     style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}
                   >
-                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CloseIcon size={9} color="#ef4444" />
                     </span>
                     <span>{t('remove', 'Gỡ')}</span>
@@ -649,7 +650,7 @@ export default function CartPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--primary-color, #ea580c)" }}>
                   <div>
                     <span style={{ fontWeight: 800, color: "var(--primary-color, #ea580c)", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "#ffedd5", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                      <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "rgba(234, 88, 12, 0.12)", border: "1px solid rgba(234, 88, 12, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                         <TagIcon size={12} color="#ea580c" />
                       </span>
                       <span>{appliedDiscountVoucher.code}</span>
