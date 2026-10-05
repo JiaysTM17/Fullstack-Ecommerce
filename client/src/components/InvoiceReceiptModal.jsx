@@ -145,7 +145,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 marginRight: '6px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ArrowLeftIcon size={11} color="#2563eb" />
               </span>
               <span>Quay lại</span>
@@ -157,6 +157,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
               height: '30px',
               borderRadius: '8px',
               background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+              border: '1px solid rgba(37, 99, 235, 0.35)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -187,7 +188,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
               height: '32px',
             }}
           >
-            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <PrinterIcon size={11} color="#ffffff" />
             </span>
             <span>In Hóa Đơn / Lưu PDF</span>
@@ -208,7 +209,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 gap: '5px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CloseIcon size={10} color="#ef4444" />
               </span>
               <span>Đóng</span>
@@ -248,6 +249,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                     width: '26px',
                     height: '26px',
                     borderRadius: '6px',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -291,7 +293,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                   borderRadius: '4px',
                 }}
               >
-                <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(21, 128, 61, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(21, 128, 61, 0.15)', border: '1px solid rgba(21, 128, 61, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CheckIcon size={10} color="#15803d" />
                 </span>
                 <span>ĐÃ KÝ ĐIỆN TỬ</span>
@@ -328,13 +330,13 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 Giao Nhận & Thanh Toán
               </div>
               <div style={{ color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#dbeafe', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <CreditCardIcon size={11} color="#2563eb" />
                 </span>
                 <span>Hình thức: <strong>{order.paymentMethod || 'Thanh toán khi nhận hàng (COD)'}</strong></span>
               </div>
               <div style={{ color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#ffedd5', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <TruckIcon size={11} color="#ea580c" />
                 </span>
                 <span>Vận chuyển: <strong>SPX Express</strong></span>
@@ -446,7 +448,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 }}
               >
                 <div style={{ fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#dcfce7', border: '1px solid rgba(21, 128, 61, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <ShieldCheckIcon size={11} color="#15803d" />
                   </span>
                   <span>ĐÃ KÝ SỐ BỞI {companyName}</span>

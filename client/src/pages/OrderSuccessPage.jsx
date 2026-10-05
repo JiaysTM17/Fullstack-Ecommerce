@@ -185,6 +185,7 @@ export default function OrderSuccessPage() {
                   height: '42px',
                   borderRadius: '10px',
                   background: isVietQRPaid ? 'rgba(21, 128, 61, 0.15)' : 'rgba(37, 99, 235, 0.12)',
+                  border: isVietQRPaid ? '1px solid rgba(21, 128, 61, 0.3)' : '1px solid rgba(37, 99, 235, 0.25)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -227,7 +228,7 @@ export default function OrderSuccessPage() {
                   gap: '6px',
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <QrCodeIcon size={12} color="#ffffff" />
                 </span>
                 <span>Quét Mã QR</span>
@@ -252,7 +253,7 @@ export default function OrderSuccessPage() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)', flexShrink: 0 }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)', border: '1px solid rgba(234, 88, 12, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)', flexShrink: 0 }}>
               <BoltIcon size={22} color="#c2410c" />
             </div>
             <div>
@@ -283,7 +284,7 @@ export default function OrderSuccessPage() {
               gap: '6px',
             }}
           >
-            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <BoltIcon size={12} color="#ffffff" />
             </span>
             <span>Quay Ngay</span>
@@ -298,7 +299,7 @@ export default function OrderSuccessPage() {
             style={{ padding: '12px 24px', fontSize: '15px', fontWeight: 800, width: '100%', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
             onClick={() => navigate('/orders')}
           >
-            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <TruckIcon size={14} color="#ffffff" />
             </span>
             <span>{t('order_view_tracking_btn', 'Theo dõi vận chuyển đơn hàng')}</span>
