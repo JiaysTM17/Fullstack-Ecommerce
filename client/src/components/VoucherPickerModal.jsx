@@ -673,7 +673,12 @@ export default function VoucherPickerModal({
                                 </span>
                               )}
                             </div>
-                            <span className="voucher-code-badge">{v.code}</span>
+                            <span className="voucher-code-badge" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                              <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(2, 132, 199, 0.15)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                <TruckIcon size={9} color="#0284c7" />
+                              </span>
+                              <span>{v.code}</span>
+                            </span>
                             {isEligible && saving > 0 && (
                               <div className="voucher-saving-highlight" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
                                 <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(2, 132, 199, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
@@ -732,10 +737,10 @@ export default function VoucherPickerModal({
                                 : isEligible
                                   ? undefined
                                   : undefined,
-                              display: isSelected ? 'inline-flex' : undefined,
-                              alignItems: isSelected ? 'center' : undefined,
-                              justifyContent: isSelected ? 'center' : undefined,
-                              gap: isSelected ? '4px' : undefined,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '5px',
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -744,11 +749,18 @@ export default function VoucherPickerModal({
                           >
                             {isSelected ? (
                               <>
-                                <CheckIcon size={11} color="#ffffff" />
+                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <CheckIcon size={11} color="#ffffff" />
+                                </span>
                                 <span>Đã chọn</span>
                               </>
                             ) : isEligible ? (
-                              "Chọn mã"
+                              <>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(2, 132, 199, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <TicketIcon size={10} color="#0284c7" />
+                                </span>
+                                <span>Chọn mã</span>
+                              </>
                             ) : (
                               "Chưa đủ ĐK"
                             )}
@@ -909,7 +921,12 @@ export default function VoucherPickerModal({
                                 </span>
                               )}
                             </div>
-                            <span className="voucher-code-badge">{v.code}</span>
+                            <span className="voucher-code-badge" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                              <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(234, 88, 12, 0.15)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                <TagIcon size={9} color="#ea580c" />
+                              </span>
+                              <span>{v.code}</span>
+                            </span>
                             {isEligible && saving > 0 && (
                               <div className="voucher-saving-highlight" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
                                 <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(234, 88, 12, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
@@ -963,10 +980,10 @@ export default function VoucherPickerModal({
                             type="button"
                             className={`voucher-apply-btn ${isSelected ? "applied" : isEligible ? "select" : "disabled"}`}
                             style={{
-                              display: isSelected ? 'inline-flex' : undefined,
-                              alignItems: isSelected ? 'center' : undefined,
-                              justifyContent: isSelected ? 'center' : undefined,
-                              gap: isSelected ? '4px' : undefined,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '5px',
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -975,11 +992,18 @@ export default function VoucherPickerModal({
                           >
                             {isSelected ? (
                               <>
-                                <CheckIcon size={11} color="#ffffff" />
+                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <CheckIcon size={11} color="#ffffff" />
+                                </span>
                                 <span>Đã chọn</span>
                               </>
                             ) : isEligible ? (
-                              "Chọn mã"
+                              <>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <TicketIcon size={10} color="#ea580c" />
+                                </span>
+                                <span>Chọn mã</span>
+                              </>
                             ) : (
                               "Chưa đủ ĐK"
                             )}

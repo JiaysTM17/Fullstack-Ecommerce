@@ -579,7 +579,12 @@ export default function RewardsHubModal({ onClose }) {
                     <span>QUAY NGAY ({totalSpins} lượt khả dụng)</span>
                   </>
                 ) : (
-                  'ĐÃ HẾT LƯỢT QUAY HÔM NAY'
+                  <>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ClockIcon size={12} color="#ffffff" />
+                    </span>
+                    <span>ĐÃ HẾT LƯỢT QUAY HÔM NAY</span>
+                  </>
                 )}
               </button>
 
