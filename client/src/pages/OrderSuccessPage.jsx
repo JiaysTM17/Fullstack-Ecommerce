@@ -129,7 +129,7 @@ export default function OrderSuccessPage() {
                   gap: '5px',
                 }}
               >
-                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CopyIcon size={10} color="#2563eb" />
                 </span>
                 <span>Sao chép</span>
@@ -154,7 +154,7 @@ export default function OrderSuccessPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Đơn vị vận chuyển:</span>
             <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(22, 163, 74, 0.14)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <TruckIcon size={13} color="#16a34a" />
               </span>
               <span>SPX Express (Giao hàng dự kiến 24H)</span>
@@ -310,7 +310,7 @@ export default function OrderSuccessPage() {
             style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
             onClick={() => setShowInvoiceModal(true)}
           >
-            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <ReceiptIcon size={14} color="#0284c7" />
             </span>
             <span>In Hóa Đơn / Xem Biên Lai VAT</span>
@@ -322,7 +322,7 @@ export default function OrderSuccessPage() {
             style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, width: '100%', textAlign: 'center', borderRadius: '10px', textDecoration: 'none' }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <HomeIcon size={13} color="#2563eb" />
               </span>
               <span>{t('order_continue_shopping_btn', 'Tiếp tục mua sắm')}</span>
