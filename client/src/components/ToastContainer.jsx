@@ -110,7 +110,7 @@ export default function ToastContainer() {
                 onClick={() => removeToast(toast.id)}
                 style={{
                   background: 'rgba(239, 68, 68, 0.1)',
-                  border: 'none',
+                  border: '1px solid rgba(239, 68, 68, 0.22)',
                   borderRadius: '50%',
                   width: '22px',
                   height: '22px',
@@ -120,7 +120,7 @@ export default function ToastContainer() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
-                  transition: 'background 0.2s',
+                  transition: 'all 0.2s ease',
                   padding: 0,
                 }}
                 aria-label="Đóng thông báo"
