@@ -2126,7 +2126,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <EyeIcon size={11} color="#2563eb" />
                             </span>
                             <span>{t('view_details', 'Xem chi tiết')}</span>
@@ -2139,8 +2139,8 @@ export default function OrderHistoryPage() {
                             onClick={() => handleReorderWholeOrder(ord)}
                             title="Mua lại tất cả sản phẩm trong đơn hàng này"
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <RefreshIcon size={11} color="#2563eb" />
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <RefreshIcon size={11} color="#10b981" />
                             </span>
                             <span>{t('buy_again_whole', 'Mua lại đơn này')}</span>
                           </button>
@@ -2152,16 +2152,16 @@ export default function OrderHistoryPage() {
                                 fontSize: '12px',
                                 padding: '6px 13px',
                                 borderRadius: '6px',
-                                background: '#f8fafc',
+                                background: '#f0fdf4',
                                 color: '#059669',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid #bbf7d0',
                                 fontWeight: 700,
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '6px',
                               }}
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <CheckIcon size={10} color="#059669" />
                               </span>
                               <span>{t('reviewed_badge', 'Đã đánh giá (+200 Xu)')}</span>
@@ -2173,8 +2173,8 @@ export default function OrderHistoryPage() {
                               onClick={() => setSelectedReviewOrder(ord)}
                               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 179, 8, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <StarIcon size={10} color="#eab308" fill="#eab308" />
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fef3c7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <StarIcon size={11} color="#d97706" fill="#d97706" />
                               </span>
                               <span>{t('review_order_btn', 'Đánh giá (+200 Xu)')}</span>
                             </button>
@@ -2192,8 +2192,8 @@ export default function OrderHistoryPage() {
                             onClick={() => handleReorderWholeOrder(ord)}
                             title="Mua lại tất cả sản phẩm trong đơn hàng này"
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <RefreshIcon size={11} color="#2563eb" />
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <RefreshIcon size={11} color="#ea580c" />
                             </span>
                             <span>{t('buy_again_whole', 'Mua lại đơn này')}</span>
                           </button>
