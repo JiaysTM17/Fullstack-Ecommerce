@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import logger from "./logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -39,7 +40,7 @@ export function saveToDisk(memoryStoreInstance) {
     writeFileSync(STORE_FILE, JSON.stringify(snapshot, null, 2), "utf8");
     return true;
   } catch (err) {
-    console.error("[Persistence] Error saving to disk:", err.message);
+    logger.error(`[Persistence] Error saving to disk: ${err.message}`);
     return false;
   }
 }
@@ -55,10 +56,10 @@ export function loadFromDisk() {
     }
     const raw = readFileSync(STORE_FILE, "utf8");
     const data = JSON.parse(raw);
-    console.log(`[Persistence] Loaded store from disk (saved at ${data._savedAt})`);
+    logger.info(`[Persistence] Loaded store from disk (saved at ${data._savedAt})`);
     return data;
   } catch (err) {
-    console.error("[Persistence] Error loading from disk:", err.message);
+    logger.error(`[Persistence] Error loading from disk: ${err.message}`);
     return null;
   }
 }
