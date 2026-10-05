@@ -77,8 +77,8 @@ export default function NotFoundPage() {
             transition: 'all 0.2s ease'
           }}
         >
-          <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <PackageIcon size={13} color="#ea580c" />
+          <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <PackageIcon size={12} color="#ea580c" />
           </span>
           <span>Đơn Hàng Của Tôi</span>
         </Link>
@@ -100,8 +100,8 @@ export default function NotFoundPage() {
             transition: 'all 0.2s ease'
           }}
         >
-          <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CartIcon size={13} color="#ea580c" />
+          <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CartIcon size={12} color="#2563eb" />
           </span>
           <span>Xem Giỏ Hàng</span>
         </Link>

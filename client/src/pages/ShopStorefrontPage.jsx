@@ -26,6 +26,8 @@ import {
   ChevronRightIcon,
   ShieldCheckIcon,
   UserIcon,
+  HomeIcon,
+  AlertCircleIcon,
 } from '../components/OrdersIcons';
 
 // Hàm phân loại chuyên nghiệp cho từng mặt hàng trong gian hàng
@@ -251,10 +253,23 @@ export default function ShopStorefrontPage() {
 
   if (!shop) {
     return (
-      <main className="shopee-container" style={{ padding: '60px 0', textAlign: 'center' }}>
-        <h2>{t('shop_not_found')}</h2>
-        <Link to="/" className="shopee-btn shopee-btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
-          Về trang chủ
+      <main className="shopee-container" style={{ padding: '80px 20px', textAlign: 'center' }}>
+        <div style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '18px' }}>
+          <span style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1.5px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(239, 68, 68, 0.12)' }}>
+            <AlertCircleIcon size={34} color="#ef4444" />
+          </span>
+        </div>
+        <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+          {t('shop_not_found')}
+        </h2>
+        <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', maxWidth: '420px', margin: '0 auto 24px' }}>
+          Gian hàng này không tồn tại hoặc đã tạm dừng hoạt động. Vui lòng quay về trang chủ để khám phá các đối tác chính hãng khác.
+        </p>
+        <Link to="/" className="shopee-btn shopee-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 24px', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>
+          <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <HomeIcon size={13} color="#ffffff" />
+          </span>
+          <span>Về trang chủ</span>
         </Link>
       </main>
     );
