@@ -435,7 +435,7 @@ export default function RegisterPage() {
         <div className="shopee-auth-hero-col">
           <div className="shopee-auth-hero-brand">
             <div className="shopee-auth-hero-badge">
-              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.2)', border: '1px solid rgba(234, 88, 12, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 {role === 'seller' ? <BoltIcon size={13} color="#ea580c" /> : <TicketIcon size={13} color="#ea580c" />}
               </span>
               <span>{role === 'seller' ? 'GIA NHẬP HỆ THỐNG ĐỐI TÁC BÁN HÀNG' : 'GIA NHẬP CỘNG ĐỒNG NGƯỜI MUA'}</span>
@@ -566,7 +566,7 @@ export default function RegisterPage() {
               <div className="shopee-auth-live-text">
                 <span>Hơn <strong>1.480+</strong> người dùng & đối tác đang trực tuyến</span>
                 <small style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', border: '1px solid rgba(22, 163, 74, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <ShieldCheckIcon size={10} color="#16a34a" />
                   </span>
                   <span>Mã hóa dữ liệu SSL 256-Bit • Xác thực an ninh 2 bước (2FA OTP)</span>
@@ -615,7 +615,7 @@ export default function RegisterPage() {
         <div className="shopee-auth-form-col">
           <div className="shopee-auth-header" style={{ marginBottom: '14px' }}>
             <div className="shopee-auth-brand-badge">
-              <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <SparklesIcon size={13} color="#ea580c" />
               </span>
               <span>TẠO TÀI KHOẢN MỚI</span>
@@ -635,7 +635,7 @@ export default function RegisterPage() {
               className={`shopee-role-tab ${role === 'customer' ? 'active' : ''}`}
               onClick={() => handleRoleChange('customer')}
             >
-              <span style={{ width: "26px", height: "26px", borderRadius: "6px", background: role === 'customer' ? 'rgba(255, 255, 255, 0.2)' : 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)', border: role === 'customer' ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid #86efac', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: "26px", height: "26px", borderRadius: "6px", background: role === 'customer' ? 'rgba(255, 255, 255, 0.2)' : 'linear-gradient(135deg, rgba(220, 252, 231, 0.9) 0%, rgba(187, 247, 208, 0.9) 100%)', border: role === 'customer' ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid rgba(22, 163, 74, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CartIcon size={14} color={role === 'customer' ? '#ffffff' : '#16a34a'} />
               </span>
               <span>{t('register_role_customer', 'Mua Hàng')}</span>
@@ -645,7 +645,7 @@ export default function RegisterPage() {
               className={`shopee-role-tab ${role === 'seller' ? 'active' : ''}`}
               onClick={() => handleRoleChange('seller')}
             >
-              <span style={{ width: "26px", height: "26px", borderRadius: "6px", background: role === 'seller' ? 'rgba(255, 255, 255, 0.2)' : 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: role === 'seller' ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid #fed7aa', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: "26px", height: "26px", borderRadius: "6px", background: role === 'seller' ? 'rgba(255, 255, 255, 0.2)' : 'linear-gradient(135deg, rgba(255, 247, 237, 0.9) 0%, rgba(255, 237, 213, 0.9) 100%)', border: role === 'seller' ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid rgba(234, 88, 12, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <StoreIcon size={14} color={role === 'seller' ? '#ffffff' : '#ea580c'} />
               </span>
               <span>{t('register_role_seller', 'Mở Shop Bán Hàng')}</span>
@@ -664,7 +664,7 @@ export default function RegisterPage() {
               alignItems: 'flex-start',
               gap: '12px'
             }}>
-              <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <StoreIcon size={18} color="#2563eb" />
               </span>
               <div style={{ fontSize: '13px', color: '#1e40af', lineHeight: 1.5 }}>

@@ -502,7 +502,7 @@ export default function LoginPage() {
         <div className="shopee-auth-form-col">
           <div className="shopee-auth-header" style={{ marginBottom: '16px' }}>
             <div className="shopee-auth-brand-badge">
-              <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShieldCheckIcon size={13} color="#2563eb" />
               </span>
               <span>CỔNG TRUY CẬP BẢO MẬT SSL 256-BIT</span>
@@ -522,7 +522,7 @@ export default function LoginPage() {
               className={`shopee-role-card ${activeRole === 'customer' ? 'active' : ''}`}
               onClick={() => setActiveRole('customer')}
             >
-              <span className="role-icon" style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)", border: "1px solid #86efac", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
+              <span className="role-icon" style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, rgba(220, 252, 231, 0.9) 0%, rgba(187, 247, 208, 0.9) 100%)", border: "1px solid rgba(22, 163, 74, 0.3)", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
                 <CartIcon size={18} color="#16a34a" />
               </span>
               <span className="role-name">{t('role_customer', 'Người Mua')}</span>
@@ -534,7 +534,7 @@ export default function LoginPage() {
               className={`shopee-role-card ${activeRole === 'seller' ? 'active' : ''}`}
               onClick={() => setActiveRole('seller')}
             >
-              <span className="role-icon" style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)", border: "1px solid #fed7aa", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
+              <span className="role-icon" style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, rgba(255, 247, 237, 0.9) 0%, rgba(255, 237, 213, 0.9) 100%)", border: "1px solid rgba(234, 88, 12, 0.3)", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
                 <StoreIcon size={18} color="#ea580c" />
               </span>
               <span className="role-name">{t('role_seller', 'Kênh Shop')}</span>
@@ -546,7 +546,7 @@ export default function LoginPage() {
               className={`shopee-role-card ${activeRole === 'admin' ? 'active' : ''}`}
               onClick={() => setActiveRole('admin')}
             >
-              <span className="role-icon" style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)", border: "1px solid #a5b4fc", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
+              <span className="role-icon" style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, rgba(224, 231, 255, 0.9) 0%, rgba(199, 210, 254, 0.9) 100%)", border: "1px solid rgba(79, 70, 229, 0.3)", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px" }}>
                 <ShieldCheckIcon size={18} color="#4f46e5" />
               </span>
               <span className="role-name">{t('role_admin', 'Quản Trị')}</span>
@@ -561,7 +561,7 @@ export default function LoginPage() {
               className={`shopee-auth-method-tab ${authMethod === 'password' ? 'active' : ''}`}
               onClick={() => setAuthMethod('password')}
             >
-              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <KeyIcon size={12} color="#6366f1" />
               </span>
               <span>Mật khẩu & Email</span>
@@ -571,7 +571,7 @@ export default function LoginPage() {
               className={`shopee-auth-method-tab ${authMethod === 'qr' ? 'active' : ''}`}
               onClick={() => setAuthMethod('qr')}
             >
-              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <QrCodeIcon size={12} color="#2563eb" />
               </span>
               <span>Quét mã QR</span>
@@ -619,7 +619,7 @@ export default function LoginPage() {
               {/* 1-Click Demo Logins */}
               <div className="shopee-demo-section" style={{ marginBottom: '16px' }}>
                 <div className="shopee-demo-title">
-                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <BoltIcon size={12} color="#ea580c" />
                   </span>
                   <span>{t('demo_quick_access', 'Chọn nhanh tài khoản trải nghiệm:')}</span>
@@ -633,7 +633,7 @@ export default function LoginPage() {
                       disabled={loading}
                     >
                       <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <UserIcon size={12} color="#16a34a" />
                         </span>
                         <span>Nguyễn Văn Khách (Customer)</span>
@@ -650,7 +650,7 @@ export default function LoginPage() {
                         disabled={loading}
                       >
                         <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <StoreIcon size={12} color="#ea580c" />
                           </span>
                           <span>Thời Trang GenZ Official (Shop A)</span>
@@ -664,7 +664,7 @@ export default function LoginPage() {
                         disabled={loading}
                       >
                         <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <StoreIcon size={12} color="#0284c7" />
                           </span>
                           <span>TechWorld Store (Shop B)</span>
@@ -681,7 +681,7 @@ export default function LoginPage() {
                       disabled={loading}
                     >
                       <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <ShieldCheckIcon size={12} color="#6366f1" />
                         </span>
                         <span>Tổng Quản Trị Viên Sàn (Super Admin)</span>
@@ -726,7 +726,7 @@ export default function LoginPage() {
                             className="shopee-email-dropdown-item"
                             onClick={() => handleSelectEmailSuggestion(item.full)}
                           >
-                            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                               <MailIcon size={12} color="#2563eb" />
                             </span>
                             <span>
@@ -759,7 +759,7 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label="Hiện mật khẩu"
                     >
-                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         {showPassword ? <EyeOffIcon size={14} color="#64748b" /> : <EyeIcon size={14} color="#64748b" />}
                       </span>
                     </button>
@@ -782,7 +782,7 @@ export default function LoginPage() {
                       gap: '10px',
                     }}
                   >
-                    <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.18)', border: '1px solid rgba(239, 68, 68, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <ClockIcon size={18} color="#dc2626" />
                     </div>
                     <div>
@@ -796,7 +796,7 @@ export default function LoginPage() {
                 {failedAttempts >= 3 && !isLocked && !sliderVerified && (
                   <div style={{ marginBottom: '14px' }}>
                     <div style={{ fontSize: '12px', fontWeight: 700, color: '#dc2626', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.12)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <AlertCircleIcon size={12} color="#dc2626" />
                       </span>
                       <span>Yêu cầu kiểm tra an ninh (Lần thử {failedAttempts}/5):</span>
@@ -812,7 +812,7 @@ export default function LoginPage() {
 
                 {failedAttempts >= 3 && sliderVerified && (
                   <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CheckIcon size={12} color="#16a34a" />
                     </span>
                     <span>Xác minh an ninh hoàn tất!</span>
@@ -843,7 +843,7 @@ export default function LoginPage() {
                   disabled={loading || isLocked}
                   style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 >
-                  <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <LockIcon size={13} color="#ffffff" />
                   </span>
                   <span>

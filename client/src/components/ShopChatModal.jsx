@@ -123,7 +123,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
                 gap: '4px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ArrowLeftIcon size={12} color="#ffffff" />
               </span>
               <span>Quay lại</span>
@@ -138,7 +138,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
             <div style={{ fontWeight: 800, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>{shop?.name || 'Gian Hàng Đối Tác'}</span>
               <span style={{ fontSize: '10px', background: '#dc2626', color: '#fff', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '13px', height: '13px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '13px', height: '13px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ShieldCheckIcon size={8} color="#ffffff" />
                 </span>
                 <span>Mall</span>
@@ -170,7 +170,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
           title="Đóng chat"
           aria-label="Đóng chat với gian hàng"
         >
-          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <CloseIcon size={12} color="#ef4444" />
           </span>
         </button>
@@ -217,7 +217,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
             }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChatIcon size={11} color="#ea580c" />
               </span>
               <span>Hỏi sản phẩm</span>
@@ -294,17 +294,21 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
         {QUICK_QUESTIONS.map((q, idx) => {
           let qIcon = <PackageIcon size={11} color="#ea580c" />;
           let iconBg = 'rgba(234, 88, 12, 0.1)';
+          let iconBorder = 'rgba(234, 88, 12, 0.25)';
           if (idx === 1) {
             qIcon = <TruckIcon size={11} color="#16a34a" />;
             iconBg = 'rgba(22, 163, 74, 0.1)';
+            iconBorder = 'rgba(22, 163, 74, 0.25)';
           }
           if (idx === 2) {
             qIcon = <TicketIcon size={11} color="#f59e0b" />;
             iconBg = 'rgba(245, 158, 11, 0.1)';
+            iconBorder = 'rgba(245, 158, 11, 0.25)';
           }
           if (idx === 3) {
             qIcon = <ShieldCheckIcon size={11} color="#059669" />;
             iconBg = 'rgba(5, 150, 105, 0.1)';
+            iconBorder = 'rgba(5, 150, 105, 0.25)';
           }
           return (
             <button
@@ -325,7 +329,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
                 gap: '6px'
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: iconBg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: iconBg, border: `1px solid ${iconBorder}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {qIcon}
               </span>
               <span>{q}</span>
@@ -381,7 +385,7 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
             transition: 'background 0.2s ease'
           }}
         >
-          <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: inputText.trim() ? 'rgba(255, 255, 255, 0.25)' : 'transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: inputText.trim() ? 'rgba(255, 255, 255, 0.25)' : 'transparent', border: inputText.trim() ? '1px solid rgba(255, 255, 255, 0.4)' : 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <SendIcon size={14} color="#ffffff" />
           </span>
         </button>
