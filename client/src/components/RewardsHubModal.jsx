@@ -218,16 +218,15 @@ export default function RewardsHubModal({ onClose }) {
                 width: '42px',
                 height: '42px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                border: '1px solid rgba(245, 158, 11, 0.4)',
-                color: '#fff',
+                background: 'rgba(245, 158, 11, 0.15)',
+                border: '1px solid rgba(245, 158, 11, 0.32)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
+                boxShadow: '0 2px 8px rgba(245, 158, 11, 0.2)',
               }}
             >
-              <CoinIcon size={22} color="#ffffff" />
+              <CoinIcon size={22} color="#d97706" />
             </div>
             <div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -736,8 +735,8 @@ export default function RewardsHubModal({ onClose }) {
               {!coinHistory || coinHistory.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
                   <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
-                    <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(203, 213, 225, 0.25)', border: '1px solid rgba(203, 213, 225, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <CoinIcon size={26} color="#94a3b8" />
+                    <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.14)', border: '1px solid rgba(148, 163, 184, 0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CoinIcon size={26} color="#64748b" />
                     </div>
                   </div>
                   <span>Chưa có giao dịch xu nào.</span>
@@ -765,8 +764,8 @@ export default function RewardsHubModal({ onClose }) {
                             width: '28px',
                             height: '28px',
                             borderRadius: '8px',
-                            background: isPlus ? '#ecfdf5' : '#fef2f2',
-                            border: isPlus ? '1px solid #bbf7d0' : '1px solid #fecaca',
+                            background: isPlus ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                            border: isPlus ? '1px solid rgba(16, 185, 129, 0.28)' : '1px solid rgba(239, 68, 68, 0.28)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
