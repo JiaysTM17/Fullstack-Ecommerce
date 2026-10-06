@@ -595,9 +595,7 @@ const Header = ({
                 {/* Quick Category Discovery Chips */}
                 <div className="search-quick-chips-wrapper">
                   <span className="search-quick-chips-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <BoltIcon size={11} color="#ffffff" />
-                    </span>
+                    <BoltIcon size={13} color="#ffffff" />
                     <span>Ngành hàng nổi bật:</span>
                   </span>
                   <div className="search-quick-chips-list">
@@ -635,9 +633,7 @@ const Header = ({
                           }}
                         >
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <ClockIcon size={11} color="var(--text-muted)" />
-                            </span>
+                            <ClockIcon size={12} color="var(--text-muted)" />
                             <span>Lịch Sử Tìm Kiếm Gần Đây</span>
                           </span>
                           <span
@@ -665,9 +661,7 @@ const Header = ({
                             onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.1)', border: '1px solid rgba(100, 116, 139, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <ClockIcon size={11} color="var(--text-muted)" />
-                              </span>
+                              <ClockIcon size={13} color="var(--text-muted)" />
                               <span>{item}</span>
                             </div>
                             <span
@@ -675,9 +669,7 @@ const Header = ({
                               style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                               title="Xóa mục này"
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <CloseIcon size={9} color="#ef4444" />
-                              </span>
+                              <CloseIcon size={12} color="#ef4444" />
                             </span>
                           </div>
                         ))}
@@ -687,9 +679,7 @@ const Header = ({
                     {/* Popular Searches */}
                     <div>
                       <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: recentSearches.length > 0 ? '1px solid var(--border-light, #f0f0f0)' : 'none', borderBottom: '1px solid var(--border-light, #f0f0f0)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <SparklesIcon size={11} color="var(--primary-color)" />
-                        </span>
+                        <SparklesIcon size={12} color="var(--primary-color)" />
                         <span>{t('suggested_searches', 'Gợi Ý Tìm Kiếm Phổ Biến')}</span>
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '10px 14px' }}>
@@ -702,7 +692,7 @@ const Header = ({
                               background: 'var(--bg-muted, #f1f5f9)',
                               border: '1px solid var(--border-medium, #e2e8f0)',
                               borderRadius: '20px',
-                              padding: '3px 10px 3px 6px',
+                              padding: '4px 10px',
                               fontSize: '12px',
                               color: 'var(--text-secondary, #475569)',
                               cursor: 'pointer',
@@ -711,9 +701,7 @@ const Header = ({
                               gap: '6px',
                             }}
                           >
-                            <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <SearchIcon size={9} color="#ea580c" />
-                            </span>
+                            <SearchIcon size={11} color="#ea580c" />
                             <span>{item}</span>
                           </button>
                         ))}
@@ -745,9 +733,7 @@ const Header = ({
                             onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
                             onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              <SearchIcon size={10} color="#ea580c" />
-                            </span>
+                            <SearchIcon size={13} color="#ea580c" />
                             <span>{item}</span>
                           </div>
                         ))}
@@ -758,9 +744,7 @@ const Header = ({
                     {matchingProducts.length > 0 && (
                       <div>
                         <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: '1px solid var(--border-light, #f0f0f0)', borderBottom: '1px solid var(--border-light, #f0f0f0)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <SparklesIcon size={11} color="var(--primary-color, #ea580c)" />
-                          </span>
+                          <SparklesIcon size={13} color="var(--primary-color, #ea580c)" />
                           <span>Sản Phẩm Trùng Khớp</span>
                         </div>
                         {matchingProducts.map((p) => {
@@ -861,9 +845,7 @@ const Header = ({
                 <div className="header-mini-cart-popover anim-dropdown">
                   <div className="mini-cart-header">
                     <div className="mini-cart-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <CartIcon size={14} color="#ea580c" />
-                      </span>
+                      <CartIcon size={16} color="#ea580c" />
                       <span>Giỏ Hàng Của Bạn</span>
                       <span className="mini-cart-count-badge">{(cartItems.length || cartCount)} món</span>
                     </div>
@@ -873,16 +855,12 @@ const Header = ({
                       <div className="mini-cart-freeship-banner">
                         {cartSubtotal >= 200000 ? (
                           <div className="freeship-qualified" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <SparklesIcon size={11} color="#10b981" />
-                            </span>
+                            <SparklesIcon size={13} color="#10b981" />
                             <span>Bạn đã được <strong>Miễn Phí Vận Chuyển 0Đ!</strong></span>
                           </div>
                         ) : (
                           <div className="freeship-needed" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <TruckIcon size={11} color="#2563eb" />
-                            </span>
+                            <TruckIcon size={13} color="#2563eb" />
                             <span>Mua thêm <strong>{formatCurrency(200000 - cartSubtotal)}</strong> để nhận <strong>Freeship Toàn Quốc!</strong></span>
                           </div>
                         )}
@@ -941,9 +919,7 @@ const Header = ({
                               }}
                               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <CloseIcon size={10} color="#ef4444" />
-                              </span>
+                              <CloseIcon size={12} color="#ef4444" />
                             </button>
                           </div>
                         ))}
@@ -971,9 +947,7 @@ const Header = ({
                           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
                           <span>Xem Chi Tiết Giỏ Hàng & Mua Ngay</span>
-                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <ChevronRightIcon size={12} color="#ffffff" />
-                          </span>
+                          <ChevronRightIcon size={14} color="#ffffff" />
                         </button>
                       </div>
                     </>
@@ -1216,9 +1190,7 @@ const Header = ({
                   }}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <KeyIcon size={11} color="#ffffff" />
-                  </span>
+                  <KeyIcon size={13} color="#ffffff" />
                   <span>{t('login', 'Đăng Nhập')}</span>
                 </button>
                 <button
@@ -1230,9 +1202,7 @@ const Header = ({
                   }}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <UserIcon size={11} color="#ea580c" />
-                  </span>
+                  <UserIcon size={13} color="#ffffff" />
                   <span>{t('register', 'Đăng Ký')}</span>
                 </button>
               </div>
