@@ -89,7 +89,7 @@ export default function QuickViewModal({ product, onClose }) {
           }}
           aria-label="Đóng"
         >
-          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <CloseIcon size={12} color="#ef4444" />
           </span>
         </button>
@@ -140,7 +140,7 @@ export default function QuickViewModal({ product, onClose }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <div style={{ fontSize: '12px', color: '#0284c7', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.1)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TagIcon size={12} color="#0284c7" />
                 </span>
                 <span>{product.brand || 'Chính Hãng'} · {product.category}</span>
@@ -164,7 +164,7 @@ export default function QuickViewModal({ product, onClose }) {
                 }}
                 title={wishlisted ? 'Đã yêu thích' : 'Thêm vào yêu thích'}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: wishlisted ? 'rgba(239, 68, 68, 0.15)' : 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: wishlisted ? 'rgba(239, 68, 68, 0.15)' : 'rgba(100, 116, 139, 0.1)', border: `1px solid ${wishlisted ? 'rgba(239, 68, 68, 0.25)' : 'rgba(100, 116, 139, 0.2)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <HeartIcon size={11} color={wishlisted ? '#ef4444' : '#64748b'} fill={wishlisted ? '#ef4444' : 'none'} />
                 </span>
                 <span>{wishlisted ? 'Đã thích' : 'Yêu thích'}</span>
@@ -235,7 +235,7 @@ export default function QuickViewModal({ product, onClose }) {
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   aria-label="Giảm số lượng"
                 >
-                  <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: quantity <= 1 ? 'transparent' : '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: quantity <= 1 ? 'transparent' : 'rgba(100, 116, 139, 0.1)', border: quantity <= 1 ? 'none' : '1px solid rgba(100, 116, 139, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <MinusIcon size={10} color={quantity <= 1 ? "#cbd5e1" : "#475569"} />
                   </span>
                 </button>
@@ -252,13 +252,13 @@ export default function QuickViewModal({ product, onClose }) {
                   onClick={() => setQuantity(quantity + 1)}
                   aria-label="Tăng số lượng"
                 >
-                  <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: quantity >= (product.stock || 50) ? 'transparent' : '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: quantity >= (product.stock || 50) ? 'transparent' : 'rgba(234, 88, 12, 0.12)', border: quantity >= (product.stock || 50) ? 'none' : '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <PlusIcon size={10} color={quantity >= (product.stock || 50) ? "#cbd5e1" : "#ea580c"} />
                   </span>
                 </button>
               </div>
               <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CheckIcon size={11} color="#16a34a" />
                 </span>
                 <span>{t('pdp_in_stock')}</span>
@@ -268,13 +268,13 @@ export default function QuickViewModal({ product, onClose }) {
             {/* Trust Badges */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '8px 12px', background: 'var(--bg-muted, #f8fafc)', borderRadius: '8px', border: '1px solid var(--border-light, #e2e8f0)', fontSize: '11.5px', color: 'var(--text-secondary, #475569)' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TruckIcon size={12} color="#16a34a" />
                 </span>
                 <span style={{ fontWeight: 600 }}>SPX Giao Nhanh 24H</span>
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ShieldCheckIcon size={12} color="#2563eb" />
                 </span>
                 <span style={{ fontWeight: 600 }}>100% Chính Hãng</span>
@@ -290,7 +290,7 @@ export default function QuickViewModal({ product, onClose }) {
                 onClick={handleAddToCart}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CartIcon size={13} color="#ffffff" />
                   </span>
                   <span>{t('card_add_to_cart')}</span>
@@ -303,7 +303,7 @@ export default function QuickViewModal({ product, onClose }) {
                 onClick={handleFullDetail}
               >
                 <span>Xem chi tiết đầy đủ</span>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ChevronRightIcon size={12} color="#2563eb" />
                 </span>
               </button>
