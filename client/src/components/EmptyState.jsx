@@ -45,7 +45,7 @@ const EmptyState = ({
           onClick={onAction}
           style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
         >
-          <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             {actionIcon || <ShoppingBagIcon size={13} color="#ffffff" />}
           </span>
           <span>{actionText}</span>

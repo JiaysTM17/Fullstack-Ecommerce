@@ -180,6 +180,7 @@ export default function NotificationsPopover() {
             height: '28px',
             borderRadius: '8px',
             background: 'rgba(245, 158, 11, 0.15)',
+            border: '1px solid rgba(245, 158, 11, 0.28)',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -231,6 +232,7 @@ export default function NotificationsPopover() {
                   height: '28px',
                   borderRadius: '6px',
                   background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                  border: '1px solid rgba(234, 88, 12, 0.35)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -277,7 +279,7 @@ export default function NotificationsPopover() {
                   gap: '5px',
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CheckIcon size={11} color="#ea580c" />
                 </span>
                 <span>Đã đọc tất cả</span>
@@ -297,10 +299,10 @@ export default function NotificationsPopover() {
             }}
           >
             {[
-              { id: 'all', label: `Tất cả (${notifications.length})`, icon: <BellIcon size={12} color={activeTab === 'all' ? '#ffffff' : '#f59e0b'} />, bg: 'rgba(245, 158, 11, 0.12)' },
-              { id: 'order', label: `Đơn hàng (${orderCount})`, icon: <PackageIcon size={12} color={activeTab === 'order' ? '#ffffff' : '#0284c7'} />, bg: 'rgba(2, 132, 199, 0.12)' },
-              { id: 'voucher', label: `Ưu đãi (${voucherCount})`, icon: <TicketIcon size={12} color={activeTab === 'voucher' ? '#ffffff' : '#ea580c'} />, bg: 'rgba(234, 88, 12, 0.12)' },
-              { id: 'unread', label: `Chưa đọc (${unreadCount})`, icon: <SparklesIcon size={12} color={activeTab === 'unread' ? '#ffffff' : '#ef4444'} />, bg: 'rgba(239, 68, 68, 0.12)' },
+              { id: 'all', label: `Tất cả (${notifications.length})`, icon: <BellIcon size={12} color={activeTab === 'all' ? '#ffffff' : '#f59e0b'} />, bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.25)' },
+              { id: 'order', label: `Đơn hàng (${orderCount})`, icon: <PackageIcon size={12} color={activeTab === 'order' ? '#ffffff' : '#0284c7'} />, bg: 'rgba(2, 132, 199, 0.12)', border: 'rgba(2, 132, 199, 0.25)' },
+              { id: 'voucher', label: `Ưu đãi (${voucherCount})`, icon: <TicketIcon size={12} color={activeTab === 'voucher' ? '#ffffff' : '#ea580c'} />, bg: 'rgba(234, 88, 12, 0.12)', border: 'rgba(234, 88, 12, 0.25)' },
+              { id: 'unread', label: `Chưa đọc (${unreadCount})`, icon: <SparklesIcon size={12} color={activeTab === 'unread' ? '#ffffff' : '#ef4444'} />, bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(239, 68, 68, 0.25)' },
             ].map((tab) => {
               const active = activeTab === tab.id;
               return (
@@ -324,7 +326,7 @@ export default function NotificationsPopover() {
                     gap: '6px',
                   }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: active ? 'rgba(255, 255, 255, 0.22)' : tab.bg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: active ? 'rgba(255, 255, 255, 0.22)' : tab.bg, border: active ? '1px solid rgba(255, 255, 255, 0.35)' : `1px solid ${tab.border}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     {tab.icon}
                   </span>
                   <span>{tab.label}</span>
@@ -337,7 +339,7 @@ export default function NotificationsPopover() {
           <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
             {filteredNotifs.length === 0 ? (
               <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-muted, #94a3b8)', fontSize: '13px' }}>
-                <span style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                <span style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                   <SparklesIcon size={22} color="#ea580c" />
                 </span>
                 <p style={{ margin: 0 }}>Bạn không có thông báo nào chưa đọc!</p>
@@ -458,7 +460,7 @@ export default function NotificationsPopover() {
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                 <span>Xem tất cả đơn hàng</span>
-                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ChevronRightIcon size={11} color="#ea580c" />
                 </span>
               </span>
@@ -480,7 +482,7 @@ export default function NotificationsPopover() {
                 }}
                 title="Xóa các thông báo đã đọc"
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TrashIcon size={11} color="#ef4444" />
                 </span>
                 <span>Dọn dẹp</span>
