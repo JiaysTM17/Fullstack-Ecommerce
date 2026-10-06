@@ -822,21 +822,21 @@ export default function ProfilePage() {
                   <span className={`profile-role-badge ${user.role || 'customer'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     {user.role === 'admin' ? (
                       <>
-                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <ShieldIcon size={11} color="#dc2626" />
                         </span>
                         <span>Super Admin</span>
                       </>
                     ) : user.role === 'seller' ? (
                       <>
-                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <StoreIcon size={11} color="#2563eb" />
                         </span>
                         <span>Chủ Gian Hàng</span>
                       </>
                     ) : (
                       <>
-                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <SparklesIcon size={11} color="#f59e0b" />
                         </span>
                         <span>Thành Viên</span>
@@ -847,7 +847,7 @@ export default function ProfilePage() {
 
                 <div className="profile-user-meta">
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <MailIcon size={11} color="#2563eb" />
                     </span>
                     <span>{user.email}</span>
@@ -855,7 +855,7 @@ export default function ProfilePage() {
                   {user.phone && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                       <span>·</span>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.15)', border: '1px solid rgba(22, 163, 74, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <PhoneIcon size={11} color="#16a34a" />
                       </span>
                       <span>{user.phone}</span>
@@ -863,7 +863,7 @@ export default function ProfilePage() {
                   )}
                   <span>·</span>
                   <div className="profile-loyalty-tier" style={{ color: loyaltyTier.color, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <SparklesIcon size={11} color={loyaltyTier.color} />
                     </span>
                     <span>{loyaltyTier.name}</span>
@@ -893,7 +893,7 @@ export default function ProfilePage() {
                 }}
                 onClick={() => navigate('/orders')}
               >
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PackageIcon size={12} color="#ffffff" />
                 </span>
                 <span>Đơn Mua ({ordersSummary.total})</span>
@@ -917,7 +917,7 @@ export default function ProfilePage() {
                 }}
                 onClick={() => navigate('/wishlist')}
               >
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <HeartIcon size={12} color="#ff6b6b" fill="#ff6b6b" />
                 </span>
                 <span>Yêu Thích</span>
@@ -929,7 +929,7 @@ export default function ProfilePage() {
           <div className="profile-stats-grid">
             <div className="profile-stat-box" onClick={() => navigate('/orders')}>
               <div className="profile-stat-label">
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(96, 165, 250, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(96, 165, 250, 0.15)', border: '1px solid rgba(96, 165, 250, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PackageIcon size={12} color="#60a5fa" />
                 </span>
                 <span>Tổng Đơn Hàng</span>
@@ -939,7 +939,7 @@ export default function ProfilePage() {
 
             <div className="profile-stat-box" onClick={() => navigate('/orders')}>
               <div className="profile-stat-label">
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(52, 211, 153, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(52, 211, 153, 0.15)', border: '1px solid rgba(52, 211, 153, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TruckIcon size={12} color="#34d399" />
                 </span>
                 <span>Đang Vận Chuyển</span>
@@ -949,7 +949,7 @@ export default function ProfilePage() {
 
             <div className="profile-stat-box" onClick={() => setActiveTab('coins')}>
               <div className="profile-stat-label">
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(253, 224, 71, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(253, 224, 71, 0.18)', border: '1px solid rgba(253, 224, 71, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CoinIcon size={12} color="#fde047" />
                 </span>
                 <span>Số Dư Shopee Xu</span>
@@ -961,7 +961,7 @@ export default function ProfilePage() {
 
             <div className="profile-stat-box" onClick={() => setActiveTab('vouchers')}>
               <div className="profile-stat-label">
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(251, 146, 60, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(251, 146, 60, 0.18)', border: '1px solid rgba(251, 146, 60, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TicketIcon size={12} color="#fb923c" />
                 </span>
                 <span>Ví Voucher</span>
@@ -1125,7 +1125,7 @@ export default function ProfilePage() {
                       gap: '8px',
                     }}
                   >
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <GiftIcon size={12} color="#ffffff" />
                     </span>
                     <span>Nhận +500 Shopee Xu</span>
@@ -1134,7 +1134,7 @@ export default function ProfilePage() {
 
                 {profileCompleteness.isBonusClaimed && (
                   <span style={{ fontSize: '12.5px', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <SparklesIcon size={12} color="#059669" />
                     </span>
                     <span>Đã nhận thưởng +500 Xu</span>
@@ -1164,7 +1164,7 @@ export default function ProfilePage() {
                   >
                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                       {task.isDone ? (
-                        <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <CheckIcon size={9} color="#059669" />
                         </span>
                       ) : (
@@ -1194,7 +1194,7 @@ export default function ProfilePage() {
 
               <div style={{ flex: 1 }}>
                 <h4 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CameraIcon size={14} color="#2563eb" />
                   </span>
                   <span>Studio Ảnh Đại Diện</span>
@@ -1241,7 +1241,7 @@ export default function ProfilePage() {
                     style={{ fontSize: '12.5px', padding: '7px 14px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <DownloadIcon size={11} color="#2563eb" />
                     </span>
                     <span>Tải Ảnh Từ Máy</span>
@@ -1252,7 +1252,7 @@ export default function ProfilePage() {
                     style={{ fontSize: '12.5px', padding: '7px 14px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     onClick={() => setShowCustomAvatarInput((prev) => !prev)}
                   >
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.1)', border: '1px solid rgba(2, 132, 199, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <GlobeIcon size={11} color="#0284c7" />
                     </span>
                     <span>Nhập URL Ảnh</span>
@@ -1463,7 +1463,7 @@ export default function ProfilePage() {
                 >
                   {isSubmittingProfile ? 'Đang Lưu...' : (
                     <>
-                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CheckIcon size={12} color="#ffffff" />
                       </span>
                       <span>Lưu Thay Đổi</span>
@@ -1483,7 +1483,7 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <MapPinIcon size={18} color="#ea580c" />
                   </span>
                   <span>Sổ Địa Chỉ Giao Hàng ({addresses.length})</span>
@@ -1499,7 +1499,7 @@ export default function ProfilePage() {
                 style={{ fontSize: '13px', padding: '9px 18px', fontWeight: 700, borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => setShowAddAddressModal(true)}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PlusIcon size={11} color="#ffffff" />
                 </span>
                 <span>Thêm Địa Chỉ Mới</span>
@@ -1542,7 +1542,7 @@ export default function ProfilePage() {
                         <span className="profile-address-tag-pill">{addr.tag || 'Nhà riêng'}</span>
                         {addr.isDefault && (
                           <span className="profile-address-default-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                            <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.18)', border: '1px solid rgba(5, 150, 105, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <CheckIcon size={9} color="#059669" />
                             </span>
                             <span>MẶC ĐỊNH</span>
@@ -1550,7 +1550,7 @@ export default function ProfilePage() {
                         )}
                       </div>
                       <div style={{ fontSize: '13.5px', color: '#334155', lineHeight: '1.5', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                        <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                        <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
                           <MapPinIcon size={12} color="#64748b" />
                         </span>
                         <span>{addr.address}</span>
@@ -1575,7 +1575,7 @@ export default function ProfilePage() {
                         onClick={() => handleOpenEditModal(addr)}
                         title="Chỉnh sửa địa chỉ"
                       >
-                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <PencilIcon size={10} color="#2563eb" />
                         </span>
                         <span>Sửa</span>
@@ -1597,7 +1597,7 @@ export default function ProfilePage() {
                         onClick={() => handleDeleteAddress(addr.id)}
                         title="Xóa địa chỉ"
                       >
-                        <span style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <TrashIcon size={12} color="#ef4444" />
                         </span>
                       </button>
@@ -1617,7 +1617,7 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(13, 148, 136, 0.12)', border: '1px solid rgba(13, 148, 136, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <CreditCardIcon size={18} color="#0d9488" />
                   </span>
                   <span>Tài Khoản Ngân Hàng & Thẻ Thanh Toán ({paymentMethods.length})</span>
@@ -1633,7 +1633,7 @@ export default function ProfilePage() {
                 style={{ fontSize: '13px', padding: '9px 18px', fontWeight: 700, borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => setShowAddPaymentModal(true)}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PlusIcon size={11} color="#ffffff" />
                 </span>
                 <span>Thêm Thẻ / Tài Khoản Mới</span>
@@ -1650,7 +1650,7 @@ export default function ProfilePage() {
                   <div>
                     <div className="profile-payment-card-banner">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '30px', height: '30px', borderRadius: '8px', background: pm.type === 'bank' || pm.iconType === 'bank' ? 'rgba(37, 99, 235, 0.12)' : pm.type === 'wallet' || pm.iconType === 'wallet' ? 'rgba(234, 88, 12, 0.12)' : 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '30px', height: '30px', borderRadius: '8px', background: pm.type === 'bank' || pm.iconType === 'bank' ? 'rgba(37, 99, 235, 0.12)' : pm.type === 'wallet' || pm.iconType === 'wallet' ? 'rgba(234, 88, 12, 0.12)' : 'rgba(13, 148, 136, 0.12)', border: pm.type === 'bank' || pm.iconType === 'bank' ? '1px solid rgba(37, 99, 235, 0.25)' : pm.type === 'wallet' || pm.iconType === 'wallet' ? '1px solid rgba(234, 88, 12, 0.25)' : '1px solid rgba(13, 148, 136, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           {pm.type === 'bank' || pm.iconType === 'bank' ? (
                             <StoreIcon size={16} color="#2563eb" />
                           ) : pm.type === 'wallet' || pm.iconType === 'wallet' ? (
@@ -1679,7 +1679,7 @@ export default function ProfilePage() {
                     <div>
                       {pm.isDefault ? (
                         <span className="profile-address-default-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.18)', border: '1px solid rgba(5, 150, 105, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CheckIcon size={9} color="#059669" />
                           </span>
                           <span>MẶC ĐỊNH</span>
@@ -1703,7 +1703,7 @@ export default function ProfilePage() {
                       title="Xóa phương thức thanh toán"
                       aria-label="Xóa phương thức thanh toán"
                     >
-                      <span style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <TrashIcon size={12} color="#ef4444" />
                       </span>
                     </button>
@@ -1722,7 +1722,7 @@ export default function ProfilePage() {
             {/* Change Password Card */}
             <div className="profile-security-card">
               <h3 style={{ fontSize: '17px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <KeyIcon size={18} color="#6366f1" />
                 </span>
                 <span>Đổi Mật Khẩu Đăng Nhập</span>
@@ -1766,7 +1766,7 @@ export default function ProfilePage() {
                       }}
                       title={showOldPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                     >
-                      <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         {showOldPassword ? <EyeOffIcon size={14} color="#6366f1" /> : <EyeIcon size={14} color="#6366f1" />}
                       </span>
                     </button>
@@ -1808,7 +1808,7 @@ export default function ProfilePage() {
                         }}
                         title={showNewPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                       >
-                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           {showNewPassword ? <EyeOffIcon size={14} color="#2563eb" /> : <EyeIcon size={14} color="#2563eb" />}
                         </span>
                       </button>
@@ -1877,7 +1877,7 @@ export default function ProfilePage() {
                         }}
                         title={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                       >
-                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           {showConfirmPassword ? <EyeOffIcon size={14} color="#10b981" /> : <EyeIcon size={14} color="#10b981" />}
                         </span>
                       </button>
@@ -1890,7 +1890,7 @@ export default function ProfilePage() {
                   <div className={`profile-pwd-hint-item ${passwordMetrics.hasMinLength ? 'valid' : ''}`}>
                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                       {passwordMetrics.hasMinLength ? (
-                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <CheckIcon size={10} color="#059669" />
                         </span>
                       ) : (
@@ -1902,7 +1902,7 @@ export default function ProfilePage() {
                   <div className={`profile-pwd-hint-item ${passwordMetrics.hasUppercase ? 'valid' : ''}`}>
                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                       {passwordMetrics.hasUppercase ? (
-                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <CheckIcon size={10} color="#059669" />
                         </span>
                       ) : (
@@ -1914,7 +1914,7 @@ export default function ProfilePage() {
                   <div className={`profile-pwd-hint-item ${passwordMetrics.hasNumber ? 'valid' : ''}`}>
                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                       {passwordMetrics.hasNumber ? (
-                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <CheckIcon size={10} color="#059669" />
                         </span>
                       ) : (
@@ -1927,7 +1927,7 @@ export default function ProfilePage() {
                     <div className={`profile-pwd-hint-item ${passwordMetrics.isMatching ? 'valid' : ''}`}>
                       <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                         {passwordMetrics.isMatching ? (
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CheckIcon size={10} color="#059669" />
                           </span>
                         ) : (
@@ -1964,7 +1964,7 @@ export default function ProfilePage() {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <ShieldCheckIcon size={16} color="#16a34a" />
                       </span>
                       <span>Xác Thực Hai Yếu Tố (2FA)</span>
@@ -2003,7 +2003,7 @@ export default function ProfilePage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <LaptopIcon size={16} color="#0284c7" />
                     </span>
                     <span>Thiết Bị Đăng Nhập Hoạt Động</span>
@@ -2026,7 +2026,7 @@ export default function ProfilePage() {
               {/* Current Session */}
               <div className="profile-session-item" style={{ borderLeft: '4px solid #10b981' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(37, 99, 235, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <LaptopIcon size={20} color="#0284c7" />
                   </div>
                   <div>
@@ -2046,7 +2046,7 @@ export default function ProfilePage() {
               {/* Other Session 1 */}
               <div className="profile-session-item">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(22, 163, 74, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <SmartphoneIcon size={20} color="#16a34a" />
                   </div>
                   <div>
@@ -2076,7 +2076,7 @@ export default function ProfilePage() {
                   }}
                   onClick={() => showToast('Đã đăng xuất khỏi iPhone 15 Pro', 'info')}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <LogOutIcon size={10} color="#dc2626" />
                   </span>
                   <span>Đăng xuất</span>
@@ -2092,7 +2092,7 @@ export default function ProfilePage() {
         {activeTab === 'settings' && (
           <div className="profile-tab-content-pane">
             <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <SettingsIcon size={18} color="#0284c7" />
               </span>
               <span>Cài Đặt Thông Báo & Quyền Riêng Tư</span>
@@ -2106,7 +2106,7 @@ export default function ProfilePage() {
               <div className="profile-setting-row">
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <BellIcon size={13} color="#2563eb" />
                     </span>
                     <span>Thông báo đơn hàng trực tiếp trên Web</span>
@@ -2129,7 +2129,7 @@ export default function ProfilePage() {
               <div className="profile-setting-row">
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <MailIcon size={13} color="#0284c7" />
                     </span>
                     <span>Cập nhật hóa đơn và đơn hàng qua Email</span>
@@ -2152,7 +2152,7 @@ export default function ProfilePage() {
               <div className="profile-setting-row">
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <SmartphoneIcon size={13} color="#16a34a" />
                     </span>
                     <span>Tin nhắn SMS khi Shipper đến giao</span>
@@ -2175,7 +2175,7 @@ export default function ProfilePage() {
               <div className="profile-setting-row">
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.14)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CoinIcon size={13} color="#f59e0b" />
                     </span>
                     <span>Nhắc nhở điểm danh nhận Shopee Xu mỗi ngày</span>
@@ -2198,7 +2198,7 @@ export default function ProfilePage() {
               <div className="profile-setting-row" style={{ borderLeft: '4px solid #2563eb' }}>
                 <div>
                   <strong style={{ fontSize: '14.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <ShieldIcon size={13} color="#6366f1" />
                     </span>
                     <span>Ẩn danh họ tên khi viết đánh giá sản phẩm</span>
@@ -2228,7 +2228,7 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(249, 115, 22, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(249, 115, 22, 0.12)', border: '1px solid rgba(249, 115, 22, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <TicketIcon size={18} color="#f97316" />
                   </span>
                   <span>Kho Voucher Của Tôi ({vouchersList.length || 5} mã)</span>
@@ -2243,7 +2243,7 @@ export default function ProfilePage() {
                 style={{ fontSize: '13px', padding: '8px 16px', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 onClick={() => navigate('/cart')}
               >
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CartIcon size={12} color="#ffffff" />
                 </span>
                 <span>Mua Sắm Ngay</span>
@@ -2254,10 +2254,10 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '20px' }}>
               {[
                 { id: 'all', label: `Tất cả (${vouchersList.length})` },
-                { id: 'shipping', label: `Freeship (${vouchersList.filter((v) => v.type === 'shipping').length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><TruckIcon size={11} color="#059669" /></span> },
-                { id: 'order', label: `Giảm Giá Sàn (${vouchersList.filter((v) => v.type !== 'shipping' && v.isGlobal).length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><TagIcon size={11} color="#2563eb" /></span> },
-                { id: 'shop', label: `Voucher Shop (${vouchersList.filter((v) => !v.isGlobal && v.shopId).length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StoreIcon size={11} color="#ea580c" /></span> },
-                { id: 'saved', label: `Đã Lưu Trong Ví (${savedVoucherCodes.length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 179, 8, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StarIcon size={11} color="#eab308" fill="#eab308" /></span> },
+                { id: 'shipping', label: `Freeship (${vouchersList.filter((v) => v.type === 'shipping').length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><TruckIcon size={11} color="#059669" /></span> },
+                { id: 'order', label: `Giảm Giá Sàn (${vouchersList.filter((v) => v.type !== 'shipping' && v.isGlobal).length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><TagIcon size={11} color="#2563eb" /></span> },
+                { id: 'shop', label: `Voucher Shop (${vouchersList.filter((v) => !v.isGlobal && v.shopId).length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StoreIcon size={11} color="#ea580c" /></span> },
+                { id: 'saved', label: `Đã Lưu Trong Ví (${savedVoucherCodes.length})`, icon: <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 179, 8, 0.15)', border: '1px solid rgba(234, 179, 8, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StarIcon size={11} color="#eab308" fill="#eab308" /></span> },
               ].map((tab) => {
                 const isActive = voucherFilterTab === tab.id;
                 return (
@@ -2366,21 +2366,21 @@ export default function ProfilePage() {
                           >
                             {isShipping ? (
                               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <TruckIcon size={10} color="#059669" />
                                 </span>
                                 <span>Freeship</span>
                               </span>
                             ) : v.shopId ? (
                               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <StoreIcon size={10} color="#ea580c" />
                                 </span>
                                 <span>Voucher Shop</span>
                               </span>
                             ) : (
                               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid rgba(37, 99, 235, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <TagIcon size={10} color="#2563eb" />
                                 </span>
                                 <span>Voucher Sàn</span>
@@ -2424,14 +2424,14 @@ export default function ProfilePage() {
                         >
                           {isSaved ? (
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <CheckIcon size={10} color="#059669" />
                               </span>
                               <span>Đã Lưu</span>
                             </span>
                           ) : (
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <DownloadIcon size={11} color="#2563eb" />
                               </span>
                               <span>Lưu Mã</span>
@@ -2449,7 +2449,7 @@ export default function ProfilePage() {
                           }}
                         >
                           <span>Dùng Ngay</span>
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <ChevronRightIcon size={10} color="#ffffff" />
                           </span>
                         </button>
@@ -2524,7 +2524,7 @@ export default function ProfilePage() {
                   onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
                   onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
                 >
-                  <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <SparklesIcon size={13} color="#ffffff" />
                   </span>
                   <span>Vòng Quay May Mắn</span>
@@ -2556,7 +2556,7 @@ export default function ProfilePage() {
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: hasCheckedInToday ? 'rgba(148, 163, 184, 0.2)' : 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: hasCheckedInToday ? 'rgba(148, 163, 184, 0.2)' : 'rgba(255, 255, 255, 0.25)', border: hasCheckedInToday ? '1px solid rgba(148, 163, 184, 0.3)' : '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CalendarIcon size={13} color="#ffffff" />
                   </span>
                   <span>{hasCheckedInToday ? 'Đã Điểm Danh Hôm Nay' : 'Điểm Danh Nhận Xu'}</span>
@@ -2577,7 +2577,7 @@ export default function ProfilePage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
                   <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <CalendarIcon size={16} color="#2563eb" />
                     </span>
                     <span>Chuỗi Điểm Danh 7 Ngày Nhận Thưởng</span>
@@ -2586,9 +2586,9 @@ export default function ProfilePage() {
                     Duy trì điểm danh đều đặn không ngắt quãng để nhận quà giá trị cao nhất (+5,000 Xu) vào ngày thứ 7.
                   </p>
                 </div>
-                <div style={{ background: '#fef3c7', color: '#92400e', padding: '5px 14px', borderRadius: '20px', fontSize: '12.5px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ background: '#fef3c7', color: '#92400e', border: '1px solid rgba(245, 158, 11, 0.25)', padding: '5px 14px', borderRadius: '20px', fontSize: '12.5px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <span>Chuỗi hiện tại: {streak}/7 ngày</span>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <FlameIcon size={12} color="#ea580c" />
                   </span>
                 </div>
@@ -2631,7 +2631,7 @@ export default function ProfilePage() {
                         Ngày {item.day}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
-                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: isChecked ? 'rgba(16, 185, 129, 0.15)' : item.special ? 'rgba(217, 119, 6, 0.15)' : 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: isChecked ? 'rgba(16, 185, 129, 0.15)' : item.special ? 'rgba(217, 119, 6, 0.15)' : 'rgba(245, 158, 11, 0.15)', border: isChecked ? '1px solid rgba(16, 185, 129, 0.3)' : item.special ? '1px solid rgba(217, 119, 6, 0.3)' : '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           {isChecked ? <CheckIcon size={14} color="#059669" /> : item.special ? <GiftIcon size={14} color="#d97706" /> : <CoinIcon size={14} color="#f59e0b" />}
                         </span>
                       </div>
@@ -2661,7 +2661,7 @@ export default function ProfilePage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                 <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <ReceiptIcon size={16} color="#0284c7" />
                   </span>
                   <span>Lịch Sử Biến Động Shopee Xu</span>
@@ -2709,7 +2709,7 @@ export default function ProfilePage() {
                     })
                     .slice(0, 15)
                     .map((record) => {
-                      const isPlus = record.type === 'plus' || record.type === 'credit' || record.isCredit;
+                      const isPlus = record.type === 'plus' || record.type === 'credit' || rec.isCredit;
                       const desc = record.desc || record.description || 'Giao dịch Shopee Xu';
                       const time = record.date || record.timestamp || '';
                       const renderIcon = () => {
@@ -2742,6 +2742,7 @@ export default function ProfilePage() {
                                 height: '38px',
                                 borderRadius: '50%',
                                 background: isPlus ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                                border: isPlus ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(239, 68, 68, 0.25)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -2793,7 +2794,7 @@ export default function ProfilePage() {
           <div className="profile-modal-window" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
             <div className="profile-modal-header">
               <h3 className="profile-modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <MapPinIcon size={14} color="#ea580c" />
                 </span>
                 <span>Thêm Địa Chỉ Giao Hàng Mới</span>
@@ -2805,7 +2806,7 @@ export default function ProfilePage() {
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 aria-label="Đóng modal"
               >
-                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CloseIcon size={14} color="#ef4444" />
                 </span>
               </button>
@@ -2957,6 +2958,7 @@ export default function ProfilePage() {
                       height: '18px',
                       borderRadius: '50%',
                       background: 'rgba(239, 68, 68, 0.12)',
+                      border: '1px solid rgba(239, 68, 68, 0.25)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -2977,6 +2979,7 @@ export default function ProfilePage() {
                       height: '18px',
                       borderRadius: '4px',
                       background: 'rgba(255, 255, 255, 0.22)',
+                      border: '1px solid rgba(255, 255, 255, 0.35)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -3000,7 +3003,7 @@ export default function ProfilePage() {
           <div className="profile-modal-window" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
             <div className="profile-modal-header">
               <h3 className="profile-modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PencilIcon size={14} color="#2563eb" />
                 </span>
                 <span>Chỉnh Sửa Địa Chỉ Giao Hàng</span>
@@ -3015,7 +3018,7 @@ export default function ProfilePage() {
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 aria-label="Đóng modal"
               >
-                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CloseIcon size={14} color="#ef4444" />
                 </span>
               </button>
@@ -3101,6 +3104,7 @@ export default function ProfilePage() {
                       height: '18px',
                       borderRadius: '50%',
                       background: 'rgba(239, 68, 68, 0.12)',
+                      border: '1px solid rgba(239, 68, 68, 0.25)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -3121,6 +3125,7 @@ export default function ProfilePage() {
                       height: '18px',
                       borderRadius: '4px',
                       background: 'rgba(255, 255, 255, 0.22)',
+                      border: '1px solid rgba(255, 255, 255, 0.35)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -3144,7 +3149,7 @@ export default function ProfilePage() {
           <div className="profile-modal-window" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
             <div className="profile-modal-header">
               <h3 className="profile-modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(13, 148, 136, 0.12)', border: '1px solid rgba(13, 148, 136, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CreditCardIcon size={14} color="#0d9488" />
                 </span>
                 <span>Liên Kết Phương Thức Thanh Toán</span>
@@ -3156,7 +3161,7 @@ export default function ProfilePage() {
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 aria-label="Đóng modal"
               >
-                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CloseIcon size={14} color="#ef4444" />
                 </span>
               </button>
@@ -3169,9 +3174,9 @@ export default function ProfilePage() {
                   <label className="profile-form-label">Loại Phương Thức</label>
                   <div className="profile-gender-group">
                     {[
-                      { id: 'bank', label: 'Ngân Hàng', icon: <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StoreIcon size={13} color="#2563eb" /></span> },
-                      { id: 'card', label: 'Thẻ Quốc Tế', icon: <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><CreditCardIcon size={13} color="#0d9488" /></span> },
-                      { id: 'wallet', label: 'Ví Điện Tử', icon: <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(249, 115, 22, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><TicketIcon size={13} color="#f97316" /></span> },
+                      { id: 'bank', label: 'Ngân Hàng', icon: <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StoreIcon size={13} color="#2563eb" /></span> },
+                      { id: 'card', label: 'Thẻ Quốc Tế', icon: <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(13, 148, 136, 0.12)', border: '1px solid rgba(13, 148, 136, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><CreditCardIcon size={13} color="#0d9488" /></span> },
+                      { id: 'wallet', label: 'Ví Điện Tử', icon: <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(249, 115, 22, 0.12)', border: '1px solid rgba(249, 115, 22, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><TicketIcon size={13} color="#f97316" /></span> },
                     ].map((m) => (
                       <div
                         key={m.id}
@@ -3303,6 +3308,7 @@ export default function ProfilePage() {
                       height: '18px',
                       borderRadius: '50%',
                       background: 'rgba(239, 68, 68, 0.12)',
+                      border: '1px solid rgba(239, 68, 68, 0.25)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -3323,6 +3329,7 @@ export default function ProfilePage() {
                       height: '18px',
                       borderRadius: '4px',
                       background: 'rgba(255, 255, 255, 0.22)',
+                      border: '1px solid rgba(255, 255, 255, 0.35)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
