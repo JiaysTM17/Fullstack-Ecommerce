@@ -412,11 +412,11 @@ export default function ShopStorefrontPage() {
       {/* Breadcrumb Navigation */}
       <nav style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <Link to="/" style={{ color: 'var(--primary-color, #ea580c)', textDecoration: 'none', fontWeight: 600 }}>Trang chủ</Link>
-        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.15)', border: '1px solid rgba(148, 163, 184, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <ChevronRightIcon size={10} color="#64748b" />
         </span>
         <span style={{ color: 'var(--text-muted)' }}>Gian hàng chính hãng</span>
-        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.15)', border: '1px solid rgba(148, 163, 184, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <ChevronRightIcon size={10} color="#64748b" />
         </span>
         <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{shop.name}</span>
@@ -437,7 +437,7 @@ export default function ShopStorefrontPage() {
         <div className="mall-official-ribbon">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span className="mall-badge-brand">
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(220, 38, 38, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(220, 38, 38, 0.12)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShieldCheckIcon size={12} color="#dc2626" />
               </span>
               SHOPEE MALL
@@ -448,19 +448,19 @@ export default function ShopStorefrontPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', fontSize: '12px', fontWeight: 600 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CheckIcon size={10} color="#ffffff" />
               </span>
               <span>Trả hàng miễn phí 15 ngày</span>
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CheckIcon size={10} color="#ffffff" />
               </span>
               <span>Đền bù 200% nếu phát hiện giả</span>
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CheckIcon size={10} color="#ffffff" />
               </span>
               <span>Giao hỏa tốc toàn quốc</span>
@@ -588,7 +588,7 @@ export default function ShopStorefrontPage() {
 
               <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <MapPinIcon size={11} color="#ea580c" />
                   </span>
                   <span>{shop.location}</span>
@@ -597,7 +597,7 @@ export default function ShopStorefrontPage() {
                 <span>Hoạt động {shop.joinedDate}</span>
                 <span>•</span>
                 <span style={{ color: '#ea580c', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <ClockIcon size={11} color="#ea580c" />
                   </span>
                   <span>Mở cửa: 08:00 - 21:00 hàng ngày</span>
@@ -628,7 +628,7 @@ export default function ShopStorefrontPage() {
               }}
               onClick={handleToggleFollow}
             >
-              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: isFollowing ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: isFollowing ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.25)', border: isFollowing ? '1px solid rgba(0, 0, 0, 0.12)' : '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {isFollowing ? <CheckIcon size={12} color={isFollowing ? 'var(--text-primary)' : '#ffffff'} /> : <PlusIcon size={12} color="#ffffff" />}
               </span>
               <span>{isFollowing ? t('shop_following') : 'Theo Dõi Shop'}</span>
@@ -654,7 +654,7 @@ export default function ShopStorefrontPage() {
               }}
               onClick={handleOpenShopChat}
             >
-              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <ChatIcon size={12} color="#ea580c" />
               </span>
               <span>Chat Với Shop</span>
@@ -736,7 +736,7 @@ export default function ShopStorefrontPage() {
         <section style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: '1px solid #fed7aa', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <TicketIcon size={16} color="#ea580c" />
               </span>
               <div>
@@ -769,7 +769,7 @@ export default function ShopStorefrontPage() {
                       alignItems: 'center',
                       gap: '4px',
                     }}>
-                      <span style={{ width: '14px', height: '14px', borderRadius: '3px', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '14px', height: '14px', borderRadius: '3px', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <TicketIcon size={9} color="#dc2626" />
                       </span>
                       <span>MÃ SHOP</span>
@@ -808,14 +808,14 @@ export default function ShopStorefrontPage() {
                 >
                   {claimedVouchers.includes(v.code) ? (
                     <>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <CheckIcon size={11} color="#16a34a" />
                       </span>
                       <span>Đã Lưu</span>
                     </>
                   ) : (
                     <>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <TicketIcon size={11} color="#ffffff" />
                       </span>
                       <span>Lưu Mã</span>
@@ -839,7 +839,7 @@ export default function ShopStorefrontPage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <LayersIcon size={14} color="#ea580c" />
             </span>
             <span style={{ fontSize: '13.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-primary)' }}>
@@ -867,7 +867,7 @@ export default function ShopStorefrontPage() {
                 gap: '6px',
               }}
             >
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#fdba74', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#fdba74', border: '1px solid rgba(124, 45, 18, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CloseIcon size={10} color="#7c2d12" />
               </span>
               <span>Bỏ lọc phân loại (Xem tất cả)</span>
@@ -942,7 +942,7 @@ export default function ShopStorefrontPage() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ShoppingBagIcon size={20} color="var(--primary-color, #ea580c)" />
             </span>
             <div>
@@ -971,7 +971,7 @@ export default function ShopStorefrontPage() {
                 style={{ width: '250px', padding: shopSearch ? '8px 32px 8px 38px' : '8px 14px 8px 38px', fontSize: '13px', borderRadius: '8px' }}
               />
               <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
-                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.1)', border: '1px solid rgba(100, 116, 139, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <SearchIcon size={11} color="#64748b" />
                 </span>
               </span>
@@ -982,7 +982,7 @@ export default function ShopStorefrontPage() {
                   style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                   title="Xóa tìm kiếm"
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CloseIcon size={10} color="#ef4444" />
                   </span>
                 </button>
@@ -1008,7 +1008,7 @@ export default function ShopStorefrontPage() {
         {matchingProducts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', background: 'var(--bg-card, #ffffff)', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)', color: 'var(--text-muted)' }}>
             <div style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '14px' }}>
-              <span style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(100, 116, 139, 0.08)', border: '1px solid rgba(100, 116, 139, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <SearchIcon size={32} color="#94a3b8" />
               </span>
             </div>
@@ -1027,7 +1027,7 @@ export default function ShopStorefrontPage() {
               }}
               style={{ padding: '8px 18px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CloseIcon size={10} color="#ef4444" />
               </span>
               <span>Xóa bộ lọc tìm kiếm</span>
@@ -1062,7 +1062,7 @@ export default function ShopStorefrontPage() {
                     title={t('compare_btn')}
                   >
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                      <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: isCompared(id) ? 'rgba(255, 255, 255, 0.22)' : 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: isCompared(id) ? 'rgba(255, 255, 255, 0.22)' : 'rgba(37, 99, 235, 0.12)', border: isCompared(id) ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <ScaleIcon size={10} color={isCompared(id) ? "#ffffff" : "#2563eb"} />
                       </span>
                       <span>{isCompared(id) ? 'Đã so sánh' : 'So sánh'}</span>
@@ -1080,7 +1080,7 @@ export default function ShopStorefrontPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <SparklesIcon size={16} color="#f59e0b" />
                   </span>
                   <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
@@ -1099,7 +1099,7 @@ export default function ShopStorefrontPage() {
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <span>Xem Toàn Bộ {products.length} Sản Phẩm</span>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ChevronRightIcon size={11} color="#ea580c" />
                   </span>
                 </span>
@@ -1133,7 +1133,7 @@ export default function ShopStorefrontPage() {
                       title={t('compare_btn')}
                     >
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: isCompared(id) ? 'rgba(255, 255, 255, 0.22)' : 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: isCompared(id) ? 'rgba(255, 255, 255, 0.22)' : 'rgba(37, 99, 235, 0.12)', border: isCompared(id) ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <ScaleIcon size={10} color={isCompared(id) ? "#ffffff" : "#2563eb"} />
                         </span>
                         <span>{isCompared(id) ? 'Đã so sánh' : 'So sánh'}</span>
