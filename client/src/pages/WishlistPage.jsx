@@ -190,7 +190,7 @@ export default function WishlistPage() {
                             style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
                             title="Xóa tìm kiếm"
                           >
-                            <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <CloseIcon size={9} color="#ef4444" />
                             </span>
                           </button>
@@ -217,14 +217,14 @@ export default function WishlistPage() {
                     >
                       {isAddedFeedback ? (
                         <>
-                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CheckIcon size={12} color="#ffffff" />
                           </span>
                           <span>Đã thêm vào giỏ!</span>
                         </>
                       ) : (
                         <>
-                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <ShoppingBagIcon size={12} color="#ffffff" />
                           </span>
                           <span>Thêm tất cả vào giỏ</span>
@@ -273,7 +273,7 @@ export default function WishlistPage() {
                             transition: 'all 0.15s ease',
                           }}
                         >
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: isActive ? 'rgba(234, 88, 12, 0.15)' : 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: isActive ? 'rgba(234, 88, 12, 0.15)' : 'rgba(100, 116, 139, 0.1)', border: isActive ? '1px solid rgba(234, 88, 12, 0.25)' : '1px solid rgba(100, 116, 139, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <TagIcon size={9} color={isActive ? '#ea580c' : '#64748b'} />
                           </span>
                           <span>{cat === 'all' ? 'Tất cả' : cat}</span>
@@ -285,7 +285,7 @@ export default function WishlistPage() {
 
                 {displayedProducts.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-secondary)' }}>
-                    <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(203, 213, 225, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                    <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(203, 213, 225, 0.25)', border: '1px solid rgba(203, 213, 225, 0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                       <SearchIcon size={28} color="#94a3b8" />
                     </div>
                     <p style={{ margin: '8px 0 0', fontSize: '14px', fontWeight: 600 }}>
@@ -300,7 +300,7 @@ export default function WishlistPage() {
                       }}
                       style={{ marginTop: '12px', fontSize: '12.5px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
-                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CloseIcon size={10} color="#ef4444" />
                       </span>
                       <span>Xóa bộ lọc</span>
