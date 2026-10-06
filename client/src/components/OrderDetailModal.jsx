@@ -488,7 +488,7 @@ export default function OrderDetailModal({
                   marginRight: '4px',
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ArrowLeftIcon size={11} color="#2563eb" />
                 </span>
                 <span>Quay lại danh sách</span>
@@ -533,7 +533,7 @@ export default function OrderDetailModal({
               }}
             >
               #{orderId}
-              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CopyIcon size={9} color="#2563eb" />
               </span>
             </button>
@@ -577,7 +577,7 @@ export default function OrderDetailModal({
                 gap: '5px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <PrinterIcon size={11} color="#6366f1" />
               </span>
               <span>{t('print', 'In')}</span>
@@ -598,7 +598,7 @@ export default function OrderDetailModal({
                   borderRadius: '6px',
                 }}
               >
-                <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CloseIcon size={12} color="#ef4444" />
                 </span>
               </button>
@@ -1370,7 +1370,7 @@ export default function OrderDetailModal({
                 onClick={() => onOpenInvoice(order)}
                 style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ReceiptIcon size={11} color="#2563eb" />
                 </span>
                 <span>{t('vat_invoice', 'In hóa đơn VAT')}</span>
@@ -1383,8 +1383,8 @@ export default function OrderDetailModal({
                 className="shopee-btn"
                 style={{
                   fontSize: '11.5px',
-                  background: '#eff6ff',
-                  border: '1px solid #bfdbfe',
+                  background: 'rgba(37, 99, 235, 0.08)',
+                  border: '1px solid rgba(37, 99, 235, 0.25)',
                   color: '#2563eb',
                   fontWeight: 700,
                   padding: '4px 10px',
@@ -1430,7 +1430,7 @@ export default function OrderDetailModal({
                 onClick={() => handleOpenTracking(order)}
                 style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TruckIcon size={11} color="#2563eb" />
                 </span>
                 <span>{t('spx_live_tracking', 'Bản đồ Shipper SPX')}</span>
@@ -1444,9 +1444,9 @@ export default function OrderDetailModal({
                   fontSize: '11.5px',
                   padding: '0 10px',
                   borderRadius: '6px',
-                  background: '#eff6ff',
+                  background: 'rgba(37, 99, 235, 0.08)',
                   color: '#2563eb',
-                  border: '1px solid #bfdbfe',
+                  border: '1px solid rgba(37, 99, 235, 0.25)',
                   fontWeight: 700,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1519,7 +1519,7 @@ export default function OrderDetailModal({
                     onClick={() => onOpenReturnModal(order)}
                     style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(147, 51, 234, 0.1)', border: '1px solid rgba(147, 51, 234, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(147, 51, 234, 0.12)', border: '1px solid rgba(147, 51, 234, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <ReturnIcon size={11} color="#9333ea" />
                     </span>
                     <span>{t('return_refund', 'Trả hàng / Hoàn tiền')}</span>
@@ -1570,9 +1570,9 @@ export default function OrderDetailModal({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  borderColor: '#bfdbfe',
+                  borderColor: 'rgba(37, 99, 235, 0.25)',
                   color: '#2563eb',
-                  background: '#eff6ff',
+                  background: 'rgba(37, 99, 235, 0.08)',
                   fontWeight: 600,
                 }}
               >
@@ -1589,7 +1589,7 @@ export default function OrderDetailModal({
               onClick={onClose}
               style={{ height: '32px', fontSize: '12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CloseIcon size={11} color="#ef4444" />
               </span>
               <span>{t('close', 'Đóng')}</span>
