@@ -1,180 +1,77 @@
-/* Flash Deals / Today's Deals Styles - Premium Shopee Flash Sale Redesign */
+/* Flash Deals / Today's Deals Styles - Theme Aware */
 
 .shopee-deals-section {
   background: var(--bg-card, #ffffff);
   border-radius: var(--radius-lg, 12px);
-  padding: 16px 20px 20px;
+  padding: 20px 24px;
   margin-bottom: 28px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-medium, #e2e8f0);
-  transition: all 0.25s ease;
 }
 
-/* Header */
 .shopee-deals-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
   gap: 12px;
-  border-bottom: 1px solid var(--border-light, #f1f5f9);
-  padding-bottom: 12px;
 }
 
 .shopee-deals-title-area {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 14px;
 }
 
 .shopee-deals-badge {
-  background: linear-gradient(135deg, #ef4444 0%, #ea580c 100%);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color, #0ea5e9));
   color: #ffffff;
-  font-weight: 900;
-  font-size: 16px;
-  padding: 7px 16px;
-  border-radius: 8px;
+  font-weight: 800;
+  font-size: 15px;
+  padding: 6px 14px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   gap: 6px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+  letter-spacing: 0.5px;
+  animation: pulse-glow 2s infinite;
 }
 
-.shopee-deals-bolt {
-  display: flex;
-  align-items: center;
-  animation: bolt-flicker 1.8s infinite alternate ease-in-out;
-}
-
-@keyframes bolt-flicker {
-  0% { transform: scale(1); filter: drop-shadow(0 0 2px #fff); }
-  100% { transform: scale(1.18); filter: drop-shadow(0 0 6px #fff); }
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+  50% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
 }
 
 .shopee-countdown-box {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.shopee-countdown-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-weight: 700;
-  font-size: 12px;
-  color: var(--text-secondary, #64748b);
-  letter-spacing: 0.4px;
-}
-
-.shopee-timer-digits {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-secondary, #475569);
+  font-weight: 500;
 }
 
 .shopee-timer-unit {
-  background: #0f172a;
+  background: var(--header-bg, #0f172a);
   color: #ffffff;
-  font-weight: 800;
-  font-size: 13px;
-  padding: 3px 6px;
-  border-radius: 5px;
-  min-width: 26px;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  min-width: 28px;
   text-align: center;
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="dark"] .shopee-timer-unit {
-  background: #020617;
-  color: #f8fafc;
-  border: 1px solid #334155;
 }
 
 .shopee-timer-colon {
   font-weight: 800;
-  color: #ea580c;
-  font-size: 14px;
+  color: var(--text-primary, #0f172a);
 }
 
-.shopee-deals-view-all {
-  background: transparent;
-  border: none;
-  font-size: 13px;
-  color: #ea580c;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: all 0.15s ease;
-}
-
-.shopee-deals-view-all:hover {
-  background: rgba(234, 88, 12, 0.08);
-  transform: translateX(2px);
-}
-
-/* Time Slots Bar */
-.shopee-time-slots-bar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  background: var(--bg-muted, #f8fafc);
-  border-radius: 8px;
-  border: 1px solid var(--border-light, #e2e8f0);
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-
-.shopee-time-slot-btn {
-  background: transparent;
-  color: var(--text-secondary, #64748b);
-  border: none;
-  border-bottom: 3px solid transparent;
-  padding: 10px 4px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.shopee-time-slot-btn:hover:not(.active) {
-  background: rgba(0, 0, 0, 0.02);
-  color: var(--text-primary);
-}
-
-.shopee-time-slot-btn.active {
-  background: var(--bg-card, #ffffff);
-  border-bottom: 3px solid #ea580c;
-  color: #ea580c;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-.shopee-slot-time {
-  font-size: 15px;
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  justify-content: center;
-}
-
-.shopee-slot-label {
-  font-size: 11px;
-  font-weight: 600;
-  margin-top: 2px;
-  opacity: 0.9;
-}
-
-/* Product Grid */
 .shopee-deals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 16px;
 }
 
@@ -185,31 +82,30 @@
   }
 }
 
-/* Deal Card */
 .shopee-deal-card {
-  border: 1px solid var(--border-light, #e2e8f0);
-  border-radius: var(--radius-md, 10px);
-  padding: 10px;
+  border: 1px solid var(--border-medium, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  padding: 12px;
   display: flex;
   flex-direction: column;
   background: var(--bg-card, #ffffff);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   position: relative;
   color: var(--text-primary, #0f172a);
 }
 
 .shopee-deal-card:hover {
-  border-color: #f97316;
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.12);
+  border-color: var(--primary-color);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
 }
 
 .shopee-deal-img-wrapper {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
   margin-bottom: 10px;
   background: var(--bg-muted, #f1f5f9);
@@ -219,121 +115,59 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
 }
 
-.shopee-deal-card:hover .shopee-deal-img {
-  transform: scale(1.05);
-}
-
-/* Shopee-style Yellow Flash Discount Badge */
-.shopee-deal-discount-badge {
+.shopee-deal-tag {
   position: absolute;
-  top: 0;
-  right: 0;
-  background: rgba(254, 240, 138, 0.95);
-  padding: 2px 5px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-bottom-left-radius: 4px;
-  border-left: 1px solid #facc15;
-  border-bottom: 1px solid #facc15;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.shopee-discount-number {
-  color: #dc2626;
+  top: 8px;
+  left: 8px;
+  background: var(--primary-color);
+  color: #ffffff;
   font-size: 11px;
-  font-weight: 800;
-  line-height: 1.1;
-}
-
-.shopee-discount-text {
-  color: #ea580c;
-  font-size: 8px;
-  font-weight: 800;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-/* Info */
-.shopee-deal-info {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.shopee-deal-price-row {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 .shopee-deal-price {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 800;
-  color: #ea580c;
-  letter-spacing: -0.2px;
+  color: var(--primary-color);
+  margin-bottom: 4px;
 }
 
 .shopee-deal-original {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted, #94a3b8);
   text-decoration: line-through;
+  margin-left: 6px;
 }
 
-.shopee-deal-name {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-primary, #0f172a);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 10px;
-  line-height: 1.35;
-  height: 34px;
-}
-
-/* Fire Progress Bar */
-.shopee-fire-bar-container {
+.shopee-progress-bar-wrapper {
   width: 100%;
-  height: 18px;
-  background: #ffedd5;
-  border-radius: 9999px;
+  background: var(--border-medium, #e2e8f0);
+  height: 14px;
+  border-radius: 10px;
   overflow: hidden;
   position: relative;
-  margin-top: auto;
-  border: 1px solid rgba(234, 88, 12, 0.2);
+  margin-top: 8px;
 }
 
-[data-theme="dark"] .shopee-fire-bar-container {
-  background: rgba(234, 88, 12, 0.15);
-  border-color: rgba(234, 88, 12, 0.3);
-}
-
-.shopee-fire-bar-fill {
-  background: linear-gradient(90deg, #f97316, #ef4444);
+.shopee-progress-bar-fill {
+  background: linear-gradient(90deg, var(--secondary-color, #0ea5e9), var(--primary-color));
   height: 100%;
-  border-radius: 9999px;
-  transition: width 0.5s ease;
+  border-radius: 10px;
+  transition: width 0.4s ease;
 }
 
-.shopee-fire-bar-content {
+.shopee-progress-bar-text {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  font-size: 9.5px;
-  font-weight: 800;
+  font-size: 10px;
+  font-weight: 700;
   color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
