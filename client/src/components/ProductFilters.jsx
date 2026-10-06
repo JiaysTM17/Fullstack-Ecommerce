@@ -76,7 +76,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
       {/* 1. Category */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', flexShrink: 0 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', flexShrink: 0 }}>
             <PackageIcon size={13} color="#ea580c" />
           </span>
           <span>{t('filter_categories', 'Danh Mục')}</span>
@@ -98,7 +98,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
                     <PackageIcon size={12} color="#ea580c" />
                   </span>
                 ) : (
-                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: filters.category === cat ? 'rgba(234, 88, 12, 0.15)' : 'rgba(100, 116, 139, 0.08)', border: filters.category === cat ? '1px solid rgba(234, 88, 12, 0.25)' : '1px solid transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: filters.category === cat ? '#ea580c' : '#64748b' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: filters.category === cat ? 'rgba(234, 88, 12, 0.15)' : 'rgba(100, 116, 139, 0.08)', border: filters.category === cat ? '1px solid rgba(234, 88, 12, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: filters.category === cat ? '#ea580c' : '#64748b' }}>
                     •
                   </span>
                 )}
@@ -112,7 +112,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
       {/* 2. Brand Filter (Hãng / Thương hiệu) */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.2)', flexShrink: 0 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', flexShrink: 0 }}>
             <TagIcon size={13} color="#2563eb" />
           </span>
           <span>{t('filter_brands', 'Thương Hiệu / Hãng')}</span>
@@ -136,7 +136,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
               onClick={() => onFilterChange("brand", filters.brand === b ? "" : b)}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: filters.brand === b ? 'rgba(37, 99, 235, 0.15)' : 'rgba(100, 116, 139, 0.08)', border: filters.brand === b ? '1px solid rgba(37, 99, 235, 0.25)' : '1px solid transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: filters.brand === b ? '#2563eb' : '#64748b' }}>
+                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: filters.brand === b ? 'rgba(37, 99, 235, 0.15)' : 'rgba(100, 116, 139, 0.08)', border: filters.brand === b ? '1px solid rgba(37, 99, 235, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: filters.brand === b ? '#2563eb' : '#64748b' }}>
                   •
                 </span>
                 <span>{b}</span>
@@ -149,7 +149,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
       {/* 3. Shop Filter */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.2)', flexShrink: 0 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.25)', flexShrink: 0 }}>
             <StoreIcon size={13} color="#dc2626" />
           </span>
           <span>{t('filter_official_shops', 'Cửa Hàng (Shop Chính Hãng)')}</span>
@@ -189,7 +189,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
       {/* 4. Fast Delivery */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(5, 150, 105, 0.1)', border: '1px solid rgba(5, 150, 105, 0.2)', flexShrink: 0 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(5, 150, 105, 0.1)', border: '1px solid rgba(5, 150, 105, 0.25)', flexShrink: 0 }}>
             <TruckIcon size={13} color="#059669" />
           </span>
           <span>{t('filter_shipping', 'Vận Chuyển')}</span>
@@ -212,7 +212,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
       {/* 5. Price Filter */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', flexShrink: 0 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.25)', flexShrink: 0 }}>
             <CoinIcon size={13} color="#d97706" />
           </span>
           <span>{t('filter_price_range', 'Khoảng Giá')}</span>
@@ -264,7 +264,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
           className={`shopee-rating-filter-row ${filters.minRating === "4" ? "active" : ""}`}
           onClick={() => onFilterChange("minRating", filters.minRating === "4" ? "" : "4")}
         >
-          <span className="shopee-rating-stars" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+          <span className="shopee-rating-stars" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '2px 6px', borderRadius: '4px' }}>
             <StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" />
             <StarIcon size={13} color="#cbd5e1" />
           </span>
@@ -274,7 +274,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
           className={`shopee-rating-filter-row ${filters.minRating === "4.8" ? "active" : ""}`}
           onClick={() => onFilterChange("minRating", filters.minRating === "4.8" ? "" : "4.8")}
         >
-          <span className="shopee-rating-stars" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+          <span className="shopee-rating-stars" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '2px 6px', borderRadius: '4px' }}>
             <StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" /><StarIcon size={13} color="#f59e0b" fill="#f59e0b" />
           </span>
           <span>{t('rating_48_up', 'Từ 4.8 sao (Xuất sắc)')}</span>
@@ -284,7 +284,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
       {/* 7. Special Badges */}
       <div className="shopee-filter-section">
         <h4 className="shopee-filter-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)', flexShrink: 0 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.25)', flexShrink: 0 }}>
             <SparklesIcon size={13} color="#8b5cf6" />
           </span>
           <span>{t('filter_certifications', 'Chứng Nhận Sàn')}</span>

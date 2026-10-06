@@ -144,7 +144,7 @@ const ProductCard = ({
             transition: 'all 0.2s',
           }}
         >
-          <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: wishlisted ? 'rgba(239, 68, 68, 0.15)' : 'rgba(244, 63, 94, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: wishlisted ? 'rgba(239, 68, 68, 0.15)' : 'rgba(244, 63, 94, 0.08)', border: wishlisted ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(244, 63, 94, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <HeartIcon
               size={16}
               fill={wishlisted ? "#ef4444" : "none"}
@@ -182,7 +182,7 @@ const ProductCard = ({
             transition: 'all 0.2s',
           }}
         >
-          <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: isCompared(productId) ? 'rgba(255, 255, 255, 0.25)' : 'rgba(71, 85, 105, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: isCompared(productId) ? 'rgba(255, 255, 255, 0.25)' : 'rgba(71, 85, 105, 0.1)', border: isCompared(productId) ? '1px solid rgba(255, 255, 255, 0.35)' : '1px solid rgba(71, 85, 105, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <ScaleIcon size={14} color={isCompared(productId) ? "#ffffff" : "#475569"} />
           </span>
         </button>
@@ -198,7 +198,7 @@ const ProductCard = ({
             }}
             aria-label={t('quick_view_title', 'Xem nhanh')}
           >
-            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <EyeIcon size={11} color="#2563eb" />
             </span>
             <span>{t('quick_view_title', 'Xem nhanh')}</span>
@@ -228,7 +228,7 @@ const ProductCard = ({
           >
             {badge === "Amazon's Choice" ? (
               <>
-                <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.22)', border: '1px solid rgba(245, 158, 11, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <StarIcon size={10} color="#f59e0b" fill="#f59e0b" />
                 </span>
                 <span>{t('nav_featured_picks', 'Tuyển Chọn')}</span>
@@ -239,7 +239,7 @@ const ProductCard = ({
           </span>
         ) : isMall ? (
           <span className="shopee-mall-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <ShieldCheckIcon size={9} color="#ffffff" />
             </span>
             <span>Mall</span>
@@ -250,7 +250,7 @@ const ProductCard = ({
         {hasDiscount && (
           <div className="shopee-discount-badge" style={{ top: badge ? '32px' : '0' }}>
             <span className="shopee-discount-percent" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
-              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.18)', border: '1px solid rgba(234, 88, 12, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <FlameIcon size={9} color="#ea580c" />
               </span>
               <span>-{discountPercent}%</span>
@@ -279,7 +279,7 @@ const ProductCard = ({
         {/* Thông tin phụ: Rating, reviewCount và Đã bán */}
         <div className="shopee-card-meta">
           <div className="shopee-card-rating">
-            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <StarIcon size={10} color="#f59e0b" fill="#f59e0b" />
             </span>
             <span>{Number(rating).toFixed(1)}</span>
@@ -294,7 +294,7 @@ const ProductCard = ({
         {isFastDelivery && (
           <div style={{ margin: '6px 0 2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span style={{ fontSize: '11px', color: 'var(--secondary-color, #0284c7)', fontWeight: 700, background: 'var(--primary-light, #f0f9ff)', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.15)', border: '1px solid rgba(2, 132, 199, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <BoltIcon size={10} color="#0284c7" />
               </span>
               <span>{t('nav_fast_delivery', 'Giao 2H')}</span>
@@ -312,14 +312,14 @@ const ProductCard = ({
           >
             {justAdded ? (
               <>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CheckIcon size={11} color="#ffffff" />
                 </span>
                 <span>{t('added_to_cart', 'Đã thêm!')}</span>
               </>
             ) : (
               <>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CartIcon size={11} color="#ffffff" />
                 </span>
                 <span>{t('add_to_cart', 'Thêm vào giỏ')}</span>

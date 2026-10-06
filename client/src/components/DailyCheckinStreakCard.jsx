@@ -89,6 +89,7 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
               height: '44px',
               borderRadius: '12px',
               background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+              border: '1px solid rgba(245, 158, 11, 0.4)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -170,7 +171,7 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
               background: hasCheckedInToday
                 ? '#f1f5f9'
                 : 'linear-gradient(135deg, #ea580c, #c2410c)',
-              border: hasCheckedInToday ? '1px solid #cbd5e1' : 'none',
+              border: hasCheckedInToday ? '1px solid #cbd5e1' : '1px solid rgba(234, 88, 12, 0.3)',
               color: hasCheckedInToday ? '#64748b' : '#ffffff',
               borderRadius: '8px',
               padding: '8px 18px',
