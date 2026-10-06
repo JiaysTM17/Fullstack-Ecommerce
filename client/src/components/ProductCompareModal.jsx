@@ -41,15 +41,16 @@ export default function ProductCompareModal() {
                 width: '32px',
                 height: '32px',
                 borderRadius: '8px',
-                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                background: 'rgba(37, 99, 235, 0.14)',
+                border: '1px solid rgba(37, 99, 235, 0.28)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
+                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.15)',
                 flexShrink: 0,
               }}
             >
-              <ScaleIcon size={16} color="#ffffff" />
+              <ScaleIcon size={16} color="#2563eb" />
             </div>
             <div>
               <strong style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
@@ -184,15 +185,16 @@ export default function ProductCompareModal() {
                     width: '42px',
                     height: '42px',
                     borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                    background: 'rgba(37, 99, 235, 0.14)',
+                    border: '1px solid rgba(37, 99, 235, 0.28)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)',
+                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.18)',
                     flexShrink: 0,
                   }}
                 >
-                  <ScaleIcon size={22} color="#ffffff" />
+                  <ScaleIcon size={22} color="#2563eb" />
                 </div>
                 <div>
                   <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
