@@ -1409,7 +1409,7 @@ export default function OrderHistoryPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
                     <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <PackageIcon size={20} color="#2563eb" />
                       </span>
                       <span>{t('my_orders', 'Đơn Hàng Của Tôi')}</span>
@@ -1420,7 +1420,7 @@ export default function OrderHistoryPage() {
                   </div>
 
                   <Link to="/" className="shopee-btn shopee-btn-secondary" style={{ fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <ArrowLeftIcon size={12} color="#2563eb" />
                     </span>
                     <span>{t('continue_shopping', 'Tiếp tục mua sắm')}</span>
@@ -1442,7 +1442,7 @@ export default function OrderHistoryPage() {
             gap: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <StoreIcon size={20} color="#2563eb" />
               </span>
               <div>
@@ -1460,7 +1460,7 @@ export default function OrderHistoryPage() {
               style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               <span>Vào Kênh Quản Lý Shop</span>
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChevronRightIcon size={11} color="#ffffff" />
               </span>
             </Link>
@@ -1482,7 +1482,7 @@ export default function OrderHistoryPage() {
             gap: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(220, 38, 38, 0.12)', border: '1px solid rgba(220, 38, 38, 0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <ShieldCheckIcon size={20} color="#dc2626" />
               </span>
               <div>
@@ -1500,7 +1500,7 @@ export default function OrderHistoryPage() {
               style={{ padding: '6px 14px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none', background: '#dc2626', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               <span>Bảng Quản Trị Toàn Sàn</span>
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChevronRightIcon size={11} color="#ffffff" />
               </span>
             </Link>
@@ -1512,12 +1512,12 @@ export default function OrderHistoryPage() {
           {/* Top Bar: Nav Tabs with animated sliding Royal Blue indicator */}
           <div className="shopee-order-tabs-nav" ref={tabNavRef}>
             {[
-              { id: 'all', label: t('all_orders', 'Tất cả đơn'), icon: <PackageIcon size={14} color="#2563eb" />, bg: 'rgba(37, 99, 235, 0.12)' },
-              { id: 'pending', label: 'Chờ xác nhận', icon: <ClockIcon size={14} color="#d97706" />, bg: 'rgba(217, 119, 6, 0.12)' },
-              { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển'), icon: <TruckIcon size={14} color="#059669" />, bg: 'rgba(5, 150, 105, 0.12)' },
-              { id: 'completed', label: t('status_completed', 'Hoàn thành'), icon: <CheckIcon size={14} color="#16a34a" />, bg: 'rgba(22, 163, 74, 0.12)' },
-              { id: 'returning', label: t('status_returning', 'Đổi trả / Hoàn tiền'), icon: <ReturnIcon size={14} color="#9333ea" />, bg: 'rgba(147, 51, 234, 0.12)' },
-              { id: 'cancelled', label: t('status_cancelled', 'Đã hủy'), icon: <CloseIcon size={14} color="#ef4444" />, bg: 'rgba(239, 68, 68, 0.12)' },
+              { id: 'all', label: t('all_orders', 'Tất cả đơn'), icon: <PackageIcon size={14} color="#2563eb" />, bg: 'rgba(37, 99, 235, 0.12)', border: 'rgba(37, 99, 235, 0.28)' },
+              { id: 'pending', label: 'Chờ xác nhận', icon: <ClockIcon size={14} color="#d97706" />, bg: 'rgba(217, 119, 6, 0.12)', border: 'rgba(217, 119, 6, 0.28)' },
+              { id: 'shipping', label: t('status_shipping', 'Đang vận chuyển'), icon: <TruckIcon size={14} color="#059669" />, bg: 'rgba(5, 150, 105, 0.12)', border: 'rgba(5, 150, 105, 0.28)' },
+              { id: 'completed', label: t('status_completed', 'Hoàn thành'), icon: <CheckIcon size={14} color="#16a34a" />, bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.28)' },
+              { id: 'returning', label: t('status_returning', 'Đổi trả / Hoàn tiền'), icon: <ReturnIcon size={14} color="#9333ea" />, bg: 'rgba(147, 51, 234, 0.12)', border: 'rgba(147, 51, 234, 0.28)' },
+              { id: 'cancelled', label: t('status_cancelled', 'Đã hủy'), icon: <CloseIcon size={14} color="#ef4444" />, bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(239, 68, 68, 0.28)' },
             ].map((tab) => {
               const count = getTabCount(tab.id);
               const isActive = activeTab === tab.id;
@@ -1530,7 +1530,7 @@ export default function OrderHistoryPage() {
                   onClick={() => setActiveTab(tab.id)}
                 >
                   <span className="shopee-order-tab-text-group" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="shopee-order-tab-icon" style={{ width: '22px', height: '22px', borderRadius: '50%', background: isActive ? tab.bg : 'rgba(0, 0, 0, 0.04)', border: isActive ? '1px solid rgba(37, 99, 235, 0.25)' : '1px solid transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease', flexShrink: 0 }}>
+                    <span className="shopee-order-tab-icon" style={{ width: '22px', height: '22px', borderRadius: '50%', background: isActive ? tab.bg : 'rgba(0, 0, 0, 0.04)', border: isActive ? `1px solid ${tab.border}` : '1px solid transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease', flexShrink: 0 }}>
                       {tab.icon}
                     </span>
                     <span className="shopee-order-tab-text">{tab.label}</span>
@@ -1554,7 +1554,7 @@ export default function OrderHistoryPage() {
           <div className="shopee-order-toolbar-inner">
             <div className="orders-search-row">
               <div className="orders-search-box">
-                <span className="orders-search-icon">
+                <span className="orders-search-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <SearchIcon size={15} color="#2563eb" />
                 </span>
                 <input
@@ -1573,7 +1573,7 @@ export default function OrderHistoryPage() {
                     title="Xóa tìm kiếm"
                     style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CloseIcon size={10} color="#ef4444" />
                     </span>
                   </button>
@@ -1588,7 +1588,7 @@ export default function OrderHistoryPage() {
                   title="Xuất danh sách đơn hàng sang file CSV (hỗ trợ Excel)"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 >
-                  <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ReceiptIcon size={12} color="#0284c7" />
                   </span>
                   <span>Xuất CSV</span>
@@ -1600,7 +1600,7 @@ export default function OrderHistoryPage() {
                   title="In hoặc lưu file PDF báo cáo lịch sử đơn hàng"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 >
-                  <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <PrinterIcon size={12} color="#6366f1" />
                   </span>
                   <span>In báo cáo</span>
@@ -1620,7 +1620,7 @@ export default function OrderHistoryPage() {
                       <span className="orders-active-chip">
                         Từ khóa: &ldquo;{searchTerm}&rdquo;
                         <button type="button" onClick={() => setSearchTerm('')} title="Xóa từ khóa" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center' }}>
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CloseIcon size={9} color="#ef4444" />
                           </span>
                         </button>
@@ -1630,7 +1630,7 @@ export default function OrderHistoryPage() {
                       <span className="orders-active-chip">
                         {dateRange === '30days' ? '30 ngày gần đây' : dateRange === '3months' ? '3 tháng qua' : 'Năm 2026'}
                         <button type="button" onClick={() => setDateRange('all')} title="Xóa bộ lọc thời gian" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center' }}>
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CloseIcon size={9} color="#ef4444" />
                           </span>
                         </button>
@@ -1657,7 +1657,7 @@ export default function OrderHistoryPage() {
         {filteredOrders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
-              <span style={{ width: '64px', height: '64px', borderRadius: '16px', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(148, 163, 184, 0.12)', border: '1px solid rgba(148, 163, 184, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <PackageIcon size={32} color="#94a3b8" />
               </span>
             </div>
@@ -1692,7 +1692,7 @@ export default function OrderHistoryPage() {
                         onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
                         title="Xem shop và trò chuyện"
                       >
-                        <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <StoreIcon size={13} color="#2563eb" />
                         </span>
                         <span>{ord.shopName}</span>
@@ -1704,7 +1704,7 @@ export default function OrderHistoryPage() {
                         title="Chat ngay với người bán"
                         style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                       >
-                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <ChatIcon size={10} color="#2563eb" />
                         </span>
                         <span>{t('chat_now', 'Chat ngay')}</span>
@@ -1716,7 +1716,7 @@ export default function OrderHistoryPage() {
                         style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                       >
                         <span>#{ord.orderId}</span>
-                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <CopyIcon size={10} color="#3b82f6" />
                         </span>
                       </span>
@@ -1737,27 +1737,27 @@ export default function OrderHistoryPage() {
                         }`}
                       >
                         {(ord.status === 'completed' || ord.status === 'delivered') && (
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', border: '1px solid rgba(22, 163, 74, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CheckIcon size={10} color="#16a34a" />
                           </span>
                         )}
                         {(ord.status === 'shipping' || ord.status === 'delivering') && (
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(29, 78, 216, 0.15)', border: '1px solid rgba(29, 78, 216, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(29, 78, 216, 0.15)', border: '1px solid rgba(29, 78, 216, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <TruckIcon size={10} color="#1d4ed8" />
                           </span>
                         )}
                         {(ord.status === 'pending' || ord.status === 'confirmed') && (
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(180, 83, 9, 0.15)', border: '1px solid rgba(180, 83, 9, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(180, 83, 9, 0.15)', border: '1px solid rgba(180, 83, 9, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <ClockIcon size={10} color="#b45309" />
                           </span>
                         )}
                         {ord.status === 'cancelled' && (
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CloseIcon size={10} color="#dc2626" />
                           </span>
                         )}
                         {ord.status === 'returning' && (
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(147, 51, 234, 0.15)', border: '1px solid rgba(147, 51, 234, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(147, 51, 234, 0.15)', border: '1px solid rgba(147, 51, 234, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <ReturnIcon size={10} color="#9333ea" />
                           </span>
                         )}
@@ -1857,12 +1857,12 @@ export default function OrderHistoryPage() {
                               );
                             })()}
                             <div className="shopee-order-trust-tag">
-                              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <ShieldCheckIcon size={10} color="#059669" />
                               </span>
                               <span>100% Chính hãng</span>
                               <span className="trust-dot">·</span>
-                              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <ReturnIcon size={10} color="#059669" />
                               </span>
                               <span>Đổi trả trong 15 ngày</span>
@@ -1890,7 +1890,7 @@ export default function OrderHistoryPage() {
                     <div className="shopee-order-compact-left">
                       {/* Vận chuyển */}
                       <div className="shopee-order-compact-item">
-                        <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <TruckIcon size={12} color="#2563eb" />
                         </span>
                         <span className="compact-item-label">{t('shipping_carrier', 'Vận chuyển')}:</span>
@@ -1905,7 +1905,7 @@ export default function OrderHistoryPage() {
                           style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                         >
                           <span>{ord.trackingCode || `SPX-VN-${ord.orderId}`}</span>
-                          <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CopyIcon size={9} color="#2563eb" />
                           </span>
                         </span>
@@ -1915,7 +1915,7 @@ export default function OrderHistoryPage() {
 
                       {/* Phương thức thanh toán */}
                       <div className="shopee-order-compact-item">
-                        <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <CreditCardIcon size={12} color="#0284c7" />
                         </span>
                         <span className="compact-item-label">{t('payment_method', 'Thanh toán')}:</span>
@@ -1951,7 +1951,7 @@ export default function OrderHistoryPage() {
                           title="Yêu cầu hủy đơn hàng này"
                           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                         >
-                          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CloseIcon size={10} color="#ef4444" />
                           </span>
                           <span>{t('cancel_order', 'Yêu cầu hủy đơn')}</span>
@@ -1963,8 +1963,8 @@ export default function OrderHistoryPage() {
                           className="shopee-btn"
                           style={{
                             fontSize: '11.5px',
-                            background: '#eff6ff',
-                            border: '1px solid #bfdbfe',
+                            background: 'rgba(37, 99, 235, 0.08)',
+                            border: '1px solid rgba(37, 99, 235, 0.28)',
                             color: '#2563eb',
                             fontWeight: 700,
                             padding: '4px 10px',
@@ -1977,7 +1977,7 @@ export default function OrderHistoryPage() {
                           onClick={() => handleSimulateNextStep(ord.orderId)}
                           title="Mô phỏng bưu tá giao hàng bước tiếp theo"
                         >
-                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <TruckIcon size={11} color="#2563eb" />
                           </span>
                           <span>{t('order_track_simulate_step', 'Mô phỏng giao')}</span>
@@ -1991,7 +1991,7 @@ export default function OrderHistoryPage() {
                         onClick={() => setSelectedInvoiceOrder(ord)}
                         title="Xem và in hóa đơn giá trị gia tăng (VAT)"
                       >
-                        <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <ReceiptIcon size={11} color="#0284c7" />
                         </span>
                         <span>{t('print_invoice', 'In hóa đơn VAT')}</span>
@@ -2004,7 +2004,7 @@ export default function OrderHistoryPage() {
                           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                           onClick={() => setSelectedReturnOrder(ord)}
                         >
-                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(147, 51, 234, 0.12)', border: '1px solid rgba(147, 51, 234, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(147, 51, 234, 0.12)', border: '1px solid rgba(147, 51, 234, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <ReturnIcon size={11} color="#9333ea" />
                           </span>
                           <span>{t('return_refund', 'Trả hàng / Hoàn tiền')}</span>
@@ -2049,7 +2049,7 @@ export default function OrderHistoryPage() {
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                             onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <ChatIcon size={11} color="#2563eb" />
                             </span>
                             <span>{t('chat_with_shop', 'Chat với Shop')}</span>
@@ -2063,7 +2063,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <EyeIcon size={11} color="#2563eb" />
                             </span>
                             <span>{t('view_details', 'Xem chi tiết')}</span>
@@ -2080,7 +2080,7 @@ export default function OrderHistoryPage() {
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                             onClick={() => setSelectedLiveMapOrder(ord)}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <TruckIcon size={11} color="#0284c7" />
                             </span>
                             <span>{t('shipper_map', 'Bản đồ Shipper SPX')}</span>
@@ -2094,7 +2094,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <MapPinIcon size={11} color="#ea580c" />
                             </span>
                             <span>{t('view_tracking_details', 'Lịch trình')}</span>
@@ -2126,7 +2126,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <EyeIcon size={11} color="#2563eb" />
                             </span>
                             <span>{t('view_details', 'Xem chi tiết')}</span>
@@ -2139,7 +2139,7 @@ export default function OrderHistoryPage() {
                             onClick={() => handleReorderWholeOrder(ord)}
                             title="Mua lại tất cả sản phẩm trong đơn hàng này"
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <RefreshIcon size={11} color="#10b981" />
                             </span>
                             <span>{t('buy_again_whole', 'Mua lại đơn này')}</span>
@@ -2152,16 +2152,16 @@ export default function OrderHistoryPage() {
                                 fontSize: '12px',
                                 padding: '6px 13px',
                                 borderRadius: '6px',
-                                background: '#f0fdf4',
+                                background: 'rgba(16, 185, 129, 0.12)',
                                 color: '#059669',
-                                border: '1px solid #bbf7d0',
+                                border: '1px solid rgba(16, 185, 129, 0.28)',
                                 fontWeight: 700,
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '6px',
                               }}
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <CheckIcon size={10} color="#059669" />
                               </span>
                               <span>{t('reviewed_badge', 'Đã đánh giá (+200 Xu)')}</span>
@@ -2173,7 +2173,7 @@ export default function OrderHistoryPage() {
                               onClick={() => setSelectedReviewOrder(ord)}
                               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <StarIcon size={11} color="#d97706" fill="#d97706" />
                               </span>
                               <span>{t('review_order_btn', 'Đánh giá (+200 Xu)')}</span>
@@ -2192,7 +2192,7 @@ export default function OrderHistoryPage() {
                             onClick={() => handleReorderWholeOrder(ord)}
                             title="Mua lại tất cả sản phẩm trong đơn hàng này"
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <RefreshIcon size={11} color="#ea580c" />
                             </span>
                             <span>{t('buy_again_whole', 'Mua lại đơn này')}</span>
@@ -2206,7 +2206,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <EyeIcon size={11} color="#2563eb" />
                             </span>
                             <span>{t('view_details', 'Xem chi tiết')}</span>
@@ -2226,7 +2226,7 @@ export default function OrderHistoryPage() {
                               setIsDetailModalOpen(true);
                             }}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <EyeIcon size={11} color="#2563eb" />
                             </span>
                             <span>{t('view_details', 'Xem chi tiết')}</span>
@@ -2237,7 +2237,7 @@ export default function OrderHistoryPage() {
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                             onClick={() => setSelectedChatShop({ shop: { name: ord.shopName, id: ord.shopId }, currentProduct: ord.items?.[0] })}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(147, 51, 234, 0.12)', border: '1px solid rgba(147, 51, 234, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(147, 51, 234, 0.12)', border: '1px solid rgba(147, 51, 234, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <ChatIcon size={11} color="#9333ea" />
                             </span>
                             <span>{t('chat_with_shop', 'Chat với Shop')}</span>
@@ -2267,7 +2267,7 @@ export default function OrderHistoryPage() {
           title="Cuộn lên đầu trang"
           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <ChevronUpIcon size={16} color="#2563eb" />
           </span>
         </button>
