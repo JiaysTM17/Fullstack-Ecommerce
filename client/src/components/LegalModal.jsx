@@ -24,9 +24,10 @@ export default function LegalModal({
     if (isSeller) {
       if (isTerms) {
         return {
-          icon: <StoreIcon size={20} color="#ffffff" />,
-          gradient: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
-          shadow: 'rgba(234, 88, 12, 0.35)',
+          icon: <StoreIcon size={20} color="#ea580c" />,
+          gradient: 'rgba(234, 88, 12, 0.14)',
+          border: '1px solid rgba(234, 88, 12, 0.28)',
+          shadow: 'rgba(234, 88, 12, 0.15)',
           title: 'Điều Khoản Dịch Vụ Đối Tác Gian Hàng (Seller Terms)',
           subtitle: 'Quy chuẩn thương mại, đăng bán sản phẩm và quy trình phê duyệt gian hàng',
           badgeText: 'Dành Riêng Cho Người Bán / Chủ Shop',
@@ -36,9 +37,10 @@ export default function LegalModal({
         };
       }
       return {
-        icon: <ShieldIcon size={20} color="#ffffff" />,
-        gradient: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-        shadow: 'rgba(99, 102, 241, 0.35)',
+        icon: <ShieldIcon size={20} color="#4f46e5" />,
+        gradient: 'rgba(99, 102, 241, 0.14)',
+        border: '1px solid rgba(99, 102, 241, 0.28)',
+        shadow: 'rgba(99, 102, 241, 0.15)',
         title: 'Chính Sách Bảo Mật & An Ninh Dữ Liệu Gian Hàng',
         subtitle: 'Quy chuẩn bảo vệ dữ liệu khách hàng, mã hóa API và bảo vệ ví doanh thu',
         badgeText: 'An Ninh & Bảo Mật Shop',
@@ -51,9 +53,10 @@ export default function LegalModal({
     // Customer
     if (isTerms) {
       return {
-        icon: <ReceiptIcon size={20} color="#ffffff" />,
-        gradient: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-        shadow: 'rgba(37, 99, 235, 0.35)',
+        icon: <ReceiptIcon size={20} color="#2563eb" />,
+        gradient: 'rgba(37, 99, 235, 0.14)',
+        border: '1px solid rgba(37, 99, 235, 0.28)',
+        shadow: 'rgba(37, 99, 235, 0.15)',
         title: 'Điều Khoản Dịch Vụ Khách Hàng (Customer Terms)',
         subtitle: 'Quy chế giao dịch, chính sách bảo vệ người mua và cam kết hàng chính hãng',
         badgeText: 'Dành Riêng Cho Khách Mua Hàng',
@@ -63,9 +66,10 @@ export default function LegalModal({
       };
     }
     return {
-      icon: <LockIcon size={20} color="#ffffff" />,
-      gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      shadow: 'rgba(16, 185, 129, 0.35)',
+      icon: <LockIcon size={20} color="#16a34a" />,
+      gradient: 'rgba(16, 185, 129, 0.14)',
+      border: '1px solid rgba(16, 185, 129, 0.28)',
+      shadow: 'rgba(16, 185, 129, 0.15)',
       title: 'Chính Sách Bảo Mật Dữ Liệu Khách Hàng (Privacy Policy)',
       subtitle: 'Tuân thủ Nghị định 13/2023/NĐ-CP • Bảo mật thông tin cá nhân và thanh toán',
       badgeText: 'Bảo Vệ Quyền Riêng Tư',
@@ -112,6 +116,7 @@ export default function LegalModal({
                 height: '38px',
                 borderRadius: '10px',
                 background: meta.gradient,
+                border: meta.border,
                 boxShadow: `0 4px 12px ${meta.shadow}`,
                 display: 'inline-flex',
                 alignItems: 'center',
