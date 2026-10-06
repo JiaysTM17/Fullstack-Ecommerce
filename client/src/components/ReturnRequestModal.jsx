@@ -159,7 +159,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 marginRight: '6px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ArrowLeftIcon size={11} color="#2563eb" />
               </span>
               <span>Quay lại</span>
@@ -217,7 +217,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               transition: 'all 0.15s ease',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CloseIcon size={11} color="#ef4444" />
             </span>
           </button>
@@ -685,7 +685,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   transition: 'all 0.15s ease',
                 }}
               >
-                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(37, 99, 235, 0.1)' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(37, 99, 235, 0.1)' }}>
                   <CameraIcon size={14} color="#2563eb" />
                 </span>
                 <div>
@@ -732,7 +732,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 gap: '5px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CloseIcon size={10} color="#ef4444" />
               </span>
               <span>Hủy bỏ</span>
@@ -751,7 +751,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 height: '32px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CheckIcon size={11} color="#ffffff" />
               </span>
               <span>Xác Nhận Gửi Yêu Cầu</span>
