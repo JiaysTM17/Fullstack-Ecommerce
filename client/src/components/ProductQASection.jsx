@@ -434,16 +434,17 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <span
                       style={{
-                        background: "var(--primary-color, #ea580c)",
-                        color: "#fff",
+                        background: "rgba(234, 88, 12, 0.14)",
+                        border: "1px solid rgba(234, 88, 12, 0.32)",
+                        color: "#ea580c",
                         fontSize: "11px",
-                        fontWeight: 800,
-                        width: "20px",
-                        height: "20px",
+                        fontWeight: 900,
+                        width: "22px",
+                        height: "22px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        borderRadius: "4px",
+                        borderRadius: "6px",
                         flexShrink: 0,
                       }}
                     >
@@ -508,11 +509,11 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
                             <span
                               style={{
-                                width: "22px",
-                                height: "22px",
+                                width: "24px",
+                                height: "24px",
                                 borderRadius: "50%",
-                                background: isShop ? "linear-gradient(135deg, #fff7ed, #ffedd5)" : "linear-gradient(135deg, #e0f2fe, #bae6fd)",
-                                border: isShop ? "1px solid #fed7aa" : "1px solid #7dd3fc",
+                                background: isShop ? "rgba(234, 88, 12, 0.14)" : "rgba(2, 132, 199, 0.12)",
+                                border: isShop ? "1px solid rgba(234, 88, 12, 0.28)" : "1px solid rgba(2, 132, 199, 0.25)",
                                 display: "inline-flex",
                                 alignItems: "center",
                                 justifyContent: "center",
