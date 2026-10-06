@@ -39,24 +39,10 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
 
   const formatUnit = (num) => String(num).padStart(2, '0');
 
-  // Filter all discounted products
-  const allDiscountedProducts = products.filter(
-    (p) => p.originalPrice && p.originalPrice > p.price
-  );
-
-  // Return distinct product set for each slot so clicking slots reveals different products
-  const dealProducts = React.useMemo(() => {
-    if (allDiscountedProducts.length === 0) return [];
-    const slotIndex = TIME_SLOTS.findIndex((s) => s.id === selectedSlot);
-    const offset = Math.max(0, slotIndex) * 2;
-    
-    // Rotate and pick 6 distinct products for the selected slot
-    const rotated = [
-      ...allDiscountedProducts.slice(offset % allDiscountedProducts.length),
-      ...allDiscountedProducts.slice(0, offset % allDiscountedProducts.length),
-    ];
-    return rotated.slice(0, 6);
-  }, [allDiscountedProducts, selectedSlot]);
+  // Filter discounted products for flash deals
+  const dealProducts = products
+    .filter((p) => p.originalPrice && p.originalPrice > p.price)
+    .slice(0, 6);
 
   if (dealProducts.length === 0) return null;
 
@@ -65,57 +51,86 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
       {/* Top Main Deals Header */}
       <div className="shopee-deals-header">
         <div className="shopee-deals-title-area">
-          <div className="shopee-deals-badge">
-            <span className="shopee-deals-bolt">
-              <BoltIcon size={18} color="#ffffff" />
-            </span>
-            <span>FLASH SALE</span>
+          <div className="shopee-deals-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <BoltIcon size={16} color="#ffffff" />
+            <span>FLASH DEALS / GIỜ VÀNG</span>
           </div>
-
           <div className="shopee-countdown-box">
-            <span className="shopee-countdown-label">
-              <ClockIcon size={14} color="#ea580c" />
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, fontSize: '13px' }}>
+              <ClockIcon size={14} color="var(--primary-color)" />
               <span>KẾT THÚC TRONG</span>
             </span>
-            <div className="shopee-timer-digits">
-              <span className="shopee-timer-unit">{formatUnit(timeLeft.hours)}</span>
-              <span className="shopee-timer-colon">:</span>
-              <span className="shopee-timer-unit">{formatUnit(timeLeft.minutes)}</span>
-              <span className="shopee-timer-colon">:</span>
-              <span className="shopee-timer-unit">{formatUnit(timeLeft.seconds)}</span>
-            </div>
+            <span className="shopee-timer-unit">{formatUnit(timeLeft.hours)}</span>
+            <span className="shopee-timer-colon">:</span>
+            <span className="shopee-timer-unit">{formatUnit(timeLeft.minutes)}</span>
+            <span className="shopee-timer-colon">:</span>
+            <span className="shopee-timer-unit">{formatUnit(timeLeft.seconds)}</span>
           </div>
         </div>
 
-        <button
-          type="button"
-          className="shopee-deals-view-all"
+        <span
+          style={{
+            fontSize: '13px',
+            color: 'var(--primary-color)',
+            fontWeight: 700,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+          }}
           onClick={() => {
             const el = document.getElementById('catalog-section');
             if (el) el.scrollIntoView({ behavior: 'smooth' });
           }}
         >
           <span>Xem tất cả deal sốc</span>
-          <ChevronRightIcon size={14} color="currentColor" />
-        </button>
+          <ChevronRightIcon size={13} color="var(--primary-color)" />
+        </span>
       </div>
 
       {/* Time Slots Timeline Bar */}
-      <div className="shopee-time-slots-bar">
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          background: 'var(--bg-muted, #f8fafc)',
+          borderRadius: '10px',
+          border: '1px solid var(--border-light, #e2e8f0)',
+          overflow: 'hidden',
+          marginBottom: '18px',
+        }}
+      >
         {TIME_SLOTS.map((slot) => {
           const isSelected = selectedSlot === slot.id;
           return (
             <button
               key={slot.id}
               type="button"
-              className={`shopee-time-slot-btn ${isSelected ? 'active' : ''}`}
               onClick={() => setSelectedSlot(slot.id)}
+              style={{
+                background: isSelected ? 'var(--primary-color)' : 'transparent',
+                color: isSelected ? '#ffffff' : 'var(--text-secondary, #475569)',
+                border: 'none',
+                padding: '10px 4px',
+                textAlign: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
             >
-              <div className="shopee-slot-time">
-                {isSelected && <FlameIcon size={15} color="#ea580c" />}
+              <div style={{ fontSize: '15px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'center' }}>
+                {isSelected && (
+                  <FlameIcon size={14} color="#ffffff" />
+                )}
                 <span>{slot.time}</span>
               </div>
-              <div className="shopee-slot-label">
+              <div
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  opacity: isSelected ? 1 : 0.8,
+                  marginTop: '2px',
+                }}
+              >
                 {slot.label}
               </div>
             </button>
@@ -129,14 +144,11 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
           const discountPercent = Math.round(
             ((prod.originalPrice - prod.price) / prod.originalPrice) * 100
           );
-          const isCurrentSlot = selectedSlot === 'slot-1';
-          const percentSold = isCurrentSlot
-            ? Math.min(95, Math.max(30, ((prod.sold || 50) % 70) + 25 + idx * 4))
-            : Math.min(25, Math.max(5, (idx * 3) + 5));
+          const percentSold = Math.min(95, Math.max(30, ((prod.sold || 50) % 70) + 25 + idx * 4));
 
           return (
             <div
-              key={`${selectedSlot}-${prod._id || prod.id}`}
+              key={prod._id || prod.id}
               className="shopee-deal-card"
               onClick={() => onProductClick && onProductClick(prod)}
             >
@@ -147,17 +159,12 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                   className="shopee-deal-img"
                   loading="lazy"
                 />
-                <div className="shopee-deal-discount-badge">
-                  <span className="shopee-discount-number">-{discountPercent}%</span>
-                  <span className="shopee-discount-text">GIẢM</span>
-                </div>
+                <span className="shopee-deal-tag">-{discountPercent}%</span>
               </div>
 
-              <div className="shopee-deal-info">
-                <div className="shopee-deal-price-row">
-                  <span className="shopee-deal-price">
-                    {formatCurrency ? formatCurrency(prod.price) : `${prod.price.toLocaleString()}₫`}
-                  </span>
+              <div style={{ flex: 1, marginTop: '8px' }}>
+                <div className="shopee-deal-price">
+                  {formatCurrency ? formatCurrency(prod.price) : `${prod.price.toLocaleString()}₫`}
                   <span className="shopee-deal-original">
                     {formatCurrency
                       ? formatCurrency(prod.originalPrice)
@@ -165,30 +172,32 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                   </span>
                 </div>
 
-                <div className="shopee-deal-name">
+                <div
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: 'var(--text-primary, #0f172a)',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 1,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    margin: '4px 0 8px',
+                  }}
+                >
                   {prod.name}
                 </div>
+              </div>
 
-                {/* Fire progress bar */}
-                <div className="shopee-fire-bar-container">
-                  <div
-                    className="shopee-fire-bar-fill"
-                    style={{ width: isCurrentSlot ? `${percentSold}%` : '100%', background: isCurrentSlot ? undefined : 'linear-gradient(90deg, #64748b, #475569)' }}
-                  />
-                  <div className="shopee-fire-bar-content">
-                    {isCurrentSlot ? (
-                      <>
-                        <FlameIcon size={12} color="#ffffff" />
-                        <span>ĐÃ BÁN {percentSold}%</span>
-                      </>
-                    ) : (
-                      <>
-                        <ClockIcon size={12} color="#ffffff" />
-                        <span>SẮP MỞ BÁN</span>
-                      </>
-                    )}
-                  </div>
-                </div>
+              {/* Progress bar */}
+              <div className="shopee-progress-bar-wrapper">
+                <div
+                  className="shopee-progress-bar-fill"
+                  style={{ width: `${percentSold}%` }}
+                />
+                <span className="shopee-progress-bar-text" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'center' }}>
+                  <FlameIcon size={11} color="#ffffff" />
+                  <span>ĐÃ BÁN {percentSold}%</span>
+                </span>
               </div>
             </div>
           );
