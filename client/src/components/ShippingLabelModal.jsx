@@ -50,7 +50,7 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '14px', borderRadius: '10px', marginBottom: '16px', fontSize: '13px' }}>
           <div>
             <div style={{ fontSize: '11px', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '20px', height: '20px', borderRadius: '6px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <StoreIcon size={12} color="#ea580c" />
               </span>
               <span>NGƯỜI GỬI (SHOP):</span>
@@ -61,7 +61,7 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
           </div>
           <div>
             <div style={{ fontSize: '11px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '20px', height: '20px', borderRadius: '6px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <MapPinIcon size={12} color="#2563eb" />
               </span>
               <span>NGƯỜI NHẬN (KHÁCH):</span>
@@ -75,7 +75,7 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
         {/* Items */}
         <div style={{ marginBottom: '16px' }}>
           <strong style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', color: '#0f172a' }}>
-            <span style={{ width: '20px', height: '20px', borderRadius: '6px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <PackageIcon size={12} color="#ea580c" />
             </span>
             <span>CHI TIẾT HÀNG HÓA ({order.items?.length || 1} sản phẩm):</span>
@@ -113,7 +113,7 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
           <div style={{ textAlign: 'center' }}>
             <div style={{ letterSpacing: '4px', fontFamily: 'monospace', fontWeight: 700, fontSize: '14px', color: '#0f172a' }}>||||||||||||||||||||||||||||</div>
             <small style={{ fontSize: '10.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center', marginTop: '3px' }}>
-              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <QrCodeIcon size={10} color="#475569" />
               </span>
               <span>MÃ BARCODE: {trackingCode}</span>
@@ -129,7 +129,7 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             onClick={onClose}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 16px', fontSize: '12.5px' }}
           >
-            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CloseIcon size={10} color="#ef4444" />
             </span>
             <span>Đóng</span>
@@ -140,7 +140,7 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
             onClick={() => window.print()}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 20px', fontSize: '12.5px', fontWeight: 700 }}
           >
-            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <PrinterIcon size={11} color="#ffffff" />
             </span>
             <span>In Vận Đơn Ngay</span>
