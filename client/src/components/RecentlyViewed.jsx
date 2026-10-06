@@ -58,16 +58,16 @@ export function RecentlyViewed({ currentProductId }) {
             width: '28px',
             height: '28px',
             borderRadius: '6px',
-            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-            border: '1px solid rgba(2, 132, 199, 0.35)',
+            background: 'rgba(2, 132, 199, 0.14)',
+            border: '1px solid rgba(2, 132, 199, 0.28)',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)',
+            boxShadow: '0 2px 6px rgba(2, 132, 199, 0.15)',
             flexShrink: 0,
           }}
         >
-          <ClockIcon size={15} color="#ffffff" />
+          <ClockIcon size={15} color="#0284c7" />
         </div>
         <h3
           style={{

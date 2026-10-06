@@ -173,8 +173,8 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
       {recentItems.length === 0 ? (
         <div style={{ textAlign: "center", color: "var(--text-muted, #94a3b8)", padding: "30px 0" }}>
           <div style={{ marginBottom: "8px", display: "flex", justifyContent: "center" }}>
-            <span style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <EyeIcon size={24} color="#94a3b8" />
+            <span style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.14)', border: '1px solid rgba(148, 163, 184, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <EyeIcon size={24} color="#64748b" />
             </span>
           </div>
           <p style={{ margin: 0, fontSize: "13.5px" }}>Bạn chưa xem sản phẩm nào gần đây.</p>
