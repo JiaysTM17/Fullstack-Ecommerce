@@ -145,7 +145,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                   marginRight: '6px',
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ArrowLeftIcon size={11} color="#2563eb" />
                 </span>
                 <span>Quay lại</span>
@@ -172,9 +172,9 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             </h3>
             <span
               style={{
-                background: '#eff6ff',
+                background: 'rgba(37, 99, 235, 0.1)',
                 color: '#2563eb',
-                border: '1px solid #bfdbfe',
+                border: '1px solid rgba(37, 99, 235, 0.28)',
                 padding: '2px 8px',
                 borderRadius: '12px',
                 fontSize: '11px',
@@ -206,8 +206,8 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               }
             }}
             style={{
-              background: 'rgba(37, 99, 235, 0.08)',
-              border: '1px solid rgba(37, 99, 235, 0.22)',
+              background: 'rgba(37, 99, 235, 0.1)',
+              border: '1px solid rgba(37, 99, 235, 0.28)',
               borderRadius: '8px',
               width: '32px',
               height: '32px',
@@ -228,7 +228,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             onClick={onClose}
             style={{
               background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.22)',
+              border: '1px solid rgba(239, 68, 68, 0.28)',
               borderRadius: '8px',
               width: '32px',
               height: '32px',
@@ -646,7 +646,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                 gap: '6px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChatIcon size={11} color="#2563eb" />
               </span>
               <span>Nhắn Tin</span>
