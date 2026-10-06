@@ -60,11 +60,11 @@ const POPULAR_SEARCHES = [
 ];
 
 const QUICK_CATEGORY_CHIPS = [
-  { label: 'Điện Thoại', icon: <SmartphoneIcon size={14} color="#3b82f6" />, query: 'Điện tử' },
-  { label: 'Thời Trang', icon: <ShirtIcon size={14} color="#ec4899" />, query: 'Thời trang' },
-  { label: 'Gia Dụng', icon: <HomeIcon size={14} color="#f59e0b" />, query: 'Gia dụng' },
-  { label: 'Làm Đẹp', icon: <SparklesIcon size={14} color="#f43f5e" />, query: 'Làm đẹp' },
-  { label: 'Phụ Kiện', icon: <BoltIcon size={14} color="#ea580c" />, query: 'Tai nghe' },
+  { label: 'Điện Thoại', icon: <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><SmartphoneIcon size={11} color="#3b82f6" /></span>, query: 'Điện tử' },
+  { label: 'Thời Trang', icon: <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(236, 72, 153, 0.12)', border: '1px solid rgba(236, 72, 153, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><ShirtIcon size={11} color="#ec4899" /></span>, query: 'Thời trang' },
+  { label: 'Gia Dụng', icon: <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><HomeIcon size={11} color="#f59e0b" /></span>, query: 'Gia dụng' },
+  { label: 'Làm Đẹp', icon: <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(244, 63, 94, 0.12)', border: '1px solid rgba(244, 63, 94, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><SparklesIcon size={11} color="#f43f5e" /></span>, query: 'Làm đẹp' },
+  { label: 'Phụ Kiện', icon: <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><BoltIcon size={11} color="#ea580c" /></span>, query: 'Tai nghe' },
 ];
 
 const Header = ({
@@ -1108,12 +1108,12 @@ const Header = ({
                           navTo('/orders');
                         }}
                       >
-                        <span className="item-icon" style={{ background: '#e0f2fe', border: '1px solid #bae6fd' }}><PackageIcon size={16} color="#0284c7" /></span>
+                        <span className="item-icon" style={{ background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.28)' }}><PackageIcon size={16} color="#0284c7" /></span>
                         <div className="item-text">
                           <strong>{t('nav_orders', 'Đơn Mua Của Tôi')}</strong>
                           <small>Kiểm tra đơn hàng & trạng thái vận chuyển</small>
                         </div>
-                        <span className="item-badge">Xem ngay</span>
+                        <span className="item-badge" style={{ background: 'rgba(79, 70, 229, 0.12)', border: '1px solid rgba(79, 70, 229, 0.25)', color: '#4f46e5' }}>Xem ngay</span>
                       </button>
 
                       <button
@@ -1124,7 +1124,7 @@ const Header = ({
                           setShowOrderLookupModal(true);
                         }}
                       >
-                        <span className="item-icon" style={{ background: '#dbeafe', border: '1px solid #bfdbfe' }}><TruckIcon size={16} color="#2563eb" /></span>
+                        <span className="item-icon" style={{ background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.28)' }}><TruckIcon size={16} color="#2563eb" /></span>
                         <div className="item-text">
                           <strong>Tra Cứu Vận Đơn SPX</strong>
                           <small>Kiểm tra hành trình giao hàng nhanh 1-Click</small>
@@ -1133,6 +1133,7 @@ const Header = ({
                           className="item-badge"
                           style={{
                             background: '#2563eb',
+                            border: '1px solid rgba(255, 255, 255, 0.35)',
                             color: '#fff',
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -1156,7 +1157,7 @@ const Header = ({
                           navTo('/profile');
                         }}
                       >
-                        <span className="item-icon" style={{ background: '#ede9fe', border: '1px solid #ddd6fe' }}><UserIcon size={16} color="#7c3aed" /></span>
+                        <span className="item-icon" style={{ background: 'rgba(124, 58, 237, 0.12)', border: '1px solid rgba(124, 58, 237, 0.28)' }}><UserIcon size={16} color="#7c3aed" /></span>
                         <div className="item-text">
                           <strong>Hồ Sơ Cá Nhân</strong>
                           <small>Cập nhật số điện thoại, địa chỉ nhận hàng</small>
@@ -1173,7 +1174,7 @@ const Header = ({
                             setShowRewardsModal(true);
                           }}
                         >
-                          <span className="item-icon" style={{ background: '#fef3c7', border: '1px solid #fde68a' }}><CoinIcon size={16} color="#d97706" /></span>
+                          <span className="item-icon" style={{ background: 'rgba(217, 119, 6, 0.15)', border: '1px solid rgba(217, 119, 6, 0.28)' }}><CoinIcon size={16} color="#d97706" /></span>
                           <div className="item-text">
                             <strong>Ví Xu & Điểm Thưởng</strong>
                             <small>{(coins || 0).toLocaleString('vi-VN')} Xu đang có</small>
@@ -1192,7 +1193,7 @@ const Header = ({
                               navTo('/seller/dashboard');
                             }}
                           >
-                            <span className="item-icon" style={{ background: '#ffedd5', border: '1px solid #fed7aa' }}><StoreIcon size={16} color="#ea580c" /></span>
+                            <span className="item-icon" style={{ background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.28)' }}><StoreIcon size={16} color="#ea580c" /></span>
                             <div className="item-text">
                               <strong>Kênh Quản Lý Gian Hàng</strong>
                               <small>Đơn hàng shop, kho & sản phẩm bán</small>
@@ -1206,7 +1207,7 @@ const Header = ({
                               navTo('/seller/dashboard');
                             }}
                           >
-                            <span className="item-icon" style={{ background: '#dcfce7', border: '1px solid #bbf7d0' }}><CreditCardIcon size={16} color="#16a34a" /></span>
+                            <span className="item-icon" style={{ background: 'rgba(22, 163, 74, 0.15)', border: '1px solid rgba(22, 163, 74, 0.28)' }}><CreditCardIcon size={16} color="#16a34a" /></span>
                             <div className="item-text">
                               <strong>Ví Doanh Thu & Rút Tiền</strong>
                               <small>Số dư thanh toán đơn hàng shop</small>
@@ -1224,7 +1225,7 @@ const Header = ({
                             navTo('/admin/dashboard');
                           }}
                         >
-                          <span className="item-icon" style={{ background: '#fee2e2', border: '1px solid #fecaca' }}><ShieldIcon size={16} color="#dc2626" /></span>
+                          <span className="item-icon" style={{ background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.28)' }}><ShieldIcon size={16} color="#dc2626" /></span>
                           <div className="item-text">
                             <strong>Bảng Điều Khiển Quản Trị</strong>
                             <small>Quản lý toàn bộ hệ thống e-commerce</small>
@@ -1242,7 +1243,7 @@ const Header = ({
                           onLogout();
                         }}
                       >
-                        <span className="item-icon" style={{ background: '#fee2e2', border: '1px solid #fca5a5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CloseIcon size={13} color="#ef4444" /></span>
+                        <span className="item-icon" style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CloseIcon size={13} color="#ef4444" /></span>
                         <div className="item-text">
                           <strong style={{ color: '#ef4444' }}>{t('logout', 'Đăng Xuất')}</strong>
                           <small>Thoát khỏi phiên đăng nhập hiện tại</small>
