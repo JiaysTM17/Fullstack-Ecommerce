@@ -282,7 +282,7 @@ export default function ProductDetailPage() {
     : 0;
 
   return (
-    <main className="shopee-container" style={{ padding: "20px 0" }}>
+    <main className="shopee-container amazon-pdp-page" style={{ padding: "20px 0" }}>
       {/* Breadcrumb Navigation */}
       <nav style={{ fontSize: "13px", color: "var(--text-secondary, #64748b)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
         <Link to="/" style={{ color: "var(--secondary-color, #0284c7)", textDecoration: "none" }}>Trang chủ</Link>
@@ -444,15 +444,15 @@ export default function ProductDetailPage() {
           </div>
 
           {product.stock > 0 && product.stock <= 30 && (
-            <div style={{ margin: "10px 0", padding: "10px 12px", background: "var(--bg-muted, #fff7ed)", border: "1px solid var(--border-medium, #ffedd5)", borderRadius: "8px" }}>
+            <div style={{ margin: "10px 0", padding: "10px 12px", background: "rgba(234, 88, 12, 0.08)", border: "1px solid rgba(234, 88, 12, 0.2)", borderRadius: "8px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "var(--primary-color, #ea580c)", marginBottom: "6px" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <FlameIcon size={14} color="#ea580c" />
+                  <FlameIcon size={14} color="var(--primary-color, #ea580c)" />
                   <span>Sắp hết hàng</span>
                 </span>
                 <span>Chỉ còn {product.stock} sản phẩm</span>
               </div>
-              <div style={{ height: "6px", background: "var(--border-light, #fed7aa)", borderRadius: "3px", overflow: "hidden" }}>
+              <div style={{ height: "6px", background: "rgba(234, 88, 12, 0.15)", borderRadius: "3px", overflow: "hidden" }}>
                 <div style={{ width: `${Math.min(100, Math.max(12, (product.stock / 30) * 100))}%`, height: "100%", background: "var(--primary-color, #ea580c)", borderRadius: "3px" }} />
               </div>
             </div>
@@ -852,19 +852,7 @@ export default function ProductDetailPage() {
                     className="shopee-btn shopee-btn-primary"
                     style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                   >
-                    <span
-                      style={{
-                        width: "18px",
-                        height: "18px",
-                        borderRadius: "4px",
-                        background: "rgba(255, 255, 255, 0.22)",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <CheckIcon size={11} color="#ffffff" />
-                    </span>
+                    <CheckIcon size={14} color="#ffffff" />
                     <span>Gửi Đánh Giá Ngay</span>
                   </button>
                   <button
@@ -873,19 +861,7 @@ export default function ProductDetailPage() {
                     onClick={() => setShowReviewForm(false)}
                     style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                   >
-                    <span
-                      style={{
-                        width: "18px",
-                        height: "18px",
-                        borderRadius: "50%",
-                        background: "rgba(239, 68, 68, 0.12)",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <CloseIcon size={10} color="#ef4444" />
-                    </span>
+                    <CloseIcon size={14} color="#ef4444" />
                     <span>Hủy</span>
                   </button>
                 </div>
@@ -915,8 +891,8 @@ export default function ProductDetailPage() {
                       fontWeight: isActive ? 700 : 500,
                       borderRadius: "16px",
                       border: isActive ? "1px solid var(--primary-color, #ea580c)" : "1px solid var(--border-medium, #cbd5e1)",
-                      background: isActive ? "var(--primary-color, #ea580c)" : "var(--bg-card, #fff)",
-                      color: isActive ? "#fff" : "var(--text-primary, #0f172a)",
+                      background: isActive ? "var(--primary-color, #ea580c)" : "var(--bg-card)",
+                      color: isActive ? "#ffffff" : "var(--text-primary)",
                       cursor: "pointer",
                       transition: "all 0.15s ease",
                     }}
@@ -939,7 +915,7 @@ export default function ProductDetailPage() {
                     />
                     <div>
                       <div style={{ fontWeight: 700, fontSize: "13.5px" }}>{rev.author || rev.userName || "Khách hàng Mini Shopee"}</div>
-                      <div style={{ fontSize: "12px", color: "#888" }}>Đánh giá ngày {rev.date}</div>
+                      <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>Đánh giá ngày {rev.date}</div>
                     </div>
                   </div>
 
@@ -974,9 +950,9 @@ export default function ProductDetailPage() {
                           key={tIdx}
                           style={{
                             fontSize: "11px",
-                            background: "#eff6ff",
-                            color: "#1d4ed8",
-                            border: "1px solid #bfdbfe",
+                            background: "rgba(37, 99, 235, 0.08)",
+                            color: "var(--primary-color, #2563eb)",
+                            border: "1px solid var(--border-medium, #bfdbfe)",
                             padding: "2px 8px",
                             borderRadius: "12px",
                             fontWeight: 600,
@@ -985,9 +961,7 @@ export default function ProductDetailPage() {
                             gap: "5px",
                           }}
                         >
-                          <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <TagIcon size={9} color="#2563eb" />
-                          </span>
+                          <TagIcon size={11} color="currentColor" />
                           <span>{tag}</span>
                         </span>
                       ))}
@@ -998,7 +972,7 @@ export default function ProductDetailPage() {
                 </div>
               ))
             ) : (
-              <div style={{ color: "#777", fontSize: "14px", padding: "16px 0" }}>
+              <div style={{ color: "var(--text-muted)", fontSize: "14px", padding: "16px 0" }}>
                 {selectedStarFilter === "all" 
                   ? "Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên trải nghiệm và chia sẻ cảm nhận!"
                   : `Không có đánh giá nào ${selectedStarFilter} sao.`}
@@ -1148,9 +1122,7 @@ export default function ProductDetailPage() {
                   showToast('Đã sao chép liên kết sản phẩm vào bộ nhớ tạm!', 'success');
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CopyIcon size={11} color="#ffffff" />
-                </span>
+                <CopyIcon size={14} color="#ffffff" />
                 <span>Sao chép</span>
               </button>
             </div>

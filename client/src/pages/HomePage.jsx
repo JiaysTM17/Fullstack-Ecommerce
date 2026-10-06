@@ -257,30 +257,6 @@ export default function HomePage() {
 
         {/* Right Product Grid Area */}
         <section>
-          {/* Freeship Max Banner */}
-          <div
-            style={{
-              background: "linear-gradient(90deg, #10b981 0%, #059669 100%)",
-              color: "#fff",
-              padding: "12px 18px",
-              borderRadius: "10px",
-              marginBottom: "16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              fontSize: "13px",
-              fontWeight: 600,
-              boxShadow: "0 2px 8px rgba(16, 185, 129, 0.2)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <TruckIcon size={18} color="#ffffff" />
-              <span><strong>FREESHIP MAX:</strong> Miễn phí vận chuyển toàn quốc cho đơn hàng từ <strong>300.000₫</strong></span>
-            </div>
-            <span style={{ background: "rgba(255,255,255,0.2)", border: '1px solid rgba(255, 255, 255, 0.35)', padding: "4px 10px", borderRadius: "12px", fontSize: "12px" }}>
-              Tự động áp dụng
-            </span>
-          </div>
 
           {/* Discovery Tabs */}
           <div style={{ display: "flex", gap: "8px", marginBottom: "16px", overflowX: "auto", paddingBottom: "4px" }}>

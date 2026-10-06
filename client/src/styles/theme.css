@@ -62,7 +62,7 @@
 /* Dark Mode Theme Tokens */
 [data-theme="dark"],
 .theme-dark {
-  --primary-color: #f97316;
+  --primary-color: #c2410c;
   --primary-hover: #ea580c;
   --primary-light: #2c1a14;
   --primary-border: #7c2d12;

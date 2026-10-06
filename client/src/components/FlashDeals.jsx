@@ -39,10 +39,24 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
 
   const formatUnit = (num) => String(num).padStart(2, '0');
 
-  // Filter discounted products for flash deals
-  const dealProducts = products
-    .filter((p) => p.originalPrice && p.originalPrice > p.price)
-    .slice(0, 6);
+  // Filter all discounted products
+  const allDiscountedProducts = products.filter(
+    (p) => p.originalPrice && p.originalPrice > p.price
+  );
+
+  // Return distinct product set for each slot so clicking slots reveals different products
+  const dealProducts = React.useMemo(() => {
+    if (allDiscountedProducts.length === 0) return [];
+    const slotIndex = TIME_SLOTS.findIndex((s) => s.id === selectedSlot);
+    const offset = Math.max(0, slotIndex) * 2;
+    
+    // Rotate and pick 6 distinct products for the selected slot
+    const rotated = [
+      ...allDiscountedProducts.slice(offset % allDiscountedProducts.length),
+      ...allDiscountedProducts.slice(0, offset % allDiscountedProducts.length),
+    ];
+    return rotated.slice(0, 6);
+  }, [allDiscountedProducts, selectedSlot]);
 
   if (dealProducts.length === 0) return null;
 
@@ -115,11 +129,14 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
           const discountPercent = Math.round(
             ((prod.originalPrice - prod.price) / prod.originalPrice) * 100
           );
-          const percentSold = Math.min(95, Math.max(30, ((prod.sold || 50) % 70) + 25 + idx * 4));
+          const isCurrentSlot = selectedSlot === 'slot-1';
+          const percentSold = isCurrentSlot
+            ? Math.min(95, Math.max(30, ((prod.sold || 50) % 70) + 25 + idx * 4))
+            : Math.min(25, Math.max(5, (idx * 3) + 5));
 
           return (
             <div
-              key={prod._id || prod.id}
+              key={`${selectedSlot}-${prod._id || prod.id}`}
               className="shopee-deal-card"
               onClick={() => onProductClick && onProductClick(prod)}
             >
@@ -156,11 +173,20 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                 <div className="shopee-fire-bar-container">
                   <div
                     className="shopee-fire-bar-fill"
-                    style={{ width: `${percentSold}%` }}
+                    style={{ width: isCurrentSlot ? `${percentSold}%` : '100%', background: isCurrentSlot ? undefined : 'linear-gradient(90deg, #64748b, #475569)' }}
                   />
                   <div className="shopee-fire-bar-content">
-                    <FlameIcon size={12} color="#ffffff" />
-                    <span>ĐÃ BÁN {percentSold}%</span>
+                    {isCurrentSlot ? (
+                      <>
+                        <FlameIcon size={12} color="#ffffff" />
+                        <span>ĐÃ BÁN {percentSold}%</span>
+                      </>
+                    ) : (
+                      <>
+                        <ClockIcon size={12} color="#ffffff" />
+                        <span>SẮP MỞ BÁN</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
