@@ -36,7 +36,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
         {/* 1. Shopee-style SEO Marketplace Introduction Section */}
         <section className="footer-seo-section">
           <div className="footer-seo-title">
-            <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CartIcon size={15} color="#ea580c" />
             </span>
             <span>{language === 'en' ? 'ABOUT FULLSTACK E-COMMERCE SMART MARKETPLACE' : 'VỀ SÀN THƯƠNG MẠI ĐIỆN TỬ FULLSTACK E-COMMERCE'}</span>
@@ -62,12 +62,12 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
         <section className="footer-attribution-section">
           <div className="footer-attribution-header">
             <div className="footer-attribution-title">
-              <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <LayersIcon size={15} color="#2563eb" />
               </span>
               <span>{language === 'en' ? 'DESIGN INSPIRATIONS & ARCHITECTURAL REFERENCES' : 'NGUỒN CẢM HỨNG THIẾT KẾ & TIÊU CHUẨN KIẾN TRÚC'}</span>
             </div>
-            <span style={{ fontSize: '11.5px', color: '#16a34a', background: 'rgba(22, 163, 74, 0.1)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '11.5px', color: '#16a34a', background: 'rgba(22, 163, 74, 0.1)', border: '1px solid rgba(22, 163, 74, 0.25)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               <CheckIcon size={12} color="#16a34a" />
               <span>Ethical Software Engineering</span>
             </span>
@@ -76,7 +76,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
           <div className="footer-attribution-grid">
             <div className="footer-attribution-card">
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ShoppingBagIcon size={13} color="#ea580c" />
                 </span>
                 <span>Shopee VN (SEA)</span>
@@ -90,7 +90,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
 
             <div className="footer-attribution-card">
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#e0f2fe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PackageIcon size={13} color="#0284c7" />
                 </span>
                 <span>Tiki (Vietnam)</span>
@@ -104,7 +104,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
 
             <div className="footer-attribution-card">
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(220, 38, 38, 0.12)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <StoreIcon size={13} color="#dc2626" />
                 </span>
                 <span>Lazada (Alibaba Group)</span>
@@ -118,7 +118,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
 
             <div className="footer-attribution-card">
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#fef3c7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <StarIcon size={13} color="#f59e0b" fill="#f59e0b" />
                 </span>
                 <span>Amazon (Global)</span>
@@ -132,7 +132,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
 
             <div className="footer-attribution-card">
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#ede9fe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <SparklesIcon size={13} color="#8b5cf6" />
                 </span>
                 <span>Apple & Vercel Systems</span>
@@ -250,7 +250,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             <ul className="shopee-footer-list">
               <li className="shopee-footer-item">
                 <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <GlobeIcon size={11} color="#2563eb" />
                   </span>
                   <span>GitHub Portfolio</span>
@@ -258,7 +258,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
               </li>
               <li className="shopee-footer-item">
                 <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <GlobeIcon size={11} color="#0284c7" />
                   </span>
                   <span>LinkedIn</span>
@@ -266,7 +266,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
               </li>
               <li className="shopee-footer-item">
                 <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <GlobeIcon size={11} color="#3b82f6" />
                   </span>
                   <span>Facebook</span>
@@ -276,14 +276,14 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             <h4 style={{ marginTop: '20px' }}>{language === 'en' ? 'Hotline & Support' : 'Tổng Đài Hỗ Trợ'}</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12.5px' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary, #0f172a)' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PhoneIcon size={12} color="#16a34a" />
                 </span>
                 <span style={{ fontWeight: 600 }}>1900 6868</span>
                 <span style={{ fontSize: '11px', color: '#94a3b8' }}>(8:00 - 21:00)</span>
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary, #475569)' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <MailIcon size={12} color="#ea580c" />
                 </span>
                 <span>support@shopee-mini.vn</span>
