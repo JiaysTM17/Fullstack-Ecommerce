@@ -185,37 +185,37 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             <h4>{t('footer_payment', 'Thanh Toán')}</h4>
             <div className="shopee-footer-badges">
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TruckIcon size={11} color="#ea580c" />
                 </span>
                 <span>COD</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#e0f2fe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <QrCodeIcon size={11} color="#2563eb" />
                 </span>
                 <span>VietQR</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CreditCardIcon size={11} color="#16a34a" />
                 </span>
                 <span>Visa</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#fef3c7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.12)', border: '1px solid rgba(217, 119, 6, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CreditCardIcon size={11} color="#d97706" />
                 </span>
                 <span>MasterCard</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#fae8ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(192, 38, 211, 0.12)', border: '1px solid rgba(192, 38, 211, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <SparklesIcon size={11} color="#c026d3" />
                 </span>
                 <span>Momo</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#e0e7ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(67, 56, 202, 0.12)', border: '1px solid rgba(67, 56, 202, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ShieldCheckIcon size={11} color="#4338ca" />
                 </span>
                 <span>VNPay</span>
@@ -224,19 +224,19 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             <h4 style={{ marginTop: '20px' }}>{t('footer_shipping_units', 'Đơn Vị Vận Chuyển')}</h4>
             <div className="shopee-footer-badges">
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#ffedd5', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TruckIcon size={11} color="#ea580c" />
                 </span>
                 <span>SPX Express</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#e0f2fe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TruckIcon size={11} color="#0284c7" />
                 </span>
                 <span>Giao Hàng Nhanh</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TruckIcon size={11} color="#16a34a" />
                 </span>
                 <span>Viettel Post</span>

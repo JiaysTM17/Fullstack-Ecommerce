@@ -389,21 +389,21 @@ const Header = ({
         <div className="shopee-topbar">
           <div className="shopee-topbar-left">
             <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <PackageIcon size={11} color="#ea580c" />
               </span>
               <span>{t('nav_download_app', 'Tải Ứng Dụng')}</span>
             </span>
             <span className="shopee-topbar-divider" />
             <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <PhoneIcon size={11} color="#2563eb" />
               </span>
               <span>Hotline: 1900 6868</span>
             </span>
             <span className="shopee-topbar-divider" />
             <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChatIcon size={11} color="#16a34a" />
               </span>
               <span>{t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}</span>
@@ -419,7 +419,7 @@ const Header = ({
               title={language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <GlobeIcon size={11} color="#2563eb" />
               </span>
               <span>{language === 'vi' ? 'VI' : 'EN'}</span>
@@ -435,14 +435,14 @@ const Header = ({
             >
               {theme === 'dark' ? (
                 <>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <SparklesIcon size={10} color="#f59e0b" />
                   </span>
                   <span>Tối</span>
                 </>
               ) : (
                 <>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <BoltIcon size={10} color="#ea580c" />
                   </span>
                   <span>Sáng</span>
@@ -468,7 +468,7 @@ const Header = ({
                   letterSpacing: '0.4px',
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ShieldIcon size={11} color="#dc2626" />
                 </span>
                 <span>QUẢN TRỊ VIÊN SÀN</span>
@@ -494,7 +494,7 @@ const Header = ({
                 }}
                 title="Kênh Quản Trị Gian Hàng Của Bạn"
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <StoreIcon size={11} color="#ea580c" />
                 </span>
                 <span>Kênh Người Bán</span>
@@ -508,7 +508,7 @@ const Header = ({
                 title="Điểm Thưởng & Săn Xu Hàng Ngày"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CoinIcon size={11} color="#f59e0b" />
                 </span>
                 <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
@@ -522,7 +522,7 @@ const Header = ({
                 title="Khám phá Điểm Thưởng & Săn Xu"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CoinIcon size={11} color="#f59e0b" />
                 </span>
                 <span>Săn Xu & Thưởng</span>
@@ -582,13 +582,13 @@ const Header = ({
                   aria-label={t('clear_search', 'Xóa từ khóa')}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CloseIcon size={10} color="#ef4444" />
                   </span>
                 </button>
               )}
               <button type="submit" className="shopee-search-btn" aria-label={t('search', 'Tìm kiếm')}>
-                <span style={{ width: '24px', height: '24px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '24px', height: '24px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <SearchIcon size={14} color="#ffffff" />
                 </span>
               </button>
@@ -615,7 +615,7 @@ const Header = ({
                 {/* Quick Category Discovery Chips */}
                 <div className="search-quick-chips-wrapper">
                   <span className="search-quick-chips-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <BoltIcon size={11} color="#ffffff" />
                     </span>
                     <span>Ngành hàng nổi bật:</span>
@@ -655,7 +655,7 @@ const Header = ({
                           }}
                         >
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <ClockIcon size={11} color="var(--text-muted)" />
                             </span>
                             <span>Lịch Sử Tìm Kiếm Gần Đây</span>
@@ -685,7 +685,7 @@ const Header = ({
                             onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(100, 116, 139, 0.1)', border: '1px solid rgba(100, 116, 139, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <ClockIcon size={11} color="var(--text-muted)" />
                               </span>
                               <span>{item}</span>
@@ -695,7 +695,7 @@ const Header = ({
                               style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                               title="Xóa mục này"
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <CloseIcon size={9} color="#ef4444" />
                               </span>
                             </span>
@@ -707,7 +707,7 @@ const Header = ({
                     {/* Popular Searches */}
                     <div>
                       <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: recentSearches.length > 0 ? '1px solid var(--border-light, #f0f0f0)' : 'none', borderBottom: '1px solid var(--border-light, #f0f0f0)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <SparklesIcon size={11} color="var(--primary-color)" />
                         </span>
                         <span>{t('suggested_searches', 'Gợi Ý Tìm Kiếm Phổ Biến')}</span>
@@ -731,7 +731,7 @@ const Header = ({
                               gap: '6px',
                             }}
                           >
-                            <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <SearchIcon size={9} color="#ea580c" />
                             </span>
                             <span>{item}</span>
@@ -765,7 +765,7 @@ const Header = ({
                             onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover, #f8fafc)')}
                             onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                           >
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                               <SearchIcon size={10} color="#ea580c" />
                             </span>
                             <span>{item}</span>
@@ -778,7 +778,7 @@ const Header = ({
                     {matchingProducts.length > 0 && (
                       <div>
                         <div style={{ padding: '8px 14px', fontSize: '11px', color: 'var(--text-muted, #888)', fontWeight: 700, textTransform: 'uppercase', background: 'var(--bg-muted, #fafafa)', borderTop: '1px solid var(--border-light, #f0f0f0)', borderBottom: '1px solid var(--border-light, #f0f0f0)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <SparklesIcon size={11} color="var(--primary-color, #ea580c)" />
                           </span>
                           <span>Sản Phẩm Trùng Khớp</span>
@@ -850,6 +850,7 @@ const Header = ({
                   height: '28px',
                   borderRadius: '8px',
                   background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -889,6 +890,7 @@ const Header = ({
                     height: '28px',
                     borderRadius: '8px',
                     background: 'rgba(37, 99, 235, 0.12)',
+                    border: '1px solid rgba(37, 99, 235, 0.25)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -907,7 +909,7 @@ const Header = ({
                 <div className="header-mini-cart-popover anim-dropdown">
                   <div className="mini-cart-header">
                     <div className="mini-cart-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CartIcon size={14} color="#ea580c" />
                       </span>
                       <span>Giỏ Hàng Của Bạn</span>
@@ -919,14 +921,14 @@ const Header = ({
                       <div className="mini-cart-freeship-banner">
                         {cartSubtotal >= 200000 ? (
                           <div className="freeship-qualified" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <SparklesIcon size={11} color="#10b981" />
                             </span>
                             <span>Bạn đã được <strong>Miễn Phí Vận Chuyển 0Đ!</strong></span>
                           </div>
                         ) : (
                           <div className="freeship-needed" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <TruckIcon size={11} color="#2563eb" />
                             </span>
                             <span>Mua thêm <strong>{formatCurrency(200000 - cartSubtotal)}</strong> để nhận <strong>Freeship Toàn Quốc!</strong></span>
@@ -987,7 +989,7 @@ const Header = ({
                               }}
                               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <CloseIcon size={10} color="#ef4444" />
                               </span>
                             </button>
@@ -1017,7 +1019,7 @@ const Header = ({
                           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
                           <span>Xem Chi Tiết Giỏ Hàng & Mua Ngay</span>
-                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <ChevronRightIcon size={12} color="#ffffff" />
                           </span>
                         </button>
@@ -1106,7 +1108,7 @@ const Header = ({
                           navTo('/orders');
                         }}
                       >
-                        <span className="item-icon" style={{ background: '#e0f2fe', borderColor: '#bae6fd' }}><PackageIcon size={16} color="#0284c7" /></span>
+                        <span className="item-icon" style={{ background: '#e0f2fe', border: '1px solid #bae6fd' }}><PackageIcon size={16} color="#0284c7" /></span>
                         <div className="item-text">
                           <strong>{t('nav_orders', 'Đơn Mua Của Tôi')}</strong>
                           <small>Kiểm tra đơn hàng & trạng thái vận chuyển</small>
@@ -1122,7 +1124,7 @@ const Header = ({
                           setShowOrderLookupModal(true);
                         }}
                       >
-                        <span className="item-icon" style={{ background: '#dbeafe', borderColor: '#bfdbfe' }}><TruckIcon size={16} color="#2563eb" /></span>
+                        <span className="item-icon" style={{ background: '#dbeafe', border: '1px solid #bfdbfe' }}><TruckIcon size={16} color="#2563eb" /></span>
                         <div className="item-text">
                           <strong>Tra Cứu Vận Đơn SPX</strong>
                           <small>Kiểm tra hành trình giao hàng nhanh 1-Click</small>
@@ -1154,7 +1156,7 @@ const Header = ({
                           navTo('/profile');
                         }}
                       >
-                        <span className="item-icon" style={{ background: '#ede9fe', borderColor: '#ddd6fe' }}><UserIcon size={16} color="#7c3aed" /></span>
+                        <span className="item-icon" style={{ background: '#ede9fe', border: '1px solid #ddd6fe' }}><UserIcon size={16} color="#7c3aed" /></span>
                         <div className="item-text">
                           <strong>Hồ Sơ Cá Nhân</strong>
                           <small>Cập nhật số điện thoại, địa chỉ nhận hàng</small>
@@ -1171,7 +1173,7 @@ const Header = ({
                             setShowRewardsModal(true);
                           }}
                         >
-                          <span className="item-icon" style={{ background: '#fef3c7', borderColor: '#fde68a' }}><CoinIcon size={16} color="#d97706" /></span>
+                          <span className="item-icon" style={{ background: '#fef3c7', border: '1px solid #fde68a' }}><CoinIcon size={16} color="#d97706" /></span>
                           <div className="item-text">
                             <strong>Ví Xu & Điểm Thưởng</strong>
                             <small>{(coins || 0).toLocaleString('vi-VN')} Xu đang có</small>
@@ -1190,7 +1192,7 @@ const Header = ({
                               navTo('/seller/dashboard');
                             }}
                           >
-                            <span className="item-icon" style={{ background: '#ffedd5', borderColor: '#fed7aa' }}><StoreIcon size={16} color="#ea580c" /></span>
+                            <span className="item-icon" style={{ background: '#ffedd5', border: '1px solid #fed7aa' }}><StoreIcon size={16} color="#ea580c" /></span>
                             <div className="item-text">
                               <strong>Kênh Quản Lý Gian Hàng</strong>
                               <small>Đơn hàng shop, kho & sản phẩm bán</small>
@@ -1204,7 +1206,7 @@ const Header = ({
                               navTo('/seller/dashboard');
                             }}
                           >
-                            <span className="item-icon" style={{ background: '#dcfce7', borderColor: '#bbf7d0' }}><CreditCardIcon size={16} color="#16a34a" /></span>
+                            <span className="item-icon" style={{ background: '#dcfce7', border: '1px solid #bbf7d0' }}><CreditCardIcon size={16} color="#16a34a" /></span>
                             <div className="item-text">
                               <strong>Ví Doanh Thu & Rút Tiền</strong>
                               <small>Số dư thanh toán đơn hàng shop</small>
@@ -1222,7 +1224,7 @@ const Header = ({
                             navTo('/admin/dashboard');
                           }}
                         >
-                          <span className="item-icon" style={{ background: '#fee2e2', borderColor: '#fecaca' }}><ShieldIcon size={16} color="#dc2626" /></span>
+                          <span className="item-icon" style={{ background: '#fee2e2', border: '1px solid #fecaca' }}><ShieldIcon size={16} color="#dc2626" /></span>
                           <div className="item-text">
                             <strong>Bảng Điều Khiển Quản Trị</strong>
                             <small>Quản lý toàn bộ hệ thống e-commerce</small>
@@ -1240,7 +1242,7 @@ const Header = ({
                           onLogout();
                         }}
                       >
-                        <span className="item-icon" style={{ background: '#fee2e2', borderColor: '#fca5a5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CloseIcon size={13} color="#ef4444" /></span>
+                        <span className="item-icon" style={{ background: '#fee2e2', border: '1px solid #fca5a5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CloseIcon size={13} color="#ef4444" /></span>
                         <div className="item-text">
                           <strong style={{ color: '#ef4444' }}>{t('logout', 'Đăng Xuất')}</strong>
                           <small>Thoát khỏi phiên đăng nhập hiện tại</small>
@@ -1261,7 +1263,7 @@ const Header = ({
                   }}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <KeyIcon size={11} color="#ffffff" />
                   </span>
                   <span>{t('login', 'Đăng Nhập')}</span>
@@ -1275,7 +1277,7 @@ const Header = ({
                   }}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <UserIcon size={11} color="#ea580c" />
                   </span>
                   <span>{t('register', 'Đăng Ký')}</span>
@@ -1294,7 +1296,7 @@ const Header = ({
             title="Mở danh mục ngành hàng"
             style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <LayersIcon size={12} color="#2563eb" />
             </span>
             <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
@@ -1309,7 +1311,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/', null)}
             title="Quay lại trang chủ và xem toàn bộ sản phẩm"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <HomeIcon size={12} color="#ea580c" />
             </span>
             <span>{t('nav_all_products', 'Trang Chủ')}</span>
@@ -1321,7 +1323,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Hot+Deal', 'flash-deals-section')}
             title="Săn deal chớp nhoáng giờ vàng"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <FlameIcon size={12} color="#ef4444" />
             </span>
             <span>{t('nav_flash_deals', 'Flash Deals')}</span>
@@ -1333,7 +1335,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Best+Seller', 'catalog-section')}
             title="Khám phá các sản phẩm bán chạy nhất sàn"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <StarIcon size={12} color="#f59e0b" fill="#f59e0b" />
             </span>
             <span>{t('nav_best_sellers', 'Bán Chạy Nhất')}</span>
@@ -1345,7 +1347,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Amazon%27s+Choice', 'catalog-section')}
             title="Top sản phẩm đánh giá cao tuyển chọn"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(139, 92, 246, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <SparklesIcon size={12} color="#8b5cf6" />
             </span>
             <span>{t('nav_featured_picks', 'Hàng Tuyển Chọn')}</span>
@@ -1357,7 +1359,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?fastDelivery=1', 'catalog-section')}
             title="Sản phẩm hỗ trợ giao hàng hỏa tốc trong 2H"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 179, 8, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 179, 8, 0.15)', border: '1px solid rgba(234, 179, 8, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <BoltIcon size={12} color="#eab308" />
             </span>
             <span>{t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}</span>
@@ -1369,7 +1371,7 @@ const Header = ({
             onClick={() => setShowRewardsModal(true)}
             title="Vào Rewards Hub nhận xu & quay thưởng"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(249, 115, 22, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(249, 115, 22, 0.15)', border: '1px solid rgba(249, 115, 22, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <TicketIcon size={12} color="#f97316" />
             </span>
             <span>{t('nav_rewards_hub', 'Săn Xu & Voucher')}</span>
@@ -1400,7 +1402,7 @@ const Header = ({
           >
             <div className="order-lookup-modal-header">
               <div className="order-lookup-header-left">
-                <span className="order-lookup-badge-icon" style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span className="order-lookup-badge-icon" style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dbeafe', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PackageIcon size={20} color="#2563eb" />
                 </span>
                 <div>
@@ -1415,7 +1417,7 @@ const Header = ({
                 title="Đóng modal"
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CloseIcon size={14} color="#ef4444" />
                 </span>
               </button>
@@ -1440,7 +1442,7 @@ const Header = ({
                     style={{ position: 'absolute', right: '140px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
                     aria-label="Xóa mã đơn hàng"
                   >
-                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CloseIcon size={10} color="#ef4444" />
                     </span>
                   </button>
@@ -1455,7 +1457,7 @@ const Header = ({
                   {orderLookupLoading ? 'Đang Tra Cứu...' : (
                     <>
                       <span>Tra Cứu Ngay</span>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <ChevronRightIcon size={12} color="#ffffff" />
                       </span>
                     </>
@@ -1465,7 +1467,7 @@ const Header = ({
 
               {orderLookupError && (
                 <div className="order-lookup-error-msg" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <AlertCircleIcon size={11} color="#ef4444" />
                   </span>
                   <span>{orderLookupError}</span>
@@ -1475,7 +1477,7 @@ const Header = ({
               {/* Demo Quick Chips */}
               <div className="order-lookup-demo-bar">
                 <span className="order-lookup-demo-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 179, 8, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 179, 8, 0.15)', border: '1px solid rgba(234, 179, 8, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <BoltIcon size={11} color="#eab308" />
                   </span>
                   <span>Tra cứu nhanh mã mẫu:</span>
@@ -1490,7 +1492,7 @@ const Header = ({
                     }}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <TruckIcon size={11} color="#059669" />
                     </span>
                     <span>ORD-DEMO-01 (Đang Giao Hàng)</span>
@@ -1504,7 +1506,7 @@ const Header = ({
                     }}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <PackageIcon size={11} color="#2563eb" />
                     </span>
                     <span>ORD-DEMO-02 (Rời Kho Phân Loại)</span>
@@ -1528,13 +1530,13 @@ const Header = ({
 
                   <div className="result-carrier-info">
                     <div className="carrier-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <TruckIcon size={11} color="#059669" />
                       </span>
                       <span>{orderLookupResult.carrier}</span>
                     </div>
                     <div className="delivery-eta" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.12)', border: '1px solid rgba(217, 119, 6, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <ClockIcon size={11} color="#d97706" />
                       </span>
                       <span>{orderLookupResult.estimatedDelivery}</span>
@@ -1575,7 +1577,7 @@ const Header = ({
                       style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                     >
                       <span>Xem chi tiết danh sách đơn mua của bạn</span>
-                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <ChevronRightIcon size={12} color="#ffffff" />
                       </span>
                     </button>
