@@ -865,7 +865,7 @@ export default function LiveChatWidget() {
                   }}
                   title="Chuyển sang Chuyên viên tư vấn trực tiếp"
                 >
-                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><UserIcon size={11} color="#ffffff" /></span>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><UserIcon size={11} color="#ffffff" /></span>
                   <span style={{ display: isExpanded ? 'inline' : 'none' }}>Gặp CSKH</span>
                 </button>
               ) : (
@@ -888,7 +888,7 @@ export default function LiveChatWidget() {
                   }}
                   title="Quay lại Trợ lý AI"
                 >
-                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><SparklesIcon size={11} color="#ffffff" /></span>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><SparklesIcon size={11} color="#ffffff" /></span>
                   <span style={{ display: isExpanded ? 'inline' : 'none' }}>Về AI</span>
                 </button>
               )}
@@ -906,7 +906,7 @@ export default function LiveChatWidget() {
                 }}
                 style={{
                   background: soundEnabled ? 'rgba(255,255,255,0.15)' : 'rgba(239, 68, 68, 0.25)',
-                  border: 'none',
+                  border: soundEnabled ? '1px solid rgba(255,255,255,0.25)' : '1px solid rgba(239, 68, 68, 0.35)',
                   color: soundEnabled ? '#cbd5e1' : '#fca5a5',
                   cursor: 'pointer',
                   padding: '4px 6px',
@@ -926,7 +926,7 @@ export default function LiveChatWidget() {
                 onClick={() => setIsExpanded(!isExpanded)}
                 style={{
                   background: 'rgba(255,255,255,0.12)',
-                  border: 'none',
+                  border: '1px solid rgba(255,255,255,0.25)',
                   color: '#cbd5e1',
                   cursor: 'pointer',
                   padding: '4px 6px',
@@ -944,7 +944,7 @@ export default function LiveChatWidget() {
                 onClick={handleClearHistory}
                 style={{
                   background: 'rgba(239, 68, 68, 0.15)',
-                  border: 'none',
+                  border: '1px solid rgba(239, 68, 68, 0.28)',
                   color: '#ef4444',
                   cursor: 'pointer',
                   width: '26px',
@@ -968,7 +968,7 @@ export default function LiveChatWidget() {
                 onClick={() => setIsOpen(false)}
                 style={{
                   background: 'rgba(255, 255, 255, 0.15)',
-                  border: 'none',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
                   color: '#ffffff',
                   cursor: 'pointer',
                   width: '26px',
@@ -992,7 +992,7 @@ export default function LiveChatWidget() {
                 onClick={() => setIsOpen(false)}
                 style={{
                   background: 'rgba(239, 68, 68, 0.2)',
-                  border: 'none',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
                   cursor: 'pointer',
                   width: '26px',
                   height: '26px',
@@ -1094,10 +1094,10 @@ export default function LiveChatWidget() {
           >
             {chatMode === 'human' ? (
               [
-                { label: 'Tiến độ đơn hàng', text: 'Nhờ em kiểm tra tiến độ đơn hàng gần nhất của anh/chị', icon: <PackageIcon size={12} color="#0284c7" />, bg: 'rgba(2, 132, 199, 0.15)' },
-                { label: 'Đổi trả / Hoàn tiền', text: 'Anh/chị cần hỗ trợ hoàn tiền hoặc đổi sản phẩm', icon: <RefreshIcon size={12} color="#9333ea" />, bg: 'rgba(147, 51, 234, 0.15)' },
-                { label: 'Bảo hành chính hãng', text: 'Chính sách bảo hành sản phẩm thực hiện thế nào em?', icon: <ShieldIcon size={12} color="#16a34a" />, bg: 'rgba(22, 163, 74, 0.15)' },
-                { label: 'Về Trợ lý AI', text: 'Quay lại Trợ lý AI', icon: <SparklesIcon size={12} color="#8b5cf6" />, bg: 'rgba(139, 92, 246, 0.15)' },
+                { label: 'Tiến độ đơn hàng', text: 'Nhờ em kiểm tra tiến độ đơn hàng gần nhất của anh/chị', icon: <PackageIcon size={12} color="#0284c7" />, bg: 'rgba(2, 132, 199, 0.15)', border: 'rgba(2, 132, 199, 0.28)' },
+                { label: 'Đổi trả / Hoàn tiền', text: 'Anh/chị cần hỗ trợ hoàn tiền hoặc đổi sản phẩm', icon: <RefreshIcon size={12} color="#9333ea" />, bg: 'rgba(147, 51, 234, 0.15)', border: 'rgba(147, 51, 234, 0.28)' },
+                { label: 'Bảo hành chính hãng', text: 'Chính sách bảo hành sản phẩm thực hiện thế nào em?', icon: <ShieldIcon size={12} color="#16a34a" />, bg: 'rgba(22, 163, 74, 0.15)', border: 'rgba(22, 163, 74, 0.28)' },
+                { label: 'Về Trợ lý AI', text: 'Quay lại Trợ lý AI', icon: <SparklesIcon size={12} color="#8b5cf6" />, bg: 'rgba(139, 92, 246, 0.15)', border: 'rgba(139, 92, 246, 0.28)' },
               ].map((chip, idx) => (
                 <button
                   key={idx}
@@ -1118,7 +1118,7 @@ export default function LiveChatWidget() {
                     gap: '6px',
                   }}
                 >
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: chip.bg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: chip.bg, border: `1px solid ${chip.border}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {chip.icon}
                   </span>
                   <span>{chip.label}</span>
@@ -1126,13 +1126,13 @@ export default function LiveChatWidget() {
               ))
             ) : (
               [
-                { label: 'Tư Vấn AI', text: 'Bạn có thể giúp gì cho tôi?', icon: <SparklesIcon size={12} color="#8b5cf6" />, bg: 'rgba(139, 92, 246, 0.15)' },
-                { label: 'Gợi Ý Hot', text: 'Gợi ý sản phẩm bán chạy nhất hiện nay', icon: <ShoppingBagIcon size={12} color="#ea580c" />, bg: 'rgba(234, 88, 12, 0.15)' },
-                { label: 'Tra Cứu Đơn', text: 'Kiểm tra đơn hàng của tôi', icon: <PackageIcon size={12} color="#0284c7" />, bg: 'rgba(2, 132, 199, 0.15)' },
-                { label: 'Săn Voucher', text: 'Cho tôi xin mã giảm giá và freeship', icon: <TicketIcon size={12} color="#ea580c" />, bg: 'rgba(234, 88, 12, 0.15)' },
-                { label: 'Vòng Quay & Xu', text: 'Vòng quay may mắn và xu thưởng', icon: <CoinIcon size={12} color="#f59e0b" />, bg: 'rgba(245, 158, 11, 0.18)' },
-                { label: '12 Mall Shop', text: 'Khám phá các gian hàng chính hãng', icon: <StoreIcon size={12} color="#dc2626" />, bg: 'rgba(220, 38, 38, 0.15)' },
-                { label: 'Gặp CSKH', text: 'Cho tôi gặp nhân viên trực CSKH', icon: <UserIcon size={12} color="#059669" />, bg: 'rgba(16, 185, 129, 0.18)' },
+                { label: 'Tư Vấn AI', text: 'Bạn có thể giúp gì cho tôi?', icon: <SparklesIcon size={12} color="#8b5cf6" />, bg: 'rgba(139, 92, 246, 0.15)', border: 'rgba(139, 92, 246, 0.28)' },
+                { label: 'Gợi Ý Hot', text: 'Gợi ý sản phẩm bán chạy nhất hiện nay', icon: <ShoppingBagIcon size={12} color="#ea580c" />, bg: 'rgba(234, 88, 12, 0.15)', border: 'rgba(234, 88, 12, 0.28)' },
+                { label: 'Tra Cứu Đơn', text: 'Kiểm tra đơn hàng của tôi', icon: <PackageIcon size={12} color="#0284c7" />, bg: 'rgba(2, 132, 199, 0.15)', border: 'rgba(2, 132, 199, 0.28)' },
+                { label: 'Săn Voucher', text: 'Cho tôi xin mã giảm giá và freeship', icon: <TicketIcon size={12} color="#ea580c" />, bg: 'rgba(234, 88, 12, 0.15)', border: 'rgba(234, 88, 12, 0.28)' },
+                { label: 'Vòng Quay & Xu', text: 'Vòng quay may mắn và xu thưởng', icon: <CoinIcon size={12} color="#f59e0b" />, bg: 'rgba(245, 158, 11, 0.18)', border: 'rgba(245, 158, 11, 0.3)' },
+                { label: '12 Mall Shop', text: 'Khám phá các gian hàng chính hãng', icon: <StoreIcon size={12} color="#dc2626" />, bg: 'rgba(220, 38, 38, 0.15)', border: 'rgba(220, 38, 38, 0.28)' },
+                { label: 'Gặp CSKH', text: 'Cho tôi gặp nhân viên trực CSKH', icon: <UserIcon size={12} color="#059669" />, bg: 'rgba(16, 185, 129, 0.18)', border: 'rgba(16, 185, 129, 0.3)' },
               ].map((chip, idx) => (
                 <button
                   key={idx}
@@ -1159,7 +1159,7 @@ export default function LiveChatWidget() {
                     gap: '6px',
                   }}
                 >
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: chip.bg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: chip.bg, border: `1px solid ${chip.border}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {chip.icon}
                   </span>
                   <span>{chip.label}</span>
@@ -1473,9 +1473,9 @@ export default function LiveChatWidget() {
                                       navigate(`/products/${prod.id || prod._id}`);
                                     }}
                                     style={{
-                                      background: 'transparent',
+                                      background: 'rgba(79, 70, 229, 0.08)',
                                       color: 'var(--primary-color, #4f46e5)',
-                                      border: '1px solid rgba(79, 70, 229, 0.35)',
+                                      border: '1px solid rgba(79, 70, 229, 0.28)',
                                       borderRadius: '5px',
                                       padding: '3px 6px',
                                       fontSize: '10px',
@@ -1485,7 +1485,7 @@ export default function LiveChatWidget() {
                                   >
                                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                       <span>Chi tiết</span>
-                                      <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(79, 70, 229, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(79, 70, 229, 0.15)', border: '1px solid rgba(79, 70, 229, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <ChevronRightIcon size={9} color="var(--primary-color, #4f46e5)" />
                                       </span>
                                     </span>
@@ -1599,7 +1599,10 @@ export default function LiveChatWidget() {
                                       copiedCode === vc.code
                                         ? '#ffffff'
                                         : 'var(--text-primary)',
-                                    border: 'none',
+                                    border:
+                                      copiedCode === vc.code
+                                        ? '1px solid rgba(34, 197, 94, 0.4)'
+                                        : '1px solid var(--border-medium, #cbd5e1)',
                                     borderRadius: '5px',
                                     padding: '4px 7px',
                                     fontSize: '10.5px',
@@ -1609,7 +1612,7 @@ export default function LiveChatWidget() {
                                   }}
                                 >
                                   {copiedCode === vc.code ? (
-                                    <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                       <CheckIcon size={10} color="#ffffff" />
                                     </span>
                                   ) : (
@@ -1784,7 +1787,7 @@ export default function LiveChatWidget() {
                             }}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.22)', border: '1px solid rgba(245, 158, 11, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 <CoinIcon size={18} color="#f59e0b" />
                               </span>
                               <div>
@@ -1845,7 +1848,7 @@ export default function LiveChatWidget() {
                                 boxShadow: '0 2px 6px rgba(217, 119, 6, 0.35)',
                               }}
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.32)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <SparklesIcon size={11} color="#ffffff" />
                               </span>
                               <span>Mở Vòng Quay May Mắn</span>
@@ -1856,7 +1859,7 @@ export default function LiveChatWidget() {
                               onClick={handleQuickCheckIn}
                               style={{
                                 background: 'rgba(255, 255, 255, 0.95)',
-                                border: '1px solid #d97706',
+                                border: '1px solid rgba(217, 119, 6, 0.35)',
                                 color: '#b45309',
                                 borderRadius: '6px',
                                 padding: '6px 8px',
@@ -1869,7 +1872,7 @@ export default function LiveChatWidget() {
                               }}
                               title="Điểm danh nhận xu 7 ngày liên tiếp"
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <CalendarIcon size={11} color="#2563eb" />
                               </span>
                               <span>Điểm danh</span>
@@ -2038,10 +2041,10 @@ export default function LiveChatWidget() {
                             type="button"
                             onClick={() => handleSendMessage(sug)}
                             style={{
-                              background: 'transparent',
+                              background: isHuman ? 'rgba(16, 185, 129, 0.08)' : 'rgba(234, 88, 12, 0.08)',
                               border: isHuman
-                                ? '1px solid rgba(16, 185, 129, 0.4)'
-                                : '1px solid rgba(234, 88, 12, 0.35)',
+                                ? '1px solid rgba(16, 185, 129, 0.35)'
+                                : '1px solid rgba(234, 88, 12, 0.3)',
                               color: isHuman ? '#059669' : '#ea580c',
                               padding: '2px 7px',
                               borderRadius: '9px',
@@ -2054,7 +2057,7 @@ export default function LiveChatWidget() {
                               gap: '4px',
                             }}
                           >
-                            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <ChatIcon size={9} color="#2563eb" />
                             </span>
                             <span>{sug}</span>
@@ -2164,7 +2167,7 @@ export default function LiveChatWidget() {
                 borderRadius: '50%',
                 background: isListening ? '#ef4444' : 'var(--bg-muted, #f1f5f9)',
                 color: isListening ? '#ffffff' : 'var(--text-primary)',
-                border: isListening ? 'none' : '1px solid var(--border-medium, #cbd5e1)',
+                border: isListening ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--border-medium, #cbd5e1)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -2175,7 +2178,7 @@ export default function LiveChatWidget() {
               }}
               title={isListening ? 'Dừng lắng nghe' : 'Nói bằng giọng nói'}
             >
-              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: isListening ? 'rgba(255, 255, 255, 0.25)' : 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: isListening ? 'rgba(255, 255, 255, 0.25)' : 'rgba(2, 132, 199, 0.12)', border: isListening ? '1px solid rgba(255, 255, 255, 0.35)' : '1px solid rgba(2, 132, 199, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <MicIcon size={14} color={isListening ? "#ffffff" : "#0284c7"} />
               </span>
             </button>
@@ -2208,7 +2211,7 @@ export default function LiveChatWidget() {
               }}
               title="Gửi tin nhắn"
             >
-              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: inputMessage.trim() ? 'rgba(255, 255, 255, 0.25)' : 'transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: inputMessage.trim() ? 'rgba(255, 255, 255, 0.25)' : 'transparent', border: inputMessage.trim() ? '1px solid rgba(255, 255, 255, 0.32)' : 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <SendIcon size={13} color="#ffffff" />
               </span>
             </button>
