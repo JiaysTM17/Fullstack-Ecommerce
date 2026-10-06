@@ -260,21 +260,20 @@ export default function WishlistPage() {
                             borderRadius: '20px',
                             fontSize: '12.5px',
                             fontWeight: isActive ? 700 : 500,
-                            border: '1px solid',
-                            borderColor: isActive ? 'var(--primary-color, #ea580c)' : '#e2e8f0',
-                            background: isActive ? 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)' : '#ffffff',
-                            color: isActive ? 'var(--primary-color, #ea580c)' : '#475569',
+                            border: isActive ? '1px solid rgba(234, 88, 12, 0.35)' : '1px solid rgba(203, 213, 225, 0.7)',
+                            background: isActive ? 'rgba(234, 88, 12, 0.12)' : 'rgba(248, 250, 252, 0.8)',
+                            color: isActive ? '#c2410c' : '#475569',
                             cursor: 'pointer',
                             whiteSpace: 'nowrap',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '6px',
-                            boxShadow: isActive ? '0 2px 6px rgba(234, 88, 12, 0.15)' : 'none',
+                            boxShadow: isActive ? '0 2px 6px rgba(234, 88, 12, 0.12)' : 'none',
                             transition: 'all 0.15s ease',
                           }}
                         >
-                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: isActive ? 'rgba(234, 88, 12, 0.15)' : 'rgba(100, 116, 139, 0.1)', border: isActive ? '1px solid rgba(234, 88, 12, 0.25)' : '1px solid rgba(100, 116, 139, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <TagIcon size={9} color={isActive ? '#ea580c' : '#64748b'} />
+                          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: isActive ? 'rgba(234, 88, 12, 0.18)' : 'rgba(148, 163, 184, 0.14)', border: isActive ? '1px solid rgba(234, 88, 12, 0.30)' : '1px solid rgba(148, 163, 184, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TagIcon size={10} color={isActive ? '#ea580c' : '#64748b'} />
                           </span>
                           <span>{cat === 'all' ? 'Tất cả' : cat}</span>
                         </button>
