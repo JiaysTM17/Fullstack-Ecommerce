@@ -184,7 +184,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 marginRight: '6px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ArrowLeftIcon size={11} color="#2563eb" />
               </span>
               <span>Quay lại</span>
@@ -240,7 +240,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
             }}
             aria-label="Đóng đánh giá sản phẩm"
           >
-            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CloseIcon size={13} color="#ef4444" />
             </span>
           </button>
@@ -275,7 +275,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 height: '34px',
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #fef08a 0%, #fde047 100%)',
-                border: '1.5px solid #f59e0b',
+                border: '1.5px solid rgba(245, 158, 11, 0.45)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -400,6 +400,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                       height: '36px',
                       borderRadius: '8px',
                       background: isLit ? 'rgba(245, 158, 11, 0.15)' : 'rgba(203, 213, 225, 0.15)',
+                      border: `1px solid ${isLit ? 'rgba(245, 158, 11, 0.3)' : 'rgba(203, 213, 225, 0.3)'}`,
                       cursor: 'pointer',
                       transform: isLit ? 'scale(1.12)' : 'scale(1)',
                       transition: 'all 0.15s ease',
@@ -451,7 +452,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                       gap: '5px',
                     }}
                   >
-                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: active ? 'rgba(37, 99, 235, 0.12)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: active ? 'rgba(37, 99, 235, 0.12)' : 'rgba(100, 116, 139, 0.08)', border: `1px solid ${active ? 'rgba(37, 99, 235, 0.25)' : 'rgba(100, 116, 139, 0.2)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       {active ? <CheckIcon size={10} color="#2563eb" /> : <PlusIcon size={10} color="#64748b" />}
                     </span>
                     <span>{tag}</span>
@@ -479,7 +480,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
               >
                 {comment.trim().length >= 10 ? (
                   <>
-                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CheckIcon size={9} color="#16a34a" />
                     </span>
                     <span>Đạt yêu cầu ({comment.trim().length} ký tự)</span>
@@ -544,7 +545,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                       right: '2px',
                       background: 'rgba(239, 68, 68, 0.9)',
                       color: '#fff',
-                      border: 'none',
+                      border: '1px solid rgba(255, 255, 255, 0.4)',
                       borderRadius: '50%',
                       width: '18px',
                       height: '18px',
@@ -583,7 +584,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                   }}
                   title="Tải thêm ảnh từ thiết bị"
                 >
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#ffffff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(37, 99, 235, 0.2)', marginBottom: '2px' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#ffffff', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(37, 99, 235, 0.2)', marginBottom: '2px' }}>
                     <CameraIcon size={13} color="#2563eb" />
                   </span>
                   <span style={{ fontSize: '9.5px', color: '#1d4ed8' }}>+ Thêm ảnh</span>
@@ -631,7 +632,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 gap: '8px',
               }}
             >
-              <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <AlertCircleIcon size={13} color="#dc2626" />
               </span>
               <span>{errorMsg}</span>
@@ -656,7 +657,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 gap: '5px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CloseIcon size={10} color="#ef4444" />
               </span>
               <span>Hủy Bỏ</span>
@@ -676,7 +677,7 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 height: '32px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <StarIcon size={12} color="#fef08a" filled />
               </span>
               {isSubmitting ? 'Đang gửi...' : 'Gửi Đánh Giá (+200 Điểm Xu)'}
