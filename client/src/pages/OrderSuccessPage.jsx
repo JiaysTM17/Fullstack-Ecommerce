@@ -73,19 +73,32 @@ export default function OrderSuccessPage() {
         {/* Animated Celebration Icon */}
         <div
           style={{
-            width: '72px',
-            height: '72px',
+            width: '80px',
+            height: '80px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #10b981, #059669)',
-            color: '#ffffff',
+            background: 'rgba(16, 185, 129, 0.14)',
+            border: '2px solid rgba(16, 185, 129, 0.32)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 20px',
-            boxShadow: '0 8px 24px rgba(16, 185, 129, 0.35)',
+            boxShadow: '0 8px 24px rgba(16, 185, 129, 0.25)',
           }}
         >
-          <CheckIcon size={36} color="#ffffff" />
+          <div
+            style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #10b981, #059669)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <CheckIcon size={32} color="#ffffff" />
+          </div>
         </div>
 
         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px' }}>
