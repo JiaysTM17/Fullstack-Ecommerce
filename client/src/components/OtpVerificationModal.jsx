@@ -188,7 +188,7 @@ export default function OtpVerificationModal({
               transition: 'all 0.15s ease',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CloseIcon size={12} color="#ef4444" />
             </span>
           </button>
@@ -236,13 +236,13 @@ export default function OtpVerificationModal({
               marginBottom: '16px',
             }}
           >
-            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <MailIcon size={12} color="#1d4ed8" />
             </span>
             <span>{displayEmail}</span>
             {displayPhone && (
               <span style={{ color: '#93c5fd', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                • <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                • <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#dbeafe', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PhoneIcon size={11} color="#1d4ed8" />
                 </span>
                 <span>{displayPhone}</span>
@@ -272,7 +272,7 @@ export default function OtpVerificationModal({
               gap: '8px',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#dcfce7', border: '1px solid #86efac', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <CheckIcon size={11} color="#16a34a" />
             </span>
             <span>{resendNotice}</span>
@@ -296,7 +296,7 @@ export default function OtpVerificationModal({
               gap: '8px',
             }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <AlertCircleIcon size={11} color="#ef4444" />
             </span>
             <span>{error}</span>
@@ -407,7 +407,7 @@ export default function OtpVerificationModal({
             'Đang đối soát an ninh...'
           ) : (
             <>
-              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CheckIcon size={12} color="#ffffff" />
               </span>
               <span>Xác Nhận & Kích Hoạt Tài Khoản</span>
@@ -431,14 +431,14 @@ export default function OtpVerificationModal({
                 gap: '4px',
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#eff6ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#eff6ff', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <RefreshIcon size={11} color="#2563eb" />
               </span>
               <span>Gửi lại mã OTP mới</span>
             </span>
           ) : (
             <span style={{ color: '#94a3b8', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dbeafe', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ClockIcon size={11} color="#2563eb" />
               </span>
               <span>Yêu cầu gửi lại sau <strong style={{ color: '#2563eb' }}>{countdown}s</strong></span>
@@ -469,7 +469,7 @@ export default function OtpVerificationModal({
               }}
               title="Nhấn để xem mã nếu chưa kết nối hòm thư thực tế"
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <MailIcon size={11} color="#2563eb" />
               </span>
               <span>Xem thông điệp mã hộp thư (Môi trường Test)</span>

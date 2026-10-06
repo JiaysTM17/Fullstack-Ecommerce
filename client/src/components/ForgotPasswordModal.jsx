@@ -575,7 +575,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               <div className="shopee-email-autocomplete-wrap" style={{ position: 'relative' }}>
                 <div className="shopee-form-input-wrap">
                   <span className="shopee-input-lead-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <MailIcon size={13} color="#2563eb" />
                     </span>
                   </span>
@@ -631,7 +631,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                           transition: 'background 0.15s',
                         }}
                       >
-                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <MailIcon size={12} color="#2563eb" />
                         </span>
                         <span>
@@ -670,7 +670,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 'Đang gửi mã bảo mật...'
               ) : (
                 <>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <MailIcon size={12} color="#ffffff" />
                   </span>
                   <span>Gửi Mã Xác Thực OTP</span>
@@ -836,7 +836,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   gap: '6px',
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ArrowLeftIcon size={11} color="#2563eb" />
                 </span>
                 <span>Đổi email khác</span>
@@ -856,7 +856,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                     gap: '4px',
                   }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fef3c7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fef3c7', border: '1px solid #fde68a', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ClockIcon size={11} color="#d97706" />
                   </span>
                   <span>Gửi lại sau <strong style={{ color: '#2563eb' }}>{cooldown}s</strong></span>
@@ -878,7 +878,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                     gap: '4px',
                   }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#eff6ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#eff6ff', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <RefreshIcon size={11} color="#2563eb" />
                   </span>
                   <span>Gửi lại mã OTP mới</span>
@@ -913,7 +913,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 'Đang đối soát an ninh...'
               ) : (
                 <>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CheckIcon size={12} color="#ffffff" />
                   </span>
                   <span>Xác Nhận Mã & Tiếp Tục</span>
@@ -969,7 +969,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               </label>
               <div className="shopee-form-input-wrap">
                 <span className="shopee-input-lead-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <LockIcon size={12} color="#ea580c" />
                   </span>
                 </span>
@@ -992,11 +992,11 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   tabIndex={-1}
                 >
                   {showNewPassword ? (
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <EyeOffIcon size={12} color="#64748b" />
                     </span>
                   ) : (
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <EyeIcon size={12} color="#64748b" />
                     </span>
                   )}
@@ -1147,7 +1147,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
               </label>
               <div className="shopee-form-input-wrap">
                 <span className="shopee-input-lead-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <KeyIcon size={12} color="#6366f1" />
                   </span>
                 </span>
@@ -1169,11 +1169,11 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                   tabIndex={-1}
                 >
                   {showConfirmPassword ? (
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <EyeOffIcon size={12} color="#64748b" />
                     </span>
                   ) : (
-                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <EyeIcon size={12} color="#64748b" />
                     </span>
                   )}
@@ -1215,7 +1215,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onResetSuccess, d
                 'Đang cập nhật mật khẩu...'
               ) : (
                 <>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CheckIcon size={12} color="#ffffff" />
                   </span>
                   <span>Lưu Mật Khẩu Mới & Đăng Nhập</span>

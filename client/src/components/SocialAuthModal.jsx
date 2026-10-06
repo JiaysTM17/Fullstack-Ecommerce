@@ -180,7 +180,7 @@ export default function SocialAuthModal({
               transition: 'background 0.2s',
             }}
           >
-            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CloseIcon size={14} color="#ef4444" />
             </span>
           </button>
@@ -253,7 +253,7 @@ export default function SocialAuthModal({
                 gap: '8px',
               }}
             >
-              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <AlertCircleIcon size={12} color="#ef4444" />
               </span>
               <span>{error}</span>
@@ -298,7 +298,7 @@ export default function SocialAuthModal({
                 <span style={{ fontWeight: 700, fontSize: '14.5px', color: '#1f1f1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {fullName || 'Người dùng Google'}
                 </span>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(11, 87, 208, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Tài khoản Google chính chủ">
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(11, 87, 208, 0.12)', border: '1px solid rgba(11, 87, 208, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Tài khoản Google chính chủ">
                   <CheckIcon size={11} color="#0b57d0" />
                 </span>
               </div>
@@ -312,7 +312,7 @@ export default function SocialAuthModal({
               onClick={() => setIsEditingInfo(!isEditingInfo)}
               style={{
                 background: '#e8f0fe',
-                border: 'none',
+                border: '1px solid #bfdbfe',
                 color: '#0b57d0',
                 fontSize: '12px',
                 fontWeight: 700,
@@ -414,6 +414,7 @@ export default function SocialAuthModal({
                   height: '18px',
                   borderRadius: '50%',
                   background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -446,14 +447,14 @@ export default function SocialAuthModal({
             >
               {loading ? (
                 <>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <RefreshIcon size={12} color="#ffffff" className="spin-animation" />
                   </span>
                   <span>Đang xác thực...</span>
                 </>
               ) : (
                 <>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CheckIcon size={12} color="#ffffff" />
                   </span>
                   <span>{`Tiếp tục với tư cách ${fullName.split(' ')[0] || 'Google'}`}</span>
@@ -548,7 +549,7 @@ export default function SocialAuthModal({
               onClick={onClose}
               style={{
                 background: 'rgba(239, 68, 68, 0.25)',
-                border: 'none',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
                 borderRadius: '50%',
                 width: '30px',
                 height: '30px',
@@ -561,7 +562,7 @@ export default function SocialAuthModal({
               }}
               aria-label="Đóng cửa sổ Meta"
             >
-              <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CloseIcon size={12} color="#ffffff" />
               </span>
             </button>
@@ -706,13 +707,13 @@ export default function SocialAuthModal({
             >
               <div style={{ fontWeight: 700, color: '#050505', marginBottom: '8px' }}>Quyền hạn được chia sẻ:</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(8, 102, 255, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(8, 102, 255, 0.12)', border: '1px solid rgba(8, 102, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CheckIcon size={10} color="#0866FF" />
                 </span>
                 <span>Tên hồ sơ và ảnh đại diện trang cá nhân</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(8, 102, 255, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(8, 102, 255, 0.12)', border: '1px solid rgba(8, 102, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CheckIcon size={10} color="#0866FF" />
                 </span>
                 <span>Địa chỉ email ({email})</span>
@@ -745,14 +746,14 @@ export default function SocialAuthModal({
             >
               {loading ? (
                 <>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <RefreshIcon size={12} color="#ffffff" className="spin-animation" />
                   </span>
                   <span>Đang đăng nhập...</span>
                 </>
               ) : (
                 <>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CheckIcon size={12} color="#ffffff" />
                   </span>
                   <span>{`Tiếp tục dưới tên ${fullName.split(' ')[0] || 'Facebook'}`}</span>
@@ -768,7 +769,7 @@ export default function SocialAuthModal({
                 height: '38px',
                 background: '#e4e6eb',
                 color: '#050505',
-                border: 'none',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
                 borderRadius: '10px',
                 fontSize: '13.5px',
                 fontWeight: 700,
@@ -785,6 +786,7 @@ export default function SocialAuthModal({
                   height: '18px',
                   borderRadius: '50%',
                   background: 'rgba(0, 0, 0, 0.08)',
+                  border: '1px solid rgba(0, 0, 0, 0.15)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -838,7 +840,7 @@ export default function SocialAuthModal({
             top: '18px',
             right: '18px',
             background: 'rgba(239, 68, 68, 0.2)',
-            border: 'none',
+            border: '1px solid rgba(239, 68, 68, 0.35)',
             borderRadius: '50%',
             width: '32px',
             height: '32px',
@@ -850,7 +852,7 @@ export default function SocialAuthModal({
             padding: 0,
           }}
         >
-          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <CloseIcon size={14} color="#ef4444" />
           </span>
         </button>
@@ -1061,7 +1063,7 @@ export default function SocialAuthModal({
         >
           {loading ? (
             <>
-              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(0,0,0,0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(0,0,0,0.1)', border: '1px solid rgba(0,0,0,0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <RefreshIcon size={13} color="#000000" className="spin-animation" />
               </span>
               <span>Đang xác thực Face ID...</span>
@@ -1098,6 +1100,7 @@ export default function SocialAuthModal({
               height: '18px',
               borderRadius: '50%',
               background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1110,7 +1113,7 @@ export default function SocialAuthModal({
 
         {/* Apple Privacy Notice */}
         <div style={{ marginTop: '18px', fontSize: '11px', color: '#636366', textAlign: 'center', lineHeight: 1.4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <LockIcon size={11} color="#a1a1aa" />
           </span>
           <span>Tính năng Bảo mật của Apple. Mini Shopee chỉ nhận được mã ủy quyền từ Apple ID để cấp quyền truy cập.</span>
