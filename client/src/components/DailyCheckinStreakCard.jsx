@@ -100,7 +100,7 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '16px', fontWeight: 800, color: '#92400e', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '1px solid #fcd34d', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <SparklesIcon size={13} color="#d97706" />
                 </span>
                 <span>Mini Xu Thưởng Hàng Ngày</span>
@@ -119,7 +119,7 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                   gap: '5px',
                 }}
               >
-                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', border: '1px solid rgba(217, 119, 6, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <BoltIcon size={10} color="#d97706" />
                 </span>
                 <span>Chuỗi {streak}/7 ngày</span>
@@ -152,11 +152,11 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                 boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
               }}
             >
-              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fff7ed', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fff7ed', border: '1px solid #fed7aa', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <BoltIcon size={12} color="#ea580c" />
               </span>
               <span>Vòng Quay ({totalSpins})</span>
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(180, 83, 9, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(180, 83, 9, 0.1)', border: '1px solid rgba(180, 83, 9, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChevronRightIcon size={11} color="#b45309" />
               </span>
             </button>
@@ -186,14 +186,14 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
           >
             {hasCheckedInToday ? (
               <>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', border: '1px solid #bbf7d0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CheckIcon size={11} color="#15803d" />
                 </span>
                 <span>Đã Điểm Danh Hôm Nay</span>
               </>
             ) : (
               <>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <StarIcon size={11} color="#ffffff" fill="#ffffff" />
                 </span>
                 <span>Điểm Danh (+{todayReward.toLocaleString('vi-VN')} Xu)</span>
@@ -260,7 +260,7 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                     boxShadow: '0 2px 4px rgba(220, 38, 38, 0.3)',
                   }}
                 >
-                  <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <FlameIcon size={8} color="#ffffff" />
                   </span>
                   <span>JACKPOT</span>
@@ -287,6 +287,11 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
                     : isCurrentTarget
                     ? 'linear-gradient(135deg, #ffedd5, #fed7aa)'
                     : '#fef3c7',
+                  border: isDone
+                    ? '1px solid #059669'
+                    : isCurrentTarget
+                    ? '1px solid #fdba74'
+                    : '1px solid #fde68a',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

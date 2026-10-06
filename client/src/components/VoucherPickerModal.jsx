@@ -371,7 +371,7 @@ export default function VoucherPickerModal({
             aria-label="Đóng"
             style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CloseIcon size={12} color="#ef4444" />
             </span>
           </button>
@@ -397,7 +397,7 @@ export default function VoucherPickerModal({
             className="voucher-apply-btn select"
             style={{ padding: "0 18px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
-            <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(255, 255, 255, 0.2)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(255, 255, 255, 0.2)", border: "1px solid rgba(255, 255, 255, 0.35)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
               <CheckIcon size={11} color="#ffffff" />
             </span>
             <span>{t("apply", "Áp Dụng")}</span>
@@ -423,7 +423,7 @@ export default function VoucherPickerModal({
           <div className="voucher-smart-recommendation-hero">
             <div className="voucher-smart-hero-left">
               <span className="voucher-smart-tag" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(245, 158, 11, 0.2)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(245, 158, 11, 0.2)", border: "1px solid rgba(245, 158, 11, 0.35)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   <StarIcon size={10} color="#f59e0b" filled />
                 </span>
                 <span>GỢI Ý TỐI ƯU NHẤT CHO BẠN</span>
@@ -434,7 +434,7 @@ export default function VoucherPickerModal({
               <div className="voucher-smart-hero-desc">
                 {bestShippingVoucher && (
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(2, 132, 199, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(2, 132, 199, 0.12)", border: "1px solid rgba(2, 132, 199, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                       <TruckIcon size={11} color="#0284c7" />
                     </span>
                     <span>{bestShippingVoucher.code} (-{formatCurrency(getVoucherSavings(bestShippingVoucher))})</span>
@@ -443,7 +443,7 @@ export default function VoucherPickerModal({
                 {bestShippingVoucher && bestDiscountVoucher && <span> + </span>}
                 {bestDiscountVoucher && (
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(234, 88, 12, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(234, 88, 12, 0.12)", border: "1px solid rgba(234, 88, 12, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                       <TagIcon size={11} color="#ea580c" />
                     </span>
                     <span>{bestDiscountVoucher.code} (-{formatCurrency(getVoucherSavings(bestDiscountVoucher))})</span>
@@ -457,7 +457,7 @@ export default function VoucherPickerModal({
               onClick={handleAutoApplyBestCombo}
               style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
-              <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "rgba(255, 255, 255, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "rgba(255, 255, 255, 0.25)", border: "1px solid rgba(255, 255, 255, 0.35)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                 <BoltIcon size={12} color="#ffffff" />
               </span>
               <span>Áp Dụng Ngay</span>
@@ -473,7 +473,7 @@ export default function VoucherPickerModal({
             onClick={() => setActiveTab("all")}
             style={{ display: "inline-flex", alignItems: "center" }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '6px' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '6px' }}>
               <TicketIcon size={12} color="#ea580c" />
             </span>
             <span>{t("all_vouchers", "Tất Cả")} ({vouchers.length})</span>
@@ -484,7 +484,7 @@ export default function VoucherPickerModal({
             onClick={() => setActiveTab("shipping")}
             style={{ display: "inline-flex", alignItems: "center" }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '6px' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '6px' }}>
               <TruckIcon size={12} color="#0284c7" />
             </span>
             <span>{t("shipping_voucher", "Miễn Phí Vận Chuyển")} ({shippingVouchers.length})</span>
@@ -509,7 +509,7 @@ export default function VoucherPickerModal({
             onClick={() => setActiveTab("discount")}
             style={{ display: "inline-flex", alignItems: "center" }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '6px' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '6px' }}>
               <TagIcon size={12} color="#ea580c" />
             </span>
             <span>{t("order_discount", "Giảm Giá Đơn Hàng")} ({discountVouchers.length})</span>
@@ -555,7 +555,7 @@ export default function VoucherPickerModal({
                     gap: "8px",
                   }}
                 >
-                  <span style={{ width: "26px", height: "26px", borderRadius: "7px", background: "#e0f2fe", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ width: "26px", height: "26px", borderRadius: "7px", background: "#e0f2fe", border: "1px solid #bae6fd", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <TruckIcon size={14} color="#0284c7" />
                   </span>
                   <span
@@ -571,6 +571,7 @@ export default function VoucherPickerModal({
                     style={{
                       fontSize: "11px",
                       background: "#e0f2fe",
+                      border: "1px solid #bae6fd",
                       color: "#0284c7",
                       padding: "2px 8px",
                       borderRadius: "12px",
@@ -604,7 +605,8 @@ export default function VoucherPickerModal({
                         width: "16px",
                         height: "16px",
                         borderRadius: "50%",
-                        background: "rgba(239, 68, 68, 0.15)",
+                        background: "rgba(239, 68, 68, 0.12)",
+                        border: "1px solid rgba(239, 68, 68, 0.25)",
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -666,7 +668,7 @@ export default function VoucherPickerModal({
                               <h4 className="voucher-title">{v.name}</h4>
                               {isBest && (
                                 <span className="voucher-best-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                                  <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(245, 158, 11, 0.2)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                  <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(245, 158, 11, 0.2)", border: "1px solid rgba(245, 158, 11, 0.35)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                                     <StarIcon size={9} color="#f59e0b" filled />
                                   </span>
                                   <span>TỐT NHẤT CHO BẠN</span>
@@ -674,14 +676,14 @@ export default function VoucherPickerModal({
                               )}
                             </div>
                             <span className="voucher-code-badge" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                              <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(2, 132, 199, 0.15)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                              <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(2, 132, 199, 0.15)", border: "1px solid rgba(2, 132, 199, 0.28)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                                 <TruckIcon size={9} color="#0284c7" />
                               </span>
                               <span>{v.code}</span>
                             </span>
                             {isEligible && saving > 0 && (
                               <div className="voucher-saving-highlight" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                                <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(2, 132, 199, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(2, 132, 199, 0.12)", border: "1px solid rgba(2, 132, 199, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                                   <BoltIcon size={10} color="#0284c7" />
                                 </span>
                                 <span>Tiết kiệm: -{formatCurrency(saving)}</span>
@@ -708,7 +710,7 @@ export default function VoucherPickerModal({
                           <div className="voucher-condition-tag">
                             {isEligible ? (
                               <span className="eligible" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                                <span style={{ width: "16px", height: "16px", borderRadius: "50%", background: "rgba(5, 150, 105, 0.15)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                <span style={{ width: "16px", height: "16px", borderRadius: "50%", background: "rgba(5, 150, 105, 0.15)", border: "1px solid rgba(5, 150, 105, 0.28)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                                   <CheckIcon size={9} color="#059669" />
                                 </span>
                                 <span>Đủ điều kiện</span>
@@ -749,14 +751,14 @@ export default function VoucherPickerModal({
                           >
                             {isSelected ? (
                               <>
-                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <CheckIcon size={11} color="#ffffff" />
                                 </span>
                                 <span>Đã chọn</span>
                               </>
                             ) : isEligible ? (
                               <>
-                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(2, 132, 199, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(2, 132, 199, 0.15)', border: '1px solid rgba(2, 132, 199, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <TicketIcon size={10} color="#0284c7" />
                                 </span>
                                 <span>Chọn mã</span>
@@ -794,7 +796,7 @@ export default function VoucherPickerModal({
                     gap: "8px",
                   }}
                 >
-                  <span style={{ width: "26px", height: "26px", borderRadius: "7px", background: "#ffedd5", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ width: "26px", height: "26px", borderRadius: "7px", background: "#ffedd5", border: "1px solid #fed7aa", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <TagIcon size={14} color="#ea580c" />
                   </span>
                   <span
@@ -810,6 +812,7 @@ export default function VoucherPickerModal({
                     style={{
                       fontSize: "11px",
                       background: "rgba(234, 88, 12, 0.1)",
+                      border: "1px solid rgba(234, 88, 12, 0.25)",
                       color: "var(--primary-color, #ea580c)",
                       padding: "2px 8px",
                       borderRadius: "12px",
@@ -843,7 +846,8 @@ export default function VoucherPickerModal({
                         width: "16px",
                         height: "16px",
                         borderRadius: "50%",
-                        background: "rgba(239, 68, 68, 0.15)",
+                        background: "rgba(239, 68, 68, 0.12)",
+                        border: "1px solid rgba(239, 68, 68, 0.25)",
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -914,7 +918,7 @@ export default function VoucherPickerModal({
                               <h4 className="voucher-title">{v.name}</h4>
                               {isBest && (
                                 <span className="voucher-best-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                                  <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(245, 158, 11, 0.2)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                  <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(245, 158, 11, 0.2)", border: "1px solid rgba(245, 158, 11, 0.35)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                                     <StarIcon size={9} color="#f59e0b" filled />
                                   </span>
                                   <span>TỐT NHẤT CHO BẠN</span>
@@ -922,14 +926,14 @@ export default function VoucherPickerModal({
                               )}
                             </div>
                             <span className="voucher-code-badge" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                              <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(234, 88, 12, 0.15)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                              <span style={{ width: "15px", height: "15px", borderRadius: "3px", background: "rgba(234, 88, 12, 0.15)", border: "1px solid rgba(234, 88, 12, 0.28)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                                 <TagIcon size={9} color="#ea580c" />
                               </span>
                               <span>{v.code}</span>
                             </span>
                             {isEligible && saving > 0 && (
                               <div className="voucher-saving-highlight" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                                <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(234, 88, 12, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                <span style={{ width: "16px", height: "16px", borderRadius: "3px", background: "rgba(234, 88, 12, 0.12)", border: "1px solid rgba(234, 88, 12, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                                   <BoltIcon size={10} color="#ea580c" />
                                 </span>
                                 <span>Tiết kiệm: -{formatCurrency(saving)}</span>
@@ -956,7 +960,7 @@ export default function VoucherPickerModal({
                           <div className="voucher-condition-tag">
                             {isEligible ? (
                               <span className="eligible" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                                <span style={{ width: "16px", height: "16px", borderRadius: "50%", background: "rgba(5, 150, 105, 0.15)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                <span style={{ width: "16px", height: "16px", borderRadius: "50%", background: "rgba(5, 150, 105, 0.15)", border: "1px solid rgba(5, 150, 105, 0.28)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                                   <CheckIcon size={9} color="#059669" />
                                 </span>
                                 <span>Đủ điều kiện</span>
@@ -992,14 +996,14 @@ export default function VoucherPickerModal({
                           >
                             {isSelected ? (
                               <>
-                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <CheckIcon size={11} color="#ffffff" />
                                 </span>
                                 <span>Đã chọn</span>
                               </>
                             ) : isEligible ? (
                               <>
-                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <TicketIcon size={10} color="#ea580c" />
                                 </span>
                                 <span>Chọn mã</span>
@@ -1043,7 +1047,7 @@ export default function VoucherPickerModal({
               }}
             >
               <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(2, 132, 199, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(2, 132, 199, 0.12)", border: "1px solid rgba(2, 132, 199, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   <TruckIcon size={11} color="#0284c7" />
                 </span>
                 <span>
@@ -1056,7 +1060,7 @@ export default function VoucherPickerModal({
                 </span>
               </span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(234, 88, 12, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(234, 88, 12, 0.12)", border: "1px solid rgba(234, 88, 12, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   <TagIcon size={11} color="#ea580c" />
                 </span>
                 <span>
@@ -1090,7 +1094,7 @@ export default function VoucherPickerModal({
                 style={{ fontSize: "13px", padding: "9px 14px", display: "inline-flex", alignItems: "center", gap: "6px" }}
                 onClick={handleClearAll}
               >
-                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(239, 68, 68, 0.1)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ width: "18px", height: "18px", borderRadius: "4px", background: "rgba(239, 68, 68, 0.12)", border: "1px solid rgba(239, 68, 68, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   <CloseIcon size={10} color="#ef4444" />
                 </span>
                 <span>Bỏ chọn tất cả</span>
@@ -1109,7 +1113,7 @@ export default function VoucherPickerModal({
               }}
               onClick={handleConfirmApply}
             >
-              <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "rgba(255, 255, 255, 0.22)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "rgba(255, 255, 255, 0.22)", border: "1px solid rgba(255, 255, 255, 0.35)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                 <CheckIcon size={12} color="#ffffff" />
               </span>
               <span>
