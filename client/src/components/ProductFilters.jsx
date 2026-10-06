@@ -80,22 +80,21 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
           <span>{t('filter_categories', 'Danh Mục')}</span>
         </h4>
         <div className="shopee-filter-list">
-          {CATEGORIES.map((cat) => (
-            <div
-              key={cat}
-              className={`shopee-filter-item ${
-                (filters.category === cat || (!filters.category && cat === "Tất cả"))
-                  ? "active"
-                  : ""
-              }`}
-              onClick={() => onFilterChange("category", cat === "Tất cả" ? "" : cat)}
-            >
-              <span style={{ fontSize: '12px', color: (filters.category === cat || (!filters.category && cat === "Tất cả")) ? '#ea580c' : '#94a3b8' }}>
-                {(filters.category === cat || (!filters.category && cat === "Tất cả")) ? '▸' : '•'}
-              </span>
-              <span>{cat === "Tất cả" ? t('all_categories', 'Tất cả danh mục') : cat}</span>
-            </div>
-          ))}
+          {CATEGORIES.map((cat) => {
+            const isActive = filters.category === cat || (!filters.category && cat === "Tất cả");
+            return (
+              <div
+                key={cat}
+                className={`shopee-filter-item ${isActive ? "active" : ""}`}
+                onClick={() => onFilterChange("category", cat === "Tất cả" ? "" : cat)}
+              >
+                <span style={{ fontSize: '12px', color: isActive ? '#ea580c' : '#cbd5e1' }}>
+                  {isActive ? '▸' : '•'}
+                </span>
+                <span>{cat === "Tất cả" ? t('all_categories', 'Tất cả danh mục') : cat}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -110,23 +109,26 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             className={`shopee-filter-item ${!filters.brand ? "active" : ""}`}
             onClick={() => onFilterChange("brand", "")}
           >
-            <span style={{ fontSize: '12px', color: !filters.brand ? '#ea580c' : '#94a3b8' }}>
+            <span style={{ fontSize: '12px', color: !filters.brand ? '#2563eb' : '#cbd5e1' }}>
               {!filters.brand ? '▸' : '•'}
             </span>
             <span>{t('all_brands', 'Tất cả thương hiệu')}</span>
           </div>
-          {["Apple", "Samsung", "Sony", "Xiaomi", "Asus", "Dell", "Nike", "Adidas", "Lock&Lock", "Dyson", "Shopee Basic", "Elegance"].map((b) => (
-            <div
-              key={b}
-              className={`shopee-filter-item ${filters.brand === b ? "active" : ""}`}
-              onClick={() => onFilterChange("brand", filters.brand === b ? "" : b)}
-            >
-              <span style={{ fontSize: '12px', color: filters.brand === b ? '#ea580c' : '#94a3b8' }}>
-                {filters.brand === b ? '▸' : '•'}
-              </span>
-              <span>{b}</span>
-            </div>
-          ))}
+          {["Apple", "Samsung", "Sony", "Xiaomi", "Asus", "Dell", "Nike", "Adidas", "Lock&Lock", "Dyson", "Shopee Basic", "Elegance"].map((b) => {
+            const isActive = filters.brand === b;
+            return (
+              <div
+                key={b}
+                className={`shopee-filter-item ${isActive ? "active" : ""}`}
+                onClick={() => onFilterChange("brand", isActive ? "" : b)}
+              >
+                <span style={{ fontSize: '12px', color: isActive ? '#2563eb' : '#cbd5e1' }}>
+                  {isActive ? '▸' : '•'}
+                </span>
+                <span>{b}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -141,24 +143,27 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             className={`shopee-filter-item ${!filters.shopId ? "active" : ""}`}
             onClick={() => onFilterChange("shopId", "")}
           >
-            <span style={{ fontSize: '12px', color: !filters.shopId ? '#ea580c' : '#94a3b8' }}>
+            <span style={{ fontSize: '12px', color: !filters.shopId ? '#dc2626' : '#cbd5e1' }}>
               {!filters.shopId ? '▸' : '•'}
             </span>
             <span>{t('all_shops', 'Tất cả gian hàng')} ({allShops.length})</span>
           </div>
-          {allShops.map((s) => (
-            <div
-              key={s.id}
-              className={`shopee-filter-item ${filters.shopId === s.id ? "active" : ""}`}
-              onClick={() => onFilterChange("shopId", filters.shopId === s.id ? "" : s.id)}
-              title={s.description}
-            >
-              <span style={{ fontSize: '12px', color: filters.shopId === s.id ? '#ea580c' : '#94a3b8' }}>
-                {filters.shopId === s.id ? '▸' : '•'}
-              </span>
-              <span>{s.name}</span>
-            </div>
-          ))}
+          {allShops.map((s) => {
+            const isActive = filters.shopId === s.id;
+            return (
+              <div
+                key={s.id}
+                className={`shopee-filter-item ${isActive ? "active" : ""}`}
+                onClick={() => onFilterChange("shopId", isActive ? "" : s.id)}
+                title={s.description}
+              >
+                <span style={{ fontSize: '12px', color: isActive ? '#dc2626' : '#cbd5e1' }}>
+                  {isActive ? '▸' : '•'}
+                </span>
+                <span>{s.name}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -270,8 +275,9 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
               onFilterChange("badge", e.target.checked ? "Amazon's Choice" : "")
             }
           />
-          <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>
-            {t('featured_picks', 'Hàng Tuyển Chọn')}
+          <span style={{ fontWeight: 500, color: "var(--text-primary)", display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <SparklesIcon size={14} color="#8b5cf6" />
+            <span>{t('featured_picks', 'Hàng Tuyển Chọn')}</span>
           </span>
         </label>
         <label className="shopee-filter-item">
@@ -280,8 +286,9 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             checked={Boolean(filters.inStock)}
             onChange={(e) => onFilterChange("inStock", e.target.checked ? "1" : "")}
           />
-          <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>
-            {t('in_stock_only', 'Chỉ xem hàng còn trong kho')}
+          <span style={{ fontWeight: 500, color: "var(--text-primary)", display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <CheckIcon size={14} color="#10b981" />
+            <span>{t('in_stock_only', 'Chỉ xem hàng còn trong kho')}</span>
           </span>
         </label>
       </div>

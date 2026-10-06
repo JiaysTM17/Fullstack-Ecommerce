@@ -389,17 +389,17 @@ const Header = ({
         <div className="shopee-topbar">
           <div className="shopee-topbar-left">
             <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <PackageIcon size={13} color="#ffffff" />
+              <PackageIcon size={14} color="#38bdf8" />
               <span>{t('nav_download_app', 'Tải Ứng Dụng')}</span>
             </span>
             <span className="shopee-topbar-divider" />
             <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <PhoneIcon size={13} color="#ffffff" />
+              <PhoneIcon size={14} color="#4ade80" />
               <span>Hotline: 1900 6868</span>
             </span>
             <span className="shopee-topbar-divider" />
             <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <ChatIcon size={13} color="#ffffff" />
+              <ChatIcon size={14} color="#facc15" />
               <span>{t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}</span>
             </span>
           </div>
@@ -413,7 +413,7 @@ const Header = ({
               title={language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             >
-              <GlobeIcon size={12} color="#ffffff" />
+              <GlobeIcon size={13} color="#60a5fa" />
               <span>{language === 'vi' ? 'VI' : 'EN'}</span>
             </button>
 
@@ -427,12 +427,12 @@ const Header = ({
             >
               {theme === 'dark' ? (
                 <>
-                  <SparklesIcon size={12} color="#f59e0b" />
+                  <SparklesIcon size={13} color="#f59e0b" />
                   <span>Tối</span>
                 </>
               ) : (
                 <>
-                  <BoltIcon size={12} color="#ffffff" />
+                  <BoltIcon size={13} color="#fbbf24" />
                   <span>Sáng</span>
                 </>
               )}
@@ -1219,7 +1219,7 @@ const Header = ({
             title="Mở danh mục ngành hàng"
             style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
           >
-            <LayersIcon size={14} color="#ffffff" />
+            <LayersIcon size={15} color="#38bdf8" />
             <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', opacity: 0.8 }}>
               <ChevronDownIcon size={10} />
@@ -1232,7 +1232,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/', null)}
             title="Quay lại trang chủ và xem toàn bộ sản phẩm"
           >
-            <HomeIcon size={14} color="#ffffff" />
+            <HomeIcon size={15} color="#fb923c" />
             <span>{t('nav_all_products', 'Trang Chủ')}</span>
           </span>
 
@@ -1242,7 +1242,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Hot+Deal', 'flash-deals-section')}
             title="Săn deal chớp nhoáng giờ vàng"
           >
-            <FlameIcon size={14} color="#fde047" />
+            <FlameIcon size={15} color="#ef4444" />
             <span>{t('nav_flash_deals', 'Flash Deals')}</span>
           </span>
 
@@ -1252,7 +1252,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Best+Seller', 'catalog-section')}
             title="Khám phá các sản phẩm bán chạy nhất sàn"
           >
-            <StarIcon size={14} color="#fde047" fill="#fde047" />
+            <StarIcon size={15} color="#f59e0b" fill="#f59e0b" />
             <span>{t('nav_best_sellers', 'Bán Chạy Nhất')}</span>
           </span>
 
@@ -1262,7 +1262,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Amazon%27s+Choice', 'catalog-section')}
             title="Top sản phẩm đánh giá cao tuyển chọn"
           >
-            <SparklesIcon size={14} color="#ffffff" />
+            <SparklesIcon size={15} color="#a855f7" />
             <span>{t('nav_featured_picks', 'Hàng Tuyển Chọn')}</span>
           </span>
 
@@ -1272,7 +1272,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?fastDelivery=1', 'catalog-section')}
             title="Sản phẩm hỗ trợ giao hàng hỏa tốc trong 2H"
           >
-            <BoltIcon size={14} color="#ffffff" />
+            <BoltIcon size={15} color="#38bdf8" />
             <span>{t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}</span>
           </span>
 
@@ -1282,7 +1282,7 @@ const Header = ({
             onClick={() => setShowRewardsModal(true)}
             title="Vào Rewards Hub nhận xu & quay thưởng"
           >
-            <TicketIcon size={14} color="#fef08a" />
+            <TicketIcon size={15} color="#f59e0b" />
             <span>{t('nav_rewards_hub', 'Săn Xu & Voucher')}</span>
           </span>
         </nav>
