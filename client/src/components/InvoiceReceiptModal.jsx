@@ -156,16 +156,16 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
               width: '30px',
               height: '30px',
               borderRadius: '8px',
-              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-              border: '1px solid rgba(37, 99, 235, 0.35)',
+              background: 'rgba(2, 132, 199, 0.14)',
+              border: '1px solid rgba(2, 132, 199, 0.28)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
+              boxShadow: '0 2px 6px rgba(2, 132, 199, 0.15)',
               flexShrink: 0,
             }}
           >
-            <ReceiptIcon size={16} color="#ffffff" />
+            <ReceiptIcon size={16} color="#0284c7" />
           </div>
           <span style={{ fontWeight: 800, fontSize: '13.5px', color: '#0f172a', letterSpacing: '-0.2px' }}>
             Hóa Đơn Điện Tử & Biên Lai VAT

@@ -88,15 +88,15 @@ export default function DailyCheckinStreakCard({ onOpenRewardsModal }) {
               width: '44px',
               height: '44px',
               borderRadius: '12px',
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              border: '1px solid rgba(245, 158, 11, 0.4)',
+              background: 'rgba(245, 158, 11, 0.15)',
+              border: '1px solid rgba(245, 158, 11, 0.32)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)',
+              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.2)',
             }}
           >
-            <CoinIcon size={24} color="#ffffff" />
+            <CoinIcon size={24} color="#d97706" />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

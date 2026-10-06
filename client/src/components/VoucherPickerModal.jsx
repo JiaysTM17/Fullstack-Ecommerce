@@ -338,15 +338,16 @@ export default function VoucherPickerModal({
                 width: '38px',
                 height: '38px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                background: 'rgba(234, 88, 12, 0.14)',
+                border: '1px solid rgba(234, 88, 12, 0.28)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 3px 8px rgba(234, 88, 12, 0.3)',
+                boxShadow: '0 2px 6px rgba(234, 88, 12, 0.15)',
                 flexShrink: 0,
               }}
             >
-              <TicketIcon size={20} color="#ffffff" />
+              <TicketIcon size={20} color="#ea580c" />
             </div>
             <div>
               <h3 className="voucher-modal-title" style={{ margin: 0 }}>
