@@ -40,15 +40,16 @@ export default function PackingSlipModal({ order, shop, onClose }) {
                 width: '42px',
                 height: '42px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                background: 'rgba(234, 88, 12, 0.14)',
+                border: '1px solid rgba(234, 88, 12, 0.28)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(234, 88, 12, 0.3)',
+                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.15)',
                 flexShrink: 0,
               }}
             >
-              <PackageIcon size={22} color="#ffffff" />
+              <PackageIcon size={22} color="#ea580c" />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

@@ -20,15 +20,16 @@ export default function ShippingLabelModal({ order, shopName = "Thời Trang Gen
                 width: '42px',
                 height: '42px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                background: 'rgba(234, 88, 12, 0.14)',
+                border: '1px solid rgba(234, 88, 12, 0.28)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(234, 88, 12, 0.3)',
+                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.15)',
                 flexShrink: 0,
               }}
             >
-              <TruckIcon size={22} color="#ffffff" />
+              <TruckIcon size={22} color="#ea580c" />
             </div>
             <div>
               <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.2px' }}>
