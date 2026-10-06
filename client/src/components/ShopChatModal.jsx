@@ -293,22 +293,22 @@ export default function ShopChatModal({ shop, currentProduct, onClose, inline = 
       >
         {QUICK_QUESTIONS.map((q, idx) => {
           let qIcon = <PackageIcon size={11} color="#ea580c" />;
-          let iconBg = 'rgba(234, 88, 12, 0.1)';
-          let iconBorder = 'rgba(234, 88, 12, 0.25)';
+          let iconBg = 'rgba(234, 88, 12, 0.12)';
+          let iconBorder = 'rgba(234, 88, 12, 0.28)';
           if (idx === 1) {
             qIcon = <TruckIcon size={11} color="#16a34a" />;
-            iconBg = 'rgba(22, 163, 74, 0.1)';
-            iconBorder = 'rgba(22, 163, 74, 0.25)';
+            iconBg = 'rgba(22, 163, 74, 0.12)';
+            iconBorder = 'rgba(22, 163, 74, 0.28)';
           }
           if (idx === 2) {
-            qIcon = <TicketIcon size={11} color="#f59e0b" />;
-            iconBg = 'rgba(245, 158, 11, 0.1)';
-            iconBorder = 'rgba(245, 158, 11, 0.25)';
+            qIcon = <TicketIcon size={11} color="#d97706" />;
+            iconBg = 'rgba(245, 158, 11, 0.14)';
+            iconBorder = 'rgba(245, 158, 11, 0.3)';
           }
           if (idx === 3) {
             qIcon = <ShieldCheckIcon size={11} color="#059669" />;
-            iconBg = 'rgba(5, 150, 105, 0.1)';
-            iconBorder = 'rgba(5, 150, 105, 0.25)';
+            iconBg = 'rgba(5, 150, 105, 0.12)';
+            iconBorder = 'rgba(5, 150, 105, 0.28)';
           }
           return (
             <button
