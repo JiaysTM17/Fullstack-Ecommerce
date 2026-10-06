@@ -263,7 +263,7 @@ export default function CartPage() {
               }}
             >
               <div style={{ marginBottom: "12px", display: "flex", justifyContent: "center" }}>
-                <span style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CartIcon size={32} color="#ea580c" />
                 </span>
               </div>
@@ -279,7 +279,7 @@ export default function CartPage() {
                 style={{ padding: "6px 16px", fontSize: "13px", textDecoration: "none", display: "inline-block" }}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <HomeIcon size={12} color="#2563eb" />
                   </span>
                   <span>{t('start_shopping', 'Tiếp tục mua sắm')}</span>
@@ -316,7 +316,7 @@ export default function CartPage() {
                       padding: 0,
                     }}
                   >
-                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <TrashIcon size={12} color="#ef4444" />
                     </span>
                     <span>Xóa đã chọn ({selectedItemIds.length})</span>
@@ -381,7 +381,7 @@ export default function CartPage() {
                       gap: "4px",
                     }}
                   >
-                    <span style={{ width: '13px', height: '13px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '13px', height: '13px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <ShieldCheckIcon size={8} color="#ffffff" />
                     </span>
                     <span>Mall</span>
@@ -436,7 +436,7 @@ export default function CartPage() {
                           style={{ background: "none", border: "none", color: "var(--secondary-color, #0284c7)", cursor: "pointer", fontWeight: 600, padding: 0, display: "inline-flex", alignItems: "center", gap: "6px" }}
                           onClick={() => saveForLater(item.productId)}
                         >
-                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <PackageIcon size={11} color="#0284c7" />
                           </span>
                           <span>Để dành mua sau</span>
@@ -447,7 +447,7 @@ export default function CartPage() {
                           style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", cursor: "pointer", fontWeight: 600, padding: 0, display: "inline-flex", alignItems: "center", gap: "6px" }}
                           onClick={() => handleMoveToWishlist(item)}
                         >
-                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(236, 72, 153, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(236, 72, 153, 0.12)', border: '1px solid rgba(236, 72, 153, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <HeartIcon size={11} color="#ec4899" />
                           </span>
                           <span>Chuyển vào Yêu thích</span>
@@ -458,7 +458,7 @@ export default function CartPage() {
                           style={{ background: "none", border: "none", color: "var(--color-error, #ef4444)", cursor: "pointer", padding: 0, display: "inline-flex", alignItems: "center", gap: "6px" }}
                           onClick={() => removeFromCart(item.productId)}
                         >
-                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <TrashIcon size={11} color="#ef4444" />
                           </span>
                           <span>Xóa khỏi giỏ</span>
@@ -484,7 +484,7 @@ export default function CartPage() {
                 }}
               >
                 <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary, #475569)", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <PencilIcon size={12} color="#2563eb" />
                   </span>
                   <span>Lời nhắn cho Người bán:</span>
@@ -545,7 +545,7 @@ export default function CartPage() {
                         style={{ fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "8px", borderColor: "rgba(234, 88, 12, 0.3)", color: "var(--primary-color, #ea580c)" }}
                         onClick={() => moveToCartFromSaved(saved)}
                       >
-                        <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <CartIcon size={12} color="#ea580c" />
                         </span>
                         <span>{t('move_to_cart', 'Chuyển Vào Giỏ Hàng')}</span>
@@ -556,7 +556,7 @@ export default function CartPage() {
                         onClick={() => removeFromSaved(saved.productId)}
                         aria-label="Xóa khỏi danh sách lưu lại mua sau"
                       >
-                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <TrashIcon size={10} color="#ef4444" />
                         </span>
                         <span>Xóa</span>
@@ -691,12 +691,12 @@ export default function CartPage() {
                   }}
                 >
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <TicketIcon size={13} color="#ea580c" />
                     </span>
                     <span>{appliedDiscountVoucher || appliedShippingVoucher ? "+ Chọn thêm mã còn lại" : "Nhấn để chọn mã giảm giá & Freeship"}</span>
                   </span>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ChevronRightIcon size={12} color="var(--primary-color, #ea580c)" />
                   </span>
                 </button>
@@ -724,7 +724,7 @@ export default function CartPage() {
                   fontWeight: 600,
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TagIcon size={10} color="#ea580c" />
                 </span>
                 <span>{t('apply', 'Áp Dụng')}</span>
@@ -747,7 +747,7 @@ export default function CartPage() {
                 }}
               >
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <SparklesIcon size={11} color="#047857" />
                   </span>
                   <span><strong>{voucherLivePreview.voucherCode}</strong>: Giảm xem trước</span>
@@ -812,7 +812,7 @@ export default function CartPage() {
               style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", padding: "14px", fontSize: "16px", fontWeight: 700 }}
             >
               <span>{t('proceed_to_checkout', 'Tiến Hành Thanh Toán')} ({selectedItems.length})</span>
-              <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChevronRightIcon size={14} color="#ffffff" />
               </span>
             </Link>
@@ -823,7 +823,7 @@ export default function CartPage() {
               disabled
               style={{ width: "100%", padding: "14px", fontSize: "14px", opacity: 0.85, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
             >
-              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <AlertCircleIcon size={12} color="#ea580c" />
               </span>
               <span>{t('select_items_warning', 'Vui lòng chọn sản phẩm để thanh toán')}</span>
@@ -832,7 +832,7 @@ export default function CartPage() {
 
           <div style={{ textAlign: "center", marginTop: "14px" }}>
             <Link to="/" style={{ fontSize: "13px", color: "var(--secondary-color, #007185)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ArrowLeftIcon size={12} color="#2563eb" />
               </span>
               <span>{t('continue_shopping', 'Tiếp tục chọn thêm sản phẩm')}</span>
