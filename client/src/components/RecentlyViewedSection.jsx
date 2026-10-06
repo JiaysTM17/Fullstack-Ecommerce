@@ -163,7 +163,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
             e.currentTarget.style.background = "none";
           }}
         >
-          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fee2e2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fee2e2', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <TrashIcon size={11} color="#ef4444" />
           </span>
           <span>{t("clear_history", "Xóa lịch sử")}</span>
@@ -223,7 +223,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               e.currentTarget.style.borderColor = "#cbd5e1";
             }}
           >
-            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.1)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <ChevronLeftIcon size={13} color="#0284c7" />
             </span>
           </button>
@@ -268,7 +268,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               e.currentTarget.style.borderColor = "#cbd5e1";
             }}
           >
-            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.1)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <ChevronRightIcon size={13} color="#0284c7" />
             </span>
           </button>
@@ -420,7 +420,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
                           e.currentTarget.style.color = "var(--primary-color, #ea580c)";
                         }}
                       >
-                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <CartIcon size={11} color="currentColor" />
                         </span>
                         <span>Thêm nhanh</span>

@@ -76,7 +76,7 @@ export default function HeroBanner({ onSelectCategory }) {
               <div className="shopee-hero-overlay" />
               <div className="shopee-hero-content">
                 <span className="shopee-hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', flexShrink: 0 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', flexShrink: 0 }}>
                     {idx === 0 ? <SparklesIcon size={12} color="#f59e0b" /> : idx === 1 ? <FlameIcon size={12} color="#ef4444" /> : <ShieldCheckIcon size={12} color="#10b981" />}
                   </span>
                   <span>{slide.badge}</span>
@@ -90,7 +90,7 @@ export default function HeroBanner({ onSelectCategory }) {
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 >
                   <span>{slide.buttonText}</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', flexShrink: 0 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', flexShrink: 0 }}>
                     <ChevronRightIcon size={14} color="#ffffff" />
                   </span>
                 </button>
@@ -106,7 +106,7 @@ export default function HeroBanner({ onSelectCategory }) {
           onClick={prevSlide}
           aria-label="Slide trước"
         >
-          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.28)', border: '1px solid rgba(255, 255, 255, 0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <ChevronLeftIcon size={18} color="#ffffff" />
           </span>
         </button>
@@ -116,7 +116,7 @@ export default function HeroBanner({ onSelectCategory }) {
           onClick={nextSlide}
           aria-label="Slide kế tiếp"
         >
-          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.28)', border: '1px solid rgba(255, 255, 255, 0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <ChevronRightIcon size={18} color="#ffffff" />
           </span>
         </button>

@@ -94,11 +94,11 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 {cat === "Tất cả" ? (
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <PackageIcon size={12} color="#ea580c" />
                   </span>
                 ) : (
-                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: filters.category === cat ? 'rgba(234, 88, 12, 0.15)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: filters.category === cat ? '#ea580c' : '#64748b' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: filters.category === cat ? 'rgba(234, 88, 12, 0.15)' : 'rgba(100, 116, 139, 0.08)', border: filters.category === cat ? '1px solid rgba(234, 88, 12, 0.25)' : '1px solid transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: filters.category === cat ? '#ea580c' : '#64748b' }}>
                     •
                   </span>
                 )}
@@ -123,7 +123,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             onClick={() => onFilterChange("brand", "")}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <TagIcon size={12} color="#ea580c" />
               </span>
               <span>{t('all_brands', 'Tất cả thương hiệu')}</span>
@@ -136,7 +136,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
               onClick={() => onFilterChange("brand", filters.brand === b ? "" : b)}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: filters.brand === b ? 'rgba(37, 99, 235, 0.15)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: filters.brand === b ? '#2563eb' : '#64748b' }}>
+                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: filters.brand === b ? 'rgba(37, 99, 235, 0.15)' : 'rgba(100, 116, 139, 0.08)', border: filters.brand === b ? '1px solid rgba(37, 99, 235, 0.25)' : '1px solid transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: filters.brand === b ? '#2563eb' : '#64748b' }}>
                   •
                 </span>
                 <span>{b}</span>
@@ -160,7 +160,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             onClick={() => onFilterChange("shopId", "")}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(220, 38, 38, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <StoreIcon size={12} color="#dc2626" />
               </span>
               <span>{t('all_shops', 'Tất cả gian hàng')} ({allShops.length})</span>
@@ -175,7 +175,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
                 title={s.description}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <StoreIcon size={12} color="#ea580c" />
                   </span>
                   <span>{s.name}</span>
@@ -201,7 +201,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             onChange={(e) => onFilterChange("fastDelivery", e.target.checked ? "1" : "")}
           />
           <span className="shopee-fast-delivery-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', flexShrink: 0 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', flexShrink: 0 }}>
               <BoltIcon size={11} color="#ffffff" />
             </span>
             <span>{t('fast_delivery_2h', 'Giao Nhanh 2H')}</span>
@@ -298,7 +298,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             }
           />
           <span style={{ fontWeight: 600, color: "var(--text-primary)", display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <SparklesIcon size={12} color="#ea580c" />
             </span>
             <span>{t('featured_picks', 'Hàng Tuyển Chọn')}</span>
@@ -311,7 +311,7 @@ export default function ProductFilters({ filters = {}, onFilterChange, onResetFi
             onChange={(e) => onFilterChange("inStock", e.target.checked ? "1" : "")}
           />
           <span style={{ fontWeight: 600, color: "var(--text-primary)", display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
               <CheckIcon size={11} color="#059669" />
             </span>
             <span>{t('in_stock_only', 'Chỉ xem hàng còn trong kho')}</span>

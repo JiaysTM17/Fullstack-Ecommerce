@@ -59,6 +59,7 @@ export function RecentlyViewed({ currentProductId }) {
             height: '28px',
             borderRadius: '6px',
             background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+            border: '1px solid rgba(2, 132, 199, 0.35)',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
