@@ -45,7 +45,7 @@ const renderAdminCategoryIcon = (icon) => {
     case 'shirt':
     case '\u{1F455}':
       return (
-        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <ShirtIcon size={18} color="#2563eb" />
         </span>
       );
@@ -54,7 +54,7 @@ const renderAdminCategoryIcon = (icon) => {
     case 'laptop':
     case '\u{1F3A7}':
       return (
-        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <LaptopIcon size={18} color="#0284c7" />
         </span>
       );
@@ -62,39 +62,39 @@ const renderAdminCategoryIcon = (icon) => {
     case 'living':
     case '\u{1F3E0}':
       return (
-        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(13, 148, 136, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(13, 148, 136, 0.12)', border: '1px solid rgba(13, 148, 136, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <HomeIcon size={18} color="#0d9488" />
         </span>
       );
     case 'beauty':
     case '\u{1F484}':
       return (
-        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(219, 39, 119, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(219, 39, 119, 0.12)', border: '1px solid rgba(219, 39, 119, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <SparklesIcon size={18} color="#db2777" />
         </span>
       );
     case 'sports':
     case '\u{26BD}':
       return (
-        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <TargetIcon size={18} color="#ea580c" />
         </span>
       );
     case 'book':
       return (
-        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(139, 92, 246, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <BookOpenIcon size={18} color="#8b5cf6" />
         </span>
       );
     case 'food':
       return (
-        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <FoodIcon size={18} color="#f59e0b" />
         </span>
       );
     default:
       return (
-        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(100, 116, 139, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <PackageIcon size={18} color="#64748b" />
         </span>
       );
@@ -529,6 +529,7 @@ export default function AdminDashboardPage() {
               className="shopee-sidebar-badge"
               style={{
                 background: 'rgba(234, 88, 12, 0.1)',
+                border: '1px solid rgba(234, 88, 12, 0.25)',
                 color: 'var(--primary-color, #ea580c)',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -545,6 +546,7 @@ export default function AdminDashboardPage() {
                   height: '14px',
                   borderRadius: '50%',
                   background: 'rgba(234, 88, 12, 0.2)',
+                  border: '1px solid rgba(234, 88, 12, 0.3)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -728,7 +730,7 @@ export default function AdminDashboardPage() {
           <div className="shopee-metric-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span className="shopee-metric-label">Tổng Doanh Số Sàn (GMV)</span>
-              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ChartBarIcon size={18} color="#2563eb" />
               </div>
             </div>
@@ -739,7 +741,7 @@ export default function AdminDashboardPage() {
           <div className="shopee-metric-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span className="shopee-metric-label">Hoa Hồng Thu Sàn (5%)</span>
-              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(22, 163, 74, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(22, 163, 74, 0.1)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CreditCardIcon size={18} color="#16a34a" />
               </div>
             </div>
@@ -752,7 +754,7 @@ export default function AdminDashboardPage() {
           <div className="shopee-metric-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span className="shopee-metric-label">Gian Hàng Hoạt Động</span>
-              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <StoreIcon size={18} color="#ea580c" />
               </div>
             </div>
@@ -763,7 +765,7 @@ export default function AdminDashboardPage() {
           <div className="shopee-metric-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span className="shopee-metric-label">Tổng Thành Viên Sàn</span>
-              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(147, 51, 234, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(147, 51, 234, 0.1)', border: '1px solid rgba(147, 51, 234, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <UsersIcon size={18} color="#9333ea" />
               </div>
             </div>
@@ -963,7 +965,7 @@ export default function AdminDashboardPage() {
                 onClick={() => refreshUserData(true)}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px' }}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '5px', background: '#dbeafe' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '5px', background: '#dbeafe', border: '1px solid #bfdbfe' }}>
                   <RefreshIcon size={13} color="#2563eb" />
                 </span>
                 <span>Đồng Bộ / Làm Mới</span>
@@ -991,21 +993,21 @@ export default function AdminDashboardPage() {
                         <span className="shopee-sidebar-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                           {u.role === 'admin' ? (
                             <>
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <ShieldIcon size={10} color="#ea580c" />
                               </span>
                               <span>Admin</span>
                             </>
                           ) : u.role === 'seller' ? (
                             <>
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.15)', border: '1px solid rgba(2, 132, 199, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <StoreIcon size={10} color="#0284c7" />
                               </span>
                               <span>Seller (Người bán)</span>
                             </>
                           ) : (
                             <>
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', border: '1px solid rgba(22, 163, 74, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <CartIcon size={10} color="#16a34a" />
                               </span>
                               <span>Customer (Người mua)</span>
@@ -1047,7 +1049,7 @@ export default function AdminDashboardPage() {
                               onClick={() => setUserToDelete(u)}
                               title="Xóa tài khoản vĩnh viễn để test đăng ký lại"
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <TrashIcon size={11} color="#dc2626" />
                               </span>
                               <span>Xóa</span>
@@ -1055,7 +1057,7 @@ export default function AdminDashboardPage() {
                           </div>
                         ) : (
                           <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.12)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               <ShieldIcon size={10} color="#dc2626" />
                             </span>
                             <span>Bảo vệ Admin</span>
@@ -1393,21 +1395,21 @@ export default function AdminDashboardPage() {
                           >
                             {p.status === 'approved' ? (
                               <>
-                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <CheckIcon size={10} color="#059669" />
                                 </span>
                                 <span>Đã Duyệt</span>
                               </>
                             ) : p.status === 'pending' ? (
                               <>
-                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', border: '1px solid rgba(217, 119, 6, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <ClockIcon size={10} color="#d97706" />
                                 </span>
                                 <span>Chờ Duyệt</span>
                               </>
                             ) : (
                               <>
-                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <CloseIcon size={10} color="#dc2626" />
                                 </span>
                                 <span>Từ Chối / Gỡ Bỏ</span>
@@ -1423,7 +1425,7 @@ export default function AdminDashboardPage() {
                               style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #10b981', marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                               onClick={() => handleApproveProduct(p.id)}
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <CheckIcon size={10} color="#059669" />
                               </span>
                               <span>Duyệt Bán</span>
@@ -1436,7 +1438,7 @@ export default function AdminDashboardPage() {
                               style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #ef4444', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                               onClick={() => handleRejectProduct(p.id)}
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <CloseIcon size={10} color="#dc2626" />
                               </span>
                               <span>Gỡ Bỏ</span>
@@ -1493,7 +1495,7 @@ export default function AdminDashboardPage() {
                 style={{ flex: 1 }}
               />
               <button type="submit" className="shopee-btn shopee-btn-primary" style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PlusIcon size={12} color="#ffffff" />
                 </span>
                 <span>Thêm Danh Mục</span>
@@ -1823,6 +1825,7 @@ export default function AdminDashboardPage() {
                       height: '18px',
                       borderRadius: '50%',
                       background: 'rgba(239, 68, 68, 0.12)',
+                      border: '1px solid rgba(239, 68, 68, 0.25)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1851,7 +1854,7 @@ export default function AdminDashboardPage() {
                     gap: '6px'
                   }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <TrashIcon size={12} color="#ffffff" />
                   </span>
                   <span>{isDeleting ? 'Đang Xóa...' : 'Xác Nhận Xóa Vĩnh Viễn'}</span>
@@ -1974,6 +1977,7 @@ export default function AdminDashboardPage() {
                       height: '18px',
                       borderRadius: '50%',
                       background: 'rgba(239, 68, 68, 0.12)',
+                      border: '1px solid rgba(239, 68, 68, 0.25)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -2002,7 +2006,7 @@ export default function AdminDashboardPage() {
                     gap: '6px'
                   }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <TrashIcon size={12} color="#ffffff" />
                   </span>
                   <span>{isDeleting ? 'Đang Xóa...' : 'Xác Nhận Xóa Gian Hàng'}</span>
