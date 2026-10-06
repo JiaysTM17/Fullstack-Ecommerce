@@ -804,7 +804,9 @@ export default function RegisterPage() {
                           className="shopee-email-dropdown-item"
                           onClick={() => handleSelectEmailSuggestion(item.full)}
                         >
-                          <MailIcon size={14} color="#2563eb" />
+                          <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <MailIcon size={12} color="#2563eb" />
+                          </span>
                           <span>
                             <span className="email-prefix">{item.prefix}</span>
                             <span className="email-domain">{item.domain}</span>
@@ -838,7 +840,7 @@ export default function RegisterPage() {
                 </div>
                 {formData.phone && !/(84|0[3|5|7|8|9])+([0-9]{8})\b/.test(formData.phone.replace(/\s+/g, '')) && (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '10.5px', color: '#d97706', marginTop: '4px' }}>
-                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <AlertCircleIcon size={10} color="#ef4444" />
                     </span>
                     <span>Cần đúng 10 số (VD: 0362 217 721)</span>
@@ -851,7 +853,7 @@ export default function RegisterPage() {
             {role === 'seller' && (
               <div style={{ background: 'rgba(59, 130, 246, 0.08)', padding: '14px 16px', borderRadius: '14px', border: '1px solid rgba(59, 130, 246, 0.28)', marginBottom: '16px' }}>
                 <div style={{ fontSize: '12px', fontWeight: 700, color: '#38bdf8', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: 'rgba(56, 189, 248, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <StoreIcon size={12} color="#38bdf8" />
                   </span>
                   <span>THÔNG TIN THIẾT LẬP GIAN HÀNG BÁN HÀNG</span>
@@ -1005,11 +1007,11 @@ export default function RegisterPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11.5px' }}>
                   <div style={{ color: passwordChecks.length ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
                     {passwordChecks.length ? (
-                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.14)', border: '1px solid rgba(22, 163, 74, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CheckIcon size={10} color="#16a34a" />
                       </span>
                     ) : (
-                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.12)', border: '1px solid rgba(148, 163, 184, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#94a3b8' }} />
                       </span>
                     )}
@@ -1017,11 +1019,11 @@ export default function RegisterPage() {
                   </div>
                   <div style={{ color: passwordChecks.hasUpper ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
                     {passwordChecks.hasUpper ? (
-                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.14)', border: '1px solid rgba(22, 163, 74, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CheckIcon size={10} color="#16a34a" />
                       </span>
                     ) : (
-                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.12)', border: '1px solid rgba(148, 163, 184, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#94a3b8' }} />
                       </span>
                     )}
@@ -1029,11 +1031,11 @@ export default function RegisterPage() {
                   </div>
                   <div style={{ color: passwordChecks.hasNumber ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
                     {passwordChecks.hasNumber ? (
-                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.14)', border: '1px solid rgba(22, 163, 74, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CheckIcon size={10} color="#16a34a" />
                       </span>
                     ) : (
-                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.12)', border: '1px solid rgba(148, 163, 184, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#94a3b8' }} />
                       </span>
                     )}
@@ -1041,11 +1043,11 @@ export default function RegisterPage() {
                   </div>
                   <div style={{ color: passwordChecks.hasSpecial ? '#10b981' : '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
                     {passwordChecks.hasSpecial ? (
-                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.14)', border: '1px solid rgba(22, 163, 74, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CheckIcon size={10} color="#16a34a" />
                       </span>
                     ) : (
-                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.12)', border: '1px solid rgba(148, 163, 184, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#94a3b8' }} />
                       </span>
                     )}
@@ -1152,21 +1154,21 @@ export default function RegisterPage() {
             border: '1px solid #e2e8f0',
           }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#f1f5f9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <LockIcon size={11} color="#64748b" />
               </span>
               <span>SSL 256-Bit</span>
             </span>
             <span>•</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.14)', border: '1px solid rgba(22, 163, 74, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShieldCheckIcon size={11} color="#16a34a" />
               </span>
               <span>Bảo mật 2FA OTP</span>
             </span>
             <span>•</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#eff6ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShieldIcon size={11} color="#2563eb" />
               </span>
               <span>100% Bảo vệ tài khoản</span>
