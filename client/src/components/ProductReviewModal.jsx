@@ -195,15 +195,16 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
               width: '36px',
               height: '36px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              background: 'rgba(245, 158, 11, 0.15)',
+              border: '1px solid rgba(245, 158, 11, 0.32)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 3px 8px rgba(245, 158, 11, 0.3)',
+              boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)',
               flexShrink: 0,
             }}
           >
-            <StarIcon size={18} color="#ffffff" filled />
+            <StarIcon size={18} color="#d97706" filled />
           </div>
           <div>
             <h3
@@ -274,12 +275,12 @@ export default function ProductReviewModal({ order, onClose, onSubmitReview, onS
                 width: '34px',
                 height: '34px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #fef08a 0%, #fde047 100%)',
-                border: '1.5px solid rgba(245, 158, 11, 0.45)',
+                background: 'rgba(245, 158, 11, 0.15)',
+                border: '1px solid rgba(245, 158, 11, 0.30)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 6px rgba(245, 158, 11, 0.25)',
+                boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)',
                 flexShrink: 0,
               }}
             >
