@@ -211,9 +211,7 @@ export default function ProductDetailPage() {
               animation: 'pdpSpin 0.9s linear infinite',
             }}
           />
-          <span style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ShoppingBagIcon size={16} color="#ea580c" />
-          </span>
+          <ShoppingBagIcon size={18} color="#ea580c" />
         </div>
         <h3 style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)", margin: '0 0 6px' }}>
           {t('pdp_loading', 'Đang tải thông tin chi tiết sản phẩm...')}
@@ -246,9 +244,7 @@ export default function ProductDetailPage() {
             to="/"
             style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 22px", borderRadius: "8px", textDecoration: "none", fontWeight: 700, fontSize: "14px" }}
           >
-            <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(255, 255, 255, 0.22)", border: "1px solid rgba(255, 255, 255, 0.35)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-              <HomeIcon size={13} color="#ffffff" />
-            </span>
+            <HomeIcon size={16} color="#ffffff" />
             <span>Về trang chủ</span>
           </Link>
           <Link
@@ -259,18 +255,16 @@ export default function ProductDetailPage() {
               gap: "8px",
               padding: "10px 20px",
               borderRadius: "8px",
-              border: "1.5px solid #cbd5e1",
-              background: "#ffffff",
-              color: "#1e293b",
+              border: "1.5px solid var(--border-medium)",
+              background: "var(--bg-card)",
+              color: "var(--text-primary)",
               textDecoration: "none",
               fontWeight: 700,
               fontSize: "14px",
               transition: "all 0.2s ease"
             }}
           >
-            <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(37, 99, 235, 0.12)", border: "1px solid rgba(37, 99, 235, 0.22)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-              <ShoppingBagIcon size={12} color="#2563eb" />
-            </span>
+            <ShoppingBagIcon size={16} color="var(--primary-color)" />
             <span>Xem Giỏ Hàng</span>
           </Link>
         </div>
@@ -291,13 +285,9 @@ export default function ProductDetailPage() {
       {/* Breadcrumb Navigation */}
       <nav style={{ fontSize: "13px", color: "var(--text-secondary, #64748b)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
         <Link to="/" style={{ color: "var(--secondary-color, #0284c7)", textDecoration: "none" }}>Trang chủ</Link>
-        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-          <ChevronRightIcon size={10} color="#ea580c" />
-        </span>
+        <ChevronRightIcon size={12} color="var(--text-muted, #94a3b8)" />
         <span style={{ color: "var(--secondary-color, #0284c7)" }}>{product.category || "Danh mục"}</span>
-        <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-          <ChevronRightIcon size={10} color="#ea580c" />
-        </span>
+        <ChevronRightIcon size={12} color="var(--text-muted, #94a3b8)" />
         <span style={{ color: "var(--text-primary, #0f172a)", fontWeight: 600 }}>{product.name}</span>
       </nav>
 
@@ -342,13 +332,13 @@ export default function ProductDetailPage() {
                 <StarIcon key={s} size={14} color="#ffa41c" />
               ))}
             </span>
-            <span style={{ fontWeight: 700, color: "#111" }}>{product.rating || 5.0}</span>
+            <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{product.rating || 5.0}</span>
             <span>·</span>
             <span className="amazon-ratings-count">
               {product.reviewCount || reviewsList.length || 50} đánh giá từ khách hàng
             </span>
             <span>·</span>
-            <span style={{ color: "#555" }}>Đã bán {product.sold || 100}+</span>
+            <span style={{ color: "var(--text-secondary)" }}>Đã bán {product.sold || 100}+</span>
           </div>
 
           <div className="amazon-price-row">
@@ -361,7 +351,7 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          <p style={{ fontSize: "14px", lineHeight: "1.6", color: "#333", margin: 0 }}>
+          <p style={{ fontSize: "14px", lineHeight: "1.6", color: "var(--text-secondary)", margin: 0 }}>
             {product.description}
           </p>
 
@@ -410,7 +400,7 @@ export default function ProductDetailPage() {
           {/* Specifications Table */}
           {Array.isArray(product.specifications) && product.specifications.length > 0 && (
             <div style={{ marginTop: "12px" }}>
-              <div style={{ fontSize: "14px", fontWeight: 700, color: "#111", marginBottom: "6px" }}>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "6px" }}>
                 Thông Số Kỹ Thuật Chi Tiết
               </div>
               <table className="amazon-specs-table">
@@ -435,51 +425,41 @@ export default function ProductDetailPage() {
             {product.stock > 0 ? (
               product.stock <= 5 ? (
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <BoltIcon size={10} color="#f59e0b" />
-                  </span>
+                  <BoltIcon size={14} color="#f59e0b" />
                   <span>Chỉ còn {product.stock} sản phẩm trong kho - Đặt ngay!</span>
                 </span>
               ) : (
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.14)', border: '1px solid rgba(22, 163, 74, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CheckIcon size={10} color="#16a34a" />
-                  </span>
+                  <CheckIcon size={14} color="#16a34a" />
                   <span>Còn hàng trong kho</span>
                 </span>
               )
             ) : (
               <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.14)', border: '1px solid rgba(239, 68, 68, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CloseIcon size={10} color="#dc2626" />
-                </span>
+                <CloseIcon size={14} color="#dc2626" />
                 <span>Tạm thời hết hàng</span>
               </span>
             )}
           </div>
 
           {product.stock > 0 && product.stock <= 30 && (
-            <div style={{ margin: "10px 0", padding: "10px 12px", background: "#fff7ed", border: "1px solid #ffedd5", borderRadius: "8px" }}>
+            <div style={{ margin: "10px 0", padding: "10px 12px", background: "var(--bg-muted, #fff7ed)", border: "1px solid var(--border-medium, #ffedd5)", borderRadius: "8px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "var(--primary-color, #ea580c)", marginBottom: "6px" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <FlameIcon size={12} color="#ea580c" />
-                  </span>
+                  <FlameIcon size={14} color="#ea580c" />
                   <span>Sắp hết hàng</span>
                 </span>
                 <span>Chỉ còn {product.stock} sản phẩm</span>
               </div>
-              <div style={{ height: "6px", background: "#fed7aa", borderRadius: "3px", overflow: "hidden" }}>
+              <div style={{ height: "6px", background: "var(--border-light, #fed7aa)", borderRadius: "3px", overflow: "hidden" }}>
                 <div style={{ width: `${Math.min(100, Math.max(12, (product.stock / 30) * 100))}%`, height: "100%", background: "var(--primary-color, #ea580c)", borderRadius: "3px" }} />
               </div>
             </div>
           )}
 
           <div className="amazon-delivery-info">
-            <div style={{ fontWeight: 700, color: "#007185", marginBottom: "4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <TruckIcon size={13} color="#16a34a" />
-              </span>
+            <div style={{ fontWeight: 700, color: "var(--color-success, #16a34a)", marginBottom: "4px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <TruckIcon size={16} color="var(--color-success, #16a34a)" />
               <span>Vận chuyển tiêu chuẩn & Siêu tốc</span>
             </div>
             <div>Giao hàng tới bạn vào <strong>Ngày mai</strong>. Miễn phí vận chuyển khi dùng mã FREESHIP.</div>
@@ -496,9 +476,7 @@ export default function ProductDetailPage() {
                 onClick={() => updateQuantity(quantity - 1)}
                 aria-label="Giảm số lượng"
               >
-                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: quantity <= 1 ? 'transparent' : '#f1f5f9', border: quantity <= 1 ? 'none' : '1px solid #e2e8f0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <MinusIcon size={10} color={quantity <= 1 ? "#cbd5e1" : "#475569"} />
-                </span>
+                <MinusIcon size={12} color={quantity <= 1 ? "#cbd5e1" : "currentColor"} />
               </button>
               <input
                 className="shopee-qty-input"
@@ -515,9 +493,7 @@ export default function ProductDetailPage() {
                 onClick={() => updateQuantity(quantity + 1)}
                 aria-label="Tăng số lượng"
               >
-                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: quantity >= product.stock ? 'transparent' : '#ffedd5', border: quantity >= product.stock ? 'none' : '1px solid #fed7aa', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <PlusIcon size={10} color={quantity >= product.stock ? "#cbd5e1" : "#ea580c"} />
-                </span>
+                <PlusIcon size={12} color={quantity >= product.stock ? "#cbd5e1" : "var(--primary-color)"} />
               </button>
             </div>
           </div>
@@ -532,25 +508,21 @@ export default function ProductDetailPage() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "8px",
-                backgroundColor: isAddedFeedback ? "#ecfdf5" : undefined,
-                borderColor: isAddedFeedback ? "#10b981" : undefined,
-                color: isAddedFeedback ? "#059669" : undefined,
+                backgroundColor: isAddedFeedback ? "var(--color-success-bg, #ecfdf5)" : undefined,
+                borderColor: isAddedFeedback ? "var(--color-success, #10b981)" : undefined,
+                color: isAddedFeedback ? "var(--color-success, #059669)" : undefined,
                 transition: "all 0.2s ease",
               }}
               onClick={handleAddToCart}
             >
               {isAddedFeedback ? (
                 <>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <CheckIcon size={14} color="#059669" />
-                  </span>
+                  <CheckIcon size={16} color="currentColor" />
                   <span>Đã Thêm Vào Giỏ!</span>
                 </>
               ) : (
                 <>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <ShoppingBagIcon size={14} color="#ffffff" />
-                  </span>
+                  <ShoppingBagIcon size={16} color="currentColor" />
                   <span>Thêm Vào Giỏ Hàng</span>
                 </>
               )}
@@ -561,9 +533,7 @@ export default function ProductDetailPage() {
               style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
               onClick={handleBuyNow}
             >
-              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <BoltIcon size={14} color="#ffffff" />
-              </span>
+              <BoltIcon size={16} color="#ffffff" />
               <span>Mua Ngay</span>
             </button>
             <button
@@ -572,9 +542,7 @@ export default function ProductDetailPage() {
               style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
               onClick={() => toggleWishlist(productId)}
             >
-              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: wishlisted ? 'rgba(244, 63, 94, 0.14)' : 'rgba(100, 116, 139, 0.12)', border: wishlisted ? '1px solid rgba(244, 63, 94, 0.28)' : '1px solid rgba(100, 116, 139, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <HeartIcon size={14} color={wishlisted ? "#f43f5e" : "#64748b"} fill={wishlisted ? "#f43f5e" : "none"} />
-              </span>
+              <HeartIcon size={16} color={wishlisted ? "#f43f5e" : "currentColor"} fill={wishlisted ? "#f43f5e" : "none"} />
               <span>{wishlisted ? "Đã lưu vào Yêu thích" : "Thêm vào Yêu thích"}</span>
             </button>
             <button
@@ -594,9 +562,7 @@ export default function ProductDetailPage() {
               }}
               onClick={() => addToCompare(product)}
             >
-              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: isCompared(productId) ? 'rgba(234, 88, 12, 0.12)' : 'rgba(37, 99, 235, 0.1)', border: isCompared(productId) ? '1px solid rgba(234, 88, 12, 0.28)' : '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <ScaleIcon size={12} color={isCompared(productId) ? "var(--primary-color, #ea580c)" : "#2563eb"} />
-              </span>
+              <ScaleIcon size={15} color={isCompared(productId) ? "var(--primary-color)" : "currentColor"} />
               <span>{isCompared(productId) ? "Đã thêm vào so sánh" : "So sánh với sản phẩm khác"}</span>
             </button>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "8px" }}>
@@ -606,9 +572,7 @@ export default function ProductDetailPage() {
                 style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 onClick={handleCopyLink}
               >
-                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CopyIcon size={11} color="#2563eb" />
-                </span>
+                <CopyIcon size={13} color="var(--primary-color)" />
                 <span>Sao Chép Link</span>
               </button>
               <button
@@ -617,9 +581,7 @@ export default function ProductDetailPage() {
                 style={{ fontWeight: 700, fontSize: "12px", padding: "8px 6px", borderRadius: "8px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 onClick={() => setShowShareModal(true)}
               >
-                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <QrCodeIcon size={11} color="#8b5cf6" />
-                </span>
+                <QrCodeIcon size={13} color="#8b5cf6" />
                 <span>Chia Sẻ & QR</span>
               </button>
             </div>
@@ -628,21 +590,15 @@ export default function ProductDetailPage() {
           {/* Guarantees */}
           <div className="amazon-guarantees">
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ width: "22px", height: "22px", borderRadius: "5px", background: "rgba(5, 150, 105, 0.12)", border: "1px solid rgba(5, 150, 105, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <ShieldIcon size={13} color="#059669" />
-              </span>
+              <ShieldIcon size={16} color="#059669" />
               <span><strong>Chính hãng 100%:</strong> Bồi thường gấp đôi nếu phát hiện hàng giả.</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ width: "22px", height: "22px", borderRadius: "5px", background: "rgba(2, 132, 199, 0.12)", border: "1px solid rgba(2, 132, 199, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <CheckIcon size={13} color="#0284c7" />
-              </span>
+              <CheckIcon size={16} color="#0284c7" />
               <span><strong>Đổi trả 30 ngày:</strong> Miễn phí hoàn hàng tận nơi.</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ width: "22px", height: "22px", borderRadius: "5px", background: "rgba(99, 102, 241, 0.12)", border: "1px solid rgba(99, 102, 241, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <ShieldIcon size={13} color="#6366f1" />
-              </span>
+              <ShieldIcon size={16} color="#6366f1" />
               <span><strong>Thanh toán bảo mật:</strong> Mã hóa SSL chuẩn quốc tế.</span>
             </div>
           </div>
@@ -663,21 +619,15 @@ export default function ProductDetailPage() {
 
         <div className="amazon-shop-stats">
           <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(217, 119, 6, 0.12)', border: '1px solid rgba(217, 119, 6, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <StarIcon size={12} color="#d97706" fill="#d97706" />
-            </span>
+            <StarIcon size={16} color="#d97706" fill="#d97706" />
             <span>Đánh giá: <strong>{product.shopRating || "4.9"} / 5.0</strong></span>
           </div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ClockIcon size={12} color="#16a34a" />
-            </span>
+            <ClockIcon size={16} color="#16a34a" />
             <span>Tỷ lệ phản hồi: <strong>{product.shopResponseRate || "98"}%</strong></span>
           </div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(225, 29, 72, 0.12)', border: '1px solid rgba(225, 29, 72, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <UserIcon size={12} color="#e11d48" />
-            </span>
+            <UserIcon size={16} color="#e11d48" />
             <span>Người theo dõi: <strong>12.4k</strong></span>
           </div>
         </div>
@@ -689,9 +639,7 @@ export default function ProductDetailPage() {
             style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             onClick={() => setShowShopChat(true)}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <ChatIcon size={12} color="#2563eb" />
-            </span>
+            <ChatIcon size={16} color="var(--primary-color, #2563eb)" />
             <span>Chat Ngay</span>
           </button>
           <button
@@ -700,9 +648,7 @@ export default function ProductDetailPage() {
             style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             onClick={() => navigate(`/shop/${product.shopId || "shop_01"}`)}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <StoreIcon size={12} color="#ffffff" />
-            </span>
+            <StoreIcon size={16} color="#ffffff" />
             <span>Xem Gian Hàng</span>
           </button>
         </div>
@@ -711,9 +657,7 @@ export default function ProductDetailPage() {
       {/* Customer Reviews & Ratings Section */}
       <section className="amazon-reviews-section">
         <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "20px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <StarIcon size={18} color="#f59e0b" fill="#f59e0b" />
-          </span>
+          <StarIcon size={20} color="#f59e0b" fill="#f59e0b" />
           <span>Đánh Giá Từ Khách Hàng Đã Mua</span>
         </h2>
 
@@ -721,7 +665,7 @@ export default function ProductDetailPage() {
           {/* Breakdown column */}
           <div>
             <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "12px" }}>
-              <span style={{ fontSize: "36px", fontWeight: 800, color: "#111" }}>
+              <span style={{ fontSize: "36px", fontWeight: 800, color: "var(--text-primary)" }}>
                 {product.rating || 4.9}
               </span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: "2px", background: "rgba(245, 158, 11, 0.1)", padding: "3px 8px", borderRadius: "6px" }}>
@@ -729,7 +673,7 @@ export default function ProductDetailPage() {
                   <StarIcon key={s} size={18} color="#ffa41c" />
                 ))}
               </span>
-              <span style={{ fontSize: "13px", color: "#777" }}>trên 5 sao</span>
+              <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>trên 5 sao</span>
             </div>
 
             {(() => {
@@ -771,9 +715,7 @@ export default function ProductDetailPage() {
               style={{ width: "100%", marginTop: "18px", fontSize: "13px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", fontWeight: 600 }}
               onClick={() => setShowReviewForm((prev) => !prev)}
             >
-              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#dbeafe', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <PencilIcon size={13} color="#2563eb" />
-              </span>
+              <PencilIcon size={14} color="#2563eb" />
               <span>Viết Đánh Giá Của Bạn</span>
             </button>
           </div>
@@ -972,7 +914,7 @@ export default function ProductDetailPage() {
                       fontWeight: isActive ? 700 : 500,
                       borderRadius: "16px",
                       border: isActive ? "1px solid var(--primary-color, #ea580c)" : "1px solid var(--border-medium, #cbd5e1)",
-                      background: isActive ? "var(--primary-color, #ea580c)" : "#fff",
+                      background: isActive ? "var(--primary-color, #ea580c)" : "var(--bg-card, #fff)",
                       color: isActive ? "#fff" : "var(--text-primary, #0f172a)",
                       cursor: "pointer",
                       transition: "all 0.15s ease",
@@ -1019,9 +961,7 @@ export default function ProductDetailPage() {
 
                   {rev.verifiedPurchase && (
                     <div className="amazon-review-verified" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.14)', border: '1px solid rgba(22, 163, 74, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <CheckIcon size={10} color="#16a34a" />
-                      </span>
+                      <CheckIcon size={14} color="#16a34a" />
                       <span>Đã chứng nhận mua hàng chính hãng tại Fullstack E-Commerce</span>
                     </div>
                   )}
@@ -1071,9 +1011,7 @@ export default function ProductDetailPage() {
       {relatedProducts.length > 0 && (
         <section style={{ marginTop: "32px" }}>
           <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <PackageIcon size={18} color="#ea580c" />
-            </span>
+            <PackageIcon size={20} color="#ea580c" />
             <span>Khách Hàng Cũng Mua Cùng Sản Phẩm Này</span>
           </h2>
           <div
@@ -1100,10 +1038,10 @@ export default function ProductDetailPage() {
                   alt={p.name}
                   style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: "6px", marginBottom: "8px" }}
                 />
-                <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary, #111)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", marginBottom: "4px" }}>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", marginBottom: "4px" }}>
                   {p.name}
                 </div>
-                <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
+                <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--primary-color)" }}>
                   {formatCurrency(p.price)}
                 </div>
               </div>
@@ -1155,9 +1093,7 @@ export default function ProductDetailPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <GlobeIcon size={15} color="var(--primary-color, #ea580c)" />
-                </span>
+                <GlobeIcon size={18} color="var(--primary-color, #ea580c)" />
                 <span>Chia Sẻ Sản Phẩm</span>
               </h3>
               <button
@@ -1177,9 +1113,7 @@ export default function ProductDetailPage() {
                 }}
                 aria-label="Đóng modal chia sẻ"
               >
-                <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CloseIcon size={12} color="#ef4444" />
-                </span>
+                <CloseIcon size={14} color="#ef4444" />
               </button>
             </div>
 
@@ -1267,9 +1201,7 @@ export default function ProductDetailPage() {
             className="mobile-icon-btn"
             title="Xem Shop"
           >
-            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <StoreIcon size={12} color="#ea580c" />
-            </span>
+            <StoreIcon size={18} color="currentColor" />
             <span>Shop</span>
           </Link>
           <button
@@ -1278,9 +1210,7 @@ export default function ProductDetailPage() {
             onClick={() => toggleWishlist(productId)}
             title="Yêu thích"
           >
-            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: wishlisted ? 'rgba(244, 63, 94, 0.15)' : 'rgba(100, 116, 139, 0.12)', border: wishlisted ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid rgba(100, 116, 139, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <HeartIcon size={12} color={wishlisted ? "#f43f5e" : "#64748b"} fill={wishlisted ? "#f43f5e" : "none"} />
-            </span>
+            <HeartIcon size={18} color={wishlisted ? "#f43f5e" : "currentColor"} fill={wishlisted ? "#f43f5e" : "none"} />
             <span>{wishlisted ? "Đã lưu" : "Thích"}</span>
           </button>
         </div>
@@ -1301,16 +1231,12 @@ export default function ProductDetailPage() {
           >
             {isAddedFeedback ? (
               <>
-                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#d1fae5', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CheckIcon size={12} color="#059669" />
-                </span>
+                <CheckIcon size={16} color="currentColor" />
                 <span>Đã thêm!</span>
               </>
             ) : (
               <>
-                <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#ffedd5', border: '1px solid rgba(234, 88, 12, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <ShoppingBagIcon size={12} color="#ea580c" />
-                </span>
+                <ShoppingBagIcon size={16} color="currentColor" />
                 <span>Thêm giỏ</span>
               </>
             )}
@@ -1321,9 +1247,7 @@ export default function ProductDetailPage() {
             style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
             onClick={handleBuyNow}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <BoltIcon size={13} color="#ffffff" />
-            </span>
+            <BoltIcon size={16} color="#ffffff" />
             <span>Mua Ngay</span>
           </button>
         </div>

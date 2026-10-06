@@ -294,21 +294,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "10px",
-              background: "rgba(37, 99, 235, 0.12)",
-              border: "1px solid rgba(37, 99, 235, 0.25)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <ChatIcon size={18} color="#2563eb" />
-          </div>
+          <ChatIcon size={24} color="var(--primary-color, #2563eb)" />
           <div>
             <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
               {t("qa_title", "Hỏi & Đáp về sản phẩm")} ({questions.length})
@@ -358,8 +344,8 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                 transition: "border-color 0.2s",
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = "var(--primary-color, #ea580c)";
-                e.target.style.background = "#fff";
+                e.target.style.borderColor = "var(--primary-color, #2563eb)";
+                e.target.style.background = "var(--bg-card, #fff)";
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = "var(--border-medium, #cbd5e1)";
@@ -373,7 +359,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                 padding: "9px 20px",
                 fontSize: "13px",
                 fontWeight: 700,
-                background: !newQuestionText.trim() ? "var(--bg-disabled, #e2e8f0)" : "var(--primary-color, #ea580c)",
+                background: !newQuestionText.trim() ? "var(--bg-disabled, #e2e8f0)" : "var(--primary-color, #2563eb)",
                 color: !newQuestionText.trim() ? "var(--text-disabled, #94a3b8)" : "#fff",
                 border: "none",
                 borderRadius: "8px",
@@ -385,9 +371,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                 gap: "6px",
               }}
             >
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: !newQuestionText.trim() ? 'transparent' : 'rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ChatIcon size={11} color={!newQuestionText.trim() ? "#94a3b8" : "#ffffff"} />
-              </span>
+              <ChatIcon size={14} color="currentColor" />
               <span>{submitting ? "Đang gửi..." : "Gửi câu hỏi"}</span>
             </button>
           </div>
@@ -402,9 +386,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
       ) : questions.length === 0 ? (
         <div style={{ textAlign: "center", padding: "30px 0", color: "var(--text-muted, #94a3b8)" }}>
           <span style={{ display: "inline-flex", justifyContent: "center", marginBottom: "8px" }}>
-            <span style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <LightbulbIcon size={28} color="#f59e0b" />
-            </span>
+            <LightbulbIcon size={36} color="var(--primary-color, #f59e0b)" />
           </span>
           <p style={{ margin: 0, fontSize: "14px" }}>Chưa có câu hỏi nào. Hãy là người đầu tiên đặt câu hỏi cho sản phẩm này!</p>
         </div>
@@ -426,7 +408,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                   border: "1px solid var(--border-medium, #e2e8f0)",
                   borderRadius: "10px",
                   padding: "16px",
-                  background: "#fafafa",
+                  background: "var(--bg-secondary, #fafafa)",
                 }}
               >
                 {/* Question Header */}
@@ -434,21 +416,13 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <span
                       style={{
-                        background: "rgba(234, 88, 12, 0.14)",
-                        border: "1px solid rgba(234, 88, 12, 0.32)",
-                        color: "#ea580c",
-                        fontSize: "11px",
+                        color: "var(--primary-color, #2563eb)",
+                        fontSize: "15px",
                         fontWeight: 900,
-                        width: "22px",
-                        height: "22px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "6px",
                         flexShrink: 0,
                       }}
                     >
-                      Q
+                      Q:
                     </span>
                     <strong style={{ fontSize: "14px", color: "var(--text-primary, #0f172a)" }}>
                       {qText}
@@ -459,12 +433,12 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                     type="button"
                     onClick={() => handleVoteQuestion(qId)}
                     style={{
-                      background: voted ? "rgba(234, 88, 12, 0.1)" : "none",
-                      border: voted ? "1px solid #ea580c" : "1px solid var(--border-medium, #cbd5e1)",
+                      background: voted ? "rgba(37, 99, 235, 0.1)" : "none",
+                      border: voted ? "1px solid var(--primary-color, #2563eb)" : "1px solid var(--border-medium, #cbd5e1)",
                       borderRadius: "16px",
                       padding: "4px 10px",
                       fontSize: "12px",
-                      color: voted ? "#ea580c" : "var(--text-secondary, #64748b)",
+                      color: voted ? "var(--primary-color, #2563eb)" : "var(--text-secondary, #64748b)",
                       cursor: "pointer",
                       display: "inline-flex",
                       alignItems: "center",
@@ -475,14 +449,12 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                     }}
                     title={voted ? "Bạn đã bình chọn hữu ích cho câu hỏi này" : "Bình chọn câu hỏi hữu ích"}
                   >
-                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: voted ? 'rgba(234, 88, 12, 0.15)' : 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <ThumbsUpIcon size={11} color={voted ? '#ea580c' : '#2563eb'} />
-                    </span>
+                    <ThumbsUpIcon size={14} color="currentColor" />
                     <span>Hữu ích ({votes})</span>
                   </button>
                 </div>
 
-                <div style={{ fontSize: "11.5px", color: "var(--text-muted, #94a3b8)", marginLeft: "28px", marginBottom: "12px" }}>
+                <div style={{ fontSize: "11.5px", color: "var(--text-muted, #94a3b8)", marginLeft: "24px", marginBottom: "12px" }}>
                   Hỏi bởi <strong>{author}</strong> • {dateStr ? new Date(dateStr).toLocaleDateString("vi-VN") : ""}
                 </div>
 
@@ -500,35 +472,21 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                         <div
                           key={ansId}
                           style={{
-                            background: isShop ? "rgba(234, 88, 12, 0.05)" : "#fff",
-                            border: isShop ? "1px solid rgba(234, 88, 12, 0.25)" : "1px solid #e2e8f0",
+                            background: isShop ? "rgba(37, 99, 235, 0.06)" : "var(--bg-card, #fff)",
+                            border: isShop ? "1px solid rgba(37, 99, 235, 0.2)" : "1px solid var(--border-medium, #e2e8f0)",
                             borderRadius: "8px",
                             padding: "10px 14px",
                           }}
                         >
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                            <span
-                              style={{
-                                width: "24px",
-                                height: "24px",
-                                borderRadius: "50%",
-                                background: isShop ? "rgba(234, 88, 12, 0.14)" : "rgba(2, 132, 199, 0.12)",
-                                border: isShop ? "1px solid rgba(234, 88, 12, 0.28)" : "1px solid rgba(2, 132, 199, 0.25)",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flexShrink: 0,
-                              }}
-                            >
-                              {isShop ? <StoreIcon size={12} color="#ea580c" /> : <ChatIcon size={11} color="#0284c7" />}
-                            </span>
-                            <strong style={{ fontSize: "13px", color: isShop ? "#ea580c" : "inherit" }}>
+                            {isShop ? <StoreIcon size={16} color="var(--primary-color, #2563eb)" /> : <ChatIcon size={16} color="var(--text-secondary, #64748b)" />}
+                            <strong style={{ fontSize: "13px", color: isShop ? "var(--primary-color, #2563eb)" : "inherit" }}>
                               {ansAuthor}
                             </strong>
                             {isShop && (
                               <span
                                 style={{
-                                  background: "linear-gradient(135deg, #ea580c, #c2410c)",
+                                  background: "var(--primary-color, #2563eb)",
                                   color: "#fff",
                                   fontSize: "10.5px",
                                   fontWeight: 700,
@@ -537,19 +495,14 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                                   display: "inline-flex",
                                   alignItems: "center",
                                   gap: "4px",
-                                  boxShadow: "0 1px 3px rgba(234, 88, 12, 0.25)",
                                 }}
                               >
-                                <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <StoreIcon size={10} color="#ffffff" />
-                                </span>
+                                <StoreIcon size={11} color="#ffffff" />
                                 <span>Người bán</span>
-                                <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <CheckIcon size={9} color="#ffffff" />
-                                </span>
+                                <CheckIcon size={10} color="#ffffff" />
                               </span>
                             )}
-                            <span style={{ fontSize: "11px", color: "#94a3b8", marginLeft: "auto" }}>
+                            <span style={{ fontSize: "11px", color: "var(--text-muted, #94a3b8)", marginLeft: "auto" }}>
                               {ansDate ? new Date(ansDate).toLocaleDateString("vi-VN") : ""}
                             </span>
                           </div>
@@ -579,6 +532,8 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           fontSize: "12.5px",
                           borderRadius: "6px",
                           border: "1px solid var(--border-medium, #cbd5e1)",
+                          background: "var(--bg-card, #fff)",
+                          color: "var(--text-primary, #0f172a)",
                           outline: "none",
                         }}
                       />
@@ -589,7 +544,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           padding: "6px 14px",
                           fontSize: "12px",
                           fontWeight: 600,
-                          background: "var(--primary-color, #ea580c)",
+                          background: "var(--primary-color, #2563eb)",
                           color: "#fff",
                           border: "none",
                           borderRadius: "6px",
@@ -599,9 +554,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           gap: "6px",
                         }}
                       >
-                        <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <ChatIcon size={11} color="#ffffff" />
-                        </span>
+                        <ChatIcon size={13} color="#ffffff" />
                         <span>Gửi</span>
                       </button>
                       <button
@@ -614,28 +567,16 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                           padding: "6px 12px",
                           fontSize: "12px",
                           background: "none",
-                          border: "1px solid #cbd5e1",
+                          border: "1px solid var(--border-medium, #cbd5e1)",
                           borderRadius: "6px",
                           cursor: "pointer",
-                          color: "#64748b",
+                          color: "var(--text-secondary, #64748b)",
                           display: "inline-flex",
                           alignItems: "center",
                           gap: "6px",
                         }}
                       >
-                        <span
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                            borderRadius: "50%",
-                            background: "rgba(239, 68, 68, 0.12)",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <CloseIcon size={9} color="#ef4444" />
-                        </span>
+                        <CloseIcon size={11} color="#ef4444" />
                         <span>Hủy</span>
                       </button>
                     </div>
@@ -647,7 +588,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                         alignSelf: "flex-start",
                         background: "none",
                         border: "none",
-                        color: "var(--primary-color, #ea580c)",
+                        color: "var(--primary-color, #2563eb)",
                         fontSize: "12px",
                         fontWeight: 600,
                         cursor: "pointer",
@@ -657,9 +598,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                         gap: "6px",
                       }}
                     >
-                      <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <ChatIcon size={11} color="#2563eb" />
-                      </span>
+                      <ChatIcon size={13} color="var(--primary-color, #2563eb)" />
                       <span>Trả lời câu hỏi này</span>
                     </button>
                   )}

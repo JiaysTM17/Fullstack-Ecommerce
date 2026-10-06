@@ -25,7 +25,7 @@
 }
 
 .shopee-deals-badge {
-  background: linear-gradient(135deg, var(--primary-color, #ea580c), #f97316);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color, #0ea5e9));
   color: #ffffff;
   font-weight: 800;
   font-size: 15px;
@@ -40,8 +40,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(234, 88, 12, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+  50% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
 }
 
 .shopee-countdown-box {
@@ -96,9 +96,9 @@
 }
 
 .shopee-deal-card:hover {
-  border-color: var(--primary-color, #ea580c);
+  border-color: var(--primary-color);
   transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.12);
+  box-shadow: var(--shadow-hover);
 }
 
 .shopee-deal-img-wrapper {
@@ -121,7 +121,7 @@
   position: absolute;
   top: 8px;
   left: 8px;
-  background: var(--primary-color, #ea580c);
+  background: var(--primary-color);
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
@@ -132,7 +132,7 @@
 .shopee-deal-price {
   font-size: 17px;
   font-weight: 800;
-  color: var(--primary-color, #ea580c);
+  color: var(--primary-color);
   margin-bottom: 4px;
 }
 
@@ -154,7 +154,7 @@
 }
 
 .shopee-progress-bar-fill {
-  background: linear-gradient(90deg, #f97316, var(--primary-color, #ea580c));
+  background: linear-gradient(90deg, var(--secondary-color, #0ea5e9), var(--primary-color));
   height: 100%;
   border-radius: 10px;
   transition: width 0.4s ease;

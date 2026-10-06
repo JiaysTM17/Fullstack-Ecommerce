@@ -55,7 +55,7 @@
 
 .shopee-hero-badge {
   display: inline-block;
-  background: var(--primary-color, #4f46e5);
+  background: var(--primary-color);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
@@ -172,7 +172,7 @@
 }
 
 .shopee-hero-dot.active {
-  background: var(--primary-color, #ea580c);
+  background: var(--primary-color);
   width: 24px;
   border-radius: 10px;
 }
@@ -211,6 +211,18 @@
   margin-top: 2px;
 }
 
+.banner-prop-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.shopee-hero-feature-item:hover .banner-prop-icon {
+  transform: scale(1.12);
+}
+
 @media (max-width: 900px) {
   .shopee-hero-features {
     grid-template-columns: repeat(3, 1fr);
@@ -219,6 +231,20 @@
 
 @media (max-width: 600px) {
   .shopee-hero-features {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
+    padding: 10px 14px;
+    scrollbar-width: none;
+  }
+  .shopee-hero-features::-webkit-scrollbar {
     display: none;
+  }
+  .shopee-hero-feature-item {
+    flex: 0 0 auto;
+    min-width: 170px;
+    scroll-snap-align: start;
   }
 }

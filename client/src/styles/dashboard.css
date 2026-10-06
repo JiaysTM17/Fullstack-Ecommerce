@@ -2793,3 +2793,23 @@
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
 }
 
+/* Dark Mode Overrides for Dashboards */
+[data-theme="dark"] .shopee-sidebar,
+[data-theme="dark"] .shopee-dashboard-card,
+[data-theme="dark"] .shopee-table-card,
+[data-theme="dark"] .account-portal-main-content {
+  background-color: var(--bg-card, #1e293b);
+  border-color: var(--border-color, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .seller-portal-link {
+  color: #60a5fa !important;
+  background: rgba(37, 99, 235, 0.15) !important;
+}
+
+[data-theme="dark"] .admin-portal-link {
+  color: #f87171 !important;
+  background: rgba(220, 38, 38, 0.15) !important;
+}
+

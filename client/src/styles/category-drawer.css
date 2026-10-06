@@ -490,7 +490,7 @@
   height: 36px;
   border-radius: 10px;
   background: var(--bg-muted, #f1f5f9);
-  border: 1px solid var(--border-light, #e2e8f0);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -699,3 +699,96 @@
   border-radius: 4px;
   letter-spacing: 0.2px;
 }
+
+/* ==========================================================================
+   DARK MODE HARMONIZATION RULES FOR CATEGORY MEGA MENU DRAWER
+   ========================================================================== */
+[data-theme="dark"] .category-drawer-modal {
+  background: var(--bg-card, #1e293b);
+  color: var(--text-primary, #f8fafc);
+  border-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .category-drawer-filter-bar {
+  background: var(--bg-card, #1e293b);
+  border-bottom-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .category-drawer-search-input {
+  background: var(--bg-muted, #0f172a);
+  color: var(--text-primary, #f8fafc);
+  border-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .category-drawer-search-input:focus {
+  border-color: var(--primary-color, #f97316);
+  background: #0f172a;
+}
+
+[data-theme="dark"] .category-drawer-chip {
+  background: var(--bg-muted, #141c2e);
+  color: var(--text-secondary, #94a3b8);
+  border-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .category-drawer-chip:hover {
+  background: var(--bg-hover, #243147);
+  color: var(--primary-color, #f97316);
+  border-color: var(--primary-color, #f97316);
+}
+
+[data-theme="dark"] .category-drawer-count-badge {
+  background: var(--bg-muted, #141c2e);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-muted, #94a3b8);
+}
+
+[data-theme="dark"] .category-drawer-body {
+  background: var(--bg-page, #0b0f19);
+}
+
+[data-theme="dark"] .category-drawer-card {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .category-card-name {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .category-card-desc {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .category-card-subitem-pill {
+  background: var(--bg-muted, #141c2e);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .category-card-shop-row {
+  border-top-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .category-drawer-footer {
+  background: var(--bg-card, #1e293b);
+  border-top-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .category-drawer-footer-title {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .category-drawer-scroll-arrow {
+  background: var(--bg-muted, #141c2e);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .category-drawer-mall-btn {
+  background: var(--bg-muted, #141c2e);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+

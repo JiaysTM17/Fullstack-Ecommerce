@@ -174,20 +174,8 @@ export default function NotificationsPopover() {
         title="Thông báo"
         style={{ position: 'relative' }}
       >
-        <span
-          style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '8px',
-            background: 'rgba(245, 158, 11, 0.15)',
-            border: '1px solid rgba(245, 158, 11, 0.28)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'transform 0.15s ease',
-          }}
-        >
-          <BellIcon size={18} color="#f59e0b" />
+        <span className="shopee-header-action-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BellIcon size={22} color="#f59e0b" />
         </span>
         {unreadCount > 0 && (
           <span className="shopee-action-badge badge-indigo">
@@ -232,7 +220,7 @@ export default function NotificationsPopover() {
                   height: '28px',
                   borderRadius: '6px',
                   background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
-                  border: '1px solid rgba(234, 88, 12, 0.35)',
+                  border: 'none',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -279,9 +267,7 @@ export default function NotificationsPopover() {
                   gap: '5px',
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CheckIcon size={11} color="#ea580c" />
-                </span>
+                <CheckIcon size={13} color="#ea580c" />
                 <span>Đã đọc tất cả</span>
               </button>
             )}
@@ -315,7 +301,7 @@ export default function NotificationsPopover() {
                     color: active ? '#ffffff' : 'var(--text-secondary, #475569)',
                     border: 'none',
                     borderRadius: '20px',
-                    padding: '3px 10px 3px 4px',
+                    padding: '4px 10px',
                     fontSize: '11.5px',
                     fontWeight: active ? 700 : 500,
                     cursor: 'pointer',
@@ -326,9 +312,7 @@ export default function NotificationsPopover() {
                     gap: '6px',
                   }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: active ? 'rgba(255, 255, 255, 0.22)' : tab.bg, border: active ? '1px solid rgba(255, 255, 255, 0.35)' : `1px solid ${tab.border}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {tab.icon}
-                  </span>
+                  {tab.icon}
                   <span>{tab.label}</span>
                 </button>
               );
@@ -339,9 +323,7 @@ export default function NotificationsPopover() {
           <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
             {filteredNotifs.length === 0 ? (
               <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-muted, #94a3b8)', fontSize: '13px' }}>
-                <span style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
-                  <SparklesIcon size={22} color="#ea580c" />
-                </span>
+                <SparklesIcon size={32} color="#ea580c" style={{ display: 'block', margin: '0 auto 8px' }} />
                 <p style={{ margin: 0 }}>Bạn không có thông báo nào chưa đọc!</p>
               </div>
             ) : (
@@ -372,7 +354,7 @@ export default function NotificationsPopover() {
                       height: '38px',
                       borderRadius: '10px',
                       background: item.type === 'order' ? 'rgba(2, 132, 199, 0.12)' : item.type === 'voucher' ? 'rgba(217, 119, 6, 0.12)' : 'rgba(220, 38, 38, 0.12)',
-                      border: item.type === 'order' ? '1px solid rgba(2, 132, 199, 0.25)' : item.type === 'voucher' ? '1px solid rgba(217, 119, 6, 0.25)' : '1px solid rgba(220, 38, 38, 0.25)',
+                      border: 'none',
                       color: item.type === 'order' ? '#0284c7' : item.type === 'voucher' ? '#d97706' : '#dc2626',
                       display: 'flex',
                       alignItems: 'center',
@@ -460,9 +442,7 @@ export default function NotificationsPopover() {
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                 <span>Xem tất cả đơn hàng</span>
-                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRightIcon size={11} color="#ea580c" />
-                </span>
+                <ChevronRightIcon size={12} color="#ea580c" />
               </span>
             </button>
 
@@ -482,9 +462,7 @@ export default function NotificationsPopover() {
                 }}
                 title="Xóa các thông báo đã đọc"
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <TrashIcon size={11} color="#ef4444" />
-                </span>
+                <TrashIcon size={12} color="#ef4444" />
                 <span>Dọn dẹp</span>
               </button>
             )}

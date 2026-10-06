@@ -113,21 +113,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "10px",
-              background: "rgba(2, 132, 199, 0.12)",
-              border: "1px solid rgba(2, 132, 199, 0.25)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <ClockIcon size={18} color="#0284c7" />
-          </div>
+          <ClockIcon size={24} color="var(--primary-color, #0284c7)" />
           <div>
             <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
               {t("recently_viewed", "Sản phẩm bạn vừa xem")}
@@ -156,16 +142,14 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
           }}
           onMouseOver={(e) => {
             e.currentTarget.style.color = "#ef4444";
-            e.currentTarget.style.background = "#fee2e2";
+            e.currentTarget.style.background = "rgba(239, 68, 68, 0.12)";
           }}
           onMouseOut={(e) => {
             e.currentTarget.style.color = "var(--text-muted, #94a3b8)";
             e.currentTarget.style.background = "none";
           }}
         >
-          <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fee2e2', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <TrashIcon size={11} color="#ef4444" />
-          </span>
+          <TrashIcon size={14} color="#ef4444" />
           <span>{t("clear_history", "Xóa lịch sử")}</span>
         </button>
       </div>
@@ -173,9 +157,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
       {recentItems.length === 0 ? (
         <div style={{ textAlign: "center", color: "var(--text-muted, #94a3b8)", padding: "30px 0" }}>
           <div style={{ marginBottom: "8px", display: "flex", justifyContent: "center" }}>
-            <span style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(148, 163, 184, 0.14)', border: '1px solid rgba(148, 163, 184, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <EyeIcon size={24} color="#64748b" />
-            </span>
+            <EyeIcon size={36} color="var(--text-secondary, #64748b)" />
           </div>
           <p style={{ margin: 0, fontSize: "13.5px" }}>Bạn chưa xem sản phẩm nào gần đây.</p>
         </div>
@@ -196,8 +178,8 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               width: "36px",
               height: "36px",
               borderRadius: "50%",
-              background: "#ffffff",
-              border: "1px solid #cbd5e1",
+              background: "var(--bg-card, #ffffff)",
+              border: "1px solid var(--border-medium, #cbd5e1)",
               boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
               cursor: canScrollLeft ? "pointer" : "default",
               opacity: canScrollLeft ? 1 : 0,
@@ -205,27 +187,25 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#1e293b",
+              color: "var(--text-primary, #1e293b)",
               fontSize: "20px",
               fontWeight: 800,
               transition: "all 0.2s ease",
             }}
             onMouseOver={(e) => {
               if (canScrollLeft) {
-                e.currentTarget.style.background = "var(--primary-color, #ea580c)";
+                e.currentTarget.style.background = "var(--primary-color, #2563eb)";
                 e.currentTarget.style.color = "#ffffff";
-                e.currentTarget.style.borderColor = "var(--primary-color, #ea580c)";
+                e.currentTarget.style.borderColor = "var(--primary-color, #2563eb)";
               }
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.background = "#ffffff";
-              e.currentTarget.style.color = "#1e293b";
-              e.currentTarget.style.borderColor = "#cbd5e1";
+              e.currentTarget.style.background = "var(--bg-card, #ffffff)";
+              e.currentTarget.style.color = "var(--text-primary, #1e293b)";
+              e.currentTarget.style.borderColor = "var(--border-medium, #cbd5e1)";
             }}
           >
-            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.1)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ChevronLeftIcon size={13} color="#0284c7" />
-            </span>
+            <ChevronLeftIcon size={18} color="currentColor" />
           </button>
 
           {/* Right Scroll Navigation Button */}
@@ -243,8 +223,8 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               width: "36px",
               height: "36px",
               borderRadius: "50%",
-              background: "#ffffff",
-              border: "1px solid #cbd5e1",
+              background: "var(--bg-card, #ffffff)",
+              border: "1px solid var(--border-medium, #cbd5e1)",
               boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
               cursor: canScrollRight ? "pointer" : "default",
               opacity: canScrollRight ? 1 : 0,
@@ -252,25 +232,23 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#1e293b",
+              color: "var(--text-primary, #1e293b)",
               transition: "all 0.2s ease",
             }}
             onMouseOver={(e) => {
               if (canScrollRight) {
-                e.currentTarget.style.background = "var(--primary-color, #ea580c)";
+                e.currentTarget.style.background = "var(--primary-color, #2563eb)";
                 e.currentTarget.style.color = "#ffffff";
-                e.currentTarget.style.borderColor = "var(--primary-color, #ea580c)";
+                e.currentTarget.style.borderColor = "var(--primary-color, #2563eb)";
               }
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.background = "#ffffff";
-              e.currentTarget.style.color = "#1e293b";
-              e.currentTarget.style.borderColor = "#cbd5e1";
+              e.currentTarget.style.background = "var(--bg-card, #ffffff)";
+              e.currentTarget.style.color = "var(--text-primary, #1e293b)";
+              e.currentTarget.style.borderColor = "var(--border-medium, #cbd5e1)";
             }}
           >
-            <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.1)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ChevronRightIcon size={13} color="#0284c7" />
-            </span>
+            <ChevronRightIcon size={18} color="currentColor" />
           </button>
 
           {/* Scrollable Horizontal Carousel Container */}
@@ -304,7 +282,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
                     border: "1px solid var(--border-medium, #e2e8f0)",
                     borderRadius: "8px",
                     overflow: "hidden",
-                    background: "#fff",
+                    background: "var(--bg-card, #fff)",
                     display: "flex",
                     flexDirection: "column",
                     transition: "transform 0.2s, box-shadow 0.2s",
@@ -328,7 +306,7 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
                     }}
                     style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", height: "100%" }}
                   >
-                    <div style={{ position: "relative", width: "100%", paddingTop: "100%", background: "#f8fafc" }}>
+                    <div style={{ position: "relative", width: "100%", paddingTop: "100%", background: "var(--bg-muted, #f8fafc)" }}>
                       <img
                         src={item.image}
                         alt={item.name}
@@ -381,11 +359,11 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
                         </h4>
 
                         <div style={{ display: "flex", alignItems: "baseline", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
-                          <strong style={{ fontSize: "13.5px", color: "var(--primary-color, #ea580c)" }}>
+                          <strong style={{ fontSize: "13.5px", color: "var(--primary-color, #2563eb)" }}>
                             {formatCurrency(item.price)}
                           </strong>
                           {item.originalPrice > item.price && (
-                            <span style={{ fontSize: "11px", color: "#94a3b8", textDecoration: "line-through" }}>
+                            <span style={{ fontSize: "11px", color: "var(--text-muted, #94a3b8)", textDecoration: "line-through" }}>
                               {formatCurrency(item.originalPrice)}
                             </span>
                           )}
@@ -400,29 +378,27 @@ export default function RecentlyViewedSection({ currentProductId, hideIfEmpty = 
                           padding: "6px 8px",
                           fontSize: "11.5px",
                           fontWeight: 600,
-                          background: "var(--primary-light, #ffedd5)",
-                          color: "var(--primary-color, #ea580c)",
-                          border: "1px solid rgba(234, 88, 12, 0.3)",
+                          background: "var(--primary-light, #eff6ff)",
+                          color: "var(--primary-color, #2563eb)",
+                          border: "1px solid var(--border-medium, #cbd5e1)",
                           borderRadius: "6px",
                           cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          gap: "4px",
+                          gap: "6px",
                           transition: "all 0.15s ease",
                         }}
                         onMouseOver={(e) => {
-                          e.currentTarget.style.background = "var(--primary-color, #ea580c)";
+                          e.currentTarget.style.background = "var(--primary-color, #2563eb)";
                           e.currentTarget.style.color = "#fff";
                         }}
                         onMouseOut={(e) => {
-                          e.currentTarget.style.background = "var(--primary-light, #ffedd5)";
-                          e.currentTarget.style.color = "var(--primary-color, #ea580c)";
+                          e.currentTarget.style.background = "var(--primary-light, #eff6ff)";
+                          e.currentTarget.style.color = "var(--primary-color, #2563eb)";
                         }}
                       >
-                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <CartIcon size={11} color="currentColor" />
-                        </span>
+                        <CartIcon size={14} color="currentColor" />
                         <span>Thêm nhanh</span>
                       </button>
                     </div>

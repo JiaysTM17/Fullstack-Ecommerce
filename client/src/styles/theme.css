@@ -366,30 +366,70 @@ body {
   }
 }
 
+/* Natural Flat Icon Accent Classes - Borderless & Vibrant */
+.icon-accent-blue { color: #2563eb; }
+.icon-accent-teal { color: #0d9488; }
+.icon-accent-green { color: #10b981; }
+.icon-accent-amber { color: #f59e0b; }
+.icon-accent-orange { color: #ea580c; }
+.icon-accent-red { color: #ef4444; }
+.icon-accent-purple { color: #8b5cf6; }
+
+[data-theme="dark"] .icon-accent-blue { color: #60a5fa; }
+[data-theme="dark"] .icon-accent-teal { color: #2dd4bf; }
+[data-theme="dark"] .icon-accent-green { color: #34d399; }
+[data-theme="dark"] .icon-accent-amber { color: #fbbf24; }
+[data-theme="dark"] .icon-accent-orange { color: #fb923c; }
+[data-theme="dark"] .icon-accent-red { color: #f87171; }
+[data-theme="dark"] .icon-accent-purple { color: #c084fc; }
+
+/* Frameless Translucent Accent Tiles (Zero harsh borders) */
+.accent-tile-blue { background: rgba(37, 99, 235, 0.08); border: none; border-radius: 8px; }
+.accent-tile-teal { background: rgba(13, 148, 136, 0.08); border: none; border-radius: 8px; }
+.accent-tile-green { background: rgba(16, 185, 129, 0.08); border: none; border-radius: 8px; }
+.accent-tile-orange { background: rgba(234, 88, 12, 0.08); border: none; border-radius: 8px; }
+.accent-tile-amber { background: rgba(245, 158, 11, 0.08); border: none; border-radius: 8px; }
+.accent-tile-red { background: rgba(239, 68, 68, 0.08); border: none; border-radius: 8px; }
+.accent-tile-purple { background: rgba(139, 92, 246, 0.08); border: none; border-radius: 8px; }
+
+[data-theme="dark"] .accent-tile-blue { background: rgba(59, 130, 246, 0.16); }
+[data-theme="dark"] .accent-tile-teal { background: rgba(45, 212, 191, 0.16); }
+[data-theme="dark"] .accent-tile-green { background: rgba(16, 185, 129, 0.16); }
+[data-theme="dark"] .accent-tile-orange { background: rgba(249, 115, 22, 0.16); }
+[data-theme="dark"] .accent-tile-amber { background: rgba(245, 158, 11, 0.16); }
+[data-theme="dark"] .accent-tile-red { background: rgba(239, 68, 68, 0.16); }
+[data-theme="dark"] .accent-tile-purple { background: rgba(139, 92, 246, 0.16); }
+
 /* Reusable Pastel Accent Icon Containers */
 .icon-badge-pastel-blue {
   background: rgba(37, 99, 235, 0.12);
   color: #2563eb;
+  border: none;
 }
 .icon-badge-pastel-green {
   background: rgba(16, 185, 129, 0.14);
   color: #059669;
+  border: none;
 }
 .icon-badge-pastel-orange {
   background: rgba(234, 88, 12, 0.12);
   color: #ea580c;
+  border: none;
 }
 .icon-badge-pastel-amber {
   background: rgba(245, 158, 11, 0.14);
   color: #d97706;
+  border: none;
 }
 .icon-badge-pastel-red {
   background: rgba(239, 68, 68, 0.12);
   color: #dc2626;
+  border: none;
 }
 .icon-badge-pastel-purple {
   background: rgba(139, 92, 246, 0.14);
   color: #7c3aed;
+  border: none;
 }
 
 /* Dark Mode Harmonization for Icon Accent Containers */
@@ -417,6 +457,7 @@ body {
   background: rgba(139, 92, 246, 0.22);
   color: #c084fc;
 }
+
 
 
 

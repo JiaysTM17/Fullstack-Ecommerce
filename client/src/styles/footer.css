@@ -190,3 +190,81 @@
   border-top: 1px dashed var(--border-medium, #cbd5e1);
   padding-top: 10px;
 }
+
+/* ==========================================================================
+   DARK MODE HARMONIZATION RULES FOR FOOTER
+   ========================================================================== */
+[data-theme="dark"] .shopee-footer {
+  background-color: var(--bg-card, #0f172a);
+  border-top-color: var(--primary-color, #f97316);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .shopee-footer-col h4 {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .shopee-footer-link {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .shopee-footer-link:hover {
+  color: var(--primary-color, #f97316);
+}
+
+[data-theme="dark"] .shopee-footer-badge {
+  background: var(--bg-muted, #141c2e);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .shopee-footer-bottom {
+  border-top-color: var(--border-medium, #334155);
+  color: var(--text-muted, #64748b);
+}
+
+[data-theme="dark"] .portfolio-credit-pill {
+  background: var(--bg-muted, #141c2e);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .footer-seo-section {
+  border-bottom-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .footer-seo-title {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .footer-seo-text {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .footer-attribution-section {
+  background: var(--bg-muted, #141c2e);
+  border-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .footer-attribution-title {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .footer-attribution-card {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .footer-attribution-card strong {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .footer-attribution-card span {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .footer-attribution-note {
+  color: var(--text-muted, #94a3b8);
+  border-top-color: var(--border-medium, #334155);
+}
+

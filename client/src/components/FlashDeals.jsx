@@ -57,7 +57,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
           </div>
           <div className="shopee-countdown-box">
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, fontSize: '13px' }}>
-              <ClockIcon size={13} color="#ea580c" />
+              <ClockIcon size={14} color="var(--primary-color)" />
               <span>KẾT THÚC TRONG</span>
             </span>
             <span className="shopee-timer-unit">{formatUnit(timeLeft.hours)}</span>
@@ -71,7 +71,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
         <span
           style={{
             fontSize: '13px',
-            color: 'var(--primary-color, #ea580c)',
+            color: 'var(--primary-color)',
             fontWeight: 700,
             display: 'inline-flex',
             alignItems: 'center',
@@ -84,7 +84,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
           }}
         >
           <span>Xem tất cả deal sốc</span>
-          <ChevronRightIcon size={13} color="var(--primary-color, #ea580c)" />
+          <ChevronRightIcon size={13} color="var(--primary-color)" />
         </span>
       </div>
 
@@ -108,7 +108,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
               type="button"
               onClick={() => setSelectedSlot(slot.id)}
               style={{
-                background: isSelected ? 'var(--primary-color, #ea580c)' : 'transparent',
+                background: isSelected ? 'var(--primary-color)' : 'transparent',
                 color: isSelected ? '#ffffff' : 'var(--text-secondary, #475569)',
                 border: 'none',
                 padding: '10px 4px',

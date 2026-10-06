@@ -321,9 +321,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               title="Cuộn tới danh mục ngành hàng trên trang chủ"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
-              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.15)', border: '1px solid rgba(2, 132, 199, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <PackageIcon size={13} color="#0284c7" />
-              </span>
+              <PackageIcon size={15} color="#0284c7" />
               <span>Xem Danh Mục Trang Chủ</span>
             </button>
             <button
@@ -333,9 +331,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               title="Cuộn tới danh sách toàn bộ sản phẩm trên trang chủ"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
-              <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ShoppingBagIcon size={13} color="#ffffff" />
-              </span>
+              <ShoppingBagIcon size={15} color="#ffffff" />
               <span>Xem Tất Cả Sản Phẩm</span>
             </button>
             <button
@@ -346,7 +342,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
               aria-label="Đóng bảng danh mục ngành hàng"
               style={{
                 background: 'rgba(239, 68, 68, 0.08)',
-                border: '1px solid rgba(239, 68, 68, 0.25)',
+                border: 'none',
                 borderRadius: '8px',
                 width: '32px',
                 height: '32px',
@@ -357,9 +353,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 transition: 'all 0.15s ease',
               }}
             >
-              <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CloseIcon size={12} color="#ef4444" />
-              </span>
+              <CloseIcon size={16} color="#ef4444" />
             </button>
           </div>
         </div>
@@ -386,11 +380,9 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   onClick={() => setSearchTerm('')}
                   className="category-drawer-clear-btn"
                   title="Xóa tìm kiếm"
-                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'none' }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CloseIcon size={10} color="#ef4444" />
-                  </span>
+                  <CloseIcon size={14} color="#94a3b8" />
                 </button>
               )}
             </div>
@@ -410,9 +402,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 onClick={() => setSelectedGroup(chip.id)}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: selectedGroup === chip.id ? 'rgba(255, 255, 255, 0.22)' : 'rgba(0, 0, 0, 0.05)', border: selectedGroup === chip.id ? '1px solid rgba(255, 255, 255, 0.35)' : '1px solid rgba(0, 0, 0, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {chip.icon}
-                  </span>
+                  {chip.icon}
                   <span>{chip.label}</span>
                 </span>
               </button>
@@ -424,7 +414,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         <div className="category-drawer-body">
           {filteredCategories.length === 0 ? (
             <div className="category-drawer-empty">
-              <div className="category-drawer-empty-icon" style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.1)', border: '1px solid rgba(100, 116, 139, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+              <div className="category-drawer-empty-icon" style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                 <SearchIcon size={28} color="#64748b" />
               </div>
               <div className="category-drawer-empty-text">
@@ -442,9 +432,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 }}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
               >
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <RefreshIcon size={13} color="#ea580c" />
-                </span>
+                <RefreshIcon size={14} color="#ea580c" />
                 <span>Xóa bộ lọc & Xem tất cả</span>
               </button>
             </div>
@@ -470,7 +458,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 {/* Header row of card: Icon + Name (strictly no squish) + Badge */}
                 <div className="category-card-header">
                   <div className="category-card-title-group">
-                    <span className="category-card-icon" style={{ width: '32px', height: '32px', borderRadius: '8px', background: `${cat.color}15`, border: `1px solid ${cat.color}35`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span className="category-card-icon" style={{ width: '32px', height: '32px', borderRadius: '8px', background: `${cat.color}15`, border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {getDrawerCategoryIcon(cat.id, 18, cat.color)}
                     </span>
                     <strong className="category-card-name" title={cat.name}>
@@ -533,16 +521,12 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                   title={cat.shop}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <StoreIcon size={11} color="#ea580c" />
-                  </span>
+                  <StoreIcon size={14} color="#ea580c" />
                   <span>{cat.shop}</span>
                 </span>
                 <span className="category-card-action-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   <span>Xem ngành hàng</span>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <ChevronRightIcon size={10} color="#ea580c" />
-                  </span>
+                  <ChevronRightIcon size={12} color="#ea580c" />
                 </span>
               </div>
             </div>
@@ -552,9 +536,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
         {/* Mega Menu Footer: 12 Mall Shops Strip */}
         <div className="category-drawer-footer">
           <div className="category-drawer-footer-title" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(220, 38, 38, 0.12)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <StoreIcon size={13} color="#dc2626" />
-            </span>
+            <StoreIcon size={16} color="#dc2626" />
             <span>12 Gian Hàng Mall:</span>
           </div>
 
@@ -563,7 +545,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             onClick={() => shopsScrollRef.current?.scrollBy({ left: -220, behavior: 'smooth' })}
             className="category-drawer-scroll-arrow"
             title="Cuộn sang trái"
-            style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0 }}
+            style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.08)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0 }}
           >
             <ChevronLeftIcon size={12} color="#2563eb" />
           </button>
@@ -577,9 +559,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
                 className="category-drawer-mall-btn"
               >
                 <span className="mall-red-badge">Mall</span>
-                <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <StoreIcon size={10} color="#ea580c" />
-                </span>
+                <StoreIcon size={12} color="#ea580c" />
                 <span>{shop.name}</span>
               </button>
             ))}
@@ -590,7 +570,7 @@ export default function CategoryMegaMenuDrawer({ isOpen, onClose }) {
             onClick={() => shopsScrollRef.current?.scrollBy({ left: 220, behavior: 'smooth' })}
             className="category-drawer-scroll-arrow"
             title="Cuộn sang phải"
-            style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0 }}
+            style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.08)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0 }}
           >
             <ChevronRightIcon size={12} color="#2563eb" />
           </button>

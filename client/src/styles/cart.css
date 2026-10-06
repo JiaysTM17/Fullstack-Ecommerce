@@ -18,7 +18,7 @@
 }
 
 .shopee-cart-summary {
-  background: #fff;
+  background: var(--bg-card, #fff);
   border-radius: var(--radius-sm);
   padding: 20px;
   border: 1px solid var(--border-light);
@@ -76,13 +76,13 @@
   align-items: center;
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
-  background: #fff;
+  background: var(--bg-card, #fff);
   overflow: hidden;
   user-select: none;
 }
 
 .shopee-qty-btn {
-  background: #fff;
+  background: var(--bg-card, #fff);
   border: none;
   color: var(--text-primary);
   display: flex;
@@ -166,7 +166,7 @@
 
 /* Cart Item Component */
 .shopee-cart-item {
-  background: #fff;
+  background: var(--bg-card, #fff);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
   padding: 16px;

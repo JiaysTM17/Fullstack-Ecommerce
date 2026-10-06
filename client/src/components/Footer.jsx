@@ -36,9 +36,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
         {/* 1. Shopee-style SEO Marketplace Introduction Section */}
         <section className="footer-seo-section">
           <div className="footer-seo-title">
-            <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CartIcon size={15} color="#ea580c" />
-            </span>
+            <CartIcon size={20} color="#ea580c" />
             <span>{language === 'en' ? 'ABOUT FULLSTACK E-COMMERCE SMART MARKETPLACE' : 'VỀ SÀN THƯƠNG MẠI ĐIỆN TỬ FULLSTACK E-COMMERCE'}</span>
           </div>
           <p className="footer-seo-text">
@@ -62,9 +60,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
         <section className="footer-attribution-section">
           <div className="footer-attribution-header">
             <div className="footer-attribution-title">
-              <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <LayersIcon size={15} color="#2563eb" />
-              </span>
+              <LayersIcon size={20} color="#2563eb" />
               <span>{language === 'en' ? 'DESIGN INSPIRATIONS & ARCHITECTURAL REFERENCES' : 'NGUỒN CẢM HỨNG THIẾT KẾ & TIÊU CHUẨN KIẾN TRÚC'}</span>
             </div>
             <span style={{ fontSize: '11.5px', color: '#16a34a', background: 'rgba(22, 163, 74, 0.1)', border: '1px solid rgba(22, 163, 74, 0.25)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
@@ -76,9 +72,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
           <div className="footer-attribution-grid">
             <div className="footer-attribution-card">
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ShoppingBagIcon size={13} color="#ea580c" />
-                </span>
+                <ShoppingBagIcon size={16} color="#ea580c" />
                 <span>Shopee VN (SEA)</span>
               </strong>
               <span>
@@ -90,9 +84,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
 
             <div className="footer-attribution-card">
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <PackageIcon size={13} color="#0284c7" />
-                </span>
+                <PackageIcon size={16} color="#0284c7" />
                 <span>Tiki (Vietnam)</span>
               </strong>
               <span>
@@ -104,9 +96,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
 
             <div className="footer-attribution-card">
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(220, 38, 38, 0.12)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <StoreIcon size={13} color="#dc2626" />
-                </span>
+                <StoreIcon size={16} color="#dc2626" />
                 <span>Lazada (Alibaba Group)</span>
               </strong>
               <span>
@@ -118,9 +108,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
 
             <div className="footer-attribution-card">
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <StarIcon size={13} color="#f59e0b" fill="#f59e0b" />
-                </span>
+                <StarIcon size={16} color="#f59e0b" fill="#f59e0b" />
                 <span>Amazon (Global)</span>
               </strong>
               <span>
@@ -132,9 +120,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
 
             <div className="footer-attribution-card">
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <SparklesIcon size={13} color="#8b5cf6" />
-                </span>
+                <SparklesIcon size={16} color="#8b5cf6" />
                 <span>Apple & Vercel Systems</span>
               </strong>
               <span>
@@ -146,7 +132,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
           </div>
 
           <div className="footer-attribution-note">
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', verticalAlign: 'middle', marginRight: '8px', flexShrink: 0 }}><AlertCircleIcon size={14} color="#0284c7" /></span>
+            <AlertCircleIcon size={16} color="#0284c7" style={{ verticalAlign: 'middle', marginRight: '6px' }} />
             <strong>{language === 'en' ? 'Intellectual Property & Professional Ethics Note:' : 'Tuyên Bố Bản Quyền & Tính Chuyên Nghiệp:'}</strong>{' '}
             {language === 'en'
               ? 'This system synthesizes industry-standard UX patterns from world-leading e-commerce platforms. All source code, database architectures, RESTful APIs, and UI designs were custom-engineered independently with clean-room implementation. No proprietary code or assets were duplicated, honoring intellectual property rights and academic integrity.'
@@ -185,60 +171,42 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             <h4>{t('footer_payment', 'Thanh Toán')}</h4>
             <div className="shopee-footer-badges">
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <TruckIcon size={11} color="#ea580c" />
-                </span>
+                <TruckIcon size={13} color="#ea580c" />
                 <span>COD</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <QrCodeIcon size={11} color="#2563eb" />
-                </span>
+                <QrCodeIcon size={13} color="#2563eb" />
                 <span>VietQR</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CreditCardIcon size={11} color="#16a34a" />
-                </span>
+                <CreditCardIcon size={13} color="#16a34a" />
                 <span>Visa</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.12)', border: '1px solid rgba(217, 119, 6, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CreditCardIcon size={11} color="#d97706" />
-                </span>
+                <CreditCardIcon size={13} color="#d97706" />
                 <span>MasterCard</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(192, 38, 211, 0.12)', border: '1px solid rgba(192, 38, 211, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <SparklesIcon size={11} color="#c026d3" />
-                </span>
+                <SparklesIcon size={13} color="#c026d3" />
                 <span>Momo</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(67, 56, 202, 0.12)', border: '1px solid rgba(67, 56, 202, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ShieldCheckIcon size={11} color="#4338ca" />
-                </span>
+                <ShieldCheckIcon size={13} color="#4338ca" />
                 <span>VNPay</span>
               </span>
             </div>
             <h4 style={{ marginTop: '20px' }}>{t('footer_shipping_units', 'Đơn Vị Vận Chuyển')}</h4>
             <div className="shopee-footer-badges">
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <TruckIcon size={11} color="#ea580c" />
-                </span>
+                <TruckIcon size={13} color="#ea580c" />
                 <span>SPX Express</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <TruckIcon size={11} color="#0284c7" />
-                </span>
+                <TruckIcon size={13} color="#0284c7" />
                 <span>Giao Hàng Nhanh</span>
               </span>
               <span className="shopee-footer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <TruckIcon size={11} color="#16a34a" />
-                </span>
+                <TruckIcon size={13} color="#16a34a" />
                 <span>Viettel Post</span>
               </span>
             </div>
@@ -250,25 +218,19 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             <ul className="shopee-footer-list">
               <li className="shopee-footer-item">
                 <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <GlobeIcon size={11} color="#2563eb" />
-                  </span>
+                  <GlobeIcon size={14} color="#2563eb" />
                   <span>GitHub Portfolio</span>
                 </span>
               </li>
               <li className="shopee-footer-item">
                 <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <GlobeIcon size={11} color="#0284c7" />
-                  </span>
+                  <GlobeIcon size={14} color="#0284c7" />
                   <span>LinkedIn</span>
                 </span>
               </li>
               <li className="shopee-footer-item">
                 <span className="shopee-footer-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <GlobeIcon size={11} color="#3b82f6" />
-                  </span>
+                  <GlobeIcon size={14} color="#3b82f6" />
                   <span>Facebook</span>
                 </span>
               </li>
@@ -276,16 +238,12 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
             <h4 style={{ marginTop: '20px' }}>{language === 'en' ? 'Hotline & Support' : 'Tổng Đài Hỗ Trợ'}</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12.5px' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary, #0f172a)' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <PhoneIcon size={12} color="#16a34a" />
-                </span>
+                <PhoneIcon size={14} color="#16a34a" />
                 <span style={{ fontWeight: 600 }}>1900 6868</span>
                 <span style={{ fontSize: '11px', color: '#94a3b8' }}>(8:00 - 21:00)</span>
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary, #475569)' }}>
-                <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <MailIcon size={12} color="#ea580c" />
-                </span>
+                <MailIcon size={14} color="#ea580c" />
                 <span>support@shopee-mini.vn</span>
               </div>
             </div>
@@ -296,15 +254,11 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
         <div className="shopee-footer-bottom">
           <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '12px' }}>
             <span className="portfolio-credit-pill" style={{ color: '#16a34a', borderColor: 'rgba(22, 163, 74, 0.25)', background: 'rgba(22, 163, 74, 0.05)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ShieldCheckIcon size={11} color="#16a34a" />
-              </span>
+              <ShieldCheckIcon size={13} color="#16a34a" />
               <span>{language === 'en' ? 'Verified Ministry of Industry and Trade' : 'Đã Thông Báo Bộ Công Thương'}</span>
             </span>
             <span className="portfolio-credit-pill" style={{ color: '#2563eb', borderColor: 'rgba(37, 99, 235, 0.25)', background: 'rgba(37, 99, 235, 0.05)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CheckIcon size={11} color="#2563eb" />
-              </span>
+              <CheckIcon size={13} color="#2563eb" />
               <span>{language === 'en' ? '100% Secure Checkout SSL' : 'Thanh Toán Chuẩn An Toàn SSL'}</span>
             </span>
           </div>

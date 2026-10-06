@@ -727,7 +727,7 @@
   height: 32px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1355,14 +1355,14 @@
 
 .order-lookup-badge-icon {
   font-size: 24px;
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.18);
   width: 42px;
   height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  border: 1px solid rgba(59, 130, 246, 0.4);
+  border: none;
 }
 
 .order-lookup-title {
@@ -1743,5 +1743,208 @@
   transform: rotate(180deg);
   transition: transform 0.25s ease;
 }
+
+/* ==========================================================================
+   DARK MODE HARMONIZATION RULES FOR HEADER SUBSYSTEMS
+   ========================================================================== */
+[data-theme="dark"] .shopee-search-dropdown-menu {
+  background: var(--bg-card, #1e293b) !important;
+  border-color: var(--border-medium, #334155) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .search-quick-chips-wrapper {
+  background: var(--bg-muted, #141c2e);
+  border-bottom-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .search-quick-chips-label {
+  color: var(--text-muted, #94a3b8);
+}
+
+[data-theme="dark"] .search-quick-chip-item {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .search-quick-chip-item:hover {
+  background: var(--primary-light, #2c1a14);
+  color: var(--primary-color, #f97316);
+  border-color: var(--primary-color, #f97316);
+}
+
+[data-theme="dark"] .header-mini-cart-popover {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .mini-cart-header {
+  background: var(--bg-muted, #141c2e);
+  border-bottom-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .mini-cart-title {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .mini-cart-freeship-banner {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.28);
+}
+
+[data-theme="dark"] .freeship-needed,
+[data-theme="dark"] .freeship-qualified {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .mini-cart-count-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+[data-theme="dark"] .mini-cart-item-row {
+  border-bottom-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .mini-cart-item-row:hover {
+  background: var(--bg-hover, #243147);
+}
+
+[data-theme="dark"] .mini-cart-item-img {
+  border-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .mini-cart-item-name {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .mini-cart-more-hint {
+  background: var(--bg-muted, #141c2e);
+  border-top-color: var(--border-medium, #334155);
+  color: var(--text-muted, #94a3b8);
+}
+
+[data-theme="dark"] .mini-cart-footer {
+  background: var(--bg-muted, #141c2e);
+  border-top-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .mini-cart-subtotal-label {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .mini-cart-empty-title {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .mini-cart-empty-sub {
+  color: var(--text-muted, #94a3b8);
+}
+
+[data-theme="dark"] .header-user-dropdown-card {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
+}
+
+[data-theme="dark"] .user-dropdown-header {
+  border-bottom-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .user-dropdown-name {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .user-dropdown-email {
+  color: var(--text-muted, #94a3b8);
+}
+
+[data-theme="dark"] .user-dropdown-item {
+  color: var(--text-secondary, #cbd5e1);
+}
+
+[data-theme="dark"] .user-dropdown-item:hover {
+  background: var(--bg-hover, #243147);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .user-dropdown-item .item-text strong {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .user-dropdown-item .item-text small {
+  color: var(--text-muted, #94a3b8);
+}
+
+[data-theme="dark"] .user-dropdown-divider {
+  background: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .order-lookup-modal-card {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .order-lookup-modal-header {
+  background: linear-gradient(135deg, #0b0f19 0%, #1e293b 100%);
+  border-bottom-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .order-lookup-search-input {
+  background: var(--bg-muted, #141c2e);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .order-lookup-search-input:focus {
+  border-color: var(--primary-color, #f97316);
+}
+
+[data-theme="dark"] .order-lookup-demo-chip {
+  background: var(--bg-muted, #141c2e);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .order-lookup-demo-chip:hover {
+  background: var(--bg-hover, #243147);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .order-lookup-result-card {
+  background: var(--bg-muted, #141c2e);
+  border-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .result-carrier-info {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .result-order-id {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .timeline-step-name {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .order-lookup-view-all-btn {
+  background: rgba(59, 130, 246, 0.16);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+[data-theme="dark"] .order-lookup-view-all-btn:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
 
 

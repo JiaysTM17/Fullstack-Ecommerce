@@ -76,9 +76,7 @@ export default function HeroBanner({ onSelectCategory }) {
               <div className="shopee-hero-overlay" />
               <div className="shopee-hero-content">
                 <span className="shopee-hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', flexShrink: 0 }}>
-                    {idx === 0 ? <SparklesIcon size={12} color="#f59e0b" /> : idx === 1 ? <FlameIcon size={12} color="#ef4444" /> : <ShieldCheckIcon size={12} color="#10b981" />}
-                  </span>
+                  {idx === 0 ? <SparklesIcon size={14} color="#f59e0b" /> : idx === 1 ? <FlameIcon size={14} color="#ef4444" /> : <ShieldCheckIcon size={14} color="#10b981" />}
                   <span>{slide.badge}</span>
                 </span>
                 <h2 className="shopee-hero-title">{slide.title}</h2>
@@ -90,9 +88,7 @@ export default function HeroBanner({ onSelectCategory }) {
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 >
                   <span>{slide.buttonText}</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', flexShrink: 0 }}>
-                    <ChevronRightIcon size={14} color="#ffffff" />
-                  </span>
+                  <ChevronRightIcon size={14} color="#ffffff" />
                 </button>
               </div>
             </div>
@@ -106,9 +102,7 @@ export default function HeroBanner({ onSelectCategory }) {
           onClick={prevSlide}
           aria-label="Slide trước"
         >
-          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.28)', border: '1px solid rgba(255, 255, 255, 0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ChevronLeftIcon size={18} color="#ffffff" />
-          </span>
+          <ChevronLeftIcon size={20} color="#ffffff" />
         </button>
         <button
           type="button"
@@ -116,9 +110,7 @@ export default function HeroBanner({ onSelectCategory }) {
           onClick={nextSlide}
           aria-label="Slide kế tiếp"
         >
-          <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.28)', border: '1px solid rgba(255, 255, 255, 0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ChevronRightIcon size={18} color="#ffffff" />
-          </span>
+          <ChevronRightIcon size={20} color="#ffffff" />
         </button>
 
         {/* Pagination Dots */}
@@ -138,8 +130,8 @@ export default function HeroBanner({ onSelectCategory }) {
       {/* Shopee-style Top Value Propositions Strip */}
       <div className="shopee-hero-features">
         <div className="shopee-hero-feature-item">
-          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(22, 163, 74, 0.1)', border: '1px solid rgba(22, 163, 74, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <ShieldCheckIcon size={20} color="#16a34a" />
+          <div className="banner-prop-icon">
+            <ShieldCheckIcon size={24} color="#16a34a" />
           </div>
           <div>
             <strong>100% Chính Hãng</strong>
@@ -147,8 +139,8 @@ export default function HeroBanner({ onSelectCategory }) {
           </div>
         </div>
         <div className="shopee-hero-feature-item">
-          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <TruckIcon size={20} color="#ea580c" />
+          <div className="banner-prop-icon">
+            <TruckIcon size={24} color="var(--primary-color)" />
           </div>
           <div>
             <strong>Freeship Toàn Quốc</strong>
@@ -156,8 +148,8 @@ export default function HeroBanner({ onSelectCategory }) {
           </div>
         </div>
         <div className="shopee-hero-feature-item">
-          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <RefreshIcon size={20} color="#2563eb" />
+          <div className="banner-prop-icon">
+            <RefreshIcon size={24} color="#2563eb" />
           </div>
           <div>
             <strong>Đổi Trả 30 Ngày</strong>
@@ -165,8 +157,8 @@ export default function HeroBanner({ onSelectCategory }) {
           </div>
         </div>
         <div className="shopee-hero-feature-item">
-          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <CoinIcon size={20} color="#d97706" />
+          <div className="banner-prop-icon">
+            <CoinIcon size={24} color="#d97706" />
           </div>
           <div>
             <strong>Tích Lũy Mini Xu</strong>
@@ -174,8 +166,8 @@ export default function HeroBanner({ onSelectCategory }) {
           </div>
         </div>
         <div className="shopee-hero-feature-item">
-          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(2, 132, 199, 0.1)', border: '1px solid rgba(2, 132, 199, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <ChatIcon size={20} color="#0284c7" />
+          <div className="banner-prop-icon">
+            <ChatIcon size={24} color="#0284c7" />
           </div>
           <div>
             <strong>Hỗ Trợ 24/7</strong>

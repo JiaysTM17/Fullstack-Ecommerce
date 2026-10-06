@@ -88,12 +88,10 @@ export default function MobileBottomNav() {
             color: currentPath === '/' ? '#2563eb' : '#64748b',
           }}
         >
-          <span style={{ width: '28px', height: '28px', borderRadius: '8px', background: currentPath === '/' ? 'rgba(37, 99, 235, 0.12)' : 'transparent', border: currentPath === '/' ? '1px solid rgba(37, 99, 235, 0.25)' : '1px solid transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }}>
-            <HomeIcon
-              size={18}
-              color={currentPath === '/' ? '#2563eb' : '#64748b'}
-            />
-          </span>
+          <HomeIcon
+            size={20}
+            color={currentPath === '/' ? '#2563eb' : '#64748b'}
+          />
           <span style={{ fontSize: '10.5px', fontWeight: currentPath === '/' ? 700 : 500 }}>
             Trang Chủ
           </span>
@@ -111,9 +109,7 @@ export default function MobileBottomNav() {
             color: '#ea580c',
           }}
         >
-          <span style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.08)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <PackageIcon size={18} color="#ea580c" />
-          </span>
+          <PackageIcon size={20} color="#ea580c" />
           <span style={{ fontSize: '10.5px', fontWeight: 600 }}>
             Danh Mục
           </span>
@@ -128,15 +124,13 @@ export default function MobileBottomNav() {
             color: '#0284c7',
           }}
         >
-          <div style={{ position: 'relative' }}>
-            <span style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.08)', border: '1px solid rgba(2, 132, 199, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ChatIcon size={18} color="#0284c7" />
-            </span>
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChatIcon size={20} color="#0284c7" />
             <span
               style={{
                 position: 'absolute',
                 top: '-2px',
-                right: '-4px',
+                right: '-3px',
                 width: '7px',
                 height: '7px',
                 borderRadius: '50%',
@@ -159,13 +153,11 @@ export default function MobileBottomNav() {
             color: currentPath === '/cart' ? '#9333ea' : '#64748b',
           }}
         >
-          <div style={{ position: 'relative' }}>
-            <span style={{ width: '28px', height: '28px', borderRadius: '8px', background: currentPath === '/cart' ? 'rgba(147, 51, 234, 0.12)' : 'transparent', border: currentPath === '/cart' ? '1px solid rgba(147, 51, 234, 0.25)' : '1px solid transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }}>
-              <CartIcon
-                size={18}
-                color={currentPath === '/cart' ? '#9333ea' : '#64748b'}
-              />
-            </span>
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CartIcon
+              size={20}
+              color={currentPath === '/cart' ? '#9333ea' : '#64748b'}
+            />
             {totalQuantity > 0 && (
               <span
                 style={{
@@ -208,12 +200,10 @@ export default function MobileBottomNav() {
             color: (currentPath === '/profile' || currentPath === '/orders' || currentPath === '/login') ? '#10b981' : '#64748b',
           }}
         >
-          <span style={{ width: '28px', height: '28px', borderRadius: '8px', background: (currentPath === '/profile' || currentPath === '/orders' || currentPath === '/login') ? 'rgba(16, 185, 129, 0.12)' : 'transparent', border: (currentPath === '/profile' || currentPath === '/orders' || currentPath === '/login') ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }}>
-            <UserIcon
-              size={18}
-              color={(currentPath === '/profile' || currentPath === '/orders' || currentPath === '/login') ? '#10b981' : '#64748b'}
-            />
-          </span>
+          <UserIcon
+            size={20}
+            color={(currentPath === '/profile' || currentPath === '/orders' || currentPath === '/login') ? '#10b981' : '#64748b'}
+          />
           <span style={{ fontSize: '10.5px', fontWeight: (currentPath === '/profile' || currentPath === '/orders') ? 700 : 500 }}>
             {user ? 'Tôi' : 'Tài Khoản'}
           </span>

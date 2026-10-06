@@ -47,12 +47,12 @@ export default function AccountSidebar({
   const avatarUrl = user?.avatar;
 
   const STATUS_ITEMS = [
-    { id: 'all', label: 'Tất cả đơn', count: orderCounts.all, icon: <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><PackageIcon size={12} color="#2563eb" /></span> },
-    { id: 'pending', label: 'Chờ xác nhận', count: orderCounts.pending, icon: <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'rgba(245, 158, 11, 0.14)', border: '1px solid rgba(245, 158, 11, 0.32)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><ClockIcon size={12} color="#d97706" /></span> },
-    { id: 'shipping', label: 'Đang vận chuyển', count: orderCounts.shipping, icon: <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><TruckIcon size={12} color="#059669" /></span> },
-    { id: 'completed', label: 'Hoàn thành', count: orderCounts.completed, icon: <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><CheckIcon size={12} color="#16a34a" /></span> },
-    { id: 'returning', label: 'Đổi trả / Hoàn tiền', count: orderCounts.returning, icon: <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'rgba(147, 51, 234, 0.12)', border: '1px solid rgba(147, 51, 234, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><ReturnIcon size={12} color="#9333ea" /></span> },
-    { id: 'cancelled', label: 'Đã hủy', count: orderCounts.cancelled, icon: <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><CloseIcon size={12} color="#ef4444" /></span> },
+    { id: 'all', label: 'Tất cả đơn', count: orderCounts.all, icon: <PackageIcon size={16} color="#2563eb" /> },
+    { id: 'pending', label: 'Chờ xác nhận', count: orderCounts.pending, icon: <ClockIcon size={16} color="#d97706" /> },
+    { id: 'shipping', label: 'Đang vận chuyển', count: orderCounts.shipping, icon: <TruckIcon size={16} color="#059669" /> },
+    { id: 'completed', label: 'Hoàn thành', count: orderCounts.completed, icon: <CheckIcon size={16} color="#16a34a" /> },
+    { id: 'returning', label: 'Đổi trả / Hoàn tiền', count: orderCounts.returning, icon: <ReturnIcon size={16} color="#9333ea" /> },
+    { id: 'cancelled', label: 'Đã hủy', count: orderCounts.cancelled, icon: <CloseIcon size={16} color="#ef4444" /> },
   ];
 
   return (
@@ -80,9 +80,7 @@ export default function AccountSidebar({
               : 'Thành Viên Thân Thiết'}
           </span>
           <Link to="/profile?tab=profile" className="account-sidebar-edit-link">
-            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <PencilIcon size={10} color="#2563eb" />
-            </span>
+            <PencilIcon size={12} color="#2563eb" />
             <span>Sửa hồ sơ</span>
           </Link>
         </div>
@@ -109,7 +107,7 @@ export default function AccountSidebar({
               }}
             >
               <div className="sidebar-btn-left">
-                <span className="sidebar-icon-cell" style={{ background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.28)' }}><PackageIcon size={15} color="#0284c7" /></span>
+                <span className="sidebar-icon-cell" style={{ background: 'rgba(2, 132, 199, 0.12)', border: 'none' }}><PackageIcon size={16} color="#0284c7" /></span>
                 <span className="sidebar-menu-label">Lịch sử đơn mua</span>
               </div>
               {orderCounts.all > 0 && (
@@ -157,7 +155,7 @@ export default function AccountSidebar({
               }}
             >
               <div className="sidebar-btn-left">
-                <span className="sidebar-icon-cell" style={{ background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.28)' }}><TruckIcon size={15} color="#059669" /></span>
+                <span className="sidebar-icon-cell" style={{ background: 'rgba(5, 150, 105, 0.12)', border: 'none' }}><TruckIcon size={16} color="#059669" /></span>
                 <span className="sidebar-menu-label">Tra cứu vận đơn SPX</span>
               </div>
               <span className="account-sidebar-badge-spx">Trực tiếp</span>
@@ -177,7 +175,7 @@ export default function AccountSidebar({
               className={`account-sidebar-link ${activeSection === 'profile' ? 'active' : ''}`}
             >
               <div className="sidebar-btn-left">
-                <span className="sidebar-icon-cell" style={{ background: 'rgba(124, 58, 237, 0.12)', border: '1px solid rgba(124, 58, 237, 0.28)' }}><UserIcon size={15} color="#7c3aed" /></span>
+                <span className="sidebar-icon-cell" style={{ background: 'rgba(124, 58, 237, 0.12)', border: 'none' }}><UserIcon size={16} color="#7c3aed" /></span>
                 <span className="sidebar-menu-label">Hồ sơ cá nhân</span>
               </div>
             </Link>
@@ -187,7 +185,7 @@ export default function AccountSidebar({
               className={`account-sidebar-link ${activeSection === 'addresses' ? 'active' : ''}`}
             >
               <div className="sidebar-btn-left">
-                <span className="sidebar-icon-cell" style={{ background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.28)' }}><MapPinIcon size={15} color="#ea580c" /></span>
+                <span className="sidebar-icon-cell" style={{ background: 'rgba(234, 88, 12, 0.12)', border: 'none' }}><MapPinIcon size={16} color="#ea580c" /></span>
                 <span className="sidebar-menu-label">Sổ địa chỉ nhận hàng</span>
               </div>
             </Link>
@@ -197,7 +195,7 @@ export default function AccountSidebar({
               className={`account-sidebar-link ${activeSection === 'payments' ? 'active' : ''}`}
             >
               <div className="sidebar-btn-left">
-                <span className="sidebar-icon-cell" style={{ background: 'rgba(13, 148, 136, 0.12)', border: '1px solid rgba(13, 148, 136, 0.28)' }}><CreditCardIcon size={15} color="#0d9488" /></span>
+                <span className="sidebar-icon-cell" style={{ background: 'rgba(13, 148, 136, 0.12)', border: 'none' }}><CreditCardIcon size={16} color="#0d9488" /></span>
                 <span className="sidebar-menu-label">Ngân hàng & Thẻ liên kết</span>
               </div>
             </Link>
@@ -207,7 +205,7 @@ export default function AccountSidebar({
               className={`account-sidebar-link ${activeSection === 'security' ? 'active' : ''}`}
             >
               <div className="sidebar-btn-left">
-                <span className="sidebar-icon-cell" style={{ background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.28)' }}><LockIcon size={15} color="#6366f1" /></span>
+                <span className="sidebar-icon-cell" style={{ background: 'rgba(99, 102, 241, 0.12)', border: 'none' }}><LockIcon size={16} color="#6366f1" /></span>
                 <span className="sidebar-menu-label">Đổi mật khẩu & Bảo mật</span>
               </div>
             </Link>
@@ -226,7 +224,7 @@ export default function AccountSidebar({
               className={`account-sidebar-link ${activeSection === 'vouchers' ? 'active' : ''}`}
             >
               <div className="sidebar-btn-left">
-                <span className="sidebar-icon-cell" style={{ background: 'rgba(249, 115, 22, 0.12)', border: '1px solid rgba(249, 115, 22, 0.28)' }}><TicketIcon size={15} color="#ea580c" /></span>
+                <span className="sidebar-icon-cell" style={{ background: 'rgba(249, 115, 22, 0.12)', border: 'none' }}><TicketIcon size={16} color="#ea580c" /></span>
                 <span className="sidebar-menu-label">Kho Voucher Giảm Giá</span>
               </div>
             </Link>
@@ -236,7 +234,7 @@ export default function AccountSidebar({
               className={`account-sidebar-link ${activeSection === 'coins' ? 'active' : ''}`}
             >
               <div className="sidebar-btn-left">
-                <span className="sidebar-icon-cell" style={{ background: 'rgba(217, 119, 6, 0.14)', border: '1px solid rgba(217, 119, 6, 0.30)' }}><CoinIcon size={15} color="#d97706" /></span>
+                <span className="sidebar-icon-cell" style={{ background: 'rgba(217, 119, 6, 0.14)', border: 'none' }}><CoinIcon size={16} color="#d97706" /></span>
                 <span className="sidebar-menu-label">Điểm Xu tích lũy</span>
               </div>
               <span className="account-sidebar-badge-coins">
@@ -249,7 +247,7 @@ export default function AccountSidebar({
               className={`account-sidebar-link ${activeSection === 'wishlist' ? 'active' : ''}`}
             >
               <div className="sidebar-btn-left">
-                <span className="sidebar-icon-cell" style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.28)' }}><HeartIcon size={15} color="#ef4444" /></span>
+                <span className="sidebar-icon-cell" style={{ background: 'rgba(239, 68, 68, 0.12)', border: 'none' }}><HeartIcon size={16} color="#ef4444" /></span>
                 <span className="sidebar-menu-label">Sản phẩm Yêu thích</span>
               </div>
             </Link>
@@ -265,12 +263,10 @@ export default function AccountSidebar({
             <div className="account-sidebar-group-content">
               <Link to="/seller/dashboard" className="account-sidebar-link seller-portal-link">
                 <div className="sidebar-btn-left">
-                  <span className="sidebar-icon-cell" style={{ background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.28)' }}><StoreIcon size={15} color="#ea580c" /></span>
+                  <span className="sidebar-icon-cell" style={{ background: 'rgba(234, 88, 12, 0.12)', border: 'none' }}><StoreIcon size={16} color="#ea580c" /></span>
                   <span className="sidebar-menu-label">Kênh Người Bán Hàng</span>
                 </div>
-                <span className="link-arrow" style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRightIcon size={11} color="#ea580c" />
-                </span>
+                <ChevronRightIcon size={14} color="#ea580c" className="link-arrow" />
               </Link>
             </div>
           </div>
@@ -284,12 +280,10 @@ export default function AccountSidebar({
             <div className="account-sidebar-group-content">
               <Link to="/admin/dashboard" className="account-sidebar-link admin-portal-link">
                 <div className="sidebar-btn-left">
-                  <span className="sidebar-icon-cell" style={{ background: 'rgba(220, 38, 38, 0.12)', border: '1px solid rgba(220, 38, 38, 0.28)' }}><ShieldIcon size={15} color="#dc2626" /></span>
+                  <span className="sidebar-icon-cell" style={{ background: 'rgba(220, 38, 38, 0.12)', border: 'none' }}><ShieldIcon size={16} color="#dc2626" /></span>
                   <span className="sidebar-menu-label">Bảng Quản Trị Toàn Sàn</span>
                 </div>
-                <span className="link-arrow" style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.12)', border: '1px solid rgba(220, 38, 38, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRightIcon size={11} color="#dc2626" />
-                </span>
+                <ChevronRightIcon size={14} color="#dc2626" className="link-arrow" />
               </Link>
             </div>
           </div>
