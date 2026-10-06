@@ -31,7 +31,35 @@
   margin-bottom: 12px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 8px;
+}
+
+/* Custom modern slim scrollbar for filter lists */
+.shopee-filter-scrollable {
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-medium, #cbd5e1) transparent;
+  padding-right: 4px;
+}
+
+.shopee-filter-scrollable::-webkit-scrollbar {
+  width: 5px;
+}
+
+.shopee-filter-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shopee-filter-scrollable::-webkit-scrollbar-thumb {
+  background: var(--border-medium, #cbd5e1);
+  border-radius: 4px;
+}
+
+.shopee-filter-scrollable::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted, #94a3b8);
 }
 
 .shopee-filter-list {
@@ -44,19 +72,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--text-secondary, #475569);
   cursor: pointer;
   user-select: none;
   transition: color 0.15s ease;
+  line-height: 1.4;
 }
 
 .shopee-filter-item:hover {
-  color: var(--primary-color, #4f46e5);
+  color: var(--primary-color, #ea580c);
 }
 
 .shopee-filter-item.active {
-  color: var(--primary-color, #4f46e5);
+  color: var(--primary-color, #ea580c);
   font-weight: 600;
 }
 

@@ -60,11 +60,11 @@ const POPULAR_SEARCHES = [
 ];
 
 const QUICK_CATEGORY_CHIPS = [
-  { label: 'Điện Thoại', icon: <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><SmartphoneIcon size={11} color="#3b82f6" /></span>, query: 'Điện tử' },
-  { label: 'Thời Trang', icon: <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(236, 72, 153, 0.12)', border: '1px solid rgba(236, 72, 153, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><ShirtIcon size={11} color="#ec4899" /></span>, query: 'Thời trang' },
-  { label: 'Gia Dụng', icon: <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><HomeIcon size={11} color="#f59e0b" /></span>, query: 'Gia dụng' },
-  { label: 'Làm Đẹp', icon: <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(244, 63, 94, 0.12)', border: '1px solid rgba(244, 63, 94, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><SparklesIcon size={11} color="#f43f5e" /></span>, query: 'Làm đẹp' },
-  { label: 'Phụ Kiện', icon: <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><BoltIcon size={11} color="#ea580c" /></span>, query: 'Tai nghe' },
+  { label: 'Điện Thoại', icon: <SmartphoneIcon size={13} color="#3b82f6" />, query: 'Điện tử' },
+  { label: 'Thời Trang', icon: <ShirtIcon size={13} color="#ec4899" />, query: 'Thời trang' },
+  { label: 'Gia Dụng', icon: <HomeIcon size={13} color="#f59e0b" />, query: 'Gia dụng' },
+  { label: 'Làm Đẹp', icon: <SparklesIcon size={13} color="#f43f5e" />, query: 'Làm đẹp' },
+  { label: 'Phụ Kiện', icon: <BoltIcon size={13} color="#ea580c" />, query: 'Tai nghe' },
 ];
 
 const Header = ({
@@ -388,24 +388,18 @@ const Header = ({
         {/* Top Mini Utility Bar */}
         <div className="shopee-topbar">
           <div className="shopee-topbar-left">
-            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <PackageIcon size={11} color="#ea580c" />
-              </span>
+            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <PackageIcon size={13} color="#ffffff" />
               <span>{t('nav_download_app', 'Tải Ứng Dụng')}</span>
             </span>
             <span className="shopee-topbar-divider" />
-            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <PhoneIcon size={11} color="#2563eb" />
-              </span>
+            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <PhoneIcon size={13} color="#ffffff" />
               <span>Hotline: 1900 6868</span>
             </span>
             <span className="shopee-topbar-divider" />
-            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ChatIcon size={11} color="#16a34a" />
-              </span>
+            <span className="shopee-topbar-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <ChatIcon size={13} color="#ffffff" />
               <span>{t('nav_support', 'Chăm Sóc Khách Hàng 24/7')}</span>
             </span>
           </div>
@@ -417,11 +411,9 @@ const Header = ({
               className="header-toggle-btn"
               onClick={toggleLanguage}
               title={language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             >
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <GlobeIcon size={11} color="#2563eb" />
-              </span>
+              <GlobeIcon size={12} color="#ffffff" />
               <span>{language === 'vi' ? 'VI' : 'EN'}</span>
             </button>
 
@@ -431,20 +423,16 @@ const Header = ({
               className="header-toggle-btn"
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Chế độ Sáng' : 'Chế độ Tối'}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             >
               {theme === 'dark' ? (
                 <>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <SparklesIcon size={10} color="#f59e0b" />
-                  </span>
+                  <SparklesIcon size={12} color="#f59e0b" />
                   <span>Tối</span>
                 </>
               ) : (
                 <>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <BoltIcon size={10} color="#ea580c" />
-                  </span>
+                  <BoltIcon size={12} color="#ffffff" />
                   <span>Sáng</span>
                 </>
               )}
@@ -458,9 +446,9 @@ const Header = ({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  background: 'rgba(239, 68, 68, 0.12)',
-                  color: '#dc2626',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  color: '#fca5a5',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
                   padding: '3px 10px',
                   borderRadius: '20px',
                   fontSize: '11px',
@@ -468,11 +456,9 @@ const Header = ({
                   letterSpacing: '0.4px',
                 }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ShieldIcon size={11} color="#dc2626" />
-                </span>
+                <ShieldIcon size={13} color="#fca5a5" />
                 <span>QUẢN TRỊ VIÊN SÀN</span>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a' }}></span>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }}></span>
               </div>
             ) : user?.role === 'seller' ? (
               <button
@@ -484,7 +470,7 @@ const Header = ({
                   alignItems: 'center',
                   gap: '6px',
                   background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(208, 1, 27, 0.08) 100%)',
-                  color: '#ea580c',
+                  color: '#fdba74',
                   border: '1px solid rgba(234, 88, 12, 0.35)',
                   padding: '3px 12px',
                   borderRadius: '20px',
@@ -494,9 +480,7 @@ const Header = ({
                 }}
                 title="Kênh Quản Trị Gian Hàng Của Bạn"
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <StoreIcon size={11} color="#ea580c" />
-                </span>
+                <StoreIcon size={13} color="#fdba74" />
                 <span>Kênh Người Bán</span>
                 <span style={{ fontSize: '9.5px', background: '#dc2626', color: '#fff', padding: '1px 5px', borderRadius: '8px', fontWeight: 800 }}>MALL</span>
               </button>
@@ -508,11 +492,9 @@ const Header = ({
                 title="Điểm Thưởng & Săn Xu Hàng Ngày"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CoinIcon size={11} color="#f59e0b" />
-                </span>
+                <CoinIcon size={13} color="#fef08a" />
                 <span>{(coins || 0).toLocaleString('vi-VN')} Xu</span>
-                <SparklesIcon size={11} color="#f59e0b" />
+                <SparklesIcon size={12} color="#fef08a" />
               </button>
             ) : (
               <button
@@ -522,11 +504,9 @@ const Header = ({
                 title="Khám phá Điểm Thưởng & Săn Xu"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CoinIcon size={11} color="#f59e0b" />
-                </span>
+                <CoinIcon size={13} color="#fef08a" />
                 <span>Săn Xu & Thưởng</span>
-                <SparklesIcon size={11} color="#f59e0b" />
+                <SparklesIcon size={12} color="#fef08a" />
               </button>
             )}
           </div>
@@ -844,25 +824,11 @@ const Header = ({
               aria-label={`Yêu thích, ${wishlistCount} sản phẩm`}
               title={t('wishlist_title')}
             >
-              <span
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '8px',
-                  background: 'rgba(239, 68, 68, 0.12)',
-                  border: '1px solid rgba(239, 68, 68, 0.25)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'transform 0.15s ease',
-                }}
-              >
-                <HeartIcon
-                  size={18}
-                  fill={wishlistCount > 0 ? "#ef4444" : "none"}
-                  color={wishlistCount > 0 ? "#ef4444" : "#f43f5e"}
-                />
-              </span>
+              <HeartIcon
+                size={22}
+                fill={wishlistCount > 0 ? "#ef4444" : "none"}
+                color={wishlistCount > 0 ? "#ef4444" : "#ffffff"}
+              />
               {wishlistCount > 0 && (
                 <span key={wishlistCount} className="shopee-action-badge badge-amber anim-badge-bounce">
                   {wishlistCount > 99 ? '99+' : wishlistCount}
@@ -884,21 +850,7 @@ const Header = ({
                 aria-label={`Giỏ hàng, ${cartCount} sản phẩm`}
                 title={t('cart')}
               >
-                <span
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '8px',
-                    background: 'rgba(37, 99, 235, 0.12)',
-                    border: '1px solid rgba(37, 99, 235, 0.25)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'transform 0.15s ease',
-                  }}
-                >
-                  <CartIcon size={18} color="#2563eb" />
-                </span>
+                <CartIcon size={22} color="#ffffff" />
                 <span key={cartCount} className="shopee-action-badge badge-indigo anim-badge-bounce">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
@@ -1297,9 +1249,7 @@ const Header = ({
             title="Mở danh mục ngành hàng"
             style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <LayersIcon size={12} color="#2563eb" />
-            </span>
+            <LayersIcon size={14} color="#ffffff" />
             <span>{t('nav_all_categories', 'Tất Cả Danh Mục')}</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', opacity: 0.8 }}>
               <ChevronDownIcon size={10} />
@@ -1308,13 +1258,11 @@ const Header = ({
 
           <span
             className="shopee-subnav-link"
-            style={{ fontWeight: 700, color: 'var(--primary-color, #ea580c)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            style={{ fontWeight: 700, color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onClick={() => handleSubnavItemClick('/', null)}
             title="Quay lại trang chủ và xem toàn bộ sản phẩm"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <HomeIcon size={12} color="#ea580c" />
-            </span>
+            <HomeIcon size={14} color="#ffffff" />
             <span>{t('nav_all_products', 'Trang Chủ')}</span>
           </span>
 
@@ -1324,9 +1272,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Hot+Deal', 'flash-deals-section')}
             title="Săn deal chớp nhoáng giờ vàng"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <FlameIcon size={12} color="#ef4444" />
-            </span>
+            <FlameIcon size={14} color="#fde047" />
             <span>{t('nav_flash_deals', 'Flash Deals')}</span>
           </span>
 
@@ -1336,9 +1282,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Best+Seller', 'catalog-section')}
             title="Khám phá các sản phẩm bán chạy nhất sàn"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <StarIcon size={12} color="#f59e0b" fill="#f59e0b" />
-            </span>
+            <StarIcon size={14} color="#fde047" fill="#fde047" />
             <span>{t('nav_best_sellers', 'Bán Chạy Nhất')}</span>
           </span>
 
@@ -1348,9 +1292,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?badge=Amazon%27s+Choice', 'catalog-section')}
             title="Top sản phẩm đánh giá cao tuyển chọn"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <SparklesIcon size={12} color="#8b5cf6" />
-            </span>
+            <SparklesIcon size={14} color="#ffffff" />
             <span>{t('nav_featured_picks', 'Hàng Tuyển Chọn')}</span>
           </span>
 
@@ -1360,9 +1302,7 @@ const Header = ({
             onClick={() => handleSubnavItemClick('/?fastDelivery=1', 'catalog-section')}
             title="Sản phẩm hỗ trợ giao hàng hỏa tốc trong 2H"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 179, 8, 0.15)', border: '1px solid rgba(234, 179, 8, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <BoltIcon size={12} color="#eab308" />
-            </span>
+            <BoltIcon size={14} color="#ffffff" />
             <span>{t('nav_fast_delivery', 'Giao 2H Siêu Tốc')}</span>
           </span>
 
@@ -1372,9 +1312,7 @@ const Header = ({
             onClick={() => setShowRewardsModal(true)}
             title="Vào Rewards Hub nhận xu & quay thưởng"
           >
-            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(249, 115, 22, 0.15)', border: '1px solid rgba(249, 115, 22, 0.28)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <TicketIcon size={12} color="#f97316" />
-            </span>
+            <TicketIcon size={14} color="#fef08a" />
             <span>{t('nav_rewards_hub', 'Săn Xu & Voucher')}</span>
           </span>
         </nav>

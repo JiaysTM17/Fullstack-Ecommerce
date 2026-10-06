@@ -526,9 +526,7 @@ export default function CategoryShowcase({ onSelectCategory, onSelectKeyword, on
             border: '1px solid var(--border-light, #e2e8f0)',
           }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', flexShrink: 0 }}>
-            <TruckIcon size={12} color="#059669" />
-          </span>
+          <TruckIcon size={14} color="#059669" />
           <span>{language === 'en' ? '20 Top Categories · Fast Delivery 2H' : '20 Ngành hàng nổi bật · Giao hỏa tốc 2H'}</span>
         </span>
       </div>
