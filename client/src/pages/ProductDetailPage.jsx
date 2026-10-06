@@ -15,6 +15,7 @@ import { addToWishlist as apiAddToWishlist, removeFromWishlist as apiRemoveFromW
 import { formatCurrency } from "../utils/formatCurrency";
 import {
   ShoppingBagIcon,
+  PackageIcon,
   BoltIcon,
   HeartIcon,
   CopyIcon,
@@ -227,10 +228,10 @@ export default function ProductDetailPage() {
   if (error || !product) {
     return (
       <main className="shopee-container shopee-empty-state" style={{ padding: "80px 20px", textAlign: "center" }}>
-        <div style={{ display: "inline-flex", justifyContent: "center", marginBottom: "18px" }}>
-          <span style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.1)", border: "1.5px solid rgba(239, 68, 68, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px rgba(239, 68, 68, 0.12)" }}>
-            <AlertCircleIcon size={34} color="#ef4444" />
-          </span>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "18px" }}>
+          <div className="icon-accent-red" style={{ padding: "16px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.1)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            <AlertCircleIcon size={36} color="currentColor" />
+          </div>
         </div>
         <h1 style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary)", margin: "0 0 10px 0" }}>
           Không tìm thấy sản phẩm

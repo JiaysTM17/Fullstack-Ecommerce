@@ -552,7 +552,12 @@
 
 @media (max-width: 768px) {
   .amazon-pdp-container {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
     margin-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .amazon-pdp-page {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   }
 
   .amazon-mobile-sticky-bar {

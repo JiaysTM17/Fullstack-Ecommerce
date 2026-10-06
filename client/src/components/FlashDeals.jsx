@@ -51,86 +51,57 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
       {/* Top Main Deals Header */}
       <div className="shopee-deals-header">
         <div className="shopee-deals-title-area">
-          <div className="shopee-deals-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <BoltIcon size={16} color="#ffffff" />
-            <span>FLASH DEALS / GIỜ VÀNG</span>
+          <div className="shopee-deals-badge">
+            <span className="shopee-deals-bolt">
+              <BoltIcon size={18} color="#ffffff" />
+            </span>
+            <span>FLASH SALE</span>
           </div>
+
           <div className="shopee-countdown-box">
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, fontSize: '13px' }}>
-              <ClockIcon size={14} color="var(--primary-color)" />
+            <span className="shopee-countdown-label">
+              <ClockIcon size={14} color="#ea580c" />
               <span>KẾT THÚC TRONG</span>
             </span>
-            <span className="shopee-timer-unit">{formatUnit(timeLeft.hours)}</span>
-            <span className="shopee-timer-colon">:</span>
-            <span className="shopee-timer-unit">{formatUnit(timeLeft.minutes)}</span>
-            <span className="shopee-timer-colon">:</span>
-            <span className="shopee-timer-unit">{formatUnit(timeLeft.seconds)}</span>
+            <div className="shopee-timer-digits">
+              <span className="shopee-timer-unit">{formatUnit(timeLeft.hours)}</span>
+              <span className="shopee-timer-colon">:</span>
+              <span className="shopee-timer-unit">{formatUnit(timeLeft.minutes)}</span>
+              <span className="shopee-timer-colon">:</span>
+              <span className="shopee-timer-unit">{formatUnit(timeLeft.seconds)}</span>
+            </div>
           </div>
         </div>
 
-        <span
-          style={{
-            fontSize: '13px',
-            color: 'var(--primary-color)',
-            fontWeight: 700,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
-          }}
+        <button
+          type="button"
+          className="shopee-deals-view-all"
           onClick={() => {
             const el = document.getElementById('catalog-section');
             if (el) el.scrollIntoView({ behavior: 'smooth' });
           }}
         >
           <span>Xem tất cả deal sốc</span>
-          <ChevronRightIcon size={13} color="var(--primary-color)" />
-        </span>
+          <ChevronRightIcon size={14} color="currentColor" />
+        </button>
       </div>
 
       {/* Time Slots Timeline Bar */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          background: 'var(--bg-muted, #f8fafc)',
-          borderRadius: '10px',
-          border: '1px solid var(--border-light, #e2e8f0)',
-          overflow: 'hidden',
-          marginBottom: '18px',
-        }}
-      >
+      <div className="shopee-time-slots-bar">
         {TIME_SLOTS.map((slot) => {
           const isSelected = selectedSlot === slot.id;
           return (
             <button
               key={slot.id}
               type="button"
+              className={`shopee-time-slot-btn ${isSelected ? 'active' : ''}`}
               onClick={() => setSelectedSlot(slot.id)}
-              style={{
-                background: isSelected ? 'var(--primary-color)' : 'transparent',
-                color: isSelected ? '#ffffff' : 'var(--text-secondary, #475569)',
-                border: 'none',
-                padding: '10px 4px',
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
             >
-              <div style={{ fontSize: '15px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'center' }}>
-                {isSelected && (
-                  <FlameIcon size={14} color="#ffffff" />
-                )}
+              <div className="shopee-slot-time">
+                {isSelected && <FlameIcon size={15} color="#ea580c" />}
                 <span>{slot.time}</span>
               </div>
-              <div
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  opacity: isSelected ? 1 : 0.8,
-                  marginTop: '2px',
-                }}
-              >
+              <div className="shopee-slot-label">
                 {slot.label}
               </div>
             </button>
@@ -159,12 +130,17 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                   className="shopee-deal-img"
                   loading="lazy"
                 />
-                <span className="shopee-deal-tag">-{discountPercent}%</span>
+                <div className="shopee-deal-discount-badge">
+                  <span className="shopee-discount-number">-{discountPercent}%</span>
+                  <span className="shopee-discount-text">GIẢM</span>
+                </div>
               </div>
 
-              <div style={{ flex: 1, marginTop: '8px' }}>
-                <div className="shopee-deal-price">
-                  {formatCurrency ? formatCurrency(prod.price) : `${prod.price.toLocaleString()}₫`}
+              <div className="shopee-deal-info">
+                <div className="shopee-deal-price-row">
+                  <span className="shopee-deal-price">
+                    {formatCurrency ? formatCurrency(prod.price) : `${prod.price.toLocaleString()}₫`}
+                  </span>
                   <span className="shopee-deal-original">
                     {formatCurrency
                       ? formatCurrency(prod.originalPrice)
@@ -172,32 +148,21 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                   </span>
                 </div>
 
-                <div
-                  style={{
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: 'var(--text-primary, #0f172a)',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 1,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    margin: '4px 0 8px',
-                  }}
-                >
+                <div className="shopee-deal-name">
                   {prod.name}
                 </div>
-              </div>
 
-              {/* Progress bar */}
-              <div className="shopee-progress-bar-wrapper">
-                <div
-                  className="shopee-progress-bar-fill"
-                  style={{ width: `${percentSold}%` }}
-                />
-                <span className="shopee-progress-bar-text" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'center' }}>
-                  <FlameIcon size={11} color="#ffffff" />
-                  <span>ĐÃ BÁN {percentSold}%</span>
-                </span>
+                {/* Fire progress bar */}
+                <div className="shopee-fire-bar-container">
+                  <div
+                    className="shopee-fire-bar-fill"
+                    style={{ width: `${percentSold}%` }}
+                  />
+                  <div className="shopee-fire-bar-content">
+                    <FlameIcon size={12} color="#ffffff" />
+                    <span>ĐÃ BÁN {percentSold}%</span>
+                  </div>
+                </div>
               </div>
             </div>
           );
