@@ -45,8 +45,8 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
           </p>
           <p className="footer-seo-text" style={{ marginBottom: 0 }}>
             {language === 'en'
-              ? 'Security & Customer Satisfaction: 100% genuine merchandise guarantee with 30-day hassle-free returns, multi-method payment including VietQR dynamic QR code and COD, alongside 24/7 omnichannel assistance combining AI Copilot and live human support agents.'
-              : 'An tâm mua sắm: Cam kết 100% hàng chính hãng, chính sách đổi trả 30 ngày bảo vệ người mua tối đa, đa dạng phương thức thanh toán an toàn từ VietQR động đến COD, cùng dịch vụ chăm sóc khách hàng đa kênh tích hợp Trợ lý ảo AI và đội ngũ nhân viên trực tuyến 24/7.'}
+              ? 'Security & Customer Satisfaction: 100% genuine merchandise guarantee with 15-day hassle-free returns, multi-method payment including VietQR dynamic QR code and COD, alongside 24/7 omnichannel assistance combining AI Copilot and live human support agents.'
+              : 'An tâm mua sắm: Cam kết 100% hàng chính hãng, chính sách đổi trả 15 ngày bảo vệ người mua tối đa, đa dạng phương thức thanh toán an toàn từ VietQR động đến COD, cùng dịch vụ chăm sóc khách hàng đa kênh tích hợp Trợ lý ảo AI và đội ngũ nhân viên trực tuyến 24/7.'}
           </p>
         </section>
 

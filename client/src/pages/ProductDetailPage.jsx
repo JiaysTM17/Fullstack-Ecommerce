@@ -604,7 +604,7 @@ export default function ProductDetailPage() {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <CheckIcon size={16} color="#0284c7" />
-              <span><strong>Đổi trả 30 ngày:</strong> Miễn phí hoàn hàng tận nơi.</span>
+              <span><strong>Đổi trả 15 ngày:</strong> Miễn phí hoàn hàng tận nơi theo chính sách sàn.</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <ShieldIcon size={16} color="#6366f1" />
