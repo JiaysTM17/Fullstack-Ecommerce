@@ -9,6 +9,16 @@ const server = app.listen(PORT, () => {
   logger.info(`🔗 Health check: http://localhost:${PORT}/api/health`);
 });
 
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    logger.error(`💥 Cổng PORT ${PORT} đang được sử dụng bởi một tiến trình khác (EADDRINUSE). Vui lòng dừng tiến trình cũ hoặc chọn cổng khác qua biến môi trường PORT.`);
+    process.exit(1);
+  } else {
+    logger.error("💥 Lỗi khởi động HTTP server:", { error: err.message, stack: err.stack });
+    process.exit(1);
+  }
+});
+
 // ============================================================
 // GRACEFUL SHUTDOWN — Xử lý tắt server an toàn
 // ============================================================

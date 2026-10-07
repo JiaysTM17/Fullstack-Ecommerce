@@ -68,6 +68,8 @@ import {
   TrashIcon,
   HomeIcon,
   ChevronRightIcon,
+  PlusIcon,
+  LogOutIcon,
 } from '../components/OrdersIcons';
 import '../styles/auth.css';
 import '../styles/profile.css';
