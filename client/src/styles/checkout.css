@@ -17,11 +17,11 @@
 }
 
 .shopee-checkout-form-card {
-  background: #fff;
-  border-radius: var(--radius-sm);
-  padding: 24px;
-  box-shadow: var(--shadow-card);
-  border: 1px solid var(--border-light);
+  background: var(--bg-card, #fff);
+  border-radius: var(--radius-surface, 20px);
+  padding: 26px;
+  box-shadow: var(--shadow-dual-card);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.04));
 }
 
 .shopee-checkout-header {

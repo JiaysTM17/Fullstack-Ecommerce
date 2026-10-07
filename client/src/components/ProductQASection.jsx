@@ -8,7 +8,7 @@ import {
   voteProductQuestion,
   answerProductQuestion,
 } from "../services/productService";
-import { ChatIcon, LightbulbIcon, ThumbsUpIcon, StoreIcon, CheckIcon, CloseIcon } from "./OrdersIcons";
+import { ChatIcon, LightbulbIcon, ThumbsUpIcon, StoreIcon, CheckIcon, CloseIcon, ShieldCheckIcon } from "./OrdersIcons";
 
 const LOCAL_QA_KEY_PREFIX = "mini_shopee_qa_";
 const VOTED_QA_KEY = "mini_shopee_qa_voted_questions";
@@ -463,8 +463,9 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                   {answers.length > 0 ? (
                     answers.map((ans, idx) => {
                       const ansId = ans._id || ans.id || `ans_${idx}`;
-                      const isShop = ans.isShopOwner || ans.authorName === shopName;
-                      const ansAuthor = ans.authorName || ans.answeredBy || (isShop ? shopName : "Cộng đồng Shopee");
+                      const isAdmin = ans.isAdmin || ans.role === "admin" || (ans.authorName && ans.authorName.toLowerCase().includes("quản trị"));
+                      const isShop = !isAdmin && (ans.isShopOwner || ans.authorName === shopName);
+                      const ansAuthor = ans.authorName || ans.answeredBy || (isAdmin ? "Ban Quản Trị Sàn" : isShop ? shopName : "Cộng đồng Shopee");
                       const ansContent = ans.content || ans.answer || "";
                       const ansDate = ans.createdAt || ans.answeredAt;
 
@@ -483,25 +484,46 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                             <strong style={{ fontSize: "13px", color: isShop ? "var(--primary-color, #2563eb)" : "inherit" }}>
                               {ansAuthor}
                             </strong>
-                            {isShop && (
+                            {isAdmin ? (
                               <span
+                                className="squircle-pill"
                                 style={{
-                                  background: "var(--primary-color, #2563eb)",
-                                  color: "#fff",
+                                  background: "rgba(16, 185, 129, 0.15)",
+                                  color: "#10b981",
                                   fontSize: "10.5px",
                                   fontWeight: 700,
-                                  padding: "2px 7px",
-                                  borderRadius: "4px",
+                                  padding: "2px 8px",
+                                  borderRadius: "9999px",
                                   display: "inline-flex",
                                   alignItems: "center",
                                   gap: "4px",
+                                  border: "1px solid rgba(16, 185, 129, 0.25)",
                                 }}
                               >
-                                <StoreIcon size={11} color="#ffffff" />
-                                <span>Người bán</span>
-                                <CheckIcon size={10} color="#ffffff" />
+                                <ShieldCheckIcon size={12} color="#10b981" />
+                                <span>Quản trị viên</span>
                               </span>
-                            )}
+                            ) : isShop ? (
+                              <span
+                                className="squircle-pill"
+                                style={{
+                                  background: "rgba(37, 99, 235, 0.12)",
+                                  color: "var(--primary-color, #2563eb)",
+                                  fontSize: "10.5px",
+                                  fontWeight: 700,
+                                  padding: "2px 8px",
+                                  borderRadius: "9999px",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "4px",
+                                  border: "1px solid rgba(37, 99, 235, 0.25)",
+                                }}
+                              >
+                                <StoreIcon size={11} color="var(--primary-color, #2563eb)" />
+                                <span>Người bán</span>
+                                <CheckIcon size={10} color="var(--primary-color, #2563eb)" />
+                              </span>
+                            ) : null}
                             <span style={{ fontSize: "11px", color: "var(--text-muted, #94a3b8)", marginLeft: "auto" }}>
                               {ansDate ? new Date(ansDate).toLocaleDateString("vi-VN") : ""}
                             </span>

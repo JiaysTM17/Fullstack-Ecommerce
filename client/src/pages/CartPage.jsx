@@ -430,7 +430,7 @@ export default function CartPage() {
                       />
 
                       {/* Actions row: Save for later & Move to Wishlist */}
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", marginTop: "10px", paddingLeft: "100px", fontSize: "13px" }}>
+                      <div className="shopee-cart-item-actions-row" style={{ display: "flex", flexWrap: "wrap", gap: "14px", marginTop: "10px", fontSize: "13px" }}>
                         <button
                           type="button"
                           style={{ background: "none", border: "none", color: "var(--secondary-color, #0284c7)", cursor: "pointer", fontWeight: 600, padding: 0, display: "inline-flex", alignItems: "center", gap: "6px" }}

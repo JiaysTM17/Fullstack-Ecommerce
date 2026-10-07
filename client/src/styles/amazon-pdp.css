@@ -569,17 +569,19 @@
 
 .amazon-breakdown-bar-bg {
   flex: 1;
-  height: 16px;
+  height: 14px;
   background: var(--bg-muted, #f1f5f9);
-  border-radius: 4px;
+  border-radius: 9999px;
   overflow: hidden;
-  border: 1px solid var(--border-medium, #e2e8f0);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.04));
 }
 
 .amazon-breakdown-bar-fill {
   height: 100%;
-  background: #ffa41c;
-  border-radius: 3px;
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+  box-shadow: 0 1px 4px rgba(245, 158, 11, 0.25);
 }
 
 .amazon-review-item {
