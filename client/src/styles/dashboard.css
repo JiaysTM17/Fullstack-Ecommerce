@@ -171,18 +171,18 @@
 
 .shopee-metric-card {
   background: var(--bg-card, #fff);
-  border-radius: var(--radius-md, 8px);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-medium, #e2e8f0);
+  border-radius: var(--radius-card, 16px);
+  padding: 22px;
+  box-shadow: var(--shadow-dual-kpi);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.04));
   display: flex;
   flex-direction: column;
-  transition: transform var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .shopee-metric-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-dual-hover);
 }
 
 .shopee-metric-label {
@@ -193,7 +193,7 @@
 }
 
 .shopee-metric-value {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   color: var(--primary-color, #2563eb);
   line-height: 1.2;
@@ -209,10 +209,10 @@
 /* Data Table Card */
 .shopee-table-card {
   background: var(--bg-card, #fff);
-  border-radius: var(--radius-md, 8px);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-medium, #e2e8f0);
-  padding: 20px;
+  border-radius: var(--radius-surface, 20px);
+  box-shadow: var(--shadow-dual-card);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.04));
+  padding: 24px;
   margin-bottom: 24px;
 }
 
@@ -244,13 +244,16 @@
   padding: 12px 14px;
   border-bottom: 1px solid var(--border-medium, #e2e8f0);
   white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .shopee-data-table td {
-  padding: 12px 14px;
+  padding: 14px;
   border-bottom: 1px solid var(--border-light, #f1f5f9);
   color: var(--text-primary);
   vertical-align: middle;
+  transition: background-color var(--transition-fast);
 }
 
 .shopee-data-table tr:hover td {
