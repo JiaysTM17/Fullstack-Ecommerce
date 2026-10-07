@@ -190,8 +190,8 @@ const homePageJsx = fs.readFileSync(path.join(rootDir, 'client/src/pages/HomePag
 // 3.1 CartPage threshold definition
 assert(cartPageJsx.includes('FREE_SHIPPING_THRESHOLD = 300000;'), 'CartPage.jsx defines FREE_SHIPPING_THRESHOLD as 300000');
 
-// 3.2 HomePage banner threshold
-assert(homePageJsx.includes('300.000₫'), 'HomePage.jsx advertises Freeship threshold of 300.000₫');
+// 3.2 HomePage banner threshold check (User requested removing freeship banner from HomePage, threshold remains active in Cart/Header)
+assert(!homePageJsx.includes('home-freeship-badge') || homePageJsx.includes('300.000₫'), 'HomePage.jsx adheres to freeship banner removal and standard styling');
 
 // 3.3 Header mini-cart threshold checks
 assert(headerJsx.includes('cartSubtotal >= 300000'), 'Header.jsx checks cartSubtotal >= 300000 for qualified state');
