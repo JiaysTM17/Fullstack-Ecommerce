@@ -2611,8 +2611,8 @@
   width: 24px;
   height: 24px;
   border-radius: 6px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-hover, #f8fafc);
+  border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2622,8 +2622,8 @@
 
 .account-sidebar-menu-btn:hover .sidebar-icon-cell,
 .account-sidebar-link:hover .sidebar-icon-cell {
-  background: #ffffff;
-  border-color: #cbd5e1;
+  background: var(--bg-card, #ffffff);
+  border: none;
   transform: scale(1.08);
 }
 
@@ -2797,9 +2797,67 @@
 [data-theme="dark"] .shopee-sidebar,
 [data-theme="dark"] .shopee-dashboard-card,
 [data-theme="dark"] .shopee-table-card,
-[data-theme="dark"] .account-portal-main-content {
+[data-theme="dark"] .shopee-metric-card,
+[data-theme="dark"] .account-portal-main-content,
+[data-theme="dark"] .shopee-account-sidebar-container,
+[data-theme="dark"] .shopee-order-card {
   background-color: var(--bg-card, #1e293b);
   border-color: var(--border-color, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .shopee-data-table th {
+  background-color: var(--bg-page, #0b0f19);
+  color: var(--text-secondary, #94a3b8);
+  border-bottom-color: var(--border-color, #334155);
+}
+
+[data-theme="dark"] .shopee-data-table td {
+  border-bottom-color: var(--border-color, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .shopee-data-table tr:hover td {
+  background-color: var(--bg-hover, #273549);
+}
+
+[data-theme="dark"] .account-sidebar-profile-card {
+  border-bottom-color: var(--border-color, #334155);
+}
+
+[data-theme="dark"] .account-sidebar-menu-btn,
+[data-theme="dark"] .account-sidebar-link {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .account-sidebar-menu-btn:hover,
+[data-theme="dark"] .account-sidebar-link:hover {
+  background-color: var(--bg-hover, #273549);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .account-sidebar-menu-btn.active,
+[data-theme="dark"] .account-sidebar-link.active {
+  background-color: var(--bg-hover, #273549);
+  color: var(--text-primary, #f8fafc);
+  border-left-color: var(--primary-color, #ea580c);
+}
+
+[data-theme="dark"] .account-sidebar-status-sublist {
+  border-left-color: var(--border-color, #334155);
+}
+
+[data-theme="dark"] .account-sidebar-subitem-btn {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .account-sidebar-subitem-btn:hover {
+  background-color: var(--bg-hover, #273549);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .account-sidebar-subitem-btn.active {
+  background-color: var(--bg-hover, #273549);
   color: var(--text-primary, #f8fafc);
 }
 

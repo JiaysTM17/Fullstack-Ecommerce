@@ -54,7 +54,7 @@ const SHIPPING_OPTIONS = [
     icon: TruckIcon,
     iconColor: "#2563eb",
     iconBg: "rgba(37, 99, 235, 0.1)",
-    iconBorder: "1px solid rgba(37, 99, 235, 0.22)",
+    iconBorder: "none",
   },
   {
     id: "express",
@@ -64,7 +64,7 @@ const SHIPPING_OPTIONS = [
     icon: BoltIcon,
     iconColor: "#ea580c",
     iconBg: "rgba(234, 88, 12, 0.1)",
-    iconBorder: "1px solid rgba(234, 88, 12, 0.22)",
+    iconBorder: "none",
   },
   {
     id: "economy",
@@ -74,7 +74,7 @@ const SHIPPING_OPTIONS = [
     icon: PackageIcon,
     iconColor: "#16a34a",
     iconBg: "rgba(22, 163, 74, 0.1)",
-    iconBorder: "1px solid rgba(22, 163, 74, 0.22)",
+    iconBorder: "none",
   },
 ];
 
@@ -572,7 +572,7 @@ export default function CheckoutPage() {
                   style={{ fontSize: "12.5px", padding: "6px 14px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "6px" }}
                   onClick={() => setShowAddAddressModal(true)}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <PlusIcon size={11} color="#ea580c" />
                   </span>
                   <span>Thêm Địa Chỉ Mới</span>
@@ -614,7 +614,7 @@ export default function CheckoutPage() {
                           )}
                         </div>
                         <div style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.4", display: "flex", alignItems: "flex-start", gap: "8px" }}>
-                          <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: "2px" }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: "2px" }}>
                             <MapPinIcon size={12} color="#2563eb" />
                           </span>
                           <span>{addr.address}</span>
@@ -639,7 +639,7 @@ export default function CheckoutPage() {
                                   gap: "6px",
                                 }}
                               >
-                                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <StarIcon size={10} color="#ea580c" />
                                 </span>
                                 <span>Đặt mặc định</span>
@@ -788,7 +788,7 @@ export default function CheckoutPage() {
                             height: "42px",
                             borderRadius: "10px",
                             background: opt.iconBg || "rgba(37, 99, 235, 0.1)",
-                            border: opt.iconBorder || "1px solid rgba(37, 99, 235, 0.22)",
+                            border: opt.iconBorder || "none",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -1148,7 +1148,7 @@ export default function CheckoutPage() {
                             gap: "4px",
                           }}
                         >
-                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CopyIcon size={11} color="#2563eb" />
                           </span>
                           <span>{t('copy', 'Sao chép')}</span>
@@ -1253,7 +1253,7 @@ export default function CheckoutPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-page, #f8fafc)", border: "1px solid var(--border-medium, #e2e8f0)", borderRadius: "8px", padding: "12px 16px", marginBottom: "12px", fontSize: "13.5px", flexWrap: "wrap", gap: "8px" }}>
                 <div>
                   <span style={{ fontWeight: 700, color: "var(--text-primary)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: '22px', height: '22px', borderRadius: '5px', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <TicketIcon size={13} color="var(--primary-color, #ea580c)" />
                     </span>
                     <span>Voucher Áp Dụng:</span>
@@ -1262,7 +1262,7 @@ export default function CheckoutPage() {
                     <span style={{ marginLeft: "4px" }}>
                       {appliedShippingVoucher && (
                         <strong style={{ color: "#0284c7", marginRight: "8px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <TruckIcon size={11} color="#0284c7" />
                           </span>
                           <span>{appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)})</span>
@@ -1270,7 +1270,7 @@ export default function CheckoutPage() {
                       )}
                       {appliedDiscountVoucher && (
                         <strong style={{ color: "var(--primary-color, #ea580c)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <TagIcon size={11} color="var(--primary-color, #ea580c)" />
                           </span>
                           <span>{appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})</span>
@@ -1287,7 +1287,7 @@ export default function CheckoutPage() {
                   style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
                   <span>{(appliedDiscountVoucher || appliedShippingVoucher) ? "Đổi mã khác" : "Chọn mã giảm giá"}</span>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ChevronRightIcon size={10} color="var(--primary-color, #ea580c)" />
                   </span>
                 </button>
@@ -1450,7 +1450,7 @@ export default function CheckoutPage() {
             <div style={{ borderTop: "1px dashed var(--border-medium, #ddd)", borderBottom: "1px dashed var(--border-medium, #ddd)", padding: "10px 0", margin: "4px 0" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: (appliedDiscountVoucher || appliedShippingVoucher) ? "8px" : "0" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <TicketIcon size={12} color="var(--primary-color, #ea580c)" />
                   </span>
                   <span>Voucher / Giảm giá:</span>
@@ -1461,7 +1461,7 @@ export default function CheckoutPage() {
                   style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}
                 >
                   <span>{(appliedDiscountVoucher && appliedShippingVoucher) ? "Đổi mã" : "Chọn mã"}</span>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ChevronRightIcon size={10} color="var(--primary-color, #ea580c)" />
                   </span>
                 </button>
@@ -1515,7 +1515,7 @@ export default function CheckoutPage() {
                   onClick={() => setShowVoucherModal(true)}
                   style={{ width: "100%", marginTop: "8px", padding: "8px", borderRadius: "6px", border: "1px dashed var(--primary-color, #ea580c)", background: "rgba(234, 88, 12, 0.03)", color: "var(--primary-color, #ea580c)", fontSize: "12.5px", fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     <TicketIcon size={10} color="#ea580c" />
                   </span>
                   <span>Nhấn để chọn mã giảm giá / Freeship</span>
@@ -1584,7 +1584,7 @@ export default function CheckoutPage() {
           </div>
 
           <div style={{ fontSize: "12px", color: "var(--text-muted, #777)", lineHeight: "1.5", borderTop: "1px solid var(--border-light, #eee)", paddingTop: "12px", display: "inline-flex", alignItems: "flex-start", gap: "8px" }}>
-            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: "2px" }}>
+            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: "2px" }}>
               <LockIcon size={11} color="#16a34a" />
             </span>
             <span>Nhấn &quot;Xác Nhận Đặt Hàng&quot; đồng nghĩa bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Fullstack E-Commerce.</span>
@@ -1643,7 +1643,7 @@ export default function CheckoutPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <MapPinIcon size={15} color="var(--primary-color, #ea580c)" />
                 </span>
                 <span>Thêm Địa Chỉ Giao Hàng Mới</span>
@@ -1820,7 +1820,7 @@ export default function CheckoutPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <PencilIcon size={15} color="var(--primary-color, #ea580c)" />
                 </span>
                 <span>Chỉnh Sửa Địa Chỉ Giao Hàng</span>
