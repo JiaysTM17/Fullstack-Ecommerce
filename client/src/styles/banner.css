@@ -4,9 +4,11 @@
   position: relative;
   width: 100%;
   margin-bottom: 20px;
-  border-radius: 12px;
+  border-radius: var(--radius-surface, 20px);
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-ambient-glow), var(--shadow-dual-card);
+  border: 1px solid var(--border-subtle);
+  transition: box-shadow var(--transition-normal);
 }
 
 .shopee-hero-carousel {
@@ -183,11 +185,11 @@
   grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   background: var(--bg-card, #ffffff);
-  border: 1px solid var(--border-medium, #e2e8f0);
-  border-radius: 10px;
-  padding: 14px 18px;
-  margin-top: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card, 16px);
+  padding: 16px 20px;
+  margin-top: 14px;
+  box-shadow: var(--shadow-dual-card);
 }
 
 .shopee-hero-feature-item {
@@ -216,11 +218,23 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform var(--transition-fast);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: none;
+  transition: all var(--transition-fast);
+}
+
+[data-theme="dark"] .banner-prop-icon {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .shopee-hero-feature-item:hover .banner-prop-icon {
-  transform: scale(1.12);
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: var(--shadow-sm);
 }
 
 @media (max-width: 900px) {

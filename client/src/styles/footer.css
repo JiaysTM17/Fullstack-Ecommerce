@@ -1,7 +1,8 @@
 /* client/src/styles/footer.css */
 .shopee-footer {
   background-color: var(--bg-card, #fbfbfb);
-  border-top: 3px solid var(--primary-color, #ea580c);
+  border-top: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.04));
+  box-shadow: 0 -8px 24px -8px rgba(0, 0, 0, 0.03);
   color: var(--text-secondary, #475569);
   font-size: 13px;
   padding: 40px 0 20px;
@@ -52,13 +53,15 @@
 }
 
 .shopee-footer-badge {
-  background: var(--bg-muted, #fff);
-  border: 1px solid var(--border-medium, #e2e8f0);
-  border-radius: var(--radius-sm);
-  padding: 6px 10px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9999px;
+  padding: 6px 12px;
   font-size: 12px;
   color: var(--text-primary, #0f172a);
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
 }
 
 .shopee-footer-bottom {
@@ -196,7 +199,8 @@
    ========================================================================== */
 [data-theme="dark"] .shopee-footer {
   background-color: var(--bg-card, #0f172a);
-  border-top-color: var(--primary-color, #f97316);
+  border-top-color: var(--border-subtle, rgba(255, 255, 255, 0.06));
+  box-shadow: 0 -8px 24px -8px rgba(0, 0, 0, 0.2);
   color: var(--text-secondary, #94a3b8);
 }
 
@@ -214,7 +218,7 @@
 
 [data-theme="dark"] .shopee-footer-badge {
   background: var(--bg-muted, #141c2e);
-  border-color: var(--border-medium, #334155);
+  border-color: var(--border-subtle, rgba(255, 255, 255, 0.06));
   color: var(--text-primary, #f8fafc);
 }
 

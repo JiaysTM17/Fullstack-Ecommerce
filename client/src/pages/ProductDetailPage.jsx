@@ -596,19 +596,36 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Guarantees */}
+          {/* Guarantees - 3 Spacious Cards with Tinted Pastel Backgrounds & Squircle Icon Pills */}
           <div className="amazon-guarantees">
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <ShieldIcon size={16} color="#059669" />
-              <span><strong>Chính hãng 100%:</strong> Bồi thường gấp đôi nếu phát hiện hàng giả.</span>
+            <div className="amazon-guarantee-card amazon-guarantee-authentic">
+              <div className="amazon-guarantee-icon-wrap squircle-pill">
+                <ShieldIcon size={18} color="#059669" />
+              </div>
+              <div className="amazon-guarantee-content">
+                <div className="amazon-guarantee-title">100% Chính hãng</div>
+                <div className="amazon-guarantee-desc">Bồi thường gấp đôi nếu phát hiện hàng giả</div>
+              </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <CheckIcon size={16} color="#0284c7" />
-              <span><strong>Đổi trả 15 ngày:</strong> Miễn phí hoàn hàng tận nơi theo chính sách sàn.</span>
+
+            <div className="amazon-guarantee-card amazon-guarantee-return">
+              <div className="amazon-guarantee-icon-wrap squircle-pill">
+                <CheckIcon size={18} color="#0284c7" />
+              </div>
+              <div className="amazon-guarantee-content">
+                <div className="amazon-guarantee-title">Đổi trả 15 ngày</div>
+                <div className="amazon-guarantee-desc">Miễn phí hoàn hàng tận nơi theo chính sách sàn</div>
+              </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <ShieldIcon size={16} color="#6366f1" />
-              <span><strong>Thanh toán bảo mật:</strong> Mã hóa SSL chuẩn quốc tế.</span>
+
+            <div className="amazon-guarantee-card amazon-guarantee-speed">
+              <div className="amazon-guarantee-icon-wrap squircle-pill">
+                <TruckIcon size={18} color="#ea580c" />
+              </div>
+              <div className="amazon-guarantee-content">
+                <div className="amazon-guarantee-title">Giao nhanh 2H</div>
+                <div className="amazon-guarantee-desc">Nhận hàng siêu tốc nội thành</div>
+              </div>
             </div>
           </div>
         </aside>

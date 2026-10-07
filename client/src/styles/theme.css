@@ -30,6 +30,7 @@
   --bg-hover: #f8fafc;
   --bg-disabled: #e2e8f0;
   
+  --border-subtle: rgba(0, 0, 0, 0.04);
   --border-light: #f1f5f9;
   --border-medium: #e2e8f0;
   --border-dark: #cbd5e1;
@@ -46,6 +47,10 @@
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-card: 16px;
+  --radius-surface: 20px;
+  --radius-surface-lg: 24px;
   --radius-full: 9999px;
   
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
@@ -53,6 +58,10 @@
   --shadow-hover: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 4px 8px -2px rgba(0, 0, 0, 0.03);
   --shadow-modal: 0 20px 40px -8px rgba(0, 0, 0, 0.16), 0 8px 16px -4px rgba(0, 0, 0, 0.06);
   --shadow-glow-primary: 0 4px 20px rgba(37, 99, 235, 0.25);
+  --shadow-dual-card: 0 1px 3px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04);
+  --shadow-dual-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 16px 32px -6px rgba(0, 0, 0, 0.08);
+  --shadow-dual-kpi: 0 2px 4px rgba(0, 0, 0, 0.02), 0 10px 28px -4px rgba(0, 0, 0, 0.05);
+  --shadow-ambient-glow: 0 0 40px -10px rgba(37, 99, 235, 0.15);
   
   --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -90,6 +99,7 @@
   --bg-hover: #243147;
   --bg-disabled: #334155;
   
+  --border-subtle: rgba(255, 255, 255, 0.06);
   --border-light: #1e293b;
   --border-medium: #334155;
   --border-dark: #475569;
@@ -106,6 +116,10 @@
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-card: 16px;
+  --radius-surface: 20px;
+  --radius-surface-lg: 24px;
   --radius-full: 9999px;
   
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
@@ -113,6 +127,10 @@
   --shadow-hover: 0 12px 24px -4px rgba(0, 0, 0, 0.5), 0 4px 8px -2px rgba(0, 0, 0, 0.3);
   --shadow-modal: 0 20px 40px -8px rgba(0, 0, 0, 0.7), 0 8px 16px -4px rgba(0, 0, 0, 0.5);
   --shadow-glow-primary: 0 4px 20px rgba(234, 88, 12, 0.3);
+  --shadow-dual-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 8px 24px -4px rgba(0, 0, 0, 0.35);
+  --shadow-dual-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 16px 32px -6px rgba(0, 0, 0, 0.45);
+  --shadow-dual-kpi: 0 2px 4px rgba(0, 0, 0, 0.2), 0 10px 28px -4px rgba(0, 0, 0, 0.4);
+  --shadow-ambient-glow: 0 0 40px -10px rgba(249, 115, 22, 0.2);
   
   --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -477,6 +495,25 @@ body {
   background: rgba(139, 92, 246, 0.22);
   color: #c084fc;
 }
+
+/* Squircle Translucent Pill Utility Class */
+.squircle-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .squircle-pill {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 
 
 

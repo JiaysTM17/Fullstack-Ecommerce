@@ -440,14 +440,14 @@
   background: var(--bg-card, #ffffff);
   border-radius: 16px;
   padding: 16px 18px;
-  border: 1.5px solid var(--border-medium, #e2e8f0);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.04));
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 220px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-dual-card);
   position: relative;
   animation: cardFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
@@ -465,7 +465,7 @@
 
 .category-drawer-card:hover {
   transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-dual-hover);
 }
 
 /* Card Header */
@@ -552,8 +552,8 @@
   background: var(--bg-muted, #f1f5f9);
   color: var(--text-primary, #1e293b);
   padding: 3px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle, var(--border-light, #e2e8f0));
   cursor: pointer;
   transition: all 0.18s ease;
   user-select: none;
@@ -749,8 +749,8 @@
 
 [data-theme="dark"] .category-drawer-card {
   background: var(--bg-card, #1e293b);
-  border-color: var(--border-medium, #334155);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  border-color: var(--border-subtle, rgba(255, 255, 255, 0.06));
+  box-shadow: var(--shadow-dual-card);
 }
 
 [data-theme="dark"] .category-card-name {
@@ -763,7 +763,7 @@
 
 [data-theme="dark"] .category-card-subitem-pill {
   background: var(--bg-muted, #141c2e);
-  border-color: var(--border-medium, #334155);
+  border-color: var(--border-subtle, #334155);
   color: var(--text-primary, #f8fafc);
 }
 

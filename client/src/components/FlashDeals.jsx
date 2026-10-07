@@ -112,7 +112,7 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
               onClick={() => setSelectedSlot(slot.id)}
             >
               <div className="shopee-slot-time">
-                {isSelected && <FlameIcon size={15} color="#ea580c" />}
+                {isSelected && <FlameIcon size={15} color="var(--primary-color, #ea580c)" />}
                 <span>{slot.time}</span>
               </div>
               <div className="shopee-slot-label">

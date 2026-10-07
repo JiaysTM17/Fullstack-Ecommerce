@@ -167,22 +167,26 @@ const ProductCard = ({
         {/* Badge */}
         {badge ? (
           <span
+            className="shopee-card-pill-badge"
             style={{
               position: 'absolute',
               top: '8px',
               left: '8px',
-              background: badge === "Amazon's Choice" ? '#1e293b' : 'var(--primary-color)',
+              background: badge === "Amazon's Choice" ? 'rgba(15, 23, 42, 0.88)' : 'var(--primary-color)',
               color: '#fff',
               fontSize: '10px',
               fontWeight: 700,
-              padding: '3px 8px',
-              borderRadius: '4px',
+              padding: '3px 10px',
+              borderRadius: '9999px',
               zIndex: 1,
               textTransform: 'uppercase',
               letterSpacing: '0.4px',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '4px',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.16)',
             }}
           >
             {badge === "Amazon's Choice" ? (
@@ -203,9 +207,12 @@ const ProductCard = ({
 
         {/* Huy hiệu giảm giá */}
         {hasDiscount && (
-          <div className="shopee-discount-badge" style={{ top: badge ? '32px' : '0' }}>
+          <div
+            className="shopee-discount-badge"
+            style={{ top: (badge || isMall) ? '34px' : '8px', left: '8px' }}
+          >
             <span className="shopee-discount-percent" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
-              <FlameIcon size={11} color="var(--primary-color)" />
+              <FlameIcon size={11} color="currentColor" />
               <span>-{discountPercent}%</span>
             </span>
             <span className="shopee-discount-label">{t('sale_off', 'GIẢM')}</span>
@@ -244,8 +251,8 @@ const ProductCard = ({
         {/* Fast Delivery Badge */}
         {isFastDelivery && (
           <div style={{ margin: '6px 0 2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '11px', color: 'var(--secondary-color, #0284c7)', fontWeight: 700, background: 'var(--primary-light, #f0f9ff)', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <BoltIcon size={12} color="#0284c7" />
+            <span style={{ fontSize: '11px', color: 'var(--secondary-color, #0284c7)', fontWeight: 700, background: 'var(--primary-light, #f0f9ff)', padding: '2px 8px', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <BoltIcon size={12} color="currentColor" />
               <span>{t('nav_fast_delivery', 'Giao 2H')}</span>
             </span>
           </div>
@@ -266,7 +273,7 @@ const ProductCard = ({
               </>
             ) : (
               <>
-                <CartIcon size={14} color="#ffffff" />
+                <CartIcon size={14} color="currentColor" />
                 <span>{t('add_to_cart', 'Thêm vào giỏ')}</span>
               </>
             )}

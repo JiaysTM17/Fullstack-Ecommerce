@@ -97,15 +97,14 @@
 /* Product Card */
 .shopee-product-card {
   background: var(--bg-card);
-  border-radius: 12px;
-  border: 1px solid var(--border-medium, #e2e8f0);
-  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-card, 16px);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.04));
+  box-shadow: var(--shadow-dual-card, var(--shadow-card));
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
-  border: 1px solid transparent;
+  transition: transform var(--transition-normal, 0.25s cubic-bezier(0.4, 0, 0.2, 1)), box-shadow var(--transition-normal, 0.25s cubic-bezier(0.4, 0, 0.2, 1)), border-color var(--transition-normal);
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -113,9 +112,18 @@
 }
 
 .shopee-product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--primary-color);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-dual-hover, var(--shadow-hover));
+  border-color: var(--primary-border, rgba(37, 99, 235, 0.25));
+}
+
+/* Dark mode card surface & subtle borders */
+[data-theme="dark"] .shopee-product-card {
+  border-color: var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+[data-theme="dark"] .shopee-product-card:hover {
+  border-color: rgba(234, 88, 12, 0.35);
 }
 
 /* Image container */
@@ -146,19 +154,30 @@
 /* Badges */
 .shopee-discount-badge {
   position: absolute;
-  top: 0;
-  right: 0;
-  background-color: rgba(255, 212, 36, 0.95);
-  color: var(--primary-color);
+  top: 8px;
+  left: 8px;
+  background-color: rgba(254, 240, 138, 0.95);
+  color: #b45309;
   font-size: 11px;
   font-weight: 700;
-  padding: 4px 6px 3px;
+  padding: 3px 8px;
   text-align: center;
-  border-bottom-left-radius: 2px;
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
+  border-radius: 9999px;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 3px;
+  line-height: 1.2;
   z-index: 2;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .shopee-discount-badge {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .shopee-discount-percent {
@@ -166,23 +185,31 @@
 }
 
 .shopee-discount-label {
-  color: var(--primary-color);
+  color: currentColor;
   font-size: 9px;
   text-transform: uppercase;
 }
 
-.product-card .shopee-mall-badge {
+.shopee-product-card .shopee-mall-badge {
   position: absolute;
   top: 8px;
-  left: 0;
-  background-color: #d0011b;
+  left: 8px;
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.92) 0%, rgba(190, 18, 60, 0.95) 100%);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
-  padding: 2px 6px;
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.4px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   z-index: 2;
+  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
  
 /* Floating Card Actions (Wishlist & Compare) - Unboxed & Theme Aware */
@@ -262,6 +289,34 @@
   background: var(--primary-color);
   color: #ffffff;
   border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .shopee-quickview-btn {
+  background: rgba(30, 41, 59, 0.92);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .shopee-quickview-btn:hover {
+  background: var(--primary-hover, #ea580c);
+  color: #ffffff;
+  border-color: var(--primary-hover, #ea580c);
+}
+
+[data-theme="dark"] .shopee-card-price {
+  color: var(--secondary-color, #fb923c);
+}
+
+[data-theme="dark"] .shopee-card-add-btn {
+  background-color: rgba(234, 88, 12, 0.16);
+  color: #fb923c;
+  border-color: rgba(234, 88, 12, 0.35);
+}
+
+[data-theme="dark"] .shopee-card-add-btn:hover {
+  background-color: var(--primary-hover, #ea580c);
+  color: #ffffff;
 }
 
 /* Card Content */
