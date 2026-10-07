@@ -86,10 +86,14 @@ app.use((req, res, next) => {
 // 6. Response time tracking
 app.use((req, res, next) => {
   const start = process.hrtime.bigint();
-  res.on("finish", () => {
-    const duration = Number(process.hrtime.bigint() - start) / 1e6;
-    res.setHeader("X-Response-Time", `${duration.toFixed(2)}ms`);
-  });
+  const originalEnd = res.end;
+  res.end = function (...args) {
+    if (!res.headersSent) {
+      const duration = Number(process.hrtime.bigint() - start) / 1e6;
+      res.setHeader("X-Response-Time", `${duration.toFixed(2)}ms`);
+    }
+    return originalEnd.apply(this, args);
+  };
   next();
 });
 
