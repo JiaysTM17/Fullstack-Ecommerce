@@ -1946,5 +1946,110 @@
   color: #ffffff;
 }
 
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE HARMONIZATION (A01 - PREVENT OVERFLOW)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .shopee-topbar {
+    display: none;
+  }
+
+  .shopee-main-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  .shopee-header-logo {
+    gap: 8px;
+  }
+
+  .shopee-logo-title {
+    font-size: 15px;
+  }
+
+  .shopee-logo-subtitle {
+    display: none;
+  }
+
+  .shopee-search-form {
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 4px;
+    padding: 2px 3px 2px 10px;
+  }
+
+  .shopee-search-btn {
+    height: 32px;
+    padding: 0 14px;
+  }
+
+  .header-actions-dock {
+    gap: 2px;
+    padding: 2px 4px;
+  }
+
+  .header-user-dock-name,
+  .header-user-dock-role {
+    display: none;
+  }
+
+  .header-user-dock-btn {
+    padding: 4px;
+  }
+
+  .shopee-subnav {
+    gap: 6px;
+    padding: 4px 0;
+  }
+
+  .shopee-subnav-cat-btn,
+  .shopee-subnav-link {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .shopee-header-wrapper {
+    overflow-x: hidden;
+  }
+
+  .shopee-main-header {
+    padding: 6px 0;
+  }
+
+  .shopee-logo-icon-wrap {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .shopee-logo-title {
+    font-size: 13.5px;
+  }
+
+  .shopee-search-form {
+    border-radius: 20px;
+  }
+
+  .shopee-search-input {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .shopee-search-btn {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .shopee-header-action-btn {
+    width: 32px;
+    height: 30px;
+  }
+}
+
 
 

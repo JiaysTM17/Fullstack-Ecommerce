@@ -67,6 +67,8 @@ function AppLayout() {
     navigate(`/?${nextParams.toString()}`);
   }
 
+  const isWorkbenchRoute = location.pathname.startsWith('/seller') || location.pathname.startsWith('/admin');
+
   return (
     <>
       <Header
@@ -103,8 +105,8 @@ function AppLayout() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </ErrorBoundary>
-      <Footer />
-      <MobileBottomNav />
+      {!isWorkbenchRoute && <Footer />}
+      {!isWorkbenchRoute && <MobileBottomNav />}
       <LiveChatWidget />
       <ProductCompareModal />
       <ToastContainer />

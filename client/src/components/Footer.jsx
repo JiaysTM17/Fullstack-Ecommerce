@@ -2,14 +2,7 @@ import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import {
   CartIcon,
-  LayersIcon,
-  ShoppingBagIcon,
-  PackageIcon,
-  StoreIcon,
-  StarIcon,
-  SparklesIcon,
   CheckIcon,
-  AlertCircleIcon,
   TruckIcon,
   CreditCardIcon,
   QrCodeIcon,
@@ -17,6 +10,7 @@ import {
   MailIcon,
   GlobeIcon,
   ShieldCheckIcon,
+  SparklesIcon,
 } from './OrdersIcons';
 import '../styles/footer.css';
 
@@ -56,89 +50,7 @@ const Footer = ({ shopName = 'Fullstack E-Commerce', brandYear = 2026 }) => {
           </p>
         </section>
 
-        {/* 2. Design Inspiration & Architectural References Section */}
-        <section className="footer-attribution-section">
-          <div className="footer-attribution-header">
-            <div className="footer-attribution-title">
-              <LayersIcon size={20} color="#2563eb" />
-              <span>{language === 'en' ? 'DESIGN INSPIRATIONS & ARCHITECTURAL REFERENCES' : 'NGUỒN CẢM HỨNG THIẾT KẾ & TIÊU CHUẨN KIẾN TRÚC'}</span>
-            </div>
-            <span style={{ fontSize: '11.5px', color: '#16a34a', background: 'rgba(22, 163, 74, 0.1)', border: '1px solid rgba(22, 163, 74, 0.25)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <CheckIcon size={12} color="#16a34a" />
-              <span>Ethical Software Engineering</span>
-            </span>
-          </div>
 
-          <div className="footer-attribution-grid">
-            <div className="footer-attribution-card">
-              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <ShoppingBagIcon size={16} color="#ea580c" />
-                <span>Shopee VN (SEA)</span>
-              </strong>
-              <span>
-                {language === 'en'
-                  ? 'Referenced 2-tier Category carousel, Dual Voucher Stacking, and Gamification Xu rewards.'
-                  : 'Cảm hứng bố cục Danh mục 2 tầng, cơ chế Voucher kép (Shop + Freeship) và hệ thống Gamification Xu thưởng.'}
-              </span>
-            </div>
-
-            <div className="footer-attribution-card">
-              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <PackageIcon size={16} color="#0284c7" />
-                <span>Tiki (Vietnam)</span>
-              </strong>
-              <span>
-                {language === 'en'
-                  ? 'Referenced 100% Authentic Mall Guarantee, Fast Delivery 2H, and transparent logistics tracking.'
-                  : 'Cảm hứng cam kết Hàng Chính Hãng 100%, huy hiệu Giao nhanh 2H và luồng tra cứu vận đơn minh bạch.'}
-              </span>
-            </div>
-
-            <div className="footer-attribution-card">
-              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <StoreIcon size={16} color="#dc2626" />
-                <span>Lazada (Alibaba Group)</span>
-              </strong>
-              <span>
-                {language === 'en'
-                  ? 'Referenced multi-level Category Mega Menu and official brand flagship store discovery.'
-                  : 'Cảm hứng phân nhánh Mega Menu đa cấp và trải nghiệm khám phá gian hàng thương hiệu chính hãng Mall.'}
-              </span>
-            </div>
-
-            <div className="footer-attribution-card">
-              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <StarIcon size={16} color="#f59e0b" fill="#f59e0b" />
-                <span>Amazon (Global)</span>
-              </strong>
-              <span>
-                {language === 'en'
-                  ? 'Referenced Amazon\'s Choice badge, faceted multi-attribute filters, and structured review stars.'
-                  : 'Cảm hứng chứng nhận Hàng Tuyển Chọn, bộ lọc thông số đa chiều và hệ thống đánh giá sao chuẩn mực.'}
-              </span>
-            </div>
-
-            <div className="footer-attribution-card">
-              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <SparklesIcon size={16} color="#8b5cf6" />
-                <span>Apple & Vercel Systems</span>
-              </strong>
-              <span>
-                {language === 'en'
-                  ? 'Referenced typography contrast (WCAG 2.1 AAA), Dark/Light mode, and micro-interactions.'
-                  : 'Cảm hứng bảng màu Dark/Light Mode, typography tương phản chuẩn WCAG 2.1 AAA và chuyển động vi mô.'}
-              </span>
-            </div>
-          </div>
-
-          <div className="footer-attribution-note">
-            <AlertCircleIcon size={16} color="#0284c7" style={{ verticalAlign: 'middle', marginRight: '6px' }} />
-            <strong>{language === 'en' ? 'Intellectual Property & Professional Ethics Note:' : 'Tuyên Bố Bản Quyền & Tính Chuyên Nghiệp:'}</strong>{' '}
-            {language === 'en'
-              ? 'This system synthesizes industry-standard UX patterns from world-leading e-commerce platforms. All source code, database architectures, RESTful APIs, and UI designs were custom-engineered independently with clean-room implementation. No proprietary code or assets were duplicated, honoring intellectual property rights and academic integrity.'
-              : 'Dự án kế thừa và chắt lọc các quy chuẩn trải nghiệm người dùng (UX best practices) từ các sàn thương mại điện tử hàng đầu thế giới. Toàn bộ mã nguồn React/Node.js, kiến trúc cơ sở dữ liệu, API RESTful và thiết kế giao diện được tự nghiên cứu, thiết kế riêng biệt và lập trình độc quyền (Clean-room Implementation), không sao chép nguyên mẫu, thể hiện tính chuyên nghiệp và tôn trọng bản quyền sở hữu trí tuệ.'}
-          </div>
-        </section>
 
         {/* 3. Main Footer Grid (Navigation Links, Badges, Logistics) */}
         <div className="shopee-footer-grid">

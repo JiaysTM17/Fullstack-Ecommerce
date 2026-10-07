@@ -328,18 +328,26 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="amazon-ratings-summary">
-            <span className="amazon-stars" style={{ display: "inline-flex", alignItems: "center", gap: "2px", background: "rgba(245, 158, 11, 0.1)", padding: "2px 6px", borderRadius: "4px" }}>
-              {[1, 2, 3, 4, 5].map((s) => (
-                <StarIcon key={s} size={14} color="#ffa41c" />
-              ))}
-            </span>
-            <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{product.rating || 5.0}</span>
+            {reviewsList.length > 0 || (product.reviewCount && product.reviewCount > 0) ? (
+              <>
+                <span className="amazon-stars" style={{ display: "inline-flex", alignItems: "center", gap: "2px", background: "rgba(245, 158, 11, 0.1)", padding: "2px 6px", borderRadius: "4px" }}>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <StarIcon key={s} size={14} color="#ffa41c" />
+                  ))}
+                </span>
+                <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{product.rating || 5.0}</span>
+                <span>·</span>
+                <span className="amazon-ratings-count">
+                  {product.reviewCount || reviewsList.length} đánh giá từ khách hàng
+                </span>
+              </>
+            ) : (
+              <span style={{ fontSize: "13px", color: "var(--text-muted)", fontStyle: "italic" }}>
+                Chưa có đánh giá nào
+              </span>
+            )}
             <span>·</span>
-            <span className="amazon-ratings-count">
-              {product.reviewCount || reviewsList.length || 50} đánh giá từ khách hàng
-            </span>
-            <span>·</span>
-            <span style={{ color: "var(--text-secondary)" }}>Đã bán {product.sold || 100}+</span>
+            <span style={{ color: "var(--text-secondary)" }}>Đã bán {product.sold || 0} sản phẩm</span>
           </div>
 
           <div className="amazon-price-row">

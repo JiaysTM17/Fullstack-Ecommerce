@@ -44,6 +44,7 @@ export default function HomePage() {
     () => ({
       keyword: searchParams.get("keyword") || "",
       category: searchParams.get("category") || "",
+      brand: searchParams.get("brand") || "",
       sort: searchParams.get("sort") || "",
       minPrice: searchParams.get("minPrice") || "",
       maxPrice: searchParams.get("maxPrice") || "",
