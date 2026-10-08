@@ -202,3 +202,33 @@ export async function getAdminPlatformDeepBI() {
     return null;
   }
 }
+
+/**
+ * Lấy báo cáo thuế TNCN/GTGT nhà thầu sàn TMĐT (Withholding Tax Report)
+ */
+export async function getAdminTaxReports() {
+  try {
+    const res = await apiRequest("/api/admin/finance/tax-reports", {
+      headers: getAdminHeaders(),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.warn("[AdminService] getAdminTaxReports fallback:", error.message);
+    return null;
+  }
+}
+
+/**
+ * Quét an ninh và phát hiện gian lận (Fraud & Anomaly Radar)
+ */
+export async function getAdminFraudRadar() {
+  try {
+    const res = await apiRequest("/api/admin/security/fraud-radar", {
+      headers: getAdminHeaders(),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.warn("[AdminService] getAdminFraudRadar fallback:", error.message);
+    return null;
+  }
+}

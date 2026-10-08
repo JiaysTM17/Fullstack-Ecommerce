@@ -3,19 +3,19 @@ import memoryStore from "./memoryStore.js";
 
 const disputeSchema = new mongoose.Schema(
   {
-    orderId: { type: String, required: true, index: true },
+    orderId: { type: String, required: true },
     customerId: { type: String, required: true },
-    customerName: { type: String, default: "" },
-    shopId: { type: String, required: true, index: true },
-    shopName: { type: String, default: "" },
+    customerName: { type: String, required: true },
+    shopId: { type: String, required: true },
+    shopName: { type: String, required: true },
     reason: { type: String, required: true },
     claimAmount: { type: Number, required: true },
     status: {
       type: String,
-      enum: ["opened", "under_review", "shop_responded", "resolved_refund", "resolved_rejected"],
+      enum: ["opened", "under_review", "resolved_refund", "resolved_rejected", "cancelled"],
       default: "opened",
     },
-    evidence: [{ type: String }],
+    evidence: { type: [String], default: [] },
     shopResponse: { type: String, default: "" },
     arbitrationNote: { type: String, default: "" },
     resolvedBy: { type: String, default: "" },

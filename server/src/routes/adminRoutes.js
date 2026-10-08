@@ -22,6 +22,8 @@ import {
   getAdminDisputes,
   arbitrateAdminDispute,
   getAdminPlatformDeepBI,
+  getAdminTaxReports,
+  getAdminFraudRadar,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -63,5 +65,9 @@ router.delete("/users/:id", deleteUserAdmin);
 // Platform Overview & Finance
 router.get("/overview", getPlatformOverviewAdmin);
 router.get("/finance", getFinanceSettlementsAdmin);
+router.get("/finance/tax-reports", getAdminTaxReports);
+
+// Fraud & Security Radar
+router.get("/security/fraud-radar", getAdminFraudRadar);
 
 export default router;

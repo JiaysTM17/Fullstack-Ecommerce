@@ -39,6 +39,7 @@ export function saveToDisk(memoryStoreInstance) {
       auditLogs: memoryStoreInstance.auditLogsStore || [],
       campaigns: memoryStoreInstance.campaignsStore || [],
       disputes: memoryStoreInstance.disputesStore || [],
+      adsCampaigns: memoryStoreInstance.adsCampaignsStore || [],
     };
     writeFileSync(STORE_FILE, JSON.stringify(snapshot, null, 2), "utf8");
     return true;

@@ -21,6 +21,10 @@ import {
   getSellerStaffList,
   addSellerStaff,
   updateSellerStaff,
+  getSellerAdsCampaigns,
+  createSellerAdsCampaign,
+  toggleSellerAdsCampaign,
+  batchUpdateSellerInventory,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -36,6 +40,14 @@ router.get("/dashboard", getSellerDashboard);
 router.get("/revenue", getSellerRevenue);
 router.get("/analytics/funnel", getSellerAnalyticsFunnel);
 router.get("/analytics/market", getSellerMarketIntelligence);
+
+// Shopee Ads ROI Suite
+router.get("/ads", getSellerAdsCampaigns);
+router.post("/ads", createSellerAdsCampaign);
+router.patch("/ads/:id/toggle", toggleSellerAdsCampaign);
+
+// Advanced Inventory Management
+router.post("/inventory/batch-update", batchUpdateSellerInventory);
 
 // Staff Sub-accounts Management
 router.get("/staff", getSellerStaffList);

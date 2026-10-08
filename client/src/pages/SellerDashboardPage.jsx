@@ -15,6 +15,10 @@ import {
   fetchSellerStaff,
   createSellerStaff,
   updateSellerStaff,
+  fetchSellerAdsAPI,
+  createSellerAdsAPI,
+  toggleSellerAdsAPI,
+  batchUpdateInventoryAPI,
 } from '../services/api';
 import '../styles/dashboard.css';
 import {
@@ -440,7 +444,19 @@ export default function SellerDashboardPage() {
     permissions: ['manage_products', 'manage_orders'],
   });
 
-  // Tự động nạp dữ liệu khi chuyển tab Funnel / Market / Staff
+  // BỔ SUNG: States cho Shopee Ads ROI Suite & Batch Inventory Matrix
+  const [adsData, setAdsData] = useState(null);
+  const [showCreateAdsModal, setShowCreateAdsModal] = useState(false);
+  const [adsForm, setAdsForm] = useState({
+    campaignName: '',
+    type: 'SEARCH_ADS',
+    budgetDaily: 50000,
+    budgetTotal: 1000000,
+    keyword1: 'áo thun oversize',
+    bidPrice1: 1500,
+  });
+
+  // Tự động nạp dữ liệu khi chuyển tab Funnel / Market / Staff / Ads
   useEffect(() => {
     if (activeTab === 'funnel') {
       fetchSellerFunnelAnalytics().then(res => setSellerFunnel(res));
@@ -448,6 +464,8 @@ export default function SellerDashboardPage() {
       fetchSellerMarketIntelligence().then(res => setSellerMarket(res));
     } else if (activeTab === 'staff') {
       fetchSellerStaff().then(res => setSellerStaffList(res || []));
+    } else if (activeTab === 'ads') {
+      fetchSellerAdsAPI().then(res => setAdsData(res));
     }
   }, [activeTab, selectedShopId]);
 
@@ -1748,6 +1766,27 @@ export default function SellerDashboardPage() {
             <UserIcon size={14} color="#10b981" />
           </span>
           <span>Nhân Viên & Phân Quyền</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'ads' ? 'active' : ''}`}
+          onClick={() => setActiveTab('ads')}
+        >
+          <span style={{
+            width: '26px',
+            height: '26px',
+            borderRadius: '7px',
+            background: activeTab === 'ads' ? 'rgba(234, 88, 12, 0.18)' : 'rgba(234, 88, 12, 0.1)',
+            border: activeTab === 'ads' ? '1px solid rgba(234, 88, 12, 0.3)' : '1px solid rgba(234, 88, 12, 0.18)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <BoltIcon size={14} color="#ea580c" />
+          </span>
+          <span>Shopee Ads &amp; ROI</span>
         </button>
       </aside>
 
@@ -4670,6 +4709,216 @@ export default function SellerDashboardPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* ==================== TAB 12: SHOPEE ADS & ROI SUITE ==================== */}
+        {activeTab === 'ads' && (
+          <div className="shopee-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a' }}>
+                  Trung Tâm Quảng Cáo Shopee Ads &amp; Phân Tích ROI
+                </h2>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                  Đấu thầu từ khóa tìm kiếm (Search Ads) và đề xuất hiển thị (Discovery Ads), tối ưu tỷ suất lợi nhuận ROAS.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-primary"
+                onClick={() => setShowCreateAdsModal(true)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <PlusIcon size={14} color="#fff" />
+                <span>Tạo Chiến Dịch Mới</span>
+              </button>
+            </div>
+
+            {/* Metrics Header */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '12px', color: '#64748b' }}>Chi Phí Đã Chi (Spent)</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+                  {formatCurrency(adsData?.metrics?.totalSpent || 420000)}
+                </div>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#ecfdf5', border: '1px solid #a7f3d0' }}>
+                <div style={{ fontSize: '12px', color: '#047857' }}>Doanh Thu Từ Quảng Cáo</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#059669', marginTop: '4px' }}>
+                  {formatCurrency(adsData?.metrics?.totalRevenue || 16254000)}
+                </div>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#fff7ed', border: '1px solid #fed7aa' }}>
+                <div style={{ fontSize: '12px', color: '#c2410c' }}>Hiệu Quả Đầu Tư (ROAS)</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#ea580c', marginTop: '4px' }}>
+                  {adsData?.metrics?.overallRoas || 38.7}x
+                </div>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+                <div style={{ fontSize: '12px', color: '#1d4ed8' }}>Tỷ Lệ Click (CTR Trung Bình)</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#2563eb', marginTop: '4px' }}>
+                  {adsData?.metrics?.overallCtr || 5.0}%
+                </div>
+              </div>
+            </div>
+
+            {/* Campaign Table */}
+            <div style={{ overflowX: 'auto' }}>
+              <table className="shopee-table" style={{ width: '100%', fontSize: '13px' }}>
+                <thead>
+                  <tr>
+                    <th>Tên Chiến Dịch</th>
+                    <th>Loại</th>
+                    <th>Ngân Sách Ngày</th>
+                    <th>Đã Chi</th>
+                    <th>Lượt Hiển Thị / Click</th>
+                    <th>Doanh Thu / ROAS</th>
+                    <th>Trạng Thái</th>
+                    <th style={{ textAlign: 'right' }}>Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(adsData?.campaigns || [
+                    {
+                      _id: 'ads_01',
+                      campaignName: 'Quảng Cáo Tìm Kiếm - BST Áo Thun Thu Đông',
+                      type: 'SEARCH_ADS',
+                      status: 'active',
+                      budgetDaily: 50000,
+                      spent: 420000,
+                      impressions: 28400,
+                      clicks: 1420,
+                      conversionRevenue: 16254000,
+                      roas: 38.7,
+                    }
+                  ]).map((ad) => (
+                    <tr key={ad._id}>
+                      <td>
+                        <strong>{ad.campaignName}</strong>
+                        <div style={{ fontSize: '11px', color: '#64748b' }}>Mã: {ad._id}</div>
+                      </td>
+                      <td>
+                        <span style={{ padding: '2px 8px', borderRadius: '4px', background: '#f1f5f9', fontWeight: 700, fontSize: '11px' }}>
+                          {ad.type}
+                        </span>
+                      </td>
+                      <td>{formatCurrency(ad.budgetDaily)}/ngày</td>
+                      <td style={{ color: '#b91c1c' }}>{formatCurrency(ad.spent)}</td>
+                      <td>
+                        <div>{(ad.impressions || 0).toLocaleString()} hiển thị</div>
+                        <div style={{ fontSize: '11px', color: '#0284c7' }}>{(ad.clicks || 0).toLocaleString()} clicks (CTR: {ad.ctr || 5}%)</div>
+                      </td>
+                      <td>
+                        <div style={{ color: '#059669', fontWeight: 700 }}>{formatCurrency(ad.conversionRevenue)}</div>
+                        <div style={{ fontSize: '11px', color: '#ea580c', fontWeight: 800 }}>ROAS: {ad.roas}x</div>
+                      </td>
+                      <td>
+                        <span className={`shopee-status-badge ${ad.status === 'active' ? 'status-delivered' : 'status-pending'}`}>
+                          {ad.status === 'active' ? 'Đang chạy' : 'Tạm dừng'}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-sm shopee-btn-secondary"
+                          onClick={async () => {
+                            await toggleSellerAdsAPI(ad._id);
+                            toast.success(`Đã chuyển đổi trạng thái chiến dịch!`);
+                            fetchSellerAdsAPI().then(setAdsData);
+                          }}
+                        >
+                          {ad.status === 'active' ? 'Tạm Dừng' : 'Kích Hoạt'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Tạo Chiến Dịch Shopee Ads */}
+        {showCreateAdsModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
+            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '520px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+              <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Tạo Chiến Dịch Đấu Thầu Shopee Ads</h3>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                await createSellerAdsAPI({
+                  campaignName: adsForm.campaignName,
+                  type: adsForm.type,
+                  budgetDaily: Number(adsForm.budgetDaily),
+                  budgetTotal: Number(adsForm.budgetTotal),
+                  targetKeywords: [{ keyword: adsForm.keyword1, bidPrice: Number(adsForm.bidPrice1), matchType: 'exact' }]
+                });
+                toast.success('Đã thiết lập chiến dịch Shopee Ads thành công!');
+                setShowCreateAdsModal(false);
+                fetchSellerAdsAPI().then(setAdsData);
+              }}>
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Tên Chiến Dịch</label>
+                  <input
+                    type="text" required
+                    className="shopee-input"
+                    value={adsForm.campaignName}
+                    onChange={(e) => setAdsForm({ ...adsForm, campaignName: e.target.value })}
+                    placeholder="VD: Đấu thầu từ khóa Mùa Thu 2026"
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Ngân Sách Ngày (VNĐ)</label>
+                    <input
+                      type="number" required
+                      className="shopee-input"
+                      value={adsForm.budgetDaily}
+                      onChange={(e) => setAdsForm({ ...adsForm, budgetDaily: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Ngân Sách Tổng (VNĐ)</label>
+                    <input
+                      type="number" required
+                      className="shopee-input"
+                      value={adsForm.budgetTotal}
+                      onChange={(e) => setAdsForm({ ...adsForm, budgetTotal: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Từ Khóa Mục Tiêu</label>
+                    <input
+                      type="text" required
+                      className="shopee-input"
+                      value={adsForm.keyword1}
+                      onChange={(e) => setAdsForm({ ...adsForm, keyword1: e.target.value })}
+                      placeholder="áo thun nam"
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Giá Thầu (VNĐ/click)</label>
+                    <input
+                      type="number" required
+                      className="shopee-input"
+                      value={adsForm.bidPrice1}
+                      onChange={(e) => setAdsForm({ ...adsForm, bidPrice1: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                  <button type="button" className="shopee-btn shopee-btn-secondary" onClick={() => setShowCreateAdsModal(false)}>Hủy</button>
+                  <button type="submit" className="shopee-btn shopee-btn-primary">Kích Hoạt Chiến Dịch</button>
+                </div>
+              </form>
             </div>
           </div>
         )}

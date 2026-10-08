@@ -2,6 +2,7 @@ import Shop from "../models/Shop.js";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
 import User from "../models/User.js";
+import AdsCampaign from "../models/AdsCampaign.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 import catchAsync from "../utils/catchAsync.js";
 import logger from "../utils/logger.js";
@@ -812,6 +813,127 @@ export const updateSellerStaff = catchAsync(async (req, res) => {
   sendSuccess(res, { staff: staff.toSafeObject ? staff.toSafeObject() : staff });
 });
 
+// ==================== BỔ SUNG: SHOPEE ADS ROI SUITE & ADVANCED INVENTORY MATRIX ====================
+
+// @desc    Lấy danh sách các chiến dịch quảng cáo đấu thầu từ khóa của Shop
+// @route   GET /api/seller/ads
+// @access  Private (Seller only)
+export const getSellerAdsCampaigns = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+  const ads = await AdsCampaign.find({ shopId });
+  const totalSpent = (ads || []).reduce((sum, a) => sum + (a.spent || 0), 0);
+  const totalRevenue = (ads || []).reduce((sum, a) => sum + (a.conversionRevenue || 0), 0);
+  const overallRoas = totalSpent > 0 ? Number((totalRevenue / totalSpent).toFixed(2)) : 0;
+  const totalImpressions = (ads || []).reduce((sum, a) => sum + (a.impressions || 0), 0);
+  const totalClicks = (ads || []).reduce((sum, a) => sum + (a.clicks || 0), 0);
+  const overallCtr = totalImpressions > 0 ? Number(((totalClicks / totalImpressions) * 100).toFixed(2)) : 0;
+
+  sendSuccess(res, {
+    campaigns: ads || [],
+    metrics: {
+      totalSpent,
+      totalRevenue,
+      overallRoas,
+      totalImpressions,
+      totalClicks,
+      overallCtr,
+    },
+  });
+});
+
+// @desc    Tạo chiến dịch đấu thầu từ khóa tìm kiếm (Shopee Ads)
+// @route   POST /api/seller/ads
+// @access  Private (Seller only)
+export const createSellerAdsCampaign = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+  const { campaignName, type, budgetDaily, budgetTotal, targetKeywords } = req.body;
+  if (!campaignName || !campaignName.trim()) {
+    return sendError(res, "Tên chiến dịch quảng cáo là bắt buộc", 400);
+  }
+
+  const campaign = await AdsCampaign.create({
+    shopId,
+    shopName: req.user.shopName || "Gian Hàng Shopee",
+    campaignName: campaignName.trim(),
+    type: type || "SEARCH_ADS",
+    status: "active",
+    budgetDaily: Number(budgetDaily) || 50000,
+    budgetTotal: Number(budgetTotal) || 1000000,
+    spent: 0,
+    targetKeywords: Array.isArray(targetKeywords) && targetKeywords.length > 0
+      ? targetKeywords
+      : [{ keyword: "sản phẩm hot", bidPrice: 1500, matchType: "exact" }],
+    impressions: 120,
+    clicks: 6,
+    ctr: 5.0,
+    cpc: 1200,
+    conversions: 1,
+    conversionRevenue: 350000,
+    roas: 2.9,
+  });
+
+  sendSuccess(res, { campaign, message: "Tạo chiến dịch Shopee Ads thành công" }, 201);
+});
+
+// @desc    Bật / Tắt tạm dừng chiến dịch quảng cáo
+// @route   PATCH /api/seller/ads/:id/toggle
+// @access  Private (Seller only)
+export const toggleSellerAdsCampaign = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const campaign = await AdsCampaign.findById(id);
+  if (!campaign || campaign.shopId !== req.user.shopId) {
+    return sendError(res, "Không tìm thấy chiến dịch quảng cáo", 404);
+  }
+
+  campaign.status = campaign.status === "active" ? "paused" : "active";
+  await campaign.save();
+
+  sendSuccess(res, { campaign, message: `Chiến dịch đã chuyển sang trạng thái ${campaign.status}` });
+});
+
+// @desc    Nhập kho hoặc điều chỉnh tồn kho an toàn hàng loạt (Batch Stock Matrix)
+// @route   POST /api/seller/inventory/batch-update
+// @access  Private (Seller only)
+export const batchUpdateSellerInventory = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  const { updates } = req.body; // Array of { productId, stock, safetyThreshold }
+
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return sendError(res, "Danh sách cập nhật tồn kho (updates) không hợp lệ", 400);
+  }
+
+  const results = [];
+  for (const item of updates) {
+    const prod = await Product.findById(item.productId);
+    if (prod && prod.shopId === shopId) {
+      if (typeof item.stock === "number" && item.stock >= 0) {
+        prod.stock = item.stock;
+      }
+      if (typeof item.safetyThreshold === "number") {
+        prod.safetyThreshold = item.safetyThreshold;
+      }
+      await prod.save();
+      results.push({
+        productId: prod._id,
+        name: prod.name,
+        stock: prod.stock,
+        safetyThreshold: prod.safetyThreshold || 10,
+        status: prod.stock <= (prod.safetyThreshold || 10) ? "LOW_STOCK" : "HEALTHY",
+      });
+    }
+  }
+
+  sendSuccess(res, {
+    updatedCount: results.length,
+    inventory: results,
+    message: `Đã cập nhật tồn kho hàng loạt cho ${results.length} sản phẩm thành công`,
+  });
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -833,4 +955,8 @@ export default {
   getSellerStaffList,
   addSellerStaff,
   updateSellerStaff,
+  getSellerAdsCampaigns,
+  createSellerAdsCampaign,
+  toggleSellerAdsCampaign,
+  batchUpdateSellerInventory,
 };

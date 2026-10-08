@@ -3,24 +3,26 @@ import memoryStore from "./memoryStore.js";
 
 const campaignSchema = new mongoose.Schema(
   {
+    campaignId: { type: String, unique: true, sparse: true },
     title: { type: String, required: true },
+    name: { type: String },
     description: { type: String, default: "" },
     banner: { type: String, default: "" },
-    type: { type: String, enum: ["MEGA_SALE", "FLASH_SALE", "CATEGORY_DAY", "BRAND_FEST"], default: "MEGA_SALE" },
-    status: { type: String, enum: ["upcoming", "active", "ended"], default: "upcoming" },
+    type: {
+      type: String,
+      enum: ["MEGA_SALE", "FLASH_SALE", "BRAND_FEST", "CATEGORY_DAY"],
+      default: "MEGA_SALE",
+    },
+    status: {
+      type: String,
+      enum: ["upcoming", "active", "paused", "ended"],
+      default: "upcoming",
+    },
     startDate: { type: String, required: true },
     endDate: { type: String, required: true },
     discountMinPercent: { type: Number, default: 10 },
-    subsidizedByPlatform: { type: Number, default: 5 }, // Platform subsidizes 5% discount
-    participatingShops: [
-      {
-        shopId: { type: String, required: true },
-        shopName: { type: String, default: "" },
-        registeredAt: { type: String, default: () => new Date().toISOString() },
-        status: { type: String, enum: ["pending", "approved", "rejected"], default: "approved" },
-        productIds: [{ type: String }],
-      },
-    ],
+    subsidizedByPlatform: { type: Number, default: 5 },
+    participatingShops: { type: Array, default: [] },
   },
   { timestamps: true }
 );

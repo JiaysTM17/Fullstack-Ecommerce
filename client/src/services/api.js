@@ -502,3 +502,34 @@ export async function updateSellerStaff(id, data) {
     body: JSON.stringify(data),
   });
 }
+
+/**
+ * Shopee Ads ROI Suite API
+ */
+export async function fetchSellerAdsAPI() {
+  const result = await apiRequest("/api/seller/ads");
+  return result?.data || result;
+}
+
+export async function createSellerAdsAPI(data) {
+  return await apiRequest("/api/seller/ads", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function toggleSellerAdsAPI(id) {
+  return await apiRequest(`/api/seller/ads/${id}/toggle`, {
+    method: "PATCH",
+  });
+}
+
+/**
+ * Batch Inventory Matrix API
+ */
+export async function batchUpdateInventoryAPI(updates) {
+  return await apiRequest("/api/seller/inventory/batch-update", {
+    method: "POST",
+    body: JSON.stringify({ updates }),
+  });
+}
