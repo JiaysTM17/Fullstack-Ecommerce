@@ -966,6 +966,41 @@ export const getAdminFraudRadar = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Xử lý / Thực thi biện pháp chế tài cảnh báo gian lận (Mitigate Fraud Anomaly)
+// @route   POST /api/admin/security/fraud-radar/:id/resolve
+// @access  Private (Admin Ops or Super Admin)
+export const resolveAdminFraudAnomaly = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { action, note } = req.body; // e.g. LOCK_USER, BAN_IP, DISMISS
+
+  if (action === "LOCK_USER" && id.startsWith("anomaly_usr_")) {
+    const targetUserId = id.replace("anomaly_usr_", "");
+    const user = await User.findById(targetUserId);
+    if (user) {
+      user.status = "banned";
+      await user.save();
+    }
+  }
+
+  await recordAuditLog({
+    userId: req.user._id || req.user.id || "admin_system",
+    userName: req.user.fullName || "Admin Ops Security",
+    userRole: "admin",
+    action: "FRAUD_ANOMALY_RESOLVED",
+    entityType: "FRAUD_RADAR",
+    entityId: id,
+    details: { action: action || "DISMISSED", note: note || "Đã áp dụng biện pháp phòng ngừa rủi ro" },
+    ip: req.ip || "127.0.0.1",
+  });
+
+  sendSuccess(res, {
+    anomalyId: id,
+    status: "RESOLVED",
+    actionTaken: action || "DISMISSED",
+    message: `Đã thực thi giải pháp an ninh '${action || "DISMISSED"}' thành công cho cảnh báo ${id}`,
+  });
+});
+
 export default {
   getAllShopsAdmin,
   updateShopStatusAdmin,
@@ -990,4 +1025,5 @@ export default {
   getAdminPlatformDeepBI,
   getAdminTaxReports,
   getAdminFraudRadar,
+  resolveAdminFraudAnomaly,
 };

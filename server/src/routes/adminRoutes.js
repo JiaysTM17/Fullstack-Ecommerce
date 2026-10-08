@@ -24,6 +24,7 @@ import {
   getAdminPlatformDeepBI,
   getAdminTaxReports,
   getAdminFraudRadar,
+  resolveAdminFraudAnomaly,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -69,5 +70,6 @@ router.get("/finance/tax-reports", getAdminTaxReports);
 
 // Fraud & Security Radar
 router.get("/security/fraud-radar", getAdminFraudRadar);
+router.post("/security/fraud-radar/:id/resolve", resolveAdminFraudAnomaly);
 
 export default router;

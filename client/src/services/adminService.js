@@ -232,3 +232,20 @@ export async function getAdminFraudRadar() {
     return null;
   }
 }
+
+/**
+ * Xử lý hoặc miễn trừ cảnh báo an ninh từ Fraud Radar
+ */
+export async function resolveAdminFraudAnomalyAPI(id, action, note = "") {
+  try {
+    const res = await apiRequest(`/api/admin/security/fraud-radar/${id}/resolve`, {
+      method: "POST",
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ action, note }),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.error("[AdminService] resolveAdminFraudAnomalyAPI error:", error.message);
+    throw error;
+  }
+}

@@ -19,6 +19,7 @@ import {
   getAdminPlatformDeepBI,
   getAdminTaxReports,
   getAdminFraudRadar,
+  resolveAdminFraudAnomalyAPI,
 } from '../services/adminService';
 import {
   ShieldIcon,
@@ -2490,14 +2491,42 @@ export default function AdminDashboardPage() {
                       Đề xuất xử lý: <strong style={{ color: '#0284c7' }}>{anom.suggestedAction}</strong>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    className="shopee-btn shopee-btn-sm"
-                    style={{ background: '#0f172a', color: '#fff', padding: '6px 14px', borderRadius: '8px', fontWeight: 600 }}
-                    onClick={() => toast.success(`Đã kích hoạt biện pháp phòng thủ: ${anom.suggestedAction}`)}
-                  >
-                    Xử Lý Ngay
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      className="shopee-btn shopee-btn-sm"
+                      style={{ background: '#0f172a', color: '#fff', padding: '6px 14px', borderRadius: '8px', fontWeight: 600 }}
+                      onClick={async () => {
+                        try {
+                          await resolveAdminFraudAnomalyAPI(anom.id, anom.suggestedAction, "Admin thực thi chế tài an ninh");
+                          toast.success(`Đã kích hoạt biện pháp phòng thủ: ${anom.suggestedAction}`);
+                          const refreshed = await getAdminFraudRadar();
+                          if (refreshed) setFraudData(refreshed);
+                        } catch (err) {
+                          toast.error(`Không thể thực thi: ${err.message}`);
+                        }
+                      }}
+                    >
+                      Xử Lý Ngay
+                    </button>
+                    <button
+                      type="button"
+                      className="shopee-btn shopee-btn-sm shopee-btn-secondary"
+                      style={{ padding: '6px 10px', borderRadius: '8px', fontSize: '12px' }}
+                      onClick={async () => {
+                        try {
+                          await resolveAdminFraudAnomalyAPI(anom.id, "DISMISSED", "Admin miễn trừ cảnh báo");
+                          toast.info("Đã bỏ qua cảnh báo");
+                          const refreshed = await getAdminFraudRadar();
+                          if (refreshed) setFraudData(refreshed);
+                        } catch (err) {
+                          toast.error(err.message);
+                        }
+                      }}
+                    >
+                      Bỏ Qua
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
