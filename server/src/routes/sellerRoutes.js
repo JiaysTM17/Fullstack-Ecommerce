@@ -25,6 +25,8 @@ import {
   createSellerAdsCampaign,
   toggleSellerAdsCampaign,
   batchUpdateSellerInventory,
+  getSellerFlashSales,
+  createSellerFlashSale,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -48,6 +50,10 @@ router.patch("/ads/:id/toggle", toggleSellerAdsCampaign);
 
 // Advanced Inventory Management
 router.post("/inventory/batch-update", batchUpdateSellerInventory);
+
+// Flash Sale Shop Management
+router.get("/flash-sales", getSellerFlashSales);
+router.post("/flash-sales", createSellerFlashSale);
 
 // Staff Sub-accounts Management
 router.get("/staff", getSellerStaffList);

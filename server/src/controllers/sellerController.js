@@ -3,6 +3,7 @@ import Product from "../models/Product.js";
 import Order from "../models/Order.js";
 import User from "../models/User.js";
 import AdsCampaign from "../models/AdsCampaign.js";
+import FlashSale from "../models/FlashSale.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 import catchAsync from "../utils/catchAsync.js";
 import logger from "../utils/logger.js";
@@ -934,6 +935,48 @@ export const batchUpdateSellerInventory = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Lấy danh sách các phiên Flash Sale của Shop
+// @route   GET /api/seller/flash-sales
+// @access  Private (Seller only)
+export const getSellerFlashSales = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  const list = await FlashSale.find({ shopId });
+  sendSuccess(res, { flashSales: list || [] });
+});
+
+// @desc    Tạo hoặc đăng ký tham gia Flash Sale cho Shop
+// @route   POST /api/seller/flash-sales
+// @access  Private (Seller only)
+export const createSellerFlashSale = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  const { slotTime, startTime, endTime, items } = req.body;
+
+  if (!slotTime || !Array.isArray(items) || items.length === 0) {
+    return sendError(res, "Khung giờ và danh sách sản phẩm tham gia không được để trống", 400);
+  }
+
+  const shop = await Shop.findOne({ shopId });
+  const newFlashSale = await FlashSale.create({
+    shopId,
+    shopName: shop?.name || "Shop đối tác",
+    slotTime,
+    status: "upcoming",
+    startTime: startTime || new Date(Date.now() + 3600000).toISOString(),
+    endTime: endTime || new Date(Date.now() + 10800000).toISOString(),
+    items: items.map((it) => ({
+      productId: it.productId,
+      name: it.name || "Sản phẩm Flash Sale",
+      originalPrice: Number(it.originalPrice) || 100000,
+      flashPrice: Number(it.flashPrice) || 50000,
+      discountPercent: Math.round(((Number(it.originalPrice) - Number(it.flashPrice)) / Number(it.originalPrice)) * 100) || 50,
+      stockLimit: Number(it.stockLimit) || 10,
+      soldCount: 0,
+    })),
+  });
+
+  sendSuccess(res, { flashSale: newFlashSale, message: "Đã đăng ký tham gia Flash Sale thành công" }, 201);
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -959,4 +1002,6 @@ export default {
   createSellerAdsCampaign,
   toggleSellerAdsCampaign,
   batchUpdateSellerInventory,
+  getSellerFlashSales,
+  createSellerFlashSale,
 };

@@ -494,6 +494,62 @@ const INITIAL_ADS_CAMPAIGNS = [
   },
 ];
 
+const INITIAL_FLASH_SALES = [
+  {
+    _id: "fs_slot_01",
+    id: "fs_slot_01",
+    shopId: "shop_01",
+    shopName: "Thời Trang GenZ Official",
+    slotTime: "12:00 - 14:00 Hôm Nay",
+    status: "active", // active | upcoming | ended
+    startTime: new Date().toISOString(),
+    endTime: new Date(Date.now() + 7200000).toISOString(),
+    items: [
+      {
+        productId: "prod_01",
+        name: "Áo Thun Nam Cotton 100%",
+        originalPrice: 199000,
+        flashPrice: 99000,
+        discountPercent: 50,
+        stockLimit: 50,
+        soldCount: 38,
+      },
+      {
+        productId: "prod_02",
+        name: "Áo Khoác Bomber Unisex",
+        originalPrice: 349000,
+        flashPrice: 199000,
+        discountPercent: 43,
+        stockLimit: 30,
+        soldCount: 24,
+      },
+    ],
+    createdAt: "2026-10-08T06:00:00.000Z",
+  },
+  {
+    _id: "fs_slot_02",
+    id: "fs_slot_02",
+    shopId: "shop_02",
+    shopName: "TechWorld Store",
+    slotTime: "20:00 - 22:00 Hôm Nay",
+    status: "upcoming",
+    startTime: new Date(Date.now() + 14400000).toISOString(),
+    endTime: new Date(Date.now() + 21600000).toISOString(),
+    items: [
+      {
+        productId: "prod_15",
+        name: "Tai Nghe Bluetooth True Wireless ANC",
+        originalPrice: 1250000,
+        flashPrice: 799000,
+        discountPercent: 36,
+        stockLimit: 20,
+        soldCount: 0,
+      },
+    ],
+    createdAt: "2026-10-08T07:00:00.000Z",
+  },
+];
+
 const INITIAL_ORDERS = [
   { _id: "order_demo_01", userId: "user_customer_01", customer: { fullName: "Nguyễn Văn Khách", phone: "0901234567", email: "khachhang@shopee.vn", address: "123 Đường Lê Lợi, Q1, TP.HCM", note: "Giao giờ hành chính" }, items: [{ productId: "prod_01", name: "Áo thun nam basic cotton", price: 199000, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500", quantity: 2, shopId: "shop_01", shopName: "Thời Trang GenZ", status: "confirmed" }], subtotal: 398000, shippingFee: 30000, total: 428000, paymentMethod: "COD", status: "confirmed", createdAt: new Date(Date.now() - 3600000 * 5).toISOString() },
   { _id: "order_demo_02", userId: "user_customer_01", customer: { fullName: "Nguyễn Văn Khách", phone: "0901234567", email: "khachhang@shopee.vn", address: "123 Đường Lê Lợi, Q1, TP.HCM", note: "" }, items: [{ productId: "prod_15", name: "Tai nghe Bluetooth ANC", price: 1250000, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500", quantity: 1, shopId: "shop_02", shopName: "TechWorld Store", status: "completed" }], subtotal: 1250000, shippingFee: 0, total: 1250000, paymentMethod: "VNPAY", status: "completed", createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
@@ -611,6 +667,7 @@ class MemoryStore {
       this.campaignsStore = saved.campaigns && saved.campaigns.length > 0 ? saved.campaigns : [...INITIAL_CAMPAIGNS];
       this.disputesStore = saved.disputes && saved.disputes.length > 0 ? saved.disputes : [...INITIAL_DISPUTES];
       this.adsCampaignsStore = saved.adsCampaigns && saved.adsCampaigns.length > 0 ? saved.adsCampaigns : [...INITIAL_ADS_CAMPAIGNS];
+      this.flashSalesStore = saved.flashSales && saved.flashSales.length > 0 ? saved.flashSales : [...INITIAL_FLASH_SALES];
       console.log(`[MemoryStore] Restored from disk: ${this.productsStore.length} products, ${this.ordersStore.length} orders, ${this.usersStore.length} users`);
     } else {
       this.usersStore = [...INITIAL_USERS];
@@ -626,6 +683,7 @@ class MemoryStore {
       this.campaignsStore = [...INITIAL_CAMPAIGNS];
       this.disputesStore = [...INITIAL_DISPUTES];
       this.adsCampaignsStore = [...INITIAL_ADS_CAMPAIGNS];
+      this.flashSalesStore = [...INITIAL_FLASH_SALES];
       console.log(`[MemoryStore] Initialized with seed data: ${this.productsStore.length} products, ${this.shopsStore.length} shops`);
       this.persist(); // Save initial state
     }
@@ -695,6 +753,20 @@ class MemoryStore {
       const idx = memoryStore.adsCampaignsStore.findIndex((a) => (a._id || a.id) === (this._id || this.id));
       if (idx !== -1) memoryStore.adsCampaignsStore[idx] = { ...this };
       else memoryStore.adsCampaignsStore.push({ ...this });
+      memoryStore.persist();
+      return this;
+    },
+    toObject() { return { ...this }; },
+  }));
+
+  flashSales = createCollectionAPI("flashSalesStore", (item) => ({
+    ...item,
+    _id: item._id || item.id,
+    id: item.id || item._id,
+    async save() {
+      const idx = memoryStore.flashSalesStore.findIndex((f) => (f._id || f.id) === (this._id || this.id));
+      if (idx !== -1) memoryStore.flashSalesStore[idx] = { ...this };
+      else memoryStore.flashSalesStore.push({ ...this });
       memoryStore.persist();
       return this;
     },

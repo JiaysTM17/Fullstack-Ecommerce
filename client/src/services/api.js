@@ -533,3 +533,18 @@ export async function batchUpdateInventoryAPI(updates) {
     body: JSON.stringify({ updates }),
   });
 }
+
+/**
+ * Flash Sale Shop API
+ */
+export async function fetchSellerFlashSalesAPI() {
+  const result = await apiRequest("/api/seller/flash-sales");
+  return result?.data || result;
+}
+
+export async function createSellerFlashSaleAPI(data) {
+  return await apiRequest("/api/seller/flash-sales", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
