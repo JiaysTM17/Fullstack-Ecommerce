@@ -664,13 +664,15 @@ export const getAdminCampaigns = catchAsync(async (req, res) => {
 // @route   POST /api/admin/campaigns
 // @access  Private (Admin only)
 export const createAdminCampaign = catchAsync(async (req, res) => {
-  const { title, description, banner, type, startDate, endDate, discountMinPercent, subsidizedByPlatform } = req.body;
-  if (!title || !startDate || !endDate) {
+  const { title, name, description, banner, type, startDate, endDate, discountMinPercent, subsidizedByPlatform } = req.body;
+  const campaignTitle = (title || name || "").trim();
+  if (!campaignTitle || !startDate || !endDate) {
     return sendError(res, "Tiêu đề và ngày bắt đầu/kết thúc là bắt buộc", 400);
   }
 
   const campaign = await Campaign.create({
-    title: title.trim(),
+    title: campaignTitle,
+    name: campaignTitle,
     description: description || "",
     banner: banner || "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200",
     type: type || "MEGA_SALE",
@@ -773,13 +775,15 @@ export const getAdminDisputes = catchAsync(async (req, res) => {
 // @access  Private (Admin only)
 export const arbitrateAdminDispute = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const { resolution, note } = req.body; // resolution: "REFUND_BUYER" | "REJECT_BUYER"
+  const { resolution, decision, note, resolutionNote } = req.body; // resolution: "REFUND_BUYER" | "REJECT_BUYER"
+  const finalDecision = resolution || decision || "REFUND_BUYER";
+  const finalNote = note || resolutionNote || "";
 
   const dispute = await Dispute.findById(id);
   if (!dispute) return sendError(res, "Không tìm thấy tranh chấp khiếu nại", 404);
 
-  dispute.status = resolution === "REFUND_BUYER" ? "resolved_refund" : "resolved_rejected";
-  dispute.arbitrationNote = note || "";
+  dispute.status = finalDecision === "REFUND_BUYER" ? "resolved_refund" : "resolved_rejected";
+  dispute.arbitrationNote = finalNote;
   dispute.resolvedBy = req.user.fullName || "Super Admin";
   dispute.resolvedAt = new Date().toISOString();
   await dispute.save();

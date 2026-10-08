@@ -372,6 +372,77 @@ const INITIAL_QUESTIONS = [
   },
 ];
 
+const INITIAL_CAMPAIGNS = [
+  {
+    _id: "camp_01",
+    id: "camp_01",
+    title: "Siêu Hội Mua Sắm 10.10 Ngày Đôi",
+    description: "Ngày hội giảm giá lên đến 50% cùng voucher freeship 0Đ toàn sàn",
+    banner: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200",
+    type: "MEGA_SALE",
+    status: "active",
+    startDate: "2026-10-08",
+    endDate: "2026-10-12",
+    discountMinPercent: 15,
+    subsidizedByPlatform: 5,
+    participatingShops: [
+      { shopId: "shop_01", shopName: "Thời Trang GenZ Official", status: "approved" },
+      { shopId: "shop_02", shopName: "TechWorld Store", status: "approved" },
+    ],
+    createdAt: "2026-10-01T00:00:00.000Z",
+  },
+  {
+    _id: "camp_02",
+    id: "camp_02",
+    title: "Lương Về Sale To — Siêu Giảm Giá Cuối Tháng",
+    description: "Đại tiệc công nghệ và thời trang mừng ngày nhận lương",
+    banner: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=1200",
+    type: "BRAND_FEST",
+    status: "upcoming",
+    startDate: "2026-10-25",
+    endDate: "2026-10-31",
+    discountMinPercent: 20,
+    subsidizedByPlatform: 8,
+    participatingShops: [],
+    createdAt: "2026-10-02T00:00:00.000Z",
+  },
+];
+
+const INITIAL_DISPUTES = [
+  {
+    _id: "disp_01",
+    id: "disp_01",
+    orderId: "ORD918231",
+    customerId: "user_customer_01",
+    customerName: "Nguyễn Văn Khách",
+    shopId: "shop_01",
+    shopName: "Thời Trang GenZ Official",
+    reason: "Sản phẩm bị lỗi sứt chỉ đường viền cổ áo và giao sai kích thước L thành M",
+    claimAmount: 428000,
+    status: "under_review",
+    evidence: ["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400"],
+    shopResponse: "Shop đã kiểm tra trước khi gửi, nhưng sẵn sàng hỗ trợ đổi size mới miễn phí cho khách",
+    arbitrationNote: "",
+    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+  },
+  {
+    _id: "disp_02",
+    id: "disp_02",
+    orderId: "ORD716254",
+    customerId: "user_customer_01",
+    customerName: "Lê Minh Tuấn",
+    shopId: "shop_02",
+    shopName: "TechWorld Store",
+    reason: "Đơn hàng trễ quá 5 ngày chưa bàn giao cho bên bưu cục SPX",
+    claimAmount: 680000,
+    status: "opened",
+    evidence: [],
+    shopResponse: "",
+    arbitrationNote: "",
+    createdAt: new Date(Date.now() - 3600000 * 6).toISOString(),
+  },
+];
+
 const INITIAL_ORDERS = [
   { _id: "order_demo_01", userId: "user_customer_01", customer: { fullName: "Nguyễn Văn Khách", phone: "0901234567", email: "khachhang@shopee.vn", address: "123 Đường Lê Lợi, Q1, TP.HCM", note: "Giao giờ hành chính" }, items: [{ productId: "prod_01", name: "Áo thun nam basic cotton", price: 199000, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500", quantity: 2, shopId: "shop_01", shopName: "Thời Trang GenZ", status: "confirmed" }], subtotal: 398000, shippingFee: 30000, total: 428000, paymentMethod: "COD", status: "confirmed", createdAt: new Date(Date.now() - 3600000 * 5).toISOString() },
   { _id: "order_demo_02", userId: "user_customer_01", customer: { fullName: "Nguyễn Văn Khách", phone: "0901234567", email: "khachhang@shopee.vn", address: "123 Đường Lê Lợi, Q1, TP.HCM", note: "" }, items: [{ productId: "prod_15", name: "Tai nghe Bluetooth ANC", price: 1250000, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500", quantity: 1, shopId: "shop_02", shopName: "TechWorld Store", status: "completed" }], subtotal: 1250000, shippingFee: 0, total: 1250000, paymentMethod: "VNPAY", status: "completed", createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
@@ -486,8 +557,8 @@ class MemoryStore {
       this.categoriesStore = saved.categories || [];
       this.questionsStore = saved.questions && saved.questions.length > 0 ? saved.questions : [...INITIAL_QUESTIONS];
       this.auditLogsStore = saved.auditLogs || [];
-      this.campaignsStore = saved.campaigns || [];
-      this.disputesStore = saved.disputes || [];
+      this.campaignsStore = saved.campaigns && saved.campaigns.length > 0 ? saved.campaigns : [...INITIAL_CAMPAIGNS];
+      this.disputesStore = saved.disputes && saved.disputes.length > 0 ? saved.disputes : [...INITIAL_DISPUTES];
       console.log(`[MemoryStore] Restored from disk: ${this.productsStore.length} products, ${this.ordersStore.length} orders, ${this.usersStore.length} users`);
     } else {
       this.usersStore = [...INITIAL_USERS];
@@ -500,8 +571,8 @@ class MemoryStore {
       this.categoriesStore = [...INITIAL_CATEGORIES];
       this.questionsStore = [...INITIAL_QUESTIONS];
       this.auditLogsStore = [];
-      this.campaignsStore = [];
-      this.disputesStore = [];
+      this.campaignsStore = [...INITIAL_CAMPAIGNS];
+      this.disputesStore = [...INITIAL_DISPUTES];
       console.log(`[MemoryStore] Initialized with seed data: ${this.productsStore.length} products, ${this.shopsStore.length} shops`);
       this.persist(); // Save initial state
     }
@@ -522,9 +593,46 @@ class MemoryStore {
   vouchers = createCollectionAPI("vouchersStore", wrapVoucher);
   reviews = createCollectionAPI("reviewsStore", wrapReview);
   questions = createCollectionAPI("questionsStore", (q) => q);
-  auditLogs = createCollectionAPI("auditLogsStore", (item) => ({ ...item, _id: item._id || item.id, toObject() { return { ...this }; } }));
-  campaigns = createCollectionAPI("campaignsStore", (item) => ({ ...item, _id: item._id || item.id, toObject() { return { ...this }; } }));
-  disputes = createCollectionAPI("disputesStore", (item) => ({ ...item, _id: item._id || item.id, toObject() { return { ...this }; } }));
+  auditLogs = createCollectionAPI("auditLogsStore", (item) => ({
+    ...item,
+    _id: item._id || item.id,
+    async save() {
+      const idx = memoryStore.auditLogsStore.findIndex((l) => (l._id || l.id) === (this._id || this.id));
+      if (idx !== -1) memoryStore.auditLogsStore[idx] = { ...this };
+      else memoryStore.auditLogsStore.push({ ...this });
+      memoryStore.persist();
+      return this;
+    },
+    toObject() { return { ...this }; },
+  }));
+
+  campaigns = createCollectionAPI("campaignsStore", (item) => ({
+    ...item,
+    _id: item._id || item.id,
+    id: item.id || item._id,
+    async save() {
+      const idx = memoryStore.campaignsStore.findIndex((c) => (c._id || c.id) === (this._id || this.id));
+      if (idx !== -1) memoryStore.campaignsStore[idx] = { ...this };
+      else memoryStore.campaignsStore.push({ ...this });
+      memoryStore.persist();
+      return this;
+    },
+    toObject() { return { ...this }; },
+  }));
+
+  disputes = createCollectionAPI("disputesStore", (item) => ({
+    ...item,
+    _id: item._id || item.id,
+    id: item.id || item._id,
+    async save() {
+      const idx = memoryStore.disputesStore.findIndex((d) => (d._id || d.id) === (this._id || this.id));
+      if (idx !== -1) memoryStore.disputesStore[idx] = { ...this };
+      else memoryStore.disputesStore.push({ ...this });
+      memoryStore.persist();
+      return this;
+    },
+    toObject() { return { ...this }; },
+  }));
 
   // Categories - simple read-only collection
   categories = {
