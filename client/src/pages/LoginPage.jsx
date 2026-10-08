@@ -655,41 +655,85 @@ export default function LoginPage() {
                           <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                             <StoreIcon size={12} color="#ea580c" />
                           </span>
-                          <span>Thời Trang GenZ Official (Shop A)</span>
+                          <span>Chủ Shop Thời Trang GenZ (Owner)</span>
                         </strong>
                         <span>shop.genz@shopee.vn</span>
                       </button>
                       <button
                         type="button"
                         className="shopee-demo-btn"
-                        onClick={() => handleQuickLogin('seller_tech')}
+                        onClick={() => handleQuickLogin('seller_inventory')}
                         disabled={loading}
                       >
                         <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                           <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <StoreIcon size={12} color="#0284c7" />
+                            <PackageIcon size={12} color="#0284c7" />
                           </span>
-                          <span>TechWorld Store (Shop B)</span>
+                          <span>Vũ Kho Vận (Nhân Viên Kho)</span>
                         </strong>
-                        <span>shop.tech@shopee.vn</span>
+                        <span>kho.genz@shopee.vn</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="shopee-demo-btn"
+                        onClick={() => handleQuickLogin('seller_support')}
+                        disabled={loading}
+                      >
+                        <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ChatIcon size={12} color="#10b981" />
+                          </span>
+                          <span>Mai CSKH (Nhân Viên Trực Chat)</span>
+                        </strong>
+                        <span>cskh.genz@shopee.vn</span>
                       </button>
                     </>
                   )}
                   {activeRole === 'admin' && (
-                    <button
-                      type="button"
-                      className="shopee-demo-btn"
-                      onClick={() => handleQuickLogin('admin')}
-                      disabled={loading}
-                    >
-                      <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <ShieldCheckIcon size={12} color="#6366f1" />
-                        </span>
-                        <span>Tổng Quản Trị Viên Sàn (Super Admin)</span>
-                      </strong>
-                      <span>admin@shopee.vn</span>
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        className="shopee-demo-btn"
+                        onClick={() => handleQuickLogin('admin')}
+                        disabled={loading}
+                      >
+                        <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ShieldCheckIcon size={12} color="#6366f1" />
+                          </span>
+                          <span>Tổng Quản Trị Viên (Super Admin)</span>
+                        </strong>
+                        <span>admin@shopee.vn</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="shopee-demo-btn"
+                        onClick={() => handleQuickLogin('admin_finance')}
+                        disabled={loading}
+                      >
+                        <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CreditCardIcon size={12} color="#059669" />
+                          </span>
+                          <span>Nguyễn Tài Chính (Finance Lead)</span>
+                        </strong>
+                        <span>finance.admin@shopee.vn</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="shopee-demo-btn"
+                        onClick={() => handleQuickLogin('admin_ops')}
+                        disabled={loading}
+                      >
+                        <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <SparklesIcon size={12} color="#ea580c" />
+                          </span>
+                          <span>Phạm Vận Hành (Operations Lead)</span>
+                        </strong>
+                        <span>ops.admin@shopee.vn</span>
+                      </button>
+                    </>
                   )}
                 </div>
               </div>

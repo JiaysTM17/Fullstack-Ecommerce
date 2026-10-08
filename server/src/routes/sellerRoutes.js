@@ -16,6 +16,11 @@ import {
   getSellerPendingOrders,
   confirmSellerOrder,
   getSellerWallet,
+  getSellerAnalyticsFunnel,
+  getSellerMarketIntelligence,
+  getSellerStaffList,
+  addSellerStaff,
+  updateSellerStaff,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -29,6 +34,13 @@ router.use(authenticate, authorize("seller", "admin"), requireShopAccess());
 // Seller Dashboard & Analytics
 router.get("/dashboard", getSellerDashboard);
 router.get("/revenue", getSellerRevenue);
+router.get("/analytics/funnel", getSellerAnalyticsFunnel);
+router.get("/analytics/market", getSellerMarketIntelligence);
+
+// Staff Sub-accounts Management
+router.get("/staff", getSellerStaffList);
+router.post("/staff", addSellerStaff);
+router.put("/staff/:id", updateSellerStaff);
 
 router.route("/shop")
   .get(getMySellerShop)

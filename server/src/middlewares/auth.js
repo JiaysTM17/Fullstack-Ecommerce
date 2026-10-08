@@ -19,7 +19,19 @@ export const authenticate = async (req, res, next) => {
     const token = authHeader.split(" ")[1];
 
     // Hỗ trợ Dev/Demo Mock Token giúp người dùng test trên UI không bị chặn 401
-    if (token && token.startsWith("mock_jwt_token_admin")) {
+    if (token && token.startsWith("mock_jwt_token_admin_finance")) {
+      const financeAdmin = (await User.findById("user_admin_finance")) || (await User.findOne({ email: "finance.admin@shopee.vn" }));
+      if (financeAdmin) { req.user = financeAdmin; return next(); }
+    } else if (token && token.startsWith("mock_jwt_token_admin_ops")) {
+      const opsAdmin = (await User.findById("user_admin_ops")) || (await User.findOne({ email: "ops.admin@shopee.vn" }));
+      if (opsAdmin) { req.user = opsAdmin; return next(); }
+    } else if (token && token.startsWith("mock_jwt_token_seller_inventory")) {
+      const invStaff = (await User.findById("user_seller_staff_01")) || (await User.findOne({ email: "kho.genz@shopee.vn" }));
+      if (invStaff) { req.user = invStaff; return next(); }
+    } else if (token && token.startsWith("mock_jwt_token_seller_support")) {
+      const supStaff = (await User.findById("user_seller_staff_02")) || (await User.findOne({ email: "cskh.genz@shopee.vn" }));
+      if (supStaff) { req.user = supStaff; return next(); }
+    } else if (token && token.startsWith("mock_jwt_token_admin")) {
       const adminUser = (await User.findById("user_admin_01")) || (await User.findOne({ role: "admin" }));
       if (adminUser) {
         req.user = adminUser;
@@ -97,6 +109,44 @@ export const authorize = (...roles) => {
       return res.status(403).json({
         success: false,
         message: `Bạn không có quyền thực hiện hành động này. Yêu cầu vai trò: [${roles.join(", ")}], vai trò của bạn: [${req.user.role}].`,
+      });
+    }
+
+    next();
+  };
+};
+
+/**
+ * Middleware: requirePermission
+ * Kiểm tra phân quyền chi tiết (RBAC granular permissions)
+ */
+export const requirePermission = (...requiredPerms) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Chưa xác thực danh tính người dùng.",
+      });
+    }
+
+    // Super admin hoặc Shop Owner có toàn quyền bypass
+    if (req.user.role === "admin" && (!req.user.adminRole || req.user.adminRole === "super_admin")) {
+      return next();
+    }
+    if (req.user.role === "seller" && (!req.user.subRole || req.user.subRole === "owner")) {
+      return next();
+    }
+
+    const userPerms = req.user.permissions || [];
+    if (userPerms.includes("all")) {
+      return next();
+    }
+
+    const hasPermission = requiredPerms.some((perm) => userPerms.includes(perm));
+    if (!hasPermission) {
+      return res.status(403).json({
+        success: false,
+        message: `Từ chối truy cập: Tài khoản của bạn cần một trong các quyền hạn [${requiredPerms.join(", ")}].`,
       });
     }
 

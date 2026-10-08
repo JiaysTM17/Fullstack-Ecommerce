@@ -262,9 +262,13 @@ const DEMO_PW_HASH = bcrypt.hashSync("password123", 10);
 
 const INITIAL_USERS = [
   { _id: "user_customer_01", id: "user_customer_01", email: "khachhang@shopee.vn", password: DEMO_PW_HASH, fullName: "Nguyễn Văn Khách", phone: "0901234567", role: "customer", address: "123 Đường Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120", coins: 25000, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
-  { _id: "user_seller_01", id: "user_seller_01", email: "shop.genz@shopee.vn", password: DEMO_PW_HASH, fullName: "Trần Thị Chủ Shop (Thời Trang)", phone: "0912345678", role: "seller", shopId: "shop_01", shopName: "Thời Trang GenZ Official", shopLogo: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=120", shopAddress: "Kho Tân Bình, TP. HCM", coins: 50000, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
-  { _id: "user_seller_02", id: "user_seller_02", email: "shop.tech@shopee.vn", password: DEMO_PW_HASH, fullName: "Lê Văn Chủ Shop (Công Nghệ)", phone: "0987654321", role: "seller", shopId: "shop_02", shopName: "TechWorld Store", shopLogo: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=120", shopAddress: "Kho Cầu Giấy, Hà Nội", coins: 50000, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
-  { _id: "user_admin_01", id: "user_admin_01", email: "admin@shopee.vn", password: DEMO_PW_HASH, fullName: "Tổng Quản Trị Viên Sàn", phone: "0999999999", role: "admin", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120", coins: 0, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
+  { _id: "user_seller_01", id: "user_seller_01", email: "shop.genz@shopee.vn", password: DEMO_PW_HASH, fullName: "Trần Thị Chủ Shop (Thời Trang)", phone: "0912345678", role: "seller", subRole: "owner", permissions: ["manage_shop", "manage_finance", "manage_products", "manage_orders", "manage_marketing", "manage_staff"], shopId: "shop_01", shopName: "Thời Trang GenZ Official", shopLogo: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=120", shopAddress: "Kho Tân Bình, TP. HCM", coins: 50000, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
+  { _id: "user_seller_02", id: "user_seller_02", email: "shop.tech@shopee.vn", password: DEMO_PW_HASH, fullName: "Lê Văn Chủ Shop (Công Nghệ)", phone: "0987654321", role: "seller", subRole: "owner", permissions: ["manage_shop", "manage_finance", "manage_products", "manage_orders", "manage_marketing", "manage_staff"], shopId: "shop_02", shopName: "TechWorld Store", shopLogo: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=120", shopAddress: "Kho Cầu Giấy, Hà Nội", coins: 50000, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
+  { _id: "user_seller_staff_01", id: "user_seller_staff_01", email: "kho.genz@shopee.vn", password: DEMO_PW_HASH, fullName: "Vũ Kho Vận (GenZ)", phone: "0912001122", role: "seller", subRole: "inventory_staff", permissions: ["manage_products", "manage_orders"], shopId: "shop_01", shopName: "Thời Trang GenZ Official", shopLogo: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=120", shopAddress: "Kho Tân Bình, TP. HCM", coins: 10000, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
+  { _id: "user_seller_staff_02", id: "user_seller_staff_02", email: "cskh.genz@shopee.vn", password: DEMO_PW_HASH, fullName: "Mai CSKH Tư Vấn (GenZ)", phone: "0912003344", role: "seller", subRole: "support_staff", permissions: ["view_orders", "chat_customer"], shopId: "shop_01", shopName: "Thời Trang GenZ Official", shopLogo: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=120", shopAddress: "Kho Tân Bình, TP. HCM", coins: 10000, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
+  { _id: "user_admin_01", id: "user_admin_01", email: "admin@shopee.vn", password: DEMO_PW_HASH, fullName: "Tổng Quản Trị Viên Sàn (Super Admin)", phone: "0999999999", role: "admin", adminRole: "super_admin", permissions: ["all"], avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120", coins: 0, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
+  { _id: "user_admin_finance", id: "user_admin_finance", email: "finance.admin@shopee.vn", password: DEMO_PW_HASH, fullName: "Nguyễn Tài Chính (Finance Lead)", phone: "0999888777", role: "admin", adminRole: "finance_manager", permissions: ["manage_finance", "view_analytics", "export_reports", "manage_settlements"], avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120", coins: 0, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
+  { _id: "user_admin_ops", id: "user_admin_ops", email: "ops.admin@shopee.vn", password: DEMO_PW_HASH, fullName: "Phạm Vận Hành (Operations Lead)", phone: "0999666555", role: "admin", adminRole: "operations_manager", permissions: ["manage_campaigns", "manage_disputes", "manage_shops", "manage_moderation"], avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120", coins: 0, isActive: true, status: "active", savedAddresses: [], createdAt: new Date().toISOString() },
 ];
 
 const INITIAL_SHOPS = [
@@ -461,6 +465,18 @@ class MemoryStore {
     const saved = loadFromDisk();
     if (saved && saved._version >= 2 && saved.products && saved.products.length > 0) {
       this.usersStore = saved.users || [];
+      // Đảm bảo các tài khoản quản trị và nhân viên phân quyền mẫu luôn tồn tại
+      INITIAL_USERS.forEach((initUser) => {
+        const found = this.usersStore.find((u) => u._id === initUser._id || u.email === initUser.email);
+        if (!found) {
+          this.usersStore.push({ ...initUser });
+        } else {
+          // Cập nhật bổ sung quyền hạn và adminRole/subRole nếu tài khoản cũ chưa có
+          if (initUser.adminRole && !found.adminRole) found.adminRole = initUser.adminRole;
+          if (initUser.subRole && !found.subRole) found.subRole = initUser.subRole;
+          if (initUser.permissions && (!found.permissions || found.permissions.length === 0)) found.permissions = initUser.permissions;
+        }
+      });
       this.shopsStore = saved.shops || [];
       this.productsStore = saved.products || [];
       this.ordersStore = saved.orders || [];
@@ -469,6 +485,9 @@ class MemoryStore {
       this.reviewsStore = saved.reviews || [];
       this.categoriesStore = saved.categories || [];
       this.questionsStore = saved.questions && saved.questions.length > 0 ? saved.questions : [...INITIAL_QUESTIONS];
+      this.auditLogsStore = saved.auditLogs || [];
+      this.campaignsStore = saved.campaigns || [];
+      this.disputesStore = saved.disputes || [];
       console.log(`[MemoryStore] Restored from disk: ${this.productsStore.length} products, ${this.ordersStore.length} orders, ${this.usersStore.length} users`);
     } else {
       this.usersStore = [...INITIAL_USERS];
@@ -480,6 +499,9 @@ class MemoryStore {
       this.reviewsStore = [];
       this.categoriesStore = [...INITIAL_CATEGORIES];
       this.questionsStore = [...INITIAL_QUESTIONS];
+      this.auditLogsStore = [];
+      this.campaignsStore = [];
+      this.disputesStore = [];
       console.log(`[MemoryStore] Initialized with seed data: ${this.productsStore.length} products, ${this.shopsStore.length} shops`);
       this.persist(); // Save initial state
     }
@@ -500,6 +522,9 @@ class MemoryStore {
   vouchers = createCollectionAPI("vouchersStore", wrapVoucher);
   reviews = createCollectionAPI("reviewsStore", wrapReview);
   questions = createCollectionAPI("questionsStore", (q) => q);
+  auditLogs = createCollectionAPI("auditLogsStore", (item) => ({ ...item, _id: item._id || item.id, toObject() { return { ...this }; } }));
+  campaigns = createCollectionAPI("campaignsStore", (item) => ({ ...item, _id: item._id || item.id, toObject() { return { ...this }; } }));
+  disputes = createCollectionAPI("disputesStore", (item) => ({ ...item, _id: item._id || item.id, toObject() { return { ...this }; } }));
 
   // Categories - simple read-only collection
   categories = {

@@ -108,3 +108,97 @@ export async function updateAdminShopStatus(shopId, status, reason = "") {
     throw error;
   }
 }
+
+/**
+ * Lấy danh sách Nhật ký kiểm toán toàn sàn (Audit Logs)
+ */
+export async function getAdminAuditLogs(params = {}) {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const res = await apiRequest(`/api/admin/audit-logs${query ? `?${query}` : ""}`, {
+      headers: getAdminHeaders(),
+    });
+    return res?.data?.logs || res?.logs || [];
+  } catch (error) {
+    console.warn("[AdminService] getAdminAuditLogs fallback:", error.message);
+    return [];
+  }
+}
+
+/**
+ * Lấy danh sách Siêu chiến dịch Mega Campaigns
+ */
+export async function getAdminCampaigns() {
+  try {
+    const res = await apiRequest("/api/admin/campaigns", {
+      headers: getAdminHeaders(),
+    });
+    return res?.data?.campaigns || res?.campaigns || [];
+  } catch (error) {
+    console.warn("[AdminService] getAdminCampaigns fallback:", error.message);
+    return [];
+  }
+}
+
+/**
+ * Tạo mới Siêu chiến dịch Mega Campaign
+ */
+export async function createAdminCampaign(data) {
+  return await apiRequest("/api/admin/campaigns", {
+    method: "POST",
+    headers: getAdminHeaders(),
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Cập nhật trạng thái chiến dịch
+ */
+export async function updateAdminCampaignStatus(id, status) {
+  return await apiRequest(`/api/admin/campaigns/${id}/status`, {
+    method: "PUT",
+    headers: getAdminHeaders(),
+    body: JSON.stringify({ status }),
+  });
+}
+
+/**
+ * Lấy danh sách Tranh chấp khiếu nại (Dispute Center)
+ */
+export async function getAdminDisputes() {
+  try {
+    const res = await apiRequest("/api/admin/disputes", {
+      headers: getAdminHeaders(),
+    });
+    return res?.data?.disputes || res?.disputes || [];
+  } catch (error) {
+    console.warn("[AdminService] getAdminDisputes fallback:", error.message);
+    return [];
+  }
+}
+
+/**
+ * Phán quyết trọng tài khiếu nại (Arbitration)
+ */
+export async function arbitrateAdminDispute(id, resolution, note = "") {
+  return await apiRequest(`/api/admin/disputes/${id}/arbitrate`, {
+    method: "POST",
+    headers: getAdminHeaders(),
+    body: JSON.stringify({ resolution, note }),
+  });
+}
+
+/**
+ * Lấy dữ liệu phân tích BI chuyên sâu (Cohorts, SLA, Thị phần)
+ */
+export async function getAdminPlatformDeepBI() {
+  try {
+    const res = await apiRequest("/api/admin/analytics/deep-bi", {
+      headers: getAdminHeaders(),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.warn("[AdminService] getAdminPlatformDeepBI fallback:", error.message);
+    return null;
+  }
+}

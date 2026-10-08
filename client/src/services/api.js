@@ -469,3 +469,36 @@ export async function updateUserStatusAdmin(userId, status) {
   });
   return result?.data || result;
 }
+
+// ============================================================
+// SELLER BI & ADVANCED OPS API
+// ============================================================
+
+export async function fetchSellerFunnelAnalytics() {
+  const result = await apiRequest("/api/seller/analytics/funnel");
+  return result?.data || result;
+}
+
+export async function fetchSellerMarketIntelligence() {
+  const result = await apiRequest("/api/seller/analytics/market");
+  return result?.data || result;
+}
+
+export async function fetchSellerStaff() {
+  const result = await apiRequest("/api/seller/staff");
+  return result?.data?.staff || result?.staff || [];
+}
+
+export async function createSellerStaff(data) {
+  return await apiRequest("/api/seller/staff", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateSellerStaff(id, data) {
+  return await apiRequest(`/api/seller/staff/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}

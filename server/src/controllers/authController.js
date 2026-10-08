@@ -8,9 +8,14 @@ import logger from "../utils/logger.js";
 
 const DEMO_EMAILS = {
   customer: "khachhang@shopee.vn",
+  seller: "shop.genz@shopee.vn",
   seller_fashion: "shop.genz@shopee.vn",
   seller_tech: "shop.tech@shopee.vn",
+  seller_inventory: "kho.genz@shopee.vn",
+  seller_support: "cskh.genz@shopee.vn",
   admin: "admin@shopee.vn",
+  admin_finance: "finance.admin@shopee.vn",
+  admin_ops: "ops.admin@shopee.vn",
 };
 
 // @desc    Register a new customer or seller account

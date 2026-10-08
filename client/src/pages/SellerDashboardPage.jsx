@@ -6,7 +6,16 @@ import { formatCurrency } from '../utils/formatCurrency';
 import ShippingLabelModal from '../components/ShippingLabelModal';
 import PackingSlipModal from '../components/PackingSlipModal';
 import { FALLBACK_PRODUCTS, restoreProductStock } from '../services/productService';
-import { fetchSellerOrders, updateSellerOrderStatus, createSellerProduct } from '../services/api';
+import {
+  fetchSellerOrders,
+  updateSellerOrderStatus,
+  createSellerProduct,
+  fetchSellerFunnelAnalytics,
+  fetchSellerMarketIntelligence,
+  fetchSellerStaff,
+  createSellerStaff,
+  updateSellerStaff,
+} from '../services/api';
 import '../styles/dashboard.css';
 import {
   ChartBarIcon,
@@ -417,6 +426,30 @@ export default function SellerDashboardPage() {
 
   const [activeChatId, setActiveChatId] = useState(null);
   const [chatReplyText, setChatReplyText] = useState('');
+
+  // BỔ SUNG: States cho BI Funnel, Market Benchmark & Phân quyền Nhân viên Shop
+  const [sellerFunnel, setSellerFunnel] = useState(null);
+  const [sellerMarket, setSellerMarket] = useState(null);
+  const [sellerStaffList, setSellerStaffList] = useState([]);
+  const [showAddStaffModal, setShowAddStaffModal] = useState(false);
+  const [staffForm, setStaffForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    subRole: 'inventory_staff',
+    permissions: ['manage_products', 'manage_orders'],
+  });
+
+  // Tự động nạp dữ liệu khi chuyển tab Funnel / Market / Staff
+  useEffect(() => {
+    if (activeTab === 'funnel') {
+      fetchSellerFunnelAnalytics().then(res => setSellerFunnel(res));
+    } else if (activeTab === 'market') {
+      fetchSellerMarketIntelligence().then(res => setSellerMarket(res));
+    } else if (activeTab === 'staff') {
+      fetchSellerStaff().then(res => setSellerStaffList(res || []));
+    }
+  }, [activeTab, selectedShopId]);
 
   // Phiếu xuất kho / đóng gói hàng & Tab lọc đơn hàng
   const [packingSlipOrder, setPackingSlipOrder] = useState(null);
@@ -1648,6 +1681,73 @@ export default function SellerDashboardPage() {
             <SettingsIcon size={14} color="#64748b" />
           </span>
           <span>Hồ Sơ & Kho Hàng</span>
+        </button>
+
+        <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted, #94a3b8)', padding: '10px 14px 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          TRÍ TUỆ & TĂNG TRƯỞNG
+        </div>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'funnel' ? 'active' : ''}`}
+          onClick={() => setActiveTab('funnel')}
+        >
+          <span style={{
+            width: '26px',
+            height: '26px',
+            borderRadius: '7px',
+            background: activeTab === 'funnel' ? 'rgba(99, 102, 241, 0.18)' : 'rgba(99, 102, 241, 0.1)',
+            border: activeTab === 'funnel' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid rgba(99, 102, 241, 0.18)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <ChartBarIcon size={14} color="#6366f1" />
+          </span>
+          <span>Phễu Chuyển Đổi & Tồn Kho</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'market' ? 'active' : ''}`}
+          onClick={() => setActiveTab('market')}
+        >
+          <span style={{
+            width: '26px',
+            height: '26px',
+            borderRadius: '7px',
+            background: activeTab === 'market' ? 'rgba(14, 165, 233, 0.18)' : 'rgba(14, 165, 233, 0.1)',
+            border: activeTab === 'market' ? '1px solid rgba(14, 165, 233, 0.3)' : '1px solid rgba(14, 165, 233, 0.18)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <GlobeIcon size={14} color="#0ea5e9" />
+          </span>
+          <span>Thị Trường & Chuẩn Ngành</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'staff' ? 'active' : ''}`}
+          onClick={() => setActiveTab('staff')}
+        >
+          <span style={{
+            width: '26px',
+            height: '26px',
+            borderRadius: '7px',
+            background: activeTab === 'staff' ? 'rgba(16, 185, 129, 0.18)' : 'rgba(16, 185, 129, 0.1)',
+            border: activeTab === 'staff' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(16, 185, 129, 0.18)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <UserIcon size={14} color="#10b981" />
+          </span>
+          <span>Nhân Viên & Phân Quyền</span>
         </button>
       </aside>
 
@@ -4251,6 +4351,392 @@ export default function SellerDashboardPage() {
                     </span>
                     <span>Kích Hoạt Flash Sale</span>
                   </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB: PHỄU CHUYỂN ĐỔI & DỰ BÁO TỒN KHO (FUNNEL & INVENTORY) */}
+        {/* ========================================================================= */}
+        {activeTab === 'funnel' && (
+          <div className="shopee-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  Phễu Chuyển Đổi & Dự Báo Tồn Kho (Conversion Funnel & Stock Prediction)
+                </h2>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0' }}>
+                  Theo dõi từng bước của hành trình mua hàng, điểm rơi rớt và cảnh báo mặt hàng nguy cơ cháy kho.
+                </p>
+              </div>
+              <span style={{ padding: '6px 14px', borderRadius: '20px', background: 'rgba(99, 102, 241, 0.12)', color: '#4f46e5', fontWeight: 700, fontSize: '12px' }}>
+                Tỷ lệ chuyển đổi: {sellerFunnel?.funnel?.conversionRate || '3.6%'}
+              </span>
+            </div>
+
+            {/* Funnel Visual Bars */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '32px' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '4px' }}>
+                  <span>1. Lượt xem sản phẩm (Product Views)</span>
+                  <strong>{sellerFunnel?.funnel?.views?.toLocaleString() || '14,250'} lượt</strong>
+                </div>
+                <div style={{ height: '24px', background: '#e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+                  <div style={{ width: '100%', height: '100%', background: '#3b82f6', display: 'flex', alignItems: 'center', paddingLeft: '8px', color: '#fff', fontSize: '11px', fontWeight: 700 }}>
+                    100%
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '4px' }}>
+                  <span>2. Thêm vào giỏ hàng (Add to Cart)</span>
+                  <strong>{sellerFunnel?.funnel?.cartAdds?.toLocaleString() || '3,990'} lượt</strong>
+                </div>
+                <div style={{ height: '24px', background: '#e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+                  <div style={{ width: '28%', height: '100%', background: '#6366f1', display: 'flex', alignItems: 'center', paddingLeft: '8px', color: '#fff', fontSize: '11px', fontWeight: 700 }}>
+                    28% (Rơi rớt {sellerFunnel?.funnel?.dropOffCartToCheckout || '72%'})
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '4px' }}>
+                  <span>3. Khởi tạo thanh toán (Checkout Initiated)</span>
+                  <strong>{sellerFunnel?.funnel?.checkouts?.toLocaleString() || '1,795'} lượt</strong>
+                </div>
+                <div style={{ height: '24px', background: '#e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+                  <div style={{ width: '12.6%', height: '100%', background: '#f59e0b', display: 'flex', alignItems: 'center', paddingLeft: '8px', color: '#fff', fontSize: '11px', fontWeight: 700 }}>
+                    12.6%
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '4px' }}>
+                  <span>4. Đặt hàng & thanh toán thành công (Purchased)</span>
+                  <strong>{sellerFunnel?.funnel?.purchases || shopOrders.length} đơn</strong>
+                </div>
+                <div style={{ height: '24px', background: '#e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+                  <div style={{ width: '5.2%', minWidth: '40px', height: '100%', background: '#10b981', display: 'flex', alignItems: 'center', paddingLeft: '8px', color: '#fff', fontSize: '11px', fontWeight: 700 }}>
+                    {sellerFunnel?.funnel?.conversionRate || '3.6%'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Inventory Runway Alerts */}
+            <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1e293b', marginBottom: '12px' }}>
+              Dự Báo Tồn Kho & Cảnh Báo Cạn Hàng (Days of Inventory Remaining)
+            </h3>
+            <div className="shopee-table-responsive">
+              <table className="shopee-table">
+                <thead>
+                  <tr>
+                    <th>Sản Phẩm</th>
+                    <th>Tồn Kho Hiện Tại</th>
+                    <th>Tốc Độ Bán (SP/ngày)</th>
+                    <th>Thời Gian Còn Lại</th>
+                    <th>Mức Độ Cảnh Báo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(sellerFunnel?.inventoryForecast || [
+                    { name: "Áo thun nam basic cotton 100%", stock: 12, dailyVelocity: 3.2, daysOfInventory: 4, stockAlert: "CRITICAL" },
+                    { name: "Quần jean nam ống đứng co giãn", stock: 24, dailyVelocity: 2.1, daysOfInventory: 11, stockAlert: "WARNING" },
+                    { name: "Áo polo nam công sở cao cấp", stock: 18, dailyVelocity: 1.5, daysOfInventory: 12, stockAlert: "WARNING" },
+                  ]).map((item, idx) => (
+                    <tr key={idx}>
+                      <td><strong>{item.name}</strong></td>
+                      <td>{item.stock} cái</td>
+                      <td>{item.dailyVelocity} cái/ngày</td>
+                      <td><strong>{item.daysOfInventory} ngày</strong></td>
+                      <td>
+                        <span style={{
+                          padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 800,
+                          background: item.stockAlert === 'CRITICAL' ? '#fee2e2' : '#fef3c7',
+                          color: item.stockAlert === 'CRITICAL' ? '#dc2626' : '#d97706',
+                        }}>
+                          {item.stockAlert === 'CRITICAL' ? 'CỰC KỲ KHẨN CẤP (<7 ngày)' : 'CẦN NHẬP THÊM (<15 ngày)'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB: THỊ TRƯỜNG & CHUẨN NGÀNH HÀNG (MARKET INTELLIGENCE) */}
+        {/* ========================================================================= */}
+        {activeTab === 'market' && (
+          <div className="shopee-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  Nghiên Cứu Thị Trường & Chuẩn Ngành Hàng (Market Intelligence)
+                </h2>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0' }}>
+                  So sánh trực tiếp chỉ số của gian hàng với mức trung bình của toàn ngành hàng {currentShop.category}.
+                </p>
+              </div>
+              <span style={{ padding: '6px 14px', borderRadius: '20px', background: 'rgba(14, 165, 233, 0.12)', color: '#0284c7', fontWeight: 700, fontSize: '12px' }}>
+                Điểm cạnh tranh: {sellerMarket?.benchmark?.priceCompetitivenessScore || 92}/100
+              </span>
+            </div>
+
+            {/* Benchmark Compare Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>Tỷ lệ chuyển đổi của Shop</span>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#16a34a', margin: '4px 0' }}>
+                  {sellerMarket?.benchmark?.shopConversionRate || '3.8%'}
+                </div>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                  Trung bình ngành: <strong>{sellerMarket?.benchmark?.industryAverageConversionRate || '2.5%'}</strong> (Vượt trội +52%)
+                </span>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>Thời gian chuẩn bị hàng</span>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#0284c7', margin: '4px 0' }}>
+                  {sellerMarket?.benchmark?.shopAvgPrepTime || '2.4 giờ'}
+                </div>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                  Trung bình ngành: <strong>{sellerMarket?.benchmark?.industryAvgPrepTime || '6.8 giờ'}</strong> (Nhanh gấp 2.8 lần)
+                </span>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>Tỷ lệ hoàn trả hàng</span>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#10b981', margin: '4px 0' }}>
+                  {sellerMarket?.benchmark?.shopReturnRate || '1.2%'}
+                </div>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                  Trung bình ngành: <strong>{sellerMarket?.benchmark?.industryAvgReturnRate || '3.5%'}</strong> (Chất lượng rất tốt)
+                </span>
+              </div>
+            </div>
+
+            {/* Hot Keywords Ranking */}
+            <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1e293b', marginBottom: '12px' }}>
+              Top Từ Khóa Đang Thịnh Hành Nhất Ngành Hàng
+            </h3>
+            <div style={{ overflowX: 'auto', marginBottom: '24px' }}>
+              <table className="shopee-table" style={{ width: '100%' }}>
+                <thead>
+                  <tr>
+                    <th>Hạng</th>
+                    <th>Từ Khóa Tìm Kiếm</th>
+                    <th>Lượng Tìm Kiếm Hàng Tuần</th>
+                    <th>Xu Hướng Biến Động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(sellerMarket?.hotKeywords || [
+                    { keyword: "áo thun oversize cotton 100%", searchVolume: "128,400", change: "+42%", trend: "up" },
+                    { keyword: "quần jean ống suông", searchVolume: "95,200", change: "+18%", trend: "up" },
+                    { keyword: "tai nghe bluetooth anc", searchVolume: "84,000", change: "+25%", trend: "up" },
+                    { keyword: "váy hoa nhí vintage", searchVolume: "63,100", change: "-5%", trend: "down" },
+                  ]).map((kw, i) => (
+                    <tr key={i}>
+                      <td><span style={{ width: '22px', height: '22px', borderRadius: '50%', background: i < 3 ? '#ea580c' : '#94a3b8', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800 }}>{i + 1}</span></td>
+                      <td><strong>{kw.keyword}</strong></td>
+                      <td>{kw.searchVolume}</td>
+                      <td>
+                        <span style={{ color: kw.change.startsWith('+') ? '#16a34a' : '#dc2626', fontWeight: 700 }}>
+                          {kw.change} {kw.change.startsWith('+') ? '▲' : '▼'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Smart Actionable Recommendations */}
+            <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+              Gợi Ý Hành Động Thông Minh Tối Ưu Gian Hàng
+            </h3>
+            <ul style={{ paddingLeft: '20px', color: '#334155', fontSize: '13px', lineHeight: 1.6 }}>
+              {(sellerMarket?.benchmark?.recommendations || [
+                "Bổ sung từ khóa 'cotton 100%' vào tiêu đề sản phẩm để tận dụng đợt tăng 42% lượt tìm kiếm.",
+                "Tốc độ chuẩn bị hàng của shop là 2.4 giờ, hãy kích hoạt bộ lọc 'Giao Hỏa Tốc' để thu hút thêm người mua.",
+                "Tổ chức Flash Sale khung giờ 12:00 - 15:00 giúp tăng thêm 28% tỷ lệ chốt đơn."
+              ]).map((rec, idx) => (
+                <li key={idx} style={{ marginBottom: '6px' }}>{rec}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB: NHÂN VIÊN & PHÂN QUYỀN GIAN HÀNG (STAFF SUB-ACCOUNTS) */}
+        {/* ========================================================================= */}
+        {activeTab === 'staff' && (
+          <div className="shopee-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  Quản Lý Nhân Viên & Tài Khoản Phụ (Sub-accounts & Staff Roles)
+                </h2>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0' }}>
+                  Phân tách quyền hạn rõ ràng giữa Quản lý kho vận đơn và Nhân viên CSKH tư vấn tin nhắn chat.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-primary"
+                onClick={() => setShowAddStaffModal(true)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+              >
+                <PlusIcon size={16} color="#ffffff" />
+                <span>Thêm Nhân Viên Mới</span>
+              </button>
+            </div>
+
+            <div className="shopee-table-responsive">
+              <table className="shopee-table">
+                <thead>
+                  <tr>
+                    <th>Họ Tên & Email</th>
+                    <th>Số Điện Thoại</th>
+                    <th>Vai Trò Phụ</th>
+                    <th>Phạm Vi Quyền Hạn</th>
+                    <th>Trạng Thái</th>
+                    <th style={{ textAlign: 'right' }}>Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(sellerStaffList.length > 0 ? sellerStaffList : [
+                    {
+                      _id: 'st_01',
+                      fullName: 'Vũ Kho Vận',
+                      email: 'kho.genz@shopee.vn',
+                      phone: '0912001122',
+                      subRole: 'inventory_staff',
+                      permissions: ['manage_products', 'manage_orders'],
+                      isActive: true,
+                    },
+                    {
+                      _id: 'st_02',
+                      fullName: 'Mai CSKH Tư Vấn',
+                      email: 'cskh.genz@shopee.vn',
+                      phone: '0912003344',
+                      subRole: 'support_staff',
+                      permissions: ['view_orders', 'chat_customer'],
+                      isActive: true,
+                    }
+                  ]).map((st) => (
+                    <tr key={st._id}>
+                      <td>
+                        <strong>{st.fullName}</strong>
+                        <div style={{ fontSize: '12px', color: '#64748b' }}>{st.email}</div>
+                      </td>
+                      <td>{st.phone || '0912345678'}</td>
+                      <td>
+                        <span style={{
+                          padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 800,
+                          background: st.subRole === 'inventory_staff' ? '#e0f2fe' : '#fef3c7',
+                          color: st.subRole === 'inventory_staff' ? '#0369a1' : '#b45309',
+                        }}>
+                          {st.subRole === 'inventory_staff' ? 'Kho Vận & Đơn' : 'CSKH & Chat'}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '12px', color: '#475569' }}>
+                        {(st.permissions || []).join(', ')}
+                      </td>
+                      <td>
+                        <span className={`shopee-status-badge ${st.isActive ? 'status-delivered' : 'status-pending'}`}>
+                          {st.isActive ? 'Đang hoạt động' : 'Tạm khóa'}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-sm shopee-btn-secondary"
+                          onClick={async () => {
+                            await updateSellerStaff(st._id, { isActive: !st.isActive });
+                            toast.success(`Đã cập nhật trạng thái nhân viên ${st.fullName}`);
+                            fetchSellerStaff().then(setSellerStaffList);
+                          }}
+                        >
+                          {st.isActive ? 'Khóa Quyền' : 'Mở Khóa'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Thêm Nhân Viên Gian Hàng */}
+        {showAddStaffModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
+            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '480px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+              <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Tạo Tài Khoản Nhân Viên Phụ</h3>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                await createSellerStaff(staffForm);
+                toast.success('Đã thêm nhân viên phụ thành công!');
+                setShowAddStaffModal(false);
+                fetchSellerStaff().then(setSellerStaffList);
+              }}>
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Họ Và Tên</label>
+                  <input
+                    type="text" required
+                    className="shopee-input"
+                    value={staffForm.fullName}
+                    onChange={(e) => setStaffForm({ ...staffForm, fullName: e.target.value })}
+                    placeholder="VD: Nguyễn Văn Kho"
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Email Đăng Nhập</label>
+                  <input
+                    type="email" required
+                    className="shopee-input"
+                    value={staffForm.email}
+                    onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })}
+                    placeholder="nhanvien@shopee.vn"
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Số Điện Thoại</label>
+                  <input
+                    type="text"
+                    className="shopee-input"
+                    value={staffForm.phone}
+                    onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })}
+                    placeholder="0912..."
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Vai Trò Nhân Viên</label>
+                  <select
+                    value={staffForm.subRole}
+                    onChange={(e) => setStaffForm({
+                      ...staffForm,
+                      subRole: e.target.value,
+                      permissions: e.target.value === 'inventory_staff' ? ['manage_products', 'manage_orders'] : ['view_orders', 'chat_customer']
+                    })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  >
+                    <option value="inventory_staff">Quản lý kho vận & Xác nhận đóng gói đơn</option>
+                    <option value="support_staff">Chăm sóc khách hàng & Trực chat tư vấn</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                  <button type="button" className="shopee-btn shopee-btn-secondary" onClick={() => setShowAddStaffModal(false)}>Hủy</button>
+                  <button type="submit" className="shopee-btn shopee-btn-primary">Tạo Tài Khoản</button>
                 </div>
               </form>
             </div>

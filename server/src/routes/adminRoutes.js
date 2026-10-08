@@ -15,6 +15,13 @@ import {
   getTopProducts,
   getTopShops,
   getRecentOrders,
+  getAdminAuditLogs,
+  getAdminCampaigns,
+  createAdminCampaign,
+  updateAdminCampaignStatus,
+  getAdminDisputes,
+  arbitrateAdminDispute,
+  getAdminPlatformDeepBI,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -22,12 +29,25 @@ const router = express.Router();
 // All routes require Super Admin privileges
 router.use(authenticate, authorize("admin"));
 
-// Dashboard Analytics
+// Dashboard Analytics & Deep BI
 router.get("/dashboard", getDashboard);
 router.get("/revenue-chart", getRevenueChart);
 router.get("/top-products", getTopProducts);
 router.get("/top-shops", getTopShops);
 router.get("/recent-orders", getRecentOrders);
+router.get("/analytics/deep-bi", getAdminPlatformDeepBI);
+
+// Audit Logs
+router.get("/audit-logs", getAdminAuditLogs);
+
+// Mega Campaigns Management
+router.get("/campaigns", getAdminCampaigns);
+router.post("/campaigns", createAdminCampaign);
+router.put("/campaigns/:id/status", updateAdminCampaignStatus);
+
+// Disputes & Arbitration Center
+router.get("/disputes", getAdminDisputes);
+router.post("/disputes/:id/arbitrate", arbitrateAdminDispute);
 
 // Shops moderation
 router.get("/shops", getAllShopsAdmin);
