@@ -978,6 +978,21 @@ export const createSellerAdsCampaign = catchAsync(async (req, res) => {
     return sendError(res, "Tên chiến dịch quảng cáo là bắt buộc", 400);
   }
 
+  const {
+    campaignName,
+    type,
+    budgetDaily,
+    budgetTotal,
+    targetKeywords,
+    impressions,
+    clicks,
+    ctr,
+    cpc,
+    conversions,
+    conversionRevenue,
+    roas,
+  } = req.body;
+
   const campaign = await AdsCampaign.create({
     shopId,
     shopName: req.user.shopName || "Gian Hàng Shopee",
@@ -990,13 +1005,13 @@ export const createSellerAdsCampaign = catchAsync(async (req, res) => {
     targetKeywords: Array.isArray(targetKeywords) && targetKeywords.length > 0
       ? targetKeywords
       : [{ keyword: "sản phẩm hot", bidPrice: 1500, matchType: "exact" }],
-    impressions: 120,
-    clicks: 6,
-    ctr: 5.0,
-    cpc: 1200,
-    conversions: 1,
-    conversionRevenue: 350000,
-    roas: 2.9,
+    impressions: typeof impressions === "number" ? impressions : 120,
+    clicks: typeof clicks === "number" ? clicks : 6,
+    ctr: typeof ctr === "number" ? ctr : 5.0,
+    cpc: typeof cpc === "number" ? cpc : 1200,
+    conversions: typeof conversions === "number" ? conversions : 1,
+    conversionRevenue: typeof conversionRevenue === "number" ? conversionRevenue : 350000,
+    roas: typeof roas === "number" ? roas : 2.9,
   });
 
   sendSuccess(res, { campaign, message: "Tạo chiến dịch Shopee Ads thành công" }, 201);
@@ -1018,12 +1033,137 @@ export const toggleSellerAdsCampaign = catchAsync(async (req, res) => {
   sendSuccess(res, { campaign, message: `Chiến dịch đã chuyển sang trạng thái ${campaign.status}` });
 });
 
+// @desc    Mô phỏng kết quả đấu thầu từ khóa Shopee Ads (Simulator)
+// @route   POST /api/seller/ads/simulate
+// @access  Private (Seller only)
+export const simulateSellerAds = catchAsync(async (req, res) => {
+  const { keywords, budgetDaily = 100000, productPrice = 250000, category = "Thời trang" } = req.body;
+
+  if (!Array.isArray(keywords) || keywords.length === 0) {
+    return sendError(res, "Danh sách từ khóa (keywords) không được để trống", 400);
+  }
+
+  const dailyBudgetNum = Math.max(10000, Number(budgetDaily) || 100000);
+  const aov = Math.max(10000, Number(productPrice) || 250000);
+
+  const keywordBreakdown = [];
+  let totalPotentialClicks = 0;
+  let weightedCpcSum = 0;
+  let totalPotentialImpressions = 0;
+
+  for (const kw of keywords) {
+    const keywordText = (kw.keyword || "").trim();
+    if (!keywordText) continue;
+
+    const bid = Math.max(500, Number(kw.bidPrice) || 1000);
+    const matchType = kw.matchType === "broad" ? "broad" : "exact";
+
+    // Second-price auction discounted CPC (min 500đ)
+    const cpc = Math.max(500, Math.round(bid * 0.88));
+
+    // CTR standard: exact ~5.6%, broad ~3.8%
+    const ctr = matchType === "broad" ? 3.8 : 5.6;
+
+    // Base search volume heuristic (approx 8,000 - 20,000 queries/day)
+    const baseVolume = 12000 + ((keywordText.length * 373) % 8000);
+
+    // WinRate based on bidPrice and matchType
+    const winRate = Math.min(0.95, Math.max(0.15, (bid / 1500) * 0.6 + (matchType === "broad" ? 0.25 : 0.10)));
+
+    const projectedImpressions = Math.round(baseVolume * winRate);
+    const potentialClicks = Math.round(projectedImpressions * (ctr / 100));
+
+    totalPotentialImpressions += projectedImpressions;
+    totalPotentialClicks += potentialClicks;
+    weightedCpcSum += potentialClicks * cpc;
+
+    keywordBreakdown.push({
+      keyword: keywordText,
+      matchType,
+      bidPrice: bid,
+      cpc,
+      ctr,
+      rawImpressions: projectedImpressions,
+      rawClicks: potentialClicks,
+    });
+  }
+
+  if (keywordBreakdown.length === 0) {
+    return sendError(res, "Không có từ khóa hợp lệ để mô phỏng", 400);
+  }
+
+  const avgCpc = totalPotentialClicks > 0 ? Math.round(weightedCpcSum / totalPotentialClicks) : 1000;
+  // Budget capping
+  const maxClicksBudget = Math.floor(dailyBudgetNum / (avgCpc || 1000));
+  const actualDailyClicks = Math.min(totalPotentialClicks, maxClicksBudget);
+  const scale = totalPotentialClicks > 0 ? actualDailyClicks / totalPotentialClicks : 1;
+
+  const actualSpend = Math.min(dailyBudgetNum, Math.round(actualDailyClicks * avgCpc));
+  const overallCtr = keywordBreakdown.some((k) => k.matchType === "exact") ? 4.8 : 3.8;
+  const effectiveImpressions = actualDailyClicks > 0 ? Math.round(actualDailyClicks / (overallCtr / 100)) : 0;
+
+  // Conversion rate (exact ~4.5%, broad ~3.2%)
+  const avgCr = 4.2;
+  const projectedOrders = Math.max(1, Math.round(actualDailyClicks * (avgCr / 100)));
+  const adGmv = projectedOrders * aov;
+  const roas = actualSpend > 0 ? Number((adGmv / actualSpend).toFixed(2)) : 0;
+  const roi = actualSpend > 0 ? Number((((adGmv - actualSpend) / actualSpend) * 100).toFixed(1)) : 0;
+
+  // Breakdown detail scaling
+  const formattedBreakdown = keywordBreakdown.map((item) => {
+    const itemClicks = Math.max(1, Math.round(item.rawClicks * scale));
+    const itemImpressions = Math.round(itemClicks / (item.ctr / 100));
+    const itemCr = item.matchType === "broad" ? 3.5 : 4.8;
+    const itemOrders = Math.max(1, Math.round(itemClicks * (itemCr / 100)));
+    const itemGmv = itemOrders * aov;
+    return {
+      keyword: item.keyword,
+      matchType: item.matchType,
+      bidPrice: item.bidPrice,
+      cpc: item.cpc,
+      ctr: item.ctr,
+      projectedImpressions: itemImpressions,
+      projectedClicks: itemClicks,
+      projectedOrders: itemOrders,
+      adGmv: itemGmv,
+    };
+  });
+
+  const projectedDaily = {
+    impressions: effectiveImpressions,
+    clicks: actualDailyClicks,
+    ctr: overallCtr,
+    cpc: avgCpc,
+    spend: actualSpend,
+    orders: projectedOrders,
+    adGmv,
+    roas,
+    roi,
+  };
+
+  const projectedMonthly = {
+    impressions: effectiveImpressions * 30,
+    clicks: actualDailyClicks * 30,
+    spend: actualSpend * 30,
+    orders: projectedOrders * 30,
+    adGmv: adGmv * 30,
+    roas,
+    roi,
+  };
+
+  sendSuccess(res, {
+    projectedDaily,
+    projectedMonthly,
+    keywordBreakdown: formattedBreakdown,
+  });
+});
+
 // @desc    Nhập kho hoặc điều chỉnh tồn kho an toàn hàng loạt (Batch Stock Matrix)
 // @route   POST /api/seller/inventory/batch-update
 // @access  Private (Seller only)
 export const batchUpdateSellerInventory = catchAsync(async (req, res) => {
   const shopId = req.user.shopId;
-  const { updates } = req.body; // Array of { productId, stock, safetyThreshold }
+  const { updates } = req.body; // Array of { productId, stock, addStock, replenishQuantity, safetyThreshold, expiryDate, clearanceStatus, clearanceDiscount, batchCode }
 
   if (!Array.isArray(updates) || updates.length === 0) {
     return sendError(res, "Danh sách cập nhật tồn kho (updates) không hợp lệ", 400);
@@ -1033,19 +1173,58 @@ export const batchUpdateSellerInventory = catchAsync(async (req, res) => {
   for (const item of updates) {
     const prod = await Product.findById(item.productId);
     if (prod && prod.shopId === shopId) {
-      if (typeof item.stock === "number" && item.stock >= 0) {
+      const prevStock = prod.stock ?? 0;
+
+      // Additive replenishment if addStock or replenishQuantity is provided
+      if (typeof item.addStock === "number") {
+        prod.stock = Math.max(0, (Number(prod.stock) || 0) + item.addStock);
+      } else if (typeof item.replenishQuantity === "number") {
+        prod.stock = Math.max(0, (Number(prod.stock) || 0) + item.replenishQuantity);
+      } else if (typeof item.stock === "number" && item.stock >= 0) {
         prod.stock = item.stock;
       }
-      if (typeof item.safetyThreshold === "number") {
+
+      if (typeof item.safetyThreshold === "number" && item.safetyThreshold >= 0) {
         prod.safetyThreshold = item.safetyThreshold;
       }
+
+      if (item.expiryDate !== undefined) {
+        prod.expiryDate = item.expiryDate ? new Date(item.expiryDate) : null;
+      }
+
+      if (item.clearanceStatus && ["normal", "near_expiry", "clearance"].includes(item.clearanceStatus)) {
+        prod.clearanceStatus = item.clearanceStatus;
+      }
+
+      if (typeof item.clearanceDiscount === "number" && item.clearanceDiscount >= 0) {
+        prod.clearanceDiscount = item.clearanceDiscount;
+      }
+
+      if (typeof item.batchCode === "string") {
+        prod.batchCode = item.batchCode.trim();
+      }
+
       await prod.save();
+
+      const threshold = prod.safetyThreshold ?? 10;
+      let status = "HEALTHY";
+      if (prod.stock === 0) {
+        status = "OUT_OF_STOCK";
+      } else if (prod.stock <= threshold) {
+        status = "LOW_STOCK";
+      }
+
       results.push({
         productId: prod._id,
         name: prod.name,
+        previousStock: prevStock,
         stock: prod.stock,
-        safetyThreshold: prod.safetyThreshold || 10,
-        status: prod.stock <= (prod.safetyThreshold || 10) ? "LOW_STOCK" : "HEALTHY",
+        safetyThreshold: threshold,
+        status,
+        expiryDate: prod.expiryDate,
+        clearanceStatus: prod.clearanceStatus || "normal",
+        clearanceDiscount: prod.clearanceDiscount || 0,
+        batchCode: prod.batchCode || "",
       });
     }
   }
@@ -1077,26 +1256,119 @@ export const createSellerFlashSale = catchAsync(async (req, res) => {
     return sendError(res, "Khung giờ và danh sách sản phẩm tham gia không được để trống", 400);
   }
 
+  // Validate each flash sale item
+  const validatedItems = [];
+  for (const it of items) {
+    let originalPrice = Number(it.originalPrice) || 0;
+    const flashPrice = Number(it.flashPrice) || 0;
+    const stockLimit = Number(it.stockLimit) || 0;
+
+    let prod = null;
+    if (it.productId) {
+      prod = await Product.findById(it.productId);
+      if (prod && !originalPrice) {
+        originalPrice = Number(prod.originalPrice) || Number(prod.price) || 0;
+      }
+    }
+
+    if (flashPrice <= 0) {
+      return sendError(res, "Giá Flash Sale phải lớn hơn 0", 400);
+    }
+
+    if (originalPrice <= 0 || flashPrice >= originalPrice) {
+      return sendError(
+        res,
+        `Giá Flash Sale (${flashPrice.toLocaleString()}đ) phải nhỏ hơn giá gốc (${originalPrice.toLocaleString()}đ) của sản phẩm "${it.name || prod?.name || it.productId}"`,
+        400
+      );
+    }
+
+    if (stockLimit <= 0) {
+      return sendError(res, "Số lượng suất bán Flash Sale phải lớn hơn 0", 400);
+    }
+
+    if (prod && stockLimit > (prod.stock ?? 0)) {
+      return sendError(
+        res,
+        `Số lượng suất bán Flash Sale (${stockLimit}) vượt quá tồn kho khả dụng (${prod.stock ?? 0}) của sản phẩm "${prod.name}"`,
+        400
+      );
+    }
+
+    const discountPercent = Math.round(((originalPrice - flashPrice) / originalPrice) * 100);
+
+    validatedItems.push({
+      productId: it.productId,
+      name: it.name || prod?.name || "Sản phẩm Flash Sale",
+      originalPrice,
+      flashPrice,
+      discountPercent: discountPercent > 0 ? discountPercent : 0,
+      stockLimit,
+      soldCount: 0,
+    });
+  }
+
   const shop = await Shop.findOne({ shopId });
   const newFlashSale = await FlashSale.create({
     shopId,
-    shopName: shop?.name || "Shop đối tác",
+    shopName: shop?.name || req.user.shopName || "Shop đối tác",
     slotTime,
     status: "upcoming",
     startTime: startTime || new Date(Date.now() + 3600000).toISOString(),
     endTime: endTime || new Date(Date.now() + 10800000).toISOString(),
-    items: items.map((it) => ({
-      productId: it.productId,
-      name: it.name || "Sản phẩm Flash Sale",
-      originalPrice: Number(it.originalPrice) || 100000,
-      flashPrice: Number(it.flashPrice) || 50000,
-      discountPercent: Math.round(((Number(it.originalPrice) - Number(it.flashPrice)) / Number(it.originalPrice)) * 100) || 50,
-      stockLimit: Number(it.stockLimit) || 10,
-      soldCount: 0,
-    })),
+    items: validatedItems,
   });
 
   sendSuccess(res, { flashSale: newFlashSale, message: "Đã đăng ký tham gia Flash Sale thành công" }, 201);
+});
+
+// @desc    Cập nhật trạng thái slot Flash Sale (active, paused, ended, upcoming)
+// @route   PATCH /api/seller/flash-sales/:id/status
+// @access  Private (Seller only)
+export const updateSellerFlashSaleStatus = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const validStatuses = ["active", "paused", "ended", "upcoming"];
+  if (status && !validStatuses.includes(status)) {
+    return sendError(res, `Trạng thái không hợp lệ. Phải là một trong: ${validStatuses.join(", ")}`, 400);
+  }
+
+  const flashSale = await FlashSale.findById(id);
+  if (!flashSale || (flashSale.shopId && flashSale.shopId !== shopId)) {
+    return sendError(res, "Không tìm thấy phiên Flash Sale của Shop", 404);
+  }
+
+  if (status) {
+    flashSale.status = status;
+  } else {
+    flashSale.status = flashSale.status === "active" ? "paused" : "active";
+  }
+
+  await flashSale.save();
+  sendSuccess(res, {
+    flashSale,
+    message: `Trạng thái phiên Flash Sale đã được cập nhật thành "${flashSale.status}"`,
+  });
+});
+
+// @desc    Xóa phiên Flash Sale của Shop
+// @route   DELETE /api/seller/flash-sales/:id
+// @access  Private (Seller only)
+export const deleteSellerFlashSale = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  const { id } = req.params;
+
+  const flashSale = await FlashSale.findById(id);
+  if (!flashSale || (flashSale.shopId && flashSale.shopId !== shopId)) {
+    return sendError(res, "Không tìm thấy phiên Flash Sale của Shop", 404);
+  }
+
+  await FlashSale.findByIdAndDelete(id);
+  sendSuccess(res, {
+    message: "Đã xóa phiên Flash Sale thành công",
+  });
 });
 
 export default {
@@ -1124,8 +1396,11 @@ export default {
   getSellerAdsCampaigns,
   createSellerAdsCampaign,
   toggleSellerAdsCampaign,
+  simulateSellerAds,
   batchUpdateSellerInventory,
   getSellerFlashSales,
   createSellerFlashSale,
+  updateSellerFlashSaleStatus,
+  deleteSellerFlashSale,
   requestSellerWithdrawal,
 };

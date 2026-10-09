@@ -25,9 +25,12 @@ import {
   getSellerAdsCampaigns,
   createSellerAdsCampaign,
   toggleSellerAdsCampaign,
+  simulateSellerAds,
   batchUpdateSellerInventory,
   getSellerFlashSales,
   createSellerFlashSale,
+  updateSellerFlashSaleStatus,
+  deleteSellerFlashSale,
   requestSellerWithdrawal,
 } from "../controllers/sellerController.js";
 
@@ -48,6 +51,7 @@ router.get("/analytics/market", getSellerMarketIntelligence);
 // Shopee Ads ROI Suite
 router.get("/ads", getSellerAdsCampaigns);
 router.post("/ads", createSellerAdsCampaign);
+router.post("/ads/simulate", simulateSellerAds);
 router.patch("/ads/:id/toggle", toggleSellerAdsCampaign);
 
 // Advanced Inventory Management
@@ -56,6 +60,8 @@ router.post("/inventory/batch-update", batchUpdateSellerInventory);
 // Flash Sale Shop Management
 router.get("/flash-sales", getSellerFlashSales);
 router.post("/flash-sales", createSellerFlashSale);
+router.patch("/flash-sales/:id/status", updateSellerFlashSaleStatus);
+router.delete("/flash-sales/:id", deleteSellerFlashSale);
 
 // Staff Sub-accounts Management
 router.get("/staff", getSellerStaffList);

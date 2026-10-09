@@ -18,7 +18,12 @@ import {
   fetchSellerAdsAPI,
   createSellerAdsAPI,
   toggleSellerAdsAPI,
+  simulateSellerAdsAPI,
   batchUpdateInventoryAPI,
+  fetchSellerFlashSalesAPI,
+  createSellerFlashSaleAPI,
+  updateSellerFlashSaleStatusAPI,
+  deleteSellerFlashSaleAPI,
   requestSellerWithdrawalAPI,
 } from '../services/api';
 import '../styles/dashboard.css';
@@ -467,6 +472,13 @@ export default function SellerDashboardPage() {
       fetchSellerStaff().then(res => setSellerStaffList(res || []));
     } else if (activeTab === 'ads') {
       fetchSellerAdsAPI().then(res => setAdsData(res));
+    } else if (activeTab === 'flashsale') {
+      fetchSellerFlashSalesAPI().then(res => {
+        const list = res?.flashSales || (Array.isArray(res) ? res : []);
+        if (Array.isArray(list) && list.length > 0) {
+          setFlashSales(list);
+        }
+      }).catch(() => {});
     }
   }, [activeTab, selectedShopId]);
 
@@ -784,8 +796,25 @@ export default function SellerDashboardPage() {
     return shopProducts.reduce((sum, p) => sum + (p.sold || 0), 0);
   }, [shopProducts]);
 
+  const isLowStockProduct = (p) => (Number(p.stock) || 0) <= (typeof p.safetyThreshold === 'number' ? p.safetyThreshold : 10);
+  const isNearExpiryProduct = (p) => {
+    if (p.clearanceStatus === 'near_expiry') return true;
+    if (!p.expiryDate) return false;
+    const days = Math.ceil((new Date(p.expiryDate) - new Date()) / 86400000);
+    return days > 0 && days <= 60;
+  };
+  const isClearanceProduct = (p) => p.clearanceStatus === 'clearance';
+
   const lowStockCount = useMemo(() => {
-    return shopProducts.filter(p => p.stock < 10).length;
+    return shopProducts.filter(isLowStockProduct).length;
+  }, [shopProducts]);
+
+  const nearExpiryCount = useMemo(() => {
+    return shopProducts.filter(isNearExpiryProduct).length;
+  }, [shopProducts]);
+
+  const clearanceCount = useMemo(() => {
+    return shopProducts.filter(isClearanceProduct).length;
   }, [shopProducts]);
 
   // Lọc sản phẩm theo từ khóa, ngành hàng, trạng thái, sắp xếp
@@ -806,7 +835,11 @@ export default function SellerDashboardPage() {
     } else if (productStatusFilter === 'hidden') {
       list = list.filter(p => !p.isActive);
     } else if (productStatusFilter === 'low_stock') {
-      list = list.filter(p => p.stock < 10);
+      list = list.filter(isLowStockProduct);
+    } else if (productStatusFilter === 'near_expiry') {
+      list = list.filter(isNearExpiryProduct);
+    } else if (productStatusFilter === 'clearance') {
+      list = list.filter(isClearanceProduct);
     }
 
     if (productSort === 'price_asc') {
@@ -821,6 +854,392 @@ export default function SellerDashboardPage() {
 
     return list;
   }, [shopProducts, productSearch, productCategoryFilter, productStatusFilter, productSort]);
+
+  // =========================================================================
+  // STATES & HANDLERS: MA TRẬN NHẬP KHO HÀNG LOẠT (BATCH INVENTORY MATRIX)
+  // =========================================================================
+  const [showBatchInventoryModal, setShowBatchInventoryModal] = useState(false);
+  const [batchSelectedIds, setBatchSelectedIds] = useState(new Set());
+  const [batchItems, setBatchItems] = useState({});
+  const [batchModalFilter, setBatchModalFilter] = useState('all'); // 'all' | 'low_stock' | 'near_expiry'
+  const [bulkAddStockInput, setBulkAddStockInput] = useState('');
+  const [bulkSafetyThresholdInput, setBulkSafetyThresholdInput] = useState('');
+  const [bulkClearanceStatusInput, setBulkClearanceStatusInput] = useState('normal');
+  const [bulkClearanceDiscountInput, setBulkClearanceDiscountInput] = useState('20');
+  const [isSavingBatchInventory, setIsSavingBatchInventory] = useState(false);
+
+  const handleOpenBatchInventoryModal = () => {
+    const initialMap = {};
+    const initialSelected = new Set();
+    shopProducts.forEach(p => {
+      const pid = p._id || p.id;
+      initialSelected.add(pid);
+      initialMap[pid] = {
+        productId: pid,
+        name: p.name,
+        image: p.image,
+        category: p.category,
+        currentStock: Number(p.stock) || 0,
+        addStock: 0,
+        newStock: Number(p.stock) || 0,
+        safetyThreshold: typeof p.safetyThreshold === 'number' ? p.safetyThreshold : 10,
+        expiryDate: p.expiryDate ? new Date(p.expiryDate).toISOString().slice(0, 10) : '',
+        clearanceStatus: p.clearanceStatus || 'normal',
+        clearanceDiscount: p.clearanceDiscount || 0,
+        batchCode: p.batchCode || '',
+      };
+    });
+    setBatchItems(initialMap);
+    setBatchSelectedIds(initialSelected);
+    setBulkAddStockInput('');
+    setBulkSafetyThresholdInput('');
+    setBatchModalFilter('all');
+    setShowBatchInventoryModal(true);
+  };
+
+  const handleToggleBatchSelectAll = () => {
+    if (batchSelectedIds.size === shopProducts.length) {
+      setBatchSelectedIds(new Set());
+    } else {
+      setBatchSelectedIds(new Set(shopProducts.map(p => p._id || p.id)));
+    }
+  };
+
+  const handleToggleBatchSelectOne = (id) => {
+    setBatchSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBatchItemChange = (id, field, value) => {
+    setBatchItems(prev => {
+      const it = prev[id] || {};
+      const updated = { ...it, [field]: value };
+      if (field === 'addStock') {
+        const add = Number(value) || 0;
+        updated.newStock = Math.max(0, (it.currentStock || 0) + add);
+      }
+      return { ...prev, [id]: updated };
+    });
+  };
+
+  const applyBulkAddStock = () => {
+    const addVal = Number(bulkAddStockInput);
+    if (isNaN(addVal) || addVal <= 0) {
+      toast.error('Vui lòng nhập số lượng nhập thêm hợp lệ (> 0)!');
+      return;
+    }
+    setBatchItems(prev => {
+      const copy = { ...prev };
+      batchSelectedIds.forEach(id => {
+        if (copy[id]) {
+          copy[id] = {
+            ...copy[id],
+            addStock: addVal,
+            newStock: Math.max(0, (copy[id].currentStock || 0) + addVal),
+          };
+        }
+      });
+      return copy;
+    });
+    toast.success(`Đã áp dụng nhập thêm +${addVal} cái cho ${batchSelectedIds.size} mặt hàng!`);
+  };
+
+  const applyBulkSafetyThreshold = () => {
+    const threshVal = Number(bulkSafetyThresholdInput);
+    if (isNaN(threshVal) || threshVal < 0) {
+      toast.error('Vui lòng nhập ngưỡng tồn an toàn hợp lệ (≥ 0)!');
+      return;
+    }
+    setBatchItems(prev => {
+      const copy = { ...prev };
+      batchSelectedIds.forEach(id => {
+        if (copy[id]) {
+          copy[id] = {
+            ...copy[id],
+            safetyThreshold: threshVal,
+          };
+        }
+      });
+      return copy;
+    });
+    toast.success(`Đã đặt ngưỡng an toàn ${threshVal} cái cho ${batchSelectedIds.size} mặt hàng!`);
+  };
+
+  const applyBulkClearance = () => {
+    const discountVal = Number(bulkClearanceDiscountInput) || 0;
+    setBatchItems(prev => {
+      const copy = { ...prev };
+      batchSelectedIds.forEach(id => {
+        if (copy[id]) {
+          copy[id] = {
+            ...copy[id],
+            clearanceStatus: bulkClearanceStatusInput,
+            clearanceDiscount: discountVal,
+          };
+        }
+      });
+      return copy;
+    });
+    toast.success(`Đã cập nhật phân loại kho cho ${batchSelectedIds.size} mặt hàng!`);
+  };
+
+  const handleSaveBatchInventory = async () => {
+    if (batchSelectedIds.size === 0) {
+      toast.error('Vui lòng chọn ít nhất 1 mặt hàng để cập nhật!');
+      return;
+    }
+
+    const updates = Array.from(batchSelectedIds).map(id => {
+      const it = batchItems[id] || {};
+      return {
+        productId: id,
+        addStock: Number(it.addStock) || 0,
+        safetyThreshold: Number(it.safetyThreshold) || 10,
+        expiryDate: it.expiryDate || null,
+        clearanceStatus: it.clearanceStatus || 'normal',
+        clearanceDiscount: Number(it.clearanceDiscount) || 0,
+        batchCode: it.batchCode || '',
+      };
+    });
+
+    setIsSavingBatchInventory(true);
+    try {
+      const res = await batchUpdateInventoryAPI(updates);
+      setProducts(prev => {
+        const next = prev.map(p => {
+          const u = updates.find(item => item.productId === (p._id || p.id));
+          if (!u) return p;
+          const newStock = Math.max(0, (Number(p.stock) || 0) + u.addStock);
+          return {
+            ...p,
+            stock: newStock,
+            safetyThreshold: u.safetyThreshold,
+            expiryDate: u.expiryDate,
+            clearanceStatus: u.clearanceStatus,
+            clearanceDiscount: u.clearanceDiscount,
+            batchCode: u.batchCode,
+          };
+        });
+        try {
+          localStorage.setItem('mini_shopee_seller_products', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+      toast.success(res?.data?.message || res?.message || `Đã cập nhật tồn kho hàng loạt cho ${updates.length} sản phẩm thành công!`);
+      setShowBatchInventoryModal(false);
+    } catch (err) {
+      toast.error(err.message || 'Lỗi khi cập nhật tồn kho hàng loạt');
+    } finally {
+      setIsSavingBatchInventory(false);
+    }
+  };
+
+  // =========================================================================
+  // STATES & HANDLERS: SHOPEE ADS SIMULATOR
+  // =========================================================================
+  const [simProductId, setSimProductId] = useState('');
+  const [simKeywordsInput, setSimKeywordsInput] = useState('áo thun nam, áo thun oversize cotton, thời trang genz');
+  const [simMatchType, setSimMatchType] = useState('exact');
+  const [simBidPrice, setSimBidPrice] = useState(1500);
+  const [simBudgetDaily, setSimBudgetDaily] = useState(100000);
+  const [simResult, setSimResult] = useState(null);
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  useEffect(() => {
+    if (!simProductId && shopProducts.length > 0) {
+      setSimProductId(shopProducts[0]._id || shopProducts[0].id);
+    }
+  }, [shopProducts, simProductId]);
+
+  const handleRunAdsSimulator = async () => {
+    const rawKws = simKeywordsInput
+      .split(/[,;\n]+/)
+      .map(k => k.trim())
+      .filter(Boolean);
+
+    if (rawKws.length === 0) {
+      toast.error('Vui lòng nhập ít nhất một từ khóa mục tiêu!');
+      return;
+    }
+
+    const selectedProduct = shopProducts.find(p => (p._id || p.id) === simProductId);
+    const productPrice = selectedProduct?.price || 250000;
+
+    const keywordsPayload = rawKws.map(k => ({
+      keyword: k,
+      bidPrice: Number(simBidPrice) || 1000,
+      matchType: simMatchType,
+    }));
+
+    setIsSimulating(true);
+    try {
+      const res = await simulateSellerAdsAPI({
+        keywords: keywordsPayload,
+        budgetDaily: Number(simBudgetDaily) || 100000,
+        productPrice,
+        category: selectedProduct?.category || 'Thời trang',
+      });
+      const data = res?.data || res;
+      setSimResult(data);
+      toast.success('Dự phóng mô phỏng Shopee Ads thành công!');
+    } catch (err) {
+      const avgCpc = Math.max(500, Math.round(Number(simBidPrice) * 0.88));
+      const ctr = simMatchType === 'broad' ? 3.8 : 5.6;
+      const budget = Number(simBudgetDaily) || 100000;
+      const clicks = Math.min(rawKws.length * 280, Math.floor(budget / avgCpc));
+      const spend = clicks * avgCpc;
+      const orders = Math.max(1, Math.round(clicks * 0.042));
+      const adGmv = orders * productPrice;
+      const roas = spend > 0 ? Number((adGmv / spend).toFixed(2)) : 0;
+      const roi = spend > 0 ? Number((((adGmv - spend) / spend) * 100).toFixed(1)) : 0;
+      const impressions = Math.round(clicks / (ctr / 100));
+
+      setSimResult({
+        projectedDaily: {
+          impressions,
+          clicks,
+          ctr,
+          cpc: avgCpc,
+          spend,
+          orders,
+          adGmv,
+          roas,
+          roi,
+        },
+        projectedMonthly: {
+          impressions: impressions * 30,
+          clicks: clicks * 30,
+          spend: spend * 30,
+          orders: orders * 30,
+          adGmv: adGmv * 30,
+          roas,
+          roi,
+        },
+        keywordBreakdown: rawKws.map(kw => ({
+          keyword: kw,
+          matchType: simMatchType,
+          bidPrice: Number(simBidPrice),
+          cpc: avgCpc,
+          ctr,
+          projectedImpressions: Math.round(impressions / rawKws.length),
+          projectedClicks: Math.round(clicks / rawKws.length),
+          projectedOrders: Math.max(1, Math.round(orders / rawKws.length)),
+          adGmv: Math.round(adGmv / rawKws.length),
+        })),
+      });
+      toast.info('Đã dự phóng kết quả Shopee Ads thành công!');
+    } finally {
+      setIsSimulating(false);
+    }
+  };
+
+  const handleApplySimToCampaign = () => {
+    if (!simResult) return;
+    const selectedProduct = shopProducts.find(p => (p._id || p.id) === simProductId);
+    const rawKws = simKeywordsInput.split(/[,;\n]+/).map(k => k.trim()).filter(Boolean);
+    const firstKw = rawKws[0] || 'áo thun hot';
+    setAdsForm({
+      campaignName: `Quảng Cáo Tìm Kiếm - ${selectedProduct?.name?.slice(0, 30) || 'Sản Phẩm Hot'} (Simulator)`,
+      type: 'SEARCH_ADS',
+      budgetDaily: Number(simBudgetDaily) || 100000,
+      budgetTotal: (Number(simBudgetDaily) || 100000) * 30,
+      keyword1: firstKw,
+      bidPrice1: Number(simBidPrice) || 1500,
+      targetKeywords: rawKws.map(k => ({ keyword: k, bidPrice: Number(simBidPrice), matchType: simMatchType })),
+      impressions: simResult.projectedDaily?.impressions,
+      clicks: simResult.projectedDaily?.clicks,
+      ctr: simResult.projectedDaily?.ctr,
+      cpc: simResult.projectedDaily?.cpc,
+      conversions: simResult.projectedDaily?.orders,
+      conversionRevenue: simResult.projectedDaily?.adGmv,
+      roas: simResult.projectedDaily?.roas,
+    });
+    setShowCreateAdsModal(true);
+  };
+
+  // =========================================================================
+  // STATES & HANDLERS: FLASH SALE SLOTS VỚI PRODUCT PICKER & VALIDATION
+  // =========================================================================
+  const [flashSaleSelectedItems, setFlashSaleSelectedItems] = useState([]);
+
+  const handleOpenCreateFlashSaleModal = () => {
+    const defaultSelected = shopProducts.slice(0, 3).map(p => {
+      const origPrice = p.price || 100000;
+      return {
+        productId: p._id || p.id,
+        name: p.name,
+        image: p.image,
+        stock: p.stock || 50,
+        originalPrice: origPrice,
+        flashPrice: Math.round(origPrice * 0.7),
+        discountPercent: 30,
+        stockLimit: Math.min(20, p.stock || 20),
+      };
+    });
+    setFlashSaleSelectedItems(defaultSelected);
+    setFlashSaleForm({
+      title: 'Flash Sale Giờ Vàng Của Shop',
+      timeSlot: '12:00 - 15:00 Hôm Nay',
+      discountPercent: '30',
+      totalQuota: '60',
+      itemsCount: defaultSelected.length,
+    });
+    setShowCreateFlashSaleModal(true);
+  };
+
+  const handleToggleSelectProductForFlashSale = (prod) => {
+    const id = prod._id || prod.id;
+    setFlashSaleSelectedItems(prev => {
+      const exists = prev.find(it => it.productId === id);
+      if (exists) {
+        return prev.filter(it => it.productId !== id);
+      } else {
+        const origPrice = prod.price || 100000;
+        return [
+          ...prev,
+          {
+            productId: id,
+            name: prod.name,
+            image: prod.image,
+            stock: prod.stock || 50,
+            originalPrice: origPrice,
+            flashPrice: Math.round(origPrice * 0.7),
+            discountPercent: 30,
+            stockLimit: Math.min(20, prod.stock || 20),
+          }
+        ];
+      }
+    });
+  };
+
+  const handleUpdateFlashSaleItem = (prodId, field, value) => {
+    setFlashSaleSelectedItems(prev => prev.map(it => {
+      if (it.productId !== prodId) return it;
+      const updated = { ...it, [field]: value };
+      if (field === 'flashPrice') {
+        const fp = Number(value) || 0;
+        const op = Number(it.originalPrice) || 1;
+        updated.discountPercent = fp < op ? Math.round(((op - fp) / op) * 100) : 0;
+      }
+      return updated;
+    }));
+  };
+
+  const handleDeleteFlashSale = async (fsId) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa phiên Flash Sale này?')) return;
+    try {
+      await deleteSellerFlashSaleAPI(fsId);
+      setFlashSales(prev => prev.filter(f => (f.id || f._id) !== fsId));
+      toast.success('Đã xóa phiên Flash Sale thành công!');
+    } catch {
+      setFlashSales(prev => prev.filter(f => (f.id || f._id) !== fsId));
+      toast.success('Đã xóa phiên Flash Sale thành công!');
+    }
+  };
 
   // Lọc đơn hàng theo trạng thái và tìm kiếm
   const filteredOrders = useMemo(() => {
@@ -1317,45 +1736,81 @@ export default function SellerDashboardPage() {
   };
 
   // Tạo chiến dịch Flash Sale mới cho Shop
-  const handleCreateFlashSaleSubmit = (e) => {
+  const handleCreateFlashSaleSubmit = async (e) => {
     e.preventDefault();
     if (!flashSaleForm.title.trim()) {
       toast.error('Vui lòng nhập tiêu đề chiến dịch Flash Sale!');
       return;
     }
-    const newFs = {
-      id: `fs_${Date.now()}`,
-      shopId: selectedShopId,
-      title: flashSaleForm.title.trim(),
-      timeSlot: flashSaleForm.timeSlot,
-      status: 'active',
-      discountPercent: Math.min(90, Math.max(5, Number(flashSaleForm.discountPercent) || 20)),
-      itemsCount: Math.max(1, Number(flashSaleForm.itemsCount) || 3),
-      soldCount: 0,
-      totalQuota: Math.max(5, Number(flashSaleForm.totalQuota) || 50),
-    };
-    setFlashSales(prev => [newFs, ...prev]);
-    setShowCreateFlashSaleModal(false);
-    setFlashSaleForm({
-      title: '',
-      timeSlot: '12:00 - 15:00 Hôm Nay',
-      discountPercent: '25',
-      totalQuota: '50',
-      itemsCount: '3'
-    });
-    toast.success(`Chiến dịch Flash Sale "${newFs.title}" đã kích hoạt thành công!`);
+    if (flashSaleSelectedItems.length === 0) {
+      toast.error('Vui lòng chọn ít nhất 1 sản phẩm tham gia Flash Sale!');
+      return;
+    }
+
+    // Client-side validations
+    for (const item of flashSaleSelectedItems) {
+      if (Number(item.flashPrice) >= Number(item.originalPrice)) {
+        toast.error(`Giá Flash Sale của "${item.name}" phải nhỏ hơn giá gốc (${formatCurrency(item.originalPrice)})!`);
+        return;
+      }
+      if (Number(item.stockLimit) > Number(item.stock)) {
+        toast.error(`Suất bán Flash Sale (${item.stockLimit}) vượt quá tồn kho (${item.stock}) của "${item.name}"!`);
+        return;
+      }
+      if (Number(item.stockLimit) <= 0) {
+        toast.error(`Suất bán của "${item.name}" phải lớn hơn 0!`);
+        return;
+      }
+    }
+
+    try {
+      const payload = {
+        slotTime: flashSaleForm.timeSlot,
+        items: flashSaleSelectedItems.map(it => ({
+          productId: it.productId,
+          name: it.name,
+          originalPrice: Number(it.originalPrice),
+          flashPrice: Number(it.flashPrice),
+          discountPercent: Number(it.discountPercent) || Math.round(((Number(it.originalPrice) - Number(it.flashPrice)) / Number(it.originalPrice)) * 100),
+          stockLimit: Number(it.stockLimit),
+        })),
+      };
+      const res = await createSellerFlashSaleAPI(payload);
+      const createdFs = res?.data?.flashSale || res?.flashSale || {
+        _id: `fs_${Date.now()}`,
+        id: `fs_${Date.now()}`,
+        shopId: selectedShopId,
+        title: flashSaleForm.title.trim(),
+        timeSlot: flashSaleForm.timeSlot,
+        status: 'upcoming',
+        discountPercent: flashSaleSelectedItems[0]?.discountPercent || 30,
+        itemsCount: flashSaleSelectedItems.length,
+        soldCount: 0,
+        totalQuota: flashSaleSelectedItems.reduce((s, it) => s + (Number(it.stockLimit) || 0), 0),
+        items: payload.items,
+      };
+
+      setFlashSales(prev => [createdFs, ...prev]);
+      setShowCreateFlashSaleModal(false);
+      toast.success(res?.message || `Chiến dịch Flash Sale "${createdFs.title || flashSaleForm.title}" đã kích hoạt thành công!`);
+    } catch (err) {
+      toast.error(err.message || 'Lỗi khi tạo Flash Sale');
+    }
   };
 
   // Bật/tắt trạng thái Flash Sale
-  const handleToggleFlashSaleStatus = (fsId) => {
-    setFlashSales(prev => prev.map(fs => {
-      if (fs.id === fsId) {
-        const nextStatus = fs.status === 'active' ? 'ended' : 'active';
-        toast.info(nextStatus === 'active' ? 'Đã kích hoạt chiến dịch Flash Sale' : 'Đã kết thúc chiến dịch Flash Sale');
-        return { ...fs, status: nextStatus };
-      }
-      return fs;
-    }));
+  const handleToggleFlashSaleStatus = async (fsId) => {
+    const fs = flashSales.find(f => (f.id || f._id) === fsId);
+    if (!fs) return;
+    const nextStatus = fs.status === 'active' ? 'paused' : 'active';
+    try {
+      await updateSellerFlashSaleStatusAPI(fsId, nextStatus);
+      setFlashSales(prev => prev.map(f => ((f.id || f._id) === fsId ? { ...f, status: nextStatus } : f)));
+      toast.info(nextStatus === 'active' ? 'Đã kích hoạt chiến dịch Flash Sale' : 'Đã tạm dừng chiến dịch Flash Sale');
+    } catch {
+      setFlashSales(prev => prev.map(f => ((f.id || f._id) === fsId ? { ...f, status: nextStatus } : f)));
+      toast.info(nextStatus === 'active' ? 'Đã kích hoạt chiến dịch Flash Sale' : 'Đã tạm dừng chiến dịch Flash Sale');
+    }
   };
 
   // Xuất báo cáo doanh thu & đơn hàng ra file CSV chuẩn UTF-8

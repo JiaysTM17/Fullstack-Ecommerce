@@ -92,6 +92,27 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    safetyThreshold: {
+      type: Number,
+      default: 10,
+    },
+    expiryDate: {
+      type: Date,
+      default: null,
+    },
+    clearanceStatus: {
+      type: String,
+      enum: ["normal", "near_expiry", "clearance"],
+      default: "normal",
+    },
+    clearanceDiscount: {
+      type: Number,
+      default: 0,
+    },
+    batchCode: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

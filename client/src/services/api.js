@@ -524,6 +524,13 @@ export async function toggleSellerAdsAPI(id) {
   });
 }
 
+export async function simulateSellerAdsAPI(data) {
+  return await apiRequest("/api/seller/ads/simulate", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 /**
  * Batch Inventory Matrix API
  */
@@ -546,6 +553,19 @@ export async function createSellerFlashSaleAPI(data) {
   return await apiRequest("/api/seller/flash-sales", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+export async function updateSellerFlashSaleStatusAPI(id, status) {
+  return await apiRequest(`/api/seller/flash-sales/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function deleteSellerFlashSaleAPI(id) {
+  return await apiRequest(`/api/seller/flash-sales/${id}`, {
+    method: "DELETE",
   });
 }
 
