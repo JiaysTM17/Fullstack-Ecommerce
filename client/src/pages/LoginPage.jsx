@@ -29,6 +29,8 @@ import {
   TicketIcon,
   ReceiptIcon,
   CreditCardIcon,
+  PackageIcon,
+  SparklesIcon,
 } from '../components/OrdersIcons';
 import '../styles/auth.css';
 
