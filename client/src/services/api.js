@@ -548,3 +548,13 @@ export async function createSellerFlashSaleAPI(data) {
     body: JSON.stringify(data),
   });
 }
+
+/**
+ * Seller Wallet Withdrawal API
+ */
+export async function requestSellerWithdrawalAPI(data) {
+  return await apiRequest("/api/seller/wallet/withdraw", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}

@@ -249,3 +249,20 @@ export async function resolveAdminFraudAnomalyAPI(id, action, note = "") {
     throw error;
   }
 }
+
+/**
+ * Phê duyệt và giải ngân thanh toán đối soát tài chính cho gian hàng
+ */
+export async function approveAdminSettlementAPI(shopId, note = "") {
+  try {
+    const res = await apiRequest(`/api/admin/finance/settlements/${shopId}/approve`, {
+      method: "POST",
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ note }),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.error("[AdminService] approveAdminSettlementAPI error:", error.message);
+    throw error;
+  }
+}

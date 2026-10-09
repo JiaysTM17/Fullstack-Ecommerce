@@ -27,6 +27,7 @@ import {
   batchUpdateSellerInventory,
   getSellerFlashSales,
   createSellerFlashSale,
+  requestSellerWithdrawal,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -66,6 +67,7 @@ router.route("/shop")
 
 router.get("/stats", getSellerStats);
 router.get("/wallet", getSellerWallet);
+router.post("/wallet/withdraw", requestSellerWithdrawal);
 
 router.route("/products")
   .get(getSellerProducts)

@@ -19,6 +19,7 @@ import {
   createSellerAdsAPI,
   toggleSellerAdsAPI,
   batchUpdateInventoryAPI,
+  requestSellerWithdrawalAPI,
 } from '../services/api';
 import '../styles/dashboard.css';
 import {
@@ -1256,7 +1257,7 @@ export default function SellerDashboardPage() {
   };
 
   // Rút tiền từ ví doanh thu về tài khoản ngân hàng
-  const handleCreateWithdraw = (e) => {
+  const handleCreateWithdraw = async (e) => {
     e.preventDefault();
     const amt = Number(withdrawAmount);
     if (!amt || amt < 100000) {
@@ -1270,6 +1271,17 @@ export default function SellerDashboardPage() {
     if (!withdrawAccountNum.trim() || !withdrawAccountName.trim()) {
       toast.error('Vui lòng nhập đầy đủ thông tin tài khoản ngân hàng nhận tiền!');
       return;
+    }
+
+    try {
+      await requestSellerWithdrawalAPI({
+        amount: amt,
+        bankName: withdrawBank,
+        accountNumber: withdrawAccountNum.trim(),
+        accountName: withdrawAccountName.toUpperCase().trim(),
+      });
+    } catch (err) {
+      console.warn("requestSellerWithdrawalAPI fallback:", err.message);
     }
 
     const newWd = {

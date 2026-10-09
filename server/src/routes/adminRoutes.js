@@ -25,6 +25,7 @@ import {
   getAdminTaxReports,
   getAdminFraudRadar,
   resolveAdminFraudAnomaly,
+  approveSettlementPayoutAdmin,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -66,6 +67,7 @@ router.delete("/users/:id", deleteUserAdmin);
 // Platform Overview & Finance
 router.get("/overview", getPlatformOverviewAdmin);
 router.get("/finance", getFinanceSettlementsAdmin);
+router.post("/finance/settlements/:shopId/approve", approveSettlementPayoutAdmin);
 router.get("/finance/tax-reports", getAdminTaxReports);
 
 // Fraud & Security Radar

@@ -660,6 +660,62 @@ export const getSellerWallet = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Tạo yêu cầu rút tiền từ Ví người bán về Tài khoản ngân hàng
+// @route   POST /api/seller/wallet/withdraw
+// @access  Private (Seller only)
+export const requestSellerWithdrawal = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+  const { amount, bankName, accountNumber, accountName } = req.body;
+  const withdrawAmount = Number(amount);
+
+  if (!withdrawAmount || withdrawAmount < 50000) {
+    return sendError(res, "Số tiền rút tối thiểu là 50.000₫", 400);
+  }
+
+  const shop = await Shop.findOne({ shopId });
+  if (!shop) return sendError(res, "Không tìm thấy gian hàng", 404);
+
+  const currentBalance = Number(shop.walletBalance) || 0;
+  if (currentBalance < withdrawAmount) {
+    return sendError(res, `Số dư ví không đủ (Khả dụng: ${currentBalance.toLocaleString("vi-VN")}₫)`, 400);
+  }
+
+  // Khấu trừ số dư ví người bán
+  shop.walletBalance = currentBalance - withdrawAmount;
+  if (!Array.isArray(shop.walletTransactions)) {
+    shop.walletTransactions = [];
+  }
+
+  const txId = `WTX_${Date.now()}_${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  const newTx = {
+    id: txId,
+    type: "WITHDRAWAL",
+    amount: -withdrawAmount,
+    balanceAfter: shop.walletBalance,
+    status: "PROCESSING",
+    description: `Rút tiền về ${bankName || shop.bankAccount?.bankName || "Ngân hàng"} (${accountNumber || shop.bankAccount?.accountNumber || "STK"})`,
+    createdAt: new Date().toISOString(),
+  };
+
+  shop.walletTransactions.unshift(newTx);
+  await shop.save();
+
+  logger.info(`Shop ${shopId} requested withdrawal of ${withdrawAmount} VND. TxId: ${txId}`, {
+    requestId: req.requestId,
+    shopId,
+    amount: withdrawAmount,
+    txId,
+  });
+
+  sendSuccess(res, {
+    transaction: newTx,
+    remainingBalance: shop.walletBalance,
+    message: `Đã tạo lệnh rút ${withdrawAmount.toLocaleString("vi-VN")}₫ thành công. Hệ thống đang tiến hành chuyển khoản.`,
+  }, 201);
+});
+
 // ==================== BỔ SUNG: PHÂN TÍCH CHUYÊN SÂU & BI SELLER ====================
 
 // @desc    Lấy phân tích phễu chuyển đổi, SKU sinh lời và dự báo cạn kho
@@ -1004,4 +1060,5 @@ export default {
   batchUpdateSellerInventory,
   getSellerFlashSales,
   createSellerFlashSale,
+  requestSellerWithdrawal,
 };

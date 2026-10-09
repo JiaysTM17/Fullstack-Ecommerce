@@ -384,12 +384,49 @@ export const getFinanceSettlementsAdmin = catchAsync(async (req, res) => {
       commission,
       netPayout,
       period: "Kỳ hiện tại (Tháng 09/2026)",
-      status: "pending",
-      statusText: "Chờ đối soát",
+      status: shop.settlementStatus || "pending",
+      statusText: shop.settlementStatus === "settled" ? "Đã thanh toán" : "Chờ đối soát",
+      settledAt: shop.settledAt || null,
     });
   }
 
   sendSuccess(res, settlements);
+});
+
+// @desc    Phê duyệt và giải ngân kỳ đối soát tài chính cho gian hàng
+// @route   POST /api/admin/finance/settlements/:shopId/approve
+// @access  Private (Super Admin or Finance Lead)
+export const approveSettlementPayoutAdmin = catchAsync(async (req, res) => {
+  const { shopId } = req.params;
+  const { note } = req.body;
+
+  const shop = await Shop.findOne({ shopId });
+  if (!shop) {
+    return sendError(res, "Không tìm thấy gian hàng để giải ngân", 404);
+  }
+
+  shop.settlementStatus = "settled";
+  shop.settledAt = new Date().toISOString();
+  await shop.save();
+
+  await recordAuditLog({
+    userId: req.user._id || req.user.id || "admin_finance",
+    userName: req.user.fullName || "Admin Finance Lead",
+    userRole: "admin",
+    action: "FINANCE_SETTLEMENT_APPROVED",
+    entityType: "SETTLEMENT",
+    entityId: shopId,
+    details: { shopName: shop.name, note: note || "Phê duyệt đối soát & giải ngân tự động", settledAt: shop.settledAt },
+    ip: req.ip || "127.0.0.1",
+  });
+
+  sendSuccess(res, {
+    shopId,
+    shopName: shop.name,
+    status: "settled",
+    settledAt: shop.settledAt,
+    message: `Đã phê duyệt và hoàn tất giải ngân kỳ đối soát thành công cho gian hàng ${shop.name}`,
+  });
 });
 
 // @desc    Admin Dashboard — Tổng quan hệ thống
@@ -1026,4 +1063,5 @@ export default {
   getAdminTaxReports,
   getAdminFraudRadar,
   resolveAdminFraudAnomaly,
+  approveSettlementPayoutAdmin,
 };
