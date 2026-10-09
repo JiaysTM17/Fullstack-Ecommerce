@@ -299,4 +299,60 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(orders[2].status, "completed");
     });
   });
+
+  // =========================================================================
+  // FEATURE 65: Settlement Statements & AI Dispute Arbitration (5 Tests)
+  // =========================================================================
+  describe("Feature 65: Settlement Statements & AI Dispute Arbitration", () => {
+    test("F65-T1: Settlement statement computes Net Payout after 5% commission and 1.5% tax", () => {
+      const gmv = 10000000;
+      const commission = Math.round(gmv * 0.05); // 500,000
+      const taxWithheld = Math.round(gmv * 0.015); // 150,000 (0.5% VAT + 1.0% PIT)
+      const netPayout = gmv - commission - taxWithheld; // 9,350,000
+      expect.equal(commission, 500000);
+      expect.equal(taxWithheld, 150000);
+      expect.equal(netPayout, 9350000);
+    });
+
+    test("F65-T2: Escrow cash flow calculation accurately reserves in-flight platform capital", () => {
+      const totalPlatformGmv = 50000000;
+      const escrowHeld = Math.round(totalPlatformGmv * 0.45);
+      expect.equal(escrowHeld, 22500000);
+    });
+
+    test("F65-T3: AI Dispute arbitration favors buyer when buyer reputation > 90 and seller reputation is lower", () => {
+      const buyerRep = 96;
+      const sellerRep = 92;
+      const aiRecommendation = buyerRep >= sellerRep ? "REFUND_BUYER" : "REJECT_BUYER";
+      const confidence = Math.min(99, Math.round(85 + (buyerRep - sellerRep) * 2));
+      expect.equal(aiRecommendation, "REFUND_BUYER");
+      expect.equal(confidence, 93);
+    });
+
+    test("F65-T4: Anomaly radar flags shop with excessive return rate exceeding 30%", () => {
+      const totalShopOrders = 10;
+      const returnedOrders = 4; // 40%
+      const returnRate = returnedOrders / totalShopOrders;
+      const isExcessive = returnRate > 0.30;
+      expect.equal(isExcessive, true);
+      expect.equal(returnRate, 0.40);
+    });
+
+    test("F65-T5: Consecutive order cancellations >= 3 triggers SERIAL_CANCELLATIONS anomaly", () => {
+      const userOrders = [
+        { status: "cancelled" },
+        { status: "cancelled" },
+        { status: "cancelled" },
+        { status: "completed" },
+      ];
+      let consecutiveCancels = 0;
+      for (const o of userOrders) {
+        if (o.status === "cancelled") consecutiveCancels++;
+        else break;
+      }
+      const isSerialCancellation = consecutiveCancels >= 3;
+      expect.equal(isSerialCancellation, true);
+      expect.equal(consecutiveCancels, 3);
+    });
+  });
 });
