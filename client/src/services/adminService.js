@@ -266,3 +266,19 @@ export async function approveAdminSettlementAPI(shopId, note = "") {
     throw error;
   }
 }
+
+/**
+ * Lấy danh sách đối soát tài chính của các gian hàng trên sàn (Finance Settlements)
+ */
+export async function getAdminFinanceSettlements() {
+  try {
+    const res = await apiRequest("/api/admin/finance", {
+      headers: getAdminHeaders(),
+    });
+    return res?.data || res || [];
+  } catch (error) {
+    console.warn("[AdminService] getAdminFinanceSettlements fallback:", error.message);
+    return null;
+  }
+}
+

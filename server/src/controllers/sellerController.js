@@ -4,6 +4,7 @@ import Order from "../models/Order.js";
 import User from "../models/User.js";
 import AdsCampaign from "../models/AdsCampaign.js";
 import FlashSale from "../models/FlashSale.js";
+import { recordAuditLog } from "../models/AuditLog.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 import catchAsync from "../utils/catchAsync.js";
 import logger from "../utils/logger.js";
@@ -767,6 +768,26 @@ export const requestSellerWithdrawal = catchAsync(async (req, res) => {
 
   shop.walletTransactions.unshift(newTx);
   await shop.save();
+
+  await recordAuditLog({
+    userId: req.user?._id || req.user?.id || shop.ownerId,
+    userName: req.user?.name || req.user?.fullName || "Seller",
+    userRole: req.user?.role || "seller",
+    action: "SELLER_WITHDRAWAL_REQUESTED",
+    entityType: "WALLET_WITHDRAWAL",
+    entityId: shop._id || shop.shopId,
+    details: {
+      shopId,
+      amount: withdrawAmount,
+      bankAccount: req.body.bankAccount || {
+        bankName: bankName || shop.bankAccount?.bankName,
+        accountNumber: accountNumber || shop.bankAccount?.accountNumber,
+        accountName: accountName || shop.bankAccount?.accountName,
+      },
+      txId,
+    },
+    ip: req.ip || "127.0.0.1",
+  });
 
   logger.info(`Shop ${shopId} requested withdrawal of ${withdrawAmount} VND. TxId: ${txId}`, {
     requestId: req.requestId,

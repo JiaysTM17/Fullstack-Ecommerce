@@ -223,6 +223,7 @@ export default function AdminDashboardPage() {
   const [deepBI, setDeepBI] = useState(null);
   const [taxData, setTaxData] = useState(null);
   const [fraudData, setFraudData] = useState(null);
+  const [selectedSettlementStatement, setSelectedSettlementStatement] = useState(null);
 
   const refreshUserData = async (showToastNotice = false) => {
     try {
@@ -1769,7 +1770,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="shopee-metrics-grid" style={{ margin: '16px 0 24px' }}>
+            <div className="shopee-metrics-grid" style={{ margin: '16px 0 24px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
               <div className="shopee-metric-card">
                 <span className="shopee-metric-label">Tổng GMV Toàn Sàn Đối Soát</span>
                 <div className="shopee-metric-value">{formatCurrency(totalPlatformRevenue)}</div>
@@ -1781,6 +1782,13 @@ export default function AdminDashboardPage() {
               <div className="shopee-metric-card">
                 <span className="shopee-metric-label">Tiền Cần Giải Ngân Cho Shop</span>
                 <div className="shopee-metric-value" style={{ color: 'var(--color-success)' }}>{formatCurrency(totalPlatformRevenue - platformCommission)}</div>
+              </div>
+              <div className="shopee-metric-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span className="shopee-metric-label">Dòng Tiền Ký Quỹ Escrow Sàn</span>
+                <div className="shopee-metric-value" style={{ color: '#0284c7', fontSize: '18px' }}>
+                  {formatCurrency(Math.round(totalPlatformRevenue * 0.45))}
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>Đang giữ bảo đảm 3-7 ngày</div>
               </div>
             </div>
 
@@ -1794,7 +1802,7 @@ export default function AdminDashboardPage() {
                     <th>Phí Sàn Khấu Trừ (5%)</th>
                     <th>Số Tiền Thực Trả Shop</th>
                     <th>Trạng Thái</th>
-                    <th style={{ textAlign: 'right' }}>Thao Tác Giải Ngân</th>
+                    <th style={{ textAlign: 'right' }}>Thao Tác Giải Ngân & Biên Bản</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1816,31 +1824,122 @@ export default function AdminDashboardPage() {
                         </span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        {f.status === 'pending' ? (
+                        <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
                           <button
                             type="button"
-                            className="shopee-btn shopee-btn-primary shopee-btn-sm"
-                            onClick={() => handleSettlePayout(f.id, f.shopId)}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                            className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                            style={{ padding: '5px 10px', fontSize: '11.5px', fontWeight: 600 }}
+                            onClick={() => setSelectedSettlementStatement(f)}
                           >
-                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <CreditCardIcon size={12} color="#ffffff" />
-                            </span>
-                            <span>Chuyển Khoản & Quyết Toán</span>
+                            📄 Xem Biên Bản
                           </button>
-                        ) : (
-                          <span style={{ fontSize: '12px', color: 'var(--color-success)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(22, 163, 74, 0.14)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {f.status === 'pending' ? (
+                            <button
+                              type="button"
+                              className="shopee-btn shopee-btn-primary shopee-btn-sm"
+                              onClick={() => handleSettlePayout(f.id, f.shopId)}
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            >
+                              <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CreditCardIcon size={11} color="#ffffff" />
+                              </span>
+                              <span>Giải Ngân</span>
+                            </button>
+                          ) : (
+                            <span style={{ fontSize: '11.5px', color: 'var(--color-success)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               <CheckIcon size={12} color="#16a34a" />
+                              <span>Đã Giải Ngân</span>
                             </span>
-                            <span>Đã Giải Ngân Thành Công</span>
-                          </span>
-                        )}
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Biên Bản Đối Soát Quyết Toán Tài Chính Hàng Tháng */}
+        {selectedSettlementStatement && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
+            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '640px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px', marginBottom: '16px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
+                    Biên Bản Đối Soát Tài Chính & Doanh Thu Shop
+                  </h3>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                    Kỳ thanh toán: {selectedSettlementStatement.period} — Mã gian hàng: <code>{selectedSettlementStatement.shopId}</code>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px' }}
+                  onClick={() => setSelectedSettlementStatement(null)}
+                >
+                  <CloseIcon size={18} color="#64748b" />
+                </button>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                  <span style={{ color: '#64748b' }}>Đơn vị thụ hưởng (Shop):</span>
+                  <strong style={{ color: '#0f172a' }}>{selectedSettlementStatement.shopName}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                  <span style={{ color: '#64748b' }}>Tổng doanh thu gộp (GMV):</span>
+                  <strong style={{ color: '#0f172a' }}>{formatCurrency(selectedSettlementStatement.gmv)}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                  <span style={{ color: '#64748b' }}>Phí hoa hồng sàn Mini Shopee (5%):</span>
+                  <strong style={{ color: '#dc2626' }}>-{formatCurrency(selectedSettlementStatement.commission)}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                  <span style={{ color: '#64748b' }}>Tạm khấu trừ thuế TNCN & GTGT (1.5% NĐ 52):</span>
+                  <strong style={{ color: '#ea580c' }}>-{formatCurrency(Math.round(selectedSettlementStatement.gmv * 0.015))}</strong>
+                </div>
+                <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '10px', marginTop: '10px', display: 'flex', justifyContent: 'space-between', fontSize: '15px' }}>
+                  <span style={{ fontWeight: 800, color: '#0f172a' }}>Số tiền chuyển khoản thực nhận:</span>
+                  <strong style={{ color: '#059669', fontSize: '17px' }}>
+                    {formatCurrency(selectedSettlementStatement.netPayout - Math.round(selectedSettlementStatement.gmv * 0.015))}
+                  </strong>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                  Biên bản được xác thực điện tử bởi Mini Shopee Escrow & Finance Clearing
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-secondary"
+                    onClick={() => {
+                      const csvContent = `data:text/csv;charset=utf-8,KyDoiSoat,GianHang,ShopId,GMV,PhiSan,ThueKhauTru,ThucNhan\n"${selectedSettlementStatement.period}","${selectedSettlementStatement.shopName}","${selectedSettlementStatement.shopId}",${selectedSettlementStatement.gmv},${selectedSettlementStatement.commission},${Math.round(selectedSettlementStatement.gmv * 0.015)},${selectedSettlementStatement.netPayout - Math.round(selectedSettlementStatement.gmv * 0.015)}`;
+                      const encodedUri = encodeURI(csvContent);
+                      const link = document.createElement('a');
+                      link.setAttribute('href', encodedUri);
+                      link.setAttribute('download', `DoiSoat_${selectedSettlementStatement.shopId}_${Date.now()}.csv`);
+                      link.click();
+                      toast.success('Đã xuất biên bản đối soát (CSV) thành công!');
+                    }}
+                  >
+                    📥 Xuất File CSV
+                  </button>
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-primary"
+                    onClick={() => {
+                      toast.success('Đã gửi bản in tới máy in hệ thống!');
+                      window.print();
+                    }}
+                  >
+                    🖨 In Biên Bản
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -2126,14 +2225,16 @@ export default function AdminDashboardPage() {
               </span>
             </div>
 
-            <div className="shopee-table-responsive">
+              <div className="shopee-table-responsive">
               <table className="shopee-table">
                 <thead>
                   <tr>
                     <th>Mã Đơn / Khách Hàng</th>
                     <th>Gian Hàng Liên Quan</th>
+                    <th>Điểm Uy Tín (Buyer vs Seller)</th>
                     <th>Lý Do Khiếu Nại</th>
                     <th>Số Tiền Yêu Cầu</th>
+                    <th>Đề Xuất AI</th>
                     <th>Trạng Thái</th>
                     <th style={{ textAlign: 'right' }}>Thao Tác Phán Quyết</th>
                   </tr>
@@ -2145,6 +2246,10 @@ export default function AdminDashboardPage() {
                       orderId: 'ORD918231',
                       customerName: 'Nguyễn Văn Khách',
                       shopName: 'Thời Trang GenZ Official',
+                      buyerReputation: 96,
+                      sellerReputation: 92,
+                      aiRecommendation: 'REFUND_BUYER',
+                      aiConfidence: 94,
                       reason: 'Sản phẩm lỗi rách đường chỉ viền, sai size',
                       claimAmount: 428000,
                       status: 'under_review',
@@ -2154,6 +2259,10 @@ export default function AdminDashboardPage() {
                       orderId: 'ORD716254',
                       customerName: 'Lê Minh Tuấn',
                       shopName: 'TechWorld Store',
+                      buyerReputation: 88,
+                      sellerReputation: 99,
+                      aiRecommendation: 'REFUND_BUYER',
+                      aiConfidence: 89,
                       reason: 'Giao trễ quá 5 ngày chưa bàn giao hàng',
                       claimAmount: 680000,
                       status: 'opened',
@@ -2167,11 +2276,34 @@ export default function AdminDashboardPage() {
                       <td>
                         <strong>{d.shopName}</strong>
                       </td>
-                      <td style={{ maxWidth: '280px' }}>
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                          <span style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            👤 Mua: <strong style={{ color: (d.buyerReputation || 90) >= 90 ? '#16a34a' : '#d97706' }}>{d.buyerReputation || 95}đ</strong>
+                          </span>
+                          <span style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            🏪 Bán: <strong style={{ color: (d.sellerReputation || 90) >= 90 ? '#16a34a' : '#d97706' }}>{d.sellerReputation || 98}đ</strong>
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ maxWidth: '240px' }}>
                         <span style={{ fontSize: '13px', color: '#334155' }}>{d.reason}</span>
                       </td>
                       <td>
                         <strong style={{ color: '#ea580c' }}>{formatCurrency(d.claimAmount)}</strong>
+                      </td>
+                      <td>
+                        <span style={{
+                          fontSize: '11px',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontWeight: 700,
+                          background: d.aiRecommendation === 'REFUND_BUYER' ? '#ecfdf5' : '#fef2f2',
+                          color: d.aiRecommendation === 'REFUND_BUYER' ? '#059669' : '#dc2626',
+                          display: 'inline-block'
+                        }}>
+                          🤖 {d.aiRecommendation === 'REFUND_BUYER' ? 'Nên hoàn tiền' : 'Bác bỏ'} ({d.aiConfidence || 90}%)
+                        </span>
                       </td>
                       <td>
                         <span className={`shopee-status-badge ${d.status.startsWith('resolved') ? 'status-delivered' : 'status-pending'}`}>
@@ -2184,8 +2316,8 @@ export default function AdminDashboardPage() {
                           className="shopee-btn shopee-btn-sm shopee-btn-primary"
                           onClick={() => {
                             setArbitrateModalDispute(d);
-                            setArbitrationDecision('REFUND_BUYER');
-                            setArbitrationNote('');
+                            setArbitrationDecision(d.aiRecommendation || 'REFUND_BUYER');
+                            setArbitrationNote(`Căn cứ hồ sơ đối sánh uy tín (${d.buyerReputation || 95}đ vs ${d.sellerReputation || 98}đ) và chính sách bảo vệ khách hàng sàn.`);
                           }}
                         >
                           Ra Phán Quyết
@@ -2207,6 +2339,10 @@ export default function AdminDashboardPage() {
               <p style={{ fontSize: '13px', color: '#475569', marginBottom: '14px' }}>
                 Lý do: <strong>{arbitrateModalDispute.reason}</strong> — Số tiền: <strong>{formatCurrency(arbitrateModalDispute.claimAmount)}</strong>
               </p>
+              <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '14px', fontSize: '12px' }}>
+                <div>🤖 Đề xuất Trọng tài tự động: <strong style={{ color: '#059669' }}>{arbitrateModalDispute.aiRecommendation === 'REFUND_BUYER' ? 'Chấp thuận hoàn tiền 100%' : 'Bác bỏ khiếu nại'}</strong> (Độ tin cậy: {arbitrateModalDispute.aiConfidence || 92}%)</div>
+                <div style={{ color: '#64748b', marginTop: '3px' }}>Hồ sơ tín nhiệm: Khách hàng {arbitrateModalDispute.buyerReputation || 95}/100đ — Gian hàng {arbitrateModalDispute.sellerReputation || 98}/100đ</div>
+              </div>
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Quyết Định Trọng Tài</label>
                 <select

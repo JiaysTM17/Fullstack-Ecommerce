@@ -570,8 +570,13 @@ export async function deleteSellerFlashSaleAPI(id) {
 }
 
 /**
- * Seller Wallet Withdrawal API
+ * Seller Wallet Retrieval & Withdrawal API
  */
+export async function fetchSellerWalletAPI() {
+  const result = await apiRequest("/api/seller/wallet");
+  return result?.data || result;
+}
+
 export async function requestSellerWithdrawalAPI(data) {
   return await apiRequest("/api/seller/wallet/withdraw", {
     method: "POST",
