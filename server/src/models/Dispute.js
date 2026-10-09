@@ -20,6 +20,10 @@ const disputeSchema = new mongoose.Schema(
     arbitrationNote: { type: String, default: "" },
     resolvedBy: { type: String, default: "" },
     resolvedAt: { type: String, default: null },
+    buyerReputation: { type: Number, default: 95 },
+    sellerReputation: { type: Number, default: 98 },
+    aiRecommendation: { type: String, default: "REFUND_BUYER" },
+    aiConfidence: { type: Number, default: 92 },
   },
   { timestamps: true }
 );

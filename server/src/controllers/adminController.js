@@ -784,6 +784,10 @@ export const getAdminDisputes = catchAsync(async (req, res) => {
         ],
         shopResponse: "Shop đã kiểm tra trước khi gửi, nhưng sẵn sàng hỗ trợ đổi size mới miễn phí cho khách",
         arbitrationNote: "",
+        buyerReputation: 96,
+        sellerReputation: 92,
+        aiRecommendation: "REFUND_BUYER",
+        aiConfidence: 94,
         createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
       },
       {
@@ -800,6 +804,10 @@ export const getAdminDisputes = catchAsync(async (req, res) => {
         evidence: [],
         shopResponse: "",
         arbitrationNote: "",
+        buyerReputation: 88,
+        sellerReputation: 99,
+        aiRecommendation: "REFUND_BUYER",
+        aiConfidence: 89,
         createdAt: new Date(Date.now() - 3600000 * 6).toISOString(),
       },
     ];
@@ -960,6 +968,30 @@ export const getAdminFraudRadar = catchAsync(async (req, res) => {
           targetEmail: user.email,
           description: `Tài khoản có tỷ lệ hủy/trả hàng ${(cancelRate * 100).toFixed(0)}% (${cancelledOrReturning.length}/${userOrders.length} đơn)`,
           suggestedAction: "LOCK_VOUCHER_USAGE",
+          detectedAt: new Date().toISOString(),
+        });
+      }
+    }
+  }
+
+  // 1b. Quét gian hàng có tỉ lệ hoàn tiền / trả hàng bất thường (>30%)
+  const allShopsList = await Shop.find({});
+  for (const s of allShopsList) {
+    const shopOrders = allOrders.filter((o) => (o.items || []).some((it) => it.shopId === s.shopId));
+    if (shopOrders.length >= 5) {
+      const returnedOrders = shopOrders.filter((o) => o.status === "returning" || o.status === "cancelled");
+      const returnRate = returnedOrders.length / shopOrders.length;
+      if (returnRate > 0.3) {
+        anomalies.push({
+          id: `anomaly_shop_${s.shopId}`,
+          type: "EXCESSIVE_RETURN_RATE",
+          severity: returnRate > 0.5 ? "CRITICAL" : "HIGH",
+          targetType: "SHOP",
+          targetId: s.shopId,
+          targetName: s.name,
+          targetEmail: s.phone || "N/A",
+          description: `Gian hàng có tỉ lệ hoàn hàng/khiếu nại ${(returnRate * 100).toFixed(0)}% (>30% ngưỡng cho phép)`,
+          suggestedAction: "AUDIT_SHOP_QUALITY",
           detectedAt: new Date().toISOString(),
         });
       }
