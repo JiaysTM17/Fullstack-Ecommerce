@@ -115,6 +115,24 @@ const shopSchema = new mongoose.Schema(
       type: [String],
       default: ["Chính Hãng 100%"],
     },
+    walletBalance: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    walletTransactions: {
+      type: Array,
+      default: [],
+    },
+    settlementStatus: {
+      type: String,
+      enum: ["pending", "processing", "settled"],
+      default: "pending",
+    },
+    settledAt: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );
