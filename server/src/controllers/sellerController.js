@@ -637,6 +637,72 @@ export const confirmSellerOrder = catchAsync(async (req, res) => {
   sendSuccess(res, { order }, "Đã xác nhận đơn hàng thành công");
 });
 
+// @desc    Seller Batch Confirm Orders — Xác nhận đơn hàng loạt
+// @route   POST /api/seller/orders/batch-confirm
+// @access  Private (Seller only)
+export const batchConfirmSellerOrders = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+  const { orderIds } = req.body;
+  if (!Array.isArray(orderIds) || orderIds.length === 0) {
+    return sendError(res, "Danh sách mã đơn hàng (orderIds) không hợp lệ", 400);
+  }
+
+  const confirmedOrders = [];
+  const errors = [];
+
+  for (const id of orderIds) {
+    let order = await Order.findById(id);
+    if (!order) {
+      order = await Order.findOne({ orderId: id });
+    }
+
+    if (!order) {
+      errors.push({ id, message: "Không tìm thấy đơn hàng" });
+      continue;
+    }
+
+    const hasShopItems = (order.items || []).some((item) => item.shopId === shopId);
+    if (!hasShopItems && req.user.role !== "admin") {
+      errors.push({ id, message: "Đơn hàng không thuộc gian hàng của bạn" });
+      continue;
+    }
+
+    if (order.status !== "pending") {
+      errors.push({ id, message: `Đơn hàng đang ở trạng thái '${order.status}', không thể xác nhận` });
+      continue;
+    }
+
+    order.status = "confirmed";
+    order.statusText = "Đã xác nhận";
+    order.confirmedAt = new Date().toISOString();
+    if (!Array.isArray(order.timeline)) order.timeline = [];
+    order.timeline.push({ time: new Date().toISOString(), text: "Người bán đã xác nhận đơn hàng (Xử lý hàng loạt)" });
+    await order.save();
+
+    confirmedOrders.push({
+      orderId: order._id || order.id || order.orderId,
+      status: "confirmed",
+      total: order.total,
+    });
+  }
+
+  logger.info(`Shop ${shopId} batch confirmed ${confirmedOrders.length} orders`, {
+    requestId: req.requestId,
+    shopId,
+    confirmedCount: confirmedOrders.length,
+    errorCount: errors.length,
+  });
+
+  sendSuccess(res, {
+    confirmedCount: confirmedOrders.length,
+    confirmedOrders,
+    errors,
+    message: `Đã xác nhận thành công ${confirmedOrders.length} đơn hàng${errors.length > 0 ? ` (${errors.length} đơn bị bỏ qua)` : ""}`,
+  });
+});
+
 // @desc    Lấy thông tin ví và lịch sử giao dịch ví của gian hàng
 // @route   GET /api/seller/wallet
 // @access  Private (Seller only)
@@ -1048,6 +1114,7 @@ export default {
   getSellerRevenue,
   getSellerPendingOrders,
   confirmSellerOrder,
+  batchConfirmSellerOrders,
   getSellerWallet,
   getSellerAnalyticsFunnel,
   getSellerMarketIntelligence,

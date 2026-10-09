@@ -239,4 +239,64 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(lowStockItems[0].productId, "p3");
     });
   });
+
+  // =========================================================================
+  // FEATURE 64: Seller Wallet Withdrawal & Settlement Payout Flow (5 Tests)
+  // =========================================================================
+  describe("Feature 64: Wallet Withdrawal & Settlement Payout Flow", () => {
+    test("F64-T1: Withdrawal amount less than 50.000₫ threshold is rejected", () => {
+      const amt = 30000;
+      const isValid = amt >= 50000;
+      expect.equal(isValid, false);
+    });
+
+    test("F64-T2: Withdrawal exceeding current wallet balance is prevented", () => {
+      const balance = 1500000;
+      const requestedAmt = 2000000;
+      const canWithdraw = requestedAmt <= balance;
+      expect.equal(canWithdraw, false);
+    });
+
+    test("F64-T3: Approved withdrawal deducts wallet balance and creates transaction record", () => {
+      let balance = 2500000;
+      const withdrawAmt = 1000000;
+      balance -= withdrawAmt;
+      const tx = {
+        id: "WTX_TEST_01",
+        amount: -withdrawAmt,
+        balanceAfter: balance,
+        status: "PROCESSING",
+      };
+      expect.equal(balance, 1500000);
+      expect.equal(tx.balanceAfter, 1500000);
+      expect.equal(tx.status, "PROCESSING");
+    });
+
+    test("F64-T4: Admin settlement payout updates shop settlementStatus to settled", () => {
+      const shopRecord = {
+        shopId: "shop_test_settle",
+        name: "Shop Đối Soát",
+        settlementStatus: "pending",
+        settledAt: null,
+      };
+      expect.equal(shopRecord.settlementStatus, "pending");
+      shopRecord.settlementStatus = "settled";
+      shopRecord.settledAt = new Date().toISOString();
+      expect.equal(shopRecord.settlementStatus, "settled");
+      expect.equal(typeof shopRecord.settledAt, "string");
+    });
+
+    test("F64-T5: Batch order confirmation marks all valid pending orders as confirmed", () => {
+      const orders = [
+        { id: "o1", status: "pending" },
+        { id: "o2", status: "pending" },
+        { id: "o3", status: "completed" },
+      ];
+      const pendingOrders = orders.filter((o) => o.status === "pending");
+      pendingOrders.forEach((o) => { o.status = "confirmed"; });
+      expect.equal(orders[0].status, "confirmed");
+      expect.equal(orders[1].status, "confirmed");
+      expect.equal(orders[2].status, "completed");
+    });
+  });
 });

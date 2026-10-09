@@ -558,3 +558,13 @@ export async function requestSellerWithdrawalAPI(data) {
     body: JSON.stringify(data),
   });
 }
+
+/**
+ * Seller Batch Confirm Orders API
+ */
+export async function batchConfirmSellerOrdersAPI(orderIds) {
+  return await apiRequest("/api/seller/orders/batch-confirm", {
+    method: "POST",
+    body: JSON.stringify({ orderIds }),
+  });
+}

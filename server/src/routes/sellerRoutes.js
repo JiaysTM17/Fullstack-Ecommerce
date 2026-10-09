@@ -15,6 +15,7 @@ import {
   getSellerRevenue,
   getSellerPendingOrders,
   confirmSellerOrder,
+  batchConfirmSellerOrders,
   getSellerWallet,
   getSellerAnalyticsFunnel,
   getSellerMarketIntelligence,
@@ -81,5 +82,6 @@ router.get("/orders", getSellerOrders);
 router.get("/orders/pending", getSellerPendingOrders);
 router.patch("/orders/:id/status", updateSellerOrderStatus);
 router.patch("/orders/:id/confirm", confirmSellerOrder);
+router.post("/orders/batch-confirm", batchConfirmSellerOrders);
 
 export default router;
