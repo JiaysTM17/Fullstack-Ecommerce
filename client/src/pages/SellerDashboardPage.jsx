@@ -2751,7 +2751,7 @@ export default function SellerDashboardPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowCreateFlashSaleModal(true)}
+                  onClick={handleOpenCreateFlashSaleModal}
                   className="shopee-btn shopee-btn-primary"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', fontWeight: 700 }}
                 >
@@ -2766,15 +2766,23 @@ export default function SellerDashboardPage() {
             {/* Danh sách chiến dịch Flash Sale */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '16px' }}>
               {shopFlashSales.map((fs) => {
-                const soldPct = Math.round(((fs.soldCount || 0) / (fs.totalQuota || 1)) * 100);
+                const fsKey = fs._id || fs.id;
+                const totalQuota = fs.totalQuota || (Array.isArray(fs.items) ? fs.items.reduce((s, it) => s + (Number(it.stockLimit) || 10), 0) : 50);
+                const soldCount = fs.soldCount || 0;
+                const soldPct = Math.round((soldCount / (totalQuota || 1)) * 100);
+                const title = fs.title || `Flash Sale ${fs.slotTime || fs.timeSlot || ''}`;
+                const timeSlot = fs.timeSlot || fs.slotTime || '12:00 - 15:00 Hôm Nay';
+                const itemsCount = fs.itemsCount || (Array.isArray(fs.items) ? fs.items.length : 1);
+                const discountPct = fs.discountPercent || (Array.isArray(fs.items) && fs.items[0]?.discountPercent) || 30;
+
                 return (
-                  <div key={fs.id} className="shopee-table-card" style={{ position: 'relative', overflow: 'hidden' }}>
+                  <div key={fsKey} className="shopee-table-card" style={{ position: 'relative', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                       <div>
                         <span className="seller-badge-pill" style={{
-                          background: fs.status === 'active' ? '#fef3c7' : '#f1f5f9',
-                          color: fs.status === 'active' ? '#b45309' : '#64748b',
-                          border: `1px solid ${fs.status === 'active' ? '#fde68a' : '#cbd5e1'}`,
+                          background: fs.status === 'active' ? '#fef3c7' : fs.status === 'paused' ? '#fee2e2' : '#f1f5f9',
+                          color: fs.status === 'active' ? '#b45309' : fs.status === 'paused' ? '#b91c1c' : '#64748b',
+                          border: `1px solid ${fs.status === 'active' ? '#fde68a' : fs.status === 'paused' ? '#fecaca' : '#cbd5e1'}`,
                           marginBottom: '6px',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -2785,6 +2793,11 @@ export default function SellerDashboardPage() {
                               <BoltIcon size={12} color="#b45309" />
                               <span>ĐANG DIỄN RA</span>
                             </>
+                          ) : fs.status === 'paused' ? (
+                            <>
+                              <AlertCircleIcon size={12} color="#b91c1c" />
+                              <span>TẠM DỪNG</span>
+                            </>
                           ) : fs.status === 'upcoming' ? (
                             <>
                               <ClockIcon size={12} color="#64748b" />
@@ -2794,28 +2807,48 @@ export default function SellerDashboardPage() {
                             <span>ĐÃ KẾT THÚC</span>
                           )}
                         </span>
-                        <h4 style={{ margin: '4px 0 0', fontSize: '15px', fontWeight: 800 }}>{fs.title}</h4>
+                        <h4 style={{ margin: '4px 0 0', fontSize: '15px', fontWeight: 800 }}>{title}</h4>
                       </div>
                       <span style={{ fontSize: '18px', fontWeight: 900, color: '#dc2626' }}>
-                        -{fs.discountPercent}%
+                        -{discountPct}%
                       </span>
                     </div>
 
                     <div style={{ background: 'var(--bg-muted, #f8fafc)', padding: '10px 12px', borderRadius: '8px', marginBottom: '14px', fontSize: '12.5px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                         <span style={{ color: 'var(--text-muted)' }}>Khung giờ:</span>
-                        <strong>{fs.timeSlot}</strong>
+                        <strong>{timeSlot}</strong>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: 'var(--text-muted)' }}>Số mặt hàng tham gia:</span>
-                        <strong>{fs.itemsCount} sản phẩm</strong>
+                        <strong>{itemsCount} sản phẩm</strong>
                       </div>
                     </div>
+
+                    {/* Danh sách mặt hàng tham gia Flash Sale */}
+                    {Array.isArray(fs.items) && fs.items.length > 0 && (
+                      <div style={{ marginBottom: '14px', padding: '8px 10px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginBottom: '6px' }}>Mặt hàng áp dụng Flash Sale:</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '100px', overflowY: 'auto' }}>
+                          {fs.items.map((it, idx) => (
+                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px' }}>
+                              <span style={{ fontWeight: 600, color: '#334155', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                • {it.name}
+                              </span>
+                              <span>
+                                <strong style={{ color: '#ea580c' }}>{formatCurrency(it.flashPrice)}</strong>{' '}
+                                <del style={{ fontSize: '10.5px', color: '#94a3b8' }}>{formatCurrency(it.originalPrice)}</del>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Thanh tiến độ bán */}
                     <div style={{ marginBottom: '14px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, marginBottom: '4px' }}>
-                        <span>Đã bán: {fs.soldCount} / {fs.totalQuota} suất</span>
+                        <span>Đã bán: {soldCount} / {totalQuota} suất</span>
                         <span style={{ color: '#ea580c' }}>{soldPct}%</span>
                       </div>
                       <div style={{ width: '100%', height: '8px', background: 'var(--border-medium, #e2e8f0)', borderRadius: '4px', overflow: 'hidden' }}>
@@ -2826,7 +2859,17 @@ export default function SellerDashboardPage() {
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                       <button
                         type="button"
-                        onClick={() => handleToggleFlashSaleStatus(fs.id)}
+                        onClick={() => handleDeleteFlashSale(fsKey)}
+                        className="shopee-btn shopee-btn-sm"
+                        style={{ padding: '6px 10px', fontSize: '12px', background: 'rgba(239, 68, 68, 0.08)', color: '#dc2626', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        title="Xóa phiên Flash Sale"
+                      >
+                        <TrashIcon size={12} color="#dc2626" />
+                        <span>Xóa</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFlashSaleStatus(fsKey)}
                         className={`shopee-btn ${fs.status === 'active' ? 'shopee-btn-secondary' : 'shopee-btn-primary'}`}
                         style={{ padding: '6px 12px', fontSize: '12px' }}
                       >
