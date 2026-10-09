@@ -3095,20 +3095,33 @@ export default function SellerDashboardPage() {
                     Quản lý tồn kho, giá bán và trạng thái hiển thị của các sản phẩm thuộc {currentShop.name}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  className="shopee-btn shopee-btn-primary"
-                  onClick={handleOpenAddModal}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}
-                >
-                  <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <PlusIcon size={12} color="#ffffff" />
-                  </span>
-                  <span>Đăng Bán Sản Phẩm Mới</span>
-                </button>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-outline"
+                    onClick={handleOpenBatchInventoryModal}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 700, borderColor: '#ea580c', color: '#ea580c' }}
+                  >
+                    <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <PackageIcon size={12} color="#ea580c" />
+                    </span>
+                    <span>⚡ Nhập Kho Hàng Loạt & Ma Trận Tồn Kho</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-primary"
+                    onClick={handleOpenAddModal}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}
+                  >
+                    <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <PlusIcon size={12} color="#ffffff" />
+                    </span>
+                    <span>Đăng Bán Sản Phẩm Mới</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Status Tabs: Tất cả | Đang bán | Đã ẩn | Sắp hết hàng */}
+              {/* Status Tabs: Tất cả | Đang bán | Đã ẩn | Sắp hết hàng | Cận Date | Xả Kho */}
               <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
@@ -3141,6 +3154,24 @@ export default function SellerDashboardPage() {
                       <AlertCircleIcon size={10} color="#dc2626" />
                     </span>
                     <span>Sắp hết hàng ({lowStockCount})</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`seller-tab-btn ${productStatusFilter === 'near_expiry' ? 'active' : ''}`}
+                  onClick={() => setProductStatusFilter('near_expiry')}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span>⏳ Cận Date ({nearExpiryCount})</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`seller-tab-btn ${productStatusFilter === 'clearance' ? 'active' : ''}`}
+                  onClick={() => setProductStatusFilter('clearance')}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span>🏷️ Xả Kho ({clearanceCount})</span>
                   </span>
                 </button>
               </div>
@@ -3238,9 +3269,26 @@ export default function SellerDashboardPage() {
                           <div className="shopee-table-item-name" style={{ fontWeight: 700 }} title={prod.name}>
                             {prod.name}
                           </div>
-                          <small style={{ color: 'var(--text-muted)', fontSize: '11px' }}>
-                            Mã: {prod._id}
-                          </small>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+                            <small style={{ color: 'var(--text-muted)', fontSize: '11px' }}>
+                              Mã: {prod._id}
+                            </small>
+                            {prod.batchCode && (
+                              <span style={{ fontSize: '10.5px', color: '#64748b', background: '#f1f5f9', padding: '1px 5px', borderRadius: '4px' }}>
+                                Lô: {prod.batchCode}
+                              </span>
+                            )}
+                            {prod.clearanceStatus === 'near_expiry' && (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '1px 6px', borderRadius: '6px', fontSize: '10.5px', fontWeight: 700, background: '#fff7ed', color: '#ea580c', border: '1px solid #fed7aa' }}>
+                                ⏳ Cận Date {prod.expiryDate ? `(${new Date(prod.expiryDate).toLocaleDateString('vi-VN')})` : ''}
+                              </span>
+                            )}
+                            {prod.clearanceStatus === 'clearance' && (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', padding: '1px 6px', borderRadius: '6px', fontSize: '10.5px', fontWeight: 700, background: '#faf5ff', color: '#9333ea', border: '1px solid #f3e8ff' }}>
+                                🏷️ Xả Kho {prod.clearanceDiscount > 0 ? `-${prod.clearanceDiscount}%` : ''}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td>
                           <span className="seller-stat-chip">
@@ -3258,45 +3306,50 @@ export default function SellerDashboardPage() {
                           )}
                         </td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span
-                              style={{
-                                fontWeight: 700,
-                                fontSize: '12px',
-                                color: prod.stock === 0 ? '#dc2626' : prod.stock < 10 ? '#ea580c' : '#16a34a'
-                              }}
-                            >
-                              {prod.stock === 0 ? (
-                                'Hết hàng (0)'
-                              ) : prod.stock < 10 ? (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                  <AlertCircleIcon size={12} color="#ea580c" />
-                                  <span>Còn {prod.stock}</span>
-                                </span>
-                              ) : (
-                                `${prod.stock} cái`
-                              )}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setQuickStockProduct(prod);
-                                setQuickStockValue(prod.stock);
-                              }}
-                              style={{
-                                background: 'transparent',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '4px',
-                                padding: '1px 5px',
-                                fontSize: '10px',
-                                cursor: 'pointer'
-                              }}
-                              title="Chỉnh sửa nhanh tồn kho"
-                            >
-                              <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <PencilIcon size={10} color="#2563eb" />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span
+                                style={{
+                                  fontWeight: 700,
+                                  fontSize: '12px',
+                                  color: prod.stock === 0 ? '#dc2626' : prod.stock <= (typeof prod.safetyThreshold === 'number' ? prod.safetyThreshold : 10) ? '#ea580c' : '#16a34a'
+                                }}
+                              >
+                                {prod.stock === 0 ? (
+                                  'Hết hàng (0)'
+                                ) : prod.stock <= (typeof prod.safetyThreshold === 'number' ? prod.safetyThreshold : 10) ? (
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                    <AlertCircleIcon size={12} color="#ea580c" />
+                                    <span>Còn {prod.stock}</span>
+                                  </span>
+                                ) : (
+                                  `${prod.stock} cái`
+                                )}
                               </span>
-                            </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setQuickStockProduct(prod);
+                                  setQuickStockValue(prod.stock);
+                                }}
+                                style={{
+                                  background: 'transparent',
+                                  border: '1px solid #cbd5e1',
+                                  borderRadius: '4px',
+                                  padding: '1px 5px',
+                                  fontSize: '10px',
+                                  cursor: 'pointer'
+                                }}
+                                title="Chỉnh sửa nhanh tồn kho"
+                              >
+                                <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <PencilIcon size={10} color="#2563eb" />
+                                </span>
+                              </button>
+                            </div>
+                            <small style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
+                              Ngưỡng an toàn: {typeof prod.safetyThreshold === 'number' ? prod.safetyThreshold : 10}
+                            </small>
                           </div>
                         </td>
                         <td>
@@ -4766,16 +4819,16 @@ export default function SellerDashboardPage() {
         {/* ========================================================================= */}
         {showCreateFlashSaleModal && (
           <div className="shopee-modal-overlay" onClick={() => setShowCreateFlashSaleModal(false)} style={{ animation: 'modalOverlayFadeIn 0.2s ease-out forwards' }}>
-            <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto' }}>
               <div className="shopee-modal-header">
                 <div>
                   <h3 style={{ margin: 0, fontSize: '17px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <BoltIcon size={14} color="#ea580c" />
                     </span>
-                    <span>Tạo Flash Sale Mới Cho Shop</span>
+                    <span>Tạo Slot Flash Sale Mới Cho Shop</span>
                   </h3>
-                  <small style={{ color: 'var(--text-muted)' }}>Cửa hàng: {currentShop.name}</small>
+                  <small style={{ color: 'var(--text-muted)' }}>Cửa hàng: {currentShop.name} • Chọn sản phẩm &amp; cài đặt giá Flash Sale</small>
                 </div>
                 <button
                   type="button"
@@ -4803,56 +4856,132 @@ export default function SellerDashboardPage() {
                   />
                 </div>
 
-                <div className="shopee-form-row">
-                  <div className="shopee-form-group">
-                    <label className="shopee-form-label">Khung Giờ Flash Sale</label>
-                    <select
-                      className="shopee-form-select"
-                      value={flashSaleForm.timeSlot}
-                      onChange={(e) => setFlashSaleForm({ ...flashSaleForm, timeSlot: e.target.value })}
-                    >
-                      <option value="09:00 - 12:00 Sáng">09:00 - 12:00 Sáng</option>
-                      <option value="12:00 - 15:00 Hôm Nay">12:00 - 15:00 Buổi Trưa</option>
-                      <option value="18:00 - 21:00 Tối Nay">18:00 - 21:00 Khung Giờ Vàng</option>
-                      <option value="21:00 - 23:59 Đêm">21:00 - 23:59 Săn Deal Nửa Đêm</option>
-                    </select>
-                  </div>
-
-                  <div className="shopee-form-group">
-                    <label className="shopee-form-label">Mức Giảm (%) *</label>
-                    <input
-                      type="number"
-                      required
-                      min="5"
-                      max="90"
-                      className="shopee-form-input"
-                      value={flashSaleForm.discountPercent}
-                      onChange={(e) => setFlashSaleForm({ ...flashSaleForm, discountPercent: e.target.value })}
-                    />
-                  </div>
+                <div className="shopee-form-group">
+                  <label className="shopee-form-label">Khung Giờ Flash Sale Chuẩn Shopee</label>
+                  <select
+                    className="shopee-form-select"
+                    value={flashSaleForm.timeSlot}
+                    onChange={(e) => setFlashSaleForm({ ...flashSaleForm, timeSlot: e.target.value })}
+                  >
+                    <option value="00:00 - 02:00 Nửa Đêm">00:00 - 02:00 Chớp Nhoáng Nửa Đêm</option>
+                    <option value="09:00 - 12:00 Sáng">09:00 - 12:00 Sáng Đón Ngày Mới</option>
+                    <option value="12:00 - 15:00 Buổi Trưa">12:00 - 15:00 Khung Giờ Cơm Trưa</option>
+                    <option value="15:00 - 18:00 Buổi Chiều">15:00 - 18:00 Deal Tan Tầm Chiều</option>
+                    <option value="18:00 - 21:00 Tối Nay">18:00 - 21:00 Giờ Vàng Tối Shopee</option>
+                    <option value="21:00 - 23:59 Đêm">21:00 - 23:59 Săn Deal Nửa Đêm</option>
+                  </select>
                 </div>
 
-                <div className="shopee-form-row">
-                  <div className="shopee-form-group">
-                    <label className="shopee-form-label">Số Mặt Hàng Đăng Ký</label>
-                    <input
-                      type="number"
-                      min="1"
-                      className="shopee-form-input"
-                      value={flashSaleForm.itemsCount}
-                      onChange={(e) => setFlashSaleForm({ ...flashSaleForm, itemsCount: e.target.value })}
-                    />
+                {/* BỘ CHỌN SẢN PHẨM & CÀI ĐẶT SUẤT BÁN */}
+                <div style={{ marginTop: '16px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <label className="shopee-form-label" style={{ margin: 0, fontWeight: 800 }}>
+                      Chọn Sản Phẩm Tham Gia Flash Sale ({flashSaleSelectedItems.length}/{shopProducts.length})
+                    </label>
+                    <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+                      Tick chọn &amp; nhập giá Flash Sale riêng (&lt; Giá gốc)
+                    </span>
                   </div>
 
-                  <div className="shopee-form-group">
-                    <label className="shopee-form-label">Tổng Suất Bán Khuyến Mãi</label>
-                    <input
-                      type="number"
-                      min="5"
-                      className="shopee-form-input"
-                      value={flashSaleForm.totalQuota}
-                      onChange={(e) => setFlashSaleForm({ ...flashSaleForm, totalQuota: e.target.value })}
-                    />
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', maxHeight: '240px', overflowY: 'auto', background: '#f8fafc', padding: '8px' }}>
+                    {shopProducts.map((p) => {
+                      const pid = p._id || p.id;
+                      const selectedItem = flashSaleSelectedItems.find(it => it.productId === pid);
+                      const isSelected = !!selectedItem;
+
+                      const isInvalidPrice = isSelected && Number(selectedItem.flashPrice) >= Number(selectedItem.originalPrice);
+                      const isInvalidQuota = isSelected && Number(selectedItem.stockLimit) > Number(p.stock || 0);
+
+                      return (
+                        <div
+                          key={pid}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                            background: isSelected ? '#ffffff' : '#f8fafc',
+                            border: isSelected ? '1.5px solid #ea580c' : '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            padding: '10px 12px',
+                            marginBottom: '8px',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: 1, minWidth: 0, margin: 0 }}>
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleSelectProductForFlashSale(p)}
+                                style={{ width: '16px', height: '16px', accentColor: '#ea580c', cursor: 'pointer' }}
+                              />
+                              <img
+                                src={p.image}
+                                alt={p.name}
+                                style={{ width: '38px', height: '38px', borderRadius: '6px', objectFit: 'cover', flexShrink: 0 }}
+                              />
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div style={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {p.name}
+                                </div>
+                                <div style={{ fontSize: '11px', color: '#64748b' }}>
+                                  Giá gốc: <strong>{formatCurrency(p.price)}</strong> • Kho khả dụng: <strong style={{ color: p.stock < 10 ? '#ea580c' : '#16a34a' }}>{p.stock}</strong> cái
+                                </div>
+                              </div>
+                            </label>
+
+                            {isSelected && (
+                              <span style={{ fontSize: '12px', fontWeight: 800, color: '#dc2626', background: '#fee2e2', padding: '2px 8px', borderRadius: '4px' }}>
+                                -{selectedItem.discountPercent}%
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Inputs khi được chọn */}
+                          {isSelected && (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', paddingTop: '8px', borderTop: '1px dashed #e2e8f0' }}>
+                              <div>
+                                <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>
+                                  Giá Flash Sale (VNĐ) *
+                                </label>
+                                <input
+                                  type="number"
+                                  className="shopee-form-input"
+                                  style={{ padding: '6px 10px', fontSize: '12.5px', borderColor: isInvalidPrice ? '#dc2626' : undefined }}
+                                  value={selectedItem.flashPrice}
+                                  onChange={(e) => handleUpdateFlashSaleItem(pid, 'flashPrice', e.target.value)}
+                                  placeholder="Nhập giá Flash Sale..."
+                                />
+                                {isInvalidPrice && (
+                                  <span style={{ fontSize: '10.5px', color: '#dc2626', fontWeight: 700, marginTop: '2px', display: 'block' }}>
+                                    ⚠️ Phải &lt; {formatCurrency(selectedItem.originalPrice)}
+                                  </span>
+                                )}
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>
+                                  Suất bán Flash Sale *
+                                </label>
+                                <input
+                                  type="number"
+                                  className="shopee-form-input"
+                                  style={{ padding: '6px 10px', fontSize: '12.5px', borderColor: isInvalidQuota ? '#dc2626' : undefined }}
+                                  value={selectedItem.stockLimit}
+                                  onChange={(e) => handleUpdateFlashSaleItem(pid, 'stockLimit', e.target.value)}
+                                  placeholder="Nhập suất bán..."
+                                />
+                                {isInvalidQuota && (
+                                  <span style={{ fontSize: '10.5px', color: '#dc2626', fontWeight: 700, marginTop: '2px', display: 'block' }}>
+                                    ⚠️ Vượt quá kho ({p.stock})
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -5274,6 +5403,236 @@ export default function SellerDashboardPage() {
               </div>
             </div>
 
+            {/* ========================================================================= */}
+            {/* THẺ MÔ PHỎNG ĐẤU THẦU TỪ KHÓA SHOPEE ADS (KEYWORD BIDDING SIMULATOR) */}
+            {/* ========================================================================= */}
+            <div style={{
+              background: '#ffffff',
+              border: '1.5px solid #fed7aa',
+              borderRadius: '16px',
+              padding: '20px 24px',
+              marginBottom: '24px',
+              boxShadow: '0 4px 16px rgba(234, 88, 12, 0.06)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <SparklesIcon size={18} color="#ea580c" />
+                  </span>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+                      Công Cụ Mô Phỏng &amp; Đấu Thầu Từ Khóa Thông Minh (Shopee Ads Simulator)
+                    </h3>
+                    <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b' }}>
+                      Dự phóng lượt hiển thị, click, ngân sách tiêu hao, doanh số và tỷ suất ROAS/ROI trước khi kích hoạt chiến dịch thực tế.
+                    </p>
+                  </div>
+                </div>
+                {simResult && (
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-primary"
+                    onClick={handleApplySimToCampaign}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 700 }}
+                  >
+                    <CheckIcon size={12} color="#ffffff" />
+                    <span>Áp Dụng Vào Chiến Dịch Mới</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Bảng nhập thông số mô phỏng */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    Sản Phẩm Đẩy Quảng Cáo *
+                  </label>
+                  <select
+                    className="shopee-form-select"
+                    value={simProductId}
+                    onChange={(e) => setSimProductId(e.target.value)}
+                    style={{ width: '100%', padding: '7px 10px', fontSize: '12.5px' }}
+                  >
+                    {shopProducts.map(p => (
+                      <option key={p._id || p.id} value={p._id || p.id}>
+                        {p.name.slice(0, 40)}... ({formatCurrency(p.price)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    Từ Khóa Mục Tiêu (cách nhau bởi dấu phẩy) *
+                  </label>
+                  <input
+                    type="text"
+                    className="shopee-form-input"
+                    value={simKeywordsInput}
+                    onChange={(e) => setSimKeywordsInput(e.target.value)}
+                    placeholder="VD: áo thun nam, áo unisex, thời trang genz"
+                    style={{ width: '100%', padding: '7px 10px', fontSize: '12.5px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    Loại Đối Sánh
+                  </label>
+                  <select
+                    className="shopee-form-select"
+                    value={simMatchType}
+                    onChange={(e) => setSimMatchType(e.target.value)}
+                    style={{ width: '100%', padding: '7px 10px', fontSize: '12.5px' }}
+                  >
+                    <option value="exact">Chính xác (Exact Match - CTR cao)</option>
+                    <option value="broad">Mở rộng (Broad Match - Tiếp cận rộng)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    Giá Thầu Đề Xuất (VNĐ/Click) *
+                  </label>
+                  <input
+                    type="number"
+                    min="500"
+                    step="100"
+                    className="shopee-form-input"
+                    value={simBidPrice}
+                    onChange={(e) => setSimBidPrice(e.target.value)}
+                    style={{ width: '100%', padding: '7px 10px', fontSize: '12.5px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    Ngân Sách Ngày (VNĐ/ngày) *
+                  </label>
+                  <input
+                    type="number"
+                    min="10000"
+                    step="10000"
+                    className="shopee-form-input"
+                    value={simBudgetDaily}
+                    onChange={(e) => setSimBudgetDaily(e.target.value)}
+                    style={{ width: '100%', padding: '7px 10px', fontSize: '12.5px' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-primary"
+                    disabled={isSimulating}
+                    onClick={handleRunAdsSimulator}
+                    style={{ width: '100%', padding: '8px 14px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  >
+                    <BoltIcon size={14} color="#ffffff" />
+                    <span>{isSimulating ? 'Đang Tính Toán...' : '⚡ Chạy Mô Phỏng'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Kết quả dự phóng mô phỏng */}
+              {simResult && (
+                <div style={{ background: '#fdfcfb', border: '1px solid #fed7aa', borderRadius: '12px', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <h4 style={{ margin: 0, fontSize: '13.5px', fontWeight: 800, color: '#c2410c' }}>
+                      📊 Bảng Dự Phóng Hiệu Suất Chiến Dịch (Projection Breakdown)
+                    </h4>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>
+                      Chu kỳ: 1 Ngày vs 30 Ngày
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '16px' }}>
+                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>Lượt Hiển Thị Dự Phóng</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                        {(simResult.projectedDaily?.impressions || 0).toLocaleString()}
+                      </div>
+                      <small style={{ fontSize: '10px', color: '#94a3b8' }}>{(simResult.projectedMonthly?.impressions || 0).toLocaleString()} /tháng</small>
+                    </div>
+
+                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>Lượt Click (CTR {simResult.projectedDaily?.ctr || 0}%)</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#2563eb', marginTop: '2px' }}>
+                        {(simResult.projectedDaily?.clicks || 0).toLocaleString()} clicks
+                      </div>
+                      <small style={{ fontSize: '10px', color: '#94a3b8' }}>{(simResult.projectedMonthly?.clicks || 0).toLocaleString()} /tháng</small>
+                    </div>
+
+                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>Giá CPC Ước Tính</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                        {formatCurrency(simResult.projectedDaily?.cpc || 0)}
+                      </div>
+                      <small style={{ fontSize: '10px', color: '#16a34a' }}>Tối ưu hơn giá thầu trần</small>
+                    </div>
+
+                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>Chi Phí Dự Kiến (Spend)</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#dc2626', marginTop: '2px' }}>
+                        {formatCurrency(simResult.projectedDaily?.spend || 0)}
+                      </div>
+                      <small style={{ fontSize: '10px', color: '#94a3b8' }}>{formatCurrency(simResult.projectedMonthly?.spend || 0)} /tháng</small>
+                    </div>
+
+                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>Doanh Số GMV Ước Tính</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#059669', marginTop: '2px' }}>
+                        {formatCurrency(simResult.projectedDaily?.adGmv || 0)}
+                      </div>
+                      <small style={{ fontSize: '10px', color: '#059669', fontWeight: 700 }}>~{simResult.projectedDaily?.orders || 0} đơn /ngày</small>
+                    </div>
+
+                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #fed7aa' }}>
+                      <div style={{ fontSize: '11px', color: '#c2410c' }}>Hiệu Quả ROAS / ROI</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#ea580c', marginTop: '2px' }}>
+                        {simResult.projectedDaily?.roas || 0}x
+                      </div>
+                      <small style={{ fontSize: '10px', color: '#ea580c', fontWeight: 700 }}>ROI: +{simResult.projectedDaily?.roi || 0}%</small>
+                    </div>
+                  </div>
+
+                  {/* Chi tiết từng từ khóa */}
+                  {Array.isArray(simResult.keywordBreakdown) && simResult.keywordBreakdown.length > 0 && (
+                    <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <table className="shopee-table" style={{ width: '100%', fontSize: '12px', margin: 0 }}>
+                        <thead>
+                          <tr style={{ background: '#f8fafc' }}>
+                            <th>Từ Khóa</th>
+                            <th>Đối Sánh</th>
+                            <th>Giá Thầu</th>
+                            <th>CPC Dự Kiến</th>
+                            <th>Hiển Thị</th>
+                            <th>Clicks</th>
+                            <th>Đơn Hàng</th>
+                            <th>Doanh Thu GMV</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {simResult.keywordBreakdown.map((kb, idx) => (
+                            <tr key={idx}>
+                              <td><strong>{kb.keyword}</strong></td>
+                              <td><span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '4px', background: '#f1f5f9' }}>{kb.matchType}</span></td>
+                              <td>{formatCurrency(kb.bidPrice)}</td>
+                              <td style={{ color: '#0284c7' }}>{formatCurrency(kb.cpc)}</td>
+                              <td>{(kb.projectedImpressions || 0).toLocaleString()}</td>
+                              <td style={{ fontWeight: 700 }}>{(kb.projectedClicks || 0).toLocaleString()}</td>
+                              <td style={{ color: '#059669', fontWeight: 700 }}>{kb.projectedOrders || 0}</td>
+                              <td style={{ color: '#ea580c', fontWeight: 800 }}>{formatCurrency(kb.adGmv || 0)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Campaign Table */}
             <div style={{ overflowX: 'auto' }}>
               <table className="shopee-table" style={{ width: '100%', fontSize: '13px' }}>
@@ -5518,6 +5877,352 @@ export default function SellerDashboardPage() {
             shop={currentShop}
             onClose={() => setPackingSlipOrder(null)}
           />
+        )}
+
+        {/* ========================================================================= */}
+        {/* MODAL: MA TRẬN NHẬP KHO HÀNG LOẠT (BATCH INVENTORY MATRIX MODAL) */}
+        {/* ========================================================================= */}
+        {showBatchInventoryModal && (
+          <div className="shopee-modal-overlay" onClick={() => setShowBatchInventoryModal(false)} style={{ animation: 'modalOverlayFadeIn 0.2s ease-out forwards' }}>
+            <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '960px', maxHeight: '90vh', overflowY: 'auto' }}>
+              <div className="shopee-modal-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '14px', marginBottom: '16px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a' }}>
+                    <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <PackageIcon size={16} color="#ea580c" />
+                    </span>
+                    <span>Ma Trận Nhập Kho Hàng Loạt &amp; Phân Loại Cận Date / Xả Kho</span>
+                  </h3>
+                  <small style={{ color: '#64748b', fontSize: '12.5px', marginTop: '3px', display: 'block' }}>
+                    Gian hàng: <strong>{currentShop.name}</strong> • Đang chọn <strong>{batchSelectedIds.size}/{shopProducts.length}</strong> sản phẩm
+                  </small>
+                </div>
+                <button
+                  type="button"
+                  className="shopee-modal-close"
+                  onClick={() => setShowBatchInventoryModal(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  aria-label="Đóng cửa sổ ma trận tồn kho"
+                >
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="#ef4444" />
+                  </span>
+                </button>
+              </div>
+
+              {/* Thanh Công Cụ Thao Tác Hàng Loạt (Bulk Action Toolbar) */}
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 16px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
+                  ⚡ Thao Tác Nhanh Cho Các Sản Phẩm Đã Chọn ({batchSelectedIds.size} mặt hàng)
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                  {/* Nhập thêm cộng dồn */}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <input
+                      type="number"
+                      min="1"
+                      className="shopee-form-input"
+                      placeholder="+ Số lượng nhập..."
+                      value={bulkAddStockInput}
+                      onChange={(e) => setBulkAddStockInput(e.target.value)}
+                      style={{ flex: 1, padding: '6px 10px', fontSize: '12px' }}
+                    />
+                    <button
+                      type="button"
+                      className="shopee-btn shopee-btn-secondary"
+                      onClick={applyBulkAddStock}
+                      style={{ fontSize: '11.5px', fontWeight: 700, padding: '6px 10px', whiteSpace: 'nowrap' }}
+                    >
+                      Cộng Dồn Kho
+                    </button>
+                  </div>
+
+                  {/* Đặt ngưỡng tồn an toàn */}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <input
+                      type="number"
+                      min="0"
+                      className="shopee-form-input"
+                      placeholder="Ngưỡng an toàn..."
+                      value={bulkSafetyThresholdInput}
+                      onChange={(e) => setBulkSafetyThresholdInput(e.target.value)}
+                      style={{ flex: 1, padding: '6px 10px', fontSize: '12px' }}
+                    />
+                    <button
+                      type="button"
+                      className="shopee-btn shopee-btn-secondary"
+                      onClick={applyBulkSafetyThreshold}
+                      style={{ fontSize: '11.5px', fontWeight: 700, padding: '6px 10px', whiteSpace: 'nowrap' }}
+                    >
+                      Đặt Ngưỡng
+                    </button>
+                  </div>
+
+                  {/* Gán phân loại cận date / xả kho */}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <select
+                      className="shopee-form-select"
+                      value={bulkClearanceStatusInput}
+                      onChange={(e) => setBulkClearanceStatusInput(e.target.value)}
+                      style={{ flex: 1, padding: '6px 8px', fontSize: '12px' }}
+                    >
+                      <option value="normal">Bình thường</option>
+                      <option value="near_expiry">Cận Date</option>
+                      <option value="clearance">Xả Kho</option>
+                    </select>
+                    {bulkClearanceStatusInput === 'clearance' && (
+                      <input
+                        type="number"
+                        min="5"
+                        max="90"
+                        className="shopee-form-input"
+                        placeholder="% giảm"
+                        value={bulkClearanceDiscountInput}
+                        onChange={(e) => setBulkClearanceDiscountInput(e.target.value)}
+                        style={{ width: '65px', padding: '6px 6px', fontSize: '12px' }}
+                        title="Phần trăm giảm giá xả kho"
+                      />
+                    )}
+                    <button
+                      type="button"
+                      className="shopee-btn shopee-btn-secondary"
+                      onClick={applyBulkClearance}
+                      style={{ fontSize: '11.5px', fontWeight: 700, padding: '6px 10px', whiteSpace: 'nowrap' }}
+                    >
+                      Gán Phân Loại
+                    </button>
+                  </div>
+                </div>
+
+                {/* Hàng bộ lọc sản phẩm trong Modal */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed #cbd5e1', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      type="button"
+                      className={`seller-tab-btn ${batchModalFilter === 'all' ? 'active' : ''}`}
+                      onClick={() => setBatchModalFilter('all')}
+                      style={{ fontSize: '11.5px', padding: '4px 10px' }}
+                    >
+                      Tất cả ({shopProducts.length})
+                    </button>
+                    <button
+                      type="button"
+                      className={`seller-tab-btn ${batchModalFilter === 'low_stock' ? 'active' : ''}`}
+                      onClick={() => setBatchModalFilter('low_stock')}
+                      style={{ fontSize: '11.5px', padding: '4px 10px' }}
+                    >
+                      Sắp hết hàng ({lowStockCount})
+                    </button>
+                    <button
+                      type="button"
+                      className={`seller-tab-btn ${batchModalFilter === 'near_expiry' ? 'active' : ''}`}
+                      onClick={() => setBatchModalFilter('near_expiry')}
+                      style={{ fontSize: '11.5px', padding: '4px 10px' }}
+                    >
+                      Cận Date ({nearExpiryCount})
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleToggleBatchSelectAll}
+                    style={{ background: 'none', border: 'none', color: '#ea580c', fontWeight: 700, fontSize: '12px', cursor: 'pointer', padding: 0 }}
+                  >
+                    {batchSelectedIds.size === shopProducts.length ? 'Bỏ chọn toàn bộ' : 'Chọn tất cả mặt hàng'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Bảng Danh Sách Mặt Hàng Trong Ma Trận */}
+              <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', maxHeight: '360px', overflowY: 'auto', marginBottom: '16px' }}>
+                <table className="shopee-table" style={{ width: '100%', fontSize: '12.5px', margin: 0 }}>
+                  <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 2 }}>
+                    <tr>
+                      <th style={{ width: '36px', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={batchSelectedIds.size === shopProducts.length && shopProducts.length > 0}
+                          onChange={handleToggleBatchSelectAll}
+                          style={{ accentColor: '#ea580c', cursor: 'pointer' }}
+                        />
+                      </th>
+                      <th>Sản phẩm</th>
+                      <th style={{ width: '85px', textAlign: 'center' }}>Tồn Hiện Tại</th>
+                      <th style={{ width: '100px' }}>Nhập Thêm (+)</th>
+                      <th style={{ width: '85px', textAlign: 'center' }}>Tồn Mới</th>
+                      <th style={{ width: '90px' }}>Ngưỡng Tồn</th>
+                      <th style={{ width: '130px' }}>Hạn Sử Dụng</th>
+                      <th style={{ width: '110px' }}>Mã Lô</th>
+                      <th style={{ width: '130px' }}>Phân Loại</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {shopProducts
+                      .filter(p => {
+                        if (batchModalFilter === 'low_stock') return isLowStockProduct(p);
+                        if (batchModalFilter === 'near_expiry') return isNearExpiryProduct(p);
+                        return true;
+                      })
+                      .map(p => {
+                        const pid = p._id || p.id;
+                        const it = batchItems[pid] || {
+                          currentStock: p.stock || 0,
+                          addStock: 0,
+                          newStock: p.stock || 0,
+                          safetyThreshold: typeof p.safetyThreshold === 'number' ? p.safetyThreshold : 10,
+                          expiryDate: p.expiryDate ? new Date(p.expiryDate).toISOString().slice(0, 10) : '',
+                          clearanceStatus: p.clearanceStatus || 'normal',
+                          clearanceDiscount: p.clearanceDiscount || 0,
+                          batchCode: p.batchCode || '',
+                        };
+                        const isChecked = batchSelectedIds.has(pid);
+                        const isLow = it.currentStock <= (typeof it.safetyThreshold === 'number' ? it.safetyThreshold : 10);
+
+                        return (
+                          <tr key={pid} style={{ background: isChecked ? '#ffffff' : '#f8fafc', opacity: isChecked ? 1 : 0.65 }}>
+                            <td style={{ textAlign: 'center' }}>
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => handleToggleBatchSelectOne(pid)}
+                                style={{ accentColor: '#ea580c', cursor: 'pointer' }}
+                              />
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <img
+                                  src={p.image}
+                                  alt={p.name}
+                                  style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'cover', flexShrink: 0 }}
+                                />
+                                <div style={{ minWidth: 0, maxWidth: '180px' }}>
+                                  <div style={{ fontWeight: 700, fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {p.name}
+                                  </div>
+                                  <div style={{ fontSize: '10.5px', color: '#64748b' }}>
+                                    {formatCurrency(p.price)}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <span style={{ fontWeight: 700, color: isLow ? '#dc2626' : '#16a34a' }}>
+                                {it.currentStock}
+                              </span>
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                min="0"
+                                className="shopee-form-input"
+                                style={{ padding: '4px 6px', fontSize: '12px', width: '100%' }}
+                                value={it.addStock || ''}
+                                placeholder="0"
+                                onChange={(e) => handleBatchItemChange(pid, 'addStock', e.target.value)}
+                              />
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <strong style={{ color: '#ea580c' }}>
+                                {it.newStock ?? ((it.currentStock || 0) + (Number(it.addStock) || 0))}
+                              </strong>
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                min="0"
+                                className="shopee-form-input"
+                                style={{ padding: '4px 6px', fontSize: '12px', width: '100%' }}
+                                value={it.safetyThreshold}
+                                onChange={(e) => handleBatchItemChange(pid, 'safetyThreshold', Number(e.target.value))}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="date"
+                                className="shopee-form-input"
+                                style={{ padding: '4px 6px', fontSize: '11px', width: '100%' }}
+                                value={it.expiryDate || ''}
+                                onChange={(e) => handleBatchItemChange(pid, 'expiryDate', e.target.value)}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="shopee-form-input"
+                                placeholder="Lô #..."
+                                style={{ padding: '4px 6px', fontSize: '11px', width: '100%' }}
+                                value={it.batchCode || ''}
+                                onChange={(e) => handleBatchItemChange(pid, 'batchCode', e.target.value)}
+                              />
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                <select
+                                  className="shopee-form-select"
+                                  style={{ padding: '3px 4px', fontSize: '11px' }}
+                                  value={it.clearanceStatus || 'normal'}
+                                  onChange={(e) => handleBatchItemChange(pid, 'clearanceStatus', e.target.value)}
+                                >
+                                  <option value="normal">Bình thường</option>
+                                  <option value="near_expiry">Cận Date</option>
+                                  <option value="clearance">Xả Kho</option>
+                                </select>
+                                {it.clearanceStatus === 'clearance' && (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="90"
+                                    placeholder="-% giảm"
+                                    className="shopee-form-input"
+                                    style={{ padding: '2px 4px', fontSize: '10.5px' }}
+                                    value={it.clearanceDiscount || ''}
+                                    onChange={(e) => handleBatchItemChange(pid, 'clearanceDiscount', Number(e.target.value))}
+                                  />
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Footer Modal: Tổng Kết & Nút Lưu */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderTop: '1px solid #e2e8f0', paddingTop: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '12.5px', color: '#475569' }}>
+                    Đã chọn: <strong style={{ color: '#0f172a' }}>{batchSelectedIds.size}</strong> mặt hàng
+                  </span>
+                  <span style={{ fontSize: '12.5px', color: '#475569' }}>
+                    Tổng nhập thêm: <strong style={{ color: '#ea580c' }}>
+                      {Array.from(batchSelectedIds).reduce((sum, id) => sum + (Number(batchItems[id]?.addStock) || 0), 0)}
+                    </strong> cái
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-secondary"
+                    onClick={() => setShowBatchInventoryModal(false)}
+                    disabled={isSavingBatchInventory}
+                  >
+                    Hủy Bỏ
+                  </button>
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-primary"
+                    disabled={isSavingBatchInventory || batchSelectedIds.size === 0}
+                    onClick={handleSaveBatchInventory}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 800 }}
+                  >
+                    <CheckIcon size={12} color="#ffffff" />
+                    <span>{isSavingBatchInventory ? 'Đang Lưu...' : '💾 Lưu & Cập Nhật Tồn Kho'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>
