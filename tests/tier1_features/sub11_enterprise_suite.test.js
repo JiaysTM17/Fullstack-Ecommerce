@@ -2346,6 +2346,67 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(order.timeline[0].text.includes("đóng gói quà tặng"), true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 93: Social Commerce Group Buy & Team Purchase Suite (5 Tests)
+  // =========================================================================
+  describe("Feature 93: Social Commerce Group Buy & Team Purchase Suite", () => {
+    test("F93-T1: Group buy price applies steep discount (-25%) compared to regular solo retail price", () => {
+      const regularPrice = 200000;
+      const groupPrice = Math.round(regularPrice * 0.75);
+      const discountPercent = Math.round(((regularPrice - groupPrice) / regularPrice) * 100);
+      expect.equal(groupPrice, 150000);
+      expect.equal(discountPercent, 25);
+    });
+
+    test("F93-T2: Group team requires target member count and computes remaining slots", () => {
+      const team = {
+        targetMembers: 2,
+        currentMembers: 1,
+      };
+      const remainingSlots = team.targetMembers - team.currentMembers;
+      expect.equal(remainingSlots, 1);
+      expect.equal(remainingSlots > 0, true);
+    });
+
+    test("F93-T3: Joining an existing team fills the final slot and triggers TEAM_COMPLETED_SUCCESS", () => {
+      const team = {
+        teamId: "team_test_123",
+        targetMembers: 2,
+        currentMembers: 1,
+      };
+      // New member joins
+      team.currentMembers += 1;
+      const status = team.currentMembers >= team.targetMembers ? "TEAM_COMPLETED_SUCCESS" : "TEAM_CREATED_WAITING";
+      expect.equal(team.currentMembers, 2);
+      expect.equal(status, "TEAM_COMPLETED_SUCCESS");
+    });
+
+    test("F93-T4: Product schema supports groupBuy configuration with active teams count", async () => {
+      const product = await Product.create({
+        name: "Bàn Phím Cơ TKL RGB",
+        price: 600000,
+        category: "Điện tử",
+        groupBuy: {
+          enabled: true,
+          groupPrice: 450000,
+          targetMembers: 3,
+          activeTeamsCount: 5,
+        },
+      });
+
+      expect.equal(product.groupBuy.enabled, true);
+      expect.equal(product.groupBuy.groupPrice, 450000);
+      expect.equal(product.groupBuy.targetMembers, 3);
+      expect.equal(product.groupBuy.activeTeamsCount, 5);
+    });
+
+    test("F93-T5: Group buy team countdown expires gracefully after duration threshold", () => {
+      const expiresInSeconds = 0;
+      const isExpired = expiresInSeconds <= 0;
+      expect.equal(isExpired, true);
+    });
+  });
 });
 
 

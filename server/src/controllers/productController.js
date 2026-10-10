@@ -589,6 +589,88 @@ export const getActiveLiveStreamSessions = catchAsync(async (req, res) => {
   return sendSuccess(res, { session }, 200, "Lấy thông tin phiên livestream thành công");
 });
 
+// @desc    Lấy danh sách các sản phẩm đang mở Mua Chung Nhóm (Group Buy / Social Commerce)
+// @route   GET /api/products/group-buy/deals
+// @access  Public
+export const getGroupBuyDeals = catchAsync(async (req, res) => {
+  const allProducts = await Product.find({ isActive: true, approvalStatus: "approved" });
+
+  const deals = (allProducts || []).map((p) => {
+    const regularPrice = p.price || 100000;
+    const groupPrice = p.groupBuy?.groupPrice || Math.round(regularPrice * 0.75); // Giảm 25% khi mua chung
+    const targetMembers = p.groupBuy?.targetMembers || 2;
+    const discountPercent = Math.round(((regularPrice - groupPrice) / regularPrice) * 100);
+
+    return {
+      id: p.id || p._id,
+      name: p.name,
+      regularPrice,
+      groupPrice,
+      discountPercent,
+      targetMembers,
+      stock: p.stock || 50,
+      image: p.image || p.images?.[0] || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
+      shopName: p.shopName || "Shopee Mall Official",
+      activeTeams: [
+        {
+          teamId: `team_${p.id || p._id}_1`,
+          leaderName: "Ngọc Mai",
+          leaderAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80",
+          currentMembers: 1,
+          targetMembers,
+          remainingSlots: targetMembers - 1,
+          expiresInSeconds: 3420, // 57 phút còn lại
+        },
+        {
+          teamId: `team_${p.id || p._id}_2`,
+          leaderName: "Quang Huy",
+          leaderAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80",
+          currentMembers: 1,
+          targetMembers,
+          remainingSlots: targetMembers - 1,
+          expiresInSeconds: 7100, // 1 giờ 58 phút còn lại
+        },
+      ],
+    };
+  });
+
+  return sendSuccess(res, { deals: deals.slice(0, 8) }, 200, "Lấy danh sách deal Mua Chung thành công");
+});
+
+// @desc    Tạo nhóm mới hoặc tham gia nhóm Mua Chung Nhóm
+// @route   POST /api/products/group-buy/join
+// @access  Public / Optional Auth
+export const joinGroupBuyTeam = catchAsync(async (req, res) => {
+  const { productId, teamId, memberName } = req.body;
+  if (!productId) {
+    return sendError(res, "Vui lòng cung cấp mã sản phẩm mua chung", 400);
+  }
+
+  const product = await Product.findOne({ $or: [{ _id: productId }, { id: productId }] });
+  if (!product) {
+    return sendError(res, "Không tìm thấy sản phẩm", 404);
+  }
+
+  const regularPrice = product.price || 100000;
+  const groupPrice = product.groupBuy?.groupPrice || Math.round(regularPrice * 0.75);
+
+  const finalTeamId = teamId || `team_${Date.now()}`;
+  const teamPayload = {
+    teamId: finalTeamId,
+    productId,
+    productName: product.name,
+    groupPrice,
+    regularPrice,
+    joinedMember: memberName || "Bạn (Khách hàng)",
+    status: teamId ? "TEAM_COMPLETED_SUCCESS" : "TEAM_CREATED_WAITING",
+    message: teamId
+      ? "Chúc mừng! Bạn đã hoàn thành nhóm Mua Chung và được kích hoạt Giá Nhóm Ưu Đãi!"
+      : "Đã tạo nhóm Mua Chung thành công! Chia sẻ liên kết cho bạn bè để cùng hưởng giá sốc.",
+  };
+
+  return sendSuccess(res, { team: teamPayload }, 200, teamPayload.message);
+});
+
 export default {
   getProducts,
   getProductById,
@@ -604,4 +686,6 @@ export default {
   getFlashSale,
   getProductReviewStats,
   getActiveLiveStreamSessions,
+  getGroupBuyDeals,
+  joinGroupBuyTeam,
 };

@@ -127,6 +127,13 @@ const productSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    groupBuy: {
+      enabled: { type: Boolean, default: false },
+      groupPrice: { type: Number, default: 0 },
+      targetMembers: { type: Number, default: 2 },
+      activeTeamsCount: { type: Number, default: 0 },
+      expiresInHours: { type: Number, default: 24 },
+    },
   },
   { timestamps: true }
 );

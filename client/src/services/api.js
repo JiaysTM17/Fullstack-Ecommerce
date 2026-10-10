@@ -801,3 +801,18 @@ export async function updateOrderGiftWrapAPI(orderId, giftWrapData) {
     body: JSON.stringify(giftWrapData),
   });
 }
+
+/**
+ * Social Commerce Group Buy & Team Purchase Suite API (Feature 93)
+ */
+export async function fetchGroupBuyDealsAPI() {
+  const result = await apiRequest("/api/products/group-buy/deals");
+  return result?.data?.deals || result?.deals || [];
+}
+
+export async function joinGroupBuyTeamAPI(productId, teamId, memberName) {
+  return await apiRequest("/api/products/group-buy/join", {
+    method: "POST",
+    body: JSON.stringify({ productId, teamId, memberName }),
+  });
+}

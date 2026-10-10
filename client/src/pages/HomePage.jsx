@@ -10,6 +10,7 @@ import {
   RecentlyViewed,
   RecentlyViewedSection,
   CategoryShowcase,
+  GroupBuyShowcaseSection,
 } from "../components";
 import RewardsHubModal from "../components/RewardsHubModal";
 import { useCart } from "../context/CartContext";
@@ -243,7 +244,10 @@ export default function HomePage() {
         formatCurrency={formatCurrency}
       />
 
-      {/* 3. Main Catalog Section with Sidebar Filters */}
+      {/* 4. Social Commerce Group Buy & Team Purchase Showcase (Feature 93) */}
+      <GroupBuyShowcaseSection />
+
+      {/* 5. Main Catalog Section with Sidebar Filters */}
       <div
         id="catalog-section"
         className="shopee-catalog-layout"

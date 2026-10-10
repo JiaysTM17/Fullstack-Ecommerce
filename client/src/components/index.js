@@ -34,3 +34,4 @@ export { default as MobileBottomNav } from './MobileBottomNav';
 export { default as DailyCheckinStreakCard } from './DailyCheckinStreakCard';
 export { default as LiveStreamFloatingWidget } from './LiveStreamFloatingWidget';
 export { default as DeliveryCsatFeedbackModal } from './DeliveryCsatFeedbackModal';
+export { default as GroupBuyShowcaseSection } from './GroupBuyShowcaseSection';

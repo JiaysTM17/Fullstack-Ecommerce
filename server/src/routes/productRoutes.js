@@ -14,6 +14,8 @@ import {
   getFlashSale,
   getProductReviewStats,
   getActiveLiveStreamSessions,
+  getGroupBuyDeals,
+  joinGroupBuyTeam,
 } from "../controllers/productController.js";
 import { optionalAuthenticate } from "../middlewares/auth.js";
 
@@ -26,6 +28,8 @@ router.get("/best-sellers", getBestSellers);
 router.get("/new-arrivals", getNewArrivals);
 router.get("/flash-sale", getFlashSale);
 router.get("/live-stream/active", getActiveLiveStreamSessions);
+router.get("/group-buy/deals", getGroupBuyDeals);
+router.post("/group-buy/join", optionalAuthenticate, joinGroupBuyTeam);
 router.get("/", getProducts);
 
 // Product Q&A
