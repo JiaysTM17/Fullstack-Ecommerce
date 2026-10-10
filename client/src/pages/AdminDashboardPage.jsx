@@ -28,6 +28,8 @@ import {
   batchClearAdminCodAPI,
   getBuyerAbuseRadarAPI,
   arbitrateBuyerAbuseAPI,
+  getAdminShopKycListAPI,
+  arbitrateAdminShopKycAPI,
 } from '../services/adminService';
 import {
   ShieldIcon,
@@ -253,6 +255,12 @@ export default function AdminDashboardPage() {
   const [buyerAbuseData, setBuyerAbuseData] = useState(null);
   const [isArbitratingBuyer, setIsArbitratingBuyer] = useState(false);
 
+  // States cho Cổng Định Danh Pháp Nhân & Thuế Merchant KYC (Decree 52/2018 Compliance)
+  const [merchantKycData, setMerchantKycData] = useState(null);
+  const [kycFilterStatus, setKycFilterStatus] = useState('all');
+  const [isArbitratingKyc, setIsArbitratingKyc] = useState(false);
+  const [selectedKycShop, setSelectedKycShop] = useState(null);
+
   const refreshUserData = async (showToastNotice = false) => {
     try {
       const res = await getAdminUsers();
@@ -355,6 +363,8 @@ export default function AdminDashboardPage() {
       getAdminCodReconciliationAPI().then(c => setCodData(c));
     } else if (activeTab === 'buyer_abuse') {
       getBuyerAbuseRadarAPI().then(b => setBuyerAbuseData(b));
+    } else if (activeTab === 'merchant_kyc') {
+      getAdminShopKycListAPI().then(k => setMerchantKycData(k));
     }
   }, [activeTab]);
 
@@ -1102,6 +1112,28 @@ export default function AdminDashboardPage() {
             <ShieldIcon size={16} color="#dc2626" />
           </span>
           <span>Radar Gian Lận Người Mua</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'merchant_kyc' ? 'active' : ''}`}
+          onClick={() => setActiveTab('merchant_kyc')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+        >
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '7px',
+            background: activeTab === 'merchant_kyc' ? 'rgba(13, 148, 136, 0.14)' : 'rgba(100, 116, 139, 0.08)',
+            border: activeTab === 'merchant_kyc' ? '1px solid rgba(13, 148, 136, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)',
+            flexShrink: 0
+          }}>
+            <StoreIcon size={16} color="#0d9488" />
+          </span>
+          <span>Định Danh Thuế Merchant KYC</span>
         </button>
       </aside>
 
@@ -3383,6 +3415,216 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         )}
+
+        {/* =========================================================================
+            MERCHANT KYC & TAX COMPLIANCE CENTER (Decree 52/2018/NĐ-CP)
+        ========================================================================= */}
+        {activeTab === 'merchant_kyc' && (
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <StoreIcon size={20} color="#0d9488" />
+                  Cổng Định Danh Pháp Nhân &amp; Thuế Gian Hàng (Merchant KYC)
+                </h2>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+                  Thẩm định MST, CCCD người đại diện và GPKD các nhà bán hàng theo quy định Nghị định 52/2018/NĐ-CP và Thông tư thuế TMĐT.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <span style={{ fontSize: '12.5px', color: '#64748b', fontWeight: 600 }}>Lọc theo trạng thái:</span>
+                <select
+                  className="shopee-input"
+                  value={kycFilterStatus}
+                  onChange={(e) => setKycFilterStatus(e.target.value)}
+                  style={{ padding: '6px 12px', fontSize: '12.5px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                >
+                  <option value="all">Tất cả ({merchantKycData?.summary?.total || 0})</option>
+                  <option value="VERIFIED">Đã Xác Minh ({merchantKycData?.summary?.verified || 0})</option>
+                  <option value="PENDING_REVIEW">Chờ Thẩm Định ({merchantKycData?.summary?.pending || 0})</option>
+                  <option value="UNVERIFIED">Chưa Định Danh ({merchantKycData?.summary?.unverified || 0})</option>
+                  <option value="REJECTED">Từ Chối ({merchantKycData?.summary?.rejected || 0})</option>
+                </select>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => getAdminShopKycListAPI().then(k => setMerchantKycData(k))}
+                  style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '8px', fontWeight: 600 }}
+                >
+                  Làm mới
+                </button>
+              </div>
+            </div>
+
+            {/* KPI Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+              <div style={{ padding: '14px 18px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+                <div style={{ fontSize: '12px', color: '#166534', fontWeight: 600 }}>Gian Hàng Đã Định Danh</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#15803d', marginTop: '2px' }}>
+                  {merchantKycData?.summary?.verified || 0} Shop
+                </div>
+                <div style={{ fontSize: '11px', color: '#16a34a', marginTop: '4px' }}>Đủ điều kiện xuất VAT tự động</div>
+              </div>
+
+              <div style={{ padding: '14px 18px', background: '#fffbeb', borderRadius: '12px', border: '1px solid #fde68a' }}>
+                <div style={{ fontSize: '12px', color: '#92400e', fontWeight: 600 }}>Hồ Sơ Chờ Phê Duyệt</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#d97706', marginTop: '2px' }}>
+                  {merchantKycData?.summary?.pending || 0} Shop
+                </div>
+                <div style={{ fontSize: '11px', color: '#b45309', marginTop: '4px' }}>Cần Admin rà soát pháp lý</div>
+              </div>
+
+              <div style={{ padding: '14px 18px', background: '#fef2f2', borderRadius: '12px', border: '1px solid #fecaca' }}>
+                <div style={{ fontSize: '12px', color: '#991b1b', fontWeight: 600 }}>Chưa Nộp / Bị Từ Chối</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#dc2626', marginTop: '2px' }}>
+                  {(merchantKycData?.summary?.unverified || 0) + (merchantKycData?.summary?.rejected || 0)} Shop
+                </div>
+                <div style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px' }}>Tạm giới hạn rút tiền doanh thu</div>
+              </div>
+            </div>
+
+            {/* KYC Table */}
+            <div style={{ overflowX: 'auto', border: '1px solid #f1f5f9', borderRadius: '12px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
+                    <th style={{ padding: '12px 16px', fontWeight: 700 }}>Gian Hàng</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700 }}>Loại Hình Pháp Nhân</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700 }}>Mã Số Thuế (MST)</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700 }}>Đại Diện Pháp Luật</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700 }}>Trạng Thái Thẩm Định</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, textAlign: 'center' }}>Thao Tác Thẩm Định</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(!merchantKycData?.kycList || merchantKycData.kycList.length === 0) ? (
+                    <tr>
+                      <td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>
+                        Không có hồ sơ định danh KYC nào phù hợp với bộ lọc
+                      </td>
+                    </tr>
+                  ) : (
+                    merchantKycData.kycList
+                      .filter((item) => kycFilterStatus === 'all' || item.kycVerification?.status === kycFilterStatus)
+                      .map((item) => {
+                        const kyc = item.kycVerification || {};
+                        const isVerified = kyc.status === 'VERIFIED';
+                        const isPending = kyc.status === 'PENDING_REVIEW';
+                        const isRejected = kyc.status === 'REJECTED';
+
+                        return (
+                          <tr key={item.shopId} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                            <td style={{ padding: '12px 16px' }}>
+                              <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.shopName}</div>
+                              <div style={{ fontSize: '11px', color: '#64748b' }}>Mã: {item.shopId} • ĐT: {item.phone}</div>
+                            </td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <span style={{
+                                padding: '3px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                background: kyc.businessType === 'ENTERPRISE' ? '#eff6ff' : '#f8fafc',
+                                color: kyc.businessType === 'ENTERPRISE' ? '#1d4ed8' : '#475569',
+                                border: '1px solid #e2e8f0',
+                              }}>
+                                {kyc.businessType === 'ENTERPRISE' ? 'Doanh Nghiệp' : (kyc.businessType === 'HOUSEHOLD' ? 'Hộ Kinh Doanh' : 'Cá Nhân')}
+                              </span>
+                            </td>
+                            <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontWeight: 600, color: '#0f172a' }}>
+                              {kyc.taxId || 'Chưa cung cấp'}
+                            </td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <div style={{ fontWeight: 600, color: '#334155' }}>{kyc.legalRepresentative || 'Chưa cập nhật'}</div>
+                              <div style={{ fontSize: '11px', color: '#94a3b8' }}>CCCD: {kyc.citizenId || '---'}</div>
+                            </td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <span style={{
+                                padding: '3px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                background: isVerified ? '#dcfce7' : (isPending ? '#fef3c7' : '#fee2e2'),
+                                color: isVerified ? '#15803d' : (isPending ? '#b45309' : '#b91c1c'),
+                              }}>
+                                {isVerified ? '✓ Đã Xác Minh' : (isPending ? '⏳ Chờ Duyệt' : (isRejected ? '✕ Bị Từ Chối' : 'Chưa Nộp'))}
+                              </span>
+                            </td>
+                            <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                              <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                                <button
+                                  type="button"
+                                  disabled={isArbitratingKyc}
+                                  onClick={async () => {
+                                    try {
+                                      setIsArbitratingKyc(true);
+                                      await arbitrateAdminShopKycAPI(item.shopId, { action: 'APPROVE' });
+                                      showToast(`Đã duyệt hồ sơ KYC gian hàng ${item.shopName} thành công!`, 'success');
+                                      const refreshed = await getAdminShopKycListAPI();
+                                      setMerchantKycData(refreshed);
+                                    } catch (err) {
+                                      showToast(err.message || 'Lỗi khi duyệt KYC', 'error');
+                                    } finally {
+                                      setIsArbitratingKyc(false);
+                                    }
+                                  }}
+                                  style={{
+                                    background: '#16a34a',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    padding: '5px 10px',
+                                    fontSize: '11.5px',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  Duyệt KYC
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isArbitratingKyc}
+                                  onClick={async () => {
+                                    const reason = window.prompt('Nhập lý do từ chối hồ sơ thuế KYC:', 'Ảnh chụp GPKD mờ, không khớp MST');
+                                    if (reason === null) return;
+                                    try {
+                                      setIsArbitratingKyc(true);
+                                      await arbitrateAdminShopKycAPI(item.shopId, { action: 'REJECT', rejectedReason: reason });
+                                      showToast(`Đã từ chối hồ sơ KYC của ${item.shopName}`, 'info');
+                                      const refreshed = await getAdminShopKycListAPI();
+                                      setMerchantKycData(refreshed);
+                                    } catch (err) {
+                                      showToast(err.message || 'Lỗi từ chối KYC', 'error');
+                                    } finally {
+                                      setIsArbitratingKyc(false);
+                                    }
+                                  }}
+                                  style={{
+                                    background: '#f8fafc',
+                                    color: '#dc2626',
+                                    border: '1px solid #fecaca',
+                                    borderRadius: '6px',
+                                    padding: '5px 10px',
+                                    fontSize: '11.5px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  Từ Chối
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
 
 
         {/* ==================== MODAL XÁC NHẬN XÓA TÀI KHOẢN (NGƯỜI MUA & NGƯỜI BÁN) ==================== */}

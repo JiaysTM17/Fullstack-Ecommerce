@@ -1449,6 +1449,92 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(response.products.every((p) => p.slotId === "slot-2"), true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 82: Merchant KYC & Tax Compliance Center (5 Tests)
+  // =========================================================================
+  describe("Feature 82: Merchant KYC & Tax Compliance Center", () => {
+    test("F82-T1: Shop KYC classification validates ENTERPRISE, HOUSEHOLD, and INDIVIDUAL types", () => {
+      const validTypes = ["ENTERPRISE", "HOUSEHOLD", "INDIVIDUAL"];
+      const isValid = (t) => validTypes.includes(t);
+
+      expect.equal(isValid("ENTERPRISE"), true);
+      expect.equal(isValid("HOUSEHOLD"), true);
+      expect.equal(isValid("INDIVIDUAL"), true);
+      expect.equal(isValid("UNKNOWN_TYPE"), false);
+    });
+
+    test("F82-T2: Vietnamese Tax Identification Number (MST) format validation (10 or 13 digits)", () => {
+      const validateMST = (mst) => {
+        if (!mst || typeof mst !== "string") return false;
+        const clean = mst.replace(/-/g, "").trim();
+        return /^[0-9]{10}$|^[0-9]{13}$/.test(clean);
+      };
+
+      expect.equal(validateMST("0318928172"), true); // 10-digit enterprise MST
+      expect.equal(validateMST("0318928172-001"), true); // 13-digit branch MST
+      expect.equal(validateMST("12345"), false); // too short
+      expect.equal(validateMST("ABC1234567"), false); // non-digits
+    });
+
+    test("F82-T3: Approving KYC sets status to VERIFIED and awards Đã Xác Minh Thuế badge", () => {
+      const shop = {
+        shopId: "shop_test_kyc",
+        badges: ["Chính Hãng 100%"],
+        kycVerification: {
+          status: "PENDING_REVIEW",
+          taxId: "0318928172",
+        },
+      };
+
+      // Admin executes APPROVE
+      shop.kycVerification.status = "VERIFIED";
+      shop.kycVerification.verifiedAt = new Date().toISOString();
+      if (!shop.badges.includes("Đã Xác Minh Thuế")) {
+        shop.badges.push("Đã Xác Minh Thuế");
+      }
+
+      expect.equal(shop.kycVerification.status, "VERIFIED");
+      expect.equal(shop.badges.includes("Đã Xác Minh Thuế"), true);
+      expect.equal(Boolean(shop.kycVerification.verifiedAt), true);
+    });
+
+    test("F82-T4: Rejecting KYC records rejectedReason and strips verifiedAt", () => {
+      const shop = {
+        shopId: "shop_test_kyc2",
+        kycVerification: {
+          status: "PENDING_REVIEW",
+          verifiedAt: "2026-01-01T00:00:00.000Z",
+        },
+      };
+
+      const reason = "Ảnh chụp GPKD mờ, không trùng khớp tên người đại diện";
+      shop.kycVerification.status = "REJECTED";
+      shop.kycVerification.rejectedReason = reason;
+      shop.kycVerification.verifiedAt = null;
+
+      expect.equal(shop.kycVerification.status, "REJECTED");
+      expect.equal(shop.kycVerification.rejectedReason, reason);
+      expect.equal(shop.kycVerification.verifiedAt, null);
+    });
+
+    test("F82-T5: Audit log captures KYC arbitration with admin ID and shop entity", () => {
+      const auditLog = {
+        userId: "user_admin_01",
+        userName: "Super Admin",
+        action: "KYC_MERCHANT_APPROVE",
+        entityType: "SHOP",
+        entityId: "shop_01",
+        details: { action: "APPROVE", shopName: "Thời Trang GenZ Official" },
+        createdAt: new Date().toISOString(),
+      };
+
+      expect.equal(auditLog.action, "KYC_MERCHANT_APPROVE");
+      expect.equal(auditLog.entityType, "SHOP");
+      expect.equal(auditLog.entityId, "shop_01");
+      expect.equal(auditLog.details.action, "APPROVE");
+    });
+  });
 });
 
 

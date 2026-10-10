@@ -379,3 +379,38 @@ export async function arbitrateBuyerAbuseAPI(userId, { action, reason }) {
   }
 }
 
+/**
+ * Lấy danh sách hồ sơ định danh thuế Merchant KYC toàn sàn
+ */
+export async function getAdminShopKycListAPI(status = "") {
+
+  try {
+    const query = status ? `?status=${encodeURIComponent(status)}` : "";
+    const res = await apiRequest(`/api/admin/kyc/merchants${query}`, {
+      headers: getAdminHeaders(),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.warn("[AdminService] getAdminShopKycListAPI fallback:", error.message);
+    return null;
+  }
+}
+
+/**
+ * Thẩm định phê duyệt hoặc từ chối hồ sơ pháp nhân KYC gian hàng
+ */
+export async function arbitrateAdminShopKycAPI(shopId, { action, rejectedReason, businessType, taxId }) {
+  try {
+    const res = await apiRequest(`/api/admin/kyc/merchants/${shopId}/arbitrate`, {
+      method: "POST",
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ action, rejectedReason, businessType, taxId }),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.error("[AdminService] arbitrateAdminShopKycAPI error:", error.message);
+    throw error;
+  }
+}
+
+

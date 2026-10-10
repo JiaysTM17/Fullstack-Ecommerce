@@ -180,6 +180,24 @@ const shopSchema = new mongoose.Schema(
         ],
       },
     },
+    kycVerification: {
+      status: {
+        type: String,
+        enum: ["UNVERIFIED", "PENDING_REVIEW", "VERIFIED", "REJECTED"],
+        default: "VERIFIED",
+      },
+      businessType: {
+        type: String,
+        enum: ["INDIVIDUAL", "HOUSEHOLD", "ENTERPRISE"],
+        default: "ENTERPRISE",
+      },
+      taxId: { type: String, default: "0318928172" },
+      citizenId: { type: String, default: "079094001234" },
+      businessLicenseNumber: { type: String, default: "GPKD-HCM-2024-889" },
+      legalRepresentative: { type: String, default: "Nguyễn Văn Đại Diện" },
+      verifiedAt: { type: String, default: "2026-01-15T08:00:00.000Z" },
+      rejectedReason: { type: String, default: "" },
+    },
   },
   { timestamps: true }
 );

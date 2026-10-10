@@ -31,6 +31,8 @@ import {
   batchClearAdminCodReconciliation,
   getBuyerAbuseRadar,
   arbitrateBuyerAbuse,
+  getAdminShopKycList,
+  arbitrateAdminShopKyc,
 } from "../controllers/adminController.js";
 
 
@@ -84,5 +86,9 @@ router.get("/security/fraud-radar", getAdminFraudRadar);
 router.post("/security/fraud-radar/:id/resolve", resolveAdminFraudAnomaly);
 router.get("/security/buyer-abuse-radar", getBuyerAbuseRadar);
 router.post("/security/buyer-abuse/:userId/arbitrate", arbitrateBuyerAbuse);
+
+// Merchant Legal KYC & Tax Center
+router.get("/kyc/merchants", getAdminShopKycList);
+router.post("/kyc/merchants/:shopId/arbitrate", arbitrateAdminShopKyc);
 
 export default router;
