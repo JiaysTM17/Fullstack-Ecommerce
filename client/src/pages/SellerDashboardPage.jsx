@@ -36,6 +36,8 @@ import {
   simulateSellerAutoReplyAPI,
   fetchSellerShippingManifestAPI,
   batchDispatchSellerOrdersAPI,
+  fetchSellerCodReconciliationAPI,
+  reconcileSellerCodOrdersAPI,
 } from '../services/api';
 import '../styles/dashboard.css';
 import {
@@ -1397,6 +1399,71 @@ export default function SellerDashboardPage() {
     }
   };
 
+  // =========================================================================
+  // STATES & HANDLERS: COD RECONCILIATION & REMITTANCE (Feature 89)
+  // =========================================================================
+  const [codReconciliationData, setCodReconciliationData] = useState(null);
+  const [loadingCod, setLoadingCod] = useState(false);
+  const [selectedCodOrderIds, setSelectedCodOrderIds] = useState([]);
+  const [isReconcilingCod, setIsReconcilingCod] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'cod_reconciliation') {
+      let active = true;
+      (async () => {
+        try {
+          setLoadingCod(true);
+          const data = await fetchSellerCodReconciliationAPI();
+          if (active && data) {
+            setCodReconciliationData(data);
+          }
+        } catch (err) {
+          console.warn('Failed to fetch COD reconciliation data:', err?.message);
+        } finally {
+          if (active) setLoadingCod(false);
+        }
+      })();
+      return () => { active = false; };
+    }
+  }, [activeTab, selectedShopId]);
+
+  const handleToggleSelectCodOrder = (id) => {
+    setSelectedCodOrderIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllCollectedCodOrders = () => {
+    const collectedOrders = (codReconciliationData?.orders || []).filter(
+      (o) => o.codSettlementStatus === 'collected_by_courier'
+    );
+    if (selectedCodOrderIds.length === collectedOrders.length) {
+      setSelectedCodOrderIds([]);
+    } else {
+      setSelectedCodOrderIds(collectedOrders.map((o) => o.id || o.orderId));
+    }
+  };
+
+  const handleReconcileSelectedCod = async () => {
+    if (selectedCodOrderIds.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một đơn COD đã thu tiền để quyết toán!');
+      return;
+    }
+
+    try {
+      setIsReconcilingCod(true);
+      await reconcileSellerCodOrdersAPI(selectedCodOrderIds);
+      toast.success(`Đã đối soát thành công ${selectedCodOrderIds.length} đơn hàng COD về ví doanh thu Shop!`);
+      setSelectedCodOrderIds([]);
+      const updated = await fetchSellerCodReconciliationAPI();
+      if (updated) setCodReconciliationData(updated);
+    } catch (err) {
+      toast.error(err.message || 'Lỗi đối soát COD, vui lòng thử lại');
+    } finally {
+      setIsReconcilingCod(false);
+    }
+  };
+
   // Lọc đơn hàng theo trạng thái và tìm kiếm
   const filteredOrders = useMemo(() => {
     let list = [...shopOrders];
@@ -2530,6 +2597,27 @@ export default function SellerDashboardPage() {
             <ChatIcon size={14} color="#a855f7" />
           </span>
           <span>Trợ Lý Chat &amp; Tự Động</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'cod_reconciliation' ? 'active' : ''}`}
+          onClick={() => setActiveTab('cod_reconciliation')}
+        >
+          <span style={{
+            width: '26px',
+            height: '26px',
+            borderRadius: '7px',
+            background: activeTab === 'cod_reconciliation' ? 'rgba(16, 185, 129, 0.18)' : 'rgba(16, 185, 129, 0.1)',
+            border: activeTab === 'cod_reconciliation' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(16, 185, 129, 0.18)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <CreditCardIcon size={14} color="#10b981" />
+          </span>
+          <span>Đối Soát Thu Hộ COD</span>
         </button>
       </aside>
 
@@ -7096,6 +7184,192 @@ export default function SellerDashboardPage() {
             </div>
           </div>
         )}
+
+        {/* ========================================================================= */}
+        {/* PHÂN HỆ: ĐỐI SOÁT TIỀN THU HỘ COD & QUYẾT TOÁN VÍ DOANH THU (Feature 89) */}
+        {/* ========================================================================= */}
+        {activeTab === 'cod_reconciliation' && (
+          <div className="shopee-tab-content">
+            {/* Header Dashboard COD */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+              <div>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CreditCardIcon size={16} color="#10b981" />
+                  </span>
+                  <span>Đối Soát Tiền Thu Hộ COD &amp; Bàn Giao Quỹ SPX</span>
+                </h2>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                  Kiểm toán dòng tiền thu hộ từ bưu tá SPX Express, trừ phí dịch vụ chuẩn 1.5% và quyết toán về ví khả dụng.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={handleSelectAllCollectedCodOrders}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px' }}
+                >
+                  <span>Chọn Tất Cả Đã Thu ({((codReconciliationData?.orders || []).filter(o => o.codSettlementStatus === 'collected_by_courier')).length})</span>
+                </button>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-primary"
+                  disabled={selectedCodOrderIds.length === 0 || isReconcilingCod}
+                  onClick={handleReconcileSelectedCod}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 800 }}
+                >
+                  <CheckIcon size={14} color="#ffffff" />
+                  <span>{isReconcilingCod ? 'Đang Quyết Toán...' : `Quyết Toán Ví (${selectedCodOrderIds.length} Đơn)`}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Metrics 4 Cards Overview */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, marginBottom: '6px' }}>Tổng Đơn COD Phát Sinh</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a' }}>
+                  {codReconciliationData?.summary?.totalCodOrders || 0} đơn
+                </div>
+              </div>
+
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 600, marginBottom: '6px' }}>Chờ Bưu Tá Thu Tiền</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#d97706' }}>
+                  {formatCurrency(codReconciliationData?.summary?.pendingCollection || 0)}
+                </div>
+              </div>
+
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ fontSize: '12px', color: '#0284c7', fontWeight: 600, marginBottom: '6px' }}>SPX Đã Thu (Chờ Rút Về)</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0284c7' }}>
+                  {formatCurrency(codReconciliationData?.summary?.collectedByCourier || 0)}
+                </div>
+              </div>
+
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600, marginBottom: '6px' }}>Đã Quyết Toán Về Ví</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#10b981' }}>
+                  {formatCurrency(codReconciliationData?.summary?.reconciledTotal || 0)}
+                </div>
+              </div>
+            </div>
+
+            {/* Bảng Dữ Liệu Đối Soát Chi Tiết */}
+            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="shopee-table" style={{ width: '100%', margin: 0 }}>
+                  <thead style={{ background: '#f8fafc' }}>
+                    <tr>
+                      <th style={{ width: '40px', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={
+                            selectedCodOrderIds.length > 0 &&
+                            selectedCodOrderIds.length ===
+                              (codReconciliationData?.orders || []).filter(
+                                (o) => o.codSettlementStatus === 'collected_by_courier'
+                              ).length
+                          }
+                          onChange={handleSelectAllCollectedCodOrders}
+                          style={{ accentColor: '#10b981', cursor: 'pointer' }}
+                        />
+                      </th>
+                      <th>Mã Đơn / Vận Đơn</th>
+                      <th>Khách Hàng</th>
+                      <th style={{ textAlign: 'right' }}>Tiền Thu COD</th>
+                      <th style={{ textAlign: 'right' }}>Phí COD (1.5%)</th>
+                      <th style={{ textAlign: 'right' }}>Thực Nhận</th>
+                      <th>Trạng Thái Đối Soát</th>
+                      <th style={{ textAlign: 'center' }}>Thao Tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(codReconciliationData?.orders || []).length === 0 ? (
+                      <tr>
+                        <td colSpan="8" style={{ textAlign: 'center', padding: '36px', color: '#94a3b8' }}>
+                          Chưa có đơn hàng thanh toán COD nào phát sinh trong gian hàng.
+                        </td>
+                      </tr>
+                    ) : (
+                      (codReconciliationData?.orders || []).map((ord) => {
+                        const canReconcile = ord.codSettlementStatus === 'collected_by_courier';
+                        const isReconciled = ord.codSettlementStatus === 'remitted_to_seller';
+                        const isSelected = selectedCodOrderIds.includes(ord.id || ord.orderId);
+
+                        return (
+                          <tr key={ord.id || ord.orderId} style={{ background: isSelected ? 'rgba(16, 185, 129, 0.05)' : undefined }}>
+                            <td style={{ textAlign: 'center' }}>
+                              <input
+                                type="checkbox"
+                                disabled={!canReconcile}
+                                checked={isSelected}
+                                onChange={() => handleToggleSelectCodOrder(ord.id || ord.orderId)}
+                                style={{ accentColor: '#10b981', cursor: canReconcile ? 'pointer' : 'not-allowed' }}
+                              />
+                            </td>
+                            <td>
+                              <div style={{ fontWeight: 800, color: '#0f172a' }}>{ord.orderId}</div>
+                              <div style={{ fontSize: '11px', color: '#0284c7', fontFamily: 'monospace' }}>{ord.trackingCode}</div>
+                            </td>
+                            <td>
+                              <div style={{ fontWeight: 600 }}>{ord.customerName}</div>
+                              <div style={{ fontSize: '11px', color: '#64748b' }}>{ord.phone}</div>
+                            </td>
+                            <td style={{ textAlign: 'right', fontWeight: 800, color: '#0f172a' }}>
+                              {formatCurrency(ord.total)}
+                            </td>
+                            <td style={{ textAlign: 'right', color: '#ef4444', fontSize: '12px' }}>
+                              -{formatCurrency(ord.codFee)}
+                            </td>
+                            <td style={{ textAlign: 'right', fontWeight: 800, color: '#10b981' }}>
+                              {formatCurrency(ord.netCodAmount)}
+                            </td>
+                            <td>
+                              {isReconciled ? (
+                                <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, background: '#dcfce7', color: '#15803d' }}>
+                                  ✓ Đã về ví Shop
+                                </span>
+                              ) : canReconcile ? (
+                                <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, background: '#e0f2fe', color: '#0369a1' }}>
+                                  SPX đã thu tiền
+                                </span>
+                              ) : (
+                                <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, background: '#fef3c7', color: '#b45309' }}>
+                                  Chờ giao hàng
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              {canReconcile && (
+                                <button
+                                  type="button"
+                                  className="shopee-btn shopee-btn-sm"
+                                  onClick={async () => {
+                                    await reconcileSellerCodOrdersAPI([ord.id || ord.orderId]);
+                                    toast.success(`Đã đối soát đơn ${ord.orderId} về ví!`);
+                                    const updated = await fetchSellerCodReconciliationAPI();
+                                    if (updated) setCodReconciliationData(updated);
+                                  }}
+                                  style={{ padding: '3px 8px', fontSize: '11px', fontWeight: 700 }}
+                                >
+                                  Quyết toán
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
 
 
         {/* Modal Tạo Chiến Dịch Shopee Ads */}

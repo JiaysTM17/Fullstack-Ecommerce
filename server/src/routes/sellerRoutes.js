@@ -43,6 +43,8 @@ import {
   simulateSellerAutoReply,
   getSellerOrderShippingManifest,
   batchDispatchSellerOrders,
+  getSellerCodReconciliation,
+  reconcileSellerCodOrders,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -111,6 +113,8 @@ router.route("/products/:id")
 router.get("/orders", getSellerOrders);
 router.get("/orders/pending", getSellerPendingOrders);
 router.get("/orders/returns", getSellerReturnRequests);
+router.get("/orders/cod-reconciliation", getSellerCodReconciliation);
+router.post("/orders/cod-reconciliation/reconcile", reconcileSellerCodOrders);
 router.get("/orders/:id/shipping-manifest", getSellerOrderShippingManifest);
 router.patch("/orders/:id/status", updateSellerOrderStatus);
 router.patch("/orders/:id/confirm", confirmSellerOrder);

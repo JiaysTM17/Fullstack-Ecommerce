@@ -1949,6 +1949,108 @@ export const batchDispatchSellerOrders = catchAsync(async (req, res) => {
   }, 200, `Đã xuất kho và bàn giao ${updatedOrders.length} đơn hàng cho SPX Express`);
 });
 
+// @desc    Lấy bảng đối soát tiền thu hộ COD của Shop
+// @route   GET /api/seller/orders/cod-reconciliation
+// @access  Private (Seller only)
+export const getSellerCodReconciliation = catchAsync(async (req, res) => {
+  const shop = await getShopFromUser(req.user);
+  if (!shop) return sendError(res, "Không tìm thấy gian hàng của bạn", 404);
+
+  const shopOrders = await Order.find({
+    $or: [{ "items.shopId": shop.shopId || shop._id }, { shopId: shop.shopId || shop._id }],
+    paymentMethod: "COD",
+  });
+
+  const orders = (shopOrders || []).map((o) => ({
+    id: o._id || o.id,
+    orderId: o.orderId || o._id,
+    customerName: o.customer?.fullName || "Khách hàng",
+    phone: o.customer?.phone || "",
+    total: o.total || 0,
+    codFee: Math.round((o.total || 0) * 0.015), // Phí dịch vụ COD 1.5%
+    netCodAmount: (o.total || 0) - Math.round((o.total || 0) * 0.015),
+    status: o.status,
+    codSettlementStatus: o.codSettlementStatus || (o.status === "completed" ? "collected_by_courier" : "uncollected"),
+    trackingCode: o.trackingCode || `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`,
+    createdAt: o.createdAt,
+    codReconciledAt: o.codReconciledAt || null,
+  }));
+
+  const pendingCollection = orders
+    .filter((o) => o.codSettlementStatus === "uncollected")
+    .reduce((acc, o) => acc + o.total, 0);
+
+  const collectedByCourier = orders
+    .filter((o) => o.codSettlementStatus === "collected_by_courier")
+    .reduce((acc, o) => acc + o.netCodAmount, 0);
+
+  const reconciledTotal = orders
+    .filter((o) => o.codSettlementStatus === "reconciled_with_platform" || o.codSettlementStatus === "remitted_to_seller")
+    .reduce((acc, o) => acc + o.netCodAmount, 0);
+
+  sendSuccess(res, {
+    summary: {
+      totalCodOrders: orders.length,
+      pendingCollection,
+      collectedByCourier,
+      reconciledTotal,
+    },
+    orders,
+  }, 200, "Lấy danh sách đối soát COD thành công");
+});
+
+// @desc    Đối soát & quyết toán COD về ví doanh thu Seller
+// @route   POST /api/seller/orders/cod-reconciliation/reconcile
+// @access  Private (Seller only)
+export const reconcileSellerCodOrders = catchAsync(async (req, res) => {
+  const shop = await getShopFromUser(req.user);
+  if (!shop) return sendError(res, "Không tìm thấy gian hàng của bạn", 404);
+
+  const { orderIds } = req.body;
+  if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+    return sendError(res, "Vui lòng chọn các đơn hàng đã thu COD để đối soát", 400);
+  }
+
+  let totalReconciledAmount = 0;
+  const reconciledOrders = [];
+
+  for (const id of orderIds) {
+    const order = await Order.findOne({ $or: [{ _id: id }, { orderId: id }] });
+    if (order && order.paymentMethod === "COD") {
+      order.codSettlementStatus = "remitted_to_seller";
+      order.codReconciledAt = new Date().toISOString();
+      const codFee = Math.round((order.total || 0) * 0.015);
+      const net = (order.total || 0) - codFee;
+      totalReconciledAmount += net;
+      await order.save?.();
+      reconciledOrders.push(order);
+    }
+  }
+
+  // Cộng số dư đối soát vào ví doanh thu của Shop nếu có
+  if (shop.wallet) {
+    shop.wallet.balance = (shop.wallet.balance || 0) + totalReconciledAmount;
+    await shop.save?.();
+  }
+
+  recordAuditLog({
+    userId: req.user._id || req.user.id,
+    userName: req.user.name || shop.name,
+    userRole: "seller",
+    action: "RECONCILE_COD_SETTLEMENT",
+    entityType: "ORDER",
+    entityId: `COD_RECONCILE_${orderIds.length}`,
+    details: { reconciledCount: reconciledOrders.length, totalAmount: totalReconciledAmount, orderIds },
+    ip: req.ip || "127.0.0.1",
+  });
+
+  sendSuccess(res, {
+    reconciledCount: reconciledOrders.length,
+    totalReconciledAmount,
+    reconciledOrders,
+  }, 200, `Đã đối soát thành công ${reconciledOrders.length} đơn hàng COD, tổng tiền: ${totalReconciledAmount.toLocaleString('vi-VN')} Đ`);
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -1992,5 +2094,7 @@ export default {
   simulateSellerAutoReply,
   getSellerOrderShippingManifest,
   batchDispatchSellerOrders,
+  getSellerCodReconciliation,
+  reconcileSellerCodOrders,
 };
 

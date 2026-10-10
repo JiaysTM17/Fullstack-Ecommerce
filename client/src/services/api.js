@@ -768,3 +768,18 @@ export async function fetchActiveLiveStreamAPI() {
   const result = await apiRequest("/api/products/live-stream/active");
   return result?.data?.session || result?.session || null;
 }
+
+/**
+ * Seller COD Cash-on-Delivery Settlement & Remittance Reconciliation API (Feature 89)
+ */
+export async function fetchSellerCodReconciliationAPI() {
+  const result = await apiRequest("/api/seller/orders/cod-reconciliation");
+  return result?.data || result || null;
+}
+
+export async function reconcileSellerCodOrdersAPI(orderIds) {
+  return await apiRequest("/api/seller/orders/cod-reconciliation/reconcile", {
+    method: "POST",
+    body: JSON.stringify({ orderIds }),
+  });
+}

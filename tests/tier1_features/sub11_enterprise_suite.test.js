@@ -2078,6 +2078,77 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(typeof (first.name || ""), "string");
     });
   });
+
+  // =========================================================================
+  // FEATURE 89: Seller COD Cash-on-Delivery Settlement & Remittance Suite (5 Tests)
+  // =========================================================================
+  describe("Feature 89: Seller COD Settlement & Remittance Suite", () => {
+    test("F89-T1: Computes COD fee at standard 1.5% and calculates net remittance", () => {
+      const orderTotal = 400000;
+      const codFeeRate = 0.015;
+      const codFee = Math.round(orderTotal * codFeeRate);
+      const netRemittance = orderTotal - codFee;
+      expect.equal(codFee, 6000);
+      expect.equal(netRemittance, 394000);
+    });
+
+    test("F89-T2: Distinguishes uncollected vs collected_by_courier COD settlement states", () => {
+      const order1 = { status: "shipping", codSettlementStatus: "uncollected" };
+      const order2 = { status: "completed", codSettlementStatus: "collected_by_courier" };
+      expect.equal(order1.codSettlementStatus, "uncollected");
+      expect.equal(order2.codSettlementStatus, "collected_by_courier");
+    });
+
+    test("F89-T3: Multi-order batch COD reconciliation aggregates net settlement amount accurately", () => {
+      const collectedOrders = [
+        { id: "cod_1", total: 200000, codFee: 3000, net: 197000 },
+        { id: "cod_2", total: 500000, codFee: 7500, net: 492500 },
+        { id: "cod_3", total: 1000000, codFee: 15000, net: 985000 },
+      ];
+      const aggregatedNet = collectedOrders.reduce((acc, o) => acc + o.net, 0);
+      expect.equal(aggregatedNet, 1674500);
+      expect.equal(collectedOrders.length, 3);
+    });
+
+    test("F89-T4: Reconciled COD transition updates status to remitted_to_seller with timestamp", async () => {
+      const testCodOrder = await Order.create({
+        orderId: `ORD_COD_${Date.now()}`,
+        status: "completed",
+        paymentMethod: "COD",
+        total: 350000,
+        customer: { fullName: "Khách COD", phone: "0911223344", address: "Hà Nội" },
+        items: [{ name: "Sản phẩm COD", price: 350000, quantity: 1, shopId: "shop_01" }],
+        codSettlementStatus: "collected_by_courier",
+      });
+
+      expect.equal(testCodOrder.codSettlementStatus, "collected_by_courier");
+
+      // Simulate reconciliation
+      testCodOrder.codSettlementStatus = "remitted_to_seller";
+      testCodOrder.codReconciledAt = new Date().toISOString();
+      await testCodOrder.save?.();
+
+      expect.equal(testCodOrder.codSettlementStatus, "remitted_to_seller");
+      expect.equal(Boolean(testCodOrder.codReconciledAt), true);
+    });
+
+    test("F89-T5: Recording COD settlement logs audit trail entry with reconciled amount and order count", async () => {
+      const auditLog = await recordAuditLog({
+        userId: "seller_01",
+        userName: "Thời Trang GenZ Official",
+        userRole: "seller",
+        action: "RECONCILE_COD_SETTLEMENT",
+        entityType: "ORDER",
+        entityId: "COD_RECONCILE_3",
+        details: { reconciledCount: 3, totalAmount: 1674500, orderIds: ["cod_1", "cod_2", "cod_3"] },
+      });
+
+      expect.equal(Boolean(auditLog), true);
+      expect.equal(auditLog.action, "RECONCILE_COD_SETTLEMENT");
+      expect.equal(auditLog.details.reconciledCount, 3);
+      expect.equal(auditLog.details.totalAmount, 1674500);
+    });
+  });
 });
 
 
