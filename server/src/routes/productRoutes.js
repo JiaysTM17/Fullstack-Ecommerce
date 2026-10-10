@@ -13,6 +13,7 @@ import {
   getNewArrivals,
   getFlashSale,
   getProductReviewStats,
+  getActiveLiveStreamSessions,
 } from "../controllers/productController.js";
 import { optionalAuthenticate } from "../middlewares/auth.js";
 
@@ -24,6 +25,7 @@ router.get("/categories/list", getCategories);
 router.get("/best-sellers", getBestSellers);
 router.get("/new-arrivals", getNewArrivals);
 router.get("/flash-sale", getFlashSale);
+router.get("/live-stream/active", getActiveLiveStreamSessions);
 router.get("/", getProducts);
 
 // Product Q&A

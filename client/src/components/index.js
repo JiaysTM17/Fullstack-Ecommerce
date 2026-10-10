@@ -32,3 +32,4 @@ export { default as OrderDetailModal } from './OrderDetailModal';
 export { default as VietQRPaymentModal } from './VietQRPaymentModal';
 export { default as MobileBottomNav } from './MobileBottomNav';
 export { default as DailyCheckinStreakCard } from './DailyCheckinStreakCard';
+export { default as LiveStreamFloatingWidget } from './LiveStreamFloatingWidget';

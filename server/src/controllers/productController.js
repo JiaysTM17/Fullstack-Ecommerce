@@ -543,6 +543,52 @@ export const getProductReviewStats = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Lấy phiên Livestream bán hàng đang hoạt động kèm sản phẩm ghim
+// @route   GET /api/products/live-stream/active
+// @access  Public
+export const getActiveLiveStreamSessions = catchAsync(async (req, res) => {
+  // Lấy các sản phẩm có giảm giá flash hoặc bán chạy để làm sản phẩm ghim livestream
+  const allProducts = await Product.find({ isActive: true, approvalStatus: "approved" });
+  const featured = (allProducts || []).slice(0, 4).map((p) => ({
+    id: p.id || p._id,
+    name: p.name,
+    price: p.price,
+    originalPrice: p.originalPrice || Math.round(p.price * 1.3),
+    discountPercent: p.discount || Math.round((( (p.originalPrice || p.price * 1.3) - p.price) / (p.originalPrice || p.price * 1.3)) * 100) || 25,
+    image: p.image || p.images?.[0] || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60",
+    stock: p.stock || 50,
+    sold: p.sold || 120,
+    shopName: p.shopName || "Shopee Mall Official",
+  }));
+
+  const session = {
+    id: "live_session_main",
+    title: "🔥 ĐẠI TIỆC LIVESTREAM: SĂN DEAL ĐỘC QUYỀN GIẢM 50% & VOUCHER 100K",
+    host: {
+      name: "Kim Ngân & Trâm Anh",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
+      badge: "Shopee Live Star ⭐",
+    },
+    viewerCount: 1845,
+    likeCount: 24500,
+    pinnedProduct: featured[0] || null,
+    showcaseProducts: featured,
+    liveVoucher: {
+      code: "LIVEHOT50",
+      discountText: "Giảm 50.000Đ cho đơn từ 200.000Đ",
+      expiresInMinutes: 15,
+    },
+    mockChatMessages: [
+      { id: "msg_1", user: "minh_thanh99", text: "Áo này size L cao 1m75 mặc vừa không shop ơi?", time: "Vừa xong" },
+      { id: "msg_2", user: "ngan_ha_vip", text: "Đã chốt 2 chiếc màu be rồi nha, chất đẹp lắm!", time: "10s trước" },
+      { id: "msg_3", user: "tuan_tran_dn", text: "Shop ghim lại đôi giày sneaker với ạ", time: "25s trước" },
+      { id: "msg_4", user: "hoang_yen_sg", text: "Áp được voucher LIVEHOT50 luôn nè mn", time: "40s trước" },
+    ],
+  };
+
+  return sendSuccess(res, { session }, 200, "Lấy thông tin phiên livestream thành công");
+});
+
 export default {
   getProducts,
   getProductById,
@@ -557,4 +603,5 @@ export default {
   getNewArrivals,
   getFlashSale,
   getProductReviewStats,
+  getActiveLiveStreamSessions,
 };

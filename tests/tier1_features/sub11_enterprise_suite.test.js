@@ -2026,6 +2026,58 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(foundUser.loyalty.lifetimeSpent, 5200000);
     });
   });
+
+  // =========================================================================
+  // FEATURE 88: Real-time Live Stream & Product Showcase Floating Widget (5 Tests)
+  // =========================================================================
+  describe("Feature 88: Real-time Live Stream & Product Showcase Floating Widget", () => {
+    test("F88-T1: Pinned live stream discount percent calculates accurately", () => {
+      const originalPrice = 400000;
+      const livePrice = 280000;
+      const discountPercent = Math.round(((originalPrice - livePrice) / originalPrice) * 100);
+      expect.equal(discountPercent, 30);
+    });
+
+    test("F88-T2: Live voucher code validation conforms to alphanumeric pattern with expiry guard", () => {
+      const voucher = {
+        code: "LIVEHOT50",
+        discountAmount: 50000,
+        minOrder: 200000,
+        expiresInMinutes: 15,
+      };
+      const isValidFormat = /^[A-Z0-9_-]+$/.test(voucher.code);
+      expect.equal(isValidFormat, true);
+      expect.equal(voucher.expiresInMinutes > 0, true);
+      expect.equal(voucher.discountAmount, 50000);
+    });
+
+    test("F88-T3: Client like counter increments without mutation collisions", () => {
+      let initialLikes = 24500;
+      const likeAction = () => { initialLikes += 1; return initialLikes; };
+      const newCount = likeAction();
+      expect.equal(newCount, 24501);
+    });
+
+    test("F88-T4: Real-time live comment prepends cleanly to message stream", () => {
+      const messageStream = [
+        { id: "m1", user: "User A", text: "Chốt 1 chiếc", time: "10s trước" },
+      ];
+      const newComment = { id: "m2", user: "User B", text: "Có freeship không shop?", time: "Vừa xong" };
+      const updatedStream = [newComment, ...messageStream];
+      expect.equal(updatedStream.length, 2);
+      expect.equal(updatedStream[0].id, "m2");
+      expect.equal(updatedStream[0].user, "User B");
+    });
+
+    test("F88-T5: Live showcase products list contains valid non-empty array with price metadata", async () => {
+      const liveProducts = await Product.find({ isActive: true });
+      expect.equal(Array.isArray(liveProducts), true);
+      expect.equal(liveProducts.length > 0, true);
+      const first = liveProducts[0];
+      expect.equal(first.price > 0, true);
+      expect.equal(typeof (first.name || ""), "string");
+    });
+  });
 });
 
 

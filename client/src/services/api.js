@@ -760,3 +760,11 @@ export async function fetchLoyaltyProfileAPI() {
   const result = await apiRequest("/api/auth/loyalty");
   return result?.data?.loyalty || result?.loyalty || null;
 }
+
+/**
+ * Real-time Live Stream & Product Showcase Floating Widget API (Feature 88)
+ */
+export async function fetchActiveLiveStreamAPI() {
+  const result = await apiRequest("/api/products/live-stream/active");
+  return result?.data?.session || result?.session || null;
+}
