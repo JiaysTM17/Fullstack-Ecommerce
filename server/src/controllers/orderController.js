@@ -1068,3 +1068,59 @@ export const repurchaseOrder = async (req, res) => {
   }
 };
 
+// @desc    Khách hàng gửi yêu cầu Trả hàng / Hoàn tiền cho đơn hàng
+// @route   POST /api/orders/:id/return-request
+// @access  Public (Guest lookup) or Private (Customer)
+export const requestOrderReturn = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason, evidence, refundAmount } = req.body;
+
+    if (!reason || !reason.trim()) {
+      return sendError(res, "Vui lòng cung cấp lý do yêu cầu trả hàng / hoàn tiền", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    if (order.status === "cancelled") {
+      return sendError(res, "Không thể yêu cầu trả hàng cho đơn đã hủy", 400);
+    }
+
+    order.returnRequest = {
+      reason: reason.trim(),
+      evidence: Array.isArray(evidence) ? evidence : [],
+      status: "pending",
+      refundAmount: Number(refundAmount) || order.total || 0,
+      requestedAt: new Date().toISOString(),
+      respondedAt: null,
+      responseNote: "",
+    };
+
+    if (!Array.isArray(order.timeline)) order.timeline = [];
+    order.timeline.push({
+      time: new Date().toISOString(),
+      text: `Khách hàng gửi yêu cầu Trả hàng / Hoàn tiền: ${reason.trim()}`,
+    });
+
+    await order.save();
+
+    sendSuccess(res, {
+      orderId: order._id || order.id || order.orderId,
+      returnRequest: order.returnRequest,
+      message: "Đã gửi yêu cầu trả hàng / hoàn tiền thành công. Vui lòng chờ người bán phản hồi.",
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+

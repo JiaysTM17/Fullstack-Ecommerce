@@ -14,6 +14,7 @@ import {
   returnOrder,
   getOrderStats,
   searchOrders,
+  requestOrderReturn,
 } from "../controllers/orderController.js";
 import { authenticate, optionalAuthenticate, authorize } from "../middlewares/auth.js";
 
@@ -30,6 +31,9 @@ router.get("/search", authenticate, searchOrders);
 router.get("/:id/tracking", optionalAuthenticate, getOrderTracking);
 router.get("/:id/invoice", optionalAuthenticate, getOrderInvoice);
 
+// Customer return request
+router.post("/:id/return-request", optionalAuthenticate, requestOrderReturn);
+
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);
 router.patch("/:id/ship", authenticate, shipOrder);
@@ -44,4 +48,5 @@ router.patch("/:id/return", authenticate, returnOrder);
 router.post("/:id/repurchase", authenticate, repurchaseOrder);
 
 export default router;
+
 

@@ -616,3 +616,14 @@ export async function fetchSellerProfitAndLossAPI() {
   const result = await apiRequest("/api/seller/analytics/profit-loss");
   return result?.data || result || { summary: {}, skuAnalytics: [] };
 }
+
+/**
+ * Customer Return Request API
+ */
+export async function createCustomerReturnRequestAPI(orderId, { reason, evidence = [], refundAmount = 0 }) {
+  return await apiRequest(`/api/orders/${orderId}/return-request`, {
+    method: "POST",
+    body: JSON.stringify({ reason, evidence, refundAmount }),
+  });
+}
+

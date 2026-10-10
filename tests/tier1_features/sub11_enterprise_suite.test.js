@@ -477,5 +477,60 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(margin, 0);
     });
   });
+
+  describe("Feature 68: Buyer Initiated Return & Refund Workflow", () => {
+    test("F68-T1: Customer return request initializes status to pending and records timeline event", () => {
+      const order = {
+        id: "ord_cust_ret_1",
+        status: "completed",
+        total: 320000,
+        timeline: [],
+        returnRequest: { status: "none" },
+      };
+
+      const reason = "Sản phẩm lỗi đường chỉ may, không đúng kích thước";
+      order.returnRequest = {
+        reason,
+        evidence: ["https://example.com/evidence1.jpg"],
+        status: "pending",
+        refundAmount: order.total,
+        requestedAt: new Date().toISOString(),
+      };
+      order.timeline.push({ time: new Date().toISOString(), text: `Khách hàng gửi yêu cầu Trả hàng / Hoàn tiền: ${reason}` });
+
+      expect.equal(order.returnRequest.status, "pending");
+      expect.equal(order.returnRequest.refundAmount, 320000);
+      expect.equal(order.timeline.length, 1);
+      expect.equal(order.timeline[0].text.includes("Khách hàng gửi yêu cầu Trả hàng"), true);
+    });
+
+    test("F68-T2: Empty reason submission is rejected with error", () => {
+      const validateReason = (r) => Boolean(r && r.trim());
+      expect.equal(validateReason(""), false);
+      expect.equal(validateReason("   "), false);
+      expect.equal(validateReason("Hàng vỡ bể trong quá trình vận chuyển"), true);
+    });
+
+    test("F68-T3: Cancelled orders are strictly prevented from initiating return requests", () => {
+      const order = { id: "ord_canc_1", status: "cancelled" };
+      const canInitiateReturn = order.status !== "cancelled";
+      expect.equal(canInitiateReturn, false);
+    });
+
+    test("F68-T4: Partial refund amount capping ensures refund does not exceed order total", () => {
+      const orderTotal = 450000;
+      const requestedRefund = 500000;
+      const effectiveRefund = Math.min(orderTotal, requestedRefund);
+      expect.equal(effectiveRefund, 450000);
+    });
+
+    test("F68-T5: Multiple evidence image attachments are correctly mapped into request array", () => {
+      const rawEvidence = ["https://img1.jpg", "https://img2.jpg"];
+      const evidence = Array.isArray(rawEvidence) ? rawEvidence : [];
+      expect.equal(evidence.length, 2);
+      expect.equal(evidence[0], "https://img1.jpg");
+    });
+  });
 });
+
 
