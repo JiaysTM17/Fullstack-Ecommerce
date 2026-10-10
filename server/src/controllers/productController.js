@@ -422,11 +422,11 @@ export const getNewArrivals = catchAsync(async (req, res) => {
   sendSuccess(res, { products, total: products.length });
 });
 
-// @desc    Get flash sale products (products with discount)
+// @desc    Get flash sale products with real-time slot countdown, stock depletion and rush alerts
 // @route   GET /api/products/flash-sale
 // @access  Public
 export const getFlashSale = catchAsync(async (req, res) => {
-  const { limit = 20 } = req.query;
+  const { limit = 20, slot = "slot-1" } = req.query;
   const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
 
   const allProducts = await Product.find({
@@ -434,18 +434,70 @@ export const getFlashSale = catchAsync(async (req, res) => {
     approvalStatus: "approved",
   });
 
+  // Calculate standard time slots and remaining countdown
+  const now = new Date();
+  const currentHour = now.getHours();
+  let nextSlotHour = 24;
+  if (currentHour < 9) nextSlotHour = 9;
+  else if (currentHour < 12) nextSlotHour = 12;
+  else if (currentHour < 16) nextSlotHour = 16;
+  else if (currentHour < 20) nextSlotHour = 20;
+
+  const targetDate = new Date(now);
+  if (nextSlotHour === 24) {
+    targetDate.setDate(targetDate.getDate() + 1);
+    targetDate.setHours(9, 0, 0, 0);
+  } else {
+    targetDate.setHours(nextSlotHour, 0, 0, 0);
+  }
+  const remainingSeconds = Math.max(0, Math.floor((targetDate.getTime() - now.getTime()) / 1000));
+
   // Filter products where originalPrice > price (on sale)
   const flashSaleProducts = allProducts
     .filter((p) => p.originalPrice && p.originalPrice > p.price)
-    .map((p) => ({
-      ...p.toObject ? p.toObject() : p,
-      discountPercent: Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100),
-      savedAmount: p.originalPrice - p.price,
-    }))
+    .map((p, idx) => {
+      const obj = p.toObject ? p.toObject() : p;
+      const discountPercent = Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100);
+      const stock = Math.max(0, Number(obj.stock) || 0);
+      const sold = Number(obj.sold) || 0;
+      const initialPool = Math.max(1, stock + sold);
+      const percentSold = Math.min(99, Math.max(15, Math.round((sold / initialPool) * 100)));
+
+      // Burning deal status (stock depletion broadcast)
+      let depletionStatus = "AVAILABLE"; // AVAILABLE | BURNING_OUT | CRITICAL_LOW | SOLD_OUT
+      if (stock === 0) {
+        depletionStatus = "SOLD_OUT";
+      } else if (stock <= 3 || percentSold >= 90) {
+        depletionStatus = "CRITICAL_LOW";
+      } else if (stock <= 10 || percentSold >= 70) {
+        depletionStatus = "BURNING_OUT";
+      }
+
+      return {
+        ...obj,
+        discountPercent,
+        savedAmount: p.originalPrice - p.price,
+        percentSold,
+        depletionStatus,
+        isBurningOut: depletionStatus === "BURNING_OUT" || depletionStatus === "CRITICAL_LOW",
+        slotId: slot,
+      };
+    })
     .sort((a, b) => b.discountPercent - a.discountPercent)
     .slice(0, limitNum);
 
-  sendSuccess(res, { products: flashSaleProducts, total: flashSaleProducts.length });
+  sendSuccess(res, {
+    slot,
+    countdown: {
+      hours: Math.floor(remainingSeconds / 3600),
+      minutes: Math.floor((remainingSeconds % 3600) / 60),
+      seconds: remainingSeconds % 60,
+      totalSeconds: remainingSeconds,
+    },
+    products: flashSaleProducts,
+    total: flashSaleProducts.length,
+    criticalCount: flashSaleProducts.filter((p) => p.isBurningOut).length,
+  });
 });
 
 // @desc    Get review statistics for a product

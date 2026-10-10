@@ -9724,9 +9724,9 @@ export async function answerProductQuestion(productId, questionId, data) {
   return null;
 }
 
-export async function getFlashSale(limit = 10) {
+export async function getFlashSale(limit = 10, slot = "slot-1") {
   try {
-    const res = await apiRequest(`/api/products/flash-sale?limit=${limit}`);
+    const res = await apiRequest(`/api/products/flash-sale?limit=${limit}&slot=${slot}`);
     if (res?.data?.products) {
       return res.data.products;
     }
@@ -9736,6 +9736,24 @@ export async function getFlashSale(limit = 10) {
   return FALLBACK_PRODUCTS
     .filter((p) => p.originalPrice && p.originalPrice > p.price)
     .slice(0, limit);
+}
+
+export async function getFlashSaleMeta(slot = "slot-1") {
+  try {
+    const res = await apiRequest(`/api/products/flash-sale?limit=16&slot=${slot}`);
+    if (res?.data) {
+      return res.data;
+    }
+  } catch (err) {
+    // fallback
+  }
+  return {
+    slot,
+    countdown: { hours: 2, minutes: 45, seconds: 30 },
+    products: FALLBACK_PRODUCTS.filter((p) => p.originalPrice && p.originalPrice > p.price).slice(0, 16),
+    total: 16,
+    criticalCount: 2,
+  };
 }
 
 export async function getBestSellers(limit = 10) {

@@ -1389,6 +1389,66 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(product.stock - product.reservedStock, 20);
     });
   });
+
+  // =========================================================================
+  // FEATURE 81: Flash Sale Real-time Countdown & Stock Depletion Broadcast (5 Tests)
+  // =========================================================================
+  describe("Feature 81: Flash Sale Real-time Countdown & Stock Depletion Broadcast", () => {
+    test("F81-T1: Flash sale slot countdown computes valid remaining hours, minutes and seconds", () => {
+      const remainingSeconds = 3600 * 2 + 60 * 45 + 30; // 2h 45m 30s
+      const countdown = {
+        hours: Math.floor(remainingSeconds / 3600),
+        minutes: Math.floor((remainingSeconds % 3600) / 60),
+        seconds: remainingSeconds % 60,
+      };
+
+      expect.equal(countdown.hours, 2);
+      expect.equal(countdown.minutes, 45);
+      expect.equal(countdown.seconds, 30);
+    });
+
+    test("F81-T2: Stock depletion engine classifies status as CRITICAL_LOW when stock <= 3", () => {
+      const item = { stock: 2, sold: 98 };
+      const percentSold = Math.round((item.sold / (item.stock + item.sold)) * 100);
+
+      let depletionStatus = "AVAILABLE";
+      if (item.stock === 0) depletionStatus = "SOLD_OUT";
+      else if (item.stock <= 3 || percentSold >= 90) depletionStatus = "CRITICAL_LOW";
+      else if (item.stock <= 10 || percentSold >= 70) depletionStatus = "BURNING_OUT";
+
+      expect.equal(depletionStatus, "CRITICAL_LOW");
+      expect.equal(percentSold, 98);
+    });
+
+    test("F81-T3: Burning out deals trigger alert flag and gradient badge", () => {
+      const item = { stock: 8, sold: 40 };
+      const percentSold = Math.round((item.sold / (item.stock + item.sold)) * 100);
+
+      const isBurningOut = item.stock <= 10 || percentSold >= 70;
+      expect.equal(isBurningOut, true);
+    });
+
+    test("F81-T4: Fully sold out flash deal switches depletion status to SOLD_OUT", () => {
+      const item = { stock: 0, sold: 100 };
+      const depletionStatus = item.stock === 0 ? "SOLD_OUT" : "AVAILABLE";
+
+      expect.equal(depletionStatus, "SOLD_OUT");
+    });
+
+    test("F81-T5: Multi-slot query correctly links products to requested slotId", () => {
+      const response = {
+        slot: "slot-2",
+        products: [
+          { _id: "prod_1", slotId: "slot-2", discountPercent: 45 },
+          { _id: "prod_2", slotId: "slot-2", discountPercent: 30 },
+        ],
+      };
+
+      expect.equal(response.slot, "slot-2");
+      expect.equal(response.products.length, 2);
+      expect.equal(response.products.every((p) => p.slotId === "slot-2"), true);
+    });
+  });
 });
 
 

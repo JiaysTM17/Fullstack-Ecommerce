@@ -168,20 +168,28 @@ export default function FlashDeals({ products = [], onProductClick, formatCurren
                   {prod.name}
                 </div>
 
-                {/* Fire progress bar */}
+                {/* Fire progress bar & Stock Depletion Indicator */}
                 <div className="shopee-fire-bar-container">
                   <div
                     className="shopee-fire-bar-fill"
                     style={{
                       width: isCurrentSlot ? `${percentSold}%` : '100%',
-                      background: isCurrentSlot ? undefined : 'linear-gradient(90deg, #64748b, #475569)',
+                      background: isCurrentSlot
+                        ? (prod.isBurningOut || percentSold >= 80
+                            ? 'linear-gradient(90deg, #dc2626, #f97316)'
+                            : undefined)
+                        : 'linear-gradient(90deg, #64748b, #475569)',
                     }}
                   />
                   <div className="shopee-fire-bar-content">
                     {isCurrentSlot ? (
                       <>
                         <FlameIcon size={12} color="#ffffff" />
-                        <span>ĐÃ BÁN {percentSold}%</span>
+                        <span>
+                          {prod.isBurningOut
+                            ? `CHÁY HÀNG • ĐÃ BÁN ${percentSold}%`
+                            : `ĐÃ BÁN ${percentSold}%`}
+                        </span>
                       </>
                     ) : (
                       <>
