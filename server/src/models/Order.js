@@ -35,6 +35,22 @@ const orderSchema = new mongoose.Schema(
     voucherDiscount: { type: Number, default: 0 },
     coinsUsed: { type: Number, default: 0 },
     coinDiscount: { type: Number, default: 0 },
+    tripleVouchers: {
+      freeship: {
+        code: { type: String, default: "" },
+        discount: { type: Number, default: 0 },
+      },
+      shopVoucher: {
+        code: { type: String, default: "" },
+        discount: { type: Number, default: 0 },
+      },
+      platformVoucher: {
+        code: { type: String, default: "" },
+        discount: { type: Number, default: 0 },
+      },
+      coinDiscount: { type: Number, default: 0 },
+      coinsRedeemed: { type: Number, default: 0 },
+    },
     total: { type: Number, required: true },
     paymentMethod: { type: String, enum: ["COD", "BANK_TRANSFER", "MOMO", "VNPAY"], default: "COD" },
     status: {

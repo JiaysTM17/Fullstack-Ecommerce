@@ -134,6 +134,22 @@ export const createOrder = async (req, res) => {
       coinsUsed: effectiveCoinsUsed,
       coinDiscount: effectiveCoinDiscount,
       ...(coinDiscountOriginal !== undefined && { coinDiscountOriginal }),
+      tripleVouchers: {
+        freeship: {
+          code: shippingVoucherCode || "",
+          discount: Number(shippingDiscount || shippingVoucherDiscount || 0),
+        },
+        shopVoucher: {
+          code: req.body.shopVoucherCode || "",
+          discount: Number(req.body.shopVoucherDiscount || 0),
+        },
+        platformVoucher: {
+          code: voucherCode || "",
+          discount: Number(voucherDiscount || 0),
+        },
+        coinDiscount: effectiveCoinDiscount,
+        coinsRedeemed: effectiveCoinsUsed,
+      },
       total: finalTotal,
       paymentMethod: paymentMethod || "COD",
       status: "pending",

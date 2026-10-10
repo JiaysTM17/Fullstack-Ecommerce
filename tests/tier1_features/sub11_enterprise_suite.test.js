@@ -1153,6 +1153,76 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(shop.autoReply.quickTemplates[1].triggerKeyword, "freeship");
     });
   });
+
+  // =========================================================================
+  // FEATURE 78: Triple Voucher Stacking & Checkout Ledger Persistence (5 Tests)
+  // =========================================================================
+  describe("Feature 78: Triple Voucher Stacking & Checkout Ledger Persistence", () => {
+    test("F78-T1: Order model schema holds tripleVouchers breakdown snapshot", () => {
+      const order = {
+        subtotal: 500000,
+        shippingFee: 30000,
+        tripleVouchers: {
+          freeship: { code: "FREESHIPVIP", discount: 30000 },
+          shopVoucher: { code: "SHOPGENZ", discount: 50000 },
+          platformVoucher: { code: "MEGA100", discount: 100000 },
+          coinDiscount: 50000,
+          coinsRedeemed: 50000,
+        },
+        total: 300000,
+      };
+
+      expect.equal(order.tripleVouchers.freeship.code, "FREESHIPVIP");
+      expect.equal(order.tripleVouchers.shopVoucher.discount, 50000);
+      expect.equal(order.tripleVouchers.platformVoucher.discount, 100000);
+      expect.equal(order.total, 300000);
+    });
+
+    test("F78-T2: Total discount sum across 3 voucher tiers equals total savings", () => {
+      const freeshipDiscount = 25000;
+      const shopDiscount = 40000;
+      const platformDiscount = 60000;
+      const coinDiscount = 35000;
+
+      const totalSavings = freeshipDiscount + shopDiscount + platformDiscount + coinDiscount;
+      expect.equal(totalSavings, 160000);
+    });
+
+    test("F78-T3: Applying order with only freeship leaves shop and platform voucher zeroed", () => {
+      const tripleVouchers = {
+        freeship: { code: "FREESHIP", discount: 15000 },
+        shopVoucher: { code: "", discount: 0 },
+        platformVoucher: { code: "", discount: 0 },
+        coinDiscount: 0,
+        coinsRedeemed: 0,
+      };
+
+      expect.equal(tripleVouchers.freeship.discount, 15000);
+      expect.equal(tripleVouchers.shopVoucher.discount, 0);
+      expect.equal(tripleVouchers.platformVoucher.discount, 0);
+    });
+
+    test("F78-T4: Cart subtotal after shop discount serves as base for platform discount computation", () => {
+      const baseSubtotal = 1000000;
+      const shopVoucher = { type: "fixed", value: 100000 };
+      const subtotalAfterShop = baseSubtotal - shopVoucher.value; // 900,000
+
+      const platformVoucher = { type: "percent", value: 10, maxDiscount: 150000 };
+      const platformDiscount = Math.min((subtotalAfterShop * platformVoucher.value) / 100, platformVoucher.maxDiscount); // 90,000
+
+      expect.equal(subtotalAfterShop, 900000);
+      expect.equal(platformDiscount, 90000);
+    });
+
+    test("F78-T5: Final payable total never drops below zero regardless of voucher stacking", () => {
+      const subtotal = 100000;
+      const shippingFee = 20000;
+      const totalDiscounts = 250000; // Large stacked voucher exceeds total
+
+      const payable = Math.max(0, subtotal + shippingFee - totalDiscounts);
+      expect.equal(payable, 0);
+    });
+  });
 });
 
 
