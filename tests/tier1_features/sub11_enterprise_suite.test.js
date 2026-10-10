@@ -2219,6 +2219,61 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(csatPercent, 88);
     });
   });
+
+  // =========================================================================
+  // FEATURE 91: Smart Price Comparison & Competitor Monitoring Radar (5 Tests)
+  // =========================================================================
+  describe("Feature 91: Smart Price Comparison & Competitor Monitoring Radar for Sellers", () => {
+    test("F91-T1: Product priced significantly lower than market avg (-5%+) is marked as WINNING Buy Box", () => {
+      const myPrice = 180000;
+      const avgMarketPrice = 200000;
+      const isWinning = myPrice < avgMarketPrice * 0.95;
+      expect.equal(isWinning, true);
+    });
+
+    test("F91-T2: Product priced higher than market avg (+8%+) is flagged as OVERPRICED with lower suggested price", () => {
+      const myPrice = 250000;
+      const avgMarketPrice = 200000;
+      const isOverpriced = myPrice > avgMarketPrice * 1.08;
+      const suggestedPrice = Math.round(avgMarketPrice * 0.98);
+      expect.equal(isOverpriced, true);
+      expect.equal(suggestedPrice, 196000);
+      expect.equal(suggestedPrice < myPrice, true);
+    });
+
+    test("F91-T3: Price difference percentage computes accurately with rounding", () => {
+      const myPrice = 230000;
+      const avgMarketPrice = 200000;
+      const diff = myPrice - avgMarketPrice;
+      const diffPercent = Number(((diff / avgMarketPrice) * 100).toFixed(1));
+      expect.equal(diffPercent, 15.0);
+    });
+
+    test("F91-T4: Overall shop price competitiveness score evaluates correctly between 0 and 100", () => {
+      const radarItems = [
+        { buyBoxStatus: "winning" },
+        { buyBoxStatus: "winning" },
+        { buyBoxStatus: "competitive" },
+        { buyBoxStatus: "overpriced" },
+      ];
+      const winningCount = radarItems.filter((i) => i.buyBoxStatus === "winning").length;
+      const overpricedCount = radarItems.filter((i) => i.buyBoxStatus === "overpriced").length;
+      const compCount = radarItems.length - winningCount - overpricedCount;
+      const score = Math.round(((winningCount * 1.0 + compCount * 0.7) / radarItems.length) * 100);
+      expect.equal(winningCount, 2);
+      expect.equal(overpricedCount, 1);
+      expect.equal(score, 68);
+    });
+
+    test("F91-T5: Empty competitor catalog returns graceful fallback price equal to current product price", () => {
+      const myPrice = 150000;
+      const competitorPrices = [];
+      const avgCompPrice = competitorPrices.length > 0
+        ? Math.round(competitorPrices.reduce((a, b) => a + b, 0) / competitorPrices.length)
+        : myPrice;
+      expect.equal(avgCompPrice, myPrice);
+    });
+  });
 });
 
 

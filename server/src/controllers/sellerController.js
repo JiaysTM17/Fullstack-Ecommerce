@@ -2051,6 +2051,84 @@ export const reconcileSellerCodOrders = catchAsync(async (req, res) => {
   }, 200, `Đã đối soát thành công ${reconciledOrders.length} đơn hàng COD, tổng tiền: ${totalReconciledAmount.toLocaleString('vi-VN')} Đ`);
 });
 
+// @desc    Lấy radar so sánh giá thị trường & giám sát đối thủ cùng phân khúc
+// @route   GET /api/seller/analytics/price-radar
+// @access  Private (Seller only)
+export const getSellerPriceRadar = catchAsync(async (req, res) => {
+  const shop = await getShopFromUser(req.user);
+  if (!shop) return sendError(res, "Không tìm thấy gian hàng của bạn", 404);
+
+  const shopId = shop.shopId || shop._id;
+  const myProducts = await Product.find({ shopId });
+  const allProducts = await Product.find({ isActive: true });
+
+  const radarItems = (myProducts || []).map((prod) => {
+    const category = prod.category || "Khác";
+    // Tìm các sản phẩm cùng ngành hàng của các shop khác
+    const competitorProducts = allProducts.filter(
+      (p) => (p.shopId !== shopId) && (p.category === category)
+    );
+
+    const competitorPrices = competitorProducts.map((p) => p.price || 0).filter((p) => p > 0);
+    const minCompPrice = competitorPrices.length > 0 ? Math.min(...competitorPrices) : prod.price;
+    const maxCompPrice = competitorPrices.length > 0 ? Math.max(...competitorPrices) : prod.price;
+    const avgCompPrice = competitorPrices.length > 0
+      ? Math.round(competitorPrices.reduce((a, b) => a + b, 0) / competitorPrices.length)
+      : prod.price;
+
+    const myPrice = prod.price || 0;
+    const priceDiff = myPrice - avgCompPrice;
+    const priceDiffPercent = avgCompPrice > 0 ? Number(((priceDiff / avgCompPrice) * 100).toFixed(1)) : 0;
+
+    let buyBoxStatus = "competitive"; // 'winning' | 'competitive' | 'overpriced'
+    let recommendation = "Mức giá hợp lý, duy trì để giữ vững vị thế.";
+    let suggestedPrice = myPrice;
+
+    if (myPrice < avgCompPrice * 0.95) {
+      buyBoxStatus = "winning";
+      recommendation = "Giá đang rất cạnh tranh (rẻ hơn mặt bằng chung 5%+), tỷ lệ trúng Buy Box và chuyển đổi rất cao.";
+      suggestedPrice = myPrice;
+    } else if (myPrice > avgCompPrice * 1.08) {
+      buyBoxStatus = "overpriced";
+      suggestedPrice = Math.round(avgCompPrice * 0.98);
+      recommendation = `Giá đang cao hơn mặt bằng chung ngành ${category} (+${priceDiffPercent}%). Khuyến nghị điều chỉnh về ${suggestedPrice.toLocaleString("vi-VN")}₫ để tăng tốc bán.`;
+    }
+
+    return {
+      productId: prod._id || prod.id,
+      name: prod.name,
+      category,
+      myPrice,
+      competitorCount: competitorProducts.length,
+      minMarketPrice: minCompPrice,
+      avgMarketPrice: avgCompPrice,
+      maxMarketPrice: maxCompPrice,
+      priceDiffPercent,
+      buyBoxStatus,
+      suggestedPrice,
+      recommendation,
+      stock: prod.stock || 0,
+      sold: prod.sold || 0,
+    };
+  });
+
+  const winningCount = radarItems.filter((i) => i.buyBoxStatus === "winning").length;
+  const overpricedCount = radarItems.filter((i) => i.buyBoxStatus === "overpriced").length;
+  const competitiveScore = radarItems.length > 0
+    ? Math.round(((winningCount * 1.0 + (radarItems.length - overpricedCount - winningCount) * 0.7) / radarItems.length) * 100)
+    : 85;
+
+  sendSuccess(res, {
+    summary: {
+      totalMonitoredSkus: radarItems.length,
+      winningCount,
+      overpricedCount,
+      competitiveScore,
+    },
+    radarItems,
+  }, 200, "Lấy dữ liệu radar so sánh giá thị trường thành công");
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -2096,5 +2174,6 @@ export default {
   batchDispatchSellerOrders,
   getSellerCodReconciliation,
   reconcileSellerCodOrders,
+  getSellerPriceRadar,
 };
 

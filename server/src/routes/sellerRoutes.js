@@ -45,6 +45,7 @@ import {
   batchDispatchSellerOrders,
   getSellerCodReconciliation,
   reconcileSellerCodOrders,
+  getSellerPriceRadar,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -61,6 +62,7 @@ router.get("/revenue", getSellerRevenue);
 router.get("/analytics/funnel", getSellerAnalyticsFunnel);
 router.get("/analytics/market", getSellerMarketIntelligence);
 router.get("/analytics/profit-loss", getSellerProfitAndLoss);
+router.get("/analytics/price-radar", getSellerPriceRadar);
 
 // Shopee Ads ROI Suite
 router.get("/ads", getSellerAdsCampaigns);

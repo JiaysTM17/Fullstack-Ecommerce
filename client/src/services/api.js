@@ -783,3 +783,11 @@ export async function reconcileSellerCodOrdersAPI(orderIds) {
     body: JSON.stringify({ orderIds }),
   });
 }
+
+/**
+ * Smart Price Comparison & Competitor Monitoring Radar API (Feature 91)
+ */
+export async function fetchSellerPriceRadarAPI() {
+  const result = await apiRequest("/api/seller/analytics/price-radar");
+  return result?.data || result || null;
+}
