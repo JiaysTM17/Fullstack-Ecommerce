@@ -17,10 +17,16 @@ import {
   requestOrderReturn,
   simulateCarrierWebhook,
   submitOrderCsatFeedback,
+  reserveStock,
+  releaseStock,
 } from "../controllers/orderController.js";
 import { authenticate, optionalAuthenticate, authorize } from "../middlewares/auth.js";
 
 const router = express.Router();
+
+// Stock reservation endpoints (Cart/Checkout Guard)
+router.post("/reserve-stock", optionalAuthenticate, reserveStock);
+router.post("/release-stock", optionalAuthenticate, releaseStock);
 
 // Order creation supports both guest and authenticated checkout
 router.post("/", optionalAuthenticate, createOrder);

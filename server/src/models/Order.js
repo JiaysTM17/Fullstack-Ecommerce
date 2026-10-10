@@ -58,6 +58,8 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "shipping", "completed", "cancelled", "returning"],
       default: "pending",
     },
+    idempotencyKey: { type: String, default: null, index: true },
+    reservationId: { type: String, default: null },
     trackingCode: { type: String, default: "" },
     carrierPartner: {
       type: String,

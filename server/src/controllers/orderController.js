@@ -26,6 +26,19 @@ export const createOrder = async (req, res) => {
       return sendError(res, "Tổng tiền thanh toán không hợp lệ", 400);
     }
 
+    // === IDEMPOTENCY GUARD — Prevent duplicate double-clicks ===
+    const idempotencyKey = req.headers["x-idempotency-key"] || req.body.idempotencyKey;
+    if (idempotencyKey) {
+      const existingOrder = await Order.findOne({ idempotencyKey });
+      if (existingOrder) {
+        return sendSuccess(res, {
+          order: existingOrder,
+          isDuplicate: true,
+          message: "Đơn hàng đã được ghi nhận trước đó (Idempotent replay)",
+        });
+      }
+    }
+
     // === ENFORCE BUYER RESTRICTIONS (Abuse Radar Guard) ===
     const activeUserId = req.user ? (req.user._id || req.user.id) : null;
     if (activeUserId) {
@@ -153,11 +166,18 @@ export const createOrder = async (req, res) => {
       total: finalTotal,
       paymentMethod: paymentMethod || "COD",
       status: "pending",
+      idempotencyKey: idempotencyKey || null,
+      reservationId: req.body.reservationId || null,
       trackingCode: `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`,
       timeline: [
         { time: new Date().toISOString(), text: "Đơn hàng đã được đặt thành công" },
       ],
     });
+
+    // === COMMIT STOCK RESERVATION IF PRESENT ===
+    if (req.body.reservationId && memoryStore.reservations) {
+      memoryStore.reservations.commit(req.body.reservationId);
+    }
 
     // === CLEAR CART after successful order ===
     if (userId) {
@@ -1287,4 +1307,76 @@ export const submitOrderCsatFeedback = async (req, res) => {
     sendError(res, error.message, 500);
   }
 };
+
+// @desc    Reserve stock for checkout (15 min TTL)
+// @route   POST /api/orders/reserve-stock
+// @access  Public / Optional Auth
+export const reserveStock = async (req, res) => {
+  try {
+    const { items, ttlMinutes } = req.body;
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return sendError(res, "Danh sách sản phẩm giữ chỗ không hợp lệ", 400);
+    }
+
+    const userId = req.user ? (req.user._id || req.user.id) : null;
+    const ttl = Math.min(60, Math.max(5, Number(ttlMinutes) || 15));
+
+    // Dọn dẹp các reservation quá hạn trước
+    if (memoryStore.reservations.cleanExpired) {
+      memoryStore.reservations.cleanExpired();
+    }
+
+    // Kiểm tra tính khả dụng tồn kho: available = stock - reservedStock
+    for (const it of items) {
+      const prod = await Product.findOne({ _id: it.productId });
+      if (!prod) {
+        return sendError(res, `Không tìm thấy sản phẩm ${it.productId}`, 404);
+      }
+      const availableStock = (prod.stock || 0) - (prod.reservedStock || 0);
+      const requestedQty = Number(it.quantity) || 1;
+      if (requestedQty > availableStock) {
+        return sendError(
+          res,
+          `Sản phẩm "${prod.name}" không đủ tồn kho khả dụng (còn ${Math.max(0, availableStock)}, yêu cầu ${requestedQty})`,
+          400
+        );
+      }
+    }
+
+    const reservation = memoryStore.reservations.create(userId, items, ttl);
+
+    sendSuccess(res, {
+      reservation,
+      message: `Giữ chỗ tồn kho thành công trong ${ttl} phút!`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Release stock reservation early (e.g. user closes checkout or removes items)
+// @route   POST /api/orders/release-stock
+// @access  Public / Optional Auth
+export const releaseStock = async (req, res) => {
+  try {
+    const { reservationId } = req.body;
+    if (!reservationId) {
+      return sendError(res, "Thiếu mã reservationId để giải phóng tồn kho", 400);
+    }
+
+    const released = memoryStore.reservations.release(reservationId);
+    if (!released) {
+      return sendError(res, "Không tìm thấy phiên giữ chỗ hợp lệ hoặc phiên đã kết thúc", 404);
+    }
+
+    sendSuccess(res, {
+      reservationId,
+      status: "CANCELLED",
+      message: "Đã hủy giữ chỗ và hoàn trả tồn kho thành công!",
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 

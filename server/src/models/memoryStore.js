@@ -836,6 +836,86 @@ class MemoryStore {
       this.persist();
     },
   };
+
+  // Stock Reservations (15-min TTL reservation system)
+  reservationsStore = [];
+  reservations = {
+    create: (userId, items, ttlMinutes = 15) => {
+      const reservationId = `resv_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+      const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000).toISOString();
+      const resv = {
+        reservationId,
+        userId: userId || null,
+        items, // [{ productId, quantity }]
+        status: "ACTIVE", // ACTIVE | COMMITTED | EXPIRED | CANCELLED
+        expiresAt,
+        createdAt: new Date().toISOString(),
+      };
+
+      // Tăng reservedStock trong productsStore
+      for (const it of items) {
+        const prod = this.productsStore.find((p) => p._id === it.productId || p.id === it.productId);
+        if (prod) {
+          prod.reservedStock = (prod.reservedStock || 0) + (Number(it.quantity) || 1);
+        }
+      }
+
+      this.reservationsStore.push(resv);
+      this.persist();
+      return resv;
+    },
+    findById: (reservationId) => {
+      return this.reservationsStore.find((r) => r.reservationId === reservationId) || null;
+    },
+    commit: (reservationId) => {
+      const resv = this.reservationsStore.find((r) => r.reservationId === reservationId);
+      if (!resv || resv.status !== "ACTIVE") return false;
+      resv.status = "COMMITTED";
+
+      // Giảm reservedStock vì đã chính thức chuyển thành đơn hàng
+      for (const it of resv.items) {
+        const prod = this.productsStore.find((p) => p._id === it.productId || p.id === it.productId);
+        if (prod) {
+          prod.reservedStock = Math.max(0, (prod.reservedStock || 0) - (Number(it.quantity) || 1));
+        }
+      }
+      this.persist();
+      return true;
+    },
+    release: (reservationId) => {
+      const resv = this.reservationsStore.find((r) => r.reservationId === reservationId);
+      if (!resv || resv.status !== "ACTIVE") return false;
+      resv.status = "CANCELLED";
+
+      // Trả lại reservedStock
+      for (const it of resv.items) {
+        const prod = this.productsStore.find((p) => p._id === it.productId || p.id === it.productId);
+        if (prod) {
+          prod.reservedStock = Math.max(0, (prod.reservedStock || 0) - (Number(it.quantity) || 1));
+        }
+      }
+      this.persist();
+      return true;
+    },
+    cleanExpired: () => {
+      const now = new Date().toISOString();
+      let cleaned = 0;
+      for (const resv of this.reservationsStore) {
+        if (resv.status === "ACTIVE" && resv.expiresAt <= now) {
+          resv.status = "EXPIRED";
+          for (const it of resv.items) {
+            const prod = this.productsStore.find((p) => p._id === it.productId || p.id === it.productId);
+            if (prod) {
+              prod.reservedStock = Math.max(0, (prod.reservedStock || 0) - (Number(it.quantity) || 1));
+            }
+          }
+          cleaned++;
+        }
+      }
+      if (cleaned > 0) this.persist();
+      return cleaned;
+    },
+  };
 }
 
 export const memoryStore = new MemoryStore();

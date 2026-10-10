@@ -122,6 +122,11 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    reservedStock: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true }
 );

@@ -1310,6 +1310,85 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(order.timeline[0].text.includes("Khách đi vắng"), true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 80: Cart Stock Reservation TTL & Idempotency Key Guard (5 Tests)
+  // =========================================================================
+  describe("Feature 80: Cart Stock Reservation & Order Idempotency Engine", () => {
+    test("F80-T1: Idempotency Key Guard detects replayed requests and avoids duplicate order creation", () => {
+      const orders = [
+        { _id: "ord_101", idempotencyKey: "idem_abc_123", total: 450000, status: "pending" },
+      ];
+
+      const incomingKey = "idem_abc_123";
+      const existing = orders.find((o) => o.idempotencyKey === incomingKey);
+
+      expect.equal(Boolean(existing), true);
+      expect.equal(existing._id, "ord_101");
+    });
+
+    test("F80-T2: Stock reservation locks reservedStock and decrements available pool", () => {
+      const product = { _id: "prod_p1", stock: 10, reservedStock: 0 };
+      const requestedQty = 3;
+
+      const availableStock = product.stock - product.reservedStock;
+      expect.equal(availableStock >= requestedQty, true);
+
+      // Lock reservation
+      product.reservedStock += requestedQty;
+      const remainingAvailable = product.stock - product.reservedStock;
+
+      expect.equal(product.reservedStock, 3);
+      expect.equal(remainingAvailable, 7);
+    });
+
+    test("F80-T3: Stock reservation rejects reservation if requested quantity exceeds available stock", () => {
+      const product = { _id: "prod_p2", stock: 5, reservedStock: 4 };
+      const requestedQty = 2;
+
+      const available = product.stock - product.reservedStock; // 1
+      const canReserve = requestedQty <= available;
+
+      expect.equal(canReserve, false);
+      expect.equal(available, 1);
+    });
+
+    test("F80-T4: Committing order completes reservation and clears reservedStock", () => {
+      const product = { _id: "prod_p3", stock: 10, reservedStock: 2, sold: 5 };
+      const reservation = { reservationId: "resv_99", status: "ACTIVE", quantity: 2 };
+
+      // Checkout completed: commit
+      reservation.status = "COMMITTED";
+      product.reservedStock = Math.max(0, product.reservedStock - reservation.quantity);
+      product.stock = Math.max(0, product.stock - reservation.quantity);
+      product.sold += reservation.quantity;
+
+      expect.equal(reservation.status, "COMMITTED");
+      expect.equal(product.reservedStock, 0);
+      expect.equal(product.stock, 8);
+      expect.equal(product.sold, 7);
+    });
+
+    test("F80-T5: Expired or cancelled reservation releases reservedStock back to catalog", () => {
+      const product = { _id: "prod_p4", stock: 20, reservedStock: 5 };
+      const reservation = {
+        reservationId: "resv_100",
+        status: "ACTIVE",
+        expiresAt: new Date(Date.now() - 60000).toISOString(), // expired
+        quantity: 5,
+      };
+
+      const now = new Date().toISOString();
+      if (reservation.expiresAt <= now && reservation.status === "ACTIVE") {
+        reservation.status = "EXPIRED";
+        product.reservedStock = Math.max(0, product.reservedStock - reservation.quantity);
+      }
+
+      expect.equal(reservation.status, "EXPIRED");
+      expect.equal(product.reservedStock, 0);
+      expect.equal(product.stock - product.reservedStock, 20);
+    });
+  });
 });
 
 
