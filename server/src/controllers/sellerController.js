@@ -1392,6 +1392,89 @@ export const deleteSellerFlashSale = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Lấy danh sách yêu cầu Trả hàng / Hoàn tiền của gian hàng
+// @route   GET /api/seller/orders/returns
+// @access  Private (Seller only)
+export const getSellerReturnRequests = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+  const allOrders = await Order.find({ "returnRequest.status": { $ne: "none" } });
+  const returnOrders = allOrders.filter((order) =>
+    (order.items || []).some((item) => item.shopId === shopId)
+  );
+
+  const returns = returnOrders.map((o) => ({
+    orderId: o._id || o.id,
+    customerName: o.customer?.fullName || "Khách hàng",
+    phone: o.customer?.phone || "",
+    total: o.total,
+    refundAmount: o.returnRequest?.refundAmount || o.total,
+    reason: o.returnRequest?.reason || "Không vừa ý sản phẩm",
+    evidence: o.returnRequest?.evidence || [],
+    status: o.returnRequest?.status || "pending",
+    requestedAt: o.returnRequest?.requestedAt || o.updatedAt,
+    responseNote: o.returnRequest?.responseNote || "",
+    respondedAt: o.returnRequest?.respondedAt || null,
+    items: (o.items || []).filter((item) => item.shopId === shopId),
+  }));
+
+  sendSuccess(res, { returns });
+});
+
+// @desc    Phản hồi yêu cầu Trả hàng / Hoàn tiền (Chấp thuận hoặc Bác bỏ)
+// @route   POST /api/seller/orders/:id/return-response
+// @access  Private (Seller only)
+export const respondSellerReturnRequest = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  const { id } = req.params;
+  const { decision, note } = req.body; // decision: "approved" | "rejected"
+
+  if (!["approved", "rejected"].includes(decision)) {
+    return sendError(res, "Quyết định xử lý không hợp lệ ('approved' hoặc 'rejected')", 400);
+  }
+
+  let order = await Order.findById(id);
+  if (!order) order = await Order.findOne({ orderId: id });
+  if (!order) return sendError(res, "Không tìm thấy đơn hàng", 404);
+
+  const hasShopItems = (order.items || []).some((it) => it.shopId === shopId);
+  if (!hasShopItems && req.user.role !== "admin") {
+    return sendError(res, "Đơn hàng không thuộc gian hàng của bạn", 403);
+  }
+
+  if (!order.returnRequest || order.returnRequest.status !== "pending") {
+    return sendError(res, "Đơn hàng không có yêu cầu hoàn tiền đang chờ xử lý", 400);
+  }
+
+  order.returnRequest.status = decision;
+  order.returnRequest.responseNote = note || (decision === "approved" ? "Shop đồng ý hoàn tiền" : "Shop từ chối yêu cầu");
+  order.returnRequest.respondedAt = new Date().toISOString();
+
+  if (decision === "approved") {
+    order.status = "returning";
+    order.statusText = "Đang hoàn hàng/hoàn tiền";
+    // Tự động hoàn lại tồn kho cho sản phẩm của shop
+    for (const it of order.items || []) {
+      if (it.shopId === shopId) {
+        const prod = await Product.findById(it.productId);
+        if (prod) {
+          prod.stock = (prod.stock || 0) + (it.quantity || 1);
+          await prod.save();
+        }
+      }
+    }
+  }
+
+  await order.save();
+
+  sendSuccess(res, {
+    orderId: order._id,
+    returnStatus: decision,
+    message: decision === "approved" ? "Đã chấp thuận hoàn tiền và nhập lại tồn kho sản phẩm" : "Đã từ chối yêu cầu trả hàng",
+  });
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -1424,4 +1507,6 @@ export default {
   updateSellerFlashSaleStatus,
   deleteSellerFlashSale,
   requestSellerWithdrawal,
+  getSellerReturnRequests,
+  respondSellerReturnRequest,
 };

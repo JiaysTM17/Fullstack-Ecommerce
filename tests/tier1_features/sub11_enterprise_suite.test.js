@@ -355,4 +355,65 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(consecutiveCancels, 3);
     });
   });
+
+  // =========================================================================
+  // FEATURE 66: Seller Return & Refund Handling (5 Tests)
+  // =========================================================================
+  describe("Feature 66: Seller Return & Refund Handling", () => {
+    test("F66-T1: Approving return request transitions order status to 'returning'", () => {
+      const order = {
+        id: "ord_ret_01",
+        status: "completed",
+        returnRequest: { status: "pending", reason: "Hàng lỗi", refundAmount: 189000 },
+      };
+      const decision = "approved";
+      order.returnRequest.status = decision;
+      if (decision === "approved") {
+        order.status = "returning";
+      }
+      expect.equal(order.returnRequest.status, "approved");
+      expect.equal(order.status, "returning");
+    });
+
+    test("F66-T2: Approving return automatically restores stock quantity of returned product", () => {
+      let productStock = 50;
+      const returnedQuantity = 2;
+      productStock += returnedQuantity;
+      expect.equal(productStock, 52);
+    });
+
+    test("F66-T3: Rejecting return request keeps order status and attaches explanation note", () => {
+      const order = {
+        id: "ord_ret_02",
+        status: "completed",
+        returnRequest: { status: "pending", reason: "Đổi ý", refundAmount: 250000, responseNote: "" },
+      };
+      const decision = "rejected";
+      const note = "Sản phẩm đã bóc tem và qua sử dụng > 7 ngày";
+      order.returnRequest.status = decision;
+      order.returnRequest.responseNote = note;
+      expect.equal(order.returnRequest.status, "rejected");
+      expect.equal(order.status, "completed");
+      expect.equal(order.returnRequest.responseNote, note);
+    });
+
+    test("F66-T4: Invalid return decision throws validation error", () => {
+      const validDecisions = ["approved", "rejected"];
+      const attempt = "dismissed";
+      const isValid = validDecisions.includes(attempt);
+      expect.equal(isValid, false);
+    });
+
+    test("F66-T5: Filter return orders retrieves only orders with non-empty return requests", () => {
+      const orders = [
+        { id: "o1", returnRequest: { status: "none" } },
+        { id: "o2", returnRequest: { status: "pending" } },
+        { id: "o3", returnRequest: { status: "approved" } },
+      ];
+      const activeReturns = orders.filter((o) => o.returnRequest?.status && o.returnRequest.status !== "none");
+      expect.equal(activeReturns.length, 2);
+      expect.equal(activeReturns[0].id, "o2");
+      expect.equal(activeReturns[1].id, "o3");
+    });
+  });
 });

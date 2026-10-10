@@ -45,6 +45,19 @@ const orderSchema = new mongoose.Schema(
     trackingCode: { type: String, default: "" },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
+    returnRequest: {
+      reason: { type: String, default: "" },
+      evidence: { type: [String], default: [] },
+      status: {
+        type: String,
+        enum: ["none", "pending", "approved", "rejected"],
+        default: "none",
+      },
+      refundAmount: { type: Number, default: 0 },
+      requestedAt: { type: String, default: null },
+      respondedAt: { type: String, default: null },
+      responseNote: { type: String, default: "" },
+    },
   },
   { timestamps: true }
 );

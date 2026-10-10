@@ -593,3 +593,18 @@ export async function batchConfirmSellerOrdersAPI(orderIds) {
     body: JSON.stringify({ orderIds }),
   });
 }
+
+/**
+ * Seller Return & Refund Management APIs
+ */
+export async function fetchSellerReturnsAPI() {
+  const result = await apiRequest("/api/seller/orders/returns");
+  return result?.data?.returns || result?.returns || [];
+}
+
+export async function respondSellerReturnAPI(id, decision, note = "") {
+  return await apiRequest(`/api/seller/orders/${id}/return-response`, {
+    method: "POST",
+    body: JSON.stringify({ decision, note }),
+  });
+}

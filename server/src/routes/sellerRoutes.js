@@ -32,6 +32,8 @@ import {
   updateSellerFlashSaleStatus,
   deleteSellerFlashSale,
   requestSellerWithdrawal,
+  getSellerReturnRequests,
+  respondSellerReturnRequest,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -86,8 +88,10 @@ router.route("/products/:id")
 
 router.get("/orders", getSellerOrders);
 router.get("/orders/pending", getSellerPendingOrders);
+router.get("/orders/returns", getSellerReturnRequests);
 router.patch("/orders/:id/status", updateSellerOrderStatus);
 router.patch("/orders/:id/confirm", confirmSellerOrder);
 router.post("/orders/batch-confirm", batchConfirmSellerOrders);
+router.post("/orders/:id/return-response", respondSellerReturnRequest);
 
 export default router;
