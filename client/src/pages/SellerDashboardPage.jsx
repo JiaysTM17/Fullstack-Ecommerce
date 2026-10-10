@@ -25,6 +25,8 @@ import {
   updateSellerFlashSaleStatusAPI,
   deleteSellerFlashSaleAPI,
   requestSellerWithdrawalAPI,
+  fetchSellerReturnsAPI,
+  respondSellerReturnAPI,
 } from '../services/api';
 import '../styles/dashboard.css';
 import {
@@ -59,6 +61,7 @@ import {
   SparklesIcon,
   ChevronRightIcon,
   TrashIcon,
+  RotateCcwIcon,
 } from '../components/OrdersIcons';
 
 // 12 Gian hàng mẫu với đầy đủ thông tin chuẩn TMĐT
@@ -462,7 +465,20 @@ export default function SellerDashboardPage() {
     bidPrice1: 1500,
   });
 
-  // Tự động nạp dữ liệu khi chuyển tab Funnel / Market / Staff / Ads
+  // BỔ SUNG: States cho Quản Lý Trả Hàng & Hoàn Tiền (Return & Refund Hub)
+  const [returnsList, setReturnsList] = useState([]);
+  const [returnsFilter, setReturnsFilter] = useState('all'); // 'all' | 'pending' | 'approved' | 'rejected'
+  const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
+  const [returnDecisionNote, setReturnDecisionNote] = useState('');
+  const [isProcessingReturn, setIsProcessingReturn] = useState(false);
+
+  const loadSellerReturns = () => {
+    fetchSellerReturnsAPI()
+      .then(list => setReturnsList(Array.isArray(list) ? list : []))
+      .catch(() => {});
+  };
+
+  // Tự động nạp dữ liệu khi chuyển tab Funnel / Market / Staff / Ads / Returns
   useEffect(() => {
     if (activeTab === 'funnel') {
       fetchSellerFunnelAnalytics().then(res => setSellerFunnel(res));
@@ -472,6 +488,8 @@ export default function SellerDashboardPage() {
       fetchSellerStaff().then(res => setSellerStaffList(res || []));
     } else if (activeTab === 'ads') {
       fetchSellerAdsAPI().then(res => setAdsData(res));
+    } else if (activeTab === 'returns') {
+      loadSellerReturns();
     } else if (activeTab === 'flashsale') {
       fetchSellerFlashSalesAPI().then(res => {
         const list = res?.flashSales || (Array.isArray(res) ? res : []);
@@ -2006,6 +2024,35 @@ export default function SellerDashboardPage() {
           {pendingOrdersCount > 0 && (
             <span style={{ background: '#dc2626', color: '#fff', fontSize: '10.5px', padding: '1px 6px', borderRadius: '10px', fontWeight: 800 }}>
               {pendingOrdersCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'returns' ? 'active' : ''}`}
+          onClick={() => setActiveTab('returns')}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{
+              width: '26px',
+              height: '26px',
+              borderRadius: '7px',
+              background: activeTab === 'returns' ? 'rgba(239, 68, 68, 0.18)' : 'rgba(239, 68, 68, 0.1)',
+              border: activeTab === 'returns' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(239, 68, 68, 0.18)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <RotateCcwIcon size={14} color="#ef4444" />
+            </span>
+            <span>Trả Hàng & Hoàn Tiền</span>
+          </div>
+          {returnsList.filter(r => r.status === 'pending').length > 0 && (
+            <span style={{ background: '#ef4444', color: '#fff', fontSize: '10.5px', padding: '1px 6px', borderRadius: '10px', fontWeight: 800 }}>
+              {returnsList.filter(r => r.status === 'pending').length}
             </span>
           )}
         </button>
@@ -3685,6 +3732,305 @@ export default function SellerDashboardPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 3.5: QUẢN LÝ TRẢ HÀNG & HOÀN TIỀN (RETURN & REFUND HUB) */}
+        {/* ========================================================================= */}
+        {activeTab === 'returns' && (
+          <div className="shopee-table-card">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div>
+                  <h2 style={{ fontSize: '17px', margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <RotateCcwIcon size={14} color="#ef4444" />
+                    </span>
+                    <span>Xử Lý Khiếu Nại Trả Hàng & Hoàn Tiền ({returnsList.length})</span>
+                  </h2>
+                  <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                    Xem xét lý do và bằng chứng khiếu nại của khách hàng, phê duyệt hoàn tiền và tự động hoàn trả kho hàng
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                  onClick={loadSellerReturns}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <RotateCcwIcon size={12} color="currentColor" />
+                  <span>Tải lại dữ liệu</span>
+                </button>
+              </div>
+
+              {/* Status Filter Tabs */}
+              <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className={`seller-tab-btn ${returnsFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setReturnsFilter('all')}
+                >
+                  Tất cả ({returnsList.length})
+                </button>
+                <button
+                  type="button"
+                  className={`seller-tab-btn ${returnsFilter === 'pending' ? 'active' : ''}`}
+                  onClick={() => setReturnsFilter('pending')}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <ClockIcon size={12} color="#d97706" />
+                    <span>Chờ xử lý ({returnsList.filter(r => r.status === 'pending').length})</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`seller-tab-btn ${returnsFilter === 'approved' ? 'active' : ''}`}
+                  onClick={() => setReturnsFilter('approved')}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <CheckIcon size={12} color="#16a34a" />
+                    <span>Đã chấp thuận ({returnsList.filter(r => r.status === 'approved').length})</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`seller-tab-btn ${returnsFilter === 'rejected' ? 'active' : ''}`}
+                  onClick={() => setReturnsFilter('rejected')}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <CloseIcon size={12} color="#ef4444" />
+                    <span>Đã từ chối ({returnsList.filter(r => r.status === 'rejected').length})</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Bảng danh sách khiếu nại trả hàng */}
+            <div className="shopee-table-responsive">
+              <table className="shopee-data-table">
+                <thead>
+                  <tr>
+                    <th>Mã Đơn / Khách Hàng</th>
+                    <th>Sản Phẩm Trả Về</th>
+                    <th>Số Tiền Yêu Cầu</th>
+                    <th>Lý Do Khiếu Nại</th>
+                    <th>Trạng Thái</th>
+                    <th>Thời Gian Gửi</th>
+                    <th style={{ textAlign: 'right' }}>Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {returnsList.filter(r => returnsFilter === 'all' || r.status === returnsFilter).length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--text-muted)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <RotateCcwIcon size={20} color="#ef4444" />
+                          </span>
+                          <span style={{ fontWeight: 600 }}>Không có yêu cầu trả hàng nào ở trạng thái này.</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    returnsList
+                      .filter(r => returnsFilter === 'all' || r.status === returnsFilter)
+                      .map((ret, idx) => (
+                        <tr key={ret.orderId || idx}>
+                          <td>
+                            <strong style={{ color: '#0284c7', display: 'block' }}>#{ret.orderId?.slice(-8) || ret.orderId}</strong>
+                            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{ret.customerName} ({ret.phone || 'SĐT ẩn'})</span>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              {(ret.items || []).map((it, iIdx) => (
+                                <span key={iIdx} style={{ fontSize: '12.5px', color: '#1e293b' }}>
+                                  • {it.name || it.productName || 'Sản phẩm'} (x{it.quantity || 1})
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <strong style={{ color: '#ef4444', fontSize: '13.5px' }}>
+                              {formatCurrency(ret.refundAmount || ret.total || 0)}
+                            </strong>
+                          </td>
+                          <td style={{ maxWidth: '240px' }}>
+                            <span style={{ fontSize: '12.5px', color: '#334155' }}>{ret.reason}</span>
+                            {Array.isArray(ret.evidence) && ret.evidence.length > 0 && (
+                              <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                                {ret.evidence.map((imgUrl, imgIdx) => (
+                                  <a key={imgIdx} href={imgUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
+                                    <img src={imgUrl} alt="Bằng chứng" style={{ width: '28px', height: '28px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #cbd5e1' }} />
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            {ret.status === 'pending' && (
+                              <span className="shopee-badge" style={{ background: 'rgba(217, 119, 6, 0.12)', color: '#d97706', border: '1px solid rgba(217, 119, 6, 0.3)', fontWeight: 700 }}>
+                                ⏳ Chờ shop duyệt
+                              </span>
+                            )}
+                            {ret.status === 'approved' && (
+                              <span className="shopee-badge" style={{ background: 'rgba(22, 163, 74, 0.12)', color: '#16a34a', border: '1px solid rgba(22, 163, 74, 0.3)', fontWeight: 700 }}>
+                                ✓ Đã chấp thuận hoàn tiền
+                              </span>
+                            )}
+                            {ret.status === 'rejected' && (
+                              <span className="shopee-badge" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', fontWeight: 700 }}>
+                                ✕ Đã từ chối
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                            {ret.requestedAt ? new Date(ret.requestedAt).toLocaleString('vi-VN') : 'Mới đây'}
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            {ret.status === 'pending' ? (
+                              <button
+                                type="button"
+                                className="shopee-btn shopee-btn-primary shopee-btn-sm"
+                                onClick={() => {
+                                  setSelectedReturnOrder(ret);
+                                  setReturnDecisionNote('');
+                                }}
+                                style={{ fontWeight: 700 }}
+                              >
+                                Phản Hồi
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="shopee-btn shopee-btn-secondary shopee-btn-sm"
+                                onClick={() => {
+                                  setSelectedReturnOrder(ret);
+                                  setReturnDecisionNote(ret.responseNote || '');
+                                }}
+                              >
+                                Xem Chi Tiết
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* MODAL PHẢN HỒI KHIẾU NẠI TRẢ HÀNG & HOÀN TIỀN */}
+            {selectedReturnOrder && (
+              <div className="shopee-modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="shopee-modal-content" style={{ maxWidth: '580px', width: '90%', padding: '24px', borderRadius: '12px', background: '#fff' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                    <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <RotateCcwIcon size={18} color="#ef4444" />
+                      <span>Xử Lý Yêu Cầu Trả Hàng #{selectedReturnOrder.orderId?.slice(-8) || selectedReturnOrder.orderId}</span>
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedReturnOrder(null)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    >
+                      <CloseIcon size={18} color="#64748b" />
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13.5px' }}>
+                    <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <p style={{ margin: '0 0 6px', fontWeight: 700, color: '#334155' }}>Khách hàng: {selectedReturnOrder.customerName} ({selectedReturnOrder.phone || 'SĐT không khả dụng'})</p>
+                      <p style={{ margin: '0 0 6px', color: '#64748b' }}>Số tiền hoàn đề xuất: <strong style={{ color: '#ef4444' }}>{formatCurrency(selectedReturnOrder.refundAmount || selectedReturnOrder.total || 0)}</strong></p>
+                      <p style={{ margin: 0, color: '#334155' }}>Lý do: <em>"{selectedReturnOrder.reason}"</em></p>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontWeight: 700, marginBottom: '6px', color: '#1e293b' }}>
+                        Ghi chú / Phản hồi của Shop:
+                      </label>
+                      <textarea
+                        rows="3"
+                        className="shopee-input"
+                        placeholder="Nhập ghi chú phản hồi gửi khách hàng (ví dụ: Đồng ý nhận lại hàng hoàn tiền, hoặc lý do từ chối)..."
+                        value={returnDecisionNote}
+                        onChange={(e) => setReturnDecisionNote(e.target.value)}
+                        disabled={selectedReturnOrder.status !== 'pending' || isProcessingReturn}
+                        style={{ width: '100%', resize: 'vertical' }}
+                      />
+                    </div>
+
+                    {selectedReturnOrder.status !== 'pending' && (
+                      <div style={{ padding: '10px 14px', borderRadius: '8px', background: selectedReturnOrder.status === 'approved' ? '#f0fdf4' : '#fef2f2', border: selectedReturnOrder.status === 'approved' ? '1px solid #bbf7d0' : '1px solid #fecaca' }}>
+                        <span style={{ fontWeight: 700, color: selectedReturnOrder.status === 'approved' ? '#16a34a' : '#ef4444' }}>
+                          Trạng thái hiện tại: {selectedReturnOrder.status === 'approved' ? 'Đã chấp thuận và tự động nhập lại kho' : 'Đã từ chối khiếu nại'}
+                        </span>
+                        {selectedReturnOrder.responseNote && (
+                          <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#475569' }}>Phản hồi đã gửi: {selectedReturnOrder.responseNote}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '14px' }}>
+                    <button
+                      type="button"
+                      className="shopee-btn shopee-btn-secondary"
+                      onClick={() => setSelectedReturnOrder(null)}
+                      disabled={isProcessingReturn}
+                    >
+                      Đóng
+                    </button>
+                    {selectedReturnOrder.status === 'pending' && (
+                      <>
+                        <button
+                          type="button"
+                          className="shopee-btn"
+                          style={{ background: '#ef4444', color: '#fff', fontWeight: 700 }}
+                          disabled={isProcessingReturn}
+                          onClick={async () => {
+                            setIsProcessingReturn(true);
+                            try {
+                              await respondSellerReturnAPI(selectedReturnOrder.orderId, 'rejected', returnDecisionNote);
+                              toast.success('Đã từ chối khiếu nại trả hàng của khách.');
+                              setSelectedReturnOrder(null);
+                              loadSellerReturns();
+                            } catch (err) {
+                              toast.error(err.message || 'Lỗi xử lý phản hồi khiếu nại');
+                            } finally {
+                              setIsProcessingReturn(false);
+                            }
+                          }}
+                        >
+                          ✕ Từ Chối Khiếu Nại
+                        </button>
+                        <button
+                          type="button"
+                          className="shopee-btn shopee-btn-primary"
+                          style={{ fontWeight: 700 }}
+                          disabled={isProcessingReturn}
+                          onClick={async () => {
+                            setIsProcessingReturn(true);
+                            try {
+                              await respondSellerReturnAPI(selectedReturnOrder.orderId, 'approved', returnDecisionNote);
+                              toast.success('Đã chấp thuận hoàn tiền & hoàn kho sản phẩm thành công!');
+                              setSelectedReturnOrder(null);
+                              loadSellerReturns();
+                            } catch (err) {
+                              toast.error(err.message || 'Lỗi xử lý hoàn tiền');
+                            } finally {
+                              setIsProcessingReturn(false);
+                            }
+                          }}
+                        >
+                          ✓ Chấp Thuận Hoàn Tiền
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
