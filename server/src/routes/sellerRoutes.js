@@ -35,6 +35,8 @@ import {
   getSellerReturnRequests,
   respondSellerReturnRequest,
   getSellerProfitAndLoss,
+  getSellerShippingPolicy,
+  updateSellerShippingPolicy,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -75,6 +77,10 @@ router.put("/staff/:id", updateSellerStaff);
 router.route("/shop")
   .get(getMySellerShop)
   .put(updateMySellerShop);
+
+router.route("/shipping-policy")
+  .get(getSellerShippingPolicy)
+  .put(updateSellerShippingPolicy);
 
 router.get("/stats", getSellerStats);
 router.get("/wallet", getSellerWallet);

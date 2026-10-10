@@ -289,6 +289,13 @@ const INITIAL_SHOPS = [
 INITIAL_SHOPS.forEach(shop => {
   shop.walletBalance = 0;
   shop.walletTransactions = [];
+  shop.shippingPolicy = shop.shippingPolicy || {
+    baseFee: 22000,
+    freeShipThreshold: 300000,
+    spxSubsidized: true,
+    expressAvailable: true,
+    expressSurcharge: 15000,
+  };
 });
 
 // Load 109 products from extracted JSON

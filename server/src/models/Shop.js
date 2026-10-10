@@ -133,6 +133,13 @@ const shopSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    shippingPolicy: {
+      baseFee: { type: Number, default: 22000 },
+      freeShipThreshold: { type: Number, default: 300000 },
+      spxSubsidized: { type: Boolean, default: true },
+      expressAvailable: { type: Boolean, default: true },
+      expressSurcharge: { type: Number, default: 15000 },
+    },
   },
   { timestamps: true }
 );

@@ -1559,6 +1559,80 @@ export const getSellerProfitAndLoss = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Lấy chính sách vận chuyển động & trợ giá SPX của shop
+// @route   GET /api/seller/shipping-policy
+// @access  Private (Seller)
+export const getSellerShippingPolicy = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId || "shop_01";
+  const shop = await Shop.findOne({ shopId });
+  if (!shop) {
+    return sendError(res, "Không tìm thấy gian hàng", 404);
+  }
+
+  const policy = shop.shippingPolicy || {
+    baseFee: 22000,
+    freeShipThreshold: 300000,
+    spxSubsidized: true,
+    expressAvailable: true,
+    expressSurcharge: 15000,
+  };
+
+  sendSuccess(res, {
+    shopId,
+    shippingPolicy: policy,
+    spxLogisticsTier: {
+      provider: "SPX Express Vietnam",
+      fulfillmentSpeed: "24h - 48h toàn quốc",
+      sellerSubsidyRate: policy.spxSubsidized ? "50% hỗ trợ bởi sàn Shopee" : "0%",
+      activeRoutes: ["Nội thành", "Liên tỉnh", "Hỏa tốc 2H"],
+    },
+  });
+});
+
+// @desc    Cập nhật chính sách vận chuyển động & trợ giá SPX của shop
+// @route   PUT /api/seller/shipping-policy
+// @access  Private (Seller)
+export const updateSellerShippingPolicy = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId || "shop_01";
+  const shop = await Shop.findOne({ shopId });
+  if (!shop) {
+    return sendError(res, "Không tìm thấy gian hàng", 404);
+  }
+
+  const { baseFee, freeShipThreshold, spxSubsidized, expressAvailable, expressSurcharge } = req.body;
+
+  if (baseFee !== undefined && (typeof baseFee !== "number" || baseFee < 0)) {
+    return sendError(res, "Cước vận chuyển cơ bản không hợp lệ", 400);
+  }
+
+  if (freeShipThreshold !== undefined && (typeof freeShipThreshold !== "number" || freeShipThreshold < 0)) {
+    return sendError(res, "Hạn mức miễn phí vận chuyển không hợp lệ", 400);
+  }
+
+  shop.shippingPolicy = {
+    baseFee: baseFee !== undefined ? baseFee : (shop.shippingPolicy?.baseFee ?? 22000),
+    freeShipThreshold: freeShipThreshold !== undefined ? freeShipThreshold : (shop.shippingPolicy?.freeShipThreshold ?? 300000),
+    spxSubsidized: spxSubsidized !== undefined ? Boolean(spxSubsidized) : (shop.shippingPolicy?.spxSubsidized ?? true),
+    expressAvailable: expressAvailable !== undefined ? Boolean(expressAvailable) : (shop.shippingPolicy?.expressAvailable ?? true),
+    expressSurcharge: expressSurcharge !== undefined ? expressSurcharge : (shop.shippingPolicy?.expressSurcharge ?? 15000),
+  };
+
+  await shop.save();
+
+  recordAuditLog({
+    userId: req.user._id || req.user.id,
+    action: "UPDATE_SHIPPING_POLICY",
+    resourceType: "SHOP",
+    resourceId: shopId,
+    details: shop.shippingPolicy,
+  });
+
+  sendSuccess(res, {
+    message: "Đã cập nhật chính sách vận chuyển động thành công",
+    shippingPolicy: shop.shippingPolicy,
+  });
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -1594,5 +1668,7 @@ export default {
   getSellerReturnRequests,
   respondSellerReturnRequest,
   getSellerProfitAndLoss,
+  getSellerShippingPolicy,
+  updateSellerShippingPolicy,
 };
 

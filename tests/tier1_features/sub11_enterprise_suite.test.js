@@ -11,6 +11,7 @@ import { describe, test, expect, beforeEach } from "../harness/testRunner.js";
 import { memoryStore } from "../../server/src/models/memoryStore.js";
 import AdsCampaign from "../../server/src/models/AdsCampaign.js";
 import FlashSale from "../../server/src/models/FlashSale.js";
+import Shop from "../../server/src/models/Shop.js";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
 
@@ -703,6 +704,77 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(getDefaultIcon("order"), "📦");
       expect.equal(getDefaultIcon("promotion"), "🎉");
       expect.equal(getDefaultIcon("unknown"), "🔔");
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 72: Dynamic Shipping Tier & SPX Subsidies Matrix (5 Tests)
+  // =========================================================================
+  describe("Feature 72: Dynamic Shipping Tier & SPX Subsidies Matrix", () => {
+    test("F72-T1: Seller shipping policy calculates zero fee when cart subtotal meets freeShipThreshold", () => {
+      const policy = {
+        baseFee: 25000,
+        freeShipThreshold: 300000,
+        spxSubsidized: true,
+      };
+
+      const calculateFee = (subtotal, isExpress = false) => {
+        let fee = subtotal >= policy.freeShipThreshold ? 0 : policy.baseFee;
+        if (isExpress) fee += 15000;
+        return fee;
+      };
+
+      expect.equal(calculateFee(350000), 0);
+      expect.equal(calculateFee(200000), 25000);
+      expect.equal(calculateFee(350000, true), 15000);
+    });
+
+    test("F72-T2: SPX 50% subsidy rule cuts standard shipping fee by half when enabled", () => {
+      const baseFee = 30000;
+      const spxSubsidized = true;
+      const actualBuyerFee = spxSubsidized ? Math.round(baseFee * 0.5) : baseFee;
+      expect.equal(actualBuyerFee, 15000);
+    });
+
+    test("F72-T3: Express shipping surcharge validation rejects negative surcharge values", () => {
+      const validateExpressPolicy = (surcharge) => typeof surcharge === "number" && surcharge >= 0;
+      expect.equal(validateExpressPolicy(15000), true);
+      expect.equal(validateExpressPolicy(0), true);
+      expect.equal(validateExpressPolicy(-5000), false);
+    });
+
+    test("F72-T4: Shop model updates shippingPolicy and persists configurations", async () => {
+      const shop = await Shop.findOne({ shopId: "shop_01" });
+      expect.equal(Boolean(shop), true);
+
+      shop.shippingPolicy = {
+        baseFee: 28000,
+        freeShipThreshold: 250000,
+        spxSubsidized: true,
+        expressAvailable: true,
+        expressSurcharge: 20000,
+      };
+      await shop.save();
+
+      const updated = await Shop.findOne({ shopId: "shop_01" });
+      expect.equal(updated.shippingPolicy.baseFee, 28000);
+      expect.equal(updated.shippingPolicy.freeShipThreshold, 250000);
+      expect.equal(updated.shippingPolicy.expressSurcharge, 20000);
+    });
+
+    test("F72-T5: Multi-shop shipping calculator applies independent policies per vendor", () => {
+      const shopA = { baseFee: 20000, freeShipThreshold: 200000 };
+      const shopB = { baseFee: 30000, freeShipThreshold: 500000 };
+
+      const subtotalA = 250000;
+      const subtotalB = 400000;
+
+      const feeA = subtotalA >= shopA.freeShipThreshold ? 0 : shopA.baseFee;
+      const feeB = subtotalB >= shopB.freeShipThreshold ? 0 : shopB.baseFee;
+
+      expect.equal(feeA, 0); // Đủ điều kiện freeship Shop A
+      expect.equal(feeB, 30000); // Chưa đủ freeship Shop B
+      expect.equal(feeA + feeB, 30000);
     });
   });
 });

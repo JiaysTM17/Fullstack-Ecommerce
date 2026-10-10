@@ -28,6 +28,8 @@ import {
   fetchSellerReturnsAPI,
   respondSellerReturnAPI,
   fetchSellerProfitAndLossAPI,
+  fetchSellerShippingPolicyAPI,
+  updateSellerShippingPolicyAPI,
 } from '../services/api';
 import '../styles/dashboard.css';
 import {
@@ -477,6 +479,16 @@ export default function SellerDashboardPage() {
   const [pnlData, setPnlData] = useState(null);
   const [pnlFilter, setPnlFilter] = useState('all'); // 'all' | 'high_margin' | 'healthy' | 'low_margin'
 
+  // BỔ SUNG: States cho Cấu Hình Vận Chuyển Động & Trợ Giá SPX Logistics
+  const [shippingPolicyData, setShippingPolicyData] = useState({
+    baseFee: 22000,
+    freeShipThreshold: 300000,
+    spxSubsidized: true,
+    expressAvailable: true,
+    expressSurcharge: 15000,
+  });
+  const [isSavingShippingPolicy, setIsSavingShippingPolicy] = useState(false);
+
   const loadSellerReturns = () => {
     fetchSellerReturnsAPI()
       .then(list => setReturnsList(Array.isArray(list) ? list : []))
@@ -489,7 +501,33 @@ export default function SellerDashboardPage() {
       .catch(() => {});
   };
 
-  // Tự động nạp dữ liệu khi chuyển tab Funnel / Market / Staff / Ads / Returns / PnL
+  const loadSellerShippingPolicy = () => {
+    fetchSellerShippingPolicyAPI()
+      .then(res => {
+        if (res?.shippingPolicy) {
+          setShippingPolicyData(res.shippingPolicy);
+        }
+      })
+      .catch(() => {});
+  };
+
+  const handleSaveShippingPolicy = async (e) => {
+    e.preventDefault();
+    setIsSavingShippingPolicy(true);
+    try {
+      const res = await updateSellerShippingPolicyAPI(shippingPolicyData);
+      if (res?.shippingPolicy) {
+        setShippingPolicyData(res.shippingPolicy);
+      }
+      toast.success('Đã lưu cấu hình biểu phí vận chuyển & trợ giá SPX thành công!');
+    } catch (err) {
+      toast.error(`Lưu thất bại: ${err.message || 'Lỗi hệ thống'}`);
+    } finally {
+      setIsSavingShippingPolicy(false);
+    }
+  };
+
+  // Tự động nạp dữ liệu khi chuyển tab Funnel / Market / Staff / Ads / Returns / PnL / Shipping
   useEffect(() => {
     if (activeTab === 'funnel') {
       fetchSellerFunnelAnalytics().then(res => setSellerFunnel(res));
@@ -503,6 +541,8 @@ export default function SellerDashboardPage() {
       loadSellerReturns();
     } else if (activeTab === 'pnl') {
       loadSellerProfitAndLoss();
+    } else if (activeTab === 'shipping_policy') {
+      loadSellerShippingPolicy();
     } else if (activeTab === 'flashsale') {
       fetchSellerFlashSalesAPI().then(res => {
         const list = res?.flashSales || (Array.isArray(res) ? res : []);
@@ -2335,6 +2375,27 @@ export default function SellerDashboardPage() {
             <ReceiptIcon size={14} color="#10b981" />
           </span>
           <span>P&amp;L Lợi Nhuận Từng SKU</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'shipping_policy' ? 'active' : ''}`}
+          onClick={() => setActiveTab('shipping_policy')}
+        >
+          <span style={{
+            width: '26px',
+            height: '26px',
+            borderRadius: '7px',
+            background: activeTab === 'shipping_policy' ? 'rgba(2, 132, 199, 0.18)' : 'rgba(2, 132, 199, 0.1)',
+            border: activeTab === 'shipping_policy' ? '1px solid rgba(2, 132, 199, 0.3)' : '1px solid rgba(2, 132, 199, 0.18)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <TruckIcon size={14} color="#0284c7" />
+          </span>
+          <span>Vận Chuyển Động &amp; SPX</span>
         </button>
       </aside>
 
@@ -6327,6 +6388,167 @@ export default function SellerDashboardPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 12: QUẢN LÝ VẬN CHUYỂN ĐỘNG & MA TRẬN TRỢ GIÁ SPX LOGISTICS
+        ========================================================================= */}
+        {activeTab === 'shipping_policy' && (
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <TruckIcon size={20} color="#0284c7" />
+                  Cấu Hình Biểu Phí Vận Chuyển Động &amp; Trợ Giá SPX Logistics
+                </h2>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                  Thiết lập hạn mức freeship riêng cho shop, phụ phí giao hỏa tốc 2H và tối ưu cước vận chuyển SPX Express
+                </p>
+              </div>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-outline"
+                onClick={loadSellerShippingPolicy}
+                style={{ padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}
+              >
+                Làm Mới Cấu Hình
+              </button>
+            </div>
+
+            {/* 3 Thẻ Trạng Thái Logistics */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#16a34a' }}>ĐỐI TÁC VẬN CHUYỂN CHÍNH</span>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#14532d', margin: '4px 0' }}>SPX Express Vietnam</div>
+                <span style={{ fontSize: '12px', color: '#15803d' }}>Thời gian lấy hàng: 2-4 giờ sau khi chốt đơn</span>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb' }}>TRỢ GIÁ BỞI SÀN SHOPEE</span>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#1e40af', margin: '4px 0' }}>
+                  {shippingPolicyData.spxSubsidized ? '50% Chi Phí' : 'Không Áp Dụng'}
+                </div>
+                <span style={{ fontSize: '12px', color: '#1d4ed8' }}>Giúp giảm rào cản phí ship cho khách mua</span>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#fff7ed', border: '1px solid #fed7aa' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#ea580c' }}>NGƯỠNG MIỄN PHÍ VẬN CHUYỂN</span>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#9a3412', margin: '4px 0' }}>
+                  {formatCurrency(shippingPolicyData.freeShipThreshold)}
+                </div>
+                <span style={{ fontSize: '12px', color: '#c2410c' }}>Đơn hàng đạt giá trị này tự động freeship</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveShippingPolicy} style={{ maxWidth: '680px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                    Cước Vận Chuyển Tiêu Chuẩn Cơ Bản (VNĐ) <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1000"
+                    required
+                    className="shopee-input"
+                    value={shippingPolicyData.baseFee}
+                    onChange={(e) => setShippingPolicyData({ ...shippingPolicyData, baseFee: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                  <span style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                    Áp dụng cho các đơn hàng chưa thỏa điều kiện Freeship của shop
+                  </span>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                    Hạn Mức Đơn Hàng Để Được Miễn Phí Vận Chuyển (VNĐ) <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="10000"
+                    required
+                    className="shopee-input"
+                    value={shippingPolicyData.freeShipThreshold}
+                    onChange={(e) => setShippingPolicyData({ ...shippingPolicyData, freeShipThreshold: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                  <span style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                    Khách hàng mua đạt hoặc vượt hạn mức này sẽ được miễn cước tiêu chuẩn
+                  </span>
+                </div>
+
+                <div style={{ padding: '16px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <strong style={{ fontSize: '13px', color: '#0f172a', display: 'block' }}>Tham Gia Chương Trình Trợ Giá Vận Chuyển SPX (50%)</strong>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>Sàn đồng tài trợ 50% cước phí, đẩy mạnh tỷ lệ hoàn tất đơn hàng</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(shippingPolicyData.spxSubsidized)}
+                    onChange={(e) => setShippingPolicyData({ ...shippingPolicyData, spxSubsidized: e.target.checked })}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#0284c7' }}
+                  />
+                </div>
+
+                <div style={{ padding: '16px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: shippingPolicyData.expressAvailable ? '12px' : 0 }}>
+                    <div>
+                      <strong style={{ fontSize: '13px', color: '#0f172a', display: 'block' }}>Bật Dịch Vụ Giao Hàng Hỏa Tốc (SPX Instant 2H)</strong>
+                      <span style={{ fontSize: '12px', color: '#64748b' }}>Phục vụ khách hàng cần nhận hàng ngay trong vòng 2 giờ nội thành</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(shippingPolicyData.expressAvailable)}
+                      onChange={(e) => setShippingPolicyData({ ...shippingPolicyData, expressAvailable: e.target.checked })}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#ea580c' }}
+                    />
+                  </div>
+
+                  {shippingPolicyData.expressAvailable && (
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Phụ Phí Hỏa Tốc Cộng Thêm (VNĐ)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="5000"
+                        className="shopee-input"
+                        value={shippingPolicyData.expressSurcharge}
+                        onChange={(e) => setShippingPolicyData({ ...shippingPolicyData, expressSurcharge: Number(e.target.value) })}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ marginTop: '8px' }}>
+                  <button
+                    type="submit"
+                    disabled={isSavingShippingPolicy}
+                    className="shopee-btn"
+                    style={{
+                      background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '10px 24px',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      cursor: isSavingShippingPolicy ? 'not-allowed' : 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 8px rgba(2, 132, 199, 0.25)'
+                    }}
+                  >
+                    <TruckIcon size={16} color="#ffffff" />
+                    <span>{isSavingShippingPolicy ? 'Đang Lưu...' : 'Lưu Thay Đổi Cấu Hình'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         )}
 

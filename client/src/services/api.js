@@ -627,3 +627,18 @@ export async function createCustomerReturnRequestAPI(orderId, { reason, evidence
   });
 }
 
+/**
+ * Seller Dynamic Shipping Policy & SPX Subsidy APIs
+ */
+export async function fetchSellerShippingPolicyAPI() {
+  const result = await apiRequest("/api/seller/shipping-policy");
+  return result?.data || result || null;
+}
+
+export async function updateSellerShippingPolicyAPI(policyData) {
+  return await apiRequest("/api/seller/shipping-policy", {
+    method: "PUT",
+    body: JSON.stringify(policyData),
+  });
+}
+
