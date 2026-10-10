@@ -74,6 +74,14 @@ const orderSchema = new mongoose.Schema(
       comment: { type: String, default: "" },
       submittedAt: { type: String, default: null },
     },
+    giftWrap: {
+      enabled: { type: Boolean, default: false },
+      fee: { type: Number, default: 0 },
+      theme: { type: String, enum: ["STANDARD", "LUXURY_RED", "PASTEL_PINK", "BIRTHDAY_CELEBRATION"], default: "STANDARD" },
+      greetingMessage: { type: String, default: "" },
+      recipientName: { type: String, default: "" },
+      senderName: { type: String, default: "" },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

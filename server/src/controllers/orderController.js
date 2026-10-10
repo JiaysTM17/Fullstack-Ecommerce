@@ -1379,4 +1379,63 @@ export const releaseStock = async (req, res) => {
   }
 };
 
+// @desc    Cập nhật dịch vụ gói quà tặng & thiệp chúc mừng cho đơn hàng
+// @route   PATCH /api/orders/:id/gift-wrap
+// @access  Public / Optional Auth
+export const updateOrderGiftWrap = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { enabled, theme, greetingMessage, recipientName, senderName } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    const isEnabled = Boolean(enabled);
+    const wrapFee = isEnabled ? 25000 : 0; // Phí gói quà kèm thiệp 25.000₫
+
+    // Điều chỉnh tổng tiền đơn nếu thay đổi trạng thái gói quà
+    const prevWrapFee = order.giftWrap?.enabled ? (order.giftWrap.fee || 25000) : 0;
+    const diffFee = wrapFee - prevWrapFee;
+    order.total = Math.max(0, (order.total || 0) + diffFee);
+
+    order.giftWrap = {
+      enabled: isEnabled,
+      fee: wrapFee,
+      theme: theme || "STANDARD",
+      greetingMessage: greetingMessage ? String(greetingMessage).trim() : "",
+      recipientName: recipientName ? String(recipientName).trim() : "",
+      senderName: senderName ? String(senderName).trim() : "",
+    };
+
+    if (!Array.isArray(order.timeline)) order.timeline = [];
+    order.timeline.push({
+      time: new Date().toISOString(),
+      text: isEnabled
+        ? `Đã đăng ký dịch vụ đóng gói quà tặng: ${theme || "STANDARD"} - Thiệp: "${greetingMessage || "Chúc mừng"}"`
+        : "Đã hủy yêu cầu gói quà tặng",
+    });
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order._id || order.id || order.orderId,
+      giftWrap: order.giftWrap,
+      total: order.total,
+      message: isEnabled
+        ? "Đã lưu dịch vụ gói quà tặng & thiệp chúc mừng thành công!"
+        : "Đã hủy gói quà tặng",
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 

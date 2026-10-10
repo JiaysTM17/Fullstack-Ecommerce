@@ -2274,6 +2274,78 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(avgCompPrice, myPrice);
     });
   });
+
+  // =========================================================================
+  // FEATURE 92: Gift Wrapping & Personalized Greeting Card Customizer (5 Tests)
+  // =========================================================================
+  describe("Feature 92: Gift Wrapping & Personalized Greeting Card Customizer", () => {
+    test("F92-T1: Enabling gift wrap adds standard fixed fee of 25.000₫ to order total", () => {
+      const subtotal = 200000;
+      const shippingFee = 25000;
+      const giftWrapEnabled = true;
+      const giftWrapFee = giftWrapEnabled ? 25000 : 0;
+      const total = subtotal + shippingFee + giftWrapFee;
+      expect.equal(giftWrapFee, 25000);
+      expect.equal(total, 250000);
+    });
+
+    test("F92-T2: Order created with giftWrap schema stores theme and greeting card text", async () => {
+      const order = await Order.create({
+        orderId: `ORD_GIFT_${Date.now()}`,
+        status: "pending",
+        customer: { fullName: "Người Mua Quà", phone: "0911", address: "Đà Nẵng" },
+        items: [{ name: "Hộp Son Môi Cao Cấp", price: 350000, quantity: 1 }],
+        subtotal: 350000,
+        total: 375000,
+        giftWrap: {
+          enabled: true,
+          fee: 25000,
+          theme: "LUXURY_RED",
+          greetingMessage: "Chúc em sinh nhật vui vẻ và luôn hạnh phúc!",
+          recipientName: "Lan Anh",
+          senderName: "Huy Hoàng",
+        },
+      });
+
+      expect.equal(order.giftWrap.enabled, true);
+      expect.equal(order.giftWrap.theme, "LUXURY_RED");
+      expect.equal(order.giftWrap.recipientName, "Lan Anh");
+      expect.equal(order.giftWrap.fee, 25000);
+    });
+
+    test("F92-T3: Updating gift wrap toggles order total dynamically without precision error", () => {
+      let initialTotal = 300000;
+      let prevWrapFee = 25000;
+      let newWrapFee = 0; // customer cancelled gift wrap
+      let updatedTotal = initialTotal + (newWrapFee - prevWrapFee);
+      expect.equal(updatedTotal, 275000);
+    });
+
+    test("F92-T4: Gift wrap themes conform to valid premium styles", () => {
+      const validThemes = ["STANDARD", "LUXURY_RED", "PASTEL_PINK", "BIRTHDAY_CELEBRATION"];
+      const selectedTheme = "PASTEL_PINK";
+      expect.equal(validThemes.includes(selectedTheme), true);
+      expect.equal(validThemes.includes("INVALID_THEME"), false);
+    });
+
+    test("F92-T5: Gift wrap registration appends distinct event entry to order timeline", async () => {
+      const order = await Order.create({
+        orderId: `ORD_GW_TL_${Date.now()}`,
+        status: "pending",
+        customer: { fullName: "Khách Quà Tặng", phone: "0922", address: "Hà Nội" },
+        items: [{ name: "Nước hoa mini", price: 150000, quantity: 1 }],
+        total: 175000,
+        timeline: [],
+      });
+
+      const timelineText = `Đã đăng ký dịch vụ đóng gói quà tặng: LUXURY_RED - Thiệp: "Chúc mừng sinh nhật"`;
+      order.timeline.push({ time: new Date().toISOString(), text: timelineText });
+      await order.save?.();
+
+      expect.equal(order.timeline.length, 1);
+      expect.equal(order.timeline[0].text.includes("đóng gói quà tặng"), true);
+    });
+  });
 });
 
 

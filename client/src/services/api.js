@@ -791,3 +791,13 @@ export async function fetchSellerPriceRadarAPI() {
   const result = await apiRequest("/api/seller/analytics/price-radar");
   return result?.data || result || null;
 }
+
+/**
+ * Gift Wrapping & Personalized Greeting Card Customizer API (Feature 92)
+ */
+export async function updateOrderGiftWrapAPI(orderId, giftWrapData) {
+  return await apiRequest(`/api/orders/${orderId}/gift-wrap`, {
+    method: "PATCH",
+    body: JSON.stringify(giftWrapData),
+  });
+}

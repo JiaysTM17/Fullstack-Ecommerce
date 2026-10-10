@@ -1976,6 +1976,18 @@ export default function OrderHistoryPage() {
                         <strong className="compact-item-val">{ord.paymentMethod || 'COD'}</strong>
                         <span className="compact-guarantee-note">· Bảo vệ an tâm 100%</span>
                       </div>
+
+                      {ord.giftWrap?.enabled && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={ord.giftWrap.greetingMessage ? `Thiệp: "${ord.giftWrap.greetingMessage}"` : "Đã kèm gói quà & thiệp"}>
+                            <span style={{ fontSize: '13px' }}>🎁</span>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#e11d48', background: '#ffe4e6', padding: '2px 6px', borderRadius: '4px' }}>
+                              Gói Quà &amp; Thiệp ({ord.giftWrap.theme === 'LUXURY_RED' ? 'Đỏ Rượu' : ord.giftWrap.theme === 'PASTEL_PINK' ? 'Hồng Pastel' : ord.giftWrap.theme === 'BIRTHDAY_CELEBRATION' ? 'Sinh Nhật' : 'Tối Giản'})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

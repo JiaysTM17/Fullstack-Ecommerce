@@ -340,6 +340,14 @@ export default function CheckoutPage() {
   const [cardHolder, setCardHolder] = useState("NGUYEN VAN A");
   const [cardExpiry, setCardExpiry] = useState("12/28");
 
+  // Dịch vụ gói quà tặng & thiệp chúc mừng (Feature 92)
+  const [giftWrapEnabled, setGiftWrapEnabled] = useState(false);
+  const [giftWrapTheme, setGiftWrapTheme] = useState("LUXURY_RED");
+  const [greetingMessage, setGreetingMessage] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [senderName, setSenderName] = useState("");
+  const giftWrapFee = giftWrapEnabled ? 25000 : 0;
+
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
@@ -356,7 +364,7 @@ export default function CheckoutPage() {
   // Coin calculation: 1 Xu = 1 VND, max 50% of currentSubtotal
   const maxCoinsUsable = Math.min(coins || 0, Math.floor(currentSubtotal * 0.5));
   const coinDiscount = (useCoinsToggle && maxCoinsUsable > 0) ? maxCoinsUsable : 0;
-  const finalOrderTotal = Math.max(0, currentSubtotal - voucherDiscount - coinDiscount + finalShippingFee);
+  const finalOrderTotal = Math.max(0, currentSubtotal - voucherDiscount - coinDiscount + finalShippingFee + giftWrapFee);
 
   async function handleFinalPlaceOrder() {
     setSubmitError("");
@@ -392,6 +400,14 @@ export default function CheckoutPage() {
       coinsUsed: coinDiscount,
       shippingFee: finalShippingFee,
       shippingMethod: shippingOption.name,
+      giftWrap: {
+        enabled: giftWrapEnabled,
+        fee: giftWrapFee,
+        theme: giftWrapTheme,
+        greetingMessage: greetingMessage.trim(),
+        recipientName: recipientName.trim(),
+        senderName: senderName.trim(),
+      },
       total: finalOrderTotal,
       paymentMethod,
     };
@@ -1519,6 +1535,136 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
+              {/* Dịch vụ gói quà tặng & Thiệp chúc mừng cao cấp (Feature 92) */}
+              <div style={{
+                background: giftWrapEnabled ? "rgba(244, 63, 94, 0.04)" : "#f8fafc",
+                border: giftWrapEnabled ? "1.5px solid #f43f5e" : "1px solid #e2e8f0",
+                borderRadius: "12px",
+                padding: "16px",
+                marginBottom: "20px",
+                transition: "all 0.2s ease"
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: giftWrapEnabled ? "14px" : "0" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "8px",
+                      background: "rgba(244, 63, 94, 0.12)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center"
+                    }}>
+                      🎁
+                    </span>
+                    <div>
+                      <div style={{ fontSize: "14px", fontWeight: 800, color: "#0f172a" }}>
+                        Dịch Vụ Gói Quà Tặng &amp; Thiệp Chúc Mừng Cao Cấp
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#64748b" }}>
+                        Hộp quà sang trọng, nơ ruy băng thủ công + Thiệp viết tay theo yêu cầu (+25.000₫)
+                      </div>
+                    </div>
+                  </div>
+
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={giftWrapEnabled}
+                      onChange={(e) => setGiftWrapEnabled(e.target.checked)}
+                      style={{ width: "18px", height: "18px", accentColor: "#f43f5e", cursor: "pointer" }}
+                    />
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: giftWrapEnabled ? "#f43f5e" : "#64748b" }}>
+                      {giftWrapEnabled ? "Đang chọn (+25k)" : "Đăng ký gói"}
+                    </span>
+                  </label>
+                </div>
+
+                {giftWrapEnabled && (
+                  <div style={{ borderTop: "1px dashed #cbd5e1", paddingTop: "14px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div>
+                      <label style={{ fontSize: "12.5px", fontWeight: 700, color: "#334155", display: "block", marginBottom: "6px" }}>
+                        Chủ Đề Hộp Quà &amp; Màu Ruy Băng:
+                      </label>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "8px" }}>
+                        {[
+                          { id: "LUXURY_RED", name: "Đỏ Rượu Sang Trọng", emoji: "🍷" },
+                          { id: "PASTEL_PINK", name: "Hồng Pastel Ngọt Ngào", emoji: "🌸" },
+                          { id: "BIRTHDAY_CELEBRATION", name: "Sinh Nhật Rực Rỡ", emoji: "🎂" },
+                          { id: "STANDARD", name: "Tối Giản Thanh Lịch", emoji: "🎀" },
+                        ].map((th) => (
+                          <button
+                            key={th.id}
+                            type="button"
+                            onClick={() => setGiftWrapTheme(th.id)}
+                            style={{
+                              padding: "8px 10px",
+                              borderRadius: "8px",
+                              border: giftWrapTheme === th.id ? "2px solid #f43f5e" : "1px solid #cbd5e1",
+                              background: giftWrapTheme === th.id ? "#fff1f2" : "#ffffff",
+                              color: giftWrapTheme === th.id ? "#e11d48" : "#475569",
+                              fontSize: "12px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              justifyContent: "center"
+                            }}
+                          >
+                            <span>{th.emoji}</span>
+                            <span>{th.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                      <div>
+                        <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: "4px" }}>
+                          Người gửi (tùy chọn):
+                        </label>
+                        <input
+                          type="text"
+                          className="shopee-form-input"
+                          placeholder="VD: Tuấn Anh"
+                          style={{ fontSize: "12.5px", padding: "6px 10px" }}
+                          value={senderName}
+                          onChange={(e) => setSenderName(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: "4px" }}>
+                          Người nhận thiệp:
+                        </label>
+                        <input
+                          type="text"
+                          className="shopee-form-input"
+                          placeholder="VD: Em Trang iu"
+                          style={{ fontSize: "12.5px", padding: "6px 10px" }}
+                          value={recipientName}
+                          onChange={(e) => setRecipientName(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: "4px" }}>
+                        Lời nhắn chúc mừng in trên thiệp hoa:
+                      </label>
+                      <textarea
+                        className="shopee-form-input"
+                        rows="2"
+                        placeholder="VD: Chúc mừng sinh nhật em gái, chúc em tuổi mới luôn xinh đẹp và rạng rỡ nhé!"
+                        style={{ fontSize: "12.5px", padding: "8px 10px", width: "100%", resize: "none" }}
+                        value={greetingMessage}
+                        onChange={(e) => setGreetingMessage(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Order Note */}
               <div style={{ marginBottom: "24px" }}>
                 <label style={{ fontSize: "13px", fontWeight: 600, display: "block", marginBottom: "4px" }}>
@@ -1704,6 +1850,13 @@ export default function CheckoutPage() {
                 {finalShippingFee === 0 ? "MIỄN PHÍ" : formatCurrency(finalShippingFee)}
               </span>
             </div>
+
+            {giftWrapEnabled && (
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#e11d48" }}>
+                <span>🎁 Dịch vụ gói quà &amp; thiệp:</span>
+                <span style={{ fontWeight: 700 }}>+{formatCurrency(giftWrapFee)}</span>
+              </div>
+            )}
 
             <div style={{ borderTop: "2px solid var(--border-dark, #222)", paddingTop: "12px", marginTop: "4px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <span style={{ fontSize: "15px", fontWeight: 800 }}>TỔNG CỘNG:</span>
