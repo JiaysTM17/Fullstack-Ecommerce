@@ -23,6 +23,7 @@ import {
   approveAdminSettlementAPI,
   getAdminFinanceSettlements,
   getAdminEscrowVaultAPI,
+  broadcastAdminNotificationAPI,
 } from '../services/adminService';
 import {
   ShieldIcon,
@@ -229,6 +230,16 @@ export default function AdminDashboardPage() {
   const [fraudData, setFraudData] = useState(null);
   const [escrowVault, setEscrowVault] = useState(null);
   const [selectedSettlementStatement, setSelectedSettlementStatement] = useState(null);
+
+  // States cho tính năng Phát Sóng Thông Báo Toàn Sàn (Omnichannel Broadcast)
+  const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [broadcastForm, setBroadcastForm] = useState({
+    title: '',
+    message: '',
+    type: 'system',
+    targetRole: 'all',
+  });
 
   const refreshUserData = async (showToastNotice = false) => {
     try {
@@ -601,6 +612,42 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleBroadcastNotification = async (e) => {
+    e.preventDefault();
+    if (!broadcastForm.title.trim()) {
+      toast.error('Vui lòng nhập tiêu đề thông báo!');
+      return;
+    }
+    if (!broadcastForm.message.trim()) {
+      toast.error('Vui lòng nhập nội dung thông báo phát sóng!');
+      return;
+    }
+
+    setIsBroadcasting(true);
+    try {
+      const res = await broadcastAdminNotificationAPI({
+        title: broadcastForm.title.trim(),
+        message: broadcastForm.message.trim(),
+        type: broadcastForm.type,
+        targetRole: broadcastForm.targetRole,
+      });
+
+      const recipientCount = res?.recipientCount || 'toàn bộ';
+      toast.success(`Đã phát sóng thông báo thành công tới ${recipientCount} người dùng trên hệ thống!`);
+      setShowBroadcastModal(false);
+      setBroadcastForm({
+        title: '',
+        message: '',
+        type: 'system',
+        targetRole: 'all',
+      });
+    } catch (err) {
+      toast.error(`Phát sóng thất bại: ${err.message || 'Lỗi hệ thống'}`);
+    } finally {
+      setIsBroadcasting(false);
+    }
+  };
+
   return (
     <div className="shopee-dashboard-container">
       {/* Sidebar Super Admin */}
@@ -956,12 +1003,36 @@ export default function AdminDashboardPage() {
 
       {/* Main Content */}
       <main className="shopee-dashboard-main">
-        <div className="shopee-dashboard-header">
+        <div className="shopee-dashboard-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h1 className="shopee-dashboard-title">Hệ Thống Quản Trị Sàn Fullstack E-Commerce</h1>
             <p className="shopee-dashboard-subtitle">
               Giám sát toàn bộ cửa hàng, người bán, khách hàng, voucher khuyến mãi và doanh thu toàn sàn.
             </p>
+          </div>
+          <div>
+            <button
+              type="button"
+              className="shopee-btn"
+              onClick={() => setShowBroadcastModal(true)}
+              style={{
+                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                color: '#fff',
+                border: 'none',
+                padding: '9px 18px',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '13px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)',
+                cursor: 'pointer',
+              }}
+            >
+              <SparklesIcon size={16} color="#ffffff" />
+              <span>Phát Sóng Thông Báo Toàn Sàn</span>
+            </button>
           </div>
         </div>
 
@@ -3233,6 +3304,204 @@ export default function AdminDashboardPage() {
                   <span>{isDeleting ? 'Đang Xóa...' : 'Xác Nhận Xóa Gian Hàng'}</span>
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Phát Sóng Thông Báo Toàn Sàn (Super Admin Omnichannel Broadcast) */}
+        {showBroadcastModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '16px'
+          }}>
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              maxWidth: '560px',
+              width: '100%',
+              overflow: 'hidden',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              border: '1px solid #e2e8f0',
+              animation: 'adminModalSlideUp 0.25s ease-out'
+            }}>
+              <div style={{
+                padding: '20px 24px',
+                background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+                borderBottom: '1px solid #fed7aa',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    background: '#ea580c',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)'
+                  }}>
+                    <SparklesIcon size={20} color="#ffffff" />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: '#9a3412' }}>
+                      Phát Sóng Thông Báo Toàn Sàn
+                    </h3>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#c2410c' }}>
+                      Gửi thông báo hệ thống tức thì tới Người mua, Người bán hoặc Toàn sàn
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowBroadcastModal(false)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    borderRadius: '6px',
+                    color: '#9a3412',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <CloseIcon size={18} color="#9a3412" />
+                </button>
+              </div>
+
+              <form onSubmit={handleBroadcastNotification}>
+                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                      Đối Tượng Nhận Thông Báo <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <select
+                      className="shopee-input"
+                      value={broadcastForm.targetRole}
+                      onChange={(e) => setBroadcastForm({ ...broadcastForm, targetRole: e.target.value })}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    >
+                      <option value="all">Toàn bộ Người Dùng Trên Sàn (Khách Hàng &amp; Gian Hàng)</option>
+                      <option value="seller">Chỉ Người Bán (Kênh Quản Trị Gian Hàng Seller Center)</option>
+                      <option value="customer">Chỉ Khách Hàng (Tất Cả Người Mua Sắm)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                      Phân Loại Thông Báo
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                      {[
+                        { id: 'system', label: 'Hệ Thống', color: '#0284c7' },
+                        { id: 'promotion', label: 'Khuyến Mãi', color: '#ea580c' },
+                        { id: 'policy', label: 'Chính Sách', color: '#16a34a' },
+                      ].map((type) => (
+                        <button
+                          key={type.id}
+                          type="button"
+                          onClick={() => setBroadcastForm({ ...broadcastForm, type: type.id })}
+                          style={{
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: broadcastForm.type === type.id ? `2px solid ${type.color}` : '1px solid #e2e8f0',
+                            background: broadcastForm.type === type.id ? `${type.color}15` : '#f8fafc',
+                            color: broadcastForm.type === type.id ? type.color : '#64748b',
+                            fontWeight: broadcastForm.type === type.id ? 700 : 500,
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          {type.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                      Tiêu Đề Thông Báo <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="shopee-input"
+                      placeholder="Ví dụ: Đại Tiệc Siêu Sale 10.10 Đang Bắt Đầu..."
+                      value={broadcastForm.title}
+                      onChange={(e) => setBroadcastForm({ ...broadcastForm, title: e.target.value })}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                      Nội Dung Chi Tiết <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <textarea
+                      className="shopee-input"
+                      rows={4}
+                      placeholder="Nhập thông điệp cần truyền tải tới người nhận..."
+                      value={broadcastForm.message}
+                      onChange={(e) => setBroadcastForm({ ...broadcastForm, message: e.target.value })}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{
+                  padding: '16px 24px',
+                  background: '#f8fafc',
+                  borderTop: '1px solid #e2e8f0',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '12px'
+                }}>
+                  <button
+                    type="button"
+                    disabled={isBroadcasting}
+                    className="shopee-btn shopee-btn-secondary"
+                    onClick={() => setShowBroadcastModal(false)}
+                    style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600 }}
+                  >
+                    Hủy Bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isBroadcasting}
+                    className="shopee-btn"
+                    style={{
+                      background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '8px 22px',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      cursor: isBroadcasting ? 'not-allowed' : 'pointer',
+                      opacity: isBroadcasting ? 0.7 : 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <SparklesIcon size={14} color="#ffffff" />
+                    <span>{isBroadcasting ? 'Đang Phát Sóng...' : 'Phát Sóng Ngay'}</span>
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

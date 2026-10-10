@@ -298,3 +298,20 @@ export async function getAdminFinanceSettlements() {
   }
 }
 
+/**
+ * Phát sóng thông báo đa kênh toàn sàn (Super Admin Omnichannel Notification Broadcast)
+ */
+export async function broadcastAdminNotificationAPI(payload) {
+  try {
+    const res = await apiRequest("/api/notifications/broadcast", {
+      method: "POST",
+      headers: getAdminHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.error("[AdminService] broadcastAdminNotificationAPI error:", error.message);
+    throw error;
+  }
+}
+
