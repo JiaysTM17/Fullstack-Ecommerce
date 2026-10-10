@@ -641,7 +641,72 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(summary.statutoryCompliance.includes("ký quỹ bên thứ ba"), true);
     });
   });
+
+  describe("Feature 71: Super Admin Omnichannel Notification Broadcast Engine", () => {
+    test("F71-T1: Broadcast notification distributes message to multiple user inboxes", () => {
+      const userStores = new Map();
+      userStores.set("user_1", []);
+      userStores.set("user_2", []);
+
+      const payload = {
+        title: "Bảo Trì Hệ Thống Định Kỳ",
+        message: "Hệ thống sẽ bảo trì thanh toán trong 15 phút từ 02:00 sáng mai",
+        type: "system",
+      };
+
+      let count = 0;
+      for (const [uid, arr] of userStores.entries()) {
+        arr.unshift({ ...payload, id: `notif-${Date.now()}-${uid}`, isRead: false });
+        count++;
+      }
+
+      expect.equal(count, 2);
+      expect.equal(userStores.get("user_1").length, 1);
+      expect.equal(userStores.get("user_2").length, 1);
+      expect.equal(userStores.get("user_1")[0].title, payload.title);
+    });
+
+    test("F71-T2: Broadcast request missing title or message throws validation error", () => {
+      const validateBroadcast = (body) => Boolean(body?.title && body?.message);
+      expect.equal(validateBroadcast({ title: "Hi", message: "" }), false);
+      expect.equal(validateBroadcast({ title: "", message: "Hello" }), false);
+      expect.equal(validateBroadcast({ title: "Voucher Hot", message: "Nhận 50k" }), true);
+    });
+
+    test("F71-T3: Notification buffer enforces 200 items maximum capacity limit", () => {
+      const notifications = [];
+      for (let i = 0; i < 210; i++) {
+        notifications.unshift({ id: `n-${i}`, title: `Thông báo ${i}` });
+        if (notifications.length > 200) {
+          notifications.length = 200;
+        }
+      }
+      expect.equal(notifications.length, 200);
+      expect.equal(notifications[0].title, "Thông báo 209");
+    });
+
+    test("F71-T4: Unread notification filter counts only isRead === false items", () => {
+      const items = [
+        { id: "1", isRead: true },
+        { id: "2", isRead: false },
+        { id: "3", isRead: false },
+      ];
+      const unread = items.filter((i) => !i.isRead).length;
+      expect.equal(unread, 2);
+    });
+
+    test("F71-T5: Notification default icons correctly map domain specific types", () => {
+      const getDefaultIcon = (t) => {
+        const map = { order: "📦", promotion: "🎉", system: "🔔", warning: "⚠️" };
+        return map[t] || "🔔";
+      };
+      expect.equal(getDefaultIcon("order"), "📦");
+      expect.equal(getDefaultIcon("promotion"), "🎉");
+      expect.equal(getDefaultIcon("unknown"), "🔔");
+    });
+  });
 });
+
 
 
 

@@ -6,8 +6,9 @@ import {
   markAllAsRead,
   deleteNotification,
   clearAllNotifications,
+  broadcastNotification,
 } from "../controllers/notificationController.js";
-import { authenticate } from "../middlewares/auth.js";
+import { authenticate, authorize } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -20,5 +21,8 @@ router.patch("/read-all", markAllAsRead);
 router.patch("/:id/read", markAsRead);
 router.delete("/:id", deleteNotification);
 router.delete("/", clearAllNotifications);
+
+// Admin-only broadcast
+router.post("/broadcast", authorize("admin"), broadcastNotification);
 
 export default router;

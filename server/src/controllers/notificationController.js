@@ -169,7 +169,39 @@ export const clearAllNotifications = catchAsync(async (req, res) => {
     userId,
   });
 
-  sendSuccess(res, { message: "Đã xóa toàn bộ thông báo" });
+// @desc    Broadcast notification to all users (Super Admin only)
+// @route   POST /api/notifications/broadcast
+// @access  Private (Admin only)
+export const broadcastNotification = catchAsync(async (req, res) => {
+  const { title, message, type = "system", icon, link } = req.body;
+
+  if (!title || !message) {
+    return sendError(res, "Tiêu đề và nội dung thông báo là bắt buộc", 400);
+  }
+
+  let broadcastCount = 0;
+  for (const [targetUserId, notifs] of notificationStore.entries()) {
+    createNotification(targetUserId, {
+      type,
+      title,
+      message,
+      icon,
+      orderId: null,
+      productId: null,
+    });
+    broadcastCount++;
+  }
+
+  logger.info(`Admin broadcasted notification '${title}' to ${broadcastCount} active user stores`, {
+    adminId: req.user._id || req.user.id,
+    type,
+    broadcastCount,
+  });
+
+  sendSuccess(res, {
+    message: `Đã phát sóng thông báo thành công tới ${broadcastCount} hộp thư người dùng`,
+    broadcastCount,
+  });
 });
 
 export default {
@@ -180,4 +212,6 @@ export default {
   markAllAsRead,
   deleteNotification,
   clearAllNotifications,
+  broadcastNotification,
 };
+
