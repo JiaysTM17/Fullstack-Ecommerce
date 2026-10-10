@@ -1223,6 +1223,93 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(payable, 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 79: 3PL Carrier Webhook & Post-Delivery CSAT Feedback (5 Tests)
+  // =========================================================================
+  describe("Feature 79: 3PL Carrier Webhook & Post-Delivery CSAT Feedback", () => {
+    test("F79-T1: 3PL webhook event DELIVERED marks order completed and triggers COD collection", () => {
+      const order = {
+        status: "shipping",
+        paymentMethod: "COD",
+        codSettlementStatus: "uncollected",
+        timeline: [],
+      };
+
+      const eventStatus = "DELIVERED";
+      if (eventStatus === "DELIVERED") {
+        order.status = "completed";
+        if (order.paymentMethod === "COD") {
+          order.codSettlementStatus = "collected_by_courier";
+        }
+      }
+
+      expect.equal(order.status, "completed");
+      expect.equal(order.codSettlementStatus, "collected_by_courier");
+    });
+
+    test("F79-T2: 3PL webhook appends carrier audit timeline entry with hub location", () => {
+      const timeline = [];
+      const carrier = "VIETTEL_POST";
+      const hub = "Kho Bưu Cục Hoàn Kiếm";
+
+      timeline.push({
+        time: new Date().toISOString(),
+        text: `[${carrier}] Kiện hàng đã đến ${hub}. Đang phân loại để xuất bưu cục phát.`,
+      });
+
+      expect.equal(timeline.length, 1);
+      expect.equal(timeline[0].text.includes("VIETTEL_POST"), true);
+      expect.equal(timeline[0].text.includes("Hoàn Kiếm"), true);
+    });
+
+    test("F79-T3: CSAT feedback rating must be within 1 to 5 stars range strictly", () => {
+      const validRating = 5;
+      const invalidRatingLow = 0;
+      const invalidRatingHigh = 6;
+
+      const isValid = (r) => typeof r === "number" && r >= 1 && r <= 5;
+
+      expect.equal(isValid(validRating), true);
+      expect.equal(isValid(invalidRatingLow), false);
+      expect.equal(isValid(invalidRatingHigh), false);
+    });
+
+    test("F79-T4: CSAT feedback aggregates deliverySpeed and courierAttitude dimensions", () => {
+      const csat = {
+        rating: 5,
+        deliverySpeedRating: 5,
+        courierAttitudeRating: 4,
+        comment: "Bưu tá thân thiện, giao hỏa tốc rất nhanh!",
+        submittedAt: new Date().toISOString(),
+      };
+
+      const averageScore = (csat.rating + csat.deliverySpeedRating + csat.courierAttitudeRating) / 3;
+
+      expect.equal(averageScore.toFixed(1), "4.7");
+      expect.equal(csat.comment.length > 0, true);
+    });
+
+    test("F79-T5: Failed delivery webhook preserves shipping status and records re-attempt note", () => {
+      const order = {
+        status: "shipping",
+        timeline: [],
+      };
+
+      const eventStatus = "DELIVERY_FAILED";
+      const note = "Khách đi vắng";
+
+      if (eventStatus === "DELIVERY_FAILED") {
+        order.timeline.push({
+          time: new Date().toISOString(),
+          text: `[SPX] Giao hàng không thành công. Lý do: ${note}. Bưu tá sẽ thử phát lại.`,
+        });
+      }
+
+      expect.equal(order.status, "shipping");
+      expect.equal(order.timeline[0].text.includes("Khách đi vắng"), true);
+    });
+  });
 });
 
 

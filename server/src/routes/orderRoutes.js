@@ -15,6 +15,8 @@ import {
   getOrderStats,
   searchOrders,
   requestOrderReturn,
+  simulateCarrierWebhook,
+  submitOrderCsatFeedback,
 } from "../controllers/orderController.js";
 import { authenticate, optionalAuthenticate, authorize } from "../middlewares/auth.js";
 
@@ -33,6 +35,10 @@ router.get("/:id/invoice", optionalAuthenticate, getOrderInvoice);
 
 // Customer return request
 router.post("/:id/return-request", optionalAuthenticate, requestOrderReturn);
+
+// 3PL Carrier Webhook Simulator & CSAT Delivery Feedback
+router.post("/:id/carrier-webhook", simulateCarrierWebhook);
+router.post("/:id/csat-feedback", optionalAuthenticate, submitOrderCsatFeedback);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

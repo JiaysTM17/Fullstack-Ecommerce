@@ -59,6 +59,19 @@ const orderSchema = new mongoose.Schema(
       default: "pending",
     },
     trackingCode: { type: String, default: "" },
+    carrierPartner: {
+      type: String,
+      enum: ["SPX_EXPRESS", "VIETTEL_POST", "GHN_EXPRESS"],
+      default: "SPX_EXPRESS",
+    },
+    shippingHub: { type: String, default: "Kho Phân Loại Trung Tâm Sài Gòn SOC" },
+    csatFeedback: {
+      rating: { type: Number, min: 1, max: 5, default: null }, // 1 to 5 stars
+      deliverySpeedRating: { type: Number, min: 1, max: 5, default: null },
+      courierAttitudeRating: { type: Number, min: 1, max: 5, default: null },
+      comment: { type: String, default: "" },
+      submittedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

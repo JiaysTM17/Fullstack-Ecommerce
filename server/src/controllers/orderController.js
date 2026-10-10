@@ -1161,4 +1161,130 @@ export const requestOrderReturn = async (req, res) => {
   }
 };
 
+// @desc    Mô phỏng Webhook từ đơn vị vận chuyển 3PL (3PL Carrier Status Webhook Simulator)
+// @route   POST /api/orders/:id/carrier-webhook
+// @access  Public (Simulated Webhook with API token or open for integration)
+export const simulateCarrierWebhook = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { carrierPartner, eventStatus, currentLocation, note } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    if (carrierPartner) {
+      order.carrierPartner = carrierPartner;
+    }
+
+    if (!Array.isArray(order.timeline)) order.timeline = [];
+
+    const now = new Date().toISOString();
+    const hub = currentLocation || order.shippingHub || "Kho Phân Loại Trung Tâm";
+
+    if (eventStatus === "PICKED_UP") {
+      order.status = "shipping";
+      order.timeline.push({
+        time: now,
+        text: `[${order.carrierPartner || "SPX"}] Bưu tá đã lấy hàng thành công tại kho shop. Đang trung chuyển về ${hub}.`,
+      });
+    } else if (eventStatus === "IN_TRANSIT") {
+      order.status = "shipping";
+      order.timeline.push({
+        time: now,
+        text: `[${order.carrierPartner || "SPX"}] Kiện hàng đã đến ${hub}. Đang phân loại để xuất bưu cục phát.`,
+      });
+    } else if (eventStatus === "OUT_FOR_DELIVERY") {
+      order.status = "shipping";
+      order.timeline.push({
+        time: now,
+        text: `[${order.carrierPartner || "SPX"}] Bưu tá đang giao hàng tới địa chỉ nhận. Vui lòng để ý điện thoại.`,
+      });
+    } else if (eventStatus === "DELIVERED") {
+      order.status = "completed";
+      if (order.paymentMethod === "COD") {
+        order.codSettlementStatus = "collected_by_courier";
+      }
+      order.timeline.push({
+        time: now,
+        text: `[${order.carrierPartner || "SPX"}] Giao hàng thành công. ${note || "Khách hàng đã ký nhận trọn vẹn."}`,
+      });
+    } else if (eventStatus === "DELIVERY_FAILED") {
+      order.timeline.push({
+        time: now,
+        text: `[${order.carrierPartner || "SPX"}] Giao hàng không thành công. Lý do: ${note || "Không liên lạc được người nhận"}. Bưu tá sẽ thử phát lại.`,
+      });
+    }
+
+    await order.save();
+
+    sendSuccess(res, {
+      orderId: order._id || order.id || order.orderId,
+      status: order.status,
+      carrierPartner: order.carrierPartner,
+      codSettlementStatus: order.codSettlementStatus,
+      timeline: order.timeline,
+      message: `Đã tiếp nhận và cập nhật trạng thái bưu kiện 3PL '${eventStatus}' thành công`,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Khách hàng chấm điểm hài lòng & khảo sát CSAT sau giao hàng (Post-Delivery CSAT & NPS)
+// @route   POST /api/orders/:id/csat-feedback
+// @access  Public / Private (Customer)
+export const submitOrderCsatFeedback = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, deliverySpeedRating, courierAttitudeRating, comment } = req.body;
+
+    const numRating = Number(rating);
+    if (!numRating || numRating < 1 || numRating > 5) {
+      return sendError(res, "Điểm đánh giá dịch vụ (rating) phải từ 1 đến 5 sao", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    order.csatFeedback = {
+      rating: numRating,
+      deliverySpeedRating: Number(deliverySpeedRating) || numRating,
+      courierAttitudeRating: Number(courierAttitudeRating) || numRating,
+      comment: comment ? String(comment).trim() : "",
+      submittedAt: new Date().toISOString(),
+    };
+
+    if (!Array.isArray(order.timeline)) order.timeline = [];
+    order.timeline.push({
+      time: new Date().toISOString(),
+      text: `Khách hàng đánh giá dịch vụ giao vận ${numRating}/5 sao: ${comment ? `"${comment.trim()}"` : "Hài lòng"}`,
+    });
+
+    await order.save();
+
+    sendSuccess(res, {
+      orderId: order._id || order.id || order.orderId,
+      csatFeedback: order.csatFeedback,
+      message: "Cảm ơn bạn đã gửi đánh giá trải nghiệm giao hàng!",
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
 

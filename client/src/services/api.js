@@ -683,3 +683,23 @@ export async function updateSellerAutoReplyAPI(autoReplyData) {
     body: JSON.stringify(autoReplyData),
   });
 }
+
+/**
+ * 3PL Carrier Webhook Simulation API
+ */
+export async function simulateCarrierWebhookAPI(orderId, payload) {
+  return await apiRequest(`/api/orders/${orderId}/carrier-webhook`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Customer Post-Delivery CSAT Feedback API
+ */
+export async function submitOrderCsatFeedbackAPI(orderId, feedbackData) {
+  return await apiRequest(`/api/orders/${orderId}/csat-feedback`, {
+    method: "POST",
+    body: JSON.stringify(feedbackData),
+  });
+}
