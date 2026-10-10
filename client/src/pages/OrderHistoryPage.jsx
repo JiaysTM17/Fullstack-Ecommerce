@@ -16,6 +16,7 @@ import ShopChatModal from '../components/ShopChatModal';
 import VietQRPaymentModal from '../components/VietQRPaymentModal';
 import { cancelOrder } from '../services/orderService';
 import { restoreProductStock } from '../services/productService';
+import { createCustomerReturnRequestAPI } from '../services/api';
 import { pushBuyerNotification } from '../utils/notificationHelper';
 import {
   PackageIcon,
@@ -271,9 +272,9 @@ export default function OrderHistoryPage() {
     return () => window.removeEventListener('storage', handleStorageUpdate);
   }, []);
 
-  const handleReturnSubmit = ({ orderId, reason, refundMethod, note, refundAmount }) => {
+  const handleReturnSubmit = async ({ orderId, reason, refundMethod, note, refundAmount, evidence = [] }) => {
     const updated = orders.map((o) => {
-      if (o.orderId !== orderId) return o;
+      if (o.orderId !== orderId && o._id !== orderId) return o;
       const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const nextTimeline = [
         ...(o.timeline || []),
@@ -283,7 +284,14 @@ export default function OrderHistoryPage() {
         ...o,
         status: 'returning',
         statusText: 'Đang xử lý đổi trả',
-        returnDetails: { reason, refundMethod, note, refundAmount },
+        returnDetails: { reason, refundMethod, note, refundAmount, evidence },
+        returnRequest: {
+          reason,
+          refundAmount: refundAmount || o.total,
+          evidence,
+          status: 'pending',
+          requestedAt: new Date().toISOString(),
+        },
         timeline: nextTimeline,
       };
     });
@@ -294,9 +302,53 @@ export default function OrderHistoryPage() {
         ...prev,
         status: 'returning',
         statusText: 'Đang xử lý đổi trả',
-        returnDetails: { reason, refundMethod, note, refundAmount },
+        returnDetails: { reason, refundMethod, note, refundAmount, evidence },
+        returnRequest: {
+          reason,
+          refundAmount: refundAmount || prev.total,
+          evidence,
+          status: 'pending',
+          requestedAt: new Date().toISOString(),
+        },
       }));
     }
+
+    // Đồng bộ đơn hàng hoàn trả sang Kênh Người Bán (mini_shopee_seller_orders)
+    try {
+      const rawSeller = localStorage.getItem('mini_shopee_seller_orders');
+      if (rawSeller) {
+        const sellerOrders = JSON.parse(rawSeller);
+        const updatedSeller = sellerOrders.map((so) => {
+          if (so.orderId === orderId || so._id === orderId) {
+            return {
+              ...so,
+              returnRequest: {
+                reason,
+                refundAmount: refundAmount || so.total,
+                evidence,
+                status: 'pending',
+                requestedAt: new Date().toISOString(),
+              },
+            };
+          }
+          return so;
+        });
+        localStorage.setItem('mini_shopee_seller_orders', JSON.stringify(updatedSeller));
+        window.dispatchEvent(new Event('storage'));
+      }
+    } catch {}
+
+    // Gọi API backend lưu yêu cầu trả hàng
+    try {
+      await createCustomerReturnRequestAPI(orderId, {
+        reason: `${reason}${note ? ` (${note})` : ''}`,
+        evidence,
+        refundAmount,
+      });
+    } catch (apiErr) {
+      console.warn('Backend return request fallback:', apiErr.message);
+    }
+
     setSelectedReturnOrder(null);
     showToast('Đã gửi yêu cầu trả hàng / hoàn tiền thành công! Shop sẽ phản hồi trong 24h.', 'success');
   };
