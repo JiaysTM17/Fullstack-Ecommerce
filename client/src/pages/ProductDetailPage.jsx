@@ -458,11 +458,16 @@ export default function ProductDetailPage() {
                   <FlameIcon size={14} color="var(--primary-color, #ea580c)" />
                   <span>Sắp hết hàng</span>
                 </span>
-                <span>Chỉ còn {product.stock} sản phẩm</span>
+                <span>Chỉ còn {Math.max(0, product.stock - (product.reservedStock || 0))} sản phẩm khả dụng</span>
               </div>
               <div style={{ height: "6px", background: "rgba(234, 88, 12, 0.15)", borderRadius: "3px", overflow: "hidden" }}>
-                <div style={{ width: `${Math.min(100, Math.max(12, (product.stock / 30) * 100))}%`, height: "100%", background: "var(--primary-color, #ea580c)", borderRadius: "3px" }} />
+                <div style={{ width: `${Math.min(100, Math.max(12, ((product.stock - (product.reservedStock || 0)) / 30) * 100))}%`, height: "100%", background: "var(--primary-color, #ea580c)", borderRadius: "3px" }} />
               </div>
+              {product.reservedStock > 0 && (
+                <div style={{ fontSize: "11px", color: "#c2410c", marginTop: "4px", fontWeight: 600 }}>
+                  ⚡ {product.reservedStock} khách đang tạm giữ trong giỏ hàng chờ thanh toán
+                </div>
+              )}
             </div>
           )}
 
