@@ -96,6 +96,11 @@ const userSchema = new mongoose.Schema(
       enum: ["active", "banned"],
       default: "active",
     },
+    restrictions: {
+      codDisabled: { type: Boolean, default: false },
+      vouchersDisabled: { type: Boolean, default: false },
+      reason: { type: String, default: "" },
+    },
   },
   {
     timestamps: true,

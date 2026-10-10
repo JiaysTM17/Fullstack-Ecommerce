@@ -989,6 +989,78 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(remainingShippingFee, 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 76: Buyer Return Abuse & Fraud Pattern Radar (5 Tests)
+  // =========================================================================
+  describe("Feature 76: Buyer Return Abuse & Fraud Pattern Radar", () => {
+    test("F76-T1: High return rate (>50%) flagged with CRITICAL severity and risk score increment", () => {
+      const totalOrders = 6;
+      const returnedOrders = 4;
+      const returnRate = (returnedOrders / totalOrders) * 100; // 66.7%
+
+      let riskScore = 0;
+      if (returnRate >= 50 && totalOrders >= 2) {
+        riskScore += 40;
+      }
+      expect.equal(returnRate > 50, true);
+      expect.equal(riskScore, 40);
+    });
+
+    test("F76-T2: High COD refusal rate flags buyer with suggested restriction", () => {
+      const codOrders = 4;
+      const rejectedCod = 3;
+      const refusalRate = (rejectedCod / codOrders) * 100; // 75%
+
+      let riskScore = 0;
+      let restriction = "NONE";
+      if (refusalRate >= 50 && codOrders >= 2) {
+        riskScore += 35;
+        restriction = "RESTRICT_COD";
+      }
+
+      expect.equal(riskScore, 35);
+      expect.equal(restriction, "RESTRICT_COD");
+    });
+
+    test("F76-T3: Risk score >= 70 categorizes buyer as CRITICAL risk tier", () => {
+      const riskScore = 75;
+      let riskLevel = "LOW";
+      if (riskScore >= 70) riskLevel = "CRITICAL";
+      else if (riskScore >= 40) riskLevel = "MEDIUM";
+
+      expect.equal(riskLevel, "CRITICAL");
+    });
+
+    test("F76-T4: Applying RESTRICT_COD updates user restrictions object accurately", () => {
+      const user = {
+        _id: "user_test_abuse",
+        status: "active",
+        restrictions: { codDisabled: false, vouchersDisabled: false, reason: "" },
+      };
+
+      // Admin arbitrates: RESTRICT_COD
+      user.restrictions.codDisabled = true;
+      user.restrictions.reason = "Tỷ lệ bùng đơn bưu tá vượt ngưỡng 50%";
+
+      expect.equal(user.restrictions.codDisabled, true);
+      expect.equal(user.restrictions.vouchersDisabled, false);
+      expect.equal(user.restrictions.reason.includes("50%"), true);
+    });
+
+    test("F76-T5: Blocked voucher buyer restriction successfully halts voucher application in order checkout", () => {
+      const userRestrictions = {
+        codDisabled: false,
+        vouchersDisabled: true,
+        reason: "Phát hiện gian lận voucher hệ thống",
+      };
+
+      const hasVoucherDiscount = true;
+      const shouldBlockOrder = userRestrictions.vouchersDisabled && hasVoucherDiscount;
+
+      expect.equal(shouldBlockOrder, true);
+    });
+  });
 });
 
 

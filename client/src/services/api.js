@@ -650,3 +650,21 @@ export async function fetchSellerOperationalSLA_API() {
   return result?.data || result || null;
 }
 
+/**
+ * Triple Voucher Stacking & Mini Xu Offset API
+ */
+export async function applyTripleVouchersAPI({ items = [], freeshipCode, shopVoucherCode, platformVoucherCode, shippingFee = 25000, requestedCoins = 0, userCoins = 0 }) {
+  const result = await apiRequest("/api/vouchers/apply-triple", {
+    method: "POST",
+    body: JSON.stringify({
+      items,
+      freeshipCode,
+      shopVoucherCode,
+      platformVoucherCode,
+      shippingFee,
+      requestedCoins,
+      userCoins,
+    }),
+  });
+  return result?.data || result || null;
+}

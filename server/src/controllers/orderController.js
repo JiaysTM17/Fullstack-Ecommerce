@@ -26,6 +26,28 @@ export const createOrder = async (req, res) => {
       return sendError(res, "Tổng tiền thanh toán không hợp lệ", 400);
     }
 
+    // === ENFORCE BUYER RESTRICTIONS (Abuse Radar Guard) ===
+    const activeUserId = req.user ? (req.user._id || req.user.id) : null;
+    if (activeUserId) {
+      const activeUser = await User.findById(activeUserId);
+      if (activeUser?.restrictions) {
+        if (activeUser.restrictions.codDisabled && paymentMethod === "COD") {
+          return sendError(
+            res,
+            `Phương thức thanh toán COD tạm thời bị khóa cho tài khoản này do: ${activeUser.restrictions.reason || "Tỷ lệ hoàn trả/bùng hàng cao"}. Vui lòng thanh toán trực tuyến (Chuyển khoản/Ví điện tử).`,
+            403
+          );
+        }
+        if (activeUser.restrictions.vouchersDisabled && (voucherCode || shippingVoucherCode || Number(voucherDiscount) > 0 || Number(shippingDiscount) > 0)) {
+          return sendError(
+            res,
+            `Đặc quyền áp dụng Voucher tạm thời bị tạm dừng do: ${activeUser.restrictions.reason || "Hệ thống ghi nhận dấu hiệu bất thường"}.`,
+            403
+          );
+        }
+      }
+    }
+
     // === MINI XU CAP (50% of subtotal) ===
     let effectiveCoinDiscount = Number(coinDiscount) || 0;
     let effectiveCoinsUsed = Number(coinsUsed) || 0;

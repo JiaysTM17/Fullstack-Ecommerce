@@ -26,6 +26,8 @@ import {
   broadcastAdminNotificationAPI,
   getAdminCodReconciliationAPI,
   batchClearAdminCodAPI,
+  getBuyerAbuseRadarAPI,
+  arbitrateBuyerAbuseAPI,
 } from '../services/adminService';
 import {
   ShieldIcon,
@@ -247,6 +249,10 @@ export default function AdminDashboardPage() {
   const [codData, setCodData] = useState(null);
   const [isClearingCod, setIsClearingCod] = useState(false);
 
+  // States cho Radar Phát Hiện Gian Lận & Lạm Dụng Hoàn Trả (Buyer Abuse Radar)
+  const [buyerAbuseData, setBuyerAbuseData] = useState(null);
+  const [isArbitratingBuyer, setIsArbitratingBuyer] = useState(false);
+
   const refreshUserData = async (showToastNotice = false) => {
     try {
       const res = await getAdminUsers();
@@ -347,6 +353,8 @@ export default function AdminDashboardPage() {
       getAdminEscrowVaultAPI().then(v => setEscrowVault(v));
     } else if (activeTab === 'cod_recon') {
       getAdminCodReconciliationAPI().then(c => setCodData(c));
+    } else if (activeTab === 'buyer_abuse') {
+      getBuyerAbuseRadarAPI().then(b => setBuyerAbuseData(b));
     }
   }, [activeTab]);
 
@@ -682,6 +690,21 @@ export default function AdminDashboardPage() {
       toast.error(`Khớp đối soát thất bại: ${err.message || 'Lỗi hệ thống'}`);
     } finally {
       setIsClearingCod(false);
+    }
+  };
+
+  const handleArbitrateBuyerAbuse = async (userId, action, reason) => {
+    setIsArbitratingBuyer(true);
+    try {
+      await arbitrateBuyerAbuseAPI(userId, { action, reason });
+      toast.success(`Đã áp dụng chế tài '${action}' thành công cho tài khoản!`);
+      // Reload buyer abuse data
+      const refreshed = await getBuyerAbuseRadarAPI();
+      if (refreshed) setBuyerAbuseData(refreshed);
+    } catch (err) {
+      toast.error(`Áp dụng chế tài thất bại: ${err.message || 'Lỗi hệ thống'}`);
+    } finally {
+      setIsArbitratingBuyer(false);
     }
   };
 
@@ -1057,6 +1080,28 @@ export default function AdminDashboardPage() {
             <ReceiptIcon size={16} color="#059669" />
           </span>
           <span>Đối Soát COD Bưu Tá</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'buyer_abuse' ? 'active' : ''}`}
+          onClick={() => setActiveTab('buyer_abuse')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+        >
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '7px',
+            background: activeTab === 'buyer_abuse' ? 'rgba(220, 38, 38, 0.14)' : 'rgba(100, 116, 139, 0.08)',
+            border: activeTab === 'buyer_abuse' ? '1px solid rgba(220, 38, 38, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)',
+            flexShrink: 0
+          }}>
+            <ShieldIcon size={16} color="#dc2626" />
+          </span>
+          <span>Radar Gian Lận Người Mua</span>
         </button>
       </aside>
 
@@ -3143,6 +3188,192 @@ export default function AdminDashboardPage() {
                         </td>
                         <td style={{ padding: '12px 16px', fontSize: '12px', color: '#64748b' }}>
                           {o.codReconciledAt ? new Date(o.codReconciledAt).toLocaleString('vi-VN') : 'Đang xử lý'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 12: RADAR PHÁT HIỆN GIAN LẬN & HOÀN TRẢ NGƯỜI MUA (BUYER ABUSE RADAR)
+        ========================================================================= */}
+        {activeTab === 'buyer_abuse' && (
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldIcon size={20} color="#dc2626" />
+                  Radar Phát Hiện Gian Lận &amp; Lạm Dụng Hoàn Trả (Buyer Abuse Radar)
+                </h2>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                  Hệ thống AI tự động phát hiện khách hàng có tỷ lệ hoàn hàng bất thường, bùng đơn COD và lạm dụng voucher sàn
+                </p>
+              </div>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-outline"
+                onClick={() => getBuyerAbuseRadarAPI().then(b => setBuyerAbuseData(b))}
+                style={{ padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}
+              >
+                Quét Lại Dữ Liệu
+              </button>
+            </div>
+
+            {/* 3 Thẻ Chỉ Số Cảnh Báo */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#fef2f2', border: '1px solid #fecaca' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#dc2626' }}>CẢNH BÁO NGUY HIỂM (CRITICAL)</span>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: '#991b1b', margin: '4px 0' }}>
+                  {buyerAbuseData?.criticalCount || 0}
+                </div>
+                <span style={{ fontSize: '12px', color: '#dc2626' }}>Tài khoản có điểm rủi ro ≥ 70</span>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#fffbeb', border: '1px solid #fde68a' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#d97706' }}>CẦN THEO DÕI (MEDIUM)</span>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: '#b45309', margin: '4px 0' }}>
+                  {buyerAbuseData?.mediumCount || 0}
+                </div>
+                <span style={{ fontSize: '12px', color: '#d97706' }}>Điểm rủi ro từ 40 - 69</span>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>TỔNG TÀI KHOẢN ĐÃ KIỂM TRA</span>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: '#334155', margin: '4px 0' }}>
+                  {buyerAbuseData?.totalAuditedBuyers || 0}
+                </div>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>Khách hàng phát sinh giao dịch</span>
+              </div>
+            </div>
+
+            {/* Bảng Danh Sách Tài Khoản Người Mua & Chế Tài */}
+            <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
+              <table className="shopee-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Khách Hàng</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Lịch Sử Mua</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Tỷ Lệ Hoàn / Hủy</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Bùng Hàng COD</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Điểm Rủi Ro</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Hành Vi Ghi Nhận</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569', textAlign: 'center' }}>Hành Động Chế Tài</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(!buyerAbuseData?.buyerProfiles || buyerAbuseData.buyerProfiles.length === 0) ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>
+                        Chưa phát hiện hành vi gian lận hoàn trả bất thường nào từ người mua.
+                      </td>
+                    </tr>
+                  ) : (
+                    buyerAbuseData.buyerProfiles.map((p) => (
+                      <tr key={p.userId} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '12px 16px' }}>
+                          <strong style={{ color: '#0f172a' }}>{p.fullName}</strong>
+                          <div style={{ fontSize: '11.5px', color: '#64748b' }}>{p.email}</div>
+                          <div style={{ fontSize: '11px', color: '#94a3b8' }}>SĐT: {p.phone}</div>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <div style={{ fontWeight: 700, color: '#334155' }}>{p.totalOrders} đơn hàng</div>
+                          <div style={{ fontSize: '12px', color: '#059669' }}>{formatCurrency(p.totalSpent)}</div>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span style={{ fontWeight: 700, color: p.returnRate >= 30 ? '#dc2626' : '#334155' }}>
+                            Hoàn: {p.returnRate}% ({p.returnedCount} đơn)
+                          </span>
+                          <div style={{ fontSize: '11.5px', color: p.cancelRate >= 50 ? '#ea580c' : '#64748b' }}>
+                            Hủy: {p.cancelRate}% ({p.cancelledCount} đơn)
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span style={{ fontWeight: 700, color: p.codRefusalRate >= 50 ? '#dc2626' : '#334155' }}>
+                            {p.codRefusalRate}%
+                          </span>
+                          <div style={{ fontSize: '11px', color: '#64748b' }}>({p.codOrdersCount} đơn COD)</div>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span
+                            className="shopee-badge"
+                            style={{
+                              background: p.riskLevel === 'CRITICAL' ? '#fee2e2' : p.riskLevel === 'MEDIUM' ? '#fef3c7' : '#ecfdf5',
+                              color: p.riskLevel === 'CRITICAL' ? '#dc2626' : p.riskLevel === 'MEDIUM' ? '#d97706' : '#059669',
+                              border: p.riskLevel === 'CRITICAL' ? '1px solid #fca5a5' : p.riskLevel === 'MEDIUM' ? '1px solid #fde68a' : '1px solid #a7f3d0',
+                              fontWeight: 800,
+                              fontSize: '12px'
+                            }}
+                          >
+                            {p.riskScore} / 100 ({p.riskLevel})
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px', maxWidth: '240px' }}>
+                          {p.riskFlags && p.riskFlags.length > 0 ? (
+                            p.riskFlags.map((flag, idx) => (
+                              <div key={idx} style={{ fontSize: '11.5px', color: '#b91c1c', marginBottom: '2px' }}>
+                                • {flag}
+                              </div>
+                            ))
+                          ) : (
+                            <span style={{ fontSize: '12px', color: '#059669' }}>Lịch sử giao dịch bình thường</span>
+                          )}
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '6px' }}>
+                            <button
+                              type="button"
+                              disabled={isArbitratingBuyer}
+                              onClick={() => handleArbitrateBuyerAbuse(p.userId, 'RESTRICT_COD', 'Khóa COD do tỷ lệ bùng đơn cao')}
+                              style={{
+                                background: '#fef2f2',
+                                border: '1px solid #fca5a5',
+                                color: '#dc2626',
+                                borderRadius: '6px',
+                                padding: '4px 8px',
+                                fontSize: '11.5px',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Khóa COD
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isArbitratingBuyer}
+                              onClick={() => handleArbitrateBuyerAbuse(p.userId, 'BLOCK_VOUCHERS', 'Khóa voucher do lạm dụng khuyến mãi')}
+                              style={{
+                                background: '#fffbeb',
+                                border: '1px solid #fde68a',
+                                color: '#d97706',
+                                borderRadius: '6px',
+                                padding: '4px 8px',
+                                fontSize: '11.5px',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Chặn Voucher
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isArbitratingBuyer}
+                              onClick={() => handleArbitrateBuyerAbuse(p.userId, 'UNRESTRICT', 'Mở lại quyền giao dịch bình thường')}
+                              style={{
+                                background: '#f8fafc',
+                                border: '1px solid #cbd5e1',
+                                color: '#475569',
+                                borderRadius: '6px',
+                                padding: '4px 8px',
+                                fontSize: '11.5px',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Gỡ Phạt
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))

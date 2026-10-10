@@ -29,6 +29,8 @@ import {
   getAdminEscrowVault,
   getAdminCodReconciliation,
   batchClearAdminCodReconciliation,
+  getBuyerAbuseRadar,
+  arbitrateBuyerAbuse,
 } from "../controllers/adminController.js";
 
 
@@ -80,5 +82,7 @@ router.post("/finance/cod-reconciliation/batch-clear", batchClearAdminCodReconci
 // Fraud & Security Radar
 router.get("/security/fraud-radar", getAdminFraudRadar);
 router.post("/security/fraud-radar/:id/resolve", resolveAdminFraudAnomaly);
+router.get("/security/buyer-abuse-radar", getBuyerAbuseRadar);
+router.post("/security/buyer-abuse/:userId/arbitrate", arbitrateBuyerAbuse);
 
 export default router;

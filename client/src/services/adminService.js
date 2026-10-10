@@ -347,3 +347,35 @@ export async function batchClearAdminCodAPI(orderIds = []) {
   }
 }
 
+/**
+ * Radar Phát hiện Gian lận & Lạm dụng Hoàn trả Khách hàng (Buyer Abuse Radar)
+ */
+export async function getBuyerAbuseRadarAPI() {
+  try {
+    const res = await apiRequest("/api/admin/security/buyer-abuse-radar", {
+      headers: getAdminHeaders(),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.warn("[AdminService] getBuyerAbuseRadarAPI fallback:", error.message);
+    return null;
+  }
+}
+
+/**
+ * Áp dụng chế tài đối với tài khoản gian lận hoàn trả (Arbitrate Buyer Abuse)
+ */
+export async function arbitrateBuyerAbuseAPI(userId, { action, reason }) {
+  try {
+    const res = await apiRequest(`/api/admin/security/buyer-abuse/${userId}/arbitrate`, {
+      method: "POST",
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ action, reason }),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.error("[AdminService] arbitrateBuyerAbuseAPI error:", error.message);
+    throw error;
+  }
+}
+

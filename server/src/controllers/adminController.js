@@ -1516,6 +1516,164 @@ export const batchClearAdminCodReconciliation = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Radar Phát Hiện Hành Vi Gian Lận & Hoàn Trả Đơn Hàng Của Người Mua (Buyer Abuse & Fraud Radar)
+// @route   GET /api/admin/security/buyer-abuse-radar
+// @access  Private (Admin Ops / Super Admin)
+export const getBuyerAbuseRadar = catchAsync(async (req, res) => {
+  const allOrders = await Order.find({});
+  const allUsers = await User.find({ role: "customer" });
+
+  const buyerProfiles = [];
+
+  for (const user of allUsers) {
+    const userId = user._id || user.id;
+    const userOrders = allOrders.filter(
+      (o) => o.userId === userId || o.customer?.email === user.email || o.customer?.phone === user.phone
+    );
+
+    if (userOrders.length === 0) continue;
+
+    const totalOrders = userOrders.length;
+    const totalSpent = userOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const returnedOrders = userOrders.filter(
+      (o) => o.status === "returning" || (o.returnRequest && o.returnRequest.status !== "none")
+    );
+    const cancelledOrders = userOrders.filter((o) => o.status === "cancelled");
+    const codOrders = userOrders.filter((o) => o.paymentMethod === "COD");
+    const rejectedCodOrders = codOrders.filter((o) => o.status === "cancelled");
+
+    const returnRate = Number(((returnedOrders.length / totalOrders) * 100).toFixed(1));
+    const cancelRate = Number(((cancelledOrders.length / totalOrders) * 100).toFixed(1));
+    const codRefusalRate = codOrders.length > 0
+      ? Number(((rejectedCodOrders.length / codOrders.length) * 100).toFixed(1))
+      : 0;
+
+    let riskScore = 0; // 0 to 100
+    const riskFlags = [];
+
+    if (returnRate >= 50 && totalOrders >= 2) {
+      riskScore += 40;
+      riskFlags.push("Tỷ lệ hoàn hàng bất thường (>50%)");
+    } else if (returnRate >= 30 && totalOrders >= 3) {
+      riskScore += 25;
+      riskFlags.push("Tỷ lệ hoàn hàng cao (>30%)");
+    }
+
+    if (codRefusalRate >= 50 && codOrders.length >= 2) {
+      riskScore += 35;
+      riskFlags.push("Tỷ lệ bùng hàng / từ chối nhận COD cao");
+    }
+
+    if (cancelRate >= 60 && totalOrders >= 3) {
+      riskScore += 20;
+      riskFlags.push("Tần suất hủy đơn hàng loạt liên tục");
+    }
+
+    // Kiểm tra lạm dụng mã giảm giá nhiều tài khoản cùng SDT / IP
+    const voucherOrders = userOrders.filter((o) => o.voucherDiscount > 0 || o.shippingDiscount > 0);
+    if (voucherOrders.length === totalOrders && totalOrders >= 3) {
+      riskScore += 15;
+      riskFlags.push("Chỉ mua hàng khi có trợ giá mã cực lớn (Voucher Hunter)");
+    }
+
+    riskScore = Math.min(100, riskScore);
+
+    let riskLevel = "LOW";
+    if (riskScore >= 70) riskLevel = "CRITICAL";
+    else if (riskScore >= 40) riskLevel = "MEDIUM";
+
+    buyerProfiles.push({
+      userId,
+      fullName: user.fullName || "Khách hàng " + userId,
+      email: user.email,
+      phone: user.phone || "0909******",
+      status: user.status || "active",
+      totalOrders,
+      totalSpent,
+      returnedCount: returnedOrders.length,
+      returnRate,
+      cancelledCount: cancelledOrders.length,
+      cancelRate,
+      codOrdersCount: codOrders.length,
+      codRefusalRate,
+      riskScore,
+      riskLevel,
+      riskFlags,
+      suggestedAction:
+        riskLevel === "CRITICAL"
+          ? "RESTRICT_COD_AND_VOUCHERS"
+          : riskLevel === "MEDIUM"
+          ? "MONITOR_CLOSELY"
+          : "NORMAL_SERVICE",
+    });
+  }
+
+  buyerProfiles.sort((a, b) => b.riskScore - a.riskScore);
+
+  const criticalBuyers = buyerProfiles.filter((b) => b.riskLevel === "CRITICAL");
+  const mediumBuyers = buyerProfiles.filter((b) => b.riskLevel === "MEDIUM");
+
+  sendSuccess(res, {
+    radarStatus: "ACTIVE",
+    totalAuditedBuyers: buyerProfiles.length,
+    criticalCount: criticalBuyers.length,
+    mediumCount: mediumBuyers.length,
+    buyerProfiles,
+  });
+});
+
+// @desc    Áp dụng chế tài đối với tài khoản lạm dụng / gian lận hoàn trả (Restrict / Lock Buyer)
+// @route   POST /api/admin/security/buyer-abuse/:userId/arbitrate
+// @access  Private (Admin Ops / Super Admin)
+export const arbitrateBuyerAbuse = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { action, reason } = req.body; // "RESTRICT_COD", "BLOCK_VOUCHERS", "SUSPEND_ACCOUNT", "UNRESTRICT"
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return sendError(res, "Không tìm thấy người dùng", 404);
+  }
+
+  user.restrictions = user.restrictions || {
+    codDisabled: false,
+    vouchersDisabled: false,
+    reason: "",
+  };
+
+  if (action === "RESTRICT_COD") {
+    user.restrictions.codDisabled = true;
+    user.restrictions.reason = reason || "Tỷ lệ bùng hàng COD quá cao";
+  } else if (action === "BLOCK_VOUCHERS") {
+    user.restrictions.vouchersDisabled = true;
+    user.restrictions.reason = reason || "Lạm dụng gian lận mã giảm giá toàn sàn";
+  } else if (action === "SUSPEND_ACCOUNT") {
+    user.status = "banned";
+    user.restrictions.reason = reason || "Gian lận nghiêm trọng quy chế sàn TMĐT";
+  } else if (action === "UNRESTRICT") {
+    user.status = "active";
+    user.restrictions.codDisabled = false;
+    user.restrictions.vouchersDisabled = false;
+    user.restrictions.reason = "";
+  }
+
+  await user.save();
+
+  recordAuditLog({
+    userId: req.user._id || req.user.id,
+    action: "ARBITRATE_BUYER_ABUSE",
+    resourceType: "SECURITY",
+    resourceId: userId,
+    details: { action, reason, userEmail: user.email },
+  });
+
+  sendSuccess(res, {
+    message: `Đã thực thi chế tài '${action}' thành công cho người dùng`,
+    userId,
+    status: user.status,
+    restrictions: user.restrictions,
+  });
+});
+
 export default {
   getAllShopsAdmin,
   updateShopStatusAdmin,
@@ -1545,4 +1703,6 @@ export default {
   getAdminEscrowVault,
   getAdminCodReconciliation,
   batchClearAdminCodReconciliation,
+  getBuyerAbuseRadar,
+  arbitrateBuyerAbuse,
 };
