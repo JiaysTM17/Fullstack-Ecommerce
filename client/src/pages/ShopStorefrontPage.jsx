@@ -29,6 +29,8 @@ import {
   UserIcon,
   HomeIcon,
   AlertCircleIcon,
+  FlameIcon,
+  BoltIcon,
 } from '../components/OrdersIcons';
 
 // Hàm phân loại chuyên nghiệp cho từng mặt hàng trong gian hàng
@@ -160,6 +162,28 @@ export default function ShopStorefrontPage() {
     });
 
     return Array.from(map.values());
+  }, [products]);
+
+  // Deal Flash Sale độc quyền của Shop (giảm giá sâu và đang cháy hàng)
+  const shopFlashDeals = useMemo(() => {
+    return (products || [])
+      .filter((p) => p.originalPrice && p.originalPrice > p.price)
+      .map((p) => {
+        const discountPercent = Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100);
+        const stock = Number(p.stock) || 0;
+        const sold = Number(p.sold) || 0;
+        const initialPool = Math.max(1, stock + sold);
+        const percentSold = Math.min(99, Math.max(25, Math.round((sold / initialPool) * 100)));
+        const isBurningOut = stock <= 10 || percentSold >= 75;
+        return {
+          ...p,
+          discountPercent,
+          percentSold,
+          isBurningOut,
+        };
+      })
+      .sort((a, b) => b.discountPercent - a.discountPercent)
+      .slice(0, 4);
   }, [products]);
 
   // Phân chia sản phẩm theo phân loại được chọn và nhóm sản phẩm gợi ý thêm
@@ -822,6 +846,150 @@ export default function ShopStorefrontPage() {
                     </>
                   )}
                 </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Shop Exclusive Flash Deals Section */}
+      {shopFlashDeals && shopFlashDeals.length > 0 && (
+        <section
+          style={{
+            background: 'linear-gradient(135deg, #fff7ed 0%, #ffffff 100%)',
+            padding: '20px',
+            borderRadius: '16px',
+            border: '1.5px solid rgba(234, 88, 12, 0.2)',
+            marginBottom: '28px',
+            boxShadow: '0 4px 16px rgba(234, 88, 12, 0.08)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{
+                background: 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)',
+                color: '#ffffff',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontWeight: 900,
+                fontSize: '13px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.35)',
+              }}>
+                <BoltIcon size={14} color="#ffffff" />
+                <span>FLASH SALE CỦA SHOP</span>
+              </span>
+              <span style={{ fontSize: '12.5px', color: '#c2410c', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <FlameIcon size={14} color="#dc2626" />
+                <span>Đang cháy hàng • Số lượng có hạn</span>
+              </span>
+            </div>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Cập nhật tồn kho theo thời gian thực
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+            {shopFlashDeals.map((prod) => (
+              <div
+                key={`shop-fs-${prod._id || prod.id}`}
+                style={{
+                  background: 'var(--bg-card, #ffffff)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(234, 88, 12, 0.15)',
+                  padding: '12px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  gap: '12px',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                }}
+                onClick={() => navigate(`/products/${prod._id || prod.id}`)}
+              >
+                <div style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, borderRadius: '8px', overflow: 'hidden' }}>
+                  <img
+                    src={prod.image || prod.images?.[0]}
+                    alt={prod.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    loading="lazy"
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: '2px',
+                    left: '2px',
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    fontSize: '10px',
+                    fontWeight: 900,
+                    padding: '1px 5px',
+                    borderRadius: '4px',
+                  }}>
+                    -{prod.discountPercent}%
+                  </div>
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div style={{
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {prod.name}
+                  </div>
+
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                      <span style={{ fontSize: '15px', fontWeight: 800, color: '#ea580c' }}>
+                        {formatCurrency(prod.price)}
+                      </span>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                        {formatCurrency(prod.originalPrice)}
+                      </span>
+                    </div>
+
+                    {/* Mini Fire Bar */}
+                    <div style={{
+                      marginTop: '6px',
+                      height: '14px',
+                      borderRadius: '9999px',
+                      background: '#fed7aa',
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: `${prod.percentSold}%`,
+                        background: prod.isBurningOut
+                          ? 'linear-gradient(90deg, #dc2626, #ea580c)'
+                          : 'linear-gradient(90deg, #f97316, #fb923c)',
+                        borderRadius: '9999px',
+                      }} />
+                      <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '9.5px',
+                        fontWeight: 800,
+                        color: '#ffffff',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                        letterSpacing: '0.2px',
+                      }}>
+                        {prod.isBurningOut ? `CHÁY HÀNG • ĐÃ BÁN ${prod.percentSold}%` : `ĐÃ BÁN ${prod.percentSold}%`}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
