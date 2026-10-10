@@ -1475,6 +1475,90 @@ export const respondSellerReturnRequest = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Báo cáo Lợi Nhuận & Phân Tích Biên Lợi Nhuận Từng SKU (P&L Per-SKU Cost & Margin Analysis)
+// @route   GET /api/seller/analytics/profit-loss
+// @access  Private (Seller only)
+export const getSellerProfitAndLoss = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
+
+  const shopProducts = await Product.find({ shopId });
+  const allOrders = await Order.find();
+  const shopOrders = allOrders.filter(
+    (o) => o.status !== "cancelled" && (o.items || []).some((it) => it.shopId === shopId)
+  );
+
+  let totalRevenue = 0;
+  let totalCogs = 0; // Cost of Goods Sold
+  let totalUnitsSold = 0;
+
+  const skuAnalytics = shopProducts.map((p) => {
+    const pid = String(p._id || p.id);
+    const cost = Number(p.costPrice) || Math.round((Number(p.price) || 0) * 0.6); // Mặc định 60% giá bán nếu chưa nhập giá vốn
+    const price = Number(p.price) || 0;
+
+    let unitsSold = 0;
+    let revenue = 0;
+
+    shopOrders.forEach((ord) => {
+      (ord.items || []).forEach((item) => {
+        const itemPid = String(item.productId || item._id || item.id);
+        if (itemPid === pid || item.name === p.name) {
+          const qty = Number(item.quantity) || 1;
+          unitsSold += qty;
+          revenue += (Number(item.price) || price) * qty;
+        }
+      });
+    });
+
+    // Nếu dữ liệu đơn hàng chưa tích lũy đủ thì lấy theo sold thực tế của sản phẩm
+    if (unitsSold === 0 && (p.sold || 0) > 0) {
+      unitsSold = Number(p.sold) || 0;
+      revenue = unitsSold * price;
+    }
+
+    const cogs = unitsSold * cost;
+    const grossProfit = revenue - cogs;
+    const grossMargin = revenue > 0 ? Number(((grossProfit / revenue) * 100).toFixed(1)) : (price > 0 ? Number((((price - cost) / price) * 100).toFixed(1)) : 0);
+
+    totalRevenue += revenue;
+    totalCogs += cogs;
+    totalUnitsSold += unitsSold;
+
+    return {
+      productId: pid,
+      sku: p.sku || `SKU-${pid.slice(-6).toUpperCase()}`,
+      name: p.name,
+      image: p.image,
+      category: p.category,
+      price,
+      costPrice: cost,
+      stock: p.stock || 0,
+      unitsSold,
+      revenue,
+      cogs,
+      grossProfit,
+      grossMargin,
+      status: grossMargin < 15 ? "low_margin" : grossMargin > 40 ? "high_margin" : "healthy",
+    };
+  });
+
+  const grossProfitTotal = totalRevenue - totalCogs;
+  const averageMargin = totalRevenue > 0 ? Number(((grossProfitTotal / totalRevenue) * 100).toFixed(1)) : 0;
+
+  sendSuccess(res, {
+    summary: {
+      totalRevenue,
+      totalCogs,
+      grossProfit: grossProfitTotal,
+      averageMargin,
+      totalUnitsSold,
+      totalSkus: shopProducts.length,
+    },
+    skuAnalytics: skuAnalytics.sort((a, b) => b.revenue - a.revenue),
+  });
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -1509,4 +1593,6 @@ export default {
   requestSellerWithdrawal,
   getSellerReturnRequests,
   respondSellerReturnRequest,
+  getSellerProfitAndLoss,
 };
+

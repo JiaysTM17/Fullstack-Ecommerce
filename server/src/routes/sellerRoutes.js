@@ -34,6 +34,7 @@ import {
   requestSellerWithdrawal,
   getSellerReturnRequests,
   respondSellerReturnRequest,
+  getSellerProfitAndLoss,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -49,6 +50,7 @@ router.get("/dashboard", getSellerDashboard);
 router.get("/revenue", getSellerRevenue);
 router.get("/analytics/funnel", getSellerAnalyticsFunnel);
 router.get("/analytics/market", getSellerMarketIntelligence);
+router.get("/analytics/profit-loss", getSellerProfitAndLoss);
 
 // Shopee Ads ROI Suite
 router.get("/ads", getSellerAdsCampaigns);

@@ -608,3 +608,11 @@ export async function respondSellerReturnAPI(id, decision, note = "") {
     body: JSON.stringify({ decision, note }),
   });
 }
+
+/**
+ * Seller P&L Per-SKU Cost & Margin Analytics
+ */
+export async function fetchSellerProfitAndLossAPI() {
+  const result = await apiRequest("/api/seller/analytics/profit-loss");
+  return result?.data || result || { summary: {}, skuAnalytics: [] };
+}

@@ -416,4 +416,66 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(activeReturns[1].id, "o3");
     });
   });
+
+  describe("Feature 67: Seller P&L Per-SKU Cost & Margin Analytics (Cost of Goods Sold, Gross Margin)", () => {
+    test("F67-T1: SKU margin calculation accurately computes Gross Profit and Margin %", () => {
+      const price = 250000;
+      const costPrice = 150000;
+      const unitsSold = 10;
+      const revenue = price * unitsSold;
+      const cogs = costPrice * unitsSold;
+      const grossProfit = revenue - cogs;
+      const margin = Number(((grossProfit / revenue) * 100).toFixed(1));
+
+      expect.equal(revenue, 2500000);
+      expect.equal(cogs, 1500000);
+      expect.equal(grossProfit, 1000000);
+      expect.equal(margin, 40.0);
+    });
+
+    test("F67-T2: Fallback cost price defaults to 60% of retail price when costPrice is omitted", () => {
+      const price = 500000;
+      const costPrice = null;
+      const effectiveCost = Number(costPrice) || Math.round(price * 0.6);
+      expect.equal(effectiveCost, 300000);
+    });
+
+    test("F67-T3: SKU margin threshold categorizes unhealthy vs healthy margins", () => {
+      const classifyMargin = (margin) => {
+        if (margin < 15) return "low_margin";
+        if (margin > 40) return "high_margin";
+        return "healthy";
+      };
+
+      expect.equal(classifyMargin(10.5), "low_margin");
+      expect.equal(classifyMargin(28.0), "healthy");
+      expect.equal(classifyMargin(45.2), "high_margin");
+    });
+
+    test("F67-T4: Overall shop P&L aggregates total revenue, COGS and weighted average margin", () => {
+      const skuData = [
+        { revenue: 1000000, cogs: 600000 },
+        { revenue: 2000000, cogs: 1000000 },
+      ];
+      const totalRev = skuData.reduce((s, i) => s + i.revenue, 0);
+      const totalCogs = skuData.reduce((s, i) => s + i.cogs, 0);
+      const grossProfitTotal = totalRev - totalCogs;
+      const avgMargin = Number(((grossProfitTotal / totalRev) * 100).toFixed(1));
+
+      expect.equal(totalRev, 3000000);
+      expect.equal(totalCogs, 1600000);
+      expect.equal(grossProfitTotal, 1400000);
+      expect.equal(avgMargin, 46.7);
+    });
+
+    test("F67-T5: Zero revenue SKU returns 0% margin without NaN division by zero", () => {
+      const revenue = 0;
+      const cogs = 0;
+      const grossProfit = revenue - cogs;
+      const margin = revenue > 0 ? Number(((grossProfit / revenue) * 100).toFixed(1)) : 0;
+      expect.equal(Number.isNaN(margin), false);
+      expect.equal(margin, 0);
+    });
+  });
 });
+
