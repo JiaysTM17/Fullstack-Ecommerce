@@ -21,6 +21,7 @@ import {
   getAdminFraudRadar,
   resolveAdminFraudAnomalyAPI,
   approveAdminSettlementAPI,
+  getAdminFinanceSettlements,
 } from '../services/adminService';
 import {
   ShieldIcon,
@@ -47,6 +48,8 @@ import {
   BookOpenIcon,
   FoodIcon,
   SearchIcon,
+  ReceiptIcon,
+  PrinterIcon,
 } from '../components/OrdersIcons';
 import '../styles/dashboard.css';
 
@@ -293,7 +296,31 @@ export default function AdminDashboardPage() {
       getAdminDisputes().then(disps => setDisputes(disps || []));
     } else if (activeTab === 'deep_bi' || activeTab === 'overview') {
       getAdminPlatformDeepBI().then(bi => setDeepBI(bi));
-    } else if (activeTab === 'finance' || activeTab === 'tax_center') {
+    } else if (activeTab === 'finance') {
+      getAdminFinanceSettlements().then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setFinanceList(data.map(item => ({
+            id: item.id || `fin_${item.shopId}`,
+            shopId: item.shopId,
+            shopName: item.shopName,
+            bankAccount: item.bankAccount,
+            gmv: item.grossGMV || item.gmv || 0,
+            grossGMV: item.grossGMV || item.gmv || 0,
+            commission: item.commission || item.platformCommission || Math.round((item.grossGMV || item.gmv || 0) * 0.05),
+            vatWithholding: item.vatWithholding || Math.round((item.grossGMV || item.gmv || 0) * 0.005),
+            pitWithholding: item.pitWithholding || Math.round((item.grossGMV || item.gmv || 0) * 0.01),
+            taxWithholding: item.taxWithholding || ((item.vatWithholding || 0) + (item.pitWithholding || 0)) || Math.round((item.grossGMV || item.gmv || 0) * 0.015),
+            netPayout: item.netPayout !== undefined ? item.netPayout : Math.max(0, (item.grossGMV || item.gmv || 0) - Math.round((item.grossGMV || item.gmv || 0) * 0.05) - Math.round((item.grossGMV || item.gmv || 0) * 0.015)),
+            period: item.period || 'Kỳ hiện tại (Tháng 09/2026)',
+            status: item.status === 'settled' || item.status === 'paid' ? 'paid' : 'pending',
+            statusText: item.status === 'settled' || item.status === 'paid' ? 'Đã thanh toán' : 'Chờ đối soát',
+            settledAt: item.settledAt,
+            ordersCount: item.ordersCount || 0,
+          })));
+        }
+      });
+      getAdminTaxReports().then(tax => setTaxData(tax));
+    } else if (activeTab === 'tax_center') {
       getAdminTaxReports().then(tax => setTaxData(tax));
     } else if (activeTab === 'fraud_radar') {
       getAdminFraudRadar().then(f => setFraudData(f));
