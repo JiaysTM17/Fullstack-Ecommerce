@@ -667,6 +667,75 @@ export const getAdminAuditLogs = catchAsync(async (req, res) => {
   sendSuccess(res, { logs, total: logs.length });
 });
 
+// @desc    Xuất báo cáo nhật ký kiểm toán hệ thống (CSV / JSON)
+// @route   GET /api/admin/audit-logs/export
+// @access  Private (Admin only)
+export const exportAdminAuditLogs = catchAsync(async (req, res) => {
+  const { action, entityType, format = "json", startDate, endDate } = req.query;
+  const query = {};
+  if (action && action !== "ALL") query.action = action;
+  if (entityType && entityType !== "ALL") query.entityType = entityType;
+
+  let logs = await AuditLog.find(query);
+  logs = logs || [];
+
+  if (startDate) {
+    const start = new Date(startDate);
+    logs = logs.filter((l) => new Date(l.createdAt) >= start);
+  }
+  if (endDate) {
+    const end = new Date(endDate);
+    logs = logs.filter((l) => new Date(l.createdAt) <= end);
+  }
+
+  logs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  if (format.toLowerCase() === "csv") {
+    const headers = [
+      "ID",
+      "Thoi_Gian",
+      "Nguoi_Thuc_Hien",
+      "Vai_Tro",
+      "Hanh_Dong",
+      "Thuc_The",
+      "Ma_Thuc_The",
+      "Chi_Tiet",
+      "IP_Address"
+    ];
+
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = typeof val === "object" ? JSON.stringify(val) : String(val);
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
+    const rows = logs.map((log) => [
+      escapeCsv(log._id || log.id),
+      escapeCsv(log.createdAt),
+      escapeCsv(log.userName || log.userId),
+      escapeCsv(log.userRole || "admin"),
+      escapeCsv(log.action),
+      escapeCsv(log.entityType),
+      escapeCsv(log.entityId),
+      escapeCsv(log.details),
+      escapeCsv(log.ip || "127.0.0.1"),
+    ].join(","));
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+    const filename = `audit_trail_${new Date().toISOString().slice(0, 10)}.csv`;
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    return res.status(200).send(csvContent);
+  }
+
+  sendSuccess(res, {
+    format: "json",
+    exportedAt: new Date().toISOString(),
+    totalRecords: logs.length,
+    logs,
+  }, 200, "Xuất nhật ký kiểm toán thành công");
+});
+
 // @desc    Lấy danh sách các siêu chiến dịch Mega Campaign
 // @route   GET /api/admin/campaigns
 // @access  Private (Admin only)
@@ -1809,6 +1878,7 @@ export default {
   getTopShops,
   getRecentOrders,
   getAdminAuditLogs,
+  exportAdminAuditLogs,
   getAdminCampaigns,
   createAdminCampaign,
   updateAdminCampaignStatus,

@@ -16,6 +16,7 @@ import {
   getTopShops,
   getRecentOrders,
   getAdminAuditLogs,
+  exportAdminAuditLogs,
   getAdminCampaigns,
   createAdminCampaign,
   updateAdminCampaignStatus,
@@ -49,7 +50,8 @@ router.get("/top-shops", getTopShops);
 router.get("/recent-orders", getRecentOrders);
 router.get("/analytics/deep-bi", getAdminPlatformDeepBI);
 
-// Audit Logs
+// Audit Logs & Export
+router.get("/audit-logs/export", exportAdminAuditLogs);
 router.get("/audit-logs", getAdminAuditLogs);
 
 // Mega Campaigns Management

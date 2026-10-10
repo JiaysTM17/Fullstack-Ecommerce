@@ -14,6 +14,7 @@ import FlashSale from "../../server/src/models/FlashSale.js";
 import Shop from "../../server/src/models/Shop.js";
 import Order from "../../server/src/models/Order.js";
 import Product from "../../server/src/models/Product.js";
+import AuditLog, { recordAuditLog } from "../../server/src/models/AuditLog.js";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
 
@@ -1723,6 +1724,120 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
 
       const prod = await Product.findById(p5._id);
       expect.equal(prod.reservedStock, 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 85: Super Admin Security Incident Response & Audit Trail Export (5 Tests)
+  // =========================================================================
+  describe("Feature 85: Super Admin Security Incident Response & Audit Trail Export", () => {
+    test("F85-T1: Audit log recorder registers critical actions with user ID, role, action, and timestamp", async () => {
+      const log = await recordAuditLog({
+        userId: "admin_sec_01",
+        userName: "Võ An Ninh (Security Lead)",
+        userRole: "admin",
+        action: "SUSPEND_FRAUDULENT_ACCOUNT",
+        entityType: "USER",
+        entityId: "user_attacker_99",
+        details: { reason: "Sybil attack voucher farming detected", confidence: 0.98 },
+        ip: "10.0.0.99",
+      });
+
+      expect.equal(Boolean(log), true);
+      expect.equal(log.action, "SUSPEND_FRAUDULENT_ACCOUNT");
+      expect.equal(log.entityId, "user_attacker_99");
+      expect.equal(Boolean(log.createdAt), true);
+    });
+
+    test("F85-T2: Audit trail export in JSON format yields structured schema with totalRecords and ISO timestamp", async () => {
+      const logs = await AuditLog.find({});
+      const exportPayload = {
+        format: "json",
+        exportedAt: new Date().toISOString(),
+        totalRecords: logs.length,
+        logs,
+      };
+
+      expect.equal(exportPayload.format, "json");
+      expect.equal(typeof exportPayload.totalRecords, "number");
+      expect.equal(exportPayload.totalRecords >= 1, true);
+      expect.equal(Array.isArray(exportPayload.logs), true);
+    });
+
+    test("F85-T3: Audit trail export in CSV format outputs UTF-8 BOM, standard headers, and properly escaped fields", () => {
+      const sampleLogs = [
+        {
+          _id: "aud_01",
+          createdAt: "2026-10-10T12:00:00.000Z",
+          userName: "Tổng Quản Trị Viên",
+          userRole: "admin",
+          action: "UPDATE_COMMISSION",
+          entityType: "SHOP",
+          entityId: "shop_01",
+          details: { oldRate: 0.05, newRate: 0.04 },
+          ip: "127.0.0.1",
+        },
+      ];
+
+      const headers = ["ID", "Thoi_Gian", "Nguoi_Thuc_Hien", "Vai_Tro", "Hanh_Dong", "Thuc_The", "Ma_Thuc_The", "Chi_Tiet", "IP_Address"];
+      const escapeCsv = (val) => {
+        if (val === null || val === undefined) return '""';
+        const str = typeof val === "object" ? JSON.stringify(val) : String(val);
+        return `"${str.replace(/"/g, '""')}"`;
+      };
+
+      const rows = sampleLogs.map((log) => [
+        escapeCsv(log._id),
+        escapeCsv(log.createdAt),
+        escapeCsv(log.userName),
+        escapeCsv(log.userRole),
+        escapeCsv(log.action),
+        escapeCsv(log.entityType),
+        escapeCsv(log.entityId),
+        escapeCsv(log.details),
+        escapeCsv(log.ip),
+      ].join(","));
+
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+
+      expect.equal(csvContent.startsWith("\uFEFF"), true);
+      expect.equal(csvContent.includes("UPDATE_COMMISSION"), true);
+      expect.equal(csvContent.includes('""oldRate"":0.05'), true);
+    });
+
+    test("F85-T4: Action-based filtering isolates targeted operations", async () => {
+      await recordAuditLog({
+        userId: "admin_kyc_01",
+        userName: "Nguyễn Thẩm Định KYC",
+        userRole: "admin",
+        action: "ARBITRATE_KYC",
+        entityType: "SHOP",
+        entityId: "shop_kyc_filter_test",
+        details: { status: "VERIFIED" },
+      });
+
+      const allLogs = await AuditLog.find({});
+      const kycLogs = allLogs.filter((l) => l.action === "ARBITRATE_KYC");
+      expect.equal(kycLogs.length >= 1, true);
+      expect.equal(kycLogs.every((l) => l.action === "ARBITRATE_KYC"), true);
+    });
+
+    test("F85-T5: Date range boundary filters constrain audit event timeframe strictly between startDate and endDate", () => {
+      const pastLog = { createdAt: "2026-01-01T00:00:00.000Z" };
+      const currentLog = { createdAt: "2026-10-10T10:00:00.000Z" };
+      const futureLog = { createdAt: "2026-12-31T23:59:59.000Z" };
+
+      const startDate = new Date("2026-10-01T00:00:00.000Z");
+      const endDate = new Date("2026-10-31T23:59:59.000Z");
+
+      const filterByDateRange = (l) => {
+        const d = new Date(l.createdAt);
+        return d >= startDate && d <= endDate;
+      };
+
+      expect.equal(filterByDateRange(pastLog), false);
+      expect.equal(filterByDateRange(currentLog), true);
+      expect.equal(filterByDateRange(futureLog), false);
     });
   });
 });

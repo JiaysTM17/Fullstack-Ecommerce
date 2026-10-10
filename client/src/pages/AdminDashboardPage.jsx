@@ -11,6 +11,7 @@ import {
   deleteAdminShop,
   updateAdminShopStatus,
   getAdminAuditLogs,
+  exportAdminAuditLogsAPI,
   getAdminCampaigns,
   createAdminCampaign,
   updateAdminCampaignStatus,
@@ -2646,7 +2647,7 @@ export default function AdminDashboardPage() {
         {/* ==================== TAB: NHẬT KÝ KIỂM TOÁN (AUDIT LOGS) ==================== */}
         {activeTab === 'audit' && (
           <div className="shopee-card" style={{ padding: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
               <div>
                 <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
                   Nhật Ký Kiểm Toán Toàn Sàn (Audit Trail & Security Logs)
@@ -2655,20 +2656,72 @@ export default function AdminDashboardPage() {
                   Ghi nhận đầy đủ danh tính người thực hiện, thao tác nhạy cảm, IP và thời gian thực để phục vụ thanh tra.
                 </p>
               </div>
-              <button
-                type="button"
-                className="shopee-btn shopee-btn-secondary"
-                onClick={() => {
-                  toast.success('Đã xuất báo cáo Audit Logs (JSON) thành công!');
-                  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(auditLogs, null, 2));
-                  const downloadAnchor = document.createElement('a');
-                  downloadAnchor.setAttribute('href', dataStr);
-                  downloadAnchor.setAttribute('download', `audit_logs_${Date.now()}.json`);
-                  downloadAnchor.click();
-                }}
-              >
-                Xuất Báo Cáo JSON
-              </button>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-primary"
+                  style={{ background: '#059669', borderColor: '#059669', fontSize: '13px' }}
+                  onClick={async () => {
+                    try {
+                      await exportAdminAuditLogsAPI({
+                        format: 'csv',
+                        action: auditFilterAction !== 'all' ? auditFilterAction : undefined,
+                      });
+                      toast.success('Đã tải xuống file đối soát kiểm toán CSV thành công!');
+                    } catch (err) {
+                      toast.error('Lỗi khi tải báo cáo CSV: ' + err.message);
+                    }
+                  }}
+                >
+                  📥 Xuất Báo Cáo CSV (Đối Soát)
+                </button>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  style={{ fontSize: '13px' }}
+                  onClick={() => {
+                    toast.success('Đã xuất báo cáo Audit Logs (JSON) thành công!');
+                    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(auditLogs, null, 2));
+                    const downloadAnchor = document.createElement('a');
+                    downloadAnchor.setAttribute('href', dataStr);
+                    downloadAnchor.setAttribute('download', `audit_logs_${Date.now()}.json`);
+                    downloadAnchor.click();
+                  }}
+                >
+                  📄 Xuất Báo Cáo JSON
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Pills */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '18px', flexWrap: 'wrap' }}>
+              {[
+                { id: 'all', label: 'Tất Cả Thao Tác' },
+                { id: 'ARBITRATE_KYC', label: 'Định Danh Thuế KYC' },
+                { id: 'ARBITRATE_BUYER_ABUSE', label: 'Chống Gian Lận Buyer' },
+                { id: 'UPDATE_COMMISSION', label: 'Biến Động Hoa Hồng Shop' },
+                { id: 'DISPUTE_ARBITRATE', label: 'Trọng Tài Hoàn Tiền' },
+                { id: 'CAMPAIGN_CREATE', label: 'Chiến Dịch Mega Sale' },
+              ].map((pill) => (
+                <button
+                  key={pill.id}
+                  type="button"
+                  onClick={() => setAuditFilterAction(pill.id)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    border: auditFilterAction === pill.id ? '1px solid #0284c7' : '1px solid #cbd5e1',
+                    background: auditFilterAction === pill.id ? 'rgba(2, 132, 199, 0.12)' : '#ffffff',
+                    color: auditFilterAction === pill.id ? '#0284c7' : '#475569',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {pill.label}
+                </button>
+              ))}
             </div>
 
             <div className="shopee-table-responsive">
@@ -2705,7 +2758,7 @@ export default function AdminDashboardPage() {
                       details: { title: 'Siêu Sale 10.10' },
                       ip: '127.0.0.1'
                     }
-                  ]).map((log, idx) => (
+                  ]).filter((log) => auditFilterAction === 'all' || log.action === auditFilterAction).map((log, idx) => (
                     <tr key={log._id || idx}>
                       <td style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap' }}>
                         {new Date(log.createdAt).toLocaleString('vi-VN')}

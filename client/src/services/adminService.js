@@ -126,6 +126,51 @@ export async function getAdminAuditLogs(params = {}) {
 }
 
 /**
+ * Xuất Nhật ký kiểm toán toàn sàn (CSV hoặc JSON)
+ */
+export async function exportAdminAuditLogsAPI({ format = "csv", action, entityType, startDate, endDate } = {}) {
+  try {
+    const params = { format };
+    if (action) params.action = action;
+    if (entityType) params.entityType = entityType;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+
+    const query = new URLSearchParams(params).toString();
+    const endpoint = `/api/admin/audit-logs/export?${query}`;
+
+    if (format === "csv") {
+      const token = localStorage.getItem("mini_shopee_token") || "mock_jwt_token_admin_auto";
+      const baseUrl = (import.meta.env?.VITE_API_URL || "http://localhost:5000").replace(/\/$/, "");
+      const res = await fetch(`${baseUrl}${endpoint}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Xuất CSV thất bại");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `audit_trail_report_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      return { success: true, message: "Tải xuống file CSV thành công!" };
+    }
+
+    const res = await apiRequest(endpoint, {
+      headers: getAdminHeaders(),
+    });
+    return res?.data || res;
+  } catch (error) {
+    console.warn("[AdminService] exportAdminAuditLogsAPI fallback:", error.message);
+    throw error;
+  }
+}
+
+/**
  * Lấy danh sách Siêu chiến dịch Mega Campaigns
  */
 export async function getAdminCampaigns() {
