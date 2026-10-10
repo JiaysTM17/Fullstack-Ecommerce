@@ -337,6 +337,96 @@ export const getVoucherStats = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Xếp chồng voucher 3 tầng (Freeship + Shop Voucher + Platform Voucher + Xu Shopee)
+// @route   POST /api/vouchers/apply-triple
+// @access  Public
+export const applyTripleVouchers = catchAsync(async (req, res) => {
+  const {
+    freeshipCode,
+    shopCode,
+    platformCode,
+    subtotal = 0,
+    shippingFee = 25000,
+    shopId = "shop_01",
+    coinsUsed = 0,
+  } = req.body;
+
+  const orderSubtotal = Math.max(0, Number(subtotal) || 0);
+  let shippingFinalFee = Math.max(0, Number(shippingFee) || 0);
+  let shippingDiscount = 0;
+  let shopDiscount = 0;
+  let platformDiscount = 0;
+  let coinDeduction = 0;
+
+  let freeshipApplied = null;
+  let shopApplied = null;
+  let platformApplied = null;
+
+  // 1. Tầng Freeship
+  if (freeshipCode) {
+    const v = await memoryStore.vouchers.findOne({ code: freeshipCode.trim().toUpperCase() });
+    if (v && (v.type === "shipping" || v.type === "freeship") && orderSubtotal >= (v.minOrderValue || 0)) {
+      shippingDiscount = Math.min(shippingFinalFee, v.value || 30000);
+      if (v.maxDiscount) shippingDiscount = Math.min(shippingDiscount, v.maxDiscount);
+      shippingFinalFee = Math.max(0, shippingFinalFee - shippingDiscount);
+      freeshipApplied = { code: v.code, discount: shippingDiscount };
+    }
+  }
+
+  // 2. Tầng Shop Voucher (Chỉ áp dụng cho đơn vị bán cụ thể)
+  if (shopCode) {
+    const v = await memoryStore.vouchers.findOne({ code: shopCode.trim().toUpperCase() });
+    if (v && (!v.isGlobal || v.shopId === shopId) && orderSubtotal >= (v.minOrderValue || 0)) {
+      if (v.type === "percent" || v.type === "percentage") {
+        shopDiscount = Math.round((orderSubtotal * (v.value || 0)) / 100);
+        if (v.maxDiscount) shopDiscount = Math.min(shopDiscount, v.maxDiscount);
+      } else {
+        shopDiscount = Math.min(orderSubtotal, v.value || 0);
+      }
+      shopApplied = { code: v.code, discount: shopDiscount };
+    }
+  }
+
+  // 3. Tầng Platform Global Voucher
+  if (platformCode) {
+    const v = await memoryStore.vouchers.findOne({ code: platformCode.trim().toUpperCase() });
+    if (v && v.isGlobal && orderSubtotal >= (v.minOrderValue || 0)) {
+      const remainingForPlatform = Math.max(0, orderSubtotal - shopDiscount);
+      if (v.type === "percent" || v.type === "percentage") {
+        platformDiscount = Math.round((remainingForPlatform * (v.value || 0)) / 100);
+        if (v.maxDiscount) platformDiscount = Math.min(platformDiscount, v.maxDiscount);
+      } else {
+        platformDiscount = Math.min(remainingForPlatform, v.value || 0);
+      }
+      platformApplied = { code: v.code, discount: platformDiscount };
+    }
+  }
+
+  // 4. Khấu trừ Shopee Xu (Tối đa 50% giá trị còn lại sau voucher)
+  const remainingAfterVouchers = Math.max(0, orderSubtotal - shopDiscount - platformDiscount);
+  const maxCoinsAllowed = Math.floor(remainingAfterVouchers * 0.5);
+  const actualCoins = Math.min(Number(coinsUsed) || 0, maxCoinsAllowed);
+  coinDeduction = actualCoins;
+
+  const finalTotal = remainingAfterVouchers - coinDeduction + shippingFinalFee;
+
+  sendSuccess(res, {
+    subtotal: orderSubtotal,
+    shippingFee: Number(shippingFee) || 0,
+    shippingDiscount,
+    shopDiscount,
+    platformDiscount,
+    coinDeduction,
+    totalDiscount: shippingDiscount + shopDiscount + platformDiscount + coinDeduction,
+    finalTotal: Math.max(0, finalTotal),
+    appliedVouchers: {
+      freeship: freeshipApplied,
+      shop: shopApplied,
+      platform: platformApplied,
+    },
+  });
+});
+
 export default {
   getVouchers,
   applyVoucher,
@@ -346,4 +436,5 @@ export default {
   validateVoucher,
   getMyVouchers,
   getVoucherStats,
+  applyTripleVouchers,
 };

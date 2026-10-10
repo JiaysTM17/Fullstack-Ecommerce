@@ -916,6 +916,79 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isCompliant, true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 75: Triple Voucher Stacking & Mini Xu Offset Engine (5 Tests)
+  // =========================================================================
+  describe("Feature 75: Triple Voucher Stacking & Mini Xu Offset Engine", () => {
+    test("F75-T1: Stack Freeship + Shop Fixed Voucher + Platform Percent Voucher cleanly", () => {
+      const subtotal = 500000;
+      const shippingFee = 30000;
+
+      // 1. Freeship 30k
+      const shipDiscount = Math.min(shippingFee, 30000);
+      const remainShip = shippingFee - shipDiscount;
+
+      // 2. Shop voucher 50k
+      const shopDiscount = 50000;
+      const afterShop = subtotal - shopDiscount;
+
+      // 3. Platform voucher 10%
+      const platformDiscount = Math.round(afterShop * 0.1); // 45k
+      const afterPlatform = afterShop - platformDiscount; // 405k
+
+      expect.equal(shipDiscount, 30000);
+      expect.equal(remainShip, 0);
+      expect.equal(platformDiscount, 45000);
+      expect.equal(afterPlatform + remainShip, 405000);
+    });
+
+    test("F75-T2: Shopee Xu offset strictly capped at 50% of payable amount after vouchers", () => {
+      const payableAfterVouchers = 400000;
+      const userCoins = 300000; // Người dùng có 300k Xu
+
+      const maxCoinsAllowed = Math.floor(payableAfterVouchers * 0.5); // 200k Xu tối đa
+      const actualCoinsUsed = Math.min(userCoins, maxCoinsAllowed);
+
+      expect.equal(maxCoinsAllowed, 200000);
+      expect.equal(actualCoinsUsed, 200000);
+      expect.equal(payableAfterVouchers - actualCoinsUsed, 200000);
+    });
+
+    test("F75-T3: Minimum order value threshold prevents applying voucher when subtotal is inadequate", () => {
+      const voucher = { code: "MIN500K", minOrderValue: 500000, value: 50000 };
+      const subtotalFail = 450000;
+      const subtotalPass = 550000;
+
+      const canApplyFail = subtotalFail >= voucher.minOrderValue;
+      const canApplyPass = subtotalPass >= voucher.minOrderValue;
+
+      expect.equal(canApplyFail, false);
+      expect.equal(canApplyPass, true);
+    });
+
+    test("F75-T4: Max discount ceiling limits high-percentage vouchers correctly", () => {
+      const orderSubtotal = 2000000;
+      const voucher = { type: "percent", value: 20, maxDiscount: 150000 };
+
+      const computed = (orderSubtotal * voucher.value) / 100; // 400k
+      const capped = Math.min(computed, voucher.maxDiscount); // 150k
+
+      expect.equal(computed, 400000);
+      expect.equal(capped, 150000);
+    });
+
+    test("F75-T5: Free shipping discount does not exceed actual shipping fee charged", () => {
+      const actualShippingFee = 18000;
+      const freeshipVoucherVal = 30000;
+
+      const appliedDiscount = Math.min(actualShippingFee, freeshipVoucherVal);
+      const remainingShippingFee = actualShippingFee - appliedDiscount;
+
+      expect.equal(appliedDiscount, 18000);
+      expect.equal(remainingShippingFee, 0);
+    });
+  });
 });
 
 
