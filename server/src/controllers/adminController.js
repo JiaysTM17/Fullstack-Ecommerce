@@ -932,9 +932,42 @@ export const getAdminDisputes = catchAsync(async (req, res) => {
   const allShops = await Shop.find({});
   const allOrders = await Order.find({});
 
-  const enrichedDisputes = disputes.map((d) => {
+  // Tự động thu thập các yêu cầu Trả hàng / Hoàn tiền đang chờ hoặc bị shop từ chối vào dòng xử lý tranh chấp của Admin
+  const orderDisputes = allOrders
+    .filter((o) => o.returnRequest && ["pending", "rejected"].includes(o.returnRequest.status))
+    .map((o) => {
+      const oid = String(o._id || o.id || o.orderId);
+      const firstItem = (o.items && o.items[0]) || {};
+      const shopObj = allShops.find((s) => (s._id || s.id) === firstItem.shopId) || {};
+      return {
+        _id: `disp_ord_${oid.slice(-8)}`,
+        id: `disp_ord_${oid.slice(-8)}`,
+        orderId: o.orderId || oid,
+        customerId: o.userId || "user_customer",
+        customerName: o.customer?.fullName || "Khách hàng",
+        shopId: firstItem.shopId || "shop_01",
+        shopName: firstItem.shopName || shopObj.name || "Gian Hàng Shopee",
+        reason: o.returnRequest.reason || "Khiếu nại sản phẩm không đạt chuẩn",
+        claimAmount: o.returnRequest.refundAmount || o.total || 0,
+        status: o.returnRequest.status === "rejected" ? "under_review" : "opened",
+        evidence: o.returnRequest.evidence || [],
+        shopResponse: o.returnRequest.responseNote || "",
+        arbitrationNote: "",
+        createdAt: o.returnRequest.requestedAt || o.updatedAt || new Date().toISOString(),
+      };
+    });
+
+  // Gộp các tranh chấp phát sinh từ đơn hàng thực tế vào danh sách tranh chấp
+  const combinedDisputes = [...disputes];
+  orderDisputes.forEach((od) => {
+    if (!combinedDisputes.some((d) => d.orderId === od.orderId)) {
+      combinedDisputes.unshift(od);
+    }
+  });
+
+  const enrichedDisputes = combinedDisputes.map((d) => {
     const raw = typeof d.toObject === "function" ? d.toObject() : { ...d };
-    const analysis = computeDisputeReputationAndRecommendation(raw, allUsers, allShops, allOrders, disputes);
+    const analysis = computeDisputeReputationAndRecommendation(raw, allUsers, allShops, allOrders, combinedDisputes);
     return {
       ...raw,
       ...analysis,
@@ -953,14 +986,55 @@ export const arbitrateAdminDispute = catchAsync(async (req, res) => {
   const finalDecision = resolution || decision || "REFUND_BUYER";
   const finalNote = note || resolutionNote || "";
 
-  const dispute = await Dispute.findById(id);
+  let dispute = await Dispute.findById(id);
+  if (!dispute) {
+    dispute = await Dispute.findOne({ orderId: id });
+  }
+
+  // Nếu tranh chấp bắt nguồn từ đơn hàng thực tế
+  let relatedOrder = null;
+  if (!dispute && id.startsWith("disp_ord_")) {
+    const rawOid = id.replace("disp_ord_", "");
+    const allOrders = await Order.find({});
+    relatedOrder = allOrders.find((o) => String(o._id || o.id || o.orderId).endsWith(rawOid));
+    if (relatedOrder) {
+      dispute = {
+        _id: id,
+        id,
+        orderId: relatedOrder.orderId || relatedOrder._id,
+        status: finalDecision === "REFUND_BUYER" ? "resolved_refund" : "resolved_rejected",
+        arbitrationNote: finalNote,
+        resolvedBy: req.user.fullName || "Super Admin",
+        resolvedAt: new Date().toISOString(),
+        save: async () => {},
+      };
+    }
+  }
+
   if (!dispute) return sendError(res, "Không tìm thấy tranh chấp khiếu nại", 404);
 
   dispute.status = finalDecision === "REFUND_BUYER" ? "resolved_refund" : "resolved_rejected";
   dispute.arbitrationNote = finalNote;
   dispute.resolvedBy = req.user.fullName || "Super Admin";
   dispute.resolvedAt = new Date().toISOString();
-  await dispute.save();
+  if (typeof dispute.save === "function") {
+    await dispute.save();
+  }
+
+  // Nếu có đơn hàng liên quan, cập nhật trạng thái returnRequest trên đơn hàng
+  if (!relatedOrder && dispute.orderId) {
+    relatedOrder = await Order.findOne({ $or: [{ _id: dispute.orderId }, { orderId: dispute.orderId }] });
+  }
+  if (relatedOrder && relatedOrder.returnRequest) {
+    relatedOrder.returnRequest.status = finalDecision === "REFUND_BUYER" ? "approved" : "rejected";
+    relatedOrder.returnRequest.responseNote = `Trọng tài Super Admin phán quyết: ${finalNote}`;
+    relatedOrder.returnRequest.respondedAt = new Date().toISOString();
+    if (finalDecision === "REFUND_BUYER") {
+      relatedOrder.status = "returning";
+      relatedOrder.statusText = "Đang hoàn tiền theo phán quyết Admin";
+    }
+    await relatedOrder.save();
+  }
 
   await recordAuditLog({
     userId: req.user._id || req.user.id,

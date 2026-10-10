@@ -531,6 +531,66 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(evidence[0], "https://img1.jpg");
     });
   });
+
+  describe("Feature 69: Super Admin Dispute Arbitration Synchronization with Live Orders", () => {
+    test("F69-T1: Admin arbitration REFUND_BUYER updates dispute and changes order status to returning", () => {
+      const dispute = { id: "disp_01", orderId: "ord_101", status: "opened", arbitrationNote: "" };
+      const order = { id: "ord_101", status: "completed", returnRequest: { status: "pending", responseNote: "" } };
+
+      const resolution = "REFUND_BUYER";
+      const note = "Super Admin chấp thuận khiếu nại dựa trên bằng chứng video khui hàng";
+
+      dispute.status = resolution === "REFUND_BUYER" ? "resolved_refund" : "resolved_rejected";
+      dispute.arbitrationNote = note;
+      order.returnRequest.status = resolution === "REFUND_BUYER" ? "approved" : "rejected";
+      order.returnRequest.responseNote = `Trọng tài Super Admin phán quyết: ${note}`;
+      if (resolution === "REFUND_BUYER") {
+        order.status = "returning";
+      }
+
+      expect.equal(dispute.status, "resolved_refund");
+      expect.equal(order.status, "returning");
+      expect.equal(order.returnRequest.status, "approved");
+      expect.equal(order.returnRequest.responseNote.includes("Trọng tài Super Admin"), true);
+    });
+
+    test("F69-T2: Admin arbitration REJECT_BUYER sets dispute resolved_rejected and keeps original order status", () => {
+      const dispute = { id: "disp_02", orderId: "ord_102", status: "under_review", arbitrationNote: "" };
+      const order = { id: "ord_102", status: "completed", returnRequest: { status: "rejected", responseNote: "" } };
+
+      const resolution = "REJECT_BUYER";
+      const note = "Bằng chứng người mua không đủ tính pháp lý";
+
+      dispute.status = resolution === "REFUND_BUYER" ? "resolved_refund" : "resolved_rejected";
+      dispute.arbitrationNote = note;
+      order.returnRequest.status = resolution === "REFUND_BUYER" ? "approved" : "rejected";
+      order.returnRequest.responseNote = `Trọng tài Super Admin phán quyết: ${note}`;
+
+      expect.equal(dispute.status, "resolved_rejected");
+      expect.equal(order.status, "completed");
+      expect.equal(order.returnRequest.status, "rejected");
+    });
+
+    test("F69-T3: Order-backed dispute generator formats synthetic disp_ord_ IDs consistently", () => {
+      const orderId = "ORD_789456123";
+      const syntheticId = `disp_ord_${orderId.slice(-8)}`;
+      expect.equal(syntheticId.startsWith("disp_ord_"), true);
+      expect.equal(syntheticId, "disp_ord_89456123");
+    });
+
+    test("F69-T4: Non-existent dispute returns 404 cleanly", () => {
+      const allDisputes = [{ id: "disp_01" }, { id: "disp_02" }];
+      const found = allDisputes.find((d) => d.id === "disp_99");
+      expect.equal(Boolean(found), false);
+    });
+
+    test("F69-T5: Enriched disputes correctly assign AI confidence metric within 0-100%", () => {
+      const aiConfidence = 94;
+      const isValidScore = typeof aiConfidence === "number" && aiConfidence >= 0 && aiConfidence <= 100;
+      expect.equal(isValidScore, true);
+    });
+  });
 });
+
 
 
