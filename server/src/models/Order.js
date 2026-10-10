@@ -58,6 +58,13 @@ const orderSchema = new mongoose.Schema(
       respondedAt: { type: String, default: null },
       responseNote: { type: String, default: "" },
     },
+    codFee: { type: Number, default: 0 },
+    codSettlementStatus: {
+      type: String,
+      enum: ["uncollected", "collected_by_courier", "reconciled_with_platform", "remitted_to_seller"],
+      default: "uncollected",
+    },
+    codReconciledAt: { type: String, default: null },
   },
   { timestamps: true }
 );

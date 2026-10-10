@@ -1423,6 +1423,99 @@ export const getAdminEscrowVault = catchAsync(async (req, res) => {
   });
 });
 
+// ==================== ĐỐI SOÁT COD & THU HỘ TIỀN MẶT BƯU TÁ (COD RECONCILIATION) ====================
+
+// @desc    Lấy báo cáo tổng hợp dòng tiền đối soát COD toàn sàn
+// @route   GET /api/admin/finance/cod-reconciliation
+// @access  Private (Super Admin / Finance Lead)
+export const getAdminCodReconciliation = catchAsync(async (req, res) => {
+  const allOrders = await Order.find({});
+  const codOrders = allOrders.filter((o) => o.paymentMethod === "COD");
+
+  let totalUncollected = 0;
+  let totalCollectedByCourier = 0;
+  let totalReconciled = 0;
+  let totalRemitted = 0;
+
+  const orderRows = codOrders.map((o) => {
+    const status = o.codSettlementStatus || (o.status === "completed" ? "reconciled_with_platform" : "collected_by_courier");
+    const amount = o.total || 0;
+    const codFee = o.codFee || 0;
+
+    if (status === "uncollected") totalUncollected += amount;
+    else if (status === "collected_by_courier") totalCollectedByCourier += amount;
+    else if (status === "reconciled_with_platform") totalReconciled += amount;
+    else if (status === "remitted_to_seller") totalRemitted += amount;
+
+    return {
+      orderId: o._id || o.orderId,
+      customerName: o.customer?.fullName || "Khách Hàng COD",
+      phone: o.customer?.phone || "N/A",
+      orderStatus: o.status,
+      total: amount,
+      codFee,
+      courierPartner: "SPX Express",
+      codSettlementStatus: status,
+      codReconciledAt: o.codReconciledAt || (o.status === "completed" ? o.updatedAt || new Date().toISOString() : null),
+      createdAt: o.createdAt,
+    };
+  });
+
+  sendSuccess(res, {
+    summary: {
+      totalCodVolume: codOrders.reduce((sum, o) => sum + (o.total || 0), 0),
+      totalCodOrders: codOrders.length,
+      totalUncollected,
+      totalCollectedByCourier,
+      totalReconciled,
+      totalRemitted,
+      courierPartner: "SPX Logistics & Kerry Express",
+      reconciliationCycle: "T+2 (Đối soát tự động mỗi Thứ Ba và Thứ Năm)",
+    },
+    orders: orderRows.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+  });
+});
+
+// @desc    Xác nhận đối soát lô COD từ nhà vận chuyển SPX
+// @route   POST /api/admin/finance/cod-reconciliation/batch-clear
+// @access  Private (Super Admin / Finance Lead)
+export const batchClearAdminCodReconciliation = catchAsync(async (req, res) => {
+  const { orderIds = [] } = req.body;
+
+  if (!Array.isArray(orderIds) || orderIds.length === 0) {
+    return sendError(res, "Danh sách mã đơn đối soát không hợp lệ", 400);
+  }
+
+  const allOrders = await Order.find({});
+  let clearedCount = 0;
+  let clearedAmount = 0;
+
+  for (const o of allOrders) {
+    const id = o._id || o.orderId;
+    if (orderIds.includes(id)) {
+      o.codSettlementStatus = "reconciled_with_platform";
+      o.codReconciledAt = new Date().toISOString();
+      await o.save();
+      clearedCount++;
+      clearedAmount += (o.total || 0);
+    }
+  }
+
+  recordAuditLog({
+    userId: req.user._id || req.user.id,
+    action: "BATCH_CLEAR_COD_RECONCILIATION",
+    resourceType: "FINANCE",
+    resourceId: `BATCH_${Date.now()}`,
+    details: { clearedCount, clearedAmount, orderIds },
+  });
+
+  sendSuccess(res, {
+    message: `Đã đối soát thành công ${clearedCount} đơn hàng COD`,
+    clearedCount,
+    clearedAmount,
+  });
+});
+
 export default {
   getAllShopsAdmin,
   updateShopStatusAdmin,
@@ -1450,4 +1543,6 @@ export default {
   resolveAdminFraudAnomaly,
   approveSettlementPayoutAdmin,
   getAdminEscrowVault,
+  getAdminCodReconciliation,
+  batchClearAdminCodReconciliation,
 };

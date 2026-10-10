@@ -27,6 +27,8 @@ import {
   resolveAdminFraudAnomaly,
   approveSettlementPayoutAdmin,
   getAdminEscrowVault,
+  getAdminCodReconciliation,
+  batchClearAdminCodReconciliation,
 } from "../controllers/adminController.js";
 
 
@@ -72,6 +74,8 @@ router.get("/finance", getFinanceSettlementsAdmin);
 router.post("/finance/settlements/:shopId/approve", approveSettlementPayoutAdmin);
 router.get("/finance/tax-reports", getAdminTaxReports);
 router.get("/finance/escrow-vault", getAdminEscrowVault);
+router.get("/finance/cod-reconciliation", getAdminCodReconciliation);
+router.post("/finance/cod-reconciliation/batch-clear", batchClearAdminCodReconciliation);
 
 // Fraud & Security Radar
 router.get("/security/fraud-radar", getAdminFraudRadar);

@@ -24,6 +24,8 @@ import {
   getAdminFinanceSettlements,
   getAdminEscrowVaultAPI,
   broadcastAdminNotificationAPI,
+  getAdminCodReconciliationAPI,
+  batchClearAdminCodAPI,
 } from '../services/adminService';
 import {
   ShieldIcon,
@@ -241,6 +243,10 @@ export default function AdminDashboardPage() {
     targetRole: 'all',
   });
 
+  // States cho tính năng Đối Soát COD Bưu Tá & Sàn (COD Reconciliation)
+  const [codData, setCodData] = useState(null);
+  const [isClearingCod, setIsClearingCod] = useState(false);
+
   const refreshUserData = async (showToastNotice = false) => {
     try {
       const res = await getAdminUsers();
@@ -339,6 +345,8 @@ export default function AdminDashboardPage() {
       getAdminFraudRadar().then(f => setFraudData(f));
     } else if (activeTab === 'escrow_vault') {
       getAdminEscrowVaultAPI().then(v => setEscrowVault(v));
+    } else if (activeTab === 'cod_recon') {
+      getAdminCodReconciliationAPI().then(c => setCodData(c));
     }
   }, [activeTab]);
 
@@ -645,6 +653,35 @@ export default function AdminDashboardPage() {
       toast.error(`Phát sóng thất bại: ${err.message || 'Lỗi hệ thống'}`);
     } finally {
       setIsBroadcasting(false);
+    }
+  };
+
+  const handleBatchClearCod = async () => {
+    if (!codData?.orders || codData.orders.length === 0) {
+      toast.info('Không có đơn hàng COD nào cần khớp đối soát.');
+      return;
+    }
+
+    const uncollectedOrCourierIds = codData.orders
+      .filter(o => o.codSettlementStatus !== 'reconciled_with_platform')
+      .map(o => o.orderId);
+
+    if (uncollectedOrCourierIds.length === 0) {
+      toast.info('Tất cả các đơn COD đã được đối soát hoàn tất!');
+      return;
+    }
+
+    setIsClearingCod(true);
+    try {
+      const res = await batchClearAdminCodAPI(uncollectedOrCourierIds);
+      toast.success(`Đã xác nhận khớp đối soát thành công ${res?.clearedCount || uncollectedOrCourierIds.length} đơn hàng COD từ đơn vị vận chuyển SPX!`);
+      // Reload cod data
+      const refreshed = await getAdminCodReconciliationAPI();
+      if (refreshed) setCodData(refreshed);
+    } catch (err) {
+      toast.error(`Khớp đối soát thất bại: ${err.message || 'Lỗi hệ thống'}`);
+    } finally {
+      setIsClearingCod(false);
     }
   };
 
@@ -998,6 +1035,28 @@ export default function AdminDashboardPage() {
             <LayersIcon size={16} color="#2563eb" />
           </span>
           <span>Quỹ Ký Quỹ &amp; Thanh Khoản</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'cod_recon' ? 'active' : ''}`}
+          onClick={() => setActiveTab('cod_recon')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+        >
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: '7px',
+            background: activeTab === 'cod_recon' ? 'rgba(5, 150, 105, 0.14)' : 'rgba(100, 116, 139, 0.08)',
+            border: activeTab === 'cod_recon' ? '1px solid rgba(5, 150, 105, 0.25)' : '1px solid rgba(100, 116, 139, 0.15)',
+            flexShrink: 0
+          }}>
+            <ReceiptIcon size={16} color="#059669" />
+          </span>
+          <span>Đối Soát COD Bưu Tá</span>
         </button>
       </aside>
 
@@ -2944,6 +3003,150 @@ export default function AdminDashboardPage() {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 11: ĐỐI SOÁT COD & THU HỘ TIỀN MẶT BƯU TÁ (COD RECONCILIATION)
+        ========================================================================= */}
+        {activeTab === 'cod_recon' && (
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ReceiptIcon size={20} color="#059669" />
+                  Sổ Cái Đối Soát Tiền Mặt Thu Hộ (COD Logistics Reconciliation)
+                </h2>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                  Theo dõi 4 pha dòng tiền bưu tá SPX thu hộ: Chưa thu, Bưu tá đang giữ, Đã đối soát sàn, Đã hoàn trả Shop
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-outline"
+                  onClick={() => getAdminCodReconciliationAPI().then(c => setCodData(c))}
+                  style={{ padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}
+                >
+                  Làm Mới
+                </button>
+                <button
+                  type="button"
+                  disabled={isClearingCod}
+                  className="shopee-btn"
+                  onClick={handleBatchClearCod}
+                  style={{
+                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '6px 16px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: isClearingCod ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 2px 8px rgba(5, 150, 105, 0.25)'
+                  }}
+                >
+                  {isClearingCod ? 'Đang Khớp Đối Soát...' : 'Khớp Đối Soát Lô SPX'}
+                </button>
+              </div>
+            </div>
+
+            {/* 4 Thẻ Phân Tầng Dòng Tiền COD */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>CHƯA THU HỘ (ĐANG GIAO)</span>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#334155', margin: '4px 0' }}>
+                  {formatCurrency(codData?.summary?.totalUncollected || 0)}
+                </div>
+                <span style={{ fontSize: '12px', color: '#94a3b8' }}>Đơn hàng đang trên đường giao SPX</span>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#fffbeb', border: '1px solid #fde68a' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#d97706' }}>BƯU TÁ ĐANG TẠM GIỮ</span>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#b45309', margin: '4px 0' }}>
+                  {formatCurrency(codData?.summary?.totalCollectedByCourier || 0)}
+                </div>
+                <span style={{ fontSize: '12px', color: '#d97706' }}>Chờ bưu tá nộp về bưu cục trung tâm</span>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#ecfdf5', border: '1px solid #a7f3d0' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#059669' }}>ĐÃ KHỚP ĐỐI SOÁT SÀN</span>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#047857', margin: '4px 0' }}>
+                  {formatCurrency(codData?.summary?.totalReconciled || 0)}
+                </div>
+                <span style={{ fontSize: '12px', color: '#059669' }}>Tiền đã về tài khoản trung gian sàn</span>
+              </div>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb' }}>TỔNG LƯU CHUYỂN COD</span>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#1d4ed8', margin: '4px 0' }}>
+                  {formatCurrency(codData?.summary?.totalCodVolume || 0)}
+                </div>
+                <span style={{ fontSize: '12px', color: '#2563eb' }}>{codData?.summary?.totalCodOrders || 0} đơn hàng thanh toán COD</span>
+              </div>
+            </div>
+
+            {/* Bảng Dữ Liệu Đơn Hàng COD Chi Tiết */}
+            <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
+              <table className="shopee-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Mã Đơn COD</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Khách Hàng &amp; SĐT</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Số Tiền Thu Hộ</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Đối Tác Giao Nhận</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Trạng Thái Đối Soát</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: '#475569' }}>Thời Gian Khớp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(!codData?.orders || codData.orders.length === 0) ? (
+                    <tr>
+                      <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>
+                        Chưa ghi nhận đơn hàng COD phát sinh trong chu kỳ này.
+                      </td>
+                    </tr>
+                  ) : (
+                    codData.orders.map((o) => (
+                      <tr key={o.orderId} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '12px 16px' }}>
+                          <code style={{ fontWeight: 800, color: '#0284c7' }}>#{o.orderId}</code>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <strong style={{ color: '#0f172a' }}>{o.customerName}</strong>
+                          <div style={{ fontSize: '11px', color: '#64748b' }}>{o.phone}</div>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <strong style={{ color: '#059669', fontSize: '13.5px' }}>{formatCurrency(o.total)}</strong>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#334155' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ea580c' }}></span>
+                            {o.courierPartner}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          {o.codSettlementStatus === 'reconciled_with_platform' ? (
+                            <span className="shopee-badge" style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', fontWeight: 700 }}>
+                              ✓ Đã Khớp Sàn
+                            </span>
+                          ) : o.codSettlementStatus === 'collected_by_courier' ? (
+                            <span className="shopee-badge" style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', fontWeight: 700 }}>
+                              ⏳ Bưu Tá Đang Giữ
+                            </span>
+                          ) : (
+                            <span className="shopee-badge" style={{ background: '#f1f5f9', color: '#64748b', border: '1px solid #cbd5e1', fontWeight: 700 }}>
+                              Chưa Thu Hộ
+                            </span>
+                          )}
+                        </td>
+                        <td style={{ padding: '12px 16px', fontSize: '12px', color: '#64748b' }}>
+                          {o.codReconciledAt ? new Date(o.codReconciledAt).toLocaleString('vi-VN') : 'Đang xử lý'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

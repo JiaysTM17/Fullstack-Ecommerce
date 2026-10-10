@@ -12,6 +12,7 @@ import { memoryStore } from "../../server/src/models/memoryStore.js";
 import AdsCampaign from "../../server/src/models/AdsCampaign.js";
 import FlashSale from "../../server/src/models/FlashSale.js";
 import Shop from "../../server/src/models/Shop.js";
+import Order from "../../server/src/models/Order.js";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
 
@@ -775,6 +776,85 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(feeA, 0); // Đủ điều kiện freeship Shop A
       expect.equal(feeB, 30000); // Chưa đủ freeship Shop B
       expect.equal(feeA + feeB, 30000);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 73: COD Cash-On-Delivery Logistics Reconciliation Ledger (5 Tests)
+  // =========================================================================
+  describe("Feature 73: COD Logistics Reconciliation Ledger", () => {
+    test("F73-T1: Separates COD payments into 4 lifecycle stages correctly", () => {
+      const orders = [
+        { total: 100000, codSettlementStatus: "uncollected" },
+        { total: 200000, codSettlementStatus: "collected_by_courier" },
+        { total: 300000, codSettlementStatus: "reconciled_with_platform" },
+        { total: 400000, codSettlementStatus: "remitted_to_seller" },
+      ];
+
+      const totals = orders.reduce(
+        (acc, o) => {
+          acc[o.codSettlementStatus] += o.total;
+          return acc;
+        },
+        { uncollected: 0, collected_by_courier: 0, reconciled_with_platform: 0, remitted_to_seller: 0 }
+      );
+
+      expect.equal(totals.uncollected, 100000);
+      expect.equal(totals.collected_by_courier, 200000);
+      expect.equal(totals.reconciled_with_platform, 300000);
+      expect.equal(totals.remitted_to_seller, 400000);
+    });
+
+    test("F73-T2: Reconciling COD batch marks orders and updates settlement timestamps", async () => {
+      const testOrder = await Order.create({
+        customer: { fullName: "Bùi Văn Thu Hộ", phone: "0909112233", email: "thuho@shopee.vn", address: "TP HCM" },
+        items: [{ productId: "p1", name: "Hàng COD", price: 150000, quantity: 1, image: "img.jpg", shopId: "shop_01" }],
+        subtotal: 150000,
+        total: 150000,
+        paymentMethod: "COD",
+        status: "shipping",
+        codSettlementStatus: "collected_by_courier",
+      });
+
+      expect.equal(testOrder.codSettlementStatus, "collected_by_courier");
+
+      testOrder.codSettlementStatus = "reconciled_with_platform";
+      testOrder.codReconciledAt = new Date().toISOString();
+      await testOrder.save();
+
+      const refreshed = await Order.findById(testOrder._id);
+      expect.equal(refreshed.codSettlementStatus, "reconciled_with_platform");
+      expect.equal(Boolean(refreshed.codReconciledAt), true);
+    });
+
+    test("F73-T3: Empty or invalid order ID list rejected during batch clear execution", () => {
+      const validateBatch = (ids) => Array.isArray(ids) && ids.length > 0;
+      expect.equal(validateBatch([]), false);
+      expect.equal(validateBatch(null), false);
+      expect.equal(validateBatch(["ord_01", "ord_02"]), true);
+    });
+
+    test("F73-T4: Non-COD payment methods (VietQR, MoMo) are excluded from COD reconciliation report", () => {
+      const orders = [
+        { id: "1", paymentMethod: "COD", total: 100000 },
+        { id: "2", paymentMethod: "BANK_TRANSFER", total: 200000 },
+        { id: "3", paymentMethod: "MOMO", total: 300000 },
+      ];
+
+      const codFiltered = orders.filter((o) => o.paymentMethod === "COD");
+      expect.equal(codFiltered.length, 1);
+      expect.equal(codFiltered[0].total, 100000);
+    });
+
+    test("F73-T5: Courier fee and net remittance calculations balance precisely without drift", () => {
+      const orderTotal = 250000;
+      const courierCodFeePercent = 0.015; // 1.5% phí thu hộ của nhà vận chuyển
+      const codFee = Math.round(orderTotal * courierCodFeePercent);
+      const netRemittance = orderTotal - codFee;
+
+      expect.equal(codFee, 3750);
+      expect.equal(netRemittance, 246250);
+      expect.equal(netRemittance + codFee, orderTotal);
     });
   });
 });

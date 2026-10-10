@@ -315,3 +315,35 @@ export async function broadcastAdminNotificationAPI(payload) {
   }
 }
 
+/**
+ * Lấy báo cáo đối soát COD bưu tá & sàn (COD Logistics Reconciliation)
+ */
+export async function getAdminCodReconciliationAPI() {
+  try {
+    const res = await apiRequest("/api/admin/finance/cod-reconciliation", {
+      headers: getAdminHeaders(),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.warn("[AdminService] getAdminCodReconciliationAPI fallback:", error.message);
+    return null;
+  }
+}
+
+/**
+ * Xác nhận khớp đối soát lô đơn hàng COD (Batch Clear COD)
+ */
+export async function batchClearAdminCodAPI(orderIds = []) {
+  try {
+    const res = await apiRequest("/api/admin/finance/cod-reconciliation/batch-clear", {
+      method: "POST",
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ orderIds }),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.error("[AdminService] batchClearAdminCodAPI error:", error.message);
+    throw error;
+  }
+}
+
