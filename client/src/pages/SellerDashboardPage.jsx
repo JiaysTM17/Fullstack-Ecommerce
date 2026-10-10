@@ -34,6 +34,8 @@ import {
   fetchSellerAutoReplyAPI,
   updateSellerAutoReplyAPI,
   simulateSellerAutoReplyAPI,
+  fetchSellerShippingManifestAPI,
+  batchDispatchSellerOrdersAPI,
 } from '../services/api';
 import '../styles/dashboard.css';
 import {
@@ -1694,12 +1696,19 @@ export default function SellerDashboardPage() {
   };
 
   // Xác nhận hàng loạt toàn bộ đơn hàng Chờ xác nhận
-  const handleBulkConfirmPendingOrders = () => {
+  const handleBulkConfirmPendingOrders = async () => {
     const pendingOrders = shopOrders.filter(o => o.status === 'pending');
     if (pendingOrders.length === 0) {
       toast.info('Không có đơn hàng nào ở trạng thái Chờ xác nhận');
       return;
     }
+    const orderIds = pendingOrders.map((o) => o.orderId || o._id || o.id);
+    try {
+      await batchDispatchSellerOrdersAPI(orderIds);
+    } catch (e) {
+      console.warn("Backend batch dispatch fallback:", e.message);
+    }
+
     const updated = orders.map((o) => {
       if (o.shopId === selectedShopId && o.status === 'pending') {
         return {

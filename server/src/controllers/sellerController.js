@@ -1843,6 +1843,112 @@ export const simulateSellerAutoReply = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Lấy chi tiết Phiếu Giao Hàng & Vận Đơn Barcode (SPX Logistics Manifest)
+// @route   GET /api/seller/orders/:id/shipping-manifest
+// @access  Private (Seller only)
+export const getSellerOrderShippingManifest = catchAsync(async (req, res) => {
+  const shop = await getShopFromUser(req.user);
+  if (!shop) return sendError(res, "Không tìm thấy gian hàng của bạn", 404);
+
+  const orderId = req.params.id;
+  const order = await Order.findOne({ 
+    $or: [{ _id: orderId }, { orderId: orderId }] 
+  });
+
+  if (!order) {
+    return sendError(res, "Không tìm thấy đơn hàng", 404);
+  }
+
+  const trackingCode = order.trackingCode || `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`;
+  if (!order.trackingCode) {
+    order.trackingCode = trackingCode;
+    await order.save?.();
+  }
+
+  const manifest = {
+    manifestId: `MNF-${order.orderId || order._id}-${Date.now().toString().slice(-4)}`,
+    trackingCode: trackingCode,
+    orderId: order.orderId || order._id,
+    carrier: "SPX Express Standard Delivery",
+    routingHub: "SGN-HUB-D1 / TRUNG TÂM KHAI THÁC MIỀN NAM",
+    sender: {
+      name: shop.name,
+      phone: shop.phone || "0987654321",
+      address: shop.address || "Kho Tổng mini-Shopee Hub",
+    },
+    recipient: {
+      name: order.customerName || order.customer?.fullName || "Khách Hàng",
+      phone: order.phone || order.customer?.phone || "0901234567",
+      address: order.address || order.customer?.address || "TP. Hồ Chí Minh",
+    },
+    items: (order.items || []).map((it) => ({
+      productId: it.productId || it._id || it.id,
+      name: it.name,
+      quantity: it.quantity || 1,
+      price: it.price || 0,
+      sku: it.sku || `SKU-${it.productId ? String(it.productId).slice(-4) : "STD"}`,
+    })),
+    paymentMethod: order.paymentMethod || "COD",
+    codAmount: (order.paymentMethod === "COD" || order.paymentMethod?.includes("COD")) ? order.total : 0,
+    isCod: Boolean(order.paymentMethod === "COD" || order.paymentMethod?.includes("COD")),
+    weightKg: 0.5,
+    shippingFee: order.shippingFee || 25000,
+    total: order.total,
+    notes: order.customer?.note || order.note || "Hàng dễ vỡ, xin nhẹ tay. Cho xem hàng không cho thử.",
+    sortingBarcodes: {
+      linearBarcode: `*${trackingCode}*`,
+      qrPayload: `SPX|${order.orderId || order._id}|${order.total}|${trackingCode}`,
+    },
+    issuedAt: new Date().toISOString(),
+  };
+
+  sendSuccess(res, { manifest }, 200, "Tạo phiếu giao hàng SPX thành công");
+});
+
+// @desc    Xuất kho & giao hàng loạt cho đơn vị vận chuyển SPX
+// @route   POST /api/seller/orders/batch-dispatch
+// @access  Private (Seller only)
+export const batchDispatchSellerOrders = catchAsync(async (req, res) => {
+  const shop = await getShopFromUser(req.user);
+  if (!shop) return sendError(res, "Không tìm thấy gian hàng của bạn", 404);
+
+  const { orderIds } = req.body;
+  if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+    return sendError(res, "Vui lòng chọn ít nhất một đơn hàng để giao hàng loạt", 400);
+  }
+
+  const updatedOrders = [];
+  for (const id of orderIds) {
+    const order = await Order.findOne({ $or: [{ _id: id }, { orderId: id }] });
+    if (order) {
+      order.status = "shipping";
+      order.statusText = "Đang giao hàng";
+      if (!order.trackingCode) {
+        order.trackingCode = `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`;
+      }
+      order.dispatchedAt = new Date().toISOString();
+      await order.save?.();
+      updatedOrders.push(order);
+    }
+  }
+
+  recordAuditLog({
+    userId: req.user._id || req.user.id,
+    userName: req.user.name || shop.name,
+    userRole: "seller",
+    action: "BATCH_DISPATCH_ORDERS",
+    entityType: "ORDER",
+    entityId: `BATCH_${orderIds.length}`,
+    details: { dispatchedCount: updatedOrders.length, orderIds },
+    ip: req.ip || "127.0.0.1",
+  });
+
+  sendSuccess(res, {
+    dispatchedCount: updatedOrders.length,
+    orders: updatedOrders,
+  }, 200, `Đã xuất kho và bàn giao ${updatedOrders.length} đơn hàng cho SPX Express`);
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -1884,5 +1990,7 @@ export default {
   getSellerAutoReply,
   updateSellerAutoReply,
   simulateSellerAutoReply,
+  getSellerOrderShippingManifest,
+  batchDispatchSellerOrders,
 };
 

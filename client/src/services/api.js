@@ -737,3 +737,18 @@ export async function submitOrderCsatFeedbackAPI(orderId, feedbackData) {
     body: JSON.stringify(feedbackData),
   });
 }
+
+/**
+ * Seller Automated Shipping Label & Dispatch Manifest APIs (Feature 86)
+ */
+export async function fetchSellerShippingManifestAPI(orderId) {
+  const result = await apiRequest(`/api/seller/orders/${orderId}/shipping-manifest`);
+  return result?.data?.manifest || result?.manifest || null;
+}
+
+export async function batchDispatchSellerOrdersAPI(orderIds) {
+  return await apiRequest("/api/seller/orders/batch-dispatch", {
+    method: "POST",
+    body: JSON.stringify({ orderIds }),
+  });
+}

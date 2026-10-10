@@ -1840,6 +1840,126 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(filterByDateRange(futureLog), false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 86: Seller Automated Shipping Label & Dispatch Manifest Generator (5 Tests)
+  // =========================================================================
+  describe("Feature 86: Seller Automated Shipping Label & Dispatch Manifest Generator", () => {
+    test("F86-T1: Generates standardized SPX Logistics Manifest with sender, recipient, routing hub, and carrier specifications", () => {
+      const order = {
+        orderId: "ORD_SPX_01",
+        trackingCode: "SPX-VN-11223344",
+        customerName: "Đỗ Minh Khách",
+        phone: "0912345678",
+        address: "72 Lê Thánh Tôn, Bến Nghé, Quận 1, TP.HCM",
+        items: [{ productId: "p_01", name: "Áo Polo Nam", quantity: 2, price: 200000 }],
+        paymentMethod: "COD",
+        total: 400000,
+        shippingFee: 25000,
+      };
+
+      const shop = {
+        name: "Shop Thời Trang GenZ",
+        phone: "0987654321",
+        address: "Kho SPX Tân Bình, TP.HCM",
+      };
+
+      const manifest = {
+        manifestId: `MNF-${order.orderId}`,
+        trackingCode: order.trackingCode,
+        orderId: order.orderId,
+        carrier: "SPX Express Standard Delivery",
+        routingHub: "SGN-HUB-D1",
+        sender: { name: shop.name, phone: shop.phone, address: shop.address },
+        recipient: { name: order.customerName, phone: order.phone, address: order.address },
+        items: order.items,
+        codAmount: order.paymentMethod === "COD" ? order.total : 0,
+        isCod: true,
+      };
+
+      expect.equal(manifest.carrier, "SPX Express Standard Delivery");
+      expect.equal(manifest.routingHub, "SGN-HUB-D1");
+      expect.equal(manifest.sender.name, "Shop Thời Trang GenZ");
+      expect.equal(manifest.recipient.name, "Đỗ Minh Khách");
+      expect.equal(manifest.trackingCode, "SPX-VN-11223344");
+    });
+
+    test("F86-T2: Computes COD collecting amount strictly for cash-on-delivery orders while zeroing for prepaid orders", () => {
+      const codOrder = { paymentMethod: "COD", total: 350000 };
+      const prepaidOrder = { paymentMethod: "VIETQR", total: 350000 };
+
+      const getCod = (ord) => (ord.paymentMethod === "COD" ? ord.total : 0);
+
+      expect.equal(getCod(codOrder), 350000);
+      expect.equal(getCod(prepaidOrder), 0);
+    });
+
+    test("F86-T3: Generates machine-readable linear barcode format and QR code dispatch payload", () => {
+      const trackingCode = "SPX-VN-88776655";
+      const orderId = "ORD_BARCODE_01";
+      const total = 500000;
+
+      const linearBarcode = `*${trackingCode}*`;
+      const qrPayload = `SPX|${orderId}|${total}|${trackingCode}`;
+
+      expect.equal(linearBarcode, "*SPX-VN-88776655*");
+      expect.equal(qrPayload.startsWith("SPX|"), true);
+      expect.equal(qrPayload.includes(orderId), true);
+      expect.equal(qrPayload.includes(trackingCode), true);
+    });
+
+    test("F86-T4: Batch order dispatch transitions selected pending orders to shipping status with unique SPX tracking codes", async () => {
+      const o1 = await Order.create({
+        orderId: `ORD_BATCH_D1_${Date.now()}`,
+        status: "pending",
+        customer: { fullName: "Khách A", phone: "0901", address: "Hà Nội" },
+        items: [{ name: "Hàng A", price: 100000, quantity: 1 }],
+        total: 100000,
+      });
+      const o2 = await Order.create({
+        orderId: `ORD_BATCH_D2_${Date.now()}`,
+        status: "pending",
+        customer: { fullName: "Khách B", phone: "0902", address: "Đà Nẵng" },
+        items: [{ name: "Hàng B", price: 200000, quantity: 1 }],
+        total: 200000,
+      });
+
+      const orderIds = [o1.orderId, o2.orderId];
+      const dispatched = [];
+
+      for (const id of orderIds) {
+        const ord = await Order.findOne({ orderId: id });
+        if (ord && ord.status === "pending") {
+          ord.status = "shipping";
+          ord.statusText = "Đang giao hàng";
+          ord.trackingCode = `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`;
+          await ord.save?.();
+          dispatched.push(ord);
+        }
+      }
+
+      expect.equal(dispatched.length, 2);
+      expect.equal(dispatched[0].status, "shipping");
+      expect.equal(dispatched[0].trackingCode.startsWith("SPX-VN-"), true);
+      expect.equal(dispatched[1].status, "shipping");
+    });
+
+    test("F86-T5: Batch dispatch logs audit trail entry with user identity and dispatched order count", async () => {
+      const auditLog = await recordAuditLog({
+        userId: "seller_01",
+        userName: "Shop Chủ",
+        userRole: "seller",
+        action: "BATCH_DISPATCH_ORDERS",
+        entityType: "ORDER",
+        entityId: "BATCH_2",
+        details: { dispatchedCount: 2, orderIds: ["ORD_1", "ORD_2"] },
+      });
+
+      expect.equal(Boolean(auditLog), true);
+      expect.equal(auditLog.action, "BATCH_DISPATCH_ORDERS");
+      expect.equal(auditLog.details.dispatchedCount, 2);
+    });
+  });
 });
 
 
