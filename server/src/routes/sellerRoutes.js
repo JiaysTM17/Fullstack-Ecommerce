@@ -40,6 +40,7 @@ import {
   getSellerOperationalSLA,
   getSellerAutoReply,
   updateSellerAutoReply,
+  simulateSellerAutoReply,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -88,6 +89,8 @@ router.route("/shipping-policy")
 router.route("/auto-reply")
   .get(getSellerAutoReply)
   .put(updateSellerAutoReply);
+
+router.post("/auto-reply/simulate", simulateSellerAutoReply);
 
 router.get("/operational-sla", getSellerOperationalSLA);
 

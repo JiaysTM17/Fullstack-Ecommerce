@@ -684,6 +684,13 @@ export async function updateSellerAutoReplyAPI(autoReplyData) {
   });
 }
 
+export async function simulateSellerAutoReplyAPI(payload) {
+  return await apiRequest("/api/seller/auto-reply/simulate", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 /**
  * 3PL Carrier Webhook Simulation API
  */

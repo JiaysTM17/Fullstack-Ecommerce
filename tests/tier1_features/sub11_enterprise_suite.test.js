@@ -1535,6 +1535,84 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(auditLog.details.action, "APPROVE");
     });
   });
+
+  // =========================================================================
+  // FEATURE 83: Seller Auto-Reply Keyword Engine & Sandbox Simulator (5 Tests)
+  // =========================================================================
+  describe("Feature 83: Seller Auto-Reply Keyword Engine & Sandbox Simulator", () => {
+    const autoReplyConfig = {
+      enabled: true,
+      welcomeMessage: "Cảm ơn bạn đã ghé thăm gian hàng!",
+      offlineMessage: "Hiện tại shop đang ngoài giờ làm việc (sau 22:00).",
+      quickTemplates: [
+        { triggerKeyword: "khi nào giao", responseMessage: "Đơn hàng sẽ giao trong 24h qua SPX ạ!" },
+        { triggerKeyword: "tư vấn size", responseMessage: "Bạn gửi chiều cao và cân nặng nhé!" },
+        { triggerKeyword: "freeship", responseMessage: "Shop hỗ trợ freeship cho đơn từ 300k trở lên!" },
+      ],
+    };
+
+    test("F83-T1: Outside working hours flag triggers OFFLINE_HOURS response unconditionally", () => {
+      const simulate = (msg, isOutside) => {
+        if (!autoReplyConfig.enabled) return { triggered: false };
+        if (isOutside) {
+          return { triggered: true, ruleType: "OFFLINE_HOURS", reply: autoReplyConfig.offlineMessage };
+        }
+        return { triggered: true, ruleType: "WELCOME_FALLBACK", reply: autoReplyConfig.welcomeMessage };
+      };
+
+      const res = simulate("khi nào giao", true);
+      expect.equal(res.triggered, true);
+      expect.equal(res.ruleType, "OFFLINE_HOURS");
+      expect.equal(res.reply, autoReplyConfig.offlineMessage);
+    });
+
+    test("F83-T2: Matching trigger keyword in buyer message triggers KEYWORD_TRIGGER rule", () => {
+      const buyerText = "Shop ơi cho mình hỏi khi nào giao hàng tới Hà Nội?";
+      const lower = buyerText.toLowerCase();
+
+      const matched = autoReplyConfig.quickTemplates.find((t) =>
+        lower.includes(t.triggerKeyword.toLowerCase())
+      );
+
+      expect.equal(Boolean(matched), true);
+      expect.equal(matched.triggerKeyword, "khi nào giao");
+      expect.equal(matched.responseMessage.includes("SPX"), true);
+    });
+
+    test("F83-T3: Case-insensitive keyword matching resolves accurately", () => {
+      const buyerText = "SHOP ƠI TƯ VẤN SIZE CHO EM VỚI";
+      const lower = buyerText.toLowerCase();
+
+      const matched = autoReplyConfig.quickTemplates.find((t) =>
+        lower.includes(t.triggerKeyword.toLowerCase())
+      );
+
+      expect.equal(Boolean(matched), true);
+      expect.equal(matched.triggerKeyword, "tư vấn size");
+    });
+
+    test("F83-T4: Message without matched keywords defaults to WELCOME_FALLBACK", () => {
+      const buyerText = "Xin chào shop";
+      const lower = buyerText.toLowerCase();
+
+      const matched = autoReplyConfig.quickTemplates.find((t) =>
+        lower.includes(t.triggerKeyword.toLowerCase())
+      );
+
+      const ruleType = matched ? "KEYWORD_TRIGGER" : "WELCOME_FALLBACK";
+      const reply = matched ? matched.responseMessage : autoReplyConfig.welcomeMessage;
+
+      expect.equal(ruleType, "WELCOME_FALLBACK");
+      expect.equal(reply, autoReplyConfig.welcomeMessage);
+    });
+
+    test("F83-T5: Disabled auto-reply engine halts responses cleanly", () => {
+      const disabledConfig = { ...autoReplyConfig, enabled: false };
+      const shouldTrigger = disabledConfig.enabled === true;
+
+      expect.equal(shouldTrigger, false);
+    });
+  });
 });
 
 

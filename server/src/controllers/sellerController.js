@@ -1783,6 +1783,66 @@ export const updateSellerAutoReply = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Mô phỏng phản hồi tự động theo tin nhắn người mua
+// @route   POST /api/seller/auto-reply/simulate
+// @access  Private (Seller only)
+export const simulateSellerAutoReply = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId || "shop_01";
+  const { message, isOutsideWorkingHours } = req.body;
+
+  const shop = await Shop.findOne({ shopId });
+  if (!shop) return sendError(res, "Không tìm thấy gian hàng", 404);
+
+  const autoReply = shop.autoReply || {
+    enabled: true,
+    welcomeMessage: "Cảm ơn bạn đã ghé thăm gian hàng!",
+    offlineMessage: "Hiện tại shop đang ngoài giờ làm việc.",
+    quickTemplates: [],
+  };
+
+  if (!autoReply.enabled) {
+    return sendSuccess(res, {
+      triggered: false,
+      replyMessage: null,
+      reason: "Trợ lý phản hồi tự động đang tắt",
+    });
+  }
+
+  // 1. Kiểm tra ngoài giờ làm việc
+  if (isOutsideWorkingHours) {
+    return sendSuccess(res, {
+      triggered: true,
+      ruleType: "OFFLINE_HOURS",
+      replyMessage: autoReply.offlineMessage,
+      matchedKeyword: null,
+    });
+  }
+
+  // 2. Kiểm tra từ khóa trong quickTemplates
+  const userText = String(message || "").toLowerCase().trim();
+  const templates = autoReply.quickTemplates || [];
+  const matched = templates.find((t) =>
+    t.triggerKeyword && userText.includes(String(t.triggerKeyword).toLowerCase().trim())
+  );
+
+  if (matched) {
+    return sendSuccess(res, {
+      triggered: true,
+      ruleType: "KEYWORD_TRIGGER",
+      replyMessage: matched.responseMessage,
+      matchedKeyword: matched.triggerKeyword,
+    });
+  }
+
+  // 3. Fallback welcome message
+  return sendSuccess(res, {
+    triggered: true,
+    ruleType: "WELCOME_FALLBACK",
+    replyMessage: autoReply.welcomeMessage,
+    matchedKeyword: null,
+  });
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -1823,5 +1883,6 @@ export default {
   getSellerOperationalSLA,
   getSellerAutoReply,
   updateSellerAutoReply,
+  simulateSellerAutoReply,
 };
 

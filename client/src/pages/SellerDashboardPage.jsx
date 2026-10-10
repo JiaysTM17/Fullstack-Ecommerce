@@ -33,6 +33,7 @@ import {
   fetchSellerOperationalSLA_API,
   fetchSellerAutoReplyAPI,
   updateSellerAutoReplyAPI,
+  simulateSellerAutoReplyAPI,
 } from '../services/api';
 import '../styles/dashboard.css';
 import {
@@ -558,6 +559,10 @@ export default function SellerDashboardPage() {
     ],
   });
   const [isSavingAutoReply, setIsSavingAutoReply] = useState(false);
+  const [testSimMessage, setTestSimMessage] = useState('Shop ơi khi nào giao hàng ạ?');
+  const [testSimOutsideHours, setTestSimOutsideHours] = useState(false);
+  const [autoReplySimResult, setAutoReplySimResult] = useState(null);
+  const [isSimulatingAutoReply, setIsSimulatingAutoReply] = useState(false);
 
   const loadSellerAutoReply = () => {
     fetchSellerAutoReplyAPI()
@@ -567,6 +572,22 @@ export default function SellerDashboardPage() {
         }
       })
       .catch(() => {});
+  };
+
+  const handleSimulateAutoReply = async () => {
+    setIsSimulatingAutoReply(true);
+    try {
+      const res = await simulateSellerAutoReplyAPI({
+        message: testSimMessage,
+        isOutsideWorkingHours: testSimOutsideHours,
+      });
+      setAutoReplySimResult(res?.data || res || null);
+      toast.success('Đã chạy mô phỏng tin nhắn phản hồi thành công!');
+    } catch (err) {
+      toast.error(err.message || 'Lỗi mô phỏng tin nhắn');
+    } finally {
+      setIsSimulatingAutoReply(false);
+    }
   };
 
   const handleSaveAutoReply = async (e) => {
@@ -6970,7 +6991,7 @@ export default function SellerDashboardPage() {
               </div>
 
               {/* Nút Lưu Cấu Hình */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginBottom: '24px' }}>
                 <button
                   type="submit"
                   disabled={isSavingAutoReply}
@@ -6991,6 +7012,79 @@ export default function SellerDashboardPage() {
                 </button>
               </div>
             </form>
+
+            {/* Khung Kiểm Thử Mô Phỏng Tương Tác Trực Tiếp */}
+            <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(168, 85, 247, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ChatIcon size={13} color="#a855f7" />
+                </span>
+                <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>
+                  Mô Phỏng Trải Nghiệm Khách Hàng (Live Sandbox Simulator)
+                </h4>
+              </div>
+              <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: '#64748b' }}>
+                Nhập câu hỏi bất kỳ từ người mua để kiểm tra xem kịch bản từ khóa hoặc tin nhắn ngoài giờ có phản hồi chính xác hay không.
+              </p>
+
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '12px' }}>
+                <input
+                  type="text"
+                  className="shopee-input"
+                  placeholder="Nhập tin nhắn khách gửi (ví dụ: Shop ơi khi nào giao, tư vấn size...)"
+                  value={testSimMessage}
+                  onChange={(e) => setTestSimMessage(e.target.value)}
+                  style={{ flex: 1, minWidth: '240px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                />
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: '#334155', cursor: 'pointer', userSelect: 'none' }}>
+                  <input
+                    type="checkbox"
+                    checked={testSimOutsideHours}
+                    onChange={(e) => setTestSimOutsideHours(e.target.checked)}
+                  />
+                  <span>Giả lập ngoài giờ (sau 22:00)</span>
+                </label>
+                <button
+                  type="button"
+                  disabled={isSimulatingAutoReply}
+                  onClick={handleSimulateAutoReply}
+                  className="shopee-btn"
+                  style={{
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '12.5px',
+                    cursor: isSimulatingAutoReply ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {isSimulatingAutoReply ? 'Đang Test...' : '⚡ Chạy Mô Phỏng'}
+                </button>
+              </div>
+
+              {autoReplySimResult && (
+                <div style={{ background: '#ffffff', padding: '14px', borderRadius: '8px', border: '1.5px solid #cbd5e1' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <span style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontSize: '10.5px',
+                      fontWeight: 800,
+                      background: autoReplySimResult.ruleType === 'KEYWORD_TRIGGER' ? '#f3e8ff' : (autoReplySimResult.ruleType === 'OFFLINE_HOURS' ? '#fee2e2' : '#e0f2fe'),
+                      color: autoReplySimResult.ruleType === 'KEYWORD_TRIGGER' ? '#7e22ce' : (autoReplySimResult.ruleType === 'OFFLINE_HOURS' ? '#b91c1c' : '#0369a1'),
+                    }}>
+                      {autoReplySimResult.ruleType === 'KEYWORD_TRIGGER' ? `KHỚP TỪ KHÓA: "${autoReplySimResult.matchedKeyword}"` : (autoReplySimResult.ruleType === 'OFFLINE_HOURS' ? 'TIN NHẮN NGOÀI GIỜ' : 'TIN NHẮN CHÀO MỪNG')}
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>Trợ lý phản hồi trong 0.05s</span>
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#0f172a', background: '#f8fafc', padding: '10px 12px', borderRadius: '6px', borderLeft: '3px solid #a855f7' }}>
+                    {autoReplySimResult.replyMessage}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
