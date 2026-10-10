@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -7,7 +7,7 @@ import { useLanguage } from "../context/LanguageContext";
 import VoucherPickerModal from "../components/VoucherPickerModal";
 import VietQRPaymentModal from "../components/VietQRPaymentModal";
 import { useCoins } from "../context/CoinContext";
-import { createOrder } from "../services/orderService";
+import { createOrder, reserveStock, releaseStock } from "../services/orderService";
 import { deductProductStock } from "../services/productService";
 import { formatCurrency } from "../utils/formatCurrency";
 import { pushBuyerNotification } from "../utils/notificationHelper";
@@ -127,6 +127,68 @@ export default function CheckoutPage() {
   // Active items for checkout
   const checkoutItems = selectedItems.length > 0 ? selectedItems : items;
   const currentSubtotal = selectedSubtotal > 0 ? selectedSubtotal : items.reduce((t, i) => t + i.price * i.quantity, 0);
+
+  // Idempotency Key & Cart Stock Reservation (Feature 84)
+  const [idempotencyKey] = useState(() => `IDEMP_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
+  const [reservation, setReservation] = useState(null);
+  const [reservationTimeRemaining, setReservationTimeRemaining] = useState(15 * 60);
+  const orderCompletedRef = useRef(false);
+
+  useEffect(() => {
+    if (!checkoutItems || checkoutItems.length === 0) return;
+
+    let isMounted = true;
+    let localReservationId = null;
+
+    const reqItems = checkoutItems.map((it) => ({
+      productId: it.productId || it._id || it.id,
+      quantity: Number(it.quantity) || 1,
+    }));
+
+    reserveStock({ items: reqItems, ttlMinutes: 15 })
+      .then((res) => {
+        if (!isMounted) return;
+        const resData = res?.reservation || res?.data?.reservation;
+        if (resData) {
+          setReservation(resData);
+          localReservationId = resData.reservationId;
+          if (resData.expiresAt) {
+            const diffSec = Math.max(0, Math.floor((new Date(resData.expiresAt).getTime() - Date.now()) / 1000));
+            setReservationTimeRemaining(diffSec || 15 * 60);
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn("Stock reservation error:", err);
+      });
+
+    return () => {
+      isMounted = false;
+      if (!orderCompletedRef.current && localReservationId) {
+        releaseStock({ reservationId: localReservationId }).catch(() => {});
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!reservation) return;
+    const timer = setInterval(() => {
+      setReservationTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [reservation]);
+
+  const formatReservationTime = (sec) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
 
   // Stepper state (1: Address, 2: Shipping, 3: Payment, 4: Review)
   const [currentStep, setCurrentStep] = useState(1);
@@ -305,6 +367,8 @@ export default function CheckoutPage() {
       .join(" + ") || appliedVoucher?.code || null;
 
     const orderPayload = {
+      idempotencyKey,
+      reservationId: reservation?.reservationId || null,
       customer: {
         fullName: fullName.trim(),
         phone: phone.trim(),
@@ -334,6 +398,7 @@ export default function CheckoutPage() {
 
     try {
       const order = await createOrder(orderPayload);
+      orderCompletedRef.current = true;
       const generatedOrderId = order?.orderId || order?._id || order?.id || `ORD${Math.floor(100000 + Math.random() * 900000)}`;
       const trackingCode = `SPX-VN-${Math.floor(10000000 + Math.random() * 90000000)}`;
       const nowStr = new Date().toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -552,6 +617,71 @@ export default function CheckoutPage() {
           <span>4. Xác Nhận & Đặt Hàng</span>
         </div>
       </nav>
+
+      {/* Real-time Cart Stock Reservation & Security Banner (Feature 84) */}
+      {reservation && (
+        <div
+          style={{
+            background: reservationTimeRemaining > 180 ? "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)" : "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
+            border: `1px solid ${reservationTimeRemaining > 180 ? "#a7f3d0" : "#fecdd3"}`,
+            borderRadius: "10px",
+            padding: "12px 18px",
+            marginBottom: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                background: reservationTimeRemaining > 180 ? "rgba(16, 185, 129, 0.18)" : "rgba(239, 68, 68, 0.18)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <ShieldCheckIcon size={18} color={reservationTimeRemaining > 180 ? "#059669" : "#dc2626"} />
+            </span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: "14px", color: reservationTimeRemaining > 180 ? "#065f46" : "#991b1b" }}>
+                {reservationTimeRemaining > 0 ? "⚡ Tồn kho giỏ hàng đã được giữ chỗ độc quyền" : "⚠️ Hết hạn giữ chỗ tồn kho giỏ hàng"}
+              </div>
+              <div style={{ fontSize: "12.5px", color: reservationTimeRemaining > 180 ? "#047857" : "#b91c1c" }}>
+                {reservationTimeRemaining > 0
+                  ? `Mã phiên: ${reservation.reservationId} • Đang khóa số lượng để tránh bị người khác mua mất`
+                  : "Phiên giữ chỗ đã hết hạn. Bạn vẫn có thể hoàn tất thanh toán nếu sản phẩm còn hàng."}
+              </div>
+            </div>
+          </div>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "6px 14px",
+              background: "#ffffff",
+              borderRadius: "20px",
+              border: `1px solid ${reservationTimeRemaining > 180 ? "#6ee7b7" : "#fda4af"}`,
+              fontWeight: 800,
+              fontSize: "14px",
+              color: reservationTimeRemaining > 180 ? "#047857" : "#dc2626",
+            }}
+          >
+            <span>Thời gian giữ chỗ:</span>
+            <span style={{ fontFamily: "monospace", fontSize: "16px" }}>
+              {formatReservationTime(reservationTimeRemaining)}
+            </span>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "28px", alignItems: "start" }}>
         {/* Left Column: Multi-Step Forms */}

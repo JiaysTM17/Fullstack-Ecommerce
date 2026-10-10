@@ -210,9 +210,36 @@ export async function clearCartAPI() {
  * Create order with stock deduction + coin earning
  */
 export async function createOrderAPI(orderPayload) {
+  const headers = {};
+  if (orderPayload?.idempotencyKey) {
+    headers["x-idempotency-key"] = orderPayload.idempotencyKey;
+  }
   const result = await apiRequest("/api/orders", {
     method: "POST",
+    headers,
     body: JSON.stringify(orderPayload),
+  });
+  return result?.data || result;
+}
+
+/**
+ * Reserve stock for cart items (TTL default 15 mins)
+ */
+export async function reserveStockAPI({ items, ttlMinutes = 15 }) {
+  const result = await apiRequest("/api/orders/reserve-stock", {
+    method: "POST",
+    body: JSON.stringify({ items, ttlMinutes }),
+  });
+  return result?.data || result;
+}
+
+/**
+ * Release reserved stock early if user backs out or cancels
+ */
+export async function releaseStockAPI({ reservationId }) {
+  const result = await apiRequest("/api/orders/release-stock", {
+    method: "POST",
+    body: JSON.stringify({ reservationId }),
   });
   return result?.data || result;
 }

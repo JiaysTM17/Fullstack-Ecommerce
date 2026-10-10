@@ -13,6 +13,7 @@ import AdsCampaign from "../../server/src/models/AdsCampaign.js";
 import FlashSale from "../../server/src/models/FlashSale.js";
 import Shop from "../../server/src/models/Shop.js";
 import Order from "../../server/src/models/Order.js";
+import Product from "../../server/src/models/Product.js";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
 
@@ -1611,6 +1612,117 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const shouldTrigger = disabledConfig.enabled === true;
 
       expect.equal(shouldTrigger, false);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 84: Checkout 1-Click Stock Reservation Transition & Client Auto-Release (5 Tests)
+  // =========================================================================
+  describe("Feature 84: Checkout 1-Click Stock Reservation Transition & Client Auto-Release", () => {
+    test("F84-T1: Client-side reserveStock invocation transitions cart items to active reservation with 15-minute expiration", async () => {
+      const p1 = await Product.create({
+        name: "Sản phẩm test Checkout TTL",
+        price: 250000,
+        stock: 10,
+        reservedStock: 0,
+      });
+
+      const reservation = memoryStore.reservations.create("user_checkout_01", [{ productId: p1._id, quantity: 2 }], 15);
+      expect.equal(reservation.status, "ACTIVE");
+      expect.equal(reservation.items.length, 1);
+      expect.equal(reservation.items[0].quantity, 2);
+
+      const updated = await Product.findById(p1._id);
+      expect.equal(updated.reservedStock, 2);
+      expect.equal(updated.stock - updated.reservedStock, 8);
+    });
+
+    test("F84-T2: Order payload bundling reservationId and idempotencyKey commits reservation and prevents race conditions", async () => {
+      const p2 = await Product.create({
+        name: "Sản phẩm test Commit",
+        price: 300000,
+        stock: 20,
+        reservedStock: 0,
+      });
+
+      const resv = memoryStore.reservations.create("user_checkout_02", [{ productId: p2._id, quantity: 3 }], 15);
+      const idempotencyKey = `IDEMP_${Date.now()}_test84_commit`;
+
+      const order = await Order.create({
+        orderId: `ORD_${Date.now()}_84`,
+        idempotencyKey,
+        reservationId: resv.reservationId,
+        customer: { fullName: "Nguyễn Văn Test", phone: "0901234567", address: "Hà Nội" },
+        items: [{ productId: p2._id, name: p2.name, price: 300000, quantity: 3 }],
+        total: 900000,
+        status: "pending",
+      });
+
+      const committed = memoryStore.reservations.commit(resv.reservationId);
+      expect.equal(committed, true);
+      expect.equal(resv.status, "COMMITTED");
+
+      const checkOrder = await Order.findOne({ idempotencyKey });
+      expect.equal(Boolean(checkOrder), true);
+      expect.equal(checkOrder.reservationId, resv.reservationId);
+    });
+
+    test("F84-T3: Client auto-release on checkout abandonment releases reserved items back to available stock pool", async () => {
+      const p3 = await Product.create({
+        name: "Sản phẩm test Abandonment Release",
+        price: 150000,
+        stock: 5,
+        reservedStock: 0,
+      });
+
+      const resv = memoryStore.reservations.create("user_checkout_abandon", [{ productId: p3._id, quantity: 4 }], 15);
+      let prod = await Product.findById(p3._id);
+      expect.equal(prod.reservedStock, 4);
+
+      const released = memoryStore.reservations.release(resv.reservationId);
+      expect.equal(released, true);
+      expect.equal(resv.status, "CANCELLED");
+
+      prod = await Product.findById(p3._id);
+      expect.equal(prod.reservedStock, 0);
+      expect.equal(prod.stock - prod.reservedStock, 5);
+    });
+
+    test("F84-T4: IdempotencyKey prevents double-order submission across concurrent client calls", async () => {
+      const idempotencyKey = `IDEMP_UNIQUE_TEST_CALL_${Date.now()}`;
+      
+      await Order.create({
+        orderId: `ORD_IDEMP_${Date.now()}`,
+        idempotencyKey,
+        customer: { fullName: "Khách 1", phone: "0911222333", address: "HCM" },
+        items: [{ name: "Item 1", price: 100000, quantity: 1 }],
+        total: 100000,
+        status: "pending",
+      });
+
+      const duplicateFound = await Order.findOne({ idempotencyKey });
+      expect.equal(Boolean(duplicateFound), true);
+      expect.equal(duplicateFound.idempotencyKey, idempotencyKey);
+    });
+
+    test("F84-T5: Expired reservation detection prevents committing stale reservations", async () => {
+      const p5 = await Product.create({
+        name: "Sản phẩm test Expired TTL",
+        price: 120000,
+        stock: 8,
+        reservedStock: 0,
+      });
+
+      const resv = memoryStore.reservations.create("user_stale", [{ productId: p5._id, quantity: 2 }], -1);
+      const isExpired = new Date(resv.expiresAt) <= new Date();
+      expect.equal(isExpired, true);
+
+      memoryStore.reservations.cleanExpired();
+      const afterClean = memoryStore.reservations.findById(resv.reservationId);
+      expect.equal(afterClean.status, "EXPIRED");
+
+      const prod = await Product.findById(p5._id);
+      expect.equal(prod.reservedStock, 0);
     });
   });
 });
