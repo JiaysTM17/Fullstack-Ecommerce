@@ -827,3 +827,19 @@ export async function rescheduleOrderDeliveryAPI(orderId, { requestedDate, timeS
   });
 }
 
+/**
+ * Smart Restock Alert & Supplier Reorder PO Generator API (Feature 95)
+ */
+export async function fetchSellerRestockRadarAPI() {
+  const result = await apiRequest("/api/seller/inventory/restock-radar");
+  return result?.data || result || null;
+}
+
+export async function createSellerPurchaseOrderAPI(poPayload) {
+  return await apiRequest("/api/seller/inventory/purchase-orders", {
+    method: "POST",
+    body: JSON.stringify(poPayload),
+  });
+}
+
+

@@ -46,6 +46,8 @@ import {
   getSellerCodReconciliation,
   reconcileSellerCodOrders,
   getSellerPriceRadar,
+  getSellerRestockRadar,
+  createSellerPurchaseOrder,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -70,8 +72,10 @@ router.post("/ads", createSellerAdsCampaign);
 router.post("/ads/simulate", simulateSellerAds);
 router.patch("/ads/:id/toggle", toggleSellerAdsCampaign);
 
-// Advanced Inventory Management
+// Advanced Inventory Management & Smart Restock Hub (Feature 95)
 router.post("/inventory/batch-update", batchUpdateSellerInventory);
+router.get("/inventory/restock-radar", getSellerRestockRadar);
+router.post("/inventory/purchase-orders", createSellerPurchaseOrder);
 
 // Flash Sale Shop Management
 router.get("/flash-sales", getSellerFlashSales);

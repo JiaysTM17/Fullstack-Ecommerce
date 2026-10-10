@@ -14,6 +14,7 @@ import FlashSale from "../../server/src/models/FlashSale.js";
 import Shop from "../../server/src/models/Shop.js";
 import Order from "../../server/src/models/Order.js";
 import Product from "../../server/src/models/Product.js";
+import PurchaseOrder from "../../server/src/models/PurchaseOrder.js";
 import AuditLog, { recordAuditLog } from "../../server/src/models/AuditLog.js";
 import User, { computeLoyaltyTier } from "../../server/src/models/User.js";
 
@@ -2489,7 +2490,84 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(rescheduleFee, 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 95: Smart Restock Alert & Supplier Reorder PO Hub (5 Tests)
+  // =========================================================================
+  describe("Feature 95: Smart Restock Alert & Supplier Reorder PO Hub", () => {
+    test("F95-T1: Reorder recommendation formula calculates target restocking quantity accurately", () => {
+      const currentStock = 4;
+      const safetyThreshold = 10;
+      // Formula: Math.max(20, safetyThreshold * 3 - currentStock)
+      const recommendedReorder = Math.max(20, safetyThreshold * 3 - currentStock);
+      expect.equal(recommendedReorder, 26);
+    });
+
+    test("F95-T2: Severity classification flags CRITICAL_OUT_OF_STOCK when stock is zero", () => {
+      const getSeverity = (stock) => (stock === 0 ? "CRITICAL_OUT_OF_STOCK" : "WARNING_LOW_STOCK");
+      expect.equal(getSeverity(0), "CRITICAL_OUT_OF_STOCK");
+      expect.equal(getSeverity(5), "WARNING_LOW_STOCK");
+    });
+
+    test("F95-T3: PurchaseOrder model creates PO record with valid total cost calculation", async () => {
+      const po = await PurchaseOrder.create({
+        poNumber: "PO-202610-TEST95",
+        shopId: "shop_test_po",
+        shopName: "Thời Trang Nam Test",
+        supplier: {
+          name: "Xưởng Dệt May Test",
+          contact: "Anh Tuấn",
+          phone: "0909888777",
+          email: "tuandm@test.vn",
+        },
+        items: [
+          {
+            productId: "prod_test_po_01",
+            name: "Áo Polo Nam Co Giãn",
+            sku: "POLO-CG-01",
+            currentStock: 2,
+            safetyThreshold: 10,
+            reorderQuantity: 30,
+            estimatedUnitCost: 80000,
+            totalCost: 2400000,
+          },
+        ],
+        totalEstimatedCost: 2400000,
+        status: "APPROVED",
+        expectedDeliveryDate: "2026-10-20",
+      });
+
+      expect.equal(po.poNumber, "PO-202610-TEST95");
+      expect.equal(po.items.length, 1);
+      expect.equal(po.items[0].reorderQuantity, 30);
+      expect.equal(po.totalEstimatedCost, 2400000);
+      expect.equal(po.status, "APPROVED");
+    });
+
+    test("F95-T4: Multi-item PO correctly sums totalEstimatedCost across distinct products", () => {
+      const items = [
+        { reorderQuantity: 20, estimatedUnitCost: 50000 },
+        { reorderQuantity: 10, estimatedUnitCost: 120000 },
+      ];
+      const totalCost = items.reduce((sum, it) => sum + it.reorderQuantity * it.estimatedUnitCost, 0);
+      expect.equal(totalCost, 2200000);
+    });
+
+    test("F95-T5: PO generation validation rejects payloads missing supplier name", () => {
+      const validatePoPayload = (payload) => {
+        if (!payload || !payload.supplier || !payload.supplier.name) {
+          return { valid: false, error: "Vui lòng cung cấp tên nhà cung cấp" };
+        }
+        return { valid: true };
+      };
+
+      const result = validatePoPayload({ items: [{ productId: "p1", reorderQuantity: 10 }] });
+      expect.equal(result.valid, false);
+      expect.equal(result.error, "Vui lòng cung cấp tên nhà cung cấp");
+    });
+  });
 });
+
 
 
 

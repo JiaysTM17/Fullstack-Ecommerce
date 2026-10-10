@@ -39,6 +39,8 @@ import {
   fetchSellerCodReconciliationAPI,
   reconcileSellerCodOrdersAPI,
   fetchSellerPriceRadarAPI,
+  fetchSellerRestockRadarAPI,
+  createSellerPurchaseOrderAPI,
 } from '../services/api';
 import '../styles/dashboard.css';
 import {
@@ -640,6 +642,8 @@ export default function SellerDashboardPage() {
       }).catch(() => {});
     } else if (activeTab === 'price_radar') {
       loadSellerPriceRadar();
+    } else if (activeTab === 'restock_radar') {
+      loadSellerRestockRadar();
     }
   }, [activeTab, selectedShopId]);
 
@@ -661,6 +665,96 @@ export default function SellerDashboardPage() {
       setIsLoadingPriceRadar(false);
     }
   };
+
+  // BỔ SUNG: States cho Smart Restock Alert & Reorder PO Hub (Feature 95)
+  const [restockData, setRestockData] = useState(null);
+  const [isLoadingRestock, setIsLoadingRestock] = useState(false);
+  const [showCreatePoModal, setShowCreatePoModal] = useState(false);
+  const [selectedPoAlertItem, setSelectedPoAlertItem] = useState(null);
+  const [poForm, setPoForm] = useState({
+    supplierName: 'Công ty Cổ phần May Mặc & Phân Phối Việt Hàn',
+    supplierContact: 'Trần Văn Minh (Phòng Kinh Doanh)',
+    supplierPhone: '0918765432',
+    supplierEmail: 'distribution.viethan@gmail.com',
+    reorderQuantity: 50,
+    estimatedUnitCost: 65000,
+    expectedDeliveryDate: '',
+    notes: 'Ưu tiên nhập gấp bổ sung kho trước đợt Mega Sale',
+  });
+  const [isCreatingPo, setIsCreatingPo] = useState(false);
+
+  const loadSellerRestockRadar = async () => {
+    setIsLoadingRestock(true);
+    try {
+      const res = await fetchSellerRestockRadarAPI();
+      if (res) {
+        setRestockData(res);
+      }
+    } catch (err) {
+      // ignore
+    } finally {
+      setIsLoadingRestock(false);
+    }
+  };
+
+  const handleOpenCreatePoModal = (alertItem) => {
+    setSelectedPoAlertItem(alertItem);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 5);
+    const defaultDelivery = tomorrow.toISOString().split('T')[0];
+
+    setPoForm({
+      supplierName: 'Công ty Cổ phần Sản Xuất & Phân Phối Việt Hàn',
+      supplierContact: 'Trần Văn Minh (Đại diện kinh doanh)',
+      supplierPhone: '0918765432',
+      supplierEmail: 'supplier.viethan@gmail.com',
+      reorderQuantity: alertItem?.recommendedReorder || 30,
+      estimatedUnitCost: alertItem?.estimatedUnitCost || 50000,
+      expectedDeliveryDate: defaultDelivery,
+      notes: `Đơn đặt hàng nhập kho bổ sung khẩn cấp cho ${alertItem?.name || 'sản phẩm'} (Tồn kho hiện tại: ${alertItem?.currentStock || 0})`,
+    });
+    setShowCreatePoModal(true);
+  };
+
+  const handleCreatePoSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedPoAlertItem) return;
+
+    setIsCreatingPo(true);
+    try {
+      const payload = {
+        supplier: {
+          name: poForm.supplierName,
+          contact: poForm.supplierContact,
+          phone: poForm.supplierPhone,
+          email: poForm.supplierEmail,
+        },
+        items: [
+          {
+            productId: selectedPoAlertItem.productId,
+            name: selectedPoAlertItem.name,
+            sku: selectedPoAlertItem.sku,
+            currentStock: selectedPoAlertItem.currentStock,
+            safetyThreshold: selectedPoAlertItem.safetyThreshold,
+            reorderQuantity: Number(poForm.reorderQuantity) || 1,
+            estimatedUnitCost: Number(poForm.estimatedUnitCost) || 0,
+          },
+        ],
+        expectedDeliveryDate: poForm.expectedDeliveryDate,
+        notes: poForm.notes,
+      };
+
+      const res = await createSellerPurchaseOrderAPI(payload);
+      toast.success(res?.message || 'Đã tạo đơn nhập hàng PO thành công!');
+      setShowCreatePoModal(false);
+      loadSellerRestockRadar();
+    } catch (err) {
+      toast.error(err.message || 'Lỗi khi tạo đơn nhập hàng');
+    } finally {
+      setIsCreatingPo(false);
+    }
+  };
+
 
   // Phiếu xuất kho / đóng gói hàng & Tab lọc đơn hàng
   const [packingSlipOrder, setPackingSlipOrder] = useState(null);
@@ -2661,6 +2755,27 @@ export default function SellerDashboardPage() {
             <BoltIcon size={14} color="#f59e0b" />
           </span>
           <span>Radar Giá &amp; Đối Thủ</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'restock_radar' ? 'active' : ''}`}
+          onClick={() => setActiveTab('restock_radar')}
+        >
+          <span style={{
+            width: '26px',
+            height: '26px',
+            borderRadius: '7px',
+            background: activeTab === 'restock_radar' ? 'rgba(239, 68, 68, 0.18)' : 'rgba(239, 68, 68, 0.1)',
+            border: activeTab === 'restock_radar' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(239, 68, 68, 0.18)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <PackageIcon size={14} color="#ef4444" />
+          </span>
+          <span>Nhập Kho &amp; Đơn PO</span>
         </button>
       </aside>
 
@@ -7610,6 +7725,329 @@ export default function SellerDashboardPage() {
             </div>
           </div>
         )}
+
+        {/* ========================================================================= */}
+        {/* PHÂN HỆ: CẢNH BÁO TỒN KHO & ĐƠN ĐẶT HÀNG NHÀ CUNG CẤP PO (Feature 95)    */}
+        {/* ========================================================================= */}
+        {activeTab === 'restock_radar' && (
+          <div className="shopee-tab-content">
+            {/* Header Dashboard Restock Radar */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+              <div>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <PackageIcon size={16} color="#ef4444" />
+                  </span>
+                  <span>Cảnh Báo Tồn Kho &amp; Đơn Đặt Hàng Nhà Cung Cấp (PO)</span>
+                </h2>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                  Hệ thống tự động phát hiện SKU rơi xuống dưới ngưỡng an toàn, tính toán số lượng reorder tối ưu và khởi tạo Purchase Order (PO) gửi đối tác dệt may / nhà cung ứng.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={loadSellerRestockRadar}
+                  disabled={isLoadingRestock}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px' }}
+                >
+                  <span>{isLoadingRestock ? 'Đang Quét Kho...' : '🔄 Làm Mới Dữ Liệu'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Metrics 4 Cards Overview */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, marginBottom: '6px' }}>Tổng Mặt Hàng Cần Nhập</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a' }}>
+                  {restockData?.summary?.totalAlerts || 0} SKU
+                </div>
+              </div>
+
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #fee2e2', boxShadow: '0 1px 3px rgba(239,68,68,0.08)' }}>
+                <div style={{ fontSize: '12px', color: '#ef4444', fontWeight: 600, marginBottom: '6px' }}>Hết Hàng Tuyệt Đối (Kho = 0)</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#ef4444' }}>
+                  {restockData?.summary?.outOfStockCount || 0} SKU
+                </div>
+              </div>
+
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #fef3c7', boxShadow: '0 1px 3px rgba(245,158,11,0.08)' }}>
+                <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 600, marginBottom: '6px' }}>Dưới Ngưỡng An Toàn</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#d97706' }}>
+                  {restockData?.summary?.lowStockCount || 0} SKU
+                </div>
+              </div>
+
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ fontSize: '12px', color: '#059669', fontWeight: 600, marginBottom: '6px' }}>Đơn Nhập PO Đã Lập</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#059669' }}>
+                  {restockData?.summary?.totalPurchaseOrders || (restockData?.purchaseOrders || []).length} đơn
+                </div>
+              </div>
+            </div>
+
+            {/* Bảng Danh Sách SKU Cảnh Báo Thiếu Hàng */}
+            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '24px', overflow: 'hidden' }}>
+              <div style={{ padding: '14px 18px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0, fontSize: '14.5px', fontWeight: 800, color: '#0f172a' }}>
+                  Danh Sách Sản Phẩm Cần Nhập Kho Gấp
+                </h3>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>
+                  Tự động gợi ý số lượng = Ngưỡng an toàn x 3 - Tồn hiện tại
+                </span>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="shopee-table" style={{ width: '100%', margin: 0, fontSize: '12.5px' }}>
+                  <thead style={{ background: '#f8fafc' }}>
+                    <tr>
+                      <th>Sản phẩm / SKU</th>
+                      <th style={{ textAlign: 'center' }}>Tồn Kho</th>
+                      <th style={{ textAlign: 'center' }}>Ngưỡng An Toàn</th>
+                      <th>Mức Độ Cảnh Báo</th>
+                      <th style={{ textAlign: 'center' }}>Gợi Ý Nhập</th>
+                      <th style={{ textAlign: 'right' }}>Giá Nhập Dự Kiến</th>
+                      <th style={{ textAlign: 'right' }}>Tổng Vốn Nhập</th>
+                      <th style={{ textAlign: 'center' }}>Hành Động</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(restockData?.lowStockAlerts || []).length === 0 ? (
+                      <tr>
+                        <td colSpan="8" style={{ textAlign: 'center', padding: '36px', color: '#059669', fontWeight: 600 }}>
+                          ✅ Tuyệt vời! Tất cả sản phẩm trong gian hàng đều có mức tồn kho dồi dào trên ngưỡng an toàn.
+                        </td>
+                      </tr>
+                    ) : (
+                      (restockData?.lowStockAlerts || []).map((alert) => {
+                        const isCritical = alert.severity === 'CRITICAL_OUT_OF_STOCK';
+                        return (
+                          <tr key={alert.productId}>
+                            <td>
+                              <div style={{ fontWeight: 700, color: '#0f172a' }}>{alert.name}</div>
+                              <div style={{ fontSize: '11px', color: '#64748b' }}>Mã: {alert.sku} · {alert.category}</div>
+                            </td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: isCritical ? '#ef4444' : '#d97706' }}>
+                              {alert.currentStock}
+                            </td>
+                            <td style={{ textAlign: 'center', color: '#64748b' }}>
+                              {alert.safetyThreshold}
+                            </td>
+                            <td>
+                              {isCritical ? (
+                                <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, background: '#fee2e2', color: '#b91c1c' }}>
+                                  🚨 Hết Hàng
+                                </span>
+                              ) : (
+                                <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, background: '#fef3c7', color: '#b45309' }}>
+                                  ⚠️ Sắp Hết Hàng
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#2563eb' }}>
+                              +{alert.recommendedReorder}
+                            </td>
+                            <td style={{ textAlign: 'right' }}>
+                              {formatCurrency(alert.estimatedUnitCost)}
+                            </td>
+                            <td style={{ textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>
+                              {formatCurrency(alert.estimatedTotalCost)}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <button
+                                type="button"
+                                className="shopee-btn shopee-btn-sm shopee-btn-primary"
+                                onClick={() => handleOpenCreatePoModal(alert)}
+                                style={{ padding: '4px 10px', fontSize: '11.5px', fontWeight: 700 }}
+                              >
+                                📋 Tạo Đơn PO
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Bảng Danh Sách Đơn Đặt Hàng PO Đã Tạo */}
+            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+              <div style={{ padding: '14px 18px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+                <h3 style={{ margin: 0, fontSize: '14.5px', fontWeight: 800, color: '#0f172a' }}>
+                  Lịch Sử Đơn Đặt Hàng (Purchase Orders) Gửi Nhà Cung Cấp
+                </h3>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="shopee-table" style={{ width: '100%', margin: 0, fontSize: '12.5px' }}>
+                  <thead style={{ background: '#f8fafc' }}>
+                    <tr>
+                      <th>Mã Đơn PO</th>
+                      <th>Nhà Cung Cấp</th>
+                      <th>Chi Tiết Mặt Hàng</th>
+                      <th style={{ textAlign: 'right' }}>Tổng Giá Trị</th>
+                      <th>Ngày Dự Kiến Giao</th>
+                      <th>Trạng Thái</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(restockData?.purchaseOrders || []).length === 0 ? (
+                      <tr>
+                        <td colSpan="6" style={{ textAlign: 'center', padding: '36px', color: '#94a3b8' }}>
+                          Chưa có đơn đặt hàng nhà cung cấp PO nào được tạo.
+                        </td>
+                      </tr>
+                    ) : (
+                      (restockData?.purchaseOrders || []).map((po) => (
+                        <tr key={po.poNumber || po._id}>
+                          <td>
+                            <strong style={{ color: '#2563eb' }}>{po.poNumber}</strong>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>{new Date(po.createdAt || Date.now()).toLocaleDateString('vi-VN')}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, color: '#0f172a' }}>{po.supplier?.name}</div>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>{po.supplier?.phone} · {po.supplier?.contact}</div>
+                          </td>
+                          <td>
+                            {(po.items || []).map((it, idx) => (
+                              <div key={idx} style={{ fontSize: '11.5px', color: '#334155' }}>
+                                • {it.name} (SL: <strong>{it.reorderQuantity}</strong> x {formatCurrency(it.estimatedUnitCost)})
+                              </div>
+                            ))}
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 800, color: '#ea580c' }}>
+                            {formatCurrency(po.totalEstimatedCost)}
+                          </td>
+                          <td style={{ color: '#475569' }}>
+                            {po.expectedDeliveryDate || 'Trong vòng 5 ngày'}
+                          </td>
+                          <td>
+                            <span style={{ padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, background: '#dcfce7', color: '#15803d' }}>
+                              ✓ Đã Duyệt Lệnh
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Khởi Tạo Purchase Order (PO) */}
+        {showCreatePoModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
+            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '540px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
+                  Tạo Đơn Đặt Hàng Nhà Cung Cấp (PO)
+                </h3>
+                <button type="button" onClick={() => setShowCreatePoModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                  <CloseIcon size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreatePoSubmit}>
+                <div style={{ padding: '12px', background: '#f1f5f9', borderRadius: '8px', marginBottom: '14px', fontSize: '12.5px' }}>
+                  <div>Sản phẩm: <strong>{selectedPoAlertItem?.name}</strong></div>
+                  <div style={{ color: '#64748b', marginTop: '2px' }}>
+                    Tồn kho: {selectedPoAlertItem?.currentStock} · Ngưỡng an toàn: {selectedPoAlertItem?.safetyThreshold}
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Tên Nhà Cung Cấp / Đối Tác Sản Xuất</label>
+                  <input
+                    type="text" required
+                    className="shopee-input"
+                    value={poForm.supplierName}
+                    onChange={(e) => setPoForm({ ...poForm, supplierName: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Số Lượng Nhập (Cái)</label>
+                    <input
+                      type="number" required min="1"
+                      className="shopee-input"
+                      value={poForm.reorderQuantity}
+                      onChange={(e) => setPoForm({ ...poForm, reorderQuantity: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Đơn Giá Nhập Ước Tính (VNĐ)</label>
+                    <input
+                      type="number" required min="0"
+                      className="shopee-input"
+                      value={poForm.estimatedUnitCost}
+                      onChange={(e) => setPoForm({ ...poForm, estimatedUnitCost: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Số Điện Thoại Đối Tác</label>
+                    <input
+                      type="text"
+                      className="shopee-input"
+                      value={poForm.supplierPhone}
+                      onChange={(e) => setPoForm({ ...poForm, supplierPhone: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Ngày Hẹn Giao Hàng</label>
+                    <input
+                      type="date" required
+                      className="shopee-input"
+                      value={poForm.expectedDeliveryDate}
+                      onChange={(e) => setPoForm({ ...poForm, expectedDeliveryDate: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Ghi Chú Đơn Hàng PO</label>
+                  <input
+                    type="text"
+                    className="shopee-input"
+                    value={poForm.notes}
+                    onChange={(e) => setPoForm({ ...poForm, notes: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+
+                <div style={{ padding: '12px', background: '#eff6ff', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13px', color: '#1e40af', fontWeight: 600 }}>Tổng Giá Trị Đơn PO:</span>
+                  <strong style={{ fontSize: '16px', color: '#1d4ed8' }}>
+                    {formatCurrency((Number(poForm.reorderQuantity) || 0) * (Number(poForm.estimatedUnitCost) || 0))}
+                  </strong>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                  <button type="button" className="shopee-btn shopee-btn-secondary" onClick={() => setShowCreatePoModal(false)} disabled={isCreatingPo}>
+                    Hủy
+                  </button>
+                  <button type="submit" className="shopee-btn shopee-btn-primary" disabled={isCreatingPo}>
+                    {isCreatingPo ? 'Đang Lập Đơn...' : 'Xác Nhận Xuất Đơn PO'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
 
 
 

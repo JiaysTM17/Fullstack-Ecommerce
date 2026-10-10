@@ -4,6 +4,7 @@ import Order from "../models/Order.js";
 import User from "../models/User.js";
 import AdsCampaign from "../models/AdsCampaign.js";
 import FlashSale from "../models/FlashSale.js";
+import PurchaseOrder from "../models/PurchaseOrder.js";
 import { recordAuditLog } from "../models/AuditLog.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -2129,6 +2130,115 @@ export const getSellerPriceRadar = catchAsync(async (req, res) => {
   }, 200, "Lấy dữ liệu radar so sánh giá thị trường thành công");
 });
 
+// @desc    Lấy danh sách cảnh báo thiếu hàng (Restock Alert) & Danh sách PO đã tạo (Feature 95)
+// @route   GET /api/seller/inventory/restock-radar
+// @access  Private (Seller only)
+export const getSellerRestockRadar = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  const products = await Product.find({ shopId });
+
+  // Phát hiện các sản phẩm có tồn kho <= ngưỡng an toàn
+  const lowStockAlerts = products
+    .filter((p) => {
+      const stock = Number(p.stock) || 0;
+      const threshold = Number(p.safetyThreshold) || 10;
+      return stock <= threshold;
+    })
+    .map((p) => {
+      const stock = Number(p.stock) || 0;
+      const threshold = Number(p.safetyThreshold) || 10;
+      const costPrice = Number(p.costPrice) || Math.round((Number(p.price) || 100000) * 0.6);
+      const recommendedReorder = Math.max(20, threshold * 3 - stock);
+
+      return {
+        productId: p._id || p.id,
+        name: p.name,
+        sku: p.sku || `SKU-${String(p._id || p.id).slice(-6).toUpperCase()}`,
+        category: p.category,
+        currentStock: stock,
+        safetyThreshold: threshold,
+        severity: stock === 0 ? "CRITICAL_OUT_OF_STOCK" : "WARNING_LOW_STOCK",
+        recommendedReorder,
+        estimatedUnitCost: costPrice,
+        estimatedTotalCost: recommendedReorder * costPrice,
+      };
+    });
+
+  // Lấy danh sách Purchase Orders đã tạo của shop
+  const purchaseOrders = await PurchaseOrder.find({ shopId });
+
+  sendSuccess(res, {
+    summary: {
+      totalAlerts: lowStockAlerts.length,
+      outOfStockCount: lowStockAlerts.filter((a) => a.severity === "CRITICAL_OUT_OF_STOCK").length,
+      lowStockCount: lowStockAlerts.filter((a) => a.severity === "WARNING_LOW_STOCK").length,
+      totalPurchaseOrders: purchaseOrders.length,
+    },
+    lowStockAlerts,
+    purchaseOrders,
+  }, 200, "Lấy danh sách cảnh báo tồn kho và đơn nhập hàng thành công");
+});
+
+// @desc    Tạo đơn nhập hàng (Purchase Order) gửi nhà cung cấp (Feature 95)
+// @route   POST /api/seller/inventory/purchase-orders
+// @access  Private (Seller only)
+export const createSellerPurchaseOrder = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  const { supplier, items, notes, expectedDeliveryDate } = req.body;
+
+  if (!supplier || !supplier.name) {
+    return sendError(res, "Vui lòng cung cấp tên nhà cung cấp", 400);
+  }
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return sendError(res, "Đơn nhập hàng phải có ít nhất 1 sản phẩm", 400);
+  }
+
+  const shop = await Shop.findOne({ shopId });
+  const poNumber = `PO-${new Date().toISOString().slice(0, 7).replace("-", "")}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  let totalEstimatedCost = 0;
+  const processedItems = items.map((it) => {
+    const qty = Math.max(1, Number(it.reorderQuantity) || 1);
+    const unitCost = Math.max(0, Number(it.estimatedUnitCost) || 0);
+    const totalCost = qty * unitCost;
+    totalEstimatedCost += totalCost;
+
+    return {
+      productId: it.productId,
+      name: it.name || "Sản phẩm nhập kho",
+      sku: it.sku || "",
+      currentStock: Number(it.currentStock) || 0,
+      safetyThreshold: Number(it.safetyThreshold) || 10,
+      reorderQuantity: qty,
+      estimatedUnitCost: unitCost,
+      totalCost,
+    };
+  });
+
+  const newPO = await PurchaseOrder.create({
+    poNumber,
+    shopId,
+    shopName: shop?.name || "Gian hàng đối tác",
+    supplier: {
+      name: supplier.name,
+      contact: supplier.contact || "",
+      phone: supplier.phone || "",
+      email: supplier.email || "",
+    },
+    items: processedItems,
+    totalEstimatedCost,
+    status: "APPROVED",
+    notes: notes || "Tạo tự động từ hệ thống gợi ý nhập kho Smart Restock",
+    expectedDeliveryDate: expectedDeliveryDate || new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
+  });
+
+  sendSuccess(res, {
+    purchaseOrder: newPO,
+    message: `Đã tạo đơn nhập hàng ${poNumber} thành công và gửi thông báo xác nhận!`,
+  }, 201);
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -2175,5 +2285,7 @@ export default {
   getSellerCodReconciliation,
   reconcileSellerCodOrders,
   getSellerPriceRadar,
+  getSellerRestockRadar,
+  createSellerPurchaseOrder,
 };
 
