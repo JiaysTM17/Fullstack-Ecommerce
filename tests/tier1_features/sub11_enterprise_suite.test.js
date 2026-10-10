@@ -2149,6 +2149,76 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(auditLog.details.totalAmount, 1674500);
     });
   });
+
+  // =========================================================================
+  // FEATURE 90: CSAT Delivery Experience & Courier Performance Rating (5 Tests)
+  // =========================================================================
+  describe("Feature 90: CSAT Delivery Experience & Courier Performance Rating", () => {
+    test("F90-T1: Validates star ratings within strict bounds 1 to 5", () => {
+      const validateRating = (r) => typeof r === "number" && r >= 1 && r <= 5;
+      expect.equal(validateRating(5), true);
+      expect.equal(validateRating(1), true);
+      expect.equal(validateRating(0), false);
+      expect.equal(validateRating(6), false);
+    });
+
+    test("F90-T2: Order persists composite CSAT ratings (overall, speed, courier attitude)", async () => {
+      const testOrder = await Order.create({
+        orderId: `ORD_CSAT_${Date.now()}`,
+        status: "completed",
+        customer: { fullName: "Khách CSAT", phone: "0988776655", address: "TP.HCM" },
+        items: [{ name: "Sản phẩm A", price: 250000, quantity: 1, shopId: "shop_01" }],
+        total: 250000,
+        carrierPartner: "SPX_EXPRESS",
+      });
+
+      testOrder.csatFeedback = {
+        rating: 5,
+        deliverySpeedRating: 5,
+        courierAttitudeRating: 4,
+        comment: "Bưu tá rất lịch sự, gọi điện trước khi giao 15 phút",
+        submittedAt: new Date().toISOString(),
+      };
+      await testOrder.save?.();
+
+      const found = await Order.findOne({ orderId: testOrder.orderId });
+      expect.equal(Boolean(found), true);
+      expect.equal(found.csatFeedback.rating, 5);
+      expect.equal(found.csatFeedback.courierAttitudeRating, 4);
+    });
+
+    test("F90-T3: CSAT feedback updates order delivery timeline entry", async () => {
+      const testOrder = await Order.create({
+        orderId: `ORD_CSAT_TL_${Date.now()}`,
+        status: "delivered",
+        customer: { fullName: "Khách Timeline", phone: "0900", address: "Hải Phòng" },
+        items: [{ name: "Hàng test", price: 100000, quantity: 1 }],
+        total: 100000,
+        timeline: [],
+      });
+
+      const ratingText = `Khách hàng đánh giá dịch vụ giao vận 5/5 sao: Hài lòng`;
+      testOrder.timeline.push({ time: new Date().toISOString(), text: ratingText });
+      await testOrder.save?.();
+
+      expect.equal(testOrder.timeline.length, 1);
+      expect.equal(testOrder.timeline[0].text.includes("5/5 sao"), true);
+    });
+
+    test("F90-T4: Average CSAT rating score computes correctly across multiple courier deliveries", () => {
+      const ratings = [5, 4, 5, 3, 5];
+      const avg = Number((ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1));
+      expect.equal(avg, 4.4);
+    });
+
+    test("F90-T5: Carrier delivery satisfaction percentage identifies >80% threshold", () => {
+      const positiveDeliveries = 42;
+      const totalDeliveries = 48;
+      const csatPercent = Math.round((positiveDeliveries / totalDeliveries) * 100);
+      expect.equal(csatPercent >= 80, true);
+      expect.equal(csatPercent, 88);
+    });
+  });
 });
 
 

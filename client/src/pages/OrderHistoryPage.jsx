@@ -14,6 +14,7 @@ import ProductReviewModal from '../components/ProductReviewModal';
 import OrderDetailModal from '../components/OrderDetailModal';
 import ShopChatModal from '../components/ShopChatModal';
 import VietQRPaymentModal from '../components/VietQRPaymentModal';
+import DeliveryCsatFeedbackModal from '../components/DeliveryCsatFeedbackModal';
 import { cancelOrder } from '../services/orderService';
 import { restoreProductStock } from '../services/productService';
 import { createCustomerReturnRequestAPI } from '../services/api';
@@ -213,6 +214,7 @@ export default function OrderHistoryPage() {
   const [selectedCancelOrder, setSelectedCancelOrder] = useState(null);
   const [selectedReviewOrder, setSelectedReviewOrder] = useState(null);
   const [selectedVietQROrder, setSelectedVietQROrder] = useState(null);
+  const [selectedCsatOrder, setSelectedCsatOrder] = useState(null);
   const [cancelReason, setCancelReason] = useState('Tôi muốn thay đổi địa chỉ nhận hàng');
   const [cancelNote, setCancelNote] = useState('');
 
@@ -2231,6 +2233,40 @@ export default function OrderHistoryPage() {
                               <span>{t('review_order_btn', 'Đánh giá (+200 Xu)')}</span>
                             </button>
                           )}
+
+                          {ord.csatFeedback?.rating ? (
+                            <span
+                              style={{
+                                fontSize: '11.5px',
+                                padding: '5px 10px',
+                                borderRadius: '6px',
+                                background: 'rgba(2, 132, 199, 0.1)',
+                                color: '#0284c7',
+                                border: '1px solid rgba(2, 132, 199, 0.25)',
+                                fontWeight: 700,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                              }}
+                              title={`Đã chấm ${ord.csatFeedback.rating} sao giao vận`}
+                            >
+                              <TruckIcon size={12} color="#0284c7" />
+                              <span>SPX: {ord.csatFeedback.rating}★</span>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              className="shopee-order-btn-outline"
+                              onClick={() => setSelectedCsatOrder(ord)}
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                              title="Đánh giá bưu tá và tốc độ giao hàng SPX"
+                            >
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <TruckIcon size={11} color="#0284c7" />
+                              </span>
+                              <span>Đánh giá SPX</span>
+                            </button>
+                          )}
                         </>
                       )}
 
@@ -2341,6 +2377,22 @@ export default function OrderHistoryPage() {
             saveOrders(updated);
             showToast(`Đã ghi nhận thanh toán VietQR thành công cho đơn #${selectedVietQROrder.orderId}!`, 'success');
             setSelectedVietQROrder(null);
+          }}
+        />
+      )}
+
+      {/* Delivery CSAT Feedback Modal (Feature 90) */}
+      {selectedCsatOrder && (
+        <DeliveryCsatFeedbackModal
+          order={selectedCsatOrder}
+          onClose={() => setSelectedCsatOrder(null)}
+          onSuccess={(feedback) => {
+            const updated = orders.map((o) =>
+              (o.orderId || o._id) === (selectedCsatOrder.orderId || selectedCsatOrder._id)
+                ? { ...o, csatFeedback: feedback }
+                : o
+            );
+            saveOrders(updated);
           }}
         />
       )}
