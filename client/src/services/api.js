@@ -642,3 +642,11 @@ export async function updateSellerShippingPolicyAPI(policyData) {
   });
 }
 
+/**
+ * Seller Operational SLA & Shopee Penalty Points Engine API
+ */
+export async function fetchSellerOperationalSLA_API() {
+  const result = await apiRequest("/api/seller/operational-sla");
+  return result?.data || result || null;
+}
+

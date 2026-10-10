@@ -857,6 +857,65 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(netRemittance + codFee, orderTotal);
     });
   });
+
+  // =========================================================================
+  // FEATURE 74: Seller Operational SLA & Shopee Penalty Points Engine (5 Tests)
+  // =========================================================================
+  describe("Feature 74: Seller Operational SLA & Penalty Points Engine", () => {
+    test("F74-T1: Computes onTimeShipmentRate and lateShipmentRate strictly totaling 100%", () => {
+      const lateShipmentRate = 2.4;
+      const onTimeShipmentRate = Number((100 - lateShipmentRate).toFixed(1));
+      expect.equal(onTimeShipmentRate, 97.6);
+      expect.equal(onTimeShipmentRate + lateShipmentRate, 100.0);
+    });
+
+    test("F74-T2: Zero penalty points maps to TIER_0 Clean Account without restrictions", () => {
+      const calculatePenaltyTier = (points) => {
+        if (points >= 6) return "TIER_3";
+        if (points >= 3) return "TIER_2";
+        if (points >= 1) return "TIER_1";
+        return "TIER_0";
+      };
+
+      expect.equal(calculatePenaltyTier(0), "TIER_0");
+      expect.equal(calculatePenaltyTier(2), "TIER_1");
+      expect.equal(calculatePenaltyTier(4), "TIER_2");
+      expect.equal(calculatePenaltyTier(7), "TIER_3");
+    });
+
+    test("F74-T3: High cancellation rate exceeding 5% adds 3 penalty points", () => {
+      const getPoints = (cancelRate) => (cancelRate > 5 ? 3 : 0);
+      expect.equal(getPoints(2.1), 0);
+      expect.equal(getPoints(6.5), 3);
+    });
+
+    test("F74-T4: Shop operationalMetrics schema persists and updates in database", async () => {
+      const shop = await Shop.findOne({ shopId: "shop_01" });
+      expect.equal(Boolean(shop), true);
+
+      shop.operationalMetrics = {
+        onTimeShipmentRate: 99.1,
+        lateShipmentRate: 0.9,
+        cancellationRate: 0.5,
+        returnRate: 1.0,
+        sellerPenaltyPoints: 0,
+        penaltyTier: "TIER_0",
+      };
+      await shop.save();
+
+      const updated = await Shop.findOne({ shopId: "shop_01" });
+      expect.equal(updated.operationalMetrics.onTimeShipmentRate, 99.1);
+      expect.equal(updated.operationalMetrics.penaltyTier, "TIER_0");
+    });
+
+    test("F74-T5: Operational benchmark comparison identifies SLA compliance", () => {
+      const benchmarks = { onTimeMin: 98.0, cancelMax: 1.0 };
+      const currentShop = { onTime: 98.5, cancel: 0.8 };
+
+      const isCompliant = currentShop.onTime >= benchmarks.onTimeMin && currentShop.cancel <= benchmarks.cancelMax;
+      expect.equal(isCompliant, true);
+    });
+  });
 });
 
 

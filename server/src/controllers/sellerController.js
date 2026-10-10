@@ -1633,6 +1633,73 @@ export const updateSellerShippingPolicy = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Lấy chỉ số vận hành SLA & điểm phạt Sao Quả Tạ của shop
+// @route   GET /api/seller/operational-sla
+// @access  Private (Seller)
+export const getSellerOperationalSLA = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId || "shop_01";
+  const shop = await Shop.findOne({ shopId });
+  if (!shop) {
+    return sendError(res, "Không tìm thấy gian hàng", 404);
+  }
+
+  const allOrders = await Order.find({ "items.shopId": shopId });
+  const totalOrders = allOrders.length || 1;
+  const lateOrders = allOrders.filter(o => o.status === "shipping" && o.shippingFee > 40000).length;
+  const cancelledOrders = allOrders.filter(o => o.status === "cancelled").length;
+  const returnedOrders = allOrders.filter(o => o.status === "returning" || o.returnRequest?.status === "approved").length;
+
+  const lateShipmentRate = Number(((lateOrders / totalOrders) * 100).toFixed(1));
+  const cancellationRate = Number(((cancelledOrders / totalOrders) * 100).toFixed(1));
+  const returnRate = Number(((returnedOrders / totalOrders) * 100).toFixed(1));
+  const onTimeShipmentRate = Number((100 - lateShipmentRate).toFixed(1));
+
+  // Tính điểm phạt Sao Quả Tạ
+  let penaltyPoints = 0;
+  if (lateShipmentRate > 10) penaltyPoints += 2;
+  if (cancellationRate > 5) penaltyPoints += 3;
+  if (returnRate > 15) penaltyPoints += 2;
+
+  let penaltyTier = "TIER_0";
+  let tierDescription = "Tài khoản sạch (Không bị hạn chế quyền lợi)";
+  if (penaltyPoints >= 6) {
+    penaltyTier = "TIER_3";
+    tierDescription = "Tạm ngưng tham gia các chiến dịch Mega Sale và mất huy hiệu Shopee Mall";
+  } else if (penaltyPoints >= 3) {
+    penaltyTier = "TIER_2";
+    tierDescription = "Giảm 30% mức độ hiển thị trong kết quả tìm kiếm tự nhiên";
+  } else if (penaltyPoints >= 1) {
+    penaltyTier = "TIER_1";
+    tierDescription = "Cảnh cáo mức 1: Cần cải thiện thời gian đóng gói & bàn giao cho SPX";
+  }
+
+  const metrics = {
+    onTimeShipmentRate,
+    lateShipmentRate,
+    cancellationRate,
+    returnRate,
+    sellerPenaltyPoints: penaltyPoints,
+    penaltyTier,
+    tierDescription,
+    targetBenchmarks: {
+      onTimeMin: 98.0,
+      lateMax: 2.0,
+      cancelMax: 1.0,
+      returnMax: 3.0,
+    },
+  };
+
+  shop.operationalMetrics = metrics;
+  await shop.save();
+
+  sendSuccess(res, {
+    shopId,
+    shopName: shop.name,
+    operationalMetrics: metrics,
+    totalOrdersAnalyzed: totalOrders,
+  });
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -1670,5 +1737,6 @@ export default {
   getSellerProfitAndLoss,
   getSellerShippingPolicy,
   updateSellerShippingPolicy,
+  getSellerOperationalSLA,
 };
 

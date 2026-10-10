@@ -30,6 +30,7 @@ import {
   fetchSellerProfitAndLossAPI,
   fetchSellerShippingPolicyAPI,
   updateSellerShippingPolicyAPI,
+  fetchSellerOperationalSLA_API,
 } from '../services/api';
 import '../styles/dashboard.css';
 import {
@@ -489,6 +490,9 @@ export default function SellerDashboardPage() {
   });
   const [isSavingShippingPolicy, setIsSavingShippingPolicy] = useState(false);
 
+  // BỔ SUNG: States cho Vận Hành SLA & Điểm Phạt Sao Quả Tạ
+  const [slaData, setSlaData] = useState(null);
+
   const loadSellerReturns = () => {
     fetchSellerReturnsAPI()
       .then(list => setReturnsList(Array.isArray(list) ? list : []))
@@ -527,7 +531,13 @@ export default function SellerDashboardPage() {
     }
   };
 
-  // Tự động nạp dữ liệu khi chuyển tab Funnel / Market / Staff / Ads / Returns / PnL / Shipping
+  const loadSellerOperationalSLA = () => {
+    fetchSellerOperationalSLA_API()
+      .then(res => setSlaData(res))
+      .catch(() => {});
+  };
+
+  // Tự động nạp dữ liệu khi chuyển tab Funnel / Market / Staff / Ads / Returns / PnL / Shipping / SLA
   useEffect(() => {
     if (activeTab === 'funnel') {
       fetchSellerFunnelAnalytics().then(res => setSellerFunnel(res));
@@ -543,6 +553,8 @@ export default function SellerDashboardPage() {
       loadSellerProfitAndLoss();
     } else if (activeTab === 'shipping_policy') {
       loadSellerShippingPolicy();
+    } else if (activeTab === 'sla_metrics') {
+      loadSellerOperationalSLA();
     } else if (activeTab === 'flashsale') {
       fetchSellerFlashSalesAPI().then(res => {
         const list = res?.flashSales || (Array.isArray(res) ? res : []);
@@ -2396,6 +2408,27 @@ export default function SellerDashboardPage() {
             <TruckIcon size={14} color="#0284c7" />
           </span>
           <span>Vận Chuyển Động &amp; SPX</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'sla_metrics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('sla_metrics')}
+        >
+          <span style={{
+            width: '26px',
+            height: '26px',
+            borderRadius: '7px',
+            background: activeTab === 'sla_metrics' ? 'rgba(239, 68, 68, 0.18)' : 'rgba(239, 68, 68, 0.1)',
+            border: activeTab === 'sla_metrics' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(239, 68, 68, 0.18)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <ShieldCheckIcon size={14} color="#ef4444" />
+          </span>
+          <span>Hiệu Suất SLA &amp; Sao Quả Tạ</span>
         </button>
       </aside>
 
@@ -6549,6 +6582,163 @@ export default function SellerDashboardPage() {
                 </div>
               </div>
             </form>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 13: HIỆU SUẤT VẬN HÀNH SLA & HỆ THỐNG SAO QUẢ TẠ SHOPEE
+        ========================================================================= */}
+        {activeTab === 'sla_metrics' && (
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldCheckIcon size={20} color="#ef4444" />
+                  Chỉ Số Vận Hành SLA &amp; Hệ Thống Điểm Phạt Sao Quả Tạ
+                </h2>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                  Giám sát tỷ lệ giao hàng đúng hạn, tỷ lệ hủy đơn chủ quan và bảo vệ thứ hạng hiển thị gian hàng
+                </p>
+              </div>
+              <button
+                type="button"
+                className="shopee-btn shopee-btn-outline"
+                onClick={loadSellerOperationalSLA}
+                style={{ padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}
+              >
+                Cập Nhật Chỉ Số
+              </button>
+            </div>
+
+            {/* Banner Cảnh Báo Cấp Độ Phạt */}
+            <div style={{
+              padding: '16px 20px',
+              borderRadius: '12px',
+              marginBottom: '24px',
+              background: (slaData?.operationalMetrics?.sellerPenaltyPoints || 0) === 0 ? '#f0fdf4' : '#fef2f2',
+              border: (slaData?.operationalMetrics?.sellerPenaltyPoints || 0) === 0 ? '1px solid #bbf7d0' : '1px solid #fecaca',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  background: (slaData?.operationalMetrics?.sellerPenaltyPoints || 0) === 0 ? '#16a34a' : '#ef4444',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 900,
+                  fontSize: '16px'
+                }}>
+                  {(slaData?.operationalMetrics?.sellerPenaltyPoints || 0) === 0 ? '✓' : '!'}
+                </div>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: (slaData?.operationalMetrics?.sellerPenaltyPoints || 0) === 0 ? '#166534' : '#991b1b' }}>
+                    {(slaData?.operationalMetrics?.sellerPenaltyPoints || 0) === 0
+                      ? 'Gian hàng đang duy trì chuẩn vận hành xuất sắc (0 Điểm Phạt)'
+                      : `Cảnh báo Sao Quả Tạ: ${slaData?.operationalMetrics?.sellerPenaltyPoints} Điểm (${slaData?.operationalMetrics?.penaltyTier})`}
+                  </h4>
+                  <p style={{ margin: '2px 0 0', fontSize: '12px', color: (slaData?.operationalMetrics?.sellerPenaltyPoints || 0) === 0 ? '#15803d' : '#b91c1c' }}>
+                    {slaData?.operationalMetrics?.tierDescription || 'Tài khoản sạch, đầy đủ quyền lợi đề xuất sản phẩm và tham gia Mega Sale sàn.'}
+                  </p>
+                </div>
+              </div>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                Đã phân tích: <strong style={{ color: '#0f172a' }}>{slaData?.totalOrdersAnalyzed || orders.length}</strong> đơn hàng
+              </div>
+            </div>
+
+            {/* 4 Thẻ KPI Chỉ Số Vận Hành */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>TỶ LỆ GIAO ĐÚNG HẠN SLA</span>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: (slaData?.operationalMetrics?.onTimeShipmentRate ?? 98.5) >= 98 ? '#16a34a' : '#ea580c', margin: '4px 0' }}>
+                  {slaData?.operationalMetrics?.onTimeShipmentRate ?? 98.5}%
+                </div>
+                <span style={{ fontSize: '11.5px', color: '#16a34a' }}>Chuẩn Shopee: &gt;= 98.0%</span>
+              </div>
+
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>TỶ LỆ GIAO TRỄ HẠN</span>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: (slaData?.operationalMetrics?.lateShipmentRate ?? 1.5) <= 2 ? '#16a34a' : '#ef4444', margin: '4px 0' }}>
+                  {slaData?.operationalMetrics?.lateShipmentRate ?? 1.5}%
+                </div>
+                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Giới hạn an toàn: &lt;= 2.0%</span>
+              </div>
+
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>TỶ LỆ HỦY ĐƠN TỰ Ý</span>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: (slaData?.operationalMetrics?.cancellationRate ?? 0.8) <= 1 ? '#16a34a' : '#ef4444', margin: '4px 0' }}>
+                  {slaData?.operationalMetrics?.cancellationRate ?? 0.8}%
+                </div>
+                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Ngưỡng cảnh báo: &gt; 1.0% (+3 điểm)</span>
+              </div>
+
+              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>TỶ LỆ TRẢ HÀNG / HOÀN TIỀN</span>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: (slaData?.operationalMetrics?.returnRate ?? 1.2) <= 3 ? '#16a34a' : '#ea580c', margin: '4px 0' }}>
+                  {slaData?.operationalMetrics?.returnRate ?? 1.2}%
+                </div>
+                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Mức khuyến nghị: &lt; 3.0%</span>
+              </div>
+            </div>
+
+            {/* Bảng Quy Chuẩn Điểm Phạt Sao Quả Tạ */}
+            <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ padding: '12px 16px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#334155', fontSize: '13px' }}>
+                Khung Chế Tài &amp; Thang Điểm Phạt Shopee
+              </div>
+              <table className="shopee-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
+                <thead>
+                  <tr style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
+                    <th style={{ padding: '10px 14px', color: '#475569' }}>Cấp Độ (Tier)</th>
+                    <th style={{ padding: '10px 14px', color: '#475569' }}>Ngưỡng Điểm Phạt</th>
+                    <th style={{ padding: '10px 14px', color: '#475569' }}>Biện Pháp Chế Tài</th>
+                    <th style={{ padding: '10px 14px', color: '#475569' }}>Thời Gian Hiệu Lực</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '10px 14px' }}>
+                      <span className="shopee-badge" style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontWeight: 700 }}>TIER_0 (Chuẩn)</span>
+                    </td>
+                    <td style={{ padding: '10px 14px', fontWeight: 700 }}>0 Điểm</td>
+                    <td style={{ padding: '10px 14px', color: '#16a34a' }}>Hưởng đầy đủ quyền lợi tài khoản Shopee Mall / Shop Yêu Thích</td>
+                    <td style={{ padding: '10px 14px', color: '#64748b' }}>Vĩnh viễn</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '10px 14px' }}>
+                      <span className="shopee-badge" style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', fontWeight: 700 }}>TIER_1 (Cảnh Báo)</span>
+                    </td>
+                    <td style={{ padding: '10px 14px', fontWeight: 700 }}>1 - 2 Điểm</td>
+                    <td style={{ padding: '10px 14px', color: '#334155' }}>Gửi cảnh báo và nhắc nhở thời gian bàn giao bưu kiện cho SPX</td>
+                    <td style={{ padding: '10px 14px', color: '#64748b' }}>28 ngày</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '10px 14px' }}>
+                      <span className="shopee-badge" style={{ background: '#fff7ed', color: '#ea580c', border: '1px solid #fed7aa', fontWeight: 700 }}>TIER_2 (Giảm Hiển Thị)</span>
+                    </td>
+                    <td style={{ padding: '10px 14px', fontWeight: 700 }}>3 - 5 Điểm</td>
+                    <td style={{ padding: '10px 14px', color: '#c2410c' }}>Giảm 30% tần suất xuất hiện sản phẩm trên thanh tìm kiếm và gợi ý hôm nay</td>
+                    <td style={{ padding: '10px 14px', color: '#64748b' }}>28 ngày</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px 14px' }}>
+                      <span className="shopee-badge" style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', fontWeight: 700 }}>TIER_3 (Đình Chỉ Chiến Dịch)</span>
+                    </td>
+                    <td style={{ padding: '10px 14px', fontWeight: 700 }}>&gt;= 6 Điểm</td>
+                    <td style={{ padding: '10px 14px', color: '#dc2626' }}>Cấm tham gia các chiến dịch Mega Sale và tạm khóa tính năng Flash Sale Shop</td>
+                    <td style={{ padding: '10px 14px', color: '#64748b' }}>28 ngày</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

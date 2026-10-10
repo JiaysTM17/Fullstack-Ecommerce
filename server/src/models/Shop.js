@@ -140,6 +140,14 @@ const shopSchema = new mongoose.Schema(
       expressAvailable: { type: Boolean, default: true },
       expressSurcharge: { type: Number, default: 15000 },
     },
+    operationalMetrics: {
+      onTimeShipmentRate: { type: Number, default: 98.5 }, // % đơn giao SPX đúng hạn SLA
+      lateShipmentRate: { type: Number, default: 1.5 },     // % giao trễ
+      cancellationRate: { type: Number, default: 0.8 },     // % đơn shop hủy
+      returnRate: { type: Number, default: 1.2 },           // % hàng trả lại
+      sellerPenaltyPoints: { type: Number, default: 0 },    // Điểm phạt Sao Quả Tạ
+      penaltyTier: { type: String, enum: ["TIER_0", "TIER_1", "TIER_2", "TIER_3"], default: "TIER_0" },
+    },
   },
   { timestamps: true }
 );

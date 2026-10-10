@@ -296,6 +296,14 @@ INITIAL_SHOPS.forEach(shop => {
     expressAvailable: true,
     expressSurcharge: 15000,
   };
+  shop.operationalMetrics = shop.operationalMetrics || {
+    onTimeShipmentRate: 98.5,
+    lateShipmentRate: 1.5,
+    cancellationRate: 0.8,
+    returnRate: 1.2,
+    sellerPenaltyPoints: 0,
+    penaltyTier: "TIER_0",
+  };
 });
 
 // Load 109 products from extracted JSON

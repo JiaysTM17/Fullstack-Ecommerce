@@ -37,6 +37,7 @@ import {
   getSellerProfitAndLoss,
   getSellerShippingPolicy,
   updateSellerShippingPolicy,
+  getSellerOperationalSLA,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -81,6 +82,8 @@ router.route("/shop")
 router.route("/shipping-policy")
   .get(getSellerShippingPolicy)
   .put(updateSellerShippingPolicy);
+
+router.get("/operational-sla", getSellerOperationalSLA);
 
 router.get("/stats", getSellerStats);
 router.get("/wallet", getSellerWallet);
