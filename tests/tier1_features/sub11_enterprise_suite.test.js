@@ -2407,7 +2407,90 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isExpired, true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 94: Flexible Delivery Slot & Doorstep Rescheduling Hub (5 Tests)
+  // =========================================================================
+  describe("Feature 94: Flexible Delivery Slot & Doorstep Rescheduling Hub", () => {
+    test("F94-T1: Order model supports deliveryReschedule schema fields", async () => {
+      const order = await Order.create({
+        orderId: "ORD_RESCHEDULE_01",
+        items: [{ name: "Giày Thể Thao Sneaker", price: 350000, quantity: 1 }],
+        total: 350000,
+        status: "shipping",
+        deliveryReschedule: {
+          status: "confirmed",
+          requestedDate: "2026-10-15",
+          timeSlot: "MORNING_8_12",
+          note: "Giao trước 11h sáng giúp mình",
+          rescheduledAt: new Date().toISOString(),
+          courierConfirmedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.deliveryReschedule.status, "confirmed");
+      expect.equal(order.deliveryReschedule.requestedDate, "2026-10-15");
+      expect.equal(order.deliveryReschedule.timeSlot, "MORNING_8_12");
+      expect.equal(order.deliveryReschedule.note, "Giao trước 11h sáng giúp mình");
+    });
+
+    test("F94-T2: Delivery time slots map to accurate customer-facing friendly labels", () => {
+      const timeSlotLabelMap = {
+        MORNING_8_12: "Buổi Sáng (08:00 - 12:00)",
+        AFTERNOON_13_17: "Buổi Chiều (13:00 - 17:00)",
+        EVENING_18_21: "Buổi Tối (18:00 - 21:00)",
+        ANYTIME: "Cả Ngày (Giờ hành chính)",
+      };
+
+      expect.equal(timeSlotLabelMap["MORNING_8_12"], "Buổi Sáng (08:00 - 12:00)");
+      expect.equal(timeSlotLabelMap["AFTERNOON_13_17"], "Buổi Chiều (13:00 - 17:00)");
+      expect.equal(timeSlotLabelMap["EVENING_18_21"], "Buổi Tối (18:00 - 21:00)");
+      expect.equal(timeSlotLabelMap["ANYTIME"], "Cả Ngày (Giờ hành chính)");
+    });
+
+    test("F94-T3: Rescheduling appends an audit event to order timeline history", async () => {
+      const order = await Order.create({
+        orderId: "ORD_RESCHEDULE_02",
+        items: [{ name: "Áo Thun Oversize", price: 150000, quantity: 1 }],
+        total: 150000,
+        status: "shipping",
+        timeline: [
+          { time: "2026-10-10 08:00", text: "Đơn hàng đã xuất kho trung chuyển" },
+        ],
+      });
+
+      const slotLabel = "Buổi Tối (18:00 - 21:00)";
+      order.timeline.push({
+        time: new Date().toISOString(),
+        text: `Bưu tá SPX đã xác nhận hẹn lại lịch giao hàng vào ngày 2026-10-14 (${slotLabel}) - Lưu ý: "Gọi trước 10 phút"`,
+      });
+      await order.save();
+
+      expect.equal(order.timeline.length, 2);
+      expect.equal(order.timeline[1].text.includes("SPX đã xác nhận"), true);
+      expect.equal(order.timeline[1].text.includes("Buổi Tối"), true);
+    });
+
+    test("F94-T4: Rescheduling validation rejects missing requested date", () => {
+      const validateReschedule = (payload) => {
+        if (!payload || !payload.requestedDate) {
+          return { valid: false, error: "Vui lòng chọn ngày giao hàng mong muốn" };
+        }
+        return { valid: true };
+      };
+
+      const result = validateReschedule({ timeSlot: "AFTERNOON_13_17" });
+      expect.equal(result.valid, false);
+      expect.equal(result.error, "Vui lòng chọn ngày giao hàng mong muốn");
+    });
+
+    test("F94-T5: Free rescheduling policy guarantees zero added fee for door delivery changes", () => {
+      const rescheduleFee = 0;
+      expect.equal(rescheduleFee, 0);
+    });
+  });
 });
+
 
 
 

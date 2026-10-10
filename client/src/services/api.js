@@ -816,3 +816,14 @@ export async function joinGroupBuyTeamAPI(productId, teamId, memberName) {
     body: JSON.stringify({ productId, teamId, memberName }),
   });
 }
+
+/**
+ * Flexible Delivery Slot & Doorstep Rescheduling Hub API (Feature 94)
+ */
+export async function rescheduleOrderDeliveryAPI(orderId, { requestedDate, timeSlot, note } = {}) {
+  return await apiRequest(`/api/orders/${orderId}/reschedule-delivery`, {
+    method: "POST",
+    body: JSON.stringify({ requestedDate, timeSlot, note }),
+  });
+}
+

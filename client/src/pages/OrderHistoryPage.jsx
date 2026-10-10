@@ -15,6 +15,7 @@ import OrderDetailModal from '../components/OrderDetailModal';
 import ShopChatModal from '../components/ShopChatModal';
 import VietQRPaymentModal from '../components/VietQRPaymentModal';
 import DeliveryCsatFeedbackModal from '../components/DeliveryCsatFeedbackModal';
+import DeliveryRescheduleModal from '../components/DeliveryRescheduleModal';
 import { cancelOrder } from '../services/orderService';
 import { restoreProductStock } from '../services/productService';
 import { createCustomerReturnRequestAPI } from '../services/api';
@@ -215,6 +216,7 @@ export default function OrderHistoryPage() {
   const [selectedReviewOrder, setSelectedReviewOrder] = useState(null);
   const [selectedVietQROrder, setSelectedVietQROrder] = useState(null);
   const [selectedCsatOrder, setSelectedCsatOrder] = useState(null);
+  const [selectedRescheduleOrder, setSelectedRescheduleOrder] = useState(null);
   const [cancelReason, setCancelReason] = useState('Tôi muốn thay đổi địa chỉ nhận hàng');
   const [cancelNote, setCancelNote] = useState('');
 
@@ -1988,6 +1990,20 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.deliveryReschedule?.requestedDate && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Lưu ý: ${ord.deliveryReschedule.note || 'Không có'}`}>
+                            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <ClockIcon size={10} color="#2563eb" />
+                            </span>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#1d4ed8', background: '#dbeafe', padding: '2px 6px', borderRadius: '4px' }}>
+                              Hẹn giao: {ord.deliveryReschedule.requestedDate} ({ord.deliveryReschedule.timeSlot === 'MORNING_8_12' ? '08-12h' : ord.deliveryReschedule.timeSlot === 'AFTERNOON_13_17' ? '13-17h' : ord.deliveryReschedule.timeSlot === 'EVENING_18_21' ? '18-21h' : 'Cả ngày'})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">
@@ -2150,6 +2166,18 @@ export default function OrderHistoryPage() {
                               <TruckIcon size={11} color="#0284c7" />
                             </span>
                             <span>{t('shipper_map', 'Bản đồ Shipper SPX')}</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="shopee-order-btn-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', borderColor: '#2563eb', color: '#2563eb', background: 'rgba(37, 99, 235, 0.05)' }}
+                            onClick={() => setSelectedRescheduleOrder(ord)}
+                            title="Hẹn lại ngày hoặc khung giờ nhận hàng SPX Express"
+                          >
+                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <ClockIcon size={11} color="#2563eb" />
+                            </span>
+                            <span>{ord.deliveryReschedule?.requestedDate ? 'Đổi Lại Lịch Giao' : 'Hẹn Lại Giờ Giao'}</span>
                           </button>
                           <button
                             type="button"
@@ -2402,6 +2430,22 @@ export default function OrderHistoryPage() {
             const updated = orders.map((o) =>
               (o.orderId || o._id) === (selectedCsatOrder.orderId || selectedCsatOrder._id)
                 ? { ...o, csatFeedback: feedback }
+                : o
+            );
+            saveOrders(updated);
+          }}
+        />
+      )}
+
+      {/* Delivery Reschedule Modal (Feature 94) */}
+      {selectedRescheduleOrder && (
+        <DeliveryRescheduleModal
+          order={selectedRescheduleOrder}
+          onClose={() => setSelectedRescheduleOrder(null)}
+          onSuccess={(rescheduleData) => {
+            const updated = orders.map((o) =>
+              (o.orderId || o._id) === (selectedRescheduleOrder.orderId || selectedRescheduleOrder._id)
+                ? { ...o, deliveryReschedule: rescheduleData }
                 : o
             );
             saveOrders(updated);

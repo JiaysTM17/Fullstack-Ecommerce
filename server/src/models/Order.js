@@ -82,6 +82,22 @@ const orderSchema = new mongoose.Schema(
       recipientName: { type: String, default: "" },
       senderName: { type: String, default: "" },
     },
+    deliveryReschedule: {
+      status: {
+        type: String,
+        enum: ["none", "requested", "confirmed", "rejected"],
+        default: "none",
+      },
+      requestedDate: { type: String, default: null }, // e.g. "2026-10-15"
+      timeSlot: {
+        type: String,
+        enum: ["ANYTIME", "MORNING_8_12", "AFTERNOON_13_17", "EVENING_18_21"],
+        default: "ANYTIME",
+      },
+      note: { type: String, default: "" },
+      rescheduledAt: { type: String, default: null },
+      courierConfirmedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

@@ -1438,4 +1438,63 @@ export const updateOrderGiftWrap = async (req, res) => {
   }
 };
 
+// @desc    Khách hàng hẹn lại lịch giao hàng / đổi khung giờ nhận SPX
+// @route   POST /api/orders/:id/reschedule-delivery
+// @access  Public / Optional Auth
+export const rescheduleOrderDelivery = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { requestedDate, timeSlot, note } = req.body;
+
+    if (!requestedDate) {
+      return sendError(res, "Vui lòng chọn ngày giao hàng mong muốn", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    const timeSlotLabelMap = {
+      MORNING_8_12: "Buổi Sáng (08:00 - 12:00)",
+      AFTERNOON_13_17: "Buổi Chiều (13:00 - 17:00)",
+      EVENING_18_21: "Buổi Tối (18:00 - 21:00)",
+      ANYTIME: "Cả Ngày (Giờ hành chính)",
+    };
+
+    const slotLabel = timeSlotLabelMap[timeSlot] || "Cả Ngày";
+
+    order.deliveryReschedule = {
+      status: "confirmed", // Bưu cục SPX tự động xác nhận dời lịch
+      requestedDate: String(requestedDate),
+      timeSlot: timeSlot || "ANYTIME",
+      note: note ? String(note).trim() : "",
+      rescheduledAt: new Date().toISOString(),
+      courierConfirmedAt: new Date().toISOString(),
+    };
+
+    if (!Array.isArray(order.timeline)) order.timeline = [];
+    order.timeline.push({
+      time: new Date().toISOString(),
+      text: `Bưu tá SPX đã xác nhận hẹn lại lịch giao hàng vào ngày ${requestedDate} (${slotLabel})${note ? ` - Lưu ý: "${note.trim()}"` : ""}`,
+    });
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order._id || order.id || order.orderId,
+      deliveryReschedule: order.deliveryReschedule,
+      message: `Đã dời lịch giao hàng thành công sang ngày ${requestedDate} (${slotLabel})! Bưu tá sẽ liên hệ trước khi phát hàng.`,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
