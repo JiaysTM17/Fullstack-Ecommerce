@@ -7,7 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useCoins } from '../context/CoinContext';
 import { getVouchers } from '../services/voucherService';
-import { fetchMyOrders } from '../services/api';
+import { fetchMyOrders, fetchLoyaltyProfileAPI } from '../services/api';
 import RewardsHubModal from '../components/RewardsHubModal';
 import {
   getSavedAddresses,
@@ -93,11 +93,11 @@ export default function ProfilePage() {
   const { coins, streak, hasCheckedInToday, checkInToday, coinHistory, addCoins } = useCoins();
 
   // Navigation & Sliding Tab Indicator State
-  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'profile'); // 'profile' | 'addresses' | 'payments' | 'security' | 'settings' | 'vouchers' | 'coins'
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'profile'); // 'profile' | 'loyalty' | 'addresses' | 'payments' | 'security' | 'settings' | 'vouchers' | 'coins'
 
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['profile', 'addresses', 'payments', 'security', 'settings', 'vouchers', 'coins'].includes(tabParam)) {
+    if (tabParam && ['profile', 'loyalty', 'addresses', 'payments', 'security', 'settings', 'vouchers', 'coins'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
@@ -300,6 +300,10 @@ export default function ProfilePage() {
     totalSpent: 0,
   });
 
+  // Tab Loyalty / VIP Membership Hub (Feature 87)
+  const [loyaltyProfile, setLoyaltyProfile] = useState(null);
+  const [loadingLoyalty, setLoadingLoyalty] = useState(false);
+
   useEffect(() => {
     let active = true;
     (async () => {
@@ -328,24 +332,54 @@ export default function ProfilePage() {
         console.warn('Unable to load order stats for profile:', err?.message);
       }
     })();
+
+    // Fetch VIP Loyalty Club Profile
+    (async () => {
+      try {
+        setLoadingLoyalty(true);
+        const lProfile = await fetchLoyaltyProfileAPI();
+        if (active && lProfile) {
+          setLoyaltyProfile(lProfile);
+        }
+      } catch (err) {
+        console.warn('Loyalty profile fetch fallback:', err?.message);
+      } finally {
+        if (active) setLoadingLoyalty(false);
+      }
+    })();
+
     return () => { active = false; };
   }, [user]);
 
-  // Determine Loyalty Tier
+  // Determine Loyalty Tier (Dynamic with Backend Sync)
   const loyaltyTier = useMemo(() => {
+    if (loyaltyProfile?.tierName) {
+      return {
+        name: loyaltyProfile.tierName,
+        tierKey: (loyaltyProfile.tier || 'BRONZE').toLowerCase(),
+        color: loyaltyProfile.badgeColor || '#eab308',
+        icon: loyaltyProfile.icon || '💎',
+        coinMultiplier: loyaltyProfile.coinMultiplier || 1.0,
+        progressPercent: loyaltyProfile.progressPercent || 0,
+        spentToNext: loyaltyProfile.spentToNext || 0,
+        nextTier: loyaltyProfile.nextTier,
+        perks: loyaltyProfile.perks || [],
+        points: loyaltyProfile.points || 0,
+      };
+    }
     const spent = ordersSummary.totalSpent;
     const totalOrders = ordersSummary.total;
-    if (spent >= 10000000 || totalOrders >= 15) {
-      return { name: 'Thành viên Kim Cương', tierKey: 'diamond', color: '#38bdf8' };
+    if (spent >= 15000000 || totalOrders >= 30) {
+      return { name: 'Thành viên Kim Cương', tierKey: 'diamond', color: '#06b6d4', icon: '💎', coinMultiplier: 2.0, progressPercent: 100, spentToNext: 0, perks: [] };
     }
-    if (spent >= 3000000 || totalOrders >= 8) {
-      return { name: 'Thành viên Vàng', tierKey: 'gold', color: '#fbbf24' };
+    if (spent >= 5000000 || totalOrders >= 15) {
+      return { name: 'Thành viên Vàng', tierKey: 'gold', color: '#eab308', icon: '🥇', coinMultiplier: 1.5, progressPercent: 60, spentToNext: 15000000 - spent, perks: [] };
     }
-    if (spent >= 1000000 || totalOrders >= 3) {
-      return { name: 'Thành viên Bạc', tierKey: 'silver', color: '#cbd5e1' };
+    if (spent >= 1000000 || totalOrders >= 5) {
+      return { name: 'Thành viên Bạc', tierKey: 'silver', color: '#94a3b8', icon: '🥈', coinMultiplier: 1.2, progressPercent: 30, spentToNext: 5000000 - spent, perks: [] };
     }
-    return { name: 'Thành viên Đồng', tierKey: 'bronze', color: '#f59e0b' };
-  }, [ordersSummary]);
+    return { name: 'Thành viên Mới', tierKey: 'bronze', color: '#b45309', icon: '🥉', coinMultiplier: 1.0, progressPercent: 10, spentToNext: 1000000 - spent, perks: [] };
+  }, [ordersSummary, loyaltyProfile]);
 
   // Profile Completeness Meter Calculation
   const profileCompleteness = useMemo(() => {
@@ -991,6 +1025,22 @@ export default function ProfilePage() {
             </button>
 
             <button
+              ref={(el) => (tabRefs.current['loyalty'] = el)}
+              type="button"
+              className={`profile-tab-button ${activeTab === 'loyalty' ? 'active' : ''}`}
+              onClick={() => setActiveTab('loyalty')}
+              style={{ color: activeTab === 'loyalty' ? loyaltyTier.color : undefined }}
+            >
+              <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: activeTab === 'loyalty' ? 'rgba(234, 179, 8, 0.2)' : 'rgba(100, 116, 139, 0.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <SparklesIcon size={13} color={loyaltyTier.color} />
+              </span>
+              <span>Hạng VIP & Đặc Quyền</span>
+              <span className="profile-tab-badge" style={{ background: loyaltyTier.color, color: '#ffffff', fontWeight: 700 }}>
+                {loyaltyProfile?.tier || 'VIP'}
+              </span>
+            </button>
+
+            <button
               ref={(el) => (tabRefs.current['addresses'] = el)}
               type="button"
               className={`profile-tab-button ${activeTab === 'addresses' ? 'active' : ''}`}
@@ -1474,6 +1524,167 @@ export default function ProfilePage() {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+
+        {/* ============================================================
+            TAB: SMART MULTI-TIER LOYALTY & VIP MEMBERSHIP CLUB (Feature 87)
+            ============================================================ */}
+        {activeTab === 'loyalty' && (
+          <div className="profile-tab-content-pane">
+            {/* VIP Header Banner */}
+            <div
+              style={{
+                borderRadius: '16px',
+                padding: '24px',
+                background: `linear-gradient(135deg, ${loyaltyTier.color}22 0%, #0f172a 100%)`,
+                border: `1px solid ${loyaltyTier.color}55`,
+                color: '#ffffff',
+                marginBottom: '24px',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', position: 'relative', zIndex: 1 }}>
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', borderRadius: '999px', background: `${loyaltyTier.color}33`, border: `1px solid ${loyaltyTier.color}`, fontSize: '12px', fontWeight: 700, color: loyaltyTier.color, marginBottom: '10px' }}>
+                    <SparklesIcon size={12} color={loyaltyTier.color} />
+                    <span>{loyaltyTier.name.toUpperCase()}</span>
+                  </div>
+                  <h2 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 6px', color: '#ffffff' }}>
+                    Hạng Thành Viên: {loyaltyTier.name}
+                  </h2>
+                  <p style={{ margin: 0, fontSize: '13.5px', color: '#cbd5e1', maxWidth: '620px', lineHeight: 1.5 }}>
+                    Tích lũy chi tiêu và đơn hàng hợp lệ để mở khóa đặc quyền cao cấp, nhận gấp đôi Mini Xu và ưu tiên chăm sóc khách hàng VIP 24/7.
+                  </p>
+                </div>
+
+                <div style={{ textAlign: 'right', minWidth: '160px' }}>
+                  <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>Điểm Loyalty Tích Lũy</div>
+                  <div style={{ fontSize: '28px', fontWeight: 900, color: '#fde047', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+                    <CoinIcon size={20} color="#fde047" />
+                    <span>{(loyaltyTier.points || 0).toLocaleString('vi-VN')}</span>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#a7f3d0', marginTop: '2px' }}>
+                    Hệ số Mini Xu: <strong>{loyaltyTier.coinMultiplier}x</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Bar To Next Tier */}
+              <div style={{ marginTop: '24px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255, 255, 255, 0.12)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: '8px', fontWeight: 600 }}>
+                  <span style={{ color: '#e2e8f0' }}>
+                    {loyaltyTier.nextTier ? `Tiến độ lên hạng ${loyaltyTier.nextTier}` : 'Bạn đã đạt hạng thành viên cao nhất!'}
+                  </span>
+                  <span style={{ color: loyaltyTier.color }}>
+                    {loyaltyTier.progressPercent}%
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '8px', borderRadius: '999px', background: 'rgba(255, 255, 255, 0.15)', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${loyaltyTier.progressPercent}%`,
+                      background: `linear-gradient(90deg, ${loyaltyTier.color}, #38bdf8)`,
+                      borderRadius: '999px',
+                      transition: 'width 0.5s ease',
+                    }}
+                  />
+                </div>
+                {loyaltyTier.spentToNext > 0 && (
+                  <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '8px' }}>
+                    Cần chi tiêu thêm <strong>{formatCurrency(loyaltyTier.spentToNext)}</strong> để nâng cấp hạng thành viên tiếp theo.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Exclusive Perks Grid */}
+            <div style={{ marginBottom: '28px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 16px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(234, 179, 8, 0.15)', border: '1px solid rgba(234, 179, 8, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <GiftIcon size={14} color="#eab308" />
+                </span>
+                <span>Đặc Quyền Dành Riêng Cho Bạn</span>
+              </h3>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                {(loyaltyTier.perks && loyaltyTier.perks.length > 0 ? loyaltyTier.perks : [
+                  'Tích lũy 1% giá trị đơn hàng bằng Mini Xu',
+                  'Voucher chào mừng thành viên mới 20.000Đ',
+                  'Tham gia Vòng Quay May Mắn miễn phí mỗi ngày',
+                ]).map((perk, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '12px',
+                    }}
+                  >
+                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                      <CheckIcon size={12} color="#10b981" />
+                    </div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#1e293b', lineHeight: 1.45 }}>
+                      {perk}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* All Tiers Overview Table */}
+            <div>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 16px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid rgba(37, 99, 235, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheckIcon size={14} color="#2563eb" />
+                </span>
+                <span>Bảng Thang Hạng Thành Viên Sàn</span>
+              </h3>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                {[
+                  { tier: 'BRONZE', name: 'Đồng (Mới)', color: '#b45309', spent: '0 Đ', orders: '0 đơn', mult: '1.0x Xu' },
+                  { tier: 'SILVER', name: 'Bạc', color: '#94a3b8', spent: '1.000.000 Đ', orders: '5 đơn', mult: '1.2x Xu' },
+                  { tier: 'GOLD', name: 'Vàng', color: '#eab308', spent: '5.000.000 Đ', orders: '15 đơn', mult: '1.5x Xu' },
+                  { tier: 'DIAMOND', name: 'Kim Cương', color: '#06b6d4', spent: '15.000.000 Đ', orders: '30 đơn', mult: '2.0x Xu' },
+                ].map((tItem) => {
+                  const isCurrent = (loyaltyProfile?.tier || 'BRONZE') === tItem.tier;
+                  return (
+                    <div
+                      key={tItem.tier}
+                      style={{
+                        padding: '16px',
+                        borderRadius: '12px',
+                        background: isCurrent ? `${tItem.color}11` : '#ffffff',
+                        border: isCurrent ? `2px solid ${tItem.color}` : '1px solid #e2e8f0',
+                        position: 'relative',
+                      }}
+                    >
+                      {isCurrent && (
+                        <span style={{ position: 'absolute', top: '-10px', right: '12px', background: tItem.color, color: '#ffffff', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '999px', textTransform: 'uppercase' }}>
+                          Hạng Của Bạn
+                        </span>
+                      )}
+                      <div style={{ fontSize: '15px', fontWeight: 800, color: tItem.color, marginBottom: '6px' }}>
+                        {tItem.name}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>
+                        Điều kiện: <strong>{tItem.spent}</strong> hoặc <strong>{tItem.orders}</strong>
+                      </div>
+                      <div style={{ fontSize: '12.5px', color: '#0f172a', fontWeight: 700 }}>
+                        Tích xu: <span style={{ color: tItem.color }}>{tItem.mult}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
 

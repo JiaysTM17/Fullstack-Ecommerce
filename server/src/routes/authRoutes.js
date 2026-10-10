@@ -5,6 +5,7 @@ import {
   refreshToken, logout,
   sendRegistrationOtp, verifyRegistrationOtp,
   checkEmailAvailability,
+  getLoyaltyProfile,
 } from "../controllers/authController.js";
 import { authenticate } from "../middlewares/auth.js";
 
@@ -23,6 +24,7 @@ router.post("/verify-registration-otp", verifyRegistrationOtp);
 
 // Private routes (authenticated)
 router.get("/me", authenticate, me);
+router.get("/loyalty", authenticate, getLoyaltyProfile);
 router.put("/profile", authenticate, profile);
 router.put("/change-password", authenticate, changePassword);
 router.post("/refresh-token", authenticate, refreshToken);

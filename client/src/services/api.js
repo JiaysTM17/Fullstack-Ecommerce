@@ -752,3 +752,11 @@ export async function batchDispatchSellerOrdersAPI(orderIds) {
     body: JSON.stringify({ orderIds }),
   });
 }
+
+/**
+ * Smart Multi-tier Loyalty & VIP Membership Club API (Feature 87)
+ */
+export async function fetchLoyaltyProfileAPI() {
+  const result = await apiRequest("/api/auth/loyalty");
+  return result?.data?.loyalty || result?.loyalty || null;
+}

@@ -21,6 +21,7 @@ import {
   HeartIcon,
   PencilIcon,
   ShieldIcon,
+  SparklesIcon,
 } from './OrdersIcons';
 
 /**
@@ -219,6 +220,19 @@ export default function AccountSidebar({
           </div>
 
           <div className="account-sidebar-group-content">
+            <Link
+              to="/profile?tab=loyalty"
+              className={`account-sidebar-link ${activeSection === 'loyalty' ? 'active' : ''}`}
+            >
+              <div className="sidebar-btn-left">
+                <span className="sidebar-icon-cell" style={{ background: 'rgba(234, 179, 8, 0.15)', border: 'none' }}><SparklesIcon size={16} color="#eab308" /></span>
+                <span className="sidebar-menu-label">Hạng VIP & Đặc Quyền</span>
+              </div>
+              <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: '#eab308', color: '#ffffff' }}>
+                VIP
+              </span>
+            </Link>
+
             <Link
               to="/profile?tab=vouchers"
               className={`account-sidebar-link ${activeSection === 'vouchers' ? 'active' : ''}`}

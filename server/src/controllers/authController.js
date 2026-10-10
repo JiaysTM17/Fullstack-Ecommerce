@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
-import User from "../models/User.js";
+import User, { computeLoyaltyTier } from "../models/User.js";
 import Shop from "../models/Shop.js";
+import Order from "../models/Order.js";
 import { generateToken } from "../utils/jwt.js";
 import { sendError, sendSuccess } from "../utils/response.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -261,6 +262,54 @@ export const me = catchAsync(async (req, res) => {
 
   const safeUser = user.toSafeObject ? user.toSafeObject() : user;
   return sendSuccess(res, safeUser);
+});
+
+// @desc    Lấy thông tin Hạng Thành Viên VIP Loyalty Club & Đặc Quyền
+// @route   GET /api/auth/loyalty
+// @access  Private (Authenticated)
+export const getLoyaltyProfile = catchAsync(async (req, res) => {
+  const userId = req.user.id || req.user._id;
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return sendError(res, "Không tìm thấy thông tin tài khoản", 404);
+  }
+
+  // Tự động đối soát chi tiêu tích lũy từ lịch sử đơn hàng
+  const userOrders = await Order.find({
+    $or: [{ userId: userId }, { "customer.phone": user.phone }],
+    status: { $in: ["completed", "delivered", "shipping", "confirmed"] },
+  });
+
+  const lifetimeSpent = (userOrders || []).reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+  const orderCount = (userOrders || []).length;
+
+  const tierMeta = computeLoyaltyTier(lifetimeSpent, orderCount);
+
+  // Cập nhật lưu vào user model
+  user.loyalty = {
+    tier: tierMeta.tier,
+    lifetimeSpent,
+    orderCount,
+    points: Math.floor(lifetimeSpent / 1000),
+    lastEvaluatedAt: new Date().toISOString(),
+  };
+  await user.save?.();
+
+  return sendSuccess(res, {
+    loyalty: {
+      ...user.loyalty,
+      tierName: tierMeta.name,
+      badgeColor: tierMeta.badgeColor,
+      icon: tierMeta.icon,
+      coinMultiplier: tierMeta.coinMultiplier,
+      nextTier: tierMeta.nextTier,
+      spentToNext: tierMeta.spentToNext,
+      progressPercent: tierMeta.progressPercent,
+      perks: tierMeta.perks,
+      activeCoins: user.coins || 0,
+    },
+  }, 200, "Lấy thông tin Hạng Thành Viên Loyalty thành công");
 });
 
 // @desc    Update profile

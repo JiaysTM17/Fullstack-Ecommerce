@@ -15,6 +15,7 @@ import Shop from "../../server/src/models/Shop.js";
 import Order from "../../server/src/models/Order.js";
 import Product from "../../server/src/models/Product.js";
 import AuditLog, { recordAuditLog } from "../../server/src/models/AuditLog.js";
+import User, { computeLoyaltyTier } from "../../server/src/models/User.js";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
 
@@ -1958,6 +1959,71 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(Boolean(auditLog), true);
       expect.equal(auditLog.action, "BATCH_DISPATCH_ORDERS");
       expect.equal(auditLog.details.dispatchedCount, 2);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 87: Smart Multi-tier Loyalty & VIP Membership Club System (5 Tests)
+  // =========================================================================
+  describe("Feature 87: Smart Multi-tier Loyalty & VIP Membership Club System", () => {
+    test("F87-T1: Computes BRONZE tier for new user with zero orders and zero lifetime spent", () => {
+      const tier = computeLoyaltyTier(0, 0);
+      expect.equal(tier.tier, "BRONZE");
+      expect.equal(tier.coinMultiplier, 1.0);
+      expect.equal(tier.nextTier, "SILVER");
+      expect.equal(tier.spentToNext, 1000000);
+      expect.equal(tier.progressPercent, 0);
+    });
+
+    test("F87-T2: Automatically promotes to SILVER tier upon reaching 1,000,000 VND spent or 5 orders", () => {
+      const tierBySpent = computeLoyaltyTier(1500000, 2);
+      expect.equal(tierBySpent.tier, "SILVER");
+      expect.equal(tierBySpent.coinMultiplier, 1.2);
+      expect.equal(tierBySpent.nextTier, "GOLD");
+
+      const tierByOrders = computeLoyaltyTier(600000, 5);
+      expect.equal(tierByOrders.tier, "SILVER");
+      expect.equal(tierByOrders.coinMultiplier, 1.2);
+    });
+
+    test("F87-T3: Promotes to GOLD tier (5M VND or 15 orders) with 1.5x Mini Xu multiplier and exclusive perks", () => {
+      const goldTier = computeLoyaltyTier(6500000, 16);
+      expect.equal(goldTier.tier, "GOLD");
+      expect.equal(goldTier.coinMultiplier, 1.5);
+      expect.equal(goldTier.nextTier, "DIAMOND");
+      expect.equal(goldTier.perks.length >= 4, true);
+    });
+
+    test("F87-T4: Promotes to DIAMOND tier (15M VND or 30 orders) with 2.0x Xu and 100% progress", () => {
+      const diamondTier = computeLoyaltyTier(22000000, 32);
+      expect.equal(diamondTier.tier, "DIAMOND");
+      expect.equal(diamondTier.coinMultiplier, 2.0);
+      expect.equal(diamondTier.nextTier, null);
+      expect.equal(diamondTier.progressPercent, 100);
+      expect.equal(diamondTier.spentToNext, 0);
+    });
+
+    test("F87-T5: User profile persists loyalty points, tier, and lifetime spent consistently", async () => {
+      const testUser = await User.create({
+        fullName: "Khách Hàng Thân Thiết VIP",
+        email: `vip.loyalty.${Date.now()}@test.vn`,
+        password: "hash_pw",
+        role: "customer",
+        coins: 1500,
+        loyalty: {
+          tier: "GOLD",
+          points: 5200,
+          lifetimeSpent: 5200000,
+          orderCount: 16,
+          lastEvaluatedAt: new Date(),
+        },
+      });
+
+      const foundUser = await User.findById(testUser.id || testUser._id);
+      expect.equal(Boolean(foundUser), true);
+      expect.equal(foundUser.loyalty.tier, "GOLD");
+      expect.equal(foundUser.loyalty.points, 5200);
+      expect.equal(foundUser.loyalty.lifetimeSpent, 5200000);
     });
   });
 });
