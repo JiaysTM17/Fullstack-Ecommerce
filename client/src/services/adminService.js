@@ -234,6 +234,22 @@ export async function getAdminFraudRadar() {
 }
 
 /**
+ * Lấy dữ liệu Giám sát Quỹ Ký Quỹ & Thanh Khoản Sàn (Escrow Cashflow & Vault Monitor)
+ */
+export async function getAdminEscrowVaultAPI() {
+  try {
+    const res = await apiRequest("/api/admin/finance/escrow-vault", {
+      headers: getAdminHeaders(),
+    });
+    return res?.data || res || null;
+  } catch (error) {
+    console.warn("[AdminService] getAdminEscrowVaultAPI fallback:", error.message);
+    return null;
+  }
+}
+
+
+/**
  * Xử lý hoặc miễn trừ cảnh báo an ninh từ Fraud Radar
  */
 export async function resolveAdminFraudAnomalyAPI(id, action, note = "") {

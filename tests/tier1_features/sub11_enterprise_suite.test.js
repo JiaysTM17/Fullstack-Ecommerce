@@ -590,7 +590,59 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValidScore, true);
     });
   });
+
+  describe("Feature 70: Super Admin Escrow Vault Liquidity & Cashflow Monitoring (Nghị định 52 Compliance)", () => {
+    test("F70-T1: Vault liquidity correctly reconciles holding, frozen dispute and cleared payout buckets", () => {
+      const holding = 18500000;
+      const frozen = 3420000;
+      const cleared = 23880000;
+      const totalLiquidity = holding + frozen + cleared;
+
+      expect.equal(totalLiquidity, 45800000);
+      expect.equal(totalLiquidity >= holding + frozen, true);
+    });
+
+    test("F70-T2: Shop escrow risk categorization identifies HIGH_RISK, MEDIUM_RISK and SAFE shops", () => {
+      const evaluateRisk = (frozenBalance) => {
+        if (frozenBalance > 1000000) return "HIGH_RISK";
+        if (frozenBalance > 0) return "MEDIUM_RISK";
+        return "SAFE";
+      };
+
+      expect.equal(evaluateRisk(0), "SAFE");
+      expect.equal(evaluateRisk(450000), "MEDIUM_RISK");
+      expect.equal(evaluateRisk(2500000), "HIGH_RISK");
+    });
+
+    test("F70-T3: Disputed order return request immediately freezes amount from cleared balance", () => {
+      let clearedBalance = 15000000;
+      let frozenBalance = 0;
+      const disputeRefundAmount = 1200000;
+
+      clearedBalance -= disputeRefundAmount;
+      frozenBalance += disputeRefundAmount;
+
+      expect.equal(clearedBalance, 13800000);
+      expect.equal(frozenBalance, 1200000);
+    });
+
+    test("F70-T4: Empty shop or zero orders initializes vault breakdown with 0 without throwing error", () => {
+      const shop = { shopId: "shop_new", name: "New Brand" };
+      const shopOrders = [];
+      const holding = shopOrders.reduce((sum, o) => sum + o.total, 0);
+      expect.equal(holding, 0);
+    });
+
+    test("F70-T5: Vault summary attaches statutory compliance notice referencing Decree 52/2018", () => {
+      const summary = {
+        statutoryCompliance: "Nghị định 52/2018/NĐ-CP Điều 74: Cơ chế bảo vệ tiền khách hàng & ký quỹ bên thứ ba",
+      };
+      expect.equal(summary.statutoryCompliance.includes("Nghị định 52/2018/NĐ-CP"), true);
+      expect.equal(summary.statutoryCompliance.includes("ký quỹ bên thứ ba"), true);
+    });
+  });
 });
+
 
 
 

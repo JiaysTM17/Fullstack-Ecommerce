@@ -26,7 +26,9 @@ import {
   getAdminFraudRadar,
   resolveAdminFraudAnomaly,
   approveSettlementPayoutAdmin,
+  getAdminEscrowVault,
 } from "../controllers/adminController.js";
+
 
 const router = express.Router();
 
@@ -69,6 +71,7 @@ router.get("/overview", getPlatformOverviewAdmin);
 router.get("/finance", getFinanceSettlementsAdmin);
 router.post("/finance/settlements/:shopId/approve", approveSettlementPayoutAdmin);
 router.get("/finance/tax-reports", getAdminTaxReports);
+router.get("/finance/escrow-vault", getAdminEscrowVault);
 
 // Fraud & Security Radar
 router.get("/security/fraud-radar", getAdminFraudRadar);
