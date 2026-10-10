@@ -31,6 +31,8 @@ import {
   fetchSellerShippingPolicyAPI,
   updateSellerShippingPolicyAPI,
   fetchSellerOperationalSLA_API,
+  fetchSellerAutoReplyAPI,
+  updateSellerAutoReplyAPI,
 } from '../services/api';
 import '../styles/dashboard.css';
 import {
@@ -537,6 +539,52 @@ export default function SellerDashboardPage() {
       .catch(() => {});
   };
 
+  // BỔ SUNG: States cho Trợ Lý Chat Tự Động Shop (Auto-Reply Assistant)
+  const [autoReplyData, setAutoReplyData] = useState({
+    enabled: true,
+    welcomeMessage: 'Cảm ơn bạn đã ghé thăm gian hàng! Shop đang chuẩn bị đơn và sẽ phản hồi tin nhắn trong ít phút ạ.',
+    offlineMessage: 'Hiện tại shop đang ngoài giờ làm việc (sau 22:00). Bạn vui lòng để lại lời nhắn, shop sẽ trả lời ngay khi mở cửa vào 8:00 sáng mai nhé!',
+    quickTemplates: [
+      {
+        id: 'tpl_shipping',
+        triggerKeyword: 'khi nào giao',
+        responseMessage: 'Đơn hàng của bạn sẽ được bàn giao cho đơn vị vận chuyển SPX trong vòng 24 giờ kể từ khi xác nhận ạ!',
+      },
+      {
+        id: 'tpl_size',
+        triggerKeyword: 'tư vấn size',
+        responseMessage: 'Dạ bạn cho shop xin thông tin chiều cao và cân nặng để shop tư vấn size chuẩn form nhất cho bạn nhé!',
+      },
+    ],
+  });
+  const [isSavingAutoReply, setIsSavingAutoReply] = useState(false);
+
+  const loadSellerAutoReply = () => {
+    fetchSellerAutoReplyAPI()
+      .then(res => {
+        if (res?.autoReply) {
+          setAutoReplyData(res.autoReply);
+        }
+      })
+      .catch(() => {});
+  };
+
+  const handleSaveAutoReply = async (e) => {
+    e.preventDefault();
+    setIsSavingAutoReply(true);
+    try {
+      const res = await updateSellerAutoReplyAPI(autoReplyData);
+      if (res?.autoReply) {
+        setAutoReplyData(res.autoReply);
+      }
+      toast.success('Đã lưu cấu hình Trợ lý Chat & Tin nhắn tự động thành công!');
+    } catch (err) {
+      toast.error(`Lưu cấu hình thất bại: ${err.message || 'Lỗi hệ thống'}`);
+    } finally {
+      setIsSavingAutoReply(false);
+    }
+  };
+
   // Tự động nạp dữ liệu khi chuyển tab Funnel / Market / Staff / Ads / Returns / PnL / Shipping / SLA
   useEffect(() => {
     if (activeTab === 'funnel') {
@@ -555,6 +603,8 @@ export default function SellerDashboardPage() {
       loadSellerShippingPolicy();
     } else if (activeTab === 'sla_metrics') {
       loadSellerOperationalSLA();
+    } else if (activeTab === 'auto_reply') {
+      loadSellerAutoReply();
     } else if (activeTab === 'flashsale') {
       fetchSellerFlashSalesAPI().then(res => {
         const list = res?.flashSales || (Array.isArray(res) ? res : []);
@@ -2429,6 +2479,27 @@ export default function SellerDashboardPage() {
             <ShieldCheckIcon size={14} color="#ef4444" />
           </span>
           <span>Hiệu Suất SLA &amp; Sao Quả Tạ</span>
+        </button>
+
+        <button
+          type="button"
+          className={`shopee-nav-item ${activeTab === 'auto_reply' ? 'active' : ''}`}
+          onClick={() => setActiveTab('auto_reply')}
+        >
+          <span style={{
+            width: '26px',
+            height: '26px',
+            borderRadius: '7px',
+            background: activeTab === 'auto_reply' ? 'rgba(168, 85, 247, 0.18)' : 'rgba(168, 85, 247, 0.1)',
+            border: activeTab === 'auto_reply' ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(168, 85, 247, 0.18)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <ChatIcon size={14} color="#a855f7" />
+          </span>
+          <span>Trợ Lý Chat &amp; Tự Động</span>
         </button>
       </aside>
 
@@ -6739,6 +6810,187 @@ export default function SellerDashboardPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 13: TRỢ LÝ TIN NHẮN TỰ ĐỘNG & BỘ LỌC TỪ KHÓA (AUTO-REPLY ASSISTANT)
+        ========================================================================= */}
+        {activeTab === 'auto_reply' && (
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ChatIcon size={20} color="#a855f7" />
+                  Trợ Lý Tin Nhắn Tự Động &amp; Phản Hồi Tức Thì (Auto-Reply Assistant)
+                </h2>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                  Tự động trả lời tin nhắn của người mua theo từ khóa, tin nhắn chào mừng và tin nhắn ngoài giờ làm việc
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '12.5px', fontWeight: 700, color: autoReplyData.enabled ? '#16a34a' : '#64748b' }}>
+                  {autoReplyData.enabled ? 'Đang Kích Hoạt' : 'Đang Tạm Tắt'}
+                </span>
+                <input
+                  type="checkbox"
+                  checked={autoReplyData.enabled}
+                  onChange={(e) => setAutoReplyData({ ...autoReplyData, enabled: e.target.checked })}
+                  style={{ width: '18px', height: '18px', accentColor: '#a855f7', cursor: 'pointer' }}
+                />
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveAutoReply}>
+              {/* Tin Nhắn Mở Đầu Chào Mừng */}
+              <div style={{ marginBottom: '20px', background: '#faf5ff', padding: '16px', borderRadius: '12px', border: '1px solid #f3e8ff' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#6b21a8', marginBottom: '6px' }}>
+                  👋 Tin Nhắn Chào Mừng Tự Động (Khi khách bắt đầu chat)
+                </label>
+                <textarea
+                  className="shopee-input"
+                  rows={3}
+                  value={autoReplyData.welcomeMessage}
+                  onChange={(e) => setAutoReplyData({ ...autoReplyData, welcomeMessage: e.target.value })}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d8b4fe', fontSize: '13px' }}
+                />
+              </div>
+
+              {/* Tin Nhắn Ngoài Giờ Làm Việc */}
+              <div style={{ marginBottom: '24px', background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  🌙 Tin Nhắn Ngoài Giờ Làm Việc (Sau 22:00 đêm)
+                </label>
+                <textarea
+                  className="shopee-input"
+                  rows={3}
+                  value={autoReplyData.offlineMessage}
+                  onChange={(e) => setAutoReplyData({ ...autoReplyData, offlineMessage: e.target.value })}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                />
+              </div>
+
+              {/* Mẫu Phản Hồi Nhanh Theo Từ Khóa */}
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: '#0f172a' }}>
+                    ⚡ Phản Hồi Tức Thì Theo Từ Khóa (Keyword Trigger Templates)
+                  </h3>
+                  <button
+                    type="button"
+                    className="shopee-btn shopee-btn-outline"
+                    onClick={() => {
+                      const newTpl = {
+                        id: `tpl_${Date.now()}`,
+                        triggerKeyword: '',
+                        responseMessage: '',
+                      };
+                      setAutoReplyData({
+                        ...autoReplyData,
+                        quickTemplates: [...(autoReplyData.quickTemplates || []), newTpl],
+                      });
+                    }}
+                    style={{ padding: '4px 12px', fontSize: '12px', fontWeight: 700 }}
+                  >
+                    + Thêm Kịch Bản Từ Khóa
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {(autoReplyData.quickTemplates || []).map((tpl, idx) => (
+                    <div
+                      key={tpl.id || idx}
+                      style={{
+                        padding: '14px',
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '10px',
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 2fr auto',
+                        gap: '12px',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#64748b', marginBottom: '4px' }}>
+                          Từ Khóa Khách Hỏi
+                        </label>
+                        <input
+                          type="text"
+                          className="shopee-input"
+                          placeholder="VD: khi nào giao"
+                          value={tpl.triggerKeyword}
+                          onChange={(e) => {
+                            const updated = [...autoReplyData.quickTemplates];
+                            updated[idx].triggerKeyword = e.target.value;
+                            setAutoReplyData({ ...autoReplyData, quickTemplates: updated });
+                          }}
+                          style={{ width: '100%', padding: '6px 10px', fontSize: '12.5px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#64748b', marginBottom: '4px' }}>
+                          Nội Dung Shop Phản Hồi Tự Động
+                        </label>
+                        <input
+                          type="text"
+                          className="shopee-input"
+                          placeholder="VD: Shop gửi SPX trong 24h ạ!"
+                          value={tpl.responseMessage}
+                          onChange={(e) => {
+                            const updated = [...autoReplyData.quickTemplates];
+                            updated[idx].responseMessage = e.target.value;
+                            setAutoReplyData({ ...autoReplyData, quickTemplates: updated });
+                          }}
+                          style={{ width: '100%', padding: '6px 10px', fontSize: '12.5px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = autoReplyData.quickTemplates.filter((_, i) => i !== idx);
+                          setAutoReplyData({ ...autoReplyData, quickTemplates: updated });
+                        }}
+                        style={{
+                          background: '#fef2f2',
+                          border: '1px solid #fecaca',
+                          color: '#dc2626',
+                          borderRadius: '6px',
+                          padding: '6px 10px',
+                          cursor: 'pointer',
+                          fontWeight: 700,
+                          fontSize: '11px',
+                        }}
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Nút Lưu Cấu Hình */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+                <button
+                  type="submit"
+                  disabled={isSavingAutoReply}
+                  className="shopee-btn"
+                  style={{
+                    background: 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 24px',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    cursor: isSavingAutoReply ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 2px 8px rgba(168, 85, 247, 0.3)',
+                  }}
+                >
+                  {isSavingAutoReply ? 'Đang Lưu...' : '💾 Lưu Cấu Hình Trợ Lý Chat'}
+                </button>
+              </div>
+            </form>
           </div>
         )}
 

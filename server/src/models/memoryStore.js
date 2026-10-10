@@ -304,6 +304,23 @@ INITIAL_SHOPS.forEach(shop => {
     sellerPenaltyPoints: 0,
     penaltyTier: "TIER_0",
   };
+  shop.autoReply = shop.autoReply || {
+    enabled: true,
+    welcomeMessage: "Cảm ơn bạn đã ghé thăm gian hàng! Shop đang chuẩn bị đơn và sẽ phản hồi tin nhắn trong ít phút ạ.",
+    offlineMessage: "Hiện tại shop đang ngoài giờ làm việc (sau 22:00). Bạn vui lòng để lại lời nhắn, shop sẽ trả lời ngay khi mở cửa vào 8:00 sáng mai nhé!",
+    quickTemplates: [
+      {
+        id: "tpl_shipping",
+        triggerKeyword: "khi nào giao",
+        responseMessage: "Đơn hàng của bạn sẽ được bàn giao cho đơn vị vận chuyển SPX trong vòng 24 giờ kể từ khi xác nhận ạ!",
+      },
+      {
+        id: "tpl_size",
+        triggerKeyword: "tư vấn size",
+        responseMessage: "Dạ bạn cho shop xin thông tin chiều cao và cân nặng để shop tư vấn size chuẩn form nhất cho bạn nhé!",
+      },
+    ],
+  };
 });
 
 // Load 109 products from extracted JSON

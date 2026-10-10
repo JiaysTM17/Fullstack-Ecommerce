@@ -668,3 +668,18 @@ export async function applyTripleVouchersAPI({ items = [], freeshipCode, shopVou
   });
   return result?.data || result || null;
 }
+
+/**
+ * Seller Auto-Reply Assistant APIs
+ */
+export async function fetchSellerAutoReplyAPI() {
+  const result = await apiRequest("/api/seller/auto-reply");
+  return result?.data || result || null;
+}
+
+export async function updateSellerAutoReplyAPI(autoReplyData) {
+  return await apiRequest("/api/seller/auto-reply", {
+    method: "PUT",
+    body: JSON.stringify(autoReplyData),
+  });
+}

@@ -38,6 +38,8 @@ import {
   getSellerShippingPolicy,
   updateSellerShippingPolicy,
   getSellerOperationalSLA,
+  getSellerAutoReply,
+  updateSellerAutoReply,
 } from "../controllers/sellerController.js";
 
 const router = express.Router();
@@ -82,6 +84,10 @@ router.route("/shop")
 router.route("/shipping-policy")
   .get(getSellerShippingPolicy)
   .put(updateSellerShippingPolicy);
+
+router.route("/auto-reply")
+  .get(getSellerAutoReply)
+  .put(updateSellerAutoReply);
 
 router.get("/operational-sla", getSellerOperationalSLA);
 

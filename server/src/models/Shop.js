@@ -148,6 +148,38 @@ const shopSchema = new mongoose.Schema(
       sellerPenaltyPoints: { type: Number, default: 0 },    // Điểm phạt Sao Quả Tạ
       penaltyTier: { type: String, enum: ["TIER_0", "TIER_1", "TIER_2", "TIER_3"], default: "TIER_0" },
     },
+    autoReply: {
+      enabled: { type: Boolean, default: true },
+      welcomeMessage: {
+        type: String,
+        default: "Cảm ơn bạn đã ghé thăm gian hàng! Shop đang chuẩn bị đơn và sẽ phản hồi tin nhắn trong ít phút ạ.",
+      },
+      offlineMessage: {
+        type: String,
+        default: "Hiện tại shop đang ngoài giờ làm việc (sau 22:00). Bạn vui lòng để lại lời nhắn, shop sẽ trả lời ngay khi mở cửa vào 8:00 sáng mai nhé!",
+      },
+      quickTemplates: {
+        type: [
+          {
+            id: String,
+            triggerKeyword: String,
+            responseMessage: String,
+          },
+        ],
+        default: [
+          {
+            id: "tpl_shipping",
+            triggerKeyword: "khi nào giao",
+            responseMessage: "Đơn hàng của bạn sẽ được bàn giao cho đơn vị vận chuyển SPX trong vòng 24 giờ kể từ khi xác nhận ạ!",
+          },
+          {
+            id: "tpl_size",
+            triggerKeyword: "tư vấn size",
+            responseMessage: "Dạ bạn cho shop xin thông tin chiều cao và cân nặng để shop tư vấn size chuẩn form nhất cho bạn nhé!",
+          },
+        ],
+      },
+    },
   },
   { timestamps: true }
 );

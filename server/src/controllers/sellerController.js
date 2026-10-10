@@ -1700,6 +1700,89 @@ export const getSellerOperationalSLA = catchAsync(async (req, res) => {
   });
 });
 
+// @desc    Lấy cấu hình Trợ lý Tin nhắn Tự động Shop (Seller Auto-Reply Assistant)
+// @route   GET /api/seller/auto-reply
+// @access  Private (Seller only)
+export const getSellerAutoReply = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  if (!shopId) {
+    return sendError(res, "Chưa liên kết gian hàng", 400);
+  }
+
+  const shop = await Shop.findOne({ shopId });
+  if (!shop) {
+    return sendError(res, "Không tìm thấy gian hàng", 404);
+  }
+
+  const autoReply = shop.autoReply || {
+    enabled: true,
+    welcomeMessage: "Cảm ơn bạn đã ghé thăm gian hàng! Shop đang chuẩn bị đơn và sẽ phản hồi tin nhắn trong ít phút ạ.",
+    offlineMessage: "Hiện tại shop đang ngoài giờ làm việc (sau 22:00). Bạn vui lòng để lại lời nhắn, shop sẽ trả lời ngay khi mở cửa vào 8:00 sáng mai nhé!",
+    quickTemplates: [
+      {
+        id: "tpl_shipping",
+        triggerKeyword: "khi nào giao",
+        responseMessage: "Đơn hàng của bạn sẽ được bàn giao cho đơn vị vận chuyển SPX trong vòng 24 giờ kể từ khi xác nhận ạ!",
+      },
+      {
+        id: "tpl_size",
+        triggerKeyword: "tư vấn size",
+        responseMessage: "Dạ bạn cho shop xin thông tin chiều cao và cân nặng để shop tư vấn size chuẩn form nhất cho bạn nhé!",
+      },
+    ],
+  };
+
+  sendSuccess(res, {
+    shopId,
+    shopName: shop.name,
+    autoReply,
+  });
+});
+
+// @desc    Cập nhật cấu hình Trợ lý Tin nhắn Tự động Shop (Update Auto-Reply)
+// @route   PUT /api/seller/auto-reply
+// @access  Private (Seller only)
+export const updateSellerAutoReply = catchAsync(async (req, res) => {
+  const shopId = req.user.shopId;
+  if (!shopId) {
+    return sendError(res, "Chưa liên kết gian hàng", 400);
+  }
+
+  const shop = await Shop.findOne({ shopId });
+  if (!shop) {
+    return sendError(res, "Không tìm thấy gian hàng", 404);
+  }
+
+  const { enabled, welcomeMessage, offlineMessage, quickTemplates } = req.body;
+
+  shop.autoReply = shop.autoReply || {};
+  if (enabled !== undefined) shop.autoReply.enabled = Boolean(enabled);
+  if (welcomeMessage !== undefined) shop.autoReply.welcomeMessage = String(welcomeMessage).trim();
+  if (offlineMessage !== undefined) shop.autoReply.offlineMessage = String(offlineMessage).trim();
+  if (quickTemplates && Array.isArray(quickTemplates)) {
+    shop.autoReply.quickTemplates = quickTemplates.map((t, idx) => ({
+      id: t.id || `tpl_${idx}_${Date.now()}`,
+      triggerKeyword: String(t.triggerKeyword || "").trim(),
+      responseMessage: String(t.responseMessage || "").trim(),
+    }));
+  }
+
+  await shop.save();
+
+  recordAuditLog({
+    userId: req.user._id || req.user.id,
+    action: "UPDATE_SELLER_AUTO_REPLY",
+    resourceType: "SHOP",
+    resourceId: shopId,
+    details: { autoReply: shop.autoReply },
+  });
+
+  sendSuccess(res, {
+    message: "Đã cập nhật cấu hình Trợ lý tin nhắn tự động thành công",
+    autoReply: shop.autoReply,
+  });
+});
+
 export default {
   getMySellerShop,
   updateMySellerShop,
@@ -1738,5 +1821,7 @@ export default {
   getSellerShippingPolicy,
   updateSellerShippingPolicy,
   getSellerOperationalSLA,
+  getSellerAutoReply,
+  updateSellerAutoReply,
 };
 

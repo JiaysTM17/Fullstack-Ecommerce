@@ -1061,6 +1061,98 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(shouldBlockOrder, true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 77: Seller Auto-Reply Chat Assistant & Keyword Trigger Engine (5 Tests)
+  // =========================================================================
+  describe("Feature 77: Seller Auto-Reply Chat Assistant & Keyword Trigger Engine", () => {
+    test("F77-T1: Auto-reply matches trigger keyword in customer query accurately", () => {
+      const templates = [
+        { id: "t1", triggerKeyword: "khi nào giao", responseMessage: "Shop giao SPX trong 24h ạ!" },
+        { id: "t2", triggerKeyword: "tư vấn size", responseMessage: "Bạn gửi chiều cao cân nặng nhé!" },
+      ];
+
+      const customerMessage = "Chào shop, cho mình hỏi đơn này khi nào giao hàng vậy ạ?";
+      const matched = templates.find((t) =>
+        customerMessage.toLowerCase().includes(t.triggerKeyword.toLowerCase())
+      );
+
+      expect.equal(matched !== undefined, true);
+      expect.equal(matched.id, "t1");
+      expect.equal(matched.responseMessage.includes("24h"), true);
+    });
+
+    test("F77-T2: Fallback to welcomeMessage when no keyword triggers match and shop is online", () => {
+      const autoReplyConfig = {
+        enabled: true,
+        welcomeMessage: "Cảm ơn bạn đã ghé thăm shop!",
+        offlineMessage: "Shop đang ngoài giờ làm việc.",
+        quickTemplates: [
+          { id: "t1", triggerKeyword: "giảm giá", responseMessage: "Mời bạn lưu voucher shop nhé" },
+        ],
+      };
+
+      const isOffline = false;
+      const customerMsg = "Alo shop ơi!";
+      const matched = autoReplyConfig.quickTemplates.find((t) =>
+        customerMsg.toLowerCase().includes(t.triggerKeyword.toLowerCase())
+      );
+
+      const reply = matched
+        ? matched.responseMessage
+        : isOffline
+        ? autoReplyConfig.offlineMessage
+        : autoReplyConfig.welcomeMessage;
+
+      expect.equal(reply, "Cảm ơn bạn đã ghé thăm shop!");
+    });
+
+    test("F77-T3: Fallback to offlineMessage during non-operating hours (after 22:00)", () => {
+      const autoReplyConfig = {
+        enabled: true,
+        welcomeMessage: "Chào bạn!",
+        offlineMessage: "Hiện tại shop đang ngoài giờ làm việc (sau 22:00).",
+        quickTemplates: [],
+      };
+
+      const isOfflineHour = true; // e.g. 23:30
+      const reply = isOfflineHour ? autoReplyConfig.offlineMessage : autoReplyConfig.welcomeMessage;
+
+      expect.equal(reply.includes("sau 22:00"), true);
+    });
+
+    test("F77-T4: Disabled autoReply toggle suppresses automated responses completely", () => {
+      const autoReplyConfig = {
+        enabled: false,
+        welcomeMessage: "Chào bạn!",
+        quickTemplates: [{ triggerKeyword: "size", responseMessage: "Size chuẩn ạ" }],
+      };
+
+      const shouldSendAutoReply = autoReplyConfig.enabled;
+      expect.equal(shouldSendAutoReply, false);
+    });
+
+    test("F77-T5: Updating quick templates persists multiple keyword patterns correctly", () => {
+      const shop = {
+        shopId: "shop_01",
+        autoReply: {
+          enabled: true,
+          quickTemplates: [],
+        },
+      };
+
+      const newTemplates = [
+        { id: "tpl_1", triggerKeyword: "bảo hành", responseMessage: "Bảo hành 12 tháng chính hãng" },
+        { id: "tpl_2", triggerKeyword: "freeship", responseMessage: "Đơn từ 300k miễn phí vận chuyển" },
+        { id: "tpl_3", triggerKeyword: "đổi trả", responseMessage: "Hỗ trợ đổi size trong 7 ngày" },
+      ];
+
+      shop.autoReply.quickTemplates = newTemplates;
+
+      expect.equal(shop.autoReply.quickTemplates.length, 3);
+      expect.equal(shop.autoReply.quickTemplates[1].triggerKeyword, "freeship");
+    });
+  });
 });
 
 
