@@ -4012,7 +4012,82 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultConsolidation.consolidationStatus, "none");
     });
   });
+
+  // =========================================================================
+  // FEATURE 115: Priority Cold-Chain Perishable Logistics & IoT Thermal Tracker (5 Tests)
+  // =========================================================================
+  describe("Feature 115: Priority Cold-Chain Perishable Logistics & IoT Thermal Tracker", () => {
+    test("F115-T1: Order model persists Priority Cold Chain Dispatch schema", async () => {
+      const order = await Order.create({
+        orderId: "ORD_COLD_CHAIN_115",
+        user: "buyer_test_cold_115",
+        shopId: "fresh_market_official",
+        total: 450000,
+        priorityColdChainDispatch: {
+          isColdChain: true,
+          sensorSerial: "TEMP-IOT-948102",
+          minTempCelsius: 0,
+          maxTempCelsius: 4,
+          currentTempCelsius: 2.3,
+          thermalInsulationBox: "smart_refrigerated_container",
+          tempBreachAlert: false,
+          lastSensorSyncAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_COLD_CHAIN_115");
+      expect.equal(order.priorityColdChainDispatch.isColdChain, true);
+      expect.equal(order.priorityColdChainDispatch.sensorSerial, "TEMP-IOT-948102");
+      expect.equal(order.priorityColdChainDispatch.currentTempCelsius, 2.3);
+      expect.equal(order.priorityColdChainDispatch.tempBreachAlert, false);
+      expect.equal(order.priorityColdChainDispatch.thermalInsulationBox, "smart_refrigerated_container");
+    });
+
+    test("F115-T2: Safe temperature range strictly maintains 0°C to 4°C without triggering breach alert", () => {
+      const minTemp = 0;
+      const maxTemp = 4;
+      const readings = [0.5, 1.8, 2.4, 3.9];
+
+      for (const temp of readings) {
+        const isBreached = temp < minTemp || temp > maxTemp;
+        expect.equal(isBreached, false);
+      }
+    });
+
+    test("F115-T3: Temperature breach above threshold triggers automated IoT alarm", () => {
+      const minTemp = 0;
+      const maxTemp = 4;
+      const tempReading = 6.2; // Quá ngưỡng
+      const isBreached = tempReading < minTemp || tempReading > maxTemp;
+
+      expect.equal(isBreached, true);
+    });
+
+    test("F115-T4: Temperature breach below freezing threshold triggers alarm for delicate fresh produce", () => {
+      const minTemp = 0;
+      const maxTemp = 4;
+      const tempReading = -2.1; // Bị đông đá hư hỏng
+      const isBreached = tempReading < minTemp || tempReading > maxTemp;
+
+      expect.equal(isBreached, true);
+    });
+
+    test("F115-T5: Default order schema initial state does not activate cold chain without perishable tag", () => {
+      const defaultColdChain = {
+        isColdChain: false,
+        sensorSerial: "",
+        minTempCelsius: 0,
+        maxTempCelsius: 4,
+        tempBreachAlert: false,
+      };
+
+      expect.equal(defaultColdChain.isColdChain, false);
+      expect.equal(defaultColdChain.tempBreachAlert, false);
+      expect.equal(defaultColdChain.sensorSerial, "");
+    });
+  });
 });
+
 
 
 

@@ -35,6 +35,7 @@ import {
   claimLateDeliveryCompensation,
   evaluateAiDamageClaim,
   consolidateOrderPackaging,
+  updatePriorityColdChainDispatch,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -82,6 +83,7 @@ router.post("/:id/cod-reconcile", optionalAuthenticate, reconcileAutomatedCodSet
 router.post("/:id/claim-late-compensation", optionalAuthenticate, claimLateDeliveryCompensation);
 router.post("/:id/ai-damage-claim", optionalAuthenticate, evaluateAiDamageClaim);
 router.post("/:id/consolidate-packaging", optionalAuthenticate, consolidateOrderPackaging);
+router.post("/:id/cold-chain", optionalAuthenticate, updatePriorityColdChainDispatch);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

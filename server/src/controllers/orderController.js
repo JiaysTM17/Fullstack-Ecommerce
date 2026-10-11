@@ -2554,6 +2554,68 @@ export const consolidateOrderPackaging = async (req, res) => {
   }
 };
 
+// @desc    Giám sát vận chuyển chuỗi cung ứng lạnh bảo quản thực phẩm tươi sống (Feature 115)
+// @route   POST /api/orders/:id/cold-chain
+// @access  Public / Authenticate
+export const updatePriorityColdChainDispatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      sensorSerial = `TEMP-IOT-${Date.now().toString().slice(-6)}`,
+      minTempCelsius = 0,
+      maxTempCelsius = 4,
+      currentTempCelsius = 2.4,
+      thermalInsulationBox = "smart_refrigerated_container",
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần giám sát chuỗi cung ứng lạnh", 404);
+    }
+
+    const now = new Date().toISOString();
+    const tempBreachAlert = currentTempCelsius < minTempCelsius || currentTempCelsius > maxTempCelsius;
+
+    order.priorityColdChainDispatch = {
+      isColdChain: true,
+      sensorSerial,
+      minTempCelsius: Number(minTempCelsius),
+      maxTempCelsius: Number(maxTempCelsius),
+      currentTempCelsius: Number(currentTempCelsius),
+      thermalInsulationBox,
+      tempBreachAlert,
+      lastSensorSyncAt: now,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Cảm biến IoT Chuỗi Cung Ứng Lạnh (#${sensorSerial}): Nhiệt độ hiện tại ${currentTempCelsius}°C [Tiêu chuẩn: ${minTempCelsius}°C ~ ${maxTempCelsius}°C]. Thùng: ${thermalInsulationBox}. Cảnh báo vi phạm nhiệt độ: ${tempBreachAlert ? "BÁO ĐỘNG" : "AN TOÀN"}.`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      priorityColdChainDispatch: order.priorityColdChainDispatch,
+      message: tempBreachAlert
+        ? `CẢNH BÁO: Nhiệt độ kiện hàng (${currentTempCelsius}°C) đã vượt ngưỡng cho phép!`
+        : `Giám sát chuỗi cung ứng lạnh an toàn (${currentTempCelsius}°C, tiêu chuẩn 0°C - 4°C).`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

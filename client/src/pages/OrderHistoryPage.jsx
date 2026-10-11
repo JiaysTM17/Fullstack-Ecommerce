@@ -2303,6 +2303,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.priorityColdChainDispatch?.isColdChain && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`IoT Chuỗi Lạnh (#${ord.priorityColdChainDispatch.sensorSerial}): ${ord.priorityColdChainDispatch.currentTempCelsius}°C. Tiêu chuẩn: ${ord.priorityColdChainDispatch.minTempCelsius}°C ~ ${ord.priorityColdChainDispatch.maxTempCelsius}°C. Cảnh báo vi phạm: ${ord.priorityColdChainDispatch.tempBreachAlert ? 'BÁO ĐỘNG' : 'AN TOÀN'}`}>
+                            <span style={{ fontSize: '13px' }}>❄️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.priorityColdChainDispatch.tempBreachAlert ? '#dc2626' : '#0284c7',
+                              background: ord.priorityColdChainDispatch.tempBreachAlert ? '#fee2e2' : '#e0f2fe',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Chuỗi Lạnh IoT: {ord.priorityColdChainDispatch.currentTempCelsius}°C {ord.priorityColdChainDispatch.tempBreachAlert ? '(Vi Phạm!)' : '(Chuẩn 0-4°C)'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

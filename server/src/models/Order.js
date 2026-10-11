@@ -327,6 +327,20 @@ const orderSchema = new mongoose.Schema(
       },
       consolidatedAt: { type: String, default: null },
     },
+    priorityColdChainDispatch: {
+      isColdChain: { type: Boolean, default: false },
+      sensorSerial: { type: String, default: "" },
+      minTempCelsius: { type: Number, default: 0 },
+      maxTempCelsius: { type: Number, default: 4 },
+      currentTempCelsius: { type: Number, default: 2.5 },
+      thermalInsulationBox: {
+        type: String,
+        enum: ["none", "dry_ice_pack", "gel_ice_sealed", "smart_refrigerated_container"],
+        default: "none",
+      },
+      tempBreachAlert: { type: Boolean, default: false },
+      lastSensorSyncAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

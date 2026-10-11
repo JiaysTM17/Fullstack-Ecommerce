@@ -1071,6 +1071,18 @@ export async function consolidateOrderPackagingAPI(orderId, { consolidationHub, 
   return result?.data || result;
 }
 
+/**
+ * Priority Cold-Chain Perishable Logistics & IoT Thermal Tracker (Feature 115)
+ */
+export async function updatePriorityColdChainDispatchAPI(orderId, { sensorSerial, minTempCelsius, maxTempCelsius, currentTempCelsius, thermalInsulationBox } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/cold-chain`, {
+    method: "POST",
+    body: JSON.stringify({ sensorSerial, minTempCelsius, maxTempCelsius, currentTempCelsius, thermalInsulationBox }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 
