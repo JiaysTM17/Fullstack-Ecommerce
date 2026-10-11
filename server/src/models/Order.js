@@ -528,6 +528,25 @@ const orderSchema = new mongoose.Schema(
       deviceReaderSerial: { type: String, default: null },
       proofSignatureToken: { type: String, default: null },
     },
+    hazardousMaterialSafetyScan: {
+      isSafetyScanned: { type: Boolean, default: false },
+      scannerStationId: { type: String, default: null },
+      flammabilityIndexScore: { type: Number, default: 0 },
+      chemicalVaporPpm: { type: Number, default: 0 },
+      lithiumBatteryClass: {
+        type: String,
+        enum: ["none", "un3481_contained_in_equipment", "un3480_standalone_prohibited_air"],
+        default: "none",
+      },
+      safetyStatus: {
+        type: String,
+        enum: ["certified_safe", "flammable_warning_flagged", "prohibited_ground_transport_only", "quarantined_hazardous"],
+        default: "certified_safe",
+      },
+      quarantineReason: { type: String, default: null },
+      scannedAt: { type: String, default: null },
+      safetyClearanceCertificate: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

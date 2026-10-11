@@ -3369,6 +3369,102 @@ export const verifyNfcGeofenceProofOfDelivery = async (req, res) => {
   }
 };
 
+// @desc    Quét an toàn chất dễ cháy và vật liệu nguy hiểm theo thời gian thực tại Hub (Hazmat Safety Scanner)
+// @route   POST /api/orders/:id/hazmat-safety-scan
+// @access  Public / Optional Auth / Hub Automation Station
+export const scanHazardousMaterialSafety = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      scannerStationId,
+      flammabilityIndexScore = 0,
+      chemicalVaporPpm = 0,
+      lithiumBatteryClass = "none",
+    } = req.body;
+
+    if (!scannerStationId) {
+      return sendError(res, "Thiếu mã trạm quét an toàn Hub (scannerStationId)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần quét an toàn vật liệu nguy hiểm", 404);
+    }
+
+    const now = new Date().toISOString();
+    const flammability = Number(flammabilityIndexScore) || 0;
+    const vapor = Number(chemicalVaporPpm) || 0;
+
+    let safetyStatus = "certified_safe";
+    let quarantineReason = null;
+
+    if (flammability >= 70 || vapor >= 100) {
+      safetyStatus = "quarantined_hazardous";
+      quarantineReason = `Nồng độ hơi hóa chất (${vapor} ppm) hoặc chỉ số cháy nổ (${flammability}/100) vượt ngưỡng an toàn vận tải hàng không/đường bộ.`;
+    } else if (lithiumBatteryClass === "un3480_standalone_prohibited_air") {
+      safetyStatus = "prohibited_ground_transport_only";
+      quarantineReason = "Pin Lithium độc lập UN3480 cấm vận chuyển đường hàng không, bắt buộc chuyển tải đường bộ.";
+    } else if (flammability >= 40 || vapor >= 45) {
+      safetyStatus = "flammable_warning_flagged";
+    }
+
+    const safetyClearanceCertificate = safetyStatus === "certified_safe"
+      ? `HAZMAT-PASS-${Date.now().toString(36).toUpperCase()}`
+      : null;
+
+    order.hazardousMaterialSafetyScan = {
+      isSafetyScanned: true,
+      scannerStationId,
+      flammabilityIndexScore: flammability,
+      chemicalVaporPpm: vapor,
+      lithiumBatteryClass,
+      safetyStatus,
+      quarantineReason,
+      scannedAt: now,
+      safetyClearanceCertificate,
+    };
+
+    const statusNote = safetyStatus === "certified_safe"
+      ? `Trạm ${scannerStationId}: Kiểm tra an toàn Hazmat đạt chuẩn (Cháy nổ: ${flammability}/100, Hơi hóa chất: ${vapor}ppm). Chứng nhận: ${safetyClearanceCertificate}.`
+      : safetyStatus === "prohibited_ground_transport_only"
+      ? `Trạm ${scannerStationId}: Phát hiện Pin UN3480. Tự động chuyển tuyến vận chuyển đường bộ an toàn.`
+      : `BÁO ĐỘNG HAZMAT: Kiện hàng bị cách ly tại ${scannerStationId}. Lý do: ${quarantineReason}`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        hazardousMaterialSafetyScan: order.hazardousMaterialSafetyScan,
+        message: safetyStatus === "certified_safe"
+          ? "Kiện hàng được chứng nhận an toàn vận chuyển thành công!"
+          : safetyStatus === "prohibited_ground_transport_only"
+          ? "Đã phân tuyến đường bộ đối với pin Lithium UN3480."
+          : "CẢNH BÁO: Kiện hàng đã bị cách ly do tiềm ẩn nguy cơ cháy nổ!",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

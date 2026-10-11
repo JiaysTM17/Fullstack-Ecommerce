@@ -1203,6 +1203,17 @@ export async function verifyNfcGeofenceProofOfDeliveryAPI(orderId, { nfcCardUid,
   return result?.data || result;
 }
 
+/**
+ * AI Hazardous & Flammable Material Real-Time Parcel Sensor Scanner (Feature 127)
+ */
+export async function scanHazardousMaterialSafetyAPI(orderId, { scannerStationId, flammabilityIndexScore, chemicalVaporPpm, lithiumBatteryClass } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/hazmat-safety-scan`, {
+    method: "POST",
+    body: JSON.stringify({ scannerStationId, flammabilityIndexScore, chemicalVaporPpm, lithiumBatteryClass }),
+  });
+  return result?.data || result;
+}
+
 
 
 

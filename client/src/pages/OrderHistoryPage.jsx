@@ -2531,6 +2531,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.hazardousMaterialSafetyScan?.isSafetyScanned && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Quét An Toàn Hazmat (#${ord.hazardousMaterialSafetyScan.scannerStationId}): Cháy nổ ${ord.hazardousMaterialSafetyScan.flammabilityIndexScore}/100, Hơi hóa chất: ${ord.hazardousMaterialSafetyScan.chemicalVaporPpm}ppm, Pin: ${ord.hazardousMaterialSafetyScan.lithiumBatteryClass}. Trạng thái: ${ord.hazardousMaterialSafetyScan.safetyStatus}`}>
+                            <span style={{ fontSize: '13px' }}>⚠️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.hazardousMaterialSafetyScan.safetyStatus === 'quarantined_hazardous' ? '#dc2626' : ord.hazardousMaterialSafetyScan.safetyStatus === 'prohibited_ground_transport_only' ? '#ea580c' : '#059669',
+                              background: ord.hazardousMaterialSafetyScan.safetyStatus === 'quarantined_hazardous' ? '#fee2e2' : ord.hazardousMaterialSafetyScan.safetyStatus === 'prohibited_ground_transport_only' ? '#ffedd5' : '#dcfce7',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Hazmat Hub: {ord.hazardousMaterialSafetyScan.safetyStatus === 'quarantined_hazardous' ? 'Cách Ly Hàng Nguy Hiểm' : ord.hazardousMaterialSafetyScan.safetyStatus === 'prohibited_ground_transport_only' ? 'Tuyến Đường Bộ (Pin UN3480)' : 'Chứng Nhận An Toàn'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

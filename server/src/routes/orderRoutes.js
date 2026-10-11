@@ -47,6 +47,7 @@ import {
   updateAcousticAntiTamperTelemetry,
   updateMicroHubPouchLockBoxHandoff,
   verifyNfcGeofenceProofOfDelivery,
+  scanHazardousMaterialSafety,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -106,6 +107,7 @@ router.post("/:id/ai-return-resale-grading", optionalAuthenticate, evaluateVideo
 router.post("/:id/acoustic-anti-tamper", optionalAuthenticate, updateAcousticAntiTamperTelemetry);
 router.post("/:id/micro-hub-pouch-handoff", optionalAuthenticate, updateMicroHubPouchLockBoxHandoff);
 router.post("/:id/nfc-geofence-pod", optionalAuthenticate, verifyNfcGeofenceProofOfDelivery);
+router.post("/:id/hazmat-safety-scan", optionalAuthenticate, scanHazardousMaterialSafety);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

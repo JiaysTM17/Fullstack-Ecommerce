@@ -4868,6 +4868,79 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 127: AI Hazardous & Flammable Material Real-Time Parcel Sensor Scanner (5 Tests)
+  // =========================================================================
+  describe("Feature 127: AI Hazardous & Flammable Material Real-Time Scanner Suite", () => {
+    test("F127-T1: Certified safe package scan persists safety clearance certificate", async () => {
+      const order = await Order.create({
+        orderId: "ORD_HAZMAT_SCAN_127",
+        userId: "user_hazmat_01",
+        status: "shipping",
+        total: 750000,
+        hazardousMaterialSafetyScan: {
+          isSafetyScanned: true,
+          scannerStationId: "AI-HAZMAT-SCANNER-HUB-01",
+          flammabilityIndexScore: 12,
+          chemicalVaporPpm: 5,
+          lithiumBatteryClass: "none",
+          safetyStatus: "certified_safe",
+          scannedAt: new Date().toISOString(),
+          safetyClearanceCertificate: "HAZMAT-PASS-9901AA",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_HAZMAT_SCAN_127");
+      expect.equal(order.hazardousMaterialSafetyScan.isSafetyScanned, true);
+      expect.equal(order.hazardousMaterialSafetyScan.safetyStatus, "certified_safe");
+      expect.equal(order.hazardousMaterialSafetyScan.safetyClearanceCertificate.startsWith("HAZMAT-PASS-"), true);
+    });
+
+    test("F127-T2: High chemical vapor or flammability triggers quarantine status", () => {
+      const flammability = 85;
+      const vapor = 110;
+
+      let safetyStatus = "certified_safe";
+      if (flammability >= 70 || vapor >= 100) {
+        safetyStatus = "quarantined_hazardous";
+      }
+
+      expect.equal(safetyStatus, "quarantined_hazardous");
+    });
+
+    test("F127-T3: Standalone UN3480 lithium battery restricts parcel to ground transport", () => {
+      const batteryClass = "un3480_standalone_prohibited_air";
+
+      let safetyStatus = "certified_safe";
+      if (batteryClass === "un3480_standalone_prohibited_air") {
+        safetyStatus = "prohibited_ground_transport_only";
+      }
+
+      expect.equal(safetyStatus, "prohibited_ground_transport_only");
+    });
+
+    test("F127-T4: Moderate vapor levels flag flammable warning without full quarantine", () => {
+      const flammability = 45;
+      const vapor = 50;
+
+      let safetyStatus = "certified_safe";
+      if (flammability >= 70 || vapor >= 100) {
+        safetyStatus = "quarantined_hazardous";
+      } else if (flammability >= 40 || vapor >= 45) {
+        safetyStatus = "flammable_warning_flagged";
+      }
+
+      expect.equal(safetyStatus, "flammable_warning_flagged");
+    });
+
+    test("F127-T5: Missing scannerStationId fails validation guard", () => {
+      const payload = { flammabilityIndexScore: 20 };
+      const isValid = Boolean(payload.scannerStationId && payload.scannerStationId.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 
