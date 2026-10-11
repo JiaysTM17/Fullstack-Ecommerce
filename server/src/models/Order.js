@@ -449,6 +449,23 @@ const orderSchema = new mongoose.Schema(
       insuranceCompensationAmount: { type: Number, default: 0 },
       lastTelemetrySyncAt: { type: String, default: null },
     },
+    multiCarrierCarbonLedger: {
+      isLedgerRecorded: { type: Boolean, default: false },
+      carrierCode: {
+        type: String,
+        enum: ["SPX_EXPRESS", "GHN_EXPRESS", "VIETTEL_POST", "JNT_EXPRESS"],
+        default: "SPX_EXPRESS",
+      },
+      carrierConsortiumBatchId: { type: String, default: "" },
+      carbonCreditsOffset: { type: Number, default: 0 },
+      blockchainVerificationHash: { type: String, default: "" },
+      greenAuditStatus: {
+        type: String,
+        enum: ["none", "pending_batch", "hash_verified", "gold_standard_certified"],
+        default: "none",
+      },
+      verifiedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

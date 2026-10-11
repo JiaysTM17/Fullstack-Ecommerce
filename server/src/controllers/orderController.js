@@ -2974,6 +2974,63 @@ export const updateFragileShockSensorTelemetry = async (req, res) => {
   }
 };
 
+// @desc    Ghi nhận đối soát bù trừ tín chỉ carbon đa đơn vị vận chuyển & cấp mã băm Blockchain (Feature 122)
+// @route   POST /api/orders/:id/carrier-carbon-ledger
+// @access  Public / Authenticate
+export const recordMultiCarrierCarbonLedger = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      carrierCode = "SPX_EXPRESS",
+      carrierConsortiumBatchId = `CONSORTIUM-VN-${Date.now().toString().slice(-4)}`,
+      carbonCreditsOffset = 1.85,
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần ghi nhận sổ cái carbon", 404);
+    }
+
+    const now = new Date().toISOString();
+    const blockchainVerificationHash = `0x7f9a${Date.now().toString(16)}bc814e${Math.random().toString(16).slice(2, 10)}`;
+
+    order.multiCarrierCarbonLedger = {
+      isLedgerRecorded: true,
+      carrierCode,
+      carrierConsortiumBatchId,
+      carbonCreditsOffset: Number(carbonCreditsOffset),
+      blockchainVerificationHash,
+      greenAuditStatus: "gold_standard_certified",
+      verifiedAt: now,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Liên minh Vận chuyển Xanh (#${carrierConsortiumBatchId} - ${carrierCode}): Đã kiểm toán bù trừ ${carbonCreditsOffset} tín chỉ Carbon (Gold Standard). Mã băm sổ cái xác thực: ${blockchainVerificationHash}.`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      multiCarrierCarbonLedger: order.multiCarrierCarbonLedger,
+      message: `Đã đối soát sổ cái Carbon đa hãng vận chuyển thành công! Bù trừ ${carbonCreditsOffset} tín chỉ.`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

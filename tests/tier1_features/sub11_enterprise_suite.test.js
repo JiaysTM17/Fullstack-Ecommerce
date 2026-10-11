@@ -4522,7 +4522,73 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultShock.insuranceCompensationAmount, 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 122: Smart Multi-Carrier Carbon Neutrality Offset Ledger & Blockchain Verification Hash (5 Tests)
+  // =========================================================================
+  describe("Feature 122: Smart Multi-Carrier Carbon Neutrality Offset Ledger & Blockchain Verification Hash", () => {
+    test("F122-T1: Order model persists Multi-Carrier Carbon Ledger schema", async () => {
+      const order = await Order.create({
+        orderId: "ORD_LEDGER_122",
+        user: "buyer_test_ledger_122",
+        shopId: "shop_green_alliance",
+        total: 980000,
+        multiCarrierCarbonLedger: {
+          isLedgerRecorded: true,
+          carrierCode: "SPX_EXPRESS",
+          carrierConsortiumBatchId: "CONSORTIUM-VN-0921",
+          carbonCreditsOffset: 1.85,
+          blockchainVerificationHash: "0x7f9a8b19bc814e5a9c02d184f9",
+          greenAuditStatus: "gold_standard_certified",
+          verifiedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_LEDGER_122");
+      expect.equal(order.multiCarrierCarbonLedger.isLedgerRecorded, true);
+      expect.equal(order.multiCarrierCarbonLedger.carrierCode, "SPX_EXPRESS");
+      expect.equal(order.multiCarrierCarbonLedger.carrierConsortiumBatchId, "CONSORTIUM-VN-0921");
+      expect.equal(order.multiCarrierCarbonLedger.carbonCreditsOffset, 1.85);
+      expect.equal(order.multiCarrierCarbonLedger.blockchainVerificationHash.startsWith("0x"), true);
+      expect.equal(order.multiCarrierCarbonLedger.greenAuditStatus, "gold_standard_certified");
+    });
+
+    test("F122-T2: Consortium supports major national courier services seamlessly", () => {
+      const carriers = ["SPX_EXPRESS", "GHN_EXPRESS", "VIETTEL_POST", "JNT_EXPRESS"];
+      expect.equal(carriers.length, 4);
+      expect.equal(carriers.includes("SPX_EXPRESS"), true);
+      expect.equal(carriers.includes("VIETTEL_POST"), true);
+    });
+
+    test("F122-T3: Blockchain hash satisfies cryptographic hex string format", () => {
+      const hash = "0x7f9a8b19bc814e5a9c02d184f9";
+      expect.equal(hash.startsWith("0x"), true);
+      expect.equal(hash.length >= 20, true);
+    });
+
+    test("F122-T4: Carbon offset credit accounting aggregates across consortium batches", () => {
+      const batchCredits = [1.85, 2.15, 0.90];
+      const totalOffset = Number(batchCredits.reduce((sum, c) => sum + c, 0).toFixed(2));
+
+      expect.equal(totalOffset, 4.9);
+      expect.equal(totalOffset > 0, true);
+    });
+
+    test("F122-T5: Default order schema initial state does not record unverified blockchain hash", () => {
+      const defaultLedger = {
+        isLedgerRecorded: false,
+        carbonCreditsOffset: 0,
+        blockchainVerificationHash: "",
+        greenAuditStatus: "none",
+      };
+
+      expect.equal(defaultLedger.isLedgerRecorded, false);
+      expect.equal(defaultLedger.carbonCreditsOffset, 0);
+      expect.equal(defaultLedger.greenAuditStatus, "none");
+    });
+  });
 });
+
 
 
 

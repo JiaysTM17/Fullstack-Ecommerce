@@ -2436,6 +2436,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.multiCarrierCarbonLedger?.isLedgerRecorded && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Liên Minh Carbon (#${ord.multiCarrierCarbonLedger.carrierConsortiumBatchId} - ${ord.multiCarrierCarbonLedger.carrierCode}): Bù trừ ${ord.multiCarrierCarbonLedger.carbonCreditsOffset} tín chỉ Carbon (Gold Standard). Hash: ${ord.multiCarrierCarbonLedger.blockchainVerificationHash}`}>
+                            <span style={{ fontSize: '13px' }}>🔗</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#0d9488',
+                              background: '#ccfbf1',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Blockchain Carbon: -{ord.multiCarrierCarbonLedger.carbonCreditsOffset} Tín Chỉ ({ord.multiCarrierCarbonLedger.carrierCode})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

@@ -1148,6 +1148,18 @@ export async function updateFragileShockSensorTelemetryAPI(orderId, { shockSenso
   return result?.data || result;
 }
 
+/**
+ * Smart Multi-Carrier Carbon Neutrality Offset Ledger & Blockchain Verification Hash (Feature 122)
+ */
+export async function recordMultiCarrierCarbonLedgerAPI(orderId, { carrierCode, carrierConsortiumBatchId, carbonCreditsOffset } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/carrier-carbon-ledger`, {
+    method: "POST",
+    body: JSON.stringify({ carrierCode, carrierConsortiumBatchId, carbonCreditsOffset }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 
