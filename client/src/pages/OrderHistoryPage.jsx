@@ -2322,6 +2322,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.doorstepOldApplianceTradeIn?.isTradeInRequested && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Thu Cũ Đổi Mới: ${ord.doorstepOldApplianceTradeIn.deviceBrandModel} (${ord.doorstepOldApplianceTradeIn.cosmeticCondition}). Trợ giá: ${Number(ord.doorstepOldApplianceTradeIn.subsidyCreditAmount).toLocaleString('vi-VN')}₫. Mã tái chế: #${ord.doorstepOldApplianceTradeIn.recycleCertificateCode}`}>
+                            <span style={{ fontSize: '13px' }}>🔄</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#059669',
+                              background: '#d1fae5',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Thu Cũ Trợ Giá: +{Number(ord.doorstepOldApplianceTradeIn.subsidyCreditAmount).toLocaleString('vi-VN')}₫ ({ord.doorstepOldApplianceTradeIn.deviceBrandModel})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

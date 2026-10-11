@@ -1082,6 +1082,18 @@ export async function updatePriorityColdChainDispatchAPI(orderId, { sensorSerial
   return result?.data || result;
 }
 
+/**
+ * Doorstep Old Appliance Trade-In & E-Waste Direct Subsidy (Feature 116)
+ */
+export async function submitDoorstepApplianceTradeInAPI(orderId, { applianceType, deviceBrandModel, cosmeticCondition, subsidyCreditAmount } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/doorstep-trade-in`, {
+    method: "POST",
+    body: JSON.stringify({ applianceType, deviceBrandModel, cosmeticCondition, subsidyCreditAmount }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 

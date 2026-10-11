@@ -36,6 +36,7 @@ import {
   evaluateAiDamageClaim,
   consolidateOrderPackaging,
   updatePriorityColdChainDispatch,
+  submitDoorstepApplianceTradeIn,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -84,6 +85,7 @@ router.post("/:id/claim-late-compensation", optionalAuthenticate, claimLateDeliv
 router.post("/:id/ai-damage-claim", optionalAuthenticate, evaluateAiDamageClaim);
 router.post("/:id/consolidate-packaging", optionalAuthenticate, consolidateOrderPackaging);
 router.post("/:id/cold-chain", optionalAuthenticate, updatePriorityColdChainDispatch);
+router.post("/:id/doorstep-trade-in", optionalAuthenticate, submitDoorstepApplianceTradeIn);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

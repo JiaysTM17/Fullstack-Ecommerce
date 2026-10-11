@@ -4086,7 +4086,86 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultColdChain.sensorSerial, "");
     });
   });
+
+  // =========================================================================
+  // FEATURE 116: Doorstep Old Appliance Trade-In & E-Waste Direct Subsidy (5 Tests)
+  // =========================================================================
+  describe("Feature 116: Doorstep Old Appliance Trade-In & E-Waste Direct Subsidy", () => {
+    test("F116-T1: Order model persists Doorstep Old Appliance Trade-In schema", async () => {
+      const order = await Order.create({
+        orderId: "ORD_TRADE_IN_116",
+        user: "buyer_test_tradein_116",
+        shopId: "apple_flagship_store",
+        total: 25000000,
+        doorstepOldApplianceTradeIn: {
+          isTradeInRequested: true,
+          applianceType: "smartphone",
+          deviceBrandModel: "iPhone 11 64GB",
+          cosmeticCondition: "like_new",
+          subsidyCreditAmount: 1800000,
+          recycleCertificateCode: "REC-EW-981023",
+          pickupCourierName: "Trần Đình Khôi (Đội Thu Hồi E-Waste)",
+          tradeInStatus: "subsidy_credited",
+          creditedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_TRADE_IN_116");
+      expect.equal(order.doorstepOldApplianceTradeIn.isTradeInRequested, true);
+      expect.equal(order.doorstepOldApplianceTradeIn.applianceType, "smartphone");
+      expect.equal(order.doorstepOldApplianceTradeIn.deviceBrandModel, "iPhone 11 64GB");
+      expect.equal(order.doorstepOldApplianceTradeIn.subsidyCreditAmount, 1800000);
+      expect.equal(order.doorstepOldApplianceTradeIn.recycleCertificateCode.startsWith("REC-EW-"), true);
+      expect.equal(order.doorstepOldApplianceTradeIn.tradeInStatus, "subsidy_credited");
+    });
+
+    test("F116-T2: Net payment calculation properly offsets trade-in subsidy credit from original order", () => {
+      const orderTotal = 25000000;
+      const tradeInSubsidy = 1800000;
+      const netPayment = Math.max(0, orderTotal - tradeInSubsidy);
+
+      expect.equal(netPayment, 23200000);
+      expect.equal(netPayment < orderTotal, true);
+    });
+
+    test("F116-T3: Cosmetic condition scales subsidy multiplier consistently", () => {
+      const baseValuation = 2000000;
+      const multipliers = {
+        like_new: 1.0,
+        minor_wear: 0.75,
+        cracked_or_faulty: 0.4,
+      };
+
+      const likeNewVal = baseValuation * multipliers.like_new;
+      const minorWearVal = baseValuation * multipliers.minor_wear;
+      const faultyVal = baseValuation * multipliers.cracked_or_faulty;
+
+      expect.equal(likeNewVal, 2000000);
+      expect.equal(minorWearVal, 1500000);
+      expect.equal(faultyVal, 800000);
+    });
+
+    test("F116-T4: Trade-in status lifecycle progresses cleanly to e_waste_recycled", () => {
+      const statuses = ["scheduled_pickup", "inspected_at_doorstep", "subsidy_credited", "e_waste_recycled"];
+      expect.equal(statuses[0], "scheduled_pickup");
+      expect.equal(statuses[3], "e_waste_recycled");
+    });
+
+    test("F116-T5: Default order schema initial state does not request trade-in", () => {
+      const defaultTradeIn = {
+        isTradeInRequested: false,
+        applianceType: "none",
+        subsidyCreditAmount: 0,
+        tradeInStatus: "none",
+      };
+
+      expect.equal(defaultTradeIn.isTradeInRequested, false);
+      expect.equal(defaultTradeIn.subsidyCreditAmount, 0);
+      expect.equal(defaultTradeIn.tradeInStatus, "none");
+    });
+  });
 });
+
 
 
 

@@ -341,6 +341,29 @@ const orderSchema = new mongoose.Schema(
       tempBreachAlert: { type: Boolean, default: false },
       lastSensorSyncAt: { type: String, default: null },
     },
+    doorstepOldApplianceTradeIn: {
+      isTradeInRequested: { type: Boolean, default: false },
+      applianceType: {
+        type: String,
+        enum: ["none", "smartphone", "laptop", "tablet", "refrigerator", "washing_machine", "television"],
+        default: "none",
+      },
+      deviceBrandModel: { type: String, default: "" },
+      cosmeticCondition: {
+        type: String,
+        enum: ["like_new", "minor_wear", "cracked_or_faulty"],
+        default: "like_new",
+      },
+      subsidyCreditAmount: { type: Number, default: 0 },
+      recycleCertificateCode: { type: String, default: "" },
+      pickupCourierName: { type: String, default: "" },
+      tradeInStatus: {
+        type: String,
+        enum: ["none", "scheduled_pickup", "inspected_at_doorstep", "subsidy_credited", "e_waste_recycled"],
+        default: "none",
+      },
+      creditedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

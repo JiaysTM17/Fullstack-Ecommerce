@@ -2615,6 +2615,67 @@ export const updatePriorityColdChainDispatch = async (req, res) => {
   }
 };
 
+// @desc    Thu cũ đổi mới đồ điện tử tận nhà & trợ giá trực tiếp (Feature 116)
+// @route   POST /api/orders/:id/doorstep-trade-in
+// @access  Public / Authenticate
+export const submitDoorstepApplianceTradeIn = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      applianceType = "smartphone",
+      deviceBrandModel = "iPhone 11 64GB",
+      cosmeticCondition = "like_new",
+      subsidyCreditAmount = 1800000,
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần thu cũ đổi mới thiết bị", 404);
+    }
+
+    const now = new Date().toISOString();
+    const recycleCertificateCode = `REC-EW-${Date.now().toString().slice(-6)}`;
+    const courierName = "Trần Đình Khôi (Đội Thu Hồi E-Waste)";
+
+    order.doorstepOldApplianceTradeIn = {
+      isTradeInRequested: true,
+      applianceType,
+      deviceBrandModel,
+      cosmeticCondition,
+      subsidyCreditAmount: Number(subsidyCreditAmount),
+      recycleCertificateCode,
+      pickupCourierName: courierName,
+      tradeInStatus: "subsidy_credited",
+      creditedAt: now,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Thu cũ đổi mới thiết bị (${deviceBrandModel} - ${cosmeticCondition}): Bưu tá ${courierName} tiếp nhận. Trợ giá trực tiếp ${Number(subsidyCreditAmount).toLocaleString('vi-VN')}₫ [Chứng chỉ tái chế xanh: #${recycleCertificateCode}].`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      doorstepOldApplianceTradeIn: order.doorstepOldApplianceTradeIn,
+      message: `Đã tiếp nhận thu cũ đổi mới ${deviceBrandModel}! Trợ giá ${Number(subsidyCreditAmount).toLocaleString('vi-VN')}₫ đã được ghi nhận.`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 
