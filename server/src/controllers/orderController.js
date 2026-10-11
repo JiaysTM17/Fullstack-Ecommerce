@@ -3650,6 +3650,93 @@ export const authorizeSmartLockInHomeDelivery = async (req, res) => {
   }
 };
 
+// @desc    Giám sát độ ẩm gói hàng & độ bão hòa gói hút ẩm IoT (Parcel Moisture & Desiccant Saturation)
+// @route   POST /api/orders/:id/moisture-telemetry
+// @access  Public / Optional Auth / IoT Warehouse & Cargo Service
+export const updateParcelMoistureTelemetry = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      moistureSensorId,
+      relativeHumidityPercent = 40,
+      desiccantSaturationPercent = 25,
+      condensationDetected = false,
+    } = req.body;
+
+    if (!moistureSensorId) {
+      return sendError(res, "Thiếu mã cảm biến độ ẩm IoT (moistureSensorId)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần giám sát độ ẩm", 404);
+    }
+
+    const now = new Date().toISOString();
+    const humidity = Number(relativeHumidityPercent) || 0;
+    const desiccant = Number(desiccantSaturationPercent) || 0;
+    const isCritical = humidity >= 75 || desiccant >= 85 || condensationDetected === true;
+    const isMild = humidity >= 55 && !isCritical;
+
+    let humidityStatus = "optimal_dry";
+    if (isCritical) {
+      humidityStatus = "critical_moisture_risk";
+    } else if (isMild) {
+      humidityStatus = "mild_humidity";
+    }
+
+    const airDryingVentilationScheduled = isCritical;
+
+    order.parcelMoistureTelemetry = {
+      isMoistureMonitored: true,
+      moistureSensorId,
+      relativeHumidityPercent: humidity,
+      desiccantSaturationPercent: desiccant,
+      condensationDetected: Boolean(condensationDetected),
+      humidityStatus,
+      alertTriggeredAt: isCritical ? now : (order.parcelMoistureTelemetry?.alertTriggeredAt || null),
+      airDryingVentilationScheduled,
+    };
+
+    const statusNote = isCritical
+      ? `BÁO ĐỘNG ĐỘ ẨM KHẨN CẤP: Cảm biến ${moistureSensorId} đo độ ẩm ${humidity}% (Gói hút ẩm no nước ${desiccant}%). Đã tự động kích hoạt quạt thông gió sấy khí khô bảo vệ hàng hóa.`
+      : isMild
+      ? `Cảnh báo độ ẩm: Kiện hàng đo được ${humidity}% RH (Gói hút ẩm ${desiccant}%). Môi trường vận chuyển ẩm ướt.`
+      : `Kiểm tra độ ẩm an toàn: Cảm biến ${moistureSensorId} đạt chuẩn khô ráo (${humidity}% RH, gói hút ẩm ${desiccant}%).`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        parcelMoistureTelemetry: order.parcelMoistureTelemetry,
+        message: isCritical
+          ? "Đã phát hiện độ ẩm nguy hiểm! Đã điều phối thông gió sấy khí khô khẩn cấp."
+          : "Cập nhật dữ liệu độ ẩm kiện hàng thành công (Môi trường an toàn).",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

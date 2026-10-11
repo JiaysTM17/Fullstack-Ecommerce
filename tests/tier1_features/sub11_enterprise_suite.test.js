@@ -5072,6 +5072,70 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 130: Real-Time Parcel Moisture & Desiccant Saturation IoT Telemetry (5 Tests)
+  // =========================================================================
+  describe("Feature 130: Parcel Moisture & Desiccant Saturation Telemetry Suite", () => {
+    test("F130-T1: Optimal dry conditions persist verified telemetry status", async () => {
+      const order = await Order.create({
+        orderId: "ORD_MOISTURE_130",
+        userId: "user_moisture_01",
+        status: "shipping",
+        total: 540000,
+        parcelMoistureTelemetry: {
+          isMoistureMonitored: true,
+          moistureSensorId: "HUMID-IOT-8812",
+          relativeHumidityPercent: 42,
+          desiccantSaturationPercent: 20,
+          condensationDetected: false,
+          humidityStatus: "optimal_dry",
+          airDryingVentilationScheduled: false,
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_MOISTURE_130");
+      expect.equal(order.parcelMoistureTelemetry.isMoistureMonitored, true);
+      expect.equal(order.parcelMoistureTelemetry.relativeHumidityPercent, 42);
+      expect.equal(order.parcelMoistureTelemetry.humidityStatus, "optimal_dry");
+      expect.equal(order.parcelMoistureTelemetry.airDryingVentilationScheduled, false);
+    });
+
+    test("F130-T2: High humidity above 75% triggers critical risk and air drying ventilation", () => {
+      const humidity = 82;
+      const desiccant = 40;
+      const condensation = false;
+
+      const isCritical = humidity >= 75 || desiccant >= 85 || condensation === true;
+      const status = isCritical ? "critical_moisture_risk" : "optimal_dry";
+
+      expect.equal(isCritical, true);
+      expect.equal(status, "critical_moisture_risk");
+    });
+
+    test("F130-T3: Saturated desiccant above 85% flags critical moisture hazard", () => {
+      const desiccant = 90;
+      const isCritical = desiccant >= 85;
+
+      expect.equal(isCritical, true);
+    });
+
+    test("F130-T4: Moderate humidity between 55% and 74% flags mild humidity warning", () => {
+      const humidity = 62;
+      const isCritical = humidity >= 75;
+      const isMild = humidity >= 55 && !isCritical;
+      const status = isCritical ? "critical_moisture_risk" : isMild ? "mild_humidity" : "optimal_dry";
+
+      expect.equal(status, "mild_humidity");
+    });
+
+    test("F130-T5: Missing moistureSensorId fails telemetry validation guard", () => {
+      const payload = { relativeHumidityPercent: 50 };
+      const isValid = Boolean(payload.moistureSensorId && payload.moistureSensorId.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

@@ -50,6 +50,7 @@ import {
   scanHazardousMaterialSafety,
   updateDroneAirCorridorLandingBeacon,
   authorizeSmartLockInHomeDelivery,
+  updateParcelMoistureTelemetry,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -112,6 +113,7 @@ router.post("/:id/nfc-geofence-pod", optionalAuthenticate, verifyNfcGeofenceProo
 router.post("/:id/hazmat-safety-scan", optionalAuthenticate, scanHazardousMaterialSafety);
 router.post("/:id/drone-air-corridor-beacon", optionalAuthenticate, updateDroneAirCorridorLandingBeacon);
 router.post("/:id/smart-lock-in-home-delivery", optionalAuthenticate, authorizeSmartLockInHomeDelivery);
+router.post("/:id/moisture-telemetry", optionalAuthenticate, updateParcelMoistureTelemetry);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

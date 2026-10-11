@@ -1236,6 +1236,17 @@ export async function authorizeSmartLockInHomeDeliveryAPI(orderId, { smartLockId
   return result?.data || result;
 }
 
+/**
+ * Real-Time Parcel Moisture & Desiccant Saturation IoT Telemetry (Feature 130)
+ */
+export async function updateParcelMoistureTelemetryAPI(orderId, { moistureSensorId, relativeHumidityPercent, desiccantSaturationPercent, condensationDetected } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/moisture-telemetry`, {
+    method: "POST",
+    body: JSON.stringify({ moistureSensorId, relativeHumidityPercent, desiccantSaturationPercent, condensationDetected }),
+  });
+  return result?.data || result;
+}
+
 
 
 

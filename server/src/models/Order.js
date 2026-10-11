@@ -580,6 +580,20 @@ const orderSchema = new mongoose.Schema(
         default: "unauthorized",
       },
     },
+    parcelMoistureTelemetry: {
+      isMoistureMonitored: { type: Boolean, default: false },
+      moistureSensorId: { type: String, default: null },
+      relativeHumidityPercent: { type: Number, default: 0 },
+      desiccantSaturationPercent: { type: Number, default: 0 },
+      condensationDetected: { type: Boolean, default: false },
+      humidityStatus: {
+        type: String,
+        enum: ["optimal_dry", "mild_humidity", "critical_moisture_risk"],
+        default: "optimal_dry",
+      },
+      alertTriggeredAt: { type: String, default: null },
+      airDryingVentilationScheduled: { type: Boolean, default: false },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

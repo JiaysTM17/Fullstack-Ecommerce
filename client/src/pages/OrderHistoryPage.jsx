@@ -2588,6 +2588,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.parcelMoistureTelemetry?.isMoistureMonitored && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Độ Ẩm Kiện Hàng (#${ord.parcelMoistureTelemetry.moistureSensorId}): ${ord.parcelMoistureTelemetry.relativeHumidityPercent}% RH. Hút ẩm: ${ord.parcelMoistureTelemetry.desiccantSaturationPercent}%. Trạng thái: ${ord.parcelMoistureTelemetry.humidityStatus}`}>
+                            <span style={{ fontSize: '13px' }}>💧</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.parcelMoistureTelemetry.humidityStatus === 'critical_moisture_risk' ? '#dc2626' : ord.parcelMoistureTelemetry.humidityStatus === 'mild_humidity' ? '#ea580c' : '#059669',
+                              background: ord.parcelMoistureTelemetry.humidityStatus === 'critical_moisture_risk' ? '#fee2e2' : ord.parcelMoistureTelemetry.humidityStatus === 'mild_humidity' ? '#ffedd5' : '#dcfce7',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Độ Ẩm IoT: {ord.parcelMoistureTelemetry.relativeHumidityPercent}% RH {ord.parcelMoistureTelemetry.humidityStatus === 'critical_moisture_risk' ? '(Báo Động Ẩm Khẩn Cấp!)' : ord.parcelMoistureTelemetry.humidityStatus === 'mild_humidity' ? '(Hơi Ẩm)' : '(Khô Ráo Chuẩn)'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">
