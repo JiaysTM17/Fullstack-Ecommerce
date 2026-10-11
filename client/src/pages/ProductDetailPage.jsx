@@ -11,7 +11,7 @@ import ProductQASection from "../components/ProductQASection";
 import { addRecentlyViewed } from "../services/recentlyViewedService";
 import ShopChatModal from "../components/ShopChatModal";
 import { addProductReview, getProductById, getProducts, getRelatedProducts, getProductReviewStats } from "../services/productService";
-import { calculateProductVolumeDiscountAPI, fetchProductWarrantyPlansAPI } from "../services/api";
+import { calculateProductVolumeDiscountAPI, fetchProductWarrantyPlansAPI, subscribePriceDropAlertAPI, fetchPriceDropAlertStatusAPI } from "../services/api";
 import { addToWishlist as apiAddToWishlist, removeFromWishlist as apiRemoveFromWishlist } from "../services/wishlistService";
 import { formatCurrency } from "../utils/formatCurrency";
 import {
@@ -22,6 +22,7 @@ import {
   CopyIcon,
   ShieldIcon,
   ShieldCheckIcon,
+  BellIcon,
   ChatIcon,
   StoreIcon,
   PencilIcon,
@@ -79,6 +80,13 @@ export default function ProductDetailPage() {
   const [warrantyPlans, setWarrantyPlans] = useState([]);
   const [selectedWarrantyPlan, setSelectedWarrantyPlan] = useState(null);
 
+  // Feature 100: Price Drop Alert State
+  const [priceDropAlertStatus, setPriceDropAlertStatus] = useState(null);
+  const [showPriceDropModal, setShowPriceDropModal] = useState(false);
+  const [targetPriceInput, setTargetPriceInput] = useState("");
+  const [alertEmailInput, setAlertEmailInput] = useState("");
+  const [isSubscribingAlert, setIsSubscribingAlert] = useState(false);
+
   // Dynamic Volume Discount calculation effect
   useEffect(() => {
     if (!product?._id && !product?.id) return;
@@ -93,6 +101,13 @@ export default function ProductDetailPage() {
     fetchProductWarrantyPlansAPI(targetId)
       .then((plans) => {
         if (Array.isArray(plans)) setWarrantyPlans(plans);
+      })
+      .catch(() => {});
+
+    // Feature 100: Check existing price drop alert status
+    fetchPriceDropAlertStatusAPI(targetId)
+      .then((status) => {
+        if (status) setPriceDropAlertStatus(status);
       })
       .catch(() => {});
   }, [product, quantity]);
@@ -193,6 +208,33 @@ export default function ProductDetailPage() {
       quantity
     );
     navigate("/checkout");
+  }
+
+  async function handleSubscribePriceDrop(e) {
+    e.preventDefault();
+    const targetId = product?._id || product?.id;
+    if (!targetId || !targetPriceInput) return;
+    const priceNum = Number(targetPriceInput);
+    if (!priceNum || priceNum >= (product.price || 0)) {
+      showToast(`Mức giá mong muốn phải thấp hơn giá hiện tại (${formatCurrency(product.price)})`, "warning");
+      return;
+    }
+
+    try {
+      setIsSubscribingAlert(true);
+      const res = await subscribePriceDropAlertAPI(targetId, priceNum, alertEmailInput);
+      setPriceDropAlertStatus({
+        isSubscribed: true,
+        alert: { targetPrice: priceNum, email: alertEmailInput },
+        currentPrice: product.price,
+      });
+      setShowPriceDropModal(false);
+      showToast(res?.message || `Đã đặt chuông báo khi giá về ${formatCurrency(priceNum)}!`, "success");
+    } catch (err) {
+      showToast(err?.message || "Không thể đặt chuông báo giá", "error");
+    } finally {
+      setIsSubscribingAlert(false);
+    }
   }
 
   function handleReviewSubmit(e) {
@@ -767,6 +809,41 @@ export default function ProductDetailPage() {
               <ScaleIcon size={15} color={isCompared(productId) ? "var(--primary-color)" : "currentColor"} />
               <span>{isCompared(productId) ? "Đã thêm vào so sánh" : "So sánh với sản phẩm khác"}</span>
             </button>
+            {/* Feature 100: Báo Khi Giảm Giá (Price Drop Alert) */}
+            <button
+              type="button"
+              className="shopee-btn shopee-btn-secondary"
+              style={{
+                width: "100%",
+                marginTop: "8px",
+                fontWeight: 700,
+                fontSize: "13px",
+                borderRadius: "8px",
+                padding: "9px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                background: priceDropAlertStatus?.isSubscribed ? "#fffbeb" : undefined,
+                borderColor: priceDropAlertStatus?.isSubscribed ? "#f59e0b" : undefined,
+                color: priceDropAlertStatus?.isSubscribed ? "#b45309" : undefined,
+              }}
+              onClick={() => {
+                if (!targetPriceInput && product?.price) {
+                  // Mặc định gợi ý giảm 10%
+                  setTargetPriceInput(String(Math.round(product.price * 0.9)));
+                }
+                setShowPriceDropModal(true);
+              }}
+            >
+              <BellIcon size={15} color={priceDropAlertStatus?.isSubscribed ? "#d97706" : "#f59e0b"} />
+              <span>
+                {priceDropAlertStatus?.isSubscribed
+                  ? `Đang chờ giá giảm về ${formatCurrency(priceDropAlertStatus.alert?.targetPrice)}`
+                  : "Báo Khi Giảm Giá (Shopee Price Alert)"}
+              </span>
+            </button>
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "8px" }}>
               <button
                 type="button"
@@ -1382,6 +1459,187 @@ export default function ProductDetailPage() {
           currentProduct={product}
           onClose={() => setShowShopChat(false)}
         />
+      )}
+
+      {/* Feature 100: Shopee Price Drop Alert Modal */}
+      {showPriceDropModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99999,
+            padding: "16px",
+          }}
+          onClick={() => setShowPriceDropModal(false)}
+        >
+          <div
+            style={{
+              background: "#ffffff",
+              borderRadius: "16px",
+              maxWidth: "420px",
+              width: "100%",
+              padding: "24px",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "10px",
+                    background: "rgba(245, 158, 11, 0.15)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <BellIcon size={20} color="#d97706" />
+                </span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 800, color: "#1e293b" }}>
+                    Đặt Chuông Báo Giảm Giá
+                  </h3>
+                  <div style={{ fontSize: "12px", color: "#64748b" }}>
+                    Nhận thông báo tức thì ngay khi sản phẩm hạ giá
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPriceDropModal(false)}
+                style={{ background: "none", border: "none", cursor: "pointer", padding: "4px" }}
+              >
+                <CloseIcon size={16} color="#64748b" />
+              </button>
+            </div>
+
+            <div style={{ background: "#f8fafc", padding: "12px", borderRadius: "10px", marginBottom: "16px", fontSize: "13px" }}>
+              <div style={{ color: "#64748b", marginBottom: "4px" }}>Giá hiện tại của sản phẩm:</div>
+              <div style={{ fontSize: "18px", fontWeight: 900, color: "#ea580c" }}>
+                {formatCurrency(product?.price || 0)}
+              </div>
+            </div>
+
+            <form onSubmit={handleSubscribePriceDrop}>
+              <div style={{ marginBottom: "14px" }}>
+                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
+                  Mức giá kỳ vọng bạn muốn mua (₫):
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="1000"
+                  max={(product?.price || 100000) - 1}
+                  value={targetPriceInput}
+                  onChange={(e) => setTargetPriceInput(e.target.value)}
+                  placeholder="Ví dụ: 190000"
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: "8px",
+                    border: "1.5px solid #cbd5e1",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <div style={{ display: "flex", gap: "6px", marginTop: "8px" }}>
+                  {[
+                    { label: "Giảm 5%", rate: 0.95 },
+                    { label: "Giảm 10%", rate: 0.90 },
+                    { label: "Giảm 15%", rate: 0.85 },
+                    { label: "Giảm 20%", rate: 0.80 },
+                  ].map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setTargetPriceInput(String(Math.round((product?.price || 100000) * preset.rate)))}
+                      style={{
+                        flex: 1,
+                        padding: "5px 4px",
+                        borderRadius: "6px",
+                        border: "1px solid #e2e8f0",
+                        background: "#f1f5f9",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        color: "#475569",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: "20px" }}>
+                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
+                  Email nhận thông báo (tùy chọn):
+                </label>
+                <input
+                  type="email"
+                  value={alertEmailInput}
+                  onChange={(e) => setAlertEmailInput(e.target.value)}
+                  placeholder="name@example.com"
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: "8px",
+                    border: "1.5px solid #cbd5e1",
+                    fontSize: "13px",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  type="button"
+                  onClick={() => setShowPriceDropModal(false)}
+                  style={{
+                    flex: 1,
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: "1px solid #cbd5e1",
+                    background: "#ffffff",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    color: "#475569",
+                  }}
+                >
+                  Đóng
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubscribingAlert}
+                  style={{
+                    flex: 1,
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                    color: "#ffffff",
+                    fontSize: "13px",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                  }}
+                >
+                  {isSubscribingAlert ? "Đang lưu..." : "Kích Hoạt Chuông"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* Mobile Sticky Action Bar */}

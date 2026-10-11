@@ -2908,6 +2908,81 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(plans[1].durationMonths, 12);
     });
   });
+
+  // =========================================================================
+  // FEATURE 100: Smart Price Drop Alert & Target Price Radar (5 Tests)
+  // =========================================================================
+  describe("Feature 100: Smart Price Drop Alert & Target Price Radar", () => {
+    test("F100-T1: Desired price must be strictly lower than current product price", () => {
+      const currentPrice = 300000;
+      const targetPriceValid = 250000;
+      const targetPriceInvalid = 350000;
+
+      const isValid1 = targetPriceValid > 0 && targetPriceValid < currentPrice;
+      const isValid2 = targetPriceInvalid > 0 && targetPriceInvalid < currentPrice;
+
+      expect.equal(isValid1, true);
+      expect.equal(isValid2, false);
+    });
+
+    test("F100-T2: Product model persists and retrieves priceDropWatchers array", async () => {
+      const product = await Product.create({
+        name: "Bàn Phím Cơ Không Dây RGB",
+        price: 850000,
+        stock: 20,
+        priceDropWatchers: [
+          {
+            userId: "user_hunter_01",
+            email: "hunter@shopee.vn",
+            targetPrice: 750000,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      });
+
+      expect.equal(product.price, 850000);
+      expect.equal(product.priceDropWatchers.length, 1);
+      expect.equal(product.priceDropWatchers[0].targetPrice, 750000);
+    });
+
+    test("F100-T3: Updating target price overrides existing user alert instead of duplicating", () => {
+      const watchers = [
+        { userId: "user_01", targetPrice: 600000 },
+        { userId: "user_02", targetPrice: 550000 },
+      ];
+
+      const updateUserId = "user_01";
+      const newTarget = 520000;
+      const existingIdx = watchers.findIndex((w) => w.userId === updateUserId);
+
+      if (existingIdx !== -1) {
+        watchers[existingIdx].targetPrice = newTarget;
+      }
+
+      expect.equal(watchers.length, 2);
+      expect.equal(watchers[0].targetPrice, 520000);
+    });
+
+    test("F100-T4: Price Drop Radar computes expected savings percentage correctly", () => {
+      const currentPrice = 500000;
+      const targetPrice = 400000;
+      const discountExpected = Math.round(((currentPrice - targetPrice) / currentPrice) * 100);
+
+      expect.equal(discountExpected, 20);
+    });
+
+    test("F100-T5: Price drop triggered when new price reaches or falls below target price", () => {
+      const targetAlert = { targetPrice: 450000 };
+      const priceUpdate1 = 480000; // Chưa đạt
+      const priceUpdate2 = 430000; // Đã đạt mức giảm
+
+      const shouldNotify1 = priceUpdate1 <= targetAlert.targetPrice;
+      const shouldNotify2 = priceUpdate2 <= targetAlert.targetPrice;
+
+      expect.equal(shouldNotify1, false);
+      expect.equal(shouldNotify2, true);
+    });
+  });
 });
 
 

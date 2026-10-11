@@ -18,6 +18,8 @@ import {
   joinGroupBuyTeam,
   calculateVolumeDiscount,
   getProductWarrantyPlans,
+  subscribePriceDropAlert,
+  getPriceDropAlertStatus,
 } from "../controllers/productController.js";
 import { optionalAuthenticate } from "../middlewares/auth.js";
 
@@ -45,6 +47,8 @@ router.get("/:id/related", getRelatedProducts);
 router.get("/:id/review-stats", getProductReviewStats);
 router.post("/:id/volume-discount", calculateVolumeDiscount);
 router.get("/:id/warranty-plans", getProductWarrantyPlans);
+router.post("/:id/price-drop-alert", subscribePriceDropAlert);
+router.get("/:id/price-drop-alert/status", getPriceDropAlertStatus);
 router.get("/:id", getProductById);
 
 export default router;

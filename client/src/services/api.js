@@ -893,6 +893,24 @@ export async function fetchProductWarrantyPlansAPI(productId) {
   return result?.data?.warrantyPlans || result?.warrantyPlans || [];
 }
 
+/**
+ * Smart Price Drop Alert & Target Price Radar API (Feature 100)
+ */
+export async function subscribePriceDropAlertAPI(productId, targetPrice, email, userId) {
+  return await apiRequest(`/api/products/${productId}/price-drop-alert`, {
+    method: "POST",
+    body: JSON.stringify({ targetPrice, email, userId }),
+  });
+}
+
+export async function fetchPriceDropAlertStatusAPI(productId, userId, email) {
+  const params = new URLSearchParams();
+  if (userId) params.append("userId", userId);
+  if (email) params.append("email", email);
+  const result = await apiRequest(`/api/products/${productId}/price-drop-alert/status?${params.toString()}`);
+  return result?.data || result || null;
+}
+
 
 
 

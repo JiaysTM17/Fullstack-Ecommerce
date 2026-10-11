@@ -782,6 +782,81 @@ export const getProductWarrantyPlans = catchAsync(async (req, res) => {
   }, 200, "Lấy danh mục gói bảo hành mở rộng thành công");
 });
 
+// @desc    Đăng ký nhận thông báo khi giá sản phẩm giảm xuống mức kỳ vọng (Feature 100)
+// @route   POST /api/products/:id/price-drop-alert
+// @access  Public / Authenticate
+export const subscribePriceDropAlert = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { targetPrice, email, userId = "guest_shopper" } = req.body;
+
+  const product = await Product.findById(id);
+  if (!product) {
+    return sendError(res, "Không tìm thấy sản phẩm", 404);
+  }
+
+  const currentPrice = product.price || 0;
+  const desiredPrice = Number(targetPrice);
+
+  if (!desiredPrice || desiredPrice <= 0) {
+    return sendError(res, "Mức giá kỳ vọng không hợp lệ", 400);
+  }
+
+  if (desiredPrice >= currentPrice) {
+    return sendError(res, `Mức giá mong muốn phải thấp hơn giá hiện tại (${currentPrice.toLocaleString('vi-VN')}₫)`, 400);
+  }
+
+  const watchers = product.priceDropWatchers || [];
+  const existingIdx = watchers.findIndex((w) => w.userId === userId || (email && w.email === email));
+
+  const newAlert = {
+    userId,
+    email: email || "",
+    targetPrice: desiredPrice,
+    createdAt: new Date().toISOString(),
+  };
+
+  if (existingIdx !== -1) {
+    watchers[existingIdx] = newAlert;
+  } else {
+    watchers.push(newAlert);
+  }
+
+  product.priceDropWatchers = watchers;
+  await product.save();
+
+  return sendSuccess(res, {
+    productId: id,
+    productName: product.name,
+    currentPrice,
+    targetPrice: desiredPrice,
+    discountExpectedPercent: Math.round(((currentPrice - desiredPrice) / currentPrice) * 100),
+    totalWatchers: watchers.length,
+  }, 200, `Đã đặt chuông báo giá! Hệ thống sẽ thông báo ngay khi giá giảm về ${desiredPrice.toLocaleString('vi-VN')}₫`);
+});
+
+// @desc    Kiểm tra trạng thái đặt chuông báo giá của người dùng cho sản phẩm (Feature 100)
+// @route   GET /api/products/:id/price-drop-alert/status
+// @access  Public
+export const getPriceDropAlertStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { userId = "guest_shopper", email } = req.query;
+
+  const product = await Product.findById(id);
+  if (!product) {
+    return sendError(res, "Không tìm thấy sản phẩm", 404);
+  }
+
+  const watchers = product.priceDropWatchers || [];
+  const existing = watchers.find((w) => w.userId === userId || (email && w.email === email));
+
+  return sendSuccess(res, {
+    isSubscribed: Boolean(existing),
+    alert: existing || null,
+    currentPrice: product.price || 0,
+    totalWatchers: watchers.length,
+  }, 200, "Lấy trạng thái chuông báo giá thành công");
+});
+
 export default {
   getProducts,
   getProductById,
@@ -801,4 +876,6 @@ export default {
   joinGroupBuyTeam,
   calculateVolumeDiscount,
   getProductWarrantyPlans,
+  subscribePriceDropAlert,
+  getPriceDropAlertStatus,
 };
