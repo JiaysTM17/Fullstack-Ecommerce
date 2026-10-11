@@ -2684,6 +2684,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.cryogenicFreezerDryIceTelemetry?.isCryoMonitored && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Bảo Ôn Siêu Lạnh Đá Khô (#${ord.cryogenicFreezerDryIceTelemetry.cryoBoxSerial}): Nhiệt độ lõi ${ord.cryogenicFreezerDryIceTelemetry.coreTemperatureCelsius}°C. Đá khô còn ${ord.cryogenicFreezerDryIceTelemetry.dryIceSublimationRemainingPercent}%. Vaccine toàn vẹn: ${ord.cryogenicFreezerDryIceTelemetry.vaccinePharmaIntegrityVerified ? 'ĐẠT CHUẨN WHO' : 'NGUY CƠ BIẾN TÍNH'}`}>
+                            <span style={{ fontSize: '13px' }}>❄️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.cryogenicFreezerDryIceTelemetry.sublimationLeakAlarm ? '#dc2626' : '#0284c7',
+                              background: ord.cryogenicFreezerDryIceTelemetry.sublimationLeakAlarm ? '#fee2e2' : '#e0f2fe',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Siêu Lạnh Đá Khô: {ord.cryogenicFreezerDryIceTelemetry.coreTemperatureCelsius}°C {ord.cryogenicFreezerDryIceTelemetry.sublimationLeakAlarm ? '(Báo Động Rò Nhiệt / Thăng Hoa!)' : `(Đá Khô ${ord.cryogenicFreezerDryIceTelemetry.dryIceSublimationRemainingPercent}%)`}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

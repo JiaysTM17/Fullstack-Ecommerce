@@ -55,6 +55,7 @@ import {
   updateMobileVanRobotSwarmDispatch,
   auditThermoChromicColorShiftBarcode,
   launchUndergroundPneumaticCapsuleDispatch,
+  monitorCryogenicFreezerDryIceTelemetry,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -122,6 +123,7 @@ router.post("/:id/fiber-optic-mesh-seal", optionalAuthenticate, updateFiberOptic
 router.post("/:id/mobile-van-robot-swarm", optionalAuthenticate, updateMobileVanRobotSwarmDispatch);
 router.post("/:id/thermochromic-barcode", optionalAuthenticate, auditThermoChromicColorShiftBarcode);
 router.post("/:id/pneumatic-capsule", optionalAuthenticate, launchUndergroundPneumaticCapsuleDispatch);
+router.post("/:id/cryogenic-dry-ice", optionalAuthenticate, monitorCryogenicFreezerDryIceTelemetry);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

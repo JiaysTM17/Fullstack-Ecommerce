@@ -1291,6 +1291,17 @@ export async function launchUndergroundPneumaticCapsuleDispatchAPI(orderId, { ca
   return result?.data || result;
 }
 
+/**
+ * Real-Time Cryogenic Ultra-Cold Dry Ice Pharma & Vaccine Telemetry (Feature 135)
+ */
+export async function monitorCryogenicFreezerDryIceTelemetryAPI(orderId, { cryoBoxSerial, coreTemperatureCelsius, dryIceSublimationRemainingPercent } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/cryogenic-dry-ice`, {
+    method: "POST",
+    body: JSON.stringify({ cryoBoxSerial, coreTemperatureCelsius, dryIceSublimationRemainingPercent }),
+  });
+  return result?.data || result;
+}
+
 
 
 

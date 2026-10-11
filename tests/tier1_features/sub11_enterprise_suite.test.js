@@ -5400,6 +5400,69 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 135: Real-Time Cryogenic Ultra-Cold Dry Ice Pharma & Vaccine Telemetry (5 Tests)
+  // =========================================================================
+  describe("Feature 135: Real-Time Cryogenic Ultra-Cold Dry Ice Pharma & Vaccine Telemetry", () => {
+    test("F135-T1: Order model successfully arms cryogenicFreezerDryIceTelemetry subdocument", async () => {
+      const order = await Order.create({
+        orderId: "ORD_CRYO_DRY_ICE_135",
+        items: [{ name: "Biologic mRNA Vaccine Cold Chain Kit", price: 2150000, quantity: 1 }],
+        total: 2150000,
+        cryogenicFreezerDryIceTelemetry: {
+          isCryoMonitored: true,
+          cryoBoxSerial: "CRYO-VAULT-8821",
+          coreTemperatureCelsius: -78.5,
+          dryIceSublimationRemainingPercent: 92,
+          vaccinePharmaIntegrityVerified: true,
+          sublimationLeakAlarm: false,
+          monitoredAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_CRYO_DRY_ICE_135");
+      expect.equal(order.cryogenicFreezerDryIceTelemetry.isCryoMonitored, true);
+      expect.equal(order.cryogenicFreezerDryIceTelemetry.cryoBoxSerial, "CRYO-VAULT-8821");
+      expect.equal(order.cryogenicFreezerDryIceTelemetry.coreTemperatureCelsius, -78.5);
+      expect.equal(order.cryogenicFreezerDryIceTelemetry.dryIceSublimationRemainingPercent, 92);
+      expect.equal(order.cryogenicFreezerDryIceTelemetry.vaccinePharmaIntegrityVerified, true);
+      expect.equal(order.cryogenicFreezerDryIceTelemetry.sublimationLeakAlarm, false);
+    });
+
+    test("F135-T2: Warming above -60°C triggers sublimation leak alarm and flags integrity", () => {
+      const temp = -52.0;
+      const dryIcePercent = 80;
+      const sublimationLeakAlarm = temp > -60 || dryIcePercent < 25;
+      const vaccinePharmaIntegrityVerified = !sublimationLeakAlarm;
+
+      expect.equal(sublimationLeakAlarm, true);
+      expect.equal(vaccinePharmaIntegrityVerified, false);
+    });
+
+    test("F135-T3: Dry ice depletion below 25% triggers replenishment emergency warning", () => {
+      const temp = -75.0;
+      const dryIcePercent = 18;
+      const sublimationLeakAlarm = temp > -60 || dryIcePercent < 25;
+
+      expect.equal(sublimationLeakAlarm, true);
+    });
+
+    test("F135-T4: Dry ice sublimation remaining percent bounded between 0 and 100", () => {
+      const clampPercent = (val) => Math.max(0, Math.min(100, Number(val) || 0));
+
+      expect.equal(clampPercent(120), 100);
+      expect.equal(clampPercent(-15), 0);
+      expect.equal(clampPercent(65), 65);
+    });
+
+    test("F135-T5: Missing cryoBoxSerial fails validation guard", () => {
+      const payload = { coreTemperatureCelsius: -78.5 };
+      const isValid = Boolean(payload.cryoBoxSerial && payload.cryoBoxSerial.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

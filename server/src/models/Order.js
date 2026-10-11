@@ -647,6 +647,15 @@ const orderSchema = new mongoose.Schema(
       capsuleLaunchedAt: { type: String, default: null },
       capsuleArrivedAt: { type: String, default: null },
     },
+    cryogenicFreezerDryIceTelemetry: {
+      isCryoMonitored: { type: Boolean, default: false },
+      cryoBoxSerial: { type: String, default: null },
+      coreTemperatureCelsius: { type: Number, default: -78.5 }, // Nhiệt độ đá khô chuẩn -78.5°C đến -80°C
+      dryIceSublimationRemainingPercent: { type: Number, default: 100 },
+      vaccinePharmaIntegrityVerified: { type: Boolean, default: true },
+      sublimationLeakAlarm: { type: Boolean, default: false },
+      monitoredAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

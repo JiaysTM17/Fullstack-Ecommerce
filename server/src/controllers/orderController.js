@@ -4070,6 +4070,81 @@ export const launchUndergroundPneumaticCapsuleDispatch = async (req, res) => {
   }
 };
 
+// @desc    Giám sát chuỗi siêu lạnh đá khô âm sâu dược phẩm/vaccine (Feature 135)
+// @route   POST /api/orders/:id/cryogenic-dry-ice
+// @access  Public / Authenticate
+export const monitorCryogenicFreezerDryIceTelemetry = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      cryoBoxSerial,
+      coreTemperatureCelsius = -78.5,
+      dryIceSublimationRemainingPercent = 100,
+    } = req.body;
+
+    if (!cryoBoxSerial) {
+      return sendError(res, "Thiếu số seri thùng bảo ôn siêu lạnh (cryoBoxSerial)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần giám sát chuỗi siêu lạnh", 404);
+    }
+
+    const now = new Date().toISOString();
+    const temp = Number(coreTemperatureCelsius) || -78.5;
+    const dryIcePercent = Math.max(0, Math.min(100, Number(dryIceSublimationRemainingPercent) || 100));
+
+    // Ngưỡng báo động: Nhiệt độ ấm hơn -60°C hoặc đá khô còn dưới 25%
+    const sublimationLeakAlarm = temp > -60 || dryIcePercent < 25;
+    const vaccinePharmaIntegrityVerified = !sublimationLeakAlarm;
+
+    order.cryogenicFreezerDryIceTelemetry = {
+      isCryoMonitored: true,
+      cryoBoxSerial,
+      coreTemperatureCelsius: temp,
+      dryIceSublimationRemainingPercent: dryIcePercent,
+      vaccinePharmaIntegrityVerified,
+      sublimationLeakAlarm,
+      monitoredAt: now,
+    };
+
+    const statusNote = sublimationLeakAlarm
+      ? `BÁO ĐỘNG SUY GIẢM NHIỆT SIÊU LẠNH: Thùng đá khô ${cryoBoxSerial} đạt ${temp}°C (đá khô còn ${dryIcePercent}%). Cảnh báo nguy cơ biến tính dược phẩm/vaccine! Kích hoạt quy trình châm đá khô khẩn cấp.`
+      : `Bảo ôn siêu lạnh ${cryoBoxSerial}: Nhiệt độ lõi ${temp}°C, đá khô tối ưu ${dryIcePercent}%. Chuẩn bảo quản dược phẩm sinh học toàn vẹn.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        cryogenicFreezerDryIceTelemetry: order.cryogenicFreezerDryIceTelemetry,
+        message: sublimationLeakAlarm
+          ? "Cảnh báo: Chuỗi bảo quản siêu lạnh gặp nguy cơ thăng hoa đá khô!"
+          : "Cập nhật đo lường bảo ôn siêu lạnh âm sâu an toàn.",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 
