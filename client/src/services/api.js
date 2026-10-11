@@ -952,3 +952,14 @@ export async function executeSmartOneClickReorderAPI(orderId) {
   });
   return result?.data || result;
 }
+
+/**
+ * Seller Multi-Warehouse Stock Splitting & Geo-Proximity Routing (Feature 104)
+ */
+export async function calculateMultiWarehouseRoutingAPI(orderId, { buyerProvince } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/warehouse-routing`, {
+    method: "POST",
+    body: JSON.stringify({ buyerProvince }),
+  });
+  return result?.data || result;
+}

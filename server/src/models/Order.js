@@ -173,6 +173,21 @@ const orderSchema = new mongoose.Schema(
       reorderVoucherApplied: { type: String, default: "" },
       reorderSavings: { type: Number, default: 0 },
     },
+    multiWarehouseRouting: {
+      isSplitOrder: { type: Boolean, default: false },
+      fulfillmentHubs: [
+        {
+          hubId: { type: String, default: "" },
+          hubName: { type: String, default: "" },
+          region: { type: String, default: "HANOI" },
+          itemsCount: { type: Number, default: 0 },
+          estimatedDistanceKm: { type: Number, default: 0 },
+          dispatchedStatus: { type: String, default: "pending" },
+        },
+      ],
+      primaryOriginHub: { type: String, default: "" },
+      carbonSavedKg: { type: Number, default: 0 },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

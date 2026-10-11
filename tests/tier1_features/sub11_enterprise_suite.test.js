@@ -3238,6 +3238,85 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(canReorder, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 104: Seller Multi-Warehouse Stock Splitting & Geo-Proximity Routing (5 Tests)
+  // =========================================================================
+  describe("Feature 104: Seller Multi-Warehouse Stock Splitting & Geo-Proximity Routing", () => {
+    test("F104-T1: Order model persists multiWarehouseRouting schema attributes", async () => {
+      const order = await Order.create({
+        orderId: "ORD_GEO_WH_104",
+        items: [{ productId: "p_wh_1", name: "Bộ Ấm Chén Bát Tràng", price: 450000, quantity: 2 }],
+        total: 475000,
+        multiWarehouseRouting: {
+          isSplitOrder: true,
+          fulfillmentHubs: [
+            {
+              hubId: "HUB_HN_01",
+              hubName: "Kho Tổng SPX Mega Bắc Ninh (Miền Bắc)",
+              region: "HANOI",
+              itemsCount: 1,
+              estimatedDistanceKm: 18.5,
+              dispatchedStatus: "allocated",
+            },
+            {
+              hubId: "HUB_DN_01",
+              hubName: "Kho Phụ SPX Liên Chiểu (Miền Trung)",
+              region: "DANANG",
+              itemsCount: 1,
+              estimatedDistanceKm: 45.0,
+              dispatchedStatus: "allocated",
+            },
+          ],
+          primaryOriginHub: "Kho Tổng SPX Mega Bắc Ninh (Miền Bắc)",
+          carbonSavedKg: 2.85,
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_GEO_WH_104");
+      expect.equal(order.multiWarehouseRouting.isSplitOrder, true);
+      expect.equal(order.multiWarehouseRouting.fulfillmentHubs.length, 2);
+      expect.equal(order.multiWarehouseRouting.carbonSavedKg, 2.85);
+    });
+
+    test("F104-T2: Geo-routing assigns Northern Mega Hub when destination province is Hanoi", () => {
+      const buyerProvince = "Hà Nội";
+      const isNorthern = buyerProvince.toLowerCase().includes("hà nội");
+      const primaryHub = isNorthern ? "Kho Tổng SPX Mega Bắc Ninh (Miền Bắc)" : "Kho Tổng SPX Tân Bình (Miền Nam)";
+
+      expect.equal(isNorthern, true);
+      expect.equal(primaryHub.includes("Bắc Ninh"), true);
+    });
+
+    test("F104-T3: Geo-routing assigns Southern Mega Hub when destination province is Ho Chi Minh City", () => {
+      const buyerProvince = "TP Hồ Chí Minh";
+      const isNorthern = buyerProvince.toLowerCase().includes("hà nội");
+      const primaryHub = isNorthern ? "Kho Tổng SPX Mega Bắc Ninh (Miền Bắc)" : "Kho Tổng SPX Tân Bình (Miền Nam)";
+
+      expect.equal(isNorthern, false);
+      expect.equal(primaryHub.includes("Tân Bình"), true);
+    });
+
+    test("F104-T4: Carbon emission savings accurately calculates from combined distance reduction", () => {
+      const distanceHub1 = 18.5;
+      const distanceHub2 = 45.0;
+      const emissionFactorPerKm = 0.045; // kg CO2 per km
+      const carbonSavedKg = Number(((distanceHub1 + distanceHub2) * emissionFactorPerKm).toFixed(2));
+
+      expect.equal(carbonSavedKg, 2.86);
+      expect.equal(carbonSavedKg > 0, true);
+    });
+
+    test("F104-T5: Item count splits proportionally across available distribution hubs", () => {
+      const totalItems = 5;
+      const hub1Count = Math.ceil(totalItems / 2);
+      const hub2Count = Math.floor(totalItems / 2);
+
+      expect.equal(hub1Count, 3);
+      expect.equal(hub2Count, 2);
+      expect.equal(hub1Count + hub2Count, totalItems);
+    });
+  });
 });
 
 

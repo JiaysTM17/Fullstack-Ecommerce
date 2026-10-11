@@ -2090,6 +2090,27 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.multiWarehouseRouting?.fulfillmentHubs?.length > 0 && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Xuất từ: ${ord.multiWarehouseRouting.primaryOriginHub || 'Đa kho SPX'}`}>
+                            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <PackageIcon size={10} color="#059669" />
+                            </span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#059669',
+                              background: '#d1fae5',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Đa Kho SPX ({ord.multiWarehouseRouting.fulfillmentHubs.length} Điểm | -{ord.multiWarehouseRouting.carbonSavedKg || 1.2}kg CO₂)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

@@ -24,6 +24,7 @@ import {
   uploadUnboxingVideoProof,
   verifyUnboxingVideoProof,
   executeSmartOneClickReorder,
+  calculateMultiWarehouseRouting,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -60,6 +61,7 @@ router.get("/:id/delivery-attempts", optionalAuthenticate, getDeliveryAttempts);
 router.post("/:id/unboxing-video", optionalAuthenticate, uploadUnboxingVideoProof);
 router.patch("/:id/unboxing-video/verify", authenticate, authorize("admin", "seller"), verifyUnboxingVideoProof);
 router.post("/:id/smart-reorder", optionalAuthenticate, executeSmartOneClickReorder);
+router.post("/:id/warehouse-routing", optionalAuthenticate, calculateMultiWarehouseRouting);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);
