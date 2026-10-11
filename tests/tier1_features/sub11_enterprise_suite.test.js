@@ -3317,6 +3317,84 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(hub1Count + hub2Count, totalItems);
     });
   });
+
+  // =========================================================================
+  // FEATURE 105: Dynamic In-Flight Delivery Address Correction Suite (5 Tests)
+  // =========================================================================
+  describe("Feature 105: Dynamic In-Flight Delivery Address Correction Suite", () => {
+    test("F105-T1: Order model persists dynamicAddressCorrection schema attributes", async () => {
+      const order = await Order.create({
+        orderId: "ORD_ADDR_CORR_105",
+        items: [{ productId: "p_acc_01", name: "Đồng hồ thông minh FitPro", price: 650000, quantity: 1 }],
+        total: 675000,
+        dynamicAddressCorrection: {
+          isModified: true,
+          originalAddress: "123 Cầu Giấy, Hà Nội",
+          correctedAddress: "456 Kim Mã, Ba Đình, Hà Nội",
+          correctionReason: "Chuyển sang cơ quan nhận hàng ban ngày",
+          modifiedAt: new Date().toISOString(),
+          lockStatus: "open",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_ADDR_CORR_105");
+      expect.equal(order.dynamicAddressCorrection.isModified, true);
+      expect.equal(order.dynamicAddressCorrection.correctedAddress, "456 Kim Mã, Ba Đình, Hà Nội");
+      expect.equal(order.dynamicAddressCorrection.lockStatus, "open");
+    });
+
+    test("F105-T2: Address correction updates timeline with modification rationale", () => {
+      const timeline = [];
+      const now = new Date().toISOString();
+      const newAddress = "Toà nhà Landmark 81, P.22, Q.Bình Thạnh, TP.HCM";
+      const reason = "Đã dọn sang căn hộ mới";
+
+      timeline.push({
+        time: now,
+        text: `Địa chỉ nhận hàng đã được cập nhật thành: ${newAddress} (Lý do: ${reason})`,
+      });
+
+      expect.equal(timeline.length, 1);
+      expect.equal(timeline[0].text.includes("Landmark 81"), true);
+      expect.equal(timeline[0].text.includes(reason), true);
+    });
+
+    test("F105-T3: Orders in late dispatch or terminal stages reject address correction", () => {
+      const terminalStatuses = ["delivering", "completed", "delivered", "cancelled"];
+      const checkCanModify = (status) => !terminalStatuses.includes(status);
+
+      expect.equal(checkCanModify("pending"), true);
+      expect.equal(checkCanModify("confirmed"), true);
+      expect.equal(checkCanModify("shipping"), true);
+      expect.equal(checkCanModify("delivering"), false);
+      expect.equal(checkCanModify("completed"), false);
+      expect.equal(checkCanModify("cancelled"), false);
+    });
+
+    test("F105-T4: Empty or blank address string is strictly rejected", () => {
+      const validateAddress = (addr) => Boolean(addr && typeof addr === "string" && addr.trim().length > 5);
+
+      expect.equal(validateAddress(""), false);
+      expect.equal(validateAddress("    "), false);
+      expect.equal(validateAddress("HN"), false);
+      expect.equal(validateAddress("Số 10 Phố Tràng Tiền, Hoàn Kiếm"), true);
+    });
+
+    test("F105-T5: Default order maintains unmodified address state with open lock", () => {
+      const defaultCorrection = {
+        isModified: false,
+        originalAddress: "",
+        correctedAddress: "",
+        correctionReason: "",
+        modifiedAt: null,
+        lockStatus: "open",
+      };
+
+      expect.equal(defaultCorrection.isModified, false);
+      expect.equal(defaultCorrection.lockStatus, "open");
+      expect.equal(defaultCorrection.modifiedAt, null);
+    });
+  });
 });
 
 

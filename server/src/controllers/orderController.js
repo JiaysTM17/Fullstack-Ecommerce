@@ -1930,5 +1930,72 @@ export const calculateMultiWarehouseRouting = async (req, res) => {
   }
 };
 
+// @desc    Hiệu chỉnh địa chỉ nhận hàng linh hoạt trước chặng bay/chuyển phát (Feature 105)
+// @route   PATCH /api/orders/:id/dynamic-address
+// @access  Public / Authenticate
+export const updateDynamicDeliveryAddress = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newAddress, reason = "Thay đổi địa chỉ nhận hàng theo nhu cầu cá nhân" } = req.body;
+
+    if (!newAddress || typeof newAddress !== "string" || !newAddress.trim()) {
+      return sendError(res, "Vui lòng cung cấp địa chỉ nhận hàng mới hợp lệ", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần cập nhật địa chỉ", 404);
+    }
+
+    // Kiểm tra giai đoạn cho phép đổi địa chỉ (chỉ được đổi trước khi bưu tá đang đi phát)
+    const disallowStatuses = ["shipping_out_for_delivery", "delivering", "completed", "delivered", "cancelled"];
+    if (disallowStatuses.includes(order.status)) {
+      return sendError(res, "Đơn hàng đã trong chặng phát cuối hoặc đã hoàn tất, không thể đổi địa chỉ nhận hàng", 400);
+    }
+
+    const originalAddress = order.customer?.address || order.shippingAddress || "Địa chỉ ban đầu";
+    const now = new Date().toISOString();
+
+    order.dynamicAddressCorrection = {
+      isModified: true,
+      originalAddress,
+      correctedAddress: newAddress.trim(),
+      correctionReason: reason,
+      modifiedAt: now,
+      lockStatus: "open",
+    };
+
+    if (order.customer) {
+      order.customer.address = newAddress.trim();
+    }
+    order.shippingAddress = newAddress.trim();
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Địa chỉ nhận hàng đã được cập nhật thành: ${newAddress.trim()} (Lý do: ${reason})`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      dynamicAddressCorrection: order.dynamicAddressCorrection,
+      currentAddress: newAddress.trim(),
+      message: "Cập nhật địa chỉ nhận hàng thành công!",
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 

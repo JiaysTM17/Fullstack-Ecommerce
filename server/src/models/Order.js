@@ -188,6 +188,18 @@ const orderSchema = new mongoose.Schema(
       primaryOriginHub: { type: String, default: "" },
       carbonSavedKg: { type: Number, default: 0 },
     },
+    dynamicAddressCorrection: {
+      isModified: { type: Boolean, default: false },
+      originalAddress: { type: String, default: "" },
+      correctedAddress: { type: String, default: "" },
+      correctionReason: { type: String, default: "" },
+      modifiedAt: { type: String, default: null },
+      lockStatus: {
+        type: String,
+        enum: ["open", "locked_in_transit"],
+        default: "open",
+      },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

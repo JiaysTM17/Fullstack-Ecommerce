@@ -2111,6 +2111,27 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.dynamicAddressCorrection?.isModified && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Gốc: ${ord.dynamicAddressCorrection.originalAddress}`}>
+                            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <MapPinIcon size={10} color="#0284c7" />
+                            </span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#0369a1',
+                              background: '#e0f2fe',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Đổi Địa Chỉ: {ord.dynamicAddressCorrection.correctedAddress.slice(0, 18)}...
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

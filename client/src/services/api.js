@@ -963,3 +963,15 @@ export async function calculateMultiWarehouseRoutingAPI(orderId, { buyerProvince
   });
   return result?.data || result;
 }
+
+/**
+ * Dynamic In-Flight Delivery Address Correction Suite (Feature 105)
+ */
+export async function updateDynamicDeliveryAddressAPI(orderId, { newAddress, reason }) {
+  const result = await apiRequest(`/api/orders/${orderId}/dynamic-address`, {
+    method: "PATCH",
+    body: JSON.stringify({ newAddress, reason }),
+  });
+  return result?.data || result;
+}
+
