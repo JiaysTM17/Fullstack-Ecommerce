@@ -2722,6 +2722,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.satelliteLoRaMeshDeadZoneTelemetry?.isLoRaMeshActive && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`LoRa Mesh Vệ Tinh (#${ord.satelliteLoRaMeshDeadZoneTelemetry.loraNodeId}): ${ord.satelliteLoRaMeshDeadZoneTelemetry.hopCountMesh} hops (RSSI: ${ord.satelliteLoRaMeshDeadZoneTelemetry.signalRssiDbm} dBm). Vệ tinh LEO: ${ord.satelliteLoRaMeshDeadZoneTelemetry.leoSatelliteUplinkConnected ? 'ĐÃ KẾT NỐI VỆ TINH TRỰC TIẾP' : 'Dự phòng'}. Mất sóng di động: ${ord.satelliteLoRaMeshDeadZoneTelemetry.isCellularDeadZone ? 'ĐÚNG' : 'KHÔNG'}`}>
+                            <span style={{ fontSize: '13px' }}>🛰️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.satelliteLoRaMeshDeadZoneTelemetry.leoSatelliteUplinkConnected ? '#7c3aed' : '#0284c7',
+                              background: ord.satelliteLoRaMeshDeadZoneTelemetry.leoSatelliteUplinkConnected ? '#f3e8ff' : '#e0f2fe',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              LoRa Mesh: {ord.satelliteLoRaMeshDeadZoneTelemetry.leoSatelliteUplinkConnected ? 'Uplink Vệ Tinh LEO' : `Mesh ${ord.satelliteLoRaMeshDeadZoneTelemetry.hopCountMesh} Hops`} ({ord.satelliteLoRaMeshDeadZoneTelemetry.signalRssiDbm} dBm)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

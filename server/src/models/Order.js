@@ -670,6 +670,16 @@ const orderSchema = new mongoose.Schema(
       },
       inspectedAt: { type: String, default: null },
     },
+    satelliteLoRaMeshDeadZoneTelemetry: {
+      isLoRaMeshActive: { type: Boolean, default: false },
+      loraNodeId: { type: String, default: null },
+      hopCountMesh: { type: Number, default: 1 },
+      signalRssiDbm: { type: Number, default: -85 }, // -85 dBm danh định (deadzone có thể xuống -120 dBm)
+      leoSatelliteUplinkConnected: { type: Boolean, default: false },
+      geoMeshPacketLossRatePercent: { type: Number, default: 0 },
+      isCellularDeadZone: { type: Boolean, default: false },
+      lastMeshBeaconAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

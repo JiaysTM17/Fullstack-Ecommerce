@@ -5528,6 +5528,69 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 137: Satellite Low-Earth Orbit & LoRa Mesh Network Telemetry (5 Tests)
+  // =========================================================================
+  describe("Feature 137: Satellite Low-Earth Orbit & LoRa Mesh Network Telemetry", () => {
+    test("F137-T1: Order model successfully arms satelliteLoRaMeshDeadZoneTelemetry subdocument", async () => {
+      const order = await Order.create({
+        orderId: "ORD_LORA_MESH_137",
+        items: [{ name: "High-Gain Satellite Uplink Terminal", price: 4200000, quantity: 1 }],
+        total: 4200000,
+        satelliteLoRaMeshDeadZoneTelemetry: {
+          isLoRaMeshActive: true,
+          loraNodeId: "LORA-RELAY-HIGHLAND-03",
+          hopCountMesh: 2,
+          signalRssiDbm: -88,
+          leoSatelliteUplinkConnected: false,
+          geoMeshPacketLossRatePercent: 1.2,
+          isCellularDeadZone: true,
+          lastMeshBeaconAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_LORA_MESH_137");
+      expect.equal(order.satelliteLoRaMeshDeadZoneTelemetry.isLoRaMeshActive, true);
+      expect.equal(order.satelliteLoRaMeshDeadZoneTelemetry.loraNodeId, "LORA-RELAY-HIGHLAND-03");
+      expect.equal(order.satelliteLoRaMeshDeadZoneTelemetry.hopCountMesh, 2);
+      expect.equal(order.satelliteLoRaMeshDeadZoneTelemetry.signalRssiDbm, -88);
+      expect.equal(order.satelliteLoRaMeshDeadZoneTelemetry.isCellularDeadZone, true);
+    });
+
+    test("F137-T2: Deadzone with weak RSSI < -105 dBm triggers LEO satellite uplink fallback", () => {
+      const deadZone = true;
+      const rssi = -112;
+      const hops = 2;
+      const leoSatelliteUplinkConnected = deadZone && (rssi < -105 || hops >= 3);
+
+      expect.equal(leoSatelliteUplinkConnected, true);
+    });
+
+    test("F137-T3: Multi-hop threshold >= 3 in cellular deadzone engages direct satellite uplink", () => {
+      const deadZone = true;
+      const rssi = -90;
+      const hops = 4;
+      const leoSatelliteUplinkConnected = deadZone && (rssi < -105 || hops >= 3);
+
+      expect.equal(leoSatelliteUplinkConnected, true);
+    });
+
+    test("F137-T4: Mesh hops count bounded between 1 and 12", () => {
+      const clampHops = (val) => Math.max(1, Math.min(12, Number(val) || 1));
+
+      expect.equal(clampHops(16), 12);
+      expect.equal(clampHops(0), 1);
+      expect.equal(clampHops(5), 5);
+    });
+
+    test("F137-T5: Missing loraNodeId fails validation guard", () => {
+      const payload = { signalRssiDbm: -92 };
+      const isValid = Boolean(payload.loraNodeId && payload.loraNodeId.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

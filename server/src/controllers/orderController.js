@@ -4230,6 +4230,87 @@ export const monitorHyperbaricPressureAntiExplosionVault = async (req, res) => {
   }
 };
 
+// @desc    Định tuyến vi sóng vệ tinh tầm thấp LEO & mạng lưới LoRa Mesh vùng lõm sóng (Feature 137)
+// @route   POST /api/orders/:id/satellite-lora-mesh
+// @access  Public / Authenticate
+export const updateSatelliteLoRaMeshDeadZoneTelemetry = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      loraNodeId,
+      hopCountMesh = 1,
+      signalRssiDbm = -85,
+      geoMeshPacketLossRatePercent = 0,
+      isCellularDeadZone = true,
+    } = req.body;
+
+    if (!loraNodeId) {
+      return sendError(res, "Thiếu mã định danh trạm tiếp sóng LoRa Mesh (loraNodeId)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần kích hoạt liên lạc LoRa Mesh vệ tinh", 404);
+    }
+
+    const now = new Date().toISOString();
+    const rssi = Number(signalRssiDbm) || -85;
+    const hops = Math.max(1, Math.min(12, Number(hopCountMesh) || 1));
+    const loss = Math.max(0, Math.min(100, Number(geoMeshPacketLossRatePercent) || 0));
+    const deadZone = Boolean(isCellularDeadZone);
+
+    // Kích hoạt vệ tinh quỹ đạo thấp LEO nếu vùng lõm sóng và RSSI rất yếu (< -105 dBm) hoặc số bước nhảy > 3
+    const leoSatelliteUplinkConnected = deadZone && (rssi < -105 || hops >= 3);
+
+    order.satelliteLoRaMeshDeadZoneTelemetry = {
+      isLoRaMeshActive: true,
+      loraNodeId,
+      hopCountMesh: hops,
+      signalRssiDbm: rssi,
+      leoSatelliteUplinkConnected,
+      geoMeshPacketLossRatePercent: loss,
+      isCellularDeadZone: deadZone,
+      lastMeshBeaconAt: now,
+    };
+
+    const statusNote = leoSatelliteUplinkConnected
+      ? `VÙNG LÕM SÓNG 4G/5G: Kích hoạt đường truyền vệ tinh LEO Direct-to-Device qua trạm LoRa Mesh #${loraNodeId} (${hops} hops, RSSI ${rssi} dBm). Duy trì định vị kiện hàng liên tục 100%.`
+      : deadZone
+      ? `Trạm LoRa Mesh #${loraNodeId}: Vượt qua vùng mất sóng viễn thông (${hops} hops, RSSI ${rssi} dBm, suy hao ${loss}%).`
+      : `Liên lạc sóng di động tiêu chuẩn ổn định (RSSI ${rssi} dBm). LoRa Mesh ở chế độ dự phòng.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        satelliteLoRaMeshDeadZoneTelemetry: order.satelliteLoRaMeshDeadZoneTelemetry,
+        message: leoSatelliteUplinkConnected
+          ? "Đã kết nối Uplink vệ tinh quỹ đạo thấp LEO xuyên suốt vùng mất sóng."
+          : "Cập nhật đo lường trạm mạng lưới LoRa Mesh thành công.",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 

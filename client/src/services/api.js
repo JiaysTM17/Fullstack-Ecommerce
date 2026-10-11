@@ -1313,6 +1313,17 @@ export async function monitorHyperbaricPressureAntiExplosionVaultAPI(orderId, { 
   return result?.data || result;
 }
 
+/**
+ * Satellite Low-Earth Orbit & LoRa Mesh Network Telemetry (Feature 137)
+ */
+export async function updateSatelliteLoRaMeshDeadZoneTelemetryAPI(orderId, { loraNodeId, hopCountMesh, signalRssiDbm, geoMeshPacketLossRatePercent, isCellularDeadZone } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/satellite-lora-mesh`, {
+    method: "POST",
+    body: JSON.stringify({ loraNodeId, hopCountMesh, signalRssiDbm, geoMeshPacketLossRatePercent, isCellularDeadZone }),
+  });
+  return result?.data || result;
+}
+
 
 
 
