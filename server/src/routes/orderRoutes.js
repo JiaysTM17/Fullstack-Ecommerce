@@ -43,6 +43,7 @@ import {
   updateRealTimeParcelRerouting,
   updateFragileShockSensorTelemetry,
   recordMultiCarrierCarbonLedger,
+  evaluateVideoReturnResaleGrading,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -98,6 +99,7 @@ router.post("/:id/solar-green-fleet", optionalAuthenticate, optimizeSolarFleetGr
 router.post("/:id/realtime-reroute", optionalAuthenticate, updateRealTimeParcelRerouting);
 router.post("/:id/fragile-shock-telemetry", optionalAuthenticate, updateFragileShockSensorTelemetry);
 router.post("/:id/carrier-carbon-ledger", optionalAuthenticate, recordMultiCarrierCarbonLedger);
+router.post("/:id/ai-return-resale-grading", optionalAuthenticate, evaluateVideoReturnResaleGrading);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

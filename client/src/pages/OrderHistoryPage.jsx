@@ -2455,6 +2455,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.aiVideoReturnResaleGrading?.hasEvaluated && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`AI Resale Grader (#${ord.aiVideoReturnResaleGrading.videoAnalysisId}): Phân loại [${ord.aiVideoReturnResaleGrading.resaleGrade}]. Giá trị tái xuất kho: ${Number(ord.aiVideoReturnResaleGrading.estimatedResaleValueVnd).toLocaleString('vi-VN')}₫ (${ord.aiVideoReturnResaleGrading.secondaryMarketChannel})`}>
+                            <span style={{ fontSize: '13px' }}>🏷️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#7c3aed',
+                              background: '#f3e8ff',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              AI Phân Loại Trả: {ord.aiVideoReturnResaleGrading.resaleGrade === 'grade_a_pristine' ? 'Hàng Like New A' : 'Hàng Open Box B'} ({Number(ord.aiVideoReturnResaleGrading.estimatedResaleValueVnd).toLocaleString('vi-VN')}₫)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

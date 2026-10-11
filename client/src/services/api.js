@@ -1159,6 +1159,18 @@ export async function recordMultiCarrierCarbonLedgerAPI(orderId, { carrierCode, 
   return result?.data || result;
 }
 
+/**
+ * AI Smart Video Return Verification & Automated Resale Grading (Feature 123)
+ */
+export async function evaluateVideoReturnResaleGradingAPI(orderId, { resaleGrade, videoAnalysisId, secondaryMarketChannel } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/ai-return-resale-grading`, {
+    method: "POST",
+    body: JSON.stringify({ resaleGrade, videoAnalysisId, secondaryMarketChannel }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 

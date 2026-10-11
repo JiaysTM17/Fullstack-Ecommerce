@@ -466,6 +466,23 @@ const orderSchema = new mongoose.Schema(
       },
       verifiedAt: { type: String, default: null },
     },
+    aiVideoReturnResaleGrading: {
+      hasEvaluated: { type: Boolean, default: false },
+      videoAnalysisId: { type: String, default: "" },
+      resaleGrade: {
+        type: String,
+        enum: ["grade_a_pristine", "grade_b_open_box", "grade_c_refurbished", "grade_d_salvage_parts"],
+        default: "grade_a_pristine",
+      },
+      restockingFeeDeductionPercent: { type: Number, default: 0 },
+      estimatedResaleValueVnd: { type: Number, default: 0 },
+      secondaryMarketChannel: {
+        type: String,
+        enum: ["shopee_outlet", "refurbished_mall", "b2b_liquidation_auction"],
+        default: "shopee_outlet",
+      },
+      gradedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {
