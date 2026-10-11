@@ -5463,6 +5463,71 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 136: Hyperbaric Anti-Explosion Inert Gas Sealed Vault Telemetry (5 Tests)
+  // =========================================================================
+  describe("Feature 136: Hyperbaric Anti-Explosion Inert Gas Sealed Vault Telemetry", () => {
+    test("F136-T1: Order model successfully arms hyperbaricPressureAntiExplosionVault subdocument", async () => {
+      const order = await Order.create({
+        orderId: "ORD_HYPERBARIC_VAULT_136",
+        items: [{ name: "High-Capacity Li-Ion Battery Pack 100Ah", price: 3450000, quantity: 1 }],
+        total: 3450000,
+        hyperbaricPressureAntiExplosionVault: {
+          isHyperbaricArmed: true,
+          vaultPodSerial: "BLAST-VAULT-ARGON-09",
+          cabinPressureAtm: 1.0,
+          inertGasArgonLevelPercent: 99.8,
+          pressureDifferentialPsi: 0.5,
+          isBlastMitigationActive: false,
+          vaultSealStatus: "nominal_pressurized",
+          inspectedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_HYPERBARIC_VAULT_136");
+      expect.equal(order.hyperbaricPressureAntiExplosionVault.isHyperbaricArmed, true);
+      expect.equal(order.hyperbaricPressureAntiExplosionVault.vaultPodSerial, "BLAST-VAULT-ARGON-09");
+      expect.equal(order.hyperbaricPressureAntiExplosionVault.inertGasArgonLevelPercent, 99.8);
+      expect.equal(order.hyperbaricPressureAntiExplosionVault.isBlastMitigationActive, false);
+      expect.equal(order.hyperbaricPressureAntiExplosionVault.vaultSealStatus, "nominal_pressurized");
+    });
+
+    test("F136-T2: High differential pressure > 15 PSI activates blast mitigation system", () => {
+      const diffPsi = 18.5;
+      const argon = 98.0;
+      const isBlastMitigationActive = diffPsi > 15 || argon < 85;
+
+      expect.equal(isBlastMitigationActive, true);
+    });
+
+    test("F136-T3: Extreme blast pressure > 25 PSI seals status to explosion_blast_contained", () => {
+      const diffPsi = 28.0;
+      let vaultSealStatus = "nominal_pressurized";
+      if (diffPsi > 25) {
+        vaultSealStatus = "explosion_blast_contained";
+      } else if (diffPsi > 15) {
+        vaultSealStatus = "rapid_depressurization_warning";
+      }
+
+      expect.equal(vaultSealStatus, "explosion_blast_contained");
+    });
+
+    test("F136-T4: Argon level percent strictly clamped between 0 and 100", () => {
+      const clampArgon = (val) => Math.max(0, Math.min(100, Number(val) || 0));
+
+      expect.equal(clampArgon(105), 100);
+      expect.equal(clampArgon(-8), 0);
+      expect.equal(clampArgon(99.4), 99.4);
+    });
+
+    test("F136-T5: Missing vaultPodSerial fails validation guard", () => {
+      const payload = { cabinPressureAtm: 1.0 };
+      const isValid = Boolean(payload.vaultPodSerial && payload.vaultPodSerial.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

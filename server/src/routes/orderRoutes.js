@@ -56,6 +56,7 @@ import {
   auditThermoChromicColorShiftBarcode,
   launchUndergroundPneumaticCapsuleDispatch,
   monitorCryogenicFreezerDryIceTelemetry,
+  monitorHyperbaricPressureAntiExplosionVault,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -124,6 +125,7 @@ router.post("/:id/mobile-van-robot-swarm", optionalAuthenticate, updateMobileVan
 router.post("/:id/thermochromic-barcode", optionalAuthenticate, auditThermoChromicColorShiftBarcode);
 router.post("/:id/pneumatic-capsule", optionalAuthenticate, launchUndergroundPneumaticCapsuleDispatch);
 router.post("/:id/cryogenic-dry-ice", optionalAuthenticate, monitorCryogenicFreezerDryIceTelemetry);
+router.post("/:id/hyperbaric-explosion-vault", optionalAuthenticate, monitorHyperbaricPressureAntiExplosionVault);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

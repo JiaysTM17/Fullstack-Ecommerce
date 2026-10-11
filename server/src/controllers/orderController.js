@@ -4145,6 +4145,91 @@ export const monitorCryogenicFreezerDryIceTelemetry = async (req, res) => {
   }
 };
 
+// @desc    Giám sát buồng kín tăng áp chống cháy nổ khí trơ (Feature 136)
+// @route   POST /api/orders/:id/hyperbaric-explosion-vault
+// @access  Public / Authenticate
+export const monitorHyperbaricPressureAntiExplosionVault = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      vaultPodSerial,
+      cabinPressureAtm = 1.0,
+      inertGasArgonLevelPercent = 99.8,
+      pressureDifferentialPsi = 0,
+    } = req.body;
+
+    if (!vaultPodSerial) {
+      return sendError(res, "Thiếu số hiệu khoang buồng tăng áp chống nổ (vaultPodSerial)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần giám sát buồng chống nổ", 404);
+    }
+
+    const now = new Date().toISOString();
+    const pressure = Number(cabinPressureAtm) || 1.0;
+    const argon = Math.max(0, Math.min(100, Number(inertGasArgonLevelPercent) || 99.8));
+    const diffPsi = Number(pressureDifferentialPsi) || 0;
+
+    // Ngưỡng báo động: Khí trơ Argon dưới 85% hoặc chênh lệch áp suất > 15 PSI (nguy cơ bục nổ pin Li-ion)
+    const isBlastMitigationActive = diffPsi > 15 || argon < 85;
+    let vaultSealStatus = "nominal_pressurized";
+    if (diffPsi > 25) {
+      vaultSealStatus = "explosion_blast_contained";
+    } else if (diffPsi > 15 || argon < 85) {
+      vaultSealStatus = "rapid_depressurization_warning";
+    } else if (argon < 95) {
+      vaultSealStatus = "inert_gas_purging";
+    }
+
+    order.hyperbaricPressureAntiExplosionVault = {
+      isHyperbaricArmed: true,
+      vaultPodSerial,
+      cabinPressureAtm: pressure,
+      inertGasArgonLevelPercent: argon,
+      pressureDifferentialPsi: diffPsi,
+      isBlastMitigationActive,
+      vaultSealStatus,
+      inspectedAt: now,
+    };
+
+    const statusNote = isBlastMitigationActive
+      ? `BÁO ĐỘNG BUỒNG CHỐNG NỔ: Áp suất lệch ${diffPsi} PSI, Khí trơ Argon ${argon}%. Kích hoạt van xả an toàn và phong tỏa ngăn nổ khoang #${vaultPodSerial}!`
+      : `Buồng tăng áp khí trơ #${vaultPodSerial}: Áp suất ${pressure} atm danh định, nồng độ Argon ${argon}%. Phong tỏa chống cháy nổ tuyệt đối.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        hyperbaricPressureAntiExplosionVault: order.hyperbaricPressureAntiExplosionVault,
+        message: isBlastMitigationActive
+          ? "Cảnh báo áp lực buồng tăng áp chống nổ! Đã kích hoạt hệ thống dập áp lực."
+          : "Khoang khí trơ chống nổ duy trì trạng thái danh định an toàn.",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 

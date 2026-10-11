@@ -1302,6 +1302,17 @@ export async function monitorCryogenicFreezerDryIceTelemetryAPI(orderId, { cryoB
   return result?.data || result;
 }
 
+/**
+ * Hyperbaric Anti-Explosion Inert Gas Sealed Vault Telemetry (Feature 136)
+ */
+export async function monitorHyperbaricPressureAntiExplosionVaultAPI(orderId, { vaultPodSerial, cabinPressureAtm, inertGasArgonLevelPercent, pressureDifferentialPsi } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/hyperbaric-explosion-vault`, {
+    method: "POST",
+    body: JSON.stringify({ vaultPodSerial, cabinPressureAtm, inertGasArgonLevelPercent, pressureDifferentialPsi }),
+  });
+  return result?.data || result;
+}
+
 
 
 

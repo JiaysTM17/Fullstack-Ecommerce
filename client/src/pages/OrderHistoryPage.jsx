@@ -2703,6 +2703,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.hyperbaricPressureAntiExplosionVault?.isHyperbaricArmed && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Khoang Chống Nổ Khí Trơ (#${ord.hyperbaricPressureAntiExplosionVault.vaultPodSerial}): Khí Argon ${ord.hyperbaricPressureAntiExplosionVault.inertGasArgonLevelPercent}%. Lệch áp ${ord.hyperbaricPressureAntiExplosionVault.pressureDifferentialPsi} PSI. Áp suất buồng ${ord.hyperbaricPressureAntiExplosionVault.cabinPressureAtm} atm. Trạng thái: ${ord.hyperbaricPressureAntiExplosionVault.vaultSealStatus}`}>
+                            <span style={{ fontSize: '13px' }}>🛡️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.hyperbaricPressureAntiExplosionVault.isBlastMitigationActive ? '#dc2626' : '#15803d',
+                              background: ord.hyperbaricPressureAntiExplosionVault.isBlastMitigationActive ? '#fee2e2' : '#dcfce7',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Khoang Chống Nổ: Argon {ord.hyperbaricPressureAntiExplosionVault.inertGasArgonLevelPercent}% {ord.hyperbaricPressureAntiExplosionVault.isBlastMitigationActive ? '(Báo Động Dập Áp Lực!)' : '(Niêm Phong Khí Trơ)'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

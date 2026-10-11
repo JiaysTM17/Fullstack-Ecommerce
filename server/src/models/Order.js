@@ -656,6 +656,20 @@ const orderSchema = new mongoose.Schema(
       sublimationLeakAlarm: { type: Boolean, default: false },
       monitoredAt: { type: String, default: null },
     },
+    hyperbaricPressureAntiExplosionVault: {
+      isHyperbaricArmed: { type: Boolean, default: false },
+      vaultPodSerial: { type: String, default: null },
+      cabinPressureAtm: { type: Number, default: 1.0 }, // 1.0 atm danh định
+      inertGasArgonLevelPercent: { type: Number, default: 99.8 }, // Khí trơ dập hồ quang
+      pressureDifferentialPsi: { type: Number, default: 0 },
+      isBlastMitigationActive: { type: Boolean, default: false },
+      vaultSealStatus: {
+        type: String,
+        enum: ["nominal_pressurized", "inert_gas_purging", "rapid_depressurization_warning", "explosion_blast_contained"],
+        default: "nominal_pressurized",
+      },
+      inspectedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {
