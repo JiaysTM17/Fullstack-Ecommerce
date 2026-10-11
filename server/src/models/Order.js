@@ -98,6 +98,19 @@ const orderSchema = new mongoose.Schema(
       rescheduledAt: { type: String, default: null },
       courierConfirmedAt: { type: String, default: null },
     },
+    doorstepInspection: {
+      enabled: { type: Boolean, default: false },
+      fee: { type: Number, default: 0 }, // Miễn phí dịch vụ bảo chứng Shopee Đồng Kiểm
+      status: {
+        type: String,
+        enum: ["none", "requested", "inspected_passed", "inspected_rejected"],
+        default: "none",
+      },
+      inspectorCourierName: { type: String, default: "" },
+      inspectionNote: { type: String, default: "" },
+      inspectedAt: { type: String, default: null },
+      photoProof: { type: [String], default: [] },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

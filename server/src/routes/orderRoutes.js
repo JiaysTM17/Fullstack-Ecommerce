@@ -19,6 +19,7 @@ import {
   submitOrderCsatFeedback,
   updateOrderGiftWrap,
   rescheduleOrderDelivery,
+  updateOrderDoorstepInspection,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -49,6 +50,7 @@ router.post("/:id/carrier-webhook", simulateCarrierWebhook);
 router.post("/:id/csat-feedback", optionalAuthenticate, submitOrderCsatFeedback);
 router.patch("/:id/gift-wrap", optionalAuthenticate, updateOrderGiftWrap);
 router.post("/:id/reschedule-delivery", optionalAuthenticate, rescheduleOrderDelivery);
+router.patch("/:id/doorstep-inspection", optionalAuthenticate, updateOrderDoorstepInspection);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

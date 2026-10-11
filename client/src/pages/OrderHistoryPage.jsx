@@ -2004,6 +2004,27 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.doorstepInspection?.enabled && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={ord.doorstepInspection.inspectionNote || "Dịch vụ đồng kiểm ngoại quan cùng bưu tá SPX"}>
+                            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <ShieldCheckIcon size={10} color="#16a34a" />
+                            </span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.doorstepInspection.status === 'inspected_passed' ? '#15803d' : ord.doorstepInspection.status === 'inspected_rejected' ? '#dc2626' : '#16a34a',
+                              background: ord.doorstepInspection.status === 'inspected_rejected' ? '#fee2e2' : '#dcfce7',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Đồng Kiểm SPX: {ord.doorstepInspection.status === 'inspected_passed' ? 'Đã Kiểm Đạt' : ord.doorstepInspection.status === 'inspected_rejected' ? 'Từ Chối Nhận' : 'Có Yêu Cầu'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

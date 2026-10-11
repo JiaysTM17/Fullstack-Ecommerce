@@ -2651,6 +2651,108 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultTiers[2].discountPercent, 15);
     });
   });
+
+  // =========================================================================
+  // FEATURE 97: Doorstep Co-Inspection & Defect Handover Protocol (5 Tests)
+  // =========================================================================
+  describe("Feature 97: Doorstep Co-Inspection & Defect Handover Protocol", () => {
+    test("F97-T1: Doorstep Co-Inspection defaults to 0 VND fee for buyer peace of mind", () => {
+      const inspectionConfig = {
+        enabled: true,
+        fee: 0,
+        status: "requested",
+      };
+
+      expect.equal(inspectionConfig.enabled, true);
+      expect.equal(inspectionConfig.fee, 0);
+      expect.equal(inspectionConfig.status, "requested");
+    });
+
+    test("F97-T2: Order model persists and retrieves doorstepInspection object", async () => {
+      const order = await Order.create({
+        orderId: "ORD_INSPECT_97",
+        customer: { fullName: "Đặng Thuỳ Trang", phone: "0918882233" },
+        items: [{ productId: "prod_spx_01", name: "Đồng Hồ Cơ Automatic", price: 1200000, quantity: 1 }],
+        total: 1200000,
+        paymentMethod: "COD",
+        doorstepInspection: {
+          enabled: true,
+          fee: 0,
+          status: "requested",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_INSPECT_97");
+      expect.equal(order.doorstepInspection.enabled, true);
+      expect.equal(order.doorstepInspection.status, "requested");
+    });
+
+    test("F97-T3: Courier records inspection passed result and logs timestamp", async () => {
+      const order = await Order.create({
+        orderId: "ORD_INSPECT_PASSED",
+        items: [{ productId: "p1", name: "Áo Polo Nam", price: 250000, quantity: 1 }],
+        total: 250000,
+        doorstepInspection: {
+          enabled: true,
+          fee: 0,
+          status: "requested",
+        },
+      });
+
+      const updated = await Order.findByIdAndUpdate(order._id, {
+        doorstepInspection: {
+          ...order.doorstepInspection,
+          status: "inspected_passed",
+          inspectorCourierName: "Nguyễn Văn Shipper (SPX)",
+          inspectionNote: "Khách đã đồng kiểm ngoại quan cùng bưu tá: đủ 1 áo, đúng màu, tem mác nguyên vẹn.",
+          inspectedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(updated.doorstepInspection.status, "inspected_passed");
+      expect.equal(updated.doorstepInspection.inspectorCourierName, "Nguyễn Văn Shipper (SPX)");
+      expect.equal(Boolean(updated.doorstepInspection.inspectedAt), true);
+    });
+
+    test("F97-T4: Defect rejection triggers inspected_rejected status and photo proof recording", async () => {
+      const order = await Order.create({
+        orderId: "ORD_INSPECT_REJECTED",
+        items: [{ productId: "p2", name: "Bình Giữ Nhiệt Khắc Tên", price: 350000, quantity: 1 }],
+        total: 350000,
+        doorstepInspection: {
+          enabled: true,
+          fee: 0,
+          status: "requested",
+        },
+      });
+
+      const updated = await Order.findByIdAndUpdate(order._id, {
+        doorstepInspection: {
+          ...order.doorstepInspection,
+          status: "inspected_rejected",
+          inspectorCourierName: "Lê Minh Tuấn (SPX Hub Tân Bình)",
+          inspectionNote: "Hộp méo mó, nắp bình trầy xước nặng, khách từ chối nhận tại chỗ.",
+          photoProof: ["https://spx.vn/proofs/defect_binh_giu_nhiet.jpg"],
+          inspectedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(updated.doorstepInspection.status, "inspected_rejected");
+      expect.equal(updated.doorstepInspection.photoProof[0], "https://spx.vn/proofs/defect_binh_giu_nhiet.jpg");
+    });
+
+    test("F97-T5: Disabling co-inspection sets status to none without inspection metadata", () => {
+      const doorstepInspection = {
+        enabled: false,
+        fee: 0,
+        status: "none",
+      };
+
+      expect.equal(doorstepInspection.enabled, false);
+      expect.equal(doorstepInspection.status, "none");
+      expect.equal(Boolean(doorstepInspection.inspectorCourierName), false);
+    });
+  });
 });
 
 

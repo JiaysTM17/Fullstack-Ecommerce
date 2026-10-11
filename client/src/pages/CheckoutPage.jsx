@@ -348,6 +348,9 @@ export default function CheckoutPage() {
   const [senderName, setSenderName] = useState("");
   const giftWrapFee = giftWrapEnabled ? 25000 : 0;
 
+  // Dịch vụ Đồng Kiểm Khi Nhận Hàng (Feature 97)
+  const [doorstepInspectionEnabled, setDoorstepInspectionEnabled] = useState(true);
+
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
@@ -407,6 +410,11 @@ export default function CheckoutPage() {
         greetingMessage: greetingMessage.trim(),
         recipientName: recipientName.trim(),
         senderName: senderName.trim(),
+      },
+      doorstepInspection: {
+        enabled: doorstepInspectionEnabled,
+        fee: 0,
+        status: doorstepInspectionEnabled ? "requested" : "none",
       },
       total: finalOrderTotal,
       paymentMethod,
@@ -1663,6 +1671,62 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Dịch vụ Đồng Kiểm Khi Nhận Hàng (Feature 97) */}
+              <div style={{
+                background: doorstepInspectionEnabled ? "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)" : "#ffffff",
+                border: doorstepInspectionEnabled ? "1.5px solid #22c55e" : "1px solid #e2e8f0",
+                borderRadius: "12px",
+                padding: "16px",
+                marginBottom: "20px",
+                transition: "all 0.2s ease"
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "8px",
+                      background: "rgba(34, 197, 94, 0.15)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center"
+                    }}>
+                      <ShieldCheckIcon size={18} color="#16a34a" />
+                    </span>
+                    <div>
+                      <div style={{ fontSize: "14px", fontWeight: 800, color: "#0f172a", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span>Đồng Kiểm Khi Nhận Hàng (SPX Co-Inspection)</span>
+                        <span style={{
+                          background: "#22c55e",
+                          color: "#ffffff",
+                          fontSize: "10.5px",
+                          fontWeight: 800,
+                          padding: "2px 6px",
+                          borderRadius: "4px"
+                        }}>
+                          0₫ MIỄN PHÍ
+                        </span>
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#475569" }}>
+                        Được mở gói hàng kiểm tra số lượng, mẫu mã cùng bưu tá trước khi nhận. Đổi trả ngay nếu lỗi ngoại quan!
+                      </div>
+                    </div>
+                  </div>
+
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={doorstepInspectionEnabled}
+                      onChange={(e) => setDoorstepInspectionEnabled(e.target.checked)}
+                      style={{ width: "18px", height: "18px", accentColor: "#16a34a", cursor: "pointer" }}
+                    />
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: doorstepInspectionEnabled ? "#16a34a" : "#64748b" }}>
+                      {doorstepInspectionEnabled ? "Đã Kích Hoạt" : "Bỏ qua"}
+                    </span>
+                  </label>
+                </div>
               </div>
 
               {/* Order Note */}

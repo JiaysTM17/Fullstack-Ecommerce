@@ -1497,4 +1497,69 @@ export const rescheduleOrderDelivery = async (req, res) => {
   }
 };
 
+// @desc    Cập nhật yêu cầu / kết quả Đồng Kiểm Hàng trước khi nhận (Feature 97)
+// @route   PATCH /api/orders/:id/doorstep-inspection
+// @access  Public (Optional auth)
+export const updateOrderDoorstepInspection = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { enabled, status, inspectorCourierName, inspectionNote, photoProof } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    const currentInspection = order.doorstepInspection || {};
+    const newStatus = status || (enabled ? "requested" : "none");
+
+    order.doorstepInspection = {
+      enabled: enabled !== undefined ? Boolean(enabled) : (currentInspection.enabled ?? true),
+      fee: 0, // Miễn phí dịch vụ
+      status: newStatus,
+      inspectorCourierName: inspectorCourierName ? String(inspectorCourierName).trim() : (currentInspection.inspectorCourierName || "Bưu tá SPX"),
+      inspectionNote: inspectionNote ? String(inspectionNote).trim() : (currentInspection.inspectionNote || ""),
+      inspectedAt: newStatus.startsWith("inspected_") ? new Date().toISOString() : currentInspection.inspectedAt,
+      photoProof: Array.isArray(photoProof) ? photoProof : (currentInspection.photoProof || []),
+    };
+
+    if (!Array.isArray(order.timeline)) order.timeline = [];
+    if (newStatus === "inspected_passed") {
+      order.timeline.push({
+        time: new Date().toISOString(),
+        text: `Đồng kiểm thành công: Khách hàng và bưu tá ${order.doorstepInspection.inspectorCourierName} đã kiểm tra kiện hàng đạt chuẩn niêm phong`,
+      });
+    } else if (newStatus === "inspected_rejected") {
+      order.timeline.push({
+        time: new Date().toISOString(),
+        text: `Đồng kiểm từ chối: Kiện hàng có dấu hiệu hư hỏng/không đúng mô tả - Lập biên bản trả hàng ngay tại chỗ`,
+      });
+    } else if (enabled) {
+      order.timeline.push({
+        time: new Date().toISOString(),
+        text: `Khách hàng đăng ký dịch vụ "Đồng Kiểm Khi Nhận Hàng" (Miễn Phí)`,
+      });
+    }
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order._id || order.id || order.orderId,
+      doorstepInspection: order.doorstepInspection,
+      message: newStatus === "inspected_passed"
+        ? "Đã xác nhận đồng kiểm đạt chuẩn chất lượng!"
+        : "Đã cập nhật cấu hình dịch vụ Đồng Kiểm thành công!",
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 

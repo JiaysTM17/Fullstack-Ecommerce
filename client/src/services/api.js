@@ -853,5 +853,16 @@ export async function calculateProductVolumeDiscountAPI(productId, quantity = 1)
   return result?.data || result || null;
 }
 
+/**
+ * Co-Inspection (Đồng Kiểm Khi Nhận Hàng) Hub API (Feature 97)
+ */
+export async function updateOrderDoorstepInspectionAPI(orderId, inspectionPayload) {
+  return await apiRequest(`/api/orders/${orderId}/doorstep-inspection`, {
+    method: "PATCH",
+    body: JSON.stringify(inspectionPayload),
+  });
+}
+
+
 
 
