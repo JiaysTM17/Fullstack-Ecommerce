@@ -3551,6 +3551,106 @@ export const updateDroneAirCorridorLandingBeacon = async (req, res) => {
   }
 };
 
+// @desc    Giao hàng tận cửa vào nhà thông minh với khóa mã số 1 lần (Smart Lock In-Home Delivery Vault)
+// @route   POST /api/orders/:id/smart-lock-in-home-delivery
+// @access  Public / Optional Auth / Courier Verified App
+export const authorizeSmartLockInHomeDelivery = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      smartLockId,
+      authorizedCourierBadge = "SPX-VERIFIED-9912",
+      accessWindowMinutes = 5,
+      actionStatus = "issue_key", // "issue_key" | "unlock_and_deposit" | "relock_and_complete"
+    } = req.body;
+
+    if (!smartLockId) {
+      return sendError(res, "Thiếu mã định danh khóa thông minh (smartLockId)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần phân quyền khóa thông minh", 404);
+    }
+
+    const now = new Date().toISOString();
+    const vault = order.smartLockInHomeDeliveryVault || {};
+
+    let inHomeDeliveryStatus = vault.inHomeDeliveryStatus || "key_issued_pending_courier";
+    let singleUsePasscodeHash = vault.singleUsePasscodeHash;
+    let doorUnlockedAt = vault.doorUnlockedAt || null;
+    let doorRelockedSecurely = vault.doorRelockedSecurely || false;
+    let surveillanceRecordingHash = vault.surveillanceRecordingHash || null;
+
+    if (actionStatus === "issue_key" || !singleUsePasscodeHash) {
+      singleUsePasscodeHash = `PASSKEY-${Math.floor(100000 + Math.random() * 900000)}`;
+      inHomeDeliveryStatus = "key_issued_pending_courier";
+    } else if (actionStatus === "unlock_and_deposit") {
+      inHomeDeliveryStatus = "door_unlocked_package_placed";
+      doorUnlockedAt = now;
+    } else if (actionStatus === "relock_and_complete") {
+      inHomeDeliveryStatus = "delivered_door_relocked_securely";
+      doorRelockedSecurely = true;
+      surveillanceRecordingHash = `SURVEILLANCE-VAULT-HASH-${Date.now().toString(36).toUpperCase()}`;
+      order.status = "delivered";
+      order.statusText = "Đã giao vào nhà an toàn (Khóa Smart Lock)";
+    }
+
+    order.smartLockInHomeDeliveryVault = {
+      isInHomeDeliveryAuthorized: true,
+      smartLockId,
+      singleUsePasscodeHash,
+      accessWindowMinutes: Number(accessWindowMinutes) || 5,
+      authorizedCourierBadge,
+      doorUnlockedAt,
+      doorRelockedSecurely,
+      surveillanceRecordingHash,
+      inHomeDeliveryStatus,
+    };
+
+    const statusMap = {
+      key_issued_pending_courier: `Khóa ${smartLockId}: Đã sinh mã mở cửa 1 lần (${singleUsePasscodeHash}) hiệu lực trong ${accessWindowMinutes} phút cho bưu tá ${authorizedCourierBadge}.`,
+      door_unlocked_package_placed: `Khóa ${smartLockId}: Bưu tá đã mở cửa đặt hàng vào sảnh an toàn. Camera bắt đầu ghi hình.`,
+      delivered_door_relocked_securely: `Khóa ${smartLockId}: Cửa đã khóa chốt an toàn. Đã băm lưu video giám sát (${surveillanceRecordingHash}). Giao hàng hoàn tất.`,
+    };
+
+    const timelineNote = statusMap[inHomeDeliveryStatus] || `Cập nhật giao hàng qua khóa thông minh (${inHomeDeliveryStatus}).`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: timelineNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        smartLockInHomeDeliveryVault: order.smartLockInHomeDeliveryVault,
+        message: inHomeDeliveryStatus === "delivered_door_relocked_securely"
+          ? "Đã giao hàng vào nhà và khóa chốt cửa an toàn!"
+          : inHomeDeliveryStatus === "door_unlocked_package_placed"
+          ? "Đã ghi nhận mở cửa và đặt hàng vào sảnh."
+          : `Đã cấp mã mở cửa tạm thời thành công (${singleUsePasscodeHash}).`,
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

@@ -49,6 +49,7 @@ import {
   verifyNfcGeofenceProofOfDelivery,
   scanHazardousMaterialSafety,
   updateDroneAirCorridorLandingBeacon,
+  authorizeSmartLockInHomeDelivery,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -110,6 +111,7 @@ router.post("/:id/micro-hub-pouch-handoff", optionalAuthenticate, updateMicroHub
 router.post("/:id/nfc-geofence-pod", optionalAuthenticate, verifyNfcGeofenceProofOfDelivery);
 router.post("/:id/hazmat-safety-scan", optionalAuthenticate, scanHazardousMaterialSafety);
 router.post("/:id/drone-air-corridor-beacon", optionalAuthenticate, updateDroneAirCorridorLandingBeacon);
+router.post("/:id/smart-lock-in-home-delivery", optionalAuthenticate, authorizeSmartLockInHomeDelivery);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

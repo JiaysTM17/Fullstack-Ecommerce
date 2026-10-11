@@ -2569,6 +2569,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.smartLockInHomeDeliveryVault?.isInHomeDeliveryAuthorized && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Khóa Nhà Thông Minh (#${ord.smartLockInHomeDeliveryVault.smartLockId}): Bưu tá ${ord.smartLockInHomeDeliveryVault.authorizedCourierBadge}. Trạng thái: ${ord.smartLockInHomeDeliveryVault.inHomeDeliveryStatus}. Mã Hash video: ${ord.smartLockInHomeDeliveryVault.surveillanceRecordingHash || 'Đang giám sát'}`}>
+                            <span style={{ fontSize: '13px' }}>🔐</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.smartLockInHomeDeliveryVault.doorRelockedSecurely ? '#059669' : '#0891b2',
+                              background: ord.smartLockInHomeDeliveryVault.doorRelockedSecurely ? '#ecfdf5' : '#cffafe',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Khóa Nhà: {ord.smartLockInHomeDeliveryVault.doorRelockedSecurely ? 'Đã Khóa Chốt An Toàn' : ord.smartLockInHomeDeliveryVault.inHomeDeliveryStatus === 'door_unlocked_package_placed' ? 'Đang Đặt Hàng Vào Sảnh' : 'Đã Cấp Mã 1 Lần'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

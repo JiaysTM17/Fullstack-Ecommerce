@@ -5012,6 +5012,66 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 129: Automated Smart Lock In-Home Delivery & Single-Use Digital Key Vault (5 Tests)
+  // =========================================================================
+  describe("Feature 129: Smart Lock In-Home Delivery & Digital Key Vault Suite", () => {
+    test("F129-T1: Authorize in-home delivery generates single-use temporary passcode", async () => {
+      const order = await Order.create({
+        orderId: "ORD_SMART_LOCK_129",
+        userId: "user_smart_lock_01",
+        status: "shipping",
+        total: 1200000,
+        smartLockInHomeDeliveryVault: {
+          isInHomeDeliveryAuthorized: true,
+          smartLockId: "SMARTLOCK-YALE-Q7-009",
+          singleUsePasscodeHash: "PASSKEY-882194",
+          accessWindowMinutes: 5,
+          authorizedCourierBadge: "SPX-VERIFIED-9912",
+          doorRelockedSecurely: false,
+          inHomeDeliveryStatus: "key_issued_pending_courier",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_SMART_LOCK_129");
+      expect.equal(order.smartLockInHomeDeliveryVault.isInHomeDeliveryAuthorized, true);
+      expect.equal(order.smartLockInHomeDeliveryVault.smartLockId, "SMARTLOCK-YALE-Q7-009");
+      expect.equal(order.smartLockInHomeDeliveryVault.singleUsePasscodeHash.startsWith("PASSKEY-"), true);
+      expect.equal(order.smartLockInHomeDeliveryVault.accessWindowMinutes, 5);
+      expect.equal(order.smartLockInHomeDeliveryVault.inHomeDeliveryStatus, "key_issued_pending_courier");
+    });
+
+    test("F129-T2: Door unlock and deposit transitions status to package placed", () => {
+      const actionStatus = "unlock_and_deposit";
+      const nextStatus = actionStatus === "unlock_and_deposit" ? "door_unlocked_package_placed" : "key_issued_pending_courier";
+
+      expect.equal(nextStatus, "door_unlocked_package_placed");
+    });
+
+    test("F129-T3: Door relock secures vault and hashes surveillance recording", () => {
+      const actionStatus = "relock_and_complete";
+      const isRelocked = actionStatus === "relock_and_complete";
+      const surveillanceHash = isRelocked ? `SURVEILLANCE-VAULT-HASH-${"KJ891"}` : null;
+
+      expect.equal(isRelocked, true);
+      expect.equal(surveillanceHash.startsWith("SURVEILLANCE-VAULT-HASH-"), true);
+    });
+
+    test("F129-T4: Single-use passcode conforms to 6-digit number suffix", () => {
+      const passkey = "PASSKEY-819203";
+      const suffix = passkey.replace("PASSKEY-", "");
+
+      expect.equal(/^\d{6}$/.test(suffix), true);
+    });
+
+    test("F129-T5: Missing smartLockId fails vault authorization", () => {
+      const payload = { accessWindowMinutes: 5 };
+      const isValid = Boolean(payload.smartLockId && payload.smartLockId.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

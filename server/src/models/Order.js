@@ -565,6 +565,21 @@ const orderSchema = new mongoose.Schema(
       groundLockerFallbackId: { type: String, default: null },
       telemetryUpdatedAt: { type: String, default: null },
     },
+    smartLockInHomeDeliveryVault: {
+      isInHomeDeliveryAuthorized: { type: Boolean, default: false },
+      smartLockId: { type: String, default: null },
+      singleUsePasscodeHash: { type: String, default: null },
+      accessWindowMinutes: { type: Number, default: 5 },
+      authorizedCourierBadge: { type: String, default: null },
+      doorUnlockedAt: { type: String, default: null },
+      doorRelockedSecurely: { type: Boolean, default: false },
+      surveillanceRecordingHash: { type: String, default: null },
+      inHomeDeliveryStatus: {
+        type: String,
+        enum: ["unauthorized", "key_issued_pending_courier", "door_unlocked_package_placed", "delivered_door_relocked_securely"],
+        default: "unauthorized",
+      },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

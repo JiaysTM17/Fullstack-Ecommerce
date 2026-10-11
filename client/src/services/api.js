@@ -1225,6 +1225,17 @@ export async function updateDroneAirCorridorLandingBeaconAPI(orderId, { corridor
   return result?.data || result;
 }
 
+/**
+ * Automated Smart Lock In-Home Delivery & Single-Use Digital Key Vault (Feature 129)
+ */
+export async function authorizeSmartLockInHomeDeliveryAPI(orderId, { smartLockId, authorizedCourierBadge, accessWindowMinutes, actionStatus } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/smart-lock-in-home-delivery`, {
+    method: "POST",
+    body: JSON.stringify({ smartLockId, authorizedCourierBadge, accessWindowMinutes, actionStatus }),
+  });
+  return result?.data || result;
+}
+
 
 
 
