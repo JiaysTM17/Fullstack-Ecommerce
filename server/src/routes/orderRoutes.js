@@ -46,6 +46,7 @@ import {
   evaluateVideoReturnResaleGrading,
   updateAcousticAntiTamperTelemetry,
   updateMicroHubPouchLockBoxHandoff,
+  verifyNfcGeofenceProofOfDelivery,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -104,6 +105,7 @@ router.post("/:id/carrier-carbon-ledger", optionalAuthenticate, recordMultiCarri
 router.post("/:id/ai-return-resale-grading", optionalAuthenticate, evaluateVideoReturnResaleGrading);
 router.post("/:id/acoustic-anti-tamper", optionalAuthenticate, updateAcousticAntiTamperTelemetry);
 router.post("/:id/micro-hub-pouch-handoff", optionalAuthenticate, updateMicroHubPouchLockBoxHandoff);
+router.post("/:id/nfc-geofence-pod", optionalAuthenticate, verifyNfcGeofenceProofOfDelivery);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

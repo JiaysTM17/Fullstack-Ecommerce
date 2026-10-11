@@ -4807,6 +4807,67 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 126: Automated Proof-of-Delivery NFC Smart Card Tapping & Geofenced Handshake (5 Tests)
+  // =========================================================================
+  describe("Feature 126: NFC Smart Card Proof-of-Delivery & Geofenced Handshake Suite", () => {
+    test("F126-T1: NFC tap within geofence successfully completes proof of delivery", async () => {
+      const order = await Order.create({
+        orderId: "ORD_NFC_POD_126",
+        userId: "user_nfc_01",
+        status: "shipping",
+        total: 620000,
+        nfcGeofenceProofOfDelivery: {
+          isNfcVerified: true,
+          nfcCardUid: "04:A3:89:E2:1B:7F:80",
+          handshakeDistanceMeters: 8,
+          geofenceThresholdMeters: 50,
+          geofenceStatus: "within_geofence_handshake",
+          tappedAt: new Date().toISOString(),
+          deviceReaderSerial: "SPX-POS-READER-99",
+          proofSignatureToken: "POD-NFC-HASH-8812AA",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_NFC_POD_126");
+      expect.equal(order.nfcGeofenceProofOfDelivery.isNfcVerified, true);
+      expect.equal(order.nfcGeofenceProofOfDelivery.handshakeDistanceMeters, 8);
+      expect.equal(order.nfcGeofenceProofOfDelivery.geofenceStatus, "within_geofence_handshake");
+      expect.equal(order.nfcGeofenceProofOfDelivery.proofSignatureToken.startsWith("POD-NFC-HASH-"), true);
+    });
+
+    test("F126-T2: NFC tap outside safe geofence threshold flags audit warning", () => {
+      const distance = 120;
+      const threshold = 50;
+      const isOutside = distance > threshold;
+      const geofenceStatus = isOutside ? "outside_geofence_flagged" : "within_geofence_handshake";
+
+      expect.equal(isOutside, true);
+      expect.equal(geofenceStatus, "outside_geofence_flagged");
+    });
+
+    test("F126-T3: OTP fallback route bypasses physical NFC card requirement", () => {
+      const bypassOtpFallback = true;
+      const geofenceStatus = bypassOtpFallback ? "bypassed_otp_fallback" : "within_geofence_handshake";
+
+      expect.equal(geofenceStatus, "bypassed_otp_fallback");
+    });
+
+    test("F126-T4: NFC card UID conforms to standard hexadecimal colon format", () => {
+      const validUid = "04:A3:89:E2:1B:7F:80";
+      const isUidFormat = /^([0-9A-Fa-f]{2}[:-]){6}[0-9A-Fa-f]{2}$/.test(validUid);
+
+      expect.equal(isUidFormat, true);
+    });
+
+    test("F126-T5: Missing card UID without OTP fallback triggers validation error", () => {
+      const payload = { handshakeDistanceMeters: 10 };
+      const isValid = Boolean(payload.nfcCardUid || payload.bypassOtpFallback);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

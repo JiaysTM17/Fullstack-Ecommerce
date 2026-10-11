@@ -2512,6 +2512,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.nfcGeofenceProofOfDelivery?.isNfcVerified && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Xác thực NFC PoD (#${ord.nfcGeofenceProofOfDelivery.proofSignatureToken}): Thẻ ${ord.nfcGeofenceProofOfDelivery.nfcCardUid}. Khoảng cách: ${ord.nfcGeofenceProofOfDelivery.handshakeDistanceMeters}m [Ngưỡng: ${ord.nfcGeofenceProofOfDelivery.geofenceThresholdMeters}m]. Trạng thái: ${ord.nfcGeofenceProofOfDelivery.geofenceStatus}`}>
+                            <span style={{ fontSize: '13px' }}>📶</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#059669',
+                              background: '#ecfdf5',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Ký Nhận NFC: {ord.nfcGeofenceProofOfDelivery.handshakeDistanceMeters}m (Geofence Hợp Lệ)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

@@ -1192,6 +1192,17 @@ export async function updateMicroHubPouchLockBoxHandoffAPI(orderId, { microHubId
   return result?.data || result;
 }
 
+/**
+ * Automated Proof-of-Delivery NFC Smart Card Tapping & Geofenced Handshake (Feature 126)
+ */
+export async function verifyNfcGeofenceProofOfDeliveryAPI(orderId, { nfcCardUid, handshakeDistanceMeters, geofenceThresholdMeters, deviceReaderSerial, bypassOtpFallback } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/nfc-geofence-pod`, {
+    method: "POST",
+    body: JSON.stringify({ nfcCardUid, handshakeDistanceMeters, geofenceThresholdMeters, deviceReaderSerial, bypassOtpFallback }),
+  });
+  return result?.data || result;
+}
+
 
 
 

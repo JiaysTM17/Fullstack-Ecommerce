@@ -514,6 +514,20 @@ const orderSchema = new mongoose.Schema(
       retrievedAt: { type: String, default: null },
       courierDepositBadgeId: { type: String, default: null },
     },
+    nfcGeofenceProofOfDelivery: {
+      isNfcVerified: { type: Boolean, default: false },
+      nfcCardUid: { type: String, default: null },
+      handshakeDistanceMeters: { type: Number, default: 0 },
+      geofenceThresholdMeters: { type: Number, default: 50 },
+      geofenceStatus: {
+        type: String,
+        enum: ["unverified", "within_geofence_handshake", "outside_geofence_flagged", "bypassed_otp_fallback"],
+        default: "unverified",
+      },
+      tappedAt: { type: String, default: null },
+      deviceReaderSerial: { type: String, default: null },
+      proofSignatureToken: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

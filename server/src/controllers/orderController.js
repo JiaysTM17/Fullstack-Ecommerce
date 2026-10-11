@@ -3272,6 +3272,104 @@ export const updateMicroHubPouchLockBoxHandoff = async (req, res) => {
   }
 };
 
+// @desc    Ký nhận giao hàng bằng thẻ NFC thông minh & đối soát vị trí Geofence Handshake (NFC Proof-of-Delivery)
+// @route   POST /api/orders/:id/nfc-geofence-pod
+// @access  Public / Optional Auth / Courier App
+export const verifyNfcGeofenceProofOfDelivery = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      nfcCardUid,
+      handshakeDistanceMeters = 5,
+      geofenceThresholdMeters = 50,
+      deviceReaderSerial = "SPX-POS-READER-99",
+      bypassOtpFallback = false,
+    } = req.body;
+
+    if (!nfcCardUid && !bypassOtpFallback) {
+      return sendError(res, "Thiếu mã định danh thẻ NFC (nfcCardUid) hoặc cờ dự phòng OTP", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần ký nhận NFC", 404);
+    }
+
+    const now = new Date().toISOString();
+    const distance = Number(handshakeDistanceMeters) || 0;
+    const threshold = Number(geofenceThresholdMeters) || 50;
+
+    let geofenceStatus = "within_geofence_handshake";
+    let isNfcVerified = true;
+
+    if (bypassOtpFallback) {
+      geofenceStatus = "bypassed_otp_fallback";
+    } else if (distance > threshold) {
+      geofenceStatus = "outside_geofence_flagged";
+      isNfcVerified = false;
+    }
+
+    const proofSignatureToken = isNfcVerified || bypassOtpFallback
+      ? `POD-NFC-HASH-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`
+      : null;
+
+    order.nfcGeofenceProofOfDelivery = {
+      isNfcVerified,
+      nfcCardUid: nfcCardUid || "OTP-FALLBACK-AUTH",
+      handshakeDistanceMeters: distance,
+      geofenceThresholdMeters: threshold,
+      geofenceStatus,
+      tappedAt: now,
+      deviceReaderSerial,
+      proofSignatureToken,
+    };
+
+    if (isNfcVerified) {
+      order.status = "delivered";
+      order.statusText = "Đã giao hàng (Xác thực NFC)";
+    }
+
+    const timelineNote = isNfcVerified
+      ? `Xác thực giao hàng NFC thành công (Thẻ: ${nfcCardUid}). Khoảng cách Geofence: ${distance}m (Ngưỡng <= ${threshold}m). Mã xác thực PoD: ${proofSignatureToken}.`
+      : geofenceStatus === "bypassed_otp_fallback"
+      ? `Xác thực giao hàng qua OTP dự phòng (Khoảng cách: ${distance}m). Mã PoD: ${proofSignatureToken}.`
+      : `CẢNH BÁO GEOFENCE: Quẹt thẻ NFC cách điểm nhận ${distance}m (vượt ngưỡng cho phép ${threshold}m). Đơn hàng bị gắn cờ cần kiểm toán đối soát.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: timelineNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        nfcGeofenceProofOfDelivery: order.nfcGeofenceProofOfDelivery,
+        message: isNfcVerified
+          ? "Ký nhận thẻ NFC & Geofence thành công! Đơn hàng đã hoàn tất giao."
+          : geofenceStatus === "bypassed_otp_fallback"
+          ? "Ký nhận qua OTP dự phòng thành công."
+          : "Cảnh báo: Vị trí quẹt thẻ vượt quá bán kính Geofence an toàn!",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 
