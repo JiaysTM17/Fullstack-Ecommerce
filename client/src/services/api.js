@@ -1028,6 +1028,18 @@ export async function evaluateOrderFraudRiskAPI(orderId) {
   return result?.data || result;
 }
 
+/**
+ * Automated COD Courier Reconciliation & Wallet Settlement Suite (Feature 111)
+ */
+export async function reconcileAutomatedCodSettlementAPI(orderId, { amountCollected, courierHandoverStatus } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/cod-reconcile`, {
+    method: "POST",
+    body: JSON.stringify({ amountCollected, courierHandoverStatus }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 

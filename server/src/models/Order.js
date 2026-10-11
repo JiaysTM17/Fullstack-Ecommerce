@@ -268,6 +268,18 @@ const orderSchema = new mongoose.Schema(
         default: "allowed",
       },
     },
+    automatedCodSettlement: {
+      settlementId: { type: String, default: "" },
+      amountCollected: { type: Number, default: 0 },
+      courierHandoverStatus: {
+        type: String,
+        enum: ["pending_collection", "courier_cash_held", "hub_verified", "platform_cleared", "seller_remitted"],
+        default: "pending_collection",
+      },
+      verifiedAt: { type: String, default: null },
+      remittedAt: { type: String, default: null },
+      reconciliationRef: { type: String, default: "" },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

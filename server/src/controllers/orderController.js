@@ -2327,5 +2327,61 @@ export const evaluateOrderFraudRisk = async (req, res) => {
   }
 };
 
+// @desc    Đối soát & Giải ngân tự động tiền thu hộ COD về ví Người bán (Feature 111)
+// @route   POST /api/orders/:id/cod-reconcile
+// @access  Public / Authenticate / Admin / Seller
+export const reconcileAutomatedCodSettlement = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      amountCollected,
+      courierHandoverStatus = "hub_verified",
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần đối soát COD", 404);
+    }
+
+    const collected = Number(amountCollected !== undefined ? amountCollected : order.total || 0);
+    const settlementId = `SETTLE-COD-${Date.now().toString().slice(-8)}`;
+    const now = new Date().toISOString();
+    const reconciliationRef = `SPX-RECON-${Date.now().toString(36).toUpperCase()}`;
+
+    order.automatedCodSettlement = {
+      settlementId,
+      amountCollected: collected,
+      courierHandoverStatus,
+      verifiedAt: now,
+      remittedAt: courierHandoverStatus === "seller_remitted" ? now : null,
+      reconciliationRef,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Đã ghi nhận đối soát tiền thu hộ COD (${collected.toLocaleString('vi-VN')}₫). Trạng thái: ${courierHandoverStatus} [Ref: #${reconciliationRef}]`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      automatedCodSettlement: order.automatedCodSettlement,
+      message: `Đối soát COD thành công (${collected.toLocaleString('vi-VN')}₫)!`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 

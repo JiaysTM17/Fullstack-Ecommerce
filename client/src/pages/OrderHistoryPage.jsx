@@ -2227,6 +2227,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.automatedCodSettlement?.settlementId && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Đối soát COD: ${ord.automatedCodSettlement.settlementId} (${Number(ord.automatedCodSettlement.amountCollected).toLocaleString('vi-VN')}₫). Trạng thái: ${ord.automatedCodSettlement.courierHandoverStatus}`}>
+                            <span style={{ fontSize: '13px' }}>💵</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.automatedCodSettlement.courierHandoverStatus === 'seller_remitted' ? '#059669' : '#0284c7',
+                              background: ord.automatedCodSettlement.courierHandoverStatus === 'seller_remitted' ? '#d1fae5' : '#e0f2fe',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Đối Soát COD: {ord.automatedCodSettlement.courierHandoverStatus === 'seller_remitted' ? 'Đã Quyết Toán' : 'Đã Xác Minh'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">
