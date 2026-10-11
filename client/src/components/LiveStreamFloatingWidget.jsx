@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchActiveLiveStreamAPI } from '../services/api';
+import { fetchActiveLiveStreamAPI, fetchLiveFlashVoucherDropAPI, claimLiveFlashVoucherAPI } from '../services/api';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
@@ -22,6 +22,13 @@ export default function LiveStreamFloatingWidget() {
   const [hasLiked, setHasLiked] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+
+  // Feature 98: Smart Shopee Live In-Stream Flash Voucher Dropper State
+  const [activeDrop, setActiveDrop] = useState(null);
+  const [dropSecondsLeft, setDropSecondsLeft] = useState(0);
+  const [hasClaimedDrop, setHasClaimedDrop] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false);
+
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -36,12 +43,50 @@ export default function LiveStreamFloatingWidget() {
           setLikes(data.likeCount || 24500);
           setComments(data.mockChatMessages || []);
         }
+
+        // Fetch active live flash voucher drop (Feature 98)
+        const dropData = await fetchLiveFlashVoucherDropAPI();
+        if (active && dropData) {
+          setActiveDrop(dropData);
+          const diff = Math.max(0, Math.floor((new Date(dropData.expiresAt).getTime() - Date.now()) / 1000));
+          setDropSecondsLeft(diff);
+        }
       } catch (err) {
         console.warn('Live stream fetch fallback:', err?.message);
       }
     })();
     return () => { active = false; };
   }, []);
+
+  // Countdown timer for in-stream flash voucher
+  useEffect(() => {
+    if (dropSecondsLeft <= 0) return;
+    const timer = setInterval(() => {
+      setDropSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [dropSecondsLeft]);
+
+  const handleClaimFlashVoucher = async (e) => {
+    e.stopPropagation();
+    if (!activeDrop || isClaiming || hasClaimedDrop) return;
+    setIsClaiming(true);
+    try {
+      const res = await claimLiveFlashVoucherAPI(activeDrop.dropId, 'viewer_' + Date.now().toString(36));
+      setHasClaimedDrop(true);
+      showToast(`🔥 Giật thành công mã ${activeDrop.code}! Giảm ${formatCurrency(activeDrop.value)} cho đơn từ ${formatCurrency(activeDrop.minOrderValue)}!`, 'success');
+    } catch (err) {
+      showToast(err?.message || 'Chậm tay rồi! Mã đã được giật hết', 'warning');
+    } finally {
+      setIsClaiming(false);
+    }
+  };
 
   if (isDismissed || !session) return null;
 
@@ -276,6 +321,57 @@ export default function LiveStreamFloatingWidget() {
               <BoltIcon size={11} color="#fde047" />
               <span>Voucher: {session.liveVoucher?.code || 'LIVEHOT50'}</span>
             </div>
+
+            {/* In-Stream Flash Voucher Drop Overlay (Feature 98) */}
+            {activeDrop && dropSecondsLeft > 0 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '40px',
+                  left: '10px',
+                  right: '50px',
+                  background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.95), rgba(220, 38, 38, 0.95))',
+                  borderRadius: '8px',
+                  padding: '6px 8px',
+                  border: '1px solid #fde047',
+                  boxShadow: '0 4px 14px rgba(220, 38, 38, 0.6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '6px',
+                  zIndex: 2,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '10px', fontWeight: 900, color: '#fef08a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span>⚡ CHỚP NHOÁNG {dropSecondsLeft}s</span>
+                  </div>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: '#ffffff' }}>
+                    Giảm {formatCurrency(activeDrop.value)} · {activeDrop.code}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleClaimFlashVoucher}
+                  disabled={hasClaimedDrop || isClaiming}
+                  style={{
+                    background: hasClaimedDrop ? '#10b981' : '#fde047',
+                    color: hasClaimedDrop ? '#ffffff' : '#7c2d12',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '4px 8px',
+                    fontSize: '10.5px',
+                    fontWeight: 900,
+                    cursor: hasClaimedDrop ? 'default' : 'pointer',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                  }}
+                >
+                  {hasClaimedDrop ? '✓ ĐÃ LƯU' : isClaiming ? 'Đang giật...' : 'GIẬT NGAY'}
+                </button>
+              </div>
+            )}
 
             <div
               style={{

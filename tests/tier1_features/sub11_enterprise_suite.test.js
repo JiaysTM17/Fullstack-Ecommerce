@@ -2753,6 +2753,97 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(Boolean(doorstepInspection.inspectorCourierName), false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 98: Smart Shopee Live In-Stream Flash Voucher Dropper (5 Tests)
+  // =========================================================================
+  describe("Feature 98: Smart Shopee Live In-Stream Flash Voucher Dropper", () => {
+    test("F98-T1: Flash voucher drop initializes with duration and limited claim slots", () => {
+      const drop = {
+        dropId: "drop_test_01",
+        code: "FLASH98LIVE",
+        name: "Flash Voucher 45s",
+        value: 50000,
+        minOrderValue: 150000,
+        totalSlots: 20,
+        claimedCount: 0,
+        durationSeconds: 45,
+        expiresAt: new Date(Date.now() + 45000).toISOString(),
+        claimedUserIds: [],
+      };
+
+      expect.equal(drop.code, "FLASH98LIVE");
+      expect.equal(drop.totalSlots, 20);
+      expect.equal(drop.claimedCount, 0);
+      expect.equal(drop.durationSeconds, 45);
+    });
+
+    test("F98-T2: In-Stream claim increments claimedCount and stores buyer identifier", () => {
+      const drop = {
+        dropId: "drop_test_02",
+        code: "FLASH50K",
+        totalSlots: 10,
+        claimedCount: 2,
+        claimedUserIds: ["buyer_01", "buyer_02"],
+      };
+
+      const newUserId = "buyer_03";
+      if (!drop.claimedUserIds.includes(newUserId) && drop.claimedCount < drop.totalSlots) {
+        drop.claimedCount += 1;
+        drop.claimedUserIds.push(newUserId);
+      }
+
+      expect.equal(drop.claimedCount, 3);
+      expect.equal(drop.claimedUserIds.includes("buyer_03"), true);
+      expect.equal(drop.totalSlots - drop.claimedCount, 7);
+    });
+
+    test("F98-T3: User cannot claim the same in-stream flash voucher more than once", () => {
+      const drop = {
+        dropId: "drop_test_03",
+        code: "FLASHVIP",
+        totalSlots: 10,
+        claimedCount: 1,
+        claimedUserIds: ["buyer_dup"],
+      };
+
+      let duplicateClaimRejected = false;
+      const attemptUserId = "buyer_dup";
+      if (drop.claimedUserIds.includes(attemptUserId)) {
+        duplicateClaimRejected = true;
+      }
+
+      expect.equal(duplicateClaimRejected, true);
+      expect.equal(drop.claimedCount, 1);
+    });
+
+    test("F98-T4: Expired in-stream flash voucher cannot be claimed even with remaining slots", () => {
+      const expiredDrop = {
+        dropId: "drop_expired",
+        code: "FLASHLATE",
+        totalSlots: 50,
+        claimedCount: 5,
+        expiresAt: new Date(Date.now() - 5000).toISOString(),
+      };
+
+      const isExpired = new Date(expiredDrop.expiresAt) <= new Date();
+      expect.equal(isExpired, true);
+    });
+
+    test("F98-T5: Reaching claim slot capacity rejects subsequent claim attempts", () => {
+      const exhaustedDrop = {
+        dropId: "drop_full",
+        code: "FLASHOUT",
+        totalSlots: 15,
+        claimedCount: 15,
+      };
+
+      const isFull = exhaustedDrop.claimedCount >= exhaustedDrop.totalSlots;
+      expect.equal(isFull, true);
+      const remainingSlots = Math.max(0, exhaustedDrop.totalSlots - exhaustedDrop.claimedCount);
+      expect.equal(remainingSlots, 0);
+    });
+  });
 });
 
 

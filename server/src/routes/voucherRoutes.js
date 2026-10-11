@@ -2,6 +2,7 @@ import express from "express";
 import {
   getVouchers, applyVoucher, applyDualVouchers, applyTripleVouchers, createVoucher, deleteVoucher,
   validateVoucher, getMyVouchers, getVoucherStats,
+  getActiveLiveFlashDrop, dropLiveFlashVoucher, claimLiveFlashVoucher,
 } from "../controllers/voucherController.js";
 import { authenticate, authorize } from "../middlewares/auth.js";
 
@@ -12,6 +13,9 @@ router.get("/", getVouchers);
 router.post("/apply", applyVoucher);
 router.post("/apply-dual", applyDualVouchers);
 router.post("/apply-triple", applyTripleVouchers);
+router.get("/live-stream/active-drop", getActiveLiveFlashDrop);
+router.post("/live-stream/drop", dropLiveFlashVoucher);
+router.post("/live-stream/claim", claimLiveFlashVoucher);
 
 // Authenticated
 router.post("/validate", authenticate, validateVoucher);

@@ -427,6 +427,125 @@ export const applyTripleVouchers = catchAsync(async (req, res) => {
   });
 });
 
+// In-Memory store for active live stream flash vouchers (Feature 98)
+let activeLiveFlashVouchers = [
+  {
+    dropId: "drop_live_init",
+    code: "LIVEFLASH88",
+    name: "Voucher Chớp Nhoáng Livestream",
+    type: "fixed",
+    value: 88000,
+    minOrderValue: 200000,
+    totalSlots: 50,
+    claimedCount: 18,
+    durationSeconds: 60,
+    droppedAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 60000).toISOString(),
+    claimedUserIds: ["user_sample_01"],
+  },
+];
+
+// @desc    Lấy mã flash voucher đang thả trực tiếp trên Livestream (Feature 98)
+// @route   GET /api/vouchers/live-stream/active-drop
+// @access  Public
+export const getActiveLiveFlashDrop = catchAsync(async (req, res) => {
+  const now = new Date();
+  const valid = activeLiveFlashVouchers.find((d) => new Date(d.expiresAt) > now && d.claimedCount < d.totalSlots);
+  return sendSuccess(res, { drop: valid || null }, 200, "Lấy thông tin flash voucher livestream thành công");
+});
+
+// @desc    Seller / Host thả mã giảm giá chớp nhoáng trên Livestream (Feature 98)
+// @route   POST /api/vouchers/live-stream/drop
+// @access  Public / Authenticate
+export const dropLiveFlashVoucher = catchAsync(async (req, res) => {
+  const {
+    code = "LIVEFLASH99",
+    name = "Flash Voucher Livestream 30s",
+    value = 50000,
+    minOrderValue = 150000,
+    totalSlots = 30,
+    durationSeconds = 45,
+  } = req.body;
+
+  const now = new Date();
+  const dropId = `drop_${Date.now()}`;
+  const normalizedCode = code.trim().toUpperCase();
+
+  const newDrop = {
+    dropId,
+    code: normalizedCode,
+    name,
+    type: "fixed",
+    value: Number(value) || 50000,
+    minOrderValue: Number(minOrderValue) || 150000,
+    totalSlots: Number(totalSlots) || 30,
+    claimedCount: 0,
+    durationSeconds: Number(durationSeconds) || 45,
+    droppedAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + (Number(durationSeconds) || 45) * 1000).toISOString(),
+    claimedUserIds: [],
+  };
+
+  // Đồng thời lưu hoặc kích hoạt trong memoryStore.vouchers để người dùng áp dụng được khi thanh toán
+  const existingVoucher = await memoryStore.vouchers.findOne({ code: normalizedCode });
+  if (!existingVoucher) {
+    await memoryStore.vouchers.create({
+      code: normalizedCode,
+      name,
+      type: "fixed",
+      value: newDrop.value,
+      maxDiscount: newDrop.value,
+      minOrderValue: newDrop.minOrderValue,
+      description: `Mã chớp nhoáng Livestream giảm ${newDrop.value.toLocaleString('vi-VN')}₫`,
+      expiryDate: new Date(now.getTime() + 86400000).toISOString(), // Áp dụng trong 24h sau khi giật được
+      usageLimit: newDrop.totalSlots,
+      usedCount: 0,
+      isGlobal: true,
+    });
+  }
+
+  activeLiveFlashVouchers.unshift(newDrop);
+
+  return sendSuccess(res, { drop: newDrop }, 201, "Đã thả Flash Voucher trên Livestream thành công!");
+});
+
+// @desc    Người xem giật mã flash voucher trong stream (Feature 98)
+// @route   POST /api/vouchers/live-stream/claim
+// @access  Public / Authenticate
+export const claimLiveFlashVoucher = catchAsync(async (req, res) => {
+  const { dropId, userId = "guest_viewer" } = req.body;
+  const now = new Date();
+
+  const drop = activeLiveFlashVouchers.find((d) => d.dropId === dropId);
+  if (!drop) {
+    return sendError(res, "Phiên thả mã không tồn tại hoặc đã kết thúc", 404);
+  }
+
+  if (new Date(drop.expiresAt) <= now) {
+    return sendError(res, "Mã chớp nhoáng đã hết thời gian giật!", 400);
+  }
+
+  if (drop.claimedCount >= drop.totalSlots) {
+    return sendError(res, "Rất tiếc! Toàn bộ số lượng mã đã được giật hết trong nháy mắt", 400);
+  }
+
+  if (drop.claimedUserIds.includes(userId)) {
+    return sendError(res, "Bạn đã giật mã này rồi! Hãy dùng khi thanh toán nhé", 400);
+  }
+
+  drop.claimedCount += 1;
+  drop.claimedUserIds.push(userId);
+
+  return sendSuccess(res, {
+    dropId: drop.dropId,
+    code: drop.code,
+    name: drop.name,
+    value: drop.value,
+    minOrderValue: drop.minOrderValue,
+    remainingSlots: drop.totalSlots - drop.claimedCount,
+  }, 200, `Chúc mừng bạn đã giật thành công Voucher ${drop.code}!`);
+});
+
 export default {
   getVouchers,
   applyVoucher,
@@ -437,4 +556,7 @@ export default {
   getMyVouchers,
   getVoucherStats,
   applyTripleVouchers,
+  getActiveLiveFlashDrop,
+  dropLiveFlashVoucher,
+  claimLiveFlashVoucher,
 };

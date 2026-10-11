@@ -863,6 +863,28 @@ export async function updateOrderDoorstepInspectionAPI(orderId, inspectionPayloa
   });
 }
 
+/**
+ * Smart Shopee Live In-Stream Flash Voucher Dropper API (Feature 98)
+ */
+export async function fetchLiveFlashVoucherDropAPI() {
+  const result = await apiRequest("/api/vouchers/live-stream/active-drop");
+  return result?.data?.drop || result?.drop || null;
+}
+
+export async function dropLiveFlashVoucherAPI(dropPayload) {
+  return await apiRequest("/api/vouchers/live-stream/drop", {
+    method: "POST",
+    body: JSON.stringify(dropPayload),
+  });
+}
+
+export async function claimLiveFlashVoucherAPI(dropId, userId) {
+  return await apiRequest("/api/vouchers/live-stream/claim", {
+    method: "POST",
+    body: JSON.stringify({ dropId, userId }),
+  });
+}
+
 
 
 
