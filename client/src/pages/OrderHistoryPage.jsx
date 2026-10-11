@@ -2398,6 +2398,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.realTimeParcelRerouting?.isRerouted && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Đổi Lộ Trình Tức Thời: ${ord.realTimeParcelRerouting.reroutedAddress} (Khung giờ: ${ord.realTimeParcelRerouting.deliveryTimeWindow}). Bưu tá đã chấp thuận (+${ord.realTimeParcelRerouting.additionalDistanceKm}km).`}>
+                            <span style={{ fontSize: '13px' }}>📍</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#2563eb',
+                              background: '#eff6ff',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Đổi Điểm Giao Tức Thời ({ord.realTimeParcelRerouting.deliveryTimeWindow === 'afternoon_13_17' ? 'Chiều 13h-17h' : 'Sáng 8h-12h'})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

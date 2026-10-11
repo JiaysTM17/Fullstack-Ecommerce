@@ -1126,6 +1126,18 @@ export async function optimizeSolarFleetGreenRoutingAPI(orderId, { vehicleType, 
   return result?.data || result;
 }
 
+/**
+ * In-App Real-Time Interactive Parcel Rerouting & Scheduled Delivery Window Switcher (Feature 120)
+ */
+export async function updateRealTimeParcelReroutingAPI(orderId, { reroutedAddress, deliveryTimeWindow, newCoordinates } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/realtime-reroute`, {
+    method: "POST",
+    body: JSON.stringify({ reroutedAddress, deliveryTimeWindow, newCoordinates }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 

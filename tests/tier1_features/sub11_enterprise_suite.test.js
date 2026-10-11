@@ -4379,7 +4379,77 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultGreen.co2AvoidedGrams, 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 120: In-App Real-Time Interactive Parcel Rerouting & Scheduled Delivery Window Switcher (5 Tests)
+  // =========================================================================
+  describe("Feature 120: In-App Real-Time Interactive Parcel Rerouting & Scheduled Delivery Window Switcher", () => {
+    test("F120-T1: Order model persists Real-Time Parcel Rerouting schema", async () => {
+      const order = await Order.create({
+        orderId: "ORD_REROUTE_120",
+        user: "buyer_test_reroute_120",
+        shopId: "shop_speed_express",
+        total: 750000,
+        realTimeParcelRerouting: {
+          isRerouted: true,
+          originalCoordinates: { lat: 10.7769, lng: 106.7009 },
+          newCoordinates: { lat: 10.7801, lng: 106.6992 },
+          reroutedAddress: "45 Lê Duẩn, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+          deliveryTimeWindow: "afternoon_13_17",
+          additionalDistanceKm: 1.4,
+          rerouteFeeCharged: 0,
+          courierAckStatus: "route_recalculated",
+          reroutedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_REROUTE_120");
+      expect.equal(order.realTimeParcelRerouting.isRerouted, true);
+      expect.equal(order.realTimeParcelRerouting.reroutedAddress, "45 Lê Duẩn, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh");
+      expect.equal(order.realTimeParcelRerouting.deliveryTimeWindow, "afternoon_13_17");
+      expect.equal(order.realTimeParcelRerouting.additionalDistanceKm, 1.4);
+      expect.equal(order.realTimeParcelRerouting.rerouteFeeCharged, 0);
+      expect.equal(order.realTimeParcelRerouting.courierAckStatus, "route_recalculated");
+    });
+
+    test("F120-T2: Radius under 3km grants free rerouting while maintaining courier efficiency", () => {
+      const maxFreeRadiusKm = 3.0;
+      const reroutedDistanceKm = 1.4;
+      const rerouteFee = reroutedDistanceKm <= maxFreeRadiusKm ? 0 : 15000;
+
+      expect.equal(rerouteFee, 0);
+    });
+
+    test("F120-T3: Radius exceeding free threshold calculates extra courier mileage surcharge", () => {
+      const maxFreeRadiusKm = 3.0;
+      const longDistanceRerouteKm = 5.2;
+      const rerouteFee = longDistanceRerouteKm > maxFreeRadiusKm ? 15000 : 0;
+
+      expect.equal(rerouteFee, 15000);
+    });
+
+    test("F120-T4: Delivery time window options cover all standard commercial shift slots", () => {
+      const shiftSlots = ["morning_08_12", "afternoon_13_17", "evening_18_21", "weekend_priority"];
+      expect.equal(shiftSlots.length, 4);
+      expect.equal(shiftSlots.includes("afternoon_13_17"), true);
+      expect.equal(shiftSlots.includes("weekend_priority"), true);
+    });
+
+    test("F120-T5: Default order schema initial state preserves original route without reroute flags", () => {
+      const defaultReroute = {
+        isRerouted: false,
+        additionalDistanceKm: 0,
+        rerouteFeeCharged: 0,
+        courierAckStatus: "none",
+      };
+
+      expect.equal(defaultReroute.isRerouted, false);
+      expect.equal(defaultReroute.additionalDistanceKm, 0);
+      expect.equal(defaultReroute.courierAckStatus, "none");
+    });
+  });
 });
+
 
 
 

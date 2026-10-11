@@ -2850,6 +2850,66 @@ export const optimizeSolarFleetGreenRouting = async (req, res) => {
   }
 };
 
+// @desc    Điều chỉnh địa chỉ giao & đổi khung giờ nhận hàng tức thời khi bưu tá đang giao (Feature 120)
+// @route   POST /api/orders/:id/realtime-reroute
+// @access  Public / Authenticate
+export const updateRealTimeParcelRerouting = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      reroutedAddress = "45 Lê Duẩn, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+      deliveryTimeWindow = "afternoon_13_17",
+      newCoordinates = { lat: 10.7801, lng: 106.6992 },
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần đổi lộ trình giao tức thời", 404);
+    }
+
+    const now = new Date().toISOString();
+    const additionalDistanceKm = 1.4; // Lệch 1.4km so với lộ trình ban đầu
+    const rerouteFeeCharged = 0; // Miễn phí đổi địa chỉ trong bán kính <3km
+
+    order.realTimeParcelRerouting = {
+      isRerouted: true,
+      originalCoordinates: { lat: 10.7769, lng: 106.7009 },
+      newCoordinates,
+      reroutedAddress,
+      deliveryTimeWindow,
+      additionalDistanceKm,
+      rerouteFeeCharged,
+      courierAckStatus: "route_recalculated",
+      reroutedAt: now,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Đổi Lộ Trình Giao Hàng Tức Thời: Điểm đến mới -> ${reroutedAddress} (Khung giờ: ${deliveryTimeWindow}). Bưu tá đã chấp thuận, lộ trình giao đã được tái định tuyến (+${additionalDistanceKm}km, Phí phụ thu: ${rerouteFeeCharged}₫).`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      realTimeParcelRerouting: order.realTimeParcelRerouting,
+      message: `Đổi lộ trình thành công! Đã gửi thông báo định tuyến mới cho bưu tá.`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

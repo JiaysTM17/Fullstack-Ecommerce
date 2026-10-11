@@ -409,6 +409,31 @@ const orderSchema = new mongoose.Schema(
       solarEnergyHarvestedWh: { type: Number, default: 0 },
       ecoDriverRating: { type: Number, default: 5.0 },
     },
+    realTimeParcelRerouting: {
+      isRerouted: { type: Boolean, default: false },
+      originalCoordinates: {
+        lat: { type: Number, default: 10.7769 },
+        lng: { type: Number, default: 106.7009 },
+      },
+      newCoordinates: {
+        lat: { type: Number, default: 10.7801 },
+        lng: { type: Number, default: 106.6992 },
+      },
+      reroutedAddress: { type: String, default: "" },
+      deliveryTimeWindow: {
+        type: String,
+        enum: ["morning_08_12", "afternoon_13_17", "evening_18_21", "weekend_priority"],
+        default: "afternoon_13_17",
+      },
+      additionalDistanceKm: { type: Number, default: 0 },
+      rerouteFeeCharged: { type: Number, default: 0 },
+      courierAckStatus: {
+        type: String,
+        enum: ["none", "pending_courier_ack", "reroute_accepted", "route_recalculated"],
+        default: "none",
+      },
+      reroutedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {
