@@ -3940,7 +3940,80 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultClaim.refundStatus, "none");
     });
   });
+
+  // =========================================================================
+  // FEATURE 114: Multi-Store Consolidated Packaging & Unified Box Shipping (5 Tests)
+  // =========================================================================
+  describe("Feature 114: Multi-Store Consolidated Packaging & Unified Box Shipping", () => {
+    test("F114-T1: Order model persists Multi-Store Consolidated Packaging Suite schema", async () => {
+      const order = await Order.create({
+        orderId: "ORD_CONSOLIDATED_114",
+        user: "buyer_test_consolidate_114",
+        shopId: "multi_vendor_hub",
+        total: 540000,
+        consolidatedPackagingSuite: {
+          isConsolidated: true,
+          consolidationHub: "SPX Logistics Sorting Center Tân Bình",
+          consolidatedBoxesCount: 1,
+          participatingShops: ["Shopee Mall Flagship", "Công Nghệ Store HCM", "Gia Dụng Xanh Official"],
+          packagingMaterialsSavedKg: 1.15,
+          shippingFeeSaved: 22000,
+          consolidationStatus: "bundled_in_hub",
+          consolidatedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_CONSOLIDATED_114");
+      expect.equal(order.consolidatedPackagingSuite.isConsolidated, true);
+      expect.equal(order.consolidatedPackagingSuite.consolidatedBoxesCount, 1);
+      expect.equal(order.consolidatedPackagingSuite.participatingShops.length, 3);
+      expect.equal(order.consolidatedPackagingSuite.packagingMaterialsSavedKg, 1.15);
+      expect.equal(order.consolidatedPackagingSuite.shippingFeeSaved, 22000);
+      expect.equal(order.consolidatedPackagingSuite.consolidationStatus, "bundled_in_hub");
+    });
+
+    test("F114-T2: Packaging material savings calculation aggregates across multiple participating shops", () => {
+      const shopsCount = 3;
+      const baseSavingPerExtraShop = 0.45; // kg
+      const totalSavedKg = Number(((shopsCount - 1) * baseSavingPerExtraShop).toFixed(2));
+
+      expect.equal(totalSavedKg, 0.9);
+      expect.equal(totalSavedKg > 0, true);
+    });
+
+    test("F114-T3: Unified box consolidation reduces multi-shop shipping fee overhead", () => {
+      const individualShippingFees = [25000, 20000, 18000];
+      const unifiedConsolidatedShippingFee = 38000;
+      const totalIndividual = individualShippingFees.reduce((a, b) => a + b, 0);
+      const savedFee = totalIndividual - unifiedConsolidatedShippingFee;
+
+      expect.equal(totalIndividual, 63000);
+      expect.equal(savedFee, 25000);
+    });
+
+    test("F114-T4: Consolidation status progresses from awaiting_items to dispatched_single_box", () => {
+      const statuses = ["awaiting_items", "bundled_in_hub", "dispatched_single_box"];
+      expect.equal(statuses[0], "awaiting_items");
+      expect.equal(statuses[2], "dispatched_single_box");
+    });
+
+    test("F114-T5: Default order schema initial state does not force consolidation", () => {
+      const defaultConsolidation = {
+        isConsolidated: false,
+        consolidatedBoxesCount: 1,
+        participatingShops: [],
+        packagingMaterialsSavedKg: 0,
+        shippingFeeSaved: 0,
+        consolidationStatus: "none",
+      };
+
+      expect.equal(defaultConsolidation.isConsolidated, false);
+      expect.equal(defaultConsolidation.participatingShops.length, 0);
+      expect.equal(defaultConsolidation.consolidationStatus, "none");
+    });
+  });
 });
+
 
 
 

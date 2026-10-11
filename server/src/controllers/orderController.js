@@ -2499,6 +2499,62 @@ export const evaluateAiDamageClaim = async (req, res) => {
   }
 };
 
+// @desc    Đóng gói gom đơn đa shop giảm thiểu rác thải & tối ưu vận chuyển (Feature 114)
+// @route   POST /api/orders/:id/consolidate-packaging
+// @access  Public / Authenticate
+export const consolidateOrderPackaging = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { consolidationHub = "SPX Logistics Sorting Center Tân Bình", participatingShops = [] } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần đóng gói gom đơn", 404);
+    }
+
+    const now = new Date().toISOString();
+    const shopsList = participatingShops.length > 0 ? participatingShops : ["Shopee Mall Flagship", "Công Nghệ Store HCM"];
+    const packagingMaterialsSavedKg = 0.85; // Giảm 0.85kg thùng carton & màng bóng khí
+    const shippingFeeSaved = 15000; // Tiết kiệm 15,000₫ cước gom kiện
+
+    order.consolidatedPackagingSuite = {
+      isConsolidated: true,
+      consolidationHub,
+      consolidatedBoxesCount: 1,
+      participatingShops: shopsList,
+      packagingMaterialsSavedKg,
+      shippingFeeSaved,
+      consolidationStatus: "bundled_in_hub",
+      consolidatedAt: now,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Đã gom đơn đóng gói hợp nhất tại ${consolidationHub}. Gom ${shopsList.length} shop vào 1 kiện duy nhất (Giảm ${packagingMaterialsSavedKg}kg rác thải bao bì, tiết kiệm ${shippingFeeSaved.toLocaleString('vi-VN')}₫ cước)`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      consolidatedPackagingSuite: order.consolidatedPackagingSuite,
+      message: `Gom đơn đa shop thành công! Đã hợp nhất ${shopsList.length} shop vào 1 kiện hàng duy nhất.`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

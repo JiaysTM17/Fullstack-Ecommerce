@@ -313,6 +313,20 @@ const orderSchema = new mongoose.Schema(
         default: "none",
       },
     },
+    consolidatedPackagingSuite: {
+      isConsolidated: { type: Boolean, default: false },
+      consolidationHub: { type: String, default: "SPX Logistics Sorting Center Tân Bình" },
+      consolidatedBoxesCount: { type: Number, default: 1 },
+      participatingShops: { type: [String], default: [] },
+      packagingMaterialsSavedKg: { type: Number, default: 0 },
+      shippingFeeSaved: { type: Number, default: 0 },
+      consolidationStatus: {
+        type: String,
+        enum: ["none", "awaiting_items", "bundled_in_hub", "dispatched_single_box"],
+        default: "none",
+      },
+      consolidatedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

@@ -2284,6 +2284,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.consolidatedPackagingSuite?.isConsolidated && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Gom Đơn Đa Shop: ${ord.consolidatedPackagingSuite.participatingShops?.length || 2} Shop gom 1 kiện tại ${ord.consolidatedPackagingSuite.consolidationHub}. Giảm ${ord.consolidatedPackagingSuite.packagingMaterialsSavedKg}kg bao bì, tiết kiệm ${Number(ord.consolidatedPackagingSuite.shippingFeeSaved).toLocaleString('vi-VN')}₫ cước.`}>
+                            <span style={{ fontSize: '13px' }}>📦</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#4338ca',
+                              background: '#e0e7ff',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Gom Đơn Đa Shop: 1 Kiện (-{ord.consolidatedPackagingSuite.packagingMaterialsSavedKg}kg Rác Bao Bì)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

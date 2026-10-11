@@ -1060,6 +1060,18 @@ export async function evaluateAiDamageClaimAPI(orderId, { imageUrls = [], buyerN
   return result?.data || result;
 }
 
+/**
+ * Multi-Store Consolidated Packaging & Unified Box Shipping (Feature 114)
+ */
+export async function consolidateOrderPackagingAPI(orderId, { consolidationHub, participatingShops } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/consolidate-packaging`, {
+    method: "POST",
+    body: JSON.stringify({ consolidationHub, participatingShops }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 

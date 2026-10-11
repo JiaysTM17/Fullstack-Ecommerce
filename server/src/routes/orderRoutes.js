@@ -34,6 +34,7 @@ import {
   reconcileAutomatedCodSettlement,
   claimLateDeliveryCompensation,
   evaluateAiDamageClaim,
+  consolidateOrderPackaging,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -80,6 +81,7 @@ router.post("/:id/fraud-risk-audit", optionalAuthenticate, evaluateOrderFraudRis
 router.post("/:id/cod-reconcile", optionalAuthenticate, reconcileAutomatedCodSettlement);
 router.post("/:id/claim-late-compensation", optionalAuthenticate, claimLateDeliveryCompensation);
 router.post("/:id/ai-damage-claim", optionalAuthenticate, evaluateAiDamageClaim);
+router.post("/:id/consolidate-packaging", optionalAuthenticate, consolidateOrderPackaging);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);
