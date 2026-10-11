@@ -1039,6 +1039,17 @@ export async function reconcileAutomatedCodSettlementAPI(orderId, { amountCollec
   return result?.data || result;
 }
 
+/**
+ * Shopee On-Time Delivery Guarantee & Automated Delay Compensation Suite (Feature 112)
+ */
+export async function claimLateDeliveryCompensationAPI(orderId) {
+  const result = await apiRequest(`/api/orders/${orderId}/claim-late-compensation`, {
+    method: "POST",
+  });
+  return result?.data || result;
+}
+
+
 
 
 

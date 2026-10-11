@@ -280,6 +280,20 @@ const orderSchema = new mongoose.Schema(
       remittedAt: { type: String, default: null },
       reconciliationRef: { type: String, default: "" },
     },
+    lateDeliveryCompensation: {
+      isEligible: { type: Boolean, default: false },
+      promiseDeliveryDate: { type: String, default: null },
+      actualDeliveredDate: { type: String, default: null },
+      delayHours: { type: Number, default: 0 },
+      compensationVoucherCode: { type: String, default: "" },
+      compensationAmount: { type: Number, default: 0 },
+      claimStatus: {
+        type: String,
+        enum: ["none", "eligible_unclaimed", "auto_credited", "expired"],
+        default: "none",
+      },
+      claimedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

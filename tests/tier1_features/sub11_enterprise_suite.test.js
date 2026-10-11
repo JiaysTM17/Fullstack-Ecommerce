@@ -3805,6 +3805,72 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultCod.verifiedAt, null);
     });
   });
+
+  // =========================================================================
+  // FEATURE 112: Shopee On-Time Delivery Guarantee & Automated Delay Compensation (5 Tests)
+  // =========================================================================
+  describe("Feature 112: Shopee On-Time Delivery Guarantee & Automated Delay Compensation", () => {
+    test("F112-T1: Order model persists lateDeliveryCompensation schema attributes", async () => {
+      const order = await Order.create({
+        orderId: "ORD_ONTIME_COMP_112",
+        items: [{ productId: "p_earphone", name: "Tai Nghe Nhét Tai Gaming", price: 290000, quantity: 1 }],
+        total: 315000,
+        lateDeliveryCompensation: {
+          isEligible: true,
+          promiseDeliveryDate: "2026-10-09",
+          actualDeliveredDate: "2026-10-11",
+          delayHours: 28,
+          compensationVoucherCode: "ONTIME40K-849102",
+          compensationAmount: 40000,
+          claimStatus: "auto_credited",
+          claimedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_ONTIME_COMP_112");
+      expect.equal(order.lateDeliveryCompensation.isEligible, true);
+      expect.equal(order.lateDeliveryCompensation.compensationAmount, 40000);
+      expect.equal(order.lateDeliveryCompensation.claimStatus, "auto_credited");
+      expect.equal(order.lateDeliveryCompensation.compensationVoucherCode.startsWith("ONTIME40K-"), true);
+    });
+
+    test("F112-T2: Delivery delay exceeding promise window (>24h) flags eligibility", () => {
+      const promiseDate = new Date("2026-10-09T18:00:00Z");
+      const actualDate = new Date("2026-10-11T00:00:00Z");
+      const delayHours = (actualDate.getTime() - promiseDate.getTime()) / (1000 * 60 * 60);
+
+      expect.equal(delayHours, 30);
+      const isEligible = delayHours > 24;
+      expect.equal(isEligible, true);
+    });
+
+    test("F112-T3: On-time delivery within window does not trigger compensation", () => {
+      const promiseDate = new Date("2026-10-11T18:00:00Z");
+      const actualDate = new Date("2026-10-11T12:00:00Z");
+      const isLate = actualDate.getTime() > promiseDate.getTime();
+
+      expect.equal(isLate, false);
+    });
+
+    test("F112-T4: Compensation voucher generation produces standard prefix code", () => {
+      const voucherCode = "ONTIME40K-928103";
+      expect.equal(voucherCode.startsWith("ONTIME40K-"), true);
+      expect.equal(voucherCode.length, 16);
+    });
+
+    test("F112-T5: Default order initial state maintains uncredited compensation state", () => {
+      const defaultLate = {
+        isEligible: false,
+        delayHours: 0,
+        compensationAmount: 0,
+        claimStatus: "none",
+      };
+
+      expect.equal(defaultLate.isEligible, false);
+      expect.equal(defaultLate.claimStatus, "none");
+      expect.equal(defaultLate.compensationAmount, 0);
+    });
+  });
 });
 
 

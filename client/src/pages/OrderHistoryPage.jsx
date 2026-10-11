@@ -2246,6 +2246,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.lateDeliveryCompensation?.isEligible && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Cam kết đúng hẹn: Trễ ${ord.lateDeliveryCompensation.delayHours}h. Đã bồi thường ${Number(ord.lateDeliveryCompensation.compensationAmount).toLocaleString('vi-VN')}₫ (Mã: ${ord.lateDeliveryCompensation.compensationVoucherCode})`}>
+                            <span style={{ fontSize: '13px' }}>⚡</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#ea580c',
+                              background: '#ffedd5',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Đúng Hẹn: +{Number(ord.lateDeliveryCompensation.compensationAmount).toLocaleString('vi-VN')}₫ Voucher
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">
