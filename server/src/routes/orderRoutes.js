@@ -33,6 +33,7 @@ import {
   evaluateOrderFraudRisk,
   reconcileAutomatedCodSettlement,
   claimLateDeliveryCompensation,
+  evaluateAiDamageClaim,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -78,6 +79,7 @@ router.post("/:id/doorstep-return-pickup", optionalAuthenticate, scheduleDoorste
 router.post("/:id/fraud-risk-audit", optionalAuthenticate, evaluateOrderFraudRisk);
 router.post("/:id/cod-reconcile", optionalAuthenticate, reconcileAutomatedCodSettlement);
 router.post("/:id/claim-late-compensation", optionalAuthenticate, claimLateDeliveryCompensation);
+router.post("/:id/ai-damage-claim", optionalAuthenticate, evaluateAiDamageClaim);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

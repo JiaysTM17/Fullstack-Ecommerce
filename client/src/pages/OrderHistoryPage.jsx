@@ -2265,6 +2265,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.aiDamageClaimEvaluation?.hasClaim && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`AI Vision Thẩm Định: Hư hại ${ord.aiDamageClaimEvaluation.damageSeverityPercent}%. Đã hoàn tiền ${Number(ord.aiDamageClaimEvaluation.instantPartialRefundOffered).toLocaleString('vi-VN')}₫. Trạng thái: ${ord.aiDamageClaimEvaluation.refundStatus}`}>
+                            <span style={{ fontSize: '13px' }}>🔍</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.aiDamageClaimEvaluation.refundStatus === 'partial_refund_credited' ? '#0d9488' : '#e11d48',
+                              background: ord.aiDamageClaimEvaluation.refundStatus === 'partial_refund_credited' ? '#ccfbf1' : '#ffe4e6',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              AI Vision: Hoàn {Number(ord.aiDamageClaimEvaluation.instantPartialRefundOffered).toLocaleString('vi-VN')}₫ ({ord.aiDamageClaimEvaluation.damageSeverityPercent}% Hư Hại)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

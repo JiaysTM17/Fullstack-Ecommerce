@@ -294,6 +294,25 @@ const orderSchema = new mongoose.Schema(
       },
       claimedAt: { type: String, default: null },
     },
+    aiDamageClaimEvaluation: {
+      hasClaim: { type: Boolean, default: false },
+      claimId: { type: String, default: "" },
+      damageSeverityPercent: { type: Number, default: 0 },
+      detectedFlaws: { type: [String], default: [] },
+      instantPartialRefundOffered: { type: Number, default: 0 },
+      acceptedByBuyer: { type: Boolean, default: false },
+      evaluationVerdict: {
+        type: String,
+        enum: ["none", "minor_scratch", "cracked_screen_or_shell", "severe_unusable", "fraud_suspected"],
+        default: "none",
+      },
+      evaluatedAt: { type: String, default: null },
+      refundStatus: {
+        type: String,
+        enum: ["none", "partial_refund_credited", "full_return_requested", "rejected"],
+        default: "none",
+      },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

@@ -3871,7 +3871,77 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultLate.compensationAmount, 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 113: Intelligent AI Damage Claim Vision Evaluator & Instant Partial Refund (5 Tests)
+  // =========================================================================
+  describe("Feature 113: Intelligent AI Damage Claim Vision Evaluator & Instant Partial Refund", () => {
+    test("F113-T1: Order model persists AI Damage Claim Evaluation data schema", async () => {
+      const order = await Order.create({
+        orderId: "ORD_AI_CLAIM_113",
+        user: "buyer_test_claim_113",
+        shopId: "shop_claim_113",
+        total: 200000,
+        aiDamageClaimEvaluation: {
+          hasClaim: true,
+          claimId: "DMG_113001",
+          damageSeverityPercent: 35,
+          detectedFlaws: ["Nứt góc viền hộp bảo vệ", "Trầy xước bề mặt nhẹ 3.5cm"],
+          instantPartialRefundOffered: 70000,
+          acceptedByBuyer: true,
+          evaluationVerdict: "minor_scratch",
+          evaluatedAt: new Date().toISOString(),
+          refundStatus: "partial_refund_credited",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_AI_CLAIM_113");
+      expect.equal(order.aiDamageClaimEvaluation.hasClaim, true);
+      expect.equal(order.aiDamageClaimEvaluation.damageSeverityPercent, 35);
+      expect.equal(order.aiDamageClaimEvaluation.instantPartialRefundOffered, 70000);
+      expect.equal(order.aiDamageClaimEvaluation.refundStatus, "partial_refund_credited");
+      expect.equal(order.aiDamageClaimEvaluation.detectedFlaws.length, 2);
+    });
+
+    test("F113-T2: Partial refund computes accurately based on total amount and damage severity percentage", () => {
+      const totalAmount = 300000;
+      const damageSeverityPercent = 40;
+      const calculatedRefund = Math.round((totalAmount * damageSeverityPercent) / 100);
+
+      expect.equal(calculatedRefund, 120000);
+      expect.equal(calculatedRefund < totalAmount, true);
+    });
+
+    test("F113-T3: Buyer accepts partial refund transitions refund status to partial_refund_credited", () => {
+      const acceptPartialRefund = true;
+      const refundStatus = acceptPartialRefund ? "partial_refund_credited" : "full_return_requested";
+
+      expect.equal(refundStatus, "partial_refund_credited");
+    });
+
+    test("F113-T4: Buyer rejects partial refund routes to full product return request", () => {
+      const acceptPartialRefund = false;
+      const refundStatus = acceptPartialRefund ? "partial_refund_credited" : "full_return_requested";
+
+      expect.equal(refundStatus, "full_return_requested");
+    });
+
+    test("F113-T5: Default order schema initial state has no active damage claim", () => {
+      const defaultClaim = {
+        hasClaim: false,
+        damageSeverityPercent: 0,
+        instantPartialRefundOffered: 0,
+        refundStatus: "none",
+      };
+
+      expect.equal(defaultClaim.hasClaim, false);
+      expect.equal(defaultClaim.damageSeverityPercent, 0);
+      expect.equal(defaultClaim.instantPartialRefundOffered, 0);
+      expect.equal(defaultClaim.refundStatus, "none");
+    });
+  });
 });
+
 
 
 

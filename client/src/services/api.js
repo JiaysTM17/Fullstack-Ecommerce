@@ -1049,6 +1049,18 @@ export async function claimLateDeliveryCompensationAPI(orderId) {
   return result?.data || result;
 }
 
+/**
+ * Intelligent AI Damage Claim Vision Evaluator & Instant Partial Refund (Feature 113)
+ */
+export async function evaluateAiDamageClaimAPI(orderId, { imageUrls = [], buyerNote = "", acceptPartialRefund = true } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/ai-damage-claim`, {
+    method: "POST",
+    body: JSON.stringify({ imageUrls, buyerNote, acceptPartialRefund }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 
