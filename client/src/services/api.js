@@ -997,5 +997,16 @@ export async function assignSmartLockerDeliveryAPI(orderId, { lockerStationId, l
   return result?.data || result;
 }
 
+/**
+ * Digital Carbon Offset Certificate & Green NFT Badge Suite (Feature 108)
+ */
+export async function issueCarbonOffsetCertificateAPI(orderId) {
+  const result = await apiRequest(`/api/orders/${orderId}/carbon-certificate`, {
+    method: "POST",
+  });
+  return result?.data || result;
+}
+
+
 
 

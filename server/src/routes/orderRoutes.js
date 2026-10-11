@@ -28,6 +28,7 @@ import {
   updateDynamicDeliveryAddress,
   updateEcoPackagingOption,
   assignSmartLockerDelivery,
+  issueCarbonOffsetCertificate,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -68,6 +69,7 @@ router.post("/:id/warehouse-routing", optionalAuthenticate, calculateMultiWareho
 router.patch("/:id/dynamic-address", optionalAuthenticate, updateDynamicDeliveryAddress);
 router.patch("/:id/eco-packaging", optionalAuthenticate, updateEcoPackagingOption);
 router.post("/:id/smart-locker", optionalAuthenticate, assignSmartLockerDelivery);
+router.post("/:id/carbon-certificate", optionalAuthenticate, issueCarbonOffsetCertificate);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

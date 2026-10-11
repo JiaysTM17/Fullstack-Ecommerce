@@ -2170,6 +2170,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.carbonOffsetCert?.isIssued && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Chứng chỉ #${ord.carbonOffsetCert.certificateId} - Giảm ${ord.carbonOffsetCert.carbonOffsetKg}kg CO₂ (${ord.carbonOffsetCert.treeUnitsPlanted} Cây)`}>
+                            <span style={{ fontSize: '13px' }}>🏅</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#047857',
+                              background: '#ecfdf5',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Cert CO₂: -{ord.carbonOffsetCert.carbonOffsetKg}kg ({ord.carbonOffsetCert.treeUnitsPlanted} Cây)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

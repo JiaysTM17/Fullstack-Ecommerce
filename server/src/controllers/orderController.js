@@ -2119,5 +2119,63 @@ export const assignSmartLockerDelivery = async (req, res) => {
   }
 };
 
+// @desc    Phát hành Chứng nhận Số Giảm Phát Thải CO2 & Huy hiệu Xanh NFT (Feature 108)
+// @route   POST /api/orders/:id/carbon-certificate
+// @access  Public / Authenticate
+export const issueCarbonOffsetCertificate = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần cấp chứng nhận trung hòa carbon", 404);
+    }
+
+    const certId = `CERT-CO2-${Date.now().toString().slice(-8)}`;
+    const carbonOffsetKg = Number(
+      ((order.multiWarehouseRouting?.carbonSavedKg || 1.8) +
+       (order.ecoPackagingContribution?.isOptedIn ? 2.5 : 0.5)).toFixed(2)
+    );
+    const treeUnitsPlanted = Math.max(1, Math.round(carbonOffsetKg / 1.2));
+    const now = new Date().toISOString();
+    const nftBadgeCode = `SPX-GREEN-HERO-${Date.now().toString(36).toUpperCase()}`;
+    const certPdfUrl = `https://cert.shopee.vn/carbon-offset/${certId}.pdf`;
+
+    order.carbonOffsetCert = {
+      isIssued: true,
+      certificateId: certId,
+      carbonOffsetKg,
+      issuedAt: now,
+      treeUnitsPlanted,
+      certPdfUrl,
+      nftBadgeCode,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Đã phát hành Chứng chỉ Số Trung Hòa Carbon (#${certId}) - Giảm phát thải ${carbonOffsetKg}kg CO2 & Đóng góp ${treeUnitsPlanted} cây xanh`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      carbonOffsetCert: order.carbonOffsetCert,
+      message: `Đã phát hành Chứng chỉ Số Giảm Phát Thải (#${certId}) thành công!`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 

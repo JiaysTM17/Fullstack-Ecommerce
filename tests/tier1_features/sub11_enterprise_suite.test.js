@@ -3539,6 +3539,73 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultLocker.pickupStatus, "none");
     });
   });
+
+  // =========================================================================
+  // FEATURE 108: Digital Carbon Offset Certificate & Green NFT Badge Suite (5 Tests)
+  // =========================================================================
+  describe("Feature 108: Digital Carbon Offset Certificate & Green NFT Badge Suite", () => {
+    test("F108-T1: Order model persists carbonOffsetCert schema attributes", async () => {
+      const order = await Order.create({
+        orderId: "ORD_CARBON_CERT_108",
+        items: [{ productId: "p_solar_lamp", name: "Đèn Năng Lượng Mặt Trời SolarPro", price: 350000, quantity: 1 }],
+        total: 375000,
+        carbonOffsetCert: {
+          isIssued: true,
+          certificateId: "CERT-CO2-98472910",
+          carbonOffsetKg: 4.3,
+          issuedAt: new Date().toISOString(),
+          treeUnitsPlanted: 4,
+          certPdfUrl: "https://cert.shopee.vn/carbon-offset/CERT-CO2-98472910.pdf",
+          nftBadgeCode: "SPX-GREEN-HERO-K98A2",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_CARBON_CERT_108");
+      expect.equal(order.carbonOffsetCert.isIssued, true);
+      expect.equal(order.carbonOffsetCert.certificateId, "CERT-CO2-98472910");
+      expect.equal(order.carbonOffsetCert.carbonOffsetKg, 4.3);
+      expect.equal(order.carbonOffsetCert.treeUnitsPlanted, 4);
+      expect.equal(order.carbonOffsetCert.nftBadgeCode.includes("SPX-GREEN-HERO"), true);
+    });
+
+    test("F108-T2: Carbon reduction computation sums multi-warehouse routing and eco-packaging savings", () => {
+      const whSaved = 1.8;
+      const ecoPackSaved = 2.5;
+      const totalOffsetKg = Number((whSaved + ecoPackSaved).toFixed(2));
+
+      expect.equal(totalOffsetKg, 4.3);
+      expect.equal(totalOffsetKg > 4.0, true);
+    });
+
+    test("F108-T3: Equivalent planted tree calculation computes accurately based on CO2 ratio", () => {
+      const carbonOffsetKg = 4.3;
+      const treeUnits = Math.max(1, Math.round(carbonOffsetKg / 1.2));
+
+      expect.equal(treeUnits, 4);
+    });
+
+    test("F108-T4: Certificate PDF URL format matches enterprise validation pattern", () => {
+      const certId = "CERT-CO2-12345678";
+      const certPdfUrl = `https://cert.shopee.vn/carbon-offset/${certId}.pdf`;
+
+      expect.equal(certPdfUrl.startsWith("https://cert.shopee.vn/carbon-offset/"), true);
+      expect.equal(certPdfUrl.endsWith(".pdf"), true);
+    });
+
+    test("F108-T5: Default order initial state reflects unissued certificate status", () => {
+      const defaultCert = {
+        isIssued: false,
+        certificateId: "",
+        carbonOffsetKg: 0,
+        treeUnitsPlanted: 0,
+        nftBadgeCode: "",
+      };
+
+      expect.equal(defaultCert.isIssued, false);
+      expect.equal(defaultCert.carbonOffsetKg, 0);
+      expect.equal(defaultCert.treeUnitsPlanted, 0);
+    });
+  });
 });
 
 

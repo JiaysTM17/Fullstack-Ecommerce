@@ -226,6 +226,15 @@ const orderSchema = new mongoose.Schema(
       },
       pickedUpAt: { type: String, default: null },
     },
+    carbonOffsetCert: {
+      isIssued: { type: Boolean, default: false },
+      certificateId: { type: String, default: "" },
+      carbonOffsetKg: { type: Number, default: 0 },
+      issuedAt: { type: String, default: null },
+      treeUnitsPlanted: { type: Number, default: 0 },
+      certPdfUrl: { type: String, default: "" },
+      nftBadgeCode: { type: String, default: "" },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {
