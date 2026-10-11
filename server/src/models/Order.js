@@ -166,6 +166,13 @@ const orderSchema = new mongoose.Schema(
       verifiedAt: { type: String, default: null },
       verificationNote: { type: String, default: "" },
     },
+    oneClickReorderSuite: {
+      isReordered: { type: Boolean, default: false },
+      reorderCount: { type: Number, default: 0 },
+      lastReorderedAt: { type: String, default: null },
+      reorderVoucherApplied: { type: String, default: "" },
+      reorderSavings: { type: Number, default: 0 },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

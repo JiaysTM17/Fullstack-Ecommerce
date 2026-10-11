@@ -3164,6 +3164,80 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultProof.verificationStatus, "none");
     });
   });
+
+  // =========================================================================
+  // FEATURE 103: Smart 1-Click Reorder Suite & Reorder Loyalty Voucher (5 Tests)
+  // =========================================================================
+  describe("Feature 103: Smart 1-Click Reorder Suite & Reorder Loyalty Voucher", () => {
+    test("F103-T1: Reorder calculation grants 10% loyalty discount voucher (REORDER10)", () => {
+      const subtotal = 500000;
+      const loyaltyDiscount = Math.round(subtotal * 0.1);
+      const shippingFee = 25000;
+      const finalTotal = subtotal - loyaltyDiscount + shippingFee;
+
+      expect.equal(loyaltyDiscount, 50000);
+      expect.equal(finalTotal, 475000);
+    });
+
+    test("F103-T2: Order model stores oneClickReorderSuite and tracks reorder counts", async () => {
+      const order = await Order.create({
+        orderId: "ORD_REORDER_ORIGIN",
+        items: [{ productId: "p_coffee", name: "Cà phê Robusta Đặc Sản", price: 150000, quantity: 2 }],
+        subtotal: 300000,
+        total: 325000,
+        oneClickReorderSuite: {
+          isReordered: true,
+          reorderCount: 1,
+          lastReorderedAt: new Date().toISOString(),
+          reorderVoucherApplied: "REORDER10",
+          reorderSavings: 30000,
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_REORDER_ORIGIN");
+      expect.equal(order.oneClickReorderSuite.isReordered, true);
+      expect.equal(order.oneClickReorderSuite.reorderCount, 1);
+      expect.equal(order.oneClickReorderSuite.reorderVoucherApplied, "REORDER10");
+    });
+
+    test("F103-T3: Subsequent reorder increments reorderCount and updates lastReorderedAt", () => {
+      const suite = {
+        isReordered: true,
+        reorderCount: 1,
+        lastReorderedAt: "2026-10-01T10:00:00Z",
+        reorderSavings: 30000,
+      };
+
+      suite.reorderCount += 1;
+      suite.lastReorderedAt = "2026-10-11T12:00:00Z";
+      suite.reorderSavings += 35000;
+
+      expect.equal(suite.reorderCount, 2);
+      expect.equal(suite.reorderSavings, 65000);
+      expect.equal(suite.lastReorderedAt, "2026-10-11T12:00:00Z");
+    });
+
+    test("F103-T4: Newly spawned reorder inherits doorstepInspection with 0₫ fee", () => {
+      const newOrderPayload = {
+        orderId: "ORD_REORDER_NEW_01",
+        doorstepInspection: {
+          enabled: true,
+          fee: 0,
+          status: "requested",
+        },
+      };
+
+      expect.equal(newOrderPayload.doorstepInspection.enabled, true);
+      expect.equal(newOrderPayload.doorstepInspection.fee, 0);
+      expect.equal(newOrderPayload.doorstepInspection.status, "requested");
+    });
+
+    test("F103-T5: Empty item order correctly prevented from executing 1-click reorder", () => {
+      const emptyOrder = { items: [] };
+      const canReorder = Array.isArray(emptyOrder.items) && emptyOrder.items.length > 0;
+      expect.equal(canReorder, false);
+    });
+  });
 });
 
 

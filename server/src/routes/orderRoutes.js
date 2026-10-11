@@ -23,6 +23,7 @@ import {
   getDeliveryAttempts,
   uploadUnboxingVideoProof,
   verifyUnboxingVideoProof,
+  executeSmartOneClickReorder,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -58,6 +59,7 @@ router.post("/:id/delivery-attempts", optionalAuthenticate, recordDeliveryAttemp
 router.get("/:id/delivery-attempts", optionalAuthenticate, getDeliveryAttempts);
 router.post("/:id/unboxing-video", optionalAuthenticate, uploadUnboxingVideoProof);
 router.patch("/:id/unboxing-video/verify", authenticate, authorize("admin", "seller"), verifyUnboxingVideoProof);
+router.post("/:id/smart-reorder", optionalAuthenticate, executeSmartOneClickReorder);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

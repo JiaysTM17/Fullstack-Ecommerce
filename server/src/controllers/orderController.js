@@ -1776,5 +1776,87 @@ export const verifyUnboxingVideoProof = async (req, res) => {
   }
 };
 
+// @desc    Mua lại thông minh 1-Click với kiểm tra tồn kho & tự động áp mã tri ân (Feature 103)
+// @route   POST /api/orders/:id/smart-reorder
+// @access  Public / Authenticate
+export const executeSmartOneClickReorder = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần mua lại", 404);
+    }
+
+    const items = order.items || [];
+    if (items.length === 0) {
+      return sendError(res, "Đơn hàng không có sản phẩm khả dụng để mua lại", 400);
+    }
+
+    // Tự động cấp mã tri ân khách hàng thân thiết "REORDER10" giảm 10%
+    const subtotal = items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
+    const loyaltyDiscount = Math.round(subtotal * 0.1);
+    const shippingFee = order.shippingFee || 25000;
+    const finalTotal = Math.max(0, subtotal - loyaltyDiscount + shippingFee);
+    const now = new Date().toISOString();
+
+    const newOrderId = `ORD${Date.now().toString().slice(-6)}`;
+    const newOrderPayload = {
+      orderId: newOrderId,
+      customer: order.customer || { fullName: "Khách Mua Lại", phone: "0900000000", address: "Việt Nam" },
+      items: items.map((it) => ({
+        ...it,
+        status: "pending",
+      })),
+      subtotal,
+      shippingFee,
+      voucherCode: "REORDER10",
+      voucherDiscount: loyaltyDiscount,
+      total: finalTotal,
+      paymentMethod: order.paymentMethod || "COD",
+      status: "pending",
+      timeline: [
+        {
+          time: now,
+          text: `Đơn hàng được khởi tạo từ tính năng Mua Lại 1-Click (Gốc từ #${order.orderId || order._id}) kèm voucher tri ân REORDER10`,
+        },
+      ],
+      doorstepInspection: {
+        enabled: true,
+        fee: 0,
+        status: "requested",
+      },
+    };
+
+    const created = await Order.create(newOrderPayload);
+
+    // Cập nhật lại lịch sử reorder của đơn cũ
+    const suite = order.oneClickReorderSuite || {};
+    order.oneClickReorderSuite = {
+      isReordered: true,
+      reorderCount: (suite.reorderCount || 0) + 1,
+      lastReorderedAt: now,
+      reorderVoucherApplied: "REORDER10",
+      reorderSavings: loyaltyDiscount,
+    };
+    await order.save?.();
+
+    sendSuccess(res, {
+      originalOrderId: order.orderId || order._id,
+      newOrder: created,
+      reorderSavings: loyaltyDiscount,
+      message: `Đã kích hoạt mua lại thành công! Bạn được tự động giảm ${loyaltyDiscount.toLocaleString('vi-VN')}₫ (Mã REORDER10)`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 

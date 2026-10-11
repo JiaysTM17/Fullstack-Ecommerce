@@ -18,7 +18,7 @@ import DeliveryCsatFeedbackModal from '../components/DeliveryCsatFeedbackModal';
 import DeliveryRescheduleModal from '../components/DeliveryRescheduleModal';
 import { cancelOrder } from '../services/orderService';
 import { restoreProductStock } from '../services/productService';
-import { createCustomerReturnRequestAPI } from '../services/api';
+import { createCustomerReturnRequestAPI, executeSmartOneClickReorderAPI } from '../services/api';
 import { pushBuyerNotification } from '../utils/notificationHelper';
 import {
   PackageIcon,
@@ -785,6 +785,29 @@ export default function OrderHistoryPage() {
     });
     showToast(`Đã thêm ${order.items.length} sản phẩm vào giỏ hàng thành công! Đang chuyển đến giỏ hàng...`, 'success');
     navigate('/cart');
+  };
+
+  const handleSmartOneClickReorder = async (order) => {
+    if (!order || !order.items || order.items.length === 0) {
+      showToast('Đơn hàng không có sản phẩm để mua lại', 'warning');
+      return;
+    }
+    try {
+      const orderId = order._id || order.id || order.orderId;
+      const res = await executeSmartOneClickReorderAPI(orderId);
+      const discount = res?.reorderSavings || Math.round((order.subtotal || order.total || 0) * 0.1);
+      
+      // Update local storage order list if new order returned
+      if (res?.newOrder) {
+        saveOrders([res.newOrder, ...orders]);
+      }
+      
+      showToast(`Mua lại 1-Click thành công! Bạn nhận voucher tri ân giảm ${discount.toLocaleString('vi-VN')}₫ (Mã REORDER10)`, 'success');
+      navigate('/orders');
+    } catch (err) {
+      // Fallback: Thêm vào giỏ hàng thông thường
+      handleReorderWholeOrder(order);
+    }
   };
 
   const handleConfirmDelivered = (orderId) => {
@@ -2300,6 +2323,32 @@ export default function OrderHistoryPage() {
                               <RefreshIcon size={11} color="#10b981" />
                             </span>
                             <span>{t('buy_again_whole', 'Mua lại đơn này')}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="shopee-btn"
+                            style={{
+                              background: 'linear-gradient(135deg, #10b981, #059669)',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '6px 12px',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)',
+                            }}
+                            onClick={() => handleSmartOneClickReorder(ord)}
+                            title="Tự động đặt lại đơn hàng với mã giảm tri ân 10% REORDER10"
+                          >
+                            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <RefreshIcon size={10} color="#ffffff" />
+                            </span>
+                            <span>1-Click Reorder (-10%)</span>
                           </button>
 
                           {ord.reviewed ? (

@@ -943,6 +943,12 @@ export async function verifyUnboxingVideoProofAPI(orderId, { status, verifiedBy,
   });
 }
 
-
-
-
+/**
+ * Smart 1-Click Reorder Suite & Loyalty Voucher (Feature 103)
+ */
+export async function executeSmartOneClickReorderAPI(orderId) {
+  const result = await apiRequest(`/api/orders/${orderId}/smart-reorder`, {
+    method: "POST",
+  });
+  return result?.data || result;
+}
