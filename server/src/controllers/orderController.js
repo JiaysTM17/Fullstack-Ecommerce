@@ -2058,5 +2058,66 @@ export const updateEcoPackagingOption = async (req, res) => {
   }
 };
 
+// @desc    Chuyển giao tủ nhận hàng tự động thông minh 24/7 Shopee Locker (Feature 107)
+// @route   POST /api/orders/:id/smart-locker
+// @access  Public / Authenticate
+export const assignSmartLockerDelivery = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      lockerStationId = "SPX_LOCKER_CGI_01",
+      lockerStationName = "Trạm Tủ Thông Minh SPX - Toà Keangnam Landmark",
+      lockerStationAddress = "Phạm Hùng, Nam Từ Liêm, Hà Nội",
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần gửi vào tủ thông minh", 404);
+    }
+
+    // Sinh mã OTP mở tủ 6 chữ số ngẫu nhiên & ngăn tủ
+    const pinCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const compartmentId = `BOX_${Math.floor(1 + Math.random() * 48)}`;
+    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(); // 48 giờ để lấy hàng
+    const now = new Date().toISOString();
+
+    order.contactlessLockerDelivery = {
+      isRequested: true,
+      lockerStationId,
+      lockerStationName,
+      lockerStationAddress,
+      compartmentPinCode: pinCode,
+      compartmentId,
+      pinExpiresAt: expiresAt,
+      pickupStatus: "delivered_in_locker",
+      pickedUpAt: null,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Bưu phẩm đã được lưu trữ an toàn tại ${lockerStationName} (Ngăn ${compartmentId}). Mã mở tủ: ${pinCode} (Hạn nhận: 48h)`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      contactlessLockerDelivery: order.contactlessLockerDelivery,
+      message: `Đã giao vào Tủ Thông Minh SPX thành công! Mã nhận hàng của bạn là: ${pinCode}`,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 

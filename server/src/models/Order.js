@@ -211,6 +211,21 @@ const orderSchema = new mongoose.Schema(
       plasticFreeGuaranteed: { type: Boolean, default: false },
       rewardCoinsIssued: { type: Number, default: 0 },
     },
+    contactlessLockerDelivery: {
+      isRequested: { type: Boolean, default: false },
+      lockerStationId: { type: String, default: "" },
+      lockerStationName: { type: String, default: "" },
+      lockerStationAddress: { type: String, default: "" },
+      compartmentPinCode: { type: String, default: "" },
+      compartmentId: { type: String, default: "" },
+      pinExpiresAt: { type: String, default: null },
+      pickupStatus: {
+        type: String,
+        enum: ["none", "allocated", "delivered_in_locker", "picked_up", "expired_returned"],
+        default: "none",
+      },
+      pickedUpAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

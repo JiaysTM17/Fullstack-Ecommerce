@@ -2151,6 +2151,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.contactlessLockerDelivery?.isRequested && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Trạm tủ: ${ord.contactlessLockerDelivery.lockerStationName}. Mã mở ngăn: ${ord.contactlessLockerDelivery.compartmentPinCode}`}>
+                            <span style={{ fontSize: '13px' }}>📦</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#7c3aed',
+                              background: '#f3e8ff',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Tủ SPX: #{ord.contactlessLockerDelivery.compartmentId} (Mã: {ord.contactlessLockerDelivery.compartmentPinCode})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

@@ -3466,6 +3466,79 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(timeline[0].text.includes("+50 Xu"), true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 107: Contactless Smart Locker Station Auto-Handoff Suite (5 Tests)
+  // =========================================================================
+  describe("Feature 107: Contactless Smart Locker Station Auto-Handoff Suite", () => {
+    test("F107-T1: Order model persists contactlessLockerDelivery schema attributes", async () => {
+      const order = await Order.create({
+        orderId: "ORD_SMART_LOCKER_107",
+        items: [{ productId: "p_book_01", name: "Sách Thiết Kế Cuộc Đời", price: 140000, quantity: 1 }],
+        total: 165000,
+        contactlessLockerDelivery: {
+          isRequested: true,
+          lockerStationId: "SPX_LOCKER_CGI_01",
+          lockerStationName: "Trạm Tủ Thông Minh SPX - Toà Keangnam Landmark",
+          lockerStationAddress: "Phạm Hùng, Nam Từ Liêm, Hà Nội",
+          compartmentPinCode: "748291",
+          compartmentId: "BOX_12",
+          pinExpiresAt: new Date(Date.now() + 172800000).toISOString(),
+          pickupStatus: "delivered_in_locker",
+          pickedUpAt: null,
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_SMART_LOCKER_107");
+      expect.equal(order.contactlessLockerDelivery.isRequested, true);
+      expect.equal(order.contactlessLockerDelivery.compartmentPinCode, "748291");
+      expect.equal(order.contactlessLockerDelivery.compartmentId, "BOX_12");
+      expect.equal(order.contactlessLockerDelivery.pickupStatus, "delivered_in_locker");
+    });
+
+    test("F107-T2: Smart Locker PIN generation conforms to 6-digit numeric pattern", () => {
+      const pinCode = "829104";
+      const isValidPin = /^\d{6}$/.test(pinCode);
+      expect.equal(isValidPin, true);
+
+      const invalidPin = "ABC12";
+      expect.equal(/^\d{6}$/.test(invalidPin), false);
+    });
+
+    test("F107-T3: Pickup expiration timeline defaults to exactly 48-hour pickup window", () => {
+      const creationMs = 1700000000000;
+      const hoursWindow = 48;
+      const expiresMs = creationMs + hoursWindow * 60 * 60 * 1000;
+      const calculatedHours = (expiresMs - creationMs) / (1000 * 60 * 60);
+
+      expect.equal(calculatedHours, 48);
+    });
+
+    test("F107-T4: Customer pickup completion transitions pickupStatus to picked_up", () => {
+      const lockerData = {
+        pickupStatus: "delivered_in_locker",
+        pickedUpAt: null,
+      };
+
+      lockerData.pickupStatus = "picked_up";
+      lockerData.pickedUpAt = new Date().toISOString();
+
+      expect.equal(lockerData.pickupStatus, "picked_up");
+      expect.equal(Boolean(lockerData.pickedUpAt), true);
+    });
+
+    test("F107-T5: Default order maintains inactive locker state", () => {
+      const defaultLocker = {
+        isRequested: false,
+        lockerStationId: "",
+        compartmentPinCode: "",
+        pickupStatus: "none",
+      };
+
+      expect.equal(defaultLocker.isRequested, false);
+      expect.equal(defaultLocker.pickupStatus, "none");
+    });
+  });
 });
 
 

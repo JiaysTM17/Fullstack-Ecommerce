@@ -986,4 +986,16 @@ export async function updateEcoPackagingOptionAPI(orderId, { isOptedIn, boxType,
   return result?.data || result;
 }
 
+/**
+ * Contactless Smart Locker Station Auto-Handoff Suite (Feature 107)
+ */
+export async function assignSmartLockerDeliveryAPI(orderId, { lockerStationId, lockerStationName, lockerStationAddress } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/smart-locker`, {
+    method: "POST",
+    body: JSON.stringify({ lockerStationId, lockerStationName, lockerStationAddress }),
+  });
+  return result?.data || result;
+}
+
+
 

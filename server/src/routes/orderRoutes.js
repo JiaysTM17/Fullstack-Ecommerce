@@ -27,6 +27,7 @@ import {
   calculateMultiWarehouseRouting,
   updateDynamicDeliveryAddress,
   updateEcoPackagingOption,
+  assignSmartLockerDelivery,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -66,6 +67,7 @@ router.post("/:id/smart-reorder", optionalAuthenticate, executeSmartOneClickReor
 router.post("/:id/warehouse-routing", optionalAuthenticate, calculateMultiWarehouseRouting);
 router.patch("/:id/dynamic-address", optionalAuthenticate, updateDynamicDeliveryAddress);
 router.patch("/:id/eco-packaging", optionalAuthenticate, updateEcoPackagingOption);
+router.post("/:id/smart-locker", optionalAuthenticate, assignSmartLockerDelivery);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);
