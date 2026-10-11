@@ -364,6 +364,24 @@ const orderSchema = new mongoose.Schema(
       },
       creditedAt: { type: String, default: null },
     },
+    autonomousDroneDelivery: {
+      isDroneEligible: { type: Boolean, default: false },
+      droneCallsign: { type: String, default: "" },
+      flightAltitudeMeters: { type: Number, default: 120 },
+      flightSpeedKmh: { type: Number, default: 65 },
+      batteryLevelPercent: { type: Number, default: 92 },
+      helipadCoordinates: {
+        lat: { type: Number, default: 10.7769 },
+        lng: { type: Number, default: 106.7009 },
+      },
+      tetherDropStatus: {
+        type: String,
+        enum: ["none", "takeoff_clearance", "airborne_cruise", "hovering_above_pad", "winch_cable_lowered", "landed_safely"],
+        default: "none",
+      },
+      windSpeedKnots: { type: Number, default: 8.5 },
+      flightLogId: { type: String, default: "" },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

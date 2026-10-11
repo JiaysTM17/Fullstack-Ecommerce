@@ -1093,6 +1093,18 @@ export async function submitDoorstepApplianceTradeInAPI(orderId, { applianceType
   return result?.data || result;
 }
 
+/**
+ * Autonomous Drone Flight Delivery Route & Helipad Drop Simulator (Feature 117)
+ */
+export async function dispatchAutonomousDroneFlightAPI(orderId, { droneCallsign, flightAltitudeMeters, flightSpeedKmh, tetherDropStatus, helipadCoordinates } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/drone-dispatch`, {
+    method: "POST",
+    body: JSON.stringify({ droneCallsign, flightAltitudeMeters, flightSpeedKmh, tetherDropStatus, helipadCoordinates }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 

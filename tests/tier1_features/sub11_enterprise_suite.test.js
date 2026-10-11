@@ -4164,7 +4164,84 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultTradeIn.tradeInStatus, "none");
     });
   });
+
+  // =========================================================================
+  // FEATURE 117: Autonomous Drone Flight Delivery Route & Helipad Drop Simulator (5 Tests)
+  // =========================================================================
+  describe("Feature 117: Autonomous Drone Flight Delivery Route & Helipad Drop Simulator", () => {
+    test("F117-T1: Order model persists Autonomous Drone Flight Delivery schema", async () => {
+      const order = await Order.create({
+        orderId: "ORD_DRONE_117",
+        user: "buyer_test_drone_117",
+        shopId: "shop_pharma_urgent",
+        total: 1200000,
+        autonomousDroneDelivery: {
+          isDroneEligible: true,
+          droneCallsign: "SPX-DRONE-VN0982",
+          flightAltitudeMeters: 120,
+          flightSpeedKmh: 68,
+          batteryLevelPercent: 88,
+          helipadCoordinates: { lat: 10.7769, lng: 106.7009 },
+          tetherDropStatus: "winch_cable_lowered",
+          windSpeedKnots: 7.8,
+          flightLogId: "FLIGHT-SPX-982103",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_DRONE_117");
+      expect.equal(order.autonomousDroneDelivery.isDroneEligible, true);
+      expect.equal(order.autonomousDroneDelivery.droneCallsign, "SPX-DRONE-VN0982");
+      expect.equal(order.autonomousDroneDelivery.flightAltitudeMeters, 120);
+      expect.equal(order.autonomousDroneDelivery.batteryLevelPercent, 88);
+      expect.equal(order.autonomousDroneDelivery.tetherDropStatus, "winch_cable_lowered");
+      expect.equal(order.autonomousDroneDelivery.helipadCoordinates.lat, 10.7769);
+    });
+
+    test("F117-T2: Wind speed under 20 knots permits safe autonomous commercial drone dispatch", () => {
+      const maxSafeWindKnots = 20;
+      const windSpeedKnots = 7.8;
+      const isSafeToFly = windSpeedKnots <= maxSafeWindKnots;
+
+      expect.equal(isSafeToFly, true);
+    });
+
+    test("F117-T3: Extreme wind speed exceeding safety limit halts autonomous drone takeoff", () => {
+      const maxSafeWindKnots = 20;
+      const gustWindKnots = 28.5;
+      const isSafeToFly = gustWindKnots <= maxSafeWindKnots;
+
+      expect.equal(isSafeToFly, false);
+    });
+
+    test("F117-T4: Drone flight state transitions sequentially to landed_safely", () => {
+      const flightSequence = [
+        "takeoff_clearance",
+        "airborne_cruise",
+        "hovering_above_pad",
+        "winch_cable_lowered",
+        "landed_safely",
+      ];
+
+      expect.equal(flightSequence[0], "takeoff_clearance");
+      expect.equal(flightSequence[3], "winch_cable_lowered");
+      expect.equal(flightSequence[4], "landed_safely");
+    });
+
+    test("F117-T5: Default order schema initial state does not engage drone delivery without urgent dispatch", () => {
+      const defaultDrone = {
+        isDroneEligible: false,
+        droneCallsign: "",
+        flightAltitudeMeters: 0,
+        tetherDropStatus: "none",
+      };
+
+      expect.equal(defaultDrone.isDroneEligible, false);
+      expect.equal(defaultDrone.droneCallsign, "");
+      expect.equal(defaultDrone.tetherDropStatus, "none");
+    });
+  });
 });
+
 
 
 

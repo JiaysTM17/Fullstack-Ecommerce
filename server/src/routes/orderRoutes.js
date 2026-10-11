@@ -37,6 +37,7 @@ import {
   consolidateOrderPackaging,
   updatePriorityColdChainDispatch,
   submitDoorstepApplianceTradeIn,
+  dispatchAutonomousDroneFlight,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -86,6 +87,7 @@ router.post("/:id/ai-damage-claim", optionalAuthenticate, evaluateAiDamageClaim)
 router.post("/:id/consolidate-packaging", optionalAuthenticate, consolidateOrderPackaging);
 router.post("/:id/cold-chain", optionalAuthenticate, updatePriorityColdChainDispatch);
 router.post("/:id/doorstep-trade-in", optionalAuthenticate, submitDoorstepApplianceTradeIn);
+router.post("/:id/drone-dispatch", optionalAuthenticate, dispatchAutonomousDroneFlight);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

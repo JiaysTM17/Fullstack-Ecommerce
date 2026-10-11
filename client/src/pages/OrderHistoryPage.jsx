@@ -2341,6 +2341,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.autonomousDroneDelivery?.isDroneEligible && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Drone SPX (#${ord.autonomousDroneDelivery.droneCallsign}): Độ cao ${ord.autonomousDroneDelivery.flightAltitudeMeters}m, tốc độ ${ord.autonomousDroneDelivery.flightSpeedKmh}km/h. Thả cáp: ${ord.autonomousDroneDelivery.tetherDropStatus}. Pin: ${ord.autonomousDroneDelivery.batteryLevelPercent}%`}>
+                            <span style={{ fontSize: '13px' }}>🛸</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#0284c7',
+                              background: '#e0f2fe',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Drone SPX: #{ord.autonomousDroneDelivery.droneCallsign} ({ord.autonomousDroneDelivery.tetherDropStatus === 'winch_cable_lowered' ? 'Hạ Cáp Thả Kiện' : 'Đang Bay'})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

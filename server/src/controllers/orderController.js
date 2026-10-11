@@ -2675,6 +2675,68 @@ export const submitDoorstepApplianceTradeIn = async (req, res) => {
   }
 };
 
+// @desc    Điều phối máy bay không người lái giao hàng tự động & mô phỏng thả cáp Helipad (Feature 117)
+// @route   POST /api/orders/:id/drone-dispatch
+// @access  Public / Authenticate
+export const dispatchAutonomousDroneFlight = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      droneCallsign = `SPX-DRONE-VN${Date.now().toString().slice(-4)}`,
+      flightAltitudeMeters = 120,
+      flightSpeedKmh = 68,
+      tetherDropStatus = "winch_cable_lowered",
+      helipadCoordinates = { lat: 10.7769, lng: 106.7009 },
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần điều phối Drone giao khẩn cấp", 404);
+    }
+
+    const now = new Date().toISOString();
+    const flightLogId = `FLIGHT-SPX-${Date.now().toString().slice(-6)}`;
+    const windSpeedKnots = 7.8; // Gió 7.8 knots, an toàn cho bay thương mại
+
+    order.autonomousDroneDelivery = {
+      isDroneEligible: true,
+      droneCallsign,
+      flightAltitudeMeters: Number(flightAltitudeMeters),
+      flightSpeedKmh: Number(flightSpeedKmh),
+      batteryLevelPercent: 88,
+      helipadCoordinates,
+      tetherDropStatus,
+      windSpeedKnots,
+      flightLogId,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Hệ thống Điều Phối Drone SPX (#${droneCallsign}): Độ cao bay ${flightAltitudeMeters}m, tốc độ ${flightSpeedKmh}km/h. Tọa độ đáp: [${helipadCoordinates.lat}, ${helipadCoordinates.lng}]. Trạng thái thả kiện: ${tetherDropStatus} [Log: #${flightLogId}].`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      autonomousDroneDelivery: order.autonomousDroneDelivery,
+      message: `Đã kích hoạt Drone ${droneCallsign}! Trạng thái: ${tetherDropStatus}.`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 
