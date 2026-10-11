@@ -11,7 +11,7 @@ import ProductQASection from "../components/ProductQASection";
 import { addRecentlyViewed } from "../services/recentlyViewedService";
 import ShopChatModal from "../components/ShopChatModal";
 import { addProductReview, getProductById, getProducts, getRelatedProducts, getProductReviewStats } from "../services/productService";
-import { calculateProductVolumeDiscountAPI } from "../services/api";
+import { calculateProductVolumeDiscountAPI, fetchProductWarrantyPlansAPI } from "../services/api";
 import { addToWishlist as apiAddToWishlist, removeFromWishlist as apiRemoveFromWishlist } from "../services/wishlistService";
 import { formatCurrency } from "../utils/formatCurrency";
 import {
@@ -21,6 +21,7 @@ import {
   HeartIcon,
   CopyIcon,
   ShieldIcon,
+  ShieldCheckIcon,
   ChatIcon,
   StoreIcon,
   PencilIcon,
@@ -75,6 +76,8 @@ export default function ProductDetailPage() {
   const [selectedStarFilter, setSelectedStarFilter] = useState("all");
   const [isAddedFeedback, setIsAddedFeedback] = useState(false);
   const [volumeDiscountInfo, setVolumeDiscountInfo] = useState(null);
+  const [warrantyPlans, setWarrantyPlans] = useState([]);
+  const [selectedWarrantyPlan, setSelectedWarrantyPlan] = useState(null);
 
   // Dynamic Volume Discount calculation effect
   useEffect(() => {
@@ -83,6 +86,13 @@ export default function ProductDetailPage() {
     calculateProductVolumeDiscountAPI(targetId, quantity)
       .then((res) => {
         if (res) setVolumeDiscountInfo(res);
+      })
+      .catch(() => {});
+
+    // Feature 99: Load Shopee Care+ Extended Warranty Plans
+    fetchProductWarrantyPlansAPI(targetId)
+      .then((plans) => {
+        if (Array.isArray(plans)) setWarrantyPlans(plans);
       })
       .catch(() => {});
   }, [product, quantity]);
@@ -163,6 +173,7 @@ export default function ProductDetailPage() {
         ...product,
         selectedColor,
         selectedSize,
+        warrantyProtection: selectedWarrantyPlan || null,
       },
       quantity
     );
@@ -177,6 +188,7 @@ export default function ProductDetailPage() {
         ...product,
         selectedColor,
         selectedSize,
+        warrantyProtection: selectedWarrantyPlan || null,
       },
       quantity
     );
@@ -619,6 +631,72 @@ export default function ProductDetailPage() {
                   🎉 Bạn đã đạt mức chiết khấu số lượng tối đa cho sản phẩm này!
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Feature 99: Shopee Care+ Extended Warranty & Damage Protection */}
+          {warrantyPlans && warrantyPlans.length > 0 && (
+            <div
+              style={{
+                margin: "12px 0 16px",
+                padding: "12px 14px",
+                background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
+                border: "1px solid #86efac",
+                borderRadius: "10px",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 800, color: "#166534", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <ShieldCheckIcon size={14} color="#16a34a" />
+                  <span>Bảo Hiểm Thiết Bị Shopee Care+</span>
+                </span>
+                <span style={{ fontSize: "10.5px", background: "#22c55e", color: "#ffffff", padding: "1px 6px", borderRadius: "4px", fontWeight: 800 }}>
+                  Chính Hãng
+                </span>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {warrantyPlans.map((plan) => {
+                  const isSelected = selectedWarrantyPlan?.planId === plan.planId;
+                  return (
+                    <div
+                      key={plan.planId}
+                      onClick={() => setSelectedWarrantyPlan(isSelected ? null : plan)}
+                      style={{
+                        padding: "8px 10px",
+                        borderRadius: "8px",
+                        border: isSelected ? "1.5px solid #16a34a" : "1px solid #bbf7d0",
+                        background: isSelected ? "#ffffff" : "rgba(255, 255, 255, 0.65)",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "8px",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {}}
+                        style={{ marginTop: "3px", accentColor: "#16a34a", cursor: "pointer" }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "6px" }}>
+                          <span style={{ fontSize: "12px", fontWeight: 700, color: "#14532d" }}>
+                            {plan.name}
+                          </span>
+                          <span style={{ fontSize: "12px", fontWeight: 800, color: "#15803d", whiteSpace: "nowrap" }}>
+                            +{formatCurrency(plan.price)}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#475569", marginTop: "2px", lineHeight: 1.35 }}>
+                          {plan.coverage}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

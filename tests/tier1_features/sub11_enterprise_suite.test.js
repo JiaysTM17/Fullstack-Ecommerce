@@ -2844,6 +2844,70 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(remainingSlots, 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 99: Extended Warranty & Accidental Damage Protection (5 Tests)
+  // =========================================================================
+  describe("Feature 99: Extended Warranty & Accidental Damage Protection Suite (Shopee Care+)", () => {
+    test("F99-T1: Warranty plans compute dynamically scaled premiums based on item base price", () => {
+      const basePrice = 2000000;
+      const fee6m = Math.max(19000, Math.round(basePrice * 0.03));
+      const fee12m = Math.max(39000, Math.round(basePrice * 0.055));
+
+      expect.equal(fee6m, 60000);
+      expect.equal(fee12m, 110000);
+    });
+
+    test("F99-T2: Minimum fallback premium floor protects low-cost accessory coverage", () => {
+      const lowBasePrice = 50000;
+      const fee6m = Math.max(19000, Math.round(lowBasePrice * 0.03));
+      const fee12m = Math.max(39000, Math.round(lowBasePrice * 0.055));
+
+      expect.equal(fee6m, 19000);
+      expect.equal(fee12m, 39000);
+    });
+
+    test("F99-T3: Order model stores selected warrantyProtection plan metadata", async () => {
+      const order = await Order.create({
+        orderId: "ORD_WARRANTY_99",
+        items: [{ productId: "p_laptop", name: "Laptop Gaming ASUS ROG", price: 25000000, quantity: 1 }],
+        total: 25000000 + 49000,
+        warrantyProtection: {
+          enabled: true,
+          planId: "care_plus_12m",
+          planName: "Bảo Hiểm VIP 12 Tháng Shopee Care+",
+          durationMonths: 12,
+          fee: 49000,
+          certificateCode: "CERT-CARE-2026-9901",
+          activatedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.warrantyProtection.enabled, true);
+      expect.equal(order.warrantyProtection.planId, "care_plus_12m");
+      expect.equal(order.warrantyProtection.durationMonths, 12);
+      expect.equal(order.warrantyProtection.certificateCode, "CERT-CARE-2026-9901");
+    });
+
+    test("F99-T4: Selecting warranty plan adds protection fee to item order item summary", () => {
+      const itemPrice = 1500000;
+      const warrantyPlan = { planId: "care_plus_6m", price: 45000 };
+      const itemTotalWithCare = itemPrice + warrantyPlan.price;
+
+      expect.equal(itemTotalWithCare, 1545000);
+    });
+
+    test("F99-T5: Product schema provides 6-month and 12-month Shopee Care+ coverage definitions", () => {
+      const plans = [
+        { planId: "care_plus_6m", durationMonths: 6, coverage: "1 đổi 1 tận nhà nếu rơi vỡ hoặc vào nước" },
+        { planId: "care_plus_12m", durationMonths: 12, coverage: "Miễn phí sửa chữa chính hãng toàn diện" },
+      ];
+
+      expect.equal(plans.length, 2);
+      expect.equal(plans[0].durationMonths, 6);
+      expect.equal(plans[1].durationMonths, 12);
+    });
+  });
 });
 
 

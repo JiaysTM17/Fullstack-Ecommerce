@@ -111,6 +111,15 @@ const orderSchema = new mongoose.Schema(
       inspectedAt: { type: String, default: null },
       photoProof: { type: [String], default: [] },
     },
+    warrantyProtection: {
+      enabled: { type: Boolean, default: false },
+      planId: { type: String, default: null },
+      planName: { type: String, default: "" },
+      durationMonths: { type: Number, default: 0 },
+      fee: { type: Number, default: 0 },
+      certificateCode: { type: String, default: null },
+      activatedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

@@ -143,6 +143,25 @@ const productSchema = new mongoose.Schema(
         },
       ],
     },
+    warrantyProtection: {
+      enabled: { type: Boolean, default: true },
+      plans: [
+        {
+          planId: { type: String, default: "care_plus_6m" },
+          name: { type: String, default: "Bảo Hiểm Toàn Diện 6 Tháng" },
+          durationMonths: { type: Number, default: 6 },
+          price: { type: Number, default: 29000 },
+          coverage: { type: String, default: "1 đổi 1 tận nhà nếu rơi vỡ, vào nước hoặc lỗi kỹ thuật" },
+        },
+        {
+          planId: { type: String, default: "care_plus_12m" },
+          name: { type: String, default: "Bảo Hiểm VIP 12 Tháng Shopee Care+" },
+          durationMonths: { type: Number, default: 12 },
+          price: { type: Number, default: 49000 },
+          coverage: { type: String, default: "Miễn phí sửa chữa chính hãng + Bồi thường tối đa 100% giá trị máy" },
+        },
+      ],
+    },
   },
   { timestamps: true }
 );

@@ -739,6 +739,49 @@ export const calculateVolumeDiscount = catchAsync(async (req, res) => {
   }, 200, "Tính toán chiết khấu mua sỉ / số lượng lớn thành công");
 });
 
+// @desc    Lấy danh sách các gói bảo hành mở rộng & bảo hiểm rơi vỡ Shopee Care+ (Feature 99)
+// @route   GET /api/products/:id/warranty-plans
+// @access  Public
+export const getProductWarrantyPlans = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const product = await Product.findById(id);
+
+  if (!product) {
+    return sendError(res, "Không tìm thấy sản phẩm", 404);
+  }
+
+  const basePrice = product.price || 100000;
+  // Tính phí bảo hiểm tương thích linh hoạt dựa trên giá trị của sản phẩm (khoảng 3% và 5% giá trị)
+  const fee6m = Math.max(19000, Math.round(basePrice * 0.03));
+  const fee12m = Math.max(39000, Math.round(basePrice * 0.055));
+
+  const plans = [
+    {
+      planId: "care_plus_6m",
+      name: "Bảo Hiểm Toàn Diện 6 Tháng",
+      durationMonths: 6,
+      price: fee6m,
+      coverage: "1 đổi 1 tận nhà nếu rơi vỡ, vào nước hoặc lỗi kỹ thuật do NSX",
+      highlight: "Gói Phổ Biến",
+    },
+    {
+      planId: "care_plus_12m",
+      name: "Bảo Hiểm VIP 12 Tháng Shopee Care+",
+      durationMonths: 12,
+      price: fee12m,
+      coverage: "Miễn phí sửa chữa chính hãng + Bồi thường tối đa 100% giá trị máy khi không thể phục hồi",
+      highlight: "Bảo Vệ Tối Đa",
+    },
+  ];
+
+  return sendSuccess(res, {
+    productId: id,
+    productName: product.name,
+    productPrice: basePrice,
+    warrantyPlans: plans,
+  }, 200, "Lấy danh mục gói bảo hành mở rộng thành công");
+});
+
 export default {
   getProducts,
   getProductById,
@@ -757,4 +800,5 @@ export default {
   getGroupBuyDeals,
   joinGroupBuyTeam,
   calculateVolumeDiscount,
+  getProductWarrantyPlans,
 };

@@ -17,6 +17,7 @@ import {
   getGroupBuyDeals,
   joinGroupBuyTeam,
   calculateVolumeDiscount,
+  getProductWarrantyPlans,
 } from "../controllers/productController.js";
 import { optionalAuthenticate } from "../middlewares/auth.js";
 
@@ -43,6 +44,7 @@ router.post("/:id/questions/:questionId/answers", optionalAuthenticate, answerPr
 router.get("/:id/related", getRelatedProducts);
 router.get("/:id/review-stats", getProductReviewStats);
 router.post("/:id/volume-discount", calculateVolumeDiscount);
+router.get("/:id/warranty-plans", getProductWarrantyPlans);
 router.get("/:id", getProductById);
 
 export default router;

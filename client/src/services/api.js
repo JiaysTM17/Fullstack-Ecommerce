@@ -885,6 +885,14 @@ export async function claimLiveFlashVoucherAPI(dropId, userId) {
   });
 }
 
+/**
+ * Extended Warranty & Accidental Damage Protection Suite (Shopee Care+) API (Feature 99)
+ */
+export async function fetchProductWarrantyPlansAPI(productId) {
+  const result = await apiRequest(`/api/products/${productId}/warranty-plans`);
+  return result?.data?.warrantyPlans || result?.warrantyPlans || [];
+}
+
 
 
 
