@@ -45,6 +45,7 @@ import {
   recordMultiCarrierCarbonLedger,
   evaluateVideoReturnResaleGrading,
   updateAcousticAntiTamperTelemetry,
+  updateMicroHubPouchLockBoxHandoff,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -102,6 +103,7 @@ router.post("/:id/fragile-shock-telemetry", optionalAuthenticate, updateFragileS
 router.post("/:id/carrier-carbon-ledger", optionalAuthenticate, recordMultiCarrierCarbonLedger);
 router.post("/:id/ai-return-resale-grading", optionalAuthenticate, evaluateVideoReturnResaleGrading);
 router.post("/:id/acoustic-anti-tamper", optionalAuthenticate, updateAcousticAntiTamperTelemetry);
+router.post("/:id/micro-hub-pouch-handoff", optionalAuthenticate, updateMicroHubPouchLockBoxHandoff);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

@@ -3188,6 +3188,91 @@ export const updateAcousticAntiTamperTelemetry = async (req, res) => {
   }
 };
 
+// @desc    Bàn giao túi niêm phong tại tủ trung chuyển bưu cục mini tự động (Micro-Hub Pouch Lock Box Handoff)
+// @route   POST /api/orders/:id/micro-hub-pouch-handoff
+// @access  Public / Optional Auth / Courier Webhook
+export const updateMicroHubPouchLockBoxHandoff = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      microHubId,
+      pouchBarcode,
+      compartmentSlotNumber = 12,
+      carrierHandoffStatus = "courier_deposited",
+      courierDepositBadgeId = "SPX-COURIER-771",
+      lockerPasscodePin,
+    } = req.body;
+
+    if (!microHubId) {
+      return sendError(res, "Thiếu mã trạm bưu cục mini (microHubId)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần bàn giao tại tủ bưu cục mini", 404);
+    }
+
+    const now = new Date().toISOString();
+    const generatedPin = lockerPasscodePin || String(Math.floor(100000 + Math.random() * 900000));
+    const finalPouchBarcode = pouchBarcode || `POUCH-SEC-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const isRetrieved = carrierHandoffStatus === "courier_retrieved_out_for_delivery";
+    const depositedAt = isRetrieved
+      ? (order.microHubPouchLockBoxHandoff?.depositedAt || now)
+      : now;
+    const retrievedAt = isRetrieved ? now : null;
+
+    order.microHubPouchLockBoxHandoff = {
+      isPouchLocked: true,
+      microHubId,
+      pouchBarcode: finalPouchBarcode,
+      compartmentSlotNumber: Number(compartmentSlotNumber) || 12,
+      lockerPasscodePin: generatedPin,
+      carrierHandoffStatus,
+      depositedAt,
+      retrievedAt,
+      courierDepositBadgeId,
+    };
+
+    const statusMap = {
+      courier_deposited: `Bưu tá (${courierDepositBadgeId}) đã gửi túi niêm phong ${finalPouchBarcode} vào ngăn #${compartmentSlotNumber} trạm ${microHubId}. Mã PIN: ${generatedPin}.`,
+      hub_sorted_ready: `Trạm ${microHubId}: Túi niêm phong đã sẵn sàng để bưu tá giao chặng cuối lấy đi phát.`,
+      courier_retrieved_out_for_delivery: `Bưu tá chặng cuối đã mở ngăn #${compartmentSlotNumber} trạm ${microHubId} lấy túi niêm phong đi giao khách.`,
+    };
+
+    const timelineText = statusMap[carrierHandoffStatus] || `Cập nhật bàn giao tủ bưu cục mini: [${carrierHandoffStatus}] tại ${microHubId}.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: timelineText,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        microHubPouchLockBoxHandoff: order.microHubPouchLockBoxHandoff,
+        message: `Đã cập nhật trạng thái bàn giao tủ trung chuyển bưu cục mini thành công (${carrierHandoffStatus})!`,
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

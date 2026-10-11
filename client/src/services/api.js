@@ -1181,6 +1181,17 @@ export async function updateAcousticAntiTamperTelemetryAPI(orderId, { sensorId, 
   return result?.data || result;
 }
 
+/**
+ * Automated Courier Micro-Hub Pouch Lock Box Handoff (Feature 125)
+ */
+export async function updateMicroHubPouchLockBoxHandoffAPI(orderId, { microHubId, pouchBarcode, compartmentSlotNumber, carrierHandoffStatus, courierDepositBadgeId, lockerPasscodePin } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/micro-hub-pouch-handoff`, {
+    method: "POST",
+    body: JSON.stringify({ microHubId, pouchBarcode, compartmentSlotNumber, carrierHandoffStatus, courierDepositBadgeId, lockerPasscodePin }),
+  });
+  return result?.data || result;
+}
+
 
 
 

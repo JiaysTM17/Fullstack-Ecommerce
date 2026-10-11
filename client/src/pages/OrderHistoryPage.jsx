@@ -2493,6 +2493,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.microHubPouchLockBoxHandoff?.isPouchLocked && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Tủ Bưu Cục Mini (#${ord.microHubPouchLockBoxHandoff.microHubId}): Ngăn tủ #${ord.microHubPouchLockBoxHandoff.compartmentSlotNumber} (Mã PIN: ${ord.microHubPouchLockBoxHandoff.lockerPasscodePin}). Túi niêm phong: ${ord.microHubPouchLockBoxHandoff.pouchBarcode}. Trạng thái: ${ord.microHubPouchLockBoxHandoff.carrierHandoffStatus}`}>
+                            <span style={{ fontSize: '13px' }}>🗄️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#0891b2',
+                              background: '#cffafe',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Tủ Bưu Cục Mini: Ngăn #{ord.microHubPouchLockBoxHandoff.compartmentSlotNumber} ({ord.microHubPouchLockBoxHandoff.carrierHandoffStatus === 'courier_deposited' ? 'Đã Nhập Tủ' : ord.microHubPouchLockBoxHandoff.carrierHandoffStatus === 'courier_retrieved_out_for_delivery' ? 'Bưu Tá Đã Lấy' : 'Sẵn Sàng Phát'})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

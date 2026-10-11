@@ -499,6 +499,21 @@ const orderSchema = new mongoose.Schema(
       courierInterceptFlag: { type: Boolean, default: false },
       investigationRef: { type: String, default: null },
     },
+    microHubPouchLockBoxHandoff: {
+      isPouchLocked: { type: Boolean, default: false },
+      microHubId: { type: String, default: null },
+      pouchBarcode: { type: String, default: null },
+      compartmentSlotNumber: { type: Number, default: 0 },
+      lockerPasscodePin: { type: String, default: null },
+      carrierHandoffStatus: {
+        type: String,
+        enum: ["pending_dispatch", "courier_deposited", "hub_sorted_ready", "courier_retrieved_out_for_delivery"],
+        default: "pending_dispatch",
+      },
+      depositedAt: { type: String, default: null },
+      retrievedAt: { type: String, default: null },
+      courierDepositBadgeId: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

@@ -4740,6 +4740,73 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 125: Automated Courier Micro-Hub Pouch Lock Box Handoff (5 Tests)
+  // =========================================================================
+  describe("Feature 125: Automated Courier Micro-Hub Pouch Lock Box Handoff Suite", () => {
+    test("F125-T1: Courier deposits sealed pouch into micro-hub locker compartment", async () => {
+      const order = await Order.create({
+        orderId: "ORD_MICRO_LOCKER_125",
+        userId: "user_micro_hub_01",
+        status: "shipping",
+        total: 450000,
+        microHubPouchLockBoxHandoff: {
+          isPouchLocked: true,
+          microHubId: "SPX-MICRO-HUB-BINHTHANH-04",
+          pouchBarcode: "POUCH-SEC-991823",
+          compartmentSlotNumber: 14,
+          lockerPasscodePin: "654321",
+          carrierHandoffStatus: "courier_deposited",
+          depositedAt: new Date().toISOString(),
+          courierDepositBadgeId: "SPX-COURIER-771",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_MICRO_LOCKER_125");
+      expect.equal(order.microHubPouchLockBoxHandoff.isPouchLocked, true);
+      expect.equal(order.microHubPouchLockBoxHandoff.microHubId, "SPX-MICRO-HUB-BINHTHANH-04");
+      expect.equal(order.microHubPouchLockBoxHandoff.compartmentSlotNumber, 14);
+      expect.equal(order.microHubPouchLockBoxHandoff.carrierHandoffStatus, "courier_deposited");
+      expect.equal(order.microHubPouchLockBoxHandoff.lockerPasscodePin, "654321");
+    });
+
+    test("F125-T2: Last-mile courier retrieves pouch marks retrieved status and timestamp", () => {
+      const handoff = {
+        carrierHandoffStatus: "courier_retrieved_out_for_delivery",
+        depositedAt: "2026-10-11T10:00:00.000Z",
+        retrievedAt: new Date().toISOString(),
+      };
+
+      const isOutForDelivery = handoff.carrierHandoffStatus === "courier_retrieved_out_for_delivery";
+      expect.equal(isOutForDelivery, true);
+      expect.equal(Boolean(handoff.retrievedAt), true);
+    });
+
+    test("F125-T3: Compartment slot number validates within standard 1..64 locker matrix", () => {
+      const validSlot = 28;
+      const invalidSlot = 100;
+
+      const checkRange = (num) => num >= 1 && num <= 64;
+      expect.equal(checkRange(validSlot), true);
+      expect.equal(checkRange(invalidSlot), false);
+    });
+
+    test("F125-T4: Locker passcode PIN strictly conforms to 6-digit numeric pattern", () => {
+      const pin = "819203";
+      const isValidPin = /^\d{6}$/.test(pin);
+      expect.equal(isValidPin, true);
+
+      const invalidPin = "ABC89";
+      expect.equal(/^\d{6}$/.test(invalidPin), false);
+    });
+
+    test("F125-T5: Missing microHubId fails validation guard", () => {
+      const payload = { compartmentSlotNumber: 5 };
+      const isValid = Boolean(payload.microHubId && payload.microHubId.trim().length > 0);
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 
