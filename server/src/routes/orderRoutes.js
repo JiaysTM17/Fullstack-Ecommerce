@@ -41,6 +41,7 @@ import {
   settleColdChainInsuranceClaim,
   optimizeSolarFleetGreenRouting,
   updateRealTimeParcelRerouting,
+  updateFragileShockSensorTelemetry,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -94,6 +95,7 @@ router.post("/:id/drone-dispatch", optionalAuthenticate, dispatchAutonomousDrone
 router.post("/:id/cold-chain-insurance-claim", optionalAuthenticate, settleColdChainInsuranceClaim);
 router.post("/:id/solar-green-fleet", optionalAuthenticate, optimizeSolarFleetGreenRouting);
 router.post("/:id/realtime-reroute", optionalAuthenticate, updateRealTimeParcelRerouting);
+router.post("/:id/fragile-shock-telemetry", optionalAuthenticate, updateFragileShockSensorTelemetry);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

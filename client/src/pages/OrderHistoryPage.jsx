@@ -2417,6 +2417,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.fragileShockSensorTelemetry?.isFragileMonitored && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Cảm biến Chấn Động IoT (#${ord.fragileShockSensorTelemetry.shockSensorId}): Lực va đập ${ord.fragileShockSensorTelemetry.recordedGForce}G [Ngưỡng: ${ord.fragileShockSensorTelemetry.maxGForceLimit}G]. Trạng thái: ${ord.fragileShockSensorTelemetry.autoClaimInsuranceStatus}`}>
+                            <span style={{ fontSize: '13px' }}>🏺</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.fragileShockSensorTelemetry.impactExceeded ? '#dc2626' : '#059669',
+                              background: ord.fragileShockSensorTelemetry.impactExceeded ? '#fee2e2' : '#dcfce7',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Cảm Biến Dễ Vỡ: {ord.fragileShockSensorTelemetry.recordedGForce}G {ord.fragileShockSensorTelemetry.impactExceeded ? `(Đã Đền Bù +${Number(ord.fragileShockSensorTelemetry.insuranceCompensationAmount).toLocaleString('vi-VN')}₫)` : '(An Toàn)'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

@@ -1137,6 +1137,18 @@ export async function updateRealTimeParcelReroutingAPI(orderId, { reroutedAddres
   return result?.data || result;
 }
 
+/**
+ * Smart Fragile Shock-Sensor IoT Telemetry & Impact Abuse Auto-Insurance Claim (Feature 121)
+ */
+export async function updateFragileShockSensorTelemetryAPI(orderId, { shockSensorId, recordedGForce, maxGForceLimit, dropEventCount } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/fragile-shock-telemetry`, {
+    method: "POST",
+    body: JSON.stringify({ shockSensorId, recordedGForce, maxGForceLimit, dropEventCount }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 

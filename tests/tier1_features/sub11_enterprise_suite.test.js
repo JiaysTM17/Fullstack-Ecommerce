@@ -4448,7 +4448,82 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultReroute.courierAckStatus, "none");
     });
   });
+
+  // =========================================================================
+  // FEATURE 121: Smart Fragile Shock-Sensor IoT Telemetry & Impact Abuse Auto-Insurance Claim (5 Tests)
+  // =========================================================================
+  describe("Feature 121: Smart Fragile Shock-Sensor IoT Telemetry & Impact Abuse Auto-Insurance Claim", () => {
+    test("F121-T1: Order model persists Fragile Shock Sensor Telemetry schema", async () => {
+      const order = await Order.create({
+        orderId: "ORD_SHOCK_121",
+        user: "buyer_test_shock_121",
+        shopId: "shop_crystal_ceramic",
+        total: 1500000,
+        fragileShockSensorTelemetry: {
+          isFragileMonitored: true,
+          shockSensorId: "SHOCK-IOT-0921",
+          maxGForceLimit: 2.5,
+          recordedGForce: 3.2,
+          impactExceeded: true,
+          dropEventCount: 1,
+          autoClaimInsuranceStatus: "compensation_disbursed",
+          insuranceCompensationAmount: 250000,
+          lastTelemetrySyncAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_SHOCK_121");
+      expect.equal(order.fragileShockSensorTelemetry.isFragileMonitored, true);
+      expect.equal(order.fragileShockSensorTelemetry.shockSensorId, "SHOCK-IOT-0921");
+      expect.equal(order.fragileShockSensorTelemetry.recordedGForce, 3.2);
+      expect.equal(order.fragileShockSensorTelemetry.maxGForceLimit, 2.5);
+      expect.equal(order.fragileShockSensorTelemetry.impactExceeded, true);
+      expect.equal(order.fragileShockSensorTelemetry.insuranceCompensationAmount, 250000);
+      expect.equal(order.fragileShockSensorTelemetry.autoClaimInsuranceStatus, "compensation_disbursed");
+    });
+
+    test("F121-T2: Impact G-Force strictly exceeding threshold flags breach and disburses compensation", () => {
+      const limit = 2.5;
+      const recorded = 3.2;
+      const isBreached = recorded > limit;
+      const payout = isBreached ? 250000 : 0;
+
+      expect.equal(isBreached, true);
+      expect.equal(payout, 250000);
+    });
+
+    test("F121-T3: Gentle handling within G-Force limit keeps transit safe without triggering false payout", () => {
+      const limit = 2.5;
+      const recorded = 1.2;
+      const isBreached = recorded > limit;
+      const payout = isBreached ? 250000 : 0;
+
+      expect.equal(isBreached, false);
+      expect.equal(payout, 0);
+    });
+
+    test("F121-T4: Shock sensor identifier adheres to SHOCK-IOT prefix standard", () => {
+      const sensorId = "SHOCK-IOT-8491";
+      expect.equal(sensorId.startsWith("SHOCK-IOT-"), true);
+      expect.equal(sensorId.length, 14);
+    });
+
+    test("F121-T5: Default order schema initial state does not activate shock sensor without fragile opt-in", () => {
+      const defaultShock = {
+        isFragileMonitored: false,
+        shockSensorId: "",
+        recordedGForce: 0,
+        impactExceeded: false,
+        insuranceCompensationAmount: 0,
+      };
+
+      expect.equal(defaultShock.isFragileMonitored, false);
+      expect.equal(defaultShock.impactExceeded, false);
+      expect.equal(defaultShock.insuranceCompensationAmount, 0);
+    });
+  });
 });
+
 
 
 

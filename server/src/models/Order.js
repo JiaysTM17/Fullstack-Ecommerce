@@ -434,6 +434,21 @@ const orderSchema = new mongoose.Schema(
       },
       reroutedAt: { type: String, default: null },
     },
+    fragileShockSensorTelemetry: {
+      isFragileMonitored: { type: Boolean, default: false },
+      shockSensorId: { type: String, default: "" },
+      maxGForceLimit: { type: Number, default: 2.5 },
+      recordedGForce: { type: Number, default: 1.1 },
+      impactExceeded: { type: Boolean, default: false },
+      dropEventCount: { type: Number, default: 0 },
+      autoClaimInsuranceStatus: {
+        type: String,
+        enum: ["none", "safe_transit", "impact_breached", "compensation_disbursed"],
+        default: "none",
+      },
+      insuranceCompensationAmount: { type: Number, default: 0 },
+      lastTelemetrySyncAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

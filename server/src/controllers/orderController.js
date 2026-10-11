@@ -2909,6 +2909,72 @@ export const updateRealTimeParcelRerouting = async (req, res) => {
   }
 };
 
+// @desc    Giám sát vi chấn IoT hàng dễ vỡ & tự động bồi thường khi va chạm quá ngưỡng G-Force (Feature 121)
+// @route   POST /api/orders/:id/fragile-shock-telemetry
+// @access  Public / Authenticate
+export const updateFragileShockSensorTelemetry = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      shockSensorId = `SHOCK-IOT-${Date.now().toString().slice(-4)}`,
+      recordedGForce = 3.2,
+      maxGForceLimit = 2.5,
+      dropEventCount = 1,
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần giám sát va đập hàng dễ vỡ", 404);
+    }
+
+    const now = new Date().toISOString();
+    const gForce = Number(recordedGForce);
+    const limit = Number(maxGForceLimit);
+    const impactExceeded = gForce > limit;
+    const compensationAmount = impactExceeded ? 250000 : 0;
+    const autoClaimInsuranceStatus = impactExceeded ? "compensation_disbursed" : "safe_transit";
+
+    order.fragileShockSensorTelemetry = {
+      isFragileMonitored: true,
+      shockSensorId,
+      maxGForceLimit: limit,
+      recordedGForce: gForce,
+      impactExceeded,
+      dropEventCount: Number(dropEventCount),
+      autoClaimInsuranceStatus,
+      insuranceCompensationAmount: compensationAmount,
+      lastTelemetrySyncAt: now,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Cảm biến chấn động IoT (#${shockSensorId}): Lực va đập ghi nhận ${gForce}G [Ngưỡng an toàn: ${limit}G]. ${impactExceeded ? `CẢNH BÁO: Rơi vỡ va chạm mạnh! Tự động đền bù bảo hiểm hàng dễ vỡ ${compensationAmount.toLocaleString('vi-VN')}₫ vào ví.` : "Vận chuyển êm ái, bưu kiện nguyên vẹn an toàn."}`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      fragileShockSensorTelemetry: order.fragileShockSensorTelemetry,
+      message: impactExceeded
+        ? `Đã phát hiện va đập quá ngưỡng (${gForce}G)! Đã kích hoạt bồi thường ${compensationAmount.toLocaleString('vi-VN')}₫.`
+        : `Kiện hàng an toàn, gia tốc chấn động trong chuẩn cho phép (${gForce}G <= ${limit}G).`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 
