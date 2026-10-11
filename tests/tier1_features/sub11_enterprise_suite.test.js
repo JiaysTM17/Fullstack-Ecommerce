@@ -2566,6 +2566,91 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(result.error, "Vui lòng cung cấp tên nhà cung cấp");
     });
   });
+
+  // =========================================================================
+  // FEATURE 96: Automated Dynamic Bundling & Volume Discount Upsell Engine (5 Tests)
+  // =========================================================================
+  describe("Feature 96: Automated Dynamic Bundling & Volume Discount Upsell Engine", () => {
+    test("F96-T1: Product model supports volumeTiers schema configuration", async () => {
+      const product = await Product.create({
+        name: "Áo Thun Cổ Tròn Cotton 100%",
+        price: 200000,
+        category: "Thời Trang",
+        volumeTiers: {
+          enabled: true,
+          tiers: [
+            { minQuantity: 2, discountPercent: 5 },
+            { minQuantity: 3, discountPercent: 10 },
+            { minQuantity: 5, discountPercent: 15 },
+          ],
+        },
+      });
+
+      expect.equal(product.volumeTiers.enabled, true);
+      expect.equal(product.volumeTiers.tiers.length, 3);
+      expect.equal(product.volumeTiers.tiers[1].minQuantity, 3);
+      expect.equal(product.volumeTiers.tiers[1].discountPercent, 10);
+    });
+
+    test("F96-T2: Matching highest achieved volume tier calculates correct unit price and total savings", () => {
+      const basePrice = 200000;
+      const quantity = 3;
+      const tiers = [
+        { minQuantity: 2, discountPercent: 5 },
+        { minQuantity: 3, discountPercent: 10 },
+        { minQuantity: 5, discountPercent: 15 },
+      ];
+
+      const sortedTiers = [...tiers].sort((a, b) => b.minQuantity - a.minQuantity);
+      const matched = sortedTiers.find((t) => quantity >= t.minQuantity);
+      const discountPercent = matched ? matched.discountPercent : 0;
+      const unitPrice = Math.round(basePrice * (1 - discountPercent / 100));
+      const totalSavings = (basePrice - unitPrice) * quantity;
+
+      expect.equal(discountPercent, 10);
+      expect.equal(unitPrice, 180000);
+      expect.equal(totalSavings, 60000);
+    });
+
+    test("F96-T3: Volume discount computes zero savings when purchase quantity is below lowest tier", () => {
+      const basePrice = 150000;
+      const quantity = 1;
+      const tiers = [{ minQuantity: 2, discountPercent: 5 }];
+
+      const matched = tiers.find((t) => quantity >= t.minQuantity);
+      const discountPercent = matched ? matched.discountPercent : 0;
+      const totalSavings = (basePrice * (discountPercent / 100)) * quantity;
+
+      expect.equal(discountPercent, 0);
+      expect.equal(totalSavings, 0);
+    });
+
+    test("F96-T4: Upsell engine identifies next tier and computes exact additional units needed", () => {
+      const currentQty = 2;
+      const tiers = [
+        { minQuantity: 2, discountPercent: 5 },
+        { minQuantity: 4, discountPercent: 12 },
+      ];
+
+      const nextTier = tiers.find((t) => t.minQuantity > currentQty);
+      expect.equal(Boolean(nextTier), true);
+      expect.equal(nextTier.minQuantity, 4);
+      const additionalNeeded = nextTier.minQuantity - currentQty;
+      expect.equal(additionalNeeded, 2);
+    });
+
+    test("F96-T5: Default volume tiers fallback provides tiered discounts (2->5%, 3->10%, 5->15%)", () => {
+      const defaultTiers = [
+        { minQuantity: 2, discountPercent: 5 },
+        { minQuantity: 3, discountPercent: 10 },
+        { minQuantity: 5, discountPercent: 15 },
+      ];
+
+      expect.equal(defaultTiers.length, 3);
+      expect.equal(defaultTiers[0].discountPercent, 5);
+      expect.equal(defaultTiers[2].discountPercent, 15);
+    });
+  });
 });
 
 

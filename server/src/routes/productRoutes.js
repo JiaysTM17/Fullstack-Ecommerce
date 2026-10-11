@@ -16,6 +16,7 @@ import {
   getActiveLiveStreamSessions,
   getGroupBuyDeals,
   joinGroupBuyTeam,
+  calculateVolumeDiscount,
 } from "../controllers/productController.js";
 import { optionalAuthenticate } from "../middlewares/auth.js";
 
@@ -41,6 +42,7 @@ router.post("/:id/questions/:questionId/answers", optionalAuthenticate, answerPr
 // Product details and related
 router.get("/:id/related", getRelatedProducts);
 router.get("/:id/review-stats", getProductReviewStats);
+router.post("/:id/volume-discount", calculateVolumeDiscount);
 router.get("/:id", getProductById);
 
 export default router;

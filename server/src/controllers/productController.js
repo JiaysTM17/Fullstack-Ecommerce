@@ -671,6 +671,74 @@ export const joinGroupBuyTeam = catchAsync(async (req, res) => {
   return sendSuccess(res, { team: teamPayload }, 200, teamPayload.message);
 });
 
+// @desc    Tính toán chiết khấu mua nhiều giảm sâu & combo gợi ý (Feature 96)
+// @route   POST /api/products/:id/volume-discount
+// @access  Public
+export const calculateVolumeDiscount = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { quantity = 1 } = req.body;
+
+  const product = await Product.findOne({ $or: [{ _id: id }, { id }] });
+  if (!product) {
+    return sendError(res, "Không tìm thấy sản phẩm", 404);
+  }
+
+  const requestedQty = Math.max(1, parseInt(quantity) || 1);
+  const basePrice = Number(product.price) || 100000;
+
+  // Bảng chiết khấu số lượng mặc định nếu shop chưa cấu hình riêng
+  // Mua 2 giảm 5%, Mua 3 giảm 10%, Mua 5+ giảm 15%
+  const defaultTiers = [
+    { minQuantity: 2, discountPercent: 5, label: "Mua 2 sản phẩm" },
+    { minQuantity: 3, discountPercent: 10, label: "Mua 3 sản phẩm" },
+    { minQuantity: 5, discountPercent: 15, label: "Mua từ 5 sản phẩm" },
+  ];
+
+  const configuredTiers =
+    product.volumeTiers?.enabled && Array.isArray(product.volumeTiers?.tiers) && product.volumeTiers.tiers.length > 0
+      ? product.volumeTiers.tiers
+      : defaultTiers;
+
+  // Sắp xếp giảm dần theo minQuantity để tìm mốc chiết khấu cao nhất mà khách đạt được
+  const sortedTiers = [...configuredTiers].sort((a, b) => b.minQuantity - a.minQuantity);
+  const matchedTier = sortedTiers.find((t) => requestedQty >= t.minQuantity);
+
+  const appliedDiscountPercent = matchedTier ? Number(matchedTier.discountPercent) || 0 : 0;
+  const unitPriceAfterDiscount = Math.round(basePrice * (1 - appliedDiscountPercent / 100));
+  const subtotalOriginal = basePrice * requestedQty;
+  const subtotalDiscounted = unitPriceAfterDiscount * requestedQty;
+  const totalSavings = subtotalOriginal - subtotalDiscounted;
+
+  // Gợi ý mốc tiếp theo để upsell (ví dụ mua 2 cái thì gợi ý mua thêm 1 cái để được -10%)
+  const ascendingTiers = [...configuredTiers].sort((a, b) => a.minQuantity - b.minQuantity);
+  const nextTier = ascendingTiers.find((t) => t.minQuantity > requestedQty);
+  let upsellHint = null;
+  if (nextTier) {
+    const additionalNeeded = nextTier.minQuantity - requestedQty;
+    upsellHint = {
+      targetQuantity: nextTier.minQuantity,
+      additionalNeeded,
+      targetDiscountPercent: nextTier.discountPercent,
+      message: `Mua thêm ${additionalNeeded} cái nữa để được giảm ${nextTier.discountPercent}% cho toàn bộ gói hàng!`,
+    };
+  }
+
+  return sendSuccess(res, {
+    productId: product._id || product.id,
+    productName: product.name,
+    requestedQuantity: requestedQty,
+    basePrice,
+    appliedDiscountPercent,
+    unitPriceAfterDiscount,
+    subtotalOriginal,
+    subtotalDiscounted,
+    totalSavings,
+    tierApplied: matchedTier || null,
+    availableTiers: configuredTiers,
+    upsellHint,
+  }, 200, "Tính toán chiết khấu mua sỉ / số lượng lớn thành công");
+});
+
 export default {
   getProducts,
   getProductById,
@@ -688,4 +756,5 @@ export default {
   getActiveLiveStreamSessions,
   getGroupBuyDeals,
   joinGroupBuyTeam,
+  calculateVolumeDiscount,
 };

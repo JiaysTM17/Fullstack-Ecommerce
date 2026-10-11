@@ -842,4 +842,16 @@ export async function createSellerPurchaseOrderAPI(poPayload) {
   });
 }
 
+/**
+ * Automated Dynamic Bundling & Volume Discount Upsell Engine API (Feature 96)
+ */
+export async function calculateProductVolumeDiscountAPI(productId, quantity = 1) {
+  const result = await apiRequest(`/api/products/${productId}/volume-discount`, {
+    method: "POST",
+    body: JSON.stringify({ quantity }),
+  });
+  return result?.data || result || null;
+}
+
+
 

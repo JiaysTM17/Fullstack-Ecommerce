@@ -134,6 +134,15 @@ const productSchema = new mongoose.Schema(
       activeTeamsCount: { type: Number, default: 0 },
       expiresInHours: { type: Number, default: 24 },
     },
+    volumeTiers: {
+      enabled: { type: Boolean, default: false },
+      tiers: [
+        {
+          minQuantity: { type: Number, default: 2 },
+          discountPercent: { type: Number, default: 5 },
+        },
+      ],
+    },
   },
   { timestamps: true }
 );

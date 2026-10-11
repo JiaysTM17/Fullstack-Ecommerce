@@ -11,6 +11,7 @@ import ProductQASection from "../components/ProductQASection";
 import { addRecentlyViewed } from "../services/recentlyViewedService";
 import ShopChatModal from "../components/ShopChatModal";
 import { addProductReview, getProductById, getProducts, getRelatedProducts, getProductReviewStats } from "../services/productService";
+import { calculateProductVolumeDiscountAPI } from "../services/api";
 import { addToWishlist as apiAddToWishlist, removeFromWishlist as apiRemoveFromWishlist } from "../services/wishlistService";
 import { formatCurrency } from "../utils/formatCurrency";
 import {
@@ -73,6 +74,18 @@ export default function ProductDetailPage() {
   const [showShopChat, setShowShopChat] = useState(false);
   const [selectedStarFilter, setSelectedStarFilter] = useState("all");
   const [isAddedFeedback, setIsAddedFeedback] = useState(false);
+  const [volumeDiscountInfo, setVolumeDiscountInfo] = useState(null);
+
+  // Dynamic Volume Discount calculation effect
+  useEffect(() => {
+    if (!product?._id && !product?.id) return;
+    const targetId = product._id || product.id;
+    calculateProductVolumeDiscountAPI(targetId, quantity)
+      .then((res) => {
+        if (res) setVolumeDiscountInfo(res);
+      })
+      .catch(() => {});
+  }, [product, quantity]);
 
   const reviewsList = useMemo(() => (Array.isArray(product?.reviews) ? product.reviews : []), [product?.reviews]);
   const filteredReviews = useMemo(() => {
@@ -511,6 +524,103 @@ export default function ProductDetailPage() {
               </button>
             </div>
           </div>
+
+          {/* Feature 96: Automated Volume Discount Tiers & Upsell Engine */}
+          {volumeDiscountInfo && (
+            <div
+              style={{
+                margin: "12px 0",
+                padding: "12px 14px",
+                background: "linear-gradient(135deg, rgba(234, 88, 12, 0.05) 0%, rgba(249, 115, 22, 0.08) 100%)",
+                border: "1px dashed rgba(234, 88, 12, 0.35)",
+                borderRadius: "10px",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 800, color: "#c2410c", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                  <TagIcon size={13} color="#ea580c" />
+                  <span>Ưu Đãi Mua Nhiều Giảm Sâu</span>
+                </span>
+                {volumeDiscountInfo.appliedDiscountPercent > 0 && (
+                  <span style={{ background: "#ea580c", color: "#ffffff", padding: "2px 7px", borderRadius: "4px", fontSize: "11px", fontWeight: 800 }}>
+                    Tiết kiệm {formatCurrency(volumeDiscountInfo.totalSavings)} (-{volumeDiscountInfo.appliedDiscountPercent}%)
+                  </span>
+                )}
+              </div>
+
+              {/* Tiers List */}
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
+                {(volumeDiscountInfo.availableTiers || []).map((t, idx) => {
+                  const isCurrentActive = volumeDiscountInfo.tierApplied?.minQuantity === t.minQuantity;
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => updateQuantity(t.minQuantity)}
+                      style={{
+                        padding: "5px 10px",
+                        borderRadius: "6px",
+                        fontSize: "11.5px",
+                        cursor: "pointer",
+                        border: isCurrentActive ? "1.5px solid #ea580c" : "1px solid #e2e8f0",
+                        background: isCurrentActive ? "#fff7ed" : "#ffffff",
+                        color: isCurrentActive ? "#c2410c" : "#475569",
+                        fontWeight: isCurrentActive ? 800 : 500,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        transition: "all 0.15s ease",
+                      }}
+                      title={`Bấm để chọn nhanh ${t.minQuantity} sản phẩm`}
+                    >
+                      <span>Mua {t.minQuantity}+:</span>
+                      <strong style={{ color: isCurrentActive ? "#ea580c" : "#059669" }}>
+                        -{t.discountPercent}%
+                      </strong>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Upsell Hint Banner */}
+              {volumeDiscountInfo.upsellHint ? (
+                <div
+                  style={{
+                    fontSize: "11.5px",
+                    color: "#9a3412",
+                    background: "rgba(255, 255, 255, 0.7)",
+                    padding: "6px 8px",
+                    borderRadius: "6px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span>💡 {volumeDiscountInfo.upsellHint.message}</span>
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(volumeDiscountInfo.upsellHint.targetQuantity)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#ea580c",
+                      fontWeight: 800,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      padding: 0,
+                      marginLeft: "6px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Chọn {volumeDiscountInfo.upsellHint.targetQuantity} cái
+                  </button>
+                </div>
+              ) : (
+                <div style={{ fontSize: "11px", color: "#059669", fontWeight: 700 }}>
+                  🎉 Bạn đã đạt mức chiết khấu số lượng tối đa cho sản phẩm này!
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="amazon-buy-box-actions">
