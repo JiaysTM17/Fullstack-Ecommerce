@@ -1561,5 +1561,115 @@ export const updateOrderDoorstepInspection = async (req, res) => {
   }
 };
 
+// @desc    Ghi nhận một lần giao hàng thất bại / giao lại (Feature 101)
+// @route   POST /api/orders/:id/delivery-attempts
+// @access  Public / Optional Auth (Courier / Seller / System)
+export const recordDeliveryAttempt = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      courierName = "Bưu tá SPX Express",
+      reason = "CUSTOMER_UNREACHABLE",
+      reasonNote = "",
+      proofPhoto = "",
+      nextScheduledSlot = null,
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    const currentAttempts = order.deliveryAttempts || {
+      totalAttempts: 0,
+      maxAttempts: 3,
+      currentStatus: "scheduled",
+      history: [],
+      escalatedToCustomerCare: false,
+    };
+
+    const nextAttemptNumber = (currentAttempts.totalAttempts || 0) + 1;
+    const now = new Date().toISOString();
+
+    const attemptRecord = {
+      attemptNumber: nextAttemptNumber,
+      attemptedAt: now,
+      courierName: courierName.trim(),
+      reason,
+      reasonNote: reasonNote.trim(),
+      proofPhoto,
+      nextScheduledSlot: nextScheduledSlot || "Ngày làm việc kế tiếp (08:00 - 18:00)",
+    };
+
+    const history = [...(currentAttempts.history || []), attemptRecord];
+    const isExceeded = nextAttemptNumber >= currentAttempts.maxAttempts;
+    const newStatus = isExceeded ? "returned_to_hub" : "failed_attempt";
+
+    order.deliveryAttempts = {
+      totalAttempts: nextAttemptNumber,
+      maxAttempts: currentAttempts.maxAttempts || 3,
+      currentStatus: newStatus,
+      history,
+      escalatedToCustomerCare: isExceeded,
+    };
+
+    if (!Array.isArray(order.timeline)) order.timeline = [];
+    order.timeline.push({
+      time: now,
+      text: `Giao hàng không thành công lần ${nextAttemptNumber}/${order.deliveryAttempts.maxAttempts}: ${reasonNote || reason}. ${isExceeded ? "Đã chuyển về kho đối soát hoàn trả." : `Lên lịch giao lại lần ${nextAttemptNumber + 1}.`}`,
+    });
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order._id || order.id || order.orderId,
+      deliveryAttempts: order.deliveryAttempts,
+      remainingAttempts: Math.max(0, order.deliveryAttempts.maxAttempts - nextAttemptNumber),
+      message: `Đã ghi nhận lần giao hàng ${nextAttemptNumber}/${order.deliveryAttempts.maxAttempts}`,
+    }, 200);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Lấy lịch sử và trạng thái các lần giao hàng (Feature 101)
+// @route   GET /api/orders/:id/delivery-attempts
+// @access  Public / Optional Auth
+export const getDeliveryAttempts = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    sendSuccess(res, {
+      orderId: order._id || order.id || order.orderId,
+      deliveryAttempts: order.deliveryAttempts || {
+        totalAttempts: 0,
+        maxAttempts: 3,
+        currentStatus: "scheduled",
+        history: [],
+        escalatedToCustomerCare: false,
+      },
+    }, 200, "Lấy thông tin nhật ký giao hàng thành công");
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 

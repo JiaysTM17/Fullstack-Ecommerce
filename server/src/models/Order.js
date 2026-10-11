@@ -120,6 +120,37 @@ const orderSchema = new mongoose.Schema(
       certificateCode: { type: String, default: null },
       activatedAt: { type: String, default: null },
     },
+    deliveryAttempts: {
+      totalAttempts: { type: Number, default: 0 },
+      maxAttempts: { type: Number, default: 3 },
+      currentStatus: {
+        type: String,
+        enum: ["scheduled", "in_transit", "failed_attempt", "delivered", "returned_to_hub"],
+        default: "scheduled",
+      },
+      history: [
+        {
+          attemptNumber: { type: Number, required: true },
+          attemptedAt: { type: String, required: true },
+          courierName: { type: String, default: "Bưu tá SPX Express" },
+          reason: {
+            type: String,
+            enum: [
+              "CUSTOMER_UNREACHABLE",
+              "CUSTOMER_RESCHEDULED",
+              "INCORRECT_ADDRESS",
+              "SECURITY_GATE_DENIED",
+              "FORCE_MAJEURE_WEATHER",
+            ],
+            default: "CUSTOMER_UNREACHABLE",
+          },
+          reasonNote: { type: String, default: "" },
+          proofPhoto: { type: String, default: "" },
+          nextScheduledSlot: { type: String, default: null },
+        },
+      ],
+      escalatedToCustomerCare: { type: Boolean, default: false },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

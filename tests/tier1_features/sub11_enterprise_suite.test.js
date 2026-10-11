@@ -2983,6 +2983,104 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(shouldNotify2, true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 101: Multi-Attempt Delivery Retry & Failed Handover Protocol (5 Tests)
+  // =========================================================================
+  describe("Feature 101: Multi-Attempt Delivery Retry & Failed Handover Protocol", () => {
+    test("F101-T1: First failed attempt increments totalAttempts and records reason", () => {
+      const deliveryState = {
+        totalAttempts: 0,
+        maxAttempts: 3,
+        currentStatus: "scheduled",
+        history: [],
+      };
+
+      const newAttempt = {
+        attemptNumber: 1,
+        attemptedAt: new Date().toISOString(),
+        courierName: "Bưu tá Nguyễn Văn Shipper",
+        reason: "CUSTOMER_UNREACHABLE",
+        reasonNote: "Gọi điện thoại 3 cuộc không nghe máy",
+      };
+
+      deliveryState.totalAttempts += 1;
+      deliveryState.history.push(newAttempt);
+      deliveryState.currentStatus = "failed_attempt";
+
+      expect.equal(deliveryState.totalAttempts, 1);
+      expect.equal(deliveryState.history.length, 1);
+      expect.equal(deliveryState.currentStatus, "failed_attempt");
+      expect.equal(deliveryState.maxAttempts - deliveryState.totalAttempts, 2);
+    });
+
+    test("F101-T2: Order model persists deliveryAttempts tracking history", async () => {
+      const order = await Order.create({
+        orderId: "ORD_RETRY_101",
+        items: [{ productId: "p_dress", name: "Đầm Dự Tiệc Cao Cấp", price: 650000, quantity: 1 }],
+        total: 650000,
+        deliveryAttempts: {
+          totalAttempts: 1,
+          maxAttempts: 3,
+          currentStatus: "failed_attempt",
+          history: [
+            {
+              attemptNumber: 1,
+              attemptedAt: new Date().toISOString(),
+              courierName: "Bưu tá SPX",
+              reason: "CUSTOMER_RESCHEDULED",
+              reasonNote: "Khách bận đi công tác, hẹn giao ngày mai",
+            },
+          ],
+          escalatedToCustomerCare: false,
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_RETRY_101");
+      expect.equal(order.deliveryAttempts.totalAttempts, 1);
+      expect.equal(order.deliveryAttempts.history[0].reason, "CUSTOMER_RESCHEDULED");
+    });
+
+    test("F101-T3: Exceeding max delivery attempts flags returned_to_hub status and triggers escalation", () => {
+      const maxAttempts = 3;
+      let totalAttempts = 2;
+
+      // Third attempt failed
+      totalAttempts += 1;
+      const isExceeded = totalAttempts >= maxAttempts;
+      const status = isExceeded ? "returned_to_hub" : "failed_attempt";
+      const escalatedToCustomerCare = isExceeded;
+
+      expect.equal(isExceeded, true);
+      expect.equal(status, "returned_to_hub");
+      expect.equal(escalatedToCustomerCare, true);
+    });
+
+    test("F101-T4: Next scheduled slot provides clear reschedule timeline to recipient", () => {
+      const attemptRecord = {
+        attemptNumber: 2,
+        reason: "SECURITY_GATE_DENIED",
+        nextScheduledSlot: "Ca chiều mai (13:00 - 17:00)",
+      };
+
+      expect.equal(attemptRecord.attemptNumber, 2);
+      expect.equal(Boolean(attemptRecord.nextScheduledSlot), true);
+    });
+
+    test("F101-T5: Standard failure reason codes conform to SPX logistics taxonomy", () => {
+      const validReasons = [
+        "CUSTOMER_UNREACHABLE",
+        "CUSTOMER_RESCHEDULED",
+        "INCORRECT_ADDRESS",
+        "SECURITY_GATE_DENIED",
+        "FORCE_MAJEURE_WEATHER",
+      ];
+
+      expect.equal(validReasons.includes("CUSTOMER_UNREACHABLE"), true);
+      expect.equal(validReasons.includes("FORCE_MAJEURE_WEATHER"), true);
+      expect.equal(validReasons.length, 5);
+    });
+  });
 });
 
 

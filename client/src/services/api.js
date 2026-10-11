@@ -911,6 +911,21 @@ export async function fetchPriceDropAlertStatusAPI(productId, userId, email) {
   return result?.data || result || null;
 }
 
+/**
+ * Multi-Attempt Delivery Retry & Failed Handover Protocol Suite (Feature 101)
+ */
+export async function recordDeliveryAttemptAPI(orderId, attemptPayload) {
+  return await apiRequest(`/api/orders/${orderId}/delivery-attempts`, {
+    method: "POST",
+    body: JSON.stringify(attemptPayload),
+  });
+}
+
+export async function fetchDeliveryAttemptsAPI(orderId) {
+  const result = await apiRequest(`/api/orders/${orderId}/delivery-attempts`);
+  return result?.data || result || null;
+}
+
 
 
 

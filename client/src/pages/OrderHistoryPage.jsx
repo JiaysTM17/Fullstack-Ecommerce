@@ -2025,6 +2025,27 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.deliveryAttempts?.totalAttempts > 0 && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Lần gần nhất: ${ord.deliveryAttempts.history?.[ord.deliveryAttempts.history.length - 1]?.reasonNote || 'Đang giao lại'}`}>
+                            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <TruckIcon size={10} color="#dc2626" />
+                            </span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.deliveryAttempts.currentStatus === 'returned_to_hub' ? '#dc2626' : '#ea580c',
+                              background: ord.deliveryAttempts.currentStatus === 'returned_to_hub' ? '#fee2e2' : '#ffedd5',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Giao Lần {ord.deliveryAttempts.totalAttempts}/{ord.deliveryAttempts.maxAttempts || 3}: {ord.deliveryAttempts.currentStatus === 'returned_to_hub' ? 'Hoàn Về Kho' : 'Đang Hẹn Lại'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">
