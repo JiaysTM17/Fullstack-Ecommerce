@@ -3094,6 +3094,101 @@ export const evaluateVideoReturnResaleGrading = async (req, res) => {
   }
 };
 
+// @desc    Ghi nhận dữ liệu cảm biến âm thanh vi chấn chống tráo hàng (Acoustic Anti-Tamper)
+// @route   POST /api/orders/:id/acoustic-anti-tamper
+// @access  Public / Optional Auth / Courier Webhook
+export const updateAcousticAntiTamperTelemetry = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      sensorId,
+      decibelSpikePeak = 0,
+      frequencySignature = "ambient_transit",
+      tamperEventDetected = false,
+      tapeCutPatternMatch = false,
+    } = req.body;
+
+    if (!sensorId) {
+      return sendError(res, "Thiếu mã định danh cảm biến âm vi chấn (sensorId)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần giám sát âm thanh chống tráo", 404);
+    }
+
+    const now = new Date().toISOString();
+    const isTapeCuttingSound =
+      tapeCutPatternMatch === true ||
+      frequencySignature === "tape_cutter_friction" ||
+      frequencySignature === "seal_tear";
+    const isSuspiciousDecibel = Number(decibelSpikePeak) >= 75;
+    const isTamper = Boolean(tamperEventDetected || isTapeCuttingSound || (isSuspiciousDecibel && frequencySignature !== "ambient_transit"));
+
+    let sealIntegrityStatus = "pristine";
+    if (isTapeCuttingSound) {
+      sealIntegrityStatus = "tampered_tape_cut";
+    } else if (isTamper) {
+      sealIntegrityStatus = "critical_seal_breach";
+    } else if (isSuspiciousDecibel) {
+      sealIntegrityStatus = "suspicious_vibration";
+    }
+
+    const courierInterceptFlag = isTamper;
+    const investigationRef = isTamper
+      ? `ACOUSTIC-AUDIT-${Date.now().toString(36).toUpperCase()}`
+      : (order.acousticAntiTamperTelemetry?.investigationRef || null);
+
+    order.acousticAntiTamperTelemetry = {
+      isAcousticMonitored: true,
+      sensorId,
+      decibelSpikePeak: Number(decibelSpikePeak),
+      frequencySignature,
+      tamperEventDetected: isTamper,
+      tapeCutPatternMatch: Boolean(isTapeCuttingSound),
+      sealIntegrityStatus,
+      alertTriggeredAt: isTamper ? now : (order.acousticAntiTamperTelemetry?.alertTriggeredAt || null),
+      courierInterceptFlag,
+      investigationRef,
+    };
+
+    const statusNote = isTamper
+      ? `CẢNH BÁO VI CHẤN / RẠCH BĂNG KEO: Cảm biến ${sensorId} phát hiện âm phổ bất thường (${decibelSpikePeak} dB, mẫu [${frequencySignature}]). Mã kiểm tra: ${investigationRef}. Đã yêu cầu bưu tá tạm dừng phát hàng.`
+      : `Kiểm tra âm phổ gói hàng ${sensorId}: Tín hiệu ổn định (${decibelSpikePeak} dB, [${frequencySignature}]). Băng keo niêm phong nguyên vẹn.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        acousticAntiTamperTelemetry: order.acousticAntiTamperTelemetry,
+        message: isTamper
+          ? "Phát hiện dấu hiệu tráo hàng / rạch băng keo! Đã kích hoạt khóa chặn khẩn cấp bưu tá."
+          : "Đã cập nhật dữ liệu âm phổ chống tráo thành công (Niêm phong an toàn).",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

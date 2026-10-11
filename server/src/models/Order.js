@@ -483,6 +483,22 @@ const orderSchema = new mongoose.Schema(
       },
       gradedAt: { type: String, default: null },
     },
+    acousticAntiTamperTelemetry: {
+      isAcousticMonitored: { type: Boolean, default: false },
+      sensorId: { type: String, default: null },
+      decibelSpikePeak: { type: Number, default: 0 },
+      frequencySignature: { type: String, default: "ambient_transit" },
+      tamperEventDetected: { type: Boolean, default: false },
+      tapeCutPatternMatch: { type: Boolean, default: false },
+      sealIntegrityStatus: {
+        type: String,
+        enum: ["pristine", "suspicious_vibration", "tampered_tape_cut", "critical_seal_breach"],
+        default: "pristine",
+      },
+      alertTriggeredAt: { type: String, default: null },
+      courierInterceptFlag: { type: Boolean, default: false },
+      investigationRef: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

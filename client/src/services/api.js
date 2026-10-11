@@ -1170,6 +1170,17 @@ export async function evaluateVideoReturnResaleGradingAPI(orderId, { resaleGrade
   return result?.data || result;
 }
 
+/**
+ * Smart In-Transit Acoustic Anti-Tamper & Package Audio Integrity Audit (Feature 124)
+ */
+export async function updateAcousticAntiTamperTelemetryAPI(orderId, { sensorId, decibelSpikePeak, frequencySignature, tamperEventDetected, tapeCutPatternMatch } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/acoustic-anti-tamper`, {
+    method: "POST",
+    body: JSON.stringify({ sensorId, decibelSpikePeak, frequencySignature, tamperEventDetected, tapeCutPatternMatch }),
+  });
+  return result?.data || result;
+}
+
 
 
 

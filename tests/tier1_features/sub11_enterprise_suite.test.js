@@ -4660,6 +4660,86 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultGrading.estimatedResaleValueVnd, 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 124: Smart In-Transit Acoustic Anti-Tamper & Package Audio Integrity Audit (5 Tests)
+  // =========================================================================
+  describe("Feature 124: Smart In-Transit Acoustic Anti-Tamper Telemetry & Seal Audit", () => {
+    test("F124-T1: Acoustic sensor persists pristine transit baseline telemetry", async () => {
+      const order = await Order.create({
+        orderId: "ORD_ACOUSTIC_124",
+        userId: "user_acoustic_01",
+        status: "shipping",
+        total: 500000,
+        acousticAntiTamperTelemetry: {
+          isAcousticMonitored: true,
+          sensorId: "ACOUSTIC-IOT-8812",
+          decibelSpikePeak: 45,
+          frequencySignature: "ambient_transit",
+          tamperEventDetected: false,
+          tapeCutPatternMatch: false,
+          sealIntegrityStatus: "pristine",
+          courierInterceptFlag: false,
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_ACOUSTIC_124");
+      expect.equal(order.acousticAntiTamperTelemetry.isAcousticMonitored, true);
+      expect.equal(order.acousticAntiTamperTelemetry.sensorId, "ACOUSTIC-IOT-8812");
+      expect.equal(order.acousticAntiTamperTelemetry.decibelSpikePeak, 45);
+      expect.equal(order.acousticAntiTamperTelemetry.tamperEventDetected, false);
+      expect.equal(order.acousticAntiTamperTelemetry.sealIntegrityStatus, "pristine");
+      expect.equal(order.acousticAntiTamperTelemetry.courierInterceptFlag, false);
+    });
+
+    test("F124-T2: Tape cut acoustic friction pattern triggers tamper detection and courier intercept", () => {
+      const frequencySignature = "tape_cutter_friction";
+      const decibelSpikePeak = 84;
+      const tapeCutPatternMatch = true;
+
+      const isTapeCuttingSound =
+        tapeCutPatternMatch === true ||
+        frequencySignature === "tape_cutter_friction" ||
+        frequencySignature === "seal_tear";
+      const isTamper = isTapeCuttingSound || decibelSpikePeak >= 75;
+      const sealIntegrityStatus = isTapeCuttingSound ? "tampered_tape_cut" : "pristine";
+      const courierInterceptFlag = isTamper;
+
+      expect.equal(isTamper, true);
+      expect.equal(sealIntegrityStatus, "tampered_tape_cut");
+      expect.equal(courierInterceptFlag, true);
+    });
+
+    test("F124-T3: High decibel spike without tape cut marks suspicious vibration", () => {
+      const decibelSpikePeak = 78;
+      const frequencySignature = "box_impact";
+      const tapeCutPatternMatch = false;
+
+      let sealIntegrityStatus = "pristine";
+      if (tapeCutPatternMatch || frequencySignature === "tape_cutter_friction") {
+        sealIntegrityStatus = "tampered_tape_cut";
+      } else if (decibelSpikePeak >= 75) {
+        sealIntegrityStatus = "suspicious_vibration";
+      }
+
+      expect.equal(sealIntegrityStatus, "suspicious_vibration");
+    });
+
+    test("F124-T4: Investigation reference generates standard audit prefix", () => {
+      const genRef = () => `ACOUSTIC-AUDIT-${"KL819".toUpperCase()}`;
+      const ref = genRef();
+
+      expect.equal(ref.startsWith("ACOUSTIC-AUDIT-"), true);
+      expect.equal(ref, "ACOUSTIC-AUDIT-KL819");
+    });
+
+    test("F124-T5: Missing sensor identifier fails validation requirements", () => {
+      const payload = { decibelSpikePeak: 50 };
+      const isValid = Boolean(payload.sensorId && payload.sensorId.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

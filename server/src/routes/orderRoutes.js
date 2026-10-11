@@ -44,6 +44,7 @@ import {
   updateFragileShockSensorTelemetry,
   recordMultiCarrierCarbonLedger,
   evaluateVideoReturnResaleGrading,
+  updateAcousticAntiTamperTelemetry,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -100,6 +101,7 @@ router.post("/:id/realtime-reroute", optionalAuthenticate, updateRealTimeParcelR
 router.post("/:id/fragile-shock-telemetry", optionalAuthenticate, updateFragileShockSensorTelemetry);
 router.post("/:id/carrier-carbon-ledger", optionalAuthenticate, recordMultiCarrierCarbonLedger);
 router.post("/:id/ai-return-resale-grading", optionalAuthenticate, evaluateVideoReturnResaleGrading);
+router.post("/:id/acoustic-anti-tamper", optionalAuthenticate, updateAcousticAntiTamperTelemetry);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);
