@@ -632,6 +632,21 @@ const orderSchema = new mongoose.Schema(
       antiCounterfeitVerificationHash: { type: String, default: null },
       inspectedAt: { type: String, default: null },
     },
+    undergroundPneumaticCapsuleDispatch: {
+      isCapsuleDispatched: { type: Boolean, default: false },
+      capsulePodSerial: { type: String, default: null },
+      tubePipelineNetworkCode: { type: String, default: null },
+      transitVelocityKmPerHour: { type: Number, default: 85 }, // Vận tốc ống khí nén ngầm 80-120 km/h
+      tubePressureBar: { type: Number, default: 3.2 },
+      pneumaticTerminalStationId: { type: String, default: null },
+      capsuleEjectionStatus: {
+        type: String,
+        enum: ["capsule_loaded_at_hub", "high_speed_subterranean_transit", "ejected_at_terminal_station", "collected_by_local_runner"],
+        default: "capsule_loaded_at_hub",
+      },
+      capsuleLaunchedAt: { type: String, default: null },
+      capsuleArrivedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

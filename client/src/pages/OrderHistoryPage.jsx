@@ -2665,6 +2665,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.undergroundPneumaticCapsuleDispatch?.isCapsuleDispatched && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Viên Nang Khí Nén Ngầm (#${ord.undergroundPneumaticCapsuleDispatch.capsulePodSerial}): Tuyến ${ord.undergroundPneumaticCapsuleDispatch.tubePipelineNetworkCode}. Vận tốc ${ord.undergroundPneumaticCapsuleDispatch.transitVelocityKmPerHour} km/h (áp suất ${ord.undergroundPneumaticCapsuleDispatch.tubePressureBar} bar). Ga đích: ${ord.undergroundPneumaticCapsuleDispatch.pneumaticTerminalStationId}. Trạng thái: ${ord.undergroundPneumaticCapsuleDispatch.capsuleEjectionStatus}`}>
+                            <span style={{ fontSize: '13px' }}>🚇</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.undergroundPneumaticCapsuleDispatch.capsuleEjectionStatus === 'ejected_at_terminal_station' ? '#059669' : ord.undergroundPneumaticCapsuleDispatch.capsuleEjectionStatus === 'collected_by_local_runner' ? '#0891b2' : '#2563eb',
+                              background: ord.undergroundPneumaticCapsuleDispatch.capsuleEjectionStatus === 'ejected_at_terminal_station' ? '#ecfdf5' : ord.undergroundPneumaticCapsuleDispatch.capsuleEjectionStatus === 'collected_by_local_runner' ? '#cffafe' : '#eff6ff',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Khí Nén Ngầm: {ord.undergroundPneumaticCapsuleDispatch.capsuleEjectionStatus === 'ejected_at_terminal_station' ? 'Đã Phóng Ra Ga Đích' : ord.undergroundPneumaticCapsuleDispatch.capsuleEjectionStatus === 'collected_by_local_runner' ? 'Bưu Tá Đã Tiếp Nhận' : 'Tốc Độ Cao Ống Ngầm'} ({ord.undergroundPneumaticCapsuleDispatch.transitVelocityKmPerHour} km/h)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

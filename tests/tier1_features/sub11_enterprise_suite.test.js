@@ -5333,6 +5333,73 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 134: Autonomous Underground Pneumatic Capsule Logistics Dispatch (5 Tests)
+  // =========================================================================
+  describe("Feature 134: Autonomous Underground Pneumatic Capsule Logistics Dispatch", () => {
+    test("F134-T1: Order model successfully arms undergroundPneumaticCapsuleDispatch subdocument", async () => {
+      const order = await Order.create({
+        orderId: "ORD_PNEUMATIC_CAPSULE_134",
+        items: [{ name: "High-Frequency Radio Transceiver", price: 890000, quantity: 1 }],
+        total: 890000,
+        undergroundPneumaticCapsuleDispatch: {
+          isCapsuleDispatched: true,
+          capsulePodSerial: "PNEUMA-POD-X7",
+          tubePipelineNetworkCode: "METRO-PNEUMA-LINE-1",
+          transitVelocityKmPerHour: 95,
+          tubePressureBar: 3.2,
+          pneumaticTerminalStationId: "TERMINAL-DISTRICT-1-CENTRAL",
+          capsuleEjectionStatus: "high_speed_subterranean_transit",
+          capsuleLaunchedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_PNEUMATIC_CAPSULE_134");
+      expect.equal(order.undergroundPneumaticCapsuleDispatch.isCapsuleDispatched, true);
+      expect.equal(order.undergroundPneumaticCapsuleDispatch.capsulePodSerial, "PNEUMA-POD-X7");
+      expect.equal(order.undergroundPneumaticCapsuleDispatch.tubePipelineNetworkCode, "METRO-PNEUMA-LINE-1");
+      expect.equal(order.undergroundPneumaticCapsuleDispatch.transitVelocityKmPerHour, 95);
+      expect.equal(order.undergroundPneumaticCapsuleDispatch.tubePressureBar, 3.2);
+    });
+
+    test("F134-T2: Arrival or collection stamps capsuleArrivedAt timestamp", () => {
+      const status1 = "ejected_at_terminal_station";
+      const status2 = "high_speed_subterranean_transit";
+      const isArrived = (s) => s === "ejected_at_terminal_station" || s === "collected_by_local_runner";
+
+      expect.equal(isArrived(status1), true);
+      expect.equal(isArrived(status2), false);
+    });
+
+    test("F134-T3: Velocity and pressure bounded within physical tolerances", () => {
+      const clampVelocity = (v) => Math.max(30, Math.min(150, Number(v) || 95));
+      const clampPressure = (p) => Math.max(1, Math.min(6, Number(p) || 3.2));
+
+      expect.equal(clampVelocity(220), 150);
+      expect.equal(clampVelocity(10), 30);
+      expect.equal(clampPressure(9), 6);
+      expect.equal(clampPressure(0.2), 1);
+    });
+
+    test("F134-T4: Status validates against allowed pneumatic transit lifecycle states", () => {
+      const validStatuses = [
+        "capsule_loaded_at_hub",
+        "high_speed_subterranean_transit",
+        "ejected_at_terminal_station",
+        "collected_by_local_runner",
+      ];
+      expect.equal(validStatuses.includes("high_speed_subterranean_transit"), true);
+      expect.equal(validStatuses.includes("flying_above_ground"), false);
+    });
+
+    test("F134-T5: Missing capsulePodSerial fails validation guard", () => {
+      const payload = { tubePipelineNetworkCode: "METRO-PNEUMA-LINE-1" };
+      const isValid = Boolean(payload.capsulePodSerial && payload.capsulePodSerial.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

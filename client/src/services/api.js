@@ -1280,6 +1280,17 @@ export async function auditThermoChromicColorShiftBarcodeAPI(orderId, { barcodeB
   return result?.data || result;
 }
 
+/**
+ * Autonomous Underground Pneumatic Capsule Logistics Dispatch (Feature 134)
+ */
+export async function launchUndergroundPneumaticCapsuleDispatchAPI(orderId, { capsulePodSerial, tubePipelineNetworkCode, transitVelocityKmPerHour, tubePressureBar, pneumaticTerminalStationId, capsuleEjectionStatus } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/pneumatic-capsule`, {
+    method: "POST",
+    body: JSON.stringify({ capsulePodSerial, tubePipelineNetworkCode, transitVelocityKmPerHour, tubePressureBar, pneumaticTerminalStationId, capsuleEjectionStatus }),
+  });
+  return result?.data || result;
+}
+
 
 
 

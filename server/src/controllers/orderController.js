@@ -3981,6 +3981,95 @@ export const auditThermoChromicColorShiftBarcode = async (req, res) => {
   }
 };
 
+// @desc    Điều phối viên nang khí nén ngầm cao tốc nội đô (Feature 134)
+// @route   POST /api/orders/:id/pneumatic-capsule
+// @access  Public / Authenticate
+export const launchUndergroundPneumaticCapsuleDispatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      capsulePodSerial,
+      tubePipelineNetworkCode = "METRO-PNEUMA-LINE-1",
+      transitVelocityKmPerHour = 95,
+      tubePressureBar = 3.2,
+      pneumaticTerminalStationId = "TERMINAL-DISTRICT-1-CENTRAL",
+      capsuleEjectionStatus = "high_speed_subterranean_transit",
+    } = req.body;
+
+    if (!capsulePodSerial) {
+      return sendError(res, "Thiếu mã định danh viên nang khí nén ngầm (capsulePodSerial)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần phóng viên nang khí nén", 404);
+    }
+
+    const now = new Date().toISOString();
+    const velocity = Math.max(30, Math.min(150, Number(transitVelocityKmPerHour) || 95));
+    const pressure = Math.max(1, Math.min(6, Number(tubePressureBar) || 3.2));
+    const validStatuses = [
+      "capsule_loaded_at_hub",
+      "high_speed_subterranean_transit",
+      "ejected_at_terminal_station",
+      "collected_by_local_runner",
+    ];
+    const status = validStatuses.includes(capsuleEjectionStatus)
+      ? capsuleEjectionStatus
+      : "high_speed_subterranean_transit";
+
+    const isArrived = status === "ejected_at_terminal_station" || status === "collected_by_local_runner";
+
+    order.undergroundPneumaticCapsuleDispatch = {
+      isCapsuleDispatched: true,
+      capsulePodSerial,
+      tubePipelineNetworkCode,
+      transitVelocityKmPerHour: velocity,
+      tubePressureBar: pressure,
+      pneumaticTerminalStationId,
+      capsuleEjectionStatus: status,
+      capsuleLaunchedAt: order.undergroundPneumaticCapsuleDispatch?.capsuleLaunchedAt || now,
+      capsuleArrivedAt: isArrived ? now : (order.undergroundPneumaticCapsuleDispatch?.capsuleArrivedAt || null),
+    };
+
+    const statusNote = status === "high_speed_subterranean_transit"
+      ? `Viên nang khí nén #${capsulePodSerial} đang di chuyển ngầm tốc độ cao ${velocity} km/h (áp suất ${pressure} bar) trên tuyến ${tubePipelineNetworkCode}.`
+      : status === "ejected_at_terminal_station"
+      ? `Viên nang #${capsulePodSerial} đã phóng ra an toàn tại ga đích ${pneumaticTerminalStationId}!`
+      : status === "collected_by_local_runner"
+      ? `Bưu tá dặm cuối đã nhận kiện hàng từ viên nang #${capsulePodSerial} tại ga ${pneumaticTerminalStationId} để giao đến tay người mua.`
+      : `Viên nang #${capsulePodSerial} đã nạp kiện hàng tại tổng kho hub ngầm.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        undergroundPneumaticCapsuleDispatch: order.undergroundPneumaticCapsuleDispatch,
+        message: "Cập nhật hành trình viên nang khí nén ngầm thành công.",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 
