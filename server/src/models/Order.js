@@ -680,6 +680,19 @@ const orderSchema = new mongoose.Schema(
       isCellularDeadZone: { type: Boolean, default: false },
       lastMeshBeaconAt: { type: String, default: null },
     },
+    quantumKeyDistributionEncryptionSeal: {
+      isQuantumEncrypted: { type: Boolean, default: false },
+      quantumKeyId: { type: String, default: null },
+      photonPolarizationState: { type: String, default: "rectilinear_diagonal_entangled" },
+      quantumBitErrorRatePercent: { type: Number, default: 1.2 }, // QBER < 11% là ngưỡng an toàn tuyệt đối của định luật lượng tử BB84
+      eavesdroppingInterceptionDetected: { type: Boolean, default: false },
+      quantumSecurityVerdict: {
+        type: String,
+        enum: ["quantum_safe_unbroken", "eavesdropping_collapsed_state", "rekeying_in_progress"],
+        default: "quantum_safe_unbroken",
+      },
+      qkdHandshakeTimestamp: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

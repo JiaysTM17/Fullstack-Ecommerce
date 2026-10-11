@@ -1324,6 +1324,17 @@ export async function updateSatelliteLoRaMeshDeadZoneTelemetryAPI(orderId, { lor
   return result?.data || result;
 }
 
+/**
+ * Quantum Key Distribution (QKD) Photonic Encryption Seal (Feature 138)
+ */
+export async function verifyQuantumKeyDistributionEncryptionSealAPI(orderId, { quantumKeyId, photonPolarizationState, quantumBitErrorRatePercent, forceInterceptionSimulation } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/qkd-encryption-seal`, {
+    method: "POST",
+    body: JSON.stringify({ quantumKeyId, photonPolarizationState, quantumBitErrorRatePercent, forceInterceptionSimulation }),
+  });
+  return result?.data || result;
+}
+
 
 
 

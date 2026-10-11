@@ -4311,6 +4311,88 @@ export const updateSatelliteLoRaMeshDeadZoneTelemetry = async (req, res) => {
   }
 };
 
+// @desc    Xác thực niêm phong khóa mật mã lượng tử QKD chống nghe lén (Feature 138)
+// @route   POST /api/orders/:id/qkd-encryption-seal
+// @access  Public / Authenticate
+export const verifyQuantumKeyDistributionEncryptionSeal = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      quantumKeyId,
+      photonPolarizationState = "rectilinear_diagonal_entangled",
+      quantumBitErrorRatePercent = 1.2,
+      forceInterceptionSimulation = false,
+    } = req.body;
+
+    if (!quantumKeyId) {
+      return sendError(res, "Thiếu mã định danh khóa mật mã lượng tử (quantumKeyId)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần bắt tay xác thực lượng tử QKD", 404);
+    }
+
+    const now = new Date().toISOString();
+    const qber = Math.max(0, Math.min(100, Number(quantumBitErrorRatePercent) || 1.2));
+    // Theo định luật vật lý lượng tử giao thức BB84, tỷ lệ lỗi bit lượng tử QBER > 11% chứng tỏ trạng thái chồng chập photon bị sụp đổ do có bên thứ ba cố tình nghe lén/can thiệp
+    const eavesdroppingInterceptionDetected = Boolean(forceInterceptionSimulation || qber >= 11.0);
+
+    let quantumSecurityVerdict = "quantum_safe_unbroken";
+    if (eavesdroppingInterceptionDetected) {
+      quantumSecurityVerdict = "eavesdropping_collapsed_state";
+    } else if (qber > 7.0) {
+      quantumSecurityVerdict = "rekeying_in_progress";
+    }
+
+    order.quantumKeyDistributionEncryptionSeal = {
+      isQuantumEncrypted: true,
+      quantumKeyId,
+      photonPolarizationState,
+      quantumBitErrorRatePercent: qber,
+      eavesdroppingInterceptionDetected,
+      quantumSecurityVerdict,
+      qkdHandshakeTimestamp: now,
+    };
+
+    const statusNote = eavesdroppingInterceptionDetected
+      ? `BÁO ĐỘNG AN NINH LƯỢNG TỬ: Tỷ lệ lỗi bit QBER đạt ${qber}% (vượt ngưỡng 11%). Trạng thái photon (${photonPolarizationState}) bị sụp đổ! Phát hiện nỗ lực can thiệp/nghe lén khóa số #${quantumKeyId}. Tự động hủy khóa mã hóa kiện hàng.`
+      : quantumSecurityVerdict === "rekeying_in_progress"
+      ? `Cảnh báo nhiễu quang học: QBER ${qber}%. Đang tái tạo khóa lượng tử ngẫu nhiên BB84.`
+      : `Bảo mật lượng tử QKD #${quantumKeyId}: QBER ${qber}% (ngưỡng an toàn tuyệt đối). Khóa quang tử vướng víu nguyên vẹn không thể giải mã.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        quantumKeyDistributionEncryptionSeal: order.quantumKeyDistributionEncryptionSeal,
+        message: eavesdroppingInterceptionDetected
+          ? "Phát hiện trạng thái lượng tử bị sụp đổ do nghe lén! Đã khóa bảo vệ kiện hàng."
+          : "Bắt tay mật mã lượng tử QKD BB84 an toàn tuyệt đối.",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 

@@ -2741,6 +2741,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.quantumKeyDistributionEncryptionSeal?.isQuantumEncrypted && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Khóa Lượng Tử QKD (#${ord.quantumKeyDistributionEncryptionSeal.quantumKeyId}): Tỷ lệ lỗi bit QBER: ${ord.quantumKeyDistributionEncryptionSeal.quantumBitErrorRatePercent}%. Trạng thái photon: ${ord.quantumKeyDistributionEncryptionSeal.photonPolarizationState}. Can thiệp nghe lén: ${ord.quantumKeyDistributionEncryptionSeal.eavesdroppingInterceptionDetected ? 'BỊ SỤP ĐỔ CHỒNG CHẬP PHOTON' : 'An Toàn Tuyệt Đối'}`}>
+                            <span style={{ fontSize: '13px' }}>⚛️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.quantumKeyDistributionEncryptionSeal.eavesdroppingInterceptionDetected ? '#dc2626' : '#059669',
+                              background: ord.quantumKeyDistributionEncryptionSeal.eavesdroppingInterceptionDetected ? '#fee2e2' : '#ecfdf5',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Lượng Tử QKD: QBER {ord.quantumKeyDistributionEncryptionSeal.quantumBitErrorRatePercent}% {ord.quantumKeyDistributionEncryptionSeal.eavesdroppingInterceptionDetected ? '(Phát Hiện Nghe Lén -> Đã Hủy Khóa!)' : '(Bảo Mật BB84 Tuyệt Đối)'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

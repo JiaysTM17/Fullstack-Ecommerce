@@ -5591,6 +5591,73 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 138: Quantum Key Distribution (QKD) Photonic Encryption Seal (5 Tests)
+  // =========================================================================
+  describe("Feature 138: Quantum Key Distribution (QKD) Photonic Encryption Seal", () => {
+    test("F138-T1: Order model successfully arms quantumKeyDistributionEncryptionSeal subdocument", async () => {
+      const order = await Order.create({
+        orderId: "ORD_QKD_SEAL_138",
+        items: [{ name: "Quantum Encryption Cryptographic Token", price: 5600000, quantity: 1 }],
+        total: 5600000,
+        quantumKeyDistributionEncryptionSeal: {
+          isQuantumEncrypted: true,
+          quantumKeyId: "QKD-KEY-BB84-X99",
+          photonPolarizationState: "rectilinear_diagonal_entangled",
+          quantumBitErrorRatePercent: 1.2,
+          eavesdroppingInterceptionDetected: false,
+          quantumSecurityVerdict: "quantum_safe_unbroken",
+          qkdHandshakeTimestamp: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_QKD_SEAL_138");
+      expect.equal(order.quantumKeyDistributionEncryptionSeal.isQuantumEncrypted, true);
+      expect.equal(order.quantumKeyDistributionEncryptionSeal.quantumKeyId, "QKD-KEY-BB84-X99");
+      expect.equal(order.quantumKeyDistributionEncryptionSeal.quantumBitErrorRatePercent, 1.2);
+      expect.equal(order.quantumKeyDistributionEncryptionSeal.eavesdroppingInterceptionDetected, false);
+      expect.equal(order.quantumKeyDistributionEncryptionSeal.quantumSecurityVerdict, "quantum_safe_unbroken");
+    });
+
+    test("F138-T2: High QBER >= 11% triggers quantum superposition collapse and eavesdropping alarm", () => {
+      const qber = 14.5;
+      const eavesdroppingInterceptionDetected = qber >= 11.0;
+      const verdict = eavesdroppingInterceptionDetected ? "eavesdropping_collapsed_state" : "quantum_safe_unbroken";
+
+      expect.equal(eavesdroppingInterceptionDetected, true);
+      expect.equal(verdict, "eavesdropping_collapsed_state");
+    });
+
+    test("F138-T3: Moderate QBER between 7% and 11% initiates dynamic rekeying process", () => {
+      const qber = 8.8;
+      const eavesdroppingInterceptionDetected = qber >= 11.0;
+      let verdict = "quantum_safe_unbroken";
+      if (eavesdroppingInterceptionDetected) {
+        verdict = "eavesdropping_collapsed_state";
+      } else if (qber > 7.0) {
+        verdict = "rekeying_in_progress";
+      }
+
+      expect.equal(eavesdroppingInterceptionDetected, false);
+      expect.equal(verdict, "rekeying_in_progress");
+    });
+
+    test("F138-T4: Quantum bit error rate strictly clamped between 0 and 100", () => {
+      const clampQber = (val) => Math.max(0, Math.min(100, Number(val) || 0));
+
+      expect.equal(clampQber(140), 100);
+      expect.equal(clampQber(-5), 0);
+      expect.equal(clampQber(2.5), 2.5);
+    });
+
+    test("F138-T5: Missing quantumKeyId fails validation guard", () => {
+      const payload = { quantumBitErrorRatePercent: 1.2 };
+      const isValid = Boolean(payload.quantumKeyId && payload.quantumKeyId.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

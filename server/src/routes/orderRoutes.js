@@ -58,6 +58,7 @@ import {
   monitorCryogenicFreezerDryIceTelemetry,
   monitorHyperbaricPressureAntiExplosionVault,
   updateSatelliteLoRaMeshDeadZoneTelemetry,
+  verifyQuantumKeyDistributionEncryptionSeal,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -128,6 +129,7 @@ router.post("/:id/pneumatic-capsule", optionalAuthenticate, launchUndergroundPne
 router.post("/:id/cryogenic-dry-ice", optionalAuthenticate, monitorCryogenicFreezerDryIceTelemetry);
 router.post("/:id/hyperbaric-explosion-vault", optionalAuthenticate, monitorHyperbaricPressureAntiExplosionVault);
 router.post("/:id/satellite-lora-mesh", optionalAuthenticate, updateSatelliteLoRaMeshDeadZoneTelemetry);
+router.post("/:id/qkd-encryption-seal", optionalAuthenticate, verifyQuantumKeyDistributionEncryptionSeal);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);
