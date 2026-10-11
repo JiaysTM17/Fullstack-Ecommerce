@@ -382,6 +382,20 @@ const orderSchema = new mongoose.Schema(
       windSpeedKnots: { type: Number, default: 8.5 },
       flightLogId: { type: String, default: "" },
     },
+    coldChainInsuranceCompensation: {
+      hasInsurance: { type: Boolean, default: false },
+      policyId: { type: String, default: "" },
+      coverageAmount: { type: Number, default: 0 },
+      breachDetected: { type: Boolean, default: false },
+      autoClaimStatus: {
+        type: String,
+        enum: ["none", "monitoring", "breach_verified", "payout_settled", "claim_rejected"],
+        default: "none",
+      },
+      payoutAmount: { type: Number, default: 0 },
+      settledAt: { type: String, default: null },
+      insuranceProvider: { type: String, default: "Shopee Bảo Hiểm Hàng Lạnh Toàn Diện" },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

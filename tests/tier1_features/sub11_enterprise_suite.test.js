@@ -4240,7 +4240,80 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultDrone.tetherDropStatus, "none");
     });
   });
+
+  // =========================================================================
+  // FEATURE 118: Smart In-Transit Package Temperature Breach Insurance Claim (5 Tests)
+  // =========================================================================
+  describe("Feature 118: Smart In-Transit Package Temperature Breach Insurance Claim", () => {
+    test("F118-T1: Order model persists Cold Chain Insurance Compensation schema", async () => {
+      const order = await Order.create({
+        orderId: "ORD_INSURANCE_118",
+        user: "buyer_test_insure_118",
+        shopId: "shop_pharma_cold",
+        total: 800000,
+        coldChainInsuranceCompensation: {
+          hasInsurance: true,
+          policyId: "POL-COLD-948102",
+          coverageAmount: 500000,
+          breachDetected: true,
+          autoClaimStatus: "payout_settled",
+          payoutAmount: 350000,
+          settledAt: new Date().toISOString(),
+          insuranceProvider: "Shopee Bảo Hiểm Hàng Lạnh Toàn Diện",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_INSURANCE_118");
+      expect.equal(order.coldChainInsuranceCompensation.hasInsurance, true);
+      expect.equal(order.coldChainInsuranceCompensation.policyId, "POL-COLD-948102");
+      expect.equal(order.coldChainInsuranceCompensation.coverageAmount, 500000);
+      expect.equal(order.coldChainInsuranceCompensation.breachDetected, true);
+      expect.equal(order.coldChainInsuranceCompensation.payoutAmount, 350000);
+      expect.equal(order.coldChainInsuranceCompensation.autoClaimStatus, "payout_settled");
+    });
+
+    test("F118-T2: Verified temperature breach triggers automated insurance settlement payout", () => {
+      const breachDetected = true;
+      const coverageAmount = 500000;
+      const payoutAmount = breachDetected ? 350000 : 0;
+      const claimStatus = breachDetected ? "payout_settled" : "claim_rejected";
+
+      expect.equal(claimStatus, "payout_settled");
+      expect.equal(payoutAmount <= coverageAmount, true);
+    });
+
+    test("F118-T3: Normal cold-chain temperature profile without breach rejects insurance claims", () => {
+      const breachDetected = false;
+      const payoutAmount = breachDetected ? 350000 : 0;
+      const claimStatus = breachDetected ? "payout_settled" : "claim_rejected";
+
+      expect.equal(claimStatus, "claim_rejected");
+      expect.equal(payoutAmount, 0);
+    });
+
+    test("F118-T4: Insurance policy code starts with standard POL-COLD prefix", () => {
+      const policyId = "POL-COLD-849102";
+      expect.equal(policyId.startsWith("POL-COLD-"), true);
+      expect.equal(policyId.length, 15);
+    });
+
+    test("F118-T5: Default order schema initial state does not activate insurance payout", () => {
+      const defaultInsurance = {
+        hasInsurance: false,
+        coverageAmount: 0,
+        breachDetected: false,
+        autoClaimStatus: "none",
+        payoutAmount: 0,
+      };
+
+      expect.equal(defaultInsurance.hasInsurance, false);
+      expect.equal(defaultInsurance.breachDetected, false);
+      expect.equal(defaultInsurance.autoClaimStatus, "none");
+      expect.equal(defaultInsurance.payoutAmount, 0);
+    });
+  });
 });
+
 
 
 

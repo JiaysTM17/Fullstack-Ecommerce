@@ -2360,6 +2360,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.coldChainInsuranceCompensation?.hasInsurance && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Bảo Hiểm Chuỗi Lạnh (#${ord.coldChainInsuranceCompensation.policyId}): Mức đền bù: ${Number(ord.coldChainInsuranceCompensation.coverageAmount).toLocaleString('vi-VN')}₫. Đã chi trả: ${Number(ord.coldChainInsuranceCompensation.payoutAmount).toLocaleString('vi-VN')}₫. Trạng thái: ${ord.coldChainInsuranceCompensation.autoClaimStatus}`}>
+                            <span style={{ fontSize: '13px' }}>🛡️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.coldChainInsuranceCompensation.autoClaimStatus === 'payout_settled' ? '#16a34a' : '#d97706',
+                              background: ord.coldChainInsuranceCompensation.autoClaimStatus === 'payout_settled' ? '#dcfce7' : '#fef3c7',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Bảo Hiểm Lạnh: {ord.coldChainInsuranceCompensation.autoClaimStatus === 'payout_settled' ? `Đã Đền Bù +${Number(ord.coldChainInsuranceCompensation.payoutAmount).toLocaleString('vi-VN')}₫` : 'Đang Bảo Hiểm'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

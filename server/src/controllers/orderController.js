@@ -2736,6 +2736,64 @@ export const dispatchAutonomousDroneFlight = async (req, res) => {
   }
 };
 
+// @desc    Tự động kích hoạt bồi thường bảo hiểm vi phạm nhiệt độ hàng lạnh (Feature 118)
+// @route   POST /api/orders/:id/cold-chain-insurance-claim
+// @access  Public / Authenticate
+export const settleColdChainInsuranceClaim = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { breachConfirmed = true, payoutAmount = 350000 } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần giải quyết bảo hiểm chuỗi lạnh", 404);
+    }
+
+    const now = new Date().toISOString();
+    const policyId = `POL-COLD-${Date.now().toString().slice(-6)}`;
+    const coverageAmount = 500000;
+    const finalPayout = Number(payoutAmount || coverageAmount);
+
+    order.coldChainInsuranceCompensation = {
+      hasInsurance: true,
+      policyId,
+      coverageAmount,
+      breachDetected: !!breachConfirmed,
+      autoClaimStatus: breachConfirmed ? "payout_settled" : "claim_rejected",
+      payoutAmount: breachConfirmed ? finalPayout : 0,
+      settledAt: now,
+      insuranceProvider: "Shopee Bảo Hiểm Hàng Lạnh Toàn Diện",
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Bảo hiểm Chuỗi Lạnh (#${policyId}): Xác nhận sự cố đứt gãy dải nhiệt IoT. Tự động chi trả bồi thường bảo hiểm ${finalPayout.toLocaleString('vi-VN')}₫ trực tiếp vào số dư ví người mua.`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      coldChainInsuranceCompensation: order.coldChainInsuranceCompensation,
+      message: breachConfirmed
+        ? `Đã bồi thường ${finalPayout.toLocaleString('vi-VN')}₫ từ bảo hiểm hàng lạnh thành công!`
+        : "Không phát hiện vi phạm dải nhiệt tiêu chuẩn, yêu cầu bồi thường không được chấp thuận.",
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

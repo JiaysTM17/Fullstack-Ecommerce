@@ -1104,6 +1104,18 @@ export async function dispatchAutonomousDroneFlightAPI(orderId, { droneCallsign,
   return result?.data || result;
 }
 
+/**
+ * Smart In-Transit Package Temperature Breach Insurance Claim (Feature 118)
+ */
+export async function settleColdChainInsuranceClaimAPI(orderId, { breachConfirmed = true, payoutAmount = 350000 } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/cold-chain-insurance-claim`, {
+    method: "POST",
+    body: JSON.stringify({ breachConfirmed, payoutAmount }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 
