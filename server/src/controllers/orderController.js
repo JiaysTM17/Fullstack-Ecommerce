@@ -3464,6 +3464,94 @@ export const scanHazardousMaterialSafety = async (req, res) => {
   }
 };
 
+// @desc    Giám sát hành lang bay Drone & Cảm biến gió ngược hạ cánh (Drone Air-Corridor & Landing Beacon)
+// @route   POST /api/orders/:id/drone-air-corridor-beacon
+// @access  Public / Optional Auth / Drone Telemetry Service
+export const updateDroneAirCorridorLandingBeacon = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      corridorFlightCode,
+      windSpeedKnots = 12,
+      landingBeaconId = "BEACON-PAD-SG-09",
+      groundLockerFallbackId = "LOCKER-SPX-FALLBACK-01",
+    } = req.body;
+
+    if (!corridorFlightCode) {
+      return sendError(res, "Thiếu mã hành lang bay Drone (corridorFlightCode)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần giám sát hạ cánh Drone", 404);
+    }
+
+    const now = new Date().toISOString();
+    const wind = Number(windSpeedKnots) || 0;
+
+    let windShearRisk = "low_calm";
+    let landingSafetyStatus = "cleared_for_touchdown";
+
+    if (wind >= 28) {
+      windShearRisk = "severe_crosswind_abort";
+      landingSafetyStatus = "rerouted_to_ground_locker";
+    } else if (wind >= 18) {
+      windShearRisk = "moderate_gusts";
+      landingSafetyStatus = "hovering_weather_hold";
+    }
+
+    order.droneAirCorridorLandingBeacon = {
+      isDroneCorridorActive: true,
+      corridorFlightCode,
+      windSpeedKnots: wind,
+      windShearRisk,
+      landingBeaconId,
+      landingSafetyStatus,
+      groundLockerFallbackId: landingSafetyStatus === "rerouted_to_ground_locker" ? groundLockerFallbackId : null,
+      telemetryUpdatedAt: now,
+    };
+
+    const statusNote = landingSafetyStatus === "cleared_for_touchdown"
+      ? `Hành lang bay ${corridorFlightCode}: Gió êm (${wind} knots). Đã bắt sóng Beacon ${landingBeaconId}, đủ điều kiện hạ cánh an toàn.`
+      : landingSafetyStatus === "hovering_weather_hold"
+      ? `Hành lang bay ${corridorFlightCode}: Gió giật ${wind} knots. Drone đang bay treo giữ cao độ chờ thời tiết ổn định.`
+      : `BÁO ĐỘNG GIÓ NGƯỢC (${wind} knots): Drone hủy hạ cánh khẩn cấp. Tự động chuyển hướng đáp xuống trạm tủ mặt đất an toàn ${groundLockerFallbackId}.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        droneAirCorridorLandingBeacon: order.droneAirCorridorLandingBeacon,
+        message: landingSafetyStatus === "cleared_for_touchdown"
+          ? "Đã cấp phép hạ cánh xuống bãi đáp Drone an toàn!"
+          : landingSafetyStatus === "hovering_weather_hold"
+          ? "Drone đang tạm thời bay treo do gió mạnh."
+          : "Đã hủy hạ cánh Drone do gió giật nguy hiểm! Đã chuyển hướng sang tủ bưu kiện mặt đất.",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

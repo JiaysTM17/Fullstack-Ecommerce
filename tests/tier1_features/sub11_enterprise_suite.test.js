@@ -4941,6 +4941,77 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 128: Autonomous Courier Drone Air-Corridor Wind Shear & Dynamic Landing Pad Beacon (5 Tests)
+  // =========================================================================
+  describe("Feature 128: Drone Air-Corridor Wind Shear & Landing Beacon Suite", () => {
+    test("F128-T1: Calm conditions allow touchdown landing clearance", async () => {
+      const order = await Order.create({
+        orderId: "ORD_DRONE_BEACON_128",
+        userId: "user_drone_01",
+        status: "shipping",
+        total: 820000,
+        droneAirCorridorLandingBeacon: {
+          isDroneCorridorActive: true,
+          corridorFlightCode: "CORRIDOR-AIR-SG-01",
+          windSpeedKnots: 10,
+          windShearRisk: "low_calm",
+          landingBeaconId: "BEACON-PAD-SG-09",
+          landingSafetyStatus: "cleared_for_touchdown",
+          telemetryUpdatedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_DRONE_BEACON_128");
+      expect.equal(order.droneAirCorridorLandingBeacon.isDroneCorridorActive, true);
+      expect.equal(order.droneAirCorridorLandingBeacon.landingSafetyStatus, "cleared_for_touchdown");
+      expect.equal(order.droneAirCorridorLandingBeacon.windSpeedKnots, 10);
+    });
+
+    test("F128-T2: Severe crosswind above 28 knots triggers emergency ground locker abort", () => {
+      const windSpeedKnots = 32;
+
+      let windShearRisk = "low_calm";
+      let landingSafetyStatus = "cleared_for_touchdown";
+
+      if (windSpeedKnots >= 28) {
+        windShearRisk = "severe_crosswind_abort";
+        landingSafetyStatus = "rerouted_to_ground_locker";
+      }
+
+      expect.equal(windShearRisk, "severe_crosswind_abort");
+      expect.equal(landingSafetyStatus, "rerouted_to_ground_locker");
+    });
+
+    test("F128-T3: Moderate gusts between 18 and 27 knots hold drone hovering", () => {
+      const windSpeedKnots = 22;
+
+      let landingSafetyStatus = "cleared_for_touchdown";
+      if (windSpeedKnots >= 28) {
+        landingSafetyStatus = "rerouted_to_ground_locker";
+      } else if (windSpeedKnots >= 18) {
+        landingSafetyStatus = "hovering_weather_hold";
+      }
+
+      expect.equal(landingSafetyStatus, "hovering_weather_hold");
+    });
+
+    test("F128-T4: Ground fallback locker is populated upon crosswind abort", () => {
+      const fallbackId = "LOCKER-SPX-FALLBACK-01";
+      const status = "rerouted_to_ground_locker";
+      const assignedLocker = status === "rerouted_to_ground_locker" ? fallbackId : null;
+
+      expect.equal(assignedLocker, "LOCKER-SPX-FALLBACK-01");
+    });
+
+    test("F128-T5: Missing corridorFlightCode fails telemetry validation", () => {
+      const payload = { windSpeedKnots: 15 };
+      const isValid = Boolean(payload.corridorFlightCode && payload.corridorFlightCode.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

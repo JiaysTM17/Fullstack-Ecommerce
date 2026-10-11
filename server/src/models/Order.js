@@ -547,6 +547,24 @@ const orderSchema = new mongoose.Schema(
       scannedAt: { type: String, default: null },
       safetyClearanceCertificate: { type: String, default: null },
     },
+    droneAirCorridorLandingBeacon: {
+      isDroneCorridorActive: { type: Boolean, default: false },
+      corridorFlightCode: { type: String, default: null },
+      windSpeedKnots: { type: Number, default: 0 },
+      windShearRisk: {
+        type: String,
+        enum: ["low_calm", "moderate_gusts", "severe_crosswind_abort"],
+        default: "low_calm",
+      },
+      landingBeaconId: { type: String, default: null },
+      landingSafetyStatus: {
+        type: String,
+        enum: ["cleared_for_touchdown", "hovering_weather_hold", "rerouted_to_ground_locker"],
+        default: "cleared_for_touchdown",
+      },
+      groundLockerFallbackId: { type: String, default: null },
+      telemetryUpdatedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

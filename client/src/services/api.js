@@ -1214,6 +1214,17 @@ export async function scanHazardousMaterialSafetyAPI(orderId, { scannerStationId
   return result?.data || result;
 }
 
+/**
+ * Autonomous Courier Drone Air-Corridor Wind Shear & Dynamic Landing Pad Beacon (Feature 128)
+ */
+export async function updateDroneAirCorridorLandingBeaconAPI(orderId, { corridorFlightCode, windSpeedKnots, landingBeaconId, groundLockerFallbackId } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/drone-air-corridor-beacon`, {
+    method: "POST",
+    body: JSON.stringify({ corridorFlightCode, windSpeedKnots, landingBeaconId, groundLockerFallbackId }),
+  });
+  return result?.data || result;
+}
+
 
 
 

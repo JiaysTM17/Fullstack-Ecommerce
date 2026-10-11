@@ -2550,6 +2550,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.droneAirCorridorLandingBeacon?.isDroneCorridorActive && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Hạ Cánh Drone (#${ord.droneAirCorridorLandingBeacon.corridorFlightCode}): Gió ${ord.droneAirCorridorLandingBeacon.windSpeedKnots} knots. Trạng thái: ${ord.droneAirCorridorLandingBeacon.landingSafetyStatus}. Trạm hạ: ${ord.droneAirCorridorLandingBeacon.landingBeaconId}`}>
+                            <span style={{ fontSize: '13px' }}>🚁</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.droneAirCorridorLandingBeacon.landingSafetyStatus === 'rerouted_to_ground_locker' ? '#dc2626' : ord.droneAirCorridorLandingBeacon.landingSafetyStatus === 'hovering_weather_hold' ? '#ea580c' : '#0284c7',
+                              background: ord.droneAirCorridorLandingBeacon.landingSafetyStatus === 'rerouted_to_ground_locker' ? '#fee2e2' : ord.droneAirCorridorLandingBeacon.landingSafetyStatus === 'hovering_weather_hold' ? '#ffedd5' : '#e0f2fe',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Drone Hạ Cánh: {ord.droneAirCorridorLandingBeacon.landingSafetyStatus === 'rerouted_to_ground_locker' ? 'Hủy (Gió Ngược -> Tủ Đất)' : ord.droneAirCorridorLandingBeacon.landingSafetyStatus === 'hovering_weather_hold' ? 'Bay Treo Giữ Vị Trí' : 'Tiếp Đất An Toàn'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">
