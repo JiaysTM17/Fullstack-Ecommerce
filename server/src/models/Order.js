@@ -151,6 +151,21 @@ const orderSchema = new mongoose.Schema(
       ],
       escalatedToCustomerCare: { type: Boolean, default: false },
     },
+    unboxingVideoProof: {
+      hasVideo: { type: Boolean, default: false },
+      videoUrl: { type: String, default: "" },
+      uploadedAt: { type: String, default: null },
+      sha256Hash: { type: String, default: "" },
+      durationSeconds: { type: Number, default: 0 },
+      verificationStatus: {
+        type: String,
+        enum: ["none", "uploaded", "verified", "rejected"],
+        default: "none",
+      },
+      verifiedBy: { type: String, default: null },
+      verifiedAt: { type: String, default: null },
+      verificationNote: { type: String, default: "" },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

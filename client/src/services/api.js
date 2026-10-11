@@ -926,6 +926,23 @@ export async function fetchDeliveryAttemptsAPI(orderId) {
   return result?.data || result || null;
 }
 
+/**
+ * Vault of Video Unboxing Evidence & Instant Dispute Arbitration API (Feature 102)
+ */
+export async function uploadUnboxingVideoProofAPI(orderId, { videoUrl, durationSeconds, sha256Hash }) {
+  return await apiRequest(`/api/orders/${orderId}/unboxing-video`, {
+    method: "POST",
+    body: JSON.stringify({ videoUrl, durationSeconds, sha256Hash }),
+  });
+}
+
+export async function verifyUnboxingVideoProofAPI(orderId, { status, verifiedBy, verificationNote }) {
+  return await apiRequest(`/api/orders/${orderId}/unboxing-video/verify`, {
+    method: "PATCH",
+    body: JSON.stringify({ status, verifiedBy, verificationNote }),
+  });
+}
+
 
 
 

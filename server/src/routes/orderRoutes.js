@@ -21,6 +21,8 @@ import {
   updateOrderDoorstepInspection,
   recordDeliveryAttempt,
   getDeliveryAttempts,
+  uploadUnboxingVideoProof,
+  verifyUnboxingVideoProof,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -54,6 +56,8 @@ router.post("/:id/reschedule-delivery", optionalAuthenticate, rescheduleOrderDel
 router.patch("/:id/doorstep-inspection", optionalAuthenticate, updateOrderDoorstepInspection);
 router.post("/:id/delivery-attempts", optionalAuthenticate, recordDeliveryAttempt);
 router.get("/:id/delivery-attempts", optionalAuthenticate, getDeliveryAttempts);
+router.post("/:id/unboxing-video", optionalAuthenticate, uploadUnboxingVideoProof);
+router.patch("/:id/unboxing-video/verify", authenticate, authorize("admin", "seller"), verifyUnboxingVideoProof);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

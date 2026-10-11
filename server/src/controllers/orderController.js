@@ -1671,5 +1671,110 @@ export const getDeliveryAttempts = async (req, res) => {
   }
 };
 
+// @desc    Người mua tải lên video bằng chứng đồng kiểm mở hộp (Feature 102)
+// @route   POST /api/orders/:id/unboxing-video
+// @access  Public / Authenticate
+export const uploadUnboxingVideoProof = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { videoUrl, durationSeconds = 30, sha256Hash = "" } = req.body;
+
+    if (!videoUrl) {
+      return sendError(res, "Vui lòng cung cấp đường dẫn video mở hộp", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    const now = new Date().toISOString();
+    order.unboxingVideoProof = {
+      hasVideo: true,
+      videoUrl: String(videoUrl).trim(),
+      uploadedAt: now,
+      sha256Hash: sha256Hash || `sha256_${Date.now()}_video`,
+      durationSeconds: Number(durationSeconds) || 30,
+      verificationStatus: "uploaded",
+      verifiedBy: null,
+      verifiedAt: null,
+      verificationNote: "Đang chờ đối soát bởi Trung Tâm Trọng Tài Trả Hàng Shopee",
+    };
+
+    if (!Array.isArray(order.timeline)) order.timeline = [];
+    order.timeline.push({
+      time: now,
+      text: "Người mua đã tải lên Video mở hộp bảo chứng (Shopee Unboxing Vault)",
+    });
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order._id || order.id || order.orderId,
+      unboxingVideoProof: order.unboxingVideoProof,
+      message: "Tải lên video đồng kiểm mở hộp thành công! Hồ sơ trả hàng của bạn đã được ưu tiên giải ngân.",
+    }, 200);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+// @desc    Admin / Seller xác thực video mở hộp và phê duyệt đối soát (Feature 102)
+// @route   PATCH /api/orders/:id/unboxing-video/verify
+// @access  Authenticate (Admin / Seller)
+export const verifyUnboxingVideoProof = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status = "verified", verifiedBy = "Trọng tài viên Shopee", verificationNote = "" } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng", 404);
+    }
+
+    const currentProof = order.unboxingVideoProof || {};
+    if (!currentProof.hasVideo) {
+      return sendError(res, "Đơn hàng này chưa có video mở hộp", 400);
+    }
+
+    const now = new Date().toISOString();
+    order.unboxingVideoProof = {
+      ...currentProof,
+      verificationStatus: status,
+      verifiedBy: String(verifiedBy).trim(),
+      verifiedAt: now,
+      verificationNote: String(verificationNote).trim() || (status === "verified" ? "Video nguyên vẹn tem mác, hộp niêm phong đạt chuẩn." : "Video không hợp lệ hoặc bị đứt đoạn."),
+    };
+
+    if (!Array.isArray(order.timeline)) order.timeline = [];
+    order.timeline.push({
+      time: now,
+      text: `Trọng tài Shopee thẩm định video mở hộp: ${status === "verified" ? "HỢP LỆ (ĐÃ DUYỆT BỒI THƯỜNG)" : "TỪ CHỐI DO KHÔNG ĐỦ BẰNG CHỨNG"}`,
+    });
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order._id || order.id || order.orderId,
+      unboxingVideoProof: order.unboxingVideoProof,
+      message: status === "verified" ? "Đã xác thực video mở hộp thành công!" : "Đã từ chối video mở hộp.",
+    }, 200);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 

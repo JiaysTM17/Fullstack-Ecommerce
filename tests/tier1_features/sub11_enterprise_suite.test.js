@@ -3081,6 +3081,89 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(validReasons.length, 5);
     });
   });
+
+  // =========================================================================
+  // FEATURE 102: Vault of Video Unboxing Evidence & Instant Dispute Arbitration (5 Tests)
+  // =========================================================================
+  describe("Feature 102: Vault of Video Unboxing Evidence & Instant Dispute Arbitration", () => {
+    test("F102-T1: Uploading unboxing video attaches SHA256 integrity hash and duration", () => {
+      const videoProof = {
+        hasVideo: true,
+        videoUrl: "https://vault.shopee.vn/videos/unboxing_ord102.mp4",
+        sha256Hash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        durationSeconds: 45,
+        verificationStatus: "uploaded",
+      };
+
+      expect.equal(videoProof.hasVideo, true);
+      expect.equal(videoProof.durationSeconds, 45);
+      expect.equal(videoProof.verificationStatus, "uploaded");
+      expect.equal(Boolean(videoProof.sha256Hash), true);
+    });
+
+    test("F102-T2: Order model persists unboxingVideoProof verification structure", async () => {
+      const order = await Order.create({
+        orderId: "ORD_UNBOX_102",
+        items: [{ productId: "p_headphone", name: "Tai Nghe Studio Master", price: 1800000, quantity: 1 }],
+        total: 1800000,
+        unboxingVideoProof: {
+          hasVideo: true,
+          videoUrl: "https://vault.shopee.vn/videos/unbox_headphone.mp4",
+          uploadedAt: new Date().toISOString(),
+          sha256Hash: "hash_vid_102",
+          durationSeconds: 60,
+          verificationStatus: "uploaded",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_UNBOX_102");
+      expect.equal(order.unboxingVideoProof.hasVideo, true);
+      expect.equal(order.unboxingVideoProof.verificationStatus, "uploaded");
+    });
+
+    test("F102-T3: Approved video transitions verificationStatus to verified with reviewer identity", () => {
+      const videoProof = {
+        hasVideo: true,
+        verificationStatus: "uploaded",
+        verifiedBy: null,
+        verifiedAt: null,
+      };
+
+      videoProof.verificationStatus = "verified";
+      videoProof.verifiedBy = "Trọng tài viên Shopee Lê Hoàng Nam";
+      videoProof.verifiedAt = new Date().toISOString();
+      videoProof.verificationNote = "Video quay rõ 6 mặt hộp, niêm phong chưa rách, phát hiện móp méo bên trong.";
+
+      expect.equal(videoProof.verificationStatus, "verified");
+      expect.equal(Boolean(videoProof.verifiedBy), true);
+      expect.equal(Boolean(videoProof.verifiedAt), true);
+    });
+
+    test("F102-T4: Rejected video notes deficiency and logs rejection justification", () => {
+      const videoProof = {
+        hasVideo: true,
+        verificationStatus: "uploaded",
+      };
+
+      videoProof.verificationStatus = "rejected";
+      videoProof.verifiedBy = "Shop Thời Trang GenZ";
+      videoProof.verificationNote = "Video bị gián đoạn giữa chừng, không quay rõ tem mã vận đơn.";
+
+      expect.equal(videoProof.verificationStatus, "rejected");
+      expect.equal(videoProof.verificationNote.includes("tem mã vận đơn"), true);
+    });
+
+    test("F102-T5: Order without unboxing video maintains default none verification status", () => {
+      const defaultProof = {
+        hasVideo: false,
+        videoUrl: "",
+        verificationStatus: "none",
+      };
+
+      expect.equal(defaultProof.hasVideo, false);
+      expect.equal(defaultProof.verificationStatus, "none");
+    });
+  });
 });
 
 

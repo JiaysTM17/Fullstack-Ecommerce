@@ -2046,6 +2046,27 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.unboxingVideoProof?.hasVideo && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={ord.unboxingVideoProof.verificationNote || "Video mở hộp đối soát"}>
+                            <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(124, 58, 237, 0.12)', border: '1px solid rgba(124, 58, 237, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <EyeIcon size={10} color="#7c3aed" />
+                            </span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.unboxingVideoProof.verificationStatus === 'verified' ? '#15803d' : ord.unboxingVideoProof.verificationStatus === 'rejected' ? '#dc2626' : '#7c3aed',
+                              background: ord.unboxingVideoProof.verificationStatus === 'verified' ? '#dcfce7' : ord.unboxingVideoProof.verificationStatus === 'rejected' ? '#fee2e2' : '#f3e8ff',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Video Mở Hộp: {ord.unboxingVideoProof.verificationStatus === 'verified' ? 'Đã Thẩm Định' : ord.unboxingVideoProof.verificationStatus === 'rejected' ? 'Từ Chối' : 'Đã Tải Lên'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">
