@@ -2208,6 +2208,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.fraudRiskScore?.riskScore > 0 && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Radar AI: ${ord.fraudRiskScore.riskScore}/100. Hành động: ${ord.fraudRiskScore.actionTaken}`}>
+                            <span style={{ fontSize: '13px' }}>🛡️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.fraudRiskScore.riskLevel === 'critical' ? '#dc2626' : ord.fraudRiskScore.riskLevel === 'high' ? '#ea580c' : ord.fraudRiskScore.riskLevel === 'medium' ? '#d97706' : '#15803d',
+                              background: ord.fraudRiskScore.riskLevel === 'critical' ? '#fee2e2' : ord.fraudRiskScore.riskLevel === 'high' ? '#ffedd5' : ord.fraudRiskScore.riskLevel === 'medium' ? '#fef3c7' : '#dcfce7',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Radar Rủi Ro: {ord.fraudRiskScore.riskScore}/100 ({ord.fraudRiskScore.riskLevel === 'low' ? 'An Toàn' : ord.fraudRiskScore.riskLevel === 'medium' ? 'Cần Duyệt' : 'Rủi Ro Cao'})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

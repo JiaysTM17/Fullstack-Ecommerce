@@ -30,6 +30,7 @@ import {
   assignSmartLockerDelivery,
   issueCarbonOffsetCertificate,
   scheduleDoorstepReturnPickup,
+  evaluateOrderFraudRisk,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -72,6 +73,7 @@ router.patch("/:id/eco-packaging", optionalAuthenticate, updateEcoPackagingOptio
 router.post("/:id/smart-locker", optionalAuthenticate, assignSmartLockerDelivery);
 router.post("/:id/carbon-certificate", optionalAuthenticate, issueCarbonOffsetCertificate);
 router.post("/:id/doorstep-return-pickup", optionalAuthenticate, scheduleDoorstepReturnPickup);
+router.post("/:id/fraud-risk-audit", optionalAuthenticate, evaluateOrderFraudRisk);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

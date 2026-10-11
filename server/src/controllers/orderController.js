@@ -2245,5 +2245,87 @@ export const scheduleDoorstepReturnPickup = async (req, res) => {
   }
 };
 
+// @desc    Đánh giá gian lận rủi ro đơn hàng tự động & Kiểm soát COD (Feature 110)
+// @route   POST /api/orders/:id/fraud-risk-audit
+// @access  Public / Authenticate / Admin
+export const evaluateOrderFraudRisk = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần thẩm định rủi ro gian lận", 404);
+    }
+
+    const flags = [];
+    let score = 5; // Điểm rủi ro cơ sở
+
+    // 1. Kiểm tra giá trị đơn hàng bất thường
+    if (order.total > 20000000) {
+      score += 45;
+      flags.push("MASSIVE_HIGH_VALUE_TRANSACTION (>20M VND)");
+    }
+
+    // 2. Kiểm tra nhiều lần giao thất bại
+    if (order.deliveryAttempts?.totalAttempts >= 2) {
+      score += 30;
+      flags.push("FREQUENT_DELIVERY_FAILURE_HISTORY");
+    }
+
+    // 3. Kiểm tra thay đổi địa chỉ chặng bay
+    if (order.dynamicAddressCorrection?.isModified) {
+      score += 15;
+      flags.push("IN_FLIGHT_ADDRESS_ALTERATION");
+    }
+
+    let riskLevel = "low";
+    let actionTaken = "allowed";
+
+    if (score >= 75) {
+      riskLevel = "critical";
+      actionTaken = "account_frozen";
+    } else if (score >= 50) {
+      riskLevel = "high";
+      actionTaken = "cod_disabled";
+    } else if (score >= 30) {
+      riskLevel = "medium";
+      actionTaken = "flagged_for_manual_review";
+    }
+
+    const now = new Date().toISOString();
+    order.fraudRiskScore = {
+      riskScore: score,
+      riskLevel,
+      flags,
+      scannedAt: now,
+      actionTaken,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Hệ thống Radar AI quét rủi ro đơn hàng: Điểm ${score}/100 (${riskLevel.toUpperCase()}). Hành động: ${actionTaken}`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      fraudRiskScore: order.fraudRiskScore,
+      message: `Đã thẩm định rủi ro đơn hàng thành công (Điểm: ${score}, Mức độ: ${riskLevel})`,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 

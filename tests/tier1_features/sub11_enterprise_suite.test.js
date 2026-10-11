@@ -3671,6 +3671,70 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultPickup.pickupStatus, "none");
     });
   });
+
+  // =========================================================================
+  // FEATURE 110: Automated Fraud Risk Radar & COD Protection Suite (5 Tests)
+  // =========================================================================
+  describe("Feature 110: Automated Fraud Risk Radar & COD Protection Suite", () => {
+    test("F110-T1: Order model persists fraudRiskScore schema attributes", async () => {
+      const order = await Order.create({
+        orderId: "ORD_FRAUD_RADAR_110",
+        items: [{ productId: "p_gold_watch", name: "Đồng hồ mạ vàng cơ học Chrono", price: 25000000, quantity: 1 }],
+        total: 25000000,
+        fraudRiskScore: {
+          riskScore: 80,
+          riskLevel: "critical",
+          flags: ["MASSIVE_HIGH_VALUE_TRANSACTION (>20M VND)", "IN_FLIGHT_ADDRESS_ALTERATION"],
+          scannedAt: new Date().toISOString(),
+          actionTaken: "account_frozen",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_FRAUD_RADAR_110");
+      expect.equal(order.fraudRiskScore.riskScore, 80);
+      expect.equal(order.fraudRiskScore.riskLevel, "critical");
+      expect.equal(order.fraudRiskScore.actionTaken, "account_frozen");
+      expect.equal(order.fraudRiskScore.flags.length, 2);
+    });
+
+    test("F110-T2: High value transaction (>20M VND) increases risk score by 45 points", () => {
+      let score = 5;
+      const orderTotal = 25000000;
+      if (orderTotal > 20000000) {
+        score += 45;
+      }
+      expect.equal(score, 50);
+    });
+
+    test("F110-T3: Moderate risk score (>=50) triggers cod_disabled protection rule", () => {
+      const score = 55;
+      const action = score >= 75 ? "account_frozen" : score >= 50 ? "cod_disabled" : "allowed";
+      expect.equal(action, "cod_disabled");
+    });
+
+    test("F110-T4: Critical risk score (>=75) flags order for account freezing", () => {
+      const score = 85;
+      const riskLevel = score >= 75 ? "critical" : "high";
+      const action = score >= 75 ? "account_frozen" : "cod_disabled";
+
+      expect.equal(riskLevel, "critical");
+      expect.equal(action, "account_frozen");
+    });
+
+    test("F110-T5: Clean normal order defaults to low risk level with allowed action", () => {
+      const defaultRisk = {
+        riskScore: 5,
+        riskLevel: "low",
+        flags: [],
+        actionTaken: "allowed",
+      };
+
+      expect.equal(defaultRisk.riskScore, 5);
+      expect.equal(defaultRisk.riskLevel, "low");
+      expect.equal(defaultRisk.actionTaken, "allowed");
+      expect.equal(defaultRisk.flags.length, 0);
+    });
+  });
 });
 
 

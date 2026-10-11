@@ -253,6 +253,21 @@ const orderSchema = new mongoose.Schema(
       pickupAddress: { type: String, default: "" },
       pickupNote: { type: String, default: "" },
     },
+    fraudRiskScore: {
+      riskScore: { type: Number, default: 0 },
+      riskLevel: {
+        type: String,
+        enum: ["low", "medium", "high", "critical"],
+        default: "low",
+      },
+      flags: { type: [String], default: [] },
+      scannedAt: { type: String, default: null },
+      actionTaken: {
+        type: String,
+        enum: ["none", "allowed", "flagged_for_manual_review", "cod_disabled", "account_frozen"],
+        default: "allowed",
+      },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

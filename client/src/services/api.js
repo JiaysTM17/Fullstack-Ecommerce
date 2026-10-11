@@ -1018,6 +1018,17 @@ export async function scheduleDoorstepReturnPickupAPI(orderId, { appointmentDate
   return result?.data || result;
 }
 
+/**
+ * Automated Fraud Risk Radar & COD Protection Suite (Feature 110)
+ */
+export async function evaluateOrderFraudRiskAPI(orderId) {
+  const result = await apiRequest(`/api/orders/${orderId}/fraud-risk-audit`, {
+    method: "POST",
+  });
+  return result?.data || result;
+}
+
+
 
 
 
