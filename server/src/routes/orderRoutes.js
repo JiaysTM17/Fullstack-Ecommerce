@@ -51,6 +51,7 @@ import {
   updateDroneAirCorridorLandingBeacon,
   authorizeSmartLockInHomeDelivery,
   updateParcelMoistureTelemetry,
+  updateFiberOpticMeshSeal,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -114,6 +115,7 @@ router.post("/:id/hazmat-safety-scan", optionalAuthenticate, scanHazardousMateri
 router.post("/:id/drone-air-corridor-beacon", optionalAuthenticate, updateDroneAirCorridorLandingBeacon);
 router.post("/:id/smart-lock-in-home-delivery", optionalAuthenticate, authorizeSmartLockInHomeDelivery);
 router.post("/:id/moisture-telemetry", optionalAuthenticate, updateParcelMoistureTelemetry);
+router.post("/:id/fiber-optic-mesh-seal", optionalAuthenticate, updateFiberOpticMeshSeal);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

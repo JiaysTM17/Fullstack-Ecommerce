@@ -594,6 +594,20 @@ const orderSchema = new mongoose.Schema(
       alertTriggeredAt: { type: String, default: null },
       airDryingVentilationScheduled: { type: Boolean, default: false },
     },
+    fiberOpticMeshSeal: {
+      isFiberMeshArmed: { type: Boolean, default: false },
+      meshSealId: { type: String, default: null },
+      lightContinuityStatus: {
+        type: String,
+        enum: ["continuous_intact", "fiber_severed_breach", "optical_attenuation_stress"],
+        default: "continuous_intact",
+      },
+      lightTransmissionLumen: { type: Number, default: 100 },
+      tamperCutDetected: { type: Boolean, default: false },
+      highValueInsuranceEscrowLocked: { type: Boolean, default: false },
+      meshArmedAt: { type: String, default: null },
+      incidentAuditRef: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

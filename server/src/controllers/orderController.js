@@ -3736,6 +3736,94 @@ export const updateParcelMoistureTelemetry = async (req, res) => {
   }
 };
 
+// @desc    Niêm phong lưới sợi quang học chống tráo hàng cao cấp (Fiber-Optic Mesh Seal)
+// @route   POST /api/orders/:id/fiber-optic-mesh-seal
+// @access  Public / Optional Auth / Courier & High-Value Vault Station
+export const updateFiberOpticMeshSeal = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      meshSealId,
+      lightTransmissionLumen = 100,
+      tamperCutDetected = false,
+    } = req.body;
+
+    if (!meshSealId) {
+      return sendError(res, "Thiếu mã niêm phong lưới sợi quang (meshSealId)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần niêm phong sợi quang", 404);
+    }
+
+    const now = new Date().toISOString();
+    const lumen = Number(lightTransmissionLumen) || 0;
+    const isBreach = tamperCutDetected === true || lumen <= 20;
+    const isStress = lumen < 80 && !isBreach;
+
+    let lightContinuityStatus = "continuous_intact";
+    if (isBreach) {
+      lightContinuityStatus = "fiber_severed_breach";
+    } else if (isStress) {
+      lightContinuityStatus = "optical_attenuation_stress";
+    }
+
+    const highValueInsuranceEscrowLocked = isBreach;
+    const incidentAuditRef = isBreach
+      ? `FIBER-BREACH-${Date.now().toString(36).toUpperCase()}`
+      : (order.fiberOpticMeshSeal?.incidentAuditRef || null);
+
+    order.fiberOpticMeshSeal = {
+      isFiberMeshArmed: true,
+      meshSealId,
+      lightContinuityStatus,
+      lightTransmissionLumen: lumen,
+      tamperCutDetected: isBreach,
+      highValueInsuranceEscrowLocked,
+      meshArmedAt: now,
+      incidentAuditRef,
+    };
+
+    const statusNote = isBreach
+      ? `BÁO ĐỘNG NIÊM PHONG SỢI QUANG: Lưới bảo mật ${meshSealId} bị đứt gãy truyền dẫn (${lumen}% ánh sáng). Khóa ký quỹ bảo hiểm tài sản cao cấp (${incidentAuditRef}). Tạm giữ điều tra gian lận tráo hàng.`
+      : isStress
+      ? `Cảnh báo vi áp suất sợi quang: Lưới ${meshSealId} suy hao truyền dẫn (${lumen}% ánh sáng). Vỏ hộp bị móp nhẹ.`
+      : `Lưới sợi quang ${meshSealId}: Luồng quang thông suốt 100% (${lumen}% ánh sáng). Niêm phong an toàn tuyệt đối.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        fiberOpticMeshSeal: order.fiberOpticMeshSeal,
+        message: isBreach
+          ? "Phát hiện đứt gãy lưới sợi quang niêm phong! Đã khóa ký quỹ bồi hoàn bảo hiểm."
+          : "Cập nhật trạng thái niêm phong sợi quang học an toàn.",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

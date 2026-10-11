@@ -2607,6 +2607,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.fiberOpticMeshSeal?.isFiberMeshArmed && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Lưới Sợi Quang (#${ord.fiberOpticMeshSeal.meshSealId}): ${ord.fiberOpticMeshSeal.lightTransmissionLumen}% quang thông. Trạng thái: ${ord.fiberOpticMeshSeal.lightContinuityStatus}. Ký quỹ: ${ord.fiberOpticMeshSeal.highValueInsuranceEscrowLocked ? 'ĐÃ KHÓA BẢO HIỂM' : 'An toàn'}`}>
+                            <span style={{ fontSize: '13px' }}>💡</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.fiberOpticMeshSeal.tamperCutDetected ? '#dc2626' : ord.fiberOpticMeshSeal.lightTransmissionLumen < 80 ? '#ea580c' : '#7c3aed',
+                              background: ord.fiberOpticMeshSeal.tamperCutDetected ? '#fee2e2' : ord.fiberOpticMeshSeal.lightTransmissionLumen < 80 ? '#ffedd5' : '#f3e8ff',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Sợi Quang: {ord.fiberOpticMeshSeal.lightTransmissionLumen}% {ord.fiberOpticMeshSeal.tamperCutDetected ? '(Đứt Lưới -> Khóa Ký Quỹ!)' : ord.fiberOpticMeshSeal.lightTransmissionLumen < 80 ? '(Suy Hao Áp Lực)' : '(Quang Thông Suốt)'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

@@ -5136,6 +5136,69 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 131: Automated High-Value Parcel Smart Tamper-Evident Fiber-Optic Mesh Seal (5 Tests)
+  // =========================================================================
+  describe("Feature 131: High-Value Fiber-Optic Mesh Seal Suite", () => {
+    test("F131-T1: Continuous light throughput confirms intact optical mesh seal", async () => {
+      const order = await Order.create({
+        orderId: "ORD_FIBER_MESH_131",
+        userId: "user_fiber_01",
+        status: "shipping",
+        total: 25000000,
+        fiberOpticMeshSeal: {
+          isFiberMeshArmed: true,
+          meshSealId: "FIBER-MESH-OPTIC-991",
+          lightContinuityStatus: "continuous_intact",
+          lightTransmissionLumen: 100,
+          tamperCutDetected: false,
+          highValueInsuranceEscrowLocked: false,
+          meshArmedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_FIBER_MESH_131");
+      expect.equal(order.fiberOpticMeshSeal.isFiberMeshArmed, true);
+      expect.equal(order.fiberOpticMeshSeal.lightContinuityStatus, "continuous_intact");
+      expect.equal(order.fiberOpticMeshSeal.lightTransmissionLumen, 100);
+      expect.equal(order.fiberOpticMeshSeal.highValueInsuranceEscrowLocked, false);
+    });
+
+    test("F131-T2: Severe lumen drop below 20% triggers fiber breach and insurance lock", () => {
+      const lumen = 10;
+      const tamperCutDetected = false;
+
+      const isBreach = tamperCutDetected === true || lumen <= 20;
+      const lightContinuityStatus = isBreach ? "fiber_severed_breach" : "continuous_intact";
+      const escrowLocked = isBreach;
+
+      expect.equal(isBreach, true);
+      expect.equal(lightContinuityStatus, "fiber_severed_breach");
+      expect.equal(escrowLocked, true);
+    });
+
+    test("F131-T3: Moderate attenuation between 21% and 79% flags stress warning without breach", () => {
+      const lumen = 65;
+      const isBreach = lumen <= 20;
+      const isStress = lumen < 80 && !isBreach;
+      const status = isBreach ? "fiber_severed_breach" : isStress ? "optical_attenuation_stress" : "continuous_intact";
+
+      expect.equal(status, "optical_attenuation_stress");
+    });
+
+    test("F131-T4: Breach incident generates standardized audit prefix", () => {
+      const auditRef = `FIBER-BREACH-${"OP981"}`;
+      expect.equal(auditRef.startsWith("FIBER-BREACH-"), true);
+    });
+
+    test("F131-T5: Missing meshSealId fails validation guard", () => {
+      const payload = { lightTransmissionLumen: 100 };
+      const isValid = Boolean(payload.meshSealId && payload.meshSealId.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

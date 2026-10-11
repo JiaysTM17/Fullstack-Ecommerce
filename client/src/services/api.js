@@ -1247,6 +1247,17 @@ export async function updateParcelMoistureTelemetryAPI(orderId, { moistureSensor
   return result?.data || result;
 }
 
+/**
+ * Automated High-Value Parcel Smart Tamper-Evident Fiber-Optic Mesh Seal (Feature 131)
+ */
+export async function updateFiberOpticMeshSealAPI(orderId, { meshSealId, lightTransmissionLumen, tamperCutDetected } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/fiber-optic-mesh-seal`, {
+    method: "POST",
+    body: JSON.stringify({ meshSealId, lightTransmissionLumen, tamperCutDetected }),
+  });
+  return result?.data || result;
+}
+
 
 
 
