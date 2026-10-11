@@ -2793,6 +2793,64 @@ export const settleColdChainInsuranceClaim = async (req, res) => {
   }
 };
 
+// @desc    Tối ưu hóa hành trình giao hàng bằng đội xe điện/năng lượng mặt trời (Feature 119)
+// @route   POST /api/orders/:id/solar-green-fleet
+// @access  Public / Authenticate
+export const optimizeSolarFleetGreenRouting = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      vehicleType = "solar_cargo_bike",
+      fleetId = `GREEN-EV-${Date.now().toString().slice(-4)}`,
+      routeOptimizationEfficiencyPercent = 28,
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần tối ưu tuyến xe điện xanh", 404);
+    }
+
+    const now = new Date().toISOString();
+    const co2AvoidedGrams = 850; // Cắt giảm 850g khí thải CO2 so với xe xăng
+    const solarEnergyHarvestedWh = 420; // 420 Wh điện thu từ tấm pin solar trên nóc thùng xe
+
+    order.solarFleetGreenRouting = {
+      isGreenFleet: true,
+      vehicleType,
+      fleetId,
+      routeOptimizationEfficiencyPercent: Number(routeOptimizationEfficiencyPercent),
+      co2AvoidedGrams,
+      solarEnergyHarvestedWh,
+      ecoDriverRating: 4.95,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Đội Xe Xanh SPX Green Fleet (#${fleetId} - ${vehicleType}): Tối ưu tuyến đường giảm ${routeOptimizationEfficiencyPercent}%. Cắt giảm ${co2AvoidedGrams}g CO₂, nạp ${solarEnergyHarvestedWh}Wh điện mặt trời.`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      solarFleetGreenRouting: order.solarFleetGreenRouting,
+      message: `Tối ưu lộ trình xe xanh thành công! Giảm ${co2AvoidedGrams}g CO₂ vào môi trường.`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
+
 
 
 

@@ -39,6 +39,7 @@ import {
   submitDoorstepApplianceTradeIn,
   dispatchAutonomousDroneFlight,
   settleColdChainInsuranceClaim,
+  optimizeSolarFleetGreenRouting,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -90,6 +91,7 @@ router.post("/:id/cold-chain", optionalAuthenticate, updatePriorityColdChainDisp
 router.post("/:id/doorstep-trade-in", optionalAuthenticate, submitDoorstepApplianceTradeIn);
 router.post("/:id/drone-dispatch", optionalAuthenticate, dispatchAutonomousDroneFlight);
 router.post("/:id/cold-chain-insurance-claim", optionalAuthenticate, settleColdChainInsuranceClaim);
+router.post("/:id/solar-green-fleet", optionalAuthenticate, optimizeSolarFleetGreenRouting);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

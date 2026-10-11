@@ -1115,6 +1115,18 @@ export async function settleColdChainInsuranceClaimAPI(orderId, { breachConfirme
   return result?.data || result;
 }
 
+/**
+ * Smart Carbon Neutral Green Route Optimization & Solar Fleet Badge (Feature 119)
+ */
+export async function optimizeSolarFleetGreenRoutingAPI(orderId, { vehicleType, fleetId, routeOptimizationEfficiencyPercent } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/solar-green-fleet`, {
+    method: "POST",
+    body: JSON.stringify({ vehicleType, fleetId, routeOptimizationEfficiencyPercent }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 

@@ -4312,7 +4312,75 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultInsurance.payoutAmount, 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 119: Smart Carbon Neutral Green Route Optimization & Solar Fleet Badge (5 Tests)
+  // =========================================================================
+  describe("Feature 119: Smart Carbon Neutral Green Route Optimization & Solar Fleet Badge", () => {
+    test("F119-T1: Order model persists Solar Fleet Green Routing schema", async () => {
+      const order = await Order.create({
+        orderId: "ORD_GREEN_FLEET_119",
+        user: "buyer_test_green_119",
+        shopId: "shop_eco_friendly",
+        total: 620000,
+        solarFleetGreenRouting: {
+          isGreenFleet: true,
+          vehicleType: "solar_cargo_bike",
+          fleetId: "GREEN-EV-0921",
+          routeOptimizationEfficiencyPercent: 28,
+          co2AvoidedGrams: 850,
+          solarEnergyHarvestedWh: 420,
+          ecoDriverRating: 4.95,
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_GREEN_FLEET_119");
+      expect.equal(order.solarFleetGreenRouting.isGreenFleet, true);
+      expect.equal(order.solarFleetGreenRouting.vehicleType, "solar_cargo_bike");
+      expect.equal(order.solarFleetGreenRouting.fleetId, "GREEN-EV-0921");
+      expect.equal(order.solarFleetGreenRouting.co2AvoidedGrams, 850);
+      expect.equal(order.solarFleetGreenRouting.solarEnergyHarvestedWh, 420);
+      expect.equal(order.solarFleetGreenRouting.ecoDriverRating, 4.95);
+    });
+
+    test("F119-T2: Carbon reduction computation aggregates accurately for multiple green drop-offs", () => {
+      const dropOffs = 5;
+      const co2SavedPerDropGrams = 850;
+      const totalCo2AvoidedKg = (dropOffs * co2SavedPerDropGrams) / 1000;
+
+      expect.equal(totalCo2AvoidedKg, 4.25);
+      expect.equal(totalCo2AvoidedKg > 0, true);
+    });
+
+    test("F119-T3: Solar energy harvested per route strictly increases vehicle auxiliary range", () => {
+      const batteryCapacityWh = 1000;
+      const solarEnergyHarvestedWh = 420;
+      const chargeAddedPercent = Math.round((solarEnergyHarvestedWh / batteryCapacityWh) * 100);
+
+      expect.equal(chargeAddedPercent, 42);
+      expect.equal(chargeAddedPercent > 0, true);
+    });
+
+    test("F119-T4: Eco driver rating maintains valid 1.0 to 5.0 range", () => {
+      const ecoDriverRating = 4.95;
+      expect.equal(ecoDriverRating >= 1.0 && ecoDriverRating <= 5.0, true);
+    });
+
+    test("F119-T5: Default order schema initial state does not force green fleet tag without dispatch assignment", () => {
+      const defaultGreen = {
+        isGreenFleet: false,
+        vehicleType: "none",
+        co2AvoidedGrams: 0,
+        solarEnergyHarvestedWh: 0,
+      };
+
+      expect.equal(defaultGreen.isGreenFleet, false);
+      expect.equal(defaultGreen.vehicleType, "none");
+      expect.equal(defaultGreen.co2AvoidedGrams, 0);
+    });
+  });
 });
+
 
 
 

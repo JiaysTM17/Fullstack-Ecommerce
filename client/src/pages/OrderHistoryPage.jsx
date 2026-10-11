@@ -2379,6 +2379,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.solarFleetGreenRouting?.isGreenFleet && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Đội Xe Xanh SPX Green Fleet (#${ord.solarFleetGreenRouting.fleetId} - ${ord.solarFleetGreenRouting.vehicleType}): Cắt giảm ${ord.solarFleetGreenRouting.co2AvoidedGrams}g CO₂, nạp ${ord.solarFleetGreenRouting.solarEnergyHarvestedWh}Wh điện mặt trời.`}>
+                            <span style={{ fontSize: '13px' }}>☀️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#059669',
+                              background: '#ecfdf5',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Xe Điện Solar: -{ord.solarFleetGreenRouting.co2AvoidedGrams}g CO₂ (+{ord.solarFleetGreenRouting.solarEnergyHarvestedWh}Wh Năng Lượng)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

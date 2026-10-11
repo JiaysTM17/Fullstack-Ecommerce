@@ -396,6 +396,19 @@ const orderSchema = new mongoose.Schema(
       settledAt: { type: String, default: null },
       insuranceProvider: { type: String, default: "Shopee Bảo Hiểm Hàng Lạnh Toàn Diện" },
     },
+    solarFleetGreenRouting: {
+      isGreenFleet: { type: Boolean, default: false },
+      vehicleType: {
+        type: String,
+        enum: ["none", "electric_van", "solar_cargo_bike", "ev_scooter"],
+        default: "none",
+      },
+      fleetId: { type: String, default: "" },
+      routeOptimizationEfficiencyPercent: { type: Number, default: 0 },
+      co2AvoidedGrams: { type: Number, default: 0 },
+      solarEnergyHarvestedWh: { type: Number, default: 0 },
+      ecoDriverRating: { type: Number, default: 5.0 },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {
