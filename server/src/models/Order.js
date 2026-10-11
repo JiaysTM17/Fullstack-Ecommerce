@@ -200,6 +200,17 @@ const orderSchema = new mongoose.Schema(
         default: "open",
       },
     },
+    ecoPackagingContribution: {
+      isOptedIn: { type: Boolean, default: false },
+      boxType: {
+        type: String,
+        enum: ["standard", "biodegradable_honeycomb", "reusable_shoebox"],
+        default: "standard",
+      },
+      treePlantContribution: { type: Number, default: 0 },
+      plasticFreeGuaranteed: { type: Boolean, default: false },
+      rewardCoinsIssued: { type: Number, default: 0 },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

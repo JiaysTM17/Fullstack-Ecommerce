@@ -975,3 +975,15 @@ export async function updateDynamicDeliveryAddressAPI(orderId, { newAddress, rea
   return result?.data || result;
 }
 
+/**
+ * Eco-Friendly Packaging & Carbon Offsetting Contribution Suite (Feature 106)
+ */
+export async function updateEcoPackagingOptionAPI(orderId, { isOptedIn, boxType, treePlantContribution }) {
+  const result = await apiRequest(`/api/orders/${orderId}/eco-packaging`, {
+    method: "PATCH",
+    body: JSON.stringify({ isOptedIn, boxType, treePlantContribution }),
+  });
+  return result?.data || result;
+}
+
+

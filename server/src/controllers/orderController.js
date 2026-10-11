@@ -1997,5 +1997,66 @@ export const updateDynamicDeliveryAddress = async (req, res) => {
   }
 };
 
+// @desc    Gói hàng sinh thái tuần hoàn & Quyên góp trồng rừng phủ xanh (Feature 106)
+// @route   PATCH /api/orders/:id/eco-packaging
+// @access  Public / Authenticate
+export const updateEcoPackagingOption = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      isOptedIn = true,
+      boxType = "biodegradable_honeycomb",
+      treePlantContribution = 5000,
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần cấu hình đóng gói sinh thái", 404);
+    }
+
+    const rewardCoins = isOptedIn ? 50 : 0;
+    const now = new Date().toISOString();
+
+    order.ecoPackagingContribution = {
+      isOptedIn: Boolean(isOptedIn),
+      boxType,
+      treePlantContribution: Number(treePlantContribution) || 0,
+      plasticFreeGuaranteed: isOptedIn,
+      rewardCoinsIssued: rewardCoins,
+    };
+
+    const boxLabel =
+      boxType === "biodegradable_honeycomb"
+        ? "Hộp giấy tổ ong phân hủy sinh học (0% Băng keo nhựa)"
+        : boxType === "reusable_shoebox"
+        ? "Túi vải Shopee Green tái sử dụng nhiều lần"
+        : "Hộp tiêu chuẩn";
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Đã kích hoạt Đóng gói Xanh: ${boxLabel}. Đóng góp ${Number(treePlantContribution).toLocaleString('vi-VN')}₫ trồng rừng SPX Green (+${rewardCoins} Xu)`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      ecoPackagingContribution: order.ecoPackagingContribution,
+      message: `Đã cập nhật Đóng gói Sinh thái thành công! Cảm ơn bạn đã chung tay bảo vệ môi trường (+${rewardCoins} Xu).`,
+    });
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 

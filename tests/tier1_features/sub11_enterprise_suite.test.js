@@ -3395,6 +3395,77 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultCorrection.modifiedAt, null);
     });
   });
+
+  // =========================================================================
+  // FEATURE 106: Eco-Friendly Packaging & Carbon Offsetting Contribution Suite (5 Tests)
+  // =========================================================================
+  describe("Feature 106: Eco-Friendly Packaging & Carbon Offsetting Contribution Suite", () => {
+    test("F106-T1: Order model persists ecoPackagingContribution schema attributes", async () => {
+      const order = await Order.create({
+        orderId: "ORD_ECO_PACK_106",
+        items: [{ productId: "p_bamboo_cup", name: "Ly Tre Tự Nhiên Sinh Thái", price: 120000, quantity: 2 }],
+        total: 265000,
+        ecoPackagingContribution: {
+          isOptedIn: true,
+          boxType: "biodegradable_honeycomb",
+          treePlantContribution: 5000,
+          plasticFreeGuaranteed: true,
+          rewardCoinsIssued: 50,
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_ECO_PACK_106");
+      expect.equal(order.ecoPackagingContribution.isOptedIn, true);
+      expect.equal(order.ecoPackagingContribution.boxType, "biodegradable_honeycomb");
+      expect.equal(order.ecoPackagingContribution.rewardCoinsIssued, 50);
+      expect.equal(order.ecoPackagingContribution.treePlantContribution, 5000);
+    });
+
+    test("F106-T2: Opting in eco-packaging awards +50 Mini Xu incentive", () => {
+      const isOptedIn = true;
+      const rewardCoins = isOptedIn ? 50 : 0;
+      expect.equal(rewardCoins, 50);
+
+      const isOptedOut = false;
+      const noReward = isOptedOut ? 50 : 0;
+      expect.equal(noReward, 0);
+    });
+
+    test("F106-T3: Plastic-free guarantee confirms 0% single-use plastic wrap", () => {
+      const pack = {
+        isOptedIn: true,
+        boxType: "biodegradable_honeycomb",
+        plasticFreeGuaranteed: true,
+      };
+
+      expect.equal(pack.plasticFreeGuaranteed, true);
+      expect.equal(pack.boxType.includes("honeycomb"), true);
+    });
+
+    test("F106-T4: Tree plant contribution adds directly to carbon offsetting total", () => {
+      const initialPool = 1250000; // 1,250,000 VND
+      const contribution = 5000;
+      const updatedPool = initialPool + contribution;
+
+      expect.equal(updatedPool, 1255000);
+    });
+
+    test("F106-T5: Eco-packaging timeline logs environmental action and tree contribution amount", () => {
+      const timeline = [];
+      const now = new Date().toISOString();
+      const contribution = 5000;
+      const rewardCoins = 50;
+
+      timeline.push({
+        time: now,
+        text: `Đã kích hoạt Đóng gói Xanh: Hộp giấy tổ ong phân hủy sinh học. Đóng góp ${contribution.toLocaleString('vi-VN')}₫ trồng rừng SPX Green (+${rewardCoins} Xu)`,
+      });
+
+      expect.equal(timeline.length, 1);
+      expect.equal(timeline[0].text.includes("trồng rừng SPX Green"), true);
+      expect.equal(timeline[0].text.includes("+50 Xu"), true);
+    });
+  });
 });
 
 

@@ -2132,6 +2132,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.ecoPackagingContribution?.isOptedIn && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Gói Xanh: ${ord.ecoPackagingContribution.boxType}. Đóng góp trồng rừng: ${Number(ord.ecoPackagingContribution.treePlantContribution || 0).toLocaleString('vi-VN')}₫`}>
+                            <span style={{ fontSize: '13px' }}>🌱</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#15803d',
+                              background: '#dcfce7',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Đóng Gói Xanh (+50 Xu)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">
