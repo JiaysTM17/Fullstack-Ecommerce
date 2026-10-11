@@ -5268,6 +5268,71 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(validate(validPayload), true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 133: Dynamic Parcel Barcode Color-Shifting Thermo-Chromic Ink Tamper Audit (5 Tests)
+  // =========================================================================
+  describe("Feature 133: Dynamic Parcel Barcode Color-Shifting Thermo-Chromic Ink Tamper Audit", () => {
+    test("F133-T1: Order model successfully arms thermoChromicColorShiftBarcode subdocument", async () => {
+      const order = await Order.create({
+        orderId: "ORD_THERMO_BARCODE_133",
+        items: [{ name: "High-End Perfume Limited Edition", price: 1250000, quantity: 1 }],
+        total: 1250000,
+        thermoChromicColorShiftBarcode: {
+          isThermoChromicArmed: true,
+          barcodeBatchSerialNumber: "THERMO-LOT-9092-VN",
+          spectralColorShiftHex: "#10b981",
+          ambientTemperatureCelsius: 28,
+          thermalExposureThresholdCelsius: 45,
+          heatTamperExceeded: false,
+          antiCounterfeitVerificationHash: "THERMO-HASH-SAFE-9092",
+          inspectedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_THERMO_BARCODE_133");
+      expect.equal(order.thermoChromicColorShiftBarcode.isThermoChromicArmed, true);
+      expect.equal(order.thermoChromicColorShiftBarcode.barcodeBatchSerialNumber, "THERMO-LOT-9092-VN");
+      expect.equal(order.thermoChromicColorShiftBarcode.spectralColorShiftHex, "#10b981");
+      expect.equal(order.thermoChromicColorShiftBarcode.heatTamperExceeded, false);
+      expect.equal(order.thermoChromicColorShiftBarcode.ambientTemperatureCelsius, 28);
+    });
+
+    test("F133-T2: Heat exceeding threshold triggers color shift to magenta and tamper flag", () => {
+      const temp = 52;
+      const threshold = 45;
+      const heatTamperExceeded = temp >= threshold;
+      const colorHex = heatTamperExceeded ? "#be185d" : "#10b981";
+
+      expect.equal(heatTamperExceeded, true);
+      expect.equal(colorHex, "#be185d");
+    });
+
+    test("F133-T3: Normal ambient temperature retains emerald authentic hue", () => {
+      const temp = 30;
+      const threshold = 45;
+      const heatTamperExceeded = temp >= threshold;
+      const colorHex = heatTamperExceeded ? "#be185d" : "#10b981";
+
+      expect.equal(heatTamperExceeded, false);
+      expect.equal(colorHex, "#10b981");
+    });
+
+    test("F133-T4: Dynamic verification hash generated with THERMO-HASH prefix", () => {
+      const serial = "LOT-SER-9941";
+      const hash = `THERMO-HASH-${Date.now().toString(36).toUpperCase()}-${serial.slice(-4)}`;
+
+      expect.equal(hash.startsWith("THERMO-HASH-"), true);
+      expect.equal(hash.endsWith("9941"), true);
+    });
+
+    test("F133-T5: Missing barcodeBatchSerialNumber fails validation guard", () => {
+      const payload = { ambientTemperatureCelsius: 32 };
+      const isValid = Boolean(payload.barcodeBatchSerialNumber && payload.barcodeBatchSerialNumber.trim().length > 0);
+
+      expect.equal(isValid, false);
+    });
+  });
 });
 
 

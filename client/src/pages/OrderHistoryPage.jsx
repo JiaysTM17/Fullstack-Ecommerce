@@ -2645,6 +2645,26 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.thermoChromicColorShiftBarcode?.isThermoChromicArmed && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Mực Nhiệt Quang Học (#${ord.thermoChromicColorShiftBarcode.barcodeBatchSerialNumber}): Nhiệt độ ${ord.thermoChromicColorShiftBarcode.ambientTemperatureCelsius}°C [Ngưỡng: ${ord.thermoChromicColorShiftBarcode.thermalExposureThresholdCelsius}°C]. Màu: ${ord.thermoChromicColorShiftBarcode.spectralColorShiftHex}. Can thiệp nhiệt: ${ord.thermoChromicColorShiftBarcode.heatTamperExceeded ? 'CÓ DẤU HIỆU BÓC TEM' : 'Nguyên Bản'}`}>
+                            <span style={{ fontSize: '13px' }}>🌡️</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.thermoChromicColorShiftBarcode.heatTamperExceeded ? '#be185d' : '#059669',
+                              background: ord.thermoChromicColorShiftBarcode.heatTamperExceeded ? '#fdf2f8' : '#ecfdf5',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              border: `1px solid ${ord.thermoChromicColorShiftBarcode.spectralColorShiftHex}`
+                            }}>
+                              Mực Nhiệt: {ord.thermoChromicColorShiftBarcode.ambientTemperatureCelsius}°C {ord.thermoChromicColorShiftBarcode.heatTamperExceeded ? '(Đổi Màu Tía - Cảnh Báo Sấy Bóc!)' : '(Xanh Chuẩn)'}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

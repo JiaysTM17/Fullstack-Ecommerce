@@ -1269,6 +1269,17 @@ export async function updateMobileVanRobotSwarmDispatchAPI(orderId, { motherVanI
   return result?.data || result;
 }
 
+/**
+ * Dynamic Parcel Barcode Color-Shifting Thermo-Chromic Ink Tamper Audit (Feature 133)
+ */
+export async function auditThermoChromicColorShiftBarcodeAPI(orderId, { barcodeBatchSerialNumber, ambientTemperatureCelsius, thermalExposureThresholdCelsius, spectralColorShiftHex } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/thermochromic-barcode`, {
+    method: "POST",
+    body: JSON.stringify({ barcodeBatchSerialNumber, ambientTemperatureCelsius, thermalExposureThresholdCelsius, spectralColorShiftHex }),
+  });
+  return result?.data || result;
+}
+
 
 
 

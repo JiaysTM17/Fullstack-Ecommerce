@@ -3903,6 +3903,84 @@ export const updateMobileVanRobotSwarmDispatch = async (req, res) => {
   }
 };
 
+// @desc    Kiểm tra bảo mật mực nhiệt quang học chống sao chép vận đơn (Feature 133)
+// @route   POST /api/orders/:id/thermochromic-barcode
+// @access  Public / Authenticate
+export const auditThermoChromicColorShiftBarcode = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      barcodeBatchSerialNumber,
+      ambientTemperatureCelsius = 25,
+      thermalExposureThresholdCelsius = 45,
+      spectralColorShiftHex,
+    } = req.body;
+
+    if (!barcodeBatchSerialNumber) {
+      return sendError(res, "Thiếu số seri lô mực in nhiệt quang học (barcodeBatchSerialNumber)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần xác thực mực in nhiệt quang học", 404);
+    }
+
+    const now = new Date().toISOString();
+    const temp = Number(ambientTemperatureCelsius) || 25;
+    const threshold = Number(thermalExposureThresholdCelsius) || 45;
+    const heatTamperExceeded = temp >= threshold;
+
+    // Khi quá nhiệt, mực chuyển màu đỏ tía cảnh báo can thiệp máy sấy bóc tem
+    const dynamicHex = spectralColorShiftHex || (heatTamperExceeded ? "#be185d" : "#10b981");
+    const antiCounterfeitVerificationHash = `THERMO-HASH-${Date.now().toString(36).toUpperCase()}-${barcodeBatchSerialNumber.slice(-4)}`;
+
+    order.thermoChromicColorShiftBarcode = {
+      isThermoChromicArmed: true,
+      barcodeBatchSerialNumber,
+      spectralColorShiftHex: dynamicHex,
+      ambientTemperatureCelsius: temp,
+      thermalExposureThresholdCelsius: threshold,
+      heatTamperExceeded,
+      antiCounterfeitVerificationHash,
+      inspectedAt: now,
+    };
+
+    const statusNote = heatTamperExceeded
+      ? `BÁO ĐỘNG GIAN LẬN NHIỆT: Tem vận đơn ${barcodeBatchSerialNumber} đổi màu quang học (${dynamicHex}) do nhiệt độ bề mặt đạt ${temp}°C (vượt ngưỡng ${threshold}°C). Phát hiện dấu hiệu dùng nhiệt bóc tách tem!`
+      : `Tem quang học nhiệt ${barcodeBatchSerialNumber}: Màu chuẩn ${dynamicHex} tại ${temp}°C (ngưỡng an toàn ${threshold}°C). Vận đơn nguyên bản, không sao chép giả mạo.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        thermoChromicColorShiftBarcode: order.thermoChromicColorShiftBarcode,
+        message: heatTamperExceeded
+          ? "Phát hiện dấu hiệu can thiệp nhiệt độ bóc tem vận đơn!"
+          : "Tem vận đơn mực nhiệt quang học đạt chuẩn chống giả mạo.",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 

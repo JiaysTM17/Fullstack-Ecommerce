@@ -622,6 +622,16 @@ const orderSchema = new mongoose.Schema(
       missionDispatchedAt: { type: String, default: null },
       missionCompletedAt: { type: String, default: null },
     },
+    thermoChromicColorShiftBarcode: {
+      isThermoChromicArmed: { type: Boolean, default: false },
+      barcodeBatchSerialNumber: { type: String, default: null },
+      spectralColorShiftHex: { type: String, default: "#10b981" }, // e.g. Chuyển từ Xanh lá (#10b981) sang Đỏ tím (#be185d) khi quá nhiệt
+      ambientTemperatureCelsius: { type: Number, default: 25 },
+      thermalExposureThresholdCelsius: { type: Number, default: 45 },
+      heatTamperExceeded: { type: Boolean, default: false },
+      antiCounterfeitVerificationHash: { type: String, default: null },
+      inspectedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {
