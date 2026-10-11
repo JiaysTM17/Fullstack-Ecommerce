@@ -2177,5 +2177,73 @@ export const issueCarbonOffsetCertificate = async (req, res) => {
   }
 };
 
+// @desc    Đặt lịch bưu tá lấy hàng đổi trả tận cửa miễn phí (Feature 109)
+// @route   POST /api/orders/:id/doorstep-return-pickup
+// @access  Public / Authenticate
+export const scheduleDoorstepReturnPickup = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      appointmentDate,
+      timeWindow = "morning_8_12",
+      pickupAddress,
+      pickupNote = "Kiện hàng đã dán tem hoàn trả SPX",
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần đặt lịch lấy hàng hoàn", 404);
+    }
+
+    const scheduledDate = appointmentDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+    const defaultAddress = pickupAddress || order.customer?.address || order.shippingAddress || "Địa chỉ khách hàng";
+    const now = new Date().toISOString();
+
+    order.doorstepReturnPickup = {
+      isBooked: true,
+      appointmentDate: scheduledDate,
+      timeWindow,
+      courierName: "Nguyễn Văn Tuấn (Bưu tá SPX Thu Hồi)",
+      courierPhone: "0912839102",
+      pickupStatus: "scheduled",
+      pickupAddress: defaultAddress,
+      pickupNote,
+    };
+
+    const windowLabel =
+      timeWindow === "morning_8_12"
+        ? "08h00 - 12h00"
+        : timeWindow === "afternoon_13_17"
+        ? "13h00 - 17h00"
+        : timeWindow === "evening_18_20"
+        ? "18h00 - 20h00"
+        : "Cả ngày";
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: `Đã đặt lịch bưu tá SPX đến lấy hàng đổi trả tận nơi vào ngày ${scheduledDate} (${windowLabel})`,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(res, {
+      orderId: order.orderId || order._id,
+      doorstepReturnPickup: order.doorstepReturnPickup,
+      message: `Đã hẹn bưu tá lấy hàng hoàn trả tận nhà thành công vào ${scheduledDate}!`,
+    }, 201);
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 

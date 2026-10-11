@@ -1007,6 +1007,18 @@ export async function issueCarbonOffsetCertificateAPI(orderId) {
   return result?.data || result;
 }
 
+/**
+ * Doorstep Return & Exchange Courier Dispatch Suite (Feature 109)
+ */
+export async function scheduleDoorstepReturnPickupAPI(orderId, { appointmentDate, timeWindow, pickupAddress, pickupNote } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/doorstep-return-pickup`, {
+    method: "POST",
+    body: JSON.stringify({ appointmentDate, timeWindow, pickupAddress, pickupNote }),
+  });
+  return result?.data || result;
+}
+
+
 
 
 

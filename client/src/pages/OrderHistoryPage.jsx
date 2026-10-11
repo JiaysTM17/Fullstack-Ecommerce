@@ -2189,6 +2189,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.doorstepReturnPickup?.isBooked && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Bưu tá thu hồi: ${ord.doorstepReturnPickup.courierName} (${ord.doorstepReturnPickup.courierPhone}). Ngày hẹn: ${ord.doorstepReturnPickup.appointmentDate}`}>
+                            <span style={{ fontSize: '13px' }}>🛵</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#c026d3',
+                              background: '#fae8ff',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Thu Hồi Tận Nơi ({ord.doorstepReturnPickup.appointmentDate})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

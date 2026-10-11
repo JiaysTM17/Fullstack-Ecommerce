@@ -235,6 +235,24 @@ const orderSchema = new mongoose.Schema(
       certPdfUrl: { type: String, default: "" },
       nftBadgeCode: { type: String, default: "" },
     },
+    doorstepReturnPickup: {
+      isBooked: { type: Boolean, default: false },
+      appointmentDate: { type: String, default: null },
+      timeWindow: {
+        type: String,
+        enum: ["anytime", "morning_8_12", "afternoon_13_17", "evening_18_20"],
+        default: "anytime",
+      },
+      courierName: { type: String, default: "" },
+      courierPhone: { type: String, default: "" },
+      pickupStatus: {
+        type: String,
+        enum: ["none", "scheduled", "courier_assigned", "picked_up", "returned_to_hub"],
+        default: "none",
+      },
+      pickupAddress: { type: String, default: "" },
+      pickupNote: { type: String, default: "" },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

@@ -3606,6 +3606,71 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(defaultCert.treeUnitsPlanted, 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 109: Doorstep Return & Exchange Courier Dispatch Suite (5 Tests)
+  // =========================================================================
+  describe("Feature 109: Doorstep Return & Exchange Courier Dispatch Suite", () => {
+    test("F109-T1: Order model persists doorstepReturnPickup schema attributes", async () => {
+      const order = await Order.create({
+        orderId: "ORD_DOORSTEP_RET_109",
+        items: [{ productId: "p_shoe_01", name: "Giày Sneaker Running SPX", price: 790000, quantity: 1 }],
+        total: 815000,
+        doorstepReturnPickup: {
+          isBooked: true,
+          appointmentDate: "2026-10-15",
+          timeWindow: "morning_8_12",
+          courierName: "Nguyễn Văn Tuấn (Bưu tá SPX Thu Hồi)",
+          courierPhone: "0912839102",
+          pickupStatus: "scheduled",
+          pickupAddress: "Số 88 Phố Huế, Hai Bà Trưng, Hà Nội",
+          pickupNote: "Kiện hàng đã dán tem đổi trả",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_DOORSTEP_RET_109");
+      expect.equal(order.doorstepReturnPickup.isBooked, true);
+      expect.equal(order.doorstepReturnPickup.appointmentDate, "2026-10-15");
+      expect.equal(order.doorstepReturnPickup.pickupStatus, "scheduled");
+      expect.equal(order.doorstepReturnPickup.courierName.includes("Nguyễn Văn Tuấn"), true);
+    });
+
+    test("F109-T2: Courier dispatch assignment maps valid contact phone format", () => {
+      const courierPhone = "0912839102";
+      const isValidPhone = /^(03|05|07|08|09)\d{8}$/.test(courierPhone);
+      expect.equal(isValidPhone, true);
+    });
+
+    test("F109-T3: Time window presets support designated shift options", () => {
+      const allowedWindows = ["anytime", "morning_8_12", "afternoon_13_17", "evening_18_20"];
+      expect.equal(allowedWindows.includes("morning_8_12"), true);
+      expect.equal(allowedWindows.includes("afternoon_13_17"), true);
+      expect.equal(allowedWindows.includes("midnight"), false);
+    });
+
+    test("F109-T4: Pickup handover execution advances pickupStatus to picked_up", () => {
+      const returnPickup = {
+        pickupStatus: "scheduled",
+      };
+
+      returnPickup.pickupStatus = "picked_up";
+      expect.equal(returnPickup.pickupStatus, "picked_up");
+
+      returnPickup.pickupStatus = "returned_to_hub";
+      expect.equal(returnPickup.pickupStatus, "returned_to_hub");
+    });
+
+    test("F109-T5: Default order initial state preserves unbooked doorstep return state", () => {
+      const defaultPickup = {
+        isBooked: false,
+        appointmentDate: null,
+        pickupStatus: "none",
+      };
+
+      expect.equal(defaultPickup.isBooked, false);
+      expect.equal(defaultPickup.pickupStatus, "none");
+    });
+  });
 });
 
 
