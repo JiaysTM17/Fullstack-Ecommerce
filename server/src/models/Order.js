@@ -608,6 +608,20 @@ const orderSchema = new mongoose.Schema(
       meshArmedAt: { type: String, default: null },
       incidentAuditRef: { type: String, default: null },
     },
+    mobileVanRobotSwarmDispatch: {
+      isSwarmDispatched: { type: Boolean, default: false },
+      motherVanId: { type: String, default: null },
+      assignedRobotId: { type: String, default: null },
+      robotBatteryLevelPercent: { type: Number, default: 100 },
+      curbsideDockStationPin: { type: String, default: null },
+      swarmMissionStatus: {
+        type: String,
+        enum: ["docked_in_van", "dispatched_sidewalk_transit", "customer_doorstep_delivered", "returned_to_mother_van"],
+        default: "docked_in_van",
+      },
+      missionDispatchedAt: { type: String, default: null },
+      missionCompletedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

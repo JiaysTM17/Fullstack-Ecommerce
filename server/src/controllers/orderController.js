@@ -3823,6 +3823,86 @@ export const updateFiberOpticMeshSeal = async (req, res) => {
   }
 };
 
+// @desc    Điều động Robot Swarm tự hành từ xe tải điện vi mô (Feature 132)
+// @route   POST /api/orders/:id/mobile-van-robot-swarm
+// @access  Public / Authenticate
+export const updateMobileVanRobotSwarmDispatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      motherVanId,
+      assignedRobotId,
+      robotBatteryLevelPercent = 100,
+      curbsideDockStationPin,
+      swarmMissionStatus = "docked_in_van",
+    } = req.body;
+
+    if (!motherVanId || !assignedRobotId) {
+      return sendError(res, "Thiếu thông tin nhận diện xe mẹ (motherVanId) hoặc ID Robot Swarm (assignedRobotId)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần điều phối Robot Swarm", 404);
+    }
+
+    const now = new Date().toISOString();
+    const battery = Math.max(0, Math.min(100, Number(robotBatteryLevelPercent) || 100));
+    const validStatuses = ["docked_in_van", "dispatched_sidewalk_transit", "customer_doorstep_delivered", "returned_to_mother_van"];
+    const missionStatus = validStatuses.includes(swarmMissionStatus) ? swarmMissionStatus : "dispatched_sidewalk_transit";
+
+    const isDelivered = missionStatus === "customer_doorstep_delivered";
+    const isReturned = missionStatus === "returned_to_mother_van";
+
+    order.mobileVanRobotSwarmDispatch = {
+      isSwarmDispatched: true,
+      motherVanId,
+      assignedRobotId,
+      robotBatteryLevelPercent: battery,
+      curbsideDockStationPin: curbsideDockStationPin || `DOCK-PIN-${Math.floor(1000 + Math.random() * 9000)}`,
+      swarmMissionStatus: missionStatus,
+      missionDispatchedAt: order.mobileVanRobotSwarmDispatch?.missionDispatchedAt || now,
+      missionCompletedAt: (isDelivered || isReturned) ? now : (order.mobileVanRobotSwarmDispatch?.missionCompletedAt || null),
+    };
+
+    const statusNote = missionStatus === "dispatched_sidewalk_transit"
+      ? `Xe tải mẹ ${motherVanId} đã phóng Robot #${assignedRobotId} xuất kích tiếp cận vỉa hè nhà người nhận (Pin ${battery}%).`
+      : isDelivered
+      ? `Robot #${assignedRobotId} đã giao hàng tận ngưỡng cửa thành công! Khách xác nhận qua mã DOCK.`
+      : isReturned
+      ? `Robot #${assignedRobotId} hoàn thành sứ mệnh, đã tự hành quay về neo sạc tại xe tải mẹ ${motherVanId}.`
+      : `Robot #${assignedRobotId} sẵn sàng trong khoang xe tải mẹ ${motherVanId}.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        mobileVanRobotSwarmDispatch: order.mobileVanRobotSwarmDispatch,
+        message: "Cập nhật trạng thái điều phối Robot Swarm từ xe tải điện thành công.",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 

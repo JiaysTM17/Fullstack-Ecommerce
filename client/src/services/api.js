@@ -1258,6 +1258,17 @@ export async function updateFiberOpticMeshSealAPI(orderId, { meshSealId, lightTr
   return result?.data || result;
 }
 
+/**
+ * Autonomous Electric Delivery Van Mobile Micro-Hub Robot Swarm Dispatch (Feature 132)
+ */
+export async function updateMobileVanRobotSwarmDispatchAPI(orderId, { motherVanId, assignedRobotId, robotBatteryLevelPercent, curbsideDockStationPin, swarmMissionStatus } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/mobile-van-robot-swarm`, {
+    method: "POST",
+    body: JSON.stringify({ motherVanId, assignedRobotId, robotBatteryLevelPercent, curbsideDockStationPin, swarmMissionStatus }),
+  });
+  return result?.data || result;
+}
+
 
 
 

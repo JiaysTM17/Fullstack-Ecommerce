@@ -52,6 +52,7 @@ import {
   authorizeSmartLockInHomeDelivery,
   updateParcelMoistureTelemetry,
   updateFiberOpticMeshSeal,
+  updateMobileVanRobotSwarmDispatch,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -116,6 +117,7 @@ router.post("/:id/drone-air-corridor-beacon", optionalAuthenticate, updateDroneA
 router.post("/:id/smart-lock-in-home-delivery", optionalAuthenticate, authorizeSmartLockInHomeDelivery);
 router.post("/:id/moisture-telemetry", optionalAuthenticate, updateParcelMoistureTelemetry);
 router.post("/:id/fiber-optic-mesh-seal", optionalAuthenticate, updateFiberOpticMeshSeal);
+router.post("/:id/mobile-van-robot-swarm", optionalAuthenticate, updateMobileVanRobotSwarmDispatch);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

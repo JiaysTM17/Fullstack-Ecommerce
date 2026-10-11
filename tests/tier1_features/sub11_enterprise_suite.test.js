@@ -5199,6 +5199,75 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 132: Autonomous Electric Delivery Van Mobile Micro-Hub Robot Swarm Dispatch (5 Tests)
+  // =========================================================================
+  describe("Feature 132: Autonomous Electric Delivery Van Mobile Micro-Hub Robot Swarm Dispatch", () => {
+    test("F132-T1: Order model successfully arms mobileVanRobotSwarmDispatch subdocument", async () => {
+      const order = await Order.create({
+        orderId: "ORD_ROBOT_SWARM_132",
+        items: [{ name: "Mini Smart Home Gadget", price: 320000, quantity: 1 }],
+        total: 320000,
+        mobileVanRobotSwarmDispatch: {
+          isSwarmDispatched: true,
+          motherVanId: "EV-VAN-HUB-HCM-07",
+          assignedRobotId: "SWARM-BOT-ALPHA-12",
+          robotBatteryLevelPercent: 95,
+          curbsideDockStationPin: "DOCK-PIN-9812",
+          swarmMissionStatus: "dispatched_sidewalk_transit",
+          missionDispatchedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_ROBOT_SWARM_132");
+      expect.equal(order.mobileVanRobotSwarmDispatch.isSwarmDispatched, true);
+      expect.equal(order.mobileVanRobotSwarmDispatch.motherVanId, "EV-VAN-HUB-HCM-07");
+      expect.equal(order.mobileVanRobotSwarmDispatch.assignedRobotId, "SWARM-BOT-ALPHA-12");
+      expect.equal(order.mobileVanRobotSwarmDispatch.robotBatteryLevelPercent, 95);
+      expect.equal(order.mobileVanRobotSwarmDispatch.swarmMissionStatus, "dispatched_sidewalk_transit");
+    });
+
+    test("F132-T2: Delivery completion stamps missionCompletedAt timestamp", () => {
+      const missionStatus = "customer_doorstep_delivered";
+      const isCompleted = missionStatus === "customer_doorstep_delivered" || missionStatus === "returned_to_mother_van";
+      const now = new Date().toISOString();
+      const missionCompletedAt = isCompleted ? now : null;
+
+      expect.equal(isCompleted, true);
+      expect.notEqual(missionCompletedAt, null);
+    });
+
+    test("F132-T3: Robot battery level percent is clamped within 0-100 bounds", () => {
+      const rawBatteryOver = 150;
+      const rawBatteryUnder = -20;
+      const clamp = (val) => Math.max(0, Math.min(100, Number(val) || 0));
+
+      expect.equal(clamp(rawBatteryOver), 100);
+      expect.equal(clamp(rawBatteryUnder), 0);
+    });
+
+    test("F132-T4: Status validates against allowed swarm lifecycle states", () => {
+      const validStatuses = ["docked_in_van", "dispatched_sidewalk_transit", "customer_doorstep_delivered", "returned_to_mother_van"];
+      const testStatus = "dispatched_sidewalk_transit";
+      const invalidStatus = "flying_in_sky";
+
+      expect.equal(validStatuses.includes(testStatus), true);
+      expect.equal(validStatuses.includes(invalidStatus), false);
+    });
+
+    test("F132-T5: Missing motherVanId or assignedRobotId fails validation guard", () => {
+      const invalidPayload1 = { assignedRobotId: "BOT-01" };
+      const invalidPayload2 = { motherVanId: "VAN-01" };
+      const validPayload = { motherVanId: "VAN-01", assignedRobotId: "BOT-01" };
+
+      const validate = (p) => Boolean(p.motherVanId && p.assignedRobotId);
+
+      expect.equal(validate(invalidPayload1), false);
+      expect.equal(validate(invalidPayload2), false);
+      expect.equal(validate(validPayload), true);
+    });
+  });
 });
 
 

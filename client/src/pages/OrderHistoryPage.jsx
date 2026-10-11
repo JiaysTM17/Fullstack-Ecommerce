@@ -2626,6 +2626,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.mobileVanRobotSwarmDispatch?.isSwarmDispatched && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Robot Swarm (#${ord.mobileVanRobotSwarmDispatch.assignedRobotId}): Xe mẹ ${ord.mobileVanRobotSwarmDispatch.motherVanId}. Pin: ${ord.mobileVanRobotSwarmDispatch.robotBatteryLevelPercent}%. Trạng thái: ${ord.mobileVanRobotSwarmDispatch.swarmMissionStatus}. Mã Dock: ${ord.mobileVanRobotSwarmDispatch.curbsideDockStationPin}`}>
+                            <span style={{ fontSize: '13px' }}>🤖</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: ord.mobileVanRobotSwarmDispatch.swarmMissionStatus === 'customer_doorstep_delivered' ? '#059669' : ord.mobileVanRobotSwarmDispatch.swarmMissionStatus === 'dispatched_sidewalk_transit' ? '#0284c7' : '#7c3aed',
+                              background: ord.mobileVanRobotSwarmDispatch.swarmMissionStatus === 'customer_doorstep_delivered' ? '#ecfdf5' : ord.mobileVanRobotSwarmDispatch.swarmMissionStatus === 'dispatched_sidewalk_transit' ? '#e0f2fe' : '#f3e8ff',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Robot Swarm: {ord.mobileVanRobotSwarmDispatch.swarmMissionStatus === 'customer_doorstep_delivered' ? 'Đã Giao Tận Cửa' : ord.mobileVanRobotSwarmDispatch.swarmMissionStatus === 'dispatched_sidewalk_transit' ? 'Đang Lăn Bánh Vỉa Hè' : 'Đã Thu Hồi Về Xe Tải'} (Pin {ord.mobileVanRobotSwarmDispatch.robotBatteryLevelPercent}%)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">
