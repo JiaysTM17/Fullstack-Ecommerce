@@ -18,6 +18,7 @@ import {
   simulateCarrierWebhook,
   submitOrderCsatFeedback,
   updateOrderGiftWrap,
+  rescheduleOrderDelivery,
   updateOrderDoorstepInspection,
   recordDeliveryAttempt,
   getDeliveryAttempts,
