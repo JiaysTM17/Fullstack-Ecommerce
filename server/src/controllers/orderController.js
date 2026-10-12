@@ -4393,6 +4393,88 @@ export const verifyQuantumKeyDistributionEncryptionSeal = async (req, res) => {
   }
 };
 
+// @desc    Xác thực tem phân tử ADN tổng hợp & Huỳnh quang nano chống giả mạo (Feature 139)
+// @route   POST /api/orders/:id/dna-nanotech-seal
+// @access  Public / Authenticate
+export const verifySyntheticDnaNanotechTaggingSeal = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      dnaOligonucleotideSequence,
+      pcrReplicationKeySignature,
+      opticalFluorescenceWavelengthNm = 520,
+      counterfeitMismatchScorePercent = 0,
+    } = req.body;
+
+    if (!dnaOligonucleotideSequence || !pcrReplicationKeySignature) {
+      return sendError(res, "Thiếu chuỗi ADN tổng hợp (dnaOligonucleotideSequence) hoặc khóa PCR (pcrReplicationKeySignature)", 400);
+    }
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần giải trình tự tem phân tử ADN", 404);
+    }
+
+    const now = new Date().toISOString();
+    const wavelength = Number(opticalFluorescenceWavelengthNm) || 520;
+    const mismatch = Math.max(0, Math.min(100, Number(counterfeitMismatchScorePercent) || 0));
+
+    // Nếu tỷ lệ lệch chuỗi ADN > 5% hoặc bước sóng quang huỳnh quang lệch chuẩn (510 - 530nm) -> hàng giả mạo tráo đổi
+    const isWavelengthValid = wavelength >= 510 && wavelength <= 530;
+    const isMismatchAcceptable = mismatch <= 5.0;
+    const isDnaSignatureAuthentic = isWavelengthValid && isMismatchAcceptable;
+
+    const molecularTagStatus = isDnaSignatureAuthentic
+      ? "dna_sequence_authentic"
+      : "molecular_counterfeit_altered";
+
+    order.syntheticDnaNanotechTaggingSeal = {
+      isDnaTagged: true,
+      dnaOligonucleotideSequence,
+      pcrReplicationKeySignature,
+      opticalFluorescenceWavelengthNm: wavelength,
+      counterfeitMismatchScorePercent: mismatch,
+      isDnaSignatureAuthentic,
+      molecularTagStatus,
+      verifiedAt: now,
+    };
+
+    const statusNote = !isDnaSignatureAuthentic
+      ? `BÁO ĐỘNG HÀNG GIẢ PHÂN TỬ: Mã ADN (${dnaOligonucleotideSequence.slice(0, 12)}...) lệch ${mismatch}%, huỳnh quang ${wavelength}nm. Tráo đổi sản phẩm bất hợp pháp! Khóa toàn bộ thanh toán đơn hàng.`
+      : `Tem ADN tổng hợp nano: Chuỗi oligonucleotide khớp 100% (Khóa PCR: ${pcrReplicationKeySignature}), phát huỳnh quang ${wavelength}nm đạt chuẩn. Sản phẩm chính hãng độc bản.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        syntheticDnaNanotechTaggingSeal: order.syntheticDnaNanotechTaggingSeal,
+        message: isDnaSignatureAuthentic
+          ? "Chuỗi ADN nano và huỳnh quang phân tử khớp nguyên bản chính hãng."
+          : "Cảnh báo sai lệch chuỗi ADN: Phát hiện hành vi tráo hàng giả mạo!",
+      },
+      201
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 

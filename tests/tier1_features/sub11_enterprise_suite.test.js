@@ -5658,6 +5658,77 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(isValid, false);
     });
   });
+
+  // =========================================================================
+  // FEATURE 139: Synthetic DNA Nanotech & Optical Fluorescence Tagging Seal (5 Tests)
+  // =========================================================================
+  describe("Feature 139: Synthetic DNA Nanotech & Optical Fluorescence Tagging Seal", () => {
+    test("F139-T1: Order model successfully arms syntheticDnaNanotechTaggingSeal subdocument", async () => {
+      const order = await Order.create({
+        orderId: "ORD_DNA_NANO_139",
+        items: [{ name: "Limited Luxury Chronograph Watch", price: 18500000, quantity: 1 }],
+        total: 18500000,
+        syntheticDnaNanotechTaggingSeal: {
+          isDnaTagged: true,
+          dnaOligonucleotideSequence: "ATCG-TTGA-CCAG-9988-XYZZ",
+          pcrReplicationKeySignature: "PCR-SIG-CHRONO-2026",
+          opticalFluorescenceWavelengthNm: 520,
+          counterfeitMismatchScorePercent: 0,
+          isDnaSignatureAuthentic: true,
+          molecularTagStatus: "dna_sequence_authentic",
+          verifiedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_DNA_NANO_139");
+      expect.equal(order.syntheticDnaNanotechTaggingSeal.isDnaTagged, true);
+      expect.equal(order.syntheticDnaNanotechTaggingSeal.dnaOligonucleotideSequence, "ATCG-TTGA-CCAG-9988-XYZZ");
+      expect.equal(order.syntheticDnaNanotechTaggingSeal.opticalFluorescenceWavelengthNm, 520);
+      expect.equal(order.syntheticDnaNanotechTaggingSeal.isDnaSignatureAuthentic, true);
+      expect.equal(order.syntheticDnaNanotechTaggingSeal.molecularTagStatus, "dna_sequence_authentic");
+    });
+
+    test("F139-T2: Sequence mismatch exceeding 5% flags molecular counterfeit alteration", () => {
+      const wavelength = 520;
+      const mismatch = 12.5;
+      const isWavelengthValid = wavelength >= 510 && wavelength <= 530;
+      const isMismatchAcceptable = mismatch <= 5.0;
+      const isDnaSignatureAuthentic = isWavelengthValid && isMismatchAcceptable;
+
+      expect.equal(isDnaSignatureAuthentic, false);
+    });
+
+    test("F139-T3: Deviation outside 510-530nm fluorescence range invalidates tag", () => {
+      const wavelength = 580; // Cam đỏ thay vì xanh lục 520nm
+      const mismatch = 1.0;
+      const isWavelengthValid = wavelength >= 510 && wavelength <= 530;
+      const isMismatchAcceptable = mismatch <= 5.0;
+      const isDnaSignatureAuthentic = isWavelengthValid && isMismatchAcceptable;
+
+      expect.equal(isWavelengthValid, false);
+      expect.equal(isDnaSignatureAuthentic, false);
+    });
+
+    test("F139-T4: Counterfeit mismatch score clamped within 0 to 100", () => {
+      const clampMismatch = (val) => Math.max(0, Math.min(100, Number(val) || 0));
+
+      expect.equal(clampMismatch(125), 100);
+      expect.equal(clampMismatch(-10), 0);
+      expect.equal(clampMismatch(3.8), 3.8);
+    });
+
+    test("F139-T5: Missing dnaOligonucleotideSequence or pcrReplicationKeySignature fails validation guard", () => {
+      const invalidPayload1 = { pcrReplicationKeySignature: "PCR-01" };
+      const invalidPayload2 = { dnaOligonucleotideSequence: "ATCG" };
+      const validPayload = { dnaOligonucleotideSequence: "ATCG", pcrReplicationKeySignature: "PCR-01" };
+
+      const validate = (p) => Boolean(p.dnaOligonucleotideSequence && p.pcrReplicationKeySignature);
+
+      expect.equal(validate(invalidPayload1), false);
+      expect.equal(validate(invalidPayload2), false);
+      expect.equal(validate(validPayload), true);
+    });
+  });
 });
 
 

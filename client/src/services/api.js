@@ -1335,6 +1335,17 @@ export async function verifyQuantumKeyDistributionEncryptionSealAPI(orderId, { q
   return result?.data || result;
 }
 
+/**
+ * Synthetic DNA Nanotech & Optical Fluorescence Tagging Seal (Feature 139)
+ */
+export async function verifySyntheticDnaNanotechTaggingSealAPI(orderId, { dnaOligonucleotideSequence, pcrReplicationKeySignature, opticalFluorescenceWavelengthNm, counterfeitMismatchScorePercent } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/dna-nanotech-seal`, {
+    method: "POST",
+    body: JSON.stringify({ dnaOligonucleotideSequence, pcrReplicationKeySignature, opticalFluorescenceWavelengthNm, counterfeitMismatchScorePercent }),
+  });
+  return result?.data || result;
+}
+
 
 
 

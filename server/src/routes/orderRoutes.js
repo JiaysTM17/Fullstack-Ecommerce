@@ -59,6 +59,7 @@ import {
   monitorHyperbaricPressureAntiExplosionVault,
   updateSatelliteLoRaMeshDeadZoneTelemetry,
   verifyQuantumKeyDistributionEncryptionSeal,
+  verifySyntheticDnaNanotechTaggingSeal,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -130,6 +131,7 @@ router.post("/:id/cryogenic-dry-ice", optionalAuthenticate, monitorCryogenicFree
 router.post("/:id/hyperbaric-explosion-vault", optionalAuthenticate, monitorHyperbaricPressureAntiExplosionVault);
 router.post("/:id/satellite-lora-mesh", optionalAuthenticate, updateSatelliteLoRaMeshDeadZoneTelemetry);
 router.post("/:id/qkd-encryption-seal", optionalAuthenticate, verifyQuantumKeyDistributionEncryptionSeal);
+router.post("/:id/dna-nanotech-seal", optionalAuthenticate, verifySyntheticDnaNanotechTaggingSeal);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

@@ -2760,6 +2760,25 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {ord.syntheticDnaNanotechTaggingSeal?.isDnaTagged && (
+                        <>
+                          <span className="compact-bar-divider">|</span>
+                          <div className="shopee-order-compact-item" title={`Tem ADN Nano (#${ord.syntheticDnaNanotechTaggingSeal.dnaOligonucleotideSequence?.slice(0, 10)}...): Khóa PCR ${ord.syntheticDnaNanotechTaggingSeal.pcrReplicationKeySignature}. Quang huỳnh quang: ${ord.syntheticDnaNanotechTaggingSeal.opticalFluorescenceWavelengthNm}nm. Lệch base: ${ord.syntheticDnaNanotechTaggingSeal.counterfeitMismatchScorePercent}%. Trạng thái: ${ord.syntheticDnaNanotechTaggingSeal.molecularTagStatus}`}>
+                            <span style={{ fontSize: '13px' }}>🧬</span>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: !ord.syntheticDnaNanotechTaggingSeal.isDnaSignatureAuthentic ? '#dc2626' : '#0d9488',
+                              background: !ord.syntheticDnaNanotechTaggingSeal.isDnaSignatureAuthentic ? '#fee2e2' : '#ccfbf1',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              ADN Nano: {!ord.syntheticDnaNanotechTaggingSeal.isDnaSignatureAuthentic ? 'Phát Hiện Tráo Hàng Giả!' : 'Mã ADN Khớp Tuyệt Đối'} ({ord.syntheticDnaNanotechTaggingSeal.opticalFluorescenceWavelengthNm}nm)
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="shopee-order-compact-right">

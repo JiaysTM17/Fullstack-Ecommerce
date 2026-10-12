@@ -693,6 +693,20 @@ const orderSchema = new mongoose.Schema(
       },
       qkdHandshakeTimestamp: { type: String, default: null },
     },
+    syntheticDnaNanotechTaggingSeal: {
+      isDnaTagged: { type: Boolean, default: false },
+      dnaOligonucleotideSequence: { type: String, default: null }, // e.g. Chuỗi ADN mã hóa base nitơ tổng hợp ATCG
+      pcrReplicationKeySignature: { type: String, default: null },
+      opticalFluorescenceWavelengthNm: { type: Number, default: 520 }, // 520nm bước sóng quang huỳnh quang xanh lục
+      counterfeitMismatchScorePercent: { type: Number, default: 0 },
+      isDnaSignatureAuthentic: { type: Boolean, default: true },
+      molecularTagStatus: {
+        type: String,
+        enum: ["dna_sequence_authentic", "molecular_counterfeit_altered", "pcr_sequencing_in_progress"],
+        default: "dna_sequence_authentic",
+      },
+      verifiedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {
