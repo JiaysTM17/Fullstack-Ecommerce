@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (/quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/gsp|quality score|điểm chất lượng|ad rank/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -202,7 +202,67 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
-  // 9. Tổng Quan Trợ Lý Người Bán (Default Shop Copilot Greeting)
+  // 9. Tối Ưu Đấu Thầu Quảng Cáo Từ Khóa & Điểm Chất Lượng (GSP Keyword Bidding Optimizer)
+  if (/đấu thầu gsp|tối ưu cpc|ad rank shop|điểm chất lượng|quality score|roas ads|từ khóa quảng cáo/i.test(raw)) {
+    return {
+      text: `🎯 **TỐI ƯU ĐẤU THẦU TỪ KHÓA GSP & QUALITY SCORE (${currentShop.name})**:
+- **Nguyên lý Xếp hạng Ad Rank**:
+  \`Ad Rank = Bid × QualityScore\`
+  - Vị trí hiển thị ưu tiên phụ thuộc trực tiếp vào Điểm chất lượng (0.1 - 10.0), không chỉ tiền thầu!
+- **Công thức tính CPC thực tế (Generalized Second Price)**:
+  \`CPC = floor(Rank_{đối thủ dưới} / QualityScore_{shop}) + 1₫\`
+  - **Lợi ích thực tiễn**: Khi tăng Quality Score từ 5.0 lên 8.0, mức CPC shop phải trả giảm tới **37.5%** trong khi vẫn duy trì Top 1 tìm kiếm!
+- **Chiến lược tối ưu ROAS**:
+  1. Tăng CTR (>= 5%) bằng hình ảnh sắc nét và tiêu đề chứa từ khóa chính xác.
+  2. Nâng cao tỷ lệ chuyển đổi CVR bằng video mở hộp và giá bán cạnh tranh.
+  3. Duy trì đánh giá 5 sao để đạt chỉ số ROAS mục tiêu >= 3.5x.`,
+      type: 'marketing',
+      tag: 'TỐI ƯU ĐẤU THẦU GSP ADS',
+      suggestions: [
+        'Kiểm tra hiệu quả Shopee Ads',
+        'Xem chuyển đổi giỏ hàng CRDT',
+        'Bảo vệ bản quyền catalog LSH'
+      ]
+    };
+  }
+
+  // 10. Chuyển Đổi Đa Nền Tảng Với Giỏ Hàng Đồng Bộ CRDT (CRDT Multi-Device Cart Conversion)
+  if (/giỏ hàng đồng bộ|crdt người mua|đa thiết bị shop|bảo vệ giỏ hàng khách|chuyển đổi giỏ hàng/i.test(raw)) {
+    return {
+      text: `🛒 **LỢI THẾ CHUYỂN ĐỔI TỪ GIỎ HÀNG ĐỒNG BỘ CRDT (${currentShop.name})**:
+- **Trải nghiệm khách hàng liền mạch**: Khách hàng thêm sản phẩm của shop vào giỏ trên điện thoại lúc di chuyển, giỏ hàng tự động đồng bộ sang máy tính ở nhà mà không lo mất mặt hàng.
+- **Không xảy ra lỗi Lost Updates**: Giải thuật CRDT (PN-Counter và LWW-Element-Set) triệt tiêu hoàn toàn xung đột dữ liệu và rớt giỏ hàng khi mạng chập chờn.
+- **Bứt phá chuyển đổi Flash Sale**: Tăng 25% tỷ lệ hoàn tất thanh toán do khách hàng có thể chốt đơn tức thì trên mọi thiết bị mà không cần thêm giỏ hàng lại từ đầu.`,
+      type: 'conversion',
+      tag: 'GIỎ HÀNG ĐỒNG BỘ CRDT',
+      suggestions: [
+        'Tư vấn chiến lược Flash Sale',
+        'Xem đấu thầu từ khóa GSP',
+        'Phân tích biên lợi nhuận P&L'
+      ]
+    };
+  }
+
+  // 11. Lá Chắn Bảo Vệ Catalog Bản Quyền (LSH Catalog Theft Shield)
+  if (/chống copycat|bảo vệ bản quyền|lsh shop|hàng giả hàng nhái clone|khiếu nại sao chép|bảo vệ catalog/i.test(raw)) {
+    return {
+      text: `🛡️ **LÁ CHẮN BẢO VỆ GIAN HÀNG LSH MINHASH (${currentShop.name})**:
+- **Radar chống sao chép tự động**: Thuật toán Locality-Sensitive Hashing quét liên tục toàn sàn, nhận diện các shop lừa đảo cào tự động và sao chép tiêu đề, mô tả của gian hàng bạn với độ tương đồng Jaccard >= 80%.
+- **Chế tài bảo vệ bản quyền**:
+  - Gắn cờ và cô lập các shop clone sản phẩm.
+  - Tước quyền tham gia Flash Sale và thu hồi voucher của các tài khoản gian lận sao chép.
+- **Lời khuyên**: Giữ nguyên mã SKU chính hãng và đăng ký bảo hộ thương hiệu trong hồ sơ gian hàng Mall.`,
+      type: 'security',
+      tag: 'BẢO VỆ GIAN HÀNG LSH',
+      suggestions: [
+        'Xem báo cáo vi phạm bản quyền',
+        'Tối ưu đấu thầu từ khóa GSP',
+        'Kiểm tra cảnh báo tồn kho'
+      ]
+    };
+  }
+
+  // 12. Tổng Quan Trợ Lý Người Bán (Default Shop Copilot Greeting)
   return {
     text: `Chào Bạn! Tôi là **ShopSmart AI** - Trợ lý số đồng hành cùng **${currentShop.name}** để tối ưu hóa doanh số và tinh gọn vận hành:
 - 📦 **Cảnh báo kho & Run Rate**: Rà soát sản phẩm sắp hết hàng theo Safety Stock & DIR.

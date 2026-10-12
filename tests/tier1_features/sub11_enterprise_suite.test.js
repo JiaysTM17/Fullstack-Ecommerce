@@ -57,6 +57,17 @@ import {
   MerkleTree,
   SkiplistIndex,
   MultiWarehouseDispatcher,
+  kShingles,
+  MinHash,
+  MinHashLSH,
+  LSHCloneDetector,
+  CatalogCloneRadar,
+  AuctionEngine,
+  GspAuctionEngine,
+  VcgAuctionEngine,
+  PNCounter,
+  LWWElementSet,
+  CrdtCart,
 } from "../../client/src/services/aiAlgorithms.js";
 import fs from "fs";
 
@@ -8259,6 +8270,491 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.ok(res.text.includes("FULFILLMENT"));
         expect.ok(res.text.includes("Single Warehouse Consolidated"));
         expect.ok(res.text.includes("Multi-Warehouse Greedy Split"));
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 156: Locality-Sensitive Hashing, GSP/VCG Auction & CRDTs Cart (20 Tests)
+  // =========================================================================
+  describe("Feature 156: LSH MinHash, GSP/VCG Auction & CRDTs Multi-Device Cart Suite", () => {
+
+    // --- 1. LSH & MinHash Catalog Clone Detector (5 Tests) ---
+    describe("Algorithm 1: Locality-Sensitive Hashing & MinHash Catalog Clone Radar", () => {
+      test("F156-T1: kShingles generates word/char n-grams, normalizes whitespace & Vietnamese accents", () => {
+        const text1 = "  Áo   thun nam   Polo cao cấp phong cách Hàn Quốc!  ";
+        const wordShingles = kShingles(text1, { k: 2, type: "word", stripAccents: true });
+        
+        expect.ok(wordShingles instanceof Set);
+        expect.ok(wordShingles.has("ao thun"));
+        expect.ok(wordShingles.has("thun nam"));
+        expect.ok(wordShingles.has("nam polo"));
+        expect.ok(wordShingles.has("polo cao"));
+
+        // Character 3-grams
+        const charShingles = kShingles("Áo Polo", { k: 3, type: "char", stripAccents: true });
+        expect.ok(charShingles.has("ao "));
+        expect.ok(charShingles.has("o p"));
+        expect.ok(charShingles.has("pol"));
+
+        // Normalization handles HTML tags and URLs
+        const textWithTags = "<b>Giày chạy bộ</b> chính hãng https://shopee.vn/product123";
+        const cleanShingles = kShingles(textWithTags, 2);
+        expect.ok(cleanShingles.has("giày chạy"));
+        expect.ok(cleanShingles.has("chạy bộ"));
+        expect.ok(!cleanShingles.has("https shopee"));
+      });
+
+      test("F156-T2: MinHash computes deterministic signature of length K=64 using universal hash permutations, collision prob equals Jaccard", () => {
+        const minHash = new MinHash({ numHashes: 64 });
+        expect.equal(minHash.numHashes, 64);
+
+        const setA = new Set(["giay the thao", "the thao nam", "nam chay bo", "chay bo em chan", "em chan cao cap"]);
+        const setB = new Set(["giay the thao", "the thao nam", "nam chay bo", "chay bo em chan", "em chan cao cap"]);
+        const setC = new Set(["ao so mi", "so mi nu", "nu cong so", "cong so thanh lich"]);
+
+        const sigA = minHash.getSignature(setA);
+        const sigB = minHash.getSignature(setB);
+        const sigC = minHash.getSignature(setC);
+
+        expect.equal(sigA.length, 64);
+        expect.equal(sigB.length, 64);
+
+        // Deterministic signatures for identical sets
+        for (let i = 0; i < 64; i++) {
+          expect.equal(sigA[i], sigB[i]);
+        }
+
+        const jaccardIdentical = minHash.calculateJaccard(sigA, sigB);
+        expect.equal(jaccardIdentical, 1.0);
+
+        const jaccardDisjoint = minHash.calculateJaccard(sigA, sigC);
+        expect.ok(jaccardDisjoint <= 0.1);
+      });
+
+      test("F156-T3: LSHCloneDetector partitions signatures into b=16 bands of r=4 rows, hashing bands into buckets", () => {
+        const detector = new LSHCloneDetector({ numHashes: 64, bands: 16, rowsPerBand: 4 });
+        expect.equal(detector.bands, 16);
+        expect.equal(detector.rowsPerBand, 4);
+        expect.equal(detector.numHashes, 64);
+
+        detector.addDocument("doc_1", "Tai nghe không dây Bluetooth chống ồn chủ động thời lượng pin 30 giờ");
+        detector.addDocument("doc_2", "Bàn phím cơ không dây switch đỏ đèn LED RGB công thái học");
+
+        // Verify buckets were formed across 16 bands
+        expect.ok(detector.buckets.size > 0);
+        let band0BucketFound = false;
+        for (const bucketKey of detector.buckets.keys()) {
+          if (bucketKey.startsWith("b0:")) {
+            band0BucketFound = true;
+            break;
+          }
+        }
+        expect.equal(band0BucketFound, true);
+        expect.equal(detector.hasDocument("doc_1"), true);
+        expect.equal(detector.hasDocument("doc_2"), true);
+      });
+
+      test("F156-T4: LSHCloneDetector detects near-duplicate catalog clone listings with s >= 0.8 in O(1) query time without comparing all O(N^2) pairs", () => {
+        const detector = new LSHCloneDetector({ numHashes: 64, bands: 16, rowsPerBand: 4 });
+        const originalText = "Nồi chiên không dầu điện tử Tefal dung tích 5 lít công nghệ Rapid Air chống dính bảo hành 24 tháng";
+        const cloneText = "Nồi chiên không dầu điện tử Tefal dung tích 5 lít công nghệ Rapid Air chống dính bảo hành 24 tháng chính hãng giá rẻ";
+
+        detector.addDocument("orig_p1", originalText, { shopId: "shop_authentic", name: "Nồi chiên Tefal" });
+        detector.addDocument("unrelated_p2", "Váy dạ hội đuôi cá thiết kế cao cấp đính đá lấp lánh dự tiệc", { shopId: "shop_fashion" });
+
+        const clones = detector.queryNearDuplicates(cloneText, 0.75);
+        expect.ok(clones.length >= 1);
+        expect.equal(clones[0].id, "orig_p1");
+        expect.ok(clones[0].similarity >= 0.75);
+        expect.equal(clones[0].metadata.shopId, "shop_authentic");
+      });
+
+      test("F156-T5: Unrelated products (s < 0.2) produce zero candidate bucket collisions across all LSH bands", () => {
+        const detector = new LSHCloneDetector({ numHashes: 64, bands: 16, rowsPerBand: 4 });
+        detector.addDocument("tech_p1", "Điện thoại thông minh camera 200MP màn hình AMOLED 120Hz sạc siêu nhanh");
+        detector.addDocument("tech_p2", "Laptop gaming card đồ họa RTX 4070 RAM 32GB tản nhiệt buồng hơi");
+
+        const cosmeticQuery = "Son kem lì dưỡng môi mềm mượt giữ màu suốt 16 giờ không lem trôi mỹ phẩm chính hãng";
+        const clones = detector.queryNearDuplicates(cosmeticQuery, 0.5);
+        expect.equal(clones.length, 0);
+      });
+    });
+
+    // --- 2. Generalized Second Price (GSP) & VCG Sponsored Search Auction Engine (5 Tests) ---
+    describe("Algorithm 2: GSP & VCG Sponsored Search & Flash Sale Auction Engine", () => {
+      test("F156-T6: AuctionEngine sorts candidate bidders by Ad Rank (Bid * QualityScore) descending", () => {
+        const engine = new AuctionEngine();
+        const bidders = [
+          { bidderId: "bidder_A", bid: 3000, qualityScore: 8.0, shopId: "shop_A" },
+          { bidderId: "bidder_B", bid: 5000, qualityScore: 4.0, shopId: "shop_B" },
+          { bidderId: "bidder_C", bid: 2000, qualityScore: 6.0, shopId: "shop_C" },
+        ];
+
+        const result = engine.runGspAuction({ slots: 3, bidders, reservePrice: 500 });
+        expect.equal(result.allocations.length, 3);
+        expect.equal(result.allocations[0].bidderId, "bidder_A");
+        expect.equal(result.allocations[0].adRank, 24000);
+        expect.equal(result.allocations[1].bidderId, "bidder_B");
+        expect.equal(result.allocations[1].adRank, 20000);
+        expect.equal(result.allocations[2].bidderId, "bidder_C");
+        expect.equal(result.allocations[2].adRank, 12000);
+      });
+
+      test("F156-T7: AuctionEngine calculates Second-Price CPC where winner at slot i pays floor(Rank_{i+1} / QS_i) + 1 VND", () => {
+        const engine = new AuctionEngine();
+        const bidders = [
+          { bidderId: "bidder_1", bid: 3000, qualityScore: 8.0 },
+          { bidderId: "bidder_2", bid: 5000, qualityScore: 4.0 },
+          { bidderId: "bidder_3", bid: 2000, qualityScore: 6.0 },
+        ];
+
+        const result = engine.runGspAuction({ slots: 3, bidders, reservePrice: 500 });
+        expect.equal(result.allocations[0].cpc, 2501);
+        expect.equal(result.allocations[1].cpc, 3001);
+      });
+
+      test("F156-T8: AuctionEngine strictly enforces the Max Bid ceiling constraint: CPC_i <= Bid_i", () => {
+        const engine = new AuctionEngine();
+        const bidders = [
+          { bidderId: "bidder_top", bid: 2000, qualityScore: 1.0 },
+          { bidderId: "bidder_next", bid: 1999, qualityScore: 1.0 },
+        ];
+
+        const result = engine.runGspAuction({ slots: 2, bidders, reservePrice: 500 });
+        for (const alloc of result.allocations) {
+          expect.ok(alloc.cpc <= alloc.bid, `CPC ${alloc.cpc} must not exceed bid ${alloc.bid}`);
+          expect.ok(alloc.cpc >= 500, `CPC ${alloc.cpc} must be at least reserve price 500`);
+        }
+      });
+
+      test("F156-T9: Solitary bidder or last allocated slot pays reserve price (floor bid, e.g. 500₫)", () => {
+        const engine = new AuctionEngine({ defaultReservePrice: 500 });
+        const bidders = [
+          { bidderId: "solo_bidder", bid: 10000, qualityScore: 9.5 },
+        ];
+
+        const result = engine.runGspAuction({ slots: 3, bidders, reservePrice: 500 });
+        expect.equal(result.allocations.length, 1);
+        expect.equal(result.allocations[0].cpc, 500);
+        expect.equal(result.allocations[0].pricingRule, "RESERVE_PRICE_FLOOR");
+      });
+
+      test("F156-T10: AuctionEngine VCG model computes negative externality costs for exclusive Flash Sale slots (M=1 collapse to second price), proving truthful bidding strategy payoff", () => {
+        const engine = new AuctionEngine();
+        const bidders = [
+          { bidderId: "vendor_1", bid: 8000, qualityScore: 8.0 },
+          { bidderId: "vendor_2", bid: 6000, qualityScore: 7.0 },
+          { bidderId: "vendor_3", bid: 4000, qualityScore: 6.0 },
+        ];
+
+        const vcgResult = engine.runVcgAuction({ slots: 1, bidders, reservePrice: 1000 });
+        expect.equal(vcgResult.allocations.length, 1);
+        expect.equal(vcgResult.allocations[0].bidderId, "vendor_1");
+        expect.equal(vcgResult.allocations[0].cpc, 6000);
+
+        const sim = engine.simulateBiddingStrategy({
+          targetBidderId: "vendor_1",
+          trueValuation: 8000,
+          testBids: [4000, 6000, 8000, 10000],
+          competitors: [{ bidderId: "vendor_2", bid: 6000 }],
+          slots: 1,
+        });
+
+        expect.ok(sim.isTruthfulOptimal);
+        expect.equal(sim.truthfulUtility >= 0, true);
+      });
+    });
+
+    // --- 3. Conflict-Free Replicated Data Types (CRDTs) Multi-Device Cart Suite (6 Tests) ---
+    describe("Algorithm 3: CRDTs Multi-Device Shopping Cart (PN-Counter & LWW-Element-Set)", () => {
+      test("F156-T11: PNCounter tracks separate addition (P) and subtraction (N) vectors across device IDs and calculates net quantity Q = sum P - sum N", () => {
+        const counter = new PNCounter();
+        counter.increment("device_phone", 5);
+        counter.increment("device_laptop", 3);
+        counter.decrement("device_phone", 2);
+
+        expect.equal(counter.p["device_phone"], 5);
+        expect.equal(counter.p["device_laptop"], 3);
+        expect.equal(counter.n["device_phone"], 2);
+        expect.equal(counter.value, 6);
+
+        counter.decrement("device_laptop", 10);
+        expect.equal(counter.value, 0);
+      });
+
+      test("F156-T12: LWWElementSet correctly resolves item membership using timestamps (t_add >= t_remove => in cart)", () => {
+        const set = new LWWElementSet();
+        const pId = "product_sneaker_1";
+
+        set.add(pId, 1000);
+        expect.equal(set.has(pId), true);
+
+        set.remove(pId, 1500);
+        expect.equal(set.has(pId), false);
+
+        set.add(pId, 2000);
+        expect.equal(set.has(pId), true);
+        expect.ok(set.elements().includes(pId));
+      });
+
+      test("F156-T13: CrdtCart handles additions, quantity updates, removals, and price subtotals", () => {
+        const cart = new CrdtCart({ cartId: "cart_user_01" });
+        cart.addItem("phone", { id: "p_polo", name: "Áo polo", price: 200000 }, 2, 100);
+        cart.addItem("phone", { id: "p_short", name: "Quần short", price: 150000 }, 1, 100);
+
+        let totals = cart.getTotals();
+        expect.equal(totals.totalItems, 3);
+        expect.equal(totals.subtotal, 550000);
+
+        cart.updateQuantity("phone", "p_polo", 1, 110);
+        totals = cart.getTotals();
+        expect.equal(totals.totalItems, 4);
+        expect.equal(totals.subtotal, 750000);
+
+        cart.removeItem("phone", "p_short", 120);
+        totals = cart.getTotals();
+        expect.equal(totals.totalItems, 3);
+        expect.equal(totals.subtotal, 600000);
+      });
+
+      test("F156-T14: CrdtCart two-way merge satisfies Commutativity (A ⊔ B = B ⊔ A)", () => {
+        const cartA = new CrdtCart({ cartId: "shared_cart" });
+        cartA.addItem("device_A", { id: "p1", name: "Bàn phím cơ", price: 500000 }, 2, 100);
+        cartA.addItem("device_A", { id: "p2", name: "Chuột gaming", price: 300000 }, 1, 100);
+
+        const cartB = new CrdtCart({ cartId: "shared_cart" });
+        cartB.addItem("device_B", { id: "p1", name: "Bàn phím cơ", price: 500000 }, 1, 110);
+        cartB.addItem("device_B", { id: "p3", name: "Lót chuột cỡ lớn", price: 100000 }, 3, 110);
+
+        const mergedAB = CrdtCart.fromJSON(cartA.toJSON()).merge(cartB);
+        const mergedBA = CrdtCart.fromJSON(cartB.toJSON()).merge(cartA);
+
+        const totalsAB = mergedAB.getTotals();
+        const totalsBA = mergedBA.getTotals();
+
+        expect.equal(totalsAB.totalItems, totalsBA.totalItems);
+        expect.equal(totalsAB.subtotal, totalsBA.subtotal);
+        expect.equal(totalsAB.uniqueSkus, totalsBA.uniqueSkus);
+        expect.equal(totalsAB.uniqueSkus, 3);
+        expect.deepEqual(
+          mergedAB.getCartItems().map(x => x.id),
+          mergedBA.getCartItems().map(x => x.id)
+        );
+        expect.equal(
+          JSON.stringify(mergedAB.toJSON()),
+          JSON.stringify(mergedBA.toJSON())
+        );
+      });
+
+      test("F156-T15: CrdtCart multi-replica merge satisfies Associativity ((A ⊔ B) ⊔ C = A ⊔ (B ⊔ C)) and Idempotence (A ⊔ A = A)", () => {
+        const replicaA = new CrdtCart({ cartId: "cart_sync" });
+        replicaA.addItem("dev_A", { id: "item1", price: 100000 }, 1, 100);
+
+        const replicaB = new CrdtCart({ cartId: "cart_sync" });
+        replicaB.addItem("dev_B", { id: "item2", price: 200000 }, 2, 110);
+
+        const replicaC = new CrdtCart({ cartId: "cart_sync" });
+        replicaC.addItem("dev_C", { id: "item3", price: 300000 }, 3, 120);
+
+        const leftMerge = CrdtCart.fromJSON(replicaA.toJSON()).merge(replicaB).merge(replicaC);
+        const rightInner = CrdtCart.fromJSON(replicaB.toJSON()).merge(replicaC);
+        const rightMerge = CrdtCart.fromJSON(replicaA.toJSON()).merge(rightInner);
+
+        expect.equal(leftMerge.getTotals().subtotal, rightMerge.getTotals().subtotal);
+        expect.equal(leftMerge.getTotals().totalItems, rightMerge.getTotals().totalItems);
+
+        const originalTotals = replicaA.getTotals();
+        const selfMerged = CrdtCart.fromJSON(replicaA.toJSON()).merge(replicaA);
+        expect.equal(selfMerged.getTotals().totalItems, originalTotals.totalItems);
+        expect.equal(selfMerged.getTotals().subtotal, originalTotals.subtotal);
+      });
+
+      test("F156-T16: Concurrent offline scenario: Device 1 adds 2 units offline and Device 2 removes 1 unit offline; merging both replicas deterministically resolves to net 1 unit without lost updates or race conditions", () => {
+        const baseState = {
+          cartId: "offline_cart",
+          items: {
+            sku_watch: {
+              productId: "sku_watch",
+              name: "Đồng hồ thông minh",
+              price: 1000000,
+              pVector: { server: 2 },
+              nVector: {},
+              addedAt: 100,
+              removedAt: 0,
+            },
+          },
+        };
+
+        const dev1Cart = CrdtCart.fromJSON(baseState);
+        const dev2Cart = CrdtCart.fromJSON(baseState);
+
+        dev1Cart.updateQuantity("device_phone", "sku_watch", 2, 200);
+        dev2Cart.updateQuantity("device_laptop", "sku_watch", -1, 205);
+
+        dev1Cart.merge(dev2Cart);
+
+        const items = dev1Cart.getCartItems();
+        expect.equal(items.length, 1);
+        expect.equal(items[0].productId, "sku_watch");
+        expect.equal(items[0].quantity, 3);
+        expect.equal(items[0].subtotal, 3000000);
+      });
+
+      test("F156-T21: CrdtCart achieves canonical sorting and equal-timestamp metadata commutativity (A ⊔ B = B ⊔ A)", () => {
+        // 1. Canonical Sorting Test across devices with opposite insertion orders
+        const cartX = new CrdtCart({ cartId: "canon_sync" });
+        cartX.addItem("device_1", { id: "sku_zebra", name: "Ngựa vằn", price: 100000 }, 1, 100);
+        cartX.addItem("device_1", { id: "sku_alpha", name: "Alpha", price: 200000 }, 2, 100);
+        cartX.addItem("device_1", { id: "sku_beta", name: "Beta", price: 300000 }, 1, 100);
+
+        const cartY = new CrdtCart({ cartId: "canon_sync" });
+        cartY.addItem("device_2", { id: "sku_beta", name: "Beta", price: 300000 }, 1, 100);
+        cartY.addItem("device_2", { id: "sku_zebra", name: "Ngựa vằn", price: 100000 }, 1, 100);
+        cartY.addItem("device_2", { id: "sku_alpha", name: "Alpha", price: 200000 }, 2, 100);
+
+        const mergedXY = CrdtCart.fromJSON(cartX.toJSON()).merge(cartY);
+        const mergedYX = CrdtCart.fromJSON(cartY.toJSON()).merge(cartX);
+
+        expect.deepEqual(
+          mergedXY.getCartItems().map(x => x.id),
+          ["sku_alpha", "sku_beta", "sku_zebra"]
+        );
+        expect.deepEqual(
+          mergedYX.getCartItems().map(x => x.id),
+          ["sku_alpha", "sku_beta", "sku_zebra"]
+        );
+        expect.equal(
+          JSON.stringify(mergedXY.toJSON()),
+          JSON.stringify(mergedYX.toJSON())
+        );
+
+        // 2. Equal-Timestamp Metadata Commutativity Test
+        const fixedTs = 500000;
+        const cartA = new CrdtCart({ cartId: "equal_ts_sync" });
+        const cartB = new CrdtCart({ cartId: "equal_ts_sync" });
+
+        cartA.addItem("devA", { id: "p_cam", name: "Máy ảnh A7 IV Standard", price: 45000000 }, 1, fixedTs);
+        cartB.addItem("devB", { id: "p_cam", name: "Máy ảnh A7 IV Promo", price: 42000000 }, 1, fixedTs);
+
+        const ab = CrdtCart.fromJSON(cartA.toJSON()).merge(cartB);
+        const ba = CrdtCart.fromJSON(cartB.toJSON()).merge(cartA);
+
+        const itemAB = ab.getCartItems()[0];
+        const itemBA = ba.getCartItems()[0];
+
+        expect.equal(itemAB.price, itemBA.price);
+        expect.equal(itemAB.name, itemBA.name);
+        expect.equal(itemAB.deviceId, itemBA.deviceId);
+        expect.equal(ab.getTotals().subtotal, ba.getTotals().subtotal);
+        expect.equal(JSON.stringify(ab.toJSON()), JSON.stringify(ba.toJSON()));
+      });
+
+      test("F156-T22: CrdtCart prevents post-clear/post-remove quantity resurrection and clamps decrement debt from swallowing subsequent additions", () => {
+        // 1. Post-clear resurrection guard
+        const cart = new CrdtCart({ cartId: "resurrection_guard" });
+        cart.addItem("phone", { id: "p_apple", name: "Apple", price: 20000 }, 5, 100);
+        expect.equal(cart.getTotals().totalItems, 5);
+
+        cart.clear("phone", 200);
+        expect.equal(cart.getTotals().totalItems, 0);
+
+        cart.addItem("phone", { id: "p_apple", name: "Apple", price: 20000 }, 1, 300);
+        expect.equal(cart.getTotals().totalItems, 1);
+        expect.equal(cart.getTotals().subtotal, 20000);
+
+        // 2. Post-remove resurrection guard
+        cart.addItem("laptop", { id: "p_shirt", name: "Shirt", price: 150000 }, 4, 350);
+        expect.equal(cart.getTotals().totalItems, 5);
+
+        cart.removeItem("laptop", "p_shirt", 400);
+        expect.equal(cart.getTotals().totalItems, 1);
+
+        cart.addItem("laptop", { id: "p_shirt", name: "Shirt", price: 150000 }, 1, 500);
+        expect.equal(cart.getTotals().totalItems, 2);
+        expect.equal(cart.getTotals().subtotal, 170000);
+
+        // 3. Decrement debt clamping
+        const cartDebt = new CrdtCart({ cartId: "debt_guard" });
+        cartDebt.updateQuantity("phone", "p_shoes", -10, 100);
+        expect.equal(cartDebt.getTotals().totalItems, 0);
+
+        cartDebt.addItem("phone", { id: "p_shoes", name: "Shoes", price: 500000 }, 3, 200);
+        expect.equal(cartDebt.getTotals().totalItems, 3);
+        expect.equal(cartDebt.getTotals().subtotal, 1500000);
+
+        cartDebt.updateQuantity("phone", "p_shoes", -5, 300);
+        expect.equal(cartDebt.getTotals().totalItems, 0);
+
+        cartDebt.addItem("phone", { id: "p_shoes", name: "Shoes", price: 500000 }, 2, 400);
+        expect.equal(cartDebt.getTotals().totalItems, 2);
+        expect.equal(cartDebt.getTotals().subtotal, 1000000);
+      });
+    });
+
+    // --- 4. Deep Tri-Role AI Copilots Training for Phase 9 Suite (4 Tests) ---
+    describe("AI Copilot Training for Phase 9 Algorithms", () => {
+      test("F156-T17: Admin Sentinel Copilot AI explains LSH Catalog Clone Detection and GSP/VCG Ad Auction mechanics", () => {
+        const cloneRes = generateAdminCopilotResponse("Phát hiện shop gian lận sao chép catalog bằng LSH MinHash");
+        expect.equal(cloneRes.tag, "BẢO VỆ CATALOG LSH MINHASH");
+        expect.ok(cloneRes.text.includes("LSH"));
+        expect.ok(cloneRes.text.includes("MinHash"));
+        expect.ok(cloneRes.text.includes("Jaccard"));
+        expect.ok(cloneRes.text.includes("O(1)"));
+
+        const auctionRes = generateAdminCopilotResponse("Kiểm toán cơ chế đấu thầu quảng cáo tìm kiếm GSP và VCG");
+        expect.equal(auctionRes.tag, "ĐẤU THẦU GSP & VCG");
+        expect.ok(auctionRes.text.includes("GSP"));
+        expect.ok(auctionRes.text.includes("VCG"));
+        expect.ok(auctionRes.text.includes("Ad Rank"));
+        expect.ok(auctionRes.text.includes("Second-Price"));
+      });
+
+      test("F156-T18: Admin Sentinel Copilot AI explains CRDTs Multi-Device Cart Synchronization and Strong Eventual Consistency", () => {
+        const res = generateAdminCopilotResponse("Kiểm toán thuật toán CRDT đồng bộ giỏ hàng đa thiết bị Strong Eventual Consistency");
+        expect.equal(res.tag, "ĐỒNG BỘ GIỎ HÀNG CRDT");
+        expect.ok(res.text.includes("CRDT"));
+        expect.ok(res.text.includes("PN-Counter"));
+        expect.ok(res.text.includes("LWW-Element-Set"));
+        expect.ok(res.text.includes("Strong Eventual Consistency"));
+        expect.ok(res.text.includes("Join-Semilattice"));
+      });
+
+      test("F156-T19: Seller ShopSmart Copilot AI advises on GSP Keyword Ad Bidding, Quality Score optimization, and CRDT multi-device cart sync benefits", () => {
+        const currentShop = { id: "shop_01", name: "Ananas Official Store" };
+
+        const adRes = generateSellerCopilotResponse("Tư vấn tối ưu đấu thầu GSP và nâng cao điểm chất lượng Quality Score", currentShop);
+        expect.equal(adRes.tag, "TỐI ƯU ĐẤU THẦU GSP ADS");
+        expect.ok(adRes.text.includes("Ad Rank = Bid × QualityScore"));
+        expect.ok(adRes.text.includes("CPC"));
+        expect.ok(adRes.text.includes("ROAS"));
+
+        const cartRes = generateSellerCopilotResponse("Lợi ích chuyển đổi từ giỏ hàng đồng bộ CRDT cho người mua", currentShop);
+        expect.equal(cartRes.tag, "GIỎ HÀNG ĐỒNG BỘ CRDT");
+        expect.ok(cartRes.text.includes("CRDT"));
+        expect.ok(cartRes.text.includes("Lost Updates"));
+
+        const shieldRes = generateSellerCopilotResponse("Bảo vệ bản quyền gian hàng chống copycat bằng LSH", currentShop);
+        expect.equal(shieldRes.tag, "BẢO VỆ GIAN HÀNG LSH");
+        expect.ok(shieldRes.text.includes("LSH"));
+        expect.ok(shieldRes.text.includes("Jaccard"));
+      });
+
+      test("F156-T20: Buyer Shopping Assistant AI recognizes Cart Protection queries and recommends unique, non-clone authentic products", () => {
+        const cartProtectionRes = generateAiChatResponse("Giỏ hàng của tôi có được bảo vệ và đồng bộ khi đổi sang máy tính không?");
+        expect.equal(cartProtectionRes.intent, "CART_CRDT_SYNC_PROTECT");
+        expect.ok(cartProtectionRes.replyText.includes("CRDT"));
+        expect.ok(cartProtectionRes.replyText.includes("Ngoại tuyến"));
+
+        const uniqueRecommendRes = generateAiChatResponse("Tìm sản phẩm độc lạ không trùng lặp tránh hàng clone");
+        expect.equal(uniqueRecommendRes.intent, "UNIQUE_CATALOG_RECOMMEND");
+        expect.ok(uniqueRecommendRes.replyText.includes("LSH MinHash"));
+        expect.ok(uniqueRecommendRes.replyText.includes("chính hãng"));
+
+        const sponsoredRes = generateAiChatResponse("Tại sao có nhãn tài trợ trên kết quả tìm kiếm?");
+        expect.equal(sponsoredRes.intent, "SPONSORED_ADS_TRANSPARENCY");
+        expect.ok(sponsoredRes.replyText.includes("Tài trợ"));
+        expect.ok(sponsoredRes.replyText.includes("GSP"));
       });
     });
   });

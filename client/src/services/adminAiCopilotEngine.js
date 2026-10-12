@@ -131,7 +131,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 4. Radar phát hiện gian lận & Người mua bất thường (Fraud Radar / Buyer Abuse)
-  if (!/sybil|dsu|disjoint set/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
+  if (!/sybil|dsu|disjoint set|lsh|minhash|catalog clone|sao chép catalog/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
     const anomalyCount = fraudAnomaliesCount || (fraudData?.criticalCount ?? 0) || (fraudData?.mediumCount ?? 1);
     return {
       text: `🚨 **RADAR PHÁT HIỆN GIAN LẬN TOÀN SÀN (AI FRAUD GUARD)**:
@@ -555,7 +555,73 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 24. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
+  // 24. Radar Phát Hiện Sao Chép Catalog (Locality-Sensitive Hashing & MinHash)
+  if (/lsh|minhash|catalog clone|sao chép catalog|clone sản phẩm|trùng lặp sản phẩm|jaccard|shingles/i.test(raw)) {
+    return {
+      text: `🛡️ **BẢO VỆ CATALOG LSH MINHASH (NEAR-DUPLICATE & CLONE DETECTION)**:
+- **Mục đích thiết kế**: Phát hiện hành vi sao chép catalog, copycat gian hàng ăn cắp bản quyền hình ảnh/tiêu đề để trục lợi mã voucher hoặc spam tìm kiếm.
+- **Nguyên lý giải thuật LSH & MinHash (Andrei Broder 1997, Indyk & Motwani 1998)**:
+  - **Tách Shingles**: Word 2-grams trích xuất từ tiêu đề và mô tả sản phẩm sau khi chuẩn hóa Unicode NFC và làm sạch ký tự.
+  - **Chữ ký MinHash**: Nén văn bản thành vector $K = 100$ số nguyên bằng họ hàm băm vạn năng $(a_i x + b_i) \\pmod p$ với số nguyên tố $p = 4.294.967.311$. Xác suất trùng khớp chữ ký đúng bằng hệ số tương đồng Jaccard: $\\mathbb{P}(h_i(A) = h_i(B)) = J(A, B)$.
+  - **Phân đoạn băng LSH (S-Curve)**: Chia $K$ thành $b = 20$ băng, mỗi băng $r = 5$ dòng. Cặp sản phẩm có độ tương đồng Jaccard $s \\ge 0.8$ đạt xác suất va chạm bucket lên tới $99.97\\%$ ($1 - (1 - s^r)^b$).
+  - **Độ phức tạp $O(1)$**: Tra cứu bucket tức thì thay vì duyệt toàn bộ cặp $O(N^2)$.
+- **Cơ chế xử lý tự động**: Khi tỷ lệ sao chép $\\ge 50\\%$ hoặc $\\ge 3$ sản phẩm trùng lặp, hệ thống gắn cờ \`CRITICAL_CATALOG_CLONE_FRAUD\` và đề xuất \`SUSPEND_SHOP_FOR_CATALOG_THEFT\`.`,
+      type: 'security',
+      tag: 'BẢO VỆ CATALOG LSH MINHASH',
+      suggestions: [
+        'Xem báo cáo Catalog Clone Radar',
+        'Kiểm tra đấu thầu GSP & VCG',
+        'Tìm hiểu giỏ hàng đồng bộ CRDT'
+      ]
+    };
+  }
+
+  // 25. Kiểm Toán Đấu Thầu Quảng Cáo Tìm Kiếm & Flash Sale (GSP & VCG Auction Engine)
+  if (/gsp|vcg|đấu giá từ khóa|ad rank|second price|quảng cáo tìm kiếm|thặng dư xã hội|social welfare|giá thầu cpc|đấu thầu/i.test(raw)) {
+    return {
+      text: `🎯 **ĐỘNG CƠ ĐẤU THẦU GSP & VCG (SPONSORED SEARCH & FLASH SALE AUCTION)**:
+- **Mục đích thiết kế**: Phân bổ vị trí hiển thị tìm kiếm (Shopee Ads) và đấu giá vị trí tài trợ độc quyền Flash Sale Hero Banner một cách minh bạch, cạnh tranh lành mạnh.
+- **Cơ chế Generalized Second Price (GSP)**:
+  - **Xếp hạng hiển thị**: $\\text{Ad Rank} = \\text{Bid} \\times \\text{QualityScore}$.
+  - **Định giá Second-Price**: Người thắng vị trí $i$ chỉ trả mức CPC tối thiểu để vượt đối thủ $i+1$: $\\text{CPC}_i = \\lfloor \\frac{\\text{Rank}_{i+1}}{\\text{QualityScore}_i} \\rfloor + 1\\,\\text{VND}$.
+  - **Bất biến bắt buộc**: $\\text{CPC}_i \\le \\text{Bid}_i$ (người bán không bao giờ phải trả quá mức thầu tối đa).
+- **Cơ chế Vickrey-Clarke-Groves (VCG)**:
+  - Tối đa hóa thặng dư xã hội (Social Welfare Maximization).
+  - Người thắng vị trí trả chi phí ngoại ứng (Externality Cost) gây ra cho các đối thủ.
+  - **Đấu thầu trung thực (DSIC)**: Khai báo đúng giá trị thực $b_i = v_i$ là chiến lược trội yếu, loại bỏ hoàn toàn hiện tượng hạ thầu (Bid Shading).
+  - Với 1 vị trí độc quyền ($M=1$), VCG thu gọn chính xác về đấu giá Vickrey giá thứ hai cổ điển: $\\text{CPC}_1 = v_2$.`,
+      type: 'finance',
+      tag: 'ĐẤU THẦU GSP & VCG',
+      suggestions: [
+        'Xem báo cáo đấu thầu Shopee Ads',
+        'Kiểm tra bảo vệ Catalog LSH',
+        'Xem kiểm toán dòng tiền Escrow'
+      ]
+    };
+  }
+
+  // 26. Kiểm Toán Đồng Bộ Giỏ Hàng Đa Thiết Bị CRDT (Conflict-Free Replicated Data Types)
+  if (/crdt|giỏ hàng đa thiết bị|đồng bộ giỏ hàng|pn-counter|lww-element-set|strong eventual consistency|sec giỏ hàng/i.test(raw)) {
+    return {
+      text: `🛒 **ĐỒNG BỘ GIỎ HÀNG ĐA THIẾT BỊ CRDT (Strong Eventual Consistency - SEC)**:
+- **Mục đích thiết kế**: Đồng bộ giỏ hàng đa thiết bị (Điện thoại, Laptop, Tablet) không khóa (Lock-free), hoạt động bền bỉ trong điều kiện mạng di động chập chờn offline-first.
+- **Cấu trúc dữ liệu lai PN-Counter & LWW-Element-Set**:
+  - **PN-Counter**: Vector số lượng tăng $P[d]$ và giảm $N[d]$ theo từng thiết bị. Số lượng thực $Q = \\max(0, \\sum P - \\sum N)$. Phép merge lấy $\\max$ từng phần tử.
+  - **LWW-Element-Set**: Nhãn thời gian logic thêm $t_a$ và xóa $t_r$. Mặt hàng tồn tại trong giỏ khi và chỉ khi $t_a \\ge t_r$ và $Q > 0$.
+- **Chứng minh Tính nhất quán cuối cùng mạnh (Strong Eventual Consistency - SEC)**:
+  - Không gian trạng thái tạo thành Join-Semilattice thỏa mãn 3 tính chất đại số: Giao hoán (Commutativity), Kết hợp (Associativity) và Lũy đẳng (Idempotence).
+  - Triệt tiêu hoàn toàn lỗi mất mặt hàng (Lost Updates) và xung đột ghi đè trong các đợt Flash Sale cao điểm.`,
+      type: 'algorithm',
+      tag: 'ĐỒNG BỘ GIỎ HÀNG CRDT',
+      suggestions: [
+        'Xem thống kê giỏ hàng toàn sàn',
+        'Kiểm tra radar sao chép LSH',
+        'Xem đấu thầu từ khóa GSP'
+      ]
+    };
+  }
+
+  // 27. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
   return {
     text: `Chào Quản Trị Viên! Tôi là **Admin Sentinel AI** - Trợ lý số chuyên trách giám sát, phân tích số liệu và đảm bảo tuân thủ vận hành sàn TMĐT:
 - 📊 **Tra cứu GMV & Hoa hồng**: Phân tích doanh số và hoa hồng sàn 5%.

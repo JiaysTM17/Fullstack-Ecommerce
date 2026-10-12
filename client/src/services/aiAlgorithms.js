@@ -1943,6 +1943,1459 @@ export class MultiWarehouseDispatcher {
   }
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 19: Locality-Sensitive Hashing (LSH) & MinHash Catalog Clone Detector
+// ------------------------------------------------------------------------------
+export const LSH_PRIME = 4294967311;
+
+export function kShingles(text, optionsOrK = 2, maybeType = "word", maybeStrip = false) {
+  let k = 2;
+  let type = "word";
+  let stripAccents = false;
+
+  if (typeof optionsOrK === "object" && optionsOrK !== null) {
+    k = Number(optionsOrK.k || optionsOrK.shingleSize || 2);
+    type = optionsOrK.type || optionsOrK.shingleType || "word";
+    stripAccents = Boolean(optionsOrK.stripAccents);
+  } else {
+    k = Number(optionsOrK) || 2;
+    type = maybeType || "word";
+    stripAccents = Boolean(maybeStrip);
+  }
+
+  k = Math.max(1, k);
+  const shingles = new Set();
+  if (!text || typeof text !== "string") return shingles;
+
+  let clean = text.toLowerCase().normalize("NFC");
+  if (stripAccents) {
+    clean = removeVietnameseTones(clean);
+  }
+  clean = clean
+    .replace(/<[^>]*>/g, " ")
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!clean) return shingles;
+
+  if (type === "char") {
+    if (clean.length <= k) {
+      shingles.add(clean);
+      return shingles;
+    }
+    for (let i = 0; i <= clean.length - k; i++) {
+      shingles.add(clean.slice(i, i + k));
+    }
+  } else {
+    const words = clean.split(/\s+/).filter(Boolean);
+    if (words.length <= k) {
+      shingles.add(words.join(" "));
+      return shingles;
+    }
+    for (let i = 0; i <= words.length - k; i++) {
+      shingles.add(words.slice(i, i + k).join(" "));
+    }
+  }
+
+  return shingles;
+}
+
+export class MinHash {
+  constructor({ numHashes = 100, prime = LSH_PRIME, seed = 0x1f3d5b79 } = {}) {
+    this.numHashes = numHashes;
+    this.prime = prime;
+    this.seed = seed;
+    this.a = new Uint32Array(this.numHashes);
+    this.b = new Uint32Array(this.numHashes);
+    this._initHashCoefficients();
+  }
+
+  _initHashCoefficients() {
+    let s = this.seed;
+    const lcg = () => {
+      s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+      return s;
+    };
+
+    for (let i = 0; i < this.numHashes; i++) {
+      let aVal = (lcg() % (this.prime - 1)) + 1;
+      if (aVal % 2 === 0) aVal = (aVal + 1) >>> 0;
+      this.a[i] = aVal;
+      this.b[i] = lcg() % this.prime;
+    }
+  }
+
+  getSignature(textOrShingles) {
+    const shingles = textOrShingles instanceof Set
+      ? textOrShingles
+      : kShingles(textOrShingles);
+
+    const sig = new Uint32Array(this.numHashes);
+    sig.fill(0xffffffff);
+    if (shingles.size === 0) return sig;
+
+    const pBig = BigInt(this.prime);
+
+    for (const shingle of shingles) {
+      const x = murmur32(shingle);
+      const xBig = BigInt(x);
+
+      for (let i = 0; i < this.numHashes; i++) {
+        const aBig = BigInt(this.a[i]);
+        const bBig = BigInt(this.b[i]);
+        const hVal = Number((aBig * xBig + bBig) % pBig);
+
+        if (hVal < sig[i]) {
+          sig[i] = hVal;
+        }
+      }
+    }
+
+    return sig;
+  }
+
+  calculateJaccard(sigA, sigB) {
+    if (!sigA || !sigB || sigA.length !== sigB.length || sigA.length === 0) return 0;
+    let matches = 0;
+    const len = sigA.length;
+    for (let i = 0; i < len; i++) {
+      if (sigA[i] === sigB[i]) matches++;
+    }
+    return Number((matches / len).toFixed(4));
+  }
+
+  calculateExactJaccard(setA, setB) {
+    if (!setA || !setB || (setA.size === 0 && setB.size === 0)) return 0;
+    let intersection = 0;
+    const [smaller, larger] = setA.size <= setB.size ? [setA, setB] : [setB, setA];
+    for (const item of smaller) {
+      if (larger.has(item)) intersection++;
+    }
+    const union = setA.size + setB.size - intersection;
+    return union > 0 ? Number((intersection / union).toFixed(4)) : 0;
+  }
+}
+
+export class MinHashLSH {
+  constructor({
+    numHashes = null,
+    bands = null,
+    numBands = null,
+    rowsPerBand = null,
+    shingleSize = 2,
+    shingleType = "word",
+    stripAccents = false,
+  } = {}) {
+    const effectiveBands = numBands !== null && numBands !== undefined ? numBands : bands;
+
+    if (effectiveBands !== null && rowsPerBand !== null) {
+      this.bands = Number(effectiveBands);
+      this.rowsPerBand = Number(rowsPerBand);
+      this.numHashes = numHashes !== null ? Number(numHashes) : this.bands * this.rowsPerBand;
+    } else if (numHashes !== null) {
+      this.numHashes = Number(numHashes);
+      if (this.numHashes === 64) {
+        this.bands = 16;
+        this.rowsPerBand = 4;
+      } else if (this.numHashes === 128) {
+        this.bands = 16;
+        this.rowsPerBand = 8;
+      } else {
+        this.bands = 20;
+        this.rowsPerBand = Math.floor(this.numHashes / 20) || 5;
+        this.numHashes = this.bands * this.rowsPerBand;
+      }
+    } else {
+      this.numHashes = 100;
+      this.bands = 20;
+      this.rowsPerBand = 5;
+    }
+
+    if (this.bands * this.rowsPerBand !== this.numHashes) {
+      this.numHashes = this.bands * this.rowsPerBand;
+    }
+
+    this.shingleSize = Math.max(1, Number(shingleSize) || 2);
+    this.shingleType = shingleType;
+    this.stripAccents = Boolean(stripAccents);
+    this.theoreticalThreshold = Number(Math.pow(1 / this.bands, 1 / this.rowsPerBand).toFixed(4));
+    this.minHashEngine = new MinHash({ numHashes: this.numHashes });
+    this.documents = new Map();
+    this.buckets = new Map();
+  }
+
+  preprocessText(text) {
+    if (!text || typeof text !== "string") return "";
+    let clean = text.toLowerCase().normalize("NFC");
+    if (this.stripAccents) {
+      clean = removeVietnameseTones(clean);
+    }
+    clean = clean
+      .replace(/<[^>]*>/g, " ")
+      .replace(/https?:\/\/\S+/g, " ")
+      .replace(/[^\p{L}\p{N}\s]/gu, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return clean;
+  }
+
+  getShingles(text) {
+    return kShingles(text, {
+      k: this.shingleSize,
+      type: this.shingleType,
+      stripAccents: this.stripAccents,
+    });
+  }
+
+  getSignature(textOrShingles) {
+    return this.minHashEngine.getSignature(textOrShingles);
+  }
+
+  calculateJaccard(sigA, sigB) {
+    return this.minHashEngine.calculateJaccard(sigA, sigB);
+  }
+
+  calculateExactJaccard(setA, setB) {
+    return this.minHashEngine.calculateExactJaccard(setA, setB);
+  }
+
+  addDocument(id, text, metadata = {}) {
+    if (!id || typeof text !== "string") {
+      throw new Error("Document must have a valid string id and text");
+    }
+
+    if (this.documents.has(id)) {
+      this.removeDocument(id);
+    }
+
+    const shingles = this.getShingles(text);
+    const signature = this.getSignature(shingles);
+
+    for (let b = 0; b < this.bands; b++) {
+      const start = b * this.rowsPerBand;
+      const end = start + this.rowsPerBand;
+      const bandValues = signature.subarray(start, end);
+      const bandKey = `b${b}:${bandValues.join(",")}`;
+
+      if (!this.buckets.has(bandKey)) {
+        this.buckets.set(bandKey, new Set());
+      }
+      this.buckets.get(bandKey).add(id);
+    }
+
+    const docRecord = {
+      id,
+      text,
+      signature,
+      shingles,
+      metadata,
+    };
+    this.documents.set(id, docRecord);
+    return { id, signature };
+  }
+
+  removeDocument(id) {
+    const doc = this.documents.get(id);
+    if (!doc) return false;
+
+    for (let b = 0; b < this.bands; b++) {
+      const start = b * this.rowsPerBand;
+      const end = start + this.rowsPerBand;
+      const bandValues = doc.signature.subarray(start, end);
+      const bandKey = `b${b}:${bandValues.join(",")}`;
+
+      const bucket = this.buckets.get(bandKey);
+      if (bucket) {
+        bucket.delete(id);
+        if (bucket.size === 0) {
+          this.buckets.delete(bandKey);
+        }
+      }
+    }
+
+    this.documents.delete(id);
+    return true;
+  }
+
+  getDocument(id) {
+    return this.documents.get(id) || null;
+  }
+
+  hasDocument(id) {
+    return this.documents.has(id);
+  }
+
+  clear() {
+    this.documents.clear();
+    this.buckets.clear();
+  }
+
+  queryNearDuplicates(queryTextOrId, threshold = 0.8, limit = 20) {
+    let querySig;
+    let excludeId = null;
+
+    if (this.documents.has(queryTextOrId)) {
+      const doc = this.documents.get(queryTextOrId);
+      querySig = doc.signature;
+      excludeId = doc.id;
+    } else {
+      querySig = this.getSignature(queryTextOrId);
+    }
+
+    const candidates = new Set();
+    for (let b = 0; b < this.bands; b++) {
+      const start = b * this.rowsPerBand;
+      const end = start + this.rowsPerBand;
+      const bandValues = querySig.subarray(start, end);
+      const bandKey = `b${b}:${bandValues.join(",")}`;
+
+      const bucket = this.buckets.get(bandKey);
+      if (bucket) {
+        for (const docId of bucket) {
+          if (docId !== excludeId) {
+            candidates.add(docId);
+          }
+        }
+      }
+    }
+
+    const results = [];
+    for (const candId of candidates) {
+      const candDoc = this.documents.get(candId);
+      if (!candDoc) continue;
+
+      const approxSim = this.calculateJaccard(querySig, candDoc.signature);
+      if (approxSim >= threshold) {
+        results.push({
+          id: candId,
+          similarity: approxSim,
+          metadata: candDoc.metadata,
+        });
+      }
+    }
+
+    results.sort((a, b) => b.similarity - a.similarity);
+    return results.slice(0, limit);
+  }
+
+  detectCatalogClones(shopAId, shopBId, threshold = 0.8) {
+    const productsA = [];
+    const productsB = [];
+
+    for (const doc of this.documents.values()) {
+      if (doc.metadata?.shopId === shopAId) productsA.push(doc);
+      if (doc.metadata?.shopId === shopBId) productsB.push(doc);
+    }
+
+    const clonedPairs = [];
+
+    for (const pB of productsB) {
+      const matches = this.queryNearDuplicates(pB.id, threshold, 5);
+      const shopAMatch = matches.find((m) => m.metadata?.shopId === shopAId);
+      if (shopAMatch) {
+        clonedPairs.push({
+          targetId: pB.id,
+          sourceId: shopAMatch.id,
+          similarity: shopAMatch.similarity,
+          targetName: pB.metadata?.name || pB.id,
+          sourceName: shopAMatch.metadata?.name || shopAMatch.id,
+        });
+      }
+    }
+
+    const totalTarget = productsB.length;
+    const clonedCount = clonedPairs.length;
+    const cloneRatio = totalTarget > 0 ? Number((clonedCount / totalTarget).toFixed(2)) : 0;
+
+    let severity = "CLEAN";
+    let isFraud = false;
+    let riskLevel = "LOW";
+    let action = "ALLOW_NORMAL_OPERATIONS";
+    let recommendedAction = "ALLOW_NORMAL_OPERATIONS";
+
+    if (clonedCount >= 3 || cloneRatio >= 0.5) {
+      severity = "CRITICAL";
+      isFraud = true;
+      riskLevel = "CRITICAL_CATALOG_CLONE_FRAUD";
+      action = "SUSPEND_SHOP_FOR_CATALOG_THEFT";
+      recommendedAction = "SUSPEND_SHOP_FOR_CATALOG_THEFT";
+    } else if (clonedCount >= 1 && cloneRatio >= 0.2) {
+      severity = "SUSPICIOUS";
+      isFraud = false;
+      riskLevel = "SUSPICIOUS_PARTIAL_CLONE";
+      action = "REQUIRE_MERCHANT_COPYRIGHT_AUDIT";
+      recommendedAction = "REQUIRE_MERCHANT_COPYRIGHT_AUDIT";
+    }
+
+    return {
+      shopAId,
+      shopBId,
+      isClone: isFraud,
+      isFraud,
+      cloneRatio,
+      clonedPairs,
+      clonedCount,
+      totalTargetProducts: totalTarget,
+      riskLevel,
+      severity,
+      action,
+      recommendedAction,
+    };
+  }
+
+  getStats() {
+    let totalBucketEntries = 0;
+    for (const set of this.buckets.values()) {
+      totalBucketEntries += set.size;
+    }
+    const avgDepth = this.buckets.size > 0 ? Number((totalBucketEntries / this.buckets.size).toFixed(2)) : 0;
+
+    return {
+      totalDocs: this.documents.size,
+      totalDocuments: this.documents.size,
+      totalBuckets: this.buckets.size,
+      avgBucketDepth: avgDepth,
+      numHashes: this.numHashes,
+      bands: this.bands,
+      numBands: this.bands,
+      rowsPerBand: this.rowsPerBand,
+      theoreticalThreshold: this.theoreticalThreshold,
+    };
+  }
+
+  toJSON() {
+    const docs = [];
+    for (const [id, doc] of this.documents.entries()) {
+      docs.push({
+        id,
+        text: doc.text,
+        signature: Array.from(doc.signature),
+        metadata: doc.metadata,
+      });
+    }
+
+    return {
+      numHashes: this.numHashes,
+      bands: this.bands,
+      rowsPerBand: this.rowsPerBand,
+      shingleSize: this.shingleSize,
+      shingleType: this.shingleType,
+      stripAccents: this.stripAccents,
+      documents: docs,
+    };
+  }
+
+  static fromJSON(data) {
+    if (!data) throw new Error("Invalid LSH JSON data");
+    const instance = new MinHashLSH({
+      numHashes: data.numHashes,
+      bands: data.bands,
+      rowsPerBand: data.rowsPerBand,
+      shingleSize: data.shingleSize,
+      shingleType: data.shingleType,
+      stripAccents: data.stripAccents,
+    });
+
+    if (Array.isArray(data.documents)) {
+      for (const d of data.documents) {
+        instance.addDocument(d.id, d.text, d.metadata);
+      }
+    }
+
+    return instance;
+  }
+}
+
+export const LSHCloneDetector = MinHashLSH;
+
+export class CatalogCloneRadar {
+  constructor(lshEngine = null, options = {}) {
+    if (lshEngine instanceof MinHashLSH) {
+      this.lsh = lshEngine;
+    } else {
+      this.lsh = new MinHashLSH(options);
+    }
+    this.indexedProducts = new Map();
+  }
+
+  indexProduct(product) {
+    if (!product) return;
+    const pId = String(product.id || product._id || `p_${Date.now()}`);
+    const shopId = String(product.shopId || "unknown_shop");
+    const title = String(product.name || product.title || "");
+    const desc = String(product.description || "");
+    const cat = String(product.category || "");
+    const brand = String(product.brand || "");
+
+    const docText = `${title} ${title} ${cat} ${brand} ${desc}`.trim();
+    const metadata = {
+      id: pId,
+      shopId,
+      name: title,
+      price: product.price,
+      category: cat,
+      brand,
+    };
+
+    this.lsh.addDocument(pId, docText, metadata);
+    this.indexedProducts.set(pId, metadata);
+    return { id: pId, shopId };
+  }
+
+  analyzeShopPair(targetShopId, suspectShopId, threshold = 0.8) {
+    return this.lsh.detectCatalogClones(targetShopId, suspectShopId, threshold);
+  }
+
+  detectCatalogClones(shopAId, shopBId, threshold = 0.8) {
+    return this.lsh.detectCatalogClones(shopAId, shopBId, threshold);
+  }
+
+  scanAllShops(threshold = 0.8) {
+    const shopMap = new Map();
+    for (const doc of this.lsh.documents.values()) {
+      const sId = doc.metadata?.shopId;
+      if (sId) {
+        if (!shopMap.has(sId)) shopMap.set(sId, []);
+        shopMap.get(sId).push(doc);
+      }
+    }
+
+    const shopIds = Array.from(shopMap.keys());
+    const alerts = [];
+
+    for (let i = 0; i < shopIds.length; i++) {
+      for (let j = 0; j < shopIds.length; j++) {
+        if (i === j) continue;
+        const res = this.analyzeShopPair(shopIds[i], shopIds[j], threshold);
+        if (res.isFraud || res.isClone) {
+          alerts.push(res);
+        }
+      }
+    }
+
+    return {
+      totalShopsScanned: shopIds.length,
+      alertsCount: alerts.length,
+      alerts,
+    };
+  }
+
+  toJSON() {
+    return {
+      lsh: this.lsh.toJSON(),
+      indexedProducts: Array.from(this.indexedProducts.entries()),
+    };
+  }
+
+  static fromJSON(data) {
+    if (!data) throw new Error("Invalid CatalogCloneRadar JSON");
+    const lsh = MinHashLSH.fromJSON(data.lsh);
+    const radar = new CatalogCloneRadar(lsh);
+    if (Array.isArray(data.indexedProducts)) {
+      radar.indexedProducts = new Map(data.indexedProducts);
+    }
+    return radar;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 20: Generalized Second Price (GSP) & VCG Sponsored Search Auction Engine
+// ------------------------------------------------------------------------------
+export class AuctionEngine {
+  constructor(config = {}) {
+    this.defaultReservePrice = Math.max(100, Number(config.defaultReservePrice) || 500);
+    this.currency = config.currency || "VND";
+    this.qualityScoreWeight = Number(config.qualityScoreWeight) || 1.0;
+    this.positionCtrDecay = Array.isArray(config.positionCtrDecay)
+      ? config.positionCtrDecay
+      : [1.0, 0.7, 0.45, 0.3, 0.2];
+
+    this.defaultSlots = Array.isArray(config.defaultSlots) && config.defaultSlots.length > 0
+      ? config.defaultSlots
+      : [
+          { id: "slot_1", position: 1, name: "Top 1 Hero Sponsored", ctr: 0.15 },
+          { id: "slot_2", position: 2, name: "Top 2 Sponsored Card", ctr: 0.09 },
+          { id: "slot_3", position: 3, name: "Top 3 Sponsored Card", ctr: 0.05 },
+        ];
+  }
+
+  calculateQualityScore(bidder = {}) {
+    if (typeof bidder.qualityScore === "number" && !isNaN(bidder.qualityScore)) {
+      return Math.min(10.0, Math.max(0.1, Number(bidder.qualityScore.toFixed(2))));
+    }
+
+    const rel = typeof bidder.relevanceScore === "number" ? bidder.relevanceScore : 7.0;
+    const ctr = typeof bidder.ctr === "number" ? bidder.ctr : 0.045;
+    const cvr = typeof bidder.cvr === "number" ? bidder.cvr : 0.030;
+    const rating = typeof bidder.shopRating === "number" ? bidder.shopRating : 4.5;
+
+    const score = (rel / 10.0) * 4.0 +
+                  Math.min(1.0, ctr / 0.06) * 3.0 +
+                  Math.min(1.0, cvr / 0.04) * 2.0 +
+                  (rating / 5.0) * 1.0;
+
+    return Math.min(10.0, Math.max(0.1, Number(score.toFixed(2))));
+  }
+
+  _normalizeInputs(slotsInput, biddersInput, reservePriceInput) {
+    const reservePrice = typeof reservePriceInput === "number" ? reservePriceInput : this.defaultReservePrice;
+
+    let slots = [];
+    if (typeof slotsInput === "number" && slotsInput > 0) {
+      const count = Math.min(10, Math.floor(slotsInput));
+      for (let i = 1; i <= count; i++) {
+        const ctr = Number((0.15 * Math.pow(0.65, i - 1)).toFixed(4));
+        slots.push({ id: `slot_${i}`, position: i, name: `Vị trí tài trợ ${i}`, ctr });
+      }
+    } else if (Array.isArray(slotsInput) && slotsInput.length > 0) {
+      slots = slotsInput.map((s, idx) => ({
+        id: s.id || `slot_${idx + 1}`,
+        position: s.position || idx + 1,
+        name: s.name || `Vị trí tài trợ ${idx + 1}`,
+        ctr: typeof s.ctr === "number" ? s.ctr : Number((0.15 * Math.pow(0.65, idx)).toFixed(4)),
+      }));
+    } else {
+      slots = [...this.defaultSlots];
+    }
+    slots.sort((a, b) => b.ctr - a.ctr);
+
+    const rawBidders = Array.isArray(biddersInput) ? biddersInput : [];
+    const validBidders = [];
+    const disqualifiedBidders = [];
+
+    for (const b of rawBidders) {
+      const bid = Number(b.bid) || 0;
+      const qs = this.calculateQualityScore(b);
+      const adRank = Number((bid * qs).toFixed(2));
+
+      const normalized = {
+        bidderId: String(b.bidderId || b.id || `bidder_${validBidders.length + 1}`),
+        shopId: String(b.shopId || "unknown_shop"),
+        productId: String(b.productId || "unknown_product"),
+        bid,
+        qualityScore: qs,
+        adRank,
+        ctr: typeof b.ctr === "number" ? b.ctr : 0.05,
+      };
+
+      if (bid < reservePrice) {
+        disqualifiedBidders.push({ ...normalized, reason: `Bid ${bid}₫ dưới giá sàn ${reservePrice}₫` });
+      } else {
+        validBidders.push(normalized);
+      }
+    }
+
+    validBidders.sort((a, b) => b.adRank - a.adRank || b.bid - a.bid);
+    return { slots, validBidders, disqualifiedBidders, reservePrice };
+  }
+
+  runGspAuction({ slots = 3, bidders = [], reservePrice, impressions = 1000 } = {}) {
+    const norm = this._normalizeInputs(slots, bidders, reservePrice);
+    const { slots: slotList, validBidders, disqualifiedBidders, reservePrice: minPrice } = norm;
+
+    const allocations = [];
+    const unallocatedBidders = [];
+    const totalSlots = slotList.length;
+    let totalRevenue = 0;
+    let totalClicks = 0;
+
+    for (let i = 0; i < validBidders.length; i++) {
+      const bidder = validBidders[i];
+
+      if (i < totalSlots) {
+        const slot = slotList[i];
+        let nextRank = 0;
+        if (i + 1 < validBidders.length) {
+          nextRank = validBidders[i + 1].adRank;
+        }
+
+        let computedCpc = 0;
+        if (nextRank > 0) {
+          computedCpc = Math.floor(nextRank / bidder.qualityScore) + 1;
+        } else {
+          computedCpc = minPrice;
+        }
+
+        const finalCpc = Math.min(bidder.bid, Math.max(minPrice, computedCpc));
+
+        const slotCtr = slot.ctr;
+        const estClicks = Math.round(impressions * slotCtr);
+        const estCost = estClicks * finalCpc;
+        const savingsPerClick = bidder.bid - finalCpc;
+        const savings = savingsPerClick * estClicks;
+
+        totalRevenue += estCost;
+        totalClicks += estClicks;
+
+        allocations.push({
+          rank: i + 1,
+          position: slot.position,
+          slotIndex: i,
+          slotId: slot.id,
+          slotName: slot.name,
+          slotCtr,
+          bidderId: bidder.bidderId,
+          shopId: bidder.shopId,
+          productId: bidder.productId,
+          bid: bidder.bid,
+          qualityScore: bidder.qualityScore,
+          adRank: bidder.adRank,
+          cpc: finalCpc,
+          nextAdRank: nextRank,
+          nextCompetitorRank: nextRank,
+          expectedClicks: estClicks,
+          expectedCost: estCost,
+          savingsPerClick,
+          savings,
+          pricingRule: nextRank > 0 ? "SECOND_PRICE_COMPETITOR" : "RESERVE_PRICE_FLOOR",
+        });
+      } else {
+        unallocatedBidders.push({
+          ...bidder,
+          reason: `AdRank ${bidder.adRank} không đủ cao để vào top ${totalSlots} vị trí`,
+        });
+      }
+    }
+
+    return {
+      mechanism: "GSP",
+      auctionType: "GSP",
+      reservePrice: minPrice,
+      totalSlots,
+      slotsAllocated: allocations.length,
+      allocatedCount: allocations.length,
+      unallocatedCount: unallocatedBidders.length,
+      disqualifiedCount: disqualifiedBidders.length,
+      winners: allocations,
+      allocations,
+      unallocated: unallocatedBidders,
+      unallocatedBidders,
+      disqualifiedBidders,
+      totalRevenue,
+      summary: {
+        totalRevenue,
+        totalClicks,
+        averageCpc: totalClicks > 0 ? Math.round(totalRevenue / totalClicks) : 0,
+        currency: this.currency,
+      },
+    };
+  }
+
+  runVcgAuction({ slots = 3, bidders = [], reservePrice, impressions = 1000 } = {}) {
+    const norm = this._normalizeInputs(slots, bidders, reservePrice);
+    const { slots: slotList, validBidders, disqualifiedBidders, reservePrice: minPrice } = norm;
+
+    const M = slotList.length;
+    const N = validBidders.length;
+    const allocatedCount = Math.min(M, N);
+
+    const allocations = [];
+    const unallocatedBidders = [];
+    let totalWelfare = 0;
+    let totalRevenue = 0;
+    let totalClicks = 0;
+
+    const alphas = slotList.map((s) => s.ctr);
+    alphas.push(0);
+
+    for (let i = 0; i < N; i++) {
+      const bidder = validBidders[i];
+
+      if (i < allocatedCount) {
+        const slot = slotList[i];
+        const alpha_i = alphas[i];
+
+        let externalityTotal = 0;
+        if (M === 1) {
+          const secondBidder = validBidders[1];
+          const secondVal = secondBidder ? secondBidder.bid : minPrice;
+          externalityTotal = secondVal;
+        } else {
+          for (let k = i + 1; k <= Math.min(M, N); k++) {
+            const competitor = validBidders[k];
+            if (competitor) {
+              const deltaAlpha = alphas[k - 1] - alphas[k];
+              externalityTotal += competitor.bid * deltaAlpha;
+            }
+          }
+        }
+
+        let cpcVcg = M === 1
+          ? Math.round(externalityTotal)
+          : (alpha_i > 0 ? Math.round(externalityTotal / alpha_i) : minPrice);
+
+        if (cpcVcg === 0 || isNaN(cpcVcg)) {
+          cpcVcg = minPrice;
+        }
+
+        const finalCpc = Math.min(bidder.bid, Math.max(minPrice, cpcVcg));
+
+        const estClicks = Math.round(impressions * alpha_i);
+        const estCost = estClicks * finalCpc;
+        const welfareContribution = Number((bidder.bid * alpha_i).toFixed(2));
+        const savingsPerClick = bidder.bid - finalCpc;
+        const savings = savingsPerClick * estClicks;
+
+        totalWelfare += welfareContribution;
+        totalRevenue += estCost;
+        totalClicks += estClicks;
+
+        allocations.push({
+          rank: i + 1,
+          position: slot.position,
+          slotIndex: i,
+          slotId: slot.id,
+          slotName: slot.name,
+          slotCtr: alpha_i,
+          bidderId: bidder.bidderId,
+          shopId: bidder.shopId,
+          productId: bidder.productId,
+          bid: bidder.bid,
+          qualityScore: bidder.qualityScore,
+          adRank: bidder.adRank,
+          cpc: finalCpc,
+          externalityTotal: Number(externalityTotal.toFixed(2)),
+          welfareContribution,
+          expectedClicks: estClicks,
+          expectedCost: estCost,
+          savingsPerClick,
+          savings,
+          pricingRule: M === 1 ? "VCG_EXCLUSIVE_SLOT_COLLAPSE" : "VCG_EXTERNALITY_HARMONIC",
+        });
+      } else {
+        unallocatedBidders.push({
+          ...bidder,
+          reason: `Vượt quá giới hạn ${M} vị trí hiển thị VCG`,
+        });
+      }
+    }
+
+    return {
+      mechanism: "VCG",
+      auctionType: "VCG",
+      reservePrice: minPrice,
+      totalSlots: M,
+      slotsAllocated: allocatedCount,
+      allocatedCount,
+      unallocatedCount: unallocatedBidders.length,
+      disqualifiedCount: disqualifiedBidders.length,
+      winners: allocations,
+      allocations,
+      unallocated: unallocatedBidders,
+      unallocatedBidders,
+      disqualifiedBidders,
+      totalRevenue,
+      totalSocialWelfare: Number(totalWelfare.toFixed(2)),
+      externalityPayments: allocations.map((a) => a.externalityTotal),
+      summary: {
+        socialWelfare: Number(totalWelfare.toFixed(2)),
+        totalRevenue,
+        totalClicks,
+        averageCpc: totalClicks > 0 ? Math.round(totalRevenue / totalClicks) : 0,
+        currency: this.currency,
+      },
+    };
+  }
+
+  runAuction({ type = "GSP", mechanism = "GSP", slots, bidders, reservePrice, impressions } = {}) {
+    const selectedType = String(type || mechanism).toUpperCase();
+    if (selectedType === "VCG") {
+      return this.runVcgAuction({ slots, bidders, reservePrice, impressions });
+    }
+    return this.runGspAuction({ slots, bidders, reservePrice, impressions });
+  }
+
+  simulateBiddingStrategy({
+    targetBidderId,
+    originalBid,
+    testBids,
+    targetBidder,
+    trueValuation,
+    alternativeBids = [],
+    competitors = [],
+    slots = null,
+    mechanism = "VCG",
+    auctionType = "VCG",
+  } = {}) {
+    const v_i = Number(trueValuation || originalBid || targetBidder?.bid || 2000);
+    const bidsToTest = Array.isArray(testBids) && testBids.length > 0
+      ? testBids
+      : (Array.isArray(alternativeBids) && alternativeBids.length > 0
+          ? alternativeBids
+          : [v_i * 0.5, v_i * 0.8, v_i, v_i * 1.2, v_i * 1.5]);
+
+    const activeMechanism = String(auctionType || mechanism).toUpperCase();
+    const targetId = targetBidderId || targetBidder?.bidderId || "target_bidder";
+
+    const results = [];
+    let bestBid = null;
+    let maxUtility = -Infinity;
+
+    for (const testBid of bidsToTest) {
+      const simulatedBidder = {
+        ...targetBidder,
+        bidderId: targetId,
+        bid: Number(testBid),
+        qualityScore: targetBidder?.qualityScore || 8.0,
+      };
+
+      const biddersPool = [simulatedBidder, ...competitors];
+      const outcome = this.runAuction({
+        type: activeMechanism,
+        slots,
+        bidders: biddersPool,
+      });
+
+      const myAllocation = outcome.allocations.find((a) => a.bidderId === simulatedBidder.bidderId);
+
+      let slotPosition = null;
+      let slotCtr = 0;
+      let cpcPaid = 0;
+      let won = false;
+      let utility = 0;
+
+      if (myAllocation) {
+        won = true;
+        slotPosition = myAllocation.position;
+        slotCtr = myAllocation.slotCtr;
+        cpcPaid = myAllocation.cpc;
+        utility = Number((slotCtr * (v_i - cpcPaid)).toFixed(4));
+      }
+
+      if (utility > maxUtility) {
+        maxUtility = utility;
+        bestBid = testBid;
+      }
+
+      results.push({
+        bid: testBid,
+        won,
+        slotPosition,
+        slotCtr,
+        cpcPaid,
+        utility,
+      });
+    }
+
+    const truthfulScenario = results.find((r) => Number(r.bid) === Number(v_i));
+    const truthfulUtility = truthfulScenario ? truthfulScenario.utility : maxUtility;
+    const isTruthfulOptimal = results.every((r) => r.utility <= truthfulUtility + 1e-4);
+
+    return {
+      auctionType: activeMechanism,
+      mechanism: activeMechanism,
+      trueValuation: v_i,
+      bestBid,
+      maxUtility,
+      truthfulUtility,
+      isTruthfulOptimal,
+      scenarios: results,
+    };
+  }
+
+  toJSON() {
+    return {
+      defaultReservePrice: this.defaultReservePrice,
+      currency: this.currency,
+      qualityScoreWeight: this.qualityScoreWeight,
+      positionCtrDecay: this.positionCtrDecay,
+      defaultSlots: this.defaultSlots,
+    };
+  }
+
+  static fromJSON(data) {
+    if (!data) throw new Error("Invalid AuctionEngine JSON");
+    const parsed = typeof data === "string" ? JSON.parse(data) : data;
+    return new AuctionEngine(parsed);
+  }
+}
+
+export class GspAuctionEngine extends AuctionEngine {
+  run(params) {
+    return this.runGspAuction(params);
+  }
+}
+
+export class VcgAuctionEngine extends AuctionEngine {
+  run(params) {
+    return this.runVcgAuction(params);
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 21: Conflict-Free Replicated Data Types (CRDTs) Multi-Device Cart
+// ------------------------------------------------------------------------------
+export class PNCounter {
+  constructor(initialState = {}) {
+    this.p = {};
+    this.n = {};
+
+    const pInit = initialState.p || initialState.pVector || {};
+    const nInit = initialState.n || initialState.nVector || {};
+
+    for (const [k, v] of Object.entries(pInit)) {
+      this.p[k] = Math.max(0, Number(v) || 0);
+    }
+    for (const [k, v] of Object.entries(nInit)) {
+      this.n[k] = Math.max(0, Number(v) || 0);
+    }
+  }
+
+  increment(deviceId, delta = 1) {
+    const d = String(deviceId || "default");
+    const val = Math.max(0, Number(delta) || 0);
+    this.p[d] = (this.p[d] || 0) + val;
+    return this.value;
+  }
+
+  decrement(deviceId, delta = 1) {
+    const d = String(deviceId || "default");
+    const val = Math.max(0, Number(delta) || 0);
+    this.n[d] = (this.n[d] || 0) + val;
+    return this.value;
+  }
+
+  get value() {
+    let sumP = 0;
+    let sumN = 0;
+    for (const v of Object.values(this.p)) sumP += v;
+    for (const v of Object.values(this.n)) sumN += v;
+    return Math.max(0, sumP - sumN);
+  }
+
+  merge(other) {
+    if (!other) return this;
+    const otherP = other.p || other.pVector || {};
+    const otherN = other.n || other.nVector || {};
+
+    for (const [k, v] of Object.entries(otherP)) {
+      this.p[k] = Math.max(this.p[k] || 0, Number(v) || 0);
+    }
+    for (const [k, v] of Object.entries(otherN)) {
+      this.n[k] = Math.max(this.n[k] || 0, Number(v) || 0);
+    }
+    return this;
+  }
+
+  toJSON() {
+    const sortedP = {};
+    for (const k of Object.keys(this.p).sort()) sortedP[k] = this.p[k];
+    const sortedN = {};
+    for (const k of Object.keys(this.n).sort()) sortedN[k] = this.n[k];
+    return {
+      p: sortedP,
+      n: sortedN,
+    };
+  }
+
+  static fromJSON(data) {
+    if (!data) return new PNCounter();
+    return new PNCounter(data);
+  }
+}
+
+export class LWWElementSet {
+  constructor(initialState = {}) {
+    this.addSet = {};
+    this.removeSet = {};
+
+    const aInit = initialState.addSet || initialState.a || {};
+    const rInit = initialState.removeSet || initialState.r || {};
+
+    for (const [k, v] of Object.entries(aInit)) {
+      this.addSet[k] = Number(v) || 0;
+    }
+    for (const [k, v] of Object.entries(rInit)) {
+      this.removeSet[k] = Number(v) || 0;
+    }
+  }
+
+  add(element, timestamp = Date.now()) {
+    const e = String(element);
+    const ts = Number(timestamp) || Date.now();
+    this.addSet[e] = Math.max(this.addSet[e] || 0, ts);
+    return this;
+  }
+
+  remove(element, timestamp = Date.now()) {
+    const e = String(element);
+    const ts = Number(timestamp) || Date.now();
+    this.removeSet[e] = Math.max(this.removeSet[e] || 0, ts);
+    return this;
+  }
+
+  has(element) {
+    const e = String(element);
+    const tAdd = this.addSet[e] || 0;
+    const tRemove = this.removeSet[e] || 0;
+    return tAdd >= tRemove && tAdd > 0;
+  }
+
+  elements() {
+    const result = [];
+    for (const e of Object.keys(this.addSet).sort()) {
+      if (this.has(e)) result.push(e);
+    }
+    return result;
+  }
+
+  merge(other) {
+    if (!other) return this;
+    const otherA = other.addSet || other.a || {};
+    const otherR = other.removeSet || other.r || {};
+
+    for (const [k, v] of Object.entries(otherA)) {
+      this.addSet[k] = Math.max(this.addSet[k] || 0, Number(v) || 0);
+    }
+    for (const [k, v] of Object.entries(otherR)) {
+      this.removeSet[k] = Math.max(this.removeSet[k] || 0, Number(v) || 0);
+    }
+    return this;
+  }
+
+  toJSON() {
+    const sortedAdd = {};
+    for (const k of Object.keys(this.addSet).sort()) sortedAdd[k] = this.addSet[k];
+    const sortedRemove = {};
+    for (const k of Object.keys(this.removeSet).sort()) sortedRemove[k] = this.removeSet[k];
+    return {
+      addSet: sortedAdd,
+      removeSet: sortedRemove,
+    };
+  }
+
+  static fromJSON(data) {
+    if (!data) return new LWWElementSet();
+    return new LWWElementSet(data);
+  }
+}
+
+export class CrdtCart {
+  constructor(options = {}) {
+    this.cartId = String(options.cartId || "default_cart");
+    this.userId = String(options.userId || "default_user");
+    this.items = new Map();
+
+    if (options.items) {
+      if (Array.isArray(options.items)) {
+        for (const item of options.items) {
+          this._loadItemEntry(item);
+        }
+      } else if (typeof options.items === "object") {
+        for (const [pId, item] of Object.entries(options.items)) {
+          this._loadItemEntry({ productId: pId, ...item });
+        }
+      }
+    }
+  }
+
+  _loadItemEntry(raw) {
+    const pId = String(raw.productId || raw.id || raw._id);
+    const pCounter = new PNCounter(raw.pCounter || { p: raw.pVector, n: raw.nVector });
+    const lwwSet = new LWWElementSet(raw.lwwSet || { addSet: raw.addSet, removeSet: raw.removeSet });
+
+    const addedAt = Math.max(
+      Number(raw.addedAt) || 0,
+      lwwSet.addSet[pId] || 0
+    );
+    const removedAt = Math.max(
+      Number(raw.removedAt) || 0,
+      lwwSet.removeSet[pId] || 0
+    );
+
+    if (addedAt > 0) lwwSet.addSet[pId] = addedAt;
+    if (removedAt > 0) lwwSet.removeSet[pId] = removedAt;
+
+    this.items.set(pId, {
+      productId: pId,
+      metadata: raw.metadata || {
+        name: raw.name || "Sản phẩm",
+        price: Number(raw.price) || 0,
+        originalPrice: Number(raw.originalPrice) || Number(raw.price) || 0,
+        image: raw.image || "",
+        shopId: raw.shopId || "unknown_shop",
+        shopName: raw.shopName || "",
+      },
+      pCounter,
+      lwwSet,
+      addedAt,
+      removedAt,
+      lastUpdatedDeviceId: raw.deviceId || raw.lastUpdatedDeviceId || "default",
+    });
+  }
+
+  _getOrCreateItem(productId, productDetails = {}) {
+    const pId = String(productId);
+    if (!this.items.has(pId)) {
+      this.items.set(pId, {
+        productId: pId,
+        metadata: {
+          name: productDetails.name || "Sản phẩm",
+          price: Number(productDetails.price) || 0,
+          originalPrice: Number(productDetails.originalPrice) || Number(productDetails.price) || 0,
+          image: productDetails.image || "",
+          shopId: productDetails.shopId || "unknown_shop",
+          shopName: productDetails.shopName || "",
+          selectedColor: productDetails.selectedColor || null,
+          selectedSize: productDetails.selectedSize || null,
+        },
+        pCounter: new PNCounter(),
+        lwwSet: new LWWElementSet(),
+        addedAt: 0,
+        removedAt: 0,
+        lastUpdatedDeviceId: "default",
+      });
+    }
+    return this.items.get(pId);
+  }
+
+  addItem(deviceId, product, quantity = 1, timestamp = Date.now()) {
+    const pId = String(typeof product === "object" && product !== null ? (product.id || product._id || product.productId) : product);
+    const details = typeof product === "object" && product !== null ? product : {};
+    const ts = Number(timestamp) || Date.now();
+    const qty = Math.max(1, Number(quantity) || 1);
+    const d = String(deviceId || "default");
+
+    const item = this._getOrCreateItem(pId, details);
+    if (details.name) item.metadata.name = details.name;
+    if (typeof details.price === "number") item.metadata.price = details.price;
+    if (details.image) item.metadata.image = details.image;
+    if (details.shopId) item.metadata.shopId = details.shopId;
+    if (details.shopName) item.metadata.shopName = details.shopName;
+
+    // If re-adding an item that was previously removed, offset prior quantity
+    if (item.removedAt >= item.addedAt && item.removedAt > 0 && item.pCounter.value > 0) {
+      item.pCounter.decrement(d, item.pCounter.value);
+    }
+
+    item.pCounter.increment(d, qty);
+    item.lwwSet.add(pId, ts);
+    item.addedAt = Math.max(item.addedAt, ts);
+    item.lastUpdatedDeviceId = d;
+    return this;
+  }
+
+  removeItem(deviceId, productId, timestamp = Date.now()) {
+    const pId = String(productId);
+    const ts = Number(timestamp) || Date.now();
+    const d = String(deviceId || "default");
+
+    if (this.items.has(pId)) {
+      const item = this.items.get(pId);
+      item.lwwSet.remove(pId, ts);
+      item.removedAt = Math.max(item.removedAt, ts);
+      item.lastUpdatedDeviceId = d;
+    }
+    return this;
+  }
+
+  updateQuantity(deviceId, productId, delta, timestamp = Date.now()) {
+    const pId = String(productId);
+    const ts = Number(timestamp) || Date.now();
+    const d = String(deviceId || "default");
+    const dVal = Number(delta) || 0;
+
+    const item = this._getOrCreateItem(pId);
+    if (dVal > 0) {
+      item.pCounter.increment(d, dVal);
+      item.lwwSet.add(pId, ts);
+      item.addedAt = Math.max(item.addedAt, ts);
+    } else if (dVal < 0) {
+      const decAmount = Math.min(Math.abs(dVal), item.pCounter.value);
+      if (decAmount > 0) {
+        item.pCounter.decrement(d, decAmount);
+      }
+      if (item.pCounter.value <= 0) {
+        item.lwwSet.remove(pId, ts);
+        item.removedAt = Math.max(item.removedAt, ts);
+      } else {
+        item.lwwSet.add(pId, ts);
+        item.addedAt = Math.max(item.addedAt, ts);
+      }
+    }
+    item.lastUpdatedDeviceId = d;
+    return this;
+  }
+
+  setQuantity(deviceId, productId, targetQty, timestamp = Date.now()) {
+    const pId = String(productId);
+    const ts = Number(timestamp) || Date.now();
+    const target = Number(targetQty) || 0;
+
+    const item = this._getOrCreateItem(pId);
+    const currentQty = item.pCounter.value;
+    const delta = target - currentQty;
+
+    if (delta !== 0) {
+      this.updateQuantity(deviceId, pId, delta, ts);
+    }
+    if (target <= 0) {
+      this.removeItem(deviceId, pId, ts);
+    }
+    return this;
+  }
+
+  merge(remoteCartState) {
+    if (!remoteCartState) return this;
+
+    let remoteItems = null;
+    if (remoteCartState instanceof CrdtCart) {
+      remoteItems = remoteCartState.items;
+    } else if (remoteCartState.items) {
+      if (Array.isArray(remoteCartState.items)) {
+        remoteItems = new Map();
+        for (const item of remoteCartState.items) {
+          const pId = String(item.productId || item.id);
+          remoteItems.set(pId, item);
+        }
+      } else if (typeof remoteCartState.items === "object") {
+        remoteItems = new Map(Object.entries(remoteCartState.items));
+      }
+    }
+
+    if (!remoteItems) return this;
+
+    for (const [pId, remoteItem] of remoteItems.entries()) {
+      const localItem = this._getOrCreateItem(pId, remoteItem.metadata);
+
+      localItem.pCounter.merge(remoteItem.pCounter || {
+        p: remoteItem.pVector || remoteItem.p,
+        n: remoteItem.nVector || remoteItem.n,
+      });
+
+      // 2. Read Timestamps BEFORE merging LWWElementSet to avoid local AddedAt pollution
+      const remoteAddedAt = Number(remoteItem.addedAt) || (remoteItem.lwwSet?.addSet?.[pId]) || 0;
+      const remoteRemovedAt = Number(remoteItem.removedAt) || (remoteItem.lwwSet?.removeSet?.[pId]) || 0;
+      const localAddedAt = Number(localItem.addedAt) || (localItem.lwwSet?.addSet?.[pId]) || 0;
+
+      // 3. Merge LWWElementSet
+      localItem.lwwSet.merge(remoteItem.lwwSet || {
+        addSet: remoteItem.addSet,
+        removeSet: remoteItem.removeSet,
+      });
+
+      const remoteDev = String(remoteItem.deviceId || remoteItem.lastUpdatedDeviceId || "");
+      const localDev = String(localItem.lastUpdatedDeviceId || localItem.deviceId || "");
+
+      // Deterministic 3-Tier LWW tie-breaker:
+      // 1. Primary: compare logical timestamp (higher addedAt wins)
+      // 2. Secondary: compare device ID (lexicographically greater deviceId wins)
+      // 3. Tertiary: compare serialized metadata (guarantees commutativity even if same device mutated at same millisecond)
+      const isRemoteNewer = (remoteAddedAt > localAddedAt) ||
+        (remoteAddedAt === localAddedAt && remoteDev > localDev) ||
+        (remoteAddedAt === localAddedAt && remoteDev === localDev &&
+         JSON.stringify(remoteItem.metadata || {}) > JSON.stringify(localItem.metadata || {}));
+
+      if (isRemoteNewer && remoteItem.metadata) {
+        localItem.metadata = { ...localItem.metadata, ...remoteItem.metadata };
+        localItem.lastUpdatedDeviceId = remoteDev || localDev;
+      }
+
+      localItem.addedAt = Math.max(localItem.addedAt, remoteAddedAt);
+      localItem.removedAt = Math.max(localItem.removedAt, remoteRemovedAt);
+      if (localItem.addedAt > 0) localItem.lwwSet.addSet[pId] = localItem.addedAt;
+      if (localItem.removedAt > 0) localItem.lwwSet.removeSet[pId] = localItem.removedAt;
+    }
+
+    return this;
+  }
+
+  getCartItems() {
+    const result = [];
+    const sortedKeys = Array.from(this.items.keys()).sort();
+    for (const pId of sortedKeys) {
+      const item = this.items.get(pId);
+      const isPresent = item.addedAt >= item.removedAt && item.addedAt > 0;
+      const quantity = item.pCounter.value;
+
+      if (isPresent && quantity > 0) {
+        result.push({
+          id: pId,
+          productId: pId,
+          name: item.metadata.name,
+          price: item.metadata.price,
+          originalPrice: item.metadata.originalPrice,
+          image: item.metadata.image,
+          shopId: item.metadata.shopId,
+          shopName: item.metadata.shopName,
+          selectedColor: item.metadata.selectedColor,
+          selectedSize: item.metadata.selectedSize,
+          quantity,
+          subtotal: item.metadata.price * quantity,
+          addedAt: item.addedAt,
+          removedAt: item.removedAt,
+          lastUpdated: Math.max(item.addedAt, item.removedAt),
+          deviceId: item.lastUpdatedDeviceId,
+        });
+      }
+    }
+    return result;
+  }
+
+  getTotals() {
+    const items = this.getCartItems();
+    let totalItems = 0;
+    let subtotal = 0;
+
+    for (const it of items) {
+      totalItems += it.quantity;
+      subtotal += it.subtotal;
+    }
+
+    return {
+      totalItems,
+      itemCount: totalItems,
+      subtotal,
+      uniqueSkus: items.length,
+      distinctItems: items.length,
+    };
+  }
+
+  clear(deviceId, timestamp = Date.now()) {
+    const ts = Number(timestamp) || Date.now();
+    const d = String(deviceId || "default");
+    for (const item of this.items.values()) {
+      item.lwwSet.remove(item.productId, ts);
+      item.removedAt = Math.max(item.removedAt, ts);
+      item.lastUpdatedDeviceId = d;
+    }
+    return this;
+  }
+
+  toJSON() {
+    const itemsObj = {};
+    const sortedKeys = Array.from(this.items.keys()).sort();
+    for (const pId of sortedKeys) {
+      const item = this.items.get(pId);
+      const pCountJson = item.pCounter.toJSON();
+      itemsObj[pId] = {
+        productId: pId,
+        metadata: item.metadata,
+        pCounter: pCountJson,
+        pVector: pCountJson.p,
+        nVector: pCountJson.n,
+        lwwSet: item.lwwSet.toJSON(),
+        addedAt: item.addedAt,
+        removedAt: item.removedAt,
+        deviceId: item.lastUpdatedDeviceId,
+      };
+    }
+
+    return {
+      cartId: this.cartId,
+      userId: this.userId,
+      items: itemsObj,
+    };
+  }
+
+  static fromJSON(data) {
+    if (!data) return new CrdtCart();
+    return new CrdtCart(data);
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -1973,5 +3426,19 @@ export default {
   MerkleTree,
   SkiplistIndex,
   MultiWarehouseDispatcher,
+  // Phase 9 Enterprise Algorithms
+  LSH_PRIME,
+  kShingles,
+  MinHash,
+  MinHashLSH,
+  LSHCloneDetector,
+  CatalogCloneRadar,
+  AuctionEngine,
+  GspAuctionEngine,
+  VcgAuctionEngine,
+  PNCounter,
+  LWWElementSet,
+  CrdtCart,
 };
+
 

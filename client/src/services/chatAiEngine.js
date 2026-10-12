@@ -528,6 +528,38 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // -------------------------------------------------------------
+  // PHASE 9: TRI-ROLE AI COPILOT BUYER ASSISTANT INTENTS
+  // -------------------------------------------------------------
+
+  // 1. Bảo Vệ & Đồng Bộ Giỏ Hàng Đa Thiết Bị CRDT (CART_CRDT_SYNC_PROTECT)
+  if (/giỏ hàng.*không mất|đồng bộ giỏ hàng.*điện thoại|giỏ hàng.*máy tính|giỏ hàng offline|crdt giỏ hàng|bảo vệ giỏ hàng/i.test(lower)) {
+    return {
+      intent: 'CART_CRDT_SYNC_PROTECT',
+      replyText: `**[BẢO VỆ GIỎ HÀNG THÔNG MINH CRDT] BẠN HOÀN TOÀN YÊN TÂM NHÉ!**\n\n• **Công nghệ đồng bộ không khóa (CRDT)**: Mọi sản phẩm bạn thêm vào giỏ hàng trên điện thoại sẽ tự động xuất hiện nguyên vẹn trên laptop hoặc máy tính bảng.\n• **Chế độ Ngoại tuyến (Offline-First)**: Dù mạng di động chập chờn hay mất kết nối tạm thời, giỏ hàng của bạn vẫn được lưu giữ an toàn và tự động đồng bộ ngay khi có mạng trở lại.\n• Không lo bị mất hàng hay phải tìm lại sản phẩm từ đầu trong các đợt Flash Sale!`,
+      suggestions: ['Xem giỏ hàng của tôi', 'Săn thêm mã giảm giá', 'Tiếp tục mua sắm'],
+    };
+  }
+
+  // 2. Đề Xuất Sản Phẩm Độc Đáo, Tránh Hàng Trùng Lặp Clone (UNIQUE_CATALOG_RECOMMEND)
+  if (/tìm sản phẩm độc lạ|không trùng lặp|tránh hàng clone|hàng chính hãng khác biệt|sản phẩm độc đáo|catalog clone/i.test(lower)) {
+    return {
+      intent: 'UNIQUE_CATALOG_RECOMMEND',
+      replyText: `**[GỢI Ý SẢN PHẨM ĐỘC ĐÁO CHÍNH HÃNG]:**\n\n• Hệ thống radar **LSH MinHash** của sàn đã tự động lọc bỏ các danh mục copycat, hàng giả và shop clone lừa đảo.\n• Dưới đây là các sản phẩm chính hãng độc quyền từ gian hàng Shopee Mall uy tín với chất lượng và thiết kế khác biệt hoàn toàn:`,
+      products: searchSmartProducts('độc đáo cao cấp chính hãng').slice(0, 3),
+      suggestions: ['Xem thêm hàng Mall', 'Lấy voucher 15%', 'Xem chính sách bảo hành'],
+    };
+  }
+
+  // 3. Minh Bạch Vị Trí Tài Trợ & Đấu Thầu Quảng Cáo (SPONSORED_ADS_TRANSPARENCY)
+  if (/tại sao có nhãn tài trợ|quảng cáo tìm kiếm|sản phẩm tài trợ là gì|shop tài trợ|quảng cáo tài trợ/i.test(lower)) {
+    return {
+      intent: 'SPONSORED_ADS_TRANSPARENCY',
+      replyText: `**[MINH BẠCH QUẢNG CÁO TÀI TRỢ]:**\n\n• Nhãn **"Tài trợ"** (Sponsored) biểu thị sản phẩm được hiển thị ưu tiên thông qua cơ chế đấu thầu vị trí **GSP (Generalized Second Price)** công khai.\n• **Tiêu chuẩn kiểm duyệt khắt khe**: Sản phẩm chỉ được xuất hiện ở vị trí tài trợ khi đạt Điểm chất lượng (Quality Score) cao: tỷ lệ đánh giá tốt >= 4.5 sao, nguồn gốc chính hãng và tỷ lệ hoàn tất đơn hàng uy tín.\n• Người bán thắng thầu chỉ trả mức chi phí hợp lý để đem lại những gợi ý chuẩn xác nhất cho bạn!`,
+      suggestions: ['Xem gian hàng Mall uy tín', 'Săn voucher giảm giá', 'Tra cứu đơn hàng'],
+    };
+  }
+
+  // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH
   // -------------------------------------------------------------
   const matchingProducts = searchSmartProducts(lower);
