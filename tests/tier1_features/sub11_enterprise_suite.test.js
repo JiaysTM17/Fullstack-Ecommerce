@@ -25,6 +25,9 @@ import { TokenBucket, TokenBucketStore, tokenBucketLimiter } from "../../server/
 import { CircuitBreaker, CircuitState } from "../../server/src/utils/circuitBreaker.js";
 import { LRUCache } from "../../server/src/utils/lruCache.js";
 import { OptimisticConcurrencyManager } from "../../server/src/utils/occManager.js";
+import { redisService } from "../../server/src/config/redis.js";
+import { rabbitMQService } from "../../server/src/config/rabbitmq.js";
+import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
 
@@ -6759,6 +6762,210 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         lru.clear();
         expect.equal(lru.size, 0);
         expect.equal(lru.get("item2"), null);
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 149: Enterprise Infrastructure Suite (Redis, Nginx, RabbitMQ) (15 Tests)
+  // =========================================================================
+  describe("Feature 149: Enterprise Infrastructure Suite (Redis, Nginx, RabbitMQ)", () => {
+
+    // --- SUB-FEATURE 1: Redis Distributed Cache & Redlock Mutex (5 Tests) ---
+    describe("Redis Distributed Cache & Redlock Mutex", () => {
+      beforeEach(() => {
+        redisService.clear();
+      });
+
+      test("F149-T1: Redis get, set, getJson, setJson stores and retrieves data accurately", async () => {
+        await redisService.set("key1", "val1");
+        const val = await redisService.get("key1");
+        expect.equal(val, "val1");
+
+        const catalogObj = { id: "p101", title: "Áo Polo Nam", price: 299000 };
+        await redisService.setJson("catalog:p101", catalogObj, 60);
+        const retrieved = await redisService.getJson("catalog:p101");
+        expect.equal(retrieved.title, "Áo Polo Nam");
+        expect.equal(retrieved.price, 299000);
+      });
+
+      test("F149-T2: Redis key automatically expires when TTL passes", async () => {
+        await redisService.set("short_key", "temporary", "PX", 40); // 40ms TTL
+        expect.equal(await redisService.get("short_key"), "temporary");
+
+        await new Promise((r) => setTimeout(r, 55));
+        expect.equal(await redisService.get("short_key"), null);
+      });
+
+      test("F149-T3: Redlock acquires distributed lock with unique UUID token", async () => {
+        const lock = await redisService.acquireLock("flash_sale_iphone_slot", 5000);
+        expect.equal(lock.success, true);
+        expect.ok(lock.token.length >= 32);
+        expect.equal(lock.lockKey, "lock:flash_sale_iphone_slot");
+      });
+
+      test("F149-T4: Redlock prevents simultaneous lock acquisition on the same resource", async () => {
+        const worker1Lock = await redisService.acquireLock("wallet_settlement_shop_88", 5000);
+        expect.equal(worker1Lock.success, true);
+
+        // Worker 2 attempts while Worker 1 still holds the lock
+        const worker2Lock = await redisService.acquireLock("wallet_settlement_shop_88", 5000);
+        expect.equal(worker2Lock.success, false);
+      });
+
+      test("F149-T5: Redlock release allows next worker to acquire lock, rejecting invalid tokens", async () => {
+        const lock = await redisService.acquireLock("order_sync_queue", 5000);
+        
+        // Releasing with wrong token fails
+        const fakeRelease = await redisService.releaseLock("order_sync_queue", "wrong-token-123");
+        expect.equal(fakeRelease, false);
+
+        // Releasing with genuine token succeeds
+        const genuineRelease = await redisService.releaseLock("order_sync_queue", lock.token);
+        expect.equal(genuineRelease, true);
+
+        // Next worker can now acquire
+        const nextLock = await redisService.acquireLock("order_sync_queue", 5000);
+        expect.equal(nextLock.success, true);
+      });
+    });
+
+    // --- SUB-FEATURE 2: Nginx Gateway & Security Hardening (5 Tests) ---
+    describe("Nginx Gateway & Reverse Proxy Configuration", () => {
+      const nginxConfigPath = "deploy/nginx/nginx.conf";
+      let nginxContent = "";
+
+      beforeEach(() => {
+        nginxContent = fs.readFileSync(nginxConfigPath, "utf-8");
+      });
+
+      test("F149-T6: Nginx config includes Upstream backend cluster with least_conn load balancing", () => {
+        expect.ok(nginxContent.includes("upstream backend_cluster"));
+        expect.ok(nginxContent.includes("least_conn;"));
+        expect.ok(nginxContent.includes("127.0.0.1:5000"));
+      });
+
+      test("F149-T7: Nginx config enforces Layer 7 Rate Limiting zones for API and Flash Sale", () => {
+        expect.ok(nginxContent.includes("limit_req_zone $binary_remote_addr zone=api_general_limit:10m rate=20r/s;"));
+        expect.ok(nginxContent.includes("limit_req_zone $binary_remote_addr zone=flash_sale_checkout_limit:10m rate=5r/s;"));
+        expect.ok(nginxContent.includes("limit_conn_zone $binary_remote_addr zone=addr_conn_limit:10m;"));
+      });
+
+      test("F149-T8: Nginx config enforces Enterprise Security Headers (HSTS, CSP, X-Frame-Options)", () => {
+        expect.ok(nginxContent.includes("Strict-Transport-Security"));
+        expect.ok(nginxContent.includes("X-Frame-Options \"SAMEORIGIN\""));
+        expect.ok(nginxContent.includes("X-Content-Type-Options \"nosniff\""));
+        expect.ok(nginxContent.includes("Content-Security-Policy"));
+      });
+
+      test("F149-T9: Nginx config enables Gzip compression for static files and SVG assets", () => {
+        expect.ok(nginxContent.includes("gzip on;"));
+        expect.ok(nginxContent.includes("application/json"));
+        expect.ok(nginxContent.includes("application/javascript"));
+        expect.ok(nginxContent.includes("image/svg+xml"));
+      });
+
+      test("F149-T10: Nginx config includes SSL termination and HTTP to HTTPS 301 redirection", () => {
+        expect.ok(nginxContent.includes("listen 443 ssl http2;"));
+        expect.ok(nginxContent.includes("return 301 https://$host$request_uri;"));
+        expect.ok(nginxContent.includes("ssl_protocols TLSv1.2 TLSv1.3;"));
+      });
+    });
+
+    // --- SUB-FEATURE 3: RabbitMQ Message Broker & Event-Driven Architecture (5 Tests) ---
+    describe("RabbitMQ Message Broker & Event Bus", () => {
+      beforeEach(() => {
+        rabbitMQService.reset();
+        rabbitMQService.assertExchange("orders.direct", "direct");
+        rabbitMQService.assertExchange("orders.dlx", "direct");
+        rabbitMQService.assertQueue("orders.payment.processing");
+        rabbitMQService.assertQueue("orders.invoice.vat");
+        rabbitMQService.assertQueue("orders.dead.letter.queue");
+        rabbitMQService.bindQueue("orders.payment.processing", "orders.direct", "order.created");
+        rabbitMQService.bindQueue("orders.invoice.vat", "orders.direct", "order.paid");
+        rabbitMQService.bindQueue("orders.dead.letter.queue", "orders.dlx", "order.failed");
+      });
+
+      test("F149-T11: Publishes order event to direct exchange and routes to bound queue", async () => {
+        await rabbitMQService.publish("orders.direct", "order.created", {
+          orderId: "ord-test-888",
+          total: 500000,
+          customer: "Trần Văn B",
+        });
+
+        expect.equal(rabbitMQService.getQueueLength("orders.payment.processing"), 1);
+        expect.equal(rabbitMQService.getQueueLength("orders.invoice.vat"), 0);
+      });
+
+      test("F149-T12: Consumer processes message and acknowledges (Ack) successfully", async () => {
+        let processedOrderId = null;
+
+        rabbitMQService.consume("orders.payment.processing", async (msg, { ack }) => {
+          processedOrderId = msg.content.orderId;
+          ack();
+        });
+
+        await rabbitMQService.publish("orders.direct", "order.created", {
+          orderId: "ord-ack-999",
+          total: 250000,
+        });
+
+        expect.equal(processedOrderId, "ord-ack-999");
+        const stats = rabbitMQService.getStats();
+        expect.equal(stats.acked, 1);
+        expect.equal(stats.consumed, 1);
+      });
+
+      test("F149-T13: Fanout-like multi-queue routing: One paid event distributes to invoice and notifications", async () => {
+        rabbitMQService.assertQueue("orders.notifications");
+        rabbitMQService.bindQueue("orders.notifications", "orders.direct", "order.paid");
+
+        let invoiceReceived = false;
+        let notifReceived = false;
+
+        rabbitMQService.consume("orders.invoice.vat", async (msg, { ack }) => {
+          invoiceReceived = true;
+          ack();
+        });
+
+        rabbitMQService.consume("orders.notifications", async (msg, { ack }) => {
+          notifReceived = true;
+          ack();
+        });
+
+        await rabbitMQService.publish("orders.direct", "order.paid", { orderId: "ord-multi-queue" });
+
+        expect.equal(invoiceReceived, true);
+        expect.equal(notifReceived, true);
+      });
+
+      test("F149-T14: Failed message retries and gets routed to Dead Letter Exchange (DLX)", async () => {
+        rabbitMQService.consume("orders.payment.processing", async (msg, { nack }) => {
+          // Reject with requeue=false -> Triggers DLX
+          nack(false);
+        });
+
+        await rabbitMQService.publish("orders.direct", "order.created", {
+          orderId: "ord-bad-payload",
+          corrupt: true,
+        });
+
+        const stats = rabbitMQService.getStats();
+        expect.equal(stats.nacked, 1);
+        expect.equal(stats.deadLetterCount, 1);
+        expect.equal(rabbitMQService.deadLetterQueue[0].content.orderId, "ord-bad-payload");
+      });
+
+      test("F149-T15: Message headers track retry counts and preserve message delivery timestamps", async () => {
+        let recordedRetry = -1;
+        rabbitMQService.consume("orders.payment.processing", async (msg, { nack }) => {
+          recordedRetry = msg.headers.retryCount || 0;
+          nack(false);
+        });
+
+        await rabbitMQService.publish("orders.direct", "order.created", { orderId: "ord-retry-track" });
+        expect.equal(recordedRetry, 0);
+        expect.ok(rabbitMQService.deadLetterQueue[0].deadLetterTimestamp > 0);
       });
     });
   });
