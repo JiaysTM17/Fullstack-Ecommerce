@@ -5,6 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import ShippingLabelModal from '../components/ShippingLabelModal';
 import PackingSlipModal from '../components/PackingSlipModal';
+import SellerAiCopilotModal from '../components/SellerAiCopilotModal';
 import { FALLBACK_PRODUCTS, restoreProductStock } from '../services/productService';
 import {
   fetchSellerOrders,
@@ -468,6 +469,7 @@ export default function SellerDashboardPage() {
   });
 
   // BỔ SUNG: States cho Shopee Ads ROI Suite & Batch Inventory Matrix
+  const [showSellerCopilot, setShowSellerCopilot] = useState(false);
   const [adsData, setAdsData] = useState(null);
   const [showCreateAdsModal, setShowCreateAdsModal] = useState(false);
   const [adsForm, setAdsForm] = useState({
@@ -2836,6 +2838,32 @@ export default function SellerDashboardPage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            {/* Nút Trợ Lý Kinh Doanh AI Shop */}
+            <button
+              type="button"
+              className="shopee-btn"
+              onClick={() => setShowSellerCopilot(true)}
+              style={{
+                fontSize: '12.5px',
+                fontWeight: 600,
+                padding: '6px 14px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                borderRadius: '6px',
+                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                color: '#ffffff',
+                border: 'none',
+                boxShadow: '0 1px 3px rgba(234, 88, 12, 0.25)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              title="Mở Trợ Lý Kinh Doanh AI - Tối ưu P&L, Ads và Tồn kho"
+            >
+              <SparklesIcon size={13} color="#ffffff" />
+              <span>Trợ Lý Kinh Doanh AI</span>
+            </button>
+
             {/* Nút Xem Gian Hàng Thực Tế Sang Trọng & Nhỏ Gọn */}
             <Link
               to={`/shop/${currentShop.id || selectedShopId}`}
@@ -8551,6 +8579,18 @@ export default function SellerDashboardPage() {
             </div>
           </div>
         )}
+
+        <SellerAiCopilotModal
+          isOpen={showSellerCopilot}
+          onClose={() => setShowSellerCopilot(false)}
+          currentShop={currentShop}
+          shopProducts={shopProducts}
+          shopOrders={shopOrders}
+          totalRevenue={totalRevenue}
+          pnlData={pnlData}
+          restockData={restockData}
+          adsData={adsData}
+        />
       </main>
     </div>
   );

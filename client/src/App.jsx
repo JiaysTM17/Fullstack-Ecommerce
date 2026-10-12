@@ -107,7 +107,7 @@ function AppLayout() {
       </ErrorBoundary>
       {!isWorkbenchRoute && <Footer />}
       {!isWorkbenchRoute && <MobileBottomNav />}
-      <LiveChatWidget />
+      {!isWorkbenchRoute && <LiveChatWidget />}
       {!isWorkbenchRoute && <LiveStreamFloatingWidget />}
       <ProductCompareModal />
       <ToastContainer />

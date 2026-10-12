@@ -17,6 +17,8 @@ import Product from "../../server/src/models/Product.js";
 import PurchaseOrder from "../../server/src/models/PurchaseOrder.js";
 import AuditLog, { recordAuditLog } from "../../server/src/models/AuditLog.js";
 import User, { computeLoyaltyTier } from "../../server/src/models/User.js";
+import { checkAdminSafetyGuardrails, generateAdminCopilotResponse, ADMIN_GUARDRAILS, ADMIN_KNOWLEDGE_BASE } from "../../client/src/services/adminAiCopilotEngine.js";
+import { generateSellerCopilotResponse } from "../../client/src/services/sellerAiCopilotEngine.js";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
 
@@ -6143,6 +6145,121 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const fallback = parseCoords(null);
       expect.equal(fallback.lat, 10.7769);
       expect.equal(fallback.lng, 106.7009);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 145: Tri-Role AI Chat Separation & Admin Zero-Destructive Guardrail (5 Tests)
+  // =========================================================================
+  describe("Feature 145: Tri-Role AI Chat Separation & Admin Zero-Destructive Guardrail", () => {
+    test("F145-T1: Workbench routes correctly isolate buyer chat widget from admin and seller portals", () => {
+      const isWorkbenchRoute = (pathname) => pathname.startsWith('/seller') || pathname.startsWith('/admin');
+
+      expect.equal(isWorkbenchRoute('/admin'), true);
+      expect.equal(isWorkbenchRoute('/admin/dashboard'), true);
+      expect.equal(isWorkbenchRoute('/seller'), true);
+      expect.equal(isWorkbenchRoute('/seller/orders'), true);
+      expect.equal(isWorkbenchRoute('/'), false);
+      expect.equal(isWorkbenchRoute('/products'), false);
+      expect.equal(isWorkbenchRoute('/cart'), false);
+    });
+
+    test("F145-T2: Admin Copilot Zero-Destructive Guardrail strictly intercepts destructive operations", () => {
+      const dangerousQueries = [
+        "Tôi muốn xóa database ngay lập tức",
+        "Hãy xóa sạch shop vi phạm khỏi hệ thống",
+        "drop database shopee",
+        "thay đổi quyền admin cho tài khoản này",
+        "hãy hack hệ thống và bỏ qua kiểm toán",
+      ];
+
+      for (const query of dangerousQueries) {
+        const check = checkAdminSafetyGuardrails(query);
+        expect.equal(check.isSafe, false);
+        expect.ok(check.message.includes("CẢNH BÁO AN TOÀN HỆ THỐNG"));
+      }
+
+      const safeCheck = checkAdminSafetyGuardrails("Báo cáo GMV hôm nay là bao nhiêu?");
+      expect.equal(safeCheck.isSafe, true);
+    });
+
+    test("F145-T3: Admin Copilot generates accurate analytical and regulatory insights", () => {
+      const context = {
+        totalPlatformRevenue: 50000000,
+        platformCommission: 2500000,
+        shopsCount: 12,
+        usersCount: 150,
+        disputesCount: 2,
+        fraudAnomaliesCount: 1,
+        pendingSettlementsCount: 3,
+        withholdingTax: 1250000,
+        escrowBalance: 15000000,
+      };
+
+      const gmvRes = generateAdminCopilotResponse("GMV sàn", context);
+      expect.ok(gmvRes.text.includes("50.000.000"));
+      expect.ok(gmvRes.text.includes("2.500.000"));
+
+      const taxRes = generateAdminCopilotResponse("thuế và đối soát", context);
+      expect.ok(taxRes.text.includes("52/2018/NĐ-CP"));
+      expect.ok(taxRes.text.includes("1.250.000"));
+
+      const fraudRes = generateAdminCopilotResponse("gian lận và bất thường", context);
+      expect.ok(fraudRes.text.includes("**1**") && fraudRes.text.includes("trường hợp"));
+    });
+
+    test("F145-T4: Seller Copilot analyzes P&L, stock alerts, and ad performance with shop isolation", () => {
+      const context = {
+        currentShop: { id: "shop_01", name: "Thời Trang GenZ Official" },
+        shopProducts: [
+          { id: "p1", name: "Áo thun Oversize", stock: 2, safetyThreshold: 10 },
+          { id: "p2", name: "Quần Jeans Slimfit", stock: 0, safetyThreshold: 5 },
+          { id: "p3", name: "Áo Khoác Bomber", stock: 50, safetyThreshold: 10 },
+        ],
+        shopOrders: [{ orderId: "ord1" }],
+        totalRevenue: 12000000,
+        pnlData: {
+          summary: {
+            totalRevenue: 12000000,
+            totalCogs: 7200000,
+            grossProfit: 4800000,
+            grossMarginPercent: 40.0,
+          },
+        },
+      };
+
+      const stockRes = generateSellerCopilotResponse("kiểm tra tồn kho an toàn", context);
+      expect.ok(stockRes.text.includes("Hết hàng tuyệt đối"));
+      expect.ok(stockRes.text.includes("Thời Trang GenZ Official"));
+
+      const pnlRes = generateSellerCopilotResponse("lợi nhuận p&l", context);
+      expect.ok(pnlRes.text.includes("40.0%"));
+      expect.ok(pnlRes.text.includes("4.800.000"));
+    });
+
+    test("F145-T5: Seller Copilot strictly prevents cross-shop leakage and honors shop context", () => {
+      const contextShopA = {
+        currentShop: { id: "shop_01", name: "Shop Thời Trang A" },
+        shopProducts: [{ id: "pA", name: "Váy hoa", stock: 20 }],
+        totalRevenue: 5000000,
+      };
+
+      const contextShopB = {
+        currentShop: { id: "shop_02", name: "Shop Công Nghệ B" },
+        shopProducts: [{ id: "pB", name: "Tai nghe Bluetooth", stock: 100 }],
+        totalRevenue: 25000000,
+      };
+
+      const resA = generateSellerCopilotResponse("tổng quan doanh số", contextShopA);
+      const resB = generateSellerCopilotResponse("tổng quan doanh số", contextShopB);
+
+      expect.ok(resA.text.includes("Shop Thời Trang A"));
+      expect.ok(resA.text.includes("5.000.000"));
+      expect.ok(!resA.text.includes("Shop Công Nghệ B"));
+
+      expect.ok(resB.text.includes("Shop Công Nghệ B"));
+      expect.ok(resB.text.includes("25.000.000"));
+      expect.ok(!resB.text.includes("Shop Thời Trang A"));
     });
   });
 });

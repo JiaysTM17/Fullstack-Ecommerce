@@ -61,6 +61,7 @@ import {
   PrinterIcon,
 } from '../components/OrdersIcons';
 import '../styles/dashboard.css';
+import AdminAiCopilotModal from '../components/AdminAiCopilotModal';
 
 const renderAdminCategoryIcon = (icon) => {
   switch (icon) {
@@ -237,6 +238,7 @@ export default function AdminDashboardPage() {
   const [fraudData, setFraudData] = useState(null);
   const [escrowVault, setEscrowVault] = useState(null);
   const [selectedSettlementStatement, setSelectedSettlementStatement] = useState(null);
+  const [showAdminCopilot, setShowAdminCopilot] = useState(false);
 
   // States cho tính năng Phát Sóng Thông Báo Toàn Sàn (Omnichannel Broadcast)
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
@@ -1175,7 +1177,31 @@ export default function AdminDashboardPage() {
               Giám sát gian hàng, người bán, người mua, voucher khuyến mãi, thuế và quyết toán toàn sàn.
             </p>
           </div>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="shopee-btn"
+              onClick={() => setShowAdminCopilot(true)}
+              style={{
+                background: '#0f172a',
+                color: '#38bdf8',
+                border: '1px solid rgba(56, 189, 248, 0.4)',
+                padding: '7px 14px',
+                borderRadius: '6px',
+                fontWeight: 600,
+                fontSize: '12.5px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 1px 4px rgba(15, 23, 42, 0.25)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              title="Mở Trợ Lý Giám Sát AI (Role-isolated & Safe Guardrail)"
+            >
+              <SparklesIcon size={14} color="#38bdf8" />
+              <span>Trợ Lý Giám Sát AI</span>
+            </button>
             <button
               type="button"
               className="shopee-btn"
@@ -4263,6 +4289,22 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         )}
+
+        <AdminAiCopilotModal
+          isOpen={showAdminCopilot}
+          onClose={() => setShowAdminCopilot(false)}
+          contextData={{
+            totalPlatformRevenue: totalPlatformRevenue || 0,
+            platformCommission: platformCommission || 0,
+            shopsCount: shops?.length || 0,
+            usersCount: users?.length || 0,
+            disputesCount: disputes?.length || 0,
+            fraudAnomaliesCount: fraudRadar?.anomalies?.length || 0,
+            pendingSettlementsCount: pendingSettlements?.length || 0,
+            withholdingTax: taxReports?.totalWithholdingTax || 0,
+            escrowBalance: escrowVault?.escrowBalance || 0,
+          }}
+        />
       </main>
     </div>
   );
