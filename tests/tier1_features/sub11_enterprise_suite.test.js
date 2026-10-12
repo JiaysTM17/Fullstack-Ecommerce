@@ -21,6 +21,10 @@ import { checkAdminSafetyGuardrails, generateAdminCopilotResponse, ADMIN_GUARDRA
 import { generateSellerCopilotResponse } from "../../client/src/services/sellerAiCopilotEngine.js";
 import { generateAiChatResponse } from "../../client/src/services/chatAiEngine.js";
 import { idempotencyStore, idempotencyGuard } from "../../server/src/middlewares/idempotency.js";
+import { TokenBucket, TokenBucketStore, tokenBucketLimiter } from "../../server/src/utils/tokenBucket.js";
+import { CircuitBreaker, CircuitState } from "../../server/src/utils/circuitBreaker.js";
+import { LRUCache } from "../../server/src/utils/lruCache.js";
+import { OptimisticConcurrencyManager } from "../../server/src/utils/occManager.js";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
 
@@ -6508,6 +6512,254 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(headersSet["Idempotent-Replay"], "true");
       expect.equal(headersSet["X-Idempotency-Key"], testKey);
       expect.equal(jsonCalledWith.message, "Order processed");
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 148: Distributed E-Commerce Algorithms Suite (16 Tests)
+  // =========================================================================
+  describe("Feature 148: Distributed E-Commerce Algorithms Suite", () => {
+
+    // --- ALGORITHM 1: Token Bucket Rate Limiting (4 Tests) ---
+    describe("Algorithm 1: Token Bucket Rate Limiting", () => {
+      test("F148-T1: Consuming tokens within capacity succeeds and decrements token count", () => {
+        const bucket = new TokenBucket(5, 1);
+        const r1 = bucket.tryConsume(1);
+        expect.equal(r1.allowed, true);
+        expect.equal(r1.remaining, 4);
+
+        const r2 = bucket.tryConsume(3);
+        expect.equal(r2.allowed, true);
+        expect.equal(r2.remaining, 1);
+      });
+
+      test("F148-T2: Exceeding capacity strictly rejects with Retry-After calculation", () => {
+        const bucket = new TokenBucket(3, 2);
+        bucket.tryConsume(3); // Empty bucket
+        const rejected = bucket.tryConsume(1);
+        expect.equal(rejected.allowed, false);
+        expect.equal(rejected.remaining, 0);
+        expect.ok(rejected.retryAfterSec >= 1);
+      });
+
+      test("F148-T3: TokenBucketStore segregates tokens per client key", () => {
+        const store = new TokenBucketStore(4, 1);
+        const clientA = store.consume("client-A", 4);
+        expect.equal(clientA.allowed, true);
+
+        const clientABlocked = store.consume("client-A", 1);
+        expect.equal(clientABlocked.allowed, false);
+
+        // Client B is unaffected
+        const clientB = store.consume("client-B", 2);
+        expect.equal(clientB.allowed, true);
+        expect.equal(clientB.remaining, 2);
+      });
+
+      test("F148-T4: tokenBucketLimiter Express middleware injects rate-limit headers and returns 429", () => {
+        const middleware = tokenBucketLimiter({
+          capacity: 2,
+          refillRatePerSec: 1,
+          keyGenerator: () => "ip-test-123",
+        });
+
+        const mockReq = { ip: "127.0.0.1" };
+        let statusCode = 200;
+        let responseBody = null;
+        const headers = {};
+        const mockRes = {
+          setHeader: (k, v) => { headers[k] = v; },
+          status: (code) => {
+            statusCode = code;
+            return { json: (b) => { responseBody = b; } };
+          },
+        };
+
+        // Call 1 & 2 pass
+        let nextCalled = 0;
+        middleware(mockReq, mockRes, () => { nextCalled++; });
+        middleware(mockReq, mockRes, () => { nextCalled++; });
+        expect.equal(nextCalled, 2);
+
+        // Call 3 triggers 429
+        middleware(mockReq, mockRes, () => { nextCalled++; });
+        expect.equal(statusCode, 429);
+        expect.equal(responseBody.error, "TOO_MANY_REQUESTS");
+        expect.equal(headers["X-RateLimit-Limit"], "2");
+        expect.ok(Number(headers["Retry-After"]) >= 1);
+      });
+    });
+
+    // --- ALGORITHM 2: Circuit Breaker with Exponential Backoff (4 Tests) ---
+    describe("Algorithm 2: Circuit Breaker with Exponential Backoff", () => {
+      test("F148-T5: Normal operations execute and remain in CLOSED state", async () => {
+        const breaker = new CircuitBreaker({ name: "VietQR_Gateway", failureThreshold: 3 });
+        const res = await breaker.execute(async () => "PAYMENT_SUCCESS");
+        expect.equal(res, "PAYMENT_SUCCESS");
+        expect.equal(breaker.state, CircuitState.CLOSED);
+      });
+
+      test("F148-T6: Reaching failure threshold trips breaker to OPEN state and fails fast", async () => {
+        const breaker = new CircuitBreaker({ name: "SPX_Webhook", failureThreshold: 2, resetTimeoutMs: 5000 });
+
+        // Trigger 2 failures
+        try { await breaker.execute(async () => { throw new Error("Timeout 504"); }); } catch (e) {}
+        try { await breaker.execute(async () => { throw new Error("Connection Refused"); }); } catch (e) {}
+
+        expect.equal(breaker.state, CircuitState.OPEN);
+
+        // Third call fast-fails without executing the action
+        let actionExecuted = false;
+        try {
+          await breaker.execute(async () => {
+            actionExecuted = true;
+            return "SHOULD_NOT_RUN";
+          });
+        } catch (err) {
+          expect.equal(err.circuitBreakerOpen, true);
+        }
+        expect.equal(actionExecuted, false);
+      });
+
+      test("F148-T7: Graceful fallback function is triggered when circuit is OPEN", async () => {
+        const fallbackFn = (err) => ({ status: "FALLBACK_CACHED_RATE", reason: err.message });
+        const breaker = new CircuitBreaker({ name: "FX_Rate_API", failureThreshold: 1, fallback: fallbackFn });
+
+        try { await breaker.execute(async () => { throw new Error("Outage"); }); } catch (e) {}
+        expect.equal(breaker.state, CircuitState.OPEN);
+
+        const result = await breaker.execute(async () => "LIVE_DATA");
+        expect.equal(result.status, "FALLBACK_CACHED_RATE");
+      });
+
+      test("F148-T8: Exponential backoff with jitter produces bounded sleep values", () => {
+        for (let attempt = 1; attempt <= 5; attempt++) {
+          const sleep = CircuitBreaker.calculateBackoffWithJitter(attempt, 100, 2000);
+          expect.ok(sleep >= 0);
+          expect.ok(sleep <= 2000);
+        }
+      });
+    });
+
+    // --- ALGORITHM 3: Optimistic Concurrency Control (OCC) (4 Tests) ---
+    describe("Algorithm 3: Optimistic Concurrency Control (OCC)", () => {
+      test("F148-T9: Single-thread atomic stock decrement updates version and balance correctly", async () => {
+        const occ = new OptimisticConcurrencyManager();
+        const product = { id: "p-flash-1", stock: 10, version: 1 };
+
+        const res = await occ.decrementStockAtomic(product, 3);
+        expect.equal(res.success, true);
+        expect.equal(product.stock, 7);
+        expect.equal(product.version, 2);
+      });
+
+      test("F148-T10: Deducting more than available stock is rejected with OUT_OF_STOCK without corrupting version", async () => {
+        const occ = new OptimisticConcurrencyManager();
+        const product = { id: "p-flash-2", stock: 2, version: 5 };
+
+        const res = await occ.decrementStockAtomic(product, 5);
+        expect.equal(res.success, false);
+        expect.equal(res.error, "OUT_OF_STOCK");
+        expect.equal(product.stock, 2);
+        expect.equal(product.version, 5);
+      });
+
+      test("F148-T11: Detects CAS conflict when expected version differs from stored version", async () => {
+        const occ = new OptimisticConcurrencyManager({ maxRetries: 0 });
+        let entity = { id: "doc-1", data: "initial", version: 1 };
+
+        const result = await occ.executeWithRetry({
+          fetchEntity: async () => entity,
+          mutate: (item) => { item.data = "modified"; return { isValid: true }; },
+          commitUpdate: async (item, expectedVer) => {
+            // Simulate another thread updated version to 2 behind our back
+            return false;
+          },
+        });
+
+        expect.equal(result.success, false);
+        expect.equal(result.error, "OCC_CONFLICT_MAX_RETRIES_EXCEEDED");
+      });
+
+      test("F148-T12: Multi-transaction race simulation prevents overselling under 50 concurrent buyers", async () => {
+        const occ = new OptimisticConcurrencyManager({ maxRetries: 10, baseBackoffMs: 2, maxBackoffMs: 20 });
+        const flashProduct = { id: "p-iphone-deal", stock: 10, version: 0 };
+
+        // 50 concurrent buyers trying to grab 1 item each from a stock of 10
+        const promises = [];
+        for (let i = 0; i < 50; i++) {
+          promises.push(occ.decrementStockAtomic(flashProduct, 1));
+        }
+
+        const results = await Promise.all(promises);
+        const successfulBuys = results.filter((r) => r.success);
+        const outOfStockBuys = results.filter((r) => !r.success && (r.error === "OUT_OF_STOCK" || r.error === "OCC_CONFLICT_MAX_RETRIES_EXCEEDED"));
+
+        // Exactly 10 buyers grab the 10 available items
+        expect.equal(successfulBuys.length, 10);
+        expect.equal(outOfStockBuys.length, 40);
+        // Stock must never drop below 0
+        expect.equal(flashProduct.stock, 0);
+      });
+    });
+
+    // --- ALGORITHM 4: LRU Cache with TTL (4 Tests) ---
+    describe("Algorithm 4: LRU Cache with TTL Eviction", () => {
+      test("F148-T13: get and put operations maintain O(1) order and cache size", () => {
+        const lru = new LRUCache(3, 10000);
+        lru.put("a", 1);
+        lru.put("b", 2);
+        lru.put("c", 3);
+
+        expect.equal(lru.get("a"), 1);
+        expect.equal(lru.size, 3);
+        // Accessing 'a' moves it to MRU (front)
+        expect.equal(lru.keys()[0], "a");
+      });
+
+      test("F148-T14: Evicts the least recently used element when capacity is exceeded", () => {
+        const lru = new LRUCache(3, 10000);
+        lru.put("x", 10);
+        lru.put("y", 20);
+        lru.put("z", 30);
+
+        // Access 'x' so 'y' becomes the oldest
+        lru.get("x");
+
+        // Insert 'w', 'y' should be evicted
+        lru.put("w", 40);
+
+        expect.equal(lru.get("y"), null);
+        expect.equal(lru.get("x"), 10);
+        expect.equal(lru.get("z"), 30);
+        expect.equal(lru.get("w"), 40);
+        expect.equal(lru.size, 3);
+      });
+
+      test("F148-T15: Automatically discards expired items when TTL elapses", async () => {
+        const lru = new LRUCache(5, 50); // 50ms TTL
+        lru.put("flash_deal", { discount: 50 }, 50);
+
+        expect.ok(lru.get("flash_deal") !== null);
+
+        // Wait for TTL to expire
+        await new Promise((r) => setTimeout(r, 60));
+        expect.equal(lru.get("flash_deal"), null);
+      });
+
+      test("F148-T16: delete and clear operations reset internal linked list state properly", () => {
+        const lru = new LRUCache(5, 10000);
+        lru.put("item1", "val1");
+        lru.put("item2", "val2");
+
+        expect.equal(lru.delete("item1"), true);
+        expect.equal(lru.get("item1"), null);
+        expect.equal(lru.size, 1);
+
+        lru.clear();
+        expect.equal(lru.size, 0);
+        expect.equal(lru.get("item2"), null);
+      });
     });
   });
 });
