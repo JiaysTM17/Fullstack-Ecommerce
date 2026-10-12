@@ -27,10 +27,12 @@ export const createOrder = async (req, res) => {
     }
 
     // === IDEMPOTENCY GUARD — Prevent duplicate double-clicks ===
-    const idempotencyKey = req.headers["x-idempotency-key"] || req.body.idempotencyKey;
+    const idempotencyKey = req.headers["idempotency-key"] || req.headers["x-idempotency-key"] || req.body.idempotencyKey;
     if (idempotencyKey) {
       const existingOrder = await Order.findOne({ idempotencyKey });
       if (existingOrder) {
+        res.setHeader("Idempotent-Replay", "true");
+        res.setHeader("X-Idempotency-Key", String(idempotencyKey));
         return sendSuccess(res, {
           order: existingOrder,
           isDuplicate: true,

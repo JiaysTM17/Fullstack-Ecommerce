@@ -1,5 +1,6 @@
 import express from "express";
 import { authenticate, authorize, requireShopAccess } from "../middlewares/auth.js";
+import { idempotencyGuard } from "../middlewares/idempotency.js";
 import {
   getMySellerShop,
   updateMySellerShop,
@@ -106,7 +107,7 @@ router.get("/operational-sla", getSellerOperationalSLA);
 
 router.get("/stats", getSellerStats);
 router.get("/wallet", getSellerWallet);
-router.post("/wallet/withdraw", requestSellerWithdrawal);
+router.post("/wallet/withdraw", idempotencyGuard(), requestSellerWithdrawal);
 
 router.route("/products")
   .get(getSellerProducts)

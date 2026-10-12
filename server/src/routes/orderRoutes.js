@@ -70,6 +70,7 @@ import {
   releaseStock,
 } from "../controllers/orderController.js";
 import { authenticate, optionalAuthenticate, authorize } from "../middlewares/auth.js";
+import { idempotencyGuard } from "../middlewares/idempotency.js";
 
 const router = express.Router();
 
@@ -77,8 +78,8 @@ const router = express.Router();
 router.post("/reserve-stock", optionalAuthenticate, reserveStock);
 router.post("/release-stock", optionalAuthenticate, releaseStock);
 
-// Order creation supports both guest and authenticated checkout
-router.post("/", optionalAuthenticate, createOrder);
+// Order creation supports both guest and authenticated checkout with Enterprise Idempotency Guard
+router.post("/", optionalAuthenticate, idempotencyGuard(), createOrder);
 
 // Order statistics and search (must be before /:id routes)
 router.get("/stats", authenticate, getOrderStats);

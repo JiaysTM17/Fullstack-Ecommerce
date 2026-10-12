@@ -20,6 +20,7 @@ import User, { computeLoyaltyTier } from "../../server/src/models/User.js";
 import { checkAdminSafetyGuardrails, generateAdminCopilotResponse, ADMIN_GUARDRAILS, ADMIN_KNOWLEDGE_BASE } from "../../client/src/services/adminAiCopilotEngine.js";
 import { generateSellerCopilotResponse } from "../../client/src/services/sellerAiCopilotEngine.js";
 import { generateAiChatResponse } from "../../client/src/services/chatAiEngine.js";
+import { idempotencyStore, idempotencyGuard } from "../../server/src/middlewares/idempotency.js";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
 
@@ -6336,6 +6337,177 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const redeliveryRes = generateAiChatResponse("shipper gọi nhỡ hẹn lại lịch giao");
       expect.equal(redeliveryRes.intent, "REDELIVERY_GUIDE");
       expect.ok(redeliveryRes.replyText.includes("tối đa 3 lần trong vòng 48 giờ"));
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 147: Enterprise Payment Idempotency Engine (5 Tests)
+  // =========================================================================
+  describe("Feature 147: Enterprise Payment Idempotency Engine", () => {
+    beforeEach(() => {
+      idempotencyStore.clear();
+    });
+
+    test("F147-T1: Sequential replay with same key returns cached response with Idempotent-Replay header and does not duplicate state", () => {
+      const key = "idem-order-key-101";
+      const payload = {
+        customer: { fullName: "Nguyễn Văn A", phone: "0901234567", address: "Hà Nội" },
+        items: [{ productId: "p1", name: "Áo thun", price: 150000, quantity: 1 }],
+        total: 150000,
+        paymentMethod: "COD",
+      };
+
+      // First call acquires lock
+      const acq = idempotencyStore.acquire(key, payload);
+      expect.equal(acq.status, "acquired");
+
+      // Simulates completing order creation
+      const createdOrderData = {
+        success: true,
+        data: {
+          order: { id: "ord-test-1", total: 150000, status: "pending", idempotencyKey: key },
+        },
+      };
+      idempotencyStore.complete(key, 201, createdOrderData);
+
+      // Second call (Replay)
+      const replay = idempotencyStore.acquire(key, payload);
+      expect.equal(replay.status, "completed");
+      expect.equal(replay.record.statusCode, 201);
+      expect.equal(replay.record.body.data.order.id, "ord-test-1");
+    });
+
+    test("F147-T2: Concurrent in-flight requests on the same key trigger 409 Conflict with Retry-After", () => {
+      const key = "idem-concurrent-key-202";
+      const payload = { amount: 500000, bankName: "Vietcombank", accountNumber: "123456789" };
+
+      // Worker 1 acquires lock
+      const req1 = idempotencyStore.acquire(key, payload);
+      expect.equal(req1.status, "acquired");
+
+      // Worker 2 sends simultaneous request while Worker 1 is still processing
+      const req2 = idempotencyStore.acquire(key, payload);
+      expect.equal(req2.status, "processing");
+
+      // Test middleware behavior on in-flight conflict
+      const middleware = idempotencyGuard();
+      const mockReq = {
+        method: "POST",
+        headers: { "idempotency-key": key },
+        body: payload,
+        ip: "127.0.0.1",
+        originalUrl: "/api/orders",
+      };
+      let capturedStatusCode = 0;
+      let capturedHeaders = {};
+      let capturedErrorBody = null;
+
+      const mockRes = {
+        setHeader: (k, v) => { capturedHeaders[k] = v; },
+        status: (code) => {
+          capturedStatusCode = code;
+          return {
+            json: (data) => { capturedErrorBody = data; },
+          };
+        },
+      };
+
+      middleware(mockReq, mockRes, () => {});
+      expect.equal(capturedStatusCode, 409);
+      expect.equal(capturedHeaders["Retry-After"], "2");
+      expect.ok(capturedErrorBody.message.includes("đang được xử lý"));
+    });
+
+    test("F147-T3: Payload mismatch (tampering/cart change with same key) returns 422 Unprocessable Entity", () => {
+      const key = "idem-tamper-key-303";
+      const originalPayload = { total: 200000, items: [{ id: "p1", qty: 1 }] };
+      const tamperedPayload = { total: 999000, items: [{ id: "p2", qty: 5 }] };
+
+      // First transaction finishes
+      idempotencyStore.acquire(key, originalPayload);
+      idempotencyStore.complete(key, 201, { success: true, orderId: "ord-orig" });
+
+      // Second transaction tries to reuse key with modified payload
+      const check = idempotencyStore.acquire(key, tamperedPayload);
+      expect.equal(check.status, "mismatch");
+
+      // Middleware verify
+      const middleware = idempotencyGuard();
+      const mockReq = {
+        method: "POST",
+        headers: { "x-idempotency-key": key },
+        body: tamperedPayload,
+        ip: "127.0.0.1",
+        originalUrl: "/api/orders",
+      };
+      let capturedCode = 0;
+      let capturedBody = null;
+      const mockRes = {
+        setHeader: () => {},
+        status: (code) => {
+          capturedCode = code;
+          return { json: (data) => { capturedBody = data; } };
+        },
+      };
+
+      middleware(mockReq, mockRes, () => {});
+      expect.equal(capturedCode, 422);
+      expect.ok(capturedBody.message.includes("Unprocessable Entity"));
+    });
+
+    test("F147-T4: Seller Wallet withdrawal with idempotency key prevents double debiting", () => {
+      const sellerWithdrawKey = "wtx-seller-idem-404";
+      const withdrawPayload = {
+        amount: 200000,
+        bankName: "MBBank",
+        accountNumber: "987654321",
+        accountName: "NGUYEN VAN BAN",
+      };
+
+      // Initial execution succeeds
+      const firstRun = idempotencyStore.acquire(sellerWithdrawKey, withdrawPayload);
+      expect.equal(firstRun.status, "acquired");
+      idempotencyStore.complete(sellerWithdrawKey, 201, {
+        success: true,
+        data: { txId: "WTX_999", remainingBalance: 800000 },
+      });
+
+      // User double clicks "Rút Tiền" (Replay)
+      const secondRun = idempotencyStore.acquire(sellerWithdrawKey, withdrawPayload);
+      expect.equal(secondRun.status, "completed");
+      expect.equal(secondRun.record.body.data.remainingBalance, 800000);
+      expect.equal(secondRun.record.body.data.txId, "WTX_999");
+    });
+
+    test("F147-T5: Supports both IETF standard 'Idempotency-Key' and legacy 'X-Idempotency-Key' headers with response replay", () => {
+      const middleware = idempotencyGuard();
+      const testKey = "ietf-standard-key-505";
+      const body = { orderTotal: 50000 };
+
+      // Seed completed state in store
+      idempotencyStore.acquire(testKey, body);
+      idempotencyStore.complete(testKey, 200, { success: true, message: "Order processed" });
+
+      // Test with IETF 'idempotency-key' header
+      const reqIetf = {
+        method: "POST",
+        headers: { "idempotency-key": testKey },
+        body,
+        ip: "127.0.0.1",
+      };
+      let headersSet = {};
+      let jsonCalledWith = null;
+      const resIetf = {
+        setHeader: (k, v) => { headersSet[k] = v; },
+        status: (c) => ({
+          json: (b) => { jsonCalledWith = b; },
+        }),
+      };
+
+      middleware(reqIetf, resIetf, () => {});
+      expect.equal(headersSet["Idempotent-Replay"], "true");
+      expect.equal(headersSet["X-Idempotency-Key"], testKey);
+      expect.equal(jsonCalledWith.message, "Order processed");
     });
   });
 });
