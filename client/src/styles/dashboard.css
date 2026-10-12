@@ -1,8 +1,8 @@
-/* client/src/styles/dashboard.css - Modern Design System */
+/* client/src/styles/dashboard.css - Modern Clean SaaS Design System */
 
 .shopee-dashboard-container {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 220px 1fr;
   min-height: calc(100vh - 160px);
   background-color: var(--bg-page, #f8fafc);
   transition: background-color var(--transition-normal);
@@ -14,14 +14,14 @@
   }
 }
 
-/* Sidebar */
+/* Sidebar - Compact & Clean */
 .shopee-sidebar {
   background: var(--bg-card, #fff);
   border-right: 1px solid var(--border-medium, #e2e8f0);
-  padding: 20px 12px;
+  padding: 16px 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   transition: background-color var(--transition-normal);
 }
 
@@ -29,48 +29,48 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px 20px;
+  padding: 8px 10px 14px;
   border-bottom: 1px solid var(--border-light, #f1f5f9);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .shopee-sidebar-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm, 6px);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm, 8px);
   object-fit: cover;
-  background: var(--bg-muted, #eee);
+  background: var(--bg-muted, #f1f5f9);
   border: 1px solid var(--border-medium, #e2e8f0);
 }
 
 .shopee-sidebar-info h3 {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
   margin: 0;
-  color: var(--text-primary);
+  color: var(--text-primary, #0f172a);
   line-height: 1.3;
 }
 
 .shopee-sidebar-badge {
-  font-size: 11px;
+  font-size: 10.5px;
   background: var(--primary-light, #eff6ff);
   border: 1px solid var(--primary-border, #bfdbfe);
   color: var(--primary-color, #2563eb);
-  padding: 2px 8px;
-  border-radius: var(--radius-full, 9999px);
+  padding: 1px 6px;
+  border-radius: 4px;
   display: inline-block;
-  margin-top: 4px;
+  margin-top: 3px;
   font-weight: 700;
 }
 
 .shopee-nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm, 6px);
-  color: var(--text-secondary);
-  font-size: 14px;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--text-secondary, #475569);
+  font-size: 13px;
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
@@ -83,20 +83,20 @@
 }
 
 .shopee-nav-item:hover {
-  background-color: var(--bg-hover, #f8fafc);
-  color: var(--text-primary);
+  background-color: var(--bg-hover, #f1f5f9);
+  color: var(--text-primary, #0f172a);
 }
 
 .shopee-nav-item.active {
   background-color: var(--primary-light, #eff6ff);
   color: var(--primary-color, #2563eb);
-  font-weight: 700;
+  font-weight: 600;
   border-left: 3px solid var(--primary-color, #2563eb);
 }
 
 /* Dashboard Main Content */
 .shopee-dashboard-main {
-  padding: 28px 24px;
+  padding: 20px 24px;
   box-sizing: border-box;
   overflow-x: auto;
 }
@@ -106,55 +106,56 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
 .shopee-dashboard-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
   margin: 0;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
+  line-height: 1.3;
 }
 
 .shopee-dashboard-subtitle {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--text-secondary, #64748b);
+  margin-top: 3px;
 }
 
 /* Shop Switcher Bar */
 .shopee-shop-switcher {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: var(--bg-card, #fff);
-  padding: 8px 14px;
-  border-radius: var(--radius-sm, 6px);
+  padding: 6px 12px;
+  border-radius: 6px;
   border: 1px solid var(--border-medium, #e2e8f0);
-  font-size: 13px;
-  box-shadow: var(--shadow-sm);
-  color: var(--text-primary);
+  font-size: 12.5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  color: var(--text-primary, #0f172a);
 }
 
 .shopee-shop-switcher select {
   border: 1px solid var(--border-medium, #cbd5e1);
-  border-radius: var(--radius-sm, 4px);
-  padding: 5px 10px;
-  font-size: 13px;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
   background: var(--bg-muted, #f8fafc);
-  color: var(--text-primary);
+  color: var(--text-primary, #0f172a);
   outline: none;
   cursor: pointer;
 }
 
-/* Stat Metric Cards */
+/* Stat Metric Cards - SaaS Compact */
 .shopee-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
 @media (max-width: 1100px) {
@@ -171,49 +172,56 @@
 
 .shopee-metric-card {
   background: var(--bg-card, #fff);
-  border-radius: var(--radius-card, 16px);
-  padding: 22px;
-  box-shadow: var(--shadow-dual-kpi);
-  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.04));
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-medium, #e2e8f0);
   display: flex;
   flex-direction: column;
-  transition: all var(--transition-fast);
+  justify-content: space-between;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .shopee-metric-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-dual-hover);
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
 .shopee-metric-label {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 6px;
   font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .shopee-metric-value {
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--primary-color, #2563eb);
-  line-height: 1.2;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  line-height: 1.25;
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
 }
 
 .shopee-metric-hint {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--color-success, #10b981);
-  margin-top: 6px;
+  margin-top: 5px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-/* Data Table Card */
+/* Data Table Card - Compact & Clean */
 .shopee-table-card {
   background: var(--bg-card, #fff);
-  border-radius: var(--radius-surface, 20px);
-  box-shadow: var(--shadow-dual-card);
-  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.04));
-  padding: 24px;
-  margin-bottom: 24px;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-medium, #e2e8f0);
+  padding: 16px 18px;
+  margin-bottom: 20px;
 }
 
 .shopee-table-toolbar {
@@ -221,8 +229,8 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
 .shopee-table-responsive {
@@ -234,26 +242,28 @@
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
 .shopee-data-table th {
-  background-color: var(--bg-muted, #f1f5f9);
+  background-color: var(--bg-muted, #f8fafc);
   color: var(--text-secondary, #475569);
-  font-weight: 700;
-  padding: 12px 14px;
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border-medium, #e2e8f0);
   white-space: nowrap;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .shopee-data-table td {
-  padding: 14px;
+  padding: 11px 12px;
   border-bottom: 1px solid var(--border-light, #f1f5f9);
-  color: var(--text-primary);
+  color: var(--text-primary, #1e293b);
   vertical-align: middle;
   transition: background-color var(--transition-fast);
+  font-size: 12.5px;
 }
 
 .shopee-data-table tr:hover td {
@@ -261,16 +271,16 @@
 }
 
 .shopee-table-thumb {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-sm, 6px);
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
   object-fit: cover;
   border: 1px solid var(--border-medium, #e2e8f0);
 }
 
 .shopee-table-item-name {
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-primary, #0f172a);
   max-width: 260px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -279,9 +289,11 @@
 
 /* Status Badges */
 .shopee-status-badge {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: var(--radius-full, 9999px);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 9999px;
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;

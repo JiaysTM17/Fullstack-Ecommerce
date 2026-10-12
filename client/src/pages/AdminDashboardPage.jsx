@@ -1140,11 +1140,39 @@ export default function AdminDashboardPage() {
 
       {/* Main Content */}
       <main className="shopee-dashboard-main">
-        <div className="shopee-dashboard-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        <div className="shopee-dashboard-header" style={{
+          background: 'var(--bg-card, #ffffff)',
+          padding: '14px 18px',
+          borderRadius: '10px',
+          border: '1px solid var(--border-medium, #e2e8f0)',
+          marginBottom: '18px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
           <div>
-            <h1 className="shopee-dashboard-title">Hệ Thống Quản Trị Sàn Fullstack E-Commerce</h1>
-            <p className="shopee-dashboard-subtitle">
-              Giám sát toàn bộ cửa hàng, người bán, khách hàng, voucher khuyến mãi và doanh thu toàn sàn.
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h1 className="shopee-dashboard-title" style={{ fontSize: '17px', fontWeight: 700, margin: 0, color: 'var(--text-primary, #0f172a)' }}>
+                Quản Trị Sàn Thương Mại Điện Tử
+              </h1>
+              <span style={{
+                background: '#eff6ff',
+                color: '#2563eb',
+                border: '1px solid #bfdbfe',
+                padding: '1px 6px',
+                borderRadius: '4px',
+                fontSize: '10.5px',
+                fontWeight: 700,
+                letterSpacing: '0.4px'
+              }}>
+                SUPER ADMIN
+              </span>
+            </div>
+            <p className="shopee-dashboard-subtitle" style={{ margin: '4px 0 0', fontSize: '12px', color: '#64748b' }}>
+              Giám sát gian hàng, người bán, người mua, voucher khuyến mãi, thuế và quyết toán toàn sàn.
             </p>
           </div>
           <div>
@@ -1153,79 +1181,80 @@ export default function AdminDashboardPage() {
               className="shopee-btn"
               onClick={() => setShowBroadcastModal(true)}
               style={{
-                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                background: 'var(--primary-color, #ea580c)',
                 color: '#fff',
                 border: 'none',
-                padding: '9px 18px',
-                borderRadius: '8px',
-                fontWeight: 700,
-                fontSize: '13px',
+                padding: '7px 14px',
+                borderRadius: '6px',
+                fontWeight: 600,
+                fontSize: '12.5px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)',
+                gap: '6px',
+                boxShadow: '0 1px 3px rgba(234, 88, 12, 0.2)',
                 cursor: 'pointer',
+                transition: 'all 0.15s ease',
               }}
             >
-              <SparklesIcon size={16} color="#ffffff" />
-              <span>Phát Sóng Thông Báo Toàn Sàn</span>
+              <SparklesIcon size={14} color="#ffffff" />
+              <span>Phát Sóng Thông Báo</span>
             </button>
           </div>
         </div>
 
-        {/* 4 Thẻ chỉ số toàn sàn */}
-        <div className="shopee-metrics-grid">
+        {/* 4 Thẻ chỉ số toàn sàn - Compact SaaS */}
+        <div className="shopee-metrics-grid" style={{ marginBottom: '18px' }}>
           <div className="shopee-metric-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
               <span className="shopee-metric-label">Tổng Doanh Số Sàn (GMV)</span>
-              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ChartBarIcon size={18} color="#2563eb" />
+              <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChartBarIcon size={13} color="#2563eb" />
               </div>
             </div>
             <div className="shopee-metric-value">{formatCurrency(totalPlatformRevenue)}</div>
-            <span style={{ fontSize: '11px', color: 'var(--color-success, #16a34a)' }}>+18.4% so với tháng trước</span>
+            <span style={{ fontSize: '11px', color: 'var(--color-success, #16a34a)', marginTop: '4px', display: 'block' }}>+18.4% so với tháng trước</span>
           </div>
 
           <div className="shopee-metric-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
               <span className="shopee-metric-label">Hoa Hồng Thu Sàn (5%)</span>
-              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(22, 163, 74, 0.1)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CreditCardIcon size={18} color="#16a34a" />
+              <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(22, 163, 74, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CreditCardIcon size={13} color="#16a34a" />
               </div>
             </div>
             <div className="shopee-metric-value" style={{ color: 'var(--color-success, #16a34a)' }}>
               {formatCurrency(platformCommission)}
             </div>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Doanh thu thuần của sàn</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted, #64748b)', marginTop: '4px', display: 'block' }}>Doanh thu thuần của sàn</span>
           </div>
 
           <div className="shopee-metric-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
               <span className="shopee-metric-label">Gian Hàng Hoạt Động</span>
-              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <StoreIcon size={18} color="#ea580c" />
+              <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <StoreIcon size={13} color="#ea580c" />
               </div>
             </div>
             <div className="shopee-metric-value">{totalActiveShops} / {shops.length}</div>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Tỷ lệ duyệt shop: 95%</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted, #64748b)', marginTop: '4px', display: 'block' }}>Tỷ lệ duyệt shop: 95%</span>
           </div>
 
           <div className="shopee-metric-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
               <span className="shopee-metric-label">Tổng Thành Viên Sàn</span>
-              <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(147, 51, 234, 0.1)', border: '1px solid rgba(147, 51, 234, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <UsersIcon size={18} color="#9333ea" />
+              <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'rgba(147, 51, 234, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <UsersIcon size={13} color="#9333ea" />
               </div>
             </div>
             <div className="shopee-metric-value">{users.length}</div>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{totalProducts} mặt hàng niêm yết</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted, #64748b)', marginTop: '4px', display: 'block' }}>{totalProducts} mặt hàng niêm yết</span>
           </div>
         </div>
 
         {/* TAB 1: TỔNG QUAN */}
         {activeTab === 'overview' && (
           <div className="shopee-table-card">
-            <h2 style={{ fontSize: '16px', margin: '0 0 16px', fontWeight: 700 }}>
+            <h2 style={{ fontSize: '14.5px', margin: '0 0 14px', fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>
               Xếp Hạng Doanh Thu Các Gian Hàng Trên Sàn
             </h2>
             <div className="shopee-table-responsive">
@@ -1243,13 +1272,13 @@ export default function AdminDashboardPage() {
                 <tbody>
                   {shops.map(s => (
                     <tr key={s.id}>
-                      <td><strong>{s.name}</strong></td>
-                      <td>{s.ownerName} ({s.email})</td>
+                      <td><strong style={{ color: 'var(--text-primary, #0f172a)' }}>{s.name}</strong></td>
+                      <td style={{ color: '#475569' }}>{s.ownerName} <span style={{ fontSize: '11.5px', color: '#64748b' }}>({s.email})</span></td>
                       <td>{s.productsCount} sản phẩm</td>
-                      <td style={{ fontWeight: 700, color: 'var(--primary-color)' }}>
+                      <td style={{ fontWeight: 600, color: 'var(--primary-color, #ea580c)' }}>
                         {formatCurrency(s.totalRevenue)}
                       </td>
-                      <td style={{ fontWeight: 600, color: 'var(--color-success)' }}>
+                      <td style={{ fontWeight: 600, color: 'var(--color-success, #16a34a)' }}>
                         {formatCurrency(Math.round(s.totalRevenue * 0.05))}
                       </td>
                       <td>
