@@ -4300,7 +4300,7 @@ export default function AdminDashboardPage() {
             usersCount: users?.length || 0,
             disputesCount: disputes?.length || 0,
             fraudAnomaliesCount: fraudData?.anomalies?.length || 0,
-            pendingSettlementsCount: pendingSettlements?.length || 0,
+            pendingSettlementsCount: financeList?.filter(f => f.status === 'pending')?.length || 0,
             withholdingTax: taxData?.totalWithholdingTax || 0,
             escrowBalance: escrowVault?.escrowBalance || 0,
           }}
