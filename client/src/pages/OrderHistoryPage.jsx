@@ -2093,10 +2093,10 @@ export default function OrderHistoryPage() {
                           boxShadow: '0 1px 3px rgba(37, 99, 235, 0.1)',
                           transition: 'all 0.15s ease',
                         }}
-                        title="Xem Chuông Cửa Video AI, Tủ SPX Tap & Go và Hồ Sơ An Ninh Bưu Kiện Đa Lớp"
+                        title="Xem Chuông Cửa Video AI, Nắn Tuyến AI, Tủ SPX Tap & Go và Hồ Sơ An Ninh Bưu Kiện"
                       >
                         <ShieldCheckIcon size={12} color="#2563eb" />
-                        <span>Bảo Mật Đa Lớp &amp; Chuông Cửa Video</span>
+                        <span>An Ninh, Khung Giờ AI &amp; Chuông Cửa</span>
                         <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
                       </button>
                     </div>
