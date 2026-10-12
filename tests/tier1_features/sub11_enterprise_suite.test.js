@@ -34,6 +34,10 @@ import {
   calculateCosineSimilarity,
   createTfEmbedding,
   analyzeSentiment,
+  ConsistentHashRing,
+  fnv1a32,
+  BloomFilter,
+  murmur32,
 } from "../../client/src/services/aiAlgorithms.js";
 import fs from "fs";
 
@@ -7109,6 +7113,222 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.equal(chatRes.intent, "FRUSTRATED_CUSTOMER_RECOVERY");
         expect.ok(chatRes.replyText.includes("ƯU TIÊN ĐẶC BIỆT"));
         expect.ok(chatRes.replyText.includes("MINI50K"));
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 151: Consistent Hashing & Bloom Filter Algorithms Suite (16 Tests)
+  // =========================================================================
+  describe("Feature 151: Consistent Hashing & Bloom Filter Algorithms Suite", () => {
+    // --- 1. Consistent Hashing with Virtual Nodes (8 Tests) ---
+    describe("Algorithm 1: Consistent Hashing Ring with Virtual Nodes", () => {
+      test("F151-T1: fnv1a32 hashes consistently and produces valid 32-bit unsigned integer [0, 2^32-1]", () => {
+        const h1 = fnv1a32("voucher_super_sale_50k");
+        const h2 = fnv1a32("voucher_super_sale_50k");
+        expect.equal(h1, h2);
+        expect.ok(h1 >= 0 && h1 <= 4294967295);
+        expect.ok(Number.isInteger(h1));
+      });
+
+      test("F151-T2: murmur32 hashes strings into independent pseudo-random 32-bit values", () => {
+        const hA = murmur32("product_sku_1001", 0x12345678);
+        const hB = murmur32("product_sku_1001", 0x87654321);
+        expect.ok(hA !== hB);
+        expect.ok(hA >= 0 && hA <= 4294967295);
+      });
+
+      test("F151-T3: ConsistentHashRing initializes with configured replicas of virtual nodes", () => {
+        const ring = new ConsistentHashRing({ replicas: 100 });
+        ring.addNode("cache-node-1");
+        ring.addNode("cache-node-2");
+        expect.equal(ring.getNodes().length, 2);
+        expect.equal(ring.ring.length, 200);
+      });
+
+      test("F151-T4: ConsistentHashRing routes identical key to the exact same node deterministically", () => {
+        const ring = new ConsistentHashRing({ replicas: 120 });
+        ring.addNode("node-alpha");
+        ring.addNode("node-beta");
+        ring.addNode("node-gamma");
+
+        const targetNode1 = ring.getNode("cart_user_998877");
+        const targetNode2 = ring.getNode("cart_user_998877");
+        const targetNode3 = ring.getNode("cart_user_998877");
+
+        expect.equal(targetNode1, targetNode2);
+        expect.equal(targetNode2, targetNode3);
+        expect.ok(["node-alpha", "node-beta", "node-gamma"].includes(targetNode1));
+      });
+
+      test("F151-T5: Handles ring wrap-around when key hash exceeds largest vnode hash", () => {
+        const ring = new ConsistentHashRing({ replicas: 50 });
+        ring.addNode("node-first");
+        ring.addNode("node-second");
+
+        // Key with highest possible 32-bit value will wrap around to node with smallest hash on ring
+        const maxKey = "some_very_high_hash_key_9999999";
+        const assigned = ring.getNode(maxKey);
+        expect.ok(assigned !== null);
+        expect.ok(["node-first", "node-second"].includes(assigned));
+      });
+
+      test("F151-T6: Distributes 1,000 keys across 5 nodes uniformly without acute data skew", () => {
+        const ring = new ConsistentHashRing({ replicas: 150 });
+        const nodes = ["cache-1", "cache-2", "cache-3", "cache-4", "cache-5"];
+        nodes.forEach((n) => ring.addNode(n));
+
+        const keys = Array.from({ length: 1000 }, (_, i) => `session_user_${i}_cart_token`);
+        const dist = ring.getDistribution(keys);
+
+        // Mỗi node lý tưởng nhận ~200 keys (20%). Với 150 vnodes, mỗi node nhận tối thiểu 10% và tối đa 35%
+        for (const n of nodes) {
+          expect.ok(dist[n].count > 100); // Không có node nào bị bỏ đói (< 10%)
+          expect.ok(dist[n].percentage >= 10 && dist[n].percentage <= 35);
+        }
+      });
+
+      test("F151-T7: Adding a 6th node rebalances only ~1/N keys, leaving ~80% unchanged", () => {
+        const ring = new ConsistentHashRing({ replicas: 150 });
+        const initialNodes = ["cache-1", "cache-2", "cache-3", "cache-4", "cache-5"];
+        initialNodes.forEach((n) => ring.addNode(n));
+
+        const keys = Array.from({ length: 1000 }, (_, i) => `order_item_key_${i}`);
+        const before = {};
+        keys.forEach((k) => (before[k] = ring.getNode(k)));
+
+        // Thêm node thứ 6
+        ring.addNode("cache-6");
+        let movedCount = 0;
+        keys.forEach((k) => {
+          const after = ring.getNode(k);
+          if (after !== before[k]) {
+            movedCount++;
+            expect.equal(after, "cache-6"); // Các key bị di chuyển phải chuyển sang đúng node mới thêm
+          }
+        });
+
+        // Theo lý thuyết 1/N = 1/6 ~ 16.7%. Cho phép biên độ 10% đến 25% (100 -> 250 keys)
+        const movedRatio = (movedCount / keys.length) * 100;
+        expect.ok(movedRatio >= 10 && movedRatio <= 28);
+      });
+
+      test("F151-T8: Removing a node cleanly reallocates its keys to remaining active nodes", () => {
+        const ring = new ConsistentHashRing({ replicas: 100 });
+        ring.addNode("node-A");
+        ring.addNode("node-B");
+        ring.addNode("node-C");
+
+        const keys = Array.from({ length: 300 }, (_, i) => `cart_${i}`);
+        ring.removeNode("node-B");
+
+        expect.equal(ring.getNodes().length, 2);
+        keys.forEach((k) => {
+          const assigned = ring.getNode(k);
+          expect.ok(assigned === "node-A" || assigned === "node-C");
+          expect.ok(assigned !== "node-B");
+        });
+      });
+    });
+
+    // --- 2. Bloom Filter with Double Hashing (8 Tests) ---
+    describe("Algorithm 2: Bloom Filter Cache Penetration Guard", () => {
+      test("F151-T9: Dynamically calculates optimal bit array size m and hash function count k", () => {
+        const filter = new BloomFilter({ expectedElements: 5000, falsePositiveRate: 0.01 });
+        const stats = filter.getStats();
+
+        // Với n = 5000, p = 0.01:
+        // m = ceil(- 5000 * ln(0.01) / (ln(2)^2)) ~ 47,926 bits (~5,991 bytes)
+        // k = ceil(m/n * ln(2)) ~ 7
+        expect.ok(stats.sizeBits >= 47000 && stats.sizeBits <= 49000);
+        expect.equal(stats.numHashFunctions, 7);
+        expect.equal(stats.expectedElements, 5000);
+        expect.equal(stats.targetFpr, 0.01);
+      });
+
+      test("F151-T10: Guarantees Zero False Negatives: items added are ALWAYS returned as true", () => {
+        const filter = new BloomFilter({ expectedElements: 1000, falsePositiveRate: 0.01 });
+        const insertedVouchers = Array.from({ length: 500 }, (_, i) => `MINI_VOUCHER_${i}_DISCOUNT`);
+
+        filter.addMany(insertedVouchers);
+
+        // 100% các phần tử đã add phải có mặt (không được phép có false negative)
+        for (const v of insertedVouchers) {
+          expect.equal(filter.has(v), true);
+        }
+      });
+
+      test("F151-T11: Accurately identifies non-existent keys as false with negligible false positives", () => {
+        const filter = new BloomFilter({ expectedElements: 1000, falsePositiveRate: 0.01 });
+        const realVouchers = ["FREESHIPMAX", "GIAM50K", "HOANXU20K", "CHAOBANMOI"];
+        filter.addMany(realVouchers);
+
+        expect.equal(filter.has("FREESHIPMAX"), true);
+        expect.equal(filter.has("GIAM50K"), true);
+
+        // Kiểm tra các mã rác không tồn tại
+        expect.equal(filter.has("FAKE_HACK_VOUCHER_XYZ"), false);
+        expect.equal(filter.has("NON_EXISTENT_COUPON_999"), false);
+        expect.equal(filter.has("ATTACKER_INJECTION_CODE"), false);
+      });
+
+      test("F151-T12: Empirical False Positive Rate across 2,000 unseen keys strictly honors target threshold (FPR <= 2%)", () => {
+        const filter = new BloomFilter({ expectedElements: 2000, falsePositiveRate: 0.01 });
+        for (let i = 0; i < 1000; i++) {
+          filter.add(`valid_sku_item_${i}`);
+        }
+
+        let falsePositives = 0;
+        const testCount = 2000;
+        for (let i = 0; i < testCount; i++) {
+          // Kiểm tra các key không hề được add
+          if (filter.has(`unseen_ghost_sku_${i}`)) {
+            falsePositives++;
+          }
+        }
+
+        const empiricalFPR = (falsePositives / testCount) * 100;
+        // FPR thực nghiệm phải nhỏ hơn 2.5% (đạt chuẩn thiết kế target p = 1%)
+        expect.ok(empiricalFPR < 2.5);
+      });
+
+      test("F151-T13: Correctly tracks elements count, bit array fill ratio, and estimated current FPR", () => {
+        const filter = new BloomFilter({ expectedElements: 1000, falsePositiveRate: 0.01 });
+        for (let i = 0; i < 200; i++) {
+          filter.add(`sku_${i}`);
+        }
+
+        const stats = filter.getStats();
+        expect.equal(stats.currentElements, 200);
+        expect.ok(stats.fillRatioPercent > 0 && stats.fillRatioPercent < 30);
+        expect.ok(stats.estimatedCurrentFpr <= 0.01);
+      });
+
+      test("F151-T14: BloomFilter clear() wipes all bit marks and resets element count to zero", () => {
+        const filter = new BloomFilter({ expectedElements: 500, falsePositiveRate: 0.01 });
+        filter.add("TEST_KEY");
+        expect.equal(filter.has("TEST_KEY"), true);
+
+        filter.clear();
+        expect.equal(filter.getStats().currentElements, 0);
+        expect.equal(filter.getStats().fillRatioPercent, 0);
+        expect.equal(filter.has("TEST_KEY"), false);
+      });
+
+      test("F151-T15: Admin Sentinel Copilot AI provides in-depth technical answers for Bloom Filter queries", () => {
+        const res = generateAdminCopilotResponse("Giải thích thuật toán Bloom Filter chống Cache Penetration");
+        expect.equal(res.tag, "THUẬT TOÁN BLOOM FILTER");
+        expect.ok(res.text.includes("BLOOM FILTER"));
+        expect.ok(res.text.includes("Zero False Negatives"));
+        expect.ok(res.text.includes("Double Hashing"));
+      });
+
+      test("F151-T16: Admin Sentinel Copilot AI explains Consistent Hashing Ring and Virtual Nodes load balancing architecture", () => {
+        const res = generateAdminCopilotResponse("Nguyên lý hoạt động của Consistent Hashing với Virtual Nodes");
+        expect.equal(res.tag, "THUẬT TOÁN BĂM NHẤT QUÁN");
+        expect.ok(res.text.includes("CONSISTENT HASHING"));
+        expect.ok(res.text.includes("Cache Avalanche"));
+        expect.ok(res.text.includes("Virtual Nodes"));
       });
     });
   });

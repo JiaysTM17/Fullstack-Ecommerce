@@ -247,6 +247,203 @@ export function analyzeSentiment(text) {
   };
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 5: Consistent Hashing with Virtual Nodes (Sharding & Load Balancing)
+// ------------------------------------------------------------------------------
+export function fnv1a32(str) {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+export class ConsistentHashRing {
+  constructor({ replicas = 150, hashFn = fnv1a32 } = {}) {
+    this.replicas = replicas;
+    this.hashFn = hashFn;
+    this.ring = [];
+    this.nodes = new Set();
+  }
+
+  addNode(nodeId) {
+    if (!nodeId || this.nodes.has(nodeId)) return;
+    this.nodes.add(nodeId);
+
+    for (let i = 0; i < this.replicas; i++) {
+      const vnodeKey = `${nodeId}#vn${i}`;
+      const hash = this.hashFn(vnodeKey);
+      this.ring.push({ hash, nodeId, vnodeKey });
+    }
+
+    this.ring.sort((a, b) => a.hash - b.hash);
+  }
+
+  removeNode(nodeId) {
+    if (!this.nodes.has(nodeId)) return;
+    this.nodes.delete(nodeId);
+    this.ring = this.ring.filter((entry) => entry.nodeId !== nodeId);
+  }
+
+  getNode(key) {
+    if (this.ring.length === 0) return null;
+    const hash = this.hashFn(String(key));
+
+    let low = 0;
+    let high = this.ring.length - 1;
+    let targetIndex = 0;
+
+    if (hash > this.ring[high].hash) {
+      return this.ring[0].nodeId;
+    }
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      if (this.ring[mid].hash >= hash) {
+        targetIndex = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    return this.ring[targetIndex].nodeId;
+  }
+
+  getNodes() {
+    return Array.from(this.nodes);
+  }
+
+  getDistribution(keys = []) {
+    const counts = {};
+    for (const node of this.nodes) counts[node] = 0;
+    for (const k of keys) {
+      const node = this.getNode(k);
+      if (node) counts[node] = (counts[node] || 0) + 1;
+    }
+    const total = keys.length || 1;
+    const dist = {};
+    for (const node of Object.keys(counts)) {
+      dist[node] = {
+        count: counts[node],
+        percentage: Number(((counts[node] / total) * 100).toFixed(2)),
+      };
+    }
+    return dist;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 6: Bloom Filter (Probabilistic Cache Penetration Guard)
+// ------------------------------------------------------------------------------
+export function murmur32(str, seed = 0x9747b28c) {
+  let h = seed ^ str.length;
+  for (let i = 0; i < str.length; i++) {
+    let k = str.charCodeAt(i);
+    k = Math.imul(k, 0xcc9e2d51);
+    k = (k << 15) | (k >>> 17);
+    k = Math.imul(k, 0x1b873593);
+
+    h ^= k;
+    h = (h << 13) | (h >>> 19);
+    h = (Math.imul(h, 5) + 0xe6546b64) >>> 0;
+  }
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x85ebca6b);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35);
+  h ^= h >>> 16;
+  return h >>> 0;
+}
+
+export class BloomFilter {
+  constructor({ expectedElements = 10000, falsePositiveRate = 0.01 } = {}) {
+    this.n = Math.max(1, expectedElements);
+    this.p = Math.min(Math.max(falsePositiveRate, 0.0001), 0.5);
+
+    const ln2 = Math.LN2;
+    const ln2Sq = ln2 * ln2;
+    this.m = Math.ceil(-(this.n * Math.log(this.p)) / ln2Sq);
+    this.k = Math.max(1, Math.ceil((this.m / this.n) * ln2));
+
+    const byteLength = Math.ceil(this.m / 8);
+    this.bitArray = new Uint8Array(byteLength);
+    this.count = 0;
+  }
+
+  _getHashIndices(item) {
+    const str = String(item);
+    const h1 = fnv1a32(str);
+    const h2 = murmur32(str);
+    const indices = [];
+
+    for (let i = 0; i < this.k; i++) {
+      const combined = (h1 + Math.imul(i, h2)) >>> 0;
+      indices.push(combined % this.m);
+    }
+    return indices;
+  }
+
+  add(item) {
+    if (item === undefined || item === null) return;
+    const indices = this._getHashIndices(item);
+    for (const idx of indices) {
+      const byteIdx = Math.floor(idx / 8);
+      const bitOffset = idx % 8;
+      this.bitArray[byteIdx] |= 1 << bitOffset;
+    }
+    this.count++;
+  }
+
+  addMany(items = []) {
+    for (const it of items) this.add(it);
+  }
+
+  has(item) {
+    if (item === undefined || item === null) return false;
+    const indices = this._getHashIndices(item);
+    for (const idx of indices) {
+      const byteIdx = Math.floor(idx / 8);
+      const bitOffset = idx % 8;
+      if ((this.bitArray[byteIdx] & (1 << bitOffset)) === 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  clear() {
+    this.bitArray.fill(0);
+    this.count = 0;
+  }
+
+  getStats() {
+    let bitsSet = 0;
+    for (let i = 0; i < this.bitArray.length; i++) {
+      let byte = this.bitArray[i];
+      while (byte > 0) {
+        byte &= byte - 1;
+        bitsSet++;
+      }
+    }
+    const fillRatio = Number(((bitsSet / this.m) * 100).toFixed(2));
+    const expTerm = Math.exp((-this.k * this.count) / this.m);
+    const estimatedFPR = Math.pow(1 - expTerm, this.k);
+
+    return {
+      sizeBits: this.m,
+      sizeBytes: this.bitArray.byteLength,
+      numHashFunctions: this.k,
+      expectedElements: this.n,
+      currentElements: this.count,
+      targetFpr: this.p,
+      fillRatioPercent: fillRatio,
+      estimatedCurrentFpr: Number(estimatedFPR.toFixed(6)),
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -254,4 +451,8 @@ export default {
   calculateCosineSimilarity,
   createTfEmbedding,
   analyzeSentiment,
+  ConsistentHashRing,
+  fnv1a32,
+  BloomFilter,
+  murmur32,
 };

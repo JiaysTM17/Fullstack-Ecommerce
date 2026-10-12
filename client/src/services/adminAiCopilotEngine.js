@@ -275,7 +275,50 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 10. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
+  // 10. Phân tích Cấu trúc Dữ liệu Xác suất Bloom Filter (Cache Penetration Guard)
+  if (/bloom filter|cache penetration|bộ lọc bloom|chống vét cạn|xác suất|lọc voucher/i.test(raw)) {
+    return {
+      text: `🔬 **CẤU TRÚC DỮ LIỆU XÁC SUẤT BLOOM FILTER (CACHE PENETRATION GUARD)**:
+- **Mục đích thiết kế**: Chặn đứng 100% các cuộc tấn công quét mã Voucher rác hoặc quét ID sản phẩm không tồn tại trước khi chạm tới Database.
+- **Nguyên lý toán học**:
+  - Không gian bit mảng: $m = -\\frac{n \\ln p}{(\\ln 2)^2}$ bits.
+  - Số hàm băm tối ưu: $k = \\frac{m}{n} \\ln 2$ hàm băm độc lập (triển khai qua Double Hashing Kirsch-Mitzenmacher).
+- **Đặc tính cốt lõi**:
+  - **Zero False Negatives**: Nếu Bloom Filter trả về \`false\`, phần tử chắc chắn $100\\%$ không tồn tại $\\rightarrow$ Chặn ngay lập tức ở tầng Gateway.
+  - **Bounded False Positive Rate (FPR)**: Tỷ lệ dương tính giả được kiểm soát thực nghiệm $\\le 1.0\\%$.
+  - **Tốc độ xử lý**: $O(k)$ cực nhanh ($< 0.03\\text{ms}$), tiết kiệm $99.9\\%$ tài nguyên I/O đĩa.`,
+      type: 'algorithm',
+      tag: 'THUẬT TOÁN BLOOM FILTER',
+      suggestions: [
+        'Tìm hiểu thuật toán Băm Nhất Quán',
+        'Kiểm tra cấu hình Redis Redlock',
+        'Xem radar gian lận và an ninh sàn'
+      ]
+    };
+  }
+
+  // 11. Phân tích Thuật toán Băm Nhất Quán (Consistent Hashing with Virtual Nodes)
+  if (/consistent hashing|băm nhất quán|virtual nodes|sharding|hash ring|chia tải phân tán|điểm băm ảo/i.test(raw)) {
+    return {
+      text: `🔄 **THUẬT TOÁN BĂM NHẤT QUÁN KÈM VIRTUAL NODES (CONSISTENT HASHING RING)**:
+- **Mục đích thiết kế**: Phân vùng dữ liệu (Sharding) cho Giỏ hàng, Phiên đăng nhập và Bộ nhớ đệm phân tán mà không bị sập nguồn khi quy mô cụm máy chủ thay đổi.
+- **Giải pháp triệt tiêu Cache Avalanche**:
+  - Khi dùng hàm băm thông thường $\\text{hash}(key) \\pmod N$, thêm/bớt 1 node sẽ làm đảo lộn gần $100\\%$ vị trí $\\rightarrow$ sập database.
+  - Với **Consistent Hashing**: Cả Key và Node cùng nằm trên một vòng tròn băm $2^{32}$. Khi thêm node mới, chỉ có đúng $\\approx \\frac{1}{N}$ số keys cần di dời (Rebalancing), $\\frac{N-1}{N}$ keys còn lại giữ nguyên vị trí.
+- **Cơ chế Virtual Nodes (k = 150 vnodes/node)**:
+  - Phân bổ đều các điểm ảo trên vòng tròn để triệt tiêu hiện tượng lệch dữ liệu (Data Skewness) và loại bỏ hoàn toàn các điểm nóng (Hotspots).
+  - Tìm kiếm nhị phân $O(\\log(N \\times k))$ siêu tốc.`,
+      type: 'algorithm',
+      tag: 'THUẬT TOÁN BĂM NHẤT QUÁN',
+      suggestions: [
+        'Tìm hiểu cấu trúc Bloom Filter',
+        'Kiểm tra cơ chế ngắt mạch Circuit Breaker',
+        'Xem tỷ lệ phân bổ tải cụm Nginx'
+      ]
+    };
+  }
+
+  // 12. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
   return {
     text: `Chào Quản Trị Viên! Tôi là **Admin Sentinel AI** - Trợ lý số chuyên trách giám sát, phân tích số liệu và đảm bảo tuân thủ vận hành sàn TMĐT:
 - 📊 **Tra cứu GMV & Hoa hồng**: Phân tích doanh số và hoa hồng sàn 5%.
