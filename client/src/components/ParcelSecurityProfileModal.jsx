@@ -528,6 +528,16 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
                 </div>
                 <div style={{ fontSize: '11px', color: '#2563eb', marginTop: '2px' }}>Liên lạc vệ tinh LEO thông suốt</div>
               </div>
+
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>KIỂM ÂM RƠI VỠ AI (MIC)</div>
+                <div style={{ fontSize: '16px', fontWeight: 800, color: order.acousticParcelListeningDropTamperAudit?.auditIntegrityStatus === 'crystal_intact_audio_silent' ? '#059669' : '#dc2626', marginTop: '4px' }}>
+                  {order.acousticParcelListeningDropTamperAudit?.decibelDropSpike || 38.2} dB
+                </div>
+                <div style={{ fontSize: '11px', color: '#059669', marginTop: '2px' }}>
+                  {order.acousticParcelListeningDropTamperAudit?.auditIntegrityStatus === 'crystal_intact_audio_silent' ? 'Âm thanh êm tĩnh, không va đập' : 'Phát hiện tạp âm chấn động'}
+                </div>
+              </div>
             </div>
           )}
 

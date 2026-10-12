@@ -4675,6 +4675,94 @@ export const triggerSmartLockerPinlessNfcTapAndGo = async (req, res) => {
   }
 };
 
+// @desc    Cảm biến âm thanh AI kiểm âm rơi vỡ & phát hiện tiếng rạch băng dính (Feature 142)
+// @route   POST /api/orders/:id/acoustic-drop-tamper
+// @access  Public / Authenticate
+export const auditAcousticParcelDropTamper = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      sensorModuleSerial = "ACOUSTIC_MIC_AI_77X",
+      decibelDropSpike = 42.5,
+      internalRattleDetected = false,
+      sealTapeTearAudioDetected = false,
+      soundFrequencyPatternHz = 2400,
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần giám định âm học rơi vỡ", 404);
+    }
+
+    const now = new Date().toISOString();
+    const spike = Number(decibelDropSpike) || 0;
+    const isTapeTorn = Boolean(sealTapeTearAudioDetected);
+    const isRattle = Boolean(internalRattleDetected) || spike >= 85.0;
+
+    let status = "crystal_intact_audio_silent";
+    let compensationCredit = 0;
+
+    if (isTapeTorn) {
+      status = "tamper_tape_tear_sound_flagged";
+      compensationCredit = Math.min(Number(order.total) || 0, 500000);
+    } else if (isRattle) {
+      status = "drop_shock_crack_sound_flagged";
+      compensationCredit = Math.min(Number(order.total) || 0, 300000);
+    }
+
+    order.acousticParcelListeningDropTamperAudit = {
+      isAcousticAudioAuditActive: true,
+      sensorModuleSerial,
+      decibelDropSpike: spike,
+      internalRattleDetected: isRattle,
+      sealTapeTearAudioDetected: isTapeTorn,
+      soundFrequencyPatternHz: Number(soundFrequencyPatternHz) || 2400,
+      auditIntegrityStatus: status,
+      auditedAt: now,
+      compensationEscrowCreditVnd: compensationCredit,
+    };
+
+    let logText = "";
+    if (status === "tamper_tape_tear_sound_flagged") {
+      logText = `CẢNH BÁO ÂM HỌC BĂNG DÍNH (#${sensorModuleSerial}): Phát hiện tần số âm thanh bóc rách niêm phong! Khóa tạm thời chuyển tiền, trợ giá bảo hiểm +${compensationCredit.toLocaleString('vi-VN')}₫.`;
+    } else if (status === "drop_shock_crack_sound_flagged") {
+      logText = `BÁO ĐỘNG RƠI VỠ NỘI QUAN: Đỉnh âm chấn động ${spike}dB phát hiện tiếng lạch cạch gãy vỡ bên trong kiện hàng. Đã lập biên bản bảo hiểm tức thì (+${compensationCredit.toLocaleString('vi-VN')}₫).`;
+    } else {
+      logText = `Kiểm âm kiện hàng an toàn: Sóng âm chuẩn êm tĩnh (${spike}dB), không phát hiện va đập nứt vỡ hay cạy mở vỏ hộp.`;
+    }
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: logText,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        acousticParcelListeningDropTamperAudit: order.acousticParcelListeningDropTamperAudit,
+        message: status === "crystal_intact_audio_silent"
+          ? "Kiểm âm bưu kiện toàn vẹn, không có tạp âm chấn động hoặc cạy mở."
+          : "Phát hiện bất thường qua cảm biến âm học! Đã kích hoạt bảo hiểm an tâm.",
+      },
+      200
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 

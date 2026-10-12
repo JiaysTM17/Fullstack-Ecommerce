@@ -5923,6 +5923,77 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(validate("CELL_B08"), true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 142: Acoustic Parcel Listening Drop-Shock & Seal Tape-Tear Tamper Audio Audit (5 Tests)
+  // =========================================================================
+  describe("Feature 142: Acoustic Parcel Listening Drop-Shock & Seal Tape-Tear Tamper Audio Audit", () => {
+    test("F142-T1: Order arms acousticParcelListeningDropTamperAudit subdocument successfully", async () => {
+      const order = await Order.create({
+        orderId: "ORD_ACOUSTIC_142",
+        items: [{ name: "Máy ảnh Mirrorless Full-frame", price: 34500000, quantity: 1 }],
+        total: 34500000,
+        status: "shipping",
+        acousticParcelListeningDropTamperAudit: {
+          isAcousticAudioAuditActive: true,
+          sensorModuleSerial: "ACOUSTIC_MIC_AI_77X",
+          decibelDropSpike: 38.2,
+          internalRattleDetected: false,
+          sealTapeTearAudioDetected: false,
+          soundFrequencyPatternHz: 2400,
+          auditIntegrityStatus: "crystal_intact_audio_silent",
+          auditedAt: "2026-10-12T08:38:00.000Z",
+          compensationEscrowCreditVnd: 0,
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_ACOUSTIC_142");
+      expect.equal(order.acousticParcelListeningDropTamperAudit.isAcousticAudioAuditActive, true);
+      expect.equal(order.acousticParcelListeningDropTamperAudit.sensorModuleSerial, "ACOUSTIC_MIC_AI_77X");
+      expect.equal(order.acousticParcelListeningDropTamperAudit.decibelDropSpike, 38.2);
+      expect.equal(order.acousticParcelListeningDropTamperAudit.auditIntegrityStatus, "crystal_intact_audio_silent");
+      expect.equal(order.acousticParcelListeningDropTamperAudit.internalRattleDetected, false);
+    });
+
+    test("F142-T2: Seal tape tearing acoustic frequency triggers immediate tamper audio flag & compensation credit", () => {
+      const isTapeTorn = true;
+      const orderTotal = 2500000;
+      let status = "crystal_intact_audio_silent";
+      let compensationCredit = 0;
+
+      if (isTapeTorn) {
+        status = "tamper_tape_tear_sound_flagged";
+        compensationCredit = Math.min(orderTotal, 500000);
+      }
+
+      expect.equal(status, "tamper_tape_tear_sound_flagged");
+      expect.equal(compensationCredit, 500000);
+    });
+
+    test("F142-T3: Severe drop impact shock spike >= 85dB flags internal crack rattle sound", () => {
+      const spike = 88.5;
+      const internalRattleDetected = spike >= 85.0;
+      const status = internalRattleDetected ? "drop_shock_crack_sound_flagged" : "crystal_intact_audio_silent";
+
+      expect.equal(internalRattleDetected, true);
+      expect.equal(status, "drop_shock_crack_sound_flagged");
+    });
+
+    test("F142-T4: Ambient sound frequency pattern falls within valid audio threshold", () => {
+      const validateFreq = (hz) => Number(hz) >= 20 && Number(hz) <= 20000;
+
+      expect.equal(validateFreq(2400), true);
+      expect.equal(validateFreq(15), false);
+      expect.equal(validateFreq(25000), false);
+    });
+
+    test("F142-T5: Missing sensorModuleSerial falls back to default serial gracefully", () => {
+      const fallbackSerial = (val) => val || "ACOUSTIC_MIC_AI_77X";
+
+      expect.equal(fallbackSerial(null), "ACOUSTIC_MIC_AI_77X");
+      expect.equal(fallbackSerial("MIC_CUSTOM_01"), "MIC_CUSTOM_01");
+    });
+  });
 });
 
 

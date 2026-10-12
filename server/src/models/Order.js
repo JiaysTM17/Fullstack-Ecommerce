@@ -739,6 +739,21 @@ const orderSchema = new mongoose.Schema(
       retrievedAt: { type: String, default: null },
       biometricConfirmed: { type: Boolean, default: true },
     },
+    acousticParcelListeningDropTamperAudit: {
+      isAcousticAudioAuditActive: { type: Boolean, default: false },
+      sensorModuleSerial: { type: String, default: null }, // e.g. "ACOUSTIC_MIC_AI_77X"
+      decibelDropSpike: { type: Number, default: 42.5 },
+      internalRattleDetected: { type: Boolean, default: false }, // Có tiếng lọc xọc linh kiện gãy vỡ bên trong hộp
+      sealTapeTearAudioDetected: { type: Boolean, default: false }, // Tiếng rạch băng dính niêm phong
+      soundFrequencyPatternHz: { type: Number, default: 2400 },
+      auditIntegrityStatus: {
+        type: String,
+        enum: ["crystal_intact_audio_silent", "drop_shock_crack_sound_flagged", "tamper_tape_tear_sound_flagged"],
+        default: "crystal_intact_audio_silent",
+      },
+      auditedAt: { type: String, default: null },
+      compensationEscrowCreditVnd: { type: Number, default: 0 },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

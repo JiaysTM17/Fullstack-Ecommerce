@@ -1368,6 +1368,17 @@ export async function triggerSmartLockerPinlessNfcTapAndGoAPI(orderId, { lockerS
   return result?.data || result;
 }
 
+/**
+ * Acoustic Parcel Listening Drop-Shock & Seal Tape-Tear Tamper Audio Audit (Feature 142)
+ */
+export async function auditAcousticParcelDropTamperAPI(orderId, { sensorModuleSerial, decibelDropSpike, internalRattleDetected, sealTapeTearAudioDetected, soundFrequencyPatternHz } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/acoustic-drop-tamper`, {
+    method: "POST",
+    body: JSON.stringify({ sensorModuleSerial, decibelDropSpike, internalRattleDetected, sealTapeTearAudioDetected, soundFrequencyPatternHz }),
+  });
+  return result?.data || result;
+}
+
 
 
 

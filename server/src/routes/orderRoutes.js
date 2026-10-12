@@ -62,6 +62,7 @@ import {
   verifySyntheticDnaNanotechTaggingSeal,
   triggerInteractiveDoorbellGateRelease,
   triggerSmartLockerPinlessNfcTapAndGo,
+  auditAcousticParcelDropTamper,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -136,6 +137,7 @@ router.post("/:id/qkd-encryption-seal", optionalAuthenticate, verifyQuantumKeyDi
 router.post("/:id/dna-nanotech-seal", optionalAuthenticate, verifySyntheticDnaNanotechTaggingSeal);
 router.post("/:id/doorbell-gate-release", optionalAuthenticate, triggerInteractiveDoorbellGateRelease);
 router.post("/:id/smart-locker-pinless-nfc", optionalAuthenticate, triggerSmartLockerPinlessNfcTapAndGo);
+router.post("/:id/acoustic-drop-tamper", optionalAuthenticate, auditAcousticParcelDropTamper);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);
