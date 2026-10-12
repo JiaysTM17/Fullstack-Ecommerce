@@ -4763,6 +4763,103 @@ export const auditAcousticParcelDropTamper = async (req, res) => {
   }
 };
 
+// @desc    Predictive AI Delivery Window Slot Optimization & Real-Time Traffic Reroute Notice (Feature 143)
+// @route   POST /api/orders/:id/predictive-delivery-window
+// @access  Public / Optional Authenticate
+export const updatePredictiveDeliveryWindowReroute = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      predictedSlot = "17:30 - 18:30 Hôm Nay",
+      confidencePercent = 94.6,
+      trafficStatus = "clear_smooth_flow",
+      rerouteDelayMinutes = 0,
+      rerouteReasonNote = "",
+      buyerHomePresenceConfirmed = true,
+      adjustedEta = null,
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng để dự đoán khung giờ giao & điều hướng tuyến đường", 404);
+    }
+
+    const validTrafficStatuses = [
+      "clear_smooth_flow",
+      "heavy_congestion_rerouted",
+      "flash_flood_detour_active",
+      "courier_approaching_5min",
+    ];
+
+    const safeTrafficStatus = validTrafficStatuses.includes(trafficStatus)
+      ? trafficStatus
+      : "clear_smooth_flow";
+
+    const now = new Date().toISOString();
+    const delay = Number(rerouteDelayMinutes) || 0;
+    const conf = Math.max(50, Math.min(100, Number(confidencePercent) || 94.6));
+
+    let defaultEta = adjustedEta;
+    if (!defaultEta) {
+      const etaDate = new Date(Date.now() + (delay + 25) * 60 * 1000);
+      defaultEta = `${etaDate.getHours().toString().padStart(2, "0")}:${etaDate.getMinutes().toString().padStart(2, "0")}`;
+    }
+
+    order.predictiveDeliveryWindowReroute = {
+      isPredictiveWindowActive: true,
+      predictedSlot: predictedSlot || "17:30 - 18:30 Hôm Nay",
+      confidencePercent: conf,
+      trafficStatus: safeTrafficStatus,
+      rerouteDelayMinutes: delay,
+      rerouteReasonNote: rerouteReasonNote || (safeTrafficStatus === "heavy_congestion_rerouted" ? "Ùn tắc cục bộ ngã tư, AI đã nắn tuyến qua đường gom" : "Lộ trình thông thoáng"),
+      buyerHomePresenceConfirmed: Boolean(buyerHomePresenceConfirmed),
+      adjustedEta: defaultEta,
+      updatedAt: now,
+    };
+
+    let logText = "";
+    if (safeTrafficStatus === "heavy_congestion_rerouted") {
+      logText = `ĐIỀU HƯỚNG GIAO HÀNG THÔNG MINH: Tuyến đường chính kẹt xe (+${delay} phút). AI tự động tối ưu tuyến tránh ngập/ùn tắc, dự kiến giao lúc ${defaultEta}.`;
+    } else if (safeTrafficStatus === "flash_flood_detour_active") {
+      logText = `CẢNH BÁO MƯA NGẬP: Đoạn đường ngập cục bộ, shipper đã chuyển hướng an toàn (+${delay} phút, dự kiến ${defaultEta}).`;
+    } else if (safeTrafficStatus === "courier_approaching_5min") {
+      logText = `SHIPPER ĐANG ĐẾN GẦN: Bưu tá SPX chỉ còn cách bạn khoảng 500m (dự kiến đến sau 5 phút). Vui lòng chuẩn bị nhận hàng.`;
+    } else {
+      logText = `Khung giờ vàng giao hàng AI (${predictedSlot}, độ tin cậy ${conf}%): Lộ trình di chuyển thông suốt, dự kiến giao lúc ${defaultEta}.`;
+    }
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: logText,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        predictiveDeliveryWindowReroute: order.predictiveDeliveryWindowReroute,
+        message: safeTrafficStatus === "clear_smooth_flow"
+          ? "Khung giờ vàng AI tối ưu, shipper đang di chuyển đúng lộ trình."
+          : `Thông báo điều hướng: ${order.predictiveDeliveryWindowReroute.rerouteReasonNote}`,
+      },
+      200
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 

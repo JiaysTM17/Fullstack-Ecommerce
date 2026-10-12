@@ -754,6 +754,21 @@ const orderSchema = new mongoose.Schema(
       auditedAt: { type: String, default: null },
       compensationEscrowCreditVnd: { type: Number, default: 0 },
     },
+    predictiveDeliveryWindowReroute: {
+      isPredictiveWindowActive: { type: Boolean, default: false },
+      predictedSlot: { type: String, default: "17:30 - 18:30 Hôm Nay" }, // Khung giờ vàng AI dự đoán người mua ở nhà
+      confidencePercent: { type: Number, default: 94.6 }, // Độ tin cậy thói quen nhận hàng
+      trafficStatus: {
+        type: String,
+        enum: ["clear_smooth_flow", "heavy_congestion_rerouted", "flash_flood_detour_active", "courier_approaching_5min"],
+        default: "clear_smooth_flow",
+      },
+      rerouteDelayMinutes: { type: Number, default: 0 },
+      rerouteReasonNote: { type: String, default: "" },
+      buyerHomePresenceConfirmed: { type: Boolean, default: true },
+      adjustedEta: { type: String, default: null },
+      updatedAt: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

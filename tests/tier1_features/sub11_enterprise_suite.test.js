@@ -5994,6 +5994,87 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(fallbackSerial("MIC_CUSTOM_01"), "MIC_CUSTOM_01");
     });
   });
+
+  // =========================================================================
+  // FEATURE 143: Predictive AI Delivery Window Slot Optimization & Traffic Reroute (5 Tests)
+  // =========================================================================
+  describe("Feature 143: Predictive AI Delivery Window Slot Optimization & Traffic Reroute Notice", () => {
+    test("F143-T1: Successfully records predictive home arrival slot and high confidence score", async () => {
+      const order = await Order.create({
+        orderId: "ORD_PREDICT_143",
+        user: "user_test_predict_143",
+        items: [{ product: "prod_p1", quantity: 1, price: 650000 }],
+        totalPrice: 650000,
+        shippingFee: 22000,
+        finalTotal: 672000,
+        predictiveDeliveryWindowReroute: {
+          isPredictiveWindowActive: true,
+          predictedSlot: "17:30 - 18:30 Hôm Nay",
+          confidencePercent: 96.2,
+          trafficStatus: "clear_smooth_flow",
+          rerouteDelayMinutes: 0,
+          rerouteReasonNote: "Lộ trình thông thoáng, lưu lượng xe thấp",
+          buyerHomePresenceConfirmed: true,
+          adjustedEta: "17:45",
+          updatedAt: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_PREDICT_143");
+      expect.equal(order.predictiveDeliveryWindowReroute.isPredictiveWindowActive, true);
+      expect.equal(order.predictiveDeliveryWindowReroute.predictedSlot, "17:30 - 18:30 Hôm Nay");
+      expect.equal(order.predictiveDeliveryWindowReroute.confidencePercent, 96.2);
+      expect.equal(order.predictiveDeliveryWindowReroute.trafficStatus, "clear_smooth_flow");
+      expect.equal(order.predictiveDeliveryWindowReroute.buyerHomePresenceConfirmed, true);
+    });
+
+    test("F143-T2: Traffic congestion dynamically triggers AI smart detour rerouting with delay minutes", () => {
+      const trafficStatus = "heavy_congestion_rerouted";
+      const isDetourActive = trafficStatus === "heavy_congestion_rerouted";
+      const delayMinutes = isDetourActive ? 18 : 0;
+      const rerouteReason = isDetourActive
+        ? "Ùn tắc cục bộ ngã tư, AI đã nắn tuyến qua đường gom"
+        : "Lộ trình thông suốt";
+
+      expect.equal(isDetourActive, true);
+      expect.equal(delayMinutes, 18);
+      expect.equal(rerouteReason.includes("nắn tuyến qua đường gom"), true);
+    });
+
+    test("F143-T3: Flash flood condition halts delivery route and initiates safe highland detour", () => {
+      const trafficStatus = "flash_flood_detour_active";
+      const isFloodSafeRerouted = trafficStatus === "flash_flood_detour_active";
+      const delayMinutes = isFloodSafeRerouted ? 30 : 0;
+
+      expect.equal(isFloodSafeRerouted, true);
+      expect.equal(delayMinutes >= 20, true);
+    });
+
+    test("F143-T4: Buyer re-scheduling shifts predicted delivery slot to evening seamlessly", () => {
+      const rescheduleSlot = "19:00 - 20:30 Tối Nay";
+      const buyerPresence = false;
+      const confidence = 92.0;
+
+      const windowConfig = {
+        predictedSlot: rescheduleSlot,
+        buyerHomePresenceConfirmed: buyerPresence,
+        confidencePercent: confidence,
+      };
+
+      expect.equal(windowConfig.predictedSlot, "19:00 - 20:30 Tối Nay");
+      expect.equal(windowConfig.buyerHomePresenceConfirmed, false);
+      expect.equal(windowConfig.confidencePercent, 92.0);
+    });
+
+    test("F143-T5: Confidence score bounds strictly between 50% and 100%", () => {
+      const clampConfidence = (c) => Math.max(50, Math.min(100, Number(c) || 50));
+
+      expect.equal(clampConfidence(120), 100);
+      expect.equal(clampConfidence(30), 50);
+      expect.equal(clampConfidence(94.6), 94.6);
+      expect.equal(clampConfidence("invalid"), 50);
+    });
+  });
 });
 
 

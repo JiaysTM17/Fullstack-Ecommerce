@@ -1379,6 +1379,17 @@ export async function auditAcousticParcelDropTamperAPI(orderId, { sensorModuleSe
   return result?.data || result;
 }
 
+/**
+ * Predictive AI Delivery Window Slot Optimization & Real-Time Traffic Reroute Notice (Feature 143)
+ */
+export async function updatePredictiveDeliveryWindowRerouteAPI(orderId, { predictedSlot, confidencePercent, trafficStatus, rerouteDelayMinutes, rerouteReasonNote, buyerHomePresenceConfirmed, adjustedEta } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/predictive-delivery-window`, {
+    method: "POST",
+    body: JSON.stringify({ predictedSlot, confidencePercent, trafficStatus, rerouteDelayMinutes, rerouteReasonNote, buyerHomePresenceConfirmed, adjustedEta }),
+  });
+  return result?.data || result;
+}
+
 
 
 

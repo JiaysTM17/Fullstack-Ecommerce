@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { triggerInteractiveDoorbellGateReleaseAPI } from '../services/api';
+import { triggerInteractiveDoorbellGateReleaseAPI, updatePredictiveDeliveryWindowRerouteAPI } from '../services/api';
 import {
   ShieldCheckIcon,
   TruckIcon,
@@ -175,6 +175,7 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
           {[
             { id: 'overview', label: '🛡️ Chứng Nhận Toàn Vẹn' },
             { id: 'doorbell', label: '🔔 Chuông Cửa Video AI & Mở Cổng' },
+            { id: 'predictive_window', label: '⏱️ Khung Giờ & Nắn Tuyến AI' },
             { id: 'telemetry', label: '📊 Giám Sát Cảm Biến IoT' },
             { id: 'locker', label: '📱 Tủ SPX Tap & Go' },
           ].map((tab) => (
@@ -688,6 +689,255 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
               </div>
             </div>
           )}
+
+          {/* TAB 5: KHUNG GIỜ VÀNG & NẮN TUYẾN AI */}
+          {activeTab === 'predictive_window' && (() => {
+            const pred = order.predictiveDeliveryWindowReroute || {
+              isPredictiveWindowActive: true,
+              predictedSlot: '17:30 - 18:30 Hôm Nay',
+              confidencePercent: 94.6,
+              trafficStatus: 'clear_smooth_flow',
+              rerouteDelayMinutes: 0,
+              rerouteReasonNote: 'Lộ trình di chuyển thông suốt, shipper đi theo làn ưu tiên',
+              buyerHomePresenceConfirmed: true,
+              adjustedEta: '17:50',
+            };
+
+            const isCongested = pred.trafficStatus === 'heavy_congestion_rerouted';
+            const isFlooded = pred.trafficStatus === 'flash_flood_detour_active';
+            const isApproaching = pred.trafficStatus === 'courier_approaching_5min';
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                  flexWrap: 'wrap',
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '18px' }}>🤖</span>
+                      <strong style={{ fontSize: '15px', color: '#0f172a' }}>AI Dự Đoán Thói Quen Nhận Hàng Của Bạn</strong>
+                      <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: '#dbeafe', color: '#1d4ed8' }}>
+                        Độ chính xác {pred.confidencePercent}%
+                      </span>
+                    </div>
+                    <p style={{ margin: '6px 0 0', fontSize: '13px', color: '#475569' }}>
+                      Hệ thống tự động học lịch sử nhận bưu kiện để chọn khung giờ bạn có mặt tại nhà, hạn chế tối đa việc lỡ hẹn.
+                    </p>
+                  </div>
+
+                  <div style={{
+                    background: '#ffffff',
+                    border: '1.5px solid #3b82f6',
+                    padding: '10px 16px',
+                    borderRadius: '10px',
+                    textAlign: 'center',
+                    boxShadow: '0 2px 6px rgba(59, 130, 246, 0.1)',
+                  }}>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block' }}>Khung Giờ Vàng Đề Xuất</span>
+                    <strong style={{ fontSize: '16px', fontWeight: 800, color: '#1d4ed8' }}>{pred.predictedSlot}</strong>
+                    <div style={{ fontSize: '11px', color: '#10b981', fontWeight: 600, marginTop: '2px' }}>
+                      Dự kiến shipper tới: {pred.adjustedEta || '17:50'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tình Trạng Tuyến Đường Thực Tế */}
+                <div style={{
+                  padding: '16px',
+                  borderRadius: '12px',
+                  border: isCongested || isFlooded ? '1.5px solid #fca5a5' : isApproaching ? '1.5px solid #93c5fd' : '1px solid #bbf7d0',
+                  background: isCongested || isFlooded ? '#fff1f2' : isApproaching ? '#eff6ff' : '#f0fdf4',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '18px' }}>
+                        {isCongested ? '🚗' : isFlooded ? '🌧️' : isApproaching ? '⚡' : '🛣️'}
+                      </span>
+                      <strong style={{ fontSize: '14px', color: isCongested || isFlooded ? '#991b1b' : isApproaching ? '#1e40af' : '#166534' }}>
+                        {isCongested
+                          ? 'Tuyến Đường Đang Ùn Tắc - AI Đã Tự Động Nắn Tuyến Tránh Kẹt'
+                          : isFlooded
+                          ? 'Đoạn Tuyến Ngập Nước - Shipper Đang Đi Đường Vòng An Toàn'
+                          : isApproaching
+                          ? 'Shipper Đang Ở Gần Bạn (Dưới 5 Phút Nữa)'
+                          : 'Giao Thông Thông Suốt - Di Chuyển Chuẩn Xác'}
+                      </strong>
+                    </div>
+
+                    <span style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      background: isCongested || isFlooded ? '#fee2e2' : isApproaching ? '#dbeafe' : '#dcfce7',
+                      color: isCongested || isFlooded ? '#b91c1c' : isApproaching ? '#1d4ed8' : '#15803d',
+                    }}>
+                      {pred.rerouteDelayMinutes > 0 ? `Chênh lệch +${pred.rerouteDelayMinutes} phút` : 'Đúng giờ 100%'}
+                    </span>
+                  </div>
+
+                  <p style={{ margin: 0, fontSize: '12px', color: '#475569', lineHeight: 1.5 }}>
+                    <strong>Chi tiết:</strong> {pred.rerouteReasonNote || 'Bưu tá SPX di chuyển thuận lợi theo trục đường gom, không gặp sự cố phát sinh.'}
+                  </p>
+                </div>
+
+                {/* Bảng Hành Động Nhanh Của Người Trải Nghiệm */}
+                <div style={{
+                  padding: '16px',
+                  borderRadius: '12px',
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '12px' }}>
+                    Tương Tác Thuận Tiện &amp; Phản Hồi 1 Chạm:
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      disabled={doorbellActionLoading}
+                      onClick={async () => {
+                        setDoorbellActionLoading(true);
+                        try {
+                          const res = await updatePredictiveDeliveryWindowRerouteAPI(order.orderId || order._id, {
+                            predictedSlot: '17:30 - 18:30 Hôm Nay',
+                            trafficStatus: 'courier_approaching_5min',
+                            rerouteDelayMinutes: 0,
+                            buyerHomePresenceConfirmed: true,
+                            rerouteReasonNote: 'Người mua xác nhận đang có mặt ở nhà và sẵn sàng nhận hàng!',
+                          });
+                          setDoorbellLog('Đã xác nhận có mặt ở nhà! Shipper nhận thông báo ưu tiên giao ngay.');
+                          if (onUpdateOrder) {
+                            onUpdateOrder({
+                              ...order,
+                              predictiveDeliveryWindowReroute: res?.predictiveDeliveryWindowReroute,
+                            });
+                          }
+                        } catch (e) {
+                          setDoorbellLog('Lỗi gửi phản hồi: ' + e.message);
+                        } finally {
+                          setDoorbellActionLoading(false);
+                        }
+                      }}
+                      style={{
+                        background: '#2563eb',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '9px 16px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 2px 6px rgba(37, 99, 235, 0.2)',
+                      }}
+                    >
+                      <span>🏠</span>
+                      <span>Xác Nhận Tôi Đang Ở Nhà</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={doorbellActionLoading}
+                      onClick={async () => {
+                        setDoorbellActionLoading(true);
+                        try {
+                          const res = await updatePredictiveDeliveryWindowRerouteAPI(order.orderId || order._id, {
+                            predictedSlot: '19:00 - 20:30 Tối Nay',
+                            trafficStatus: 'clear_smooth_flow',
+                            rerouteDelayMinutes: 60,
+                            buyerHomePresenceConfirmed: false,
+                            rerouteReasonNote: 'Người mua đổi hẹn sang khung giờ tối 19:00 - 20:30 do bận việc ngoài.',
+                          });
+                          setDoorbellLog('Đã dời sang khung giờ tối 19:00 - 20:30 thành công!');
+                          if (onUpdateOrder) {
+                            onUpdateOrder({
+                              ...order,
+                              predictiveDeliveryWindowReroute: res?.predictiveDeliveryWindowReroute,
+                            });
+                          }
+                        } catch (e) {
+                          setDoorbellLog('Lỗi đổi khung giờ: ' + e.message);
+                        } finally {
+                          setDoorbellActionLoading(false);
+                        }
+                      }}
+                      style={{
+                        background: '#ffffff',
+                        color: '#475569',
+                        border: '1.5px solid #cbd5e1',
+                        padding: '9px 16px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <span>🌙</span>
+                      <span>Dời Sang 19:00 - 20:30 Tối</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={doorbellActionLoading}
+                      onClick={async () => {
+                        setDoorbellActionLoading(true);
+                        try {
+                          const res = await updatePredictiveDeliveryWindowRerouteAPI(order.orderId || order._id, {
+                            predictedSlot: pred.predictedSlot,
+                            trafficStatus: 'heavy_congestion_rerouted',
+                            rerouteDelayMinutes: 15,
+                            rerouteReasonNote: 'Mô phỏng nắn tuyến tránh điểm ùn tắc giao thông giờ cao điểm.',
+                          });
+                          setDoorbellLog('Đã kích hoạt thử nghiệm nắn tuyến AI thông minh!');
+                          if (onUpdateOrder) {
+                            onUpdateOrder({
+                              ...order,
+                              predictiveDeliveryWindowReroute: res?.predictiveDeliveryWindowReroute,
+                            });
+                          }
+                        } catch (e) {
+                          setDoorbellLog('Lỗi kích hoạt: ' + e.message);
+                        } finally {
+                          setDoorbellActionLoading(false);
+                        }
+                      }}
+                      style={{
+                        background: '#ffffff',
+                        color: '#d97706',
+                        border: '1.5px solid #fde68a',
+                        padding: '9px 16px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <span>🔄</span>
+                      <span>Mô Phỏng Nắn Tuyến Tránh Kẹt</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Footer */}
