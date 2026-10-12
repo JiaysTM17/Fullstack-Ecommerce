@@ -15,12 +15,16 @@ const connectDB = async () => {
     });
 
     mongoose.connection.on("error", (err) => {
-      logger.error(`MongoDB connection error: ${err.message}`);
+      if (isConnected) {
+        logger.error(`MongoDB connection error: ${err.message}`);
+      }
     });
 
     mongoose.connection.on("disconnected", () => {
-      isConnected = false;
-      logger.warn("MongoDB disconnected. Falling back to in-memory store.");
+      if (isConnected) {
+        isConnected = false;
+        logger.warn("MongoDB disconnected. Falling back to in-memory store.");
+      }
     });
 
     const conn = await mongoose.connect(mongoUri, {
@@ -31,7 +35,7 @@ const connectDB = async () => {
     return true;
   } catch (error) {
     isConnected = false;
-    logger.warn(`MongoDB not reachable (${error.message}). Running with in-memory persistence fallback.`);
+    logger.info(`💡 MongoDB local không mở (${error.message}). Đang vận hành mượt mà với In-Memory Store & Disk Persistence.`);
     return false;
   }
 };
