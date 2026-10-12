@@ -131,7 +131,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 4. Radar phát hiện gian lận & Người mua bất thường (Fraud Radar / Buyer Abuse)
-  if (/gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
+  if (!/sybil|dsu|disjoint set/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
     const anomalyCount = fraudAnomaliesCount || (fraudData?.criticalCount ?? 0) || (fraudData?.mediumCount ?? 1);
     return {
       text: `🚨 **RADAR PHÁT HIỆN GIAN LẬN TOÀN SÀN (AI FRAUD GUARD)**:
@@ -175,7 +175,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 6. Điểm Uy Tín Tài Khoản & Chống Gian Lận Đa Tài Khoản (Trust Score & Anti-Sybil Guard)
-  if (/trust score|điểm uy tín|tài khoản ảo|sybil|seeding|đánh giá ảo|tỷ lệ hủy/i.test(raw)) {
+  if (!/sybil ring|dsu|disjoint set/i.test(raw) && /trust score|điểm uy tín|tài khoản ảo|sybil|seeding|đánh giá ảo|tỷ lệ hủy/i.test(raw)) {
     return {
       text: `🛡️ **HỆ THỐNG ĐÁNH GIÁ ĐIỂM UY TÍN (TRUST SCORE & ANTI-SYBIL GUARD)**:
 - **Nguyên lý tính điểm (Thang 0 - 100)**:
@@ -438,7 +438,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 18. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
+  // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
+  if (/thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+    return {
+      text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
+- **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
+- **Nguyên lý xác suất Bayesian (Beta-Bernoulli Bandit)**:
+  - Mỗi mức giá là một cánh tay (Arm). Tỷ lệ chuyển đổi mua hàng (CVR) được mô hình hóa: $\\theta_k \\sim \\text{Beta}(\\alpha_k + 1, \\beta_k + 1)$.
+  - $\\alpha_k$: Số khách mua thành công; $\\beta_k$: Số khách chỉ xem rồi thoát.
+  - Cân bằng Thử nghiệm & Khai thác (Exploration vs Exploitation): Rút mẫu ngẫu nhiên từ phân phối hậu nghiệm; chọn mức giá có Doanh thu kỳ vọng mẫu $E[R] = P \\times \\theta_k$ cao nhất.
+- **Ưu thế vượt trội**: Nhanh chóng tự động hội tụ về mức giá có doanh thu cao nhất, loại bỏ hoàn toàn cảm tính của người bán.`,
+      type: 'algorithm',
+      tag: 'ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING',
+      suggestions: [
+        'Tìm hiểu mạng lưới Sybil DSU',
+        'Kiểm tra bộ máy Trie Autocomplete',
+        'Xem báo cáo doanh số GMV toàn sàn'
+      ]
+    };
+  }
+
+  // 19. Radar Phát Hiện Mạng Lưới Gian Lận Tài Khoản Ảo (Disjoint Set Union - DSU Sybil Ring)
+  if (/sybil ring|mạng lưới gian lận|dsu|disjoint set union|liên minh gian lận|tài khoản chung thiết bị|cụm sybil/i.test(raw)) {
+    return {
+      text: `🕸️ **RADAR MẠNG LƯỚI GIAN LẬN SYBIL RING (DISJOINT SET UNION - DSU)**:
+- **Mục đích thiết kế**: Phát hiện và phong tỏa các cụm tài khoản ảo (Sybil Farm) chuyên dùng chung thiết bị, dải IP, thẻ ngân hàng hoặc số điện thoại để trục lợi mã giảm giá tân thủ.
+- **Nguyên lý cấu trúc DSU**:
+  - **Nén đường đi (Path Compression)**: Đệ quy trỏ trực tiếp các tài khoản thành viên về nút đại diện gốc của cụm, đưa thao tác tra cứu \`find()\` về $O(1)$.
+  - **Gộp theo cấp (Union by Rank)**: Luôn gắn cây nông hơn vào cây sâu hơn khi phát hiện hai tài khoản dùng chung thực thể.
+  - Độ phức tạp gần như tối ưu $O(\\alpha(N))$ (hàm Ackermann nghịch đảo $\\le 4$).
+- **Cơ chế phản ứng tự động**: Khi cụm có từ 3 tài khoản liên kết trở lên hoặc tỷ lệ bùng đơn $\\ge 30\\%$, tự động kích hoạt chế độ \`LOCK_VOUCHER_PRIVILEGES_AND_REQUIRE_PREPAYMENT\`.`,
+      type: 'algorithm',
+      tag: 'RADAR GIAN LẬN DSU SYBIL',
+      suggestions: [
+        'Xem danh sách các cụm Sybil bị gắn cờ',
+        'Kiểm tra điểm uy tín Trust Score',
+        'Xem thuật toán Định giá Thompson Sampling'
+      ]
+    };
+  }
+
+  // 20. Bộ Máy Gợi Ý Tìm Kiếm Tức Thì & Chịu Lỗi Chính Tả (Trie & Fuzzy Search Typo-Tolerance)
+  if (/trie|autocomplete|tìm kiếm mờ|fuzzy search|gợi ý tìm kiếm|typo tolerance|levenshtein autocomplete/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ MÁY TÌM KIẾM TỨC THÌ TRIE & FUZZY TYPO-TOLERANCE**:
+- **Mục đích thiết kế**: Cung cấp tính năng gợi ý từ khóa (Typeahead Autocomplete) trong thời gian dưới $1\\text{ms}$ và tự động sửa lỗi gõ sai chính tả của người mua hàng.
+- **Kiến trúc giải thuật**:
+  - **Cây tiền tố Trie với bộ đệm Top-K**: Mỗi node lưu sẵn danh sách gợi ý phổ biến nhất của nhánh con; độ phức tạp tra cứu tiền tố chỉ là $O(L)$ với $L$ là độ dài từ khóa người dùng gõ.
+  - **Chuẩn hóa tiếng Việt đa tầng**: Gõ không dấu (*"ao khoac"*) vẫn gợi ý chính xác sản phẩm có dấu (*"Áo khoác gió"*).
+  - **Chịu lỗi chính tả (Levenshtein Fuzzy Search)**: Tự động phát hiện và gợi ý đúng khi gõ sai $1$ ký tự (*"iphoen"* $\\rightarrow$ *"iPhone 15"*, *"son mồi"* $\\rightarrow$ *"Son môi"*).`,
+      type: 'algorithm',
+      tag: 'TÌM KIẾM TRIE AUTOCOMPLETE',
+      suggestions: [
+        'Xem thuật toán Định giá Thompson Sampling',
+        'Tìm hiểu thuật toán Bloom Filter',
+        'Xem báo cáo SLA tìm kiếm sàn'
+      ]
+    };
+  }
+
+  // 21. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
   return {
     text: `Chào Quản Trị Viên! Tôi là **Admin Sentinel AI** - Trợ lý số chuyên trách giám sát, phân tích số liệu và đảm bảo tuân thủ vận hành sàn TMĐT:
 - 📊 **Tra cứu GMV & Hoa hồng**: Phân tích doanh số và hoa hồng sàn 5%.

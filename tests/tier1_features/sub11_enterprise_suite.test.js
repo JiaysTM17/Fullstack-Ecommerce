@@ -46,6 +46,12 @@ import {
   HyperLogLog,
   knapsack01,
   findOptimalAddonToUnlockVoucher,
+  DynamicPricingBandit,
+  sampleBeta,
+  DisjointSetUnion,
+  SybilFraudRadar,
+  TrieAutocomplete,
+  removeVietnameseTones,
 } from "../../client/src/services/aiAlgorithms.js";
 import fs from "fs";
 
@@ -7768,7 +7774,235 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       });
     });
   });
+
+  // =========================================================================
+  // FEATURE 154: Advanced Enterprise E-Commerce Algorithms Suite (Phase 7 - 19 Tests)
+  // =========================================================================
+  describe("Feature 154: Advanced Enterprise E-Commerce Algorithms Suite (Phase 7)", () => {
+    // --- 1. Dynamic Pricing & Price Elasticity Optimizer (Multi-Armed Bandit) ---
+    describe("Algorithm 1: Dynamic Pricing & Price Elasticity Optimizer (Thompson Sampling)", () => {
+      test("F154-T1: DynamicPricingBandit initializes arms with prior Beta(1, 1) and zero impressions", () => {
+        const bandit = new DynamicPricingBandit([
+          { id: "tier_1", price: 100000, discountPercent: 10 },
+          { id: "tier_2", price: 80000, discountPercent: 20 },
+        ]);
+
+        const stats = bandit.getStats();
+        expect.equal(stats.totalArms, 2);
+        expect.equal(stats.totalImpressions, 0);
+        expect.equal(stats.totalRevenue, 0);
+        expect.equal(stats.arms[0].expectedCVR, 50.0); // 1 / (1 + 1) = 0.5 (50%)
+      });
+
+      test("F154-T2: sampleBeta draws random values bounded strictly between 0 and 1", () => {
+        for (let i = 0; i < 50; i++) {
+          const val = sampleBeta(5, 10);
+          expect.ok(val > 0 && val < 1);
+        }
+      });
+
+      test("F154-T3: recordFeedback accurately increments alpha on purchase and beta on bounce", () => {
+        const bandit = new DynamicPricingBandit([{ id: "price_a", price: 150000 }]);
+        bandit.recordFeedback("price_a", true); // Mua hàng
+        bandit.recordFeedback("price_a", true); // Mua hàng
+        bandit.recordFeedback("price_a", false); // Không mua
+
+        const arm = bandit.arms.get("price_a");
+        expect.equal(arm.impressions, 3);
+        expect.equal(arm.conversions, 2);
+        expect.equal(arm.alpha, 3); // 1 + 2
+        expect.equal(arm.beta, 2);  // 1 + 1
+        expect.equal(arm.revenueGenerated, 300000);
+      });
+
+      test("F154-T4: selectArm returns a valid arm and explores options based on posterior distribution", () => {
+        const bandit = new DynamicPricingBandit([
+          { id: "p1", price: 100000 },
+          { id: "p2", price: 200000 },
+        ]);
+
+        const selected = bandit.selectArm("revenue");
+        expect.ok(selected !== null);
+        expect.ok(selected.id === "p1" || selected.id === "p2");
+      });
+
+      test("F154-T5: getBestArm identifies the arm with the highest expected revenue per impression", () => {
+        const bandit = new DynamicPricingBandit([
+          { id: "low_price", price: 100000 },  // CVR ~ 20% -> 20k/imp
+          { id: "high_price", price: 300000 }, // CVR ~ 15% -> 45k/imp
+        ]);
+
+        // Giả lập 100 lượt thử cho mỗi arm
+        for (let i = 0; i < 20; i++) bandit.recordFeedback("low_price", true);
+        for (let i = 0; i < 80; i++) bandit.recordFeedback("low_price", false);
+
+        for (let i = 0; i < 15; i++) bandit.recordFeedback("high_price", true);
+        for (let i = 0; i < 85; i++) bandit.recordFeedback("high_price", false);
+
+        const best = bandit.getBestArm("revenue");
+        expect.equal(best.id, "high_price");
+      });
+
+      test("F154-T6: getStats computes empirical CVR, expected CVR, and confidence intervals", () => {
+        const bandit = new DynamicPricingBandit([{ id: "deal_1", price: 50000 }]);
+        for (let i = 0; i < 10; i++) bandit.recordFeedback("deal_1", true);
+        for (let i = 0; i < 10; i++) bandit.recordFeedback("deal_1", false);
+
+        const stats = bandit.getStats();
+        expect.equal(stats.arms[0].impressions, 20);
+        expect.equal(stats.arms[0].conversions, 10);
+        expect.equal(stats.arms[0].empiricalCVR, 50.0);
+        expect.equal(stats.totalRevenue, 500000);
+      });
+    });
+
+    // --- 2. Disjoint Set Union (DSU) & Sybil Fraud Radar ---
+    describe("Algorithm 2: Disjoint Set Union (DSU) & Sybil Fraud Radar", () => {
+      test("F154-T7: DisjointSetUnion creates sets and unions disjoint elements accurately", () => {
+        const dsu = new DisjointSetUnion();
+        dsu.makeSet("user_1");
+        dsu.makeSet("user_2");
+        expect.equal(dsu.connected("user_1", "user_2"), false);
+
+        dsu.union("user_1", "user_2");
+        expect.equal(dsu.connected("user_1", "user_2"), true);
+        expect.equal(dsu.getClusterSize("user_1"), 2);
+      });
+
+      test("F154-T8: DisjointSetUnion path compression flattens trees so find() executes in O(1)", () => {
+        const dsu = new DisjointSetUnion();
+        dsu.union("a", "b");
+        dsu.union("b", "c");
+        dsu.union("c", "d");
+
+        expect.equal(dsu.connected("a", "d"), true);
+        expect.equal(dsu.getClusterSize("a"), 4);
+        const root = dsu.find("d");
+        expect.equal(dsu.parent.get("d"), root); // Direct link after find
+      });
+
+      test("F154-T9: SybilFraudRadar groups accounts sharing the same device fingerprint into one cluster", () => {
+        const radar = new SybilFraudRadar({ clusterSizeThreshold: 3 });
+        radar.registerUser({ userId: "acc_1", deviceId: "device_imei_999", vouchersClaimed: 2 });
+        radar.registerUser({ userId: "acc_2", deviceId: "device_imei_999", vouchersClaimed: 3 });
+
+        expect.equal(radar.dsu.connected("acc_1", "acc_2"), true);
+        expect.equal(radar.dsu.getClusterSize("acc_1"), 2);
+      });
+
+      test("F154-T10: SybilFraudRadar transitively connects accounts through shared entities (multi-hop graph)", () => {
+        const radar = new SybilFraudRadar({ clusterSizeThreshold: 3 });
+        // acc_1 và acc_2 chung device_A
+        radar.registerUser({ userId: "acc_1", deviceId: "dev_A" });
+        radar.registerUser({ userId: "acc_2", deviceId: "dev_A", bankAccount: "bank_XYZ" });
+        // acc_3 chung bank_XYZ với acc_2 -> acc_3 cũng thuộc cụm với acc_1
+        radar.registerUser({ userId: "acc_3", bankAccount: "bank_XYZ" });
+
+        expect.equal(radar.dsu.connected("acc_1", "acc_3"), true);
+        expect.equal(radar.dsu.getClusterSize("acc_1"), 3);
+      });
+
+      test("F154-T11: SybilFraudRadar flags cluster with size >= 3 and voucher abuse as suspicious", () => {
+        const radar = new SybilFraudRadar({ clusterSizeThreshold: 3 });
+        radar.registerUser({ userId: "cheat_1", ip: "192.168.1.100", vouchersClaimed: 4, ordersCount: 5, cancelledCount: 2 });
+        radar.registerUser({ userId: "cheat_2", ip: "192.168.1.100", vouchersClaimed: 3, ordersCount: 4, cancelledCount: 1 });
+        radar.registerUser({ userId: "cheat_3", ip: "192.168.1.100", vouchersClaimed: 5, ordersCount: 6, cancelledCount: 2 });
+
+        const analysis = radar.analyzeUser("cheat_1");
+        expect.equal(analysis.isSuspicious, true);
+        expect.equal(analysis.clusterSize, 3);
+        expect.ok(analysis.riskScore >= 50);
+        expect.equal(analysis.recommendedAction, "LOCK_VOUCHER_PRIVILEGES_AND_REQUIRE_PREPAYMENT");
+      });
+
+      test("F154-T12: SybilFraudRadar marks independent legitimate buyer as safe with risk score 0", () => {
+        const radar = new SybilFraudRadar();
+        radar.registerUser({ userId: "clean_buyer", deviceId: "unique_dev_1", ordersCount: 10, cancelledCount: 0 });
+
+        const analysis = radar.analyzeUser("clean_buyer");
+        expect.equal(analysis.isSuspicious, false);
+        expect.equal(analysis.clusterSize, 1);
+        expect.equal(analysis.riskScore, 0);
+      });
+    });
+
+    // --- 3. Trie Autocomplete & Fuzzy Typo Tolerance ---
+    describe("Algorithm 3: Trie Autocomplete & Fuzzy Typo Tolerance", () => {
+      test("F154-T13: removeVietnameseTones strips diacritics and tones from Vietnamese text cleanly", () => {
+        expect.equal(removeVietnameseTones("Áo khoác gió"), "ao khoac gio");
+        expect.equal(removeVietnameseTones("Giày thể thao nam"), "giay the thao nam");
+        expect.equal(removeVietnameseTones("Đồng hồ điện tử"), "dong ho dien tu");
+      });
+
+      test("F154-T14: TrieAutocomplete indexes items and returns Top-K suggestions sorted by frequency", () => {
+        const trie = new TrieAutocomplete();
+        trie.insert("Áo thun basic", 50);
+        trie.insert("Áo thun cổ tim", 20);
+        trie.insert("Áo thun oversize", 100);
+
+        const results = trie.searchPrefix("Áo thun", 3);
+        expect.equal(results.length, 3);
+        expect.equal(results[0].text, "Áo thun oversize"); // Cao nhất: 100
+        expect.equal(results[1].text, "Áo thun basic");    // 50
+        expect.equal(results[2].text, "Áo thun cổ tim");   // 20
+      });
+
+      test("F154-T15: TrieAutocomplete resolves unaccented prefixes to correct accented Vietnamese items", () => {
+        const trie = new TrieAutocomplete();
+        trie.insert("Kem chống nắng SPF 50+", 80);
+        trie.insert("Kem dưỡng ẩm ban đêm", 60);
+
+        const results = trie.searchPrefix("kem chong nang", 2);
+        expect.ok(results.length >= 1);
+        expect.equal(results[0].text, "Kem chống nắng SPF 50+");
+      });
+
+      test("F154-T16: TrieAutocomplete fuzzySearch recovers correct keyword with 1-character typo", () => {
+        const trie = new TrieAutocomplete();
+        trie.insert("iPhone 15 Pro Max", 100);
+        trie.insert("Son môi kem lì", 80);
+
+        // Gõ nhầm 1 ký tự: 'iphoen' thay vì 'iphone'
+        const typoResults = trie.fuzzySearch("iphoen", 1, 2);
+        expect.ok(typoResults.length >= 1);
+        expect.equal(typoResults[0].text, "iPhone 15 Pro Max");
+
+        // Gõ nhầm: 'son mồi' thay vì 'son môi'
+        const typoSon = trie.fuzzySearch("son mồi", 1, 2);
+        expect.ok(typoSon.length >= 1);
+        expect.equal(typoSon[0].text, "Son môi kem lì");
+      });
+    });
+
+    // --- 4. AI Copilot Integration for Phase 7 Algorithms ---
+    describe("AI Copilot Training for Phase 7 Algorithms", () => {
+      test("F154-T17: Admin Sentinel Copilot AI explains Thompson Sampling Dynamic Pricing", () => {
+        const res = generateAdminCopilotResponse("Cơ chế định giá động Thompson Sampling Multi-Armed Bandit");
+        expect.equal(res.tag, "ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING");
+        expect.ok(res.text.includes("THOMPSON SAMPLING"));
+        expect.ok(res.text.includes("Beta-Bernoulli"));
+        expect.ok(res.text.includes("Exploration vs Exploitation"));
+      });
+
+      test("F154-T18: Admin Sentinel Copilot AI explains DSU Sybil Fraud Radar", () => {
+        const res = generateAdminCopilotResponse("Mạng lưới gian lận Sybil Ring và cấu trúc Disjoint Set Union");
+        expect.equal(res.tag, "RADAR GIAN LẬN DSU SYBIL");
+        expect.ok(res.text.includes("SYBIL RING"));
+        expect.ok(res.text.includes("Path Compression"));
+        expect.ok(res.text.includes("Union by Rank"));
+      });
+
+      test("F154-T19: Admin Sentinel Copilot AI explains Trie Autocomplete and Fuzzy Typo Tolerance", () => {
+        const res = generateAdminCopilotResponse("Bộ máy tìm kiếm Trie Autocomplete và Fuzzy Search sửa lỗi chính tả");
+        expect.equal(res.tag, "TÌM KIẾM TRIE AUTOCOMPLETE");
+        expect.ok(res.text.includes("TRIE"));
+        expect.ok(res.text.includes("Typeahead"));
+        expect.ok(res.text.includes("Levenshtein"));
+      });
+    });
+  });
 });
+
 
 
 

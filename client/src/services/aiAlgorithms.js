@@ -1034,6 +1034,434 @@ export function findOptimalAddonToUnlockVoucher(availableProducts = [], currentC
   };
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 13: Dynamic Pricing Multi-Armed Bandit (Thompson Sampling)
+// ------------------------------------------------------------------------------
+function randomStandardNormal() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+function sampleGamma(shape) {
+  if (shape < 1) {
+    return sampleGamma(shape + 1) * Math.pow(Math.random(), 1.0 / shape);
+  }
+  const d = shape - 1.0 / 3.0;
+  const c = 1.0 / Math.sqrt(9.0 * d);
+  while (true) {
+    let z = randomStandardNormal();
+    let v = 1.0 + c * z;
+    if (v <= 0) continue;
+    v = v * v * v;
+    let u = Math.random();
+    if (u < 1.0 - 0.0331 * z * z * z * z) return d * v;
+    if (Math.log(u) < 0.5 * z * z + d * (1.0 - v + Math.log(v))) return d * v;
+  }
+}
+
+export function sampleBeta(alpha, beta) {
+  const safeAlpha = Math.max(alpha, 0.001);
+  const safeBeta = Math.max(beta, 0.001);
+  const x = sampleGamma(safeAlpha);
+  const y = sampleGamma(safeBeta);
+  return x / (x + y);
+}
+
+export class DynamicPricingBandit {
+  constructor(arms = []) {
+    this.arms = new Map();
+    for (const arm of arms) this.addArm(arm);
+  }
+
+  addArm({ id, price, discountPercent = 0, name = "" }) {
+    if (!id || price <= 0) throw new Error("Arm must have a valid id and positive price");
+    this.arms.set(id, {
+      id,
+      price: Number(price),
+      discountPercent: Number(discountPercent),
+      name: name || `Mức giá ${price.toLocaleString("vi-VN")}₫`,
+      alpha: 1,
+      beta: 1,
+      impressions: 0,
+      conversions: 0,
+      revenueGenerated: 0
+    });
+  }
+
+  selectArm(objective = "revenue") {
+    if (this.arms.size === 0) return null;
+    let bestArm = null;
+    let maxMetric = -Infinity;
+    for (const arm of this.arms.values()) {
+      const sampledCVR = sampleBeta(arm.alpha, arm.beta);
+      const metric = objective === "revenue" ? arm.price * sampledCVR : sampledCVR;
+      if (metric > maxMetric) {
+        maxMetric = metric;
+        bestArm = arm;
+      }
+    }
+    return bestArm;
+  }
+
+  recordFeedback(armId, converted) {
+    const arm = this.arms.get(armId);
+    if (!arm) return;
+    arm.impressions++;
+    if (converted) {
+      arm.conversions++;
+      arm.alpha += 1;
+      arm.revenueGenerated += arm.price;
+    } else {
+      arm.beta += 1;
+    }
+  }
+
+  getBestArm(objective = "revenue") {
+    let bestArm = null;
+    let maxMetric = -Infinity;
+    for (const arm of this.arms.values()) {
+      const expectedCVR = arm.alpha / (arm.alpha + arm.beta);
+      const metric = objective === "revenue" ? arm.price * expectedCVR : expectedCVR;
+      if (metric > maxMetric) {
+        maxMetric = metric;
+        bestArm = arm;
+      }
+    }
+    return bestArm;
+  }
+
+  getStats() {
+    const totalImpressions = Array.from(this.arms.values()).reduce((sum, a) => sum + a.impressions, 0);
+    const totalRevenue = Array.from(this.arms.values()).reduce((sum, a) => sum + a.revenueGenerated, 0);
+    const armsSummary = Array.from(this.arms.values()).map(arm => {
+      const empiricalCVR = arm.impressions > 0 ? (arm.conversions / arm.impressions) : 0;
+      const expectedCVR = arm.alpha / (arm.alpha + arm.beta);
+      return {
+        id: arm.id,
+        name: arm.name,
+        price: arm.price,
+        discountPercent: arm.discountPercent,
+        impressions: arm.impressions,
+        conversions: arm.conversions,
+        empiricalCVR: Number((empiricalCVR * 100).toFixed(2)),
+        expectedCVR: Number((expectedCVR * 100).toFixed(2)),
+        revenueGenerated: arm.revenueGenerated,
+        expectedRevenuePerImpression: Math.round(arm.price * expectedCVR)
+      };
+    });
+    return {
+      totalArms: this.arms.size,
+      totalImpressions,
+      totalRevenue,
+      bestArm: this.getBestArm("revenue"),
+      arms: armsSummary
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 14: Disjoint Set Union (DSU) & Sybil Fraud Radar
+// ------------------------------------------------------------------------------
+export class DisjointSetUnion {
+  constructor() {
+    this.parent = new Map();
+    this.rank = new Map();
+    this.size = new Map();
+  }
+
+  makeSet(x) {
+    if (!this.parent.has(x)) {
+      this.parent.set(x, x);
+      this.rank.set(x, 0);
+      this.size.set(x, 1);
+    }
+  }
+
+  find(x) {
+    this.makeSet(x);
+    if (this.parent.get(x) !== x) {
+      this.parent.set(x, this.find(this.parent.get(x)));
+    }
+    return this.parent.get(x);
+  }
+
+  union(x, y) {
+    const rootX = this.find(x);
+    const rootY = this.find(y);
+    if (rootX === rootY) return false;
+
+    const rankX = this.rank.get(rootX);
+    const rankY = this.rank.get(rootY);
+    const sizeX = this.size.get(rootX);
+    const sizeY = this.size.get(rootY);
+
+    if (rankX < rankY) {
+      this.parent.set(rootX, rootY);
+      this.size.set(rootY, sizeX + sizeY);
+    } else if (rankX > rankY) {
+      this.parent.set(rootY, rootX);
+      this.size.set(rootX, sizeX + sizeY);
+    } else {
+      this.parent.set(rootY, rootX);
+      this.size.set(rootX, sizeX + sizeY);
+      this.rank.set(rootX, rankX + 1);
+    }
+    return true;
+  }
+
+  connected(x, y) {
+    return this.find(x) === this.find(y);
+  }
+
+  getClusterSize(x) {
+    return this.size.get(this.find(x)) || 1;
+  }
+
+  getAllClusters() {
+    const clusters = new Map();
+    for (const node of this.parent.keys()) {
+      const root = this.find(node);
+      if (!clusters.has(root)) clusters.set(root, []);
+      clusters.get(root).push(node);
+    }
+    return Array.from(clusters.values());
+  }
+}
+
+export class SybilFraudRadar {
+  constructor({ clusterSizeThreshold = 3 } = {}) {
+    this.dsu = new DisjointSetUnion();
+    this.clusterSizeThreshold = clusterSizeThreshold;
+    this.accountMetadata = new Map();
+    this.entityIndex = {
+      devices: new Map(),
+      bankAccounts: new Map(),
+      phones: new Map(),
+      ips: new Map()
+    };
+  }
+
+  registerUser({
+    userId,
+    deviceId = null,
+    bankAccount = null,
+    phone = null,
+    ip = null,
+    vouchersClaimed = 0,
+    ordersCount = 0,
+    cancelledCount = 0
+  }) {
+    if (!userId) return;
+    this.dsu.makeSet(userId);
+    this.accountMetadata.set(userId, {
+      userId,
+      deviceId,
+      bankAccount,
+      phone,
+      ip,
+      vouchersClaimed: Number(vouchersClaimed) || 0,
+      ordersCount: Number(ordersCount) || 0,
+      cancelledCount: Number(cancelledCount) || 0
+    });
+
+    const link = (map, key) => {
+      if (!key) return;
+      if (!map.has(key)) map.set(key, new Set());
+      const set = map.get(key);
+      for (const other of set) this.dsu.union(userId, other);
+      set.add(userId);
+    };
+
+    link(this.entityIndex.devices, deviceId);
+    link(this.entityIndex.bankAccounts, bankAccount);
+    link(this.entityIndex.phones, phone);
+    link(this.entityIndex.ips, ip);
+  }
+
+  analyzeUser(userId) {
+    if (!this.dsu.parent.has(userId)) {
+      return { userId, isSuspicious: false, clusterSize: 1, riskScore: 0 };
+    }
+    const clusterSize = this.dsu.getClusterSize(userId);
+    const root = this.dsu.find(userId);
+    const myCluster = this.dsu.getAllClusters().find(c => c.includes(userId)) || [userId];
+
+    let totalVouchers = 0, totalOrders = 0, totalCancelled = 0;
+    for (const u of myCluster) {
+      const m = this.accountMetadata.get(u);
+      if (m) {
+        totalVouchers += m.vouchersClaimed;
+        totalOrders += m.ordersCount;
+        totalCancelled += m.cancelledCount;
+      }
+    }
+
+    let riskScore = 0;
+    if (clusterSize >= this.clusterSizeThreshold) riskScore += 40;
+    if (clusterSize >= 5) riskScore += 30;
+    if (totalVouchers >= clusterSize * 2) riskScore += 20;
+    const cancelRate = totalOrders > 0 ? totalCancelled / totalOrders : 0;
+    if (cancelRate >= 0.3) riskScore += 20;
+
+    riskScore = Math.min(100, riskScore);
+    const isSuspicious = riskScore >= 50;
+
+    return {
+      userId,
+      rootRepresentative: root,
+      clusterSize,
+      clusterMembers: myCluster,
+      riskScore,
+      isSuspicious,
+      recommendedAction: isSuspicious ? "LOCK_VOUCHER_PRIVILEGES_AND_REQUIRE_PREPAYMENT" : "ALLOW_NORMAL_ACCESS"
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 15: Trie Autocomplete with Fuzzy Typo Tolerance
+// ------------------------------------------------------------------------------
+export function removeVietnameseTones(str) {
+  if (!str) return "";
+  let res = String(str).toLowerCase().trim();
+  res = res.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+  res = res.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+  res = res.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+  res = res.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+  res = res.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+  res = res.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+  res = res.replace(/đ/g, "d");
+  return res;
+}
+
+class TrieNode {
+  constructor() {
+    this.children = new Map();
+    this.isEndOfWord = false;
+    this.frequency = 0;
+    this.originalText = "";
+    this.payload = null;
+    this.topSuggestions = [];
+  }
+
+  updateSuggestion(item, maxCapacity = 10) {
+    const existing = this.topSuggestions.find(s => s.text === item.text);
+    if (existing) {
+      if (item.frequency > existing.frequency) existing.frequency = item.frequency;
+    } else {
+      this.topSuggestions.push(item);
+    }
+    this.topSuggestions.sort((a, b) => b.frequency - a.frequency);
+    if (this.topSuggestions.length > maxCapacity) this.topSuggestions.pop();
+  }
+}
+
+export class TrieAutocomplete {
+  constructor({ maxSuggestionsPerNode = 10 } = {}) {
+    this.root = new TrieNode();
+    this.maxSuggestionsPerNode = maxSuggestionsPerNode;
+  }
+
+  insert(text, frequency = 1, payload = null) {
+    if (!text || typeof text !== "string") return;
+    const normalized = text.trim();
+    const unaccented = removeVietnameseTones(normalized);
+    const item = { text: normalized, unaccented, frequency: Number(frequency), payload };
+
+    this._insertPath(normalized.toLowerCase(), item);
+    if (unaccented !== normalized.toLowerCase()) {
+      this._insertPath(unaccented, item);
+    }
+  }
+
+  _insertPath(pathStr, item) {
+    let curr = this.root;
+    curr.updateSuggestion(item, this.maxSuggestionsPerNode);
+    for (const char of pathStr) {
+      if (!curr.children.has(char)) curr.children.set(char, new TrieNode());
+      curr = curr.children.get(char);
+      curr.updateSuggestion(item, this.maxSuggestionsPerNode);
+    }
+    curr.isEndOfWord = true;
+    curr.frequency = Math.max(curr.frequency, item.frequency);
+    curr.originalText = item.text;
+    curr.payload = item.payload;
+  }
+
+  searchPrefix(prefix, limit = 5) {
+    if (!prefix) return [];
+    const norm = prefix.trim().toLowerCase();
+    const unaccented = removeVietnameseTones(norm);
+    let suggestions = this._findPathSuggestions(norm);
+    if (suggestions.length === 0 && unaccented !== norm) {
+      suggestions = this._findPathSuggestions(unaccented);
+    }
+    const unique = new Map();
+    for (const item of suggestions) {
+      if (!unique.has(item.text)) unique.set(item.text, item);
+    }
+    return Array.from(unique.values()).slice(0, limit);
+  }
+
+  _findPathSuggestions(pathStr) {
+    let curr = this.root;
+    for (const char of pathStr) {
+      if (!curr.children.has(char)) return [];
+      curr = curr.children.get(char);
+    }
+    return curr.topSuggestions;
+  }
+
+  fuzzySearch(query, maxDistance = 1, limit = 5) {
+    if (!query) return [];
+    const exact = this.searchPrefix(query, limit);
+    if (exact.length > 0) return exact;
+
+    const normQuery = removeVietnameseTones(query);
+    const results = [];
+    const currentRow = Array.from({ length: normQuery.length + 1 }, (_, i) => i);
+
+    for (const [char, child] of this.root.children.entries()) {
+      this._fuzzySearchRecursive(child, char, normQuery, currentRow, results, maxDistance);
+    }
+
+    results.sort((a, b) => (a.distance !== b.distance ? a.distance - b.distance : b.frequency - a.frequency));
+    const unique = new Map();
+    for (const r of results) {
+      if (!unique.has(r.text)) unique.set(r.text, r);
+    }
+    return Array.from(unique.values()).slice(0, limit);
+  }
+
+  _fuzzySearchRecursive(node, char, query, previousRow, results, maxDistance) {
+    const columns = query.length + 1;
+    const currentRow = [previousRow[0] + 1];
+    for (let col = 1; col < columns; col++) {
+      const insertCost = currentRow[col - 1] + 1;
+      const deleteCost = previousRow[col] + 1;
+      const replaceCost = previousRow[col - 1] + (query[col - 1] === char ? 0 : 1);
+      currentRow.push(Math.min(insertCost, deleteCost, replaceCost));
+    }
+    if (currentRow[columns - 1] <= maxDistance) {
+      for (const item of node.topSuggestions) {
+        results.push({
+          text: item.text,
+          distance: currentRow[columns - 1],
+          frequency: item.frequency,
+          payload: item.payload
+        });
+      }
+    }
+    if (Math.min(...currentRow) <= maxDistance) {
+      for (const [nextChar, child] of node.children.entries()) {
+        this._fuzzySearchRecursive(child, nextChar, query, currentRow, results, maxDistance);
+      }
+    }
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -1053,4 +1481,11 @@ export default {
   HyperLogLog,
   knapsack01,
   findOptimalAddonToUnlockVoucher,
+  DynamicPricingBandit,
+  sampleBeta,
+  DisjointSetUnion,
+  SybilFraudRadar,
+  TrieAutocomplete,
+  removeVietnameseTones,
 };
+
