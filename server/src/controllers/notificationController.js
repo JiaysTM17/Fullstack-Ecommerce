@@ -169,6 +169,9 @@ export const clearAllNotifications = catchAsync(async (req, res) => {
     userId,
   });
 
+  sendSuccess(res, { message: "Đã xóa toàn bộ thông báo" });
+});
+
 // @desc    Broadcast notification to all users (Super Admin only)
 // @route   POST /api/notifications/broadcast
 // @access  Private (Admin only)
