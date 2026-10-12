@@ -4299,9 +4299,9 @@ export default function AdminDashboardPage() {
             shopsCount: shops?.length || 0,
             usersCount: users?.length || 0,
             disputesCount: disputes?.length || 0,
-            fraudAnomaliesCount: fraudRadar?.anomalies?.length || 0,
+            fraudAnomaliesCount: fraudData?.anomalies?.length || 0,
             pendingSettlementsCount: pendingSettlements?.length || 0,
-            withholdingTax: taxReports?.totalWithholdingTax || 0,
+            withholdingTax: taxData?.totalWithholdingTax || 0,
             escrowBalance: escrowVault?.escrowBalance || 0,
           }}
         />
