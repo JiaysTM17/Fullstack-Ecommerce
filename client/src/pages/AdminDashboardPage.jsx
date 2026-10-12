@@ -2252,25 +2252,25 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Health SLA Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Tỷ lệ giao đúng hạn (On-Time SLA)</span>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#16a34a', marginTop: '6px' }}>{deepBI?.healthSla?.onTimeDeliveryRate || '97.4%'}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '18px' }}>
+              <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>Tỷ lệ giao đúng hạn (On-Time SLA)</span>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#16a34a', marginTop: '4px' }}>{deepBI?.healthSla?.onTimeDeliveryRate || '97.4%'}</div>
                 <span style={{ fontSize: '11px', color: '#16a34a' }}>Đạt chuẩn mục tiêu vàng (&gt;95%)</span>
               </div>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Thời gian giao trung bình</span>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0284c7', marginTop: '6px' }}>{deepBI?.healthSla?.avgDeliveryHours || '26.5 giờ'}</div>
+              <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>Thời gian giao trung bình</span>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#0284c7', marginTop: '4px' }}>{deepBI?.healthSla?.avgDeliveryHours || '26.5 giờ'}</div>
                 <span style={{ fontSize: '11px', color: '#64748b' }}>Nhanh hơn 4.2h so với tháng trước</span>
               </div>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Tỷ lệ tranh chấp khiếu nại</span>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#ea580c', marginTop: '6px' }}>{deepBI?.healthSla?.disputeRate || '0.4%'}</div>
+              <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>Tỷ lệ tranh chấp khiếu nại</span>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#ea580c', marginTop: '4px' }}>{deepBI?.healthSla?.disputeRate || '0.4%'}</div>
                 <span style={{ fontSize: '11px', color: '#16a34a' }}>Rất thấp (&lt;1%)</span>
               </div>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Ngăn chặn gian lận đơn ảo</span>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#9333ea', marginTop: '6px' }}>{deepBI?.healthSla?.fraudIncidentsPrevented || 18} vụ</div>
+              <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>Ngăn chặn gian lận đơn ảo</span>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#9333ea', marginTop: '4px' }}>{deepBI?.healthSla?.fraudIncidentsPrevented || 18} vụ</div>
                 <span style={{ fontSize: '11px', color: '#9333ea' }}>Hệ thống AI Fraud Guard chủ động</span>
               </div>
             </div>
@@ -3337,28 +3337,28 @@ export default function AdminDashboardPage() {
               </button>
             </div>
 
-            {/* 3 Thẻ Chỉ Số Cảnh Báo */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#fef2f2', border: '1px solid #fecaca' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#dc2626' }}>CẢNH BÁO NGUY HIỂM (CRITICAL)</span>
-                <div style={{ fontSize: '24px', fontWeight: 800, color: '#991b1b', margin: '4px 0' }}>
+            {/* 3 Thẻ Chỉ Số Cảnh Báo - Compact */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '18px' }}>
+              <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#fef2f2', border: '1px solid #fecaca', boxShadow: '0 1px 2px rgba(220,38,38,0.04)' }}>
+                <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#dc2626' }}>CẢNH BÁO NGUY HIỂM (CRITICAL)</span>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#991b1b', margin: '3px 0' }}>
                   {buyerAbuseData?.criticalCount || 0}
                 </div>
-                <span style={{ fontSize: '12px', color: '#dc2626' }}>Tài khoản có điểm rủi ro ≥ 70</span>
+                <span style={{ fontSize: '11px', color: '#dc2626' }}>Tài khoản có điểm rủi ro ≥ 70</span>
               </div>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#fffbeb', border: '1px solid #fde68a' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#d97706' }}>CẦN THEO DÕI (MEDIUM)</span>
-                <div style={{ fontSize: '24px', fontWeight: 800, color: '#b45309', margin: '4px 0' }}>
+              <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#fffbeb', border: '1px solid #fde68a', boxShadow: '0 1px 2px rgba(217,119,6,0.04)' }}>
+                <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#d97706' }}>CẦN THEO DÕI (MEDIUM)</span>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#b45309', margin: '3px 0' }}>
                   {buyerAbuseData?.mediumCount || 0}
                 </div>
-                <span style={{ fontSize: '12px', color: '#d97706' }}>Điểm rủi ro từ 40 - 69</span>
+                <span style={{ fontSize: '11px', color: '#d97706' }}>Điểm rủi ro từ 40 - 69</span>
               </div>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>TỔNG TÀI KHOẢN ĐÃ KIỂM TRA</span>
-                <div style={{ fontSize: '24px', fontWeight: 800, color: '#334155', margin: '4px 0' }}>
+              <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#64748b' }}>TỔNG TÀI KHOẢN ĐÃ KIỂM TRA</span>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#334155', margin: '3px 0' }}>
                   {buyerAbuseData?.totalAuditedBuyers || 0}
                 </div>
-                <span style={{ fontSize: '12px', color: '#64748b' }}>Khách hàng phát sinh giao dịch</span>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>Khách hàng phát sinh giao dịch</span>
               </div>
             </div>
 

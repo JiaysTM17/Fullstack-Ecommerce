@@ -3395,19 +3395,19 @@ export default function SellerDashboardPage() {
         {/* ========================================================================= */}
         {activeTab === 'reviews' && (
           <div>
-            {/* Header thống kê sao */}
-            <div className="shopee-table-card" style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-                <div style={{ textAlign: 'center', minWidth: '120px' }}>
-                  <div style={{ fontSize: '36px', fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>
+            {/* Header thống kê sao - Compact */}
+            <div className="shopee-table-card" style={{ marginBottom: '18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                <div style={{ textAlign: 'center', minWidth: '100px' }}>
+                  <div style={{ fontSize: '24px', fontWeight: 800, color: '#f59e0b', lineHeight: 1 }}>
                     {currentShop.rating}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '2px', margin: '4px 0' }}>
                     {[1, 2, 3, 4, 5].map((s) => (
-                      <StarIcon key={s} size={18} color="#f59e0b" />
+                      <StarIcon key={s} size={14} color="#f59e0b" />
                     ))}
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted, #64748b)' }}>
                     Trên 5.0 sao
                   </div>
                 </div>
@@ -7378,23 +7378,23 @@ export default function SellerDashboardPage() {
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 600, marginBottom: '6px' }}>Chờ Bưu Tá Thu Tiền</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#d97706' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#d97706', fontWeight: 600, marginBottom: '4px' }}>Chờ Bưu Tá Thu Tiền</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#d97706' }}>
                   {formatCurrency(codReconciliationData?.summary?.pendingCollection || 0)}
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '12px', color: '#0284c7', fontWeight: 600, marginBottom: '6px' }}>SPX Đã Thu (Chờ Rút Về)</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0284c7' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#0284c7', fontWeight: 600, marginBottom: '4px' }}>SPX Đã Thu (Chờ Rút Về)</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#0284c7' }}>
                   {formatCurrency(codReconciliationData?.summary?.collectedByCourier || 0)}
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600, marginBottom: '6px' }}>Đã Quyết Toán Về Ví</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#10b981' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#10b981', fontWeight: 600, marginBottom: '4px' }}>Đã Quyết Toán Về Ví</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#10b981' }}>
                   {formatCurrency(codReconciliationData?.summary?.reconciledTotal || 0)}
                 </div>
               </div>
@@ -7545,32 +7545,32 @@ export default function SellerDashboardPage() {
               </div>
             </div>
 
-            {/* Metrics 4 Cards Overview */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '20px' }}>
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, marginBottom: '6px' }}>Tổng SKU Giám Sát</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a' }}>
+            {/* Metrics 4 Cards Overview - Compact */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '18px' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Tổng SKU Giám Sát</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>
                   {priceRadarData?.summary?.totalMonitoredSkus || shopProducts.length} sản phẩm
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600, marginBottom: '6px' }}>Thắng Thế Giá (Buy Box Leader)</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#10b981' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#10b981', fontWeight: 600, marginBottom: '4px' }}>Thắng Thế Giá (Buy Box)</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#10b981' }}>
                   {priceRadarData?.summary?.winningCount || 0} SKU
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '12px', color: '#ef4444', fontWeight: 600, marginBottom: '6px' }}>Cần Hạ Giá Cạnh Tranh</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#ef4444' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #fee2e2', boxShadow: '0 1px 2px rgba(239,68,68,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#ef4444', fontWeight: 600, marginBottom: '4px' }}>Cần Hạ Giá Cạnh Tranh</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#ef4444' }}>
                   {priceRadarData?.summary?.overpricedCount || 0} SKU
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '12px', color: '#6366f1', fontWeight: 600, marginBottom: '6px' }}>Chỉ Số Cạnh Tranh Gian Hàng</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#6366f1' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#6366f1', fontWeight: 600, marginBottom: '4px' }}>Điểm Cạnh Tranh Gian Hàng</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#6366f1' }}>
                   {priceRadarData?.summary?.competitiveScore || 85}/100
                 </div>
               </div>
@@ -7743,32 +7743,32 @@ export default function SellerDashboardPage() {
               </div>
             </div>
 
-            {/* Metrics 4 Cards Overview */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '20px' }}>
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, marginBottom: '6px' }}>Tổng Mặt Hàng Cần Nhập</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a' }}>
+            {/* Metrics 4 Cards Overview - Compact */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '18px' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Tổng Mặt Hàng Cần Nhập</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>
                   {restockData?.summary?.totalAlerts || 0} SKU
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #fee2e2', boxShadow: '0 1px 3px rgba(239,68,68,0.08)' }}>
-                <div style={{ fontSize: '12px', color: '#ef4444', fontWeight: 600, marginBottom: '6px' }}>Hết Hàng Tuyệt Đối (Kho = 0)</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#ef4444' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #fee2e2', boxShadow: '0 1px 2px rgba(239,68,68,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#ef4444', fontWeight: 600, marginBottom: '4px' }}>Hết Hàng (Kho = 0)</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#ef4444' }}>
                   {restockData?.summary?.outOfStockCount || 0} SKU
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #fef3c7', boxShadow: '0 1px 3px rgba(245,158,11,0.08)' }}>
-                <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 600, marginBottom: '6px' }}>Dưới Ngưỡng An Toàn</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#d97706' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #fef3c7', boxShadow: '0 1px 2px rgba(245,158,11,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#d97706', fontWeight: 600, marginBottom: '4px' }}>Dưới Ngưỡng An Toàn</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#d97706' }}>
                   {restockData?.summary?.lowStockCount || 0} SKU
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '12px', color: '#059669', fontWeight: 600, marginBottom: '6px' }}>Đơn Nhập PO Đã Lập</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#059669' }}>
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '11.5px', color: '#059669', fontWeight: 600, marginBottom: '4px' }}>Đơn Nhập PO Đã Lập</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#059669' }}>
                   {restockData?.summary?.totalPurchaseOrders || (restockData?.purchaseOrders || []).length} đơn
                 </div>
               </div>
