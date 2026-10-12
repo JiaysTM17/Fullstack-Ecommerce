@@ -52,6 +52,11 @@ import {
   SybilFraudRadar,
   TrieAutocomplete,
   removeVietnameseTones,
+  sha256,
+  DoubleEntryLedger,
+  MerkleTree,
+  SkiplistIndex,
+  MultiWarehouseDispatcher,
 } from "../../client/src/services/aiAlgorithms.js";
 import fs from "fs";
 
@@ -8001,7 +8006,264 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       });
     });
   });
+
+  // =========================================================================
+  // FEATURE 155: Enterprise Financial, Indexing & Logistics Algorithms Suite (Phase 8 - 18 Tests)
+  // =========================================================================
+  describe("Feature 155: Enterprise Financial, Indexing & Logistics Algorithms Suite (Phase 8)", () => {
+    // --- 1. Double-Entry Bookkeeping Ledger & Merkle Tree Audit Trail (6 Tests) ---
+    describe("Algorithm 1: Double-Entry Ledger & Cryptographic Merkle Tree", () => {
+      test("F155-T1: DoubleEntryLedger records balanced transactions and updates account balances correctly", () => {
+        const ledger = new DoubleEntryLedger();
+        ledger.recordTransaction({
+          id: "tx_order_1001",
+          description: "Khách thanh toán đơn hàng VietQR vào Escrow Vault",
+          entries: [
+            { account: "ASSETS:ESCROW_BANK", debit: 500000 },
+            { account: "LIABILITIES:MERCHANT_PAYABLE", credit: 475000 },
+            { account: "REVENUE:PLATFORM_COMMISSION", credit: 25000 },
+          ],
+        });
+
+        expect.equal(ledger.getBalance("ASSETS:ESCROW_BANK"), 500000);
+        expect.equal(ledger.getBalance("LIABILITIES:MERCHANT_PAYABLE"), 475000);
+        expect.equal(ledger.getBalance("REVENUE:PLATFORM_COMMISSION"), 25000);
+      });
+
+      test("F155-T2: DoubleEntryLedger strictly rejects imbalanced transactions with LEDGER_IMBALANCE_ERROR", () => {
+        const ledger = new DoubleEntryLedger();
+        expect.throws(() => {
+          ledger.recordTransaction({
+            id: "tx_cheat_1002",
+            entries: [
+              { account: "ASSETS:ESCROW_BANK", debit: 500000 },
+              { account: "LIABILITIES:MERCHANT_PAYABLE", credit: 400000 }, // Lệch 100,000đ
+            ],
+          });
+        }, /LEDGER_IMBALANCE_ERROR/);
+      });
+
+      test("F155-T3: DoubleEntryLedger getTrialBalance verifies total debits equals total credits", () => {
+        const ledger = new DoubleEntryLedger();
+        ledger.recordTransaction({
+          id: "tx_1",
+          entries: [
+            { account: "ASSETS:ESCROW_BANK", debit: 200000 },
+            { account: "LIABILITIES:MERCHANT_PAYABLE", credit: 200000 },
+          ],
+        });
+
+        const trial = ledger.getTrialBalance();
+        expect.equal(trial.isBalanced, true);
+        expect.equal(trial.discrepancy, 0);
+        expect.equal(trial.totalDebit, 200000);
+        expect.equal(trial.totalCredit, 200000);
+      });
+
+      test("F155-T4: sha256 produces deterministic 64-character lowercase hex hash", () => {
+        const hash1 = sha256("MiniShopeeEscrowVault");
+        const hash2 = sha256("MiniShopeeEscrowVault");
+        expect.equal(hash1, hash2);
+        expect.equal(hash1.length, 64);
+        expect.ok(/^[0-9a-f]{64}$/.test(hash1));
+      });
+
+      test("F155-T5: MerkleTree builds binary hash tree and produces a single deterministic root", () => {
+        const transactions = [
+          { txId: "tx_1", amount: 100000 },
+          { txId: "tx_2", amount: 200000 },
+          { txId: "tx_3", amount: 300000 },
+        ];
+        const tree = new MerkleTree(transactions);
+        const root = tree.getRoot();
+
+        expect.ok(root !== "");
+        expect.equal(root.length, 64);
+        expect.equal(tree.layers.length, 3); // 3 leaves -> layer0 (3 items), layer1 (2 items), layer2 (1 root)
+      });
+
+      test("F155-T6: MerkleTree verifyProof validates genuine transaction and rejects tampered data", () => {
+        const txList = [
+          { txId: "settlement_shop_A", amount: 5000000 },
+          { txId: "settlement_shop_B", amount: 3000000 },
+          { txId: "settlement_shop_C", amount: 7500000 },
+          { txId: "settlement_shop_D", amount: 1200000 },
+        ];
+        const tree = new MerkleTree(txList);
+        const root = tree.getRoot();
+
+        // Lấy bằng chứng cho txList[1] (Shop B)
+        const proof = tree.getProof(1);
+        expect.ok(proof.length > 0);
+
+        // 1. Xác thực giao dịch gốc -> Hợp lệ
+        const isValid = MerkleTree.verifyProof(txList[1], proof, root);
+        expect.equal(isValid, true);
+
+        // 2. Kẻ gian sửa đổi số tiền thành 9,999,999đ -> Bị từ chối ngay lập tức
+        const tamperedTx = { txId: "settlement_shop_B", amount: 9999999 };
+        const isTamperedValid = MerkleTree.verifyProof(tamperedTx, proof, root);
+        expect.equal(isTamperedValid, false);
+      });
+    });
+
+    // --- 2. Probabilistic Skiplist Price Range Index (5 Tests) ---
+    describe("Algorithm 2: Probabilistic Skiplist Price Range Index", () => {
+      test("F155-T7: SkiplistIndex inserts items and retrieves them in expected O(log N)", () => {
+        const skip = new SkiplistIndex();
+        skip.insert(150000, { name: "Áo polo nam" });
+        skip.insert(50000, { name: "Tất thể thao" });
+        skip.insert(300000, { name: "Balo chống nước" });
+
+        expect.equal(skip.size, 3);
+        const found = skip.search(150000);
+        expect.ok(found !== null);
+        expect.equal(found.name, "Áo polo nam");
+      });
+
+      test("F155-T8: SkiplistIndex search returns null for non-existent keys", () => {
+        const skip = new SkiplistIndex();
+        skip.insert(100000, { name: "Ốp lưng" });
+        expect.equal(skip.search(999999), null);
+      });
+
+      test("F155-T9: SkiplistIndex rangeQuery returns sorted products within price interval", () => {
+        const skip = new SkiplistIndex();
+        skip.insert(25000, { id: "p1", name: "Dây sạc" });
+        skip.insert(75000, { id: "p2", name: "Tai nghe có dây" });
+        skip.insert(120000, { id: "p3", name: "Củ sạc nhanh 20W" });
+        skip.insert(180000, { id: "p4", name: "Sạc dự phòng 10000mAh" });
+        skip.insert(450000, { id: "p5", name: "Tai nghe Bluetooth" });
+
+        // Lọc deal từ 50,000đ đến 200,000đ
+        const deals = skip.rangeQuery(50000, 200000);
+        expect.equal(deals.length, 3);
+        expect.equal(deals[0].price, 75000);
+        expect.equal(deals[1].price, 120000);
+        expect.equal(deals[2].price, 180000);
+      });
+
+      test("F155-T10: SkiplistIndex rangeQuery honors limit parameter without overflow", () => {
+        const skip = new SkiplistIndex();
+        for (let p = 10000; p <= 100000; p += 10000) {
+          skip.insert(p, { price: p });
+        }
+        const limited = skip.rangeQuery(10000, 100000, 3);
+        expect.equal(limited.length, 3);
+        expect.equal(limited[0].price, 10000);
+        expect.equal(limited[2].price, 30000);
+      });
+
+      test("F155-T11: SkiplistIndex delete removes node and decreases size", () => {
+        const skip = new SkiplistIndex();
+        skip.insert(100000, { item: "Item A" });
+        expect.equal(skip.size, 1);
+
+        const deleted = skip.delete(100000);
+        expect.equal(deleted, true);
+        expect.equal(skip.size, 0);
+        expect.equal(skip.search(100000), null);
+      });
+    });
+
+    // --- 3. Multi-Warehouse Optimal Fulfillment Dispatch (4 Tests) ---
+    describe("Algorithm 3: Multi-Warehouse Optimal Fulfillment Dispatch", () => {
+      const warehouses = [
+        {
+          id: "WH_HN",
+          name: "Kho Tổng Hà Nội",
+          location: { lat: 21.0285, lng: 105.8542 },
+          inventory: { sku_polo: 50, sku_short: 20, sku_shoes: 0 },
+        },
+        {
+          id: "WH_HCM",
+          name: "Kho Tổng TP.HCM",
+          location: { lat: 10.8231, lng: 106.6297 },
+          inventory: { sku_polo: 100, sku_short: 80, sku_shoes: 30 },
+        },
+      ];
+
+      test("F155-T12: MultiWarehouseDispatcher computes accurate composite shipping cost", () => {
+        const dispatcher = new MultiWarehouseDispatcher(warehouses, { basePackageFee: 15000, ratePerKm: 20 });
+        const buyerInHanoi = { lat: 21.03, lng: 105.86 };
+        const cost = dispatcher.calculateShippingCost(warehouses[0], buyerInHanoi);
+
+        expect.ok(cost.distanceKm < 5); // Dưới 5km nội thành
+        expect.ok(cost.shippingFee >= 15000);
+      });
+
+      test("F155-T13: MultiWarehouseDispatcher selects Single Warehouse Consolidated when warehouse has 100% stock", () => {
+        const dispatcher = new MultiWarehouseDispatcher(warehouses);
+        const buyerInSaigon = { lat: 10.7769, lng: 106.7009 }; // Quận 1, TP.HCM
+        const order = [
+          { skuId: "sku_polo", quantity: 2 },
+          { skuId: "sku_short", quantity: 1 },
+        ];
+
+        const plan = dispatcher.optimizeDispatch(order, buyerInSaigon);
+        expect.equal(plan.success, true);
+        expect.equal(plan.strategy, "SINGLE_WAREHOUSE_CONSOLIDATED");
+        expect.equal(plan.splitCount, 1);
+        expect.equal(plan.packages[0].warehouseId, "WH_HCM"); // Kho TP.HCM gần hơn và đủ hàng
+      });
+
+      test("F155-T14: MultiWarehouseDispatcher splits packages across warehouses when no single warehouse has all items", () => {
+        const dispatcher = new MultiWarehouseDispatcher(warehouses);
+        const buyerInHanoi = { lat: 21.03, lng: 105.86 };
+        // Kho HN có 50 polo, 0 shoes. Kho HCM có 100 polo, 30 shoes.
+        // Đơn hàng cần 120 polo (vượt quá 50 của HN và 100 của HCM) + 1 đôi giày -> Bắt buộc phải split đa kho
+        const order = [
+          { skuId: "sku_polo", quantity: 120 },
+          { skuId: "sku_shoes", quantity: 1 },
+        ];
+
+        const plan = dispatcher.optimizeDispatch(order, buyerInHanoi);
+        expect.equal(plan.success, true);
+        expect.equal(plan.strategy, "MULTI_WAREHOUSE_SPLIT");
+        expect.ok(plan.splitCount >= 2);
+      });
+
+      test("F155-T15: MultiWarehouseDispatcher returns INSUFFICIENT_STOCK when overall network inventory is inadequate", () => {
+        const dispatcher = new MultiWarehouseDispatcher(warehouses);
+        const buyer = { lat: 21.03, lng: 105.86 };
+        const order = [{ skuId: "sku_shoes", quantity: 9999 }]; // Tổng cả 2 kho chỉ có 30
+
+        const plan = dispatcher.optimizeDispatch(order, buyer);
+        expect.equal(plan.success, false);
+        expect.equal(plan.strategy, "INSUFFICIENT_STOCK");
+        expect.equal(plan.unfulfilledItems[0].skuId, "sku_shoes");
+      });
+    });
+
+    // --- 4. AI Copilot Integration for Phase 8 Algorithms (3 Tests) ---
+    describe("AI Copilot Training for Phase 8 Algorithms", () => {
+      test("F155-T16: Admin Sentinel Copilot AI explains Double-Entry Ledger and Merkle Tree audit trail", () => {
+        const res = generateAdminCopilotResponse("Kiểm toán sổ cái kế toán kép và cây băm Merkle Tree bảo chứng dòng tiền");
+        expect.equal(res.tag, "SỔ CÁI MERKLE TREE");
+        expect.ok(res.text.includes("MERKLE TREE"));
+        expect.ok(res.text.includes("Double-Entry"));
+        expect.ok(res.text.includes("Merkle Proof"));
+      });
+
+      test("F155-T17: Admin Sentinel Copilot AI explains Skiplist Flash Sale Price Range Index", () => {
+        const res = generateAdminCopilotResponse("Thuật toán danh sách nhảy Skiplist lọc khoảng giá Flash Sale");
+        expect.equal(res.tag, "CHỈ MỤC GIÁ SKIPLIST");
+        expect.ok(res.text.includes("SKIPLIST"));
+        expect.ok(res.text.includes("Range Query"));
+        expect.ok(res.text.includes("O(\\log N"));
+      });
+
+      test("F155-T18: Admin Sentinel Copilot AI explains Multi-Warehouse Fulfillment Dispatch", () => {
+        const res = generateAdminCopilotResponse("Thuật toán điều phối xuất kho đa điểm fulfillment và chia gói hàng tối ưu");
+        expect.equal(res.tag, "ĐIỀU PHỐI ĐA KHO FULFILLMENT");
+        expect.ok(res.text.includes("FULFILLMENT"));
+        expect.ok(res.text.includes("Single Warehouse Consolidated"));
+        expect.ok(res.text.includes("Multi-Warehouse Greedy Split"));
+      });
+    });
+  });
 });
+
 
 
 

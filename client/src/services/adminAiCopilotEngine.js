@@ -152,7 +152,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 5. Đối Soát Dòng Tiền Ký Quỹ & Nợ Đọng COD Bưu Tá (Escrow Vault & COD Float Reconciliation)
-  if (/ký quỹ|escrow|dòng tiền|nợ đọng|đối soát cod|tiền về|nợ bưu tá|cod.*bưu tá|bưu tá.*cod/i.test(raw)) {
+  if (!/merkle|double-entry|kế toán kép/i.test(raw) && /ký quỹ|escrow|dòng tiền|nợ đọng|đối soát cod|tiền về|nợ bưu tá|cod.*bưu tá|bưu tá.*cod/i.test(raw)) {
     const escrowVal = context.escrowBalance || Math.round(totalRevenue * 0.3);
     const codFloatEst = Math.round(totalRevenue * 0.15);
     return {
@@ -439,7 +439,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
-  if (/thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+  if (!/skiplist|danh sách nhảy/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
 - **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
@@ -497,7 +497,65 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 21. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
+  // 21. Sổ Cái Kế Toán Kép & Cây Băm Merkle Tree (Double-Entry Ledger & Merkle Audit Trail)
+  if (/merkle|double-entry|kế toán kép|cây merkle|sổ cái bất biến|bảo chứng dòng tiền|merkle tree|bằng chứng merkle/i.test(raw)) {
+    return {
+      text: `🏛️ **SỔ CÁI KẾ TOÁN KÉP & BẢO CHỨNG BẤT BIẾN MERKLE TREE**:
+- **Mục đích thiết kế**: Bảo chứng toàn vẹn dòng tiền ký quỹ Escrow Vault hàng chục tỷ đồng và phát hiện ngay lập tức bất kỳ sự giả mạo số liệu quyết toán nào.
+- **Nguyên tắc Kế toán kép (Double-Entry Invariant)**:
+  - Mọi bút toán phải thỏa mãn: $\\sum \\text{Debit} = \\sum \\text{Credit}$.
+  - Phân loại 5 nhóm tài khoản chuẩn mực (Asset, Liability, Equity, Revenue, Expense).
+- **Mật mã học Merkle Tree (Ralph Merkle 1979)**:
+  - Mỗi bút toán là một nút lá $H_i = \\text{SHA256}(T_i)$. Cặp nút con được băm kép lũy tiến lên đỉnh Merkle Root duy nhất.
+  - **Bằng chứng Merkle (Merkle Proof)**: Kích thước chỉ $O(\\log N)$, cho phép kiểm toán độc lập bất kỳ giao dịch nào mà không cần tải toàn bộ sổ cái.`,
+      type: 'finance',
+      tag: 'SỔ CÁI MERKLE TREE',
+      suggestions: [
+        'Xem đối soát dòng tiền Escrow Vault',
+        'Kiểm tra chỉ mục giá Skiplist',
+        'Xem báo cáo điều phối xuất kho đa điểm'
+      ]
+    };
+  }
+
+  // 22. Danh Sách Nhảy Đa Tầng Lọc Giá Flash Sale (Probabilistic Skiplist Range Index)
+  if (/skiplist|danh sách nhảy|khoảng giá flash sale|range query|lọc giá siêu tốc|skiplist index/i.test(raw)) {
+    return {
+      text: `⚡ **DANH SÁCH NHẢY ĐA TẦNG SKIPLIST (FLASH SALE RANGE INDEX)**:
+- **Mục đích thiết kế**: Lọc và phân trang hàng chục nghìn sản phẩm Flash Sale theo khoảng giá $[P_{\\min}, P_{\\max}]$ trong bộ nhớ RAM mà không cần duyệt $O(N)$ hoặc tốn CPU cho thao tác sort.
+- **Cấu trúc phân tầng ngẫu nhiên (William Pugh 1990)**:
+  - Tầng $0$ chứa toàn bộ danh sách liên kết tăng dần. Các tầng cao hơn ($1..16$) với xác suất $p = 0.5$ đóng vai trò "làn đường cao tốc" (Express Lanes) nhảy cóc qua hàng loạt phần tử.
+  - Độ phức tạp tìm kiếm, chèn, xóa kỳ vọng: $O(\\log N)$.
+- **Range Query siêu tốc**: $O(\\log N + K)$, tự động trả về kết quả đã được sắp xếp tăng dần theo giá.`,
+      type: 'algorithm',
+      tag: 'CHỈ MỤC GIÁ SKIPLIST',
+      suggestions: [
+        'Xem thuật toán Trie Autocomplete',
+        'Tìm hiểu thuật toán Định giá Thompson Sampling',
+        'Xem danh sách chiến dịch Flash Sale'
+      ]
+    };
+  }
+
+  // 23. Điều Phối Xuất Kho Đa Điểm Tối Ưu Chi Phí (Multi-Warehouse Fulfillment Dispatch)
+  if (/đa kho|multi-warehouse|xuất kho tối ưu|chia gói hàng|điều phối xuất kho|fulfillment dispatch|kho hà nội.*đà nẵng/i.test(raw)) {
+    return {
+      text: `📦 **ĐIỀU PHỐI XUẤT KHO ĐA ĐIỂM FULFILLMENT (MIN-COST DISPATCH HEURISTIC)**:
+- **Mục đích thiết kế**: Tự động chỉ định trung tâm hoàn tất đơn hàng (Kho Hà Nội, Đà Nẵng, TP.HCM, Cần Thơ) để giảm thiểu tổng chi phí đóng gói và cước vận chuyển giao hàng chặng cuối.
+- **Chiến lược phân bổ 2 giai đoạn**:
+  1. **Single Warehouse Consolidated**: Ưu tiên tìm kho duy nhất có đủ 100% các mặt hàng và có khoảng cách GPS mặt cầu Haversine gần người mua nhất để gom thành đúng 1 kiện hàng.
+  2. **Multi-Warehouse Greedy Split**: Nếu không có kho nào đủ toàn bộ đơn, thuật toán chia gói thông minh theo thứ tự kho gần nhất có sẵn tồn kho, hạn chế tối đa số lượng kiện hàng tách rời.`,
+      type: 'logistics',
+      tag: 'ĐIỀU PHỐI ĐA KHO FULFILLMENT',
+      suggestions: [
+        'Xem thuật toán Tối ưu Tuyến đường TSP 2-Opt',
+        'Kiểm tra chỉ số SLA giao hàng toàn sàn',
+        'Xem kiểm toán sổ cái Merkle Tree'
+      ]
+    };
+  }
+
+  // 24. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
   return {
     text: `Chào Quản Trị Viên! Tôi là **Admin Sentinel AI** - Trợ lý số chuyên trách giám sát, phân tích số liệu và đảm bảo tuân thủ vận hành sàn TMĐT:
 - 📊 **Tra cứu GMV & Hoa hồng**: Phân tích doanh số và hoa hồng sàn 5%.

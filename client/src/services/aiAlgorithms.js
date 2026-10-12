@@ -675,12 +675,21 @@ export class AhoCorasick {
 // ------------------------------------------------------------------------------
 const EARTH_RADIUS_KM = 6371;
 
-export function calculateHaversineDistance(locA, locB) {
-  if (!locA || !locB) return 0;
-  const lat1 = locA.lat || locA.latitude || 0;
-  const lon1 = locA.lng || locA.lon || locA.longitude || 0;
-  const lat2 = locB.lat || locB.latitude || 0;
-  const lon2 = locB.lng || locB.lon || locB.longitude || 0;
+export function calculateHaversineDistance(locA, locB, lat2Arg, lon2Arg) {
+  if (locA === undefined || locA === null) return 0;
+  let lat1, lon1, lat2, lon2;
+  if (typeof locA === "number" && typeof locB === "number") {
+    lat1 = locA;
+    lon1 = locB;
+    lat2 = Number(lat2Arg) || 0;
+    lon2 = Number(lon2Arg) || 0;
+  } else {
+    if (!locA || !locB) return 0;
+    lat1 = locA.lat || locA.latitude || 0;
+    lon1 = locA.lng || locA.lon || locA.longitude || 0;
+    lat2 = locB.lat || locB.latitude || 0;
+    lon2 = locB.lng || locB.lon || locB.longitude || 0;
+  }
 
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -1462,6 +1471,478 @@ export class TrieAutocomplete {
   }
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 16: Double-Entry Bookkeeping Ledger & Cryptographic Merkle Tree
+// ------------------------------------------------------------------------------
+export function sha256(ascii) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  const lengthProperty = "length";
+  let i, j;
+  let result = "";
+  const words = [];
+  const asciiBitLength = ascii[lengthProperty] * 8;
+  let hash = [
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+  ];
+  const k = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+  let currentBlock = 0;
+  for (i = 0; i < ascii[lengthProperty]; i++) {
+    const code = ascii.charCodeAt(i);
+    currentBlock = (currentBlock << 8) | (code & 0xff);
+    if ((i % 4) === 3) {
+      words.push(currentBlock >>> 0);
+      currentBlock = 0;
+    }
+  }
+  const remaining = ascii[lengthProperty] % 4;
+  if (remaining !== 0) {
+    currentBlock = (currentBlock << ((4 - remaining) * 8)) >>> 0;
+    words.push(currentBlock);
+  }
+  const bitOffset = asciiBitLength % 32;
+  const wordIndex = asciiBitLength >>> 5;
+  if (words.length <= wordIndex) {
+    words.push(0x80000000 >>> 0);
+  } else {
+    words[wordIndex] = (words[wordIndex] | (0x80 << (24 - bitOffset))) >>> 0;
+  }
+  while ((words.length % 16) !== 14) words.push(0);
+  words.push((asciiBitLength / maxWord) | 0);
+  words.push(asciiBitLength >>> 0);
+
+  for (j = 0; j < words.length;) {
+    const w = words.slice(j, j += 16);
+    const oldHash = hash;
+    hash = hash.slice(0);
+    for (i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const s0 = i < 16 ? w[i] : (
+        w[i] = (
+          (w[i - 16] +
+          (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
+          w[i - 7] +
+          (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0
+        )
+      );
+      const s1 = rightRotate(hash[0], 2) ^ rightRotate(hash[0], 13) ^ rightRotate(hash[0], 22);
+      const ch = (hash[0] & hash[1]) ^ ((~hash[0]) & hash[2]);
+      const temp1 = (hash[7] + (rightRotate(hash[4], 6) ^ rightRotate(hash[4], 11) ^ rightRotate(hash[4], 25)) +
+        ((hash[4] & hash[5]) ^ ((~hash[4]) & hash[6])) + k[i] + w[i]) | 0;
+      const temp2 = (s1 + ch) | 0;
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+      hash.pop();
+    }
+    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+  }
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j + 1; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16 ? 0 : "") + b.toString(16));
+    }
+  }
+  return result;
+}
+
+export class DoubleEntryLedger {
+  constructor() {
+    this.accounts = new Map();
+    this.transactions = [];
+    this._initAccount("ASSETS:ESCROW_BANK", "ASSET");
+    this._initAccount("ASSETS:COD_RECEIVABLE", "ASSET");
+    this._initAccount("LIABILITIES:MERCHANT_PAYABLE", "LIABILITY");
+    this._initAccount("LIABILITIES:TAX_WITHHOLDING", "LIABILITY");
+    this._initAccount("REVENUE:PLATFORM_COMMISSION", "REVENUE");
+    this._initAccount("EXPENSES:VOUCHER_SUBSIDY", "EXPENSE");
+  }
+
+  _initAccount(name, type) {
+    if (!this.accounts.has(name)) {
+      this.accounts.set(name, { name, type, balance: 0, debitTotal: 0, creditTotal: 0 });
+    }
+  }
+
+  recordTransaction({ id, description = "", entries = [], timestamp = null }) {
+    if (!id || !Array.isArray(entries) || entries.length < 2) {
+      throw new Error("Transaction must have an id and at least 2 ledger entries");
+    }
+    let totalDebit = 0, totalCredit = 0;
+    for (const entry of entries) {
+      const debit = Number(entry.debit || 0);
+      const credit = Number(entry.credit || 0);
+      if (debit < 0 || credit < 0) throw new Error("Debit and credit amounts must be non-negative");
+      totalDebit += debit;
+      totalCredit += credit;
+    }
+    if (totalDebit !== totalCredit || totalDebit === 0) {
+      throw new Error(`LEDGER_IMBALANCE_ERROR: Total Debits (${totalDebit}) must equal Total Credits (${totalCredit})`);
+    }
+    for (const entry of entries) {
+      const debit = Number(entry.debit || 0);
+      const credit = Number(entry.credit || 0);
+      this._initAccount(entry.account, entry.account.startsWith("ASSET") ? "ASSET" : "LIABILITY");
+      const acc = this.accounts.get(entry.account);
+      acc.debitTotal += debit;
+      acc.creditTotal += credit;
+      if (acc.type === "ASSET" || acc.type === "EXPENSE") {
+        acc.balance += (debit - credit);
+      } else {
+        acc.balance += (credit - debit);
+      }
+    }
+    const txRecord = { id, description, entries, totalAmount: totalDebit, timestamp: timestamp || new Date().toISOString() };
+    this.transactions.push(txRecord);
+    return txRecord;
+  }
+
+  getBalance(accountName) {
+    const acc = this.accounts.get(accountName);
+    return acc ? acc.balance : 0;
+  }
+
+  getTrialBalance() {
+    let grandTotalDebit = 0, grandTotalCredit = 0;
+    const accountList = [];
+    for (const acc of this.accounts.values()) {
+      grandTotalDebit += acc.debitTotal;
+      grandTotalCredit += acc.creditTotal;
+      accountList.push({ name: acc.name, type: acc.type, debit: acc.debitTotal, credit: acc.creditTotal, balance: acc.balance });
+    }
+    return {
+      isBalanced: grandTotalDebit === grandTotalCredit,
+      totalDebit: grandTotalDebit,
+      totalCredit: grandTotalCredit,
+      discrepancy: Math.abs(grandTotalDebit - grandTotalCredit),
+      accounts: accountList
+    };
+  }
+}
+
+export class MerkleTree {
+  constructor(transactions = []) {
+    this.leaves = [];
+    this.layers = [];
+    if (transactions.length > 0) this.buildTree(transactions);
+  }
+
+  buildTree(transactions) {
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+      this.leaves = [];
+      this.layers = [[]];
+      return "";
+    }
+    this.leaves = transactions.map(tx => {
+      const serialized = typeof tx === "string" ? tx : JSON.stringify(tx);
+      return sha256(serialized);
+    });
+    this.layers = [this.leaves];
+    let currentLayer = this.leaves;
+    while (currentLayer.length > 1) {
+      const nextLayer = [];
+      for (let i = 0; i < currentLayer.length; i += 2) {
+        const left = currentLayer[i];
+        const right = (i + 1 < currentLayer.length) ? currentLayer[i + 1] : left;
+        nextLayer.push(sha256(left + right));
+      }
+      this.layers.push(nextLayer);
+      currentLayer = nextLayer;
+    }
+    return this.getRoot();
+  }
+
+  getRoot() {
+    if (this.layers.length === 0 || this.layers[this.layers.length - 1].length === 0) return "";
+    return this.layers[this.layers.length - 1][0];
+  }
+
+  getProof(leafIndex) {
+    if (leafIndex < 0 || leafIndex >= this.leaves.length) throw new Error(`Invalid leaf index: ${leafIndex}`);
+    const proof = [];
+    let currentIndex = leafIndex;
+    for (let layerIdx = 0; layerIdx < this.layers.length - 1; layerIdx++) {
+      const layer = this.layers[layerIdx];
+      const isRightSibling = currentIndex % 2 === 1;
+      const siblingIndex = isRightSibling ? currentIndex - 1 : currentIndex + 1;
+      if (siblingIndex < layer.length) {
+        proof.push({ position: isRightSibling ? "left" : "right", hash: layer[siblingIndex] });
+      } else {
+        proof.push({ position: "right", hash: layer[currentIndex] });
+      }
+      currentIndex = Math.floor(currentIndex / 2);
+    }
+    return proof;
+  }
+
+  static verifyProof(transaction, proof, root) {
+    if (!transaction || !proof || !root) return false;
+    const serialized = typeof transaction === "string" ? transaction : JSON.stringify(transaction);
+    let currentHash = sha256(serialized);
+    for (const item of proof) {
+      if (item.position === "left") {
+        currentHash = sha256(item.hash + currentHash);
+      } else {
+        currentHash = sha256(currentHash + item.hash);
+      }
+    }
+    return currentHash === root;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 17: Probabilistic Skiplist Range Query Index
+// ------------------------------------------------------------------------------
+class SkiplistNode {
+  constructor(key, value, level) {
+    this.key = key;
+    this.value = value;
+    this.forward = new Array(level).fill(null);
+  }
+}
+
+export class SkiplistIndex {
+  constructor({ maxLevel = 16, p = 0.5 } = {}) {
+    this.maxLevel = maxLevel;
+    this.p = p;
+    this.level = 1;
+    this.size = 0;
+    this.header = new SkiplistNode(-Infinity, null, this.maxLevel);
+  }
+
+  _randomLevel() {
+    let lvl = 1;
+    while (Math.random() < this.p && lvl < this.maxLevel) lvl++;
+    return lvl;
+  }
+
+  insert(key, value) {
+    const numKey = Number(key);
+    const update = new Array(this.maxLevel).fill(null);
+    let curr = this.header;
+    for (let i = this.level - 1; i >= 0; i--) {
+      while (curr.forward[i] !== null && curr.forward[i].key < numKey) {
+        curr = curr.forward[i];
+      }
+      update[i] = curr;
+    }
+    curr = curr.forward[0];
+    const newLevel = this._randomLevel();
+    if (newLevel > this.level) {
+      for (let i = this.level; i < newLevel; i++) update[i] = this.header;
+      this.level = newLevel;
+    }
+    const newNode = new SkiplistNode(numKey, value, newLevel);
+    for (let i = 0; i < newLevel; i++) {
+      newNode.forward[i] = update[i].forward[i];
+      update[i].forward[i] = newNode;
+    }
+    this.size++;
+    return newNode;
+  }
+
+  search(key) {
+    const numKey = Number(key);
+    let curr = this.header;
+    for (let i = this.level - 1; i >= 0; i--) {
+      while (curr.forward[i] !== null && curr.forward[i].key < numKey) {
+        curr = curr.forward[i];
+      }
+    }
+    curr = curr.forward[0];
+    return (curr !== null && curr.key === numKey) ? curr.value : null;
+  }
+
+  rangeQuery(minPrice = 0, maxPrice = Infinity, limit = 50) {
+    const min = Number(minPrice);
+    const max = Number(maxPrice);
+    const results = [];
+    let curr = this.header;
+    for (let i = this.level - 1; i >= 0; i--) {
+      while (curr.forward[i] !== null && curr.forward[i].key < min) {
+        curr = curr.forward[i];
+      }
+    }
+    curr = curr.forward[0];
+    while (curr !== null && curr.key <= max && results.length < limit) {
+      results.push({ price: curr.key, data: curr.value });
+      curr = curr.forward[0];
+    }
+    return results;
+  }
+
+  delete(key) {
+    const numKey = Number(key);
+    const update = new Array(this.maxLevel).fill(null);
+    let curr = this.header;
+    for (let i = this.level - 1; i >= 0; i--) {
+      while (curr.forward[i] !== null && curr.forward[i].key < numKey) {
+        curr = curr.forward[i];
+      }
+      update[i] = curr;
+    }
+    curr = curr.forward[0];
+    if (curr !== null && curr.key === numKey) {
+      for (let i = 0; i < this.level; i++) {
+        if (update[i].forward[i] !== curr) break;
+        update[i].forward[i] = curr.forward[i];
+      }
+      while (this.level > 1 && this.header.forward[this.level - 1] === null) this.level--;
+      this.size--;
+      return true;
+    }
+    return false;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 18: Multi-Warehouse Optimal Fulfillment Dispatcher
+// ------------------------------------------------------------------------------
+export class MultiWarehouseDispatcher {
+  constructor(warehouses = [], { basePackageFee = 15000, ratePerKm = 30 } = {}) {
+    this.warehouses = new Map();
+    this.basePackageFee = basePackageFee;
+    this.ratePerKm = ratePerKm;
+    for (const wh of warehouses) this.addWarehouse(wh);
+  }
+
+  addWarehouse({ id, name, location, inventory = {} }) {
+    if (!id || !location) throw new Error("Warehouse must have an id and GPS location");
+    const invMap = inventory instanceof Map ? inventory : new Map(Object.entries(inventory));
+    this.warehouses.set(id, {
+      id,
+      name: name || id,
+      location: { lat: Number(location.lat), lng: Number(location.lng) },
+      inventory: invMap
+    });
+  }
+
+  setStock(warehouseId, skuId, quantity) {
+    const wh = this.warehouses.get(warehouseId);
+    if (!wh) throw new Error(`Warehouse ${warehouseId} not found`);
+    wh.inventory.set(skuId, Math.max(0, Number(quantity)));
+  }
+
+  getStock(warehouseId, skuId) {
+    const wh = this.warehouses.get(warehouseId);
+    return wh ? (wh.inventory.get(skuId) || 0) : 0;
+  }
+
+  calculateShippingCost(warehouse, buyerLocation) {
+    const distanceKm = calculateHaversineDistance(
+      warehouse.location,
+      buyerLocation
+    );
+    const shippingFee = Math.round(this.basePackageFee + (distanceKm * this.ratePerKm));
+    return { distanceKm: Number(distanceKm.toFixed(1)), shippingFee };
+  }
+
+  optimizeDispatch(orderItems = [], buyerLocation) {
+    if (!Array.isArray(orderItems) || orderItems.length === 0 || !buyerLocation) {
+      return { success: false, reason: "INVALID_DISPATCH_INPUT", packages: [], totalCost: 0 };
+    }
+
+    // 1. Kiểm tra Single Warehouse Fulfillment
+    const fullyCapable = [];
+    for (const wh of this.warehouses.values()) {
+      let canFulfill = true;
+      for (const item of orderItems) {
+        if ((wh.inventory.get(item.skuId) || 0) < item.quantity) {
+          canFulfill = false;
+          break;
+        }
+      }
+      if (canFulfill) {
+        const { distanceKm, shippingFee } = this.calculateShippingCost(wh, buyerLocation);
+        fullyCapable.push({ warehouse: wh, distanceKm, shippingFee });
+      }
+    }
+
+    if (fullyCapable.length > 0) {
+      fullyCapable.sort((a, b) => a.shippingFee - b.shippingFee);
+      const chosen = fullyCapable[0];
+      return {
+        success: true,
+        strategy: "SINGLE_WAREHOUSE_CONSOLIDATED",
+        splitCount: 1,
+        totalCost: chosen.shippingFee,
+        packages: [{
+          packageId: `PKG_${chosen.warehouse.id}_1`,
+          warehouseId: chosen.warehouse.id,
+          warehouseName: chosen.warehouse.name,
+          items: orderItems.map(i => ({ skuId: i.skuId, quantity: i.quantity, name: i.name })),
+          distanceKm: chosen.distanceKm,
+          shippingFee: chosen.shippingFee
+        }]
+      };
+    }
+
+    // 2. Multi-Warehouse Split Fulfillment
+    const needed = new Map();
+    for (const item of orderItems) needed.set(item.skuId, item.quantity);
+
+    const packages = [];
+    let totalCost = 0;
+    const sortedWarehouses = Array.from(this.warehouses.values()).map(wh => {
+      const { distanceKm, shippingFee } = this.calculateShippingCost(wh, buyerLocation);
+      return { warehouse: wh, distanceKm, shippingFee };
+    }).sort((a, b) => a.shippingFee - b.shippingFee);
+
+    for (const { warehouse, distanceKm, shippingFee } of sortedWarehouses) {
+      const itemsToFulfill = [];
+      for (const [skuId, requiredQty] of needed.entries()) {
+        if (requiredQty <= 0) continue;
+        const available = warehouse.inventory.get(skuId) || 0;
+        if (available > 0) {
+          const allocateQty = Math.min(requiredQty, available);
+          itemsToFulfill.push({ skuId, quantity: allocateQty });
+          needed.set(skuId, requiredQty - allocateQty);
+        }
+      }
+      if (itemsToFulfill.length > 0) {
+        packages.push({
+          packageId: `PKG_${warehouse.id}_${packages.length + 1}`,
+          warehouseId: warehouse.id,
+          warehouseName: warehouse.name,
+          items: itemsToFulfill,
+          distanceKm,
+          shippingFee
+        });
+        totalCost += shippingFee;
+      }
+      if (!Array.from(needed.values()).some(qty => qty > 0)) break;
+    }
+
+    const unfulfilled = Array.from(needed.entries())
+      .filter(([_, qty]) => qty > 0)
+      .map(([skuId, qty]) => ({ skuId, missingQuantity: qty }));
+
+    if (unfulfilled.length > 0) {
+      return { success: false, strategy: "INSUFFICIENT_STOCK", unfulfilledItems: unfulfilled, packages, totalCost };
+    }
+
+    return {
+      success: true,
+      strategy: "MULTI_WAREHOUSE_SPLIT",
+      splitCount: packages.length,
+      totalCost,
+      packages
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -1487,5 +1968,10 @@ export default {
   SybilFraudRadar,
   TrieAutocomplete,
   removeVietnameseTones,
+  sha256,
+  DoubleEntryLedger,
+  MerkleTree,
+  SkiplistIndex,
+  MultiWarehouseDispatcher,
 };
 

@@ -23,12 +23,21 @@ const EARTH_RADIUS_KM = 6371;
 /**
  * Tính khoảng cách đường cong mặt cầu (Haversine) giữa 2 tọa độ GPS (km)
  */
-export function calculateHaversineDistance(locA, locB) {
-  if (!locA || !locB) return 0;
-  const lat1 = locA.lat || locA.latitude || 0;
-  const lon1 = locA.lng || locA.lon || locA.longitude || 0;
-  const lat2 = locB.lat || locB.latitude || 0;
-  const lon2 = locB.lng || locB.lon || locB.longitude || 0;
+export function calculateHaversineDistance(locA, locB, lat2Arg, lon2Arg) {
+  if (locA === undefined || locA === null) return 0;
+  let lat1, lon1, lat2, lon2;
+  if (typeof locA === "number" && typeof locB === "number") {
+    lat1 = locA;
+    lon1 = locB;
+    lat2 = Number(lat2Arg) || 0;
+    lon2 = Number(lon2Arg) || 0;
+  } else {
+    if (!locA || !locB) return 0;
+    lat1 = locA.lat || locA.latitude || 0;
+    lon1 = locA.lng || locA.lon || locA.longitude || 0;
+    lat2 = locB.lat || locB.latitude || 0;
+    lon2 = locB.lng || locB.lon || locB.longitude || 0;
+  }
 
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
