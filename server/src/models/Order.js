@@ -769,6 +769,28 @@ const orderSchema = new mongoose.Schema(
       adjustedEta: { type: String, default: null },
       updatedAt: { type: String, default: null },
     },
+    doorstepUnattendedSafeDropPhoto: {
+      isSafeDropRequested: { type: Boolean, default: false },
+      designatedSafeSpot: {
+        type: String,
+        enum: ["gate_mailbox", "doorstep_mat", "shoerack_top", "neighbor_handoff", "building_reception"],
+        default: "doorstep_mat",
+      },
+      safeDropInstructionNote: { type: String, default: "" },
+      photoProofUrl: { type: String, default: null },
+      placedCoordinates: {
+        lat: { type: Number, default: 10.7769 },
+        lng: { type: Number, default: 106.7009 },
+      },
+      waterproofWeatherTarpPlaced: { type: Boolean, default: true },
+      safeDropStatus: {
+        type: String,
+        enum: ["unattended_requested", "photo_captured_safely_placed", "retrieved_by_buyer"],
+        default: "unattended_requested",
+      },
+      dropTimestamp: { type: String, default: null },
+      buyerRetrievedTimestamp: { type: String, default: null },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

@@ -4860,6 +4860,103 @@ export const updatePredictiveDeliveryWindowReroute = async (req, res) => {
   }
 };
 
+// @desc    Doorstep Unattended Safe Drop Photo Proof & Weather-Tarp Placement (Feature 144)
+// @route   POST /api/orders/:id/unattended-safe-drop
+// @access  Public / Optional Authenticate
+export const updateDoorstepUnattendedSafeDrop = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      designatedSafeSpot = "doorstep_mat",
+      safeDropInstructionNote = "Để gọn trước cửa nhà sau chậu cây giúp mình nhé",
+      photoProofUrl = null,
+      placedCoordinates = { lat: 10.7769, lng: 106.7009 },
+      waterproofWeatherTarpPlaced = true,
+      action = "request_safe_drop", // 'request_safe_drop' | 'confirm_drop_placed' | 'buyer_retrieved'
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng để cấu hình giao không tiếp xúc", 404);
+    }
+
+    const validSpots = ["gate_mailbox", "doorstep_mat", "shoerack_top", "neighbor_handoff", "building_reception"];
+    const safeSpot = validSpots.includes(designatedSafeSpot) ? designatedSafeSpot : "doorstep_mat";
+    const now = new Date().toISOString();
+
+    const spotNameMap = {
+      gate_mailbox: "Hòm thư cổng trước",
+      doorstep_mat: "Trước cửa nhà (sau chậu cây / thảm cửa)",
+      shoerack_top: "Trên nóc kệ giày",
+      neighbor_handoff: "Gửi hàng xóm cạnh nhà",
+      building_reception: "Lễ tân tòa nhà / Chung cư",
+    };
+
+    let updatedStatus = "unattended_requested";
+    let logText = "";
+    let photoUrl = photoProofUrl || order.doorstepUnattendedSafeDropPhoto?.photoProofUrl;
+
+    if (action === "confirm_drop_placed") {
+      updatedStatus = "photo_captured_safely_placed";
+      photoUrl = photoUrl || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=600&q=80";
+      logText = `GIAO HÀNG KHÔNG TIẾP XÚC HOÀN TẤT: Bưu tá đã đặt gói hàng tại '${spotNameMap[safeSpot]}', phủ bạt che mưa Nano ${waterproofWeatherTarpPlaced ? 'ĐẠT CHUẨN' : 'cơ bản'} và chụp ảnh nghiệm thu đối chứng.`;
+    } else if (action === "buyer_retrieved") {
+      updatedStatus = "retrieved_by_buyer";
+      logText = `NGƯỜI MUA ĐÃ LẤY HÀNG: Khách hàng xác nhận đã mang bưu kiện vào nhà an toàn từ vị trí '${spotNameMap[safeSpot]}'.`;
+    } else {
+      updatedStatus = "unattended_requested";
+      logText = `YÊU CẦU GIAO AN TOÀN KHI VẮNG NHÀ: Người mua chỉ định vị trí '${spotNameMap[safeSpot]}'. Ghi chú: "${safeDropInstructionNote}".`;
+    }
+
+    order.doorstepUnattendedSafeDropPhoto = {
+      isSafeDropRequested: true,
+      designatedSafeSpot: safeSpot,
+      safeDropInstructionNote: safeDropInstructionNote || "Vui lòng đặt nhẹ tay trước cửa nhà",
+      photoProofUrl: photoUrl,
+      placedCoordinates: {
+        lat: Number(placedCoordinates?.lat) || 10.7769,
+        lng: Number(placedCoordinates?.lng) || 106.7009,
+      },
+      waterproofWeatherTarpPlaced: Boolean(waterproofWeatherTarpPlaced),
+      safeDropStatus: updatedStatus,
+      dropTimestamp: action === "confirm_drop_placed" ? now : order.doorstepUnattendedSafeDropPhoto?.dropTimestamp,
+      buyerRetrievedTimestamp: action === "buyer_retrieved" ? now : order.doorstepUnattendedSafeDropPhoto?.buyerRetrievedTimestamp,
+    };
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: logText,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        doorstepUnattendedSafeDropPhoto: order.doorstepUnattendedSafeDropPhoto,
+        message: action === "confirm_drop_placed"
+          ? "Đã lưu ảnh nghiệm thu đặt hàng an toàn trước cửa nhà!"
+          : action === "buyer_retrieved"
+          ? "Xác nhận người mua đã nhận bưu kiện thành công."
+          : `Đã lưu chỉ dẫn giao an toàn tại: ${spotNameMap[safeSpot]}`,
+      },
+      200
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 

@@ -65,6 +65,7 @@ import {
   triggerSmartLockerPinlessNfcTapAndGo,
   auditAcousticParcelDropTamper,
   updatePredictiveDeliveryWindowReroute,
+  updateDoorstepUnattendedSafeDrop,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -141,6 +142,7 @@ router.post("/:id/doorbell-gate-release", optionalAuthenticate, triggerInteracti
 router.post("/:id/smart-locker-pinless-nfc", optionalAuthenticate, triggerSmartLockerPinlessNfcTapAndGo);
 router.post("/:id/acoustic-drop-tamper", optionalAuthenticate, auditAcousticParcelDropTamper);
 router.post("/:id/predictive-delivery-window", optionalAuthenticate, updatePredictiveDeliveryWindowReroute);
+router.post("/:id/unattended-safe-drop", optionalAuthenticate, updateDoorstepUnattendedSafeDrop);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

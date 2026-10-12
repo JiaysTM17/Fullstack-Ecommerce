@@ -1390,6 +1390,17 @@ export async function updatePredictiveDeliveryWindowRerouteAPI(orderId, { predic
   return result?.data || result;
 }
 
+/**
+ * Doorstep Unattended Safe Drop Photo Proof & Weather-Tarp Placement (Feature 144)
+ */
+export async function updateDoorstepUnattendedSafeDropAPI(orderId, { designatedSafeSpot, safeDropInstructionNote, photoProofUrl, placedCoordinates, waterproofWeatherTarpPlaced, action } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/unattended-safe-drop`, {
+    method: "POST",
+    body: JSON.stringify({ designatedSafeSpot, safeDropInstructionNote, photoProofUrl, placedCoordinates, waterproofWeatherTarpPlaced, action }),
+  });
+  return result?.data || result;
+}
+
 
 
 

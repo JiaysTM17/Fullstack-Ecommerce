@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
-import { triggerInteractiveDoorbellGateReleaseAPI, updatePredictiveDeliveryWindowRerouteAPI } from '../services/api';
+import {
+  triggerInteractiveDoorbellGateReleaseAPI,
+  updatePredictiveDeliveryWindowRerouteAPI,
+  updateDoorstepUnattendedSafeDropAPI,
+} from '../services/api';
 import {
   ShieldCheckIcon,
   TruckIcon,
@@ -175,6 +179,7 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
           {[
             { id: 'overview', label: '🛡️ Chứng Nhận Toàn Vẹn' },
             { id: 'doorbell', label: '🔔 Chuông Cửa Video AI & Mở Cổng' },
+            { id: 'safe_drop', label: '📸 Đặt Hàng An Toàn & Bạt Che' },
             { id: 'predictive_window', label: '⏱️ Khung Giờ & Nắn Tuyến AI' },
             { id: 'telemetry', label: '📊 Giám Sát Cảm Biến IoT' },
             { id: 'locker', label: '📱 Tủ SPX Tap & Go' },
@@ -689,6 +694,263 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
               </div>
             </div>
           )}
+
+          {/* TAB 3: ĐẶT HÀNG AN TOÀN KHI VẮNG NHÀ & BẠT CHE NANO */}
+          {activeTab === 'safe_drop' && (() => {
+            const drop = order.doorstepUnattendedSafeDropPhoto || {
+              isSafeDropRequested: true,
+              designatedSafeSpot: 'doorstep_mat',
+              safeDropInstructionNote: 'Đặt gọn gàng trước cửa nhà sau chậu cây giúp mình nhé',
+              photoProofUrl: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=600&q=80',
+              waterproofWeatherTarpPlaced: true,
+              safeDropStatus: 'photo_captured_safely_placed',
+              dropTimestamp: new Date().toISOString(),
+            };
+
+            const spotMap = {
+              gate_mailbox: 'Hòm thư cổng trước',
+              doorstep_mat: 'Trước cửa nhà (sau chậu cây / thảm cửa)',
+              shoerack_top: 'Trên nóc kệ giày',
+              neighbor_handoff: 'Gửi hàng xóm cạnh nhà',
+              building_reception: 'Lễ tân tòa nhà / Chung cư',
+            };
+
+            const isPlaced = drop.safeDropStatus === 'photo_captured_safely_placed';
+            const isRetrieved = drop.safeDropStatus === 'retrieved_by_buyer';
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                  flexWrap: 'wrap',
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '18px' }}>📸</span>
+                      <strong style={{ fontSize: '15px', color: '#0f172a' }}>Giao Không Tiếp Xúc &amp; Nghiệm Thu Ảnh Chụp</strong>
+                      <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: isRetrieved ? '#dcfce7' : isPlaced ? '#dbeafe' : '#fef3c7', color: isRetrieved ? '#15803d' : isPlaced ? '#1d4ed8' : '#b45309' }}>
+                        {isRetrieved ? 'ĐÃ LẤY VÀO NHÀ' : isPlaced ? 'ĐÃ ĐẶT AN TOÀN' : 'CHỜ SHIPPER ĐẶT'}
+                      </span>
+                    </div>
+                    <p style={{ margin: '6px 0 0', fontSize: '13px', color: '#475569' }}>
+                      Khi bạn vắng nhà, bưu tá SPX sẽ đặt hàng tại vị trí bạn chọn, phủ bạt che mưa Nano chống ướt và chụp ảnh đối chứng lưu lại.
+                    </p>
+                  </div>
+
+                  <div style={{
+                    background: '#ffffff',
+                    border: '1.5px solid #10b981',
+                    padding: '10px 16px',
+                    borderRadius: '10px',
+                    textAlign: 'center',
+                    boxShadow: '0 2px 6px rgba(16, 185, 129, 0.1)',
+                  }}>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block' }}>Vị Trí Đã Chỉ Định</span>
+                    <strong style={{ fontSize: '14.5px', fontWeight: 800, color: '#047857' }}>
+                      {spotMap[drop.designatedSafeSpot] || drop.designatedSafeSpot}
+                    </strong>
+                    <div style={{ fontSize: '11px', color: '#059669', fontWeight: 600, marginTop: '2px' }}>
+                      {drop.waterproofWeatherTarpPlaced ? '🛡️ Có phủ bạt che mưa Nano' : 'Không dùng bạt'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Khối Ảnh Nghiệm Thu Đối Chứng Thực Tế */}
+                {drop.photoProofUrl && (
+                  <div style={{
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <strong style={{ fontSize: '13.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>🖼️ Ảnh Chụp Đối Chứng Của Shipper:</span>
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
+                          (Chụp lúc: {drop.dropTimestamp ? new Date(drop.dropTimestamp).toLocaleTimeString('vi-VN') : 'Hôm nay'})
+                        </span>
+                      </strong>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#16a34a', background: '#dcfce7', padding: '2px 8px', borderRadius: '4px' }}>
+                        GPS Khớp 100%
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <img
+                        src={drop.photoProofUrl}
+                        alt="Ảnh nghiệm thu đặt hàng"
+                        style={{
+                          width: '180px',
+                          height: '120px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '2px solid #e2e8f0',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                        }}
+                      />
+                      <div style={{ flex: 1, minWidth: '220px', fontSize: '12.5px', color: '#475569', lineHeight: 1.6 }}>
+                        <div><strong>Ghi chú người mua:</strong> "{drop.safeDropInstructionNote || 'Vui lòng đặt nhẹ tay'}"</div>
+                        <div><strong>Bạt che Nano chống mưa:</strong> <span style={{ color: '#16a34a', fontWeight: 700 }}>Đã phủ bạt kín gói hàng</span></div>
+                        <div style={{ color: '#64748b', fontSize: '11.5px', marginTop: '4px' }}>
+                          💡 Nếu bạn về nhà không thấy bưu kiện, hệ thống bảo hiểm bưu kiện SPX bồi thường 100% giá trị tức thì.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Các Nút Tương Tác 1 Chạm Của Người Mua */}
+                <div style={{
+                  padding: '16px',
+                  borderRadius: '12px',
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '12px' }}>
+                    Thao Tác Nhận Hàng Hoặc Đổi Vị Trí:
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      disabled={doorbellActionLoading}
+                      onClick={async () => {
+                        setDoorbellActionLoading(true);
+                        try {
+                          const res = await updateDoorstepUnattendedSafeDropAPI(order.orderId || order._id, {
+                            action: 'buyer_retrieved',
+                            designatedSafeSpot: drop.designatedSafeSpot,
+                          });
+                          setDoorbellLog('Đã xác nhận lấy hàng vào nhà thành công!');
+                          if (onUpdateOrder) {
+                            onUpdateOrder({
+                              ...order,
+                              doorstepUnattendedSafeDropPhoto: res?.doorstepUnattendedSafeDropPhoto,
+                            });
+                          }
+                        } catch (e) {
+                          setDoorbellLog('Lỗi xác nhận: ' + e.message);
+                        } finally {
+                          setDoorbellActionLoading(false);
+                        }
+                      }}
+                      style={{
+                        background: '#16a34a',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '9px 16px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 2px 6px rgba(22, 163, 74, 0.2)',
+                      }}
+                    >
+                      <span>🏠</span>
+                      <span>Tôi Đã Lấy Hàng Vào Nhà</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={doorbellActionLoading}
+                      onClick={async () => {
+                        setDoorbellActionLoading(true);
+                        try {
+                          const res = await updateDoorstepUnattendedSafeDropAPI(order.orderId || order._id, {
+                            action: 'confirm_drop_placed',
+                            designatedSafeSpot: 'shoerack_top',
+                            safeDropInstructionNote: 'Đổi sang đặt trên nóc kệ giày giúp mình nhé',
+                            waterproofWeatherTarpPlaced: true,
+                          });
+                          setDoorbellLog('Đã cập nhật vị trí đặt hàng sang Nóc Kệ Giày!');
+                          if (onUpdateOrder) {
+                            onUpdateOrder({
+                              ...order,
+                              doorstepUnattendedSafeDropPhoto: res?.doorstepUnattendedSafeDropPhoto,
+                            });
+                          }
+                        } catch (e) {
+                          setDoorbellLog('Lỗi đổi vị trí: ' + e.message);
+                        } finally {
+                          setDoorbellActionLoading(false);
+                        }
+                      }}
+                      style={{
+                        background: '#ffffff',
+                        color: '#2563eb',
+                        border: '1.5px solid #bfdbfe',
+                        padding: '9px 16px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <span>👞</span>
+                      <span>Chuyển Sang Nóc Kệ Giày</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={doorbellActionLoading}
+                      onClick={async () => {
+                        setDoorbellActionLoading(true);
+                        try {
+                          const res = await updateDoorstepUnattendedSafeDropAPI(order.orderId || order._id, {
+                            action: 'confirm_drop_placed',
+                            designatedSafeSpot: 'neighbor_handoff',
+                            safeDropInstructionNote: 'Gửi nhà bác Ba hàng xóm số 24A giúp em nhé',
+                            waterproofWeatherTarpPlaced: true,
+                          });
+                          setDoorbellLog('Đã lưu chỉ dẫn gửi hàng xóm cạnh nhà!');
+                          if (onUpdateOrder) {
+                            onUpdateOrder({
+                              ...order,
+                              doorstepUnattendedSafeDropPhoto: res?.doorstepUnattendedSafeDropPhoto,
+                            });
+                          }
+                        } catch (e) {
+                          setDoorbellLog('Lỗi đổi chỉ dẫn: ' + e.message);
+                        } finally {
+                          setDoorbellActionLoading(false);
+                        }
+                      }}
+                      style={{
+                        background: '#ffffff',
+                        color: '#d97706',
+                        border: '1.5px solid #fde68a',
+                        padding: '9px 16px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <span>🤝</span>
+                      <span>Gửi Hàng Xóm Cạnh Nhà</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* TAB 5: KHUNG GIỜ VÀNG & NẮN TUYẾN AI */}
           {activeTab === 'predictive_window' && (() => {

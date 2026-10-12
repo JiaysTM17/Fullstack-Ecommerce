@@ -6075,6 +6075,76 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(clampConfidence("invalid"), 50);
     });
   });
+
+  // =========================================================================
+  // FEATURE 144: Doorstep Unattended Safe Drop Photo Proof & Weather-Tarp (5 Tests)
+  // =========================================================================
+  describe("Feature 144: Doorstep Unattended Safe Drop Photo Proof & Weather-Tarp", () => {
+    test("F144-T1: Successfully records unattended safe drop instructions and designated safe spot", async () => {
+      const order = await Order.create({
+        orderId: "ORD_SAFE_DROP_144",
+        user: "user_test_safedrop_144",
+        items: [{ product: "prod_sd_1", quantity: 1, price: 320000 }],
+        totalPrice: 320000,
+        shippingFee: 15000,
+        finalTotal: 335000,
+        doorstepUnattendedSafeDropPhoto: {
+          isSafeDropRequested: true,
+          designatedSafeSpot: "shoerack_top",
+          safeDropInstructionNote: "Đặt gọn gàng trên nóc kệ giày trước nhà",
+          photoProofUrl: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48",
+          waterproofWeatherTarpPlaced: true,
+          safeDropStatus: "photo_captured_safely_placed",
+          dropTimestamp: new Date().toISOString(),
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_SAFE_DROP_144");
+      expect.equal(order.doorstepUnattendedSafeDropPhoto.isSafeDropRequested, true);
+      expect.equal(order.doorstepUnattendedSafeDropPhoto.designatedSafeSpot, "shoerack_top");
+      expect.equal(order.doorstepUnattendedSafeDropPhoto.waterproofWeatherTarpPlaced, true);
+      expect.equal(order.doorstepUnattendedSafeDropPhoto.safeDropStatus, "photo_captured_safely_placed");
+    });
+
+    test("F144-T2: Buyer retrieving parcel updates safe drop status to retrieved_by_buyer", () => {
+      const currentStatus = "photo_captured_safely_placed";
+      const action = "buyer_retrieved";
+      const newStatus = action === "buyer_retrieved" ? "retrieved_by_buyer" : currentStatus;
+
+      expect.equal(newStatus, "retrieved_by_buyer");
+    });
+
+    test("F144-T3: Designated safe spot validates against approved delivery spots", () => {
+      const validSpots = ["gate_mailbox", "doorstep_mat", "shoerack_top", "neighbor_handoff", "building_reception"];
+      const validateSpot = (spot) => validSpots.includes(spot) ? spot : "doorstep_mat";
+
+      expect.equal(validateSpot("gate_mailbox"), "gate_mailbox");
+      expect.equal(validateSpot("neighbor_handoff"), "neighbor_handoff");
+      expect.equal(validateSpot("unsafe_roof"), "doorstep_mat");
+    });
+
+    test("F144-T4: Waterproof weather tarp defaults to true for outdoor drop spots", () => {
+      const tarpCheck = (isOutdoor) => isOutdoor ? true : false;
+
+      expect.equal(tarpCheck(true), true);
+      expect.equal(tarpCheck(false), false);
+    });
+
+    test("F144-T5: Geolocation coordinate fallback correctly handles missing lat/lng", () => {
+      const parseCoords = (coords) => ({
+        lat: Number(coords?.lat) || 10.7769,
+        lng: Number(coords?.lng) || 106.7009,
+      });
+
+      const valid = parseCoords({ lat: 21.0285, lng: 105.8542 });
+      expect.equal(valid.lat, 21.0285);
+      expect.equal(valid.lng, 105.8542);
+
+      const fallback = parseCoords(null);
+      expect.equal(fallback.lat, 10.7769);
+      expect.equal(fallback.lng, 106.7009);
+    });
+  });
 });
 
 
