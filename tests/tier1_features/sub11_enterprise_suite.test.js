@@ -38,6 +38,10 @@ import {
   fnv1a32,
   BloomFilter,
   murmur32,
+  RecommendationEngine,
+  AhoCorasick,
+  calculateHaversineDistance,
+  optimizeDeliveryRoute,
 } from "../../client/src/services/aiAlgorithms.js";
 import fs from "fs";
 
@@ -7329,6 +7333,202 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.ok(res.text.includes("CONSISTENT HASHING"));
         expect.ok(res.text.includes("Cache Avalanche"));
         expect.ok(res.text.includes("Virtual Nodes"));
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 152: Advanced E-Commerce Business Algorithms Suite (18 Tests)
+  // =========================================================================
+  describe("Feature 152: Advanced E-Commerce Business Algorithms Suite", () => {
+    // --- 1. Recommendation Engine: Collaborative Filtering & Item Affinity (5 Tests) ---
+    describe("Algorithm 1: Collaborative Filtering & Item Affinity", () => {
+      const mockOrders = [
+        { items: [{ productId: "p-iphone" }, { productId: "p-case" }, { productId: "p-charger" }] },
+        { items: [{ productId: "p-iphone" }, { productId: "p-case" }] },
+        { items: [{ productId: "p-iphone" }, { productId: "p-charger" }] },
+        { items: [{ productId: "p-samsung" }, { productId: "p-charger" }] },
+        { items: [{ productId: "p-laptop" }, { productId: "p-mouse" }] },
+      ];
+
+      test("F152-T1: RecommendationEngine trains from order history and builds co-occurrence matrix", () => {
+        const engine = new RecommendationEngine();
+        engine.trainFromOrders(mockOrders);
+
+        expect.equal(engine.itemFrequencies.get("p-iphone"), 3);
+        expect.equal(engine.itemFrequencies.get("p-case"), 2);
+        expect.equal(engine.cooccurrenceMatrix.get("p-iphone").get("p-case"), 2);
+      });
+
+      test("F152-T2: getFrequentlyBoughtTogether returns top co-occurring products ranked by Cosine affinity", () => {
+        const engine = new RecommendationEngine();
+        engine.trainFromOrders(mockOrders);
+
+        const bundles = engine.getFrequentlyBoughtTogether("p-iphone", 3);
+        expect.ok(bundles.length >= 2);
+        expect.ok(["p-case", "p-charger"].includes(bundles[0].productId));
+        expect.ok(bundles[0].score > 0);
+      });
+
+      test("F152-T3: getFrequentlyBoughtTogether excludes the target product itself and handles isolated items", () => {
+        const engine = new RecommendationEngine();
+        engine.trainFromOrders(mockOrders);
+
+        const isolated = engine.getFrequentlyBoughtTogether("p-unknown-item");
+        expect.equal(isolated.length, 0);
+
+        const iphoneBundles = engine.getFrequentlyBoughtTogether("p-iphone");
+        expect.ok(!iphoneBundles.some((b) => b.productId === "p-iphone"));
+      });
+
+      test("F152-T4: getPersonalizedRecommendations suggests relevant products based on user history without recommending owned items", () => {
+        const engine = new RecommendationEngine();
+        engine.trainFromOrders(mockOrders);
+
+        // Khách đã mua p-laptop -> Hệ thống phải gợi ý p-mouse
+        const recs = engine.getPersonalizedRecommendations(["p-laptop"], [], 3);
+        expect.ok(recs.includes("p-mouse"));
+        expect.ok(!recs.includes("p-laptop")); // Không gợi ý lại laptop
+      });
+
+      test("F152-T5: getPersonalizedRecommendations gracefully falls back to popular items on empty history", () => {
+        const engine = new RecommendationEngine();
+        engine.trainFromOrders(mockOrders);
+
+        const catalog = [
+          { id: "p-pop-1", soldCount: 500 },
+          { id: "p-pop-2", soldCount: 300 },
+          { id: "p-pop-3", soldCount: 100 },
+        ];
+
+        const fallbackRecs = engine.getPersonalizedRecommendations([], catalog, 2);
+        expect.equal(fallbackRecs.length, 2);
+        expect.equal(fallbackRecs[0], "p-pop-1");
+        expect.equal(fallbackRecs[1], "p-pop-2");
+      });
+    });
+
+    // --- 2. Aho-Corasick Multi-Pattern String Matcher (5 Tests) ---
+    describe("Algorithm 2: Aho-Corasick Multi-Pattern Content Moderation", () => {
+      const bannedWords = ["fake", "nhái", "rep 1:1", "lừa đảo", "vũ khí", "hàng lậu"];
+
+      test("F152-T6: AhoCorasick builds Trie and failure automaton over multiple banned words", () => {
+        const ac = new AhoCorasick(bannedWords);
+        expect.equal(ac.built, true);
+        expect.ok(ac.root.children.size > 0);
+      });
+
+      test("F152-T7: AhoCorasick scan finds all occurrences of prohibited keywords in single-pass O(N)", () => {
+        const ac = new AhoCorasick(bannedWords);
+        const text = "Giày thể thao hàng nhái cực đẹp, cam kết không lừa đảo, bao chuẩn rep 1:1!";
+        const matches = ac.scan(text);
+
+        expect.ok(matches.length >= 3);
+        const matchedPatterns = matches.map((m) => m.pattern);
+        expect.ok(matchedPatterns.includes("nhái"));
+        expect.ok(matchedPatterns.includes("lừa đảo"));
+        expect.ok(matchedPatterns.includes("rep 1:1"));
+      });
+
+      test("F152-T8: AhoCorasick handles overlapping and nested keywords accurately", () => {
+        const ac = new AhoCorasick(["lừa", "lừa đảo"]);
+        const matches = ac.scan("Cảnh báo shop lừa đảo khách hàng!");
+
+        expect.ok(matches.length >= 2);
+        expect.ok(matches.some((m) => m.pattern === "lừa"));
+        expect.ok(matches.some((m) => m.pattern === "lừa đảo"));
+      });
+
+      test("F152-T9: AhoCorasick censor masks forbidden words into '***' without corrupting compliant text", () => {
+        const ac = new AhoCorasick(bannedWords);
+        const text = "Tai nghe fake giá rẻ";
+        const clean = ac.censor(text, "***");
+
+        expect.equal(clean, "Tai nghe *** giá rẻ");
+      });
+
+      test("F152-T10: AhoCorasick hasMatch returns true for violating text and false for compliant text", () => {
+        const ac = new AhoCorasick(bannedWords);
+        expect.equal(ac.hasMatch("Áo khoác chính hãng hàng lậu giá sốc"), true);
+        expect.equal(ac.hasMatch("Áo thun cotton thoáng mát 100% chính hãng"), false);
+      });
+    });
+
+    // --- 3. TSP Last-Mile Logistics Route Optimizer (5 Tests) ---
+    describe("Algorithm 3: TSP Last-Mile Logistics Route Optimizer", () => {
+      // Tọa độ các điểm tại Hà Nội
+      const depotHub = { lat: 21.0285, lng: 105.8542, name: "Bưu Cục Trung Tâm Hoàn Kiếm" };
+      const stopBaDinh = { id: "stop-1", lat: 21.0345, lng: 105.8322, name: "Ba Đình" };
+      const stopDongDa = { id: "stop-2", lat: 21.0180, lng: 105.8280, name: "Đống Đa" };
+      const stopHaiBaTrung = { id: "stop-3", lat: 21.0065, lng: 105.8550, name: "Hai Bà Trưng" };
+
+      test("F152-T11: calculateHaversineDistance computes accurate distance between Hanoi and HCMC", () => {
+        const hanoi = { lat: 21.0285, lng: 105.8542 };
+        const hcmc = { lat: 10.8231, lng: 106.6297 };
+        const distKm = calculateHaversineDistance(hanoi, hcmc);
+
+        // Khoảng cách chim bay Hà Nội - TP.HCM khoảng 1,130km - 1,160km (~1,137.8km)
+        expect.ok(distKm >= 1130 && distKm <= 1160);
+      });
+
+      test("F152-T12: calculateHaversineDistance returns 0 for identical coordinates", () => {
+        const loc = { lat: 21.0285, lng: 105.8542 };
+        expect.equal(calculateHaversineDistance(loc, loc), 0);
+      });
+
+      test("F152-T13: optimizeDeliveryRoute visits all delivery stops without missing or repeating", () => {
+        const stops = [stopBaDinh, stopDongDa, stopHaiBaTrung];
+        const result = optimizeDeliveryRoute(depotHub, stops);
+
+        expect.equal(result.optimizedStops.length, 3);
+        const visitedIds = result.optimizedStops.map((s) => s.id);
+        expect.ok(visitedIds.includes("stop-1"));
+        expect.ok(visitedIds.includes("stop-2"));
+        expect.ok(visitedIds.includes("stop-3"));
+      });
+
+      test("F152-T14: optimizeDeliveryRoute calculates positive total distance and estimated minutes", () => {
+        const stops = [stopBaDinh, stopDongDa, stopHaiBaTrung];
+        const result = optimizeDeliveryRoute(depotHub, stops);
+
+        expect.ok(result.totalDistanceKm > 0);
+        expect.ok(result.estimatedMinutes > 15); // Tối thiểu 3 điểm * 5 phút = 15 phút handling
+        expect.equal(result.optimizedStops[0].deliverySequence, 1);
+        expect.equal(result.optimizedStops[2].deliverySequence, 3);
+      });
+
+      test("F152-T15: optimizeDeliveryRoute handles empty stops gracefully without exception", () => {
+        const result = optimizeDeliveryRoute(depotHub, []);
+        expect.equal(result.optimizedStops.length, 0);
+        expect.equal(result.totalDistanceKm, 0);
+        expect.equal(result.estimatedMinutes, 0);
+      });
+    });
+
+    // --- 4. AI Copilot Integration for New Algorithms (3 Tests) ---
+    describe("AI Copilot Training for Business Algorithms", () => {
+      test("F152-T16: Admin Sentinel Copilot AI explains Aho-Corasick Multi-Pattern Automaton", () => {
+        const res = generateAdminCopilotResponse("Cơ chế quét từ cấm siêu tốc bằng thuật toán Aho-Corasick");
+        expect.equal(res.tag, "THUẬT TOÁN AHO-CORASICK");
+        expect.ok(res.text.includes("AHO-CORASICK"));
+        expect.ok(res.text.includes("Failure Links"));
+        expect.ok(res.text.includes("O(N + M + Z)"));
+      });
+
+      test("F152-T17: Admin Sentinel Copilot AI provides detailed architecture for Collaborative Filtering", () => {
+        const res = generateAdminCopilotResponse("Thuật toán gợi ý sản phẩm Collaborative Filtering và mua kèm");
+        expect.equal(res.tag, "THUẬT TOÁN GỢI Ý SẢN PHẨM");
+        expect.ok(res.text.includes("COLLABORATIVE FILTERING"));
+        expect.ok(res.text.includes("Co-occurrence Matrix"));
+        expect.ok(res.text.includes("Frequently Bought Together"));
+      });
+
+      test("F152-T18: Admin Sentinel Copilot AI explains TSP Nearest Neighbor and 2-Opt Route Optimizer", () => {
+        const res = generateAdminCopilotResponse("Tối ưu hóa tuyến đường giao hàng bưu tá SPX bằng thuật toán TSP 2-Opt");
+        expect.equal(res.tag, "TỐI ƯU TUYẾN ĐƯỜNG SPX");
+        expect.ok(res.text.includes("TSP"));
+        expect.ok(res.text.includes("Nearest Neighbor"));
+        expect.ok(res.text.includes("2-Opt"));
       });
     });
   });

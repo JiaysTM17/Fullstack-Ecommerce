@@ -444,6 +444,352 @@ export class BloomFilter {
   }
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 7: Recommendation Engine (Collaborative Filtering & Item Affinity)
+// ------------------------------------------------------------------------------
+export class RecommendationEngine {
+  constructor() {
+    this.itemFrequencies = new Map();
+    this.cooccurrenceMatrix = new Map();
+  }
+
+  trainFromOrders(orders = []) {
+    this.itemFrequencies.clear();
+    this.cooccurrenceMatrix.clear();
+
+    for (const order of orders) {
+      const items = order.items || [];
+      const productIds = Array.from(new Set(items.map((i) => String(i.productId || i.id || i._id)).filter(Boolean)));
+
+      for (const pId of productIds) {
+        this.itemFrequencies.set(pId, (this.itemFrequencies.get(pId) || 0) + 1);
+        if (!this.cooccurrenceMatrix.has(pId)) {
+          this.cooccurrenceMatrix.set(pId, new Map());
+        }
+      }
+
+      for (let i = 0; i < productIds.length; i++) {
+        for (let j = i + 1; j < productIds.length; j++) {
+          const idA = productIds[i];
+          const idB = productIds[j];
+
+          const mapA = this.cooccurrenceMatrix.get(idA);
+          mapA.set(idB, (mapA.get(idB) || 0) + 1);
+
+          const mapB = this.cooccurrenceMatrix.get(idB);
+          mapB.set(idA, (mapB.get(idA) || 0) + 1);
+        }
+      }
+    }
+  }
+
+  getFrequentlyBoughtTogether(productId, limit = 4) {
+    const targetId = String(productId);
+    const cooccurMap = this.cooccurrenceMatrix.get(targetId);
+    if (!cooccurMap || cooccurMap.size === 0) return [];
+
+    const targetFreq = this.itemFrequencies.get(targetId) || 1;
+    const candidates = [];
+
+    for (const [otherId, cooccurCount] of cooccurMap.entries()) {
+      if (otherId === targetId) continue;
+      const otherFreq = this.itemFrequencies.get(otherId) || 1;
+      const cosineAffinity = cooccurCount / Math.sqrt(targetFreq * otherFreq);
+
+      candidates.push({
+        productId: otherId,
+        score: Number(cosineAffinity.toFixed(4)),
+        cooccurCount,
+      });
+    }
+
+    candidates.sort((a, b) => b.score - a.score || b.cooccurCount - a.cooccurCount);
+    return candidates.slice(0, limit);
+  }
+
+  getPersonalizedRecommendations(userHistoryProductIds = [], allProducts = [], limit = 6) {
+    const historySet = new Set(userHistoryProductIds.map(String));
+    const scoreMap = new Map();
+
+    for (const viewedId of historySet) {
+      const related = this.getFrequentlyBoughtTogether(viewedId, limit * 2);
+      for (const item of related) {
+        if (!historySet.has(item.productId)) {
+          const current = scoreMap.get(item.productId) || 0;
+          scoreMap.set(item.productId, current + item.score);
+        }
+      }
+    }
+
+    const ranked = Array.from(scoreMap.entries()).map(([productId, score]) => ({
+      productId,
+      score: Number(score.toFixed(4)),
+    }));
+    ranked.sort((a, b) => b.score - a.score);
+
+    const resultIds = ranked.slice(0, limit).map((r) => r.productId);
+
+    if (resultIds.length < limit && allProducts.length > 0) {
+      const popularProducts = [...allProducts]
+        .sort((a, b) => (b.soldCount || b.sold || 0) - (a.soldCount || a.sold || 0))
+        .map((p) => String(p.id || p._id))
+        .filter((id) => !historySet.has(id) && !resultIds.includes(id));
+
+      for (const pid of popularProducts) {
+        if (resultIds.length >= limit) break;
+        resultIds.push(pid);
+      }
+    }
+
+    return resultIds;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 8: Aho-Corasick Multi-Pattern Matcher (Content Moderation & Fraud Words)
+// ------------------------------------------------------------------------------
+class AhoNode {
+  constructor() {
+    this.children = new Map();
+    this.fail = null;
+    this.output = [];
+  }
+}
+
+export class AhoCorasick {
+  constructor(patterns = []) {
+    this.root = new AhoNode();
+    this.built = false;
+
+    if (patterns.length > 0) {
+      for (const p of patterns) this.addWord(p);
+      this.buildFailureLinks();
+    }
+  }
+
+  addWord(word) {
+    const pattern = String(word || "").trim().toLowerCase();
+    if (!pattern) return;
+
+    let curr = this.root;
+    for (let i = 0; i < pattern.length; i++) {
+      const char = pattern[i];
+      if (!curr.children.has(char)) {
+        curr.children.set(char, new AhoNode());
+      }
+      curr = curr.children.get(char);
+    }
+    curr.output.push(pattern);
+    this.built = false;
+  }
+
+  buildFailureLinks() {
+    const queue = [];
+    for (const [, child] of this.root.children.entries()) {
+      child.fail = this.root;
+      queue.push(child);
+    }
+
+    while (queue.length > 0) {
+      const current = queue.shift();
+
+      for (const [char, child] of current.children.entries()) {
+        let fallback = current.fail;
+        while (fallback !== null && !fallback.children.has(char)) {
+          fallback = fallback.fail;
+        }
+
+        child.fail = fallback ? fallback.children.get(char) : this.root;
+        if (child.fail && child.fail.output.length > 0) {
+          child.output = child.output.concat(child.fail.output);
+        }
+        queue.push(child);
+      }
+    }
+    this.built = true;
+  }
+
+  scan(text) {
+    if (!this.built) this.buildFailureLinks();
+    const input = String(text || "").toLowerCase();
+    const matches = [];
+    let curr = this.root;
+
+    for (let i = 0; i < input.length; i++) {
+      const char = input[i];
+      while (curr !== null && !curr.children.has(char)) {
+        curr = curr.fail;
+      }
+      if (curr === null) {
+        curr = this.root;
+        continue;
+      }
+      curr = curr.children.get(char);
+      if (curr.output.length > 0) {
+        for (const pattern of curr.output) {
+          matches.push({
+            pattern,
+            start: i - pattern.length + 1,
+            end: i + 1,
+          });
+        }
+      }
+    }
+    return matches;
+  }
+
+  hasMatch(text) {
+    return this.scan(text).length > 0;
+  }
+
+  censor(text, replacement = "***") {
+    const matches = this.scan(text);
+    if (matches.length === 0) return text;
+
+    const chars = text.split("");
+    const masked = new Uint8Array(chars.length);
+
+    for (const m of matches) {
+      for (let i = m.start; i < m.end; i++) {
+        if (i >= 0 && i < masked.length) masked[i] = 1;
+      }
+    }
+
+    let result = "";
+    let i = 0;
+    while (i < chars.length) {
+      if (masked[i] === 1) {
+        result += replacement;
+        while (i < chars.length && masked[i] === 1) i++;
+      } else {
+        result += chars[i];
+        i++;
+      }
+    }
+    return result;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 9: TSP Last-Mile Logistics Route Optimizer (Nearest Neighbor + 2-Opt)
+// ------------------------------------------------------------------------------
+const EARTH_RADIUS_KM = 6371;
+
+export function calculateHaversineDistance(locA, locB) {
+  if (!locA || !locB) return 0;
+  const lat1 = locA.lat || locA.latitude || 0;
+  const lon1 = locA.lng || locA.lon || locA.longitude || 0;
+  const lat2 = locB.lat || locB.latitude || 0;
+  const lon2 = locB.lng || locB.lon || locB.longitude || 0;
+
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const rLat1 = (lat1 * Math.PI) / 180;
+  const rLat2 = (lat2 * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(rLat1) * Math.cos(rLat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Number((EARTH_RADIUS_KM * c).toFixed(3));
+}
+
+export function nearestNeighborTSP(depot, stops = []) {
+  if (!stops || stops.length === 0) return [depot];
+  const unvisited = [...stops];
+  const route = [depot];
+  let current = depot;
+
+  while (unvisited.length > 0) {
+    let nearestIndex = 0;
+    let shortestDist = Infinity;
+
+    for (let i = 0; i < unvisited.length; i++) {
+      const dist = calculateHaversineDistance(current, unvisited[i]);
+      if (dist < shortestDist) {
+        shortestDist = dist;
+        nearestIndex = i;
+      }
+    }
+    current = unvisited.splice(nearestIndex, 1)[0];
+    route.push(current);
+  }
+  return route;
+}
+
+export function twoOptOptimize(route = [], maxIterations = 50) {
+  if (route.length <= 3) return route;
+  let bestRoute = [...route];
+  let improved = true;
+  let iteration = 0;
+
+  while (improved && iteration < maxIterations) {
+    improved = false;
+    iteration++;
+
+    for (let i = 1; i < bestRoute.length - 2; i++) {
+      for (let j = i + 1; j < bestRoute.length - 1; j++) {
+        const currentDist =
+          calculateHaversineDistance(bestRoute[i - 1], bestRoute[i]) +
+          calculateHaversineDistance(bestRoute[j], bestRoute[j + 1]);
+
+        const newDist =
+          calculateHaversineDistance(bestRoute[i - 1], bestRoute[j]) +
+          calculateHaversineDistance(bestRoute[i], bestRoute[j + 1]);
+
+        if (newDist < currentDist - 0.001) {
+          const newRoute = bestRoute.slice(0, i);
+          const reversed = bestRoute.slice(i, j + 1).reverse();
+          bestRoute = newRoute.concat(reversed, bestRoute.slice(j + 1));
+          improved = true;
+        }
+      }
+    }
+  }
+  return bestRoute;
+}
+
+export function optimizeDeliveryRoute(depot, stops = [], speedKmH = 25) {
+  if (!depot) throw new Error("Depot location is required");
+  if (!stops || stops.length === 0) {
+    return { optimizedStops: [], totalDistanceKm: 0, estimatedMinutes: 0 };
+  }
+
+  const initialRoute = nearestNeighborTSP(depot, stops);
+  const optimizedRoute = twoOptOptimize(initialRoute);
+
+  let totalDist = 0;
+  for (let i = 0; i < optimizedRoute.length - 1; i++) {
+    totalDist += calculateHaversineDistance(optimizedRoute[i], optimizedRoute[i + 1]);
+  }
+  totalDist = Number(totalDist.toFixed(3));
+
+  const travelMinutes = (totalDist / speedKmH) * 60;
+  const handlingMinutes = stops.length * 5;
+  const estimatedMinutes = Math.round(travelMinutes + handlingMinutes);
+
+  let accDist = 0;
+  const stopsWithEta = optimizedRoute.slice(1).map((stop, index) => {
+    const legDist = calculateHaversineDistance(optimizedRoute[index], stop);
+    accDist += legDist;
+    return {
+      ...stop,
+      deliverySequence: index + 1,
+      legDistanceKm: legDist,
+      cumulativeDistanceKm: Number(accDist.toFixed(2)),
+      etaMinutes: Math.round((accDist / speedKmH) * 60 + (index + 1) * 5),
+    };
+  });
+
+  return {
+    depot,
+    optimizedStops: stopsWithEta,
+    totalDistanceKm: totalDist,
+    estimatedMinutes,
+  };
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -455,4 +801,8 @@ export default {
   fnv1a32,
   BloomFilter,
   murmur32,
+  RecommendationEngine,
+  AhoCorasick,
+  calculateHaversineDistance,
+  optimizeDeliveryRoute,
 };

@@ -152,7 +152,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 5. Đối Soát Dòng Tiền Ký Quỹ & Nợ Đọng COD Bưu Tá (Escrow Vault & COD Float Reconciliation)
-  if (/ký quỹ|escrow|cod|bưu tá|dòng tiền|nợ đọng|đối soát cod|tiền về/i.test(raw)) {
+  if (/ký quỹ|escrow|dòng tiền|nợ đọng|đối soát cod|tiền về|nợ bưu tá|cod.*bưu tá|bưu tá.*cod/i.test(raw)) {
     const escrowVal = context.escrowBalance || Math.round(totalRevenue * 0.3);
     const codFloatEst = Math.round(totalRevenue * 0.15);
     return {
@@ -217,7 +217,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 8. Đánh giá chất lượng vận hành & SLA giao hàng (Operational SLA)
-  if (/sla|giao hàng|đúng hạn|khiếu nại|tranh chấp|vận hành sàn/i.test(raw)) {
+  if (!/tsp|lộ trình|tuyến đường/i.test(raw) && /sla|giao đúng hạn|đúng hạn|khiếu nại|tranh chấp|vận hành sàn/i.test(raw)) {
     const onTime = slaMetrics?.onTimeRate ?? '97.4%';
     const avgDelivery = slaMetrics?.avgHours ?? '26.5 giờ';
     const dispute = slaMetrics?.disputeRate ?? '0.4%';
@@ -318,7 +318,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 12. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
+  // 12. Kiểm Duyệt Nội Dung & Quét Từ Cấm Siêu Tốc (Aho-Corasick Multi-Pattern Automaton)
+  if (/aho-corasick|kiểm duyệt từ cấm|hàng giả|quét từ cấm|censor|lọc từ cấm/i.test(raw)) {
+    return {
+      text: `🛡️ **THUẬT TOÁN KIỂM DUYỆT TỪ CẤM SIÊU TỐC AHO-CORASICK (AUTOMATON)**:
+- **Mục đích thiết kế**: Quét và tự động che dấu (Censor) hàng nghìn từ cấm, hàng giả, hàng nhái (*"fake", "rep 1:1", "nhái", "lừa đảo"*) trong tiêu đề sản phẩm, đánh giá và tin nhắn chat.
+- **Nguyên lý hoạt động**:
+  - Xây dựng cây tiền tố Trie kết hợp các liên kết chuyển tiếp thất bại (**Failure Links**) và liên kết đầu ra từ điển (**Dictionary Links**).
+  - Hoạt động như một máy trạng thái hữu hạn (DFA/NFA) cho phép chuyển trạng thái tức thì khi không khớp ký tự.
+- **Ưu việt hiệu năng**:
+  - Độ phức tạp thời gian tuyến tính $O(N + M + Z)$ chỉ qua **đúng 1 lần duyệt chuỗi**.
+  - Tốc độ kiểm duyệt hoàn toàn **độc lập với số lượng từ cấm** trong từ điển (quét 10.000 từ cấm nhanh tương đương quét 5 từ).`,
+      type: 'algorithm',
+      tag: 'THUẬT TOÁN AHO-CORASICK',
+      suggestions: [
+        'Tìm hiểu thuật toán Gợi ý Sản phẩm',
+        'Kiểm tra cấu hình Bloom Filter',
+        'Xem radar gian lận và an ninh sàn'
+      ]
+    };
+  }
+
+  // 13. Thuật toán Gợi ý Sản phẩm Cá nhân hóa (Collaborative Filtering & Item Affinity)
+  if (/collaborative filtering|gợi ý sản phẩm|mua kèm|thường mua cùng|affinity|recommendation/i.test(raw)) {
+    return {
+      text: `🛍️ **THUẬT TOÁN GỢI Ý CÁ NHÂN HÓA (ITEM AFFINITY & COLLABORATIVE FILTERING)**:
+- **Mục đích thiết kế**: Tối ưu hóa chuyển đổi giỏ hàng, thúc đẩy doanh số bán chéo (Cross-sell & Bundle) đóng góp tới $35\\%$ tổng GMV toàn sàn.
+- **Cơ chế triển khai**:
+  - **Ma trận đồng xuất hiện (Co-occurrence Matrix)**: Phân tích các cặp sản phẩm thường xuyên được đặt cùng nhau trong lịch sử hàng triệu đơn hàng.
+  - **Đo lường độ tương đồng Cosine & Jaccard**: $\\text{Affinity}(A, B) = \\frac{\\text{CoOccur}(A, B)}{\\sqrt{\\text{Freq}(A) \\cdot \\text{Freq}(B)}}$.
+  - Gợi ý 2 phân hệ: **"Thường mua cùng nhau"** (Frequently Bought Together) và **"Có thể bạn cũng thích"** (You May Also Like).`,
+      type: 'algorithm',
+      tag: 'THUẬT TOÁN GỢI Ý SẢN PHẨM',
+      suggestions: [
+        'Tìm hiểu thuật toán Tối ưu Tuyến đường SPX',
+        'Xem báo cáo doanh số GMV toàn sàn',
+        'Kiểm tra chỉ số ROAS quảng cáo Shopee Ads'
+      ]
+    };
+  }
+
+  // 14. Thuật toán Tối ưu Lộ trình Giao hàng Chặng Cuối (TSP Nearest Neighbor & 2-Opt)
+  if (/tsp|lộ trình giao hàng|tối ưu tuyến đường|nearest neighbor|2-opt|bưu tá spx|giao hàng chặng cuối/i.test(raw)) {
+    return {
+      text: `🚚 **THUẬT TOÁN TỐI ƯU TUYẾN ĐƯỜNG GIAO VẬN SPX (TSP NEAREST NEIGHBOR & 2-OPT)**:
+- **Mục đích thiết kế**: Giải bài toán người du lịch (Traveling Salesperson Problem) cho bưu tá SPX, giảm thiểu quãng đường di chuyển và hạ tỷ lệ giao trễ LSR xuống mức tối thiểu ($< 2\\%$).
+- **Quy trình 2 giai đoạn**:
+  1. **Nearest Neighbor Heuristic $O(K^2)$**: Bắt đầu từ Bưu cục / Hub trung tâm, luôn tham lam chọn điểm giao hàng chưa ghé gần nhất dựa trên khoảng cách mặt cầu Haversine (km).
+  2. **Tinh chỉnh cục bộ 2-Opt**: Tự động phát hiện và đảo ngược các đoạn đường chéo nhau (Crossing paths) giúp rút ngắn thêm $10\\% - 20\\%$ tổng quãng đường di chuyển.
+- **Độ chính xác ETA**: Tự động dự báo thời gian giao hàng từng điểm dừng = Thời gian di chuyển ($25\\text{ km/h}$) + $5\\text{ phút}$ giao nhận thực tế.`,
+      type: 'algorithm',
+      tag: 'TỐI ƯU TUYẾN ĐƯỜNG SPX',
+      suggestions: [
+        'Xem chỉ số SLA giao hàng toàn sàn',
+        'Kiểm tra định vị bưu tá SPX Live Map',
+        'Xem thuật toán Kiểm duyệt Aho-Corasick'
+      ]
+    };
+  }
+
+  // 15. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
   return {
     text: `Chào Quản Trị Viên! Tôi là **Admin Sentinel AI** - Trợ lý số chuyên trách giám sát, phân tích số liệu và đảm bảo tuân thủ vận hành sàn TMĐT:
 - 📊 **Tra cứu GMV & Hoa hồng**: Phân tích doanh số và hoa hồng sàn 5%.
