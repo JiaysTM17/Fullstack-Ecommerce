@@ -6,6 +6,7 @@
  */
 
 import { FALLBACK_PRODUCTS } from './productService.js';
+import { analyzeSentiment } from './aiAlgorithms.js';
 
 // 1. CƠ SỞ TRI THỨC VOUCHER & KHUYẾN MÃI (Dual Voucher Stacking Engine)
 export const VOUCHER_KNOWLEDGE = [
@@ -250,6 +251,17 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
 
   const raw = (text || '').trim();
   const lower = raw.toLowerCase();
+  const sentiment = analyzeSentiment(raw);
+
+  // Khách hàng bức xúc cực độ -> Tự động kích hoạt cơ chế ưu tiên xoa dịu (trừ trường hợp hỏi về chế tài bom hàng)
+  if (sentiment.isFrustrated && chatMode === 'ai' && !/bom hàng|bùng hàng|bùng đơn|tại sao bị khóa cod/i.test(lower)) {
+    return {
+      intent: 'FRUSTRATED_CUSTOMER_RECOVERY',
+      sentiment,
+      replyText: `**[ƯU TIÊN ĐẶC BIỆT] Em vô cùng thấu hiểu và xin lỗi về trải nghiệm chưa tốt của bạn!**\n\n• Hệ thống đã ghi nhận tình huống khẩn cấp này và gán cờ hỗ trợ VIP.\n• Tặng bạn Voucher thiện chí **MINI50K** (Giảm ngay 50.000₫) cho đơn hàng tiếp theo.\n• Bạn có muốn em kết nối trực tiếp với Chuyên Viên CSKH Kim Ngân ngay bây giờ không ạ?`,
+      suggestions: ['Kết nối ngay với Kim Ngân', 'Tra cứu mã vận đơn SPX', 'Yêu cầu trả hàng hoàn tiền 1-click'],
+    };
+  }
 
   // -------------------------------------------------------------
   // CHUYỂN GIAO NHÂN VIÊN TRỰC (HANDOVER PROTOCOL)

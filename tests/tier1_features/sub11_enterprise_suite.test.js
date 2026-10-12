@@ -27,6 +27,14 @@ import { LRUCache } from "../../server/src/utils/lruCache.js";
 import { OptimisticConcurrencyManager } from "../../server/src/utils/occManager.js";
 import { redisService } from "../../server/src/config/redis.js";
 import { rabbitMQService } from "../../server/src/config/rabbitmq.js";
+import {
+  calculateLevenshteinDistance,
+  findClosestTerm,
+  BM25Engine,
+  calculateCosineSimilarity,
+  createTfEmbedding,
+  analyzeSentiment,
+} from "../../client/src/services/aiAlgorithms.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -6966,6 +6974,141 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         await rabbitMQService.publish("orders.direct", "order.created", { orderId: "ord-retry-track" });
         expect.equal(recordedRetry, 0);
         expect.ok(rabbitMQService.deadLetterQueue[0].deadLetterTimestamp > 0);
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 150: Advanced AI & NLP Algorithms Suite (15 Tests)
+  // =========================================================================
+  describe("Feature 150: Advanced AI & NLP Algorithms Suite for Chatbots", () => {
+
+    // --- ALGORITHM 1: Levenshtein Distance & Fuzzy Spelling Correction (4 Tests) ---
+    describe("Algorithm 1: Levenshtein Distance & Fuzzy Matcher", () => {
+      test("F150-T1: Calculates exact edit distance between Vietnamese e-commerce terms", () => {
+        expect.equal(calculateLevenshteinDistance("voucher", "voucher"), 0);
+        expect.equal(calculateLevenshteinDistance("vouche", "voucher"), 1); // 1 insertion
+        expect.equal(calculateLevenshteinDistance("serum", "sơm"), 3);      // 3 edits
+        expect.equal(calculateLevenshteinDistance("shopee", "sopee"), 1);   // 1 deletion
+        expect.equal(calculateLevenshteinDistance("", "shopee"), 6);        // empty to word
+      });
+
+      test("F150-T2: Suggests closest correct keyword from e-commerce vocabulary", () => {
+        const dictionary = ["voucher", "freeship", "áo thun", "củ sạc gan", "kem chống nắng", "tai nghe bluetooth"];
+        const match1 = findClosestTerm("vouche", dictionary, 2);
+        expect.equal(match1.term, "voucher");
+        expect.equal(match1.distance, 1);
+
+        const match2 = findClosestTerm("freship", dictionary, 2);
+        expect.equal(match2.term, "freeship");
+        expect.equal(match2.distance, 1);
+      });
+
+      test("F150-T3: Returns null when typo exceeds maximum allowed edit threshold", () => {
+        const dictionary = ["voucher", "freeship"];
+        const match = findClosestTerm("hoàn toàn khác", dictionary, 2);
+        expect.equal(match, null);
+      });
+
+      test("F150-T4: Case-insensitive and whitespace resilient distance calculation", () => {
+        expect.equal(calculateLevenshteinDistance("  VOUCHER  ", "voucher"), 0);
+      });
+    });
+
+    // --- ALGORITHM 2: BM25 (Best Matching 25) Text Relevance (4 Tests) ---
+    describe("Algorithm 2: BM25 Text Relevance Engine", () => {
+      const documents = [
+        { id: "doc-1", content: "Chính sách trả hàng hoàn tiền 1-click miễn phí trong 15 ngày qua bưu tá SPX" },
+        { id: "doc-2", content: "Hướng dẫn kích hoạt mã freeship và voucher giảm giá 50k khi đặt hàng" },
+        { id: "doc-3", content: "Quy định bảo hành thiết bị điện tử chính hãng 12 tháng tại Shopee Mall" },
+      ];
+
+      test("F150-T5: Scores and ranks most relevant document for shopping policy queries", () => {
+        const bm25 = new BM25Engine(documents);
+        const results = bm25.search("chính sách trả hàng hoàn tiền");
+        expect.ok(results.length > 0);
+        expect.equal(results[0].id, "doc-1");
+        expect.ok(results[0].score > 0);
+      });
+
+      test("F150-T6: Query with multiple matches ranks document with higher term frequency higher", () => {
+        const bm25 = new BM25Engine(documents);
+        const results = bm25.search("mã voucher freeship");
+        expect.ok(results.length > 0);
+        expect.equal(results[0].id, "doc-2");
+      });
+
+      test("F150-T7: Irrelevant query returns empty array or zero score", () => {
+        const bm25 = new BM25Engine(documents);
+        const results = bm25.search("khủng long bạo chúa kỷ jura");
+        expect.equal(results.length, 0);
+      });
+
+      test("F150-T8: Empty document corpus or blank query handles gracefully without throwing", () => {
+        const emptyEngine = new BM25Engine([]);
+        expect.equal(emptyEngine.search("bất kỳ").length, 0);
+      });
+    });
+
+    // --- ALGORITHM 3: Cosine Similarity Vector Search RAG (4 Tests) ---
+    describe("Algorithm 3: Cosine Similarity Vector Search (RAG)", () => {
+      test("F150-T9: Computes cosine similarity of identical vectors as exactly 1.0", () => {
+        const vec = [0.2, 0.5, 0.8, 0.1];
+        expect.equal(calculateCosineSimilarity(vec, vec), 1.0);
+      });
+
+      test("F150-T10: Orthogonal vectors have cosine similarity of 0.0", () => {
+        const vecA = [1, 0, 0];
+        const vecB = [0, 1, 0];
+        expect.equal(calculateCosineSimilarity(vecA, vecB), 0.0);
+      });
+
+      test("F150-T11: Vector RAG matching identifies semantic similarity over shared vocabulary", () => {
+        const vocabulary = ["đơn", "hàng", "giao", "trễ", "voucher", "giảm", "giá"];
+        const queryText = "đơn hàng giao trễ";
+        const docText = "đơn hàng bị giao trễ quá hạn";
+        const irrelevantDoc = "voucher giảm giá 50k";
+
+        const queryVec = createTfEmbedding(queryText, vocabulary);
+        const docVec = createTfEmbedding(docText, vocabulary);
+        const irrelevantVec = createTfEmbedding(irrelevantDoc, vocabulary);
+
+        const simRelevant = calculateCosineSimilarity(queryVec, docVec);
+        const simIrrelevant = calculateCosineSimilarity(queryVec, irrelevantVec);
+
+        expect.ok(simRelevant > 0.6);
+        expect.equal(simIrrelevant, 0);
+      });
+
+      test("F150-T12: Handles zero-magnitude or empty vectors safely without NaN", () => {
+        expect.equal(calculateCosineSimilarity([0, 0], [0, 0]), 0);
+        expect.equal(calculateCosineSimilarity([], []), 0);
+      });
+    });
+
+    // --- ALGORITHM 4: E-Commerce Sentiment Analysis & Frustration Radar (3 Tests) ---
+    describe("Algorithm 4: E-Commerce Sentiment & Frustration Radar", () => {
+      test("F150-T13: Classifies positive satisfied customer review with POSITIVE label", () => {
+        const res = analyzeSentiment("Hàng rất đẹp, đóng gói cẩn thận, giao hàng cực kỳ nhanh và uy tín 5 sao");
+        expect.equal(res.label, "POSITIVE");
+        expect.ok(res.score > 0.3);
+        expect.equal(res.isFrustrated, false);
+      });
+
+      test("F150-T14: Detects extreme buyer frustration and triggers supervisor escalation flag", () => {
+        const res = analyzeSentiment("Shop lừa đảo quá thất vọng, hàng hư hỏng rách bẩn giao trễ làm mất tiền!");
+        expect.equal(res.label, "NEGATIVE");
+        expect.ok(res.score < -0.4);
+        expect.equal(res.isFrustrated, true);
+        expect.equal(res.action, "ESCALATE_TO_SUPERVISOR_WITH_VOUCHER_COMPENSATION");
+      });
+
+      test("F150-T15: Buyer AI Chat automatically triggers recovery compensation voucher on frustrated queries", () => {
+        const angryMessage = "Tại sao shop lừa đảo giao hàng hư hỏng tệ hại như vậy?";
+        const chatRes = generateAiChatResponse(angryMessage);
+        expect.equal(chatRes.intent, "FRUSTRATED_CUSTOMER_RECOVERY");
+        expect.ok(chatRes.replyText.includes("ƯU TIÊN ĐẶC BIỆT"));
+        expect.ok(chatRes.replyText.includes("MINI50K"));
       });
     });
   });
