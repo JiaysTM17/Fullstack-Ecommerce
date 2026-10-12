@@ -109,7 +109,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 3. Tra cứu Thuế nhà thầu TMĐT (Tax Compliance)
-  if (/thuế|nghị định 52|thông tư 40|vat|tncn|khấu trừ thuế|đối soát/i.test(raw)) {
+  if (/thuế|nghị định 52|thông tư 40|vat|tncn|khấu trừ thuế|đối soát thuế/i.test(raw)) {
     const totalTaxVal = withholdingTax || Math.round(totalRevenue * 0.025);
     const vatEst = Math.round(totalTaxVal * (1.0 / 2.5));
     const pitEst = totalTaxVal - vatEst;
@@ -151,7 +151,72 @@ export function generateAdminCopilotResponse(query, context = {}) {
     };
   }
 
-  // 5. Đánh giá chất lượng vận hành & SLA giao hàng (Operational SLA)
+  // 5. Đối Soát Dòng Tiền Ký Quỹ & Nợ Đọng COD Bưu Tá (Escrow Vault & COD Float Reconciliation)
+  if (/ký quỹ|escrow|cod|bưu tá|dòng tiền|nợ đọng|đối soát cod|tiền về/i.test(raw)) {
+    const escrowVal = context.escrowBalance || Math.round(totalRevenue * 0.3);
+    const codFloatEst = Math.round(totalRevenue * 0.15);
+    return {
+      text: `🏦 **ĐỐI SOÁT DÒNG TIỀN KÝ QUỸ & CÔNG NỢ BƯU TÁ (ESCROW & COD RECONCILIATION)**:
+- **Số dư bảo chứng đang giữ trong Escrow Vault**: **${escrowVal.toLocaleString('vi-VN')}₫**
+  *(Dòng tiền được đóng băng trong chu kỳ T+7 nhằm bảo vệ quyền lợi đổi trả/khiếu nại của người mua).*
+- **Công nợ COD lưu động bưu tá SPX đang thu hộ (COD Float)**: **${codFloatEst.toLocaleString('vi-VN')}₫**
+- **Đánh giá rủi ro dòng tiền**: 
+  - Tỷ lệ lệch đối soát COD toàn sàn: **0.08%** (Đạt chuẩn an toàn dưới ngưỡng 0.5%).
+  - Tất cả các khoản tiền thu hộ COD đều được quét mã đối soát tự động khi bưu tá nộp về bưu cục trung tâm.
+- **Khuyến nghị**: Tiến hành giải ngân định kỳ theo Tab "Quyết Toán Tài Chính" cho các đơn hàng đã vượt qua thời hạn 7 ngày bảo chứng.`,
+      type: 'finance',
+      tag: 'ĐỐI SOÁT DÒNG TIỀN',
+      suggestions: [
+        'Mở tab Quyết Toán Tài Chính',
+        'Kiểm tra danh sách đơn COD cần chốt',
+        'Xem báo cáo thuế Nghị định 52'
+      ]
+    };
+  }
+
+  // 6. Điểm Uy Tín Tài Khoản & Chống Gian Lận Đa Tài Khoản (Trust Score & Anti-Sybil Guard)
+  if (/trust score|điểm uy tín|tài khoản ảo|sybil|seeding|đánh giá ảo|tỷ lệ hủy/i.test(raw)) {
+    return {
+      text: `🛡️ **HỆ THỐNG ĐÁNH GIÁ ĐIỂM UY TÍN (TRUST SCORE & ANTI-SYBIL GUARD)**:
+- **Nguyên lý tính điểm (Thang 0 - 100)**:
+  1. *Lịch sử nhận hàng*: Hoàn tất đơn thành công (+30 điểm). Tỷ lệ bùng hàng > 30% (-50 điểm).
+  2. *Định danh thiết bị (Device Fingerprint)*: 1 thiết bị tạo > 3 tài khoản trong 24h (-40 điểm, nghi vấn Sybil Farm).
+  3. *Tần suất dùng mã*: Tỷ lệ đơn dùng mã tân thủ bất thường (-20 điểm).
+- **Phân loại hành động**:
+  - **Trust Score ≥ 80**: Tài khoản VIP, mở khóa toàn bộ quyền COD và voucher độc quyền.
+  - **Trust Score 50 - 79**: Mức bình thường, giới hạn tối đa 3 đơn COD đang giao cùng thời điểm.
+  - **Trust Score < 50**: Tự động tắt phương thức COD, bắt buộc thanh toán trước VietQR.`,
+      type: 'radar',
+      tag: 'ĐIỂM UY TÍN TRUST SCORE',
+      suggestions: [
+        'Xem danh sách tài khoản dưới 50 điểm',
+        'Kiểm tra các IP nghi vấn Sybil',
+        'Xem lại chỉ số SLA sàn'
+      ]
+    };
+  }
+
+  // 7. Hệ Thống Điểm Sao Quả Tạ & Kỷ Luật Gian Hàng (Penalty Points & Merchant Discipline)
+  if (/sao quả tạ|penalty|phạt|kỷ luật|khóa shop|tắt shop|tạm ngừng/i.test(raw)) {
+    return {
+      text: `⚖️ **HỆ THỐNG ĐIỂM PHẠT SAO QUẢ TẠ GIAN HÀNG (PENALTY POINTS)**:
+- **Khung điểm vi phạm**:
+  - **1 - 2 điểm**: Nhắc nhở hệ thống, tạm tước huy hiệu Shopee Mall trong 14 ngày.
+  - **3 - 5 điểm**: Tắt tính năng tham gia Flash Sale toàn sàn, hạ bậc tìm kiếm 50%.
+  - **6 - 8 điểm**: Đóng băng ví doanh thu, yêu cầu ký quỹ bổ sung.
+  - **≥ 9 điểm**: Khóa gian hàng vĩnh viễn và chấm dứt hợp đồng thương mại điện tử.
+- **Tiêu chuẩn không bị phạt**: Duy trì tỷ lệ giao trễ LSR < 5% và tỷ lệ hủy đơn do hết hàng NFR < 2%.`,
+      type: 'governance',
+      tag: 'KỶ LUẬT GIAN HÀNG',
+      suggestions: [
+        'Kiểm tra danh sách shop có điểm phạt',
+        'Mở tab Giám Sát Gian Hàng',
+        'Xem báo cáo SLA giao hàng'
+      ]
+    };
+  }
+
+  // 8. Đánh giá chất lượng vận hành & SLA giao hàng (Operational SLA)
   if (/sla|giao hàng|đúng hạn|khiếu nại|tranh chấp|vận hành sàn/i.test(raw)) {
     const onTime = slaMetrics?.onTimeRate ?? '97.4%';
     const avgDelivery = slaMetrics?.avgHours ?? '26.5 giờ';
@@ -172,8 +237,25 @@ export function generateAdminCopilotResponse(query, context = {}) {
     };
   }
 
-  // 6. Soạn thảo thông báo phát sóng toàn sàn (Broadcast Assistant)
+  // 9. Soạn thảo thông báo phát sóng toàn sàn (Broadcast Assistant)
   if (/soạn|phát sóng|thông báo|gửi tin nhắn|banner/i.test(raw)) {
+    const isMaintenance = /bảo trì|nâng cấp|hệ thống/i.test(raw);
+    const isMegaSale = /sale|siêu hội|khuyến mãi/i.test(raw);
+
+    if (isMaintenance) {
+      return {
+        text: `📢 **TRỢ LÝ SOẠN THẢO THÔNG BÁO BẢO TRÌ HỆ THỐNG**:
+Dưới đây là bản tin chuẩn:
+
+**Tiêu đề**: [BẢO TRÌ ĐỊNH KỲ] Nâng cấp hạ tầng xử lý giao dịch Mini Shopee  
+**Nội dung**:  
+*"Kính gửi Quý Đối Tác & Khách Hàng, sàn Mini Shopee sẽ tiến hành bảo trì tối ưu hóa cổng thanh toán và tra cứu SPX Express từ 01:00 đến 03:00 sáng. Trong thời gian này, các tính năng duyệt đơn và thanh toán tạm ngưng trong giây lát. Trân trọng cảm ơn!"*`,
+        type: 'broadcast',
+        tag: 'THÔNG BÁO BẢO TRÌ',
+        suggestions: ['Dán vào khung Phát Sóng', 'Chỉnh sửa thời gian bảo trì', 'Xem nhật ký phát sóng']
+      };
+    }
+
     return {
       text: `📢 **TRỢ LÝ SOẠN THẢO THÔNG BÁO PHÁT SÓNG TOÀN SÀN**:
 Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
@@ -193,21 +275,23 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 7. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
+  // 10. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
   return {
     text: `Chào Quản Trị Viên! Tôi là **Admin Sentinel AI** - Trợ lý số chuyên trách giám sát, phân tích số liệu và đảm bảo tuân thủ vận hành sàn TMĐT:
 - 📊 **Tra cứu GMV & Hoa hồng**: Phân tích doanh số và hoa hồng sàn 5%.
-- ⚖️ **Tuân thủ thuế**: Đối soát số thuế TNCN/GTGT theo Nghị định 52.
-- 🚨 **Radar gian lận**: Quét tài khoản bất thường và cảnh báo nguy cơ bom hàng.
-- 📈 **Giám sát SLA**: Đánh giá tỷ lệ giao hàng đúng hạn và khiếu nại.
-- 🛡️ **Bảo vệ dữ liệu**: Hoạt động theo nguyên tắc Read-Only an toàn, không can thiệp phá hủy dữ liệu.`,
+- 🏦 **Dòng tiền & Ký quỹ**: Theo dõi số dư Escrow Vault và đối soát nợ COD.
+- ⚖️ **Tuân thủ thuế**: Đối soát số thuế TNCN/GTGT theo Nghị định 52/2018/NĐ-CP.
+- 🛡️ **Điểm uy tín Trust Score**: Quét tài khoản Sybil và ngăn chặn bùng hàng.
+- 📈 **Giám sát SLA & Sao Quả Tạ**: Đánh giá tỷ lệ giao đúng hạn và kỷ luật gian hàng.
+- 🔒 **Bảo vệ dữ liệu**: Hoạt động theo nguyên tắc Read-Only an toàn, không can thiệp phá hủy dữ liệu.`,
     type: 'general',
     tag: 'TỔNG QUAN GIÁM SÁT',
     suggestions: [
       'Báo cáo doanh số GMV toàn sàn',
+      'Đối soát dòng tiền ký quỹ Escrow',
       'Kiểm tra nghĩa vụ thuế Nghị định 52',
-      'Quét radar tài khoản gian lận',
-      'Đánh giá chất lượng vận hành SLA'
+      'Đánh giá Trust Score và radar gian lận',
+      'Xem chỉ số SLA và điểm sao quả tạ'
     ]
   };
 }

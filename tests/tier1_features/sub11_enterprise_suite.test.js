@@ -19,6 +19,7 @@ import AuditLog, { recordAuditLog } from "../../server/src/models/AuditLog.js";
 import User, { computeLoyaltyTier } from "../../server/src/models/User.js";
 import { checkAdminSafetyGuardrails, generateAdminCopilotResponse, ADMIN_GUARDRAILS, ADMIN_KNOWLEDGE_BASE } from "../../client/src/services/adminAiCopilotEngine.js";
 import { generateSellerCopilotResponse } from "../../client/src/services/sellerAiCopilotEngine.js";
+import { generateAiChatResponse } from "../../client/src/services/chatAiEngine.js";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
 
@@ -6260,6 +6261,81 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.ok(resB.text.includes("Shop Công Nghệ B"));
       expect.ok(resB.text.includes("25.000.000"));
       expect.ok(!resB.text.includes("Shop Thời Trang A"));
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 146: Deep Domain AI Training & Advanced Scenarios (5 Tests)
+  // =========================================================================
+  describe("Feature 146: Deep Domain AI Training & Advanced Scenarios", () => {
+    test("F146-T1: Admin Copilot reconciles Escrow Vault reserves and courier COD float exposure", () => {
+      const context = {
+        totalPlatformRevenue: 100000000,
+        escrowBalance: 30000000,
+      };
+
+      const res = generateAdminCopilotResponse("đối soát ký quỹ và nợ đọng cod", context);
+      expect.ok(res.text.includes("30.000.000"));
+      expect.ok(res.text.includes("COD Float"));
+      expect.ok(res.text.includes("0.08%"));
+    });
+
+    test("F146-T2: Admin Copilot models Trust Score evaluation and Shop penalty points structure", () => {
+      const trustRes = generateAdminCopilotResponse("hệ thống trust score và tài khoản ảo sybil", {});
+      expect.ok(trustRes.text.includes("Thang 0 - 100"));
+      expect.ok(trustRes.text.includes("Trust Score ≥ 80"));
+      expect.ok(trustRes.text.includes("Trust Score < 50"));
+
+      const penaltyRes = generateAdminCopilotResponse("hệ thống phạt sao quả tạ", {});
+      expect.ok(penaltyRes.text.includes("1 - 2 điểm"));
+      expect.ok(penaltyRes.text.includes("3 - 5 điểm"));
+      expect.ok(penaltyRes.text.includes("≥ 9 điểm"));
+    });
+
+    test("F146-T3: Seller Copilot projects inventory run rate and days of inventory remaining (DIR)", () => {
+      const context = {
+        currentShop: { id: "shop_01", name: "Thời Trang GenZ Official" },
+        shopProducts: [
+          { id: "p1", name: "Áo thun", stock: 30 },
+          { id: "p2", name: "Quần âu", stock: 40 },
+        ],
+        shopOrders: Array(14).fill({ status: "completed" }),
+      };
+
+      const res = generateSellerCopilotResponse("dự báo run rate và số ngày còn hàng dir", context);
+      expect.ok(res.text.includes("Daily Run Rate"));
+      expect.ok(res.text.includes("**70**") && res.text.includes("sản phẩm"));
+      expect.ok(res.text.includes("DIR"));
+    });
+
+    test("F146-T4: Seller Copilot models unit economics and calculates breakeven pricing threshold", () => {
+      const context = {
+        currentShop: { id: "shop_01", name: "Thời Trang GenZ Official" },
+        shopProducts: [{ id: "p1", name: "Áo polo", stock: 50 }],
+      };
+
+      const res = generateSellerCopilotResponse("công thức định giá bán và hòa vốn unit economics", context);
+      expect.ok(res.text.includes("Giá vốn hàng bán (COGS)"));
+      expect.ok(res.text.includes("5.0% GMV"));
+      expect.ok(res.text.includes("Giá Bán = (Giá Vốn + Chi Phí Đóng Gói) / 0.52"));
+    });
+
+    test("F146-T5: Buyer AI recognizes colloquial slang, bundle cross-sell, and SPX redelivery rules", () => {
+      const passRes = generateAiChatResponse("tôi muốn pass đơn cho bạn");
+      expect.equal(passRes.intent, "PASS_ORDER_EXPLAIN");
+      expect.ok(passRes.replyText.includes("không hỗ trợ chuyển nhượng"));
+
+      const bomRes = generateAiChatResponse("tại sao bị khóa cod do bùng hàng");
+      expect.equal(bomRes.intent, "TRUST_SCORE_WARNING");
+      expect.ok(bomRes.replyText.includes("Trust Score dưới 50 điểm"));
+
+      const bundleRes = generateAiChatResponse("tư vấn phối đồ và combo");
+      expect.equal(bundleRes.intent, "FASHION_BUNDLE_RECOMMEND");
+      expect.ok(bundleRes.replyText.includes("GỢI Ý PHỐI ĐỒ CHUẨN GU"));
+
+      const redeliveryRes = generateAiChatResponse("shipper gọi nhỡ hẹn lại lịch giao");
+      expect.equal(redeliveryRes.intent, "REDELIVERY_GUIDE");
+      expect.ok(redeliveryRes.replyText.includes("tối đa 3 lần trong vòng 48 giờ"));
     });
   });
 });

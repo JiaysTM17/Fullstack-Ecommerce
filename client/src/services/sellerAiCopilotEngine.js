@@ -136,7 +136,55 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
-  // 6. Tổng Quan Doanh Số & Tình Hình Bán Hàng (Shop Revenue Overview)
+  // 6. Tốc Độ Tiêu Thụ Kho & Dự Báo Ngày Hết Hàng (Run Rate & Days of Inventory Remaining - DIR)
+  if (/run rate|tốc độ bán|dir|ngày còn hàng|dự báo kho|cạn kho|nhu cầu nhập/i.test(raw)) {
+    const totalStock = shopProducts.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
+    const avgDailySales = Math.max(1, Math.round(shopOrders.length / 7)) || 3;
+    const daysRemaining = Math.round(totalStock / avgDailySales);
+
+    return {
+      text: `📊 **DỰ BÁO TỐC ĐỘ BÁN & SỐ NGÀY CÒN HÀNG (RUN RATE & DIR - ${currentShop.name})**:
+- **Tốc độ bán trung bình (Daily Run Rate)**: **~${avgDailySales}** sản phẩm/ngày.
+- **Tổng tồn kho sẵn có toàn shop**: **${totalStock}** sản phẩm.
+- **Dự báo số ngày bán còn lại (DIR)**: **${daysRemaining} ngày** trước khi cạn kho toàn bộ.
+- **Quy tắc an toàn chuỗi cung ứng**:
+  - Khi DIR < 10 ngày: Lập tức khởi tạo phiếu đặt hàng PO tới xưởng/nhà phân phối.
+  - Thời gian vận chuyển nhập kho thông thường mất từ 3 - 5 ngày để kiểm hàng nhập kho.
+- **Thao tác**: Vào Tab **"Nhập Kho & Đơn PO"** để tạo bản nháp đơn đặt hàng nhanh!`,
+      type: 'inventory',
+      tag: 'TỐC ĐỘ BÁN & DIR',
+      suggestions: [
+        'Mở tab Nhập Kho & Đơn PO',
+        'Xem sản phẩm dưới ngưỡng an toàn',
+        'Phân tích biên lợi nhuận P&L'
+      ]
+    };
+  }
+
+  // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
+  if (/định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+    return {
+      text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
+- **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
+  1. *Giá vốn hàng bán (COGS)*: ~50% - 60% giá niêm yết.
+  2. *Phí sàn Shopee Mall cố định*: 5.0% GMV.
+  3. *Thuế TMĐT khấu trừ*: 1.0% GTGT + 1.5% TNCN = 2.5%.
+  4. *Chi phí đóng gói, in hóa đơn & vận hành*: 5.000₫ - 10.000₫/đơn.
+  5. *Ngân sách quảng cáo Shopee Ads*: 8.0% - 12.0%.
+- **Công thức tính Giá Niêm Yết Đề Xuất (Target Margin 30%)**:
+  \`Giá Bán = (Giá Vốn + Chi Phí Đóng Gói) / 0.52\`
+- **Cảnh báo**: Tuyệt đối không giảm giá Flash Sale sâu hơn điểm hòa vốn (COGS + Phí sàn 5% + Thuế 2.5%) để bảo vệ dòng tiền kinh doanh.`,
+      type: 'pnl',
+      tag: 'ĐỊNH GIÁ & HÒA VỐN',
+      suggestions: [
+        'Kiểm tra biên lãi trong tab P&L',
+        'Tư vấn chiến lược Flash Sale',
+        'Xem hiệu quả Shopee Ads'
+      ]
+    };
+  }
+
+  // 8. Tổng Quan Doanh Số & Tình Hình Bán Hàng (Shop Revenue Overview)
   if (/doanh số|doanh thu|tổng quan|bán hàng/i.test(raw)) {
     return {
       text: `📈 **TỔNG QUAN DOANH SỐ GIAN HÀNG (${currentShop.name})**:
@@ -154,20 +202,21 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
-  // 7. Tổng Quan Trợ Lý Người Bán (Default Shop Copilot Greeting)
+  // 9. Tổng Quan Trợ Lý Người Bán (Default Shop Copilot Greeting)
   return {
     text: `Chào Bạn! Tôi là **ShopSmart AI** - Trợ lý số đồng hành cùng **${currentShop.name}** để tối ưu hóa doanh số và tinh gọn vận hành:
-- 📦 **Cảnh báo kho**: Rà soát sản phẩm sắp hết hàng theo Safety Stock.
-- 💰 **Phân tích P&L**: Tính toán giá vốn COGS và biên lãi gộp từng SKU.
-- ⚡ **Flash Sale Shop**: Tư vấn khung giờ và mức giảm giá hút khách.
-- 🎯 **Shopee Ads**: Đánh giá chỉ số ROAS, CTR và hiệu quả đấu thầu.
+- 📦 **Cảnh báo kho & Run Rate**: Rà soát sản phẩm sắp hết hàng theo Safety Stock & DIR.
+- 💰 **Phân tích P&L & Định giá**: Tính toán giá vốn COGS, điểm hòa vốn và biên lãi gộp.
+- ⚡ **Flash Sale Shop**: Tư vấn khung giờ vàng và mức giảm giá hút khách.
+- 🎯 **Shopee Ads**: Đánh giá chỉ số ROAS, CTR và cấu trúc từ khóa đấu thầu.
 - 🔒 **Bảo mật**: Dữ liệu được cô lập 100% trong phạm vi gian hàng của bạn.`,
     type: 'general',
     tag: 'TRỢ LÝ KINH DOANH SHOP',
     suggestions: [
       'Cảnh báo sản phẩm sắp hết hàng',
+      'Dự báo tốc độ bán và ngày còn hàng (DIR)',
       'Phân tích biên lợi nhuận P&L',
-      'Tư vấn chiến lược Flash Sale',
+      'Công thức định giá và điểm hòa vốn',
       'Đánh giá hiệu quả Shopee Ads'
     ]
   };

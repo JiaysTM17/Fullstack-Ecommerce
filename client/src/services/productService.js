@@ -1,4 +1,4 @@
-import { apiRequest, buildQueryString } from "./api";
+import { apiRequest, buildQueryString } from "./api.js";
 
 const PRODUCT_REVIEWS_KEY = "mini_shopee_custom_reviews";
 

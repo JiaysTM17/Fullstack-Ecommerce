@@ -5,7 +5,7 @@
  * và giải đáp tức thì không lòng vòng mọi tình huống mua sắm & hậu mãi.
  */
 
-import { FALLBACK_PRODUCTS } from './productService';
+import { FALLBACK_PRODUCTS } from './productService.js';
 
 // 1. CƠ SỞ TRI THỨC VOUCHER & KHUYẾN MÃI (Dual Voucher Stacking Engine)
 export const VOUCHER_KNOWLEDGE = [
@@ -355,6 +355,70 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       replyText: `**HƯỚNG DẪN ÁP DỤNG ĐỒNG THỜI DUAL VOUCHER & MINI XU:**\n\n1. **Bước 1 (Mã Đơn Hàng):** Chọn 1 mã giảm giá sản phẩm (\`MINI10\` giảm 10% hoặc \`SUPERDEAL\` giảm 15%).\n2. **Bước 2 (Mã Vận Chuyển):** Chọn thêm 1 mã \`FREESHIP\` để trừ 30.000₫ cước vận chuyển.\n3. **Bước 3 (Khấu Trừ Mini Xu):** Gạt công tắc "Dùng Mini Xu" tại trang thanh toán để cấn trừ thêm tới **50% giá trị đơn hàng** (1 Xu = 1 VNĐ).\n\nCả 3 ưu đãi này được tự động cộng dồn giúp bạn tiết kiệm tối đa!`,
       vouchers: VOUCHER_KNOWLEDGE.slice(0, 3),
       suggestions: ['Xem giỏ hàng của tôi', 'Săn thêm mã giảm giá', 'Mở vòng quay nhận xu'],
+    };
+  }
+
+  // -------------------------------------------------------------
+  // TIẾNG LÓNG MUA SẮM & XỬ LÝ GENZ / TÌNH HUỐNG THƯỜNG GẶP
+  // -------------------------------------------------------------
+
+  // 1. Pass đơn / Nhượng đơn
+  if (/pass đơn|nhượng đơn|chuyển đơn/i.test(lower)) {
+    return {
+      intent: 'PASS_ORDER_EXPLAIN',
+      replyText: `**[LƯU Ý] CHÍNH SÁCH BẢO MẬT & ĐIỀU PHỐI ĐƠN HÀNG:**\n\n• Sàn **không hỗ trợ chuyển nhượng trực tiếp đơn hàng** giữa 2 tài khoản nhằm bảo mật thông tin cá nhân và chống lừa đảo giả mạo.\n• **Giải pháp tối ưu:**\n  1. Nếu chưa nhận hàng: Bạn có thể bấm **Hủy đơn** để được hoàn tiền/mã giảm giá 100% tự động.\n  2. Bạn bè của bạn có thể áp dụng mã \`MINI10\` và \`FREESHIP\` để đặt lại đơn mới với giá ưu đãi tương đương!`,
+      vouchers: VOUCHER_KNOWLEDGE.slice(0, 2),
+      suggestions: ['Xem đơn hàng để hủy', 'Lấy mã giảm giá mới', 'Gặp nhân viên CSKH'],
+    };
+  }
+
+  // 2. Cháy deal / Săn sale
+  if (/cháy deal|hết deal|deal sốc|săn sale|khung giờ sale/i.test(lower)) {
+    return {
+      intent: 'FLASH_SALE_TIPS',
+      replyText: `**[MẸO SĂN DEAL] BÍ KÍP KHÔNG BỊ "CHÁY DEAL" TẠI MINI SHOPEE:**\n\n• **3 Khung Giờ Vàng Mỗi Ngày:** **00:00** (Siêu Deal Nửa Đêm) | **12:00** (Chính Ngọ Freeship) | **20:00** (Xả Kho Shopee Mall).\n• **Mẹo giật voucher 150k:** Cho sản phẩm vào giỏ trước 5 phút -> Canh đúng giây thứ 00 bấm Thanh toán với mã lưu sẵn.\n• Áp dụng cùng lúc **Dual Voucher** (Mã Đơn + Mã Ship) để đạt giá đáy!`,
+      vouchers: VOUCHER_KNOWLEDGE.slice(0, 3),
+      suggestions: ['Xem sản phẩm Flash Sale', 'Lưu trước mã giảm giá', 'Mở vòng quay nhận xu'],
+    };
+  }
+
+  // 3. Bom hàng / Bùng hàng / Khóa COD
+  if (/bom hàng|bùng hàng|bùng đơn|tài khoản xấu/i.test(lower)) {
+    return {
+      intent: 'TRUST_SCORE_WARNING',
+      replyText: `**[CẢNH BÁO AN TOÀN] HỆ QUẢ CỦA HÀNH VI BÙNG ĐƠN / BOM HÀNG:**\n\n• Tài khoản có tỷ lệ từ chối nhận hàng vô cớ > 30% sẽ bị **hạ điểm uy tín Trust Score dưới 50 điểm**.\n• **Chế tài tự động:** Hệ thống sẽ tạm khóa phương thức thanh toán tiền mặt (COD), yêu cầu thanh toán trước qua **VietQR** hoặc Thẻ.\n• Nếu có sự cố bất khả kháng khi bưu tá giao đến, vui lòng chọn "Hẹn lại lịch giao" thay vì từ chối nhận để bảo toàn điểm uy tín nhé!`,
+      suggestions: ['Xem đơn hàng đang giao', 'Thanh toán VietQR an toàn', 'Gặp CSKH giải quyết'],
+    };
+  }
+
+  // 4. Tư vấn phối đồ & Gợi ý Combo mua kèm (Cross-sell & Bundle)
+  if (/phối đồ|combo|mua kèm|set đồ|mix đồ|đi cùng|phù hợp với/i.test(lower)) {
+    const isFashion = /áo|quần|giày|đầm|váy/i.test(lower);
+    const isTech = /sạc|tai nghe|chuột|bàn phím|laptop/i.test(lower);
+
+    if (isTech) {
+      return {
+        intent: 'TECH_BUNDLE_RECOMMEND',
+        replyText: `**[COMBO CÔNG NGHỆ CHÍNH HÃNG] GỢI Ý MUA KÈM HOÀN HẢO:**\n\n• **Combo Bàn Làm Việc Pro:** Củ sạc nhanh GaN 65W + Cáp sạc bọc dù 100W + Chuột công thái học Bluetooth.\n• **Đặc quyền:** Mua combo tiết kiệm thêm 10% và được tặng mã Freeship 0Đ!`,
+        products: searchSmartProducts('sạc GaN chuột tai nghe').slice(0, 3),
+        suggestions: ['Thêm combo vào giỏ', 'Lấy mã FREESHIP', 'Xem sản phẩm bảo hành 24T'],
+      };
+    }
+
+    return {
+      intent: 'FASHION_BUNDLE_RECOMMEND',
+      replyText: `**[GỢI Ý PHỐI ĐỒ CHUẨN GU SHOPEE MALL]:**\n\n• **Phong cách Smart Casual:** Áo Polo thoáng khí + Quần Tây Âu Slimfit + Giày Sneaker da trắng thanh lịch.\n• **Phong cách Dạo Phố GenZ:** Áo thun Oversize + Quần Jean Baggy Denim + Túi đeo chéo Canvas.\n\nNhấn xem sản phẩm bên dưới để chọn size vừa vặn:`,
+      products: searchSmartProducts('áo polo quần tây sneaker').slice(0, 3),
+      suggestions: ['Xem bảng size chuẩn', 'Lấy voucher 15%', 'Thêm combo vào giỏ'],
+    };
+  }
+
+  // 5. Shipper gọi nhỡ / Giao không thành công / Hẹn lại lịch
+  if (/gọi nhỡ|không có nhà|hẹn lại|giao lại|chưa nhận được hàng/i.test(lower)) {
+    return {
+      intent: 'REDELIVERY_GUIDE',
+      replyText: `**[HỖ TRỢ PHÁT HÀNG SPX EXPRESS]:**\n\n• **Quy chế phát hàng:** Bưu tá SPX sẽ tự động thử giao lại **tối đa 3 lần trong vòng 48 giờ** hoàn toàn miễn phí.\n• **Nếu bạn bận hoặc đi vắng:** Hãy gọi lại cho số điện thoại của shipper hiển thị trên mục "Chi tiết đơn hàng" hoặc nhắn tin hẹn giờ nhận hàng thuận tiện.\n• Kiện hàng được bảo quản an toàn tại Bưu cục địa phương cho đến khi giao thành công!`,
+      suggestions: ['Xem số điện thoại shipper', 'Tra cứu mã vận đơn', 'Kết nối CSKH Kim Ngân'],
     };
   }
 
