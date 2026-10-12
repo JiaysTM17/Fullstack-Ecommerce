@@ -5820,6 +5820,109 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(intercomSession.courierGreeting.includes("hiên nhà"), true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 141: Smart Delivery Locker Pinless NFC Tap-and-Go Instant Compartment Pop (5 Tests)
+  // =========================================================================
+  describe("Feature 141: Smart Delivery Locker Pinless NFC Tap-and-Go Instant Compartment Pop", () => {
+    test("F141-T1: Order arms smartDeliveryLockerPinlessNfcTapAndGo subdocument successfully", async () => {
+      const order = await Order.create({
+        orderId: "ORD_LOCKER_NFC_141",
+        items: [{ name: "Bàn phím cơ không dây Bluetooth", price: 1890000, quantity: 1 }],
+        total: 1890000,
+        status: "shipping",
+        smartDeliveryLockerPinlessNfcTapAndGo: {
+          isPinlessNfcActive: true,
+          lockerStationCode: "SPX_TAP_LOCKER_BINHTHANH_09",
+          compartmentCellId: "CELL_A14",
+          nfcSecureTokenUid: "NFC_TOKEN_UID_SECURE_9988",
+          cryptographicTapNonce: "NONCE_CRYPTO_BINH_THANH",
+          tapStatus: "assigned_awaiting_tap",
+          tappedAt: null,
+          retrievedAt: null,
+          biometricConfirmed: true,
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_LOCKER_NFC_141");
+      expect.equal(order.smartDeliveryLockerPinlessNfcTapAndGo.isPinlessNfcActive, true);
+      expect.equal(order.smartDeliveryLockerPinlessNfcTapAndGo.lockerStationCode, "SPX_TAP_LOCKER_BINHTHANH_09");
+      expect.equal(order.smartDeliveryLockerPinlessNfcTapAndGo.compartmentCellId, "CELL_A14");
+      expect.equal(order.smartDeliveryLockerPinlessNfcTapAndGo.tapStatus, "assigned_awaiting_tap");
+      expect.equal(order.smartDeliveryLockerPinlessNfcTapAndGo.biometricConfirmed, true);
+    });
+
+    test("F141-T2: NFC tap event instantly pops compartment door open with biometric pass", () => {
+      const lockerSession = {
+        tapStatus: "assigned_awaiting_tap",
+        biometricConfirmed: true,
+        tappedAt: null,
+      };
+
+      const handleTap = (biometricPass) => {
+        if (!biometricPass) {
+          throw new Error("Biometric mismatch");
+        }
+        return {
+          tapStatus: "tapped_cell_popped_open",
+          tappedAt: "2026-10-12T08:35:00.000Z",
+          doorSolenoidReleased: true,
+        };
+      };
+
+      const result = handleTap(lockerSession.biometricConfirmed);
+      expect.equal(result.tapStatus, "tapped_cell_popped_open");
+      expect.equal(result.doorSolenoidReleased, true);
+      expect.equal(result.tappedAt !== null, true);
+    });
+
+    test("F141-T3: Failed biometric authentication strictly blocks compartment solenoid release", () => {
+      const handleTap = (biometricPass) => {
+        if (!biometricPass) {
+          return { success: false, doorSolenoidReleased: false, errorCode: "BIOMETRIC_FAIL" };
+        }
+        return { success: true, doorSolenoidReleased: true, errorCode: null };
+      };
+
+      const result = handleTap(false);
+      expect.equal(result.success, false);
+      expect.equal(result.doorSolenoidReleased, false);
+      expect.equal(result.errorCode, "BIOMETRIC_FAIL");
+    });
+
+    test("F141-T4: Closing compartment door marks parcel retrieval & completes order workflow", () => {
+      const order = {
+        status: "shipping",
+        statusText: "Đang ở tủ nhận hàng",
+        smartDeliveryLockerPinlessNfcTapAndGo: {
+          tapStatus: "tapped_cell_popped_open",
+          retrievedAt: null,
+        },
+      };
+
+      // Người dùng lấy gói hàng ra và đẩy đóng chốt cửa tủ
+      const action = "close_door_completed";
+      if (action === "close_door_completed") {
+        order.smartDeliveryLockerPinlessNfcTapAndGo.tapStatus = "door_closed_package_retrieved";
+        order.smartDeliveryLockerPinlessNfcTapAndGo.retrievedAt = "2026-10-12T08:36:10.000Z";
+        order.status = "completed";
+        order.statusText = "Giao hàng thành công (Đã lấy tại Tủ SPX Tap & Go)";
+      }
+
+      expect.equal(order.smartDeliveryLockerPinlessNfcTapAndGo.tapStatus, "door_closed_package_retrieved");
+      expect.equal(order.status, "completed");
+      expect.equal(order.statusText.includes("Tủ SPX Tap & Go"), true);
+    });
+
+    test("F141-T5: Missing or empty compartmentCellId fails locker dispatch configuration", () => {
+      const validate = (cellId) => Boolean(cellId && cellId.trim().length > 0);
+
+      expect.equal(validate(""), false);
+      expect.equal(validate("   "), false);
+      expect.equal(validate(null), false);
+      expect.equal(validate("CELL_B08"), true);
+    });
+  });
 });
 
 

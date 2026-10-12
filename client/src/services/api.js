@@ -1357,6 +1357,17 @@ export async function triggerInteractiveDoorbellGateReleaseAPI(orderId, { doorbe
   return result?.data || result;
 }
 
+/**
+ * Smart Delivery Locker Pinless NFC Tap-and-Go Instant Compartment Pop (Feature 141)
+ */
+export async function triggerSmartLockerPinlessNfcTapAndGoAPI(orderId, { lockerStationCode, compartmentCellId, nfcSecureTokenUid, action, biometricConfirmed } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/smart-locker-pinless-nfc`, {
+    method: "POST",
+    body: JSON.stringify({ lockerStationCode, compartmentCellId, nfcSecureTokenUid, action, biometricConfirmed }),
+  });
+  return result?.data || result;
+}
+
 
 
 

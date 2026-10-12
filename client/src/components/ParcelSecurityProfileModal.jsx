@@ -176,6 +176,7 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
             { id: 'overview', label: '🛡️ Chứng Nhận Toàn Vẹn' },
             { id: 'doorbell', label: '🔔 Chuông Cửa Video AI & Mở Cổng' },
             { id: 'telemetry', label: '📊 Giám Sát Cảm Biến IoT' },
+            { id: 'locker', label: '📱 Tủ SPX Tap & Go' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -526,6 +527,154 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
                   {order.satelliteLoRaMeshDeadZoneTelemetry?.signalRssiDbm || -88} dBm
                 </div>
                 <div style={{ fontSize: '11px', color: '#2563eb', marginTop: '2px' }}>Liên lạc vệ tinh LEO thông suốt</div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: SMART DELIVERY LOCKER NFC TAP & GO (FEATURE 141) */}
+          {activeTab === 'locker' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%)',
+                  border: '1px solid #99f6e4',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#ccfbf1', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+                    📱
+                  </div>
+                  <div>
+                    <strong style={{ fontSize: '14px', color: '#115e59' }}>
+                      Tủ Thông Minh SPX Tap &amp; Go (Không Cần Bấm Mã PIN)
+                    </strong>
+                    <div style={{ fontSize: '12px', color: '#0f766e', marginTop: '2px' }}>
+                      Chạm nhẹ điện thoại có chip NFC hoặc FaceID vào đầu đọc tại trạm để mở ngăn tức thì trong 0.5 giây.
+                    </div>
+                  </div>
+                </div>
+
+                <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '9999px', background: '#ccfbf1', color: '#0f766e' }}>
+                  NFC 1-CHẠM BẬT NGĂN
+                </span>
+              </div>
+
+              {/* Station Info */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    Trạm Tủ Gần Bạn
+                  </div>
+                  <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+                    {order.smartDeliveryLockerPinlessNfcTapAndGo?.lockerStationCode || 'SPX_TAP_LOCKER_BINHTHANH_09'}
+                  </div>
+                  <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px' }}>
+                    Đầu hồi toà nhà Landmark Plus, 208 Nguyễn Hữu Cảnh
+                  </div>
+                </div>
+
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    Ngăn Tủ Phân Bổ
+                  </div>
+                  <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#0d9488', marginTop: '4px' }}>
+                    Ngăn #{order.smartDeliveryLockerPinlessNfcTapAndGo?.compartmentCellId || 'CELL_A14'} (Tầng 2)
+                  </div>
+                  <div style={{ fontSize: '11.5px', color: '#059669', marginTop: '2px' }}>
+                    Trạng thái: {order.smartDeliveryLockerPinlessNfcTapAndGo?.tapStatus === 'tapped_cell_popped_open' ? 'Đã bật mở' : 'Sẵn sàng chạm'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tap Simulation Button */}
+              <div style={{ background: '#ffffff', border: '1.5px dashed #0d9488', borderRadius: '12px', padding: '18px', textAlign: 'center' }}>
+                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#ccfbf1', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', margin: '0 auto 10px' }}>
+                  📶
+                </div>
+                <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#0f172a' }}>
+                  Mô Phỏng Chạm Điện Thoại Vào Trạm Tủ
+                </div>
+                <p style={{ fontSize: '12px', color: '#64748b', maxWidth: '420px', margin: '4px auto 14px' }}>
+                  Khi bạn đứng trước tủ bưu cục, hãy đưa điện thoại lại gần biểu tượng sóng NFC để kích hoạt chốt điện bật mở ngăn #{order.smartDeliveryLockerPinlessNfcTapAndGo?.compartmentCellId || 'CELL_A14'}.
+                </p>
+
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onUpdateOrder) {
+                        onUpdateOrder({
+                          ...order,
+                          smartDeliveryLockerPinlessNfcTapAndGo: {
+                            ...(order.smartDeliveryLockerPinlessNfcTapAndGo || {}),
+                            isPinlessNfcActive: true,
+                            lockerStationCode: 'SPX_TAP_LOCKER_BINHTHANH_09',
+                            compartmentCellId: 'CELL_A14',
+                            tapStatus: 'tapped_cell_popped_open',
+                            tappedAt: new Date().toISOString(),
+                            biometricConfirmed: true,
+                          },
+                        });
+                      }
+                      setDoorbellLog('Đã chạm NFC thành công! Ngăn #CELL_A14 đã tự động bật mở cánh cửa.');
+                    }}
+                    style={{
+                      background: 'linear-gradient(135deg, #0d9488, #0f766e)',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '9px 20px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 12px rgba(13, 148, 136, 0.3)',
+                    }}
+                  >
+                    <span>📶</span>
+                    <span>Chạm Điện Thoại (Tap &amp; Pop)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onUpdateOrder) {
+                        onUpdateOrder({
+                          ...order,
+                          status: 'completed',
+                          statusText: 'Giao hàng thành công (Đã lấy tại Tủ SPX Tap & Go)',
+                          smartDeliveryLockerPinlessNfcTapAndGo: {
+                            ...(order.smartDeliveryLockerPinlessNfcTapAndGo || {}),
+                            tapStatus: 'door_closed_package_retrieved',
+                            retrievedAt: new Date().toISOString(),
+                          },
+                        });
+                      }
+                      setDoorbellLog('Đã đóng cửa tủ thành công. Đơn hàng hoàn tất!');
+                    }}
+                    style={{
+                      background: '#ffffff',
+                      color: '#0d9488',
+                      border: '1.5px solid #0d9488',
+                      padding: '9px 18px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Lấy Hàng &amp; Đóng Cửa Tủ
+                  </button>
+                </div>
               </div>
             </div>
           )}

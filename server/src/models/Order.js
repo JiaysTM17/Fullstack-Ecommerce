@@ -724,6 +724,21 @@ const orderSchema = new mongoose.Schema(
       relockedAt: { type: String, default: null },
       courierVoiceGreetingNote: { type: String, default: "" },
     },
+    smartDeliveryLockerPinlessNfcTapAndGo: {
+      isPinlessNfcActive: { type: Boolean, default: false },
+      lockerStationCode: { type: String, default: null }, // e.g. "SPX_TAP_LOCKER_BINHTHANH_09"
+      compartmentCellId: { type: String, default: null }, // e.g. "CELL_A14"
+      nfcSecureTokenUid: { type: String, default: null }, // Chuỗi Token cảm ứng 1 chạm NFC
+      cryptographicTapNonce: { type: String, default: null },
+      tapStatus: {
+        type: String,
+        enum: ["assigned_awaiting_tap", "tapped_cell_popped_open", "door_closed_package_retrieved", "tap_expired_voided"],
+        default: "assigned_awaiting_tap",
+      },
+      tappedAt: { type: String, default: null },
+      retrievedAt: { type: String, default: null },
+      biometricConfirmed: { type: Boolean, default: true },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

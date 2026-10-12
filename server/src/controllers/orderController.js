@@ -4581,6 +4581,100 @@ export const triggerInteractiveDoorbellGateRelease = async (req, res) => {
   }
 };
 
+// @desc    Tủ nhận hàng thông minh không cần PIN chạm NFC 1 bước bật ngăn (Feature 141)
+// @route   POST /api/orders/:id/smart-locker-pinless-nfc
+// @access  Public / Authenticate
+export const triggerSmartLockerPinlessNfcTapAndGo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      lockerStationCode = "SPX_TAP_LOCKER_BINHTHANH_09",
+      compartmentCellId = "CELL_A14",
+      nfcSecureTokenUid,
+      action = "tap_to_pop", // "tap_to_pop" | "close_door_completed" | "expire_token"
+      biometricConfirmed = true,
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần nhận tại tủ thông minh NFC", 404);
+    }
+
+    const now = new Date().toISOString();
+    const tokenUid = nfcSecureTokenUid || `NFC_TOKEN_UID_${Date.now().toString(36).toUpperCase()}`;
+    const nonce = `NONCE_CRYPTO_${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+
+    let tapStatus = "assigned_awaiting_tap";
+    let tappedAt = order.smartDeliveryLockerPinlessNfcTapAndGo?.tappedAt || null;
+    let retrievedAt = order.smartDeliveryLockerPinlessNfcTapAndGo?.retrievedAt || null;
+
+    if (action === "tap_to_pop") {
+      if (!biometricConfirmed) {
+        return sendError(res, "Xác thực sinh trắc học thiết bị không hợp lệ (FaceID/Vân tay không khớp)", 403);
+      }
+      tapStatus = "tapped_cell_popped_open";
+      tappedAt = now;
+    } else if (action === "close_door_completed") {
+      tapStatus = "door_closed_package_retrieved";
+      retrievedAt = now;
+      order.status = "completed";
+      order.statusText = "Giao hàng thành công (Đã lấy tại Tủ SPX Tap & Go)";
+    } else if (action === "expire_token") {
+      tapStatus = "tap_expired_voided";
+    }
+
+    order.smartDeliveryLockerPinlessNfcTapAndGo = {
+      isPinlessNfcActive: true,
+      lockerStationCode,
+      compartmentCellId,
+      nfcSecureTokenUid: tokenUid,
+      cryptographicTapNonce: nonce,
+      tapStatus,
+      tappedAt,
+      retrievedAt,
+      biometricConfirmed: Boolean(biometricConfirmed),
+    };
+
+    const statusNote = action === "tap_to_pop"
+      ? `Tủ SPX Tap & Go (#${lockerStationCode}): Khách hàng đã chạm điện thoại NFC (Token: ${tokenUid}) -> Ngăn tủ #${compartmentCellId} tự động bật mở tức thì!`
+      : action === "close_door_completed"
+      ? `Tủ SPX Tap & Go: Khách hàng đã lấy kiện hàng #${order.orderId} và đóng cửa tủ an toàn -> Đơn hàng hoàn tất.`
+      : `Tủ SPX Tap & Go: Token chạm NFC đã hết hạn sử dụng.`;
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: statusNote,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        smartDeliveryLockerPinlessNfcTapAndGo: order.smartDeliveryLockerPinlessNfcTapAndGo,
+        message: action === "tap_to_pop"
+          ? "Đã nhận diện NFC 1 chạm! Ngăn tủ đã tự động bật mở, mời quý khách lấy hàng."
+          : action === "close_door_completed"
+          ? "Đã đóng tủ an toàn, chúc bạn có trải nghiệm tuyệt vời cùng Shopee!"
+          : "Đã hủy phiên mở tủ.",
+      },
+      200
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 

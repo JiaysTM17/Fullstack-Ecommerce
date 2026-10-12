@@ -61,6 +61,7 @@ import {
   verifyQuantumKeyDistributionEncryptionSeal,
   verifySyntheticDnaNanotechTaggingSeal,
   triggerInteractiveDoorbellGateRelease,
+  triggerSmartLockerPinlessNfcTapAndGo,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -134,6 +135,7 @@ router.post("/:id/satellite-lora-mesh", optionalAuthenticate, updateSatelliteLoR
 router.post("/:id/qkd-encryption-seal", optionalAuthenticate, verifyQuantumKeyDistributionEncryptionSeal);
 router.post("/:id/dna-nanotech-seal", optionalAuthenticate, verifySyntheticDnaNanotechTaggingSeal);
 router.post("/:id/doorbell-gate-release", optionalAuthenticate, triggerInteractiveDoorbellGateRelease);
+router.post("/:id/smart-locker-pinless-nfc", optionalAuthenticate, triggerSmartLockerPinlessNfcTapAndGo);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);
