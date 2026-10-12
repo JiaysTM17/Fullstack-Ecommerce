@@ -16,6 +16,7 @@ import ShopChatModal from '../components/ShopChatModal';
 import VietQRPaymentModal from '../components/VietQRPaymentModal';
 import DeliveryCsatFeedbackModal from '../components/DeliveryCsatFeedbackModal';
 import DeliveryRescheduleModal from '../components/DeliveryRescheduleModal';
+import ParcelSecurityProfileModal from '../components/ParcelSecurityProfileModal';
 import { cancelOrder } from '../services/orderService';
 import { restoreProductStock } from '../services/productService';
 import { createCustomerReturnRequestAPI, executeSmartOneClickReorderAPI } from '../services/api';
@@ -217,6 +218,7 @@ export default function OrderHistoryPage() {
   const [selectedVietQROrder, setSelectedVietQROrder] = useState(null);
   const [selectedCsatOrder, setSelectedCsatOrder] = useState(null);
   const [selectedRescheduleOrder, setSelectedRescheduleOrder] = useState(null);
+  const [selectedSecurityOrder, setSelectedSecurityOrder] = useState(null);
   const [cancelReason, setCancelReason] = useState('Tôi muốn thay đổi địa chỉ nhận hàng');
   const [cancelNote, setCancelNote] = useState('');
 
@@ -2779,6 +2781,36 @@ export default function OrderHistoryPage() {
                           </div>
                         </>
                       )}
+
+                      {/* Huy Hiệu An Ninh & Chuông Cửa Video Thông Minh (Buyer-Centric Trust Badge) */}
+                      <span className="compact-bar-divider">|</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSecurityOrder(ord);
+                        }}
+                        style={{
+                          background: 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%)',
+                          border: '1px solid #bfdbfe',
+                          borderRadius: '6px',
+                          padding: '3px 9px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: '#1d4ed8',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: '0 1px 3px rgba(37, 99, 235, 0.1)',
+                          transition: 'all 0.15s ease',
+                        }}
+                        title="Xem Hồ Sơ An Ninh, Chuông Cửa Video AI & Mở Cổng 1 Chạm"
+                      >
+                        <ShieldCheckIcon size={12} color="#2563eb" />
+                        <span>Hồ Sơ An Ninh &amp; Chuông Cửa Video</span>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+                      </button>
                     </div>
 
                     <div className="shopee-order-compact-right">
@@ -3250,6 +3282,23 @@ export default function OrderHistoryPage() {
                 : o
             );
             saveOrders(updated);
+          }}
+        />
+      )}
+
+      {/* Parcel Security & Interactive Doorbell Profile Modal (Feature 140) */}
+      {selectedSecurityOrder && (
+        <ParcelSecurityProfileModal
+          order={selectedSecurityOrder}
+          onClose={() => setSelectedSecurityOrder(null)}
+          onUpdateOrder={(updatedOrder) => {
+            const updated = orders.map((o) =>
+              (o.orderId || o._id) === (updatedOrder.orderId || updatedOrder._id)
+                ? updatedOrder
+                : o
+            );
+            saveOrders(updated);
+            setSelectedSecurityOrder(updatedOrder);
           }}
         />
       )}

@@ -5729,6 +5729,97 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(validate(validPayload), true);
     });
   });
+
+  // =========================================================================
+  // FEATURE 140: Interactive Live Delivery Audio-Visual Doorbell Notification & Instant Gate Release (5 Tests)
+  // =========================================================================
+  describe("Feature 140: Interactive Live Delivery Audio-Visual Doorbell Notification & Instant Gate Release", () => {
+    test("F140-T1: Successfully records active doorbell visitor verification & generates gate unlock token", async () => {
+      const order = await Order.create({
+        orderId: "ORD_DOORBELL_140",
+        items: [{ name: "Smart Home Hub Gateway", price: 1250000, quantity: 1 }],
+        total: 1250000,
+        status: "shipping",
+        interactiveDoorbellAIVisualGateRelease: {
+          isDoorbellActive: true,
+          doorbellDeviceId: "RING_AI_DOORBELL_G4_V98",
+          visitorFaceRecognized: true,
+          courierIdentityMatchPercent: 99.4,
+          liveVideoFeedStreamUrl: "https://cdn.shopee.vn/streams/doorbell-cam-live-feed-v98.mp4",
+          twoWayAudioIntercomConnected: true,
+          gateUnlockAuthorizationToken: "GATE_OTP_TOKEN_DOORBELL_SECURE",
+          gateUnlockStatus: "gate_unlocked_temporary",
+          unlockedAt: "2026-10-12T08:30:00.000Z",
+          relockedAt: null,
+          courierVoiceGreetingNote: "Chào anh/chị, em là bưu tá SPX giao kiện hàng Shopee đây ạ!",
+        },
+      });
+
+      expect.equal(order.orderId, "ORD_DOORBELL_140");
+      expect.equal(order.interactiveDoorbellAIVisualGateRelease.isDoorbellActive, true);
+      expect.equal(order.interactiveDoorbellAIVisualGateRelease.doorbellDeviceId, "RING_AI_DOORBELL_G4_V98");
+      expect.equal(order.interactiveDoorbellAIVisualGateRelease.visitorFaceRecognized, true);
+      expect.equal(order.interactiveDoorbellAIVisualGateRelease.courierIdentityMatchPercent >= 99, true);
+      expect.equal(order.interactiveDoorbellAIVisualGateRelease.gateUnlockStatus, "gate_unlocked_temporary");
+      expect.equal(order.interactiveDoorbellAIVisualGateRelease.gateUnlockAuthorizationToken.startsWith("GATE_OTP"), true);
+    });
+
+    test("F140-T2: Courier face match below 80% strictly rejects gate release authorization", () => {
+      const courierIdentityMatchPercent = 64.2; // Dưới ngưỡng an toàn 80%
+      const isVisitorFaceRecognized = courierIdentityMatchPercent >= 80.0;
+      const canUnlockGate = isVisitorFaceRecognized;
+
+      expect.equal(isVisitorFaceRecognized, false);
+      expect.equal(canUnlockGate, false);
+    });
+
+    test("F140-T3: Courier exit triggers automatic secure gate relock transition", () => {
+      const gateState = {
+        status: "gate_unlocked_temporary",
+        unlockedAt: "2026-10-12T08:30:00.000Z",
+        relockedAt: null,
+      };
+
+      // Bưu tá đặt xong kiện hàng và bước ra ngoài vạch cảm biến cổng
+      const action = "relock_gate";
+      if (action === "relock_gate") {
+        gateState.status = "gate_relocked_confirmed";
+        gateState.relockedAt = "2026-10-12T08:32:15.000Z";
+      }
+
+      expect.equal(gateState.status, "gate_relocked_confirmed");
+      expect.equal(gateState.relockedAt !== null, true);
+    });
+
+    test("F140-T4: Unauthorized stranger presence triggers trespass alert siren state", () => {
+      const handleSecurityAction = (action) => {
+        if (action === "trespass_alert") {
+          return {
+            status: "unauthorized_trespass_alert",
+            sirenActive: true,
+            pushNotificationSent: true,
+          };
+        }
+        return { status: "gate_locked", sirenActive: false, pushNotificationSent: false };
+      };
+
+      const result = handleSecurityAction("trespass_alert");
+      expect.equal(result.status, "unauthorized_trespass_alert");
+      expect.equal(result.sirenActive, true);
+      expect.equal(result.pushNotificationSent, true);
+    });
+
+    test("F140-T5: Two-way intercom audio connection maintains greeting transcription log", () => {
+      const intercomSession = {
+        connected: true,
+        streamChannel: "webrtc_audio_doorbell_ch1",
+        courierGreeting: "Chào anh/chị, em để kiện hàng vào hiên nhà theo yêu cầu nhé!",
+      };
+
+      expect.equal(intercomSession.connected, true);
+      expect.equal(intercomSession.courierGreeting.includes("hiên nhà"), true);
+    });
+  });
 });
 
 

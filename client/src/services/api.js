@@ -1346,6 +1346,17 @@ export async function verifySyntheticDnaNanotechTaggingSealAPI(orderId, { dnaOli
   return result?.data || result;
 }
 
+/**
+ * Interactive Live Delivery Audio-Visual Doorbell Notification & Instant Gate Release (Feature 140)
+ */
+export async function triggerInteractiveDoorbellGateReleaseAPI(orderId, { doorbellDeviceId, action, courierIdentityMatchPercent, liveVideoFeedStreamUrl, twoWayAudioIntercomConnected, courierVoiceGreetingNote } = {}) {
+  const result = await apiRequest(`/api/orders/${orderId}/doorbell-gate-release`, {
+    method: "POST",
+    body: JSON.stringify({ doorbellDeviceId, action, courierIdentityMatchPercent, liveVideoFeedStreamUrl, twoWayAudioIntercomConnected, courierVoiceGreetingNote }),
+  });
+  return result?.data || result;
+}
+
 
 
 

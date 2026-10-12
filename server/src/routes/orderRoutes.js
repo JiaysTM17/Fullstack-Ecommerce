@@ -60,6 +60,7 @@ import {
   updateSatelliteLoRaMeshDeadZoneTelemetry,
   verifyQuantumKeyDistributionEncryptionSeal,
   verifySyntheticDnaNanotechTaggingSeal,
+  triggerInteractiveDoorbellGateRelease,
   reserveStock,
   releaseStock,
 } from "../controllers/orderController.js";
@@ -132,6 +133,7 @@ router.post("/:id/hyperbaric-explosion-vault", optionalAuthenticate, monitorHype
 router.post("/:id/satellite-lora-mesh", optionalAuthenticate, updateSatelliteLoRaMeshDeadZoneTelemetry);
 router.post("/:id/qkd-encryption-seal", optionalAuthenticate, verifyQuantumKeyDistributionEncryptionSeal);
 router.post("/:id/dna-nanotech-seal", optionalAuthenticate, verifySyntheticDnaNanotechTaggingSeal);
+router.post("/:id/doorbell-gate-release", optionalAuthenticate, triggerInteractiveDoorbellGateRelease);
 
 // Order workflow transitions
 router.patch("/:id/confirm", authenticate, confirmOrder);

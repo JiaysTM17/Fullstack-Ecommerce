@@ -707,6 +707,23 @@ const orderSchema = new mongoose.Schema(
       },
       verifiedAt: { type: String, default: null },
     },
+    interactiveDoorbellAIVisualGateRelease: {
+      isDoorbellActive: { type: Boolean, default: false },
+      doorbellDeviceId: { type: String, default: null }, // e.g. "RING_AI_DOORBELL_G4_V98"
+      visitorFaceRecognized: { type: Boolean, default: true },
+      courierIdentityMatchPercent: { type: Number, default: 99.4 },
+      liveVideoFeedStreamUrl: { type: String, default: null },
+      twoWayAudioIntercomConnected: { type: Boolean, default: false },
+      gateUnlockAuthorizationToken: { type: String, default: null },
+      gateUnlockStatus: {
+        type: String,
+        enum: ["gate_locked", "gate_unlocked_temporary", "gate_relocked_confirmed", "unauthorized_trespass_alert"],
+        default: "gate_locked",
+      },
+      unlockedAt: { type: String, default: null },
+      relockedAt: { type: String, default: null },
+      courierVoiceGreetingNote: { type: String, default: "" },
+    },
     invoiceIssued: { type: Boolean, default: false },
     timeline: { type: Array, default: [] },
     returnRequest: {

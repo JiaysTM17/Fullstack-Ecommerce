@@ -4475,6 +4475,112 @@ export const verifySyntheticDnaNanotechTaggingSeal = async (req, res) => {
   }
 };
 
+// @desc    Chuông cửa thị giác AI & Cấp quyền mở cổng 1 chạm cho bưu tá (Feature 140)
+// @route   POST /api/orders/:id/doorbell-gate-release
+// @access  Public / Authenticate
+export const triggerInteractiveDoorbellGateRelease = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      doorbellDeviceId = "RING_AI_DOORBELL_G4_V98",
+      action = "unlock_gate", // "unlock_gate" | "relock_gate" | "intercom_call" | "trespass_alert"
+      courierIdentityMatchPercent = 99.4,
+      liveVideoFeedStreamUrl = "https://cdn.shopee.vn/streams/doorbell-cam-live-feed-v98.mp4",
+      twoWayAudioIntercomConnected = true,
+      courierVoiceGreetingNote = "Chào anh/chị, em là bưu tá SPX giao kiện hàng Shopee đây ạ!",
+    } = req.body;
+
+    let order = await Order.findOne({ _id: id });
+    if (!order) order = await Order.findOne({ orderId: id });
+    if (!order) {
+      const all = await Order.find();
+      order = all.find((o) => (o._id || o.id || o.orderId) === id);
+    }
+
+    if (!order) {
+      return sendError(res, "Không tìm thấy đơn hàng cần tương tác chuông cửa thông minh", 404);
+    }
+
+    const now = new Date().toISOString();
+    const matchPercent = Number(courierIdentityMatchPercent) || 0;
+    const isVisitorFaceRecognized = matchPercent >= 80.0;
+
+    let nextGateStatus = "gate_locked";
+    let token = order.interactiveDoorbellAIVisualGateRelease?.gateUnlockAuthorizationToken || null;
+    let unlockedAt = order.interactiveDoorbellAIVisualGateRelease?.unlockedAt || null;
+    let relockedAt = order.interactiveDoorbellAIVisualGateRelease?.relockedAt || null;
+
+    if (action === "unlock_gate") {
+      if (!isVisitorFaceRecognized) {
+        return sendError(res, "Khuôn mặt bưu tá không khớp dữ liệu thẻ nhân viên SPX (dưới 80%), từ chối mở cổng an ninh", 403);
+      }
+      nextGateStatus = "gate_unlocked_temporary";
+      token = `GATE_OTP_TOKEN_${Date.now().toString(36).toUpperCase()}_SECURE`;
+      unlockedAt = now;
+    } else if (action === "relock_gate") {
+      nextGateStatus = "gate_relocked_confirmed";
+      relockedAt = now;
+    } else if (action === "trespass_alert") {
+      nextGateStatus = "unauthorized_trespass_alert";
+    } else if (action === "intercom_call") {
+      nextGateStatus = order.interactiveDoorbellAIVisualGateRelease?.gateUnlockStatus || "gate_locked";
+    }
+
+    order.interactiveDoorbellAIVisualGateRelease = {
+      isDoorbellActive: true,
+      doorbellDeviceId,
+      visitorFaceRecognized: isVisitorFaceRecognized,
+      courierIdentityMatchPercent: matchPercent,
+      liveVideoFeedStreamUrl,
+      twoWayAudioIntercomConnected: Boolean(twoWayAudioIntercomConnected),
+      gateUnlockAuthorizationToken: token,
+      gateUnlockStatus: nextGateStatus,
+      unlockedAt,
+      relockedAt,
+      courierVoiceGreetingNote: courierVoiceGreetingNote.trim(),
+    };
+
+    let logText = "";
+    if (action === "unlock_gate") {
+      logText = `Chuông cửa AI (#${doorbellDeviceId}): Nhận diện khuôn mặt bưu tá ${matchPercent}% -> Khách hàng đã mở cổng 1 chạm (Mã cấp phép: ${token}) để đặt bưu kiện vào sân an toàn.`;
+    } else if (action === "relock_gate") {
+      logText = `Cổng an ninh thông minh: Bưu tá đã rời khỏi sân -> Cổng đã tự động đóng chốt khóa an toàn 100%.`;
+    } else if (action === "trespass_alert") {
+      logText = `CẢNH BÁO XÂM PHẬP BẤT THƯỜNG: Phát hiện người lạ không đúng khuôn mặt bưu tá SPX tại chuông cửa! Đã kích hoạt còi báo động.`;
+    } else {
+      logText = `Đàm thoại chuông cửa: Đã kết nối đàm thoại 2 chiều qua camera chuông cửa: "${courierVoiceGreetingNote}"`;
+    }
+
+    order.timeline = [
+      ...(order.timeline || []),
+      {
+        time: now,
+        text: logText,
+      },
+    ];
+
+    await order.save?.();
+
+    sendSuccess(
+      res,
+      {
+        orderId: order.orderId || order._id,
+        interactiveDoorbellAIVisualGateRelease: order.interactiveDoorbellAIVisualGateRelease,
+        message: action === "unlock_gate"
+          ? "Đã mở chốt cổng từ xa cho bưu tá đặt hàng an toàn."
+          : action === "relock_gate"
+          ? "Đã khóa chốt cổng an toàn thành công."
+          : action === "trespass_alert"
+          ? "Đã kích hoạt còi báo động an ninh chuông cửa!"
+          : "Đã kết nối đàm thoại 2 chiều cùng bưu tá.",
+      },
+      200
+    );
+  } catch (error) {
+    sendError(res, error.message, 500);
+  }
+};
+
 
 
 
