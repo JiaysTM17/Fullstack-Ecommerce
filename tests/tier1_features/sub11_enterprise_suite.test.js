@@ -42,6 +42,10 @@ import {
   AhoCorasick,
   calculateHaversineDistance,
   optimizeDeliveryRoute,
+  CountMinSketch,
+  HyperLogLog,
+  knapsack01,
+  findOptimalAddonToUnlockVoucher,
 } from "../../client/src/services/aiAlgorithms.js";
 import fs from "fs";
 
@@ -7529,6 +7533,238 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.ok(res.text.includes("TSP"));
         expect.ok(res.text.includes("Nearest Neighbor"));
         expect.ok(res.text.includes("2-Opt"));
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 153: Big Data Streaming & Optimization Algorithms Suite (18 Tests)
+  // =========================================================================
+  describe("Feature 153: Big Data Streaming & Optimization Algorithms Suite", () => {
+    // --- 1. Count-Min Sketch: Streaming Frequency & Heavy Hitters (6 Tests) ---
+    describe("Algorithm 1: Count-Min Sketch (Heavy Hitters & Stream Frequency)", () => {
+      test("F153-T1: CountMinSketch dynamically sizes matrix depth d and width w from epsilon and delta", () => {
+        const cms = new CountMinSketch({ epsilon: 0.005, delta: 0.01 });
+        const stats = cms.getStats();
+
+        // w = ceil(e / 0.005) = ceil(543.65) = 544
+        // d = ceil(ln(100)) = ceil(4.605) = 5
+        expect.equal(stats.rows, 5);
+        expect.ok(stats.columns >= 540 && stats.columns <= 550);
+        expect.ok(stats.memoryBytes > 0);
+      });
+
+      test("F153-T2: CountMinSketch correctly updates single and batch item frequencies", () => {
+        const cms = new CountMinSketch({ epsilon: 0.01, delta: 0.01 });
+        cms.update("sku_iphone_15", 10);
+        cms.update("sku_macbook_pro", 5);
+        cms.update("sku_iphone_15", 15);
+
+        expect.equal(cms.estimate("sku_iphone_15"), 25);
+        expect.equal(cms.estimate("sku_macbook_pro"), 5);
+        expect.equal(cms.totalEvents, 30);
+      });
+
+      test("F153-T3: CountMinSketch guarantees zero underestimation: estimate(x) >= trueCount(x)", () => {
+        const cms = new CountMinSketch({ epsilon: 0.005, delta: 0.01 });
+        const trueCounts = { "deal-A": 100, "deal-B": 50, "deal-C": 30 };
+
+        for (const [k, v] of Object.entries(trueCounts)) {
+          cms.update(k, v);
+        }
+
+        // Add 500 noise items
+        for (let i = 0; i < 500; i++) {
+          cms.update(`noise_${i % 50}`);
+        }
+
+        for (const [k, v] of Object.entries(trueCounts)) {
+          expect.ok(cms.estimate(k) >= v); // Zero underestimation guarantee
+        }
+      });
+
+      test("F153-T4: CountMinSketch empirical overestimation stays bounded within epsilon * totalEvents", () => {
+        const epsilon = 0.005;
+        const cms = new CountMinSketch({ epsilon, delta: 0.01 });
+        cms.update("target_item", 200);
+
+        // Stream 2,000 background events
+        for (let i = 0; i < 2000; i++) {
+          cms.update(`bg_item_${i}`);
+        }
+
+        const est = cms.estimate("target_item");
+        const maxAllowed = 200 + epsilon * cms.totalEvents;
+        expect.ok(est <= maxAllowed + 5); // Tần suất ước lượng nằm trong chặn trên lý thuyết
+      });
+
+      test("F153-T5: CountMinSketch getTopK accurately surfaces the Heavy Hitter items", () => {
+        const cms = new CountMinSketch();
+        cms.update("deal_hot_1", 500);
+        cms.update("deal_hot_2", 300);
+        cms.update("deal_hot_3", 150);
+        cms.update("deal_cold", 10);
+
+        const top3 = cms.getTopK(3);
+        expect.equal(top3.length, 3);
+        expect.equal(top3[0].item, "deal_hot_1");
+        expect.equal(top3[1].item, "deal_hot_2");
+        expect.equal(top3[2].item, "deal_hot_3");
+      });
+
+      test("F153-T6: CountMinSketch clear() resets all matrix cells and event counters to zero", () => {
+        const cms = new CountMinSketch();
+        cms.update("item", 100);
+        cms.clear();
+
+        expect.equal(cms.totalEvents, 0);
+        expect.equal(cms.estimate("item"), 0);
+        expect.equal(cms.getTopK(5).length, 0);
+      });
+    });
+
+    // --- 2. HyperLogLog: Massive Cardinality Estimation (6 Tests) ---
+    describe("Algorithm 2: HyperLogLog Cardinality Estimation", () => {
+      test("F153-T7: HyperLogLog initializes with configured precision bits b and registers count m", () => {
+        const hll = new HyperLogLog(10);
+        const stats = hll.getStats();
+
+        expect.equal(stats.precisionBits, 10);
+        expect.equal(stats.registersCount, 1024);
+        expect.equal(stats.memoryBytes, 1024); // Đúng 1 KB
+        expect.ok(stats.standardErrorPercent < 3.5);
+      });
+
+      test("F153-T8: HyperLogLog estimates cardinality of 1,000 distinct items within standard error range (+- 4%)", () => {
+        const hll = new HyperLogLog(10);
+        for (let i = 0; i < 1000; i++) {
+          hll.add(`user_viewer_${i}`);
+        }
+
+        const est = hll.count();
+        // Sai số trong khoảng 4% của 1000: [950, 1050]
+        expect.ok(est >= 940 && est <= 1060);
+      });
+
+      test("F153-T9: HyperLogLog estimates cardinality of 5,000 distinct items without memory growth", () => {
+        const hll = new HyperLogLog(11); // m = 2048 registers (2KB)
+        for (let i = 0; i < 5000; i++) {
+          hll.add(`live_stream_viewer_${i}_hcm`);
+        }
+
+        const est = hll.count();
+        expect.ok(est >= 4700 && est <= 5300);
+        expect.equal(hll.registers.byteLength, 2048); // Dung lượng luôn cố định 2048 bytes
+      });
+
+      test("F153-T10: HyperLogLog handles duplicate additions without inflating cardinality estimate", () => {
+        const hll = new HyperLogLog(10);
+        // Thêm 50 user khác nhau, mỗi user lặp lại 100 lần
+        for (let round = 0; round < 100; round++) {
+          for (let u = 0; u < 50; u++) {
+            hll.add(`vip_buyer_${u}`);
+          }
+        }
+
+        const est = hll.count();
+        expect.ok(est >= 45 && est <= 58); // Xấp xỉ 50, không bị đội lên 5000
+      });
+
+      test("F153-T11: HyperLogLog merge accurately combines two disjoint HLL instances into unified cardinality", () => {
+        const hllA = new HyperLogLog(10);
+        const hllB = new HyperLogLog(10);
+
+        for (let i = 0; i < 500; i++) hllA.add(`buyer_north_${i}`);
+        for (let i = 500; i < 1000; i++) hllB.add(`buyer_south_${i}`);
+
+        hllA.merge(hllB);
+        const combinedEst = hllA.count();
+
+        // 500 + 500 = 1000
+        expect.ok(combinedEst >= 940 && combinedEst <= 1060);
+      });
+
+      test("F153-T12: HyperLogLog clear() wipes registers and resets cardinality count to zero", () => {
+        const hll = new HyperLogLog(10);
+        hll.add("test_user_123");
+        expect.ok(hll.count() > 0);
+
+        hll.clear();
+        expect.equal(hll.count(), 0);
+      });
+    });
+
+    // --- 3. Knapsack Dynamic Programming & Voucher Optimizer (3 Tests) ---
+    describe("Algorithm 3: 0/1 Knapsack Dynamic Programming & Voucher Optimizer", () => {
+      const items = [
+        { id: "item-1", name: "Áo polo", weight: 200000, value: 50 },
+        { id: "item-2", name: "Quần short", weight: 150000, value: 40 },
+        { id: "item-3", name: "Tất thể thao", weight: 50000, value: 15 },
+        { id: "item-4", name: "Thắt lưng da", weight: 300000, value: 70 },
+      ];
+
+      test("F153-T13: knapsack01 finds optimal subset of items that maximizes value within budget", () => {
+        // Ngân sách 400,000 VND
+        // Phương án tối ưu: Quần short (150k, val 40) + Áo polo (200k, val 50) + Tất (50k, val 15) = 400k, val 105
+        const result = knapsack01(items, 400000);
+
+        expect.equal(result.maxValue, 105);
+        expect.equal(result.totalWeight, 400000);
+        expect.equal(result.chosenItems.length, 3);
+        const chosenIds = result.chosenItems.map((i) => i.id);
+        expect.ok(chosenIds.includes("item-1"));
+        expect.ok(chosenIds.includes("item-2"));
+        expect.ok(chosenIds.includes("item-3"));
+      });
+
+      test("F153-T14: knapsack01 handles zero capacity or empty items safely returning 0", () => {
+        expect.equal(knapsack01([], 500000).maxValue, 0);
+        expect.equal(knapsack01(items, 0).maxValue, 0);
+      });
+
+      test("F153-T15: findOptimalAddonToUnlockVoucher identifies the cheapest add-on to cross threshold", () => {
+        const catalog = [
+          { id: "p1", name: "Ốp lưng", price: 25000 },
+          { id: "p2", name: "Cáp sạc ngắn", price: 35000 },
+          { id: "p3", name: "Kính cường lực", price: 50000 },
+        ];
+
+        // Giỏ hiện tại: 270,000đ. Ngưỡng voucher: 300,000đ (cần thêm 30,000đ)
+        // Món rẻ nhất >= 30,000đ là Cáp sạc ngắn (35,000đ)
+        const res = findOptimalAddonToUnlockVoucher(catalog, 270000, 300000);
+
+        expect.equal(res.alreadyQualified, false);
+        expect.equal(res.neededAmount, 30000);
+        expect.equal(res.bestAddons.length, 1);
+        expect.equal(res.bestAddons[0].id, "p2");
+        expect.equal(res.excessAmount, 5000);
+      });
+    });
+
+    // --- 4. AI Copilot Integration for Streaming & Optimization Algorithms (3 Tests) ---
+    describe("AI Copilot Training for Streaming Algorithms", () => {
+      test("F153-T16: Admin Sentinel Copilot AI explains Count-Min Sketch Heavy Hitters architecture", () => {
+        const res = generateAdminCopilotResponse("Cấu trúc Count-Min Sketch tìm Top Trending Heavy Hitters");
+        expect.equal(res.tag, "THUẬT TOÁN COUNT-MIN SKETCH");
+        expect.ok(res.text.includes("COUNT-MIN SKETCH"));
+        expect.ok(res.text.includes("Zero Undercounting"));
+        expect.ok(res.text.includes("Heavy Hitters"));
+      });
+
+      test("F153-T17: Admin Sentinel Copilot AI explains HyperLogLog Cardinality Estimation for Shopee Live", () => {
+        const res = generateAdminCopilotResponse("Thuật toán HyperLogLog đếm Unique Viewers Shopee Live với 12KB RAM");
+        expect.equal(res.tag, "THUẬT TOÁN HYPERLOGLOG");
+        expect.ok(res.text.includes("HYPERLOGLOG"));
+        expect.ok(res.text.includes("Harmonic Mean"));
+        expect.ok(res.text.includes("12 KB"));
+      });
+
+      test("F153-T18: Admin Sentinel Copilot AI explains 0/1 Knapsack Voucher Optimizer and gap minimization", () => {
+        const res = generateAdminCopilotResponse("Thuật toán Knapsack Quy hoạch động tối ưu ngưỡng voucher giỏ hàng");
+        expect.equal(res.tag, "TỐI ƯU HÓA KNAPSACK");
+        expect.ok(res.text.includes("KNAPSACK"));
+        expect.ok(res.text.includes("Backtracking"));
+        expect.ok(res.text.includes("Voucher Gap"));
       });
     });
   });

@@ -377,7 +377,68 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 15. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
+  // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
+  if (/count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+    return {
+      text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
+- **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
+- **Nguyên lý toán học**:
+  - Ma trận gồm $d$ hàng và $w$ cột với $d$ hàm băm độc lập: $w = \\lceil e / \\epsilon \\rceil, d = \\lceil \\ln(1 / \\delta) \\rceil$.
+  - Khi cập nhật phần tử $x$: Tăng giá trị ô $C[r, h_r(x)]$ lên $1$.
+  - Khi ước lượng: Lấy giá trị nhỏ nhất qua $d$ hàng $\\min_r C[r, h_r(x)]$.
+- **Đặc tính đảm bảo**:
+  - **Zero Undercounting**: Tần suất ước lượng không bao giờ thấp hơn tần suất thực tế.
+  - **Heavy Hitters**: Tự động trích xuất Top-K sản phẩm Hot Trend thời gian thực với dung lượng bộ nhớ cố định chỉ vài KB.`,
+      type: 'algorithm',
+      tag: 'THUẬT TOÁN COUNT-MIN SKETCH',
+      suggestions: [
+        'Tìm hiểu thuật toán HyperLogLog',
+        'Kiểm tra thuật toán Knapsack Giỏ hàng',
+        'Xem radar gian lận và an ninh sàn'
+      ]
+    };
+  }
+
+  // 16. Ước Lượng Số Lượng Phần Tử Duy Nhất (HyperLogLog Cardinality Estimation)
+  if (/hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
+    return {
+      text: `🎯 **THUẬT TOÁN HYPERLOGLOG (MASSIVE CARDINALITY ESTIMATION)**:
+- **Mục đích thiết kế**: Đếm hàng chục triệu người xem Shopee Live độc nhất (Unique Viewers) hoặc người dùng hoạt động DAU với dung lượng bộ nhớ cố định **dưới 12 KB RAM** (thay vì hàng GB nếu dùng Hash Set).
+- **Nguyên lý hoạt động (Flajolet et al.)**:
+  - Sử dụng $m = 2^b$ thanh ghi (registers). Lấy $b$ bit đầu của mã băm làm chỉ số thanh ghi $j$.
+  - Đếm số lượng số 0 liên tiếp ở đầu chuỗi còn lại (Leading Zeros $\\rho$). Ghi nhận $\\max(\\rho)$.
+  - Tính trung bình điều hòa (Harmonic Mean) qua $m$ thanh ghi: $E = \\alpha_m m^2 (\\sum 2^{-M[j]})^{-1}$.
+- **Hiệu chuẩn đa tầng**: Tự động áp dụng Linear Counting cho vùng số nhỏ và hiệu chuẩn 32-bit cho vùng số cực lớn, đảm bảo sai số chuẩn chỉ $\\approx \\frac{1.04}{\\sqrt{m}} \\le 1.6\\%$.`,
+      type: 'algorithm',
+      tag: 'THUẬT TOÁN HYPERLOGLOG',
+      suggestions: [
+        'Tìm hiểu thuật toán Count-Min Sketch',
+        'Kiểm tra cấu hình Bloom Filter',
+        'Xem báo cáo SLA giao hàng toàn sàn'
+      ]
+    };
+  }
+
+  // 17. Tối Ưu Hóa Giỏ Hàng & Xếp Chồng Voucher (0/1 Knapsack Dynamic Programming)
+  if (/knapsack|quy hoạch động|tối ưu voucher|ngưỡng voucher|tối ưu giỏ hàng|mua kèm tối ưu/i.test(raw)) {
+    return {
+      text: `🎒 **THUẬT TOÁN QUY HOẠCH ĐỘNG KNAPSACK (0/1 CART & VOUCHER OPTIMIZER)**:
+- **Mục đích thiết kế**: Tối ưu hóa giá trị giỏ hàng trong giới hạn ngân sách và tính toán sản phẩm mua kèm có giá rẻ nhất để "vừa khít" ngưỡng áp mã voucher sàn (Voucher Gap Minimization).
+- **Cơ chế triển khai**:
+  - Bảng Quy hoạch động $O(N \\times B)$: $DP[i][w] = \\max(DP[i-1][w], DP[i-1][w - w_i] + v_i)$.
+  - **Truy vết ngược (Backtracking)**: Trả về chính xác danh sách các mặt hàng tối ưu giúp người mua đạt mức chiết khấu sâu nhất.
+  - **Voucher Gap Minimizer**: Đề xuất món đồ phụ kiện cần thêm để đạt mốc giảm giá (ví dụ: *"Mua thêm 1 món 25k để được giảm 50k"*).`,
+      type: 'algorithm',
+      tag: 'TỐI ƯU HÓA KNAPSACK',
+      suggestions: [
+        'Xem thuật toán Gợi ý Sản phẩm',
+        'Kiểm tra cơ chế Xếp chồng Voucher',
+        'Xem báo cáo doanh số GMV toàn sàn'
+      ]
+    };
+  }
+
+  // 18. Phản hồi chung hỗ trợ Quản Trị Viên (Default Governance Copilot Overview)
   return {
     text: `Chào Quản Trị Viên! Tôi là **Admin Sentinel AI** - Trợ lý số chuyên trách giám sát, phân tích số liệu và đảm bảo tuân thủ vận hành sàn TMĐT:
 - 📊 **Tra cứu GMV & Hoa hồng**: Phân tích doanh số và hoa hồng sàn 5%.

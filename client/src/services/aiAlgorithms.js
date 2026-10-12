@@ -790,6 +790,250 @@ export function optimizeDeliveryRoute(depot, stops = [], speedKmH = 25) {
   };
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 10: Count-Min Sketch (Real-Time Heavy Hitters & Stream Frequency)
+// ------------------------------------------------------------------------------
+export class CountMinSketch {
+  constructor({ epsilon = 0.005, delta = 0.01 } = {}) {
+    this.epsilon = Math.max(0.0001, epsilon);
+    this.delta = Math.max(0.0001, delta);
+    this.w = Math.ceil(Math.E / this.epsilon);
+    this.d = Math.max(2, Math.ceil(Math.log(1 / this.delta)));
+    this.table = new Uint32Array(this.d * this.w);
+    this.totalEvents = 0;
+    this.seeds = Array.from({ length: this.d }, (_, i) => (0x9e3779b9 + i * 0x85ebca6b) >>> 0);
+    this.topCandidates = new Map();
+  }
+
+  _hash(item, rowIdx) {
+    const str = String(item);
+    return murmur32(str, this.seeds[rowIdx]) % this.w;
+  }
+
+  update(item, count = 1) {
+    if (item === undefined || item === null || count <= 0) return;
+    for (let r = 0; r < this.d; r++) {
+      const col = this._hash(item, r);
+      this.table[r * this.w + col] += count;
+    }
+    this.totalEvents += count;
+
+    const est = this.estimate(item);
+    this.topCandidates.set(String(item), est);
+
+    if (this.topCandidates.size > 100) {
+      let minKey = null;
+      let minVal = Infinity;
+      for (const [k, v] of this.topCandidates.entries()) {
+        if (v < minVal) {
+          minVal = v;
+          minKey = k;
+        }
+      }
+      if (minKey) this.topCandidates.delete(minKey);
+    }
+  }
+
+  estimate(item) {
+    if (item === undefined || item === null) return 0;
+    let minVal = Infinity;
+    for (let r = 0; r < this.d; r++) {
+      const col = this._hash(item, r);
+      const val = this.table[r * this.w + col];
+      if (val < minVal) minVal = val;
+    }
+    return minVal === Infinity ? 0 : minVal;
+  }
+
+  getTopK(k = 5) {
+    const list = [];
+    for (const [item] of this.topCandidates.entries()) {
+      list.push({ item, estimatedCount: this.estimate(item) });
+    }
+    list.sort((a, b) => b.estimatedCount - a.estimatedCount);
+    return list.slice(0, k);
+  }
+
+  clear() {
+    this.table.fill(0);
+    this.totalEvents = 0;
+    this.topCandidates.clear();
+  }
+
+  getStats() {
+    return {
+      rows: this.d,
+      columns: this.w,
+      totalCells: this.d * this.w,
+      memoryBytes: this.table.byteLength,
+      totalEventsProcessed: this.totalEvents,
+      epsilon: this.epsilon,
+      delta: this.delta,
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 11: HyperLogLog (Cardinality Estimation for Unique Users / Viewers)
+// ------------------------------------------------------------------------------
+export class HyperLogLog {
+  constructor(precision = 10) {
+    this.b = Math.min(Math.max(precision, 4), 16);
+    this.m = 1 << this.b;
+    this.registers = new Uint8Array(this.m);
+
+    if (this.m === 16) this.alpha = 0.673;
+    else if (this.m === 32) this.alpha = 0.697;
+    else if (this.m === 64) this.alpha = 0.709;
+    else this.alpha = 0.7213 / (1 + 1.079 / this.m);
+  }
+
+  _countLeadingZeros(value, maxBits) {
+    let zeros = 0;
+    for (let i = maxBits - 1; i >= 0; i--) {
+      if ((value & (1 << i)) === 0) zeros++;
+      else break;
+    }
+    return zeros + 1;
+  }
+
+  add(item) {
+    if (item === undefined || item === null) return;
+    const hash = murmur32(String(item));
+    const j = hash >>> (32 - this.b);
+    const w = hash & ((1 << (32 - this.b)) - 1);
+    const lz = this._countLeadingZeros(w, 32 - this.b);
+    if (lz > this.registers[j]) {
+      this.registers[j] = lz;
+    }
+  }
+
+  addMany(items = []) {
+    for (const it of items) this.add(it);
+  }
+
+  count() {
+    let sum = 0;
+    let zeroRegisters = 0;
+    for (let j = 0; j < this.m; j++) {
+      const val = this.registers[j];
+      sum += Math.pow(2, -val);
+      if (val === 0) zeroRegisters++;
+    }
+
+    let estimate = (this.alpha * this.m * this.m) / sum;
+    if (estimate <= 2.5 * this.m) {
+      if (zeroRegisters > 0) {
+        estimate = this.m * Math.log(this.m / zeroRegisters);
+      }
+    } else if (estimate > (1 / 30) * 4294967296) {
+      estimate = -4294967296 * Math.log(1 - estimate / 4294967296);
+    }
+    return Math.round(estimate);
+  }
+
+  merge(otherHLL) {
+    if (!otherHLL || otherHLL.m !== this.m) {
+      throw new Error("Cannot merge HyperLogLog with different precision");
+    }
+    for (let j = 0; j < this.m; j++) {
+      if (otherHLL.registers[j] > this.registers[j]) {
+        this.registers[j] = otherHLL.registers[j];
+      }
+    }
+  }
+
+  clear() {
+    this.registers.fill(0);
+  }
+
+  getStats() {
+    return {
+      precisionBits: this.b,
+      registersCount: this.m,
+      memoryBytes: this.registers.byteLength,
+      standardErrorPercent: Number(((1.04 / Math.sqrt(this.m)) * 100).toFixed(2)),
+      estimatedCardinality: this.count(),
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 12: 0/1 Knapsack Dynamic Programming & Voucher Optimizer
+// ------------------------------------------------------------------------------
+export function knapsack01(items = [], capacity = 0) {
+  const cap = Math.floor(Math.max(0, capacity));
+  const n = items.length;
+  if (n === 0 || cap === 0) return { maxValue: 0, totalWeight: 0, chosenItems: [] };
+
+  const dp = Array.from({ length: n + 1 }, () => new Int32Array(cap + 1));
+  for (let i = 1; i <= n; i++) {
+    const item = items[i - 1];
+    const weight = Math.floor(item.weight || item.price || 0);
+    const value = Math.floor(item.value || item.utility || item.rating || 0);
+
+    for (let w = 0; w <= cap; w++) {
+      if (weight <= w) {
+        dp[i][w] = Math.max(dp[i - 1][w], dp[i - 1][w - weight] + value);
+      } else {
+        dp[i][w] = dp[i - 1][w];
+      }
+    }
+  }
+
+  let currentCap = cap;
+  const chosenItems = [];
+  let totalWeight = 0;
+
+  for (let i = n; i > 0; i--) {
+    if (dp[i][currentCap] !== dp[i - 1][currentCap]) {
+      const item = items[i - 1];
+      chosenItems.unshift(item);
+      const weight = Math.floor(item.weight || item.price || 0);
+      totalWeight += weight;
+      currentCap -= weight;
+    }
+  }
+
+  return { maxValue: dp[n][cap], totalWeight, chosenItems };
+}
+
+export function findOptimalAddonToUnlockVoucher(availableProducts = [], currentCartTotal = 0, voucherMinSpend = 300000) {
+  const gap = voucherMinSpend - currentCartTotal;
+  if (gap <= 0) return { alreadyQualified: true, neededAmount: 0, bestAddons: [] };
+
+  const candidates = availableProducts
+    .filter((p) => (p.price || 0) >= gap)
+    .sort((a, b) => (a.price || 0) - (b.price || 0));
+
+  if (candidates.length > 0) {
+    const bestSingle = candidates[0];
+    return {
+      alreadyQualified: false,
+      neededAmount: gap,
+      bestAddons: [bestSingle],
+      excessAmount: (bestSingle.price || 0) - gap,
+    };
+  }
+
+  const sortedCheap = [...availableProducts].sort((a, b) => (a.price || 0) - (b.price || 0));
+  let currentSum = 0;
+  const bundle = [];
+
+  for (const item of sortedCheap) {
+    bundle.push(item);
+    currentSum += item.price || 0;
+    if (currentSum >= gap) break;
+  }
+
+  return {
+    alreadyQualified: false,
+    neededAmount: gap,
+    bestAddons: bundle,
+    excessAmount: Math.max(0, currentSum - gap),
+  };
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -805,4 +1049,8 @@ export default {
   AhoCorasick,
   calculateHaversineDistance,
   optimizeDeliveryRoute,
+  CountMinSketch,
+  HyperLogLog,
+  knapsack01,
+  findOptimalAddonToUnlockVoucher,
 };
