@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext';
 import InvoiceReceiptModal from '../components/InvoiceReceiptModal';
 import RewardsHubModal from '../components/RewardsHubModal';
 import VietQRPaymentModal from '../components/VietQRPaymentModal';
+import ParcelSecurityProfileModal from '../components/ParcelSecurityProfileModal';
 import {
   CheckIcon,
   CopyIcon,
@@ -27,6 +28,7 @@ export default function OrderSuccessPage() {
   const [showRewardsModal, setShowRewardsModal] = useState(false);
   const [showVietQRModal, setShowVietQRModal] = useState(false);
   const [isVietQRPaid, setIsVietQRPaid] = useState(false);
+  const [showSecurityModal, setShowSecurityModal] = useState(false);
 
   const orderId = location.state?.orderId || `ORD${Math.floor(100000 + Math.random() * 900000)}`;
   const total = location.state?.total || 0;
@@ -172,6 +174,37 @@ export default function OrderSuccessPage() {
               </span>
               <span>SPX Express (Giao hàng dự kiến 24H)</span>
             </span>
+          </div>
+
+          <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '12.5px', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldCheckIcon size={14} color="#2563eb" />
+              <span>Bảo vệ đơn hàng đa lớp:</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowSecurityModal(true)}
+              style={{
+                background: 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%)',
+                border: '1px solid #bfdbfe',
+                borderRadius: '6px',
+                padding: '4px 10px',
+                fontSize: '11.5px',
+                fontWeight: 700,
+                color: '#1d4ed8',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 1px 3px rgba(37, 99, 235, 0.1)',
+                transition: 'all 0.15s ease',
+              }}
+              title="Xem Chuông Cửa Video AI, Nắn Tuyến AI, Tủ SPX Tap & Go và Hồ Sơ An Ninh Bưu Kiện"
+            >
+              <ShieldCheckIcon size={12} color="#2563eb" />
+              <span>An Ninh, Khung Giờ AI &amp; Chuông Cửa</span>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+            </button>
           </div>
         </div>
 
@@ -366,6 +399,13 @@ export default function OrderSuccessPage() {
             setIsVietQRPaid(true);
             setShowVietQRModal(false);
           }}
+        />
+      )}
+
+      {showSecurityModal && (
+        <ParcelSecurityProfileModal
+          order={orderData}
+          onClose={() => setShowSecurityModal(false)}
         />
       )}
     </main>

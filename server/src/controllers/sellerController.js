@@ -995,11 +995,6 @@ export const createSellerAdsCampaign = catchAsync(async (req, res) => {
   const shopId = req.user.shopId;
   if (!shopId) return sendError(res, "Chưa liên kết gian hàng", 400);
 
-  const { campaignName, type, budgetDaily, budgetTotal, targetKeywords } = req.body;
-  if (!campaignName || !campaignName.trim()) {
-    return sendError(res, "Tên chiến dịch quảng cáo là bắt buộc", 400);
-  }
-
   const {
     campaignName,
     type,
@@ -1014,6 +1009,10 @@ export const createSellerAdsCampaign = catchAsync(async (req, res) => {
     conversionRevenue,
     roas,
   } = req.body;
+
+  if (!campaignName || !campaignName.trim()) {
+    return sendError(res, "Tên chiến dịch quảng cáo là bắt buộc", 400);
+  }
 
   const campaign = await AdsCampaign.create({
     shopId,
