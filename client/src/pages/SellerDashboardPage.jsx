@@ -8098,10 +8098,29 @@ export default function SellerDashboardPage() {
 
 
         {/* Modal Tạo Chiến Dịch Shopee Ads */}
+        {/* Modal Tạo Chiến Dịch Quảng Cáo Shopee Ads */}
         {showCreateAdsModal && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
-            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '520px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Tạo Chiến Dịch Đấu Thầu Shopee Ads</h3>
+          <div className="shopee-modal-overlay" onClick={() => setShowCreateAdsModal(false)} style={{ animation: 'modalOverlayFadeIn 0.2s ease-out forwards' }}>
+            <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
+              <div className="shopee-modal-header" style={{ borderBottom: '1px solid var(--border-medium, #e2e8f0)', paddingBottom: '14px', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <PlusIcon size={14} color="#ea580c" />
+                  </span>
+                  <span>Tạo Chiến Dịch Đấu Thầu Shopee Ads</span>
+                </h3>
+                <button
+                  type="button"
+                  className="shopee-modal-close"
+                  onClick={() => setShowCreateAdsModal(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  aria-label="Đóng cửa sổ"
+                >
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="#ef4444" />
+                  </span>
+                </button>
+              </div>
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 await createSellerAdsAPI({
@@ -8116,58 +8135,58 @@ export default function SellerDashboardPage() {
                 fetchSellerAdsAPI().then(setAdsData);
               }}>
                 <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Tên Chiến Dịch</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Tên Chiến Dịch</label>
                   <input
                     type="text" required
                     className="shopee-input"
                     value={adsForm.campaignName}
                     onChange={(e) => setAdsForm({ ...adsForm, campaignName: e.target.value })}
                     placeholder="VD: Đấu thầu từ khóa Mùa Thu 2026"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                   />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Ngân Sách Ngày (VNĐ)</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Ngân Sách Ngày (VNĐ)</label>
                     <input
                       type="number" required
                       className="shopee-input"
                       value={adsForm.budgetDaily}
                       onChange={(e) => setAdsForm({ ...adsForm, budgetDaily: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Ngân Sách Tổng (VNĐ)</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Ngân Sách Tổng (VNĐ)</label>
                     <input
                       type="number" required
                       className="shopee-input"
                       value={adsForm.budgetTotal}
                       onChange={(e) => setAdsForm({ ...adsForm, budgetTotal: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px', marginBottom: '16px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Từ Khóa Mục Tiêu</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Từ Khóa Mục Tiêu</label>
                     <input
                       type="text" required
                       className="shopee-input"
                       value={adsForm.keyword1}
                       onChange={(e) => setAdsForm({ ...adsForm, keyword1: e.target.value })}
                       placeholder="áo thun nam"
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Giá Thầu (VNĐ/click)</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Giá Thầu (VNĐ/click)</label>
                     <input
                       type="number" required
                       className="shopee-input"
                       value={adsForm.bidPrice1}
                       onChange={(e) => setAdsForm({ ...adsForm, bidPrice1: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
                 </div>
@@ -8182,9 +8201,27 @@ export default function SellerDashboardPage() {
 
         {/* Modal Thêm Nhân Viên Gian Hàng */}
         {showAddStaffModal && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
-            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '480px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Tạo Tài Khoản Nhân Viên Phụ</h3>
+          <div className="shopee-modal-overlay" onClick={() => setShowAddStaffModal(false)} style={{ animation: 'modalOverlayFadeIn 0.2s ease-out forwards' }}>
+            <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+              <div className="shopee-modal-header" style={{ borderBottom: '1px solid var(--border-medium, #e2e8f0)', paddingBottom: '14px', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <PlusIcon size={14} color="#2563eb" />
+                  </span>
+                  <span>Tạo Tài Khoản Nhân Viên Phụ</span>
+                </h3>
+                <button
+                  type="button"
+                  className="shopee-modal-close"
+                  onClick={() => setShowAddStaffModal(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  aria-label="Đóng cửa sổ"
+                >
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon size={14} color="#ef4444" />
+                  </span>
+                </button>
+              </div>
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 await createSellerStaff(staffForm);
@@ -8193,40 +8230,40 @@ export default function SellerDashboardPage() {
                 fetchSellerStaff().then(setSellerStaffList);
               }}>
                 <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Họ Và Tên</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Họ Và Tên</label>
                   <input
                     type="text" required
                     className="shopee-input"
                     value={staffForm.fullName}
                     onChange={(e) => setStaffForm({ ...staffForm, fullName: e.target.value })}
                     placeholder="VD: Nguyễn Văn Kho"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                   />
                 </div>
                 <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Email Đăng Nhập</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Email Đăng Nhập</label>
                   <input
                     type="email" required
                     className="shopee-input"
                     value={staffForm.email}
                     onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })}
                     placeholder="nhanvien@shopee.vn"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                   />
                 </div>
                 <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Số Điện Thoại</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Số Điện Thoại</label>
                   <input
                     type="text"
                     className="shopee-input"
                     value={staffForm.phone}
                     onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })}
                     placeholder="0912..."
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                   />
                 </div>
                 <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Vai Trò Nhân Viên</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Vai Trò Nhân Viên</label>
                   <select
                     value={staffForm.subRole}
                     onChange={(e) => setStaffForm({
@@ -8234,7 +8271,7 @@ export default function SellerDashboardPage() {
                       subRole: e.target.value,
                       permissions: e.target.value === 'inventory_staff' ? ['manage_products', 'manage_orders'] : ['view_orders', 'chat_customer']
                     })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                   >
                     <option value="inventory_staff">Quản lý kho vận & Xác nhận đóng gói đơn</option>
                     <option value="support_staff">Chăm sóc khách hàng & Trực chat tư vấn</option>

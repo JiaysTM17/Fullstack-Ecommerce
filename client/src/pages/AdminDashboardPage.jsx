@@ -2986,16 +2986,16 @@ export default function AdminDashboardPage() {
         {/* ==================== TAB 10: RADAR PHÁT HIỆN GIAN LẬN AN NINH ==================== */}
         {activeTab === 'fraud_radar' && (
           <div className="shopee-card" style={{ padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary, #0f172a)' }}>
                   Hệ Thống Radar Quét Bất Thường &amp; Phòng Chống Gian Lận (Fraud Radar)
                 </h2>
-                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted, #64748b)' }}>
                   Giám sát các hành vi trục lợi voucher, tạo đơn ảo, bùng hàng COD và spam đánh giá tiêu cực theo thời gian thực.
                 </p>
               </div>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fee2e2', color: '#dc2626', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 700 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(239, 68, 68, 0.12)', color: 'var(--color-error, #dc2626)', border: '1px solid rgba(239, 68, 68, 0.25)', padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700 }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#dc2626', display: 'inline-block' }} />
                 Đang Quét Radar Thời Gian Thực
               </span>
@@ -3027,12 +3027,13 @@ export default function AdminDashboardPage() {
                   style={{
                     padding: '16px',
                     borderRadius: '12px',
-                    background: anom.severity === 'CRITICAL' ? '#fff1f2' : anom.severity === 'HIGH' ? '#fff7ed' : '#f8fafc',
-                    border: `1px solid ${anom.severity === 'CRITICAL' ? '#fecdd3' : anom.severity === 'HIGH' ? '#ffedd5' : '#e2e8f0'}`,
+                    background: anom.severity === 'CRITICAL' ? 'rgba(239, 68, 68, 0.08)' : anom.severity === 'HIGH' ? 'rgba(234, 88, 12, 0.08)' : 'var(--bg-muted, #f8fafc)',
+                    border: `1px solid ${anom.severity === 'CRITICAL' ? 'rgba(239, 68, 68, 0.25)' : anom.severity === 'HIGH' ? 'rgba(234, 88, 12, 0.25)' : 'var(--border-medium, #e2e8f0)'}`,
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    gap: '16px'
+                    gap: '16px',
+                    flexWrap: 'wrap',
                   }}
                 >
                   <div>
@@ -3047,9 +3048,9 @@ export default function AdminDashboardPage() {
                       }}>
                         {anom.severity}
                       </span>
-                      <strong style={{ fontSize: '14px', color: '#0f172a' }}>{anom.targetName}</strong>
+                      <strong style={{ fontSize: '14px', color: 'var(--text-primary, #0f172a)' }}>{anom.targetName}</strong>
                     </div>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#475569' }}>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary, #475569)' }}>
                       {anom.description}
                     </p>
                     <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>

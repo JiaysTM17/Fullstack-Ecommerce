@@ -1422,19 +1422,19 @@ export default function OrderHistoryPage() {
                       </div>
 
                       {/* Shipper & Delivery Details */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', padding: '16px 18px', background: '#fafafa' }}>
-                        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
-                          <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', padding: '16px 18px', background: 'var(--bg-muted, #fafafa)' }}>
+                        <div style={{ background: 'var(--bg-card, #ffffff)', border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '8px', padding: '12px' }}>
+                          <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', marginBottom: '8px' }}>
                             Thông Tin Tài Xế Giao Hàng (SPX)
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <TruckIcon size={20} color="#2563eb" />
                             </div>
                             <div>
-                              <strong style={{ fontSize: '13px', color: '#0f172a' }}>Nguyễn Văn Tài</strong>
-                              <div style={{ fontSize: '11.5px', color: '#64748b' }}>SPX Đội Phát Tân Bình · Xe: 59-P1 982.34</div>
-                              <div style={{ fontSize: '11.5px', color: '#2563eb', marginTop: '2px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                              <strong style={{ fontSize: '13px', color: 'var(--text-primary, #0f172a)' }}>Nguyễn Văn Tài</strong>
+                              <div style={{ fontSize: '11.5px', color: 'var(--text-muted, #64748b)' }}>SPX Đội Phát Tân Bình · Xe: 59-P1 982.34</div>
+                              <div style={{ fontSize: '11.5px', color: 'var(--secondary-color, #2563eb)', marginTop: '2px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                                 <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <PhoneIcon size={10} color="#2563eb" />
                                 </span>
@@ -1444,14 +1444,14 @@ export default function OrderHistoryPage() {
                           </div>
                         </div>
 
-                        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
-                          <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
+                        <div style={{ background: 'var(--bg-card, #ffffff)', border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '8px', padding: '12px' }}>
+                          <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted, #64748b)', textTransform: 'uppercase', marginBottom: '8px' }}>
                             Địa Chỉ Nhận Hàng
                           </div>
-                          <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}>
+                          <div style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--text-primary, #0f172a)' }}>
                             {activeTrackingOrder.customerName || 'Khách Hàng'} · {activeTrackingOrder.phone || '0901234567'}
                           </div>
-                          <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '3px', lineHeight: 1.4 }}>
+                          <div style={{ fontSize: '11.5px', color: 'var(--text-muted, #64748b)', marginTop: '3px', lineHeight: 1.4 }}>
                             {activeTrackingOrder.shippingAddress?.address || (typeof activeTrackingOrder.shippingAddress === 'string' ? activeTrackingOrder.shippingAddress : 'Số 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh')}
                           </div>
                         </div>
@@ -2079,18 +2079,18 @@ export default function OrderHistoryPage() {
                           setSelectedSecurityOrder(ord);
                         }}
                         style={{
-                          background: 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%)',
-                          border: '1px solid #bfdbfe',
+                          background: 'rgba(37, 99, 235, 0.08)',
+                          border: '1px solid rgba(37, 99, 235, 0.25)',
                           borderRadius: '6px',
-                          padding: '3px 10px',
+                          padding: '4px 10px',
                           fontSize: '11px',
                           fontWeight: 700,
-                          color: '#1d4ed8',
+                          color: 'var(--secondary-color, #2563eb)',
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '6px',
-                          boxShadow: '0 1px 3px rgba(37, 99, 235, 0.1)',
+                          boxShadow: '0 1px 3px rgba(37, 99, 235, 0.08)',
                           transition: 'all 0.15s ease',
                         }}
                         title="Xem Chuông Cửa Video AI, Nắn Tuyến AI, Tủ SPX Tap & Go và Hồ Sơ An Ninh Bưu Kiện"
