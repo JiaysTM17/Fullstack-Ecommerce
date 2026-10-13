@@ -239,3 +239,40 @@
 .checkout-summary-box:hover {
   border-color: #cbd5e1;
 }
+
+/* =========================================================================
+   5. DARK MODE ADAPTATIONS FOR MULTI-STEP CHECKOUT
+   ========================================================================= */
+[data-theme="dark"] .checkout-steps-nav,
+[data-theme="dark"] .address-card,
+[data-theme="dark"] .shipping-option-card,
+[data-theme="dark"] .payment-method-card,
+[data-theme="dark"] .payment-qr-preview,
+[data-theme="dark"] .checkout-summary-box {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .address-card.selected {
+  background: linear-gradient(145deg, rgba(234, 88, 12, 0.15) 0%, rgba(234, 88, 12, 0.08) 100%);
+  border-color: var(--primary-color, #f97316);
+}
+
+[data-theme="dark"] .shipping-option-card.selected {
+  background: linear-gradient(145deg, rgba(2, 132, 199, 0.18) 0%, rgba(2, 132, 199, 0.08) 100%);
+  border-color: #38bdf8;
+}
+
+[data-theme="dark"] .payment-method-card.selected {
+  background: linear-gradient(145deg, rgba(124, 58, 237, 0.18) 0%, rgba(124, 58, 237, 0.08) 100%);
+  border-color: #a78bfa;
+}
+
+[data-theme="dark"] .checkout-step-item {
+  color: var(--text-muted, #94a3b8);
+}
+
+[data-theme="dark"] .checkout-step-item.active {
+  color: var(--primary-color, #f97316);
+}
