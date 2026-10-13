@@ -96,8 +96,8 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
     <div
       className={`invoice-printable-container ${inline ? 'invoice-inline-container' : 'anim-modal-content'}`}
       style={{
-        background: '#ffffff',
-        color: '#0f172a',
+        background: 'var(--bg-card, #ffffff)',
+        color: 'var(--text-primary, #0f172a)',
         borderRadius: inline ? '12px' : '16px',
         width: '100%',
         maxWidth: inline ? '100%' : '740px',
@@ -105,7 +105,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
         display: 'flex',
         flexDirection: 'column',
         boxShadow: inline ? 'none' : '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
-        border: inline ? 'none' : '1px solid #e2e8f0',
+        border: inline ? 'none' : '1px solid var(--border-medium, #e2e8f0)',
         position: 'relative',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         boxSizing: 'border-box',
@@ -121,8 +121,8 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: inline ? '14px 18px' : '12px 20px',
-          borderBottom: '1px solid #f1f5f9',
-          background: '#f8fafc',
+          borderBottom: '1px solid var(--border-medium, #f1f5f9)',
+          background: 'var(--bg-muted, #f8fafc)',
           borderRadius: inline ? '12px 12px 0 0' : 0,
           flexShrink: 0,
         }}
@@ -304,8 +304,8 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
           {/* Customer & Order Metadata Grid */}
           <div
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-muted, #f8fafc)',
+              border: '1px solid var(--border-medium, #e2e8f0)',
               borderRadius: '8px',
               padding: '10px 14px',
               display: 'grid',
@@ -316,32 +316,32 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
             }}
           >
             <div>
-              <div style={{ color: '#64748b', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '3px' }}>
+              <div style={{ color: 'var(--text-muted, #64748b)', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '3px' }}>
                 Đơn Vị Mua Hàng (Buyer)
               </div>
-              <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '1px', fontSize: '12.5px' }}>{buyerName}</div>
-              <div style={{ color: '#475569' }}>Điện thoại: {buyerPhone}</div>
-              <div style={{ color: '#475569' }}>Địa chỉ: {buyerAddress}</div>
-              <div style={{ color: '#475569' }}>MST: {buyerTaxCode}</div>
+              <div style={{ fontWeight: 700, color: 'var(--text-primary, #0f172a)', marginBottom: '1px', fontSize: '12.5px' }}>{buyerName}</div>
+              <div style={{ color: 'var(--text-secondary, #475569)' }}>Điện thoại: {buyerPhone}</div>
+              <div style={{ color: 'var(--text-secondary, #475569)' }}>Địa chỉ: {buyerAddress}</div>
+              <div style={{ color: 'var(--text-secondary, #475569)' }}>MST: {buyerTaxCode}</div>
             </div>
 
             <div>
-              <div style={{ color: '#64748b', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
-                Giao Nhận & Thanh Toán
+              <div style={{ color: 'var(--text-muted, #64748b)', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
+                Giao Nhận &amp; Thanh Toán
               </div>
-              <div style={{ color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#dbeafe', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ color: 'var(--text-primary, #0f172a)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <CreditCardIcon size={11} color="#2563eb" />
                 </span>
                 <span>Hình thức: <strong>{order.paymentMethod || 'Thanh toán khi nhận hàng (COD)'}</strong></span>
               </div>
-              <div style={{ color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: '#ffedd5', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ color: 'var(--text-primary, #0f172a)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <TruckIcon size={11} color="#ea580c" />
                 </span>
                 <span>Vận chuyển: <strong>SPX Express</strong></span>
               </div>
-              <div style={{ color: '#0f172a' }}>
+              <div style={{ color: 'var(--text-primary, #0f172a)' }}>
                 Mã vận đơn SPX: <strong>{order.trackingCode || `SPX-VN-${orderIdStr.slice(-8).toUpperCase()}`}</strong>
               </div>
             </div>
@@ -352,7 +352,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
             style={{
               width: '100%',
               marginBottom: '14px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--border-medium, #e2e8f0)',
               borderRadius: '8px',
               overflow: 'hidden',
             }}
@@ -366,7 +366,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
               }}
             >
               <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #cbd5e1', textAlign: 'left' }}>
+                <tr style={{ background: 'var(--bg-muted, #f8fafc)', borderBottom: '1.5px solid var(--border-medium, #cbd5e1)', textAlign: 'left' }}>
                   <th style={{ padding: '7px 8px', fontWeight: 700, width: '32px', textAlign: 'center' }}>STT</th>
                   <th style={{ padding: '7px 8px', fontWeight: 700 }}>Tên Hàng Hóa, Dịch Vụ</th>
                   <th style={{ padding: '7px 8px', fontWeight: 700, textAlign: 'center', width: '38px' }}>ĐVT</th>

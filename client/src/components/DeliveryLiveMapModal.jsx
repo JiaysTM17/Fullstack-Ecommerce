@@ -97,8 +97,8 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
     <div
       className={inline ? 'delivery-map-inline-container' : 'anim-modal-content'}
       style={{
-        background: '#ffffff',
-        color: '#0f172a',
+        background: 'var(--bg-card, #ffffff)',
+        color: 'var(--text-primary, #0f172a)',
         borderRadius: inline ? '12px' : '16px',
         width: '100%',
         maxWidth: inline ? '100%' : '640px',
@@ -106,7 +106,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
         display: 'flex',
         flexDirection: 'column',
         boxShadow: inline ? 'none' : '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
-        border: inline ? 'none' : '1px solid #e2e8f0',
+        border: inline ? 'none' : '1px solid var(--border-medium, #e2e8f0)',
         position: 'relative',
         overflow: inline ? 'visible' : 'hidden',
         margin: inline ? '0' : 'auto',
@@ -120,8 +120,8 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: inline ? '14px 18px' : '16px 22px',
-          borderBottom: '1px solid #f1f5f9',
-          background: '#f8fafc',
+          borderBottom: '1px solid var(--border-medium, #f1f5f9)',
+          background: 'var(--bg-muted, #f8fafc)',
           borderRadius: inline ? '12px 12px 0 0' : 0,
           flexShrink: 0,
         }}
@@ -594,8 +594,9 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
                 <span>Biển số:</span>
                 <strong
                   style={{
-                    background: '#e2e8f0',
-                    color: '#0f172a',
+                    background: 'var(--bg-muted, #e2e8f0)',
+                    color: 'var(--text-primary, #0f172a)',
+                    border: '1px solid var(--border-medium, #cbd5e1)',
                     padding: '1px 6px',
                     borderRadius: '4px',
                     fontWeight: 800,
