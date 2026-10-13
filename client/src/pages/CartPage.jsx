@@ -518,7 +518,7 @@ export default function CartPage() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      borderBottom: "1px solid #f0f0f0",
+                      borderBottom: "1px solid var(--border-medium, #e2e8f0)",
                       paddingBottom: "12px",
                       flexWrap: "wrap",
                       gap: "12px",

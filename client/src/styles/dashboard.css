@@ -2842,32 +2842,45 @@
 
 /* Dark Mode Overrides for Dashboards */
 [data-theme="dark"] .shopee-sidebar,
+body.dark-mode .shopee-sidebar,
 [data-theme="dark"] .shopee-dashboard-card,
+body.dark-mode .shopee-dashboard-card,
 [data-theme="dark"] .shopee-table-card,
+body.dark-mode .shopee-table-card,
 [data-theme="dark"] .shopee-metric-card,
+body.dark-mode .shopee-metric-card,
 [data-theme="dark"] .account-portal-main-content,
+body.dark-mode .account-portal-main-content,
 [data-theme="dark"] .shopee-account-sidebar-container,
-[data-theme="dark"] .shopee-order-card {
+body.dark-mode .shopee-account-sidebar-container,
+[data-theme="dark"] .shopee-order-card,
+body.dark-mode .shopee-order-card {
   background-color: var(--bg-card, #1e293b);
   border-color: var(--border-color, #334155);
   color: var(--text-primary, #f8fafc);
 }
 
 [data-theme="dark"] .shopee-table th,
-[data-theme="dark"] .shopee-data-table th {
+body.dark-mode .shopee-table th,
+[data-theme="dark"] .shopee-data-table th,
+body.dark-mode .shopee-data-table th {
   background-color: var(--bg-page, #0b0f19);
   color: var(--text-secondary, #94a3b8);
   border-bottom-color: var(--border-color, #334155);
 }
 
 [data-theme="dark"] .shopee-table td,
-[data-theme="dark"] .shopee-data-table td {
+body.dark-mode .shopee-table td,
+[data-theme="dark"] .shopee-data-table td,
+body.dark-mode .shopee-data-table td {
   border-bottom-color: var(--border-color, #334155);
   color: var(--text-primary, #f8fafc);
 }
 
 [data-theme="dark"] .shopee-table tr:hover td,
-[data-theme="dark"] .shopee-data-table tr:hover td {
+body.dark-mode .shopee-table tr:hover td,
+[data-theme="dark"] .shopee-data-table tr:hover td,
+body.dark-mode .shopee-data-table tr:hover td {
   background-color: var(--bg-hover, #273549);
 }
 
