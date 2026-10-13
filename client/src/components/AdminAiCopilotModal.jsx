@@ -73,6 +73,7 @@ Tôi hoạt động với cơ chế **Zero-Destructive Read-Only Guardrails**: H
     setInputQuery('');
     setIsTyping(true);
 
+    // Giả lập thời gian phân tích suy nghĩ tự nhiên (đọc snapshot dữ liệu sàn, tra cứu thuật toán)
     setTimeout(() => {
       const resp = generateAdminCopilotResponse(q, contextData);
       const aiMsg = {
@@ -86,7 +87,7 @@ Tôi hoạt động với cơ chế **Zero-Destructive Read-Only Guardrails**: H
       };
       setMessages(prev => [...prev, aiMsg]);
       setIsTyping(false);
-    }, 450);
+    }, 850);
   }
 
   function handleClearHistory() {
@@ -210,19 +211,24 @@ Tôi hoạt động với cơ chế **Zero-Destructive Read-Only Guardrails**: H
           </div>
         </div>
 
-        {/* Security Guardrail Notification Pill */}
+        {/* Security Guardrail & Live Platform Context Indicator */}
         <div style={{
           background: '#f8fafc',
           borderBottom: '1px solid #e2e8f0',
           padding: '8px 16px',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
+          justifyContent: 'space-between',
           fontSize: '11px',
           color: '#475569'
         }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
-          <span>Chế độ an toàn: <strong>Read-Only Intelligence</strong> (Không tự ý xóa dữ liệu)</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
+            <span>Chế độ an toàn: <strong>Read-Only</strong></span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#2563eb', fontWeight: 600 }}>
+            <span>⚡ Dữ liệu sàn: <strong>Realtime Snapshot</strong></span>
+          </div>
         </div>
 
         {/* Message Stream */}

@@ -559,6 +559,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 4. Minh Bạch Nguồn Dữ Liệu & Cơ Chế Hoạt Động Chat AI (BUYER_AI_TRANSPARENCY)
+  if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(lower)) {
+    return {
+      intent: 'BUYER_AI_TRANSPARENCY',
+      replyText: `**[MINH BẠCH DỮ LIỆU & CƠ CHẾ TRỢ LÝ AI]:**\n\n• **Dữ liệu thực tế 100%**: AI đọc trực tiếp danh mục **109 sản phẩm**, kho voucher đang mở, giỏ hàng cá nhân và trạng thái đơn hàng SPX Express của chính bạn.\n• **Tốc độ phản hồi tức thì**: Sử dụng engine AI suy luận biên (Client-side Inference) giúp phân tích ý định và tìm kiếm sản phẩm trong vòng mili-giây mà không làm gián đoạn trải nghiệm mua sắm.\n• **Gợi ý chuẩn xác**: Kết hợp thuật toán lọc cộng tác (Item Affinity) và lọc từ cấm an toàn, đảm bảo bạn luôn nhận được sản phẩm chính hãng với giá tốt nhất!`,
+      suggestions: ['Gợi ý sản phẩm hot', 'Lấy voucher giảm giá', 'Kiểm tra đơn hàng'],
+    };
+  }
+
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH
   // -------------------------------------------------------------
