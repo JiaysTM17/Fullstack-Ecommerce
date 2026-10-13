@@ -153,3 +153,37 @@
   height: 40px;
   padding: 0 24px;
 }
+
+/* =========================================================================
+   Dark Mode Adaptations for Feedback, Loading & Empty States
+   ========================================================================= */
+[data-theme="dark"] .shopee-feedback {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .shopee-loading-fullscreen {
+  background: rgba(15, 23, 42, 0.85);
+}
+
+[data-theme="dark"] .shopee-skeleton-shimmer {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+}
+
+[data-theme="dark"] .shopee-skeleton-card {
+  background: var(--bg-card, #1e293b);
+  border: 1px solid var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .shopee-empty-state {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .shopee-empty-icon {
+  color: #475569;
+}
+
