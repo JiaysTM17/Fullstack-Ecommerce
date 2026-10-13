@@ -669,7 +669,7 @@ export default function ShopStorefrontPage() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                background: '#ffffff',
+                background: 'var(--bg-card, #ffffff)',
                 border: '1.5px solid var(--primary-color, #ea580c)',
                 color: 'var(--primary-color, #ea580c)',
                 cursor: 'pointer',
