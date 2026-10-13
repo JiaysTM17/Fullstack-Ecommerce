@@ -2954,3 +2954,38 @@
   color: var(--text-primary, #f8fafc);
 }
 
+/* Order Detail Modal & Account Portal Comprehensive Dark Mode */
+[data-theme="dark"] .order-detail-modal-container,
+body.dark-mode .order-detail-modal-container {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .shopee-account-sidebar-container,
+body.dark-mode .shopee-account-sidebar-container {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .copy-pill,
+body.dark-mode .copy-pill {
+  background: var(--bg-page, #0f172a) !important;
+  border-color: var(--border-medium, #334155) !important;
+  color: var(--text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] .shopee-order-btn-outline,
+body.dark-mode .shopee-order-btn-outline {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .shopee-order-btn-outline:hover,
+body.dark-mode .shopee-order-btn-outline:hover {
+  background: var(--bg-hover, #273549);
+  border-color: var(--primary-color, #ea580c);
+  color: var(--primary-color, #ea580c);
+}
+

@@ -167,7 +167,7 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
             >
               <MapPinIcon size={18} color="#ffffff" />
             </div>
-            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
               Theo Dõi Vị Trí Shipper Trực Tiếp
             </h3>
             <span
@@ -184,8 +184,8 @@ export default function DeliveryLiveMapModal({ order, onClose, inline = false })
               {carrier}
             </span>
           </div>
-          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
-            Mã vận đơn: <strong style={{ color: '#0f172a' }}>{trackingCode}</strong> · Trạng thái: <strong>{liveTracking?.statusText || 'Đang giao hàng'}</strong>
+          <div style={{ fontSize: '12px', color: 'var(--text-secondary, #64748b)', marginTop: '2px' }}>
+            Mã vận đơn: <strong style={{ color: 'var(--text-primary, #0f172a)' }}>{trackingCode}</strong> · Trạng thái: <strong>{liveTracking?.statusText || 'Đang giao hàng'}</strong>
           </div>
         </div>
 

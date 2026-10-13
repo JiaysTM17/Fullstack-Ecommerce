@@ -1032,7 +1032,7 @@ export default function VoucherPickerModal({
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: "12px",
-            background: "var(--bg-card, #ffffff)",
+            background: "var(--bg-card)",
             borderTop: "1px solid var(--border-medium, #e2e8f0)",
             padding: "16px 22px",
           }}

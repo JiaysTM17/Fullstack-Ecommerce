@@ -140,11 +140,11 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
         width: '100%',
         maxWidth: '460px',
         height: '100vh',
-        background: '#ffffff',
+        background: 'var(--bg-card, #ffffff)',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
-        borderLeft: '1px solid #e2e8f0',
+        borderLeft: '1px solid var(--border-medium, #e2e8f0)',
         animation: 'slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1)'
       }}>
         {/* Header Seller Copilot */}
@@ -155,7 +155,7 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid #fed7aa'
+          borderBottom: '1px solid rgba(255, 255, 255, 0.15)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{
@@ -227,16 +227,16 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
 
         {/* Isolation Context Banner */}
         <div style={{
-          background: '#fff7ed',
-          borderBottom: '1px solid #fed7aa',
+          background: 'rgba(234, 88, 12, 0.08)',
+          borderBottom: '1px solid var(--border-medium, #fed7aa)',
           padding: '8px 16px',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
           fontSize: '11px',
-          color: '#9a3412'
+          color: 'var(--primary-color, #ea580c)'
         }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ea580c' }} />
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary-color, #ea580c)' }} />
           <span>Ngữ cảnh độc quyền: <strong>#{currentShop?.id?.toUpperCase()} ({currentShop?.name})</strong></span>
         </div>
 
@@ -248,7 +248,7 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
           display: 'flex',
           flexDirection: 'column',
           gap: '14px',
-          background: '#f8fafc'
+          background: 'var(--bg-page, #f8fafc)'
         }}>
           {messages.map(msg => (
             <div
@@ -265,9 +265,9 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
                 <span style={{
                   fontSize: '9.5px',
                   fontWeight: 700,
-                  color: '#ea580c',
-                  background: '#fff7ed',
-                  border: '1px solid #fed7aa',
+                  color: 'var(--primary-color, #ea580c)',
+                  background: 'rgba(234, 88, 12, 0.12)',
+                  border: '1px solid rgba(234, 88, 12, 0.28)',
                   padding: '1px 6px',
                   borderRadius: '3px',
                   marginBottom: '4px'
@@ -277,20 +277,20 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
               )}
 
               <div style={{
-                background: msg.sender === 'user' ? '#ea580c' : '#ffffff',
-                color: msg.sender === 'user' ? '#ffffff' : '#0f172a',
+                background: msg.sender === 'user' ? 'var(--primary-color, #ea580c)' : 'var(--bg-card, #ffffff)',
+                color: msg.sender === 'user' ? '#ffffff' : 'var(--text-primary, #0f172a)',
                 padding: '10px 14px',
                 borderRadius: msg.sender === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
                 fontSize: '12.5px',
                 lineHeight: 1.5,
-                border: msg.sender === 'user' ? 'none' : '1px solid #e2e8f0',
+                border: msg.sender === 'user' ? 'none' : '1px solid var(--border-medium, #e2e8f0)',
                 boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                 whiteSpace: 'pre-wrap'
               }}>
                 {msg.text}
               </div>
 
-              <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '3px', padding: '0 2px' }}>
+              <span style={{ fontSize: '10px', color: 'var(--text-muted, #94a3b8)', marginTop: '3px', padding: '0 2px' }}>
                 {msg.time}
               </span>
 
@@ -303,18 +303,18 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
                       type="button"
                       onClick={() => handleSendQuery(sug)}
                       style={{
-                        background: '#ffffff',
-                        border: '1px solid #fed7aa',
+                        background: 'var(--bg-card, #ffffff)',
+                        border: '1px solid var(--border-medium, #cbd5e1)',
                         borderRadius: '14px',
                         padding: '4px 10px',
                         fontSize: '11px',
-                        color: '#c2410c',
+                        color: 'var(--text-secondary, #334155)',
                         cursor: 'pointer',
                         fontWeight: 500,
                         transition: 'all 0.15s ease'
                       }}
-                      onMouseOver={e => { e.currentTarget.style.borderColor = '#ea580c'; e.currentTarget.style.background = '#fff7ed'; }}
-                      onMouseOut={e => { e.currentTarget.style.borderColor = '#fed7aa'; e.currentTarget.style.background = '#ffffff'; }}
+                      onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--primary-color, #ea580c)'; e.currentTarget.style.color = 'var(--primary-color, #ea580c)'; }}
+                      onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-medium, #cbd5e1)'; e.currentTarget.style.color = 'var(--text-secondary, #334155)'; }}
                     >
                       {sug}
                     </button>
@@ -330,11 +330,11 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
               alignItems: 'center',
               gap: '6px',
               padding: '8px 12px',
-              background: '#ffffff',
+              background: 'var(--bg-card, #ffffff)',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--border-medium, #e2e8f0)',
               fontSize: '11.5px',
-              color: '#64748b',
+              color: 'var(--text-muted, #64748b)',
               alignSelf: 'flex-start'
             }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ea580c', animation: 'pulse 1s infinite' }} />
@@ -351,8 +351,8 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
           }}
           style={{
             padding: '12px 14px',
-            background: '#ffffff',
-            borderTop: '1px solid #e2e8f0',
+            background: 'var(--bg-card, #ffffff)',
+            borderTop: '1px solid var(--border-medium, #e2e8f0)',
             display: 'flex',
             gap: '8px'
           }}
@@ -366,7 +366,9 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
               flex: 1,
               padding: '8px 12px',
               borderRadius: '6px',
-              border: '1px solid #cbd5e1',
+              border: '1px solid var(--border-medium, #cbd5e1)',
+              background: 'var(--bg-page, #f8fafc)',
+              color: 'var(--text-primary)',
               fontSize: '12.5px',
               outline: 'none'
             }}
@@ -375,7 +377,7 @@ Tôi sẵn sàng hỗ trợ bạn tối ưu hóa kinh doanh với dữ liệu ph
             type="submit"
             disabled={!inputQuery.trim() || isTyping}
             style={{
-              background: '#ea580c',
+              background: 'var(--primary-color, #ea580c)',
               color: '#ffffff',
               border: 'none',
               borderRadius: '6px',
