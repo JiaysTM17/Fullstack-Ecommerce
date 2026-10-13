@@ -2931,6 +2931,22 @@
   background: #475569;
 }
 
+[data-theme="dark"] .account-sidebar-role-badge {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .subitem-count-badge {
+  background: var(--bg-hover, #273549);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .subitem-count-badge.active {
+  background: var(--color-primary, #2563eb);
+  color: #ffffff;
+}
+
 [data-theme="dark"] .shopee-form-input,
 [data-theme="dark"] .shopee-form-select {
   background-color: var(--bg-page, #0f172a);
