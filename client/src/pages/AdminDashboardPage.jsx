@@ -2179,14 +2179,22 @@ export default function AdminDashboardPage() {
 
         {/* Modal: Biên Bản Đối Soát Quyết Toán Tài Chính Hàng Tháng */}
         {selectedSettlementStatement && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
-            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '640px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px', marginBottom: '16px' }}>
+          <div
+            className="shopee-modal-overlay"
+            style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}
+            onClick={() => setSelectedSettlementStatement(null)}
+          >
+            <div
+              className="shopee-modal-content"
+              style={{ background: 'var(--bg-card, #ffffff)', borderRadius: '16px', width: '100%', maxWidth: '640px', padding: '24px', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-medium, #e2e8f0)', paddingBottom: '14px', marginBottom: '16px' }}>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
-                    Biên Bản Đối Soát Tài Chính & Doanh Thu Shop
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
+                    Biên Bản Đối Soát Tài Chính &amp; Doanh Thu Shop
                   </h3>
-                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)', marginTop: '4px' }}>
                     Kỳ thanh toán: {selectedSettlementStatement.period} — Mã gian hàng: <code>{selectedSettlementStatement.shopId}</code>
                   </div>
                 </div>
@@ -2195,38 +2203,38 @@ export default function AdminDashboardPage() {
                   style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px' }}
                   onClick={() => setSelectedSettlementStatement(null)}
                 >
-                  <CloseIcon size={18} color="#64748b" />
+                  <CloseIcon size={18} color="var(--text-muted, #64748b)" />
                 </button>
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+              <div style={{ background: 'var(--bg-muted, #f8fafc)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-                  <span style={{ color: '#64748b' }}>Đơn vị thụ hưởng (Shop):</span>
-                  <strong style={{ color: '#0f172a' }}>{selectedSettlementStatement.shopName}</strong>
+                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>Đơn vị thụ hưởng (Shop):</span>
+                  <strong style={{ color: 'var(--text-primary, #0f172a)' }}>{selectedSettlementStatement.shopName}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-                  <span style={{ color: '#64748b' }}>Tổng doanh thu gộp (GMV):</span>
-                  <strong style={{ color: '#0f172a' }}>{formatCurrency(selectedSettlementStatement.gmv)}</strong>
+                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>Tổng doanh thu gộp (GMV):</span>
+                  <strong style={{ color: 'var(--text-primary, #0f172a)' }}>{formatCurrency(selectedSettlementStatement.gmv)}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-                  <span style={{ color: '#64748b' }}>Phí hoa hồng sàn Mini Shopee (5%):</span>
+                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>Phí hoa hồng sàn Mini Shopee (5%):</span>
                   <strong style={{ color: '#dc2626' }}>-{formatCurrency(selectedSettlementStatement.commission)}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-                  <span style={{ color: '#64748b' }}>Tạm khấu trừ thuế TNCN & GTGT (1.5% NĐ 52):</span>
+                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>Tạm khấu trừ thuế TNCN &amp; GTGT (1.5% NĐ 52):</span>
                   <strong style={{ color: '#ea580c' }}>-{formatCurrency(Math.round(selectedSettlementStatement.gmv * 0.015))}</strong>
                 </div>
-                <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '10px', marginTop: '10px', display: 'flex', justifyContent: 'space-between', fontSize: '15px' }}>
-                  <span style={{ fontWeight: 800, color: '#0f172a' }}>Số tiền chuyển khoản thực nhận:</span>
+                <div style={{ borderTop: '1px dashed var(--border-medium, #cbd5e1)', paddingTop: '10px', marginTop: '10px', display: 'flex', justifyContent: 'space-between', fontSize: '15px' }}>
+                  <span style={{ fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>Số tiền chuyển khoản thực nhận:</span>
                   <strong style={{ color: '#059669', fontSize: '17px' }}>
                     {formatCurrency(selectedSettlementStatement.netPayout - Math.round(selectedSettlementStatement.gmv * 0.015))}
                   </strong>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                  Biên bản được xác thực điện tử bởi Mini Shopee Escrow & Finance Clearing
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted, #94a3b8)' }}>
+                  Biên bản được xác thực điện tử bởi Mini Shopee Escrow &amp; Finance Clearing
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button

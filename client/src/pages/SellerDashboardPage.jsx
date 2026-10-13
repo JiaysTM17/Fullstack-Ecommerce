@@ -5745,12 +5745,12 @@ export default function SellerDashboardPage() {
                     <label className="shopee-form-label" style={{ margin: 0, fontWeight: 800 }}>
                       Chọn Sản Phẩm Tham Gia Flash Sale ({flashSaleSelectedItems.length}/{shopProducts.length})
                     </label>
-                    <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+                    <span style={{ fontSize: '11.5px', color: 'var(--text-muted, #64748b)' }}>
                       Tick chọn &amp; nhập giá Flash Sale riêng (&lt; Giá gốc)
                     </span>
                   </div>
 
-                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', maxHeight: '240px', overflowY: 'auto', background: '#f8fafc', padding: '8px' }}>
+                  <div style={{ border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '8px', maxHeight: '240px', overflowY: 'auto', background: 'var(--bg-muted, #f8fafc)', padding: '8px' }}>
                     {shopProducts.map((p) => {
                       const pid = p._id || p.id;
                       const selectedItem = flashSaleSelectedItems.find(it => it.productId === pid);
@@ -5766,8 +5766,8 @@ export default function SellerDashboardPage() {
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '8px',
-                            background: isSelected ? '#ffffff' : '#f8fafc',
-                            border: isSelected ? '1.5px solid #ea580c' : '1px solid #e2e8f0',
+                            background: isSelected ? 'var(--bg-card, #ffffff)' : 'var(--bg-muted, #f8fafc)',
+                            border: isSelected ? '1.5px solid var(--primary-color, #ea580c)' : '1px solid var(--border-medium, #e2e8f0)',
                             borderRadius: '8px',
                             padding: '10px 12px',
                             marginBottom: '8px',
@@ -6905,10 +6905,10 @@ export default function SellerDashboardPage() {
                   </span>
                 </div>
 
-                <div style={{ padding: '16px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ padding: '16px', borderRadius: '10px', background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
-                    <strong style={{ fontSize: '13px', color: '#0f172a', display: 'block' }}>Tham Gia Chương Trình Trợ Giá Vận Chuyển SPX (50%)</strong>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>Sàn đồng tài trợ 50% cước phí, đẩy mạnh tỷ lệ hoàn tất đơn hàng</span>
+                    <strong style={{ fontSize: '13px', color: 'var(--text-primary, #0f172a)', display: 'block' }}>Tham Gia Chương Trình Trợ Giá Vận Chuyển SPX (50%)</strong>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)' }}>Sàn đồng tài trợ 50% cước phí, đẩy mạnh tỷ lệ hoàn tất đơn hàng</span>
                   </div>
                   <input
                     type="checkbox"
@@ -6918,11 +6918,11 @@ export default function SellerDashboardPage() {
                   />
                 </div>
 
-                <div style={{ padding: '16px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <div style={{ padding: '16px', borderRadius: '10px', background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: shippingPolicyData.expressAvailable ? '12px' : 0 }}>
                     <div>
-                      <strong style={{ fontSize: '13px', color: '#0f172a', display: 'block' }}>Bật Dịch Vụ Giao Hàng Hỏa Tốc (SPX Instant 2H)</strong>
-                      <span style={{ fontSize: '12px', color: '#64748b' }}>Phục vụ khách hàng cần nhận hàng ngay trong vòng 2 giờ nội thành</span>
+                      <strong style={{ fontSize: '13px', color: 'var(--text-primary, #0f172a)', display: 'block' }}>Bật Dịch Vụ Giao Hàng Hỏa Tốc (SPX Instant 2H)</strong>
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)' }}>Phục vụ khách hàng cần nhận hàng ngay trong vòng 2 giờ nội thành</span>
                     </div>
                     <input
                       type="checkbox"
@@ -6933,8 +6933,8 @@ export default function SellerDashboardPage() {
                   </div>
 
                   {shippingPolicyData.expressAvailable && (
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                    <div style={{ marginTop: '12px' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #334155)', marginBottom: '4px' }}>
                         Phụ Phí Hỏa Tốc Cộng Thêm (VNĐ)
                       </label>
                       <input
@@ -6944,7 +6944,7 @@ export default function SellerDashboardPage() {
                         className="shopee-input"
                         value={shippingPolicyData.expressSurcharge}
                         onChange={(e) => setShippingPolicyData({ ...shippingPolicyData, expressSurcharge: Number(e.target.value) })}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                       />
                     </div>
                   )}
@@ -7049,88 +7049,90 @@ export default function SellerDashboardPage() {
 
             {/* 4 Thẻ KPI Chỉ Số Vận Hành */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>TỶ LỆ GIAO ĐÚNG HẠN SLA</span>
+              <div style={{ padding: '16px', borderRadius: '12px', background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted, #64748b)' }}>TỶ LỆ GIAO ĐÚNG HẠN SLA</span>
                 <div style={{ fontSize: '22px', fontWeight: 800, color: (slaData?.operationalMetrics?.onTimeShipmentRate ?? 98.5) >= 98 ? '#16a34a' : '#ea580c', margin: '4px 0' }}>
                   {slaData?.operationalMetrics?.onTimeShipmentRate ?? 98.5}%
                 </div>
                 <span style={{ fontSize: '11.5px', color: '#16a34a' }}>Chuẩn Shopee: &gt;= 98.0%</span>
               </div>
 
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>TỶ LỆ GIAO TRỄ HẠN</span>
+              <div style={{ padding: '16px', borderRadius: '12px', background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted, #64748b)' }}>TỶ LỆ GIAO TRỄ HẠN</span>
                 <div style={{ fontSize: '22px', fontWeight: 800, color: (slaData?.operationalMetrics?.lateShipmentRate ?? 1.5) <= 2 ? '#16a34a' : '#ef4444', margin: '4px 0' }}>
                   {slaData?.operationalMetrics?.lateShipmentRate ?? 1.5}%
                 </div>
-                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Giới hạn an toàn: &lt;= 2.0%</span>
+                <span style={{ fontSize: '11.5px', color: 'var(--text-muted, #64748b)' }}>Giới hạn an toàn: &lt;= 2.0%</span>
               </div>
 
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>TỶ LỆ HỦY ĐƠN TỰ Ý</span>
+              <div style={{ padding: '16px', borderRadius: '12px', background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted, #64748b)' }}>TỶ LỆ HỦY ĐƠN TỰ Ý</span>
                 <div style={{ fontSize: '22px', fontWeight: 800, color: (slaData?.operationalMetrics?.cancellationRate ?? 0.8) <= 1 ? '#16a34a' : '#ef4444', margin: '4px 0' }}>
                   {slaData?.operationalMetrics?.cancellationRate ?? 0.8}%
                 </div>
-                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Ngưỡng cảnh báo: &gt; 1.0% (+3 điểm)</span>
+                <span style={{ fontSize: '11.5px', color: 'var(--text-muted, #64748b)' }}>Ngưỡng cảnh báo: &gt; 1.0% (+3 điểm)</span>
               </div>
 
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>TỶ LỆ TRẢ HÀNG / HOÀN TIỀN</span>
+              <div style={{ padding: '16px', borderRadius: '12px', background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted, #64748b)' }}>TỶ LỆ TRẢ HÀNG / HOÀN TIỀN</span>
                 <div style={{ fontSize: '22px', fontWeight: 800, color: (slaData?.operationalMetrics?.returnRate ?? 1.2) <= 3 ? '#16a34a' : '#ea580c', margin: '4px 0' }}>
                   {slaData?.operationalMetrics?.returnRate ?? 1.2}%
                 </div>
-                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Mức khuyến nghị: &lt; 3.0%</span>
+                <span style={{ fontSize: '11.5px', color: 'var(--text-muted, #64748b)' }}>Mức khuyến nghị: &lt; 3.0%</span>
               </div>
             </div>
 
             {/* Bảng Quy Chuẩn Điểm Phạt Sao Quả Tạ */}
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-              <div style={{ padding: '12px 16px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#334155', fontSize: '13px' }}>
+            <div style={{ border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ padding: '12px 16px', background: 'var(--bg-muted, #f8fafc)', borderBottom: '1px solid var(--border-medium, #e2e8f0)', fontWeight: 700, color: 'var(--text-secondary, #334155)', fontSize: '13px' }}>
                 Khung Chế Tài &amp; Thang Điểm Phạt Shopee
               </div>
-              <table className="shopee-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
-                <thead>
-                  <tr style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
-                    <th style={{ padding: '10px 14px', color: '#475569' }}>Cấp Độ (Tier)</th>
-                    <th style={{ padding: '10px 14px', color: '#475569' }}>Ngưỡng Điểm Phạt</th>
-                    <th style={{ padding: '10px 14px', color: '#475569' }}>Biện Pháp Chế Tài</th>
-                    <th style={{ padding: '10px 14px', color: '#475569' }}>Thời Gian Hiệu Lực</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '10px 14px' }}>
-                      <span className="shopee-badge" style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontWeight: 700 }}>TIER_0 (Chuẩn)</span>
-                    </td>
-                    <td style={{ padding: '10px 14px', fontWeight: 700 }}>0 Điểm</td>
-                    <td style={{ padding: '10px 14px', color: '#16a34a' }}>Hưởng đầy đủ quyền lợi tài khoản Shopee Mall / Shop Yêu Thích</td>
-                    <td style={{ padding: '10px 14px', color: '#64748b' }}>Vĩnh viễn</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '10px 14px' }}>
-                      <span className="shopee-badge" style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', fontWeight: 700 }}>TIER_1 (Cảnh Báo)</span>
-                    </td>
-                    <td style={{ padding: '10px 14px', fontWeight: 700 }}>1 - 2 Điểm</td>
-                    <td style={{ padding: '10px 14px', color: '#334155' }}>Gửi cảnh báo và nhắc nhở thời gian bàn giao bưu kiện cho SPX</td>
-                    <td style={{ padding: '10px 14px', color: '#64748b' }}>28 ngày</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '10px 14px' }}>
-                      <span className="shopee-badge" style={{ background: '#fff7ed', color: '#ea580c', border: '1px solid #fed7aa', fontWeight: 700 }}>TIER_2 (Giảm Hiển Thị)</span>
-                    </td>
-                    <td style={{ padding: '10px 14px', fontWeight: 700 }}>3 - 5 Điểm</td>
-                    <td style={{ padding: '10px 14px', color: '#c2410c' }}>Giảm 30% tần suất xuất hiện sản phẩm trên thanh tìm kiếm và gợi ý hôm nay</td>
-                    <td style={{ padding: '10px 14px', color: '#64748b' }}>28 ngày</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '10px 14px' }}>
-                      <span className="shopee-badge" style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', fontWeight: 700 }}>TIER_3 (Đình Chỉ Chiến Dịch)</span>
-                    </td>
-                    <td style={{ padding: '10px 14px', fontWeight: 700 }}>&gt;= 6 Điểm</td>
-                    <td style={{ padding: '10px 14px', color: '#dc2626' }}>Cấm tham gia các chiến dịch Mega Sale và tạm khóa tính năng Flash Sale Shop</td>
-                    <td style={{ padding: '10px 14px', color: '#64748b' }}>28 ngày</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <table className="shopee-table" style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', fontSize: '12.5px' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--bg-card, #ffffff)', borderBottom: '1px solid var(--border-medium, #e2e8f0)', textAlign: 'left' }}>
+                      <th style={{ padding: '10px 14px', color: 'var(--text-secondary, #475569)' }}>Cấp Độ (Tier)</th>
+                      <th style={{ padding: '10px 14px', color: 'var(--text-secondary, #475569)' }}>Ngưỡng Điểm Phạt</th>
+                      <th style={{ padding: '10px 14px', color: 'var(--text-secondary, #475569)' }}>Biện Pháp Chế Tài</th>
+                      <th style={{ padding: '10px 14px', color: 'var(--text-secondary, #475569)' }}>Thời Gian Hiệu Lực</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderBottom: '1px solid var(--border-light, #f1f5f9)' }}>
+                      <td style={{ padding: '10px 14px' }}>
+                        <span className="shopee-badge" style={{ background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', border: '1px solid rgba(22, 163, 74, 0.25)', fontWeight: 700 }}>TIER_0 (Chuẩn)</span>
+                      </td>
+                      <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>0 Điểm</td>
+                      <td style={{ padding: '10px 14px', color: '#16a34a' }}>Hưởng đầy đủ quyền lợi tài khoản Shopee Mall / Shop Yêu Thích</td>
+                      <td style={{ padding: '10px 14px', color: 'var(--text-muted, #64748b)' }}>Vĩnh viễn</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid var(--border-light, #f1f5f9)' }}>
+                      <td style={{ padding: '10px 14px' }}>
+                        <span className="shopee-badge" style={{ background: 'rgba(217, 119, 6, 0.1)', color: '#d97706', border: '1px solid rgba(217, 119, 6, 0.25)', fontWeight: 700 }}>TIER_1 (Cảnh Báo)</span>
+                      </td>
+                      <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>1 - 2 Điểm</td>
+                      <td style={{ padding: '10px 14px', color: 'var(--text-secondary, #334155)' }}>Gửi cảnh báo và nhắc nhở thời gian bàn giao bưu kiện cho SPX</td>
+                      <td style={{ padding: '10px 14px', color: 'var(--text-muted, #64748b)' }}>28 ngày</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid var(--border-light, #f1f5f9)' }}>
+                      <td style={{ padding: '10px 14px' }}>
+                        <span className="shopee-badge" style={{ background: 'rgba(234, 88, 12, 0.1)', color: '#ea580c', border: '1px solid rgba(234, 88, 12, 0.25)', fontWeight: 700 }}>TIER_2 (Giảm Hiển Thị)</span>
+                      </td>
+                      <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>3 - 5 Điểm</td>
+                      <td style={{ padding: '10px 14px', color: '#c2410c' }}>Giảm 30% tần suất xuất hiện sản phẩm trên thanh tìm kiếm và gợi ý hôm nay</td>
+                      <td style={{ padding: '10px 14px', color: 'var(--text-muted, #64748b)' }}>28 ngày</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '10px 14px' }}>
+                        <span className="shopee-badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.25)', fontWeight: 700 }}>TIER_3 (Đình Chỉ Chiến Dịch)</span>
+                      </td>
+                      <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>&gt;= 6 Điểm</td>
+                      <td style={{ padding: '10px 14px', color: '#dc2626' }}>Cấm tham gia các chiến dịch Mega Sale và tạm khóa tính năng Flash Sale Shop</td>
+                      <td style={{ padding: '10px 14px', color: 'var(--text-muted, #64748b)' }}>28 ngày</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -7165,8 +7167,8 @@ export default function SellerDashboardPage() {
 
             <form onSubmit={handleSaveAutoReply}>
               {/* Tin Nhắn Mở Đầu Chào Mừng */}
-              <div style={{ marginBottom: '20px', background: '#faf5ff', padding: '16px', borderRadius: '12px', border: '1px solid #f3e8ff' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#6b21a8', marginBottom: '6px' }}>
+              <div style={{ marginBottom: '20px', background: 'rgba(168, 85, 247, 0.08)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#a855f7', marginBottom: '6px' }}>
                   👋 Tin Nhắn Chào Mừng Tự Động (Khi khách bắt đầu chat)
                 </label>
                 <textarea
@@ -7174,13 +7176,13 @@ export default function SellerDashboardPage() {
                   rows={3}
                   value={autoReplyData.welcomeMessage}
                   onChange={(e) => setAutoReplyData({ ...autoReplyData, welcomeMessage: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d8b4fe', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #d8b4fe)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)', fontSize: '13px' }}
                 />
               </div>
 
               {/* Tin Nhắn Ngoài Giờ Làm Việc */}
-              <div style={{ marginBottom: '24px', background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+              <div style={{ marginBottom: '24px', background: 'var(--bg-muted, #f8fafc)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary, #334155)', marginBottom: '6px' }}>
                   🌙 Tin Nhắn Ngoài Giờ Làm Việc (Sau 22:00 đêm)
                 </label>
                 <textarea
@@ -7188,14 +7190,14 @@ export default function SellerDashboardPage() {
                   rows={3}
                   value={autoReplyData.offlineMessage}
                   onChange={(e) => setAutoReplyData({ ...autoReplyData, offlineMessage: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)', fontSize: '13px' }}
                 />
               </div>
 
               {/* Mẫu Phản Hồi Nhanh Theo Từ Khóa */}
               <div style={{ marginBottom: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: '#0f172a' }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: 'var(--text-primary, #0f172a)' }}>
                     ⚡ Phản Hồi Tức Thì Theo Từ Khóa (Keyword Trigger Templates)
                   </h3>
                   <button
@@ -7224,8 +7226,8 @@ export default function SellerDashboardPage() {
                       key={tpl.id || idx}
                       style={{
                         padding: '14px',
-                        background: '#ffffff',
-                        border: '1px solid #e2e8f0',
+                        background: 'var(--bg-card, #ffffff)',
+                        border: '1px solid var(--border-medium, #e2e8f0)',
                         borderRadius: '10px',
                         display: 'grid',
                         gridTemplateColumns: '1fr 2fr auto',
@@ -7234,7 +7236,7 @@ export default function SellerDashboardPage() {
                       }}
                     >
                       <div>
-                        <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#64748b', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: 'var(--text-muted, #64748b)', marginBottom: '4px' }}>
                           Từ Khóa Khách Hỏi
                         </label>
                         <input
@@ -7247,11 +7249,11 @@ export default function SellerDashboardPage() {
                             updated[idx].triggerKeyword = e.target.value;
                             setAutoReplyData({ ...autoReplyData, quickTemplates: updated });
                           }}
-                          style={{ width: '100%', padding: '6px 10px', fontSize: '12.5px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                          style={{ width: '100%', padding: '6px 10px', fontSize: '12.5px', borderRadius: '6px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                         />
                       </div>
                       <div>
-                        <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#64748b', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: 'var(--text-muted, #64748b)', marginBottom: '4px' }}>
                           Nội Dung Shop Phản Hồi Tự Động
                         </label>
                         <input
@@ -7264,7 +7266,7 @@ export default function SellerDashboardPage() {
                             updated[idx].responseMessage = e.target.value;
                             setAutoReplyData({ ...autoReplyData, quickTemplates: updated });
                           }}
-                          style={{ width: '100%', padding: '6px 10px', fontSize: '12.5px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                          style={{ width: '100%', padding: '6px 10px', fontSize: '12.5px', borderRadius: '6px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                         />
                       </div>
                       <button
@@ -7274,8 +7276,8 @@ export default function SellerDashboardPage() {
                           setAutoReplyData({ ...autoReplyData, quickTemplates: updated });
                         }}
                         style={{
-                          background: '#fef2f2',
-                          border: '1px solid #fecaca',
+                          background: 'rgba(239, 68, 68, 0.1)',
+                          border: '1px solid rgba(239, 68, 68, 0.25)',
                           color: '#dc2626',
                           borderRadius: '6px',
                           padding: '6px 10px',
@@ -7292,7 +7294,7 @@ export default function SellerDashboardPage() {
               </div>
 
               {/* Nút Lưu Cấu Hình */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border-medium, #e2e8f0)', paddingTop: '16px', marginBottom: '24px' }}>
                 <button
                   type="submit"
                   disabled={isSavingAutoReply}
@@ -7315,16 +7317,16 @@ export default function SellerDashboardPage() {
             </form>
 
             {/* Khung Kiểm Thử Mô Phỏng Tương Tác Trực Tiếp */}
-            <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            <div style={{ background: 'var(--bg-muted, #f8fafc)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                 <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(168, 85, 247, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ChatIcon size={13} color="#a855f7" />
                 </span>
-                <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>
+                <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                   Mô Phỏng Trải Nghiệm Khách Hàng (Live Sandbox Simulator)
                 </h4>
               </div>
-              <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: '#64748b' }}>
+              <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--text-muted, #64748b)' }}>
                 Nhập câu hỏi bất kỳ từ người mua để kiểm tra xem kịch bản từ khóa hoặc tin nhắn ngoài giờ có phản hồi chính xác hay không.
               </p>
 
@@ -7335,9 +7337,9 @@ export default function SellerDashboardPage() {
                   placeholder="Nhập tin nhắn khách gửi (ví dụ: Shop ơi khi nào giao, tư vấn size...)"
                   value={testSimMessage}
                   onChange={(e) => setTestSimMessage(e.target.value)}
-                  style={{ flex: 1, minWidth: '240px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  style={{ flex: 1, minWidth: '240px', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)', fontSize: '13px' }}
                 />
-                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: '#334155', cursor: 'pointer', userSelect: 'none' }}>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: 'var(--text-secondary, #334155)', cursor: 'pointer', userSelect: 'none' }}>
                   <input
                     type="checkbox"
                     checked={testSimOutsideHours}
