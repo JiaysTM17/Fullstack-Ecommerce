@@ -669,10 +669,39 @@
   color: var(--text-primary, #0f172a);
 }
 
+[data-theme="dark"] .amazon-buy-box,
+[data-theme="dark"] .amazon-shop-card,
+[data-theme="dark"] .amazon-reviews-section,
 [data-theme="dark"] .amazon-write-review-box {
   background: var(--bg-card, #1e293b);
   border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
 }
+
+[data-theme="dark"] .amazon-specs-table td {
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .amazon-specs-table td:first-child {
+  background: var(--bg-muted, #0f172a);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .amazon-btn-wishlist {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .amazon-review-item {
+  border-bottom-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .amazon-review-avatar {
+  border-color: var(--border-medium, #334155);
+}
+
 
 /* Mobile Sticky Action Bar */
 .amazon-mobile-sticky-bar {
