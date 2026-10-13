@@ -153,6 +153,8 @@ router.patch("/:id/complete", authenticate, completeOrder);
 
 // Authenticated routes
 router.get("/mine", authenticate, getMyOrders);
+router.get("/my-orders", authenticate, getMyOrders); // Alias for flexible client compatibility
+router.get("/:id/vat-invoice", optionalAuthenticate, getOrderInvoice); // Alias for /:id/invoice
 router.get("/:id", authenticate, getOrderById);
 router.patch("/:id/cancel", authenticate, cancelOrder);
 router.patch("/:id/return", authenticate, returnOrder);

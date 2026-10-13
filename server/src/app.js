@@ -17,6 +17,7 @@ import cartRoutes from "./routes/cartRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import { getCategories } from "./controllers/productController.js";
 import notFound from "./middlewares/notFound.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import { apiLimiter, authLimiter } from "./middlewares/rateLimiter.js";
@@ -169,6 +170,7 @@ app.get("/api/health", (req, res) => {
 // MOUNT ROUTES (11 route groups)
 // ============================================================
 app.use("/api/auth", authLimiter, authRoutes);
+app.get("/api/categories", getCategories);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
