@@ -44,7 +44,7 @@ export default function DeliveryCsatFeedbackModal({ order, onClose, onSuccess })
     <div style={{ marginBottom: '16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
         {icon}
-        <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>{label}</span>
+        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary, #334155)' }}>{label}</span>
       </div>
       <div style={{ display: 'flex', gap: '8px' }}>
         {[1, 2, 3, 4, 5].map((star) => (
@@ -89,7 +89,7 @@ export default function DeliveryCsatFeedbackModal({ order, onClose, onSuccess })
     >
       <div
         style={{
-          background: '#ffffff',
+          background: 'var(--bg-card, #ffffff)',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '460px',
@@ -97,6 +97,7 @@ export default function DeliveryCsatFeedbackModal({ order, onClose, onSuccess })
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           overflow: 'hidden',
           position: 'relative',
+          border: '1px solid var(--border-medium, #e2e8f0)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -118,10 +119,10 @@ export default function DeliveryCsatFeedbackModal({ order, onClose, onSuccess })
               <TruckIcon size={16} color="#ea580c" />
             </span>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                 Đánh Giá Giao Vận SPX
               </h3>
-              <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+              <div style={{ fontSize: '11.5px', color: 'var(--text-muted, #64748b)' }}>
                 Đơn hàng #{order.orderId || order._id}
               </div>
             </div>
@@ -132,7 +133,7 @@ export default function DeliveryCsatFeedbackModal({ order, onClose, onSuccess })
             onClick={onClose}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
           >
-            <CloseIcon size={16} color="#64748b" />
+            <CloseIcon size={16} color="var(--text-muted, #64748b)" />
           </button>
         </div>
 
@@ -159,7 +160,7 @@ export default function DeliveryCsatFeedbackModal({ order, onClose, onSuccess })
           )}
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: 'var(--text-secondary, #334155)', marginBottom: '6px' }}>
               Nhận xét chi tiết (tùy chọn)
             </label>
             <textarea
@@ -171,7 +172,9 @@ export default function DeliveryCsatFeedbackModal({ order, onClose, onSuccess })
                 width: '100%',
                 padding: '10px 12px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
+                border: '1px solid var(--border-medium, #cbd5e1)',
+                background: 'var(--bg-input, var(--bg-card, #ffffff))',
+                color: 'var(--text-primary, #0f172a)',
                 fontSize: '13px',
                 outline: 'none',
                 resize: 'none',

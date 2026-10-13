@@ -83,13 +83,14 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
     >
       <div
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--bg-card, #ffffff)',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '520px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           overflow: 'hidden',
           animation: 'fadeInModal 0.2s ease-out',
+          border: '1px solid var(--border-medium, #e2e8f0)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -97,11 +98,11 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
         <div
           style={{
             padding: '18px 24px',
-            borderBottom: '1px solid #e2e8f0',
+            borderBottom: '1px solid var(--border-medium, #e2e8f0)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+            background: 'var(--bg-muted, #f8fafc)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -117,13 +118,13 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
                 justifyContent: 'center',
               }}
             >
-              <ClockIcon size={18} color="#2563eb" />
+              <ClockIcon size={18} color="var(--color-primary, #2563eb)" />
             </span>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                 Hẹn Lại Lịch Giao Hàng SPX Express
               </h3>
-              <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b' }}>
+              <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--text-muted, #64748b)' }}>
                 Đơn hàng #{order?.orderId || order?._id} · Miễn phí dịch vụ
               </p>
             </div>
@@ -135,7 +136,7 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              color: '#64748b',
+              color: 'var(--text-muted, #64748b)',
               padding: '6px',
               borderRadius: '8px',
             }}
@@ -150,18 +151,18 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
           <div
             style={{
               padding: '12px 14px',
-              background: '#eff6ff',
-              border: '1px solid #bfdbfe',
+              background: 'rgba(37, 99, 235, 0.08)',
+              border: '1px solid rgba(37, 99, 235, 0.25)',
               borderRadius: '10px',
               marginBottom: '18px',
               display: 'flex',
               gap: '10px',
               fontSize: '12.5px',
-              color: '#1e40af',
+              color: 'var(--text-primary, #1e40af)',
               lineHeight: 1.5,
             }}
           >
-            <TruckIcon size={18} color="#2563eb" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <TruckIcon size={18} color="var(--color-primary, #2563eb)" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
               Bưu tá SPX Express sẽ lưu trữ gói hàng an toàn tại bưu cục gần nhất và ưu tiên giao đúng khung giờ quý khách đã chọn.
             </div>
@@ -169,7 +170,7 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
 
           {/* Chọn ngày giao */}
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary, #334155)', marginBottom: '6px' }}>
               Chọn ngày giao mới (Trong vòng 7 ngày tới)
             </label>
             <input
@@ -183,17 +184,19 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
                 width: '100%',
                 padding: '10px 14px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
+                border: '1px solid var(--border-medium, #cbd5e1)',
+                background: 'var(--bg-input, var(--bg-card, #ffffff))',
                 fontSize: '13.5px',
-                color: '#0f172a',
+                color: 'var(--text-primary, #0f172a)',
                 outline: 'none',
+                boxSizing: 'border-box',
               }}
             />
           </div>
 
           {/* Chọn khung giờ */}
           <div style={{ marginBottom: '18px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary, #334155)', marginBottom: '8px' }}>
               Khung giờ mong muốn nhận hàng
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
@@ -204,8 +207,8 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
                     key={slot.id}
                     onClick={() => setTimeSlot(slot.id)}
                     style={{
-                      border: isSelected ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                      backgroundColor: isSelected ? 'rgba(37, 99, 235, 0.04)' : '#ffffff',
+                      border: isSelected ? '2px solid var(--color-primary, #2563eb)' : '1px solid var(--border-medium, #e2e8f0)',
+                      backgroundColor: isSelected ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-card, #ffffff)',
                       borderRadius: '10px',
                       padding: '10px 12px',
                       cursor: 'pointer',
@@ -213,15 +216,15 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: isSelected ? '#2563eb' : '#0f172a' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: isSelected ? 'var(--color-primary, #2563eb)' : 'var(--text-primary, #0f172a)' }}>
                         {slot.label}
                       </span>
-                      {isSelected && <CheckIcon size={14} color="#2563eb" />}
+                      {isSelected && <CheckIcon size={14} color="var(--color-primary, #2563eb)" />}
                     </div>
-                    <div style={{ fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '2px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary, #475569)', marginBottom: '2px' }}>
                       {slot.time}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted, #94a3b8)' }}>
                       {slot.desc}
                     </div>
                   </div>
@@ -232,7 +235,7 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
 
           {/* Ghi chú cho bưu tá */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary, #334155)', marginBottom: '6px' }}>
               Ghi chú thêm cho bưu tá (tùy chọn)
             </label>
             <input
@@ -245,10 +248,12 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
                 width: '100%',
                 padding: '10px 14px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
+                border: '1px solid var(--border-medium, #cbd5e1)',
+                background: 'var(--bg-input, var(--bg-card, #ffffff))',
                 fontSize: '13px',
-                color: '#0f172a',
+                color: 'var(--text-primary, #0f172a)',
                 outline: 'none',
+                boxSizing: 'border-box',
               }}
             />
           </div>
@@ -262,9 +267,9 @@ export default function DeliveryRescheduleModal({ order, onClose, onSuccess }) {
               style={{
                 padding: '9px 18px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
-                color: '#475569',
+                border: '1px solid var(--border-medium, #cbd5e1)',
+                background: 'var(--bg-card, #ffffff)',
+                color: 'var(--text-secondary, #475569)',
                 fontSize: '13px',
                 fontWeight: 600,
                 cursor: 'pointer',

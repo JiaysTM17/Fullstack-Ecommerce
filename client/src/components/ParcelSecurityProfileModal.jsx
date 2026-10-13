@@ -101,7 +101,7 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
     >
       <div
         style={{
-          background: '#ffffff',
+          background: 'var(--bg-card, #ffffff)',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '780px',
@@ -111,6 +111,7 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           overflow: 'hidden',
           animation: 'slideUp 0.25s ease',
+          border: '1px solid var(--border-medium, #e2e8f0)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -175,7 +176,7 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
         </div>
 
         {/* Tab Navigation */}
-        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', padding: '0 16px' }}>
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-medium, #e2e8f0)', background: 'var(--bg-muted, #f8fafc)', padding: '0 16px', overflowX: 'auto' }}>
           {[
             { id: 'overview', label: '🛡️ Chứng Nhận Toàn Vẹn' },
             { id: 'doorbell', label: '🔔 Chuông Cửa Video AI & Mở Cổng' },
@@ -192,12 +193,13 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
                 padding: '12px 18px',
                 fontSize: '13px',
                 fontWeight: activeTab === tab.id ? 700 : 500,
-                color: activeTab === tab.id ? '#2563eb' : '#64748b',
+                color: activeTab === tab.id ? 'var(--color-primary, #2563eb)' : 'var(--text-muted, #64748b)',
                 border: 'none',
-                borderBottom: activeTab === tab.id ? '2px solid #2563eb' : '2px solid transparent',
+                borderBottom: activeTab === tab.id ? '2px solid var(--color-primary, #2563eb)' : '2px solid transparent',
                 background: 'none',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
               }}
             >
               {tab.label}
@@ -212,8 +214,8 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div
                 style={{
-                  background: 'linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%)',
-                  border: '1px solid #bbf7d0',
+                  background: 'rgba(34, 197, 94, 0.08)',
+                  border: '1px solid rgba(34, 197, 94, 0.25)',
                   borderRadius: '12px',
                   padding: '14px 18px',
                   display: 'flex',
@@ -223,30 +225,30 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.16)', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CheckIcon size={20} color="#16a34a" />
                   </div>
                   <div>
-                    <strong style={{ fontSize: '13.5px', color: '#15803d' }}>
+                    <strong style={{ fontSize: '13.5px', color: '#16a34a' }}>
                       Niêm Phong Độc Bản Khớp 100%
                     </strong>
-                    <div style={{ fontSize: '12px', color: '#166534', marginTop: '2px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-primary, #166534)', marginTop: '2px' }}>
                       Gói hàng được bảo vệ nguyên vẹn qua chuỗi cung ứng công nghệ cao SPX Express.
                     </div>
                   </div>
                 </div>
-                <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '9999px', background: '#dcfce7', color: '#15803d' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '9999px', background: 'rgba(34, 197, 94, 0.16)', color: '#16a34a' }}>
                   Xác Thực An Toàn
                 </span>
               </div>
 
               {/* Highlights Matrix */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                <div style={{ background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '10px', padding: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted, #64748b)', textTransform: 'uppercase' }}>
                     Khóa Lượng Tử QKD
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #0f172a)', marginTop: '4px' }}>
                     {order.quantumKeyDistributionEncryptionSeal?.isQuantumEncrypted ? 'Đã Mã Hóa BB84' : 'Chuẩn An Toàn AES-256'}
                   </div>
                   <div style={{ fontSize: '11.5px', color: '#059669', marginTop: '2px' }}>

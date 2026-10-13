@@ -112,8 +112,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
     <div
       className={inline ? 'return-req-inline-container' : 'anim-modal-content'}
       style={{
-        background: '#ffffff',
-        color: '#0f172a',
+        background: 'var(--bg-card, #ffffff)',
+        color: 'var(--text-primary, #0f172a)',
         borderRadius: inline ? '12px' : '16px',
         width: '100%',
         maxWidth: inline ? '100%' : '560px',
@@ -121,7 +121,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
         display: 'flex',
         flexDirection: 'column',
         boxShadow: inline ? 'none' : '0 25px 50px -12px rgba(0, 0, 0, 0.28)',
-        border: inline ? 'none' : '1px solid #e2e8f0',
+        border: inline ? 'none' : '1px solid var(--border-medium, #e2e8f0)',
         position: 'relative',
         overflow: inline ? 'visible' : 'hidden',
         margin: inline ? '0' : 'auto',
@@ -132,11 +132,11 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
       <div
         style={{
           padding: inline ? '14px 18px' : '14px 20px',
-          borderBottom: '1px solid #f1f5f9',
+          borderBottom: '1px solid var(--border-light, #f1f5f9)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: '#f8fafc',
+          background: 'var(--bg-muted, #f8fafc)',
           borderRadius: inline ? '12px 12px 0 0' : 0,
           flexShrink: 0,
         }}
@@ -186,14 +186,14 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 margin: 0,
                 fontSize: '15px',
                 fontWeight: 800,
-                color: '#0f172a',
+                color: 'var(--text-primary, #0f172a)',
                 letterSpacing: '-0.2px',
               }}
             >
               Yêu Cầu Trả Hàng & Hoàn Tiền
             </h3>
-            <div style={{ fontSize: '11.5px', color: '#64748b' }}>
-              Mã đơn: <strong style={{ color: '#0f172a' }}>#{order.orderId}</strong> · Shop: {order.shopName || 'Shopee Mall'}
+            <div style={{ fontSize: '11.5px', color: 'var(--text-muted, #64748b)' }}>
+              Mã đơn: <strong style={{ color: 'var(--text-primary, #0f172a)' }}>#{order.orderId}</strong> · Shop: {order.shopName || 'Shopee Mall'}
             </div>
           </div>
         </div>
@@ -261,11 +261,11 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
           {/* Product Summary Box - Styled with unified slate & blue tone */}
           <div
             style={{
-              background: '#f8fafc',
+              background: 'var(--bg-muted, #f8fafc)',
               borderRadius: '8px',
               padding: '10px 12px',
               marginBottom: '14px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--border-medium, #e2e8f0)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -281,7 +281,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   height: '46px',
                   borderRadius: '6px',
                   objectFit: 'cover',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--border-medium, #cbd5e1)',
                   flexShrink: 0,
                 }}
               />
@@ -290,7 +290,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   style={{
                     fontSize: '12.5px',
                     fontWeight: 700,
-                    color: '#0f172a',
+                    color: 'var(--text-primary, #0f172a)',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -298,7 +298,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 >
                   {firstItem.name}
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted, #64748b)', marginTop: '2px' }}>
                   {firstItem.variant ? `Phân loại: ${firstItem.variant} · ` : ''}
                   Số lượng: x{firstItem.quantity || 1}
                 </div>
@@ -306,8 +306,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
             </div>
 
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontSize: '10.5px', color: '#64748b' }}>Tiền hoàn:</div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#2563eb' }}>
+              <div style={{ fontSize: '10.5px', color: 'var(--text-muted, #64748b)' }}>Tiền hoàn:</div>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--color-primary, #2563eb)' }}>
                 {formatCurrency(order.total)}
               </div>
             </div>
@@ -316,8 +316,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
           {/* Shopee Guarantee Notice */}
           <div
             style={{
-              background: '#f0fdf4',
-              border: '1px solid #bbf7d0',
+              background: 'rgba(34, 197, 94, 0.08)',
+              border: '1px solid rgba(34, 197, 94, 0.25)',
               borderRadius: '8px',
               padding: '9px 12px',
               marginBottom: '14px',
@@ -326,17 +326,17 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               gap: '10px',
             }}
           >
-            <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(220, 252, 231, 0.9)', border: '1px solid rgba(21, 128, 61, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <ShieldCheckIcon size={13} color="#15803d" />
+            <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(34, 197, 94, 0.16)', border: '1px solid rgba(34, 197, 94, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ShieldCheckIcon size={13} color="#16a34a" />
             </span>
-            <div style={{ fontSize: '11.5px', color: '#166534', lineHeight: 1.4 }}>
-              <strong>Shopee Đảm Bảo:</strong> Miễn phí 100% cước thu hồi hàng tại nhà bởi SPX Express. Yêu cầu của bạn được bảo vệ minh bạch.
+            <div style={{ fontSize: '11.5px', color: 'var(--text-primary, #166534)', lineHeight: 1.4 }}>
+              <strong style={{ color: '#16a34a' }}>Shopee Đảm Bảo:</strong> Miễn phí 100% cước thu hồi hàng tại nhà bởi SPX Express. Yêu cầu của bạn được bảo vệ minh bạch.
             </div>
           </div>
 
           {/* Reason Select */}
           <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '5px', color: '#334155' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '5px', color: 'var(--text-secondary, #334155)' }}>
               Lý do bạn muốn trả hàng / hoàn tiền <span style={{ color: '#ef4444' }}>*</span>:
             </label>
             <select
@@ -349,9 +349,9 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 width: '100%',
                 padding: '8px 10px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
-                color: '#0f172a',
+                border: '1px solid var(--border-medium, #cbd5e1)',
+                background: 'var(--bg-input, var(--bg-card, #ffffff))',
+                color: 'var(--text-primary, #0f172a)',
                 fontSize: '12.5px',
                 outline: 'none',
               }}
@@ -366,14 +366,14 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
 
           {/* Refund Method Radio */}
           <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: '#334155' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text-secondary, #334155)' }}>
               Phương thức nhận tiền hoàn <span style={{ color: '#ef4444' }}>*</span>:
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <label
                 style={{
-                  border: `1.5px solid ${refundMethod === 'wallet' ? '#2563eb' : '#e2e8f0'}`,
-                  background: refundMethod === 'wallet' ? '#eff6ff' : '#ffffff',
+                  border: `1.5px solid ${refundMethod === 'wallet' ? 'var(--color-primary, #2563eb)' : 'var(--border-medium, #e2e8f0)'}`,
+                  background: refundMethod === 'wallet' ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-card, #ffffff)',
                   padding: '8px 10px',
                   borderRadius: '8px',
                   cursor: 'pointer',
@@ -382,7 +382,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   gap: '6px',
                   fontSize: '12px',
                   fontWeight: 600,
-                  color: refundMethod === 'wallet' ? '#2563eb' : '#334155',
+                  color: refundMethod === 'wallet' ? 'var(--color-primary, #2563eb)' : 'var(--text-secondary, #334155)',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -395,7 +395,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                     setRefundMethod('wallet');
                     setErrorMsg('');
                   }}
-                  style={{ accentColor: '#2563eb' }}
+                  style={{ accentColor: 'var(--color-primary, #2563eb)' }}
                 />
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: refundMethod === 'wallet' ? 'rgba(37, 99, 235, 0.12)' : 'rgba(234, 88, 12, 0.1)', border: `1px solid ${refundMethod === 'wallet' ? 'rgba(37, 99, 235, 0.25)' : 'rgba(234, 88, 12, 0.25)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -407,8 +407,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
 
               <label
                 style={{
-                  border: `1.5px solid ${refundMethod === 'bank' ? '#2563eb' : '#e2e8f0'}`,
-                  background: refundMethod === 'bank' ? '#eff6ff' : '#ffffff',
+                  border: `1.5px solid ${refundMethod === 'bank' ? 'var(--color-primary, #2563eb)' : 'var(--border-medium, #e2e8f0)'}`,
+                  background: refundMethod === 'bank' ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-card, #ffffff)',
                   padding: '8px 10px',
                   borderRadius: '8px',
                   cursor: 'pointer',
@@ -417,7 +417,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                   gap: '6px',
                   fontSize: '12px',
                   fontWeight: 600,
-                  color: refundMethod === 'bank' ? '#2563eb' : '#334155',
+                  color: refundMethod === 'bank' ? 'var(--color-primary, #2563eb)' : 'var(--text-secondary, #334155)',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -430,7 +430,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                     setRefundMethod('bank');
                     setErrorMsg('');
                   }}
-                  style={{ accentColor: '#2563eb' }}
+                  style={{ accentColor: 'var(--color-primary, #2563eb)' }}
                 />
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: refundMethod === 'bank' ? 'rgba(37, 99, 235, 0.12)' : 'rgba(2, 132, 199, 0.1)', border: `1px solid ${refundMethod === 'bank' ? 'rgba(37, 99, 235, 0.25)' : 'rgba(2, 132, 199, 0.25)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -446,10 +446,10 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
           {refundMethod === 'bank' && (
             <div
               style={{
-                background: '#f8fafc',
+                background: 'var(--bg-muted, #f8fafc)',
                 padding: '10px 12px',
                 borderRadius: '8px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--border-medium, #e2e8f0)',
                 marginBottom: '14px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -457,7 +457,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               }}
             >
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '3px', color: '#475569' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '3px', color: 'var(--text-secondary, #475569)' }}>
                   Ngân hàng thụ hưởng:
                 </label>
                 <select
@@ -467,9 +467,9 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                     width: '100%',
                     padding: '6px 8px',
                     borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    color: '#0f172a',
+                    border: '1px solid var(--border-medium, #cbd5e1)',
+                    background: 'var(--bg-input, var(--bg-card, #ffffff))',
+                    color: 'var(--text-primary, #0f172a)',
                     fontSize: '12px',
                   }}
                 >
@@ -483,7 +483,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '3px', color: '#475569' }}>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '3px', color: 'var(--text-secondary, #475569)' }}>
                     Số tài khoản:
                   </label>
                   <input
@@ -499,16 +499,16 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                       width: '100%',
                       padding: '6px 8px',
                       borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      background: '#ffffff',
-                      color: '#0f172a',
+                      border: '1px solid var(--border-medium, #cbd5e1)',
+                      background: 'var(--bg-input, var(--bg-card, #ffffff))',
+                      color: 'var(--text-primary, #0f172a)',
                       fontSize: '12px',
                       boxSizing: 'border-box',
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '3px', color: '#475569' }}>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '3px', color: 'var(--text-secondary, #475569)' }}>
                     Chủ tài khoản (Không dấu):
                   </label>
                   <input
@@ -524,9 +524,9 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                       width: '100%',
                       padding: '6px 8px',
                       borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      background: '#ffffff',
-                      color: '#0f172a',
+                      border: '1px solid var(--border-medium, #cbd5e1)',
+                      background: 'var(--bg-input, var(--bg-card, #ffffff))',
+                      color: 'var(--text-primary, #0f172a)',
                       fontSize: '12px',
                       boxSizing: 'border-box',
                     }}
@@ -539,10 +539,10 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
           {/* Description Textarea with strict character count */}
           <div style={{ marginBottom: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #334155)' }}>
                 Mô tả chi tiết tình trạng sản phẩm <span style={{ color: '#ef4444' }}>*</span>:
               </label>
-              <span style={{ fontSize: '11px', color: note.trim().length >= 10 ? '#059669' : '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '11px', color: note.trim().length >= 10 ? '#059669' : 'var(--text-muted, #64748b)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 {note.trim().length >= 10 ? (
                   <>
                     <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -567,9 +567,9 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 width: '100%',
                 padding: '8px 10px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
-                color: '#0f172a',
+                border: '1px solid var(--border-medium, #cbd5e1)',
+                background: 'var(--bg-input, var(--bg-card, #ffffff))',
+                color: 'var(--text-primary, #0f172a)',
                 fontSize: '12px',
                 boxSizing: 'border-box',
                 outline: 'none',
@@ -580,10 +580,10 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
           {/* Image & Video Evidence (Mandatory - Ràng buộc cấp hình ảnh) */}
           <div style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', borderBottom: 'none', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #334155)' }}>
                 Hình ảnh / Video bằng chứng thực tế <span style={{ color: '#ef4444' }}>* (Bắt buộc)</span>:
               </label>
-              <span style={{ fontSize: '11px', color: images.length >= 1 ? '#059669' : '#64748b' }}>
+              <span style={{ fontSize: '11px', color: images.length >= 1 ? '#059669' : 'var(--text-muted, #64748b)' }}>
                 {images.length >= 1 ? `Đã chọn ${images.length}/5 ảnh` : 'Tối thiểu 1 ảnh'}
               </span>
             </div>
@@ -603,11 +603,11 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                     key={img.id}
                     style={{
                       position: 'relative',
-                      border: '1px solid #cbd5e1',
+                      border: '1px solid var(--border-medium, #cbd5e1)',
                       borderRadius: '6px',
                       overflow: 'hidden',
                       height: '70px',
-                      background: '#f8fafc',
+                      background: 'var(--bg-muted, #f8fafc)',
                     }}
                   >
                     <img
@@ -672,8 +672,8 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
             {images.length < 5 && (
               <label
                 style={{
-                  border: '1.5px dashed #93c5fd',
-                  background: 'rgba(239, 246, 255, 0.6)',
+                  border: '1.5px dashed var(--color-primary, #93c5fd)',
+                  background: 'rgba(37, 99, 235, 0.05)',
                   borderRadius: '8px',
                   padding: '12px',
                   display: 'flex',
@@ -686,13 +686,13 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
                 }}
               >
                 <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(37, 99, 235, 0.1)' }}>
-                  <CameraIcon size={14} color="#2563eb" />
+                  <CameraIcon size={14} color="var(--color-primary, #2563eb)" />
                 </span>
                 <div>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#1d4ed8' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-primary, #1d4ed8)' }}>
                     {images.length === 0 ? 'Tải lên hình ảnh / video sản phẩm lỗi hoặc hư hỏng *' : '+ Thêm hình ảnh / video khác'}
                   </span>
-                  <span style={{ fontSize: '11px', color: '#64748b', marginLeft: '6px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted, #64748b)', marginLeft: '6px' }}>
                     (Tối đa 5 ảnh, định dạng JPG, PNG)
                   </span>
                 </div>
@@ -714,7 +714,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               gap: '8px',
               justifyContent: 'flex-end',
               paddingTop: '12px',
-              borderTop: '1px solid #f1f5f9',
+              borderTop: '1px solid var(--border-light, #f1f5f9)',
             }}
           >
             <button
