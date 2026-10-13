@@ -237,9 +237,9 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
           {errorMsg && (
             <div
               style={{
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                color: '#b91c1c',
+                background: 'var(--color-error-bg, rgba(239, 68, 68, 0.08))',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                color: 'var(--color-error, #dc2626)',
                 padding: '9px 12px',
                 borderRadius: '8px',
                 fontSize: '12px',
@@ -252,7 +252,7 @@ export default function ReturnRequestModal({ order, onClose, onSubmit, inline = 
               }}
             >
               <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <AlertCircleIcon size={13} color="#ef4444" />
+                <AlertCircleIcon size={13} color="var(--color-error, #ef4444)" />
               </span>
               <span>{errorMsg}</span>
             </div>

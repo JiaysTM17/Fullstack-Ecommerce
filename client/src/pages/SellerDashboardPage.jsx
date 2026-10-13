@@ -6414,47 +6414,47 @@ export default function SellerDashboardPage() {
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '16px' }}>
-                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>Lượt Hiển Thị Dự Phóng</div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    <div style={{ background: 'var(--bg-card, #ffffff)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #64748b)' }}>Lượt Hiển Thị Dự Phóng</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary, #0f172a)', marginTop: '2px' }}>
                         {(simResult.projectedDaily?.impressions || 0).toLocaleString()}
                       </div>
-                      <small style={{ fontSize: '10px', color: '#94a3b8' }}>{(simResult.projectedMonthly?.impressions || 0).toLocaleString()} /tháng</small>
+                      <small style={{ fontSize: '10px', color: 'var(--text-muted, #94a3b8)' }}>{(simResult.projectedMonthly?.impressions || 0).toLocaleString()} /tháng</small>
                     </div>
 
-                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>Lượt Click (CTR {simResult.projectedDaily?.ctr || 0}%)</div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#2563eb', marginTop: '2px' }}>
+                    <div style={{ background: 'var(--bg-card, #ffffff)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #64748b)' }}>Lượt Click (CTR {simResult.projectedDaily?.ctr || 0}%)</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--primary-color, #2563eb)', marginTop: '2px' }}>
                         {(simResult.projectedDaily?.clicks || 0).toLocaleString()} clicks
                       </div>
-                      <small style={{ fontSize: '10px', color: '#94a3b8' }}>{(simResult.projectedMonthly?.clicks || 0).toLocaleString()} /tháng</small>
+                      <small style={{ fontSize: '10px', color: 'var(--text-muted, #94a3b8)' }}>{(simResult.projectedMonthly?.clicks || 0).toLocaleString()} /tháng</small>
                     </div>
 
-                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>Giá CPC Ước Tính</div>
-                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    <div style={{ background: 'var(--bg-card, #ffffff)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #64748b)' }}>Giá CPC Ước Tính</div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary, #0f172a)', marginTop: '2px' }}>
                         {formatCurrency(simResult.projectedDaily?.cpc || 0)}
                       </div>
                       <small style={{ fontSize: '10px', color: '#16a34a' }}>Tối ưu hơn giá thầu trần</small>
                     </div>
 
-                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>Chi Phí Dự Kiến (Spend)</div>
+                    <div style={{ background: 'var(--bg-card, #ffffff)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #64748b)' }}>Chi Phí Dự Kiến (Spend)</div>
                       <div style={{ fontSize: '16px', fontWeight: 800, color: '#dc2626', marginTop: '2px' }}>
                         {formatCurrency(simResult.projectedDaily?.spend || 0)}
                       </div>
-                      <small style={{ fontSize: '10px', color: '#94a3b8' }}>{formatCurrency(simResult.projectedMonthly?.spend || 0)} /tháng</small>
+                      <small style={{ fontSize: '10px', color: 'var(--text-muted, #94a3b8)' }}>{formatCurrency(simResult.projectedMonthly?.spend || 0)} /tháng</small>
                     </div>
 
-                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>Doanh Số GMV Ước Tính</div>
+                    <div style={{ background: 'var(--bg-card, #ffffff)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #64748b)' }}>Doanh Số GMV Ước Tính</div>
                       <div style={{ fontSize: '16px', fontWeight: 800, color: '#059669', marginTop: '2px' }}>
                         {formatCurrency(simResult.projectedDaily?.adGmv || 0)}
                       </div>
                       <small style={{ fontSize: '10px', color: '#059669', fontWeight: 700 }}>~{simResult.projectedDaily?.orders || 0} đơn /ngày</small>
                     </div>
 
-                    <div style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #fed7aa' }}>
+                    <div style={{ background: 'var(--bg-card, #ffffff)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(234, 88, 12, 0.3)' }}>
                       <div style={{ fontSize: '11px', color: '#c2410c' }}>Hiệu Quả ROAS / ROI</div>
                       <div style={{ fontSize: '16px', fontWeight: 800, color: '#ea580c', marginTop: '2px' }}>
                         {simResult.projectedDaily?.roas || 0}x
@@ -6465,10 +6465,10 @@ export default function SellerDashboardPage() {
 
                   {/* Chi tiết từng từ khóa */}
                   {Array.isArray(simResult.keywordBreakdown) && simResult.keywordBreakdown.length > 0 && (
-                    <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ overflowX: 'auto', background: 'var(--bg-card, #fff)', borderRadius: '8px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
                       <table className="shopee-table" style={{ width: '100%', fontSize: '12px', margin: 0 }}>
                         <thead>
-                          <tr style={{ background: '#f8fafc' }}>
+                          <tr style={{ background: 'var(--bg-muted, #f8fafc)' }}>
                             <th>Từ Khóa</th>
                             <th>Đối Sánh</th>
                             <th>Giá Thầu</th>
@@ -6821,10 +6821,10 @@ export default function SellerDashboardPage() {
             TAB 12: QUẢN LÝ VẬN CHUYỂN ĐỘNG & MA TRẬN TRỢ GIÁ SPX LOGISTICS
         ========================================================================= */}
         {activeTab === 'shipping_policy' && (
-          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: 'var(--bg-card, #ffffff)', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <TruckIcon size={20} color="#0284c7" />
                   Cấu Hình Biểu Phí Vận Chuyển Động &amp; Trợ Giá SPX Logistics
                 </h2>
@@ -6982,10 +6982,10 @@ export default function SellerDashboardPage() {
             TAB 13: HIỆU SUẤT VẬN HÀNH SLA & HỆ THỐNG SAO QUẢ TẠ SHOPEE
         ========================================================================= */}
         {activeTab === 'sla_metrics' && (
-          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: 'var(--bg-card, #ffffff)', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <ShieldCheckIcon size={20} color="#ef4444" />
                   Chỉ Số Vận Hành SLA &amp; Hệ Thống Điểm Phạt Sao Quả Tạ
                 </h2>
@@ -7141,10 +7141,10 @@ export default function SellerDashboardPage() {
             TAB 13: TRỢ LÝ TIN NHẮN TỰ ĐỘNG & BỘ LỌC TỪ KHÓA (AUTO-REPLY ASSISTANT)
         ========================================================================= */}
         {activeTab === 'auto_reply' && (
-          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: 'var(--bg-card, #ffffff)', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <ChatIcon size={20} color="#a855f7" />
                   Trợ Lý Tin Nhắn Tự Động &amp; Phản Hồi Tức Thì (Auto-Reply Assistant)
                 </h2>
@@ -7434,28 +7434,28 @@ export default function SellerDashboardPage() {
 
             {/* Metrics 4 Cards Overview */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '20px' }}>
-              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, marginBottom: '6px' }}>Tổng Đơn COD Phát Sinh</div>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a' }}>
+              <div style={{ background: 'var(--bg-card, #ffffff)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary, #64748b)', fontWeight: 600, marginBottom: '6px' }}>Tổng Đơn COD Phát Sinh</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                   {codReconciliationData?.summary?.totalCodOrders || 0} đơn
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+              <div style={{ background: 'var(--bg-card, #ffffff)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                 <div style={{ fontSize: '11.5px', color: '#d97706', fontWeight: 600, marginBottom: '4px' }}>Chờ Bưu Tá Thu Tiền</div>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: '#d97706' }}>
                   {formatCurrency(codReconciliationData?.summary?.pendingCollection || 0)}
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+              <div style={{ background: 'var(--bg-card, #ffffff)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                 <div style={{ fontSize: '11.5px', color: '#0284c7', fontWeight: 600, marginBottom: '4px' }}>SPX Đã Thu (Chờ Rút Về)</div>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: '#0284c7' }}>
                   {formatCurrency(codReconciliationData?.summary?.collectedByCourier || 0)}
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+              <div style={{ background: 'var(--bg-card, #ffffff)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                 <div style={{ fontSize: '11.5px', color: '#10b981', fontWeight: 600, marginBottom: '4px' }}>Đã Quyết Toán Về Ví</div>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: '#10b981' }}>
                   {formatCurrency(codReconciliationData?.summary?.reconciledTotal || 0)}
@@ -7464,10 +7464,10 @@ export default function SellerDashboardPage() {
             </div>
 
             {/* Bảng Dữ Liệu Đối Soát Chi Tiết */}
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--bg-card, #ffffff)', borderRadius: '12px', border: '1px solid var(--border-medium, #e2e8f0)', overflow: 'hidden' }}>
               <div style={{ overflowX: 'auto' }}>
                 <table className="shopee-table" style={{ width: '100%', margin: 0 }}>
-                  <thead style={{ background: '#f8fafc' }}>
+                  <thead style={{ background: 'var(--bg-muted, #f8fafc)' }}>
                     <tr>
                       <th style={{ width: '40px', textAlign: 'center' }}>
                         <input

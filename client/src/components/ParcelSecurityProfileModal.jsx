@@ -256,11 +256,11 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
                   </div>
                 </div>
 
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                <div style={{ background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '10px', padding: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary, #64748b)', textTransform: 'uppercase' }}>
                     Tem ADN Phân Tử Nano
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #0f172a)', marginTop: '4px' }}>
                     {order.syntheticDnaNanotechTaggingSeal?.isDnaTagged ? 'Mã Hóa Oligonucleotide' : 'Tem Chống Giả Hologram'}
                   </div>
                   <div style={{ fontSize: '11.5px', color: '#059669', marginTop: '2px' }}>
@@ -268,11 +268,11 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
                   </div>
                 </div>
 
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                <div style={{ background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '10px', padding: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary, #64748b)', textTransform: 'uppercase' }}>
                     Đóng Gói Tuần Hoàn CO₂
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #0f172a)', marginTop: '4px' }}>
                     Giảm -{order.carbonOffsetCert?.carbonOffsetKg || 1.8}kg Khí Thải
                   </div>
                   <div style={{ fontSize: '11.5px', color: '#15803d', marginTop: '2px' }}>
@@ -282,7 +282,7 @@ export default function ParcelSecurityProfileModal({ order, onClose, onUpdateOrd
               </div>
 
               {/* Courier Identity */}
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 18px' }}>
+              <div style={{ background: 'var(--bg-card, #ffffff)', border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '12px', padding: '14px 18px' }}>
                 <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
                   Đội Phát SPX Phụ Trách
                 </div>
