@@ -2680,17 +2680,17 @@ export default function AdminDashboardPage() {
         {/* Modal Phán Quyết Trọng Tài Tranh Chấp */}
         {arbitrateModalDispute && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
-            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '520px', padding: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #e2e8f0', position: 'relative' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+            <div style={{ background: 'var(--bg-card, #ffffff)', borderRadius: '16px', width: '100%', maxWidth: '520px', padding: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid var(--border-medium, #e2e8f0)', position: 'relative' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', borderBottom: '1px solid var(--border-medium, #f1f5f9)', paddingBottom: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <ShieldIcon size={18} color="#ef4444" />
                   </span>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '16.5px', fontWeight: 800, color: '#0f172a' }}>
+                    <h3 style={{ margin: 0, fontSize: '16.5px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                       Phán Quyết Tranh Chấp #{arbitrateModalDispute.orderId}
                     </h3>
-                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary, #64748b)', marginTop: '2px' }}>
                       Gian hàng: <strong>{arbitrateModalDispute.shopName}</strong> · Khách: <strong>{arbitrateModalDispute.customerName}</strong>
                     </div>
                   </div>
@@ -2705,32 +2705,32 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '14px', fontSize: '12.5px' }}>
+              <div style={{ background: 'var(--bg-muted, #f8fafc)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--border-medium, #e2e8f0)', marginBottom: '14px', fontSize: '12.5px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span style={{ color: '#64748b' }}>Lý do khiếu nại:</span>
-                  <strong style={{ color: '#0f172a' }}>{arbitrateModalDispute.reason}</strong>
+                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>Lý do khiếu nại:</span>
+                  <strong style={{ color: 'var(--text-primary, #0f172a)' }}>{arbitrateModalDispute.reason}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ color: '#64748b' }}>Số tiền yêu cầu hoàn:</span>
+                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>Số tiền yêu cầu hoàn:</span>
                   <strong style={{ color: '#ea580c', fontSize: '14px' }}>{formatCurrency(arbitrateModalDispute.claimAmount)}</strong>
                 </div>
-                <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ borderTop: '1px dashed var(--border-medium, #cbd5e1)', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                     <SparklesIcon size={12} color="#059669" />
                     <span>AI Đề xuất: {arbitrateModalDispute.aiRecommendation === 'REFUND_BUYER' ? 'Chấp thuận hoàn tiền 100%' : 'Bác bỏ khiếu nại'}</span>
                   </span>
-                  <span style={{ color: '#64748b', fontSize: '11px' }}>Độ tin cậy: {arbitrateModalDispute.aiConfidence || 92}%</span>
+                  <span style={{ color: 'var(--text-muted, #64748b)', fontSize: '11px' }}>Độ tin cậy: {arbitrateModalDispute.aiConfidence || 92}%</span>
                 </div>
               </div>
 
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: 'var(--text-secondary, #334155)', marginBottom: '6px' }}>
                   Quyết Định Trọng Tài Toàn Sàn *
                 </label>
                 <select
                   value={arbitrationDecision}
                   onChange={(e) => setArbitrationDecision(e.target.value)}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '13px', background: '#fff', color: '#0f172a', fontWeight: 600 }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid var(--border-medium, #cbd5e1)', fontSize: '13px', background: 'var(--bg-input, var(--bg-card, #ffffff))', color: 'var(--text-primary, #0f172a)', fontWeight: 600 }}
                 >
                   <option value="REFUND_BUYER">✅ Chấp thuận khiếu nại — Hoàn tiền 100% cho người mua</option>
                   <option value="REJECT_BUYER">❌ Bác bỏ khiếu nại — Giữ tiền thanh toán cho gian hàng</option>
@@ -3278,10 +3278,10 @@ export default function AdminDashboardPage() {
             TAB 11: ĐỐI SOÁT COD & THU HỘ TIỀN MẶT BƯU TÁ (COD RECONCILIATION)
         ========================================================================= */}
         {activeTab === 'cod_recon' && (
-          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: 'var(--bg-card, #ffffff)', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <ReceiptIcon size={20} color="#059669" />
                   Sổ Cái Đối Soát Tiền Mặt Thu Hộ (COD Logistics Reconciliation)
                 </h2>
@@ -3422,10 +3422,10 @@ export default function AdminDashboardPage() {
             TAB 12: RADAR PHÁT HIỆN GIAN LẬN & HOÀN TRẢ NGƯỜI MUA (BUYER ABUSE RADAR)
         ========================================================================= */}
         {activeTab === 'buyer_abuse' && (
-          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: 'var(--bg-card, #ffffff)', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <ShieldIcon size={20} color="#dc2626" />
                   Radar Phát Hiện Gian Lận &amp; Lạm Dụng Hoàn Trả (Buyer Abuse Radar)
                 </h2>
