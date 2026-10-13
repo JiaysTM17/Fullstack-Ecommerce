@@ -909,16 +909,16 @@ export default function OrderHistoryPage() {
     <div
       className="cancel-order-inline-container"
       style={{
-        background: '#ffffff',
+        background: 'var(--bg-card, #ffffff)',
         borderRadius: '12px',
         padding: '24px',
-        border: '1px solid #e2e8f0',
+        border: '1px solid var(--border-medium, #e2e8f0)',
         animation: 'fadeIn 0.25s ease-out',
         width: '100%',
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-medium, #f1f5f9)', paddingBottom: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
             type="button"
@@ -998,9 +998,9 @@ export default function OrderHistoryPage() {
             width: '100%',
             padding: '10px 12px',
             borderRadius: '8px',
-            border: '1px solid #cbd5e1',
-            background: '#ffffff',
-            color: '#0f172a',
+            border: '1px solid var(--border-medium, #cbd5e1)',
+            background: 'var(--bg-card, #ffffff)',
+            color: 'var(--text-primary, #0f172a)',
             fontSize: '12.5px',
             fontFamily: 'inherit',
             outline: 'none',
@@ -1229,13 +1229,13 @@ export default function OrderHistoryPage() {
 
                 {/* Tracking Search Input Form */}
                 <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  background: 'var(--bg-muted, #f8fafc)',
+                  border: '1px solid var(--border-medium, #e2e8f0)',
                   borderRadius: '10px',
                   padding: '16px',
                   marginBottom: '20px'
                 }}>
-                  <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-secondary, #334155)', marginBottom: '8px' }}>
                     Nhập mã vận đơn hoặc chọn nhanh từ đơn hàng của bạn:
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1248,8 +1248,9 @@ export default function OrderHistoryPage() {
                         flex: 1,
                         minWidth: '240px',
                         padding: '10px 14px',
-                        fontSize: '13.5px',
-                        border: '1.5px solid #cbd5e1',
+                        background: 'var(--bg-card, #ffffff)',
+                        color: 'var(--text-primary, #0f172a)',
+                        border: '1.5px solid var(--border-medium, #cbd5e1)',
                         borderRadius: '8px',
                         outline: 'none',
                       }}
@@ -1328,12 +1329,12 @@ export default function OrderHistoryPage() {
                   }
 
                   return (
-                    <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden', background: '#ffffff' }}>
+                    <div style={{ border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '12px', overflow: 'hidden', background: 'var(--bg-card, #ffffff)' }}>
                       {/* Tracking Card Header */}
-                      <div style={{ background: '#f8fafc', padding: '14px 18px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                      <div style={{ background: 'var(--bg-muted, #f8fafc)', padding: '14px 18px', borderBottom: '1px solid var(--border-medium, #f1f5f9)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
+                            <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                               Mã Vận Đơn: {activeTrackingOrder.trackingCode || 'SPX-VN-84729104'}
                             </span>
                             <span
@@ -1381,7 +1382,7 @@ export default function OrderHistoryPage() {
                       </div>
 
                       {/* Stepper Progress Bar */}
-                      <div style={{ padding: '20px 18px', borderBottom: '1px solid #f1f5f9' }}>
+                      <div style={{ padding: '20px 18px', borderBottom: '1px solid var(--border-medium, #f1f5f9)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
                           {[
                             { step: 1, label: 'Đặt Hàng', sub: 'Thành công' },
@@ -1399,8 +1400,8 @@ export default function OrderHistoryPage() {
                                   width: '28px',
                                   height: '28px',
                                   borderRadius: '50%',
-                                  background: isPassed ? '#2563eb' : '#f1f5f9',
-                                  color: isPassed ? '#ffffff' : '#94a3b8',
+                                  background: isPassed ? 'var(--primary-color, #2563eb)' : 'var(--bg-muted, #f1f5f9)',
+                                  color: isPassed ? '#ffffff' : 'var(--text-muted, #94a3b8)',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
@@ -1411,10 +1412,10 @@ export default function OrderHistoryPage() {
                                 }}>
                                   {isPassed ? <CheckIcon size={12} color="#ffffff" /> : s.step}
                                 </div>
-                                <div style={{ fontSize: '12px', fontWeight: isPassed ? 700 : 500, color: isPassed ? '#0f172a' : '#64748b' }}>
+                                <div style={{ fontSize: '12px', fontWeight: isPassed ? 700 : 500, color: isPassed ? 'var(--text-primary, #0f172a)' : 'var(--text-secondary, #64748b)' }}>
                                   {s.label}
                                 </div>
-                                <div style={{ fontSize: '10.5px', color: '#94a3b8' }}>{s.sub}</div>
+                                <div style={{ fontSize: '10.5px', color: 'var(--text-muted, #94a3b8)' }}>{s.sub}</div>
                               </div>
                             );
                           })}

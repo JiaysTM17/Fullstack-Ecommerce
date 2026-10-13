@@ -3002,6 +3002,20 @@ body.dark-mode .shopee-order-btn-outline:hover {
   color: var(--primary-color, #ea580c);
 }
 
+[data-theme="dark"] .shopee-order-btn-danger-outline,
+body.dark-mode .shopee-order-btn-danger-outline {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #f87171 !important;
+}
+
+[data-theme="dark"] .shopee-order-btn-danger-outline:hover,
+body.dark-mode .shopee-order-btn-danger-outline:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+  color: #fca5a5 !important;
+}
+
 /* Seller Tabs & Subitems Dark Mode */
 [data-theme="dark"] .seller-tab-btn,
 body.dark-mode .seller-tab-btn {

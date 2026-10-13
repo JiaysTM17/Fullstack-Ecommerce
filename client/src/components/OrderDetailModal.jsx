@@ -627,8 +627,8 @@ export default function OrderDetailModal({
           {isCancelled && (
             <div
               style={{
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
+                background: 'var(--color-error-bg, rgba(239, 68, 68, 0.08))',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
                 borderRadius: '8px',
                 padding: '9px 12px',
                 display: 'flex',
@@ -637,9 +637,9 @@ export default function OrderDetailModal({
               }}
             >
               <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
-                <ReturnIcon size={13} color="#ef4444" />
+                <ReturnIcon size={13} color="var(--color-error, #ef4444)" />
               </span>
-              <div style={{ flex: 1, fontSize: '12px', color: '#991b1b', lineHeight: 1.4 }}>
+              <div style={{ flex: 1, fontSize: '12px', color: 'var(--color-error, #dc2626)', lineHeight: 1.4 }}>
                 <strong>Đơn hàng đã được hủy:</strong> {order.cancelReason || 'Người mua yêu cầu hủy đơn'}
                 {order.cancelNote ? ` · Ghi chú: ${order.cancelNote}` : ''}. Tiền và Shopee Xu (nếu có) đã hoàn về ví.
               </div>
@@ -650,8 +650,8 @@ export default function OrderDetailModal({
           {isReturning && (
             <div
               style={{
-                background: '#eff6ff',
-                border: '1px solid #bfdbfe',
+                background: 'var(--primary-light, rgba(37, 99, 235, 0.08))',
+                border: '1px solid var(--primary-border, rgba(37, 99, 235, 0.25))',
                 borderRadius: '8px',
                 padding: '9px 12px',
                 display: 'flex',
@@ -662,7 +662,7 @@ export default function OrderDetailModal({
               <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(147, 51, 234, 0.12)', border: '1px solid rgba(147, 51, 234, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
                 <ReturnIcon size={13} color="#9333ea" />
               </span>
-              <div style={{ flex: 1, fontSize: '12px', color: '#1e40af', lineHeight: 1.4 }}>
+              <div style={{ flex: 1, fontSize: '12px', color: 'var(--text-primary, #1e40af)', lineHeight: 1.4 }}>
                 <strong>Yêu cầu Trả hàng / Hoàn tiền đang được xử lý:</strong> {order.returnDetails?.reason || 'Sản phẩm lỗi hoặc hư hỏng'}
                 {order.returnDetails?.refundAmount ? ` · Tiền hoàn: ${formatCurrency(order.returnDetails.refundAmount)}` : ''}. Shopee & Người bán đang giải quyết khiếu nại.
               </div>
@@ -798,15 +798,15 @@ export default function OrderDetailModal({
                             width: '20px',
                             height: '20px',
                             borderRadius: '50%',
-                            background: isPassed ? '#2563eb' : isCurrent ? '#eff6ff' : '#ffffff',
-                            border: `1.5px solid ${isPassed || isCurrent ? '#2563eb' : '#cbd5e1'}`,
-                            color: isPassed ? '#ffffff' : isCurrent ? '#2563eb' : '#64748b',
+                            background: isPassed ? 'var(--primary-color, #2563eb)' : isCurrent ? 'var(--primary-light, #eff6ff)' : 'var(--bg-card, #ffffff)',
+                            border: `1.5px solid ${isPassed || isCurrent ? 'var(--primary-color, #2563eb)' : 'var(--border-medium, #cbd5e1)'}`,
+                            color: isPassed ? '#ffffff' : isCurrent ? 'var(--primary-color, #2563eb)' : 'var(--text-muted, #64748b)',
                             fontSize: '10px',
                             fontWeight: 700,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            boxShadow: '0 0 0 2px #ffffff',
+                            boxShadow: '0 0 0 2px var(--bg-card, #ffffff)',
                           }}
                         >
                           {isPassed ? <CheckIcon size={10} color="#ffffff" /> : s.step}
@@ -815,7 +815,7 @@ export default function OrderDetailModal({
                           style={{
                             fontSize: '11px',
                             fontWeight: isPassed || isCurrent ? 700 : 500,
-                            color: isPassed || isCurrent ? '#0f172a' : '#64748b',
+                            color: isPassed || isCurrent ? 'var(--text-primary, #0f172a)' : 'var(--text-muted, #64748b)',
                             marginTop: '4px',
                           }}
                         >
@@ -833,13 +833,13 @@ export default function OrderDetailModal({
                   style={{
                     marginTop: '10px',
                     paddingTop: '8px',
-                    borderTop: '1px dashed #cbd5e1',
+                    borderTop: '1px dashed var(--border-medium, #cbd5e1)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '8px',
                   }}
                 >
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary, #475569)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
                     Nhật ký hành trình bưu kiện ({trackingEvents.length} mốc thời gian)
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '140px', overflowY: 'auto' }}>
@@ -859,19 +859,19 @@ export default function OrderDetailModal({
                             width: '7px',
                             height: '7px',
                             borderRadius: '50%',
-                            background: evt.active ? '#2563eb' : '#94a3b8',
-                            boxShadow: evt.active ? '0 0 0 3px #bfdbfe' : 'none',
+                            background: evt.active ? 'var(--primary-color, #2563eb)' : 'var(--border-dark, #94a3b8)',
+                            boxShadow: evt.active ? '0 0 0 3px rgba(37, 99, 235, 0.25)' : 'none',
                             marginTop: '5px',
                             flexShrink: 0,
                           }}
                         />
                         <div style={{ flex: 1 }}>
-                          <span style={{ fontWeight: evt.active ? 700 : 600, color: evt.active ? '#2563eb' : '#0f172a' }}>
+                          <span style={{ fontWeight: evt.active ? 700 : 600, color: evt.active ? 'var(--primary-color, #2563eb)' : 'var(--text-primary, #0f172a)' }}>
                             {evt.title}
                           </span>
-                          <span style={{ color: '#64748b', margin: '0 4px' }}>·</span>
-                          <span style={{ color: '#64748b', fontSize: '11px' }}>{evt.time}</span>
-                          <div style={{ color: '#475569', fontSize: '11px', marginTop: '1px' }}>
+                          <span style={{ color: 'var(--text-muted, #64748b)', margin: '0 4px' }}>·</span>
+                          <span style={{ color: 'var(--text-muted, #64748b)', fontSize: '11px' }}>{evt.time}</span>
+                          <div style={{ color: 'var(--text-secondary, #475569)', fontSize: '11px', marginTop: '1px' }}>
                             {evt.desc}
                           </div>
                         </div>
@@ -1470,9 +1470,9 @@ export default function OrderDetailModal({
                       fontSize: '11.5px',
                       padding: '0 10px',
                       borderRadius: '6px',
-                      background: '#f8fafc',
-                      color: '#16a34a',
-                      border: '1px solid #e2e8f0',
+                      background: 'var(--bg-muted, #f8fafc)',
+                      color: 'var(--color-success, #16a34a)',
+                      border: '1px solid var(--border-medium, #e2e8f0)',
                       fontWeight: 700,
                       display: 'inline-flex',
                       alignItems: 'center',
