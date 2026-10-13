@@ -167,7 +167,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
           >
             <ReceiptIcon size={16} color="#0284c7" />
           </div>
-          <span style={{ fontWeight: 800, fontSize: '13.5px', color: '#0f172a', letterSpacing: '-0.2px' }}>
+          <span style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.2px' }}>
             Hóa Đơn Điện Tử & Biên Lai VAT
           </span>
         </div>
@@ -259,24 +259,24 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 >
                   <ReceiptIcon size={14} color="#ffffff" />
                 </div>
-                <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary, #0f172a)', letterSpacing: '-0.3px' }}>
                   {companyName}
                 </span>
               </div>
-              <div style={{ fontSize: '11.5px', color: '#64748b', lineHeight: '1.45' }}>
-                Mã số thuế: <strong style={{ color: '#0f172a' }}>{taxCode}</strong> · Hotline: 1900 1221<br />
+              <div style={{ fontSize: '11.5px', color: 'var(--text-secondary, #64748b)', lineHeight: '1.45' }}>
+                Mã số thuế: <strong style={{ color: 'var(--text-primary, #0f172a)' }}>{taxCode}</strong> · Hotline: 1900 1221<br />
                 Địa chỉ: {company.address || 'Tòa nhà Capital Tower, 109 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội'}
               </div>
             </div>
 
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#0f172a', marginBottom: '3px' }}>
+              <div style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--text-primary, #0f172a)', marginBottom: '3px' }}>
                 HÓA ĐƠN GIÁ TRỊ GIA TĂNG (VAT)
               </div>
-              <div style={{ fontSize: '11.5px', color: '#475569', marginBottom: '2px' }}>
+              <div style={{ fontSize: '11.5px', color: 'var(--text-secondary, #475569)', marginBottom: '2px' }}>
                 Mẫu số: <strong>{templateCode}</strong> · Ký hiệu: <strong>{invoiceSerial}</strong>
               </div>
-              <div style={{ fontSize: '12px', color: '#0f172a', marginBottom: '2px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-primary, #0f172a)', marginBottom: '2px' }}>
                 Số HĐ: <strong>{invoiceNo}</strong> · Ngày: {invoiceDate}
               </div>
               <span
@@ -382,20 +382,20 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                   const unitPriceNet = item.unitPrice || Math.round((item.price || item.rawPrice || 0) / 1.08);
                   const lineTotalNet = item.amount || (unitPriceNet * qty);
                   return (
-                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '7px 8px', color: '#64748b', textAlign: 'center' }}>{idx + 1}</td>
-                      <td style={{ padding: '7px 8px', fontWeight: 600, color: '#0f172a', wordBreak: 'break-word', lineHeight: '1.35' }}>
+                    <tr key={idx} style={{ borderBottom: '1px solid var(--border-medium, #f1f5f9)' }}>
+                      <td style={{ padding: '7px 8px', color: 'var(--text-muted, #64748b)', textAlign: 'center' }}>{idx + 1}</td>
+                      <td style={{ padding: '7px 8px', fontWeight: 600, color: 'var(--text-primary, #0f172a)', wordBreak: 'break-word', lineHeight: '1.35' }}>
                         {item.name}
                       </td>
-                      <td style={{ padding: '7px 8px', textAlign: 'center', color: '#64748b' }}>Cái</td>
-                      <td style={{ padding: '7px 8px', textAlign: 'center', color: '#0f172a', fontWeight: 600 }}>{qty}</td>
-                      <td style={{ padding: '7px 8px', textAlign: 'right', color: '#475569' }}>
+                      <td style={{ padding: '7px 8px', textAlign: 'center', color: 'var(--text-secondary, #64748b)' }}>Cái</td>
+                      <td style={{ padding: '7px 8px', textAlign: 'center', color: 'var(--text-primary, #0f172a)', fontWeight: 600 }}>{qty}</td>
+                      <td style={{ padding: '7px 8px', textAlign: 'right', color: 'var(--text-secondary, #475569)' }}>
                         {formatCurrency(unitPriceNet)}
                       </td>
                       <td style={{ padding: '7px 8px', textAlign: 'center', fontWeight: 700, color: '#2563eb' }}>
                         {item.vatRate || vatRate}
                       </td>
-                      <td style={{ padding: '7px 8px', textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>
+                      <td style={{ padding: '7px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>
                         {formatCurrency(lineTotalNet)}
                       </td>
                     </tr>
@@ -461,7 +461,7 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
 
             {/* VAT Totals Breakdown */}
             <div style={{ width: '250px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11.5px', flexShrink: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary, #475569)' }}>
                 <span>Cộng tiền hàng (chưa VAT):</span>
                 <strong>{formatCurrency(netSubtotal)}</strong>
               </div>
@@ -471,12 +471,12 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                 <strong>{vatRate}</strong>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary, #475569)' }}>
                 <span>Tiền thuế GTGT (8%):</span>
                 <strong>{formatCurrency(vatAmount)}</strong>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary, #475569)' }}>
                 <span>Phí vận chuyển:</span>
                 <span>{shippingFee === 0 ? 'Miễn phí (0đ)' : formatCurrency(shippingFee)}</span>
               </div>
@@ -493,10 +493,10 @@ export default function InvoiceReceiptModal({ order, onClose, inline = false }) 
                   display: 'flex',
                   justifyContent: 'space-between',
                   paddingTop: '6px',
-                  borderTop: '1.5px solid #cbd5e1',
+                  borderTop: '1.5px solid var(--border-medium, #cbd5e1)',
                   fontSize: '13.5px',
                   fontWeight: 900,
-                  color: '#0f172a',
+                  color: 'var(--text-primary, #0f172a)',
                 }}
               >
                 <span>Tổng thanh toán:</span>

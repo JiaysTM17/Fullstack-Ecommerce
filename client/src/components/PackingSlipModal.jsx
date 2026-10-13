@@ -23,18 +23,18 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         style={{
           maxWidth: '680px',
           width: '95%',
-          background: '#ffffff',
+          background: 'var(--bg-card, #ffffff)',
           borderRadius: '16px',
           padding: '24px',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           maxHeight: '90vh',
           overflowY: 'auto',
-          color: '#1e293b',
+          color: 'var(--text-primary, #1e293b)',
           boxSizing: 'border-box'
         }}
       >
         {/* Header Phiếu */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #0f172a', paddingBottom: '16px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--border-medium, #0f172a)', paddingBottom: '16px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
@@ -57,17 +57,17 @@ export default function PackingSlipModal({ order, shop, onClose }) {
                 <span style={{ background: '#ea580c', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 900 }}>
                   SPX EXPRESS
                 </span>
-                <h2 style={{ margin: 0, fontSize: '19px', fontWeight: 800, letterSpacing: '-0.3px', color: '#0f172a' }}>
+                <h2 style={{ margin: 0, fontSize: '19px', fontWeight: 800, letterSpacing: '-0.3px', color: 'var(--text-primary, #0f172a)' }}>
                   PHIẾU XUẤT KHO & ĐÓNG GÓI
                 </h2>
               </div>
-              <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#64748b' }}>
+              <p style={{ margin: '3px 0 0', fontSize: '12px', color: 'var(--text-secondary, #64748b)' }}>
                 Phiếu kiểm soát đóng gói hàng hóa trước khi bàn giao đơn vị vận chuyển
               </p>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '12px', color: '#64748b' }}>Mã đơn hàng:</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary, #64748b)' }}>Mã đơn hàng:</div>
             <div style={{ fontSize: '18px', fontWeight: 900, color: '#ea580c', letterSpacing: '0.5px' }}>
               #{orderId}
             </div>
@@ -80,10 +80,10 @@ export default function PackingSlipModal({ order, shop, onClose }) {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
             gap: '16px',
-            background: '#f8fafc',
+            background: 'var(--bg-muted, #f8fafc)',
             padding: '16px',
             borderRadius: '12px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid var(--border-medium, #e2e8f0)',
             marginBottom: '20px',
             fontSize: '13px'
           }}
@@ -95,9 +95,9 @@ export default function PackingSlipModal({ order, shop, onClose }) {
               </span>
               <span>ĐƠN VỊ XUẤT HÀNG (SHOP)</span>
             </div>
-            <div style={{ fontWeight: 800, fontSize: '14px', color: '#0f172a' }}>{shopName}</div>
-            <div style={{ color: '#475569', marginTop: '2px' }}>Kho: {shopAddress}</div>
-            <div style={{ color: '#475569', marginTop: '2px' }}>Hotline: {shopPhone}</div>
+            <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary, #0f172a)' }}>{shopName}</div>
+            <div style={{ color: 'var(--text-secondary, #475569)', marginTop: '2px' }}>Kho: {shopAddress}</div>
+            <div style={{ color: 'var(--text-secondary, #475569)', marginTop: '2px' }}>Hotline: {shopPhone}</div>
           </div>
 
           <div>
@@ -107,13 +107,13 @@ export default function PackingSlipModal({ order, shop, onClose }) {
               </span>
               <span>NGƯỜI NHẬN HÀNG (KHÁCH)</span>
             </div>
-            <div style={{ fontWeight: 800, fontSize: '14px', color: '#0f172a' }}>
+            <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary, #0f172a)' }}>
               {order.customerName || order.customer?.fullName || 'Khách Hàng Mini Shopee'}
             </div>
-            <div style={{ color: '#475569', marginTop: '2px' }}>
+            <div style={{ color: 'var(--text-secondary, #475569)', marginTop: '2px' }}>
               SĐT: <strong>{order.phone || order.customer?.phone || '0901234567'}</strong>
             </div>
-            <div style={{ color: '#475569', marginTop: '2px', lineHeight: 1.4 }}>
+            <div style={{ color: 'var(--text-secondary, #475569)', marginTop: '2px', lineHeight: 1.4 }}>
               Địa chỉ: {order.address || order.customer?.address || 'TP. Hồ Chí Minh'}
             </div>
           </div>
@@ -122,7 +122,7 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         {/* Bảng Danh Sách Sản Phẩm Cần Nhặt & Kiểm Hàng */}
         <div style={{ marginBottom: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <strong style={{ fontSize: '13.5px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <strong style={{ fontSize: '13.5px', color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <PackageIcon size={12} color="#ea580c" />
               </span>
@@ -139,7 +139,7 @@ export default function PackingSlipModal({ order, shop, onClose }) {
           <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
-                <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1', textAlign: 'left', color: '#475569' }}>
+                <tr style={{ background: 'var(--bg-muted, #f1f5f9)', borderBottom: '2px solid var(--border-medium, #cbd5e1)', textAlign: 'left', color: 'var(--text-secondary, #475569)' }}>
                   <th style={{ padding: '8px 10px', width: '36px', textAlign: 'center' }}>Kiểm</th>
                   <th style={{ padding: '8px 10px' }}>Sản Phẩm & Quy Cách</th>
                   <th style={{ padding: '8px 10px', textAlign: 'center', width: '70px' }}>Số Lượng</th>
@@ -149,21 +149,21 @@ export default function PackingSlipModal({ order, shop, onClose }) {
               </thead>
               <tbody>
                 {(order.items || []).map((item, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--border-medium, #e2e8f0)' }}>
                     <td style={{ padding: '10px', textAlign: 'center' }}>
                       <input type="checkbox" defaultChecked style={{ width: '16px', height: '16px', accentColor: '#16a34a', cursor: 'pointer' }} />
                     </td>
                     <td style={{ padding: '10px' }}>
-                      <div style={{ fontWeight: 700, color: '#1e293b' }}>{item.name}</div>
-                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>Mã SKU: #{item.productId || item.id || `SKU_${idx + 1}`}</div>
+                      <div style={{ fontWeight: 700, color: 'var(--text-primary, #1e293b)' }}>{item.name}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94a3b8)' }}>Mã SKU: #{item.productId || item.id || `SKU_${idx + 1}`}</div>
                     </td>
                     <td style={{ padding: '10px', textAlign: 'center', fontWeight: 800, fontSize: '14px', color: '#ea580c' }}>
                       x{item.quantity}
                     </td>
-                    <td style={{ padding: '10px', textAlign: 'right', color: '#64748b' }}>
+                    <td style={{ padding: '10px', textAlign: 'right', color: 'var(--text-secondary, #64748b)' }}>
                       {formatCurrency(item.price)}
                     </td>
-                    <td style={{ padding: '10px', textAlign: 'right', fontWeight: 800, color: '#0f172a' }}>
+                    <td style={{ padding: '10px', textAlign: 'right', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                       {formatCurrency(item.price * item.quantity)}
                     </td>
                   </tr>
@@ -179,28 +179,28 @@ export default function PackingSlipModal({ order, shop, onClose }) {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
             gap: '16px',
-            background: '#f8fafc',
+            background: 'var(--bg-muted, #f8fafc)',
             padding: '14px 16px',
             borderRadius: '12px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid var(--border-medium, #e2e8f0)',
             marginBottom: '20px'
           }}
         >
           <div>
-            <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary, #1e293b)' }}>
               <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CreditCardIcon size={11} color="#2563eb" />
               </span>
               <span>Phương thức thanh toán: <strong>{order.paymentMethod || 'VietQR'}</strong></span>
             </div>
-            <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary, #1e293b)' }}>
               <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 <TruckIcon size={11} color="#ea580c" />
               </span>
               <span>Mã vận đơn bưu cục: <strong style={{ color: '#ea580c' }}>{trackingCode}</strong></span>
             </div>
             {order.note && (
-              <div style={{ fontSize: '12px', color: '#d97706', marginTop: '6px', background: '#fef3c7', padding: '4px 8px', borderRadius: '4px', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--color-warning, #d97706)', marginTop: '6px', background: 'rgba(217, 119, 6, 0.1)', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(217, 119, 6, 0.25)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.15)', border: '1px solid rgba(217, 119, 6, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ChatIcon size={11} color="#d97706" />
                 </span>
@@ -210,7 +210,7 @@ export default function PackingSlipModal({ order, shop, onClose }) {
           </div>
 
           <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: '12px', color: '#64748b' }}>Tổng Giá Trị Đơn Hàng:</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary, #64748b)' }}>Tổng Giá Trị Đơn Hàng:</div>
             <div style={{ fontSize: '20px', fontWeight: 900, color: '#ea580c' }}>
               {formatCurrency(order.total || 0)}
             </div>
@@ -228,28 +228,29 @@ export default function PackingSlipModal({ order, shop, onClose }) {
             gap: '12px',
             textAlign: 'center',
             paddingTop: '10px',
-            borderTop: '1px dashed #cbd5e1',
+            borderTop: '1px dashed var(--border-medium, #cbd5e1)',
             marginBottom: '24px',
-            fontSize: '12px'
+            fontSize: '12px',
+            color: 'var(--text-primary, #1e293b)'
           }}
         >
           <div>
-            <div style={{ fontWeight: 800, color: '#475569' }}>NGƯỜI ĐÓNG GÓI</div>
-            <div style={{ fontStyle: 'italic', color: '#94a3b8', fontSize: '11px' }}>(Ký, ghi rõ họ tên)</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-secondary, #475569)' }}>NGƯỜI ĐÓNG GÓI</div>
+            <div style={{ fontStyle: 'italic', color: 'var(--text-secondary, #94a3b8)', fontSize: '11px' }}>(Ký, ghi rõ họ tên)</div>
             <div style={{ height: '40px' }} />
             <div style={{ fontWeight: 600 }}>{shopName.split(' ')[0]} Store</div>
           </div>
 
           <div>
-            <div style={{ fontWeight: 800, color: '#475569' }}>THỦ KHO XUẤT HÀNG</div>
-            <div style={{ fontStyle: 'italic', color: '#94a3b8', fontSize: '11px' }}>(Ký, ghi rõ họ tên)</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-secondary, #475569)' }}>THỦ KHO XUẤT HÀNG</div>
+            <div style={{ fontStyle: 'italic', color: 'var(--text-secondary, #94a3b8)', fontSize: '11px' }}>(Ký, ghi rõ họ tên)</div>
             <div style={{ height: '40px' }} />
             <div style={{ fontWeight: 600 }}>Đã kiểm xuất</div>
           </div>
 
           <div>
-            <div style={{ fontWeight: 800, color: '#475569' }}>BƯU TÁ SPX EXPRESS</div>
-            <div style={{ fontStyle: 'italic', color: '#94a3b8', fontSize: '11px' }}>(Ký nhận kiện hàng)</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-secondary, #475569)' }}>BƯU TÁ SPX EXPRESS</div>
+            <div style={{ fontStyle: 'italic', color: 'var(--text-secondary, #94a3b8)', fontSize: '11px' }}>(Ký nhận kiện hàng)</div>
             <div style={{ height: '40px' }} />
             <div style={{ fontWeight: 600, color: '#ea580c' }}>SPX Courier</div>
           </div>
