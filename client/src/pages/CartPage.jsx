@@ -621,10 +621,10 @@ export default function CartPage() {
             {/* Dual Voucher Badges */}
             <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "10px" }}>
               {appliedShippingVoucher && (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f0f9ff", padding: "8px 12px", borderRadius: "8px", border: "1px solid #0284c7" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(2, 132, 199, 0.08)", padding: "8px 12px", borderRadius: "8px", border: "1px solid rgba(2, 132, 199, 0.3)" }}>
                   <div>
                     <span style={{ fontWeight: 800, color: "#0284c7", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "rgba(2, 132, 199, 0.12)", border: "1px solid rgba(2, 132, 199, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                      <span style={{ width: "20px", height: "20px", borderRadius: "4px", background: "rgba(2, 132, 199, 0.15)", border: "1px solid rgba(2, 132, 199, 0.3)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                         <TruckIcon size={12} color="#0284c7" />
                       </span>
                       <span>{appliedShippingVoucher.code}</span>
