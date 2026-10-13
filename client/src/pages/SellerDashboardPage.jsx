@@ -5545,9 +5545,9 @@ export default function SellerDashboardPage() {
               </div>
 
               <form onSubmit={handleCreateWithdraw}>
-                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px 14px', marginBottom: '16px' }}>
-                  <div style={{ fontSize: '12px', color: '#166534', fontWeight: 600 }}>Số Dư Khả Dụng Hiện Có:</div>
-                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#15803d' }}>
+                <div style={{ background: 'rgba(22, 163, 74, 0.08)', border: '1px solid rgba(22, 163, 74, 0.25)', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--color-success, #16a34a)', fontWeight: 700 }}>Số Dư Khả Dụng Hiện Có:</div>
+                  <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--color-success, #15803d)', marginTop: '2px' }}>
                     {formatCurrency(shopWalletBalance)}
                   </div>
                 </div>
@@ -8273,15 +8273,15 @@ export default function SellerDashboardPage() {
         {showBatchInventoryModal && (
           <div className="shopee-modal-overlay" onClick={() => setShowBatchInventoryModal(false)} style={{ animation: 'modalOverlayFadeIn 0.2s ease-out forwards' }}>
             <div className="shopee-modal-content anim-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '960px', maxHeight: '90vh', overflowY: 'auto' }}>
-              <div className="shopee-modal-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '14px', marginBottom: '16px' }}>
+              <div className="shopee-modal-header" style={{ borderBottom: '1px solid var(--border-medium, #e2e8f0)', paddingBottom: '14px', marginBottom: '16px' }}>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a' }}>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary, #0f172a)' }}>
                     <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                       <PackageIcon size={16} color="#ea580c" />
                     </span>
                     <span>Ma Trận Nhập Kho Hàng Loạt &amp; Phân Loại Cận Date / Xả Kho</span>
                   </h3>
-                  <small style={{ color: '#64748b', fontSize: '12.5px', marginTop: '3px', display: 'block' }}>
+                  <small style={{ color: 'var(--text-muted, #64748b)', fontSize: '12.5px', marginTop: '3px', display: 'block' }}>
                     Gian hàng: <strong>{currentShop.name}</strong> • Đang chọn <strong>{batchSelectedIds.size}/{shopProducts.length}</strong> sản phẩm
                   </small>
                 </div>
@@ -8299,8 +8299,8 @@ export default function SellerDashboardPage() {
               </div>
 
               {/* Thanh Công Cụ Thao Tác Hàng Loạt (Bulk Action Toolbar) */}
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 16px', marginBottom: '16px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
+              <div style={{ background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '12px', padding: '14px 16px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary, #334155)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
                   ⚡ Thao Tác Nhanh Cho Các Sản Phẩm Đã Chọn ({batchSelectedIds.size} mặt hàng)
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
@@ -8421,9 +8421,9 @@ export default function SellerDashboardPage() {
               </div>
 
               {/* Bảng Danh Sách Mặt Hàng Trong Ma Trận */}
-              <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', maxHeight: '360px', overflowY: 'auto', marginBottom: '16px' }}>
-                <table className="shopee-table" style={{ width: '100%', fontSize: '12.5px', margin: 0 }}>
-                  <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 2 }}>
+              <div style={{ border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '10px', maxHeight: '360px', overflowY: 'auto', overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: '16px' }}>
+                <table className="shopee-table" style={{ width: '100%', fontSize: '12.5px', margin: 0, minWidth: '780px' }}>
+                  <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-muted, #f8fafc)', zIndex: 2 }}>
                     <tr>
                       <th style={{ width: '36px', textAlign: 'center' }}>
                         <input
@@ -8466,7 +8466,7 @@ export default function SellerDashboardPage() {
                         const isLow = it.currentStock <= (typeof it.safetyThreshold === 'number' ? it.safetyThreshold : 10);
 
                         return (
-                          <tr key={pid} style={{ background: isChecked ? '#ffffff' : '#f8fafc', opacity: isChecked ? 1 : 0.65 }}>
+                          <tr key={pid} style={{ background: isChecked ? 'var(--bg-card, #ffffff)' : 'var(--bg-muted, #f8fafc)', opacity: isChecked ? 1 : 0.65 }}>
                             <td style={{ textAlign: 'center' }}>
                               <input
                                 type="checkbox"

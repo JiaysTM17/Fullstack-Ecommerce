@@ -697,9 +697,9 @@ export default function VoucherPickerModal({
                               height: "20px",
                               borderRadius: "50%",
                               border: isSelected
-                                ? "#0284c7"
-                                : "2px solid #cbd5e1",
-                              background: "#fff",
+                                ? "6px solid #0284c7"
+                                : "2px solid var(--border-medium, #cbd5e1)",
+                              background: "var(--bg-card, #ffffff)",
                               transition: "all 0.15s ease",
                             }}
                           />
@@ -948,8 +948,8 @@ export default function VoucherPickerModal({
                               borderRadius: "50%",
                               border: isSelected
                                 ? "6px solid var(--primary-color, #ea580c)"
-                                : "2px solid #cbd5e1",
-                              background: "#fff",
+                                : "2px solid var(--border-medium, #cbd5e1)",
+                              background: "var(--bg-card, #ffffff)",
                               transition: "all 0.15s ease",
                             }}
                           />
@@ -1032,8 +1032,8 @@ export default function VoucherPickerModal({
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: "12px",
-            background: "#fff",
-            borderTop: "2px solid #e2e8f0",
+            background: "var(--bg-card, #ffffff)",
+            borderTop: "1px solid var(--border-medium, #e2e8f0)",
             padding: "16px 22px",
           }}
         >

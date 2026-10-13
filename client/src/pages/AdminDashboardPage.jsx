@@ -2900,44 +2900,44 @@ export default function AdminDashboardPage() {
           <div className="shopee-card" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary, #0f172a)' }}>
                   Cổng Kê Khai Thuế Nhà Thầu Sàn TMĐT (Withholding Tax Center)
                 </h2>
-                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted, #64748b)' }}>
                   Tự động khấu trừ và nộp thay thuế TNCN (1%) &amp; GTGT (0.5%) cho các hộ kinh doanh theo Nghị định 52/2018 &amp; Thông tư 40/2021/TT-BTC.
                 </p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <span style={{ background: '#ecfdf5', color: '#059669', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 700 }}>
+                <span style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--color-success, #059669)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '5px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, display: 'inline-block' }}>
                   Kỳ đối soát: Tháng 09/2026
                 </span>
-                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>Hạn chót nộp: 20/10/2026</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted, #64748b)', marginTop: '4px' }}>Hạn chót nộp: 20/10/2026</div>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '12px', color: '#64748b' }}>Tổng Doanh Thu Tính Thuế</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+              <div style={{ padding: '16px', borderRadius: '12px', background: 'var(--bg-muted, #f8fafc)', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>Tổng Doanh Thu Tính Thuế</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary, #0f172a)', marginTop: '4px' }}>
                   {formatCurrency(taxData?.summary?.totalGross || totalPlatformRevenue)}
                 </div>
               </div>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#ecfdf5', border: '1px solid #a7f3d0' }}>
-                <div style={{ fontSize: '12px', color: '#047857' }}>Tổng Thuế Khấu Trừ Tạm Thu</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#059669', marginTop: '4px' }}>
+              <div style={{ padding: '16px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--color-success, #047857)', fontWeight: 600 }}>Tổng Thuế Khấu Trừ Tạm Thu</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--color-success, #059669)', marginTop: '4px' }}>
                   {formatCurrency(taxData?.summary?.totalTaxCollected || Math.round(totalPlatformRevenue * 0.015))}
                 </div>
               </div>
-              <div style={{ padding: '16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-                <div style={{ fontSize: '12px', color: '#1d4ed8' }}>Số Lượng Gian Hàng Kê Khai</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#2563eb', marginTop: '4px' }}>
+              <div style={{ padding: '16px', borderRadius: '12px', background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.25)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--secondary-color, #1d4ed8)', fontWeight: 600 }}>Số Lượng Gian Hàng Kê Khai</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--secondary-color, #2563eb)', marginTop: '4px' }}>
                   {taxData?.summary?.totalShopsFiled || shops.length} Gian hàng
                 </div>
               </div>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
-              <table className="shopee-table" style={{ width: '100%', fontSize: '13px' }}>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '10px' }}>
+              <table className="shopee-table" style={{ width: '100%', fontSize: '13px', margin: 0, minWidth: '760px' }}>
                 <thead>
                   <tr>
                     <th>Gian Hàng</th>
@@ -3579,25 +3579,25 @@ export default function AdminDashboardPage() {
             MERCHANT KYC & TAX COMPLIANCE CENTER (Decree 52/2018/NĐ-CP)
         ========================================================================= */}
         {activeTab === 'merchant_kyc' && (
-          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
+          <div className="shopee-card" style={{ padding: '24px', borderRadius: '16px', background: 'var(--bg-card, #ffffff)', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: 'var(--shadow-sm)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <StoreIcon size={20} color="#0d9488" />
                   Cổng Định Danh Pháp Nhân &amp; Thuế Gian Hàng (Merchant KYC)
                 </h2>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted, #64748b)', margin: 0 }}>
                   Thẩm định MST, CCCD người đại diện và GPKD các nhà bán hàng theo quy định Nghị định 52/2018/NĐ-CP và Thông tư thuế TMĐT.
                 </p>
               </div>
 
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <span style={{ fontSize: '12.5px', color: '#64748b', fontWeight: 600 }}>Lọc theo trạng thái:</span>
+                <span style={{ fontSize: '12.5px', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>Lọc theo trạng thái:</span>
                 <select
                   className="shopee-input"
                   value={kycFilterStatus}
                   onChange={(e) => setKycFilterStatus(e.target.value)}
-                  style={{ padding: '6px 12px', fontSize: '12.5px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  style={{ padding: '6px 12px', fontSize: '12.5px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                 >
                   <option value="all">Tất cả ({merchantKycData?.summary?.total || 0})</option>
                   <option value="VERIFIED">Đã Xác Minh ({merchantKycData?.summary?.verified || 0})</option>
@@ -3618,36 +3618,36 @@ export default function AdminDashboardPage() {
 
             {/* KPI Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '20px' }}>
-              <div style={{ padding: '14px 18px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
-                <div style={{ fontSize: '12px', color: '#166534', fontWeight: 600 }}>Gian Hàng Đã Định Danh</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#15803d', marginTop: '2px' }}>
+              <div style={{ padding: '14px 18px', background: 'rgba(22, 163, 74, 0.08)', borderRadius: '12px', border: '1px solid rgba(22, 163, 74, 0.25)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--color-success, #166534)', fontWeight: 600 }}>Gian Hàng Đã Định Danh</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--color-success, #15803d)', marginTop: '2px' }}>
                   {merchantKycData?.summary?.verified || 0} Shop
                 </div>
-                <div style={{ fontSize: '11px', color: '#16a34a', marginTop: '4px' }}>Đủ điều kiện xuất VAT tự động</div>
+                <div style={{ fontSize: '11px', color: 'var(--color-success, #16a34a)', marginTop: '4px' }}>Đủ điều kiện xuất VAT tự động</div>
               </div>
 
-              <div style={{ padding: '14px 18px', background: '#fffbeb', borderRadius: '12px', border: '1px solid #fde68a' }}>
-                <div style={{ fontSize: '12px', color: '#92400e', fontWeight: 600 }}>Hồ Sơ Chờ Phê Duyệt</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#d97706', marginTop: '2px' }}>
+              <div style={{ padding: '14px 18px', background: 'rgba(245, 158, 11, 0.08)', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--color-warning, #92400e)', fontWeight: 600 }}>Hồ Sơ Chờ Phê Duyệt</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--color-warning, #d97706)', marginTop: '2px' }}>
                   {merchantKycData?.summary?.pending || 0} Shop
                 </div>
-                <div style={{ fontSize: '11px', color: '#b45309', marginTop: '4px' }}>Cần Admin rà soát pháp lý</div>
+                <div style={{ fontSize: '11px', color: 'var(--color-warning, #b45309)', marginTop: '4px' }}>Cần Admin rà soát pháp lý</div>
               </div>
 
-              <div style={{ padding: '14px 18px', background: '#fef2f2', borderRadius: '12px', border: '1px solid #fecaca' }}>
-                <div style={{ fontSize: '12px', color: '#991b1b', fontWeight: 600 }}>Chưa Nộp / Bị Từ Chối</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#dc2626', marginTop: '2px' }}>
+              <div style={{ padding: '14px 18px', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--color-error, #991b1b)', fontWeight: 600 }}>Chưa Nộp / Bị Từ Chối</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--color-error, #dc2626)', marginTop: '2px' }}>
                   {(merchantKycData?.summary?.unverified || 0) + (merchantKycData?.summary?.rejected || 0)} Shop
                 </div>
-                <div style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px' }}>Tạm giới hạn rút tiền doanh thu</div>
+                <div style={{ fontSize: '11px', color: 'var(--color-error, #ef4444)', marginTop: '4px' }}>Tạm giới hạn rút tiền doanh thu</div>
               </div>
             </div>
 
             {/* KYC Table */}
-            <div style={{ overflowX: 'auto', border: '1px solid #f1f5f9', borderRadius: '12px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', border: '1px solid var(--border-medium, #e2e8f0)', borderRadius: '12px' }}>
+              <table className="shopee-table" style={{ width: '100%', fontSize: '13px', margin: 0, minWidth: '780px' }}>
                 <thead>
-                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
+                  <tr style={{ background: 'var(--bg-muted, #f8fafc)', borderBottom: '1px solid var(--border-medium, #e2e8f0)', color: 'var(--text-secondary, #475569)' }}>
                     <th style={{ padding: '12px 16px', fontWeight: 700 }}>Gian Hàng</th>
                     <th style={{ padding: '12px 16px', fontWeight: 700 }}>Loại Hình Pháp Nhân</th>
                     <th style={{ padding: '12px 16px', fontWeight: 700 }}>Mã Số Thuế (MST)</th>

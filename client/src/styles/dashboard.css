@@ -255,6 +255,7 @@
   overflow-x: auto;
 }
 
+.shopee-table,
 .shopee-data-table {
   width: 100%;
   border-collapse: collapse;
@@ -262,6 +263,7 @@
   font-size: 12.5px;
 }
 
+.shopee-table th,
 .shopee-data-table th {
   background-color: var(--bg-muted, #f8fafc);
   color: var(--text-secondary, #475569);
@@ -274,6 +276,7 @@
   white-space: nowrap;
 }
 
+.shopee-table td,
 .shopee-data-table td {
   padding: 11px 12px;
   border-bottom: 1px solid var(--border-light, #f1f5f9);
@@ -283,6 +286,7 @@
   font-size: 12.5px;
 }
 
+.shopee-table tr:hover td,
 .shopee-data-table tr:hover td {
   background-color: var(--bg-hover, #f8fafc);
 }
@@ -2849,17 +2853,20 @@
   color: var(--text-primary, #f8fafc);
 }
 
+[data-theme="dark"] .shopee-table th,
 [data-theme="dark"] .shopee-data-table th {
   background-color: var(--bg-page, #0b0f19);
   color: var(--text-secondary, #94a3b8);
   border-bottom-color: var(--border-color, #334155);
 }
 
+[data-theme="dark"] .shopee-table td,
 [data-theme="dark"] .shopee-data-table td {
   border-bottom-color: var(--border-color, #334155);
   color: var(--text-primary, #f8fafc);
 }
 
+[data-theme="dark"] .shopee-table tr:hover td,
 [data-theme="dark"] .shopee-data-table tr:hover td {
   background-color: var(--bg-hover, #273549);
 }
