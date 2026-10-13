@@ -497,14 +497,14 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <main className="profile-page-wrapper" style={{ textAlign: 'center', padding: '80px 16px' }}>
-        <div style={{ maxWidth: '440px', margin: '0 auto', background: '#fff', padding: '40px 32px', borderRadius: '18px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+        <div style={{ maxWidth: '440px', margin: '0 auto', background: 'var(--bg-card, #ffffff)', padding: '40px 32px', borderRadius: '18px', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--primary-light, #eff6ff)', color: 'var(--primary-color, #2563eb)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
             <UserIcon size={28} color="#2563eb" />
           </div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', margin: '0 0 8px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary, #0f172a)', margin: '0 0 8px' }}>
             {t('please_login_profile', 'Vui lòng đăng nhập để xem thông tin')}
           </h2>
-          <p style={{ fontSize: '13.5px', color: '#64748b', margin: '0 0 24px' }}>
+          <p style={{ fontSize: '13.5px', color: 'var(--text-secondary, #64748b)', margin: '0 0 24px' }}>
             Đăng nhập để quản lý đơn hàng, địa chỉ giao hàng và ví quà tặng cá nhân.
           </p>
           <Link to="/login" className="shopee-btn shopee-btn-primary" style={{ display: 'block', padding: '12px', fontWeight: 700 }}>
@@ -1721,14 +1721,14 @@ export default function ProfilePage() {
 
             {/* Address List */}
             {addresses.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px 16px', background: '#f8fafc', borderRadius: '14px', border: '1px dashed #cbd5e1' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: '#eff6ff', color: '#2563eb', marginBottom: '12px' }}>
+              <div style={{ textAlign: 'center', padding: '48px 16px', background: 'var(--bg-muted, #f8fafc)', borderRadius: '14px', border: '1px dashed var(--border-medium, #cbd5e1)' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'var(--primary-light, #eff6ff)', color: 'var(--primary-color, #2563eb)', marginBottom: '12px' }}>
                   <HomeIcon size={32} color="#cbd5e1" />
                 </div>
-                <div style={{ fontWeight: 700, fontSize: '15px', color: '#0f172a', marginBottom: '4px' }}>
+                <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--text-primary, #0f172a)', marginBottom: '4px' }}>
                   Chưa có địa chỉ giao hàng nào
                 </div>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 16px' }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary, #64748b)', margin: '0 0 16px' }}>
                   Thêm địa chỉ ngay để việc thanh toán và giao nhận diễn ra nhanh chóng nhất.
                 </p>
                 <button
