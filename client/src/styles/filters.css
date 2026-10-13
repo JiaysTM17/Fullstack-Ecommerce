@@ -223,3 +223,44 @@
   }
 }
 
+/* =========================================================================
+   Dark Mode Adaptations for Filters Sidebar
+   ========================================================================= */
+[data-theme="dark"] .shopee-filter-sidebar {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .shopee-filter-section {
+  border-bottom-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .shopee-price-chip {
+  background: var(--bg-muted, #0f172a);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .shopee-price-chip:hover {
+  background: var(--bg-hover, #273549);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .shopee-custom-price-input {
+  background: var(--bg-page, #0f172a);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .shopee-clear-filters-btn {
+  color: #818cf8;
+  border-color: #818cf8;
+}
+
+[data-theme="dark"] .shopee-clear-filters-btn:hover {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+
