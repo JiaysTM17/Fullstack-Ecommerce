@@ -3702,10 +3702,10 @@ export default function AdminDashboardPage() {
                         const isRejected = kyc.status === 'REJECTED';
 
                         return (
-                          <tr key={item.shopId} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <tr key={item.shopId} style={{ borderBottom: '1px solid var(--border-medium, #f1f5f9)' }}>
                             <td style={{ padding: '12px 16px' }}>
-                              <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.shopName}</div>
-                              <div style={{ fontSize: '11px', color: '#64748b' }}>Mã: {item.shopId} • ĐT: {item.phone}</div>
+                              <div style={{ fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>{item.shopName}</div>
+                              <div style={{ fontSize: '11px', color: 'var(--text-secondary, #64748b)' }}>Mã: {item.shopId} • ĐT: {item.phone}</div>
                             </td>
                             <td style={{ padding: '12px 16px' }}>
                               <span style={{
@@ -3713,19 +3713,19 @@ export default function AdminDashboardPage() {
                                 borderRadius: '6px',
                                 fontSize: '11px',
                                 fontWeight: 700,
-                                background: kyc.businessType === 'ENTERPRISE' ? '#eff6ff' : '#f8fafc',
-                                color: kyc.businessType === 'ENTERPRISE' ? '#1d4ed8' : '#475569',
-                                border: '1px solid #e2e8f0',
+                                background: kyc.businessType === 'ENTERPRISE' ? 'rgba(37, 99, 235, 0.12)' : 'var(--bg-muted, #f8fafc)',
+                                color: kyc.businessType === 'ENTERPRISE' ? 'var(--primary-color, #1d4ed8)' : 'var(--text-secondary, #475569)',
+                                border: '1px solid var(--border-medium, #e2e8f0)',
                               }}>
                                 {kyc.businessType === 'ENTERPRISE' ? 'Doanh Nghiệp' : (kyc.businessType === 'HOUSEHOLD' ? 'Hộ Kinh Doanh' : 'Cá Nhân')}
                               </span>
                             </td>
-                            <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontWeight: 600, color: '#0f172a' }}>
+                            <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontWeight: 600, color: 'var(--text-primary, #0f172a)' }}>
                               {kyc.taxId || 'Chưa cung cấp'}
                             </td>
                             <td style={{ padding: '12px 16px' }}>
-                              <div style={{ fontWeight: 600, color: '#334155' }}>{kyc.legalRepresentative || 'Chưa cập nhật'}</div>
-                              <div style={{ fontSize: '11px', color: '#94a3b8' }}>CCCD: {kyc.citizenId || '---'}</div>
+                              <div style={{ fontWeight: 600, color: 'var(--text-primary, #334155)' }}>{kyc.legalRepresentative || 'Chưa cập nhật'}</div>
+                              <div style={{ fontSize: '11px', color: 'var(--text-muted, #94a3b8)' }}>CCCD: {kyc.citizenId || '---'}</div>
                             </td>
                             <td style={{ padding: '12px 16px' }}>
                               <span style={{

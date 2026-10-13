@@ -408,7 +408,7 @@ export default function ProductQASection({ productId, shopName = "Thời Trang G
                   border: "1px solid var(--border-medium, #e2e8f0)",
                   borderRadius: "10px",
                   padding: "16px",
-                  background: "var(--bg-secondary, #fafafa)",
+                  background: "var(--bg-muted, #fafafa)",
                 }}
               >
                 {/* Question Header */}
