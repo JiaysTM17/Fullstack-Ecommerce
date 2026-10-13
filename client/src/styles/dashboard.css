@@ -2989,3 +2989,31 @@ body.dark-mode .shopee-order-btn-outline:hover {
   color: var(--primary-color, #ea580c);
 }
 
+/* Seller Tabs & Subitems Dark Mode */
+[data-theme="dark"] .seller-tab-btn,
+body.dark-mode .seller-tab-btn {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .seller-tab-btn:hover,
+body.dark-mode .seller-tab-btn:hover {
+  background: var(--bg-hover, #273549);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .seller-tab-btn.active,
+body.dark-mode .seller-tab-btn.active {
+  background: var(--primary-color, #ea580c);
+  border-color: var(--primary-color, #ea580c);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .account-sidebar-badge-count,
+body.dark-mode .account-sidebar-badge-count {
+  background: var(--bg-hover, #273549);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-secondary, #94a3b8);
+}
+
