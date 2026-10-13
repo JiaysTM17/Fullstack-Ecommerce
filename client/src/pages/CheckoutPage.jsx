@@ -713,26 +713,30 @@ export default function CheckoutPage() {
           {/* STEP 1: Address */}
           {currentStep === 1 && (
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
-                <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0, display: "inline-flex", alignItems: "center", gap: "10px" }}>
-                  <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)", border: "1px solid #fed7aa", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <MapPinIcon size={16} color="#ea580c" />
-                  </span>
-                  <span>Bước 1: Chọn Địa Chỉ Giao Hàng</span>
-                </h2>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px", borderBottom: "1px solid #f1f5f9", paddingBottom: "14px" }}>
+                <div>
+                  <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0, display: "inline-flex", alignItems: "center", gap: "10px", color: "#0f172a" }}>
+                    <span style={{ width: "34px", height: "34px", borderRadius: "10px", background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)", border: "1px solid #fed7aa", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <MapPinIcon size={18} color="#ea580c" />
+                    </span>
+                    <span>Bước 1: Địa Chỉ Nhận Hàng</span>
+                  </h2>
+                  <p style={{ margin: "4px 0 0", fontSize: "12.5px", color: "#64748b" }}>
+                    Chọn địa chỉ có sẵn từ sổ tay hoặc thêm địa chỉ nhận hàng mới
+                  </p>
+                </div>
                 <button
                   type="button"
                   className="shopee-btn shopee-btn-secondary"
-                  style={{ fontSize: "12.5px", padding: "6px 14px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  style={{ fontSize: "12.5px", padding: "8px 16px", fontWeight: 700, borderRadius: "8px", display: "inline-flex", alignItems: "center", gap: "8px", background: "#fff7ed", border: "1px solid #fed7aa", color: "#ea580c" }}
                   onClick={() => setShowAddAddressModal(true)}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <PlusIcon size={11} color="#ea580c" />
-                  </span>
-                  <span>Thêm Địa Chỉ Mới</span>
+                  <PlusIcon size={13} color="#ea580c" />
+                  <span>+ Thêm Địa Chỉ Mới</span>
                 </button>
               </div>
 
+              {/* Lưới Thẻ Địa Chỉ Đã Lưu */}
               <div className="address-card-grid">
                 {savedAddresses.length > 0 ? (
                   savedAddresses.map((addr) => {
@@ -746,35 +750,53 @@ export default function CheckoutPage() {
                           setPhone(addr.phone);
                           setAddress(addr.address);
                         }}
-                        style={{ cursor: "pointer", position: "relative" }}
                       >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                          <div style={{ fontWeight: 700, fontSize: "14.5px", display: "inline-flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                            <span>{addr.name || addr.fullName} ({addr.phone})</span>
-                            <span style={{ fontSize: "11px", color: "#2563eb", background: "rgba(37, 99, 235, 0.08)", border: "1px solid rgba(37, 99, 235, 0.2)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "5px", fontWeight: 600 }}>
-                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.14)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {addr.tag === 'Văn Phòng' ? <StoreIcon size={9} color="#2563eb" /> : <HomeIcon size={9} color="#2563eb" />}
+                        <div>
+                          {/* Header Thẻ: Tên, SĐT, Tag, Huy hiệu mặc định */}
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "8px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                              <strong style={{ fontSize: "15px", color: isSelected ? "#ea580c" : "#0f172a" }}>
+                                {addr.name || addr.fullName}
+                              </strong>
+                              <span style={{ fontSize: "13px", fontWeight: 600, color: "#64748b" }}>
+                                ({addr.phone})
                               </span>
-                              <span>{addr.tag || 'Nhà Riêng'}</span>
-                            </span>
+                              <span style={{
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                color: addr.tag === 'Văn phòng' || addr.tag === 'Văn Phòng' ? '#0284c7' : '#ea580c',
+                                background: addr.tag === 'Văn phòng' || addr.tag === 'Văn Phòng' ? '#e0f2fe' : '#fff7ed',
+                                border: `1px solid ${addr.tag === 'Văn phòng' || addr.tag === 'Văn Phòng' ? '#bae6fd' : '#fed7aa'}`,
+                                padding: "2px 8px",
+                                borderRadius: "6px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px"
+                              }}>
+                                {addr.tag === 'Văn phòng' || addr.tag === 'Văn Phòng' ? <StoreIcon size={10} color="#0284c7" /> : <HomeIcon size={10} color="#ea580c" />}
+                                <span>{addr.tag || 'Nhà riêng'}</span>
+                              </span>
+                            </div>
+
+                            {addr.isDefault && (
+                              <span className="address-default-badge">
+                                <CheckIcon size={10} color="#ffffff" />
+                                <span>MẶC ĐỊNH</span>
+                              </span>
+                            )}
                           </div>
-                          {addr.isDefault && (
-                            <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <CheckIcon size={9} color="#ffffff" />
-                              </span>
-                              <span>MẶC ĐỊNH</span>
+
+                          {/* Địa chỉ chi tiết */}
+                          <div style={{ fontSize: "13px", color: "#334155", lineHeight: 1.5, display: "flex", alignItems: "flex-start", gap: "8px", marginBottom: "14px" }}>
+                            <span style={{ width: "20px", height: "20px", borderRadius: "5px", background: isSelected ? "rgba(234, 88, 12, 0.12)" : "#f1f5f9", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "2px" }}>
+                              <MapPinIcon size={12} color={isSelected ? "#ea580c" : "#64748b"} />
                             </span>
-                          )}
-                        </div>
-                        <div style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.4", display: "flex", alignItems: "flex-start", gap: "8px" }}>
-                          <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: "2px" }}>
-                            <MapPinIcon size={12} color="#2563eb" />
-                          </span>
-                          <span>{addr.address}</span>
+                            <span>{addr.address}</span>
+                          </div>
                         </div>
 
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px", paddingTop: "8px", borderTop: "1px dashed var(--border-light, #e2e8f0)" }}>
+                        {/* Thao tác địa chỉ */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px dashed #e2e8f0" }}>
                           <div>
                             {!addr.isDefault && (
                               <button
@@ -783,56 +805,54 @@ export default function CheckoutPage() {
                                 style={{
                                   background: "none",
                                   border: "none",
-                                  color: "var(--primary-color, #ea580c)",
-                                  fontSize: "11.5px",
+                                  color: "#ea580c",
+                                  fontSize: "12px",
                                   fontWeight: 700,
                                   cursor: "pointer",
-                                  padding: "2px 0",
+                                  padding: 0,
                                   display: "inline-flex",
                                   alignItems: "center",
-                                  gap: "6px",
+                                  gap: "5px",
                                 }}
                               >
-                                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <StarIcon size={10} color="#ea580c" />
-                                </span>
+                                <StarIcon size={12} color="#ea580c" />
                                 <span>Đặt mặc định</span>
                               </button>
                             )}
                           </div>
-                          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                             <button
                               type="button"
                               onClick={(e) => handleOpenEditAddress(addr, e)}
                               style={{
-                                background: "none",
-                                border: "none",
-                                color: "var(--text-secondary, #475569)",
-                                fontSize: "11.5px",
+                                background: "#f8fafc",
+                                border: "1px solid #e2e8f0",
+                                color: "#475569",
+                                fontSize: "12px",
                                 fontWeight: 600,
                                 cursor: "pointer",
-                                padding: "2px 4px",
+                                padding: "3px 8px",
+                                borderRadius: "6px",
                                 display: "inline-flex",
                                 alignItems: "center",
                                 gap: "5px",
                               }}
                               title="Sửa địa chỉ"
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(100, 116, 139, 0.12)', border: '1px solid rgba(100, 116, 139, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <PencilIcon size={10} color="#64748b" />
-                              </span>
+                              <PencilIcon size={11} color="#64748b" />
                               <span>Sửa</span>
                             </button>
                             <button
                               type="button"
                               onClick={(e) => handleDeleteAddress(addr.id, e)}
                               style={{
-                                background: "none",
-                                border: "none",
-                                color: "#ef4444",
-                                fontSize: "11.5px",
+                                background: "#fef2f2",
+                                border: "1px solid #fecaca",
+                                color: "#dc2626",
+                                fontSize: "12px",
                                 cursor: "pointer",
-                                padding: "2px 4px",
+                                padding: "3px 8px",
+                                borderRadius: "6px",
                                 display: "inline-flex",
                                 alignItems: "center",
                                 gap: "5px",
@@ -840,9 +860,7 @@ export default function CheckoutPage() {
                               }}
                               title="Xóa địa chỉ"
                             >
-                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <TrashIcon size={10} color="#ef4444" />
-                              </span>
+                              <TrashIcon size={11} color="#dc2626" />
                               <span>Xóa</span>
                             </button>
                           </div>
@@ -851,65 +869,77 @@ export default function CheckoutPage() {
                     );
                   })
                 ) : (
-                  <div className="address-card selected">
-                    <span className="address-default-badge" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                      <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <CheckIcon size={9} color="#059669" />
+                  <div className="address-card selected" style={{ padding: "18px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                      <span className="address-default-badge">
+                        <CheckIcon size={10} color="#ffffff" />
+                        <span>MẶC ĐỊNH</span>
                       </span>
-                      <span>MẶC ĐỊNH</span>
-                    </span>
-                    <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px" }}>{fullName} ({phone})</div>
-                    <div style={{ color: "var(--text-secondary)", fontSize: "13.5px", lineHeight: "1.5" }}>{address}</div>
+                      <strong style={{ fontSize: "15px" }}>{fullName} ({phone})</strong>
+                    </div>
+                    <div style={{ color: "#334155", fontSize: "13.5px", lineHeight: "1.5" }}>{address}</div>
                   </div>
                 )}
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px", background: "#fafafa", padding: "16px", borderRadius: "8px", border: "1px solid #eee" }}>
-                <div style={{ fontSize: "13px", fontWeight: 700, color: "#333" }}>Hoặc cập nhật thông tin người nhận:</div>
+              {/* Chỉnh sửa nhanh thông tin nếu muốn đổi người nhận */}
+              <div style={{ background: "#f8fafc", padding: "18px 20px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "20px" }}>
+                <div style={{ fontSize: "13.5px", fontWeight: 700, color: "#0f172a", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <PencilIcon size={14} color="#ea580c" />
+                  <span>Xác nhận thông tin người nhận đơn hàng này:</span>
+                </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "12px" }}>
                   <div>
-                    <label style={{ fontSize: "12px", fontWeight: 600 }}>Họ và tên:</label>
+                    <label style={{ fontSize: "12px", fontWeight: 700, color: "#475569", display: "block", marginBottom: "4px" }}>
+                      Họ và tên người nhận:
+                    </label>
                     <input
                       type="text"
                       className="shopee-form-input"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
+                      style={{ borderRadius: "8px", padding: "8px 12px", fontSize: "13px" }}
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: "12px", fontWeight: 600 }}>Số điện thoại:</label>
+                    <label style={{ fontSize: "12px", fontWeight: 700, color: "#475569", display: "block", marginBottom: "4px" }}>
+                      Số điện thoại liên hệ:
+                    </label>
                     <input
                       type="text"
                       className="shopee-form-input"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
+                      style={{ borderRadius: "8px", padding: "8px 12px", fontSize: "13px" }}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ fontSize: "12px", fontWeight: 600 }}>Địa chỉ chi tiết (Số nhà, đường, phường, quận):</label>
+                  <label style={{ fontSize: "12px", fontWeight: 700, color: "#475569", display: "block", marginBottom: "4px" }}>
+                    Địa chỉ giao hàng chi tiết:
+                  </label>
                   <input
                     type="text"
                     className="shopee-form-input"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
+                    style={{ borderRadius: "8px", padding: "8px 12px", fontSize: "13px" }}
                   />
                 </div>
               </div>
 
-              <div style={{ marginTop: "24px", display: "flex", justifyContent: "flex-end" }}>
+              {/* Navigation button */}
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <button
                   type="button"
                   className="shopee-btn shopee-btn-primary"
                   onClick={() => setCurrentStep(2)}
-                  style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "10px 24px", fontSize: "14.5px", fontWeight: 700, borderRadius: "8px" }}
                 >
                   <span>Tiếp Tục: Chọn Vận Chuyển</span>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.22)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <ChevronRightIcon size={13} color="#ffffff" />
-                  </span>
+                  <ChevronRightIcon size={14} color="#ffffff" />
                 </button>
               </div>
             </div>
@@ -918,42 +948,92 @@ export default function CheckoutPage() {
           {/* STEP 2: Shipping */}
           {currentStep === 2 && (
             <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "10px" }}>
-                <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)", border: "1px solid #7dd3fc", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <TruckIcon size={16} color="#0284c7" />
-                </span>
-                <span>Bước 2: Tốc Độ & Phương Thức Vận Chuyển</span>
-              </h2>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", flexWrap: "wrap", gap: "10px" }}>
+                <div>
+                  <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 4px", display: "inline-flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ width: "32px", height: "32px", borderRadius: "10px", background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)", border: "1px solid #7dd3fc", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <TruckIcon size={17} color="#0284c7" />
+                    </span>
+                    <span>Bước 2: Phương Thức Vận Chuyển & Thời Gian Giao Hàng</span>
+                  </h2>
+                  <div style={{ fontSize: "13px", color: "var(--text-muted, #64748b)" }}>
+                    Đơn vị vận chuyển liên kết chính hãng: <strong>SPX Express &amp; Shopee Xpress Hub</strong>
+                  </div>
+                </div>
+
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#f0fdf4", border: "1px solid #86efac", padding: "6px 12px", borderRadius: "20px", fontSize: "12px", color: "#16a34a", fontWeight: 700 }}>
+                  <ShieldCheckIcon size={14} color="#16a34a" />
+                  <span>Cam kết đúng hẹn · Bồi thường 15k nếu giao trễ</span>
+                </div>
+              </div>
 
               <div className="shipping-options-list">
                 {SHIPPING_OPTIONS.map((opt) => {
                   const IconComponent = opt.icon || TruckIcon;
                   const isSelected = selectedShipping === opt.id;
+                  
+                  // Tính ngày nhận hàng dự kiến
+                  const today = new Date();
+                  let estimateText = "";
+                  if (opt.id === "express") {
+                    estimateText = "Nhận trong 2 giờ hôm nay";
+                  } else if (opt.id === "economy") {
+                    const fromDate = new Date(today);
+                    fromDate.setDate(fromDate.getDate() + 4);
+                    const toDate = new Date(today);
+                    toDate.setDate(toDate.getDate() + 5);
+                    estimateText = `Dự kiến: ${fromDate.getDate()}/${fromDate.getMonth() + 1} - ${toDate.getDate()}/${toDate.getMonth() + 1}`;
+                  } else {
+                    const fromDate = new Date(today);
+                    fromDate.setDate(fromDate.getDate() + 2);
+                    const toDate = new Date(today);
+                    toDate.setDate(toDate.getDate() + 3);
+                    estimateText = `Dự kiến: ${fromDate.getDate()}/${fromDate.getMonth() + 1} - ${toDate.getDate()}/${toDate.getMonth() + 1}`;
+                  }
+
+                  const hasFreeship = appliedVoucher?.type === "shipping" || appliedShippingVoucher;
+
                   return (
                     <div
                       key={opt.id}
                       className={`shipping-option-card ${isSelected ? "selected" : ""}`}
                       onClick={() => setSelectedShipping(opt.id)}
+                      style={{
+                        padding: "16px 20px",
+                        position: "relative",
+                        overflow: "hidden"
+                      }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "16px", flex: 1 }}>
                         <div
                           style={{
-                            width: "42px",
-                            height: "42px",
-                            borderRadius: "10px",
+                            width: "46px",
+                            height: "46px",
+                            borderRadius: "12px",
                             background: opt.iconBg || "rgba(37, 99, 235, 0.1)",
                             border: opt.iconBorder || "none",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             flexShrink: 0,
+                            boxShadow: isSelected ? "0 4px 12px rgba(2, 132, 199, 0.2)" : "none"
                           }}
                         >
-                          <IconComponent size={22} color={opt.iconColor || "#2563eb"} />
+                          <IconComponent size={24} color={opt.iconColor || "#2563eb"} />
                         </div>
-                        <div>
-                          <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                             <span>{opt.name}</span>
+                            {opt.id === "express" && (
+                              <span style={{ background: "#ea580c", color: "#ffffff", fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px", textTransform: "uppercase" }}>
+                                HỎA TỐC 2H
+                              </span>
+                            )}
+                            {opt.id === "standard" && (
+                              <span style={{ background: "#0284c7", color: "#ffffff", fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px" }}>
+                                PHỔ BIẾN NHẤT
+                              </span>
+                            )}
                             {isSelected && (
                               <span
                                 style={{
@@ -975,15 +1055,46 @@ export default function CheckoutPage() {
                               </span>
                             )}
                           </div>
-                          <div style={{ color: "#64748b", fontSize: "13px" }}>{opt.desc}</div>
+                          <div style={{ color: "var(--text-muted, #64748b)", fontSize: "13px", marginBottom: "4px" }}>{opt.desc}</div>
+                          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#0284c7", fontWeight: 600 }}>
+                            <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: "#0284c7" }}></span>
+                            <span>{estimateText}</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="shipping-price-tag">
-                        {appliedVoucher?.type === "shipping" ? "MIỄN PHÍ" : formatCurrency(opt.fee)}
+
+                      <div style={{ textAlign: "right", marginLeft: "16px" }}>
+                        <div className="shipping-price-tag" style={{ fontSize: "16px", fontWeight: 800 }}>
+                          {hasFreeship ? (
+                            <div>
+                              <div style={{ color: "#16a34a", fontSize: "16px" }}>MIỄN PHÍ</div>
+                              <div style={{ fontSize: "11.5px", color: "var(--text-muted, #94a3b8)", textDecoration: "line-through" }}>
+                                {formatCurrency(opt.fee)}
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ color: "var(--primary-color, #ea580c)" }}>
+                              {formatCurrency(opt.fee)}
+                            </div>
+                          )}
+                        </div>
+                        {hasFreeship && (
+                          <span style={{ display: "inline-block", background: "rgba(22, 163, 74, 0.12)", color: "#16a34a", fontSize: "10.5px", fontWeight: 700, padding: "2px 6px", borderRadius: "4px", marginTop: "2px" }}>
+                            Freeship Xtra
+                          </span>
+                        )}
                       </div>
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Ghi chú đồng bộ kho vận */}
+              <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "12px 16px", marginBottom: "20px", display: "flex", alignItems: "center", gap: "10px", fontSize: "12.5px", color: "#475569" }}>
+                <span style={{ fontSize: "16px" }}>📦</span>
+                <span>
+                  Đơn hàng được chuẩn bị và bàn giao cho bưu tá SPX trong vòng <strong>2-4 giờ</strong>. Quý khách có thể theo dõi hành trình trực tuyến ngay sau khi đặt hàng.
+                </span>
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: "24px" }}>
@@ -1016,40 +1127,60 @@ export default function CheckoutPage() {
           {/* STEP 3: Payment */}
           {currentStep === 3 && (
             <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 16px", display: "inline-flex", alignItems: "center", gap: "10px" }}>
-                <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)", border: "1px solid #c4b5fd", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <CreditCardIcon size={16} color="#7c3aed" />
-                </span>
-                <span>Bước 3: Phương Thức Thanh Toán</span>
-              </h2>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", flexWrap: "wrap", gap: "10px" }}>
+                <div>
+                  <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 4px", display: "inline-flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ width: "32px", height: "32px", borderRadius: "10px", background: "linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)", border: "1px solid #c4b5fd", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <CreditCardIcon size={17} color="#7c3aed" />
+                    </span>
+                    <span>Bước 3: Phương Thức Thanh Toán An Toàn</span>
+                  </h2>
+                  <div style={{ fontSize: "13px", color: "var(--text-muted, #64748b)" }}>
+                    Được bảo vệ bởi <strong>Escrow Vault Shopee</strong> · Cam kết giữ tiền an toàn tới khi nhận hàng thành công
+                  </div>
+                </div>
+
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#faf5ff", border: "1px solid #d8b4fe", padding: "6px 12px", borderRadius: "20px", fontSize: "12px", color: "#7c3aed", fontWeight: 700 }}>
+                  <LockIcon size={13} color="#7c3aed" />
+                  <span>Mã hóa SSL 256-bit chuẩn PCI-DSS</span>
+                </div>
+              </div>
 
               <div className="payment-methods-grid">
                 {/* 1. COD */}
                 <div
                   className={`payment-method-card ${paymentMethod === "COD" ? "selected" : ""}`}
                   onClick={() => setPaymentMethod("COD")}
+                  style={{
+                    padding: "16px 20px",
+                    position: "relative",
+                  }}
                 >
                   <div className="payment-card-content" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                       <span
                         className="payment-method-icon"
                         style={{
-                          width: "42px",
-                          height: "42px",
-                          borderRadius: "10px",
+                          width: "46px",
+                          height: "46px",
+                          borderRadius: "12px",
                           background: "rgba(16, 185, 129, 0.12)",
                           border: "1px solid rgba(16, 185, 129, 0.25)",
                           display: "inline-flex",
                           alignItems: "center",
                           justifyContent: "center",
                           flexShrink: 0,
+                          boxShadow: paymentMethod === "COD" ? "0 4px 12px rgba(16, 185, 129, 0.2)" : "none",
                         }}
                       >
-                        <HomeIcon size={22} color="#10b981" />
+                        <HomeIcon size={24} color="#10b981" />
                       </span>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "4px" }}>
                           <span>Thanh toán khi nhận hàng (COD)</span>
+                          <span style={{ background: "#dcfce7", color: "#15803d", fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px" }}>
+                            Tiền mặt
+                          </span>
                           {paymentMethod === "COD" && (
                             <span
                               style={{
@@ -1071,178 +1202,48 @@ export default function CheckoutPage() {
                             </span>
                           )}
                         </div>
-                        <div style={{ fontSize: "13px", color: "#64748b" }}>Nhận hàng kiểm tra xong mới trả tiền mặt cho shipper</div>
+                        <div style={{ fontSize: "13px", color: "var(--text-muted, #64748b)" }}>
+                          Nhận hàng, kiểm tra cùng shipper rồi mới trả tiền. An tâm tuyệt đối 100%!
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 2. Credit Card */}
-                <div
-                  className={`payment-method-card ${paymentMethod === "CARD" ? "selected" : ""}`}
-                  onClick={() => setPaymentMethod("CARD")}
-                >
-                  <div className="payment-card-content" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                      <span
-                        className="payment-method-icon"
-                        style={{
-                          width: "42px",
-                          height: "42px",
-                          borderRadius: "10px",
-                          background: "rgba(37, 99, 235, 0.12)",
-                          border: "1px solid rgba(37, 99, 235, 0.25)",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <CreditCardIcon size={22} color="#2563eb" />
-                      </span>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span>Thẻ Tín Dụng / Ghi Nợ Quốc Tế (Visa, MasterCard)</span>
-                          {paymentMethod === "CARD" && (
-                            <span
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "5px",
-                                background: "var(--primary-color, #ea580c)",
-                                color: "#ffffff",
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                padding: "2px 8px",
-                                borderRadius: "12px",
-                              }}
-                            >
-                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <CheckIcon size={9} color="#ffffff" />
-                              </span>
-                              <span>Đã chọn</span>
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: "13px", color: "#64748b" }}>Bảo mật mã hóa quốc tế 3D-Secure 256-bit</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {paymentMethod === "CARD" && (
-                    <div style={{ marginTop: "14px", padding: "14px", background: "#f8f9fa", borderRadius: "6px", border: "1px solid #ddd" }}>
-                      <div style={{ marginBottom: "10px" }}>
-                        <label style={{ fontSize: "11px", fontWeight: 700 }}>SỐ THẺ VISA / MASTERCARD:</label>
-                        <input
-                          type="text"
-                          className="shopee-form-input"
-                          value={cardNumber}
-                          onChange={(e) => setCardNumber(e.target.value)}
-                        />
-                      </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                        <div>
-                          <label style={{ fontSize: "11px", fontWeight: 700 }}>TÊN CHỦ THẺ:</label>
-                          <input
-                            type="text"
-                            className="shopee-form-input"
-                            value={cardHolder}
-                            onChange={(e) => setCardHolder(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ fontSize: "11px", fontWeight: 700 }}>HẠN DÙNG (MM/YY):</label>
-                          <input
-                            type="text"
-                            className="shopee-form-input"
-                            value={cardExpiry}
-                            onChange={(e) => setCardExpiry(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* 3. MoMo */}
-                <div
-                  className={`payment-method-card ${paymentMethod === "MOMO" ? "selected" : ""}`}
-                  onClick={() => setPaymentMethod("MOMO")}
-                >
-                  <div className="payment-card-content" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                      <span
-                        className="payment-method-icon"
-                        style={{
-                          width: "42px",
-                          height: "42px",
-                          borderRadius: "10px",
-                          background: "rgba(217, 70, 239, 0.12)",
-                          border: "1px solid rgba(217, 70, 239, 0.25)",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <QrCodeIcon size={22} color="#d946ef" />
-                      </span>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span>Ví Điện Tử MoMo / ZaloPay</span>
-                          {paymentMethod === "MOMO" && (
-                            <span
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "5px",
-                                background: "var(--primary-color, #ea580c)",
-                                color: "#ffffff",
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                padding: "2px 8px",
-                                borderRadius: "12px",
-                              }}
-                            >
-                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <CheckIcon size={9} color="#ffffff" />
-                              </span>
-                              <span>Đã chọn</span>
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: "13px", color: "#64748b" }}>Quét mã QR trên ứng dụng ví để thanh toán tức thì</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. Bank Transfer VietQR */}
+                {/* 2. Bank Transfer VietQR */}
                 <div
                   className={`payment-method-card ${paymentMethod === "BANK" ? "selected" : ""}`}
                   onClick={() => setPaymentMethod("BANK")}
+                  style={{
+                    padding: "16px 20px",
+                    position: "relative",
+                  }}
                 >
                   <div className="payment-card-content" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                       <span
                         className="payment-method-icon"
                         style={{
-                          width: "42px",
-                          height: "42px",
-                          borderRadius: "10px",
+                          width: "46px",
+                          height: "46px",
+                          borderRadius: "12px",
                           background: "rgba(2, 132, 199, 0.12)",
                           border: "1px solid rgba(2, 132, 199, 0.25)",
                           display: "inline-flex",
                           alignItems: "center",
                           justifyContent: "center",
                           flexShrink: 0,
+                          boxShadow: paymentMethod === "BANK" ? "0 4px 12px rgba(2, 132, 199, 0.2)" : "none",
                         }}
                       >
-                        <ShieldCheckIcon size={22} color="#0284c7" />
+                        <QrCodeIcon size={24} color="#0284c7" />
                       </span>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "4px" }}>
                           <span>Chuyển Khoản Ngân Hàng (VietQR Tự Động)</span>
+                          <span style={{ background: "#e0f2fe", color: "#0369a1", fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px" }}>
+                            Xác nhận 3 giây
+                          </span>
                           {paymentMethod === "BANK" && (
                             <span
                               style={{
@@ -1264,24 +1265,30 @@ export default function CheckoutPage() {
                             </span>
                           )}
                         </div>
-                        <div style={{ fontSize: "13px", color: "#64748b" }}>Miễn phí chuyển khoản qua mọi App ngân hàng tại VN</div>
+                        <div style={{ fontSize: "13px", color: "var(--text-muted, #64748b)" }}>
+                          Quét mã QR qua ứng dụng MBBank, Vietcombank, Techcombank,... Hoàn toàn miễn phí phí giao dịch!
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {paymentMethod === "BANK" && (
-                    <div className="payment-qr-preview" style={{ textAlign: "center", marginTop: "12px", background: "var(--bg-muted, #f8f9fa)", padding: "16px", borderRadius: "8px", border: "1px solid var(--border-medium, #e2e8f0)" }}>
-                      <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=2|99|0909123456|MINI%20SHOPEE|${finalOrderTotal}|THANH%20TOAN%20DON%20HANG`}
-                        alt="VietQR thanh toán"
-                        className="payment-qr-img"
-                        style={{ width: "150px", height: "150px", borderRadius: "6px", border: "1px solid #ddd" }}
-                      />
-                      <div style={{ fontSize: "13px", fontWeight: 700, marginTop: "8px", color: "var(--text-primary)" }}>
+                    <div className="payment-qr-preview" style={{ textAlign: "center", marginTop: "16px", background: "#f8fafc", padding: "18px", borderRadius: "12px", border: "1.5px solid #bae6fd" }}>
+                      <div style={{ display: "inline-block", background: "#ffffff", padding: "10px", borderRadius: "12px", border: "1px solid #cbd5e1", boxShadow: "0 4px 12px rgba(0,0,0,0.06)" }}>
+                        <img
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=2|99|0909123456|MINI%20SHOPEE|${finalOrderTotal}|THANH%20TOAN%20DON%20HANG`}
+                          alt="VietQR thanh toán"
+                          className="payment-qr-img"
+                          style={{ width: "150px", height: "150px", display: "block", margin: 0, border: "none" }}
+                        />
+                      </div>
+
+                      <div style={{ fontSize: "14px", fontWeight: 800, marginTop: "12px", color: "#0f172a" }}>
                         NGÂN HÀNG QUÂN ĐỘI (MBBANK)
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", margin: "6px 0" }}>
-                        <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--primary-color)" }}>STK: 0909123456</span>
+
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", margin: "8px 0" }}>
+                        <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>STK: 0909123456</span>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -1292,27 +1299,30 @@ export default function CheckoutPage() {
                             background: "var(--primary-light, #fff7ed)",
                             border: "1px solid var(--primary-border, #fed7aa)",
                             color: "var(--primary-color, #ea580c)",
-                            borderRadius: "4px",
-                            padding: "2px 8px",
-                            fontSize: "11px",
-                            fontWeight: 600,
+                            borderRadius: "6px",
+                            padding: "3px 10px",
+                            fontSize: "12px",
+                            fontWeight: 700,
                             cursor: "pointer",
                             display: "inline-flex",
                             alignItems: "center",
-                            gap: "4px",
+                            gap: "5px",
                           }}
                         >
-                          <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <CopyIcon size={11} color="#2563eb" />
-                          </span>
-                          <span>{t('copy', 'Sao chép')}</span>
+                          <CopyIcon size={12} color="#ea580c" />
+                          <span>Sao chép STK</span>
                         </button>
                       </div>
-                      <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>Chủ TK: CONG TY TNHH FULLSTACK ECOMMERCE</div>
-                      <div style={{ fontSize: "13px", fontWeight: 800, color: "var(--color-success, #10b981)", marginTop: "4px" }}>
-                        Số tiền: {formatCurrency(finalOrderTotal)}
+
+                      <div style={{ fontSize: "12px", color: "var(--text-muted, #64748b)" }}>
+                        Chủ Tài Khoản: <strong>CÔNG TY TNHH FULLSTACK E-COMMERCE</strong>
                       </div>
-                      <div style={{ marginTop: "10px" }}>
+
+                      <div style={{ fontSize: "14px", fontWeight: 800, color: "#16a34a", marginTop: "6px" }}>
+                        Số tiền thanh toán: {formatCurrency(finalOrderTotal)}
+                      </div>
+
+                      <div style={{ marginTop: "14px" }}>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -1323,25 +1333,195 @@ export default function CheckoutPage() {
                             background: "linear-gradient(135deg, #0284c7, #0369a1)",
                             color: "#ffffff",
                             border: "none",
-                            borderRadius: "6px",
-                            padding: "7px 14px",
-                            fontSize: "12px",
+                            borderRadius: "8px",
+                            padding: "8px 18px",
+                            fontSize: "13px",
                             fontWeight: 700,
                             cursor: "pointer",
                             display: "inline-flex",
                             alignItems: "center",
-                            gap: "6px",
-                            boxShadow: "0 2px 6px rgba(2, 132, 199, 0.25)",
+                            gap: "8px",
+                            boxShadow: "0 2px 8px rgba(2, 132, 199, 0.3)",
                           }}
                         >
-                          <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <QrCodeIcon size={13} color="#ffffff" />
-                          </span>
-                          <span>Mở Chi Tiết VietQR Động & Đếm Ngược</span>
+                          <QrCodeIcon size={14} color="#ffffff" />
+                          <span>Mở Chi Tiết VietQR Động &amp; Đếm Ngược</span>
                         </button>
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* 3. Credit Card */}
+                <div
+                  className={`payment-method-card ${paymentMethod === "CARD" ? "selected" : ""}`}
+                  onClick={() => setPaymentMethod("CARD")}
+                  style={{
+                    padding: "16px 20px",
+                    position: "relative",
+                  }}
+                >
+                  <div className="payment-card-content" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                      <span
+                        className="payment-method-icon"
+                        style={{
+                          width: "46px",
+                          height: "46px",
+                          borderRadius: "12px",
+                          background: "rgba(37, 99, 235, 0.12)",
+                          border: "1px solid rgba(37, 99, 235, 0.25)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          boxShadow: paymentMethod === "CARD" ? "0 4px 12px rgba(37, 99, 235, 0.2)" : "none",
+                        }}
+                      >
+                        <CreditCardIcon size={24} color="#2563eb" />
+                      </span>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "4px" }}>
+                          <span>Thẻ Tín Dụng / Ghi Nợ Quốc Tế (Visa, MasterCard, JCB)</span>
+                          <span style={{ background: "#dbeafe", color: "#1d4ed8", fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px" }}>
+                            3D-Secure 2.0
+                          </span>
+                          {paymentMethod === "CARD" && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "5px",
+                                background: "var(--primary-color, #ea580c)",
+                                color: "#ffffff",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                padding: "2px 8px",
+                                borderRadius: "12px",
+                              }}
+                            >
+                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckIcon size={9} color="#ffffff" />
+                              </span>
+                              <span>Đã chọn</span>
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: "13px", color: "var(--text-muted, #64748b)" }}>
+                          Hỗ trợ thẻ tín dụng &amp; ghi nợ trong nước và quốc tế. Trả góp 0% lãi suất.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {paymentMethod === "CARD" && (
+                    <div style={{ marginTop: "16px", padding: "18px", background: "#f8fafc", borderRadius: "12px", border: "1.5px solid #cbd5e1" }}>
+                      <div style={{ marginBottom: "14px" }}>
+                        <label style={{ fontSize: "12px", fontWeight: 700, color: "#334155", display: "block", marginBottom: "6px" }}>
+                          SỐ THẺ QUỐC TẾ (16 CHỮ SỐ):
+                        </label>
+                        <input
+                          type="text"
+                          className="shopee-form-input"
+                          placeholder="4111 2222 3333 4444"
+                          value={cardNumber}
+                          onChange={(e) => setCardNumber(e.target.value)}
+                          style={{ letterSpacing: "1px", fontWeight: 600 }}
+                        />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                        <div>
+                          <label style={{ fontSize: "12px", fontWeight: 700, color: "#334155", display: "block", marginBottom: "6px" }}>
+                            HỌ VÀ TÊN CHỦ THẺ:
+                          </label>
+                          <input
+                            type="text"
+                            className="shopee-form-input"
+                            placeholder="NGUYEN VAN A"
+                            value={cardHolder}
+                            onChange={(e) => setCardHolder(e.target.value.toUpperCase())}
+                            style={{ textTransform: "uppercase", fontWeight: 600 }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: "12px", fontWeight: 700, color: "#334155", display: "block", marginBottom: "6px" }}>
+                            HẠN DÙNG (MM/YY):
+                          </label>
+                          <input
+                            type="text"
+                            className="shopee-form-input"
+                            placeholder="12/28"
+                            value={cardExpiry}
+                            onChange={(e) => setCardExpiry(e.target.value)}
+                            style={{ fontWeight: 600 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. MoMo */}
+                <div
+                  className={`payment-method-card ${paymentMethod === "MOMO" ? "selected" : ""}`}
+                  onClick={() => setPaymentMethod("MOMO")}
+                  style={{
+                    padding: "16px 20px",
+                    position: "relative",
+                  }}
+                >
+                  <div className="payment-card-content" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                      <span
+                        className="payment-method-icon"
+                        style={{
+                          width: "46px",
+                          height: "46px",
+                          borderRadius: "12px",
+                          background: "rgba(217, 70, 239, 0.12)",
+                          border: "1px solid rgba(217, 70, 239, 0.25)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          boxShadow: paymentMethod === "MOMO" ? "0 4px 12px rgba(217, 70, 239, 0.2)" : "none",
+                        }}
+                      >
+                        <QrCodeIcon size={24} color="#d946ef" />
+                      </span>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: "15px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "4px" }}>
+                          <span>Ví Điện Tử MoMo / ShopeePay / ZaloPay</span>
+                          <span style={{ background: "#fae8ff", color: "#a21caf", fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px" }}>
+                            Ưu đãi hoàn xu 5%
+                          </span>
+                          {paymentMethod === "MOMO" && (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "5px",
+                                background: "var(--primary-color, #ea580c)",
+                                color: "#ffffff",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                padding: "2px 8px",
+                                borderRadius: "12px",
+                              }}
+                            >
+                              <span style={{ width: '15px', height: '15px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckIcon size={9} color="#ffffff" />
+                              </span>
+                              <span>Đã chọn</span>
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: "13px", color: "var(--text-muted, #64748b)" }}>
+                          Quét mã trên điện thoại hoặc tự động mở app để xác nhận thanh toán an toàn.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1389,17 +1569,38 @@ export default function CheckoutPage() {
               )}
 
               {/* Delivery and payment summary */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", background: "#fdfdfd", border: "1px solid #e0e0e0", borderRadius: "8px", padding: "16px", marginBottom: "20px", fontSize: "13.5px" }}>
-                <div>
-                  <div style={{ fontWeight: 700, color: "#555", marginBottom: "4px" }}>GIAO TỚI:</div>
-                  <div style={{ fontWeight: 700 }}>{fullName} · {phone}</div>
-                  <div style={{ color: "#444" }}>{address}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", background: "var(--bg-page, #f8fafc)", border: "1.5px solid var(--border-medium, #e2e8f0)", borderRadius: "12px", padding: "18px 20px", marginBottom: "20px", fontSize: "13.5px" }}>
+                <div style={{ borderRight: "1px dashed #cbd5e1", paddingRight: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 800, color: "var(--primary-color, #ea580c)", marginBottom: "8px", fontSize: "12.5px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                    <MapPinIcon size={14} color="var(--primary-color, #ea580c)" />
+                    <span>ĐỊA CHỈ NHẬN HÀNG</span>
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: "15px", color: "var(--text-primary, #0f172a)", marginBottom: "4px" }}>
+                    {fullName} <span style={{ color: "var(--text-muted, #64748b)", fontWeight: 500 }}>·</span> <span style={{ color: "#0284c7" }}>{phone}</span>
+                  </div>
+                  <div style={{ color: "var(--text-secondary, #334155)", lineHeight: "1.5", fontSize: "13px" }}>
+                    {address}
+                  </div>
                 </div>
 
-                <div>
-                  <div style={{ fontWeight: 700, color: "#555", marginBottom: "4px" }}>VẬN CHUYỂN & THANH TOÁN:</div>
-                  <div>Gói: <strong>{shippingOption.name}</strong></div>
-                  <div>Thanh toán: <strong>{paymentMethod}</strong></div>
+                <div style={{ paddingLeft: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 800, color: "#0284c7", marginBottom: "8px", fontSize: "12.5px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                    <TruckIcon size={14} color="#0284c7" />
+                    <span>VẬN CHUYỂN &amp; THANH TOÁN</span>
+                  </div>
+                  <div style={{ marginBottom: "6px", fontSize: "13.5px" }}>
+                    <span style={{ color: "var(--text-muted, #64748b)" }}>Gói vận chuyển: </span>
+                    <strong style={{ color: "var(--text-primary, #0f172a)" }}>{shippingOption.name}</strong>
+                  </div>
+                  <div style={{ fontSize: "13.5px" }}>
+                    <span style={{ color: "var(--text-muted, #64748b)" }}>Phương thức: </span>
+                    <strong style={{ color: "#7c3aed" }}>
+                      {paymentMethod === "COD" && "Thanh toán khi nhận hàng (COD)"}
+                      {paymentMethod === "BANK" && "Chuyển khoản VietQR tự động"}
+                      {paymentMethod === "CARD" && "Thẻ tín dụng / Ghi nợ quốc tế"}
+                      {paymentMethod === "MOMO" && "Ví điện tử MoMo / ZaloPay"}
+                    </strong>
+                  </div>
                 </div>
               </div>
 
@@ -1777,74 +1978,70 @@ export default function CheckoutPage() {
         </section>
 
         {/* Right Column: Mini Bill Summary */}
-        <aside style={{ background: "var(--bg-card, #fff)", borderRadius: "10px", padding: "20px", border: "1px solid var(--border-medium, #e0e0e0)" }}>
-          <h3 style={{ fontSize: "16px", fontWeight: 800, margin: "0 0 16px", color: "var(--text-primary)" }}>Bảng Kê Chi Phí</h3>
+        <aside className="checkout-summary-box">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingBottom: "12px", borderBottom: "1.5px solid var(--border-medium, #e2e8f0)" }}>
+            <h3 style={{ fontSize: "16px", fontWeight: 800, margin: 0, color: "var(--text-primary, #0f172a)", display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "rgba(234, 88, 12, 0.12)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <PackageIcon size={14} color="#ea580c" />
+              </span>
+              <span>Bảng Kê Đơn Hàng</span>
+            </h3>
+            <span style={{ fontSize: "12px", background: "#f1f5f9", color: "#475569", fontWeight: 700, padding: "3px 8px", borderRadius: "12px" }}>
+              {checkoutItems.length} sản phẩm
+            </span>
+          </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "14px", marginBottom: "16px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--text-secondary, #666)" }}>Tiền hàng ({checkoutItems.length} món):</span>
-              <span style={{ fontWeight: 600 }}>{formatCurrency(currentSubtotal)}</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "14px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ color: "var(--text-secondary, #64748b)" }}>Tổng tiền hàng:</span>
+              <span style={{ fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>{formatCurrency(currentSubtotal)}</span>
             </div>
 
             {/* Interactive Dual Voucher Section in Checkout summary */}
-            <div style={{ borderTop: "1px dashed var(--border-medium, #ddd)", borderBottom: "1px dashed var(--border-medium, #ddd)", padding: "10px 0", margin: "4px 0" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: (appliedDiscountVoucher || appliedShippingVoucher) ? "8px" : "0" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <TicketIcon size={12} color="var(--primary-color, #ea580c)" />
-                  </span>
-                  <span>Voucher / Giảm giá:</span>
+            <div style={{ background: "#f8fafc", borderRadius: "10px", padding: "12px", border: "1px solid #e2e8f0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: (appliedDiscountVoucher || appliedShippingVoucher) ? "10px" : "0" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
+                  <TicketIcon size={14} color="var(--primary-color, #ea580c)" />
+                  <span>Voucher Shopee:</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => setShowVoucherModal(true)}
-                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "5px" }}
+                  style={{ background: "none", border: "none", color: "var(--primary-color, #ea580c)", fontWeight: 700, fontSize: "12.5px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
                 >
-                  <span>{(appliedDiscountVoucher && appliedShippingVoucher) ? "Đổi mã" : "Chọn mã"}</span>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <ChevronRightIcon size={10} color="var(--primary-color, #ea580c)" />
-                  </span>
+                  <span>{(appliedDiscountVoucher && appliedShippingVoucher) ? "Đổi mã khác" : "Chọn mã ưu đãi"}</span>
+                  <ChevronRightIcon size={11} color="var(--primary-color, #ea580c)" />
                 </button>
               </div>
 
               {appliedShippingVoucher && (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", background: "#f0f9ff", padding: "6px 10px", borderRadius: "6px", border: "1px solid #0284c7" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 800, color: "#0284c7" }}>
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.15)', border: '1px solid rgba(2, 132, 199, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <TruckIcon size={11} color="#0284c7" />
-                    </span>
-                    <span>{appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)} ship)</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", background: "#f0f9ff", padding: "6px 10px", borderRadius: "6px", border: "1px solid #bae6fd" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 700, color: "#0284c7" }}>
+                    <TruckIcon size={12} color="#0284c7" />
+                    <span>{appliedShippingVoucher.code} (-{formatCurrency(appliedShippingDiscount)})</span>
                   </span>
                   <button
                     type="button"
                     onClick={removeShippingVoucher}
-                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                    style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontWeight: 700, fontSize: "11px" }}
                   >
-                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <CloseIcon size={9} color="#ef4444" />
-                    </span>
-                    <span>Gỡ</span>
+                    Gỡ
                   </button>
                 </div>
               )}
 
               {appliedDiscountVoucher && (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--primary-light, rgba(234, 88, 12, 0.08))", padding: "6px 10px", borderRadius: "6px", border: "1px solid var(--primary-color, #ea580c)" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
-                    <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <TagIcon size={11} color="var(--primary-color, #ea580c)" />
-                    </span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#fff7ed", padding: "6px 10px", borderRadius: "6px", border: "1px solid #fed7aa" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 700, color: "var(--primary-color, #ea580c)" }}>
+                    <TagIcon size={12} color="var(--primary-color, #ea580c)" />
                     <span>{appliedDiscountVoucher.code} (-{formatCurrency(voucherDiscount)})</span>
                   </span>
                   <button
                     type="button"
                     onClick={removeDiscountVoucher}
-                    style={{ background: "none", border: "none", color: "var(--color-error, #d32f2f)", cursor: "pointer", fontWeight: 700, fontSize: "11.5px", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                    style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontWeight: 700, fontSize: "11px" }}
                   >
-                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <CloseIcon size={9} color="#ef4444" />
-                    </span>
-                    <span>Gỡ</span>
+                    Gỡ
                   </button>
                 </div>
               )}
@@ -1853,23 +2050,19 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setShowVoucherModal(true)}
-                  style={{ width: "100%", marginTop: "8px", padding: "8px", borderRadius: "6px", border: "1px dashed var(--primary-color, #ea580c)", background: "rgba(234, 88, 12, 0.03)", color: "var(--primary-color, #ea580c)", fontSize: "12.5px", fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+                  style={{ width: "100%", marginTop: "6px", padding: "8px", borderRadius: "8px", border: "1px dashed #ea580c", background: "rgba(234, 88, 12, 0.04)", color: "#ea580c", fontSize: "12.5px", fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 >
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <TicketIcon size={10} color="#ea580c" />
-                  </span>
-                  <span>Nhấn để chọn mã giảm giá / Freeship</span>
+                  <TicketIcon size={12} color="#ea580c" />
+                  <span>Áp dụng Voucher giảm giá &amp; Freeship</span>
                 </button>
               )}
             </div>
 
             {/* Interactive Mini Xu Section in Checkout summary */}
-            <div style={{ borderBottom: "1px dashed var(--border-medium, #ddd)", padding: "10px 0", margin: "2px 0" }}>
+            <div style={{ background: useCoinsToggle ? "rgba(245, 158, 11, 0.08)" : "#f8fafc", borderRadius: "10px", padding: "10px 12px", border: useCoinsToggle ? "1px solid #f59e0b" : "1px solid #e2e8f0" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(245, 158, 11, 0.14)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CoinIcon size={13} color="#f59e0b" />
-                  </span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>
+                  <CoinIcon size={15} color="#f59e0b" />
                   <span>Mini Xu [{(coins || 0).toLocaleString("vi-VN")}]:</span>
                 </span>
                 <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: maxCoinsUsable > 0 ? "pointer" : "not-allowed" }}>
@@ -1880,7 +2073,7 @@ export default function CheckoutPage() {
                     onChange={(e) => setUseCoinsToggle(e.target.checked)}
                     style={{ width: "16px", height: "16px", accentColor: "#d97706", cursor: maxCoinsUsable > 0 ? "pointer" : "not-allowed" }}
                   />
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: useCoinsToggle ? "#d97706" : "var(--text-muted)" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: useCoinsToggle ? "#d97706" : "var(--text-muted, #94a3b8)" }}>
                     {useCoinsToggle ? `Giảm ${formatCurrency(maxCoinsUsable)}` : "Dùng Xu"}
                   </span>
                 </label>
@@ -1888,53 +2081,53 @@ export default function CheckoutPage() {
             </div>
 
             {voucherDiscount > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-success, #2e7d32)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#16a34a", fontSize: "13.5px" }}>
                 <span>Voucher giảm giá ({appliedDiscountVoucher?.code}):</span>
                 <span style={{ fontWeight: 700 }}>-{formatCurrency(voucherDiscount)}</span>
               </div>
             )}
 
             {coinDiscount > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#d97706" }}>
-                <span>Dùng Mini Xu ({coinDiscount.toLocaleString("vi-VN")} xu):</span>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#d97706", fontSize: "13.5px" }}>
+                <span>Khấu trừ Mini Xu ({coinDiscount.toLocaleString("vi-VN")} xu):</span>
                 <span style={{ fontWeight: 700 }}>-{formatCurrency(coinDiscount)}</span>
               </div>
             )}
 
             {appliedShippingDiscount > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#0284c7" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#0284c7", fontSize: "13.5px" }}>
                 <span>Ưu đãi FreeShip ({appliedShippingVoucher?.code}):</span>
                 <span style={{ fontWeight: 700 }}>-{formatCurrency(appliedShippingDiscount)}</span>
               </div>
             )}
 
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--text-secondary, #666)" }}>Phí vận chuyển:</span>
-              <span style={{ fontWeight: 600 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ color: "var(--text-secondary, #64748b)" }}>Phí vận chuyển:</span>
+              <span style={{ fontWeight: 600, color: finalShippingFee === 0 ? "#16a34a" : "var(--text-primary, #0f172a)" }}>
                 {finalShippingFee === 0 ? "MIỄN PHÍ" : formatCurrency(finalShippingFee)}
               </span>
             </div>
 
             {giftWrapEnabled && (
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#e11d48" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#e11d48", fontSize: "13.5px" }}>
                 <span>🎁 Dịch vụ gói quà &amp; thiệp:</span>
                 <span style={{ fontWeight: 700 }}>+{formatCurrency(giftWrapFee)}</span>
               </div>
             )}
 
-            <div style={{ borderTop: "2px solid var(--border-dark, #222)", paddingTop: "12px", marginTop: "4px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontSize: "15px", fontWeight: 800 }}>TỔNG CỘNG:</span>
+            <div style={{ borderTop: "2px solid #0f172a", paddingTop: "14px", marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <span style={{ fontSize: "15px", fontWeight: 800, color: "#0f172a" }}>TỔNG THANH TOÁN:</span>
               <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--primary-color, #ea580c)" }}>
                 {formatCurrency(finalOrderTotal)}
               </span>
             </div>
           </div>
 
-          <div style={{ fontSize: "12px", color: "var(--text-muted, #777)", lineHeight: "1.5", borderTop: "1px solid var(--border-light, #eee)", paddingTop: "12px", display: "inline-flex", alignItems: "flex-start", gap: "8px" }}>
-            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: "2px" }}>
-              <LockIcon size={11} color="#16a34a" />
+          <div style={{ fontSize: "12px", color: "var(--text-muted, #64748b)", lineHeight: "1.5", borderTop: "1px solid #e2e8f0", paddingTop: "14px", display: "flex", alignItems: "flex-start", gap: "8px" }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '6px', background: 'rgba(22, 163, 74, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: "1px" }}>
+              <ShieldCheckIcon size={12} color="#16a34a" />
             </span>
-            <span>Nhấn &quot;Xác Nhận Đặt Hàng&quot; đồng nghĩa bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Fullstack E-Commerce.</span>
+            <span>Shopee bảo vệ người mua: Hoàn tiền 100% nếu hàng không đúng mô tả hoặc hư hỏng do vận chuyển.</span>
           </div>
         </aside>
       </div>
