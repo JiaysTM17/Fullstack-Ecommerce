@@ -261,7 +261,7 @@ export default function ProductCompareModal() {
                       return (
                         <td key={id} style={{ padding: '14px', verticalAlign: 'top', width: `${80 / comparedProducts.length}%` }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <div style={{ position: 'relative', width: '100%', height: '140px', borderRadius: '8px', overflow: 'hidden', background: '#f1f5f9' }}>
+                            <div style={{ position: 'relative', width: '100%', height: '140px', borderRadius: '8px', overflow: 'hidden', background: 'var(--bg-muted, #f1f5f9)' }}>
                               <img src={p.image || p.images?.[0]} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                               <button
                                 type="button"

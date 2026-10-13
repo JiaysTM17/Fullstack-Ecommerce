@@ -556,14 +556,14 @@ export default function VoucherPickerModal({
                     gap: "8px",
                   }}
                 >
-                  <span style={{ width: "26px", height: "26px", borderRadius: "7px", background: "#e0f2fe", border: "1px solid #bae6fd", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ width: "26px", height: "26px", borderRadius: "7px", background: "rgba(2, 132, 199, 0.12)", border: "1px solid rgba(2, 132, 199, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <TruckIcon size={14} color="#0284c7" />
                   </span>
                   <span
                     style={{
                       fontSize: "14px",
                       fontWeight: 800,
-                      color: "#0369a1",
+                      color: "var(--text-primary, #0369a1)",
                     }}
                   >
                     Mã Miễn Phí Vận Chuyển
@@ -571,8 +571,8 @@ export default function VoucherPickerModal({
                   <span
                     style={{
                       fontSize: "11px",
-                      background: "#e0f2fe",
-                      border: "1px solid #bae6fd",
+                      background: "rgba(2, 132, 199, 0.12)",
+                      border: "1px solid rgba(2, 132, 199, 0.25)",
                       color: "#0284c7",
                       padding: "2px 8px",
                       borderRadius: "12px",
@@ -797,14 +797,14 @@ export default function VoucherPickerModal({
                     gap: "8px",
                   }}
                 >
-                  <span style={{ width: "26px", height: "26px", borderRadius: "7px", background: "#ffedd5", border: "1px solid #fed7aa", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <TagIcon size={14} color="#ea580c" />
+                  <span style={{ width: "26px", height: "26px", borderRadius: "7px", background: "rgba(234, 88, 12, 0.12)", border: "1px solid rgba(234, 88, 12, 0.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <TagIcon size={14} color="var(--primary-color, #ea580c)" />
                   </span>
                   <span
                     style={{
                       fontSize: "14px",
                       fontWeight: 800,
-                      color: "var(--primary-color, #ea580c)",
+                      color: "var(--text-primary, #0f172a)",
                     }}
                   >
                     Mã Giảm Giá Sàn / Shop
