@@ -7989,95 +7989,103 @@ export default function SellerDashboardPage() {
 
         {/* Modal Khởi Tạo Purchase Order (PO) */}
         {showCreatePoModal && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
-            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '540px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
+          <div
+            className="shopee-modal-overlay"
+            onClick={() => setShowCreatePoModal(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}
+          >
+            <div
+              className="shopee-modal-content"
+              onClick={(e) => e.stopPropagation()}
+              style={{ background: 'var(--bg-card, #ffffff)', borderRadius: '16px', width: '100%', maxWidth: '540px', padding: '24px', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-medium, #e2e8f0)', paddingBottom: '14px', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                   Tạo Đơn Đặt Hàng Nhà Cung Cấp (PO)
                 </h3>
-                <button type="button" onClick={() => setShowCreatePoModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                <button type="button" onClick={() => setShowCreatePoModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted, #64748b)', padding: '4px' }}>
                   <CloseIcon size={18} />
                 </button>
               </div>
 
               <form onSubmit={handleCreatePoSubmit}>
-                <div style={{ padding: '12px', background: '#f1f5f9', borderRadius: '8px', marginBottom: '14px', fontSize: '12.5px' }}>
-                  <div>Sản phẩm: <strong>{selectedPoAlertItem?.name}</strong></div>
-                  <div style={{ color: '#64748b', marginTop: '2px' }}>
+                <div style={{ padding: '12px', background: 'var(--bg-muted, #f1f5f9)', borderRadius: '8px', marginBottom: '14px', fontSize: '12.5px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                  <div style={{ color: 'var(--text-primary, #0f172a)' }}>Sản phẩm: <strong>{selectedPoAlertItem?.name}</strong></div>
+                  <div style={{ color: 'var(--text-muted, #64748b)', marginTop: '2px' }}>
                     Tồn kho: {selectedPoAlertItem?.currentStock} · Ngưỡng an toàn: {selectedPoAlertItem?.safetyThreshold}
                   </div>
                 </div>
 
                 <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Tên Nhà Cung Cấp / Đối Tác Sản Xuất</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Tên Nhà Cung Cấp / Đối Tác Sản Xuất</label>
                   <input
                     type="text" required
                     className="shopee-input"
                     value={poForm.supplierName}
                     onChange={(e) => setPoForm({ ...poForm, supplierName: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                   />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Số Lượng Nhập (Cái)</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Số Lượng Nhập (Cái)</label>
                     <input
                       type="number" required min="1"
                       className="shopee-input"
                       value={poForm.reorderQuantity}
                       onChange={(e) => setPoForm({ ...poForm, reorderQuantity: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Đơn Giá Nhập Ước Tính (VNĐ)</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Đơn Giá Nhập Ước Tính (VNĐ)</label>
                     <input
                       type="number" required min="0"
                       className="shopee-input"
                       value={poForm.estimatedUnitCost}
                       onChange={(e) => setPoForm({ ...poForm, estimatedUnitCost: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Số Điện Thoại Đối Tác</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Số Điện Thoại Đối Tác</label>
                     <input
                       type="text"
                       className="shopee-input"
                       value={poForm.supplierPhone}
                       onChange={(e) => setPoForm({ ...poForm, supplierPhone: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Ngày Hẹn Giao Hàng</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Ngày Hẹn Giao Hàng</label>
                     <input
                       type="date" required
                       className="shopee-input"
                       value={poForm.expectedDeliveryDate}
                       onChange={(e) => setPoForm({ ...poForm, expectedDeliveryDate: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
                 </div>
 
                 <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Ghi Chú Đơn Hàng PO</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Ghi Chú Đơn Hàng PO</label>
                   <input
                     type="text"
                     className="shopee-input"
                     value={poForm.notes}
                     onChange={(e) => setPoForm({ ...poForm, notes: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                   />
                 </div>
 
-                <div style={{ padding: '12px', background: '#eff6ff', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', color: '#1e40af', fontWeight: 600 }}>Tổng Giá Trị Đơn PO:</span>
+                <div style={{ padding: '12px', background: 'rgba(59, 130, 246, 0.08)', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                  <span style={{ fontSize: '13px', color: '#2563eb', fontWeight: 600 }}>Tổng Giá Trị Đơn PO:</span>
                   <strong style={{ fontSize: '16px', color: '#1d4ed8' }}>
                     {formatCurrency((Number(poForm.reorderQuantity) || 0) * (Number(poForm.estimatedUnitCost) || 0))}
                   </strong>

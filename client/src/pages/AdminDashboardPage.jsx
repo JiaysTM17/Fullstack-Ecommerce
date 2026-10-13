@@ -2469,9 +2469,29 @@ export default function AdminDashboardPage() {
 
         {/* Modal Khởi Tạo Siêu Chiến Dịch */}
         {showCreateCampaignModal && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
-            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '520px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Khởi Tạo Siêu Chiến Dịch Toàn Sàn</h3>
+          <div
+            className="shopee-modal-overlay"
+            onClick={() => setShowCreateCampaignModal(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}
+          >
+            <div
+              className="shopee-modal-content"
+              onClick={(e) => e.stopPropagation()}
+              style={{ background: 'var(--bg-card, #ffffff)', borderRadius: '16px', width: '100%', maxWidth: '520px', padding: '24px', border: '1px solid var(--border-medium, #e2e8f0)', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-medium, #e2e8f0)', paddingBottom: '14px', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
+                  Khởi Tạo Siêu Chiến Dịch Toàn Sàn
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateCampaignModal(false)}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted, #64748b)', padding: '4px' }}
+                >
+                  <CloseIcon size={18} />
+                </button>
+              </div>
+
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 await createAdminCampaign(campaignForm);
@@ -2480,46 +2500,46 @@ export default function AdminDashboardPage() {
                 getAdminCampaigns().then(setCampaigns);
               }}>
                 <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Tên Chiến Dịch</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Tên Chiến Dịch</label>
                   <input
                     type="text" required
                     className="shopee-input"
                     value={campaignForm.title}
                     onChange={(e) => setCampaignForm({ ...campaignForm, title: e.target.value })}
                     placeholder="VD: Siêu Sale 11.11 Độc Quyền"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                   />
                 </div>
                 <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Mô Tả Chiến Dịch</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Mô Tả Chiến Dịch</label>
                   <textarea
                     rows={2}
                     className="shopee-input"
                     value={campaignForm.description}
                     onChange={(e) => setCampaignForm({ ...campaignForm, description: e.target.value })}
                     placeholder="Mô tả quyền lợi và thông điệp gửi tới người mua & người bán..."
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                   />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Ngày Bắt Đầu</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Ngày Bắt Đầu</label>
                     <input
                       type="date" required
                       className="shopee-input"
                       value={campaignForm.startDate}
                       onChange={(e) => setCampaignForm({ ...campaignForm, startDate: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Ngày Kết Thúc</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #475569)', marginBottom: '4px' }}>Ngày Kết Thúc</label>
                     <input
                       type="date" required
                       className="shopee-input"
                       value={campaignForm.endDate}
                       onChange={(e) => setCampaignForm({ ...campaignForm, endDate: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
                 </div>
@@ -4154,34 +4174,42 @@ export default function AdminDashboardPage() {
 
         {/* Modal Phát Sóng Thông Báo Toàn Sàn (Super Admin Omnichannel Broadcast) */}
         {showBroadcastModal && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '16px'
-          }}>
-            <div style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              maxWidth: '560px',
-              width: '100%',
-              overflow: 'hidden',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              border: '1px solid #e2e8f0',
-              animation: 'adminModalSlideUp 0.25s ease-out'
-            }}>
+          <div
+            className="shopee-modal-overlay"
+            onClick={() => setShowBroadcastModal(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(15, 23, 42, 0.65)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+              padding: '16px'
+            }}
+          >
+            <div
+              className="shopee-modal-content anim-modal-content"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: 'var(--bg-card, #ffffff)',
+                borderRadius: '16px',
+                maxWidth: '560px',
+                width: '100%',
+                overflow: 'hidden',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
+                animation: 'adminModalSlideUp 0.25s ease-out'
+              }}
+            >
               <div style={{
                 padding: '20px 24px',
-                background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
-                borderBottom: '1px solid #fed7aa',
+                background: 'var(--bg-muted, #fff7ed)',
+                borderBottom: '1px solid var(--border-medium, #fed7aa)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
@@ -4201,10 +4229,10 @@ export default function AdminDashboardPage() {
                     <SparklesIcon size={20} color="#ffffff" />
                   </div>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: '#9a3412' }}>
+                    <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: 'var(--text-primary, #9a3412)' }}>
                       Phát Sóng Thông Báo Toàn Sàn
                     </h3>
-                    <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#c2410c' }}>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: 'var(--text-muted, #c2410c)' }}>
                       Gửi thông báo hệ thống tức thì tới Người mua, Người bán hoặc Toàn sàn
                     </p>
                   </div>
@@ -4218,27 +4246,27 @@ export default function AdminDashboardPage() {
                     cursor: 'pointer',
                     padding: '4px',
                     borderRadius: '6px',
-                    color: '#9a3412',
+                    color: 'var(--text-muted, #9a3412)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}
                 >
-                  <CloseIcon size={18} color="#9a3412" />
+                  <CloseIcon size={18} />
                 </button>
               </div>
 
               <form onSubmit={handleBroadcastNotification}>
                 <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary, #334155)', marginBottom: '6px' }}>
                       Đối Tượng Nhận Thông Báo <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <select
                       className="shopee-input"
                       value={broadcastForm.targetRole}
                       onChange={(e) => setBroadcastForm({ ...broadcastForm, targetRole: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     >
                       <option value="all">Toàn bộ Người Dùng Trên Sàn (Khách Hàng &amp; Gian Hàng)</option>
                       <option value="seller">Chỉ Người Bán (Kênh Quản Trị Gian Hàng Seller Center)</option>
@@ -4247,7 +4275,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary, #334155)', marginBottom: '6px' }}>
                       Phân Loại Thông Báo
                     </label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
@@ -4263,9 +4291,9 @@ export default function AdminDashboardPage() {
                           style={{
                             padding: '8px 12px',
                             borderRadius: '8px',
-                            border: broadcastForm.type === type.id ? `2px solid ${type.color}` : '1px solid #e2e8f0',
-                            background: broadcastForm.type === type.id ? `${type.color}15` : '#f8fafc',
-                            color: broadcastForm.type === type.id ? type.color : '#64748b',
+                            border: broadcastForm.type === type.id ? `2px solid ${type.color}` : '1px solid var(--border-medium, #e2e8f0)',
+                            background: broadcastForm.type === type.id ? `${type.color}15` : 'var(--bg-muted, #f8fafc)',
+                            color: broadcastForm.type === type.id ? type.color : 'var(--text-muted, #64748b)',
                             fontWeight: broadcastForm.type === type.id ? 700 : 500,
                             cursor: 'pointer',
                             fontSize: '12px'
@@ -4278,7 +4306,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary, #334155)', marginBottom: '6px' }}>
                       Tiêu Đề Thông Báo <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <input
@@ -4287,12 +4315,12 @@ export default function AdminDashboardPage() {
                       placeholder="Ví dụ: Đại Tiệc Siêu Sale 10.10 Đang Bắt Đầu..."
                       value={broadcastForm.title}
                       onChange={(e) => setBroadcastForm({ ...broadcastForm, title: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary, #334155)', marginBottom: '6px' }}>
                       Nội Dung Chi Tiết <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <textarea
@@ -4301,15 +4329,15 @@ export default function AdminDashboardPage() {
                       placeholder="Nhập thông điệp cần truyền tải tới người nhận..."
                       value={broadcastForm.message}
                       onChange={(e) => setBroadcastForm({ ...broadcastForm, message: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-medium, #cbd5e1)', background: 'var(--bg-card, #ffffff)', color: 'var(--text-primary, #0f172a)', resize: 'vertical' }}
                     />
                   </div>
                 </div>
 
                 <div style={{
                   padding: '16px 24px',
-                  background: '#f8fafc',
-                  borderTop: '1px solid #e2e8f0',
+                  background: 'var(--bg-muted, #f8fafc)',
+                  borderTop: '1px solid var(--border-medium, #e2e8f0)',
                   display: 'flex',
                   justifyContent: 'flex-end',
                   gap: '12px'
