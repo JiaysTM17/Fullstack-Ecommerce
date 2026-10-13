@@ -2,7 +2,7 @@
 
 .shopee-dashboard-container {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 250px 1fr;
   min-height: calc(100vh - 160px);
   background-color: var(--bg-page, #f8fafc);
   transition: background-color var(--transition-normal);
@@ -18,11 +18,26 @@
 .shopee-sidebar {
   background: var(--bg-card, #fff);
   border-right: 1px solid var(--border-medium, #e2e8f0);
-  padding: 16px 8px;
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  position: sticky;
+  top: 70px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
   transition: background-color var(--transition-normal);
+}
+
+.shopee-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.shopee-sidebar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
 .shopee-sidebar-brand {
@@ -67,31 +82,33 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 9px 12px;
+  border-radius: 8px;
   color: var(--text-secondary, #475569);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   width: 100%;
   text-align: left;
-  transition: all var(--transition-fast);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 
 .shopee-nav-item:hover {
   background-color: var(--bg-hover, #f1f5f9);
   color: var(--text-primary, #0f172a);
+  transform: translateX(2px);
 }
 
 .shopee-nav-item.active {
   background-color: var(--primary-light, #eff6ff);
   color: var(--primary-color, #2563eb);
-  font-weight: 600;
-  border-left: 3px solid var(--primary-color, #2563eb);
+  font-weight: 700;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
 }
 
 /* Dashboard Main Content */

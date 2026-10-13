@@ -2630,13 +2630,15 @@ export default function AdminDashboardPage() {
                         <button
                           type="button"
                           className="shopee-btn shopee-btn-sm shopee-btn-primary"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
                           onClick={() => {
                             setArbitrateModalDispute(d);
                             setArbitrationDecision(d.aiRecommendation || 'REFUND_BUYER');
                             setArbitrationNote(`Căn cứ hồ sơ đối sánh uy tín (${d.buyerReputation || 95}đ vs ${d.sellerReputation || 98}đ) và chính sách bảo vệ khách hàng sàn.`);
                           }}
                         >
-                          Ra Phán Quyết
+                          <ShieldIcon size={12} color="#ffffff" />
+                          <span>Ra Phán Quyết</span>
                         </button>
                       </td>
                     </tr>
@@ -2649,42 +2651,90 @@ export default function AdminDashboardPage() {
 
         {/* Modal Phán Quyết Trọng Tài Tranh Chấp */}
         {arbitrateModalDispute && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
-            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '520px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ margin: '0 0 12px', fontSize: '18px', fontWeight: 800, color: '#991b1b' }}>Phán Quyết Tranh Chấp Đơn #{arbitrateModalDispute.orderId}</h3>
-              <p style={{ fontSize: '13px', color: '#475569', marginBottom: '14px' }}>
-                Lý do: <strong>{arbitrateModalDispute.reason}</strong> — Số tiền: <strong>{formatCurrency(arbitrateModalDispute.claimAmount)}</strong>
-              </p>
-              <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '14px', fontSize: '12px' }}>
-                <div>🤖 Đề xuất Trọng tài tự động: <strong style={{ color: '#059669' }}>{arbitrateModalDispute.aiRecommendation === 'REFUND_BUYER' ? 'Chấp thuận hoàn tiền 100%' : 'Bác bỏ khiếu nại'}</strong> (Độ tin cậy: {arbitrateModalDispute.aiConfidence || 92}%)</div>
-                <div style={{ color: '#64748b', marginTop: '3px' }}>Hồ sơ tín nhiệm: Khách hàng {arbitrateModalDispute.buyerReputation || 95}/100đ — Gian hàng {arbitrateModalDispute.sellerReputation || 98}/100đ</div>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
+            <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '520px', padding: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #e2e8f0', position: 'relative' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ShieldIcon size={18} color="#ef4444" />
+                  </span>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '16.5px', fontWeight: 800, color: '#0f172a' }}>
+                      Phán Quyết Tranh Chấp #{arbitrateModalDispute.orderId}
+                    </h3>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                      Gian hàng: <strong>{arbitrateModalDispute.shopName}</strong> · Khách: <strong>{arbitrateModalDispute.customerName}</strong>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setArbitrateModalDispute(null)}
+                  style={{ background: 'rgba(100, 116, 139, 0.08)', border: '1px solid rgba(100, 116, 139, 0.15)', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                  aria-label="Đóng cửa sổ"
+                >
+                  <CloseIcon size={14} color="#64748b" />
+                </button>
               </div>
+
+              <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '14px', fontSize: '12.5px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={{ color: '#64748b' }}>Lý do khiếu nại:</span>
+                  <strong style={{ color: '#0f172a' }}>{arbitrateModalDispute.reason}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span style={{ color: '#64748b' }}>Số tiền yêu cầu hoàn:</span>
+                  <strong style={{ color: '#ea580c', fontSize: '14px' }}>{formatCurrency(arbitrateModalDispute.claimAmount)}</strong>
+                </div>
+                <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <SparklesIcon size={12} color="#059669" />
+                    <span>AI Đề xuất: {arbitrateModalDispute.aiRecommendation === 'REFUND_BUYER' ? 'Chấp thuận hoàn tiền 100%' : 'Bác bỏ khiếu nại'}</span>
+                  </span>
+                  <span style={{ color: '#64748b', fontSize: '11px' }}>Độ tin cậy: {arbitrateModalDispute.aiConfidence || 92}%</span>
+                </div>
+              </div>
+
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Quyết Định Trọng Tài</label>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Quyết Định Trọng Tài Toàn Sàn *
+                </label>
                 <select
                   value={arbitrationDecision}
                   onChange={(e) => setArbitrationDecision(e.target.value)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '13px', background: '#fff', color: '#0f172a', fontWeight: 600 }}
                 >
-                  <option value="REFUND_BUYER">Chấp thuận khiếu nại — Hoàn tiền 100% cho người mua</option>
-                  <option value="REJECT_BUYER">Bác bỏ khiếu nại — Giữ tiền thanh toán cho gian hàng</option>
+                  <option value="REFUND_BUYER">✅ Chấp thuận khiếu nại — Hoàn tiền 100% cho người mua</option>
+                  <option value="REJECT_BUYER">❌ Bác bỏ khiếu nại — Giữ tiền thanh toán cho gian hàng</option>
                 </select>
               </div>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Biên Bản / Lý Do Phán Quyết</label>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Biên Bản & Căn Cứ Phán Quyết *
+                </label>
                 <textarea
                   rows={3}
                   value={arbitrationNote}
                   onChange={(e) => setArbitrationNote(e.target.value)}
                   placeholder="Ghi rõ cơ sở kết luận căn cứ theo chính sách đổi trả của sàn..."
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12.5px', boxSizing: 'border-box' }}
                 />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <button type="button" className="shopee-btn shopee-btn-secondary" onClick={() => setArbitrateModalDispute(null)}>Đóng</button>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  className="shopee-btn shopee-btn-secondary"
+                  onClick={() => setArbitrateModalDispute(null)}
+                  style={{ padding: '8px 16px', fontSize: '12.5px' }}
+                >
+                  Hủy Bỏ
+                </button>
                 <button
                   type="button"
                   className="shopee-btn shopee-btn-primary"
+                  style={{ padding: '8px 18px', fontSize: '12.5px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   onClick={async () => {
                     await arbitrateAdminDispute(arbitrateModalDispute._id, arbitrationDecision, arbitrationNote);
                     toast.success('Đã ban hành phán quyết tranh chấp thành công!');
@@ -2692,7 +2742,8 @@ export default function AdminDashboardPage() {
                     getAdminDisputes().then(setDisputes);
                   }}
                 >
-                  Xác Nhận Ban Hành
+                  <CheckIcon size={12} color="#ffffff" />
+                  <span>Xác Nhận Ban Hành</span>
                 </button>
               </div>
             </div>

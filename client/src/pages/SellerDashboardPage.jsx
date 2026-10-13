@@ -5048,30 +5048,63 @@ export default function SellerDashboardPage() {
                 </button>
               </div>
 
-              <div style={{ marginBottom: '14px', fontSize: '13px' }}>
-                Sản phẩm: <strong>{quickStockProduct.name}</strong>
+              <div style={{ marginBottom: '16px', background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px' }}>
+                <span style={{ color: '#64748b' }}>Sản phẩm: </span>
+                <strong style={{ color: '#0f172a' }}>{quickStockProduct.name}</strong>
               </div>
 
-              <div className="shopee-form-group">
-                <label className="shopee-form-label">Số lượng tồn kho mới</label>
-                <input
-                  type="number"
-                  min="0"
-                  className="shopee-form-input"
-                  value={quickStockValue}
-                  onChange={(e) => setQuickStockValue(e.target.value)}
-                />
+              <div className="shopee-form-group" style={{ marginBottom: '14px' }}>
+                <label className="shopee-form-label" style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, marginBottom: '6px' }}>
+                  Số lượng tồn kho khả dụng
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setQuickStockValue(prev => Math.max(0, Number(prev || 0) - 1))}
+                    style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#f1f5f9', border: '1px solid #cbd5e1', fontSize: '16px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Giảm 1"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min="0"
+                    className="shopee-form-input"
+                    value={quickStockValue}
+                    onChange={(e) => setQuickStockValue(e.target.value)}
+                    style={{ flex: 1, textAlign: 'center', fontSize: '16px', fontWeight: 700, height: '38px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setQuickStockValue(prev => Number(prev || 0) + 1)}
+                    style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#f1f5f9', border: '1px solid #cbd5e1', fontSize: '16px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Tăng 1"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '6px', marginBottom: '16px' }}>
-                {[+10, +20, +50, +100].map(addVal => (
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '18px' }}>
+                {[-10, -5, +5, +10, +50, +100].map(addVal => (
                   <button
                     key={addVal}
                     type="button"
-                    onClick={() => setQuickStockValue(prev => Number(prev || 0) + addVal)}
-                    style={{ flex: 1, padding: '4px', background: 'var(--bg-muted)', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}
+                    onClick={() => setQuickStockValue(prev => Math.max(0, Number(prev || 0) + addVal))}
+                    style={{
+                      flex: 1,
+                      padding: '5px 2px',
+                      background: addVal > 0 ? '#eff6ff' : '#fef2f2',
+                      border: `1px solid ${addVal > 0 ? '#bfdbfe' : '#fecaca'}`,
+                      color: addVal > 0 ? '#1d4ed8' : '#dc2626',
+                      borderRadius: '6px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
                   >
-                    +{addVal}
+                    {addVal > 0 ? `+${addVal}` : addVal}
                   </button>
                 ))}
               </div>

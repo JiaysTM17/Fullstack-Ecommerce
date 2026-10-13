@@ -707,9 +707,9 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "28px", alignItems: "start" }}>
+      <div className="checkout-layout-grid">
         {/* Left Column: Multi-Step Forms */}
-        <section style={{ background: "#fff", borderRadius: "10px", padding: "24px", border: "1px solid #e0e0e0" }}>
+        <section style={{ background: "#fff", borderRadius: "12px", padding: "24px", border: "1px solid var(--border-medium, #e2e8f0)", boxShadow: "0 2px 10px rgba(0,0,0,0.03)" }}>
           {/* STEP 1: Address */}
           {currentStep === 1 && (
             <div>
