@@ -8623,12 +8623,12 @@ export default function SellerDashboardPage() {
               </div>
 
               {/* Footer Modal: Tổng Kết & Nút Lưu */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderTop: '1px solid #e2e8f0', paddingTop: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderTop: '1px solid var(--border-medium, #e2e8f0)', paddingTop: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '12.5px', color: '#475569' }}>
-                    Đã chọn: <strong style={{ color: '#0f172a' }}>{batchSelectedIds.size}</strong> mặt hàng
+                  <span style={{ fontSize: '12.5px', color: 'var(--text-secondary, #475569)' }}>
+                    Đã chọn: <strong style={{ color: 'var(--text-primary, #0f172a)' }}>{batchSelectedIds.size}</strong> mặt hàng
                   </span>
-                  <span style={{ fontSize: '12.5px', color: '#475569' }}>
+                  <span style={{ fontSize: '12.5px', color: 'var(--text-secondary, #475569)' }}>
                     Tổng nhập thêm: <strong style={{ color: '#ea580c' }}>
                       {Array.from(batchSelectedIds).reduce((sum, id) => sum + (Number(batchItems[id]?.addStock) || 0), 0)}
                     </strong> cái
