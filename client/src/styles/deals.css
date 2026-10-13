@@ -349,3 +349,51 @@
   letter-spacing: 0.3px;
   text-transform: uppercase;
 }
+
+/* =========================================================================
+   Dark Mode Adaptations for Flash Deals Section
+   ========================================================================= */
+[data-theme="dark"] .shopee-deals-section {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .shopee-deals-header {
+  border-bottom-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .shopee-time-slots-bar {
+  background: var(--bg-muted, #0f172a);
+  border-color: var(--border-medium, #334155);
+}
+
+[data-theme="dark"] .shopee-time-slot-btn {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .shopee-time-slot-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .shopee-time-slot-btn.active {
+  background: var(--bg-card, #1e293b);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .shopee-deal-card {
+  background: var(--bg-card, #1e293b);
+  border-color: var(--border-medium, #334155);
+  color: var(--text-primary, #f8fafc);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .shopee-deal-img-wrapper {
+  background: var(--bg-muted, #0f172a);
+}
+
+[data-theme="dark"] .shopee-deal-name {
+  color: var(--text-primary, #f8fafc);
+}
+
