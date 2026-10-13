@@ -8430,7 +8430,7 @@ export default function SellerDashboardPage() {
                 </div>
 
                 {/* Hàng bộ lọc sản phẩm trong Modal */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed #cbd5e1', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed var(--border-medium, #cbd5e1)', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <button
                       type="button"
@@ -8533,7 +8533,7 @@ export default function SellerDashboardPage() {
                                   <div style={{ fontWeight: 700, fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {p.name}
                                   </div>
-                                  <div style={{ fontSize: '10.5px', color: '#64748b' }}>
+                                  <div style={{ fontSize: '10.5px', color: 'var(--text-muted, #64748b)' }}>
                                     {formatCurrency(p.price)}
                                   </div>
                                 </div>

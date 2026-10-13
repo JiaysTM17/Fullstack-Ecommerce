@@ -3153,7 +3153,7 @@ export default function ProfilePage() {
                       onChange={(e) => setNewAddressForm((prev) => ({ ...prev, isDefault: e.target.checked }))}
                       style={{ width: '16px', height: '16px', accentColor: '#2563eb' }}
                     />
-                    <span style={{ fontWeight: 600, color: '#0f172a' }}>Đặt làm địa chỉ giao hàng mặc định</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary, #0f172a)' }}>Đặt làm địa chỉ giao hàng mặc định</span>
                   </label>
                 </div>
               </div>
@@ -3296,7 +3296,7 @@ export default function ProfilePage() {
                       onChange={(e) => setEditAddressForm((prev) => ({ ...prev, isDefault: e.target.checked }))}
                       style={{ width: '16px', height: '16px', accentColor: '#2563eb' }}
                     />
-                    <span style={{ fontWeight: 600, color: '#0f172a' }}>Đặt làm địa chỉ giao hàng mặc định</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary, #0f172a)' }}>Đặt làm địa chỉ giao hàng mặc định</span>
                   </label>
                 </div>
               </div>
@@ -3503,7 +3503,7 @@ export default function ProfilePage() {
                       onChange={(e) => setNewPaymentForm((prev) => ({ ...prev, isDefault: e.target.checked }))}
                       style={{ width: '16px', height: '16px', accentColor: '#2563eb' }}
                     />
-                    <span style={{ fontWeight: 600, color: '#0f172a' }}>Đặt làm phương thức thanh toán mặc định</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary, #0f172a)' }}>Đặt làm phương thức thanh toán mặc định</span>
                   </label>
                 </div>
               </div>
