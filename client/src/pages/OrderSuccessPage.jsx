@@ -176,8 +176,8 @@ export default function OrderSuccessPage() {
             </span>
           </div>
 
-          <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '12.5px', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px dashed var(--border-light, #e2e8f0)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '12.5px', color: 'var(--text-secondary, #64748b)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
               <ShieldCheckIcon size={14} color="#2563eb" />
               <span>Bảo vệ đơn hàng đa lớp:</span>
             </span>
@@ -185,18 +185,18 @@ export default function OrderSuccessPage() {
               type="button"
               onClick={() => setShowSecurityModal(true)}
               style={{
-                background: 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%)',
-                border: '1px solid #bfdbfe',
+                background: 'rgba(37, 99, 235, 0.08)',
+                border: '1px solid rgba(37, 99, 235, 0.25)',
                 borderRadius: '6px',
                 padding: '4px 10px',
                 fontSize: '11.5px',
                 fontWeight: 700,
-                color: '#1d4ed8',
+                color: 'var(--text-primary, #1d4ed8)',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: '0 1px 3px rgba(37, 99, 235, 0.1)',
+                boxShadow: '0 1px 3px rgba(37, 99, 235, 0.08)',
                 transition: 'all 0.15s ease',
               }}
               title="Xem Chuông Cửa Video AI, Nắn Tuyến AI, Tủ SPX Tap & Go và Hồ Sơ An Ninh Bưu Kiện"
@@ -212,8 +212,8 @@ export default function OrderSuccessPage() {
         {(paymentMethod === 'BANK' || orderData.paymentMethod.includes('VietQR')) && (
           <div
             style={{
-              background: isVietQRPaid ? '#f0fdf4' : '#eff6ff',
-              border: `1.5px solid ${isVietQRPaid ? '#bbf7d0' : '#bfdbfe'}`,
+              background: isVietQRPaid ? 'rgba(22, 163, 74, 0.08)' : 'rgba(37, 99, 235, 0.08)',
+              border: `1.5px solid ${isVietQRPaid ? 'rgba(22, 163, 74, 0.25)' : 'rgba(37, 99, 235, 0.25)'}`,
               borderRadius: '12px',
               padding: '16px 20px',
               marginBottom: '20px',
@@ -244,10 +244,10 @@ export default function OrderSuccessPage() {
                 )}
               </div>
               <div>
-                <div style={{ fontSize: '14.5px', fontWeight: 800, color: isVietQRPaid ? '#166534' : '#1e40af' }}>
+                <div style={{ fontSize: '14.5px', fontWeight: 800, color: isVietQRPaid ? '#166534' : 'var(--text-primary, #1e40af)' }}>
                   {isVietQRPaid ? 'Đã Xác Nhận Thanh Toán VietQR' : 'Thanh Toán VietQR Tự Động'}
                 </div>
-                <div style={{ fontSize: '12px', color: isVietQRPaid ? '#15803d' : '#3b82f6', marginTop: '2px' }}>
+                <div style={{ fontSize: '12px', color: isVietQRPaid ? '#15803d' : 'var(--text-secondary, #3b82f6)', marginTop: '2px' }}>
                   {isVietQRPaid
                     ? 'Giao dịch ngân hàng đã được hệ thống ghi nhận thành công.'
                     : 'Quét mã QR để hoàn tất thanh toán hoặc xem lại chi tiết tài khoản.'}
@@ -286,8 +286,8 @@ export default function OrderSuccessPage() {
         {/* Bonus Lucky Spin Award Banner */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #fff7ed, #ffedd5)',
-            border: '1.5px solid #fed7aa',
+            background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.08), rgba(249, 115, 22, 0.04))',
+            border: '1.5px solid rgba(234, 88, 12, 0.22)',
             borderRadius: '12px',
             padding: '16px 20px',
             marginBottom: '24px',
@@ -299,14 +299,14 @@ export default function OrderSuccessPage() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)', border: '1px solid rgba(234, 88, 12, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(234, 88, 12, 0.25)', flexShrink: 0 }}>
-              <BoltIcon size={22} color="#c2410c" />
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(234, 88, 12, 0.15)', flexShrink: 0 }}>
+              <BoltIcon size={22} color="#ea580c" />
             </div>
             <div>
-              <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#ea580c' }}>
+              <div style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--primary-color, #ea580c)' }}>
                 Tặng +1 Lượt Quay Vòng Quay May Mắn!
               </div>
-              <div style={{ fontSize: '12px', color: '#7c2d12', marginTop: '2px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary, #64748b)', marginTop: '2px' }}>
                 Đơn hàng thành công đã tặng bạn 1 lượt quay 100% trúng thưởng Mini Xu & Voucher.
               </div>
             </div>

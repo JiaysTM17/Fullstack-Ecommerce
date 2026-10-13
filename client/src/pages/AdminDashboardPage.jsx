@@ -3817,69 +3817,100 @@ export default function AdminDashboardPage() {
 
         {/* ==================== MODAL XÁC NHẬN XÓA TÀI KHOẢN (NGƯỜI MUA & NGƯỜI BÁN) ==================== */}
         {userToDelete && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '16px'
-          }}>
-            <div style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              maxWidth: '520px',
-              width: '100%',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              overflow: 'hidden'
-            }}>
+          <div
+            className="shopee-modal-overlay"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && !isDeleting) setUserToDelete(null);
+            }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(15, 23, 42, 0.7)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+              padding: '16px'
+            }}
+          >
+            <div
+              className="shopee-modal-content"
+              style={{
+                background: 'var(--bg-card, #ffffff)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
+                borderRadius: '16px',
+                maxWidth: '520px',
+                width: '100%',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+                overflow: 'hidden'
+              }}
+            >
               {/* Header */}
               <div style={{
-                background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%)',
                 padding: '18px 24px',
-                borderBottom: '1px solid #fca5a5',
+                borderBottom: '1px solid rgba(239, 68, 68, 0.25)',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'space-between',
                 gap: '14px'
               }}>
-                <div style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '50%',
-                  background: '#ef4444',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <TrashIcon size={20} color="#ffffff" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '50%',
+                    background: '#ef4444',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <TrashIcon size={20} color="#ffffff" />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: 'var(--text-primary, #991b1b)' }}>
+                      Xác Nhận Xóa Vĩnh Viễn Tài Khoản
+                    </h3>
+                    <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--text-secondary, #b91c1c)' }}>
+                      Hỗ trợ dọn sạch dữ liệu để kiểm thử (Test) đăng ký lại
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#991b1b' }}>
-                    Xác Nhận Xóa Vĩnh Viễn Tài Khoản
-                  </h3>
-                  <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#b91c1c' }}>
-                    Hỗ trợ dọn sạch dữ liệu để kiểm thử (Test) đăng ký lại
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => !isDeleting && setUserToDelete(null)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--text-secondary, #64748b)',
+                    padding: '6px',
+                    borderRadius: '8px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  title="Đóng modal"
+                >
+                  <CloseIcon size={18} />
+                </button>
               </div>
 
               {/* Body */}
               <div style={{ padding: '22px 24px' }}>
-                <p style={{ margin: '0 0 14px', fontSize: '14px', color: '#334155', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 14px', fontSize: '14px', color: 'var(--text-secondary, #334155)', lineHeight: 1.5 }}>
                   Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản người dùng sau?
                 </p>
 
                 <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  background: 'var(--bg-muted, #f8fafc)',
+                  border: '1px solid var(--border-medium, #e2e8f0)',
                   borderRadius: '10px',
                   padding: '14px 16px',
                   marginBottom: '16px',
@@ -3888,24 +3919,24 @@ export default function AdminDashboardPage() {
                   gap: '8px'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                    <span style={{ color: '#64748b' }}>Họ và tên:</span>
-                    <strong style={{ color: '#0f172a' }}>{userToDelete.fullName}</strong>
+                    <span style={{ color: 'var(--text-secondary, #64748b)' }}>Họ và tên:</span>
+                    <strong style={{ color: 'var(--text-primary, #0f172a)' }}>{userToDelete.fullName}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                    <span style={{ color: '#64748b' }}>Email:</span>
-                    <code style={{ color: '#dc2626', fontWeight: 700, background: '#fee2e2', padding: '2px 6px', borderRadius: '4px' }}>
+                    <span style={{ color: 'var(--text-secondary, #64748b)' }}>Email:</span>
+                    <code style={{ color: '#ef4444', fontWeight: 700, background: 'rgba(239, 68, 68, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
                       {userToDelete.email}
                     </code>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                    <span style={{ color: '#64748b' }}>Phân quyền vai trò:</span>
+                    <span style={{ color: 'var(--text-secondary, #64748b)' }}>Phân quyền vai trò:</span>
                     <span style={{
                       fontWeight: 700,
                       fontSize: '12px',
                       padding: '2px 8px',
                       borderRadius: '999px',
-                      background: userToDelete.role === 'seller' ? '#e0f2fe' : '#f1f5f9',
-                      color: userToDelete.role === 'seller' ? '#0369a1' : '#475569',
+                      background: userToDelete.role === 'seller' ? 'rgba(2, 132, 199, 0.12)' : 'rgba(100, 116, 139, 0.12)',
+                      color: userToDelete.role === 'seller' ? '#0284c7' : 'var(--text-secondary, #475569)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px'
@@ -3931,8 +3962,8 @@ export default function AdminDashboardPage() {
                     <div style={{
                       marginTop: '6px',
                       paddingTop: '8px',
-                      borderTop: '1px dashed #cbd5e1',
-                      color: '#b45309',
+                      borderTop: '1px dashed var(--border-medium, #cbd5e1)',
+                      color: '#d97706',
                       fontSize: '12px',
                       lineHeight: 1.5
                     }}>
@@ -3942,12 +3973,12 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div style={{
-                  background: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
+                  background: 'rgba(22, 163, 74, 0.08)',
+                  border: '1px solid rgba(22, 163, 74, 0.25)',
                   borderRadius: '8px',
                   padding: '10px 14px',
                   fontSize: '13px',
-                  color: '#166534',
+                  color: 'var(--text-primary, #166534)',
                   display: 'flex',
                   gap: '8px',
                   alignItems: 'center'
@@ -3962,8 +3993,8 @@ export default function AdminDashboardPage() {
               {/* Actions */}
               <div style={{
                 padding: '16px 24px',
-                background: '#f8fafc',
-                borderTop: '1px solid #e2e8f0',
+                background: 'var(--bg-muted, #f8fafc)',
+                borderTop: '1px solid var(--border-medium, #e2e8f0)',
                 display: 'flex',
                 justifyContent: 'flex-end',
                 gap: '12px'
@@ -4022,67 +4053,98 @@ export default function AdminDashboardPage() {
 
         {/* ==================== MODAL XÁC NHẬN XÓA GIAN HÀNG ==================== */}
         {shopToDelete && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '16px'
-          }}>
-            <div style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              maxWidth: '520px',
-              width: '100%',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              overflow: 'hidden'
-            }}>
+          <div
+            className="shopee-modal-overlay"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && !isDeleting) setShopToDelete(null);
+            }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(15, 23, 42, 0.7)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+              padding: '16px'
+            }}
+          >
+            <div
+              className="shopee-modal-content"
+              style={{
+                background: 'var(--bg-card, #ffffff)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
+                borderRadius: '16px',
+                maxWidth: '520px',
+                width: '100%',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+                overflow: 'hidden'
+              }}
+            >
               <div style={{
-                background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%)',
                 padding: '18px 24px',
-                borderBottom: '1px solid #fca5a5',
+                borderBottom: '1px solid rgba(239, 68, 68, 0.25)',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'space-between',
                 gap: '14px'
               }}>
-                <div style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '50%',
-                  background: '#ef4444',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <StoreIcon size={20} color="#ffffff" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '50%',
+                    background: '#ef4444',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <StoreIcon size={20} color="#ffffff" />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: 'var(--text-primary, #991b1b)' }}>
+                      Xác Nhận Xóa Gian Hàng
+                    </h3>
+                    <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--text-secondary, #b91c1c)' }}>
+                      Gỡ bỏ gian hàng và toàn bộ sản phẩm niêm yết
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#991b1b' }}>
-                    Xác Nhận Xóa Gian Hàng
-                  </h3>
-                  <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#b91c1c' }}>
-                    Gỡ bỏ gian hàng và toàn bộ sản phẩm niêm yết
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => !isDeleting && setShopToDelete(null)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--text-secondary, #64748b)',
+                    padding: '6px',
+                    borderRadius: '8px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  title="Đóng modal"
+                >
+                  <CloseIcon size={18} />
+                </button>
               </div>
 
               <div style={{ padding: '22px 24px' }}>
-                <p style={{ margin: '0 0 14px', fontSize: '14px', color: '#334155', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 14px', fontSize: '14px', color: 'var(--text-secondary, #334155)', lineHeight: 1.5 }}>
                   Bạn có chắc chắn muốn xóa gian hàng sau khỏi sàn?
                 </p>
 
                 <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  background: 'var(--bg-muted, #f8fafc)',
+                  border: '1px solid var(--border-medium, #e2e8f0)',
                   borderRadius: '10px',
                   padding: '14px 16px',
                   marginBottom: '16px',
@@ -4091,22 +4153,22 @@ export default function AdminDashboardPage() {
                   gap: '8px'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                    <span style={{ color: '#64748b' }}>Tên gian hàng:</span>
-                    <strong style={{ color: '#0f172a' }}>{shopToDelete.name}</strong>
+                    <span style={{ color: 'var(--text-secondary, #64748b)' }}>Tên gian hàng:</span>
+                    <strong style={{ color: 'var(--text-primary, #0f172a)' }}>{shopToDelete.name}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                    <span style={{ color: '#64748b' }}>Mã Shop:</span>
+                    <span style={{ color: 'var(--text-secondary, #64748b)' }}>Mã Shop:</span>
                     <code style={{ color: '#0284c7', fontWeight: 700 }}>{shopToDelete.shopId || shopToDelete.id}</code>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                    <span style={{ color: '#64748b' }}>Chủ sở hữu:</span>
-                    <span style={{ color: '#334155' }}>{shopToDelete.ownerName || 'N/A'}</span>
+                    <span style={{ color: 'var(--text-secondary, #64748b)' }}>Chủ sở hữu:</span>
+                    <span style={{ color: 'var(--text-primary, #334155)' }}>{shopToDelete.ownerName || 'N/A'}</span>
                   </div>
                 </div>
 
-                <p style={{ margin: 0, fontSize: '12px', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(220, 38, 38, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <TrashIcon size={11} color="#dc2626" />
+                <p style={{ margin: 0, fontSize: '12px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <TrashIcon size={11} color="#ef4444" />
                   </span>
                   <span>Cảnh báo: Thao tác này sẽ xóa vĩnh viễn gian hàng và toàn bộ sản phẩm của gian hàng này.</span>
                 </p>
@@ -4114,8 +4176,8 @@ export default function AdminDashboardPage() {
 
               <div style={{
                 padding: '16px 24px',
-                background: '#f8fafc',
-                borderTop: '1px solid #e2e8f0',
+                background: 'var(--bg-muted, #f8fafc)',
+                borderTop: '1px solid var(--border-medium, #e2e8f0)',
                 display: 'flex',
                 justifyContent: 'flex-end',
                 gap: '12px'
