@@ -24,12 +24,13 @@ export default function PackingSlipModal({ order, shop, onClose }) {
           maxWidth: '680px',
           width: '95%',
           background: '#ffffff',
-          borderRadius: '12px',
-          padding: '28px',
+          borderRadius: '16px',
+          padding: '24px',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           maxHeight: '90vh',
           overflowY: 'auto',
-          color: '#1e293b'
+          color: '#1e293b',
+          boxSizing: 'border-box'
         }}
       >
         {/* Header Phiếu */}
@@ -74,7 +75,19 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         </div>
 
         {/* Thông tin Shop & Khách hàng */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px', fontSize: '13px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '16px',
+            background: '#f8fafc',
+            padding: '16px',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            marginBottom: '20px',
+            fontSize: '13px'
+          }}
+        >
           <div>
             <div style={{ fontSize: '11px', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -123,43 +136,56 @@ export default function PackingSlipModal({ order, shop, onClose }) {
             </span>
           </div>
 
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-            <thead>
-              <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1', textAlign: 'left', color: '#475569' }}>
-                <th style={{ padding: '8px 10px', width: '36px', textAlign: 'center' }}>Kiểm</th>
-                <th style={{ padding: '8px 10px' }}>Sản Phẩm & Quy Cách</th>
-                <th style={{ padding: '8px 10px', textAlign: 'center', width: '70px' }}>Số Lượng</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', width: '100px' }}>Đơn Giá</th>
-                <th style={{ padding: '8px 10px', textAlign: 'right', width: '110px' }}>Thành Tiền</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(order.items || []).map((item, idx) => (
-                <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '10px', textAlign: 'center' }}>
-                    <input type="checkbox" defaultChecked style={{ width: '16px', height: '16px', accentColor: '#16a34a', cursor: 'pointer' }} />
-                  </td>
-                  <td style={{ padding: '10px' }}>
-                    <div style={{ fontWeight: 700, color: '#1e293b' }}>{item.name}</div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>Mã SKU: #{item.productId || item.id || `SKU_${idx + 1}`}</div>
-                  </td>
-                  <td style={{ padding: '10px', textAlign: 'center', fontWeight: 800, fontSize: '14px', color: '#ea580c' }}>
-                    x{item.quantity}
-                  </td>
-                  <td style={{ padding: '10px', textAlign: 'right', color: '#64748b' }}>
-                    {formatCurrency(item.price)}
-                  </td>
-                  <td style={{ padding: '10px', textAlign: 'right', fontWeight: 800, color: '#0f172a' }}>
-                    {formatCurrency(item.price * item.quantity)}
-                  </td>
+          <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1', textAlign: 'left', color: '#475569' }}>
+                  <th style={{ padding: '8px 10px', width: '36px', textAlign: 'center' }}>Kiểm</th>
+                  <th style={{ padding: '8px 10px' }}>Sản Phẩm & Quy Cách</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'center', width: '70px' }}>Số Lượng</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', width: '100px' }}>Đơn Giá</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right', width: '110px' }}>Thành Tiền</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {(order.items || []).map((item, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                    <td style={{ padding: '10px', textAlign: 'center' }}>
+                      <input type="checkbox" defaultChecked style={{ width: '16px', height: '16px', accentColor: '#16a34a', cursor: 'pointer' }} />
+                    </td>
+                    <td style={{ padding: '10px' }}>
+                      <div style={{ fontWeight: 700, color: '#1e293b' }}>{item.name}</div>
+                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>Mã SKU: #{item.productId || item.id || `SKU_${idx + 1}`}</div>
+                    </td>
+                    <td style={{ padding: '10px', textAlign: 'center', fontWeight: 800, fontSize: '14px', color: '#ea580c' }}>
+                      x{item.quantity}
+                    </td>
+                    <td style={{ padding: '10px', textAlign: 'right', color: '#64748b' }}>
+                      {formatCurrency(item.price)}
+                    </td>
+                    <td style={{ padding: '10px', textAlign: 'right', fontWeight: 800, color: '#0f172a' }}>
+                      {formatCurrency(item.price * item.quantity)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Thanh toán & Ghi chú */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '16px', background: '#f8fafc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '16px',
+            background: '#f8fafc',
+            padding: '14px 16px',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            marginBottom: '20px'
+          }}
+        >
           <div>
             <div style={{ fontSize: '12.5px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -195,7 +221,18 @@ export default function PackingSlipModal({ order, shop, onClose }) {
         </div>
 
         {/* Chữ ký 3 bên bàn giao */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', textAlign: 'center', paddingTop: '10px', borderTop: '1px dashed #cbd5e1', marginBottom: '24px', fontSize: '12px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '12px',
+            textAlign: 'center',
+            paddingTop: '10px',
+            borderTop: '1px dashed #cbd5e1',
+            marginBottom: '24px',
+            fontSize: '12px'
+          }}
+        >
           <div>
             <div style={{ fontWeight: 800, color: '#475569' }}>NGƯỜI ĐÓNG GÓI</div>
             <div style={{ fontStyle: 'italic', color: '#94a3b8', fontSize: '11px' }}>(Ký, ghi rõ họ tên)</div>
