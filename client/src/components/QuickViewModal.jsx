@@ -212,9 +212,9 @@ export default function QuickViewModal({ product, onClose }) {
                         fontSize: '12px',
                         borderRadius: '4px',
                         cursor: 'pointer',
-                        background: selectedColor === c ? 'var(--primary-color, #4f46e5)' : 'var(--bg-card, #fff)',
-                        color: selectedColor === c ? '#fff' : 'var(--text-primary, #111)',
-                        border: selectedColor === c ? '1px solid var(--primary-color, #4f46e5)' : '1px solid var(--border-color, #ccc)',
+                        background: selectedColor === c ? 'var(--primary-color, #4f46e5)' : 'var(--bg-card, #ffffff)',
+                        color: selectedColor === c ? '#ffffff' : 'var(--text-primary, #0f172a)',
+                        border: selectedColor === c ? '1px solid var(--primary-color, #4f46e5)' : '1px solid var(--border-medium, #cbd5e1)',
                       }}
                     >
                       {c}
