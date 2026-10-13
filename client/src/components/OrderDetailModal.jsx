@@ -436,8 +436,8 @@ export default function OrderDetailModal({
     <div
       className={`order-detail-modal-container ${inline ? 'order-detail-inline-container' : 'anim-modal-content'}`}
       style={{
-        background: '#ffffff',
-        color: '#0f172a',
+        background: 'var(--bg-card, #ffffff)',
+        color: 'var(--text-primary, #0f172a)',
         borderRadius: inline ? '12px' : '14px',
         width: '100%',
         maxWidth: inline ? '100%' : '760px',
@@ -445,7 +445,7 @@ export default function OrderDetailModal({
         display: 'flex',
         flexDirection: 'column',
         boxShadow: inline ? 'none' : '0 20px 40px -10px rgba(0, 0, 0, 0.28)',
-        border: inline ? 'none' : '1px solid #e2e8f0',
+        border: inline ? 'none' : '1px solid var(--border-medium, #e2e8f0)',
         position: 'relative',
         overflow: inline ? 'visible' : 'hidden',
         padding: 0,
@@ -460,8 +460,8 @@ export default function OrderDetailModal({
           className="order-detail-header"
           style={{
             padding: '12px 18px',
-            borderBottom: '1px solid #f1f5f9',
-            background: '#f8fafc',
+            borderBottom: '1px solid var(--border-medium, #f1f5f9)',
+            background: 'var(--bg-muted, #f8fafc)',
             flexShrink: 0,
             display: 'flex',
             justifyContent: 'space-between',
@@ -509,7 +509,7 @@ export default function OrderDetailModal({
             >
               <PackageIcon size={16} color="#ffffff" />
             </div>
-            <span style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>
+            <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
               {t('order_detail_title', 'Chi Tiết Đơn Hàng')}
             </span>
             <button
@@ -522,9 +522,9 @@ export default function OrderDetailModal({
                 padding: '2px 8px',
                 borderRadius: '6px',
                 fontWeight: 600,
-                background: '#f8fafc',
-                border: '1px solid #cbd5e1',
-                color: '#0f172a',
+                background: 'var(--bg-card, #f8fafc)',
+                border: '1px solid var(--border-medium, #cbd5e1)',
+                color: 'var(--text-primary, #0f172a)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '4px',
@@ -673,8 +673,8 @@ export default function OrderDetailModal({
           {!isCancelled && (
             <div
               style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                background: 'var(--bg-muted, #f8fafc)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
                 borderRadius: '8px',
                 padding: '10px 14px',
               }}
@@ -685,11 +685,11 @@ export default function OrderDetailModal({
                   <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <TruckIcon size={12} color="#2563eb" />
                   </span>
-                  <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>
+                  <span style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>
                     {carrierName}
                   </span>
-                  <span style={{ fontSize: '11px', color: '#64748b' }}>
-                    · Mã vận đơn: <strong style={{ color: '#0f172a' }}>{trackingCode}</strong>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary, #64748b)' }}>
+                    · Mã vận đơn: <strong style={{ color: 'var(--text-primary, #0f172a)' }}>{trackingCode}</strong>
                   </span>
                   <button
                     type="button"
@@ -894,8 +894,8 @@ export default function OrderDetailModal({
             {/* Recipient Address Card */}
             <div
               style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                background: 'var(--bg-muted, #f8fafc)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
                 borderRadius: '8px',
                 padding: '10px 12px',
                 display: 'flex',
@@ -908,16 +908,16 @@ export default function OrderDetailModal({
                   <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <MapPinIcon size={11} color="#2563eb" />
                   </span>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary, #475569)', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
                     {t('shipping_address_title', 'Địa Chỉ Nhận Hàng')}
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                  <strong style={{ fontSize: '13px', color: '#0f172a' }}>{recipientName}</strong>
+                  <strong style={{ fontSize: '13px', color: 'var(--text-primary, #0f172a)' }}>{recipientName}</strong>
                   <span
                     className="copy-pill"
                     onClick={() => handleCopy(recipientPhone, 'SĐT')}
-                    style={{ fontSize: '11.5px', color: '#475569', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)' }}
+                    style={{ fontSize: '11.5px', color: 'var(--text-secondary, #475569)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)' }}
                   >
                     <span>{recipientPhone}</span>
                     <span style={{ width: '15px', height: '15px', borderRadius: '3px', background: 'rgba(37, 99, 235, 0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -925,12 +925,12 @@ export default function OrderDetailModal({
                     </span>
                   </span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#475569', marginTop: '3px', lineHeight: 1.4 }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary, #475569)', marginTop: '3px', lineHeight: 1.4 }}>
                   {recipientAddress}
                 </div>
               </div>
               {orderNote && (
-                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '6px', paddingTop: '4px', borderTop: '1px dashed #cbd5e1' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted, #64748b)', marginTop: '6px', paddingTop: '4px', borderTop: '1px dashed var(--border-medium, #cbd5e1)' }}>
                   Ghi chú: {orderNote}
                 </div>
               )}
@@ -939,8 +939,8 @@ export default function OrderDetailModal({
             {/* Carrier & Delivery Dispatch Info Card */}
             <div
               style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                background: 'var(--bg-muted, #f8fafc)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
                 borderRadius: '8px',
                 padding: '10px 12px',
                 display: 'flex',
@@ -954,7 +954,7 @@ export default function OrderDetailModal({
                     <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <TruckIcon size={11} color="#ea580c" />
                     </span>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary, #475569)', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
                       {t('logistics_info_title', 'Thông Tin Giao Nhận')}
                     </span>
                   </div>
@@ -964,28 +964,28 @@ export default function OrderDetailModal({
                       fontWeight: 700,
                       padding: '1px 6px',
                       borderRadius: '4px',
-                      background: '#eff6ff',
-                      color: '#1d4ed8',
+                      background: 'rgba(2, 132, 199, 0.12)',
+                      color: 'var(--primary-color, #0284c7)',
                     }}
                   >
                     Tiết Kiệm (SPX)
                   </span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#0f172a', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>Đơn vị vận chuyển:</span>
+                <div style={{ fontSize: '12px', color: 'var(--text-primary, #0f172a)', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>Đơn vị vận chuyển:</span>
                   <strong>{carrierName}</strong>
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary, #64748b)', display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
                   <span>Hotline khiếu nại:</span>
-                  <strong style={{ color: '#0f172a' }}>{hotline}</strong>
+                  <strong style={{ color: 'var(--text-primary, #0f172a)' }}>{hotline}</strong>
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary, #64748b)', display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
                   <span>Thời gian giao dự kiến:</span>
                   <span style={{ color: '#16a34a', fontWeight: 600 }}>Trong ngày</span>
                 </div>
               </div>
 
-              <div style={{ fontSize: '11px', color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '4px 8px', borderRadius: '4px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontSize: '11px', color: '#15803d', background: 'rgba(22, 163, 74, 0.08)', border: '1px solid rgba(22, 163, 74, 0.25)', padding: '4px 8px', borderRadius: '4px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(22, 163, 74, 0.15)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ShieldCheckIcon size={10} color="#16a34a" />
                 </span>
@@ -997,7 +997,7 @@ export default function OrderDetailModal({
           {/* 4. Integrated Shop Bar & Products List */}
           <div
             style={{
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--border-medium, #e2e8f0)',
               borderRadius: '8px',
               overflow: 'hidden',
             }}
@@ -1005,9 +1005,9 @@ export default function OrderDetailModal({
             {/* Shop Bar */}
             <div
               style={{
-                background: '#f8fafc',
+                background: 'var(--bg-muted, #f8fafc)',
                 padding: '8px 12px',
-                borderBottom: '1px solid #f1f5f9',
+                borderBottom: '1px solid var(--border-medium, #f1f5f9)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -1027,10 +1027,10 @@ export default function OrderDetailModal({
                 >
                   MALL
                 </span>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>
                   {shopName}
                 </span>
-                <span style={{ fontSize: '11px', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary, #64748b)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   · 4.9 <span style={{ width: '16px', height: '16px', borderRadius: '3px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><StarIcon size={10} color="#f59e0b" filled /></span> (12k đánh giá)
                 </span>
               </div>
@@ -1088,8 +1088,8 @@ export default function OrderDetailModal({
                       justifyContent: 'space-between',
                       gap: '10px',
                       padding: '10px 12px',
-                      borderBottom: idx < items.length - 1 ? '1px solid #f1f5f9' : 'none',
-                      background: '#ffffff',
+                      borderBottom: idx < items.length - 1 ? '1px solid var(--border-medium, #f1f5f9)' : 'none',
+                      background: 'var(--bg-card, #ffffff)',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
@@ -1101,7 +1101,7 @@ export default function OrderDetailModal({
                           height: '46px',
                           borderRadius: '6px',
                           objectFit: 'cover',
-                          border: '1px solid #cbd5e1',
+                          border: '1px solid var(--border-medium, #cbd5e1)',
                           flexShrink: 0,
                         }}
                         onError={(e) => {
@@ -1114,7 +1114,7 @@ export default function OrderDetailModal({
                           style={{
                             fontSize: '12.5px',
                             fontWeight: 600,
-                            color: '#0f172a',
+                            color: 'var(--text-primary, #0f172a)',
                             lineHeight: 1.3,
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
@@ -1123,14 +1123,14 @@ export default function OrderDetailModal({
                         >
                           {item.name}
                         </div>
-                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                          <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #64748b)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                          <span style={{ background: 'var(--bg-muted, #f1f5f9)', color: 'var(--text-secondary, #475569)', padding: '1px 5px', borderRadius: '3px' }}>
                             Phân loại: {finalVariant}
                           </span>
-                          <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px' }}>
+                          <span style={{ background: 'var(--bg-muted, #f1f5f9)', color: 'var(--text-secondary, #475569)', padding: '1px 5px', borderRadius: '3px' }}>
                             Kích thước: {finalSize}
                           </span>
-                          <span style={{ fontWeight: 600, color: '#0f172a' }}>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary, #0f172a)' }}>
                             x{itemQty}
                           </span>
                         </div>
@@ -1144,10 +1144,10 @@ export default function OrderDetailModal({
                     </div>
 
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary, #0f172a)' }}>
                         {formatCurrency(itemTotal)}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #64748b)' }}>
                         {formatCurrency(itemPrice)} / chiếc
                       </div>
                       {onBuyAgainItem && (
@@ -1190,8 +1190,8 @@ export default function OrderDetailModal({
             {/* Payment & Trust Card */}
             <div
               style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                background: 'var(--bg-muted, #f8fafc)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
                 borderRadius: '8px',
                 padding: '10px 12px',
                 display: 'flex',
@@ -1205,7 +1205,7 @@ export default function OrderDetailModal({
                     <span style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <CreditCardIcon size={11} color="#2563eb" />
                     </span>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary, #475569)', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
                       {t('payment_info_title', 'Phương Thức Thanh Toán')}
                     </span>
                   </div>
@@ -1215,18 +1215,18 @@ export default function OrderDetailModal({
                       fontWeight: 700,
                       padding: '1px 6px',
                       borderRadius: '4px',
-                      background: isPaid ? '#dcfce7' : isCancelled ? '#fee2e2' : '#eff6ff',
-                      color: isPaid ? '#15803d' : isCancelled ? '#b91c1c' : '#1d4ed8',
+                      background: isPaid ? '#dcfce7' : isCancelled ? '#fee2e2' : 'rgba(37, 99, 235, 0.12)',
+                      color: isPaid ? '#15803d' : isCancelled ? '#b91c1c' : 'var(--primary-color, #1d4ed8)',
                     }}
                   >
                     {paymentStatusText}
                   </span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#0f172a', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>Hình thức:</span>
+                <div style={{ fontSize: '12px', color: 'var(--text-primary, #0f172a)', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>Hình thức:</span>
                   <strong>{paymentMethod}</strong>
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary, #64748b)', display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
                   <span>Mã giao dịch:</span>
                   <span
                     className="copy-pill"
@@ -1241,7 +1241,7 @@ export default function OrderDetailModal({
                 </div>
               </div>
 
-              <div style={{ fontSize: '11px', color: '#1e40af', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '6px 8px', borderRadius: '4px', marginTop: '6px', display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: 1.35 }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-primary, #1e40af)', background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.25)', padding: '6px 8px', borderRadius: '4px', marginTop: '6px', display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: 1.35 }}>
                 <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
                   <ShieldCheckIcon size={11} color="#2563eb" />
                 </span>
@@ -1252,8 +1252,8 @@ export default function OrderDetailModal({
             {/* Financial Cost Breakdown Card */}
             <div
               style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                background: 'var(--bg-muted, #f8fafc)',
+                border: '1px solid var(--border-medium, #e2e8f0)',
                 borderRadius: '8px',
                 padding: '10px 14px',
                 boxSizing: 'border-box',
@@ -1263,16 +1263,16 @@ export default function OrderDetailModal({
               }}
             >
               <div>
-                <div style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: '6px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary, #475569)', letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: '6px' }}>
                   Bảng Kê Chi Phí Thanh Toán
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary, #64748b)', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
                   <span>Tiền hàng (tạm tính):</span>
-                  <span style={{ color: '#0f172a', fontWeight: 600 }}>{formatCurrency(itemSubtotal)}</span>
+                  <span style={{ color: 'var(--text-primary, #0f172a)', fontWeight: 600 }}>{formatCurrency(itemSubtotal)}</span>
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary, #64748b)', display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
                   <span>Phí vận chuyển (SPX):</span>
-                  <span style={{ color: '#0f172a', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--text-primary, #0f172a)', fontWeight: 600 }}>
                     {shippingFee === 0 ? 'Miễn phí (Freeship Xtra)' : formatCurrency(shippingFee)}
                   </span>
                 </div>
@@ -1302,16 +1302,16 @@ export default function OrderDetailModal({
                   style={{
                     marginTop: '6px',
                     paddingTop: '6px',
-                    borderTop: '1px dashed #cbd5e1',
+                    borderTop: '1px dashed var(--border-medium, #cbd5e1)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'baseline',
                   }}
                 >
-                  <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>
+                  <span style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}>
                     Tổng thanh toán:
                   </span>
-                  <span style={{ fontSize: '17px', fontWeight: 800, color: '#2563eb' }}>
+                  <span style={{ fontSize: '17px', fontWeight: 800, color: 'var(--primary-color, #2563eb)' }}>
                     {formatCurrency(finalTotal)}
                   </span>
                 </div>
@@ -1320,8 +1320,8 @@ export default function OrderDetailModal({
                   <div
                     style={{
                       marginTop: '4px',
-                      background: '#f0fdf4',
-                      border: '1px solid #bbf7d0',
+                      background: 'rgba(22, 163, 74, 0.08)',
+                      border: '1px solid rgba(22, 163, 74, 0.25)',
                       borderRadius: '4px',
                       padding: '3px 8px',
                       color: '#15803d',
@@ -1353,8 +1353,8 @@ export default function OrderDetailModal({
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '8px 18px',
-            borderTop: '1px solid #f1f5f9',
-            background: '#f8fafc',
+            borderTop: '1px solid var(--border-medium, #f1f5f9)',
+            background: 'var(--bg-muted, #f8fafc)',
             flexShrink: 0,
             flexWrap: 'wrap',
             gap: '8px',
