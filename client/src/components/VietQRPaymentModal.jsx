@@ -400,10 +400,10 @@ export default function VietQRPaymentModal({
                   display: 'grid',
                   gridTemplateColumns: '190px 1fr',
                   gap: '18px',
-                  background: '#f8fafc',
+                  background: 'var(--bg-muted, #f8fafc)',
                   padding: '16px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid var(--border-medium, #e2e8f0)',
                   marginBottom: '16px',
                 }}
               >
@@ -461,15 +461,15 @@ export default function VietQRPaymentModal({
                 {/* Transfer Info Fields */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', justifyContent: 'center' }}>
                   {/* Account Number */}
-                  <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '10.5px', color: '#2563eb', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ background: 'var(--bg-card, #ffffff)', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
+                    <div style={{ fontSize: '10.5px', color: 'var(--primary-color, #2563eb)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <CreditCardIcon size={11} color="#2563eb" />
                       </span>
                       <span>SỐ TÀI KHOẢN:</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
-                      <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.5px' }}>
+                      <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary, #0f172a)', letterSpacing: '0.5px' }}>
                         {selectedBank.accountNo}
                       </span>
                       <button
@@ -504,20 +504,20 @@ export default function VietQRPaymentModal({
                   </div>
 
                   {/* Account Name */}
-                  <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ background: 'var(--bg-card, #ffffff)', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
                     <div style={{ fontSize: '10.5px', color: '#16a34a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <ShieldCheckIcon size={11} color="#16a34a" />
                       </span>
                       <span>CHỦ TÀI KHOẢN:</span>
                     </div>
-                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-primary, #0f172a)', marginTop: '2px' }}>
                       {selectedBank.accountName}
                     </div>
                   </div>
 
                   {/* Amount */}
-                  <div style={{ background: '#ffffff', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ background: 'var(--bg-card, #ffffff)', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-medium, #e2e8f0)' }}>
                     <div style={{ fontSize: '10.5px', color: '#ea580c', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.12)', border: '1px solid rgba(234, 88, 12, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <TagIcon size={11} color="#ea580c" />
