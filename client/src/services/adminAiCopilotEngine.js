@@ -1506,7 +1506,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 65. Xếp Hạng Doanh Số & Phân Vị GMV Bằng Cây Fenwick (BIT) (Phase 28 - Feature 175)
-  if (/fenwick|cây fenwick|binary indexed tree|\bbit\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
+  if (!/2d|2 chiều/i.test(raw) && /fenwick|cây fenwick|binary indexed tree|\bbit\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
     return {
       text: `📊 **XẾP HẠNG DOANH SỐ & PHÂN VỊ GMV BẰNG CÂY FENWICK (BINARY INDEXED TREE - BIT)**:
 - **Cấu trúc dữ liệu Fenwick Tree (Peter Fenwick 1994)**:
@@ -1681,6 +1681,64 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
       ]
     };
   }
+
+  // 74. Định Tuyến Hai Tuyến Không Trùng Cạnh Suurballe Dự Phòng SPX (Phase 31 - Feature 178)
+  if (/suurballe|không trùng cạnh|định tuyến dự phòng|tuyến đường độc lập|disjoint path|lộ trình song song/i.test(raw)) {
+    return {
+      text: `🚚 **ĐỊNH TUYẾN DỰ PHÒNG SUURBALLE (TWO LINK-DISJOINT MIN-COST PATHS)**:
+- **Khả năng chịu lỗi sự cố (Fault-Tolerant SPX Logistics)**:
+  - Khi một tuyến huyết mạch (như Quốc lộ 1A qua miền Trung) bị tê liệt do bão lụt hoặc sự cố trạm Hub, Suurballe đảm bảo luôn có lộ trình độc lập thứ 2 không chia sẻ bất kỳ cạnh nào với đường chính.
+- **Nguyên lý Suurballe (1974)**:
+  - Tìm đường ngắn nhất $P_1$, biến đổi thế năng cạnh $w'(u, v) = w(u, v) - d(v) + d(u) \\ge 0$, đảo chiều $P_1$ với trọng số 0.
+  - Tìm đường ngắn nhất $P_2$ trên đồ thị biến đổi và khử các cạnh ngược chiều, tổng hợp thành 2 đường đi độc lập có tổng chi phí nhỏ nhất trong $O(E + V \\log V)$.`,
+      type: 'logistics',
+      tag: 'ĐỊNH TUYẾN DỰ PHÒNG SUURBALLE',
+      suggestions: [
+        'Thiết lập 2 lộ trình dự phòng Bắc - Nam',
+        'Kiểm tra tính không trùng cạnh Disjoint',
+        'Xem tổng chi phí 2 tuyến đường Suurballe'
+      ]
+    };
+  }
+
+  // 75. Cây Fenwick 2 Chiều Phân Tích Ma Trận Flash Sale (Phase 31 - Feature 178)
+  if (/fenwick 2d|cây fenwick 2 chiều|2d bit|ma trận flash sale|khoảng giá và rating|truy vấn hình chữ nhật fenwick/i.test(raw)) {
+    return {
+      text: `📊 **PHÂN TÍCH MA TRẬN 2 CHIỀU FLASH SALE BẰNG CÂY FENWICK 2D (2D BINARY INDEXED TREE)**:
+- **Thách thức truy vấn đa chiều**:
+  - Quản trị viên cần biết ngay tổng GMV của nhóm sản phẩm có Giá trong $[P_1, P_2]$ VÀ Điểm đánh giá trong $[R_1, R_2]$ mà không quét $O(N)$ toàn bộ danh mục hàng triệu SKU.
+- **Cấu trúc 2D Fenwick Tree**:
+  - Cập nhật điểm \`update(r, c, delta)\` và truy vấn tổng tiền tố \`queryPrefix(r, c)\` với hàm \`lowbit(x)\` kép trong $O(\\log R \\cdot \\log C)$.
+  - Truy vấn miền chữ nhật $[r_1..r_2] \\times [c_1..c_2]$ chuẩn xác chỉ với 4 phép tính tiền tố trong vài micro-giây!`,
+      type: 'analytics',
+      tag: 'CÂY FENWICK 2 CHIỀU',
+      suggestions: [
+        'Truy vấn GMV theo khoảng Giá và Rating',
+        'Cập nhật doanh số SKU vào ma trận Fenwick 2D',
+        'Xem độ phức tạp O(log R * log C)'
+      ]
+    };
+  }
+
+  // 76. Quản Lý Trễ Hàng Đợi Kiểm Soát CoDel Chống Bufferbloat (Phase 31 - Feature 178)
+  if (/codel|bufferbloat|sojourn time|thời gian lưu trú|hàng đợi kiểm soát trễ|active queue management/i.test(raw)) {
+    return {
+      text: `⚡ **QUẢN TRỊ TRỄ HÀNG ĐỢI ACTIVE QUEUE CODEL (CONTROLLED DELAY - RFC 8290)**:
+- **Triệt tiêu hiện tượng Bufferbloat**:
+  - Trong đợt mở bán Flash Sale 0đ, các hàng đợi tĩnh truyền thống gây ứ đọng request hàng chục giây (Standing Queue), khiến người mua bị timeout trước khi server kịp xử lý.
+- **Cơ chế đo thời gian lưu trú (Sojourn Time)**:
+  - CoDel theo dõi độ trễ thực tế của request trong hàng đợi với mục tiêu Target Delay $5\\text{ms}$ trong cửa sổ Interval $100\\text{ms}$.
+  - Khi phát hiện trễ kéo dài, CoDel kích hoạt trạng thái \`DROPPING\` theo lịch căn bậc hai nghịch đảo $t_{\\text{next}} = t + \\frac{\\text{Interval}}{\\sqrt{\\text{dropCount}}}$, dọn sạch tắc nghẽn tức thì!`,
+      type: 'alert',
+      tag: 'HÀNG ĐỢI CODEL CHỐNG NGHẼN',
+      suggestions: [
+        'Kiểm tra thống kê hàng đợi CoDel',
+        'Cấu hình Target Delay và Sliding Interval',
+        'Đo thời gian lưu trú Sojourn Time'
+      ]
+    };
+  }
+
 
   // 39. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {

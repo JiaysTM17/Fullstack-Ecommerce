@@ -191,6 +191,10 @@ import {
   HysteresisLoadBalancer,
   HLLSketch,
   HLLJaccardEstimator,
+  // Phase 31 Enterprise Algorithms
+  SuurballeDisjointRouter,
+  Fenwick2DRangeTree,
+  CoDelActiveQueue,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -249,6 +253,9 @@ import ServerTreapIntervalTree, { IntervalNode as ServerIntervalNode } from "../
 import ServerRTreeIndex, { RTreeBoundingBox as ServerRTreeBoundingBox } from "../../server/src/utils/rTreeSpatialGeoIndex.js";
 import ServerHysteresisBalancer, { HYSTERESIS_STATE as ServerHysteresisState } from "../../server/src/utils/hysteresisLoadBalancer.js";
 import ServerHLLJaccardEstimator, { HLLSketch as ServerHLLSketch } from "../../server/src/utils/hllJaccardEstimator.js";
+import ServerSuurballeRouter from "../../server/src/utils/suurballeDisjointRouter.js";
+import ServerFenwick2DTree from "../../server/src/utils/fenwick2DRangeTree.js";
+import ServerCoDelQueue from "../../server/src/utils/codelActiveQueue.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -16162,6 +16169,294 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const affinity = HLLJaccardEstimator.estimate(techAudience, audioAudience);
         expect.equal(affinity.jaccard > 0.20 && affinity.jaccard < 0.50, true);
         expect.equal(affinity.intersection > 70, true);
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 178: Phase 31 Enterprise Algorithms Suite (24 Tests)
+    // 1. Suurballe Disjoint Multi-Path Router (Two Link-Disjoint Paths)
+    // 2. Fenwick 2D Range Tree (2D Binary Indexed Tree for Multi-Metric Queries)
+    // 3. CoDel Active Queue Management (Controlled Delay - RFC 8290)
+    // =========================================================================
+    describe("Feature 178: Phase 31 Enterprise Algorithms Suite", () => {
+      // --- PART 1: Suurballe Disjoint Router (F178-T01 -> F178-T06) ---
+      test("F178-T01: Suurballe router builds graph nodes and directed weighted edges", () => {
+        const router = new SuurballeDisjointRouter();
+        router.addEdge("HN", "DN", 700);
+        router.addEdge("DN", "SG", 900);
+        expect.equal(router.nodes.has("HN"), true);
+        expect.equal(router.nodes.has("DN"), true);
+        expect.equal(router.nodes.has("SG"), true);
+        expect.equal(router.adj.get("HN").length, 1);
+        expect.equal(router.adj.get("HN")[0].weight, 700);
+      });
+
+      test("F178-T02: Dijkstra single path returns minimum distance and correct path", () => {
+        const router = new SuurballeDisjointRouter();
+        router.addEdge("A", "B", 10);
+        router.addEdge("B", "C", 20);
+        router.addEdge("A", "C", 50);
+
+        const res = router._dijkstra("A", "C");
+        expect.equal(res.distance, 30);
+        expect.equal(res.path.join("->"), "A->B->C");
+      });
+
+      test("F178-T03: Suurballe finds two link-disjoint paths on a diamond network", () => {
+        const router = new SuurballeDisjointRouter();
+        // A -> B -> D (cost 1 + 2 = 3)
+        // A -> C -> D (cost 2 + 2 = 4)
+        router.addEdge("A", "B", 1);
+        router.addEdge("B", "D", 2);
+        router.addEdge("A", "C", 2);
+        router.addEdge("C", "D", 2);
+
+        const result = router.findTwoDisjointPaths("A", "D");
+        expect.equal(result !== null, true);
+        expect.equal(result.disjoint, true);
+        expect.equal(result.path1.join("->"), "A->B->D");
+        expect.equal(result.path2.join("->"), "A->C->D");
+        expect.equal(result.totalCost, 7);
+      });
+
+      test("F178-T04: Suurballe finds two link-disjoint paths on a 5-node bridge network", () => {
+        const router = new SuurballeDisjointRouter();
+        router.addEdge("S", "A", 1);
+        router.addEdge("S", "B", 2);
+        router.addEdge("A", "B", 1);
+        router.addEdge("A", "T", 4);
+        router.addEdge("B", "T", 2);
+
+        const result = router.findTwoDisjointPaths("S", "T");
+        expect.equal(result !== null, true);
+        expect.equal(result.path1 !== null, true);
+        expect.equal(result.path2 !== null, true);
+        expect.equal(result.disjoint, true);
+        expect.equal(result.totalCost, 9);
+      });
+
+      test("F178-T05: Handles single path fallback when no 2nd edge-disjoint path exists", () => {
+        const router = new SuurballeDisjointRouter();
+        router.addEdge("A", "B", 5);
+        router.addEdge("B", "C", 5);
+
+        const result = router.findTwoDisjointPaths("A", "C");
+        expect.equal(result !== null, true);
+        expect.equal(result.path1.join("->"), "A->B->C");
+        expect.equal(result.path2, null);
+        expect.equal(result.disjoint, false);
+      });
+
+      test("F178-T06: ServerSuurballeRouter parity with Client implementation", () => {
+        const serverRouter = new ServerSuurballeRouter();
+        serverRouter.addEdge("HUB_HN", "HUB_VINH", 300);
+        serverRouter.addEdge("HUB_VINH", "HUB_DN", 500);
+        serverRouter.addEdge("HUB_HN", "HUB_TH", 150);
+        serverRouter.addEdge("HUB_TH", "HUB_DN", 650);
+
+        const res = serverRouter.findTwoDisjointPaths("HUB_HN", "HUB_DN");
+        expect.equal(res.disjoint, true);
+        expect.equal(res.path1.length >= 3, true);
+        expect.equal(res.path2.length >= 3, true);
+        expect.equal(res.totalCost, 1600);
+      });
+
+      // --- PART 2: Fenwick 2D Range Tree (F178-T07 -> F178-T12) ---
+      test("F178-T07: Fenwick2DRangeTree constructor initializes grid with zeroes", () => {
+        const bit2d = new Fenwick2DRangeTree(20, 20);
+        expect.equal(bit2d.maxRows, 20);
+        expect.equal(bit2d.maxCols, 20);
+        expect.equal(bit2d.totalEntries, 0);
+        expect.equal(bit2d.queryPrefix(5, 5), 0);
+      });
+
+      test("F178-T08: Fenwick2DRangeTree point update and queryPrefix aggregate correctly", () => {
+        const bit2d = new Fenwick2DRangeTree(10, 10);
+        bit2d.update(3, 4, 25.5);
+        bit2d.update(2, 2, 10.0);
+
+        expect.equal(bit2d.queryPrefix(1, 1), 0);
+        expect.equal(bit2d.queryPrefix(2, 2), 10.0);
+        expect.equal(bit2d.queryPrefix(3, 4), 35.5);
+        expect.equal(bit2d.queryPrefix(10, 10), 35.5);
+      });
+
+      test("F178-T09: Fenwick2DRangeTree queryRange on single cell returns exact point value", () => {
+        const bit2d = new Fenwick2DRangeTree(10, 10);
+        bit2d.update(5, 5, 42);
+        const cellVal = bit2d.queryRange(5, 5, 5, 5);
+        expect.equal(cellVal, 42);
+      });
+
+      test("F178-T10: Fenwick2DRangeTree 2D subgrid range sum query spanning multiple buckets", () => {
+        const bit2d = new Fenwick2DRangeTree(10, 10);
+        bit2d.update(2, 2, 10);
+        bit2d.update(2, 3, 20);
+        bit2d.update(3, 2, 30);
+        bit2d.update(3, 3, 40);
+
+        const subSum = bit2d.queryRange(2, 2, 3, 3);
+        expect.equal(subSum, 100);
+        expect.equal(bit2d.queryRange(1, 1, 1, 3), 0);
+      });
+
+      test("F178-T11: Fenwick2DRangeTree handles inverted coordinates and out-of-bounds gracefully", () => {
+        const bit2d = new Fenwick2DRangeTree(10, 10);
+        bit2d.update(2, 2, 50);
+
+        const val = bit2d.queryRange(3, 3, 1, 1);
+        expect.equal(val, 50);
+
+        bit2d.update(99, 99, 100);
+        expect.equal(bit2d.queryPrefix(10, 10), 50);
+      });
+
+      test("F178-T12: Clear resets grid; ServerFenwick2DTree parity with Client implementation", () => {
+        const serverBIT = new ServerFenwick2DTree(15, 15);
+        serverBIT.update(5, 5, 80);
+        serverBIT.update(6, 6, 120);
+        expect.equal(serverBIT.queryRange(1, 1, 10, 10), 200);
+
+        serverBIT.clear();
+        expect.equal(serverBIT.queryRange(1, 1, 10, 10), 0);
+        expect.equal(serverBIT.totalEntries, 0);
+      });
+
+      // --- PART 3: CoDel Active Queue Management (F178-T13 -> F178-T18) ---
+      test("F178-T13: CoDelActiveQueue enqueues requests and tracks queue size accurately", () => {
+        const queue = new CoDelActiveQueue({ maxQueueSize: 50 });
+        expect.equal(queue.size(), 0);
+
+        queue.enqueue({ id: "REQ_1" }, 1000);
+        queue.enqueue({ id: "REQ_2" }, 1001);
+        expect.equal(queue.size(), 2);
+        expect.equal(queue.getStats().totalEnqueued, 2);
+      });
+
+      test("F178-T14: CoDelActiveQueue hard buffer overflow drops request when maxQueueSize is reached", () => {
+        const queue = new CoDelActiveQueue({ maxQueueSize: 2 });
+        expect.equal(queue.enqueue({ id: "R1" }), true);
+        expect.equal(queue.enqueue({ id: "R2" }), true);
+        expect.equal(queue.enqueue({ id: "R3" }), false);
+        expect.equal(queue.size(), 2);
+        expect.equal(queue.getStats().totalDropped, 1);
+      });
+
+      test("F178-T15: Dequeue below targetDelayMs keeps dropping false and returns item immediately", () => {
+        const queue = new CoDelActiveQueue({ targetDelayMs: 10, intervalMs: 100 });
+        queue.enqueue({ id: "PAYMENT_FAST" }, 1000);
+
+        const res = queue.dequeue(1005);
+        expect.equal(res.item.id, "PAYMENT_FAST");
+        expect.equal(res.sojournTime, 5);
+        expect.equal(queue.dropping, false);
+      });
+
+      test("F178-T16: High sojourn time lasting over intervalMs triggers dropping state", () => {
+        const queue = new CoDelActiveQueue({ targetDelayMs: 5, intervalMs: 100 });
+        queue.enqueue({ id: "STALE_1" }, 1000);
+        queue.enqueue({ id: "STALE_2" }, 1000);
+
+        const d1 = queue.dequeue(1020);
+        expect.equal(d1.item.id, "STALE_1");
+        expect.equal(queue.dropping, false);
+
+        queue.enqueue({ id: "STALE_3" }, 1000);
+
+        const d2 = queue.dequeue(1130);
+        expect.equal(queue.dropping, true);
+        expect.equal(queue.dropCount >= 1, true);
+      });
+
+      test("F178-T17: Drops packets according to inverse square root schedule interval / sqrt(dropCount)", () => {
+        const queue = new CoDelActiveQueue({ targetDelayMs: 5, intervalMs: 100 });
+        const interval = queue._computeNextDropInterval();
+        expect.equal(interval, 100);
+
+        queue.dropCount = 4;
+        expect.equal(queue._computeNextDropInterval(), 50);
+
+        queue.dropCount = 16;
+        expect.equal(queue._computeNextDropInterval(), 25);
+      });
+
+      test("F178-T18: Queue recovery resets dropping when sojourn time drops below target; Server parity", () => {
+        const serverQueue = new ServerCoDelQueue({ targetDelayMs: 5, intervalMs: 100 });
+        serverQueue.enqueue({ id: "SRV_REQ_1" }, 5000);
+        serverQueue.enqueue({ id: "SRV_REQ_2" }, 5050);
+
+        const d = serverQueue.dequeue(5052);
+        expect.equal(d.item.id, "SRV_REQ_1");
+        expect.equal(serverQueue.dropping, false);
+        expect.equal(serverQueue.getStats().totalDequeued, 1);
+      });
+
+      // --- PART 4: Copilots & E2E Lifecycle (F178-T19 -> F178-T24) ---
+      test("F178-T19: Admin Sentinel Copilot Section 74 recognizes Suurballe Disjoint Router", () => {
+        const res = generateAdminCopilotResponse("Lộ trình suurballe không trùng cạnh dự phòng SPX", {});
+        expect.equal(res.tag, "ĐỊNH TUYẾN DỰ PHÒNG SUURBALLE");
+        expect.equal(/suurballe/i.test(res.text), true);
+        expect.equal(/disjoint/i.test(res.text), true);
+      });
+
+      test("F178-T20: Admin Sentinel Copilot Section 75 recognizes Fenwick 2D Range Tree", () => {
+        const res = generateAdminCopilotResponse("Phân tích ma trận flash sale cây fenwick 2 chiều 2d bit", {});
+        expect.equal(res.tag, "CÂY FENWICK 2 CHIỀU");
+        expect.equal(/fenwick/i.test(res.text), true);
+        expect.equal(/lowbit/i.test(res.text), true);
+      });
+
+      test("F178-T21: Admin Sentinel Copilot Section 76 recognizes CoDel Active Queue Management", () => {
+        const res = generateAdminCopilotResponse("Kiểm soát hàng đợi codel chống bufferbloat và đo sojourn time", {});
+        expect.equal(res.tag, "HÀNG ĐỢI CODEL CHỐNG NGHẼN");
+        expect.equal(/codel/i.test(res.text), true);
+        expect.equal(/sojourn/i.test(res.text), true);
+      });
+
+      test("F178-T22: Seller ShopSmart Copilot Section 40 guides Suurballe failover & Fenwick 2D matrix", () => {
+        const res = generateSellerCopilotResponse("Lập lộ trình dự phòng suurballe và ma trận doanh số 2 chiều fenwick 2d", { name: "Shop Điện Máy" }, [], []);
+        expect.equal(res.tag, "LỘ TRÌNH DỰ PHÒNG SUURBALLE & FENWICK 2D");
+        expect.equal(/suurballe/i.test(res.text), true);
+        expect.equal(/fenwick/i.test(res.text), true);
+      });
+
+      test("F178-T23: Buyer AI Assistant Intent 33 explains Suurballe backup route & CoDel instant checkout", () => {
+        const res = generateAiChatResponse("Giao hàng dự phòng suurballe và chống nghẽn thanh toán codel");
+        expect.equal(res.intent, "SUURBALLE_CODEL_ASSIST");
+        expect.equal(/suurballe/i.test(res.replyText), true);
+        expect.equal(/codel/i.test(res.replyText), true);
+      });
+
+      test("F178-T24: E2E Lifecycle: SPX Redundant routes via Suurballe -> CoDel regulates checkout burst -> Fenwick 2D tracks sales matrix", () => {
+        // 1. Suurballe computes primary and backup logistics corridors
+        const router = new SuurballeDisjointRouter();
+        router.addEdge("KHO_HN", "HUB_VINH", 300);
+        router.addEdge("HUB_VINH", "KHO_SG", 800);
+        router.addEdge("KHO_HN", "HUB_TH", 150);
+        router.addEdge("HUB_TH", "KHO_SG", 950);
+        const corridor = router.findTwoDisjointPaths("KHO_HN", "KHO_SG");
+        expect.equal(corridor.disjoint, true);
+        expect.equal(corridor.totalCost, 2200);
+
+        // 2. Flash Sale opens -> CoDel queue regulates millions of checkout requests
+        const codel = new CoDelActiveQueue({ targetDelayMs: 5, intervalMs: 50 });
+        for (let i = 0; i < 20; i++) {
+          codel.enqueue({ orderId: `ORDER_${i}`, amount: 150000 }, 1000);
+        }
+        expect.equal(codel.size(), 20);
+        const processed = codel.dequeue(1003); // within target delay
+        expect.equal(processed.item.orderId, "ORDER_0");
+        expect.equal(processed.sojournTime, 3);
+
+        // 3. Fenwick 2D tracks real-time GMV across Price Buckets (1..10) x Rating Buckets (1..5)
+        const gmvMatrix = new Fenwick2DRangeTree(10, 5);
+        // Product in price tier 3 (100k-200k), 5-star rating -> +150,000 GMV
+        gmvMatrix.update(3, 5, 150000);
+        // Product in price tier 3 (100k-200k), 4-star rating -> +120,000 GMV
+        gmvMatrix.update(3, 4, 120000);
+        // Query total GMV for price tier 3 across 4-5 stars
+        const totalTier3 = gmvMatrix.queryRange(3, 4, 3, 5);
+        expect.equal(totalTier3, 270000);
       });
     });
   });

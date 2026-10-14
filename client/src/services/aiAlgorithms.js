@@ -14593,6 +14593,432 @@ export class HLLJaccardEstimator {
   }
 }
 
+// ==========================================
+// PHASE 31 ENTERPRISE ALGORITHMS
+// 1. Suurballe Disjoint Multi-Path Router
+// 2. Fenwick 2D Range Tree
+// 3. CoDel Active Queue Management
+// ==========================================
+
+export class SuurballeDisjointRouter {
+  constructor() {
+    this.nodes = new Set();
+    this.adj = new Map();
+  }
+
+  addNode(nodeId) {
+    this.nodes.add(nodeId);
+    if (!this.adj.has(nodeId)) {
+      this.adj.set(nodeId, []);
+    }
+  }
+
+  addEdge(from, to, weight) {
+    this.addNode(from);
+    this.addNode(to);
+    const w = Math.max(0, Number(weight));
+    this.adj.get(from).push({ to, weight: w, id: `${from}->${to}` });
+  }
+
+  _dijkstra(startNode, endNode, edgeWeightFn) {
+    const dist = new Map();
+    const prev = new Map();
+    const prevEdge = new Map();
+
+    for (const node of this.nodes) {
+      dist.set(node, Infinity);
+    }
+    dist.set(startNode, 0);
+
+    const visited = new Set();
+    const unvisited = new Set(this.nodes);
+
+    while (unvisited.size > 0) {
+      let u = null;
+      let minDist = Infinity;
+      for (const node of unvisited) {
+        const d = dist.get(node);
+        if (d < minDist) {
+          minDist = d;
+          u = node;
+        }
+      }
+
+      if (u === null || minDist === Infinity) break;
+      if (u === endNode) break;
+
+      unvisited.delete(u);
+      visited.add(u);
+
+      const neighbors = this.adj.get(u) || [];
+      for (const edge of neighbors) {
+        if (visited.has(edge.to)) continue;
+        const w = edgeWeightFn ? edgeWeightFn(u, edge) : edge.weight;
+        if (w === Infinity || w < 0) continue;
+
+        const alt = dist.get(u) + w;
+        if (alt < dist.get(edge.to)) {
+          dist.set(edge.to, alt);
+          prev.set(edge.to, u);
+          prevEdge.set(edge.to, edge);
+        }
+      }
+    }
+
+    if (dist.get(endNode) === Infinity) {
+      return null;
+    }
+
+    const path = [];
+    const edges = [];
+    let curr = endNode;
+    while (curr !== startNode) {
+      path.unshift(curr);
+      const edge = prevEdge.get(curr);
+      if (edge) edges.unshift({ from: prev.get(curr), to: curr, weight: edge.weight, id: edge.id });
+      curr = prev.get(curr);
+      if (curr === undefined) return null;
+    }
+    path.unshift(startNode);
+
+    return {
+      distance: dist.get(endNode),
+      path,
+      edges,
+      distMap: dist
+    };
+  }
+
+  findTwoDisjointPaths(source, target) {
+    if (!this.nodes.has(source) || !this.nodes.has(target) || source === target) {
+      return null;
+    }
+
+    const p1Result = this._dijkstra(source, target);
+    if (!p1Result) return null;
+
+    const p1 = p1Result.path;
+    const p1Edges = p1Result.edges;
+    const dMap = p1Result.distMap;
+
+    const p1EdgeSet = new Set(p1Edges.map(e => `${e.from}->${e.to}`));
+
+    const backupAdj = new Map();
+    for (const [node, edges] of this.adj.entries()) {
+      backupAdj.set(node, edges.map(e => ({ ...e })));
+    }
+
+    for (const e of p1Edges) {
+      const fromEdges = this.adj.get(e.from) || [];
+      this.adj.set(e.from, fromEdges.filter(edge => edge.to !== e.to));
+
+      if (!this.adj.has(e.to)) this.adj.set(e.to, []);
+      this.adj.get(e.to).push({
+        to: e.from,
+        weight: 0,
+        isReversed: true,
+        originalWeight: e.weight,
+        id: `${e.to}->${e.from}`
+      });
+    }
+
+    const edgeWeightFn = (u, edge) => {
+      if (edge.isReversed) return 0;
+      const du = dMap.get(u) || 0;
+      const dv = dMap.get(edge.to) || 0;
+      const redWeight = edge.weight - dv + du;
+      return Math.max(0, redWeight);
+    };
+
+    const p2Result = this._dijkstra(source, target, edgeWeightFn);
+    this.adj = backupAdj;
+
+    if (!p2Result) {
+      return {
+        path1: p1,
+        path2: null,
+        totalCost: p1Result.distance,
+        disjoint: false
+      };
+    }
+
+    const p2Edges = p2Result.edges;
+    const activeEdges = [];
+    const p2EdgeSet = new Set(p2Edges.map(e => `${e.from}->${e.to}`));
+
+    for (const e of p1Edges) {
+      const revKey = `${e.to}->${e.from}`;
+      if (!p2EdgeSet.has(revKey)) {
+        activeEdges.push({ from: e.from, to: e.to, weight: e.weight });
+      }
+    }
+
+    for (const e of p2Edges) {
+      const revKey = `${e.to}->${e.from}`;
+      if (!p1EdgeSet.has(revKey)) {
+        let originalWeight = e.weight;
+        const origNeighbors = this.adj.get(e.from) || [];
+        const orig = origNeighbors.find(item => item.to === e.to);
+        if (orig) originalWeight = orig.weight;
+        activeEdges.push({ from: e.from, to: e.to, weight: originalWeight });
+      }
+    }
+
+    const adjOut = new Map();
+    for (const edge of activeEdges) {
+      if (!adjOut.has(edge.from)) adjOut.set(edge.from, []);
+      adjOut.get(edge.from).push(edge);
+    }
+
+    const tracePath = (start) => {
+      const p = [start];
+      let curr = start;
+      let cost = 0;
+      while (curr !== target) {
+        const outList = adjOut.get(curr);
+        if (!outList || outList.length === 0) break;
+        const nextEdge = outList.shift();
+        curr = nextEdge.to;
+        cost += nextEdge.weight;
+        p.push(curr);
+      }
+      return { path: p, cost };
+    };
+
+    const first = tracePath(source);
+    const second = tracePath(source);
+
+    const validP1 = first.path[first.path.length - 1] === target ? first.path : p1;
+    const validP2 = second.path[second.path.length - 1] === target && second.path.length > 1
+      ? second.path
+      : null;
+
+    let isDisjoint = false;
+    if (validP1 && validP2) {
+      const edges1 = new Set();
+      for (let i = 0; i < validP1.length - 1; i++) {
+        edges1.add(`${validP1[i]}->${validP1[i+1]}`);
+      }
+      let collision = false;
+      for (let i = 0; i < validP2.length - 1; i++) {
+        if (edges1.has(`${validP2[i]}->${validP2[i+1]}`)) {
+          collision = true;
+          break;
+        }
+      }
+      isDisjoint = !collision;
+    }
+
+    const cost1 = this._calculatePathCost(validP1);
+    const cost2 = validP2 ? this._calculatePathCost(validP2) : 0;
+
+    return {
+      path1: validP1,
+      path2: validP2,
+      totalCost: cost1 + cost2,
+      disjoint: isDisjoint
+    };
+  }
+
+  _calculatePathCost(path) {
+    if (!path || path.length < 2) return 0;
+    let cost = 0;
+    for (let i = 0; i < path.length - 1; i++) {
+      const u = path[i];
+      const v = path[i + 1];
+      const neighbors = this.adj.get(u) || [];
+      const edge = neighbors.find(e => e.to === v);
+      if (edge) cost += edge.weight;
+    }
+    return cost;
+  }
+}
+
+export class Fenwick2DRangeTree {
+  constructor(maxRows = 100, maxCols = 50) {
+    this.maxRows = Math.max(1, maxRows);
+    this.maxCols = Math.max(1, maxCols);
+    this.tree = Array.from({ length: this.maxRows + 1 }, () => new Float64Array(this.maxCols + 1));
+    this.totalEntries = 0;
+  }
+
+  _lowbit(x) {
+    return x & (-x);
+  }
+
+  update(r, c, delta) {
+    const row = Math.floor(r);
+    const col = Math.floor(c);
+    const val = Number(delta);
+
+    if (row < 1 || row > this.maxRows || col < 1 || col > this.maxCols) {
+      return;
+    }
+
+    for (let i = row; i <= this.maxRows; i += this._lowbit(i)) {
+      for (let j = col; j <= this.maxCols; j += this._lowbit(j)) {
+        this.tree[i][j] += val;
+      }
+    }
+    this.totalEntries++;
+  }
+
+  queryPrefix(r, c) {
+    const row = Math.min(this.maxRows, Math.floor(r));
+    const col = Math.min(this.maxCols, Math.floor(c));
+
+    if (row < 1 || col < 1) return 0;
+
+    let sum = 0;
+    for (let i = row; i > 0; i -= this._lowbit(i)) {
+      for (let j = col; j > 0; j -= this._lowbit(j)) {
+        sum += this.tree[i][j];
+      }
+    }
+    return sum;
+  }
+
+  queryRange(r1, c1, r2, c2) {
+    const minR = Math.max(1, Math.min(Math.floor(r1), Math.floor(r2)));
+    const maxR = Math.min(this.maxRows, Math.max(Math.floor(r1), Math.floor(r2)));
+    const minC = Math.max(1, Math.min(Math.floor(c1), Math.floor(c2)));
+    const maxC = Math.min(this.maxCols, Math.max(Math.floor(c1), Math.floor(c2)));
+
+    if (minR > maxR || minC > maxC) return 0;
+
+    const total = this.queryPrefix(maxR, maxC)
+                - this.queryPrefix(minR - 1, maxC)
+                - this.queryPrefix(maxR, minC - 1)
+                + this.queryPrefix(minR - 1, minC - 1);
+
+    return Math.round(total * 100) / 100;
+  }
+
+  clear() {
+    for (let i = 0; i <= this.maxRows; i++) {
+      this.tree[i].fill(0);
+    }
+    this.totalEntries = 0;
+  }
+}
+
+export class CoDelActiveQueue {
+  constructor({
+    targetDelayMs = 5,
+    intervalMs = 100,
+    maxQueueSize = 1000
+  } = {}) {
+    this.targetDelayMs = Math.max(1, targetDelayMs);
+    this.intervalMs = Math.max(10, intervalMs);
+    this.maxQueueSize = Math.max(1, maxQueueSize);
+
+    this.queue = [];
+    this.dropping = false;
+    this.firstAboveTime = 0;
+    this.dropNextTime = 0;
+    this.dropCount = 0;
+    this.totalEnqueued = 0;
+    this.totalDequeued = 0;
+    this.totalDropped = 0;
+  }
+
+  size() {
+    return this.queue.length;
+  }
+
+  enqueue(item, now = Date.now()) {
+    if (this.queue.length >= this.maxQueueSize) {
+      this.totalDropped++;
+      return false;
+    }
+
+    this.queue.push({
+      data: item,
+      enqueuedAt: now
+    });
+    this.totalEnqueued++;
+    return true;
+  }
+
+  dequeue(now = Date.now()) {
+    let droppedCount = 0;
+
+    while (this.queue.length > 0) {
+      const entry = this.queue.shift();
+      this.totalDequeued++;
+      const sojournTime = Math.max(0, now - entry.enqueuedAt);
+
+      if (sojournTime < this.targetDelayMs) {
+        this.firstAboveTime = 0;
+        this.dropping = false;
+        return {
+          item: entry.data,
+          sojournTime,
+          droppedCountThisCall: droppedCount
+        };
+      }
+
+      if (this.firstAboveTime === 0) {
+        this.firstAboveTime = now + this.intervalMs;
+      } else if (now >= this.firstAboveTime) {
+        if (!this.dropping) {
+          this.dropping = true;
+          this.dropCount = 1;
+          this.dropNextTime = now + this._computeNextDropInterval();
+          this.totalDropped++;
+          droppedCount++;
+          continue;
+        }
+
+        if (now >= this.dropNextTime) {
+          this.dropCount++;
+          this.dropNextTime = now + this._computeNextDropInterval();
+          this.totalDropped++;
+          droppedCount++;
+          continue;
+        }
+      }
+
+      return {
+        item: entry.data,
+        sojournTime,
+        droppedCountThisCall: droppedCount
+      };
+    }
+
+    return {
+      item: null,
+      sojournTime: 0,
+      droppedCountThisCall: droppedCount
+    };
+  }
+
+  _computeNextDropInterval() {
+    return Math.max(1, Math.round(this.intervalMs / Math.sqrt(Math.max(1, this.dropCount))));
+  }
+
+  getStats() {
+    return {
+      currentQueueSize: this.queue.length,
+      isDropping: this.dropping,
+      dropCount: this.dropCount,
+      totalEnqueued: this.totalEnqueued,
+      totalDequeued: this.totalDequeued,
+      totalDropped: this.totalDropped,
+      targetDelayMs: this.targetDelayMs,
+      intervalMs: this.intervalMs
+    };
+  }
+
+  clear() {
+    this.queue = [];
+    this.dropping = false;
+    this.firstAboveTime = 0;
+    this.dropNextTime = 0;
+    this.dropCount = 0;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -14768,7 +15194,12 @@ export default {
   HysteresisLoadBalancer,
   HLLSketch,
   HLLJaccardEstimator,
+  // Phase 31 Enterprise Algorithms
+  SuurballeDisjointRouter,
+  Fenwick2DRangeTree,
+  CoDelActiveQueue,
 };
+
 
 
 

@@ -496,7 +496,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // PHƯƠNG THỨC THANH TOÁN & ĐỒNG KIỂM COD
   // -------------------------------------------------------------
-  if (!/leaky bucket/i.test(lower) && /thanh toán|chuyển khoản|vietqr|momo|zalopay|thẻ|visa|cod|đồng kiểm/i.test(lower)) {
+  if (!/leaky bucket|codel|suurballe/i.test(lower) && /thanh toán|chuyển khoản|vietqr|momo|zalopay|thẻ|visa|cod|đồng kiểm/i.test(lower)) {
     return {
       intent: 'PAYMENT_INFO',
       replyText: `**[THANH TOÁN] PHƯƠNG THỨC THANH TOÁN TIỆN LỢI & AN TOÀN:**\n\n1. **VietQR Ngân Hàng:** Quét mã QR tự động điền tiền & nội dung, xác nhận sau 3 giây.\n2. **Ví MoMo & ZaloPay:** Thanh toán 1-chạm cực nhanh.\n3. **Thẻ Quốc Tế Visa/MasterCard:** Bảo mật chuẩn PCI-DSS.\n4. **Thanh toán khi nhận hàng (COD):** Được **đồng kiểm ngoại quan** cùng shipper trước khi thanh toán.`,
@@ -816,7 +816,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 30. Trải Nghiệm Giật Deal Mượt Mà Leaky Bucket & Săn Hàng Hot Min-Max Heap (LEAKY_BUCKET_MIN_MAX_DEALS)
-  if (/leaky bucket|xếp hàng đặt deal|chống nghẽn thanh toán|min-max heap|deal bán chạy nhất.*đọng kho|săn deal êm dịu/i.test(lower)) {
+  if (!/codel|suurballe/i.test(lower) && /leaky bucket|xếp hàng đặt deal|chống nghẽn thanh toán|min-max heap|deal bán chạy nhất.*đọng kho|săn deal êm dịu/i.test(lower)) {
     return {
       intent: 'LEAKY_BUCKET_MIN_MAX_DEALS',
       replyText: `**[SĂN DEAL ÊM DỊU & HÀNG ĐỢI LEAKY BUCKET] TRẢI NGHIỆM ĐẶT HÀNG KHÔNG GIẬT LAG:**\n\n• **Bộ điều tiết Leaky Bucket**: Khi có hàng triệu lượt tranh mua Flash Sale cùng lúc, hệ thống điều tiết lưu lượng mượt mà theo nhịp đều đặn, đảm bảo đơn hàng và thanh toán VietQR của bạn không bao giờ bị nghẽn hay lỗi mạng!\n• **Cấu trúc Min-Max Heap**: Tự động hiển thị các món đồ bán chạy nhất (Top Velocity) và các deal xả hàng cực sốc (Dead Stock Clearance) với mức chiết khấu lên đến 70%!`,
@@ -841,6 +841,16 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       suggestions: ['Đặt đơn giao hỏa tốc 2h', 'Săn deal Flash Sale mượt mà', 'Xem trạng thái đơn hàng'],
     };
   }
+
+  // 33. Giao Hàng Dự Phòng Suurballe & Chống Nghẽn Thanh Toán CoDel (SUURBALLE_CODEL_ASSIST)
+  if (/suurballe|giao hàng dự phòng.*suurballe|lộ trình không trùng cạnh|codel|hàng đợi codel|chống nghẽn thanh toán.*codel/i.test(lower)) {
+    return {
+      intent: 'SUURBALLE_CODEL_ASSIST',
+      replyText: `**[LỘ TRÌNH DỰ PHÒNG SUURBALLE & HÀNG ĐỢI CODEL] ĐẶT HÀNG NHANH VÀ GIAO ĐÚNG HẸN:**\n\n• **Lộ trình dự phòng Suurballe**: Đơn hàng liên tỉnh của bạn luôn được hệ thống SPX tính toán sẵn 2 tuyến đường song song không trùng cạnh. Nếu tuyến cao tốc chính gặp sự cố thời tiết, gói hàng sẽ tự động chuyển hướng qua tuyến dự phòng để giao tận tay bạn đúng hẹn!\n• **Thanh toán tức thì CoDel**: Hàng đợi thông minh CoDel kiểm soát thời gian lưu trú (Sojourn Time) dưới 5ms, xử lý hàng triệu lượt quét mã VietQR và xác nhận đơn hàng chỉ trong tích tắc!`,
+      suggestions: ['Theo dõi lộ trình giao hàng', 'Thanh toán đơn hàng nhanh', 'Săn deal Flash Sale'],
+    };
+  }
+
 
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH

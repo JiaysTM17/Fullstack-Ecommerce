@@ -747,7 +747,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 37. Phân Vị Doanh Số Fenwick & Quản Lý Tồn Kho Hai Đầu Min-Max Heap (Phase 28 - Feature 175)
-  if (/fenwick|phân vị shop|phân vị doanh số|xếp hạng doanh số fenwick|min-max heap|tồn kho hai đầu|đọng kho.*bán chạy/i.test(raw)) {
+  if (!/2d|2 chiều|suurballe/i.test(raw) && /fenwick|phân vị shop|phân vị doanh số|xếp hạng doanh số fenwick|min-max heap|tồn kho hai đầu|đọng kho.*bán chạy/i.test(raw)) {
     return {
       text: `📈 **ĐO LƯỜNG PHÂN VỊ FENWICK & ĐIỀU PHỐI TỒN KHO HAI ĐẦU MIN-MAX HEAP**:
 - **Xác định vị thế cạnh tranh trên cây Fenwick (BIT)**:
@@ -805,6 +805,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
       ]
     };
   }
+
+  // 40. Lộ Trình Giao Hàng Dự Phòng Suurballe & Phân Tích Ma Trận Sản Phẩm Fenwick 2D (Phase 31 - Feature 178)
+  if (/suurballe|lộ trình dự phòng|fenwick 2d|ma trận doanh số 2 chiều|phân tích ma trận giá.*rating/i.test(raw)) {
+    return {
+      text: `🚚 **LỘ TRÌNH DỰ PHÒNG SUURBALLE & MA TRẬN DOANH SỐ FENWICK 2D (${currentShop.name})**:
+- **Bảo hiểm vận chuyển Suurballe Disjoint Paths**:
+  - Tự động thiết lập 2 tuyến giao nhận liên tỉnh không trùng bất kỳ chặng nào: nếu tuyến đường chính bị gián đoạn thời tiết, đơn hàng lập tức được luân chuyển qua tuyến dự phòng mà không chậm trễ SLA.
+- **Phân tích ma trận 2D Fenwick cho gian hàng**:
+  - Phân tích tương quan giữa Mức giá bán và Tỷ lệ đánh giá sao của shop trên ma trận Fenwick 2D.
+  - Xác định chính xác "vùng giá vàng" mang lại GMV và tỷ lệ chuyển đổi cao nhất cho các sản phẩm của shop!`,
+      type: 'recommendation',
+      tag: 'LỘ TRÌNH DỰ PHÒNG SUURBALLE & FENWICK 2D',
+      suggestions: [
+        'Thiết lập tuyến giao hàng dự phòng Suurballe',
+        'Xem ma trận doanh số Fenwick 2D của shop',
+        'Tối ưu hóa vùng giá vàng tăng chuyển đổi'
+      ]
+    };
+  }
+
 
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
