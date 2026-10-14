@@ -786,6 +786,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 39. Chỉ Mục R-Tree Điều Phối Shipper Lân Cận & Đo Độ Tương Quan Danh Mục HLL Jaccard (Phase 30 - Feature 177)
+  if (/r-?tree|bưu tá lân cận|khoanh vùng shipper|hll jaccard|tương quan danh mục hll|trùng lặp khách hàng/i.test(raw)) {
+    return {
+      text: `🗺️ **ĐIỀU PHỐI BƯU TÁ R-TREE & ĐO TƯƠNG QUAN DANH MỤC HLL JACCARD (${currentShop.name})**:
+- **Chỉ mục không gian R-Tree tìm kiếm Shipper 2H**:
+  - Khi shop xác nhận đơn hàng hỏa tốc, cây R-Tree tự động quét các bưu tá SPX Instant đang trực chiến trong bán kính $2\\text{km}$ quanh kho shop theo hình hộp MBR tối ưu.
+  - Rút ngắn thời gian lấy hàng xuống dưới $15$ phút, nâng cao tỷ lệ giao hàng đúng hẹn (LSR $\\le 1\\%$).
+- **Phân tích tệp khách hàng chéo bằng HLL Jaccard**:
+  - Ước lượng độ trùng lặp người mua giữa danh mục của shop với các danh mục bổ trợ (VD: Thời trang & Giày dép).
+  - Tối ưu hóa chiến dịch quà tặng kèm hoặc liên minh voucher chéo với các shop cùng tệp khách hàng!`,
+      type: 'recommendation',
+      tag: 'CHỈ MỤC R-TREE & TƯƠNG QUAN HLL JACCARD',
+      suggestions: [
+        'Tra cứu bưu tá trực chiến quanh kho hàng',
+        'Đo độ tương quan tệp khách HLL Jaccard',
+        'Khai thác chiến dịch liên minh voucher chéo'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

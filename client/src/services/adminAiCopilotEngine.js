@@ -415,7 +415,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 16. Ước Lượng Số Lượng Phần Tử Duy Nhất (HyperLogLog Cardinality Estimation)
-  if (!/hll\+\+|hyperloglog\+\+|sparse/i.test(raw) && /hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
+  if (!/hll\+\+|hyperloglog\+\+|sparse|jaccard/i.test(raw) && /hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN HYPERLOGLOG (MASSIVE CARDINALITY ESTIMATION)**:
 - **Mục đích thiết kế**: Đếm hàng chục triệu người xem Shopee Live độc nhất (Unique Viewers) hoặc người dùng hoạt động DAU với dung lượng bộ nhớ cố định **dưới 12 KB RAM** (thay vì hàng GB nếu dùng Hash Set).
@@ -571,7 +571,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 24. Radar Phát Hiện Sao Chép Catalog (Locality-Sensitive Hashing & MinHash)
-  if (/lsh|minhash|catalog clone|sao chép catalog|clone sản phẩm|trùng lặp sản phẩm|jaccard|shingles/i.test(raw)) {
+  if (!/hll jaccard|hyperloglog jaccard/i.test(raw) && /lsh|minhash|catalog clone|sao chép catalog|clone sản phẩm|trùng lặp sản phẩm|jaccard|shingles/i.test(raw)) {
     return {
       text: `🛡️ **BẢO VỆ CATALOG LSH MINHASH (NEAR-DUPLICATE & CLONE DETECTION)**:
 - **Mục đích thiết kế**: Phát hiện hành vi sao chép catalog, copycat gian hàng ăn cắp bản quyền hình ảnh/tiêu đề để trục lợi mã voucher hoặc spam tìm kiếm.
@@ -1617,6 +1617,67 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Đăng ký khoảng cảnh báo giá người mua',
         'Truy vấn các cảnh báo giao với giá Flash Sale',
         'Đo thời gian phản hồi quét chuông thông báo'
+      ]
+    };
+  }
+
+  // 71. Quản Trị Chỉ Mục Không Gian R-Tree Hộp Bao Cực Tiểu (MBR Geo-Index) (Phase 30 - Feature 177)
+  if (/r-?tree|hộp bao cực tiểu|mbr geo|chỉ mục không gian r-tree|khoanh vùng r-tree/i.test(raw)) {
+    return {
+      text: `🗺️ **QUẢN TRỊ ĐỊNH VỊ KHÔNG GIAN BẰNG R-TREE MINIMUM BOUNDING BOX (MBR)**:
+- **Nguyên lý cây đa chiều R-Tree (Guttman 1984)**:
+  - Gom các đối tượng không gian gần nhau vào Hộp Bao Cực Tiểu (Minimum Bounding Box - MBR: $[\\min_x, \\min_y, \\max_x, \\max_y]$).
+  - Tách nhánh cân bằng bậc $M$ và cắt tỉa nhánh cây không giao cắt với vùng truy vấn trong thời gian $O(\\log_M N)$.
+- **Ứng dụng thực tế cho Quản trị SPX Instant & Geo-fencing**:
+  - Quét tức thì hàng nghìn bưu tá trực chiến trong bán kính $R$ km quanh kho trung chuyển Hub SPX.
+  - Khoanh vùng phát hành mã giảm giá siêu cục bộ (Hyperlocal Geo-fencing Vouchers) không gây tải chậm hệ thống.`,
+      type: 'general',
+      tag: 'CHỈ MỤC KHÔNG GIAN R-TREE',
+      suggestions: [
+        'Tra cứu bưu tá trực chiến quanh kho Hub',
+        'Thiết lập vùng khoanh địa lý Geo-fencing',
+        'Đo lường thời gian truy vấn hộp bao MBR'
+      ]
+    };
+  }
+
+  // 72. Bộ Điều Phối Tải Độ Trễ Từ Trễ (Hysteresis Dual-Threshold Controller) (Phase 30 - Feature 177)
+  if (/hysteresis|từ trễ|chống rung giật|anti-flapping|dual-threshold|bộ điều phối tải từ trễ/i.test(raw)) {
+    return {
+      text: `⚖️ **BỘ ĐIỀU PHỐI TẢI VÒNG LẶP TỪ TRỄ (HYSTERESIS DUAL-THRESHOLD) & CHỐNG RUNG GIẬT (ANTI-FLAPPING)**:
+- **Vấn đề rung giật (Flapping/Churn) với ngưỡng đơn**:
+  - Khi áp dụng ngưỡng đơn 80%, dao động tải quanh 79%-81% khiến hệ thống liên tục chuyển đổi trạng thái BÌNH THƯỜNG $\\leftrightarrow$ THOÁI HÓA gây quá tải CPU.
+- **Cơ chế Từ Trễ (Hysteresis Loop - Dual Watermarks)**:
+  - Ngưỡng cao $H = 80\\%$: Chuyển sang \`DEGRADED\` (tiết giảm tải AI gợi ý và telemetry nặng).
+  - Ngưỡng thấp $L = 50\\% < H$: Chỉ khôi phục về \`NORMAL\` khi tải đã hạ nhiệt hoàn toàn.
+  - Vùng chết (Deadband $[L, H]$) kết hợp bộ lọc trung bình động hàm mũ (EWMA) và thời gian chờ (Cooldown) triệt tiêu hoàn toàn hiện tượng rung giật.`,
+      type: 'alert',
+      tag: 'ĐIỀU PHỐI TẢI HYSTERESIS',
+      suggestions: [
+        'Kiểm tra trạng thái điều phối tải hiện tại',
+        'Cấu hình ngưỡng cao H và ngưỡng thấp L',
+        'Xem thống kê số lần chuyển đổi trạng thái'
+      ]
+    };
+  }
+
+  // 73. Đo Lường Độ Trùng Khớp Tệp Khách Hàng HyperLogLog Jaccard (Phase 30 - Feature 177)
+  if (/hll jaccard|hyperloglog jaccard|giao tập hợp luồng|trùng khớp tệp khách hàng hll|ước lượng jaccard/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG ĐỘ TƯƠNG ĐỒNG JACCARD TỆP KHÁCH HÀNG BẰNG HYPERLOGLOG (HLL MERGE & INCLUSION-EXCLUSION)**:
+- **Thách thức Big Data TMĐT**:
+  - So sánh độ trùng lặp giữa 2 tệp khách hàng triệu user tiêu tốn hàng trăm MB RAM nếu lưu tập ID cụ thể.
+- **Nguyên lý HLL Merge & Bao hàm - Loại trừ (Inclusion-Exclusion)**:
+  - Mỗi danh mục chỉ cần một phác thảo HLL nhỏ gọn (1 KB).
+  - Hợp hai phác thảo $\\text{HLL}_{A \\cup B}$ bằng phép toán $\\max$ thanh ghi trong $O(m)$ với $m = 1024$.
+  - Tính kích thước giao: $|A \\cap B| = |A| + |B| - |A \\cup B|$.
+  - Hệ số Jaccard $J(A, B) = \\frac{|A \\cap B|}{|A \\cup B|}$ cho phép đo độ tương đồng tệp khách hàng với sai số $< 2\\%$ mà tốn cực ít bộ nhớ!`,
+      type: 'general',
+      tag: 'ƯỚC LƯỢNG HLL JACCARD',
+      suggestions: [
+        'Đo độ trùng lặp tệp khách Thời trang & Mỹ phẩm',
+        'Gộp phác thảo HLL đa danh mục',
+        'Kiểm tra sai số xấp xỉ Cardinality'
       ]
     };
   }

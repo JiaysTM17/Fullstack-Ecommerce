@@ -833,6 +833,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 32. Khoanh Vùng Shipper R-Tree & Ổn Định Tải Hysteresis Flash Sale (RTREE_HYSTERESIS_FLASH_ASSIST)
+  if (/r-?tree|bưu tá gần nhất.*r-tree|khoanh vùng shipper.*r-tree|hysteresis|ổn định hệ thống.*flash sale|săn deal không lag.*hysteresis/i.test(lower)) {
+    return {
+      intent: 'RTREE_HYSTERESIS_FLASH_ASSIST',
+      replyText: `**[GIAO NHANH R-TREE & ỔN ĐỊNH TẢI HYSTERESIS] TRẢI NGHIỆM MUA SẮM TỐI TÂN:**\n\n• **Định vị Shipper siêu tốc bằng R-Tree**: Khi bạn chốt đơn hỏa tốc, cây R-Tree tự động quét và điều phối bưu tá SPX Instant đang trực chiến gần kho shop trong bán kính 2km, giúp shipper lấy hàng ngay sau 15 phút!\n• **Bảo vệ hệ thống Hysteresis chống lag**: Cơ chế điều phối tải hai ngưỡng (Dual-Threshold) giữ cho luồng đặt hàng và thanh toán VietQR luôn trơn tru, không bị rung giật hay nghẽn mạng ngay cả trong đợt mở bán Flash Sale triệu traffic!`,
+      suggestions: ['Đặt đơn giao hỏa tốc 2h', 'Săn deal Flash Sale mượt mà', 'Xem trạng thái đơn hàng'],
+    };
+  }
+
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH
   // -------------------------------------------------------------

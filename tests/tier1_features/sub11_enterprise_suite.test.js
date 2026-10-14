@@ -183,6 +183,14 @@ import {
   VitterReservoirSampler,
   IntervalNode,
   TreapIntervalRangeTree,
+  // Phase 30 Enterprise Algorithms
+  RTreeBoundingBox,
+  RTreeNode,
+  RTreeSpatialGeoIndex,
+  HYSTERESIS_STATE,
+  HysteresisLoadBalancer,
+  HLLSketch,
+  HLLJaccardEstimator,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -238,6 +246,9 @@ import ServerMinMaxInventoryHeap from "../../server/src/utils/minMaxInventoryHea
 import ServerSimRank from "../../server/src/utils/simRankGraphSimilarity.js";
 import ServerVitterSampler from "../../server/src/utils/vitterReservoirSampler.js";
 import ServerTreapIntervalTree, { IntervalNode as ServerIntervalNode } from "../../server/src/utils/treapIntervalRangeTree.js";
+import ServerRTreeIndex, { RTreeBoundingBox as ServerRTreeBoundingBox } from "../../server/src/utils/rTreeSpatialGeoIndex.js";
+import ServerHysteresisBalancer, { HYSTERESIS_STATE as ServerHysteresisState } from "../../server/src/utils/hysteresisLoadBalancer.js";
+import ServerHLLJaccardEstimator, { HLLSketch as ServerHLLSketch } from "../../server/src/utils/hllJaccardEstimator.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -15835,8 +15846,327 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.equal(triggeredAlerts[0].data.sku, "AIRPODS_PRO");
       });
     });
+
+    // =========================================================================
+    // FEATURE 177: Phase 30 Enterprise Algorithms Suite (24 Tests)
+    // 1. R-Tree Minimum Bounding Box MBR Spatial Geo-Index for SPX Instant
+    // 2. Hysteresis Dual-Threshold Controller & Anti-Flapping Load Balancer
+    // 3. HyperLogLog Stream Jaccard Similarity & Inclusion-Exclusion Estimator
+    // =========================================================================
+    describe("Feature 177: Phase 30 Enterprise Algorithms Suite", () => {
+      // --- PART 1: R-Tree Spatial Geo-Index (F177-T01 -> F177-T06) ---
+      test("F177-T01: RTreeBoundingBox correctly computes area, intersects, containsPoint and expand", () => {
+        const box1 = new RTreeBoundingBox(0, 0, 10, 10);
+        const box2 = new RTreeBoundingBox(5, 5, 15, 15);
+        const box3 = new RTreeBoundingBox(20, 20, 30, 30);
+
+        expect.equal(box1.area(), 100);
+        expect.equal(box1.intersects(box2), true);
+        expect.equal(box1.intersects(box3), false);
+        expect.equal(box1.containsPoint(5, 5), true);
+        expect.equal(box1.containsPoint(15, 5), false);
+
+        const expanded = box1.expand(box3);
+        expect.equal(expanded.minX, 0);
+        expect.equal(expanded.minY, 0);
+        expect.equal(expanded.maxX, 30);
+        expect.equal(expanded.maxY, 30);
+        expect.equal(expanded.area(), 900);
+      });
+
+      test("F177-T02: RTreeSpatialGeoIndex inserts points and increments size accurately", () => {
+        const rtree = new RTreeSpatialGeoIndex(4, 2);
+        expect.equal(rtree.size(), 0);
+
+        rtree.insertPoint(105.80, 21.02, { id: "SHIPPER_HN_01", name: "Nguyễn Văn A" });
+        rtree.insertPoint(105.85, 21.03, { id: "SHIPPER_HN_02", name: "Trần Thị B" });
+        rtree.insertPoint(106.66, 10.76, { id: "SHIPPER_HCM_01", name: "Lê Văn C" });
+
+        expect.equal(rtree.size(), 3);
+      });
+
+      test("F177-T03: RTreeSpatialGeoIndex finds candidates intersecting bounding box query (Hà Nội vs TP.HCM)", () => {
+        const rtree = new RTreeSpatialGeoIndex(4, 2);
+        rtree.insertPoint(105.80, 21.02, { id: "COURIER_1", city: "Hà Nội" });
+        rtree.insertPoint(105.82, 21.04, { id: "COURIER_2", city: "Hà Nội" });
+        rtree.insertPoint(106.66, 10.76, { id: "COURIER_3", city: "TP.HCM" });
+
+        const hnBox = new RTreeBoundingBox(105.70, 21.00, 105.90, 21.10);
+        const hnCouriers = rtree.search(hnBox);
+        expect.equal(hnCouriers.length, 2);
+        expect.equal(hnCouriers.every(c => c.city === "Hà Nội"), true);
+
+        const hcmBox = new RTreeBoundingBox(106.60, 10.70, 106.70, 10.80);
+        const hcmCouriers = rtree.search(hcmBox);
+        expect.equal(hcmCouriers.length, 1);
+        expect.equal(hcmCouriers[0].id, "COURIER_3");
+      });
+
+      test("F177-T04: RTreeSpatialGeoIndex searchWithinRadius filters by Euclidean distance", () => {
+        const rtree = new RTreeSpatialGeoIndex();
+        // Origin (0, 0)
+        rtree.insertPoint(0, 1, { id: "P1", dist: 1 });
+        rtree.insertPoint(1, 0, { id: "P2", dist: 1 });
+        rtree.insertPoint(3, 4, { id: "P3", dist: 5 }); // dist = 5
+        rtree.insertPoint(10, 10, { id: "P4", dist: 14.14 });
+
+        // Radius = 2 -> P1, P2
+        const res2 = rtree.searchWithinRadius(0, 0, 2);
+        expect.equal(res2.length, 2);
+
+        // Radius = 5.5 -> P1, P2, P3
+        const res5 = rtree.searchWithinRadius(0, 0, 5.5);
+        expect.equal(res5.length, 3);
+      });
+
+      test("F177-T05: RTreeSpatialGeoIndex splits nodes and builds multi-level hierarchy under high load", () => {
+        const rtree = new RTreeSpatialGeoIndex(4, 2);
+        for (let i = 0; i < 20; i++) {
+          rtree.insertPoint(i * 0.1, i * 0.1, { id: `POINT_${i}` });
+        }
+        expect.equal(rtree.size(), 20);
+        expect.equal(rtree.root.isLeaf, false); // Root has split
+
+        const all = rtree.search(new RTreeBoundingBox(-1, -1, 10, 10));
+        expect.equal(all.length, 20);
+
+        rtree.clear();
+        expect.equal(rtree.size(), 0);
+        expect.equal(rtree.root.isLeaf, true);
+      });
+
+      test("F177-T06: Server RTreeSpatialGeoIndex parity with Client implementation", () => {
+        const serverRTree = new ServerRTreeIndex(4, 2);
+        serverRTree.insertPoint(10, 20, { server: true, id: "S1" });
+        serverRTree.insertPoint(12, 22, { server: true, id: "S2" });
+        serverRTree.insertPoint(50, 50, { server: true, id: "S3" });
+
+        const box = new ServerRTreeBoundingBox(5, 15, 15, 25);
+        const results = serverRTree.search(box);
+        expect.equal(results.length, 2);
+        expect.equal(results[0].server, true);
+      });
+
+      // --- PART 2: Hysteresis Dual-Threshold Controller (F177-T07 -> F177-T12) ---
+      test("F177-T07: HysteresisLoadBalancer validates watermarks in constructor", () => {
+        expect.throws(() => {
+          new HysteresisLoadBalancer({ highWatermark: 50, lowWatermark: 80 });
+        });
+        const balancer = new HysteresisLoadBalancer({ highWatermark: 85, lowWatermark: 45 });
+        expect.equal(balancer.highWatermark, 85);
+        expect.equal(balancer.lowWatermark, 45);
+        expect.equal(balancer.state, HYSTERESIS_STATE.NORMAL);
+      });
+
+      test("F177-T08: Stays in NORMAL state when metric is below highWatermark", () => {
+        const balancer = new HysteresisLoadBalancer({ highWatermark: 80, lowWatermark: 50 });
+        const res = balancer.recordSample(60);
+        expect.equal(res.state, HYSTERESIS_STATE.NORMAL);
+        expect.equal(res.stateChanged, false);
+        expect.equal(balancer.shouldShedLoad("OPTIONAL"), false);
+        expect.equal(balancer.shouldShedLoad("CRITICAL"), false);
+      });
+
+      test("F177-T09: Transitions NORMAL -> DEGRADED when smoothed metric exceeds highWatermark", () => {
+        const balancer = new HysteresisLoadBalancer({ highWatermark: 80, lowWatermark: 50, cooldownMs: 0 });
+        const r1 = balancer.recordSample(90, 1000);
+        expect.equal(r1.state, HYSTERESIS_STATE.DEGRADED);
+        expect.equal(r1.stateChanged, true);
+        expect.equal(balancer.shouldShedLoad("OPTIONAL"), true);
+        expect.equal(balancer.shouldShedLoad("CRITICAL"), false); // Critical never shedded
+      });
+
+      test("F177-T10: Deadband behavior: stays in DEGRADED state when metric drops into deadband [low, high]", () => {
+        const balancer = new HysteresisLoadBalancer({ highWatermark: 80, lowWatermark: 50, cooldownMs: 0, ewmaAlpha: 1.0 });
+        balancer.recordSample(90, 1000); // -> DEGRADED
+        expect.equal(balancer.state, HYSTERESIS_STATE.DEGRADED);
+
+        // Load drops to 65% (between 50 and 80)
+        const r2 = balancer.recordSample(65, 2000);
+        expect.equal(r2.state, HYSTERESIS_STATE.DEGRADED); // Deadband holds state!
+        expect.equal(r2.stateChanged, false);
+      });
+
+      test("F177-T11: Transitions DEGRADED -> NORMAL only when metric drops strictly below lowWatermark", () => {
+        const balancer = new HysteresisLoadBalancer({ highWatermark: 80, lowWatermark: 50, cooldownMs: 0, ewmaAlpha: 1.0 });
+        balancer.recordSample(90, 1000); // -> DEGRADED
+        expect.equal(balancer.state, HYSTERESIS_STATE.DEGRADED);
+
+        const r = balancer.recordSample(40, 2000); // Below 50%
+        expect.equal(r.state, HYSTERESIS_STATE.NORMAL);
+        expect.equal(r.stateChanged, true);
+        expect.equal(balancer.shouldShedLoad("OPTIONAL"), false);
+      });
+
+      test("F177-T12: Cooldown & EWMA smoothing prevent flapping on momentary spike; Server parity", () => {
+        const serverBalancer = new ServerHysteresisBalancer({
+          highWatermark: 80,
+          lowWatermark: 50,
+          ewmaAlpha: 0.2,
+          cooldownMs: 5000
+        });
+
+        // First sample initializes
+        serverBalancer.recordSample(50, 1000);
+        expect.equal(serverBalancer.state, ServerHysteresisState.NORMAL);
+
+        // Transient spike to 95% at t=2000: EWMA = 0.2*95 + 0.8*50 = 19 + 40 = 59% < 80%
+        const rSpike = serverBalancer.recordSample(95, 2000);
+        expect.equal(rSpike.state, ServerHysteresisState.NORMAL); // Filtered out by EWMA!
+
+        const metrics = serverBalancer.getMetrics();
+        expect.equal(metrics.deadbandWidth, 30);
+        expect.equal(metrics.totalSamples, 2);
+      });
+
+      // --- PART 3: HyperLogLog Stream Jaccard Estimator (F177-T13 -> F177-T18) ---
+      test("F177-T13: HLLSketch single stream estimates cardinality within reasonable bound", () => {
+        const sketch = new HLLSketch(10);
+        for (let i = 0; i < 500; i++) {
+          sketch.add(`USER_${i}`);
+        }
+        const card = sketch.cardinality();
+        // Expected ~500 within ±10%
+        expect.equal(card > 420 && card < 580, true);
+      });
+
+      test("F177-T14: HLLSketch merge produces union of registers", () => {
+        const s1 = new HLLSketch(8);
+        const s2 = new HLLSketch(8);
+
+        for (let i = 0; i < 100; i++) s1.add(`ITEM_${i}`);
+        for (let i = 100; i < 200; i++) s2.add(`ITEM_${i}`);
+
+        const merged = s1.merge(s2);
+        const card = merged.cardinality();
+        // Disjoint sets of 100 and 100 -> ~200
+        expect.equal(card > 160 && card < 240, true);
+      });
+
+      test("F177-T15: HLLJaccardEstimator returns 1.0 for two empty sketches", () => {
+        const s1 = new HLLSketch();
+        const s2 = new HLLSketch();
+        const est = HLLJaccardEstimator.estimate(s1, s2);
+        expect.equal(est.jaccard, 1.0);
+        expect.equal(est.intersection, 0);
+        expect.equal(est.union, 0);
+      });
+
+      test("F177-T16: HLLJaccardEstimator calculates Jaccard close to 1.0 for identical sets", () => {
+        const s1 = new HLLSketch(10);
+        const s2 = new HLLSketch(10);
+
+        for (let i = 0; i < 300; i++) {
+          s1.add(`SKU_${i}`);
+          s2.add(`SKU_${i}`);
+        }
+
+        const est = HLLJaccardEstimator.estimate(s1, s2);
+        expect.equal(est.jaccard >= 0.95, true);
+      });
+
+      test("F177-T17: HLLJaccardEstimator calculates Jaccard ~0 for completely disjoint sets", () => {
+        const s1 = new HLLSketch(10);
+        const s2 = new HLLSketch(10);
+
+        for (let i = 0; i < 200; i++) {
+          s1.add(`CAT_A_${i}`);
+          s2.add(`CAT_B_${i}`);
+        }
+
+        const est = HLLJaccardEstimator.estimate(s1, s2);
+        expect.equal(est.jaccard < 0.15, true);
+      });
+
+      test("F177-T18: HLLJaccardEstimator estimates partial overlap with Inclusion-Exclusion; Server parity", () => {
+        const sA = new ServerHLLSketch(10);
+        const sB = new ServerHLLSketch(10);
+
+        // 100 common, 100 only in A, 100 only in B
+        // |A| = 200, |B| = 200, |A cap B| = 100, |A cup B| = 300 -> J = 100 / 300 = 0.333
+        for (let i = 0; i < 100; i++) {
+          sA.add(`COMMON_${i}`);
+          sB.add(`COMMON_${i}`);
+        }
+        for (let i = 0; i < 100; i++) {
+          sA.add(`ONLY_A_${i}`);
+          sB.add(`ONLY_B_${i}`);
+        }
+
+        const res = ServerHLLJaccardEstimator.estimate(sA, sB);
+        expect.equal(res.jaccard > 0.20 && res.jaccard < 0.50, true);
+        expect.equal(res.union > 230, true);
+      });
+
+      // --- PART 4: Copilots & E2E Integration (F177-T19 -> F177-T24) ---
+      test("F177-T19: Admin Sentinel Copilot Section 71 recognizes R-Tree MBR Geo-Index", () => {
+        const res = generateAdminCopilotResponse("Làm sao để quản trị chỉ mục không gian r-tree hộp bao cực tiểu MBR", {});
+        expect.equal(res.tag, "CHỈ MỤC KHÔNG GIAN R-TREE");
+        expect.equal(res.text.includes("R-Tree"), true);
+        expect.equal(res.text.includes("Minimum Bounding Box"), true);
+      });
+
+      test("F177-T20: Admin Sentinel Copilot Section 72 recognizes Hysteresis Dual-Threshold Load Balancer", () => {
+        const res = generateAdminCopilotResponse("Kiểm tra bộ điều phối tải từ trễ hysteresis chống rung giật anti-flapping", {});
+        expect.equal(res.tag, "ĐIỀU PHỐI TẢI HYSTERESIS");
+        expect.equal(/dual-threshold/i.test(res.text), true);
+        expect.equal(/deadband/i.test(res.text), true);
+      });
+
+      test("F177-T21: Admin Sentinel Copilot Section 73 recognizes HLL Jaccard Stream Estimator", () => {
+        const res = generateAdminCopilotResponse("Ước lượng độ tương đồng jaccard tệp khách hàng hll jaccard", {});
+        expect.equal(res.tag, "ƯỚC LƯỢNG HLL JACCARD");
+        expect.equal(/hyperloglog/i.test(res.text), true);
+        expect.equal(res.text.includes("Inclusion-Exclusion"), true);
+      });
+
+      test("F177-T22: Seller ShopSmart Copilot Section 39 guides R-Tree shipper dispatch & HLL category correlation", () => {
+        const res = generateSellerCopilotResponse("Khoanh vùng shipper bưu tá lân cận bằng r-tree và đo tương quan danh mục hll", { name: "Shop Điện Máy" }, [], []);
+        expect.equal(res.tag, "CHỈ MỤC R-TREE & TƯƠNG QUAN HLL JACCARD");
+        expect.equal(res.text.includes("R-Tree"), true);
+        expect.equal(res.text.includes("HLL Jaccard"), true);
+      });
+
+      test("F177-T23: Buyer AI Assistant Intent 32 explains R-Tree 2H delivery & Hysteresis Flash Sale stability", () => {
+        const res = generateAiChatResponse("Giao nhanh bưu tá gần nhất r-tree và ổn định hệ thống flash sale hysteresis");
+        expect.equal(res.intent, "RTREE_HYSTERESIS_FLASH_ASSIST");
+        expect.equal(res.replyText.includes("R-Tree"), true);
+        expect.equal(res.replyText.includes("Hysteresis"), true);
+      });
+
+      test("F177-T24: E2E Lifecycle: Couriers indexed in R-Tree -> Flash sale load regulated with Hysteresis -> Category overlap evaluated via HLL Jaccard", () => {
+        // 1. Index couriers in R-Tree
+        const rtree = new RTreeSpatialGeoIndex();
+        rtree.insertPoint(105.80, 21.02, { id: "SHIPPER_1", active: true });
+        rtree.insertPoint(105.81, 21.03, { id: "SHIPPER_2", active: true });
+        const nearby = rtree.searchWithinRadius(105.80, 21.02, 0.05);
+        expect.equal(nearby.length, 2);
+
+        // 2. High traffic burst hits platform -> Hysteresis balancer regulates load
+        const balancer = new HysteresisLoadBalancer({ highWatermark: 80, lowWatermark: 50, cooldownMs: 0 });
+        balancer.recordSample(88); // Exceeds 80%
+        expect.equal(balancer.state, HYSTERESIS_STATE.DEGRADED);
+        expect.equal(balancer.shouldShedLoad("OPTIONAL"), true); // Shed AI heavy recommendation
+        expect.equal(balancer.shouldShedLoad("CRITICAL"), false); // Critical checkout orders continue
+
+        // 3. Marketers measure cross-audience affinity between Tech & Audio using HLL Jaccard
+        const techAudience = new HLLSketch(10);
+        const audioAudience = new HLLSketch(10);
+        for (let i = 0; i < 200; i++) {
+          techAudience.add(`USER_${i}`);
+          if (i % 2 === 0) audioAudience.add(`USER_${i}`); // 50% overlap
+        }
+        for (let i = 200; i < 300; i++) {
+          audioAudience.add(`AUDIO_USER_${i}`);
+        }
+        const affinity = HLLJaccardEstimator.estimate(techAudience, audioAudience);
+        expect.equal(affinity.jaccard > 0.20 && affinity.jaccard < 0.50, true);
+        expect.equal(affinity.intersection > 70, true);
+      });
+    });
   });
 });
+
 
 
 

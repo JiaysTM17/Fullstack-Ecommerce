@@ -14202,6 +14202,397 @@ export class TreapIntervalRangeTree {
   }
 }
 
+// ==========================================
+// PHASE 30 ENTERPRISE ALGORITHMS
+// 1. R-Tree Bounding Box MBR Spatial Geo-Index
+// 2. Hysteresis Dual-Threshold Load Balancer & Anti-Flapping
+// 3. HyperLogLog Stream Jaccard Estimator
+// ==========================================
+
+export class RTreeBoundingBox {
+  constructor(minX, minY, maxX, maxY) {
+    this.minX = Math.min(minX, maxX);
+    this.minY = Math.min(minY, maxY);
+    this.maxX = Math.max(minX, maxX);
+    this.maxY = Math.max(minY, maxY);
+  }
+
+  intersects(other) {
+    return !(
+      this.maxX < other.minX ||
+      this.minX > other.maxX ||
+      this.maxY < other.minY ||
+      this.minY > other.maxY
+    );
+  }
+
+  containsPoint(x, y) {
+    return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY;
+  }
+
+  expand(other) {
+    return new RTreeBoundingBox(
+      Math.min(this.minX, other.minX),
+      Math.min(this.minY, other.minY),
+      Math.max(this.maxX, other.maxX),
+      Math.max(this.maxY, other.maxY)
+    );
+  }
+
+  area() {
+    return (this.maxX - this.minX) * (this.maxY - this.minY);
+  }
+}
+
+export class RTreeNode {
+  constructor(isLeaf = true) {
+    this.isLeaf = isLeaf;
+    this.entries = [];
+    this.bbox = null;
+  }
+
+  updateBBox() {
+    if (this.entries.length === 0) {
+      this.bbox = null;
+      return;
+    }
+    let box = this.entries[0].bbox;
+    for (let i = 1; i < this.entries.length; i++) {
+      box = box.expand(this.entries[i].bbox);
+    }
+    this.bbox = box;
+  }
+}
+
+export class RTreeSpatialGeoIndex {
+  constructor(maxEntries = 8, minEntries = 4) {
+    this.maxEntries = Math.max(3, maxEntries);
+    this.minEntries = Math.max(1, Math.min(minEntries, Math.floor(this.maxEntries / 2)));
+    this.root = new RTreeNode(true);
+    this._size = 0;
+  }
+
+  size() {
+    return this._size;
+  }
+
+  insertPoint(x, y, data = {}) {
+    const bbox = new RTreeBoundingBox(x, y, x, y);
+    this.insert(bbox, { x, y, ...data });
+  }
+
+  insert(bbox, data) {
+    const entry = { bbox, data };
+    this._size++;
+
+    const splitNode = this._insertNode(this.root, entry);
+    if (splitNode) {
+      const newRoot = new RTreeNode(false);
+      newRoot.entries.push({ bbox: this.root.bbox, childNode: this.root });
+      newRoot.entries.push({ bbox: splitNode.bbox, childNode: splitNode });
+      newRoot.updateBBox();
+      this.root = newRoot;
+    }
+  }
+
+  _insertNode(node, entry) {
+    if (node.isLeaf) {
+      node.entries.push(entry);
+      node.updateBBox();
+      if (node.entries.length > this.maxEntries) {
+        return this._splitNode(node);
+      }
+      return null;
+    }
+
+    let bestChildEntry = node.entries[0];
+    let minIncrease = Infinity;
+
+    for (const e of node.entries) {
+      const enlarged = e.bbox.expand(entry.bbox);
+      const increase = enlarged.area() - e.bbox.area();
+      if (increase < minIncrease) {
+        minIncrease = increase;
+        bestChildEntry = e;
+      }
+    }
+
+    const splitChild = this._insertNode(bestChildEntry.childNode, entry);
+    bestChildEntry.bbox = bestChildEntry.childNode.bbox;
+
+    if (splitChild) {
+      node.entries.push({ bbox: splitChild.bbox, childNode: splitChild });
+      node.updateBBox();
+      if (node.entries.length > this.maxEntries) {
+        return this._splitNode(node);
+      }
+    } else {
+      node.updateBBox();
+    }
+
+    return null;
+  }
+
+  _splitNode(node) {
+    const mid = Math.floor(node.entries.length / 2);
+    const newNode = new RTreeNode(node.isLeaf);
+    newNode.entries = node.entries.splice(mid);
+
+    node.updateBBox();
+    newNode.updateBBox();
+    return newNode;
+  }
+
+  search(queryBBox) {
+    const box = queryBBox instanceof RTreeBoundingBox
+      ? queryBBox
+      : new RTreeBoundingBox(queryBBox.minX, queryBBox.minY, queryBBox.maxX, queryBBox.maxY);
+
+    const results = [];
+    const searchNode = (node) => {
+      if (!node || !node.bbox || !node.bbox.intersects(box)) return;
+
+      if (node.isLeaf) {
+        for (const entry of node.entries) {
+          if (entry.bbox.intersects(box)) {
+            results.push(entry.data);
+          }
+        }
+      } else {
+        for (const entry of node.entries) {
+          if (entry.bbox.intersects(box)) {
+            searchNode(entry.childNode);
+          }
+        }
+      }
+    };
+
+    searchNode(this.root);
+    return results;
+  }
+
+  searchWithinRadius(x, y, radius) {
+    const queryBox = new RTreeBoundingBox(x - radius, y - radius, x + radius, y + radius);
+    const candidates = this.search(queryBox);
+    const r2 = radius * radius;
+
+    return candidates.filter(pt => {
+      const dx = pt.x - x;
+      const dy = pt.y - y;
+      return dx * dx + dy * dy <= r2;
+    });
+  }
+
+  clear() {
+    this.root = new RTreeNode(true);
+    this._size = 0;
+  }
+}
+
+export const HYSTERESIS_STATE = {
+  NORMAL: 'NORMAL',
+  DEGRADED: 'DEGRADED'
+};
+
+export class HysteresisLoadBalancer {
+  constructor({
+    highWatermark = 80,
+    lowWatermark = 50,
+    ewmaAlpha = 0.3,
+    cooldownMs = 2000
+  } = {}) {
+    if (lowWatermark >= highWatermark) {
+      throw new Error("lowWatermark must be strictly less than highWatermark");
+    }
+    this.highWatermark = highWatermark;
+    this.lowWatermark = lowWatermark;
+    this.alpha = Math.max(0.01, Math.min(1.0, ewmaAlpha));
+    this.cooldownMs = Math.max(0, cooldownMs);
+
+    this.state = HYSTERESIS_STATE.NORMAL;
+    this.smoothedMetric = 0;
+    this.lastTransitionTime = 0;
+    this.transitionsCount = 0;
+    this.totalSamples = 0;
+  }
+
+  recordSample(currentMetric, now = Date.now()) {
+    const val = Number(currentMetric);
+    this.totalSamples++;
+
+    if (this.totalSamples === 1) {
+      this.smoothedMetric = val;
+    } else {
+      this.smoothedMetric = this.alpha * val + (1 - this.alpha) * this.smoothedMetric;
+    }
+
+    let stateChanged = false;
+    const canTransition = (now - this.lastTransitionTime) >= this.cooldownMs;
+
+    if (canTransition) {
+      if (this.state === HYSTERESIS_STATE.NORMAL && this.smoothedMetric > this.highWatermark) {
+        this.state = HYSTERESIS_STATE.DEGRADED;
+        this.lastTransitionTime = now;
+        this.transitionsCount++;
+        stateChanged = true;
+      } else if (this.state === HYSTERESIS_STATE.DEGRADED && this.smoothedMetric < this.lowWatermark) {
+        this.state = HYSTERESIS_STATE.NORMAL;
+        this.lastTransitionTime = now;
+        this.transitionsCount++;
+        stateChanged = true;
+      }
+    }
+
+    return {
+      state: this.state,
+      smoothedMetric: Math.round(this.smoothedMetric * 100) / 100,
+      stateChanged
+    };
+  }
+
+  shouldShedLoad(serviceType = 'OPTIONAL') {
+    if (serviceType === 'CRITICAL') {
+      return false;
+    }
+    return this.state === HYSTERESIS_STATE.DEGRADED;
+  }
+
+  getMetrics() {
+    return {
+      state: this.state,
+      highWatermark: this.highWatermark,
+      lowWatermark: this.lowWatermark,
+      deadbandWidth: this.highWatermark - this.lowWatermark,
+      smoothedMetric: Math.round(this.smoothedMetric * 100) / 100,
+      transitionsCount: this.transitionsCount,
+      totalSamples: this.totalSamples
+    };
+  }
+
+  reset() {
+    this.state = HYSTERESIS_STATE.NORMAL;
+    this.smoothedMetric = 0;
+    this.lastTransitionTime = 0;
+    this.transitionsCount = 0;
+    this.totalSamples = 0;
+  }
+}
+
+export class HLLSketch {
+  constructor(p = 10) {
+    this.p = Math.max(4, Math.min(16, p));
+    this.m = 1 << this.p;
+    this.registers = new Uint8Array(this.m);
+
+    if (this.m === 16) this.alphaM = 0.673;
+    else if (this.m === 32) this.alphaM = 0.697;
+    else if (this.m === 64) this.alphaM = 0.709;
+    else this.alphaM = 0.7213 / (1 + 1.079 / this.m);
+  }
+
+  _hash(val) {
+    const str = String(val);
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13;
+    h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
+    return h >>> 0;
+  }
+
+  add(item) {
+    const x = this._hash(item);
+    const j = x >>> (32 - this.p);
+    const w = (x << this.p) >>> 0;
+
+    let leadingZeros = 1;
+    if (w !== 0) {
+      let mask = 0x80000000;
+      while ((w & mask) === 0 && leadingZeros <= (32 - this.p)) {
+        leadingZeros++;
+        mask >>>= 1;
+      }
+    } else {
+      leadingZeros = 32 - this.p + 1;
+    }
+
+    if (leadingZeros > this.registers[j]) {
+      this.registers[j] = leadingZeros;
+    }
+  }
+
+  cardinality() {
+    let sum = 0;
+    let zeros = 0;
+
+    for (let i = 0; i < this.m; i++) {
+      sum += Math.pow(2, -this.registers[i]);
+      if (this.registers[i] === 0) zeros++;
+    }
+
+    let estimate = (this.alphaM * this.m * this.m) / sum;
+
+    if (estimate <= 2.5 * this.m && zeros > 0) {
+      estimate = this.m * Math.log(this.m / zeros);
+    }
+
+    return Math.round(estimate);
+  }
+
+  merge(other) {
+    if (this.p !== other.p) {
+      throw new Error("Cannot merge HLL sketches with different precision");
+    }
+    const merged = new HLLSketch(this.p);
+    for (let i = 0; i < this.m; i++) {
+      merged.registers[i] = Math.max(this.registers[i], other.registers[i]);
+    }
+    return merged;
+  }
+
+  clone() {
+    const copy = new HLLSketch(this.p);
+    copy.registers.set(this.registers);
+    return copy;
+  }
+}
+
+export class HLLJaccardEstimator {
+  static estimate(sketchA, sketchB) {
+    if (!sketchA || !sketchB) {
+      return { jaccard: 0, intersection: 0, union: 0, cardA: 0, cardB: 0 };
+    }
+
+    const cardA = sketchA.cardinality();
+    const cardB = sketchB.cardinality();
+
+    if (cardA === 0 && cardB === 0) {
+      return { jaccard: 1.0, intersection: 0, union: 0, cardA: 0, cardB: 0 };
+    }
+
+    const merged = sketchA.merge(sketchB);
+    const cardUnion = merged.cardinality();
+
+    const rawIntersection = cardA + cardB - cardUnion;
+    const cardIntersection = Math.max(0, Math.min(rawIntersection, Math.min(cardA, cardB)));
+
+    const jaccard = cardUnion > 0 ? cardIntersection / cardUnion : 0;
+
+    return {
+      jaccard: Math.round(jaccard * 10000) / 10000,
+      intersection: cardIntersection,
+      union: cardUnion,
+      cardA,
+      cardB
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -14369,7 +14760,16 @@ export default {
   VitterReservoirSampler,
   IntervalNode,
   TreapIntervalRangeTree,
+  // Phase 30 Enterprise Algorithms
+  RTreeBoundingBox,
+  RTreeNode,
+  RTreeSpatialGeoIndex,
+  HYSTERESIS_STATE,
+  HysteresisLoadBalancer,
+  HLLSketch,
+  HLLJaccardEstimator,
 };
+
 
 
 
