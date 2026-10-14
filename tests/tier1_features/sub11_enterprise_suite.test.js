@@ -124,6 +124,10 @@ import {
   DynamicTimeWarping,
   HierarchicalKMeans,
   ReservoirSampling,
+  SimHashReviewSpam,
+  AhoCorasickNode,
+  AhoCorasickModerator,
+  BellmanFordArbitrage,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -140,6 +144,9 @@ import { LSMTreeClickstream as ServerLSMTree } from "../../server/src/utils/lsmT
 import { DynamicTimeWarping as ServerDTW } from "../../server/src/utils/dynamicTimeWarping.js";
 import { HierarchicalKMeans as ServerHierarchicalKMeans } from "../../server/src/utils/hierarchicalKMeans.js";
 import { ReservoirSampling as ServerReservoirSampling } from "../../server/src/utils/reservoirSampling.js";
+import { SimHashReviewSpam as ServerSimHash } from "../../server/src/utils/simHashReviewSpam.js";
+import { AhoCorasickModerator as ServerAhoCorasick } from "../../server/src/utils/ahoCorasickModerator.js";
+import { BellmanFordArbitrage as ServerBellmanFord } from "../../server/src/utils/bellmanFordArbitrage.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -11430,6 +11437,307 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const churnEval = DynamicTimeWarping.classifyPurchasingPattern(intervals);
         expect.equal(churnEval.detectedPattern, "CHURNING_RISK");
         expect.equal(churnEval.riskLevel, "HIGH");
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 164: SimHash Review Spam, Aho-Corasick Moderator & Bellman-Ford Arbitrage Suite (24 Tests)
+    // =========================================================================
+    describe("Feature 164: SimHash Review Spam, Aho-Corasick Moderator & Bellman-Ford Arbitrage Suite", () => {
+
+      // --- Group 1: SimHash & Hamming Distance (Review Spam Radar) (F164-T01 -> F164-T06) ---
+      test("F164-T01: Two identical review texts produce identical 64-bit SimHash with Hamming distance = 0", () => {
+        const text = "Sản phẩm đóng gói rất cẩn thận, giao hàng nhanh 2h, chất lượng tuyệt vời!";
+        const res = SimHashReviewSpam.compareReviews(text, text);
+        expect.equal(res.distance, 0);
+        expect.equal(res.isDuplicate, true);
+        expect.equal(res.similarityScore, 100);
+      });
+
+      test("F164-T02: Near-duplicate reviews with minor wording variation have small Hamming distance <= 5", () => {
+        const textA = "Sản phẩm đóng gói rất cẩn thận giao hàng nhanh chất lượng tuyệt vời shop 5 sao";
+        const textB = "Sản phẩm đóng gói rất cẩn thận, giao hàng nhanh! Chất lượng tuyệt vời, shop 5 sao nhé";
+        const res = SimHashReviewSpam.compareReviews(textA, textB, 5);
+        expect.equal(res.distance <= 5, true);
+        expect.equal(res.isDuplicate, true);
+        expect.equal(res.similarityScore >= 90, true);
+      });
+
+      test("F164-T03: Completely different product reviews have high Hamming distance (> 10) avoiding false positives", () => {
+        const reviewShoe = "Giày thể thao êm chân, vừa size, đế bám tốt khi chạy bộ ban đêm.";
+        const reviewPan = "Nồi chiên không dầu dung tích lớn, nướng gà chín đều, dễ vệ sinh sau khi ăn.";
+        const res = SimHashReviewSpam.compareReviews(reviewShoe, reviewPan, 5);
+        expect.equal(res.distance > 10, true);
+        expect.equal(res.isDuplicate, false);
+      });
+
+      test("F164-T04: Server SimHash addAndCheckReview flags seeding bot spam and warns moderation team", () => {
+        const radar = new ServerSimHash(10);
+        const original = { id: "rev_001", text: "Áo rất đẹp vải mát form chuẩn y hình shop nhiệt tình", authorId: "u1", productId: "p1" };
+        const botCopy = { id: "rev_002", text: "Áo rất đẹp, vải mát form chuẩn y hình shop nhiệt tình nha", authorId: "u2_bot", productId: "p1" };
+
+        const check1 = radar.addAndCheckReview(original);
+        expect.equal(check1.isSpam, false);
+
+        const check2 = radar.addAndCheckReview(botCopy);
+        expect.equal(check2.isSpam, true);
+        expect.equal(check2.duplicateCount, 1);
+        expect.equal(check2.recommendation.includes("CẢNH BÁO SPAM SEEDING"), true);
+      });
+
+      test("F164-T05: SimHash computes exact 64-bit binary fingerprint string format", () => {
+        const hash = SimHashReviewSpam.computeSimHash("Đánh giá sản phẩm test");
+        expect.equal(hash.length, 64);
+        expect.equal(/^[01]{64}$/.test(hash), true);
+      });
+
+      test("F164-T06: SimHash safely handles empty or non-string inputs", () => {
+        const emptyHash = SimHashReviewSpam.computeSimHash("");
+        expect.equal(emptyHash, "0".repeat(64));
+
+        let threw = false;
+        try {
+          SimHashReviewSpam.hammingDistance("101", "101");
+        } catch (e) {
+          threw = true;
+        }
+        expect.equal(threw, true);
+      });
+
+      // --- Group 2: Aho-Corasick Multi-Pattern Moderator (F164-T07 -> F164-T13) ---
+      test("F164-T07: Aho-Corasick automaton builds valid Trie with correct pattern count", () => {
+        const patterns = [
+          { pattern: "zalo", category: "OFF_PLATFORM", severity: "HIGH" },
+          { pattern: "sđt", category: "OFF_PLATFORM", severity: "HIGH" },
+          { pattern: "rep 1:1", category: "COUNTERFEIT", severity: "HIGH" },
+        ];
+        const moderator = new AhoCorasickModerator(patterns);
+        expect.equal(moderator.totalPatterns, 3);
+        expect.equal(moderator.root.children.size > 0, true);
+      });
+
+      test("F164-T08: Aho-Corasick scan detects multiple forbidden patterns in single O(N) pass", () => {
+        const moderator = new AhoCorasickModerator([
+          { pattern: "zalo", category: "OFF_PLATFORM", severity: "HIGH" },
+          { pattern: "090", category: "PHONE", severity: "MEDIUM" },
+          { pattern: "fake", category: "COUNTERFEIT", severity: "HIGH" }
+        ]);
+
+        const text = "Liên hệ qua Zalo 0901234567 để mua hàng fake giá rẻ!";
+        const report = moderator.scan(text);
+
+        expect.equal(report.isClean, false);
+        expect.equal(report.matchCount, 3);
+        expect.equal(report.hasHighSeverity, true);
+        expect.equal(report.categoriesFound.includes("OFF_PLATFORM"), true);
+        expect.equal(report.categoriesFound.includes("COUNTERFEIT"), true);
+      });
+
+      test("F164-T09: Aho-Corasick detects off-platform payment evasion circumvention attempts", () => {
+        const moderator = new AhoCorasickModerator([
+          { pattern: "chuyển khoản riêng", category: "OFF_PLATFORM", severity: "HIGH" },
+          { pattern: "giao dịch ngoài sàn", category: "OFF_PLATFORM", severity: "HIGH" }
+        ]);
+
+        const text = "Khách hàng nhắn tin để chuyển khoản riêng tránh phí 5% nhé";
+        const result = moderator.scan(text);
+        expect.equal(result.isClean, false);
+        expect.equal(result.matches[0].pattern, "chuyển khoản riêng");
+      });
+
+      test("F164-T10: Aho-Corasick detects counterfeit brand keywords protect Shopee Mall integrity", () => {
+        const moderator = new AhoCorasickModerator([
+          { pattern: "super fake", category: "COUNTERFEIT", severity: "HIGH" },
+          { pattern: "rep 1:1", category: "COUNTERFEIT", severity: "HIGH" },
+          { pattern: "hàng tuồn", category: "COUNTERFEIT", severity: "MEDIUM" }
+        ]);
+
+        const text = "Giày thể thao Nike Air Force rep 1:1 siêu cấp da thật";
+        const result = moderator.scan(text);
+        expect.equal(result.isClean, false);
+        expect.equal(result.matches.some(m => m.pattern === "rep 1:1"), true);
+      });
+
+      test("F164-T11: maskText replaces forbidden substrings with asterisk mask without breaking text length", () => {
+        const moderator = new AhoCorasickModerator([
+          { pattern: "zalo", category: "OFF_PLATFORM" },
+          { pattern: "fake", category: "COUNTERFEIT" }
+        ]);
+
+        const original = "Inbox zalo mua đồ fake";
+        const masked = moderator.maskText(original, "*");
+        expect.equal(masked.length, original.length);
+        expect.equal(masked.includes("zalo"), false);
+        expect.equal(masked.includes("fake"), false);
+        expect.equal(masked.includes("****"), true);
+      });
+
+      test("F164-T12: Server AhoCorasickModerator efficiently moderates clean text with zero false-positives", () => {
+        const serverMod = new ServerAhoCorasick([
+          { pattern: "lừa đảo", category: "TOXIC", severity: "HIGH" },
+          { pattern: "hàng nhái", category: "COUNTERFEIT", severity: "HIGH" }
+        ]);
+
+        const cleanText = "Sản phẩm chính hãng 100% bảo hành 24 tháng tại trung tâm ủy quyền";
+        const report = serverMod.scan(cleanText);
+        expect.equal(report.isClean, true);
+        expect.equal(report.matchCount, 0);
+        expect.equal(serverMod.maskText(cleanText), cleanText);
+      });
+
+      test("F164-T13: Aho-Corasick handles empty string and non-string arguments safely", () => {
+        const mod = new AhoCorasickModerator();
+        const res1 = mod.scan("");
+        expect.equal(res1.isClean, true);
+        const res2 = mod.scan(null);
+        expect.equal(res2.isClean, true);
+      });
+
+      // --- Group 3: Bellman-Ford Negative Cycle Detection (Arbitrage Fraud) (F164-T14 -> F164-T20) ---
+      test("F164-T14: Legitimate acyclic or positive cost cash transfers report status SAFE", () => {
+        const bf = new BellmanFordArbitrage();
+        bf.addEdge("BUYER", "ESCROW", 100000, "PAYMENT");
+        bf.addEdge("ESCROW", "SELLER", 95000, "DISBURSEMENT");
+        bf.addEdge("ESCROW", "PLATFORM", 5000, "COMMISSION_5%");
+
+        const res = bf.detectNegativeCycle("BUYER");
+        expect.equal(res.hasNegativeCycle, false);
+        expect.equal(res.status, "SAFE");
+        expect.equal(res.cycle.length, 0);
+      });
+
+      test("F164-T15: Bellman-Ford detects cashback arbitrage negative cycle (A -> B -> C -> A)", () => {
+        const bf = new BellmanFordArbitrage();
+        // A -> B chi phí 10, B -> C chi phí 15, C -> A hoàn tiền bất thường -30 => Tổng chu trình = -5 < 0
+        bf.addEdge("USER_A", "USER_B", 10, "TRANSFER");
+        bf.addEdge("USER_B", "USER_C", 15, "TRANSFER");
+        bf.addEdge("USER_C", "USER_A", -30, "CASHBACK_EXPLOIT");
+
+        const res = bf.detectNegativeCycle("USER_A");
+        expect.equal(res.hasNegativeCycle, true);
+        expect.equal(res.status, "CRITICAL_FRAUD_DETECTED");
+        expect.equal(res.cycle.length >= 3, true);
+      });
+
+      test("F164-T16: Bellman-Ford backtracks exact cyclic vertices participating in the arbitrage ring", () => {
+        const bf = new BellmanFordArbitrage();
+        bf.addEdge("U1", "U2", 5);
+        bf.addEdge("U2", "U3", 5);
+        bf.addEdge("U3", "U1", -15); // Tổng = -5
+
+        const res = bf.detectNegativeCycle();
+        expect.equal(res.hasNegativeCycle, true);
+        const cycleSet = new Set(res.cycle);
+        expect.equal(cycleSet.has("U1"), true);
+        expect.equal(cycleSet.has("U2"), true);
+        expect.equal(cycleSet.has("U3"), true);
+      });
+
+      test("F164-T17: Graph with positive weight cycle terminates without flagging fraud", () => {
+        const bf = new BellmanFordArbitrage();
+        bf.addEdge("X", "Y", 10);
+        bf.addEdge("Y", "Z", 20);
+        bf.addEdge("Z", "X", 5); // Tổng = +35 > 0
+
+        const res = bf.detectNegativeCycle("X");
+        expect.equal(res.hasNegativeCycle, false);
+        expect.equal(res.status, "SAFE");
+      });
+
+      test("F164-T18: Bellman-Ford handles empty graph cleanly without exception", () => {
+        const bf = new BellmanFordArbitrage();
+        const res = bf.detectNegativeCycle();
+        expect.equal(res.hasNegativeCycle, false);
+        expect.equal(res.cycle.length, 0);
+      });
+
+      test("F164-T19: Server BellmanFordArbitrage flags complex 5-node escrow siphoning loop", () => {
+        const serverBF = new ServerBellmanFord();
+        serverBF.addEdge("ACC_1", "ACC_2", 10);
+        serverBF.addEdge("ACC_2", "ACC_3", 10);
+        serverBF.addEdge("ACC_3", "ACC_4", 10);
+        serverBF.addEdge("ACC_4", "ACC_5", 10);
+        serverBF.addEdge("ACC_5", "ACC_1", -50); // Net sum = -10 < 0
+
+        const res = serverBF.detectNegativeCycle();
+        expect.equal(res.hasNegativeCycle, true);
+        expect.equal(res.status, "CRITICAL_FRAUD_DETECTED");
+        expect.equal(res.involvedAccountsCount, 5);
+        expect.equal(res.message.includes("CẢNH BÁO BẢO MẬT"), true);
+      });
+
+      test("F164-T20: Disconnected component negative cycle is detected when source is not specified", () => {
+        const bf = new BellmanFordArbitrage();
+        // Thành phần 1: Bình thường
+        bf.addEdge("NORM_1", "NORM_2", 100);
+
+        // Thành phần 2: Chu trình âm riêng biệt
+        bf.addEdge("FRAUD_X", "FRAUD_Y", 10);
+        bf.addEdge("FRAUD_Y", "FRAUD_X", -25); // Net = -15 < 0
+
+        const res = bf.detectNegativeCycle(null);
+        expect.equal(res.hasNegativeCycle, true);
+        expect.equal(res.status, "CRITICAL_FRAUD_DETECTED");
+      });
+
+      // --- Group 4: AI Copilot & E2E Lifecycle Integration (F164-T21 -> F164-T24) ---
+      test("F164-T21: Admin Sentinel Copilot explains SimHash review spam and Bellman-Ford negative cycle", () => {
+        const simRes = generateAdminCopilotResponse("Quét review spam bằng simhash và khoảng cách hamming");
+        expect.equal(simRes.tag, "PHÁT HIỆN REVIEW SPAM SIMHASH");
+        expect.equal(simRes.text.includes("SIMHASH"), true);
+        expect.equal(simRes.text.includes("Hamming"), true);
+
+        const bfRes = generateAdminCopilotResponse("Phát hiện chu trình âm gian lận hoàn tiền bằng bellman-ford");
+        expect.equal(bfRes.tag, "RADAR CHU TRÌNH ÂM BELLMAN-FORD");
+        expect.equal(bfRes.text.includes("BELLMAN-FORD"), true);
+        expect.equal(bfRes.text.includes("NEGATIVE CYCLE"), true);
+      });
+
+      test("F164-T22: Admin Sentinel Copilot explains Aho-Corasick linear content moderation", () => {
+        const res = generateAdminCopilotResponse("Kiểm duyệt nội dung đa mẫu bằng thuật toán aho-corasick đa mẫu");
+        expect.equal(res.tag, "KIỂM DUYỆT TỪ CẤM AHO-CORASICK");
+        expect.equal(res.text.includes("AHO-CORASICK"), true);
+        expect.equal(res.text.includes("OFF_PLATFORM_TRADING"), true);
+      });
+
+      test("F164-T23: Seller ShopSmart Copilot & Buyer Assistant respond to Aho-Corasick & SimHash inquiries", () => {
+        // Seller Copilot
+        const sellerRes = generateSellerCopilotResponse("Kiểm duyệt tiêu đề bài đăng tránh vi phạm bằng aho-corasick shop");
+        expect.equal(sellerRes.tag, "KIỂM DUYỆT BÀI ĐĂNG AHO-CORASICK");
+        expect.equal(sellerRes.text.includes("Shopee Mall"), true);
+
+        // Buyer Assistant
+        const buyerRes = generateAiChatResponse("Đánh giá có thật không hay là review ảo simhash review");
+        expect.equal(buyerRes.intent, "BUYER_REVIEW_INTEGRITY_ASSIST");
+        expect.equal(buyerRes.replyText.includes("SIMHASH"), true);
+      });
+
+      test("F164-T24: E2E Lifecycle: Aho-Corasick Product Post -> SimHash Review Guard -> Bellman-Ford Escrow Defense", () => {
+        // 1. Seller uploads product - Title checked with Aho-Corasick
+        const moderator = new AhoCorasickModerator([
+          { pattern: "zalo", category: "OFF_PLATFORM", severity: "HIGH" },
+          { pattern: "fake", category: "COUNTERFEIT", severity: "HIGH" }
+        ]);
+        const badTitle = "Tai nghe Bluetooth hàng xịn, liên hệ zalo nhận voucher";
+        const modReport = moderator.scan(badTitle);
+        expect.equal(modReport.isClean, false);
+        const cleanTitle = moderator.maskText(badTitle);
+        expect.equal(cleanTitle.includes("zalo"), false);
+
+        // 2. Buyer posts reviews - SimHash detects duplicated seeding
+        const spamRadar = new SimHashReviewSpam(3);
+        spamRadar.addAndCheckReview({ id: "r1", text: "Sản phẩm tốt, giao nhanh 2h, đóng gói kỹ lưỡng" });
+        const secondPost = spamRadar.addAndCheckReview({ id: "r2", text: "Sản phẩm tốt giao nhanh 2h đóng gói kỹ lưỡng nha" });
+        expect.equal(secondPost.isSpam, true);
+
+        // 3. Sybil financial refund loop detected by Bellman-Ford
+        const escrowAudit = new BellmanFordArbitrage();
+        escrowAudit.addEdge("ACC_A", "ACC_B", 50000, "ORDER_PAYMENT");
+        escrowAudit.addEdge("ACC_B", "ACC_C", 50000, "ORDER_PAYMENT");
+        escrowAudit.addEdge("ACC_C", "ACC_A", -120000, "FRAUDULENT_DISPUTE_REFUND"); // Arbitrage loop!
+        const auditResult = escrowAudit.detectNegativeCycle();
+        expect.equal(auditResult.hasNegativeCycle, true);
+        expect.equal(auditResult.status, "CRITICAL_FRAUD_DETECTED");
       });
     });
   });

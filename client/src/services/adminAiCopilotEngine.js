@@ -136,7 +136,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 4. Radar phát hiện gian lận & Người mua bất thường (Fraud Radar / Buyer Abuse)
-  if (!/sybil|dsu|disjoint set|lsh|minhash|catalog clone|sao chép catalog|bản quyền ảnh|phash|dhash|hamming/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
+  if (!/sybil|dsu|disjoint set|lsh|minhash|catalog clone|sao chép catalog|bản quyền ảnh|phash|dhash|hamming|bellman-ford|chu trình âm|simhash|review spam/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
     const anomalyCount = fraudAnomaliesCount || (fraudData?.criticalCount ?? 0) || (fraudData?.mediumCount ?? 1);
     return {
       text: `🚨 **RADAR PHÁT HIỆN GIAN LẬN TOÀN SÀN (AI FRAUD GUARD)**:
@@ -334,7 +334,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 12. Kiểm Duyệt Nội Dung & Quét Từ Cấm Siêu Tốc (Aho-Corasick Multi-Pattern Automaton)
-  if (/aho-corasick|kiểm duyệt từ cấm|hàng giả|quét từ cấm|censor|lọc từ cấm/i.test(raw)) {
+  if (!/đa mẫu|giao dịch ngoài sàn|aho-corasick đa mẫu/i.test(raw) && /aho-corasick|kiểm duyệt từ cấm|hàng giả|quét từ cấm|censor|lọc từ cấm/i.test(raw)) {
     return {
       text: `🛡️ **THUẬT TOÁN KIỂM DUYỆT TỪ CẤM SIÊU TỐC AHO-CORASICK (AUTOMATON)**:
 - **Mục đích thiết kế**: Quét và tự động che dấu (Censor) hàng nghìn từ cấm, hàng giả, hàng nhái (*"fake", "rep 1:1", "nhái", "lừa đảo"*) trong tiêu đề sản phẩm, đánh giá và tin nhắn chat.
@@ -896,7 +896,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 34. Thanh Tra Vi Phạm Bản Quyền Ảnh & Sao Chép Shopee Mall (Phase 14 - Feature 161)
-  if (/bản quyền ảnh|sao chép ảnh|perceptual hash|phash|dhash|khoảng cách hamming|ăn cắp ảnh mall|trùng lặp hình ảnh|watermark gian lận/i.test(raw)) {
+  if (!/simhash|review spam/i.test(raw) && /bản quyền ảnh|sao chép ảnh|perceptual hash|phash|dhash|khoảng cách hamming|ăn cắp ảnh mall|trùng lặp hình ảnh|watermark gian lận/i.test(raw)) {
     return {
       text: `🛡️ **RADAR THANH TRA BẢN QUYỀN HÌNH ẢNH & SAO CHÉP MALL BẰNG PHASH (64-BIT DHASH)**:
 - **Cơ chế băm cảm nhận Perceptual Hash (dHash)**:
@@ -989,6 +989,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
       suggestions: [
         'Cấu trúc cây LSM-Tree',
         'Chỉ mục Roaring Bitmaps',
+        'Báo cáo doanh số GMV toàn sàn'
+      ]
+    };
+  }
+
+  // 40. Quét Đánh Giá Ảo & Review Spam Bằng SimHash & Hamming Distance (Phase 17 - Feature 164)
+  if (/simhash|review spam|đánh giá ảo|seeding gian lận|khoảng cách hamming|trùng lặp review/i.test(raw)) {
+    return {
+      text: `🔍 **RADAR PHÁT HIỆN REVIEW SPAM & SEEDING BẰNG SIMHASH (CHARIKAR'S ALGORITHM)**:
+- **Nguyên lý SimHash 64-bit**:
+  - Mã hóa toàn bộ nội dung đánh giá thành một chuỗi nhị phân 64-bit dựa trên trọng số tần suất từ (Token Weighting).
+  - Khác với hàm băm mật mã (SHA/MD5 bị hiệu ứng thác đổ Avalanche Effect), SimHash có tính chất **cảm nhận vị trí (Locality-Sensitive)**: Hai bài đánh giá có nội dung gần giống nhau (đổi vài chữ, chèn dấu cách, icon) sẽ cho ra mã SimHash có khoảng cách Hamming cực nhỏ.
+- **Ngưỡng nhận diện gian lận**:
+  - $d_H(h_1, h_2) \\le 3$: Xác định chắc chắn là **Near-Duplicate Review** (Seeding công nghiệp).
+  - Tự động tạm khóa cộng thưởng Mini Xu cho tài khoản nghi vấn và ẩn đánh giá khỏi PDP để bảo vệ tính công bằng cho người mua.`,
+      type: 'fraud',
+      tag: 'PHÁT HIỆN REVIEW SPAM SIMHASH',
+      suggestions: [
+        'Quét radar tài khoản gian lận',
+        'Kiểm duyệt từ ngữ Aho-Corasick',
+        'Chu trình âm hoàn tiền Bellman-Ford'
+      ]
+    };
+  }
+
+  // 41. Radar Phát Hiện Chu Trình Âm Gian Lận Hoàn Tiền Bằng Bellman-Ford (Phase 17 - Feature 164)
+  if (/bellman-ford|chu trình âm|negative cycle|gian lận hoàn tiền|arbitrage loop|rút ruột escrow/i.test(raw)) {
+    return {
+      text: `🛡️ **BẢO VỆ DÒNG TIỀN ESCROW BẰNG BELLMAN-FORD (NEGATIVE CYCLE DETECTION)**:
+- **Phát hiện vòng lặp tài chính bất thường (Financial Arbitrage)**:
+  - Nhóm tài khoản liên minh (Sybil Network) cố tình luân chuyển tiền, xu, và voucher hoàn tiền qua mạng lưới khép kín: $U_A \\to U_B \\to U_C \\to U_A$.
+  - Trọng số cạnh là chi phí ròng của giao dịch. Nếu tổng trọng số của chu trình khép kín mang giá trị ÂM ($< 0$), hệ thống đang bị rút tiền ký quỹ vô căn cứ sau mỗi vòng quay (Infinite Cashback Exploit)!
+- **Cơ chế Bellman-Ford $O(|V| \\cdot |E|)$**:
+  - Thư giãn $|V| - 1$ lượt. Lượt thứ $|V|$ nếu phát hiện bất kỳ cạnh nào tiếp tục giảm khoảng cách $\\Rightarrow$ Định vị ngay lập tức chu trình âm.
+  - Tự động đóng băng các ví liên quan và kích hoạt quy trình thu hồi ký quỹ Escrow.`,
+      type: 'fraud',
+      tag: 'RADAR CHU TRÌNH ÂM BELLMAN-FORD',
+      suggestions: [
+        'Đối soát dòng tiền ký quỹ Escrow',
+        'Phát hiện review spam SimHash',
+        'Kiểm tra nghĩa vụ thuế Nghị định 52'
+      ]
+    };
+  }
+
+  // 42. Kiểm Duyệt Nội Dung Đa Mẫu Tuyến Tính Bằng Aho-Corasick (Phase 17 - Feature 164)
+  if (/aho-corasick|kiểm duyệt nội dung|từ cấm đa mẫu|quét giao dịch ngoài sàn|chặn hàng nhái|từ ngữ nhạy cảm/i.test(raw)) {
+    return {
+      text: `🛑 **HỆ THỐNG KIỂM DUYỆT ĐA MẪU TUYẾN TÍNH AHO-CORASICK (O(N + M + Z))**:
+- **Nguyên lý máy hữu hạn Aho-Corasick Automaton**:
+  - Kết hợp cây Trie với Failure Links và Dictionary Links, quét đồng thời hàng nghìn từ cấm chỉ trong **MỘT LƯỢT DUY NHẤT** trên toàn văn bản.
+- **3 Nhóm vi phạm kiểm soát tự động**:
+  - **OFF_PLATFORM_TRADING (Rất nghiêm trọng)**: Chặn số điện thoại, Zalo, link chuyển khoản ngoài sàn nhằm trốn phí hoa hồng 5% và lừa đảo người mua.
+  - **COUNTERFEIT_BRAND (Vi phạm thương hiệu)**: Chặn hàng nhái, rep 1:1, fake, siêu cấp bảo vệ gian hàng Shopee Mall.
+  - **TOXIC_CONTENT**: Che mờ từ ngữ thô tục, khiêu dâm, lừa đảo trong tiêu đề sản phẩm và hội thoại tin nhắn.`,
+      type: 'compliance',
+      tag: 'KIỂM DUYỆT TỪ CẤM AHO-CORASICK',
+      suggestions: [
+        'Phát hiện review spam SimHash',
+        'Quét radar tài khoản gian lận',
         'Báo cáo doanh số GMV toàn sàn'
       ]
     };

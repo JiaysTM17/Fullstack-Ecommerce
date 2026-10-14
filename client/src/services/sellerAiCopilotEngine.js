@@ -527,6 +527,27 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 26. Kiểm Duyệt Tiêu Đề & Mô Tả Sản Phẩm Bằng Aho-Corasick (Phase 17 - Feature 164)
+  if (/kiểm duyệt tiêu đề|từ cấm sản phẩm|aho-corasick shop|tránh vi phạm mall|hàng nhái cấm bán|chặn số điện thoại/i.test(raw)) {
+    return {
+      text: `🛡️ **BỘ LỌC KIỂM DUYỆT TIÊU ĐỀ & MÔ TẢ AHO-CORASICK DÀNH CHO SHOP (${currentShop.name})**:
+- **Cơ chế quét thời gian thực $O(N)$**:
+  - Tự động kiểm tra tiêu đề và mô tả sản phẩm mới trước khi đăng bài, tránh bị hệ thống khóa sản phẩm hoặc phạt Điểm Sao Quả Tạ.
+- **Các từ khóa cấm cần tuyệt đối tránh**:
+  - **Thông tin liên hệ ngoài sàn**: "Zalo", "SĐT", "09xx", "liên hệ trực tiếp", "chuyển khoản riêng" $\\Rightarrow$ Nguy cơ bị khóa gian hàng vĩnh viễn vì trốn phí sàn.
+  - **Từ khóa nhái thương hiệu**: "rep 1:1", "super fake", "hàng tuồn", "replica" $\\Rightarrow$ Vi phạm nghiêm trọng tiêu chuẩn Shopee Mall.
+  - **Cam kết quá đà không căn cứ**: "trị dứt điểm 100%", "thuốc tiên", "số 1 thế giới".
+- **Khuyến nghị**: Hãy sử dụng tính năng mô tả chi tiết công năng thật và thông số kỹ thuật để nâng cao Quality Score và tối ưu giá thầu Shopee Ads!`,
+      type: 'compliance',
+      tag: 'KIỂM DUYỆT BÀI ĐĂNG AHO-CORASICK',
+      suggestions: [
+        'Tối ưu đấu thầu từ khóa GSP',
+        'Tư vấn chiến lược Flash Sale',
+        'Phân tầng giá bằng K-Means'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

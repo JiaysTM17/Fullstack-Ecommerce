@@ -8298,6 +8298,360 @@ export class ReservoirSampling {
   }
 }
 
+// ==========================================
+// Phase 17: SimHash Review Spam, Aho-Corasick Moderator & Bellman-Ford Arbitrage Suite
+// ==========================================
+
+export class SimHashReviewSpam {
+  static hash64(str) {
+    let h1 = 0x811c9dc5;
+    let h2 = 0x811c9dc5 ^ 0x5bd1e995;
+
+    for (let i = 0; i < str.length; i++) {
+      const code = str.charCodeAt(i);
+      h1 ^= code;
+      h1 = Math.imul(h1, 0x01000193);
+
+      h2 ^= (code * 31 + (code >> 2));
+      h2 = Math.imul(h2, 0x01000193);
+    }
+
+    const bits = new Array(64).fill(0);
+    for (let i = 0; i < 32; i++) {
+      bits[i] = (h1 >>> (31 - i)) & 1;
+      bits[i + 32] = (h2 >>> (31 - i)) & 1;
+    }
+    return bits;
+  }
+
+  static computeSimHash(text) {
+    if (!text || typeof text !== "string") return "0".repeat(64);
+
+    const tokens = text
+      .toLowerCase()
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'<>]/g, " ")
+      .split(/\s+/)
+      .filter(w => w.length > 0);
+
+    if (tokens.length === 0) return "0".repeat(64);
+
+    const tokenFreq = new Map();
+    for (const token of tokens) {
+      tokenFreq.set(token, (tokenFreq.get(token) || 0) + 1);
+    }
+
+    const v = new Array(64).fill(0);
+    for (const [token, weight] of tokenFreq.entries()) {
+      const tokenBits = this.hash64(token);
+      for (let i = 0; i < 64; i++) {
+        if (tokenBits[i] === 1) v[i] += weight;
+        else v[i] -= weight;
+      }
+    }
+
+    let fingerprint = "";
+    for (let i = 0; i < 64; i++) {
+      fingerprint += v[i] > 0 ? "1" : "0";
+    }
+    return fingerprint;
+  }
+
+  static hammingDistance(hashA, hashB) {
+    if (!hashA || !hashB || hashA.length !== 64 || hashB.length !== 64) {
+      throw new Error("Mã SimHash phải là chuỗi nhị phân 64 bit.");
+    }
+    let diff = 0;
+    for (let i = 0; i < 64; i++) {
+      if (hashA[i] !== hashB[i]) diff++;
+    }
+    return diff;
+  }
+
+  static compareReviews(textA, textB, threshold = 3) {
+    const hashA = this.computeSimHash(textA);
+    const hashB = this.computeSimHash(textB);
+    const distance = this.hammingDistance(hashA, hashB);
+    return {
+      distance,
+      isDuplicate: distance <= threshold,
+      similarityScore: Number((((64 - distance) / 64) * 100).toFixed(1)),
+      hashA,
+      hashB
+    };
+  }
+
+  constructor(threshold = 3) {
+    this.threshold = threshold;
+    this.indexedReviews = new Map();
+  }
+
+  addAndCheckReview(review) {
+    if (!review || !review.id || !review.text) {
+      throw new Error("Review phải có đầy đủ id và text.");
+    }
+    const hash = SimHashReviewSpam.computeSimHash(review.text);
+    const duplicates = [];
+
+    for (const [existingId, item] of this.indexedReviews.entries()) {
+      const dist = SimHashReviewSpam.hammingDistance(hash, item.hash);
+      if (dist <= this.threshold) {
+        duplicates.push({
+          existingReviewId: existingId,
+          authorId: item.authorId,
+          productId: item.productId,
+          distance: dist,
+          similarityScore: Number((((64 - dist) / 64) * 100).toFixed(1))
+        });
+      }
+    }
+
+    const isSpam = duplicates.length > 0;
+    this.indexedReviews.set(review.id, { ...review, hash });
+
+    return {
+      reviewId: review.id,
+      hash,
+      isSpam,
+      duplicateCount: duplicates.length,
+      duplicates,
+      recommendation: isSpam
+        ? "CẢNH BÁO SPAM SEEDING: Phát hiện nội dung đánh giá trùng lặp cao với đánh giá trước đó. Tạm hoãn thưởng Mini Xu và gắn cờ kiểm duyệt!"
+        : "Đánh giá tự nhiên, hợp lệ."
+    };
+  }
+}
+
+export class AhoCorasickNode {
+  constructor(char = "") {
+    this.char = char;
+    this.children = new Map();
+    this.fail = null;
+    this.outputs = [];
+  }
+}
+
+export class AhoCorasickModerator {
+  constructor(patterns = []) {
+    this.root = new AhoCorasickNode();
+    this.totalPatterns = 0;
+    if (Array.isArray(patterns) && patterns.length > 0) {
+      this.buildAutomaton(patterns);
+    }
+  }
+
+  buildAutomaton(patterns) {
+    this.root = new AhoCorasickNode();
+    this.totalPatterns = patterns.length;
+
+    for (const item of patterns) {
+      const patternText = (typeof item === "string" ? item : item.pattern || "").toLowerCase().trim();
+      if (!patternText) continue;
+
+      const meta = typeof item === "string"
+        ? { pattern: patternText, category: "GENERAL_SENSITIVE", severity: "MEDIUM" }
+        : {
+            pattern: patternText,
+            category: item.category || "GENERAL_SENSITIVE",
+            severity: item.severity || "MEDIUM"
+          };
+
+      let curr = this.root;
+      for (const char of patternText) {
+        if (!curr.children.has(char)) {
+          curr.children.set(char, new AhoCorasickNode(char));
+        }
+        curr = curr.children.get(char);
+      }
+      curr.outputs.push(meta);
+    }
+
+    const queue = [];
+    for (const child of this.root.children.values()) {
+      child.fail = this.root;
+      queue.push(child);
+    }
+
+    while (queue.length > 0) {
+      const curr = queue.shift();
+      for (const [char, child] of curr.children.entries()) {
+        let failureNode = curr.fail;
+        while (failureNode !== null && !failureNode.children.has(char)) {
+          failureNode = failureNode.fail;
+        }
+        child.fail = failureNode ? failureNode.children.get(char) : this.root;
+        if (child.fail.outputs.length > 0) {
+          child.outputs = [...child.outputs, ...child.fail.outputs];
+        }
+        queue.push(child);
+      }
+    }
+  }
+
+  scan(text) {
+    if (!text || typeof text !== "string") {
+      return { isClean: true, matchCount: 0, matches: [], categoriesFound: [] };
+    }
+
+    const lowerText = text.toLowerCase();
+    let curr = this.root;
+    const matches = [];
+
+    for (let i = 0; i < lowerText.length; i++) {
+      const char = lowerText[i];
+      while (curr !== this.root && !curr.children.has(char)) {
+        curr = curr.fail;
+      }
+      curr = curr.children.has(char) ? curr.children.get(char) : this.root;
+
+      if (curr.outputs.length > 0) {
+        for (const out of curr.outputs) {
+          const startIndex = i - out.pattern.length + 1;
+          matches.push({
+            pattern: out.pattern,
+            category: out.category,
+            severity: out.severity,
+            startIndex,
+            endIndex: i
+          });
+        }
+      }
+    }
+
+    const categoriesFound = Array.from(new Set(matches.map(m => m.category)));
+    const hasHighSeverity = matches.some(m => m.severity === "HIGH");
+
+    return {
+      isClean: matches.length === 0,
+      matchCount: matches.length,
+      hasHighSeverity,
+      matches,
+      categoriesFound
+    };
+  }
+
+  maskText(text, maskChar = "*") {
+    if (!text || typeof text !== "string") return text;
+    const { matches } = this.scan(text);
+    if (matches.length === 0) return text;
+
+    const chars = text.split("");
+    for (const m of matches) {
+      for (let i = m.startIndex; i <= m.endIndex; i++) {
+        chars[i] = maskChar;
+      }
+    }
+    return chars.join("");
+  }
+}
+
+export class BellmanFordArbitrage {
+  constructor() {
+    this.vertices = new Set();
+    this.edges = [];
+  }
+
+  addVertex(vertexId) {
+    if (vertexId) this.vertices.add(String(vertexId));
+  }
+
+  addEdge(from, to, weight, transactionType = "TRANSFER", meta = {}) {
+    const u = String(from);
+    const v = String(to);
+    this.vertices.add(u);
+    this.vertices.add(v);
+    this.edges.push({
+      u,
+      v,
+      weight: Number(weight),
+      transactionType,
+      meta
+    });
+  }
+
+  detectNegativeCycle(source = null) {
+    const vertexList = Array.from(this.vertices);
+    const n = vertexList.length;
+
+    if (n === 0) {
+      return { hasNegativeCycle: false, cycle: [], distances: {} };
+    }
+
+    const dist = {};
+    const predecessor = {};
+
+    for (const v of vertexList) {
+      dist[v] = Infinity;
+      predecessor[v] = null;
+    }
+
+    const startNode = source && this.vertices.has(String(source)) ? String(source) : vertexList[0];
+    dist[startNode] = 0;
+
+    if (!source) {
+      for (const v of vertexList) {
+        dist[v] = 0;
+      }
+    }
+
+    for (let i = 1; i <= n - 1; i++) {
+      let anyRelaxation = false;
+      for (const edge of this.edges) {
+        if (dist[edge.u] !== Infinity && dist[edge.u] + edge.weight < dist[edge.v]) {
+          dist[edge.v] = dist[edge.u] + edge.weight;
+          predecessor[edge.v] = edge.u;
+          anyRelaxation = true;
+        }
+      }
+      if (!anyRelaxation) break;
+    }
+
+    let cycleStartNode = null;
+    for (const edge of this.edges) {
+      if (dist[edge.u] !== Infinity && dist[edge.u] + edge.weight < dist[edge.v]) {
+        dist[edge.v] = dist[edge.u] + edge.weight;
+        predecessor[edge.v] = edge.u;
+        cycleStartNode = edge.v;
+        break;
+      }
+    }
+
+    if (!cycleStartNode) {
+      return {
+        hasNegativeCycle: false,
+        cycle: [],
+        distances: dist,
+        status: "SAFE",
+        message: "Không phát hiện vòng lặp hoàn tiền hoặc chênh lệch tài chính gian lận."
+      };
+    }
+
+    let curr = cycleStartNode;
+    for (let i = 0; i < n; i++) {
+      curr = predecessor[curr];
+    }
+
+    const cycle = [];
+    let p = curr;
+    while (true) {
+      cycle.push(p);
+      if (p === curr && cycle.length > 1) break;
+      p = predecessor[p];
+      if (!p || cycle.length > n + 1) break;
+    }
+
+    cycle.reverse();
+
+    return {
+      hasNegativeCycle: true,
+      cycleStartNode,
+      cycle,
+      status: "CRITICAL_FRAUD_DETECTED",
+      message: `CẢNH BÁO BẢO MẬT: Phát hiện chu trình hoàn tiền âm khép kín [${cycle.join(" -> ")}]. Đóng băng tự động các ví liên đới!`,
+      involvedAccountsCount: new Set(cycle).size
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -8400,6 +8754,11 @@ export default {
   DynamicTimeWarping,
   HierarchicalKMeans,
   ReservoirSampling,
+  // Phase 17 Enterprise Algorithms
+  SimHashReviewSpam,
+  AhoCorasickNode,
+  AhoCorasickModerator,
+  BellmanFordArbitrage,
 };
 
 

@@ -715,6 +715,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 19. Minh Bạch Đánh Giá & Chống Review Ảo Bằng SimHash (BUYER_REVIEW_INTEGRITY_ASSIST)
+  if (/đánh giá có thật không|review ảo|seeding sản phẩm|tin cậy đánh giá|simhash review/i.test(lower)) {
+    return {
+      intent: 'BUYER_REVIEW_INTEGRITY_ASSIST',
+      replyText: `**[BẢO CHỨNG MINH BẠCH] HỆ THỐNG QUÉT REVIEW THẬT BẰNG SIMHASH:**\n\n• **Lọc bỏ 100% review seeding sao chép**: Mọi đánh giá sản phẩm đều được quét mã vân tay SimHash 64-bit và đo khoảng cách Hamming theo thời gian thực để loại trừ các đánh giá copy hàng loạt.\n• **Đánh giá kèm ảnh/video thật**: Hệ thống chỉ gắn nhãn "Đã mua hàng chính hãng" cho những đơn hàng giao thành công qua SPX Express để bạn hoàn toàn yên tâm lựa chọn!`,
+      suggestions: ['Xem sản phẩm bán chạy', 'Lấy voucher 15%', 'Gặp CSKH'],
+    };
+  }
+
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH
   // -------------------------------------------------------------
