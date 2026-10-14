@@ -291,7 +291,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 10. Phân tích Cấu trúc Dữ liệu Xác suất Bloom Filter (Cache Penetration Guard)
-  if (/bloom filter|cache penetration|bộ lọc bloom|chống vét cạn|xác suất|lọc voucher/i.test(raw)) {
+  if (!/scalable bloom|bloom mở rộng|bloom slices/i.test(raw) && /bloom filter|cache penetration|bộ lọc bloom|chống vét cạn|xác suất|lọc voucher/i.test(raw)) {
     return {
       text: `🔬 **CẤU TRÚC DỮ LIỆU XÁC SUẤT BLOOM FILTER (CACHE PENETRATION GUARD)**:
 - **Mục đích thiết kế**: Chặn đứng 100% các cuộc tấn công quét mã Voucher rác hoặc quét ID sản phẩm không tồn tại trước khi chạm tới Database.
@@ -917,7 +917,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 35. Ghép Cặp Lưỡng Phân Hopcroft-Karp Cho Phân Bổ Bưu Tá Hỏa Tốc (Phase 15 - Feature 162)
-  if (/hopcroft-karp|ghép cặp lưỡng phân|phân bổ bưu tá hopcroft|bipartite matching|gán đơn theo lô/i.test(raw)) {
+  if (!/cực đại|phân bổ shipper|batch đơn hỏa tốc|ghép đơn bưu tá/i.test(raw) && /hopcroft-karp|ghép cặp lưỡng phân|phân bổ bưu tá hopcroft|bipartite matching|gán đơn theo lô/i.test(raw)) {
     return {
       text: `⚡ **THUẬT TOÁN GHÉP CẶP LƯỠNG PHÂN HOPCROFT-KARP (SPX BATCH DISPATCH)**:
 - **Độ phức tạp tối ưu**: $O(|E| \\cdot \\sqrt{|V|})$, vượt trội hơn rất nhiều so với thuật toán Hungarian $O(V^3)$ khi hệ thống cần gán hàng nghìn đơn hàng hỏa tốc trong giờ cao điểm.
@@ -1384,6 +1384,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem biểu đồ UV truy cập thời gian thực',
         'Kiểm tra sai số chuẩn HLL++',
         'Gộp dữ liệu UV giữa các cụm máy chủ'
+      ]
+    };
+  }
+
+  // 59. Bộ Đệm Tự Điều Chỉnh Bằng Cây Splay Tree (Self-Adjusting Hot Products Cache)
+  if (/splay tree|splay cache|cây splay|tự điều chỉnh.*cache|hot deals cache|từ khóa hot splay/i.test(raw)) {
+    return {
+      text: `🌲 **BỘ ĐỆM DỮ LIỆU TỰ ĐIỀU CHỈNH SPLAY TREE (HOT PRODUCTS & RECENT SEARCH CACHE)**:
+- **Nguyên lý cấu trúc Splay Tree (Sleator & Tarjan 1985)**:
+  - Cây nhị phân tìm kiếm tự cân bằng động: Mỗi khi sản phẩm Hot Deals hoặc từ khóa được tìm kiếm / click, thao tác **Splay** (các phép xoay Zig, Zig-Zig, Zig-Zag) tự động đẩy phần tử đó lên vị trí **Gốc (Root)**.
+  - Các mặt hàng hot được truy cập liên tục đạt thời gian phản hồi siêu tốc **$O(1)$**, trong khi thời gian khấu hao tổng thể (Amortized Complexity) luôn duy trì chuẩn **$O(\\log N)$**.
+- **Ứng dụng vận hành toàn sàn**:
+  - Tự động duy trì danh mục Top Hot Flash Sale theo biến động luồng traffic khách hàng mà không cần cron job sắp xếp định kỳ.
+  - Tự động cắt tỉa (Evict) các mặt hàng nguội lạnh khi bộ đệm đạt ngưỡng dung lượng tối đa.`,
+      type: 'cache',
+      tag: 'BỘ ĐỆM TỰ ĐIỀU CHỈNH SPLAY TREE',
+      suggestions: [
+        'Xem danh sách Top Hot Items từ Splay Tree',
+        'Kiểm tra tỷ lệ Cache Hit Rate',
+        'Cấu hình dung lượng bộ đệm Splay'
+      ]
+    };
+  }
+
+  // 60. Ghép Cặp Cực Đại Đơn Hàng & Bưu Tá Bằng Hopcroft-Karp (Hopcroft-Karp Bipartite Matching)
+  if (/hopcroft-karp|ghép cặp cực đại|bipartite matching|phân bổ shipper|batch đơn hỏa tốc|ghép đơn bưu tá/i.test(raw)) {
+    return {
+      text: `🚴 **GHÉP CẶP CỰC ĐẠI ĐƠN HÀNG & BƯU TÁ BẰNG THUẬT TOÁN HOPCROFT-KARP**:
+- **Đặc tả thuật toán Hopcroft-Karp ($O(E \\sqrt{V})$)**:
+  - Thuật toán giải bài toán ghép cặp trên đồ thị 2 phía giữa Tập $U$ (Đơn hàng hỏa tốc 2H) và Tập $V$ (Bưu tá shipper khả dụng).
+  - Kết hợp BFS tạo đồ thị phân tầng (Layering) và DFS đa luồng tìm đồng thời các đường tăng luồng cực đại (Augmenting Paths) trong từng pha lặp.
+- **Tối ưu hóa năng lực giao vận SPX**:
+  - Hỗ trợ đa đơn (Multi-Capacity Slots): Mỗi shipper có thể nhận tối đa $K$ đơn đồng thời dựa trên tải trọng xe và bán kính GPS.
+  - Tối đa hóa tỷ lệ lấp đầy đơn (Fill Rate $\\ge 95\\%$), triệt tiêu hoàn toàn hiện tượng nghẽn đơn hỏa tốc giờ cao điểm.`,
+      type: 'logistics',
+      tag: 'GHÉP CẶP SHIPPER HOPCROFT-KARP',
+      suggestions: [
+        'Xem ma trận phân bổ đơn cho bưu tá',
+        'Kiểm tra tỷ lệ Fill Rate bưu tá SPX',
+        'Cấu hình bán kính ghép đơn tự động'
+      ]
+    };
+  }
+
+  // 61. Bộ Lọc Bloom Mở Rộng Không Giới Hạn (Scalable Bloom Filter)
+  if (/scalable bloom|bloom mở rộng|bloom slices|chống trùng giao dịch.*bloom|blacklist không giới hạn/i.test(raw)) {
+    return {
+      text: `🛡️ **BỘ LỌC BLOOM MỞ RỘNG (SCALABLE BLOOM FILTER WITH TIGHTENING SLICES)**:
+- **Cơ chế lát cắt động (Almeida et al. 2007)**:
+  - Khắc phục giới hạn của Bloom Filter tĩnh: Khi dung lượng phần tử tăng vọt, hệ thống tự động sinh thêm các **lát cắt mới (Slices)** với dung lượng nhân lên ($s = 2.0$) và tỷ lệ sai số thắt chặt lũy tiến ($p_l = p_0 \\times r^l$ với $r = 0.85$).
+  - Đảm bảo tỷ lệ dương tính giả (False Positive Rate) tổng thể của toàn bộ bộ lọc luôn được chặn trên tuyệt đối: $\\sum p_l \\le P_{\\text{target}} \\le 1.0\\%$.
+- **Bảo mật giao dịch & Phòng chống gian lận**:
+  - Khử trùng lặp tức thì hàng chục triệu mã giao dịch thanh toán VietQR / Thẻ tín dụng mà không bao giờ bị tràn bộ nhớ.
+  - Quản lý danh sách đen Blacklist IP bot crawler và tài khoản gian lận với dung lượng bộ nhớ RAM chỉ vài megabytes.`,
+      type: 'security',
+      tag: 'BỘ LỌC BLOOM MỞ RỘNG SCALABLE',
+      suggestions: [
+        'Kiểm tra số lượng lát cắt Bloom Slices',
+        'Xem tỷ lệ sai số lý thuyết hiện tại',
+        'Khởi tạo bộ lọc chống trùng giao dịch VietQR'
       ]
     };
   }

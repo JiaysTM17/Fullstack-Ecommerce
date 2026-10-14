@@ -483,7 +483,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (!/hungarian|ghép bưu tá|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -583,7 +583,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 6. Giao Hỏa Tốc 2H & Ghép Bưu Tá Tối Ưu Hungarian (EXPRESS_COURIER_DISPATCH_HUNGARIAN)
-  if (/giao hỏa tốc 2h|ghép bưu tá|shipper giao nhanh|tại sao giao hàng nhanh|spx hungarian/i.test(lower)) {
+  if (!/splay|hopcroft/i.test(lower) && /giao hỏa tốc 2h|ghép bưu tá|shipper giao nhanh|tại sao giao hàng nhanh|spx hungarian/i.test(lower)) {
     return {
       intent: 'EXPRESS_COURIER_DISPATCH_HUNGARIAN',
       replyText: `**[SPX EXPRESS 2H] ĐIỀU PHỐI BƯU TÁ TỐI ƯU HUNGARIAN:**\n\n• **Ghép bưu tá thông minh**: Thuật toán Hungarian Algorithm tự động gán bưu tá SPX đang ở gần Shop nhất và có lộ trình di chuyển tối ưu tới địa chỉ nhận của bạn.\n• **Đảm bảo SLA giao hàng 2h**: Giảm tối đa thời gian chờ lấy hàng và tránh tắc đường, đảm bảo gói hàng được giao hỏa tốc tận tay đúng cam kết.\n• **Theo dõi trực tiếp**: Bạn có thể theo dõi vị trí bưu tá di chuyển từng phút trên bản đồ GPS của đơn hàng!`,
@@ -793,6 +793,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'NEARBY_RADIUS_KDTREE_ASSIST',
       replyText: `**[TÌM KIẾM QUANH ĐÂY] CÔNG NGHỆ CÂY KHÔNG GIAN K-D TREE (K-DIMENSIONAL TREE):**\n\n• **Lọc đa chiều siêu tốc**: Cấu trúc cây K-D Tree giúp bạn tìm thấy ngay các gian hàng gần bạn nhất (trong bán kính 1km - 5km) thỏa mãn đồng thời mức giá mong muốn và điểm đánh giá uy tín (Rating $\\ge 4.5\\star$).\n• **Giao Hỏa Tốc Siêu Tiết Kiệm**: Mua sắm từ các Shop lân cận giúp giảm tối đa cước phí vận chuyển và nhận hàng thần tốc trong vòng 30 - 60 phút qua SPX Now!`,
       suggestions: ['Tìm shop gần trong 3km', 'Xem ưu đãi ship hỏa tốc', 'Khám phá quán hot quanh đây'],
+    };
+  }
+
+  // 28. Gợi Ý Sản Phẩm Hot Bằng Splay Tree & Phân Bổ Shipper Hỏa Tốc (HOT_SPLAY_COURIER_BATCH_ASSIST)
+  if (/splay|deal splay|sản phẩm hot splay|ghép shipper|bưu tá hopcroft|giao hỏa tốc.*ghép|phân bổ shipper/i.test(lower)) {
+    return {
+      intent: 'HOT_SPLAY_COURIER_BATCH_ASSIST',
+      replyText: `**[SẢN PHẨM HOT & GIAO HỎA TỐC] BỘ ĐÔI CÔNG NGHỆ SPLAY TREE VÀ HOPCROFT-KARP:**\n\n• **Cây tự điều chỉnh Splay Tree**: Tự động đưa các món đồ đang được hàng ngàn người săn đón lên đầu trang với tốc độ phản hồi $O(1)$, giúp bạn không bao giờ bỏ lỡ Flash Sale giới hạn!\n• **Ghép bưu tá Hopcroft-Karp**: Tự động ghép nối đơn hàng hỏa tốc 2H của bạn với shipper gần nhất có sẵn chỗ chứa, đảm bảo bưu tá nhận đơn lập tức và xuất phát giao ngay!`,
+      suggestions: ['Xem deal hot đang splay', 'Đặt giao hỏa tốc 2h', 'Săn voucher giảm giá sốc'],
     };
   }
 

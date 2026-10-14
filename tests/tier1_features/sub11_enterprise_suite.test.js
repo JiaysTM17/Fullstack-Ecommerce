@@ -164,6 +164,12 @@ import {
   DinicBipartiteFulfillmentFlow,
   KDTreeSpatialCatalog,
   HyperLogLogPlusPlusCardinality,
+  // Phase 26 Enterprise Algorithms
+  SplayNode,
+  SplayTreeHotCache,
+  BipartiteCourierBatcher,
+  BloomSlice,
+  ScalableBloomFilter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -207,6 +213,9 @@ import ServerReservoirSampler from "../../server/src/utils/timeDecayedReservoirS
 import ServerDinicFlow from "../../server/src/utils/dinicBipartiteFulfillmentFlow.js";
 import ServerKDTreeCatalog from "../../server/src/utils/kdTreeSpatialCatalog.js";
 import ServerHLLPlusPlus from "../../server/src/utils/hyperLogLogPlusPlusCardinality.js";
+import ServerSplayTreeHotCache from "../../server/src/utils/splayTreeHotCache.js";
+import ServerCourierBatcher from "../../server/src/utils/bipartiteCourierBatcher.js";
+import ServerScalableBloomFilter from "../../server/src/utils/scalableBloomFilter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -14386,6 +14395,387 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
           uvCounter.add(`BUYER_SESSION_${i % 15}`); // 15 unique buyers
         }
         expect.equal(uvCounter.count(), 15);
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 173: Splay Tree Hot Cache, Hopcroft-Karp Courier Matching & Scalable Bloom Filter (Phase 26 - 24 Tests)
+  // =========================================================================
+  describe("Feature 173: Splay Tree Hot Cache, Hopcroft-Karp Courier Matching & Scalable Bloom Filter (Phase 26)", () => {
+
+    // --- NHÓM 1: Splay Tree for Hot Products Cache (F173-T01 -> F173-T06) ---
+    describe("Nhóm 1: Splay Tree for Self-Adjusting Hot Products Cache & Recent Search", () => {
+      test("F173-T01: Initial insertion sets root and maintains BST invariant", () => {
+        const splay = new SplayTreeHotCache({ maxSize: 100 });
+        splay.put("SKU_M", { title: "Áo Polo Nam" });
+        splay.put("SKU_A", { title: "Giày Thể Thao" });
+        splay.put("SKU_Z", { title: "Đồng Hồ Cơ" });
+
+        expect.equal(splay.size, 3);
+        // Phần tử vừa thêm cuối cùng (SKU_Z) phải được splay lên Root
+        expect.equal(splay.root.key, "SKU_Z");
+        expect.equal(splay.root.left !== null, true);
+      });
+
+      test("F173-T02: Single step Zig rotation brings left child of root to new root", () => {
+        const splay = new SplayTreeHotCache();
+        splay.put("SKU_B", { price: 200 });
+        splay.put("SKU_A", { price: 100 }); // SKU_A nhỏ hơn SKU_B -> đưa lên root
+
+        expect.equal(splay.root.key, "SKU_A");
+        expect.equal(splay.root.right.key, "SKU_B");
+      });
+
+      test("F173-T03: Put on existing key updates value, increments score and splays to root", () => {
+        const splay = new SplayTreeHotCache();
+        splay.put("IPHONE", { stock: 50 }, 10);
+        splay.put("SAMSUNG", { stock: 30 }, 5);
+        splay.put("XIAOMI", { stock: 100 }, 2);
+
+        expect.equal(splay.root.key, "XIAOMI");
+
+        // Cập nhật lại IPHONE
+        splay.put("IPHONE", { stock: 45 }, 20);
+        expect.equal(splay.root.key, "IPHONE");
+        expect.equal(splay.root.value.stock, 45);
+        expect.equal(splay.root.score, 30); // 10 + 20
+        expect.equal(splay.root.accessCount, 2);
+      });
+
+      test("F173-T04: Get operation splays queried node to root and updates hit rate statistics", () => {
+        const splay = new SplayTreeHotCache();
+        splay.put("DEAL_1", { name: "Tai nghe bluetooth" });
+        splay.put("DEAL_2", { name: "Sạc dự phòng 20000mAh" });
+        splay.put("DEAL_3", { name: "Cáp sạc type C" });
+
+        expect.equal(splay.root.key, "DEAL_3");
+
+        const val = splay.get("DEAL_1");
+        expect.equal(val.name, "Tai nghe bluetooth");
+        expect.equal(splay.root.key, "DEAL_1"); // Splay lên root
+
+        const nonExistent = splay.get("DEAL_999");
+        expect.equal(nonExistent, null);
+
+        const stats = splay.getStats();
+        expect.equal(stats.totalAccesses, 2);
+        expect.equal(stats.cacheHits, 1);
+        expect.equal(stats.cacheMisses, 1);
+        expect.equal(stats.hitRatePercent, 50.0);
+      });
+
+      test("F173-T05: Deletion splays node, removes it, and joins left and right subtrees", () => {
+        const splay = new SplayTreeHotCache();
+        splay.put("K1", 10);
+        splay.put("K2", 20);
+        splay.put("K3", 30);
+
+        const deleted = splay.delete("K2");
+        expect.equal(deleted, true);
+        expect.equal(splay.size, 2);
+        expect.equal(splay.get("K2"), null);
+
+        const notFoundDelete = splay.delete("NON_EXISTING");
+        expect.equal(notFoundDelete, false);
+      });
+
+      test("F173-T06: Automatic eviction prunes coldest items when cache size exceeds maxSize and server matches client", () => {
+        const cSplay = new SplayTreeHotCache({ maxSize: 3 });
+        const sSplay = new ServerSplayTreeHotCache({ maxSize: 3 });
+
+        for (const sp of [cSplay, sSplay]) {
+          sp.put("P1", { title: "P1" }, 10);
+          sp.put("P2", { title: "P2" }, 20);
+          sp.put("P3", { title: "P3" }, 5);
+          // Vượt ngưỡng 3: Thêm P4
+          sp.put("P4", { title: "P4" }, 15);
+
+          expect.equal(sp.size, 3);
+          expect.equal(sp.root !== null, true);
+          expect.equal(sp.get("P3"), null);
+        }
+
+        const topC = cSplay.getTopHotItems(2);
+        const topS = sSplay.getTopHotItems(2);
+        expect.equal(topC.length, topS.length);
+        expect.equal(topC[0].key, topS[0].key);
+      });
+    });
+
+    // --- NHÓM 2: Hopcroft-Karp Bipartite Courier Matching (F173-T07 -> F173-T12) ---
+    describe("Nhóm 2: Hopcroft-Karp Maximum Bipartite Matching for Multi-Courier Order Batching", () => {
+      test("F173-T07: Graph initialization creates order vertices and multi-capacity courier slots", () => {
+        const batcher = new BipartiteCourierBatcher();
+        batcher.addOrder("ORD_1", { weightKg: 2, lat: 21.02, lon: 105.85 });
+        batcher.addOrder("ORD_2", { weightKg: 1, lat: 21.03, lon: 105.86 });
+
+        batcher.addCourier("SHIPPER_A", { capacity: 3, maxDistanceKm: 10 });
+        batcher.addCourier("SHIPPER_B", { capacity: 2, maxDistanceKm: 5 });
+
+        expect.equal(batcher.orders.size, 2);
+        expect.equal(batcher.couriers.size, 2);
+        expect.equal(batcher.courierSlots.length, 5); // 3 + 2 = 5 slots
+      });
+
+      test("F173-T08: Manual eligibility matching connects orders and couriers correctly", () => {
+        const batcher = new BipartiteCourierBatcher();
+        batcher.addOrder("ORD_A");
+        batcher.addOrder("ORD_B");
+        batcher.addCourier("SHIPPER_1", { capacity: 1 });
+        batcher.addCourier("SHIPPER_2", { capacity: 1 });
+
+        batcher.addEligibility("ORD_A", "SHIPPER_1");
+        batcher.addEligibility("ORD_B", "SHIPPER_2");
+
+        const res = batcher.computeMatching();
+        expect.equal(res.totalMatched, 2);
+        expect.equal(res.fillRatePercent, 100.0);
+        expect.equal(res.unassignedOrders.length, 0);
+      });
+
+      test("F173-T09: DFS augments matching along disjoint augmenting paths to maximum cardinality", () => {
+        const batcher = new BipartiteCourierBatcher();
+        // Cấu trúc xung đột:
+        // O1 có thể giao bởi S1 hoặc S2
+        // O2 có thể giao bởi S1
+        batcher.addOrder("O1");
+        batcher.addOrder("O2");
+        batcher.addCourier("S1", { capacity: 1 });
+        batcher.addCourier("S2", { capacity: 1 });
+
+        batcher.addEligibility("O1", "S1");
+        batcher.addEligibility("O1", "S2");
+        batcher.addEligibility("O2", "S1");
+
+        const res = batcher.computeMatching();
+        // Hopcroft-Karp phải tìm đường tăng luồng để cả 2 đơn đều có shipper (O2->S1, O1->S2)
+        expect.equal(res.totalMatched, 2);
+        expect.equal(res.matchedOrders.length, 2);
+      });
+
+      test("F173-T10: Distance-based auto-connectivity links orders to couriers within Haversine radius", () => {
+        const batcher = new BipartiteCourierBatcher();
+        // Đơn hàng tại Cầu Giấy (21.0333, 105.7833)
+        batcher.addOrder("ORD_CAUGIAY", { lat: 21.0333, lon: 105.7833 });
+        // Shipper 1 ở gần Cầu Giấy (~1km)
+        batcher.addCourier("SHIPPER_NEAR", { lat: 21.0350, lon: 105.7850, capacity: 2, maxDistanceKm: 5 });
+        // Shipper 2 ở tận Long Biên (~15km)
+        batcher.addCourier("SHIPPER_FAR", { lat: 21.0400, lon: 105.9000, capacity: 2, maxDistanceKm: 5 });
+
+        batcher.autoConnectByDistance();
+        const res = batcher.computeMatching();
+
+        expect.equal(res.totalMatched, 1);
+        expect.equal(res.matchedOrders[0].courierId, "SHIPPER_NEAR");
+      });
+
+      test("F173-T11: Over-subscribed orders handle unassigned status cleanly and reports fill rate", () => {
+        const batcher = new BipartiteCourierBatcher();
+        batcher.addOrder("O1");
+        batcher.addOrder("O2");
+        batcher.addOrder("O3");
+
+        // Chỉ có 1 shipper với capacity 1
+        batcher.addCourier("SOLO_SHIPPER", { capacity: 1 });
+        batcher.addEligibility("O1", "SOLO_SHIPPER");
+        batcher.addEligibility("O2", "SOLO_SHIPPER");
+        batcher.addEligibility("O3", "SOLO_SHIPPER");
+
+        const res = batcher.computeMatching();
+        expect.equal(res.totalMatched, 1);
+        expect.equal(res.unassignedOrders.length, 2);
+        expect.equal(res.fillRatePercent, 33.33);
+      });
+
+      test("F173-T12: Server-side BipartiteCourierBatcher matches client-side implementation", () => {
+        const cBatcher = new BipartiteCourierBatcher();
+        const sBatcher = new ServerCourierBatcher();
+
+        for (const b of [cBatcher, sBatcher]) {
+          b.addOrder("O1");
+          b.addOrder("O2");
+          b.addCourier("C1", { capacity: 2 });
+          b.addEligibility("O1", "C1");
+          b.addEligibility("O2", "C1");
+        }
+
+        const cRes = cBatcher.computeMatching();
+        const sRes = sBatcher.computeMatching();
+        expect.equal(cRes.totalMatched, sRes.totalMatched);
+        expect.equal(cRes.fillRatePercent, sRes.fillRatePercent);
+      });
+    });
+
+    // --- NHÓM 3: Scalable Bloom Filter with Dynamic Tightening Slices (F173-T13 -> F173-T18) ---
+    describe("Nhóm 3: Scalable Bloom Filter with Dynamic Tightening Slices", () => {
+      test("F173-T13: Initial slice configuration satisfies targeted false positive rate", () => {
+        const sbf = new ScalableBloomFilter({
+          initialCapacity: 500,
+          targetFpRate: 0.01,
+          scaleFactor: 2,
+          tighteningRatio: 0.85
+        });
+
+        expect.equal(sbf.slices.length, 1);
+        expect.equal(sbf.slices[0].capacity, 500);
+        expect.equal(sbf.slices[0].k > 0, true);
+        expect.equal(sbf.slices[0].bitArray.length > 0, true);
+      });
+
+      test("F173-T14: Query returns false negative zero rate (all inserted items return true)", () => {
+        const sbf = new ScalableBloomFilter({ initialCapacity: 100 });
+        const items = ["TXN_001", "TXN_002", "TXN_003", "TXN_VIETQR_XYZ"];
+
+        for (const it of items) {
+          sbf.add(it);
+        }
+
+        for (const it of items) {
+          expect.equal(sbf.has(it), true);
+        }
+
+        expect.equal(sbf.has("TXN_NON_EXISTENT_999"), false);
+      });
+
+      test("F173-T15: Automatic expansion adds new slice when active slice hits capacity", () => {
+        const sbf = new ScalableBloomFilter({
+          initialCapacity: 50,
+          scaleFactor: 2
+        });
+
+        expect.equal(sbf.slices.length, 1);
+
+        for (let i = 0; i < 60; i++) {
+          sbf.add(`TXN_ID_${i}`);
+        }
+
+        // Vượt quá 50 phần tử -> phải sinh lát cắt thứ 2
+        expect.equal(sbf.slices.length, 2);
+        expect.equal(sbf.slices[1].capacity, 100); // 50 * 2 = 100
+        expect.equal(sbf.totalElements, 60);
+
+        // Tất cả 60 phần tử vẫn tra cứu được chính xác 100%
+        for (let i = 0; i < 60; i++) {
+          expect.equal(sbf.has(`TXN_ID_${i}`), true);
+        }
+      });
+
+      test("F173-T16: Successive slices tighten false positive rates geometrically", () => {
+        const sbf = new ScalableBloomFilter({
+          initialCapacity: 20,
+          scaleFactor: 2,
+          tighteningRatio: 0.85,
+          targetFpRate: 0.05
+        });
+
+        for (let i = 0; i < 80; i++) {
+          sbf.add(`KEY_${i}`);
+        }
+
+        expect.equal(sbf.slices.length >= 2, true);
+        // Tỷ lệ lỗi của slice 1 phải nhỏ hơn slice 0 (tightening)
+        expect.equal(sbf.slices[1].fpRate < sbf.slices[0].fpRate, true);
+      });
+
+      test("F173-T17: Scalable filter manages 2,000 transaction IDs while keeping total memory tiny (< 100KB)", () => {
+        const sbf = new ScalableBloomFilter({
+          initialCapacity: 200,
+          targetFpRate: 0.01
+        });
+
+        for (let i = 0; i < 2000; i++) {
+          sbf.add(`QR_PAYMENT_REF_${i}`);
+        }
+
+        const stats = sbf.getStats();
+        expect.equal(stats.totalElements, 2000);
+        expect.equal(stats.totalMemoryBytes < 100000, true); // Dưới 100 KB
+        expect.equal(stats.currentTheoreticalFpRate <= 0.01, true);
+      });
+
+      test("F173-T18: Server-side ScalableBloomFilter matches client-side implementation", () => {
+        const cSBF = new ScalableBloomFilter({ initialCapacity: 100 });
+        const sSBF = new ServerScalableBloomFilter({ initialCapacity: 100 });
+
+        for (let i = 0; i < 150; i++) {
+          cSBF.add(`ITEM_${i}`);
+          sSBF.add(`ITEM_${i}`);
+        }
+
+        expect.equal(cSBF.slices.length, sSBF.slices.length);
+        expect.equal(cSBF.totalElements, sSBF.totalElements);
+
+        for (let i = 0; i < 150; i++) {
+          expect.equal(cSBF.has(`ITEM_${i}`), sSBF.has(`ITEM_${i}`));
+        }
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Enterprise Lifecycle (F173-T19 -> F173-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Enterprise Lifecycle", () => {
+      test("F173-T19: Admin Sentinel Copilot answers Splay Tree hot cache queries", () => {
+        const res = generateAdminCopilotResponse("Tối ưu hóa bộ đệm sản phẩm hot deals cache bằng cây splay tree tự điều chỉnh");
+        expect.equal(res.tag, "BỘ ĐỆM TỰ ĐIỀU CHỈNH SPLAY TREE");
+        expect.equal(res.type, "cache");
+        expect.equal(res.text.includes("SPLAY TREE"), true);
+        expect.equal(res.text.includes("Zig-Zig"), true);
+      });
+
+      test("F173-T20: Admin Sentinel Copilot answers Hopcroft-Karp courier batching queries", () => {
+        const res = generateAdminCopilotResponse("Phân bổ bưu tá shipper giao hàng hỏa tốc bằng thuật toán hopcroft-karp ghép cặp cực đại");
+        expect.equal(res.tag, "GHÉP CẶP SHIPPER HOPCROFT-KARP");
+        expect.equal(res.type, "logistics");
+        expect.equal(res.text.includes("HOPCROFT-KARP"), true);
+        expect.equal(res.text.includes("Augmenting Paths"), true);
+      });
+
+      test("F173-T21: Admin Sentinel Copilot answers Scalable Bloom Filter anti-duplication queries", () => {
+        const res = generateAdminCopilotResponse("Chống trùng lặp mã giao dịch thanh toán vietqr bằng bộ lọc scalable bloom filter mở rộng lát cắt");
+        expect.equal(res.tag, "BỘ LỌC BLOOM MỞ RỘNG SCALABLE");
+        expect.equal(res.type, "security");
+        expect.equal(res.text.includes("SCALABLE BLOOM FILTER"), true);
+        expect.equal(res.text.includes("Almeida et al."), true);
+      });
+
+      test("F173-T22: Seller ShopSmart Copilot advises on Splay SKU trends and courier dispatch", () => {
+        const res = generateSellerCopilotResponse("Bắt trend sku hot splay và gom đơn giao hỏa tốc cho shipper bưu tá hopcroft");
+        expect.equal(res.tag, "SPLAY CACHE & GHÉP ĐƠN SHIPPER");
+        expect.equal(res.type, "recommendation");
+        expect.equal(res.text.includes("Splay Tree"), true);
+        expect.equal(res.text.includes("Hopcroft-Karp"), true);
+      });
+
+      test("F173-T23: Buyer AI Assistant explains hot splay products and instant 2H courier batching", () => {
+        const res = generateAiChatResponse("Sàn có tự đẩy sản phẩm hot splay lên đầu trang và ghép shipper giao hỏa tốc 2h không");
+        expect.equal(res.intent, "HOT_SPLAY_COURIER_BATCH_ASSIST");
+        expect.equal(res.replyText.includes("SPLAY TREE"), true);
+        expect.equal(res.replyText.includes("HOPCROFT-KARP"), true);
+      });
+
+      test("F173-T24: E2E Lifecycle: User searches product -> Splayed to Root -> Order batched to Courier via Hopcroft-Karp -> Transaction ID verified by Scalable Bloom Filter", () => {
+        // 1. Trending search query inserted and splayed in Splay Tree
+        const splay = new SplayTreeHotCache();
+        splay.put("KEYWORD_IPHONE_16", { clicks: 100 }, 10);
+        splay.put("KEYWORD_SNEAKER", { clicks: 50 }, 5);
+        splay.get("KEYWORD_IPHONE_16");
+        expect.equal(splay.root.key, "KEYWORD_IPHONE_16");
+
+        // 2. Customer places 2H instant order, Hopcroft-Karp assigns nearest courier
+        const batcher = new BipartiteCourierBatcher();
+        batcher.addOrder("ORDER_IPHONE_16_EXP", { lat: 21.0285, lon: 105.8542 });
+        batcher.addCourier("SPX_HERO_COURIER", { lat: 21.0290, lon: 105.8550, capacity: 2, maxDistanceKm: 5 });
+        batcher.autoConnectByDistance();
+        const dispatchPlan = batcher.computeMatching();
+        expect.equal(dispatchPlan.totalMatched, 1);
+        expect.equal(dispatchPlan.matchedOrders[0].courierId, "SPX_HERO_COURIER");
+
+        // 3. Payment transaction ID checked against Scalable Bloom Filter to prevent replay attacks
+        const sbf = new ScalableBloomFilter({ initialCapacity: 50, targetFpRate: 0.01 });
+        const txnId = "VIETQR_PAYMENT_99882233";
+        expect.equal(sbf.has(txnId), false); // Not seen before
+        sbf.add(txnId);
+        expect.equal(sbf.has(txnId), true); // Recorded
       });
     });
   });

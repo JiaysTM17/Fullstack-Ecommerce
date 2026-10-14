@@ -668,7 +668,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 33. Tối Ưu Bố Trí Kho (Simulated Annealing) & Mẫu Hồ Chứa Bắt Trend Deal Hot (Reservoir Sampling) (Phase 24 - Feature 171)
-  if (/luyện kim|simulated annealing|bố trí kho|warehouse slotting|reservoir sampling|deal hot xu hướng|hồ chứa suy giảm|bắt trend/i.test(raw)) {
+  if (!/splay/i.test(raw) && /luyện kim|simulated annealing|bố trí kho|warehouse slotting|reservoir sampling|deal hot xu hướng|hồ chứa suy giảm|bắt trend/i.test(raw)) {
     return {
       text: `📦 **TỐI ƯU VỊ TRÍ LƯU KHO & BẮT TREND DEAL HOT BẰNG AI (${currentShop.name})**:
 - **Tối ưu vị trí lưu kho (Simulated Annealing Slotting)**:
@@ -703,6 +703,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Phân tích khách hàng trong bán kính 5km',
         'Đo lường lượng khách UV ghé thăm',
         'Tối ưu tỷ lệ chuyển đổi CVR gian hàng'
+      ]
+    };
+  }
+
+  // 35. Tự Động Nhận Diện SKU Hot Bằng Splay Tree & Theo Dõi Ghép Đơn Shipper (Phase 26 - Feature 173)
+  if (/splay|cây splay|sku hot.*splay|ghép đơn.*shipper|bưu tá.*hopcroft|phân bổ bưu tá/i.test(raw)) {
+    return {
+      text: `🚀 **TỰ ĐỘNG BẮT TREND SKU HOT BẰNG SPLAY TREE & TỐI ƯU GHÉP ĐƠN BƯU TÁ**:
+- **Cây tự điều chỉnh Splay Tree cho gian hàng**:
+  - Mỗi khi khách hàng click hoặc tìm kiếm sản phẩm của shop bạn, thao tác **Splay** tự động đưa SKU đó lên vị trí ưu tiên cao nhất trong bộ nhớ cache.
+  - Giúp shop nhận diện ngay lập tức mặt hàng đang bùng nổ nhu cầu (Surge Demand) để kịp thời kích hoạt Flash Sale hoặc bổ sung tồn kho an toàn.
+- **Ghép đơn hỏa tốc cho shipper bằng Hopcroft-Karp**:
+  - Tự động gom nhiều đơn hàng của shop trong cùng khu vực cho một bưu tá SPX duy nhất (Multi-Order Batching).
+  - Giảm thời gian chờ đợi lấy hàng tại shop xuống dưới 15 phút, tăng tỷ lệ giao đúng hạn và giữ vững huy hiệu Shop Yêu Thích!`,
+      type: 'recommendation',
+      tag: 'SPLAY CACHE & GHÉP ĐƠN SHIPPER',
+      suggestions: [
+        'Xem danh sách SKU hot từ Splay Tree',
+        'Kiểm tra trạng thái bưu tá nhận đơn shop',
+        'Cài đặt mức chiết khấu Flash Sale tức thì'
       ]
     };
   }

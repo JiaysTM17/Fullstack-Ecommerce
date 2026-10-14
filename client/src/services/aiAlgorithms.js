@@ -12267,6 +12267,672 @@ export class HyperLogLogPlusPlusCardinality {
   }
 }
 
+// ==============================================================================
+// PHASE 26: Splay Tree Hot Cache, Hopcroft-Karp Courier Matching & Scalable Bloom Filter
+// ==============================================================================
+
+export class SplayNode {
+  constructor(key, value, score = 1) {
+    this.key = key;
+    this.value = value;
+    this.score = score;
+    this.accessCount = 1;
+    this.lastAccessed = Date.now();
+    this.left = null;
+    this.right = null;
+    this.parent = null;
+  }
+}
+
+export class SplayTreeHotCache {
+  constructor(options = {}) {
+    this.root = null;
+    this.size = 0;
+    this.maxSize = Math.max(1, options.maxSize || 1000);
+    this.totalAccesses = 0;
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
+  }
+
+  _rotateRight(x) {
+    const y = x.left;
+    if (!y) return;
+
+    x.left = y.right;
+    if (y.right) {
+      y.right.parent = x;
+    }
+
+    y.parent = x.parent;
+    if (!x.parent) {
+      this.root = y;
+    } else if (x === x.parent.right) {
+      x.parent.right = y;
+    } else {
+      x.parent.left = y;
+    }
+
+    y.right = x;
+    x.parent = y;
+  }
+
+  _rotateLeft(x) {
+    const y = x.right;
+    if (!y) return;
+
+    x.right = y.left;
+    if (y.left) {
+      y.left.parent = x;
+    }
+
+    y.parent = x.parent;
+    if (!x.parent) {
+      this.root = y;
+    } else if (x === x.parent.left) {
+      x.parent.left = y;
+    } else {
+      x.parent.right = y;
+    }
+
+    y.left = x;
+    x.parent = y;
+  }
+
+  _splay(x) {
+    if (!x) return;
+
+    while (x.parent) {
+      const p = x.parent;
+      const g = p.parent;
+
+      if (!g) {
+        if (x === p.left) {
+          this._rotateRight(p);
+        } else {
+          this._rotateLeft(p);
+        }
+      } else {
+        if (x === p.left && p === g.left) {
+          this._rotateRight(g);
+          this._rotateRight(p);
+        } else if (x === p.right && p === g.right) {
+          this._rotateLeft(g);
+          this._rotateLeft(p);
+        } else if (x === p.right && p === g.left) {
+          this._rotateLeft(p);
+          this._rotateRight(g);
+        } else {
+          this._rotateRight(p);
+          this._rotateLeft(g);
+        }
+      }
+    }
+  }
+
+  _compare(a, b) {
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+  }
+
+  put(key, value, score = 1) {
+    if (key === undefined || key === null) return null;
+
+    if (!this.root) {
+      this.root = new SplayNode(key, value, score);
+      this.size++;
+      return this.root;
+    }
+
+    let curr = this.root;
+    let parent = null;
+    let cmp = 0;
+
+    while (curr) {
+      parent = curr;
+      cmp = this._compare(key, curr.key);
+      if (cmp === 0) {
+        curr.value = value;
+        curr.score += score;
+        curr.accessCount++;
+        curr.lastAccessed = Date.now();
+        this._splay(curr);
+        return curr;
+      } else if (cmp < 0) {
+        curr = curr.left;
+      } else {
+        curr = curr.right;
+      }
+    }
+
+    const newNode = new SplayNode(key, value, score);
+    newNode.parent = parent;
+    if (cmp < 0) {
+      parent.left = newNode;
+    } else {
+      parent.right = newNode;
+    }
+
+    this.size++;
+    this._splay(newNode);
+
+    if (this.size > this.maxSize) {
+      this._evictColdest();
+    }
+
+    return newNode;
+  }
+
+  get(key) {
+    this.totalAccesses++;
+    if (!this.root || key === undefined || key === null) {
+      this.cacheMisses++;
+      return null;
+    }
+
+    let curr = this.root;
+    let lastVisited = null;
+
+    while (curr) {
+      lastVisited = curr;
+      const cmp = this._compare(key, curr.key);
+      if (cmp === 0) {
+        curr.accessCount++;
+        curr.lastAccessed = Date.now();
+        this._splay(curr);
+        this.cacheHits++;
+        return curr.value;
+      } else if (cmp < 0) {
+        curr = curr.left;
+      } else {
+        curr = curr.right;
+      }
+    }
+
+    if (lastVisited) {
+      this._splay(lastVisited);
+    }
+    this.cacheMisses++;
+    return null;
+  }
+
+  delete(key) {
+    if (!this.root) return false;
+
+    this.get(key);
+    if (this.root.key !== key) {
+      return false;
+    }
+
+    const leftSubtree = this.root.left;
+    const rightSubtree = this.root.right;
+
+    if (!leftSubtree) {
+      this.root = rightSubtree;
+      if (this.root) this.root.parent = null;
+    } else {
+      leftSubtree.parent = null;
+      let maxLeft = leftSubtree;
+      while (maxLeft.right) {
+        maxLeft = maxLeft.right;
+      }
+      this._splaySubtree(maxLeft, leftSubtree);
+      maxLeft.right = rightSubtree;
+      if (rightSubtree) rightSubtree.parent = maxLeft;
+      this.root = maxLeft;
+    }
+
+    this.size--;
+    return true;
+  }
+
+  _splaySubtree(x, subRoot) {
+    while (x !== subRoot) {
+      const p = x.parent;
+      if (p === subRoot) {
+        if (x === p.left) this._rotateRight(p);
+        else this._rotateLeft(p);
+        break;
+      }
+      const g = p.parent;
+      if (x === p.left && p === g.left) {
+        this._rotateRight(g);
+        this._rotateRight(p);
+      } else if (x === p.right && p === g.right) {
+        this._rotateLeft(g);
+        this._rotateLeft(p);
+      } else if (x === p.right && p === g.left) {
+        this._rotateLeft(p);
+        this._rotateRight(g);
+      } else {
+        this._rotateRight(p);
+        this._rotateLeft(g);
+      }
+    }
+  }
+
+  _evictColdest() {
+    let coldest = null;
+
+    const traverse = (node) => {
+      if (!node) return;
+      if (!coldest ||
+          node.score < coldest.score ||
+          (node.score === coldest.score && node.accessCount < coldest.accessCount) ||
+          (node.score === coldest.score && node.accessCount === coldest.accessCount && String(node.key) < String(coldest.key))) {
+        coldest = node;
+      }
+      traverse(node.left);
+      traverse(node.right);
+    };
+
+    traverse(this.root);
+    if (coldest) {
+      this.delete(coldest.key);
+    }
+  }
+
+  getTopHotItems(limit = 10) {
+    const items = [];
+    const traverse = (node) => {
+      if (!node) return;
+      traverse(node.left);
+      items.push({
+        key: node.key,
+        value: node.value,
+        score: node.score,
+        accessCount: node.accessCount,
+        lastAccessed: node.lastAccessed
+      });
+      traverse(node.right);
+    };
+
+    traverse(this.root);
+    items.sort((a, b) => b.score !== a.score ? b.score - a.score : b.accessCount - a.accessCount);
+    return items.slice(0, limit);
+  }
+
+  getStats() {
+    const hitRate = this.totalAccesses > 0
+      ? Number(((this.cacheHits / this.totalAccesses) * 100).toFixed(2))
+      : 0;
+
+    return {
+      size: this.size,
+      maxSize: this.maxSize,
+      rootKey: this.root ? this.root.key : null,
+      totalAccesses: this.totalAccesses,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      hitRatePercent: hitRate
+    };
+  }
+
+  clear() {
+    this.root = null;
+    this.size = 0;
+    this.totalAccesses = 0;
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
+  }
+}
+
+export class BipartiteCourierBatcher {
+  constructor() {
+    this.orders = new Map();
+    this.couriers = new Map();
+    this.orderAdj = new Map();
+    this.courierSlots = [];
+    this.slotToCourier = new Map();
+  }
+
+  addOrder(orderId, meta = {}) {
+    this.orders.set(String(orderId), {
+      id: String(orderId),
+      weightKg: meta.weightKg || 1,
+      lat: meta.lat ?? 21.0285,
+      lon: meta.lon ?? 105.8542,
+      ...meta
+    });
+    if (!this.orderAdj.has(String(orderId))) {
+      this.orderAdj.set(String(orderId), []);
+    }
+  }
+
+  addCourier(courierId, meta = {}) {
+    const cap = Math.max(1, meta.capacity || 1);
+    const id = String(courierId);
+    this.couriers.set(id, {
+      id,
+      capacity: cap,
+      lat: meta.lat ?? 21.0285,
+      lon: meta.lon ?? 105.8542,
+      maxDistanceKm: meta.maxDistanceKm || 15,
+      ...meta
+    });
+
+    for (let i = 0; i < cap; i++) {
+      const slotId = `${id}#slot${i}`;
+      this.courierSlots.push(slotId);
+      this.slotToCourier.set(slotId, id);
+    }
+  }
+
+  addEligibility(orderId, courierId) {
+    const oId = String(orderId);
+    const cId = String(courierId);
+    if (!this.orders.has(oId) || !this.couriers.has(cId)) return;
+
+    const courier = this.couriers.get(cId);
+    for (let i = 0; i < courier.capacity; i++) {
+      const slotId = `${cId}#slot${i}`;
+      const list = this.orderAdj.get(oId);
+      if (!list.includes(slotId)) {
+        list.push(slotId);
+      }
+    }
+  }
+
+  autoConnectByDistance(defaultMaxKm = 10) {
+    const toRad = deg => (deg * Math.PI) / 180;
+    const calcKm = (lat1, lon1, lat2, lon2) => {
+      const R = 6371;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    };
+
+    for (const [oId, oMeta] of this.orders) {
+      for (const [cId, cMeta] of this.couriers) {
+        const dist = calcKm(oMeta.lat, oMeta.lon, cMeta.lat, cMeta.lon);
+        const limit = cMeta.maxDistanceKm || defaultMaxKm;
+        if (dist <= limit) {
+          this.addEligibility(oId, cId);
+        }
+      }
+    }
+  }
+
+  computeMatching() {
+    const NIL = "NIL";
+    const INF = Infinity;
+
+    const pairU = new Map();
+    const pairV = new Map();
+    const dist = new Map();
+
+    const orderKeys = Array.from(this.orders.keys());
+
+    for (const u of orderKeys) {
+      pairU.set(u, NIL);
+    }
+    for (const v of this.courierSlots) {
+      pairV.set(v, NIL);
+    }
+
+    const bfs = () => {
+      const queue = [];
+      for (const u of orderKeys) {
+        if (pairU.get(u) === NIL) {
+          dist.set(u, 0);
+          queue.push(u);
+        } else {
+          dist.set(u, INF);
+        }
+      }
+      dist.set(NIL, INF);
+
+      while (queue.length > 0) {
+        const u = queue.shift();
+        if (dist.get(u) < dist.get(NIL)) {
+          const adj = this.orderAdj.get(u) || [];
+          for (const v of adj) {
+            const pairedOrder = pairV.get(v);
+            if (dist.get(pairedOrder) === INF) {
+              dist.set(pairedOrder, dist.get(u) + 1);
+              queue.push(pairedOrder);
+            }
+          }
+        }
+      }
+
+      return dist.get(NIL) !== INF;
+    };
+
+    const dfs = (u) => {
+      if (u !== NIL) {
+        const adj = this.orderAdj.get(u) || [];
+        for (const v of adj) {
+          const pairedOrder = pairV.get(v);
+          if (dist.get(pairedOrder) === dist.get(u) + 1) {
+            if (dfs(pairedOrder)) {
+              pairV.set(v, u);
+              pairU.set(u, v);
+              return true;
+            }
+          }
+        }
+        dist.set(u, INF);
+        return false;
+      }
+      return true;
+    };
+
+    let matching = 0;
+    while (bfs()) {
+      for (const u of orderKeys) {
+        if (pairU.get(u) === NIL && dfs(u)) {
+          matching++;
+        }
+      }
+    }
+
+    const matchedOrders = [];
+    const unassignedOrders = [];
+    const courierAssignments = new Map();
+
+    for (const cId of this.couriers.keys()) {
+      courierAssignments.set(cId, []);
+    }
+
+    for (const [u, v] of pairU) {
+      if (v !== NIL) {
+        const cId = this.slotToCourier.get(v);
+        matchedOrders.push({
+          orderId: u,
+          courierId: cId,
+          slotId: v
+        });
+        courierAssignments.get(cId).push(u);
+      } else {
+        unassignedOrders.push(u);
+      }
+    }
+
+    return {
+      totalMatched: matching,
+      totalOrders: this.orders.size,
+      totalCouriers: this.couriers.size,
+      totalCourierCapacity: this.courierSlots.length,
+      fillRatePercent: this.orders.size > 0 ? Number(((matching / this.orders.size) * 100).toFixed(2)) : 0,
+      matchedOrders,
+      unassignedOrders,
+      courierAssignments: Object.fromEntries(courierAssignments)
+    };
+  }
+
+  clear() {
+    this.orders.clear();
+    this.couriers.clear();
+    this.orderAdj.clear();
+    this.courierSlots = [];
+    this.slotToCourier.clear();
+  }
+}
+
+export class BloomSlice {
+  constructor(capacity, fpRate, sliceIndex = 0) {
+    this.capacity = Math.max(10, capacity);
+    this.fpRate = Math.min(0.5, Math.max(1e-6, fpRate));
+    this.sliceIndex = sliceIndex;
+    this.count = 0;
+
+    this.m = Math.ceil(- (this.capacity * Math.log(this.fpRate)) / (Math.LN2 * Math.LN2));
+    this.k = Math.max(1, Math.round((this.m / this.capacity) * Math.LN2));
+    this.bitArray = new Uint8Array(Math.ceil(this.m / 8));
+  }
+
+  _hash(str, seed) {
+    const s = String(str);
+    let h1 = seed >>> 0;
+    const c1 = 0xcc9e2d51;
+    const c2 = 0x1b873593;
+    let i = 0;
+    const len = s.length;
+
+    while (i + 4 <= len) {
+      let k1 = (s.charCodeAt(i) & 0xff) |
+               ((s.charCodeAt(i + 1) & 0xff) << 8) |
+               ((s.charCodeAt(i + 2) & 0xff) << 16) |
+               ((s.charCodeAt(i + 3) & 0xff) << 24);
+      i += 4;
+      k1 = Math.imul(k1, c1);
+      k1 = (k1 << 15) | (k1 >>> 17);
+      k1 = Math.imul(k1, c2);
+
+      h1 ^= k1;
+      h1 = (h1 << 13) | (h1 >>> 19);
+      h1 = (Math.imul(h1, 5) + 0xe6546b64) >>> 0;
+    }
+
+    let k1 = 0;
+    const rem = len - i;
+    if (rem === 3) k1 ^= (s.charCodeAt(i + 2) & 0xff) << 16;
+    if (rem >= 2) k1 ^= (s.charCodeAt(i + 1) & 0xff) << 8;
+    if (rem >= 1) {
+      k1 ^= (s.charCodeAt(i) & 0xff);
+      k1 = Math.imul(k1, c1);
+      k1 = (k1 << 15) | (k1 >>> 17);
+      k1 = Math.imul(k1, c2);
+      h1 ^= k1;
+    }
+
+    h1 ^= len;
+    h1 ^= h1 >>> 16;
+    h1 = Math.imul(h1, 0x85ebca6b);
+    h1 ^= h1 >>> 13;
+    h1 = Math.imul(h1, 0xc2b2ae35);
+    h1 ^= h1 >>> 16;
+
+    return (h1 >>> 0) % this.m;
+  }
+
+  add(item) {
+    for (let i = 0; i < this.k; i++) {
+      const bitIndex = this._hash(item, (this.sliceIndex * 1000) + (i * 31) + 17);
+      const byteIndex = bitIndex >> 3;
+      const bitOffset = bitIndex & 7;
+      this.bitArray[byteIndex] |= (1 << bitOffset);
+    }
+    this.count++;
+  }
+
+  has(item) {
+    for (let i = 0; i < this.k; i++) {
+      const bitIndex = this._hash(item, (this.sliceIndex * 1000) + (i * 31) + 17);
+      const byteIndex = bitIndex >> 3;
+      const bitOffset = bitIndex & 7;
+      if ((this.bitArray[byteIndex] & (1 << bitOffset)) === 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  isFull() {
+    return this.count >= this.capacity;
+  }
+}
+
+export class ScalableBloomFilter {
+  constructor(options = {}) {
+    this.initialCapacity = Math.max(10, options.initialCapacity || 1000);
+    this.targetFpRate = Math.min(0.2, Math.max(0.0001, options.targetFpRate || 0.01));
+    this.scaleFactor = Math.max(1.5, options.scaleFactor || 2.0);
+    this.tighteningRatio = Math.min(0.95, Math.max(0.5, options.tighteningRatio || 0.85));
+
+    this.initialSliceFp = this.targetFpRate * (1 - this.tighteningRatio);
+    this.slices = [
+      new BloomSlice(this.initialCapacity, this.initialSliceFp, 0)
+    ];
+    this.totalElements = 0;
+  }
+
+  add(item) {
+    if (item === undefined || item === null) return;
+    const str = String(item);
+
+    let activeSlice = this.slices[this.slices.length - 1];
+    if (activeSlice.isFull()) {
+      const nextIndex = this.slices.length;
+      const nextCapacity = Math.round(this.initialCapacity * Math.pow(this.scaleFactor, nextIndex));
+      const nextFp = this.initialSliceFp * Math.pow(this.tighteningRatio, nextIndex);
+      activeSlice = new BloomSlice(nextCapacity, nextFp, nextIndex);
+      this.slices.push(activeSlice);
+    }
+
+    activeSlice.add(str);
+    this.totalElements++;
+  }
+
+  has(item) {
+    if (item === undefined || item === null) return false;
+    const str = String(item);
+
+    for (let i = this.slices.length - 1; i >= 0; i--) {
+      if (this.slices[i].has(str)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  getStats() {
+    let totalBits = 0;
+    let totalBytes = 0;
+    for (const slice of this.slices) {
+      totalBits += slice.m;
+      totalBytes += slice.bitArray.length;
+    }
+
+    return {
+      totalElements: this.totalElements,
+      totalSlices: this.slices.length,
+      targetFpRate: this.targetFpRate,
+      currentTheoreticalFpRate: Number((this.targetFpRate * (1 - Math.pow(this.tighteningRatio, this.slices.length))).toFixed(6)),
+      totalMemoryBytes: totalBytes,
+      totalBits: totalBits,
+      slicesDetail: this.slices.map(s => ({
+        sliceIndex: s.sliceIndex,
+        capacity: s.capacity,
+        count: s.count,
+        mBits: s.m,
+        kHashes: s.k,
+        fpRate: s.fpRate
+      }))
+    };
+  }
+
+  clear() {
+    this.slices = [
+      new BloomSlice(this.initialCapacity, this.initialSliceFp, 0)
+    ];
+    this.totalElements = 0;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -12413,6 +13079,12 @@ export default {
   DinicBipartiteFulfillmentFlow,
   KDTreeSpatialCatalog,
   HyperLogLogPlusPlusCardinality,
+  // Phase 26 Enterprise Algorithms
+  SplayNode,
+  SplayTreeHotCache,
+  BipartiteCourierBatcher,
+  BloomSlice,
+  ScalableBloomFilter,
 };
 
 
