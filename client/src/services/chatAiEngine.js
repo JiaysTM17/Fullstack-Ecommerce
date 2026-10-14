@@ -706,6 +706,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 18. Nhận Diện Chu Kỳ Mua Sắm Cá Nhân Hóa (BUYER_PURCHASE_CYCLE_ASSIST)
+  if (/chu kỳ mua sắm của tôi|khi nào nên mua lại|nhắc mua hàng định kỳ|dtw chu kỳ/i.test(lower)) {
+    return {
+      intent: 'BUYER_PURCHASE_CYCLE_ASSIST',
+      replyText: `**[TRỢ LÝ MUA SẮM THÔNG MINH DTW] DỰ BÁO CHU KỲ TÁI ĐẶT HÀNG CỦA BẠN:**\n\n• **Công nghệ Dynamic Time Warping (DTW)**: Hệ thống tự động so khớp mẫu khoảng cách thời gian giữa các lần bạn mua sắm (chuỗi thời gian co giãn), không phụ thuộc vào độ lệch ngày lẻ.\n• **Nhắc nhở thông minh không làm phiền**: Dựa trên chu kỳ tiêu dùng quen thuộc, AI sẽ chuẩn bị sẵn mã giảm giá Freeship và thông báo ngay khi sản phẩm yêu thích của bạn sắp hết để bạn kịp thời bổ sung với giá hời nhất!`,
+      suggestions: ['Xem giỏ hàng của tôi', 'Săn mã giảm giá 15%', 'Xem hàng bán chạy'],
+    };
+  }
+
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH
   // -------------------------------------------------------------

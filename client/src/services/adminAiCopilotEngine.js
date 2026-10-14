@@ -954,7 +954,47 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 37. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
+  // 37. Phân Tích Chu Kỳ Mua Sắm DTW & Dự Báo Khách Hàng Rời Bỏ (Phase 16 - Feature 163)
+  if (/dtw|dynamic time warping|chu kỳ mua sắm dtw|so khớp chuỗi thời gian|nguy cơ rời bỏ dtw|churn prediction dtw/i.test(raw)) {
+    return {
+      text: `📈 **DỰ BÁO NGUY CƠ RỜI BỎ SÀN & SO KHỚP CHU KỲ BẰNG DTW (DYNAMIC TIME WARPING)**:
+- **Nguyên lý Dynamic Time Warping**:
+  - So khớp chuỗi thời gian khoảng cách ngày mua hàng $[\\Delta t_1, \\Delta t_2, \\dots]$ với các mẫu hành vi chuẩn bất chấp độ dài chuỗi khác nhau hoặc bị lệch pha thời gian.
+  - Ma trận quy hoạch động chi phí tích lũy $O(N \\cdot M)$ tìm đường cong vênh tối ưu (Optimal Warping Path).
+- **Phân loại 3 mẫu hành vi điển hình**:
+  - **VIP Routine**: Chu kỳ đều đặn $5-7$ ngày/đơn $\\Rightarrow$ Thưởng Mini Xu x2 và ưu tiên CSKH.
+  - **Churning Risk**: Khoảng cách ngày dãn nở nhanh ($7 \\to 18 \\to 45$ ngày) $\\Rightarrow$ Báo động đỏ nguy cơ rời bỏ sàn, kích hoạt voucher giữ chân 30k.
+  - **Seasonal Shopper**: Chỉ mua vào các đợt Siêu Sale $\\Rightarrow$ Gửi thông báo nhắc hẹn trước giờ mở Flash Sale.`,
+      type: 'marketing',
+      tag: 'DỰ BÁO CHURN BẰNG DTW',
+      suggestions: [
+        'Phân khúc khách hàng RFM & CLV',
+        'Quét radar tài khoản gian lận',
+        'Báo cáo doanh số GMV toàn sàn'
+      ]
+    };
+  }
+
+  // 38. Lấy Mẫu Hồ Chứa Reservoir Sampling Cho Báo Cáo Stream (Phase 16 - Feature 163)
+  if (/reservoir sampling|lấy mẫu hồ chứa|lấy mẫu ngẫu nhiên đồng đều|thuật toán r vitter|stream telemetry/i.test(raw)) {
+    return {
+      text: `🎯 **LẤY MẪU HỒ CHỨA RESERVOIR SAMPLING (ALGORITHM R - JEFFREY VITTER)**:
+- **Giải bài toán dòng chảy không giới hạn (Unbounded Stream)**:
+  - Khi hàng triệu đơn hàng đổ về liên tục trong Mega Sale, hệ thống duy trì mẫu đại diện cố định $K$ phần tử (VD: $K = 500$ đơn hàng) với bộ nhớ $O(1)$ RAM không bao giờ tràn bộ nhớ (Zero OOM).
+- **Tính công bằng toán học tuyệt đối**:
+  - Tại bất kỳ thời điểm $N$ phần tử đã đi qua, mỗi phần tử trong toàn bộ lịch sử đều có xác suất nằm trong mẫu đúng bằng $P = K / N$.
+- **Thống kê thời gian thực**: Trích xuất ngay lập tức giá trị đơn hàng trung bình (AOV), độ lệch chuẩn, và tỷ lệ áp mã voucher với độ tin cậy thống kê $\\ge 99\\%$.`,
+      type: 'algorithm',
+      tag: 'LẤY MẪU RESERVOIR SAMPLING',
+      suggestions: [
+        'Cấu trúc cây LSM-Tree',
+        'Chỉ mục Roaring Bitmaps',
+        'Báo cáo doanh số GMV toàn sàn'
+      ]
+    };
+  }
+
+  // 39. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
       text: `🤖 **CƠ CHẾ HOẠT ĐỘNG CỦA ADMIN SENTINEL COPILOT (MINH BẠCH AI & DỮ LIỆU)**:

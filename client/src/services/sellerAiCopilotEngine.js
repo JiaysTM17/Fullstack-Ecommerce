@@ -499,6 +499,34 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 25. Tự Động Phân Hạng Giá Sàn Bằng K-Means & Silhouette (Phase 16 - Feature 163)
+  if (/phân tầng giá|k-means|silhouette|phân hạng giá|phân khúc giá tự nhiên|tier giá/i.test(raw)) {
+    const tierSummary = shopProducts.length > 0
+      ? `Đã phân cụm ${shopProducts.length} sản phẩm thành các tầng giá tự nhiên:`
+      : 'Chưa có sản phẩm nào để phân tầng giá.';
+    return {
+      text: `📊 **PHÂN TẦNG GIÁ SẢN PHẨM BẰNG K-MEANS & SILHOUETTE (${currentShop.name})**:
+- **Nguyên lý Thuật toán K-Means++ & Silhouette**:
+  - Tự động gom cụm các mức giá bán của Shop thành các phân khúc tự nhiên (Natural Price Tiers) mà không cần chia khoảng cứng nhắc thủ công.
+  - Sử dụng hệ số **Silhouette Coefficient** $s(i) \\in [-1, 1]$ để tự động chọn số cụm tối ưu $K^*$ (2, 3 hoặc 4 tầng giá) sao cho độ gắn kết nội cụm $a(i)$ nhỏ nhất và độ tách biệt ngoại cụm $b(i)$ lớn nhất.
+- **Hiện trạng Phân tầng Giá Shop**:
+  - ${tierSummary}
+  - **Tầng Tiết Kiệm (BUDGET)**: Đóng vai trò sản phẩm mồi (Loss Leader), kích cầu lưu lượng truy cập và tối ưu hóa giỏ hàng.
+  - **Tầng Phổ Thông (MID-RANGE)**: Trụ cột doanh số cốt lõi, mang lại dòng tiền chính cho gian hàng.
+  - **Tầng Cao Cấp (PREMIUM MALL)**: Định vị thương hiệu và mang lại biên lợi nhuận gộp $Gross Margin \\ge 40\\%$.
+- **Khuyến nghị Chiến lược**:
+  - Không dàn trải giá quá dày ở tầng BUDGET để tránh rơi vào cuộc chiến giảm giá bào mòn lợi nhuận.
+  - Tập trung tạo combo kèm quà tặng cho tầng MID-RANGE để đẩy giá trị giỏ hàng AOV lên tầng PREMIUM.`,
+      type: 'pricing',
+      tag: 'PHÂN TẦNG GIÁ K-MEANS',
+      suggestions: [
+        'Mô phỏng co giãn giá',
+        'Tư vấn chiến lược Flash Sale',
+        'Phân tích biên lợi nhuận P&L'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

@@ -121,6 +121,9 @@ import {
   PriceElasticitySimulator,
   HopcroftKarpMatching,
   LSMTreeClickstream,
+  DynamicTimeWarping,
+  HierarchicalKMeans,
+  ReservoirSampling,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -134,6 +137,9 @@ import { PerceptualImageHash as ServerPerceptualHash, ImageHashIndex as ServerIm
 import { PriceElasticitySimulator as ServerPriceElasticity } from "../../server/src/utils/volatilityPricingSimulator.js";
 import { HopcroftKarpMatching as ServerHopcroftKarp } from "../../server/src/utils/hopcroftKarpMatching.js";
 import { LSMTreeClickstream as ServerLSMTree } from "../../server/src/utils/lsmTreeClickstream.js";
+import { DynamicTimeWarping as ServerDTW } from "../../server/src/utils/dynamicTimeWarping.js";
+import { HierarchicalKMeans as ServerHierarchicalKMeans } from "../../server/src/utils/hierarchicalKMeans.js";
+import { ReservoirSampling as ServerReservoirSampling } from "../../server/src/utils/reservoirSampling.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -11131,6 +11137,299 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const matchResult = dispatcher.computeMaxMatching();
         expect.equal(matchResult.matchingSize, 2);
         expect.equal(matchResult.fulfillmentRate, 100);
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 163: Dynamic Time Warping (DTW), Hierarchical K-Means Price Tiers & Reservoir Stream Sampling Suite (24 Tests)
+    // =========================================================================
+    describe("Feature 163: Dynamic Time Warping, Hierarchical K-Means Price Tiers & Reservoir Stream Sampling Suite", () => {
+
+      // --- Group 1: Dynamic Time Warping (DTW) (F163-T01 -> F163-T06) ---
+      test("F163-T01: DTW distance between two identical purchasing interval sequences is strictly 0", () => {
+        const series = [7, 14, 21, 28];
+        const res = DynamicTimeWarping.computeDistance(series, series);
+        expect.equal(res.distance, 0);
+        expect.equal(res.normalizedDistance, 0);
+        expect.equal(res.pathLength, 4);
+      });
+
+      test("F163-T02: DTW aligns time-shifted purchasing habits with minimal warping distance", () => {
+        const standardCycle = [1, 2, 3, 4, 5];
+        const shiftedCycle = [1, 1, 2, 3, 4, 5, 5]; // User delayed purchase but pattern identical
+        const res = DynamicTimeWarping.computeDistance(standardCycle, shiftedCycle);
+        expect.equal(res.distance, 0);
+        expect.equal(res.normalizedDistance, 0);
+        expect.equal(res.path.length >= 5, true);
+      });
+
+      test("F163-T03: DTW warping path backtracks correctly from (N, M) to (0, 0)", () => {
+        const s1 = [10, 20, 30];
+        const s2 = [10, 15, 25, 30];
+        const res = DynamicTimeWarping.computeDistance(s1, s2);
+        expect.equal(res.path[0].aIndex, 0);
+        expect.equal(res.path[0].bIndex, 0);
+        expect.equal(res.path[res.path.length - 1].aIndex, s1.length - 1);
+        expect.equal(res.path[res.path.length - 1].bIndex, s2.length - 1);
+      });
+
+      test("F163-T04: Server DTW classifies customer with expanding intervals as CHURNING_RISK", () => {
+        const churnPattern = [7, 12, 20, 35, 50, 65];
+        const classification = ServerDTW.classifyPurchasingPattern(churnPattern);
+        expect.equal(classification.detectedPattern, "CHURNING_RISK");
+        expect.equal(classification.riskLevel, "HIGH");
+        expect.equal(classification.recommendation.includes("voucher giảm 30k"), true);
+      });
+
+      test("F163-T05: Server DTW classifies customer with stable weekly cadence as LOYAL_ROUTINE", () => {
+        const loyalPattern = [5, 7, 6, 7, 5, 6];
+        const classification = ServerDTW.classifyPurchasingPattern(loyalPattern);
+        expect.equal(classification.detectedPattern, "LOYAL_ROUTINE");
+        expect.equal(classification.riskLevel, "LOW");
+        expect.equal(classification.recommendation.includes("Mini Xu x2"), true);
+      });
+
+      test("F163-T06: DTW handles edge cases: empty array throwing error and new customer fallback", () => {
+        let threw = false;
+        try {
+          DynamicTimeWarping.computeDistance([], [1, 2]);
+        } catch (e) {
+          threw = true;
+        }
+        expect.equal(threw, true);
+
+        const newCust = DynamicTimeWarping.classifyPurchasingPattern([]);
+        expect.equal(newCust.pattern, "NEW_CUSTOMER");
+        expect.equal(newCust.riskScore, 0);
+      });
+
+      // --- Group 2: Hierarchical K-Means & Silhouette Price Tiers (F163-T07 -> F163-T13) ---
+      test("F163-T07: 1D K-Means clustering converges to correct centroids on well-separated price clusters", () => {
+        const prices = [10000, 12000, 15000, 100000, 105000, 110000, 500000, 520000, 510000];
+        const result = HierarchicalKMeans.cluster(prices, 3);
+        expect.equal(result.k, 3);
+        expect.equal(result.centroids.length, 3);
+        expect.equal(result.iterations > 0, true);
+        expect.equal(result.silhouetteScore > 0.8, true); // High clustering quality
+      });
+
+      test("F163-T08: K-Means++ initialization spreads initial centroids widely apart", () => {
+        const prices = [5000, 10000, 50000, 200000, 1000000];
+        const centroids = HierarchicalKMeans.initKMeansPlusPlus(prices, 3);
+        expect.equal(centroids.length, 3);
+        // All centroids should be distinct
+        const distinct = new Set(centroids);
+        expect.equal(distinct.size, 3);
+      });
+
+      test("F163-T09: Silhouette score computation returns accurate value in range [-1, 1]", () => {
+        const data = [10, 12, 11, 100, 102, 105];
+        const assignments = [0, 0, 0, 1, 1, 1];
+        const score = HierarchicalKMeans.computeSilhouetteScore(data, assignments, 2);
+        expect.equal(score > 0.85, true);
+        expect.equal(score <= 1.0, true);
+      });
+
+      test("F163-T10: autoClusterPriceTiers automatically identifies optimal K* based on highest Silhouette score", () => {
+        const catalog = [
+          { id: "p1", name: "Ốp lưng 1k", price: 10000 },
+          { id: "p2", name: "Kính cường lực", price: 15000 },
+          { id: "p3", name: "Cáp sạc type-C", price: 20000 },
+          { id: "p4", name: "Tai nghe TrueWireless", price: 250000 },
+          { id: "p5", name: "Chuột công thái học", price: 300000 },
+          { id: "p6", name: "Bàn phím cơ", price: 350000 },
+          { id: "p7", name: "Màn hình 4K Mall", price: 5000000 },
+          { id: "p8", name: "Laptop Gaming Mall", price: 6000000 },
+        ];
+
+        const tiered = HierarchicalKMeans.autoClusterPriceTiers(catalog, [2, 3, 4]);
+        expect.equal(tiered.optimalK >= 2, true);
+        expect.equal(tiered.priceTiers.length, tiered.optimalK);
+        expect.equal(tiered.bestSilhouette > 0.7, true);
+      });
+
+      test("F163-T11: Price tiers are sorted by centroid price and assigned natural semantic tier labels", () => {
+        const products = [
+          { id: "p_low", name: "Móc khóa", price: 9000 },
+          { id: "p_mid", name: "Áo polo", price: 180000 },
+          { id: "p_high", name: "Đồng hồ Thụy Sĩ", price: 15000000 }
+        ];
+
+        const res = HierarchicalKMeans.autoClusterPriceTiers(products, [3]);
+        expect.equal(res.priceTiers.length, 3);
+        expect.equal(res.priceTiers[0].tierCode, "BUDGET");
+        expect.equal(res.priceTiers[1].tierCode, "MID_RANGE");
+        expect.equal(res.priceTiers[2].tierCode, "PREMIUM");
+        expect.equal(res.priceTiers[0].centroidPrice < res.priceTiers[1].centroidPrice, true);
+        expect.equal(res.priceTiers[1].centroidPrice < res.priceTiers[2].centroidPrice, true);
+      });
+
+      test("F163-T12: Server HierarchicalKMeans clusters large shop product list into distinct tiers", () => {
+        const items = [];
+        for (let i = 1; i <= 30; i++) {
+          const price = i <= 10 ? 10000 + i * 1000 : i <= 20 ? 150000 + i * 2000 : 800000 + i * 5000;
+          items.push({ id: `item_${i}`, name: `SP ${i}`, price });
+        }
+
+        const serverRes = ServerHierarchicalKMeans.autoClusterPriceTiers(items, [2, 3]);
+        expect.equal(serverRes.optimalK >= 2, true);
+        expect.equal(serverRes.priceTiers.reduce((acc, t) => acc + t.productCount, 0), 30);
+      });
+
+      test("F163-T13: HierarchicalKMeans safely handles empty or single item input without crashing", () => {
+        const emptyRes = HierarchicalKMeans.autoClusterPriceTiers([]);
+        expect.equal(emptyRes.optimalK, 0);
+        expect.equal(emptyRes.priceTiers.length, 0);
+
+        const singleRes = HierarchicalKMeans.autoClusterPriceTiers([{ id: "p1", price: 50000 }], [2, 3]);
+        expect.equal(singleRes.priceTiers.length, 1);
+      });
+
+      // --- Group 3: Reservoir Stream Sampling (Algorithm R) (F163-T14 -> F163-T20) ---
+      test("F163-T14: ReservoirSampling collects exactly K items from unbounded stream when stream >= K", () => {
+        const reservoir = new ReservoirSampling(5);
+        for (let i = 1; i <= 50; i++) {
+          reservoir.add({ orderId: `ord_${i}`, total: i * 10000 });
+        }
+
+        const sample = reservoir.getSample();
+        expect.equal(sample.length, 5);
+        expect.equal(reservoir.totalStreamCount, 50);
+      });
+
+      test("F163-T15: ReservoirSampling retains all items when stream size is less than capacity K", () => {
+        const reservoir = new ReservoirSampling(10);
+        reservoir.add({ id: 1 });
+        reservoir.add({ id: 2 });
+        reservoir.add({ id: 3 });
+
+        expect.equal(reservoir.getSample().length, 3);
+        expect.equal(reservoir.totalStreamCount, 3);
+      });
+
+      test("F163-T16: ReservoirSampling guarantees uniform replacement with deterministic mock RNG", () => {
+        // Deterministic mock RNG: returns 0.0, ensuring replacement always replaces index 0
+        const mockRng = () => 0.0;
+        const reservoir = new ReservoirSampling(2, mockRng);
+
+        reservoir.add("ITEM_A"); // goes to idx 0
+        reservoir.add("ITEM_B"); // goes to idx 1
+        // streamCount = 3, j = floor(0.0 * 3) = 0 < 2 -> replaces idx 0
+        const replaced = reservoir.add("ITEM_C");
+
+        expect.equal(replaced, true);
+        const sample = reservoir.getSample();
+        expect.equal(sample[0], "ITEM_C");
+        expect.equal(sample[1], "ITEM_B");
+      });
+
+      test("F163-T17: ReservoirSampling addBatch pushes stream in bulk and updates stream counter accurately", () => {
+        const reservoir = new ReservoirSampling(4);
+        const batch = [10, 20, 30, 40, 50, 60, 70, 80];
+        reservoir.addBatch(batch);
+
+        expect.equal(reservoir.getSample().length, 4);
+        expect.equal(reservoir.totalStreamCount, 8);
+      });
+
+      test("F163-T18: ReservoirSampling computeSampleStats calculates mean, min, max, stdDev accurately", () => {
+        const reservoir = new ReservoirSampling(5);
+        reservoir.add({ total: 100000 });
+        reservoir.add({ total: 200000 });
+        reservoir.add({ total: 300000 });
+
+        const stats = reservoir.computeSampleStats(item => item.total);
+        expect.equal(stats.sampleSize, 3);
+        expect.equal(stats.mean, 200000);
+        expect.equal(stats.min, 100000);
+        expect.equal(stats.max, 300000);
+        expect.equal(stats.stdDev > 0, true);
+      });
+
+      test("F163-T19: Server ReservoirSampling handles stream of 1000 telemetry events within strict fixed memory", () => {
+        const serverSampler = new ServerReservoirSampling(20);
+        for (let i = 1; i <= 1000; i++) {
+          serverSampler.add({ event: "CLICK", userId: `usr_${i}`, gmv: i * 50 });
+        }
+
+        expect.equal(serverSampler.getSample().length, 20);
+        expect.equal(serverSampler.totalStreamCount, 1000);
+        const stats = serverSampler.computeSampleStats(item => item.gmv);
+        expect.equal(stats.samplingRate, "2%"); // 20 / 1000 = 2%
+      });
+
+      test("F163-T20: ReservoirSampling handles reset and invalid capacity validation", () => {
+        let threw = false;
+        try {
+          new ReservoirSampling(0);
+        } catch (e) {
+          threw = true;
+        }
+        expect.equal(threw, true);
+
+        const sampler = new ReservoirSampling(5);
+        sampler.add("A");
+        sampler.reset();
+        expect.equal(sampler.getSample().length, 0);
+        expect.equal(sampler.totalStreamCount, 0);
+      });
+
+      // --- Group 4: AI Copilot & E2E Lifecycle Integration (F163-T21 -> F163-T24) ---
+      test("F163-T21: Admin Sentinel Copilot explains DTW purchasing cycle and churn recognition", () => {
+        const res = generateAdminCopilotResponse("Phân tích chu kỳ mua sắm dtw và phát hiện churn risk");
+        expect.equal(res.tag, "DỰ BÁO CHURN BẰNG DTW");
+        expect.equal(res.text.includes("DYNAMIC TIME WARPING"), true);
+        expect.equal(res.text.includes("Churning Risk"), true);
+      });
+
+      test("F163-T22: Admin Sentinel Copilot explains Reservoir Sampling telemetry stream audit", () => {
+        const res = generateAdminCopilotResponse("Kiểm toán dòng sự kiện đơn hàng bằng reservoir sampling");
+        expect.equal(res.tag, "LẤY MẪU RESERVOIR SAMPLING");
+        expect.equal(res.text.includes("ALGORITHM R"), true);
+        expect.equal(res.text.includes("P = K / N"), true);
+      });
+
+      test("F163-T23: Seller ShopSmart Copilot & Buyer Assistant respond to K-Means Price Tiers & DTW Cycles", () => {
+        // Seller Copilot
+        const sellerRes = generateSellerCopilotResponse("Phân tầng giá sản phẩm shop bằng k-means silhouette");
+        expect.equal(sellerRes.tag, "PHÂN TẦNG GIÁ K-MEANS");
+        expect.equal(sellerRes.text.includes("BUDGET"), true);
+        expect.equal(sellerRes.text.includes("PREMIUM MALL"), true);
+
+        // Buyer Assistant
+        const buyerRes = generateAiChatResponse("Chu kỳ mua sắm của tôi khi nào nên mua lại dtw chu kỳ");
+        expect.equal(buyerRes.intent, "BUYER_PURCHASE_CYCLE_ASSIST");
+        expect.equal(buyerRes.replyText.includes("Dynamic Time Warping"), true);
+      });
+
+      test("F163-T24: E2E Lifecycle: Reservoir Sampling Orders -> K-Means Price Tiers -> DTW Churn Mitigation", () => {
+        // 1. Unbounded order stream sampled into fixed-memory reservoir
+        const sampler = new ReservoirSampling(10);
+        for (let i = 1; i <= 100; i++) {
+          sampler.add({
+            orderId: `ord_stream_${i}`,
+            userId: `user_${(i % 5) + 1}`,
+            amount: 20000 + (i % 10) * 15000,
+            intervalDays: (i % 7) + 2
+          });
+        }
+        const streamSample = sampler.getSample();
+        expect.equal(streamSample.length, 10);
+
+        // 2. Products priced dynamically into natural tiers using K-Means
+        const products = streamSample.map((ord, idx) => ({
+          id: `p_${idx}`,
+          name: `Sản phẩm ${idx}`,
+          price: ord.amount
+        }));
+        const clustering = HierarchicalKMeans.autoClusterPriceTiers(products, [2, 3]);
+        expect.equal(clustering.optimalK >= 2, true);
+
+        // 3. User with increasing intervals diagnosed via DTW to trigger retention voucher
+        const intervals = [5, 10, 18, 30, 48];
+        const churnEval = DynamicTimeWarping.classifyPurchasingPattern(intervals);
+        expect.equal(churnEval.detectedPattern, "CHURNING_RISK");
+        expect.equal(churnEval.riskLevel, "HIGH");
       });
     });
   });

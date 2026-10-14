@@ -7890,6 +7890,414 @@ export class LSMTreeClickstream {
   }
 }
 
+// ==========================================
+// Phase 16: DTW Cycles, K-Means Clustering & Reservoir Sampling Suite
+// ==========================================
+
+export class DynamicTimeWarping {
+  static computeDistance(seriesA, seriesB, distFn = (x, y) => Math.abs(x - y)) {
+    if (!Array.isArray(seriesA) || !Array.isArray(seriesB) || seriesA.length === 0 || seriesB.length === 0) {
+      throw new Error("Chuỗi dữ liệu phải là mảng không rỗng.");
+    }
+
+    const n = seriesA.length;
+    const m = seriesB.length;
+
+    const dtw = Array.from({ length: n + 1 }, () => Array(m + 1).fill(Infinity));
+    dtw[0][0] = 0;
+
+    for (let i = 1; i <= n; i++) {
+      for (let j = 1; j <= m; j++) {
+        const cost = distFn(seriesA[i - 1], seriesB[j - 1]);
+        dtw[i][j] = cost + Math.min(
+          dtw[i - 1][j],
+          dtw[i][j - 1],
+          dtw[i - 1][j - 1]
+        );
+      }
+    }
+
+    const totalDistance = Number(dtw[n][m].toFixed(4));
+    const normalizedDistance = Number((totalDistance / (n + m)).toFixed(4));
+
+    const path = [];
+    let i = n;
+    let j = m;
+
+    while (i > 0 || j > 0) {
+      path.unshift({ aIndex: i - 1, bIndex: j - 1 });
+      if (i === 0) {
+        j--;
+      } else if (j === 0) {
+        i--;
+      } else {
+        const minVal = Math.min(dtw[i - 1][j], dtw[i][j - 1], dtw[i - 1][j - 1]);
+        if (minVal === dtw[i - 1][j - 1]) {
+          i--;
+          j--;
+        } else if (minVal === dtw[i - 1][j]) {
+          i--;
+        } else {
+          j--;
+        }
+      }
+    }
+
+    return {
+      distance: totalDistance,
+      normalizedDistance,
+      pathLength: path.length,
+      path
+    };
+  }
+
+  static classifyPurchasingPattern(intervalsDays) {
+    if (!intervalsDays || intervalsDays.length === 0) {
+      return { pattern: "NEW_CUSTOMER", riskScore: 0, recommendation: "Khách hàng mới, cần tặng voucher tân thủ 15%." };
+    }
+
+    const templates = {
+      LOYAL_ROUTINE: [5, 7, 6, 7, 5, 6],
+      CHURNING_RISK: [7, 10, 18, 28, 45, 60],
+      FLASH_SALE_HUNTER: [30, 1, 1, 29, 1, 30]
+    };
+
+    let bestPattern = "UNKNOWN";
+    let minNormalizedDist = Infinity;
+
+    for (const [name, template] of Object.entries(templates)) {
+      const { normalizedDistance } = this.computeDistance(intervalsDays, template);
+      if (normalizedDistance < minNormalizedDist) {
+        minNormalizedDist = normalizedDistance;
+        bestPattern = name;
+      }
+    }
+
+    let riskLevel = "LOW";
+    let recommendation = "";
+
+    if (bestPattern === "CHURNING_RISK") {
+      riskLevel = "HIGH";
+      recommendation = "Cảnh báo: Chu kỳ mua sắm thưa dần! Kích hoạt ngay voucher giảm 30k để tái thu hút.";
+    } else if (bestPattern === "LOYAL_ROUTINE") {
+      riskLevel = "LOW";
+      recommendation = "Khách hàng VIP mua sắm đều đặn. Thưởng Mini Xu x2 và cấp quyền Freeship không giới hạn.";
+    } else {
+      riskLevel = "MEDIUM";
+      recommendation = "Khách hàng săn sale. Gửi thông báo nhắc hẹn trước 2 giờ khi chiến dịch Flash Sale mở màn.";
+    }
+
+    return {
+      intervalsDays,
+      detectedPattern: bestPattern,
+      similarityScore: Number(Math.max(0, 100 - minNormalizedDist * 10).toFixed(1)),
+      riskLevel,
+      recommendation
+    };
+  }
+}
+
+export class HierarchicalKMeans {
+  static computeSilhouetteScore(data, clusterAssignments, k) {
+    const n = data.length;
+    if (n <= k || k <= 1) return 0;
+
+    const clusters = Array.from({ length: k }, () => []);
+    for (let i = 0; i < n; i++) {
+      clusters[clusterAssignments[i]].push({ val: data[i], idx: i });
+    }
+
+    let totalScore = 0;
+
+    for (let i = 0; i < n; i++) {
+      const myClusterIdx = clusterAssignments[i];
+      const myCluster = clusters[myClusterIdx];
+      const val = data[i];
+
+      let a = 0;
+      if (myCluster.length > 1) {
+        let distSum = 0;
+        for (const other of myCluster) {
+          if (other.idx !== i) {
+            distSum += Math.abs(val - other.val);
+          }
+        }
+        a = distSum / (myCluster.length - 1);
+      }
+
+      let b = Infinity;
+      for (let c = 0; c < k; c++) {
+        if (c === myClusterIdx || clusters[c].length === 0) continue;
+        let otherClusterDistSum = 0;
+        for (const other of clusters[c]) {
+          otherClusterDistSum += Math.abs(val - other.val);
+        }
+        const avgDist = otherClusterDistSum / clusters[c].length;
+        if (avgDist < b) {
+          b = avgDist;
+        }
+      }
+
+      const s = Math.max(a, b) === 0 ? 0 : (b - a) / Math.max(a, b);
+      totalScore += s;
+    }
+
+    return Number((totalScore / n).toFixed(4));
+  }
+
+  static initKMeansPlusPlus(values, k) {
+    if (!values || values.length === 0) return [];
+    const n = values.length;
+    k = Math.min(k, n);
+    const sortedVals = [...values].sort((a, b) => a - b);
+    const centroids = [];
+    const step = Math.floor(n / k);
+    for (let i = 0; i < k; i++) {
+      centroids.push(sortedVals[Math.min(n - 1, Math.floor(i * step + step / 2))]);
+    }
+    return centroids;
+  }
+
+  static cluster(values, k, maxIterations = 50) {
+    if (!values || values.length === 0) throw new Error("Mảng dữ liệu không được rỗng.");
+    const n = values.length;
+    k = Math.min(k, n);
+
+    if (k === 1) {
+      return {
+        k: 1,
+        centroids: [values.reduce((s, v) => s + v, 0) / n],
+        assignments: Array(n).fill(0),
+        silhouetteScore: 0,
+        iterations: 1
+      };
+    }
+
+    let centroids = this.initKMeansPlusPlus(values, k);
+
+    let assignments = new Array(n).fill(0);
+    let iterations = 0;
+    let converged = false;
+
+    while (iterations < maxIterations && !converged) {
+      iterations++;
+      let changed = false;
+
+      for (let i = 0; i < n; i++) {
+        const val = values[i];
+        let minDist = Infinity;
+        let bestCluster = 0;
+
+        for (let c = 0; c < k; c++) {
+          const dist = Math.abs(val - centroids[c]);
+          if (dist < minDist) {
+            minDist = dist;
+            bestCluster = c;
+          }
+        }
+
+        if (assignments[i] !== bestCluster) {
+          assignments[i] = bestCluster;
+          changed = true;
+        }
+      }
+
+      const newCentroids = new Array(k).fill(0);
+      const counts = new Array(k).fill(0);
+
+      for (let i = 0; i < n; i++) {
+        newCentroids[assignments[i]] += values[i];
+        counts[assignments[i]]++;
+      }
+
+      for (let c = 0; c < k; c++) {
+        if (counts[c] > 0) {
+          newCentroids[c] = Number((newCentroids[c] / counts[c]).toFixed(2));
+        } else {
+          newCentroids[c] = centroids[c];
+        }
+      }
+
+      let maxShift = 0;
+      for (let c = 0; c < k; c++) {
+        maxShift = Math.max(maxShift, Math.abs(centroids[c] - newCentroids[c]));
+      }
+
+      centroids = newCentroids;
+      if (!changed || maxShift < 0.01) {
+        converged = true;
+      }
+    }
+
+    const silhouetteScore = this.computeSilhouetteScore(values, assignments, k);
+
+    return {
+      k,
+      centroids,
+      assignments,
+      iterations,
+      silhouetteScore
+    };
+  }
+
+  static autoClusterPriceTiers(products, kRange = [2, 3, 4]) {
+    if (!products || products.length === 0) {
+      return { optimalK: 0, clusters: [], bestSilhouette: 0, priceTiers: [] };
+    }
+
+    if (products.length === 1) {
+      return {
+        optimalK: 1,
+        bestSilhouette: 1.0,
+        iterations: 1,
+        priceTiers: [{
+          tierRank: 1,
+          tierCode: "BUDGET",
+          label: "TIẾT KIỆM (BUDGET)",
+          centroidPrice: Math.round(Number(products[0].price || 0)),
+          productCount: 1,
+          products: [products[0]]
+        }]
+      };
+    }
+
+    const prices = products.map(p => Number(p.price || 0));
+    let bestResult = null;
+    let maxSilhouette = -Infinity;
+
+    for (const k of kRange) {
+      if (k > prices.length) continue;
+      const res = this.cluster(prices, k);
+      if (res.silhouetteScore > maxSilhouette) {
+        maxSilhouette = res.silhouetteScore;
+        bestResult = res;
+      }
+    }
+
+    if (!bestResult) {
+      bestResult = this.cluster(prices, Math.min(3, prices.length));
+    }
+
+    const sortedCentroidIndices = bestResult.centroids
+      .map((c, idx) => ({ c, idx }))
+      .sort((a, b) => a.c - b.c)
+      .map(item => item.idx);
+
+    const labels = ["TIẾT KIỆM (BUDGET)", "PHỔ THÔNG (MID-RANGE)", "CAO CẤP (PREMIUM MALL)", "SIÊU SANG (ULTRA LUXURY)"];
+
+    const clusterGroups = [];
+    for (let rank = 0; rank < sortedCentroidIndices.length; rank++) {
+      const origClusterIdx = sortedCentroidIndices[rank];
+      const groupProducts = [];
+
+      for (let i = 0; i < products.length; i++) {
+        if (bestResult.assignments[i] === origClusterIdx) {
+          groupProducts.push(products[i]);
+        }
+      }
+
+      clusterGroups.push({
+        tierRank: rank + 1,
+        tierCode: rank === 0 ? "BUDGET" : rank === 1 ? "MID_RANGE" : "PREMIUM",
+        label: labels[rank] || `TẦNG GIÁ ${rank + 1}`,
+        centroidPrice: Math.round(bestResult.centroids[origClusterIdx]),
+        productCount: groupProducts.length,
+        products: groupProducts
+      });
+    }
+
+    return {
+      optimalK: bestResult.k,
+      bestSilhouette: bestResult.silhouetteScore,
+      iterations: bestResult.iterations,
+      priceTiers: clusterGroups
+    };
+  }
+}
+
+export class ReservoirSampling {
+  constructor(capacity = 100, randomFn = Math.random) {
+    if (capacity <= 0) throw new Error("Dung lượng hồ chứa phải lớn hơn 0.");
+    this.capacity = capacity;
+    this.randomFn = randomFn;
+    this.reservoir = [];
+    this.totalStreamCount = 0;
+  }
+
+  add(item) {
+    this.totalStreamCount++;
+
+    if (this.reservoir.length < this.capacity) {
+      this.reservoir.push(item);
+      return true;
+    }
+
+    const j = Math.floor(this.randomFn() * this.totalStreamCount);
+    if (j < this.capacity) {
+      this.reservoir[j] = item;
+      return true;
+    }
+
+    return false;
+  }
+
+  addBatch(items) {
+    if (!Array.isArray(items)) return;
+    for (const item of items) {
+      this.add(item);
+    }
+  }
+
+  getSample() {
+    return [...this.reservoir];
+  }
+
+  computeSampleStats(valueExtractor = (item) => Number(item.total || item.amount || item)) {
+    const sampleSize = this.reservoir.length;
+    if (sampleSize === 0) {
+      return {
+        sampleSize: 0,
+        totalStreamCount: this.totalStreamCount,
+        samplingRate: 0,
+        mean: 0,
+        min: 0,
+        max: 0,
+        stdDev: 0
+      };
+    }
+
+    const values = this.reservoir.map(valueExtractor).filter(v => !isNaN(v));
+    const count = values.length;
+    if (count === 0) {
+      return { sampleSize, totalStreamCount: this.totalStreamCount, mean: 0 };
+    }
+
+    const sum = values.reduce((s, v) => s + v, 0);
+    const mean = Number((sum / count).toFixed(2));
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    const variance = values.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / count;
+    const stdDev = Number(Math.sqrt(variance).toFixed(2));
+    const samplingRate = Number(((sampleSize / this.totalStreamCount) * 100).toFixed(2));
+
+    return {
+      sampleSize,
+      totalStreamCount: this.totalStreamCount,
+      samplingRate: `${samplingRate}%`,
+      mean,
+      min,
+      max,
+      stdDev
+    };
+  }
+
+  reset() {
+    this.reservoir = [];
+    this.totalStreamCount = 0;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -7988,6 +8396,11 @@ export default {
   PriceElasticitySimulator,
   HopcroftKarpMatching,
   LSMTreeClickstream,
+  // Phase 16 Enterprise Algorithms
+  DynamicTimeWarping,
+  HierarchicalKMeans,
+  ReservoirSampling,
 };
+
 
 
