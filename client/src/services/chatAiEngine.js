@@ -483,7 +483,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (!/hungarian|ghép bưu tá|nghẽn|thông lượng|edmonds-karp|hopcroft/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -721,6 +721,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'BUYER_REVIEW_INTEGRITY_ASSIST',
       replyText: `**[BẢO CHỨNG MINH BẠCH] HỆ THỐNG QUÉT REVIEW THẬT BẰNG SIMHASH:**\n\n• **Lọc bỏ 100% review seeding sao chép**: Mọi đánh giá sản phẩm đều được quét mã vân tay SimHash 64-bit và đo khoảng cách Hamming theo thời gian thực để loại trừ các đánh giá copy hàng loạt.\n• **Đánh giá kèm ảnh/video thật**: Hệ thống chỉ gắn nhãn "Đã mua hàng chính hãng" cho những đơn hàng giao thành công qua SPX Express để bạn hoàn toàn yên tâm lựa chọn!`,
       suggestions: ['Xem sản phẩm bán chạy', 'Lấy voucher 15%', 'Gặp CSKH'],
+    };
+  }
+
+  // 20. Tra Cứu Tuyến Vận Chuyển Liên Tỉnh SPX Johnson (SPX_INTERPROVINCE_ROUTING_JOHNSON)
+  if (/tuyến giao hàng liên tỉnh|cước phí liên tỉnh|tại sao phí ship rẻ|johnson spx|vận chuyển liên tỉnh/i.test(lower)) {
+    return {
+      intent: 'SPX_INTERPROVINCE_ROUTING_JOHNSON',
+      replyText: `**[SPX TOÀN QUỐC] ĐỊNH TUYẾN TỐI ƯU TOÀN MẠNG BẰNG THUẬT TOÁN JOHNSON:**\n\n• **Tối ưu cước phí toàn quốc**: Hệ thống tính trước ma trận luân chuyển tối ưu giữa tất cả các trung tâm phân loại Bắc - Trung - Nam, giúp giảm cước vận chuyển liên tỉnh đến 25%.\n• **Đảm bảo lộ trình nhanh nhất**: Kết hợp Bellman-Ford và Dijkstra tự động lựa chọn các tuyến luân chuyển có trợ giá và hạ tầng cao tốc thông suốt, giao hàng an toàn chỉ từ 24 - 48h!`,
+      suggestions: ['Tra cứu mã vận đơn SPX', 'Lấy voucher Freeship 30k', 'Xem bưu cục gần tôi'],
     };
   }
 

@@ -128,6 +128,10 @@ import {
   AhoCorasickNode,
   AhoCorasickModerator,
   BellmanFordArbitrage,
+  JohnsonGraphRouting,
+  SAMState,
+  SuffixAutomatonDeduplicator,
+  CuckooFilterRevocation,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -147,6 +151,9 @@ import { ReservoirSampling as ServerReservoirSampling } from "../../server/src/u
 import { SimHashReviewSpam as ServerSimHash } from "../../server/src/utils/simHashReviewSpam.js";
 import { AhoCorasickModerator as ServerAhoCorasick } from "../../server/src/utils/ahoCorasickModerator.js";
 import { BellmanFordArbitrage as ServerBellmanFord } from "../../server/src/utils/bellmanFordArbitrage.js";
+import { JohnsonGraphRouting as ServerJohnsonGraphRouting } from "../../server/src/utils/johnsonGraphRouting.js";
+import { SuffixAutomatonDeduplicator as ServerSuffixAutomaton } from "../../server/src/utils/suffixAutomatonDeduplicator.js";
+import { CuckooFilterRevocation as ServerCuckooFilter } from "../../server/src/utils/cuckooFilterRevocation.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -11738,6 +11745,267 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const auditResult = escrowAudit.detectNegativeCycle();
         expect.equal(auditResult.hasNegativeCycle, true);
         expect.equal(auditResult.status, "CRITICAL_FRAUD_DETECTED");
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 165: Enterprise Nationwide Logistics, Suffix Automaton & Cuckoo Filter Suite (Phase 18 - 24 Tests)
+  // =========================================================================
+  describe("Feature 165: Enterprise Nationwide Logistics, Suffix Automaton & Cuckoo Filter Suite (Phase 18)", () => {
+
+    // --- NHÓM 1: Thuật toán Johnson All-Pairs Shortest Paths Mạng Lưới SPX (F165-T01 -> F165-T06) ---
+    describe("Nhóm 1: Thuật toán Johnson All-Pairs Shortest Paths SPX Multi-Hub", () => {
+      test("F165-T01: Initial state & empty graph returns empty distances, 0 hubs, no negative cycle", () => {
+        const router = new JohnsonGraphRouting();
+        const res = router.computeAllPairsShortestPaths();
+        expect.equal(res.hubCount, 0);
+        expect.equal(res.hasNegativeCycle, false);
+        expect.equal(Object.keys(res.distances).length, 0);
+      });
+
+      test("F165-T02: Simple 3-hub graph correctly reweights and finds shortest paths between all pairs", () => {
+        const router = new JohnsonGraphRouting();
+        router.addRoute("HN", "DN", 10);
+        router.addRoute("DN", "SG", 15);
+        router.addRoute("HN", "SG", 30);
+        const res = router.computeAllPairsShortestPaths();
+        expect.equal(res.hubCount, 3);
+        expect.equal(res.hasNegativeCycle, false);
+        expect.equal(res.distances["HN"]["DN"], 10);
+        expect.equal(res.distances["HN"]["SG"], 25); // via DN: 10 + 15 = 25
+        expect.equal(res.distances["DN"]["SG"], 15);
+      });
+
+      test("F165-T03: Detects negative cycle in inter-hub logistics and flags error properly", () => {
+        const router = new JohnsonGraphRouting();
+        router.addRoute("HUB_A", "HUB_B", 10);
+        router.addRoute("HUB_B", "HUB_C", -15);
+        router.addRoute("HUB_C", "HUB_A", -5);
+        const res = router.computeAllPairsShortestPaths();
+        expect.equal(res.hasNegativeCycle, true);
+        expect.equal(router.getShortestDistance("HUB_A", "HUB_B"), Infinity);
+      });
+
+      test("F165-T04: SPX nationwide 6-hub network calculates all-pairs matrix with negative promotional edge", () => {
+        const router = new JohnsonGraphRouting();
+        router.addRoute("HN", "HP", 5);
+        router.addRoute("HP", "VINH", 8);
+        router.addRoute("HN", "VINH", 12);
+        router.addRoute("VINH", "DN", 10);
+        router.addRoute("DN", "BMT", 12);
+        router.addRoute("DN", "HCM", 20);
+        router.addRoute("BMT", "HCM", 8);
+        router.addRoute("HP", "DN", -2); // Direct subsidized express flight route
+        const res = router.computeAllPairsShortestPaths();
+        expect.equal(res.hasNegativeCycle, false);
+        expect.equal(res.hubCount, 6);
+        expect.equal(res.distances["HN"]["DN"], 3); // HN->HP(5)->DN(-2) = 3
+        expect.equal(router.getShortestDistance("HN", "HCM"), 23); // HN->HP(5)->DN(-2)->HCM(20) = 23
+      });
+
+      test("F165-T05: Handles unreachable hubs gracefully returning Infinity", () => {
+        const router = new JohnsonGraphRouting();
+        router.addRoute("ISLAND_HUB", "ISLAND_HUB_2", 4);
+        router.addRoute("MAINLAND", "CAPITAL", 6);
+        expect.equal(router.getShortestDistance("ISLAND_HUB", "MAINLAND"), Infinity);
+        expect.equal(router.getShortestDistance("MAINLAND", "CAPITAL"), 6);
+      });
+
+      test("F165-T06: Server-side JohnsonGraphRouting matches client-side implementation exactly", () => {
+        const clientRouter = new JohnsonGraphRouting();
+        const serverRouter = new ServerJohnsonGraphRouting();
+        for (const r of [clientRouter, serverRouter]) {
+          r.addRoute("A", "B", 3);
+          r.addRoute("B", "C", 4);
+          r.addRoute("A", "C", 10);
+        }
+        const cRes = clientRouter.computeAllPairsShortestPaths();
+        const sRes = serverRouter.computeAllPairsShortestPaths();
+        expect.equal(cRes.distances["A"]["C"], sRes.distances["A"]["C"]);
+        expect.equal(cRes.hubCount, sRes.hubCount);
+      });
+    });
+
+    // --- NHÓM 2: Suffix Automaton Deduplicator & SEO Stuffing Detection (F165-T07 -> F165-T13) ---
+    describe("Nhóm 2: Suffix Automaton Deduplicator & SEO Stuffing", () => {
+      test("F165-T07: SAMState transitions and initial automaton structure with baseText", () => {
+        const sam = new SuffixAutomatonDeduplicator("abc");
+        expect.equal(sam.contains("a"), true);
+        expect.equal(sam.contains("bc"), true);
+        expect.equal(sam.contains("abc"), true);
+        expect.equal(sam.contains("d"), false);
+      });
+
+      test("F165-T08: SuffixAutomaton contains() correctly identifies valid substrings and rejects non-substrings", () => {
+        const sam = new SuffixAutomatonDeduplicator("Áo thun cotton cao cấp co giãn 4 chiều");
+        expect.equal(sam.contains("cotton"), true);
+        expect.equal(sam.contains("co giãn 4 chiều"), true);
+        expect.equal(sam.contains("lụa tơ tằm"), false);
+      });
+
+      test("F165-T09: Longest Common Substring (LCS) finds exact matching substring between original and copied text", () => {
+        const original = "Tai nghe chống ồn chủ động ANC chuẩn Bluetooth 5.3 pin 40h";
+        const copied = "Bán gấp Tai nghe chống ồn chủ động ANC chuẩn Bluetooth giá rẻ sinh viên";
+        const sam = new SuffixAutomatonDeduplicator(original);
+        const lcsRes = sam.findLongestCommonSubstring(copied);
+        expect.equal(lcsRes.lcsString, "Tai nghe chống ồn chủ động ANC chuẩn Bluetooth ");
+        expect.equal(lcsRes.lcsLength, 47);
+        expect.equal(lcsRes.isPlagiarized, true);
+      });
+
+      test("F165-T10: SAM correctly flags plagiarism when substring >= 30 chars or similarity >= 50%", () => {
+        const sam = new SuffixAutomatonDeduplicator("Nồi chiên không dầu dung tích lớn 10 lít bảo hành 2 năm");
+        const partial = "Nồi chiên không dầu";
+        const res = sam.findLongestCommonSubstring(partial);
+        expect.equal(res.similarityRatio, 100);
+        expect.equal(res.isPlagiarized, true);
+      });
+
+      test("F165-T11: Detects keyword stuffing when keyword exceeds threshold count with tailored recommendation", () => {
+        const stuffedText = "Giày thể thao nam giày thể thao giá rẻ giày thể thao cao cấp mua ngay giày thể thao chính hãng giày thể thao số 1 giày thể thao";
+        const res = SuffixAutomatonDeduplicator.detectKeywordStuffing(stuffedText, "giày thể thao", 4);
+        expect.equal(res.isStuffed, true);
+        expect.equal(res.occurrences >= 5, true);
+        expect.equal(res.recommendation.includes("CẢNH BÁO SEO STUFFING"), true);
+      });
+
+      test("F165-T12: Handles edge cases: empty strings, single character, non-matching text gracefully", () => {
+        const emptySam = new SuffixAutomatonDeduplicator("");
+        expect.equal(emptySam.contains(""), true);
+        expect.equal(emptySam.findLongestCommonSubstring("hello").lcsLength, 0);
+        const singleSam = new SuffixAutomatonDeduplicator("x");
+        expect.equal(singleSam.contains("x"), true);
+        expect.equal(singleSam.contains("y"), false);
+      });
+
+      test("F165-T13: Server-side SuffixAutomaton matches client-side implementation", () => {
+        const clientSam = new SuffixAutomatonDeduplicator("Sạc nhanh GaN 65W");
+        const serverSam = new ServerSuffixAutomaton("Sạc nhanh GaN 65W");
+        expect.equal(clientSam.contains("GaN 65W"), serverSam.contains("GaN 65W"));
+        const cLcs = clientSam.findLongestCommonSubstring("Củ sạc GaN 65W 3 cổng");
+        const sLcs = serverSam.findLongestCommonSubstring("Củ sạc GaN 65W 3 cổng");
+        expect.equal(cLcs.lcsString, sLcs.lcsString);
+        expect.equal(cLcs.lcsLength, sLcs.lcsLength);
+      });
+    });
+
+    // --- NHÓM 3: Cuckoo Filter Revocation & Dynamic Deletion (F165-T14 -> F165-T20) ---
+    describe("Nhóm 3: Cuckoo Filter Revocation & Dynamic Deletion", () => {
+      test("F165-T14: Initial load factor is 0, lookup on empty filter returns false", () => {
+        const cf = new CuckooFilterRevocation(64, 4);
+        expect.equal(cf.getLoadFactor(), 0);
+        expect.equal(cf.lookup("VOUCHER_NON_EXISTENT"), false);
+      });
+
+      test("F165-T15: Successful insertion and accurate lookup of items (token IDs, voucher codes)", () => {
+        const cf = new CuckooFilterRevocation(64, 4);
+        expect.equal(cf.insert("REVOKED_JWT_USER_999"), true);
+        expect.equal(cf.insert("VOUCHER_EXPIRED_MEGA50"), true);
+        expect.equal(cf.lookup("REVOKED_JWT_USER_999"), true);
+        expect.equal(cf.lookup("VOUCHER_EXPIRED_MEGA50"), true);
+        expect.equal(cf.lookup("VALID_TOKEN_123"), false);
+      });
+
+      test("F165-T16: Dynamic deletion of elements succeeds and lookup returns false after deletion", () => {
+        const cf = new CuckooFilterRevocation(64, 4);
+        cf.insert("REVOKED_VOUCHER_A");
+        expect.equal(cf.lookup("REVOKED_VOUCHER_A"), true);
+        const deleted = cf.delete("REVOKED_VOUCHER_A");
+        expect.equal(deleted, true);
+        expect.equal(cf.lookup("REVOKED_VOUCHER_A"), false);
+      });
+
+      test("F165-T17: Deleting non-existent element returns false and preserves existing elements", () => {
+        const cf = new CuckooFilterRevocation(64, 4);
+        cf.insert("ITEM_KEEP");
+        expect.equal(cf.delete("ITEM_NOT_FOUND"), false);
+        expect.equal(cf.lookup("ITEM_KEEP"), true);
+      });
+
+      test("F165-T18: Cuckoo kick relocation handles multiple items when primary bucket is filled", () => {
+        const tinyCf = new CuckooFilterRevocation(4, 2, 20);
+        let successCount = 0;
+        for (let i = 0; i < 6; i++) {
+          if (tinyCf.insert(`KEY_${i}`)) successCount++;
+        }
+        expect.equal(successCount >= 4, true);
+      });
+
+      test("F165-T19: Load factor updates accurately on insertions and deletions", () => {
+        const cf = new CuckooFilterRevocation(32, 4); // 128 total slots
+        expect.equal(cf.getLoadFactor(), 0);
+        cf.insert("A");
+        cf.insert("B");
+        expect.equal(cf.getLoadFactor(), Number((2 / 128).toFixed(4)));
+        cf.delete("A");
+        expect.equal(cf.getLoadFactor(), Number((1 / 128).toFixed(4)));
+      });
+
+      test("F165-T20: Server-side vs client-side CuckooFilter parity", () => {
+        const cCf = new CuckooFilterRevocation(64, 4);
+        const sCf = new ServerCuckooFilter(64, 4);
+        cCf.insert("TOKEN_A");
+        sCf.insert("TOKEN_A");
+        expect.equal(cCf.lookup("TOKEN_A"), sCf.lookup("TOKEN_A"));
+        cCf.delete("TOKEN_A");
+        sCf.delete("TOKEN_A");
+        expect.equal(cCf.lookup("TOKEN_A"), sCf.lookup("TOKEN_A"));
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Lifecycle (F165-T21 -> F165-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Lifecycle", () => {
+      test("F165-T21: Admin Sentinel Copilot answers Johnson All-Pairs Routing & Cuckoo Filter Revocation intents", () => {
+        const resJohnson = generateAdminCopilotResponse("Mạng lưới vận tải toàn miền spx bằng thuật toán johnson all-pairs");
+        expect.equal(resJohnson.tag, "ĐỊNH TUYẾN TOÀN MẠNG JOHNSON");
+        expect.equal(resJohnson.type, "logistics");
+        expect.equal(resJohnson.text.includes("Bellman-Ford"), true);
+
+        const resCuckoo = generateAdminCopilotResponse("Danh sách đen động và thu hồi voucher bằng cuckoo filter");
+        expect.equal(resCuckoo.tag, "BỘ LỌC CUCKOO REVOCATION");
+        expect.equal(resCuckoo.type, "security");
+        expect.equal(resCuckoo.text.includes("Bloom Filter"), true);
+      });
+
+      test("F165-T22: Seller ShopSmart Copilot advises on SEO Suffix Automaton & Keyword Stuffing", () => {
+        const resSeller = generateSellerCopilotResponse("Tối ưu seo và chống đạo nhái bài đăng bằng suffix automaton sam");
+        expect.equal(resSeller.tag, "TỐI ƯU SEO SUFFIX AUTOMATON");
+        expect.equal(resSeller.type, "seo");
+        expect.equal(resSeller.text.includes("Longest Common Substring"), true);
+      });
+
+      test("F165-T23: Buyer AI Assistant responds to SPX Interprovince Johnson logistics inquiries", () => {
+        const resBuyer = generateAiChatResponse("Tuyến giao hàng liên tỉnh cước phí liên tỉnh johnson spx");
+        expect.equal(resBuyer.intent, "SPX_INTERPROVINCE_ROUTING_JOHNSON");
+        expect.equal(resBuyer.replyText.includes("JOHNSON"), true);
+      });
+
+      test("F165-T24: E2E Enterprise Lifecycle: Johnson SPX All-Hub Dispatch -> SAM Description Plagiarism Guard -> Cuckoo Filter Voucher Revocation", () => {
+        // 1. Logistics: Johnson builds all-pairs routing matrix
+        const spx = new JohnsonGraphRouting();
+        spx.addRoute("BAC_NINH", "DA_NANG", 14);
+        spx.addRoute("DA_NANG", "CU_CHI", 18);
+        spx.addRoute("BAC_NINH", "CU_CHI", 35);
+        const routing = spx.computeAllPairsShortestPaths();
+        expect.equal(routing.distances["BAC_NINH"]["CU_CHI"], 32); // 14 + 18
+
+        // 2. Content Guard: SAM flags copycat description
+        const officialDesc = "Chuột không dây gaming siêu nhẹ 49g cảm biến PixArt PAW3395 kết nối 3 mode";
+        const fakeDesc = "Hàng hot Chuột không dây gaming siêu nhẹ 49g cảm biến PixArt PAW3395 giảm giá 80%";
+        const sam = new SuffixAutomatonDeduplicator(officialDesc);
+        const checkPlagiarism = sam.findLongestCommonSubstring(fakeDesc);
+        expect.equal(checkPlagiarism.isPlagiarized, true);
+
+        // 3. Security: Cuckoo Filter revokes exploited voucher and blacklists scam shop token
+        const securityFilter = new CuckooFilterRevocation(64, 4);
+        securityFilter.insert("VOUCHER_EXPLOIT_BUG");
+        securityFilter.insert("TOKEN_SHOP_SCAM_789");
+        expect.equal(securityFilter.lookup("VOUCHER_EXPLOIT_BUG"), true);
+        // Re-enable legitimate token after verification
+        securityFilter.delete("TOKEN_SHOP_SCAM_789");
+        expect.equal(securityFilter.lookup("TOKEN_SHOP_SCAM_789"), false);
+        expect.equal(securityFilter.lookup("VOUCHER_EXPLOIT_BUG"), true);
       });
     });
   });

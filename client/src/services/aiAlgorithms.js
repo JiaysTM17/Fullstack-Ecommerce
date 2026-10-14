@@ -8652,6 +8652,354 @@ export class BellmanFordArbitrage {
   }
 }
 
+// ==========================================
+// Phase 18: Johnson Routing, Suffix Automaton Deduplication & Cuckoo Filter Revocation Suite
+// ==========================================
+
+export class JohnsonGraphRouting {
+  constructor() {
+    this.vertices = new Set();
+    this.edges = [];
+  }
+
+  addHub(hubId) {
+    if (hubId) this.vertices.add(String(hubId));
+  }
+
+  addRoute(from, to, weight, meta = {}) {
+    const u = String(from);
+    const v = String(to);
+    this.vertices.add(u);
+    this.vertices.add(v);
+    this.edges.push({ u, v, weight: Number(weight), meta });
+  }
+
+  computeAllPairsShortestPaths() {
+    const vertexList = Array.from(this.vertices);
+    const n = vertexList.length;
+    if (n === 0) return { distances: {}, hasNegativeCycle: false, hubCount: 0 };
+
+    const q = "__VIRTUAL_SOURCE_Q__";
+    const augmentedEdges = [...this.edges];
+    for (const v of vertexList) {
+      augmentedEdges.push({ u: q, v, weight: 0 });
+    }
+
+    const allVerticesWithQ = [...vertexList, q];
+    const h = {};
+    for (const v of allVerticesWithQ) h[v] = Infinity;
+    h[q] = 0;
+
+    for (let i = 1; i <= allVerticesWithQ.length - 1; i++) {
+      let changed = false;
+      for (const edge of augmentedEdges) {
+        if (h[edge.u] !== Infinity && h[edge.u] + edge.weight < h[edge.v]) {
+          h[edge.v] = h[edge.u] + edge.weight;
+          changed = true;
+        }
+      }
+      if (!changed) break;
+    }
+
+    for (const edge of augmentedEdges) {
+      if (h[edge.u] !== Infinity && h[edge.u] + edge.weight < h[edge.v]) {
+        return {
+          distances: {},
+          hasNegativeCycle: true,
+          message: "LỖI: Phát hiện chu trình âm trong mạng lưới giao vận. Không thể tính toán đường đi tối ưu!"
+        };
+      }
+    }
+
+    const adj = new Map();
+    for (const v of vertexList) adj.set(v, []);
+
+    for (const edge of this.edges) {
+      const reweighted = edge.weight + h[edge.u] - h[edge.v];
+      adj.get(edge.u).push({
+        to: edge.v,
+        weight: Math.max(0, reweighted),
+        originalWeight: edge.weight
+      });
+    }
+
+    const allPairsDist = {};
+    for (const u of vertexList) {
+      allPairsDist[u] = {};
+      const dHat = {};
+      const visited = new Set();
+      for (const v of vertexList) dHat[v] = Infinity;
+      dHat[u] = 0;
+
+      for (let iter = 0; iter < n; iter++) {
+        let minNode = null;
+        let minDist = Infinity;
+        for (const v of vertexList) {
+          if (!visited.has(v) && dHat[v] < minDist) {
+            minDist = dHat[v];
+            minNode = v;
+          }
+        }
+        if (minNode === null || minDist === Infinity) break;
+        visited.add(minNode);
+
+        for (const neighbor of adj.get(minNode)) {
+          if (!visited.has(neighbor.to)) {
+            const newDist = dHat[minNode] + neighbor.weight;
+            if (newDist < dHat[neighbor.to]) {
+              dHat[neighbor.to] = newDist;
+            }
+          }
+        }
+      }
+
+      for (const v of vertexList) {
+        if (dHat[v] === Infinity) {
+          allPairsDist[u][v] = Infinity;
+        } else {
+          allPairsDist[u][v] = Number((dHat[v] - h[u] + h[v]).toFixed(2));
+        }
+      }
+    }
+
+    return {
+      distances: allPairsDist,
+      hasNegativeCycle: false,
+      hubCount: n,
+      hValues: h
+    };
+  }
+
+  getShortestDistance(fromHub, toHub) {
+    const result = this.computeAllPairsShortestPaths();
+    if (result.hasNegativeCycle) return Infinity;
+    return result.distances[fromHub]?.[toHub] ?? Infinity;
+  }
+}
+
+export class SAMState {
+  constructor(len = 0, link = -1) {
+    this.len = len;
+    this.link = link;
+    this.next = new Map();
+  }
+}
+
+export class SuffixAutomatonDeduplicator {
+  constructor(baseText = "") {
+    this.st = [];
+    this.sz = 0;
+    this.last = 0;
+    this._init();
+    if (baseText) this.build(baseText);
+  }
+
+  _init() {
+    this.st = [new SAMState(0, -1)];
+    this.sz = 1;
+    this.last = 0;
+  }
+
+  extend(c) {
+    const cur = this.sz++;
+    this.st.push(new SAMState(this.st[this.last].len + 1));
+    let p = this.last;
+
+    while (p !== -1 && !this.st[p].next.has(c)) {
+      this.st[p].next.set(c, cur);
+      p = this.st[p].link;
+    }
+
+    if (p === -1) {
+      this.st[cur].link = 0;
+    } else {
+      const q = this.st[p].next.get(c);
+      if (this.st[p].len + 1 === this.st[q].len) {
+        this.st[cur].link = q;
+      } else {
+        const clone = this.sz++;
+        this.st.push(new SAMState(this.st[p].len + 1, this.st[q].link));
+        for (const [ch, nxt] of this.st[q].next.entries()) {
+          this.st[clone].next.set(ch, nxt);
+        }
+        while (p !== -1 && this.st[p].next.get(c) === q) {
+          this.st[p].next.set(c, clone);
+          p = this.st[p].link;
+        }
+        this.st[q].link = clone;
+        this.st[cur].link = clone;
+      }
+    }
+    this.last = cur;
+  }
+
+  build(text) {
+    this._init();
+    if (!text || typeof text !== "string") return;
+    for (let i = 0; i < text.length; i++) this.extend(text[i]);
+  }
+
+  contains(sub) {
+    if (!sub) return true;
+    let curr = 0;
+    for (let i = 0; i < sub.length; i++) {
+      const c = sub[i];
+      if (!this.st[curr].next.has(c)) return false;
+      curr = this.st[curr].next.get(c);
+    }
+    return true;
+  }
+
+  findLongestCommonSubstring(targetText) {
+    if (!targetText || typeof targetText !== "string" || this.sz <= 1) {
+      return { lcsLength: 0, lcsString: "", similarityRatio: 0 };
+    }
+    let v = 0, l = 0, best = 0, bestpos = 0;
+    for (let i = 0; i < targetText.length; i++) {
+      const c = targetText[i];
+      while (v > 0 && !this.st[v].next.has(c)) {
+        v = this.st[v].link;
+        l = this.st[v].len;
+      }
+      if (this.st[v].next.has(c)) {
+        v = this.st[v].next.get(c);
+        l++;
+      }
+      if (l > best) {
+        best = l;
+        bestpos = i;
+      }
+    }
+    const lcsString = targetText.substring(bestpos - best + 1, bestpos + 1);
+    const similarityRatio = Number(((best / Math.max(1, targetText.length)) * 100).toFixed(1));
+    return {
+      lcsLength: best,
+      lcsString,
+      similarityRatio,
+      isPlagiarized: best >= 30 || similarityRatio >= 50
+    };
+  }
+
+  static detectKeywordStuffing(text, keyword, maxThreshold = 5) {
+    if (!text || !keyword) return { count: 0, isStuffed: false };
+    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const matches = text.match(regex);
+    const count = matches ? matches.length : 0;
+    return {
+      keyword,
+      occurrences: count,
+      isStuffed: count > maxThreshold,
+      recommendation: count > maxThreshold
+        ? `CẢNH BÁO SEO STUFFING: Từ khóa "${keyword}" lặp lại ${count} lần bất thường! Vui lòng viết tự nhiên để tránh bị hạ điểm hiển thị.`
+        : "Mật độ từ khóa đạt chuẩn tự nhiên."
+    };
+  }
+}
+
+export class CuckooFilterRevocation {
+  constructor(bucketCount = 128, bucketSize = 4, maxKicks = 50) {
+    this.bucketCount = bucketCount;
+    this.bucketSize = bucketSize;
+    this.maxKicks = maxKicks;
+    this.buckets = Array.from({ length: bucketCount }, () => []);
+    this.count = 0;
+  }
+
+  _fingerprint(item) {
+    const str = String(item);
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return (Math.abs(h) % 255) + 1;
+  }
+
+  _hashIndex(item) {
+    const str = String(item);
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = (h << 5) - h + str.charCodeAt(i);
+      h |= 0;
+    }
+    return Math.abs(h) % this.bucketCount;
+  }
+
+  _altIndex(index, fp) {
+    let h = Math.imul(fp, 0x5bd1e995);
+    h ^= h >>> 15;
+    const hashFp = Math.abs(h) % this.bucketCount;
+    return (index ^ hashFp) % this.bucketCount;
+  }
+
+  insert(item) {
+    const fp = this._fingerprint(item);
+    const i1 = this._hashIndex(item);
+    const i2 = this._altIndex(i1, fp);
+
+    if (this.buckets[i1].length < this.bucketSize) {
+      this.buckets[i1].push(fp);
+      this.count++;
+      return true;
+    }
+    if (this.buckets[i2].length < this.bucketSize) {
+      this.buckets[i2].push(fp);
+      this.count++;
+      return true;
+    }
+
+    let currIndex = Math.random() < 0.5 ? i1 : i2;
+    let currFp = fp;
+
+    for (let k = 0; k < this.maxKicks; k++) {
+      const slot = Math.floor(Math.random() * this.bucketSize);
+      const kickedFp = this.buckets[currIndex][slot];
+      this.buckets[currIndex][slot] = currFp;
+      currFp = kickedFp;
+      currIndex = this._altIndex(currIndex, currFp);
+
+      if (this.buckets[currIndex].length < this.bucketSize) {
+        this.buckets[currIndex].push(currFp);
+        this.count++;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  lookup(item) {
+    const fp = this._fingerprint(item);
+    const i1 = this._hashIndex(item);
+    const i2 = this._altIndex(i1, fp);
+    return this.buckets[i1].includes(fp) || this.buckets[i2].includes(fp);
+  }
+
+  delete(item) {
+    const fp = this._fingerprint(item);
+    const i1 = this._hashIndex(item);
+    const i2 = this._altIndex(i1, fp);
+
+    const idx1 = this.buckets[i1].indexOf(fp);
+    if (idx1 !== -1) {
+      this.buckets[i1].splice(idx1, 1);
+      this.count--;
+      return true;
+    }
+    const idx2 = this.buckets[i2].indexOf(fp);
+    if (idx2 !== -1) {
+      this.buckets[i2].splice(idx2, 1);
+      this.count--;
+      return true;
+    }
+    return false;
+  }
+
+  getLoadFactor() {
+    const totalCapacity = this.bucketCount * this.bucketSize;
+    return Number((this.count / totalCapacity).toFixed(4));
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -8759,6 +9107,11 @@ export default {
   AhoCorasickNode,
   AhoCorasickModerator,
   BellmanFordArbitrage,
+  // Phase 18 Enterprise Algorithms
+  JohnsonGraphRouting,
+  SAMState,
+  SuffixAutomatonDeduplicator,
+  CuckooFilterRevocation,
 };
 
 

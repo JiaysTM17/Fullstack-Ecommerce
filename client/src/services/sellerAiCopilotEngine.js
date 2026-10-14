@@ -548,6 +548,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 27. Tối Ưu SEO & Chống Đạo Nhái Mô Tả Bằng Suffix Automaton (Phase 18 - Feature 165)
+  if (/suffix automaton|sam|lcs|keyword stuffing|sao chép mô tả|đạo nhái bài đăng|tối ưu seo sam/i.test(raw)) {
+    return {
+      text: `📝 **TỐI ƯU SEO & CHỐNG ĐẠO NHÁI MÔ TẢ BẰNG SUFFIX AUTOMATON (SAM $O(N)$)**:
+- **Nguyên lý Suffix Automaton (Máy hữu hạn hậu tố tuyến tính)**:
+  - Cấu trúc dữ liệu đồ thị có hướng không chu trình (DAG) đại diện cho tất cả các chuỗi con của văn bản chỉ với tối đa $2N - 1$ trạng thái và $3N - 4$ cạnh chuyển đổi.
+  - Tìm chuỗi con chung dài nhất (Longest Common Substring - LCS) giữa hai bài viết trong thời gian tuyến tính $O(N)$, vượt trội hơn Dynamic Programming $O(N^2)$.
+- **Bảo vệ gian hàng (${currentShop.name})**:
+  - **Phát hiện sao chép mô tả (Content Plagiarism)**: So sánh bài viết của shop với các đối thủ copycat. Nếu tỷ lệ trùng lặp sâu $\\ge 70\\%$, hệ thống sẽ cảnh báo khiếu nại bản quyền.
+  - **Phát hiện SEO Keyword Stuffing**: Đếm tần suất chuỗi con lặp lại bất thường ("áo thun áo thun áo thun") làm giảm điểm chất lượng Quality Score trên bảng xếp hạng tìm kiếm.`,
+      type: 'seo',
+      tag: 'TỐI ƯU SEO SUFFIX AUTOMATON',
+      suggestions: [
+        'Kiểm duyệt từ cấm bài đăng Aho-Corasick',
+        'Tối ưu đấu thầu từ khóa GSP',
+        'Tư vấn chiến lược Flash Sale'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

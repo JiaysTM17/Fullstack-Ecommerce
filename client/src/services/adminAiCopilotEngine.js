@@ -1054,6 +1054,51 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
+  // 43. Mạng Lưới Vận Tải Toàn Miền SPX Bằng Johnson All-Pairs Shortest Paths (Phase 18 - Feature 165)
+  if (/johnson|all-pairs|mạng lưới vận tải toàn miền|định tuyến toàn mạng|johnson routing|spx toàn quốc/i.test(raw)) {
+    return {
+      text: `🌐 **MẠNG LƯỚI VẬN TẢI TOÀN MIỀN SPX BẰNG THUẬT TOÁN JOHNSON (ALL-PAIRS SHORTEST PATHS)**:
+- **Nguyên lý kết hợp Bellman-Ford + Dijkstra ($O(V^2 \\log V + VE)$)**:
+  - Cho mạng lưới logistics toàn quốc với $V$ trung tâm phân loại (Hub/SOC) và $E$ tuyến luân chuyển có thể có trợ giá vận chuyển hoặc chiết khấu tuyến đường (trọng số âm).
+  - Bước 1: Dùng Bellman-Ford gán hàm tiềm năng $h(u)$ cho mọi đỉnh $u$ để tái trọng số cạnh: $w'(u, v) = w(u, v) + h(u) - h(v) \\ge 0$.
+  - Bước 2: Chạy Dijkstra $V$ lần với Fibonacci/Min-Heap trên đồ thị đã tái trọng số không âm, nhanh hơn đáng kể so với Floyd-Warshall $O(V^3)$ trên đồ thị thưa.
+- **Ứng dụng vận hành SPX Logistics**:
+  - Tính trước ma trận khoảng cách và chi phí vận chuyển giữa TẤT CẢ các cặp Hub toàn quốc (Hà Nội, Đà Nẵng, TP.HCM, Cần Thơ, Hải Phòng, Buôn Ma Thuột).
+  - Tự động phát hiện chu trình âm nếu chiết khấu vận chuyển bị lạm dụng và tối ưu hóa tuyến gom hàng đa chặng chặng giữa.`,
+      type: 'logistics',
+      tag: 'ĐỊNH TUYẾN TOÀN MẠNG JOHNSON',
+      suggestions: [
+        'Định tuyến luân chuyển SPX Multi-Hub',
+        'Thu hồi voucher bằng Cuckoo Filter',
+        'Kiểm tra chỉ số SLA giao hàng'
+      ]
+    };
+  }
+
+  // 44. Danh Sách Đen & Thu Hồi Voucher Bằng Cuckoo Filter (Phase 18 - Feature 165)
+  if (/cuckoo filter|thu hồi voucher|danh sách đen động|cuckoo|thu hồi token|xóa động bộ lọc/i.test(raw)) {
+    return {
+      text: `🗄️ **DANH SÁCH ĐEN & THU HỒI VOUCHER BẰNG CUCKOO FILTER (PARTIAL-KEY CUCKOO HASHING)**:
+- **Ưu thế vượt trội so với Standard Bloom Filter**:
+  - Bloom Filter chuẩn **KHÔNG THỂ XÓA** phần tử vì xóa bit 1 có thể vô tình làm mất thông tin của phần tử khác.
+  - Cuckoo Filter hỗ trợ thao tác \`delete(item)\` động với độ phức tạp $O(1)$ mà không gây suy giảm cấu trúc dữ liệu!
+- **Nguyên lý băm tổ chim cu (Cuckoo Hashing)**:
+  - Mỗi phần tử được băm thành một fingerprint (1 byte) và có thể nằm ở 1 trong 2 xô (bucket) dự phòng:
+    $$i_1 = h(x), \\quad i_2 = i_1 \\oplus h(\\text{fingerprint})$$
+  - Khi xô đầy, thuật toán "đá" (evict) phần tử cũ sang xô dự phòng của nó tương tự tập tính chim tu hú đẻ nhờ tổ chim khác.
+- **Ứng dụng bảo mật & vận hành sàn TMĐT**:
+  - **Dynamic Voucher Revocation**: Thu hồi mã giảm giá bị lỗi hoặc bị lạm dụng ngay lập tức mà không cần xóa trong cơ sở dữ liệu chính.
+  - **Token Blacklisting**: Vô hiệu hóa JWT token đã đăng xuất của tài khoản có nguy cơ bị chiếm quyền truy cập.`,
+      type: 'security',
+      tag: 'BỘ LỌC CUCKOO REVOCATION',
+      suggestions: [
+        'Mạng lưới vận tải toàn miền Johnson',
+        'Quét radar tài khoản gian lận',
+        'Cấu trúc xác suất Bloom Filter'
+      ]
+    };
+  }
+
   // 39. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
