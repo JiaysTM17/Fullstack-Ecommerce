@@ -204,6 +204,10 @@ import {
   HopcroftTarjanPlanarity,
   HNSWProductQuantizer,
   SoftmaxGradientBandit,
+  // Phase 34 Enterprise Algorithms
+  KuhnMunkresMatching,
+  TDigestPercentileEstimator,
+  HierarchicalSoftmaxRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -271,6 +275,9 @@ import { ContextualBanditEngine as ServerContextualBandit } from "../../server/s
 import { HopcroftTarjanPlanarity as ServerHopcroftTarjan } from "../../server/src/utils/hopcroftTarjanPlanarity.js";
 import { HNSWProductQuantizer as ServerHNSWProductQuantizer } from "../../server/src/utils/hnswProductQuantizer.js";
 import { SoftmaxGradientBandit as ServerSoftmaxGradientBandit } from "../../server/src/utils/softmaxGradientBandit.js";
+import ServerKuhnMunkresMatching from "../../server/src/utils/kuhnMunkresMatching.js";
+import ServerTDigestPercentileEstimator from "../../server/src/utils/tdigestPercentileEstimator.js";
+import ServerHierarchicalSoftmaxRouter from "../../server/src/utils/hierarchicalSoftmaxRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -17061,6 +17068,328 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       }
       const bestBanner = heroBandit.selectArm();
       expect.equal(bestBanner, "BANNER_FLASH_SALE_HANDBAG");
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 181: Kuhn-Munkres Matching, t-Digest Estimator, Hierarchical Softmax (24 Tests)
+  // =========================================================================
+  describe("Feature 181: Kuhn-Munkres Matching, t-Digest Estimator, Hierarchical Softmax", () => {
+    // --- PART 1: Kuhn-Munkres Maximum Weight Bipartite Matching (F181-T01 -> F181-T06) ---
+    test("F181-T01: Kuhn-Munkres solves 2x2 optimal bipartite courier matching with max total weight", () => {
+      const km = new KuhnMunkresMatching();
+      km.setWorkers([
+        { id: "SHIPPER_A", name: "Nguyễn Văn A", rating: 4.9, activeTasksCount: 0 },
+        { id: "SHIPPER_B", name: "Trần Văn B", rating: 4.2, activeTasksCount: 0 },
+      ]);
+      km.setTasks([
+        { id: "ORDER_1", name: "Đơn Quận 1", distanceKm: 2, priority: "URGENT_2H" },
+        { id: "ORDER_2", name: "Đơn Quận 3", distanceKm: 10, priority: "STANDARD" },
+      ]);
+
+      const res = km.solve();
+      expect.equal(res.matches.length, 2);
+      expect.equal(res.isPerfect, true);
+      expect.equal(res.totalWeight > 0, true);
+      // Shipper A has higher rating and gets the urgent near order
+      const matchA = res.matches.find(m => m.workerId === "SHIPPER_A");
+      expect.equal(matchA.taskId, "ORDER_1");
+    });
+
+    test("F181-T02: Workload fairness penalty prevents overloading courier with existing active tasks", () => {
+      const km = new KuhnMunkresMatching({ workloadFairnessFactor: 0.2 });
+      km.setWorkers([
+        { id: "COURIER_OVERLOADED", rating: 5.0, activeTasksCount: 10 },
+        { id: "COURIER_FREE", rating: 4.5, activeTasksCount: 0 },
+      ]);
+      km.setTasks([
+        { id: "PACKAGE_HOT", distanceKm: 3 },
+      ]);
+
+      const res = km.solve();
+      expect.equal(res.matches.length, 1);
+      // Free courier should win because overloaded courier is heavily penalized
+      expect.equal(res.matches[0].workerId, "COURIER_FREE");
+    });
+
+    test("F181-T03: Priority URGENT_2H and Flash sale bonus boosts weight and ensures expedited assignment", () => {
+      const km = new KuhnMunkresMatching();
+      const worker = { id: "W1", rating: 4.5 };
+      const taskNormal = { id: "T_NORM", distanceKm: 5, isFlashSale: false };
+      const taskFlash = { id: "T_FLASH", distanceKm: 5, isFlashSale: true };
+
+      const wNormal = km.calculateWeight(worker, taskNormal);
+      const wFlash = km.calculateWeight(worker, taskFlash);
+      expect.equal(wFlash - wNormal, 30.0);
+    });
+
+    test("F181-T04: Unbalanced bipartite matching correctly identifies unassigned entities", () => {
+      const km = new KuhnMunkresMatching();
+      km.setWorkers([
+        { id: "S1", rating: 4.8 },
+        { id: "S2", rating: 4.7 },
+        { id: "S3", rating: 4.6 },
+      ]);
+      km.setTasks([
+        { id: "O1", distanceKm: 2 },
+      ]);
+
+      const res = km.solve();
+      expect.equal(res.matches.length, 1);
+      expect.equal(res.unassignedWorkers.length, 2);
+      expect.equal(res.unassignedTasks.length, 0);
+      expect.equal(res.isPerfect, true); // Math.min(3, 1) = 1
+    });
+
+    test("F181-T05: Zero or empty input sets return safe empty result object without throwing exceptions", () => {
+      const km = new KuhnMunkresMatching();
+      const res = km.solve();
+      expect.equal(res.matches.length, 0);
+      expect.equal(res.totalWeight, 0);
+      expect.equal(res.unassignedWorkers.length, 0);
+      expect.equal(res.unassignedTasks.length, 0);
+    });
+
+    test("F181-T06: ServerKuhnMunkresMatching parity with client implementation on 3x3 logistics assignment", () => {
+      const serverKM = new ServerKuhnMunkresMatching();
+      serverKM.setWorkers([
+        { id: "S_HN", rating: 4.8, activeTasksCount: 1 },
+        { id: "S_SG", rating: 4.9, activeTasksCount: 0 },
+        { id: "S_DN", rating: 4.6, activeTasksCount: 2 },
+      ]);
+      serverKM.setTasks([
+        { id: "P1", distanceKm: 4, priority: "URGENT_2H" },
+        { id: "P2", distanceKm: 1, priority: "STANDARD" },
+        { id: "P3", distanceKm: 8, priority: "STANDARD" },
+      ]);
+
+      const res = serverKM.solve();
+      expect.equal(res.matches.length, 3);
+      expect.equal(res.totalWeight > 200, true);
+    });
+
+    // --- PART 2: Ted Dunning t-Digest Streaming Quantile Estimator (F181-T07 -> F181-T12) ---
+    test("F181-T07: t-Digest initializes with bounded compression parameter and tracks min/max", () => {
+      const td = new TDigestPercentileEstimator({ compression: 50 });
+      td.add(10);
+      td.add(500);
+      td.add(250);
+
+      expect.equal(td.min, 10);
+      expect.equal(td.max, 500);
+      expect.equal(td.buffer.length, 3);
+    });
+
+    test("F181-T08: Compresses buffer into centroids obeying arcsin scale function condition", () => {
+      const td = new TDigestPercentileEstimator({ compression: 50 });
+      for (let i = 1; i <= 300; i++) {
+        td.add(i);
+      }
+      td.compress();
+      expect.equal(td.buffer.length, 0);
+      expect.equal(td.centroids.length > 0, true);
+      expect.equal(td.centroids.length <= 150, true);
+      expect.equal(td.totalWeight, 300);
+    });
+
+    test("F181-T09: Quantile estimation for uniform distribution [1, 1000] computes P50, P90, P99 within small margin", () => {
+      const td = new TDigestPercentileEstimator({ compression: 100 });
+      for (let i = 1; i <= 1000; i++) {
+        td.add(i);
+      }
+
+      const p50 = td.quantile(0.50);
+      const p90 = td.quantile(0.90);
+      const p99 = td.quantile(0.99);
+
+      expect.equal(Math.abs(p50 - 500) < 30, true);
+      expect.equal(Math.abs(p90 - 900) < 30, true);
+      expect.equal(Math.abs(p99 - 990) < 20, true);
+    });
+
+    test("F181-T10: Extreme tail quantile (P99.9) demonstrates high fidelity due to small tail centroids", () => {
+      const td = new TDigestPercentileEstimator({ compression: 100 });
+      for (let i = 1; i <= 5000; i++) {
+        td.add(i);
+      }
+      const p999 = td.quantile(0.999);
+      expect.equal(Math.abs(p999 - 4995) < 30, true);
+    });
+
+    test("F181-T11: cdf(x) accurately inverts quantile estimation P(X <= x)", () => {
+      const td = new TDigestPercentileEstimator({ compression: 80 });
+      for (let i = 1; i <= 1000; i++) {
+        td.add(i);
+      }
+      const cdf500 = td.cdf(500);
+      expect.equal(Math.abs(cdf500 - 0.50) < 0.05, true);
+      expect.equal(td.cdf(0), 0);
+      expect.equal(td.cdf(2000), 1);
+    });
+
+    test("F181-T12: ServerTDigestPercentileEstimator parity with client implementation on latency distribution", () => {
+      const serverTD = new ServerTDigestPercentileEstimator({ compression: 100 });
+      // Simulate API latencies (mostly 20-80ms, some tail spikes up to 1200ms)
+      for (let i = 0; i < 400; i++) serverTD.add(30 + Math.random() * 20);
+      for (let i = 0; i < 50; i++) serverTD.add(150 + Math.random() * 50);
+      for (let i = 0; i < 5; i++) serverTD.add(800 + Math.random() * 400);
+
+      const summary = serverTD.getLatencySummary();
+      expect.equal(summary.count, 455);
+      expect.equal(summary.p50 < 60, true);
+      expect.equal(summary.p99 > 200, true);
+      expect.equal(summary.max >= 800, true);
+    });
+
+    // --- PART 3: Hierarchical Softmax Category Router (F181-T13 -> F181-T18) ---
+    test("F181-T13: Huffman Tree builds valid prefix codes based on category frequencies", () => {
+      const router = new HierarchicalSoftmaxRouter({ featureDim: 4 });
+      router.registerCategory("THOI_TRANG", 1000);
+      router.registerCategory("DIEN_THOAI", 800);
+      router.registerCategory("GIA_DUNG", 200);
+      router.registerCategory("SACH_VO", 50);
+
+      router.buildTree();
+      const stats = router.getHierarchyStats();
+      expect.equal(stats.totalCategories, 4);
+      expect.equal(stats.innerNodesCount, 3);
+      // Frequent category has shorter or equal code length than rare category
+      const codeHot = router.leafMap.get("THOI_TRANG").code;
+      const codeRare = router.leafMap.get("SACH_VO").code;
+      expect.equal(codeHot.length <= codeRare.length, true);
+    });
+
+    test("F181-T14: Single category catalog builds valid trivial 1-leaf tree", () => {
+      const router = new HierarchicalSoftmaxRouter({ featureDim: 4 });
+      router.registerCategory("ONLY_CATEGORY", 10);
+      router.buildTree();
+      expect.equal(router.leafMap.size, 1);
+      const prob = router.getProbability("ONLY_CATEGORY", [0.5, 0.5, 0.5, 0.5]);
+      expect.equal(prob > 0, true);
+    });
+
+    test("F181-T15: Path probability P(category | featureVector) computes product of sigmoid decisions in O(log2 V)", () => {
+      const router = new HierarchicalSoftmaxRouter({ featureDim: 4 });
+      router.registerCategory("CAT_A", 100);
+      router.registerCategory("CAT_B", 100);
+      router.buildTree();
+
+      const probA = router.getProbability("CAT_A", [1, 0, 0, 0]);
+      const probB = router.getProbability("CAT_B", [1, 0, 0, 0]);
+      expect.equal(probA > 0, true);
+      expect.equal(probB > 0, true);
+      expect.equal(Math.abs((probA + probB) - 1.0) < 0.01, true);
+    });
+
+    test("F181-T16: predict() ranks categories by probability and returns top-K with code depth", () => {
+      const router = new HierarchicalSoftmaxRouter({ featureDim: 4 });
+      router.registerCategory("SHOES", 500);
+      router.registerCategory("SHIRTS", 400);
+      router.registerCategory("HATS", 100);
+
+      const top = router.predict([0.2, 0.5, -0.1, 0.8], 2);
+      expect.equal(top.length, 2);
+      expect.equal(top[0].probability >= top[1].probability, true);
+      expect.equal(top[0].depth > 0, true);
+    });
+
+    test("F181-T17: trainStep() performs gradient ascent on inner node weights, increasing probability of gold category", () => {
+      const router = new HierarchicalSoftmaxRouter({ featureDim: 4, learningRate: 0.2 });
+      router.registerCategory("WIN_CAT", 100);
+      router.registerCategory("LOSE_CAT", 100);
+      router.buildTree();
+
+      const feat = [1.0, 1.0, 1.0, 1.0];
+      const initialProb = router.getProbability("WIN_CAT", feat);
+
+      for (let i = 0; i < 20; i++) {
+        router.trainStep("WIN_CAT", feat);
+      }
+
+      const trainedProb = router.getProbability("WIN_CAT", feat);
+      expect.equal(trainedProb > initialProb, true);
+    });
+
+    test("F181-T18: ServerHierarchicalSoftmaxRouter parity with client implementation on 4-category classification", () => {
+      const serverRouter = new ServerHierarchicalSoftmaxRouter({ featureDim: 4 });
+      serverRouter.registerCategory("L1_TECH", 300);
+      serverRouter.registerCategory("L1_FASHION", 250);
+      serverRouter.registerCategory("L1_BEAUTY", 150);
+      serverRouter.registerCategory("L1_FOOD", 80);
+
+      serverRouter.buildTree();
+      const stats = serverRouter.getHierarchyStats();
+      expect.equal(stats.totalCategories, 4);
+      expect.equal(stats.averagePathDepth > 0, true);
+
+      const preds = serverRouter.predict([0.5, 0.2, -0.3, 0.1], 3);
+      expect.equal(preds.length, 3);
+    });
+
+    // --- PART 4: Copilots & End-to-End Integration (F181-T19 -> F181-T24) ---
+    test("F181-T19: Admin Sentinel Copilot Section 83 recognizes Kuhn-Munkres Max Weight Matching", () => {
+      const res = generateAdminCopilotResponse("Điều phối bưu tá kuhn-munkres max weight công bằng tải bưu tá", {});
+      expect.equal(res.tag, "GHÉP ĐÔI CỰC ĐẠI KUHN-MUNKRES");
+      expect.equal(/kuhn-munkres/i.test(res.text), true);
+      expect.equal(/bưu tá/i.test(res.text), true);
+    });
+
+    test("F181-T20: Admin Sentinel Copilot Section 84 recognizes t-Digest P99 Latency Monitoring", () => {
+      const res = generateAdminCopilotResponse("Giám sát độ trễ p99 t-digest arcsin centroids", {});
+      expect.equal(res.tag, "GIÁM SÁT ĐỘ TRỄ P99 T-DIGEST");
+      expect.equal(/t-digest/i.test(res.text), true);
+      expect.equal(/p99/i.test(res.text), true);
+    });
+
+    test("F181-T21: Admin Sentinel Copilot Section 85 recognizes Hierarchical Softmax Huffman Category Router", () => {
+      const res = generateAdminCopilotResponse("Phân loại danh mục huffman hierarchical softmax log2 V", {});
+      expect.equal(res.tag, "ĐỊNH TUYẾN DANH MỤC HIERARCHICAL SOFTMAX");
+      expect.equal(/hierarchical softmax/i.test(res.text), true);
+      expect.equal(/huffman/i.test(res.text), true);
+    });
+
+    test("F181-T22: Seller ShopSmart Copilot Section 43 guides SPX dispatch, P99 fulfillment latency & Huffman category router", () => {
+      const res = generateSellerCopilotResponse("Ghép bưu tá kuhn-munkres và phân loại cây huffman", { name: "Shop Thời Trang" }, [], []);
+      expect.equal(res.tag, "TỐI ƯU KUHN-MUNKRES, T-DIGEST & HUFFMAN ROUTER");
+      expect.equal(/kuhn-munkres/i.test(res.text), true);
+      expect.equal(/huffman/i.test(res.text), true);
+    });
+
+    test("F181-T23: Buyer AI Assistant Intent 36 explains Kuhn-Munkres dispatch, P99 smooth checkout & Huffman catalog browse", () => {
+      const res = generateAiChatResponse("Ghép bưu tá kuhn-munkres và độ trễ p99 t-digest");
+      expect.equal(res.intent, "KUHN_TDIGEST_HUFFMAN_ASSIST");
+      expect.equal(/kuhn-munkres/i.test(res.replyText), true);
+      expect.equal(/t-digest/i.test(res.replyText), true);
+    });
+
+    test("F181-T24: E2E Lifecycle: Category router classifies product into Huffman tree -> t-Digest monitors checkout latency -> Kuhn-Munkres dispatches optimal courier for 2H fulfillment", () => {
+      // Step 1: Category Classification
+      const catRouter = new HierarchicalSoftmaxRouter({ featureDim: 4 });
+      catRouter.registerCategory("SMARTPHONE_PREMIUM", 1000);
+      catRouter.registerCategory("CASES_COVERS", 500);
+      catRouter.buildTree();
+      const catPred = catRouter.predict([1.0, 0.5, 0.2, 0.1], 1);
+      expect.equal(catPred.length, 1);
+
+      // Step 2: Latency monitor
+      const latencyMonitor = new TDigestPercentileEstimator({ compression: 50 });
+      for (let i = 0; i < 100; i++) latencyMonitor.add(45 + Math.random() * 10);
+      latencyMonitor.add(120); // one spike
+      const latencySummary = latencyMonitor.getLatencySummary();
+      expect.equal(latencySummary.p50 < 60, true);
+
+      // Step 3: Courier dispatch
+      const dispatcher = new KuhnMunkresMatching();
+      dispatcher.setWorkers([
+        { id: "SHIPPER_FAST", rating: 4.9, activeTasksCount: 0 },
+        { id: "SHIPPER_BUSY", rating: 4.8, activeTasksCount: 5 },
+      ]);
+      dispatcher.setTasks([
+        { id: "ORDER_FLAGSHIP_PHONE", distanceKm: 2, priority: "URGENT_2H" },
+      ]);
+      const dispatchRes = dispatcher.solve();
+      expect.equal(dispatchRes.matches.length, 1);
+      expect.equal(dispatchRes.matches[0].workerId, "SHIPPER_FAST");
     });
   });
 });

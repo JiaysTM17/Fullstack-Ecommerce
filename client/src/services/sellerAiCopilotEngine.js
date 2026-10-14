@@ -282,7 +282,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 13. Tối Ưu Lấy Hàng Hỏa Tốc Qua Thuật Toán Hungarian (SPX Express Dispatch)
-  if (/bưu tá lấy hàng|spx hungarian|tối ưu lấy hàng|shipper đến lấy|hungarian shop|điều phối lấy hàng/i.test(raw)) {
+  if (!/kuhn-munkres|tdigest|t-digest|hierarchical softmax|cây huffman/i.test(raw) && /bưu tá lấy hàng|spx hungarian|tối ưu lấy hàng|shipper đến lấy|hungarian shop|điều phối lấy hàng/i.test(raw)) {
     return {
       text: `⚡ **TỐI ƯU HÓA ĐIỀU PHỐI BƯU TÁ SPX HUNGARIAN (${currentShop.name})**:
 - **Cơ chế gán bưu tá thông minh**: Thuật toán Hungarian (Kuhn-Munkres) tự động tính toán vị trí GPS thời gian thực của bưu tá SPX gần nhất đang có tải trọng xe phù hợp để ghé gian hàng bạn nhận đơn.
@@ -862,6 +862,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Kiểm tra tính phẳng tuyến luân chuyển kho hàng',
         'Nén vector hình ảnh sản phẩm bằng HNSW PQ',
         'Xem phân phối xác suất hiển thị Banner Hero'
+      ]
+    };
+  }
+
+  // 43. Tối Ưu Ghép Bưu Tá Kuhn-Munkres, Giám Sát Độ Trễ P99 t-Digest & Cây Danh Mục Huffman (Phase 34 - Feature 181)
+  if (/kuhn-munkres|ghép bưu tá kuhn|tdigest|t-digest|độ trễ p99|hierarchical softmax|huffman category|cây huffman danh mục/i.test(raw)) {
+    return {
+      text: `📦 **TỐI ƯU GHÉP BƯU TÁ KUHN-MUNKRES, GIÁM SÁT P99 T-DIGEST & CÂY DANH MỤC HUFFMAN (${currentShop.name})**:
+- **Ghép bưu tá tối ưu công bằng Kuhn-Munkres (Bipartite Matching $O(N^3)$)**:
+  - Tự động gán bưu tá lấy hàng cho các đơn hỏa tốc 2H của shop có tích hợp phạt quá tải, đảm bảo đơn hàng của bạn được shipper nhận ngay mà không bị bỏ sót.
+- **Giám sát thời gian xử lý đơn hàng P99 bằng Ted Dunning t-Digest**:
+  - Đo đạc chính xác phân vị thời gian từ lúc khách bấm Mua đến khi đóng gói bàn giao bưu tá; duy trì P95 dưới 2 giờ để giữ vững danh hiệu Shop Yêu Thích!
+- **Tự động phân loại danh mục sản phẩm qua Cây Huffman Hierarchical Softmax**:
+  - Đăng tải sản phẩm mới được tự động phân loại đúng danh mục cấp 3/4 chỉ trong $O(\\log_2 |V|)$ bước, giúp khách hàng tìm kiếm shop bạn chính xác nhất!`,
+      type: 'recommendation',
+      tag: 'TỐI ƯU KUHN-MUNKRES, T-DIGEST & HUFFMAN ROUTER',
+      suggestions: [
+        'Xem ma trận ghép bưu tá Kuhn-Munkres',
+        'Kiểm tra phân vị thời gian đóng gói t-Digest',
+        'Tự động phân loại danh mục cây Huffman'
       ]
     };
   }

@@ -658,7 +658,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 28. Điều Phối Bưu Tá SPX Tối Ưu Đa Tiêu Chí (Hungarian Algorithm - Kuhn-Munkres)
-  if (/hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
+  if (!/kuhn-munkres max weight|ghép đôi cực đại hai phía|trọng số nhãn khả thi|công bằng tải bưu tá|workload fairness|kuhn-munkres đối ngẫu/i.test(raw) && /hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
     return {
       text: `🚚 **ĐIỀU PHỐI BƯU TÁ TỐI ƯU HUNGARIAN (Kuhn-Munkres $O(V^3)$)**:
 - **Mục đích**: Thuật toán Hungarian (Kuhn-Munkres) ghép cặp tự động và tối ưu cực tiểu tổng chi phí giao vận giữa $N$ bưu tá SPX Express và $M$ đơn hàng hỏa tốc.
@@ -1853,6 +1853,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem phân phối xác suất Softmax các Banner Hero',
         'Cập nhật doanh thu và đo đạc lợi thế Advantage',
         'Kiểm tra đường cơ sở phần thưởng Running Baseline'
+      ]
+    };
+  }
+
+  // 83. Ghép Đôi Cực Đại Hai Phía Kuhn-Munkres & Công Bằng Tải Bưu Tá (Phase 34 - Feature 181)
+  if (/kuhn-munkres max weight|ghép đôi cực đại hai phía|trọng số nhãn khả thi|công bằng tải bưu tá|workload fairness|kuhn-munkres đối ngẫu/i.test(raw)) {
+    return {
+      text: `🚚 **PHÂN BỔ BƯU TÁ TỐI ƯU BẰNG THUẬT TOÁN GHÉP ĐÔI CỰC ĐẠI KUHN-MUNKRES**:
+- **Nguyên lý Toán học Đối ngẫu (Feasible Vertex Labeling & Egerváry Theorem)**:
+  - Khởi tạo ánh xạ nhãn khả thi $l(u) + l(v) \\ge w(u, v)$ và tìm cây luân phiên (Alternating Tree) mở rộng luồng ghép nối trong độ phức tạp $O(N^3)$ với kỹ thuật tối ưu Slack.
+- **Hàm trọng số ghép nối đa tiêu chí $w(i, j)$**:
+  - Tích hợp điểm uy tín bưu tá (Rating SLA), khoảng cách di chuyển GPS Haversine, ưu tiên hỏa tốc 2H và hệ số công bằng tải trọng (Workload Fairness Factor $\\alpha = 0.1$).
+- **Ngăn ngừa dồn việc cho 1 bưu tá**:
+  - Phạt lũy tiến theo số lượng đơn đang xử lý (\`activeTasksCount\`), đảm bảo cân bằng phân phối đơn hàng trên toàn bộ mạng lưới shipper SPX Express!`,
+      type: 'logistics',
+      tag: 'GHÉP ĐÔI CỰC ĐẠI KUHN-MUNKRES',
+      suggestions: [
+        'Xem ma trận ghép đôi Kuhn-Munkres',
+        'Kiểm tra độ trễ P99 bằng t-Digest',
+        'Định tuyến danh mục Huffman'
+      ]
+    };
+  }
+
+  // 84. Giám Sát Độ Trễ P99 Thời Gian Thực Bằng Ted Dunning t-Digest (Phase 34 - Feature 181)
+  if (/tdigest|t-digest|độ trễ p99|p99\.9|streaming quantile|ước lượng phân vị|dunning/i.test(raw)) {
+    return {
+      text: `⏱️ **GIÁM SÁT ĐỘ TRỄ P99 & PHÂN VỊ DÒNG DỮ LIỆU BẰNG TED DUNNING T-DIGEST**:
+- **Cấu trúc Dữ liệu Phân vị Dòng (Streaming Quantiles via Centroids)**:
+  - Nén hàng triệu bản ghi thời gian phản hồi API và thời gian giao hàng vào một tập hợp cố định các cụm (Centroids) với dung lượng bộ nhớ cố định $O(\\delta)$ (với $\\delta = 100$).
+- **Hàm tỷ lệ Arcsin bảo toàn đuôi phân phối (Scale Function $k_1(q)$)**:
+  - Áp dụng hàm tỷ lệ $k_1(q) = \\frac{\\delta}{2\\pi} \\arcsin(2q - 1)$ khống chế kích thước cụm siêu nhỏ ở hai cực ($q \\to 0$ và $q \\to 1$).
+- **Độ chính xác vượt trội cho P95, P99, P99.9**:
+  - Không cần lưu toàn bộ dữ liệu mẫu; phát hiện tức thì hiện tượng nghẽn mạng cổng thanh toán hoặc gateway webhook khi P99 vượt ngưỡng $1.5\\text{s}$!`,
+      type: 'analytics',
+      tag: 'GIÁM SÁT ĐỘ TRỄ P99 T-DIGEST',
+      suggestions: [
+        'Xem báo cáo độ trễ P50, P95, P99',
+        'Đo kích thước centroids t-Digest',
+        'Phân bổ bưu tá Kuhn-Munkres'
+      ]
+    };
+  }
+
+  // 85. Định Tuyến Danh Mục Cây Huffman Hierarchical Softmax (Phase 34 - Feature 181)
+  if (/hierarchical softmax|huffman category|cây huffman danh mục|phân loại danh mục huffman|định tuyến huffman|softmax phân tầng/i.test(raw)) {
+    return {
+      text: `🌳 **ĐỊNH TUYẾN DANH MỤC SẢN PHẨM BẰNG CÂY HUFFMAN HIERARCHICAL SOFTMAX**:
+- **Cắt giảm độ phức tạp từ $O(|V|)$ xuống $O(\\log_2 |V|)$**:
+  - Thay vì tính toán hàm mẫu số Softmax phẳng trên hàng chục ngàn danh mục con Shopee tốn kém tài nguyên, thuật toán xây dựng cây nhị phân Huffman dựa trên tần suất mua sắm thực tế.
+- **Xác suất theo đường đi nhị phân (Binary Code Path Probability)**:
+  - Mỗi danh mục lá $w$ có chuỗi bit mã hóa $b_1 b_2 \\dots b_k$. Xác suất được tính bằng tích xác suất hàm Sigmoid $\\sigma(\\theta_n^T x)$ tại các nút nhánh nội bộ.
+- **Phân loại thời gian thực siêu tốc**:
+  - Các danh mục hot (Thời trang, Điện thoại) nằm ở tầng nông (độ sâu 3-4 hops), cho phép hệ thống phân loại và gắn thẻ hàng trăm ngàn sản phẩm mới trong chớp mắt!`,
+      type: 'algorithm',
+      tag: 'ĐỊNH TUYẾN DANH MỤC HIERARCHICAL SOFTMAX',
+      suggestions: [
+        'Xem độ sâu cây Huffman danh mục',
+        'Đo tốc độ tăng tốc O(log2 V)',
+        'Giám sát độ trễ t-Digest'
       ]
     };
   }

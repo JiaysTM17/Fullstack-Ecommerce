@@ -16125,6 +16125,487 @@ export class SoftmaxGradientBandit {
   }
 }
 
+// =========================================================================
+// PHASE 34 ENTERPRISE ALGORITHMS: Kuhn-Munkres Matching, t-Digest Estimator, Hierarchical Softmax
+// =========================================================================
+
+export class KuhnMunkresMatching {
+  constructor(options = {}) {
+    this.workloadFairnessFactor = options.workloadFairnessFactor || 0.1;
+    this.workers = [];
+    this.tasks = [];
+    this.costMatrix = [];
+  }
+
+  setWorkers(workers) {
+    this.workers = workers.map(w => (typeof w === "string" ? { id: w, name: w } : w));
+  }
+
+  setTasks(tasks) {
+    this.tasks = tasks.map(t => (typeof t === "string" ? { id: t, name: t } : t));
+  }
+
+  calculateWeight(worker, task) {
+    let score = 100.0;
+    if (worker.rating) {
+      score += (worker.rating - 4.0) * 20.0;
+    }
+    if (worker.lat !== undefined && worker.lng !== undefined && task.lat !== undefined && task.lng !== undefined) {
+      const dLat = worker.lat - task.lat;
+      const dLng = worker.lng - task.lng;
+      const dist = Math.sqrt(dLat * dLat + dLng * dLng) * 111.0;
+      score -= dist * 3.0;
+    } else if (task.distanceKm) {
+      score -= task.distanceKm * 3.0;
+    }
+    if (task.priority === "URGENT_2H" || task.isFlashSale) {
+      score += 30.0;
+    }
+    const activeTasks = worker.activeTasksCount || 0;
+    score -= activeTasks * (this.workloadFairnessFactor * 50.0);
+    return Math.max(0.1, score);
+  }
+
+  solve() {
+    if (this.workers.length === 0 || this.tasks.length === 0) {
+      return { matches: [], totalWeight: 0, unassignedWorkers: [], unassignedTasks: [] };
+    }
+
+    const n = Math.max(this.workers.length, this.tasks.length);
+    const cost = Array.from({ length: n }, () => Array(n).fill(0));
+
+    for (let i = 0; i < this.workers.length; i++) {
+      for (let j = 0; j < this.tasks.length; j++) {
+        cost[i][j] = this.calculateWeight(this.workers[i], this.tasks[j]);
+      }
+    }
+
+    const lx = Array(n).fill(0);
+    const ly = Array(n).fill(0);
+    const matchY = Array(n).fill(-1);
+    const matchX = Array(n).fill(-1);
+
+    for (let i = 0; i < n; i++) {
+      let maxVal = 0;
+      for (let j = 0; j < n; j++) {
+        if (cost[i][j] > maxVal) maxVal = cost[i][j];
+      }
+      lx[i] = maxVal;
+    }
+
+    const slack = Array(n).fill(0);
+    const slackX = Array(n).fill(0);
+    const prev = Array(n).fill(-1);
+    const visX = Array(n).fill(false);
+    const visY = Array(n).fill(false);
+
+    for (let root = 0; root < n; root++) {
+      visX.fill(false);
+      visY.fill(false);
+      prev.fill(-1);
+
+      for (let j = 0; j < n; j++) {
+        slack[j] = lx[root] + ly[j] - cost[root][j];
+        slackX[j] = root;
+      }
+
+      let yMatched = -1;
+      let xCur = root;
+
+      while (true) {
+        visX[xCur] = true;
+        let delta = Infinity;
+        let yNext = -1;
+
+        for (let j = 0; j < n; j++) {
+          if (!visY[j]) {
+            if (slack[j] < delta) {
+              delta = slack[j];
+              yNext = j;
+            }
+          }
+        }
+
+        if (delta > 0) {
+          for (let i = 0; i < n; i++) {
+            if (visX[i]) lx[i] -= delta;
+          }
+          for (let j = 0; j < n; j++) {
+            if (visY[j]) ly[j] += delta;
+            else slack[j] -= delta;
+          }
+        }
+
+        visY[yNext] = true;
+        prev[yNext] = slackX[yNext];
+
+        if (matchY[yNext] === -1) {
+          yMatched = yNext;
+          break;
+        }
+
+        xCur = matchY[yNext];
+        for (let j = 0; j < n; j++) {
+          if (!visY[j]) {
+            const curSlack = lx[xCur] + ly[j] - cost[xCur][j];
+            if (curSlack < slack[j]) {
+              slack[j] = curSlack;
+              slackX[j] = xCur;
+            }
+          }
+        }
+      }
+
+      while (yMatched !== -1) {
+        const xPrev = prev[yMatched];
+        const nextY = matchX[xPrev];
+        matchY[yMatched] = xPrev;
+        matchX[xPrev] = yMatched;
+        yMatched = nextY;
+      }
+    }
+
+    const matches = [];
+    let totalWeight = 0;
+    const assignedWorkers = new Set();
+    const assignedTasks = new Set();
+
+    for (let i = 0; i < this.workers.length; i++) {
+      const taskIdx = matchX[i];
+      if (taskIdx >= 0 && taskIdx < this.tasks.length && cost[i][taskIdx] > 0) {
+        const worker = this.workers[i];
+        const task = this.tasks[taskIdx];
+        const weight = cost[i][taskIdx];
+        matches.push({
+          workerId: worker.id,
+          workerName: worker.name,
+          taskId: task.id,
+          taskName: task.name,
+          weight: Math.round(weight * 100) / 100,
+        });
+        totalWeight += weight;
+        assignedWorkers.add(worker.id);
+        assignedTasks.add(task.id);
+      }
+    }
+
+    const unassignedWorkers = this.workers.filter(w => !assignedWorkers.has(w.id));
+    const unassignedTasks = this.tasks.filter(t => !assignedTasks.has(t.id));
+
+    return {
+      matches,
+      totalWeight: Math.round(totalWeight * 100) / 100,
+      unassignedWorkers,
+      unassignedTasks,
+      isPerfect: matches.length === Math.min(this.workers.length, this.tasks.length),
+    };
+  }
+}
+
+export class TDigestPercentileEstimator {
+  constructor(options = {}) {
+    this.compression = Math.max(20, options.compression || 100);
+    this.centroids = [];
+    this.buffer = [];
+    this.bufferSize = Math.max(200, this.compression * 5);
+    this.totalWeight = 0;
+    this.min = Infinity;
+    this.max = -Infinity;
+  }
+
+  _scale(q) {
+    const clampedQ = Math.max(0, Math.min(1, q));
+    return (this.compression / (2 * Math.PI)) * Math.asin(2 * clampedQ - 1);
+  }
+
+  add(value, weight = 1) {
+    if (isNaN(value) || weight <= 0) return;
+    this.buffer.push({ mean: value, weight });
+    if (value < this.min) this.min = value;
+    if (value > this.max) this.max = value;
+
+    if (this.buffer.length >= this.bufferSize) {
+      this.compress();
+    }
+  }
+
+  compress() {
+    if (this.buffer.length === 0 && this.centroids.length <= this.compression) {
+      return;
+    }
+
+    const all = [...this.centroids, ...this.buffer].sort((a, b) => a.mean - b.mean);
+    this.buffer = [];
+
+    let totalW = 0;
+    for (const c of all) totalW += c.weight;
+    this.totalWeight = totalW;
+
+    if (totalW === 0) {
+      this.centroids = [];
+      return;
+    }
+
+    const newCentroids = [];
+    let curCentroid = { mean: all[0].mean, weight: all[0].weight };
+    let cumulativeWeight = 0;
+
+    for (let i = 1; i < all.length; i++) {
+      const next = all[i];
+      const proposedWeight = curCentroid.weight + next.weight;
+      const q0 = cumulativeWeight / totalW;
+      const q1 = (cumulativeWeight + proposedWeight) / totalW;
+      const deltaK = this._scale(q1) - this._scale(q0);
+
+      if (deltaK <= 1.0) {
+        curCentroid.mean = (curCentroid.mean * curCentroid.weight + next.mean * next.weight) / proposedWeight;
+        curCentroid.weight = proposedWeight;
+      } else {
+        newCentroids.push(curCentroid);
+        cumulativeWeight += curCentroid.weight;
+        curCentroid = { mean: next.mean, weight: next.weight };
+      }
+    }
+
+    newCentroids.push(curCentroid);
+    this.centroids = newCentroids;
+  }
+
+  quantile(q) {
+    if (this.buffer.length > 0) this.compress();
+    if (this.centroids.length === 0) return 0;
+    if (this.centroids.length === 1) return this.centroids[0].mean;
+
+    const clampedQ = Math.max(0, Math.min(1, q));
+    const targetWeight = clampedQ * this.totalWeight;
+
+    if (targetWeight <= 0) return this.min;
+    if (targetWeight >= this.totalWeight) return this.max;
+
+    let cumWeight = 0;
+    for (let i = 0; i < this.centroids.length; i++) {
+      const cur = this.centroids[i];
+      const nextWeight = cumWeight + cur.weight;
+      if (targetWeight <= nextWeight) {
+        const leftBound = i === 0 ? this.min : (this.centroids[i - 1].mean + cur.mean) / 2;
+        const rightBound = i === this.centroids.length - 1 ? this.max : (cur.mean + this.centroids[i + 1].mean) / 2;
+        const fraction = cur.weight > 0 ? (targetWeight - cumWeight) / cur.weight : 0;
+        return leftBound + fraction * (rightBound - leftBound);
+      }
+      cumWeight = nextWeight;
+    }
+    return this.max;
+  }
+
+  cdf(x) {
+    if (this.buffer.length > 0) this.compress();
+    if (this.centroids.length === 0) return 0;
+    if (x <= this.min) return 0;
+    if (x >= this.max) return 1;
+
+    let cumWeight = 0;
+    for (let i = 0; i < this.centroids.length; i++) {
+      const cur = this.centroids[i];
+      if (x < cur.mean) {
+        const prevMean = i === 0 ? this.min : this.centroids[i - 1].mean;
+        const fraction = cur.mean !== prevMean ? (x - prevMean) / (cur.mean - prevMean) : 0;
+        const weightSoFar = cumWeight + fraction * (cur.weight / 2);
+        return Math.max(0, Math.min(1, weightSoFar / this.totalWeight));
+      }
+      cumWeight += cur.weight;
+    }
+    return 1;
+  }
+
+  getLatencySummary() {
+    return {
+      count: this.totalWeight + this.buffer.length,
+      min: Math.round(this.min * 100) / 100,
+      p50: Math.round(this.quantile(0.50) * 100) / 100,
+      p90: Math.round(this.quantile(0.90) * 100) / 100,
+      p95: Math.round(this.quantile(0.95) * 100) / 100,
+      p99: Math.round(this.quantile(0.99) * 100) / 100,
+      p999: Math.round(this.quantile(0.999) * 100) / 100,
+      max: Math.round(this.max * 100) / 100,
+      centroidsCount: this.centroids.length,
+    };
+  }
+}
+
+class ClientHuffmanNode {
+  constructor(category = null, frequency = 0) {
+    this.category = category;
+    this.frequency = frequency;
+    this.left = null;
+    this.right = null;
+    this.code = "";
+    this.path = [];
+    this.nodeIndex = -1;
+  }
+}
+
+export class HierarchicalSoftmaxRouter {
+  constructor(options = {}) {
+    this.featureDim = Math.max(2, options.featureDim || 8);
+    this.learningRate = options.learningRate || 0.05;
+    this.categories = new Map();
+    this.root = null;
+    this.leafMap = new Map();
+    this.innerNodeWeights = [];
+    this.isTrained = false;
+  }
+
+  registerCategory(category, frequency = 1) {
+    const cur = this.categories.get(category) || 0;
+    this.categories.set(category, cur + frequency);
+    this.isTrained = false;
+  }
+
+  buildTree() {
+    if (this.categories.size === 0) return;
+    const nodes = [];
+    for (const [cat, freq] of this.categories.entries()) {
+      nodes.push(new ClientHuffmanNode(cat, freq));
+    }
+
+    if (nodes.length === 1) {
+      const single = nodes[0];
+      this.root = new ClientHuffmanNode(null, single.frequency);
+      this.root.left = single;
+      single.code = "0";
+      single.path = [0];
+      this.leafMap.set(single.category, single);
+      this.innerNodeWeights = [Array(this.featureDim).fill(0.1)];
+      this.isTrained = true;
+      return;
+    }
+
+    while (nodes.length > 1) {
+      nodes.sort((a, b) => a.frequency - b.frequency);
+      const left = nodes.shift();
+      const right = nodes.shift();
+      const parent = new ClientHuffmanNode(null, left.frequency + right.frequency);
+      parent.left = left;
+      parent.right = right;
+      nodes.push(parent);
+    }
+
+    this.root = nodes[0];
+    this.innerNodeWeights = [];
+    this.leafMap.clear();
+
+    let innerIdx = 0;
+    const dfs = (node, currentCode, currentPath) => {
+      if (!node) return;
+      if (node.category !== null) {
+        node.code = currentCode;
+        node.path = [...currentPath];
+        this.leafMap.set(node.category, node);
+        return;
+      }
+      node.nodeIndex = innerIdx++;
+      const weights = Array.from({ length: this.featureDim }, () => (Math.random() - 0.5) * 0.2);
+      this.innerNodeWeights.push(weights);
+      const nextPath = [...currentPath, node.nodeIndex];
+      dfs(node.left, currentCode + "0", nextPath);
+      dfs(node.right, currentCode + "1", nextPath);
+    };
+
+    dfs(this.root, "", []);
+    this.isTrained = true;
+  }
+
+  _sigmoid(z) {
+    if (z > 15) return 1.0;
+    if (z < -15) return 0.0;
+    return 1.0 / (1.0 + Math.exp(-z));
+  }
+
+  _dot(v1, v2) {
+    let sum = 0;
+    const len = Math.min(v1.length, v2.length);
+    for (let i = 0; i < len; i++) {
+      sum += v1[i] * v2[i];
+    }
+    return sum;
+  }
+
+  getProbability(category, featureVector) {
+    if (!this.isTrained) this.buildTree();
+    const leaf = this.leafMap.get(category);
+    if (!leaf) return 0;
+
+    let prob = 1.0;
+    for (let i = 0; i < leaf.code.length; i++) {
+      const bit = leaf.code[i];
+      const innerNodeIdx = leaf.path[i];
+      const weights = this.innerNodeWeights[innerNodeIdx];
+      const z = this._dot(weights, featureVector);
+      const sig = this._sigmoid(z);
+      prob *= (bit === "0" ? sig : (1.0 - sig));
+    }
+    return prob;
+  }
+
+  predict(featureVector, topK = 3) {
+    if (!this.isTrained) this.buildTree();
+    if (!this.root) return [];
+
+    const results = [];
+    for (const [cat, leaf] of this.leafMap.entries()) {
+      const p = this.getProbability(cat, featureVector);
+      results.push({
+        category: cat,
+        probability: Math.round(p * 10000) / 10000,
+        code: leaf.code,
+        depth: leaf.code.length,
+      });
+    }
+
+    results.sort((a, b) => b.probability - a.probability);
+    return results.slice(0, topK);
+  }
+
+  trainStep(goldCategory, featureVector) {
+    if (!this.isTrained) this.buildTree();
+    const leaf = this.leafMap.get(goldCategory);
+    if (!leaf) return;
+
+    for (let i = 0; i < leaf.code.length; i++) {
+      const bit = leaf.code[i];
+      const innerNodeIdx = leaf.path[i];
+      const weights = this.innerNodeWeights[innerNodeIdx];
+      const z = this._dot(weights, featureVector);
+      const sig = this._sigmoid(z);
+      const target = bit === "0" ? 1.0 : 0.0;
+      const grad = target - sig;
+
+      for (let d = 0; d < this.featureDim; d++) {
+        weights[d] += this.learningRate * grad * (featureVector[d] || 0);
+      }
+    }
+  }
+
+  getHierarchyStats() {
+    if (!this.isTrained) this.buildTree();
+    let totalDepth = 0;
+    let maxDepth = 0;
+    for (const leaf of this.leafMap.values()) {
+      totalDepth += leaf.code.length;
+      if (leaf.code.length > maxDepth) maxDepth = leaf.code.length;
+    }
+    const avgDepth = this.leafMap.size > 0 ? Math.round((totalDepth / this.leafMap.size) * 100) / 100 : 0;
+
+    return {
+      totalCategories: this.leafMap.size,
+      innerNodesCount: this.innerNodeWeights.length,
+      averagePathDepth: avgDepth,
+      maxPathDepth: maxDepth,
+      complexitySpeedup: `${this.leafMap.size} ops -> ~${Math.ceil(avgDepth)} ops (O(log2 V))`,
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -16313,6 +16794,10 @@ export default {
   HopcroftTarjanPlanarity,
   HNSWProductQuantizer,
   SoftmaxGradientBandit,
+  // Phase 34 Enterprise Algorithms
+  KuhnMunkresMatching,
+  TDigestPercentileEstimator,
+  HierarchicalSoftmaxRouter,
 };
 
 

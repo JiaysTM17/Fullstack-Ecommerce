@@ -584,7 +584,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 6. Giao Hỏa Tốc 2H & Ghép Bưu Tá Tối Ưu Hungarian (EXPRESS_COURIER_DISPATCH_HUNGARIAN)
-  if (!/splay|hopcroft/i.test(lower) && /giao hỏa tốc 2h|ghép bưu tá|shipper giao nhanh|tại sao giao hàng nhanh|spx hungarian/i.test(lower)) {
+  if (!/splay|hopcroft|kuhn-munkres|tdigest|huffman/i.test(lower) && /giao hỏa tốc 2h|ghép bưu tá|shipper giao nhanh|tại sao giao hàng nhanh|spx hungarian/i.test(lower)) {
     return {
       intent: 'EXPRESS_COURIER_DISPATCH_HUNGARIAN',
       replyText: `**[SPX EXPRESS 2H] ĐIỀU PHỐI BƯU TÁ TỐI ƯU HUNGARIAN:**\n\n• **Ghép bưu tá thông minh**: Thuật toán Hungarian Algorithm tự động gán bưu tá SPX đang ở gần Shop nhất và có lộ trình di chuyển tối ưu tới địa chỉ nhận của bạn.\n• **Đảm bảo SLA giao hàng 2h**: Giảm tối đa thời gian chờ lấy hàng và tránh tắc đường, đảm bảo gói hàng được giao hỏa tốc tận tay đúng cam kết.\n• **Theo dõi trực tiếp**: Bạn có thể theo dõi vị trí bưu tá di chuyển từng phút trên bản đồ GPS của đơn hàng!`,
@@ -866,6 +866,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'PLANAR_PQ_SOFTMAX_ASSIST',
       replyText: `**[HÀNH LANG SPX KHÔNG GIAO CẮT, NÉN ẢNH HNSW PQ & BANNER DEAL THÔNG MINH]:**\n\n• **Lộ trình không xung đột Hopcroft-Tarjan**: Tuyến luân chuyển SPX liên tỉnh được thiết kế theo cấu trúc đồ thị phẳng (Planar Corridors), triệt tiêu các nút giao cắt mặt đất giúp kiện hàng về tay bạn nhanh chóng mà không lo tắc đường!\n• **Tìm kiếm bằng ảnh siêu tốc HNSW PQ**: Công nghệ nén lượng tử hóa tích Product Quantization cho phép bạn tìm đồ bằng ảnh ngay tức thì trong 2 mili-giây với độ chính xác cao.\n• **Gợi ý Deal hot qua Softmax Bandit**: Sàn tự động phân tích thị hiếu của người mua để đẩy những sản phẩm Flash Sale và mẫu Banner chất lượng nhất lên trang chủ!`,
       suggestions: ['Tìm kiếm bằng ảnh ngay', 'Xem lộ trình bưu kiện SPX', 'Săn banner Deal hot'],
+    };
+  }
+
+  // 36. Ghép Bưu Tá Tối Ưu Kuhn-Munkres, Giám Sát Độ Trễ P99 t-Digest & Cây Danh Mục Huffman (KUHN_TDIGEST_HUFFMAN_ASSIST)
+  if (/ghép bưu tá kuhn-munkres|kuhn-munkres|độ trễ p99 t-digest|tdigest|t-digest|phân loại cây huffman|hierarchical softmax/i.test(lower)) {
+    return {
+      intent: 'KUHN_TDIGEST_HUFFMAN_ASSIST',
+      replyText: `**[ĐIỀU PHỐI BƯU TÁ KUHN-MUNKRES, GIÁM SÁT P99 T-DIGEST & CÂY DANH MỤC HUFFMAN]:**\n\n• **Ghép bưu tá tối ưu Kuhn-Munkres**: Đơn hỏa tốc 2H của bạn được thuật toán gán cho shipper gần nhất có điểm đánh giá uy tín cao và xe còn chỗ, đảm bảo lấy hàng trong 15 phút đầu!\n• **Giám sát độ trễ t-Digest chuẩn xác**: Hệ thống đo đạc thời gian thanh toán và xử lý đơn với độ trễ P99 dưới 1 giây, cam kết trải nghiệm mua sắm mượt mà không bao giờ giật lag.\n• **Tìm kiếm danh mục siêu tốc Cây Huffman**: Hàng triệu sản phẩm được sắp xếp theo cây nhị phân tối ưu tần suất mua sắm, giúp bạn lọc đúng danh mục mong muốn chỉ sau $O(\\log_2 |V|)$ bước!`,
+      suggestions: ['Theo dõi bưu tá SPX', 'Kiểm tra tốc độ hệ thống', 'Duyệt danh mục theo cây Huffman'],
     };
   }
 
