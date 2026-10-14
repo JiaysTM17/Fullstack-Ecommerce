@@ -6550,6 +6550,436 @@ export class RFMSegmentationEngine {
   }
 }
 
+// ==========================================
+// PHASE 13: INVENTORY CLEARANCE, GEOHASH SPATIAL, LINUCB BANDIT
+// ==========================================
+
+export const INVENTORY_AGE_TIERS = [
+  { code: "FRESH", minDays: 0, maxDays: 30, discountRate: 0.0, label: "Hàng Mới Nhập", recommendation: "Duy trì giá bán chuẩn và tập trung đẩy Shopee Ads." },
+  { code: "MODERATE", minDays: 31, maxDays: 60, discountRate: 0.1, label: "Tồn Kho 1-2 Tháng", recommendation: "Tham gia Flash Sale khung giờ phụ, giảm nhẹ 10% để kích cầu." },
+  { code: "SLOW", minDays: 61, maxDays: 90, discountRate: 0.25, label: "Chậm Luân Chuyển", recommendation: "Thiết lập gói Mua Kèm Deal Sốc bằng FP-Growth, chiết khấu 25%." },
+  { code: "DEADSTOCK", minDays: 91, maxDays: Infinity, discountRate: 0.4, label: "Tồn Kho Báo Động (>3 Tháng)", recommendation: "Kích hoạt chiến dịch Xả Hàng Tồn Kho, giảm 40% về sát giá sàn hòa vốn để giải phóng mặt bằng kho." },
+];
+
+export class InventoryDecayOptimizer {
+  constructor({
+    decayConstant = 0.005,
+    platformFeeRate = 0.05,
+    taxRate = 0.025,
+    referenceDate = new Date(),
+  } = {}) {
+    this.decayConstant = decayConstant;
+    this.platformFeeRate = platformFeeRate;
+    this.taxRate = taxRate;
+    this.referenceDate = new Date(referenceDate);
+  }
+
+  calculateFloorPrice(cogs) {
+    const cost = Math.max(0, Number(cogs) || 0);
+    const marginDivisor = 1 - (this.platformFeeRate + this.taxRate);
+    return Math.ceil(cost / marginDivisor);
+  }
+
+  evaluateProduct(product) {
+    const originalPrice = Number(product.price) || 0;
+    const cogs = Number(product.cogs || originalPrice * 0.5);
+    const stock = Number(product.stock) || 0;
+    const receivedDate = new Date(product.receivedDate || this.referenceDate);
+
+    const diffDays = Math.max(
+      0,
+      Math.floor((this.referenceDate.getTime() - receivedDate.getTime()) / (1000 * 3600 * 24))
+    );
+
+    let matchedTier = INVENTORY_AGE_TIERS.find(
+      (tier) => diffDays >= tier.minDays && diffDays <= tier.maxDays
+    ) || INVENTORY_AGE_TIERS[INVENTORY_AGE_TIERS.length - 1];
+
+    const floorPrice = this.calculateFloorPrice(cogs);
+
+    let suggestedPrice = originalPrice;
+    if (matchedTier.code !== "FRESH") {
+      const tierDiscountPrice = Math.round(originalPrice * (1 - matchedTier.discountRate));
+      suggestedPrice = Math.max(floorPrice, tierDiscountPrice);
+    }
+    const effectiveDiscountPct = originalPrice > 0
+      ? Number((((originalPrice - suggestedPrice) / originalPrice) * 100).toFixed(1))
+      : 0;
+
+    const lockedCapital = stock * cogs;
+    const projectedRecoveryRevenue = stock * suggestedPrice;
+
+    return {
+      productId: product.id,
+      productName: product.name,
+      stock,
+      daysInInventory: diffDays,
+      ageTier: matchedTier.code,
+      tierLabel: matchedTier.label,
+      originalPrice,
+      cogs,
+      floorPrice,
+      suggestedPrice,
+      effectiveDiscountPct,
+      isAtFloorPrice: suggestedPrice <= floorPrice,
+      lockedCapital,
+      projectedRecoveryRevenue,
+      recommendation: matchedTier.recommendation,
+    };
+  }
+
+  evaluateCatalog(products = []) {
+    const evaluations = products.map((p) => this.evaluateProduct(p));
+    let totalStock = 0;
+    let totalLockedCapital = 0;
+    let totalRecoveryRevenue = 0;
+    const tierCounts = { FRESH: 0, MODERATE: 0, SLOW: 0, DEADSTOCK: 0 };
+
+    for (const e of evaluations) {
+      totalStock += e.stock;
+      totalLockedCapital += e.lockedCapital;
+      totalRecoveryRevenue += e.projectedRecoveryRevenue;
+      tierCounts[e.ageTier] = (tierCounts[e.ageTier] || 0) + 1;
+    }
+
+    const deadstockItems = evaluations.filter((e) => e.ageTier === "SLOW" || e.ageTier === "DEADSTOCK");
+
+    return {
+      totalProducts: evaluations.length,
+      totalUnitsInStock: totalStock,
+      totalLockedCapital,
+      projectedRecoveryRevenue: totalRecoveryRevenue,
+      tierDistribution: tierCounts,
+      deadstockCount: deadstockItems.length,
+      deadstockAlert: deadstockItems.length > 0,
+      evaluations,
+    };
+  }
+}
+
+// Geohash Spatial Index
+const GEOHASH_BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+const GEOHASH_BITS = [16, 8, 4, 2, 1];
+
+export function encodeGeohash(latitude, longitude, precision = 6) {
+  let lat = Number(latitude);
+  let lon = Number(longitude);
+
+  let isEven = true;
+  let latMin = -90.0, latMax = 90.0;
+  let lonMin = -180.0, lonMax = 180.0;
+  let bit = 0;
+  let ch = 0;
+  let geohash = "";
+
+  while (geohash.length < precision) {
+    if (isEven) {
+      const mid = (lonMin + lonMax) / 2;
+      if (lon >= mid) {
+        ch |= GEOHASH_BITS[bit];
+        lonMin = mid;
+      } else {
+        lonMax = mid;
+      }
+    } else {
+      const mid = (latMin + latMax) / 2;
+      if (lat >= mid) {
+        ch |= GEOHASH_BITS[bit];
+        latMin = mid;
+      } else {
+        latMax = mid;
+      }
+    }
+
+    isEven = !isEven;
+    if (bit < 4) {
+      bit++;
+    } else {
+      geohash += GEOHASH_BASE32[ch];
+      bit = 0;
+      ch = 0;
+    }
+  }
+
+  return geohash;
+}
+
+export function decodeGeohash(geohash) {
+  let isEven = true;
+  let latMin = -90.0, latMax = 90.0;
+  let lonMin = -180.0, lonMax = 180.0;
+
+  for (let i = 0; i < geohash.length; i++) {
+    const c = geohash[i];
+    const cd = GEOHASH_BASE32.indexOf(c);
+    if (cd === -1) continue;
+
+    for (let j = 0; j < 5; j++) {
+      const mask = GEOHASH_BITS[j];
+      if (isEven) {
+        const lonMid = (lonMin + lonMax) / 2;
+        if ((cd & mask) !== 0) lonMin = lonMid;
+        else lonMax = lonMid;
+      } else {
+        const latMid = (latMin + latMax) / 2;
+        if ((cd & mask) !== 0) latMin = latMid;
+        else latMax = latMid;
+      }
+      isEven = !isEven;
+    }
+  }
+
+  const lat = (latMin + latMax) / 2;
+  const lon = (lonMin + lonMax) / 2;
+  return {
+    latitude: Number(lat.toFixed(6)),
+    longitude: Number(lon.toFixed(6)),
+    latError: (latMax - latMin) / 2,
+    lonError: (lonMax - lonMin) / 2,
+  };
+}
+
+export function calculateHaversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Number((R * c).toFixed(2));
+}
+
+export function getGeohashNeighbors(geohash) {
+  const decoded = decodeGeohash(geohash);
+  const latDelta = decoded.latError * 2;
+  const lonDelta = decoded.lonError * 2;
+  const prec = geohash.length;
+
+  return {
+    center: geohash,
+    north: encodeGeohash(decoded.latitude + latDelta, decoded.longitude, prec),
+    south: encodeGeohash(decoded.latitude - latDelta, decoded.longitude, prec),
+    east: encodeGeohash(decoded.latitude, decoded.longitude + lonDelta, prec),
+    west: encodeGeohash(decoded.latitude, decoded.longitude - lonDelta, prec),
+    northEast: encodeGeohash(decoded.latitude + latDelta, decoded.longitude + lonDelta, prec),
+    northWest: encodeGeohash(decoded.latitude + latDelta, decoded.longitude - lonDelta, prec),
+    southEast: encodeGeohash(decoded.latitude - latDelta, decoded.longitude + lonDelta, prec),
+    southWest: encodeGeohash(decoded.latitude - latDelta, decoded.longitude - lonDelta, prec),
+  };
+}
+
+export class GeohashSpatialIndex {
+  constructor(defaultPrecision = 6) {
+    this.defaultPrecision = defaultPrecision;
+    this.buckets = new Map();
+    this.items = new Map();
+  }
+
+  addLocation(id, latitude, longitude, metadata = {}) {
+    const lat = Number(latitude);
+    const lon = Number(longitude);
+    const geohash = encodeGeohash(lat, lon, this.defaultPrecision);
+
+    const record = {
+      id: String(id),
+      latitude: lat,
+      longitude: lon,
+      geohash,
+      metadata,
+    };
+
+    this.items.set(record.id, record);
+
+    if (!this.buckets.has(geohash)) {
+      this.buckets.set(geohash, []);
+    }
+    this.buckets.get(geohash).push(record);
+
+    return geohash;
+  }
+
+  findNearby(latitude, longitude, radiusKm = 5.0, limit = 10) {
+    const lat = Number(latitude);
+    const lon = Number(longitude);
+    const centerGeohash = encodeGeohash(lat, lon, this.defaultPrecision);
+
+    const neighbors = getGeohashNeighbors(centerGeohash);
+    const searchHashes = [
+      neighbors.center,
+      neighbors.north,
+      neighbors.south,
+      neighbors.east,
+      neighbors.west,
+      neighbors.northEast,
+      neighbors.northWest,
+      neighbors.southEast,
+      neighbors.southWest,
+    ];
+
+    const candidates = [];
+    const seenIds = new Set();
+
+    for (const h of searchHashes) {
+      const list = this.buckets.get(h) || [];
+      for (const item of list) {
+        if (!seenIds.has(item.id)) {
+          seenIds.add(item.id);
+          const distance = calculateHaversineKm(lat, lon, item.latitude, item.longitude);
+          if (distance <= radiusKm) {
+            candidates.push({
+              ...item,
+              distanceKm: distance,
+            });
+          }
+        }
+      }
+    }
+
+    candidates.sort((a, b) => a.distanceKm - b.distanceKm);
+
+    return {
+      query: { latitude: lat, longitude: lon, radiusKm, centerGeohash },
+      totalFound: candidates.length,
+      locations: candidates.slice(0, limit),
+    };
+  }
+}
+
+// Contextual Bandit LinUCB Recommender
+export function invertMatrix(A) {
+  const n = A.length;
+  const M = A.map((row, i) => {
+    const identityRow = new Array(n).fill(0);
+    identityRow[i] = 1;
+    return [...row, ...identityRow];
+  });
+
+  for (let i = 0; i < n; i++) {
+    let maxRow = i;
+    for (let k = i + 1; k < n; k++) {
+      if (Math.abs(M[k][i]) > Math.abs(M[maxRow][i])) {
+        maxRow = k;
+      }
+    }
+
+    if (maxRow !== i) {
+      [M[i], M[maxRow]] = [M[maxRow], M[i]];
+    }
+
+    const pivot = M[i][i];
+    if (Math.abs(pivot) < 1e-9) {
+      M[i][i] += 1e-5;
+    }
+
+    const currentPivot = M[i][i];
+    for (let j = 0; j < 2 * n; j++) {
+      M[i][j] /= currentPivot;
+    }
+
+    for (let k = 0; k < n; k++) {
+      if (k !== i) {
+        const factor = M[k][i];
+        for (let j = 0; j < 2 * n; j++) {
+          M[k][j] -= factor * M[i][j];
+        }
+      }
+    }
+  }
+
+  return M.map((row) => row.slice(n));
+}
+
+export function matrixVectorMultiply(A, x) {
+  return A.map((row) => row.reduce((sum, val, idx) => sum + val * x[idx], 0));
+}
+
+export function dotProduct(x, y) {
+  return x.reduce((sum, val, idx) => sum + val * y[idx], 0);
+}
+
+export class LinUCBRecommender {
+  constructor({ dimension = 4, alpha = 0.5 } = {}) {
+    this.d = dimension;
+    this.alpha = alpha;
+    this.arms = new Map();
+  }
+
+  addArm(armId, metadata = {}) {
+    const id = String(armId);
+    if (!this.arms.has(id)) {
+      const A = Array.from({ length: this.d }, (_, i) =>
+        Array.from({ length: this.d }, (_, j) => (i === j ? 1.0 : 0.0))
+      );
+      const b = new Array(this.d).fill(0.0);
+      this.arms.set(id, { A, b, metadata, pullCount: 0, rewardSum: 0 });
+    }
+  }
+
+  extractContextVector(context = {}) {
+    const isMobile = context.isMobile !== undefined ? (context.isMobile ? 1.0 : 0.0) : 0.8;
+    const hour = context.hourOfDay !== undefined ? Number(context.hourOfDay) : new Date().getHours();
+    const isPeakHour = (hour >= 11 && hour <= 13) || (hour >= 19 && hour <= 22) ? 1.0 : 0.2;
+    const priceSensitive = context.priceSensitivity !== undefined ? Number(context.priceSensitivity) : 0.5;
+
+    return [1.0, isMobile, isPeakHour, priceSensitive];
+  }
+
+  recommend(contextVector, topK = 3) {
+    const x = contextVector || new Array(this.d).fill(1.0);
+    const scoredArms = [];
+
+    for (const [armId, armData] of this.arms.entries()) {
+      const A_inv = invertMatrix(armData.A);
+      const thetaHat = matrixVectorMultiply(A_inv, armData.b);
+      const expectedPayoff = dotProduct(x, thetaHat);
+
+      const A_inv_x = matrixVectorMultiply(A_inv, x);
+      const variance = Math.max(0, dotProduct(x, A_inv_x));
+      const confidenceBound = this.alpha * Math.sqrt(variance);
+
+      const ucbScore = expectedPayoff + confidenceBound;
+
+      scoredArms.push({
+        armId,
+        score: Number(ucbScore.toFixed(4)),
+        expectedPayoff: Number(expectedPayoff.toFixed(4)),
+        confidenceBound: Number(confidenceBound.toFixed(4)),
+        pullCount: armData.pullCount,
+        metadata: armData.metadata,
+      });
+    }
+
+    scoredArms.sort((a, b) => b.score - a.score);
+    return scoredArms.slice(0, topK);
+  }
+
+  update(armId, contextVector, reward = 1.0) {
+    const id = String(armId);
+    if (!this.arms.has(id)) {
+      this.addArm(id);
+    }
+
+    const arm = this.arms.get(id);
+    const x = contextVector;
+    const r = Number(reward);
+
+    for (let i = 0; i < this.d; i++) {
+      for (let j = 0; j < this.d; j++) {
+        arm.A[i][j] += x[i] * x[j];
+      }
+    }
+
+    for (let i = 0; i < this.d; i++) {
+      arm.b[i] += r * x[i];
+    }
+
+    arm.pullCount++;
+    arm.rewardSum += r;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -6627,4 +7057,16 @@ export default {
   FacetedCatalogIndex,
   RFM_SEGMENT_RULES,
   RFMSegmentationEngine,
+  // Phase 13 Enterprise Algorithms
+  INVENTORY_AGE_TIERS,
+  InventoryDecayOptimizer,
+  encodeGeohash,
+  decodeGeohash,
+  calculateHaversineKm,
+  getGeohashNeighbors,
+  GeohashSpatialIndex,
+  invertMatrix,
+  matrixVectorMultiply,
+  dotProduct,
+  LinUCBRecommender,
 };

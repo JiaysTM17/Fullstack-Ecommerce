@@ -25,7 +25,7 @@ export function generateSellerCopilotResponse(query, context = {}) {
   const raw = query.toLowerCase().trim();
 
   // 1. Cảnh Báo Tồn Kho & Đề Xuất Nhập PO (Restock Radar & Safety Stock)
-  if (!/raft/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
+  if (!/raft|xả hàng|xả kho/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
     const lowStockItems = shopProducts.filter(p => p.stock <= (typeof p.safetyThreshold === 'number' ? p.safetyThreshold : 10));
     const outOfStockItems = shopProducts.filter(p => p.stock === 0);
 
@@ -119,7 +119,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 5. Quản Lý Đơn Hàng & Xử Lý Giao SPX (Order Fulfillment)
-  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
+  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router|bưu cục|drop-off|gần shop|geohash/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
     const pendingCount = shopOrders.filter(o => o.status === 'pending').length;
     return {
       text: `📦 **TIẾN ĐỘ XỬ LÝ ĐƠN HÀNG GIAN HÀNG**:
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (/định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -403,6 +403,42 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Thiết lập combo FP-Growth',
         'Lộ trình vận chuyển SPX',
         'Phân tích biên lợi nhuận P&L'
+      ]
+    };
+  }
+
+  // 20. Xả Kho Tồn Bãi & Tối Ưu Giá Sàn Hòa Vốn (Phase 13 - Feature 160)
+  if (/xả hàng tồn kho|xả kho shop|hàng cận date|tuổi hàng tồn|giá sàn hòa vốn/i.test(raw)) {
+    return {
+      text: `🏷️ **CHIẾN LƯỢC XẢ HÀNG TỒN KHO & TỐI ƯU THU HỒI VỐN (${currentShop.name})**:
+- **Nguyên tắc chiết khấu theo tuổi tồn kho**:
+  - Hàng tồn $31-60$ ngày: Giảm 10% trong các khung giờ Flash Sale phụ.
+  - Hàng tồn $61-90$ ngày: Tạo combo Mua Kèm Deal Sốc giảm 25% với sản phẩm chủ lực.
+  - Hàng tồn $>90$ ngày (Deadstock): Kích hoạt xả kho giảm 40% về sát giá sàn hòa vốn.
+- **Rào chắn bảo vệ giá sàn ($P_{\\text{floor}}$)**:
+  - Giá xả kho không được thấp hơn: $\\text{COGS} / (1 - 0.075)$. Đảm bảo thu hồi đủ tiền gốc để tái đầu tư nguồn hàng mới!`,
+      type: 'inventory',
+      tag: 'XẢ KHO TỒN BÃI & GIÁ SÀN',
+      suggestions: [
+        'Điểm gửi hàng SPX gần shop',
+        'Phân tích biên lợi nhuận P&L',
+        'Cảnh báo kho hết hàng'
+      ]
+    };
+  }
+
+  // 21. Tìm Điểm Gửi Hàng SPX Drop-off Bằng Geohash (Phase 13 - Feature 160)
+  if (/bưu cục spx gần shop|điểm gửi hàng gần nhất|khách hàng gần shop|geohash shop/i.test(raw)) {
+    return {
+      text: `📍 **MẠNG LƯỚI BƯU CỤC SPX DROP-OFF & ĐỊNH VỊ GEOHASH (${currentShop.name})**:
+- **Tìm kiếm lân cận Geohash**: Hệ thống mã hóa kho hàng của shop theo Geohash Precision 6 (~1.2km) và tự động rà soát các điểm gửi hàng SPX Drop-off Post trong bán kính 3 - 5km.
+- **Giao bưu tá tiện lợi**: Bạn có thể chọn bưu tá SPX đến lấy hàng tận kho hoặc chủ động mang hàng ra bưu cục đối tác gần nhất trước 17h hàng ngày để kịp chuyến xe trung chuyển tối.`,
+      type: 'logistics',
+      tag: 'BƯU CỤC SPX GẦN NHẤT',
+      suggestions: [
+        'Lộ trình vận chuyển SPX',
+        'Xả kho tồn bãi & giá sàn',
+        'Vận hành đơn hàng'
       ]
     };
   }

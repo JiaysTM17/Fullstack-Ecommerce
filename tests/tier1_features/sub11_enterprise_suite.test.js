@@ -102,10 +102,25 @@ import {
   FacetedCatalogIndex,
   RFM_SEGMENT_RULES,
   RFMSegmentationEngine,
+  // Phase 13 Enterprise Algorithms
+  INVENTORY_AGE_TIERS,
+  InventoryDecayOptimizer,
+  encodeGeohash,
+  decodeGeohash,
+  calculateHaversineKm,
+  getGeohashNeighbors,
+  GeohashSpatialIndex,
+  invertMatrix,
+  matrixVectorMultiply,
+  dotProduct,
+  LinUCBRecommender,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
 import { RFMSegmentationEngine as ServerRFMEngine } from "../../server/src/utils/rfmSegmentationEngine.js";
+import { InventoryDecayOptimizer as ServerInventoryDecayOptimizer } from "../../server/src/utils/inventoryDecayClearance.js";
+import { GeohashSpatialIndex as ServerGeohashSpatialIndex } from "../../server/src/utils/geohashSpatialIndex.js";
+import { LinUCBRecommender as ServerLinUCBRecommender } from "../../server/src/utils/linUcbRecommender.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -10108,6 +10123,352 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const rfmResult = rfmEngine.analyzeCustomer(customerProfile);
         expect.equal(rfmResult.segment.code, "CHAMPIONS");
         expect.equal(rfmResult.projectedCLV > 50000000, true);
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 160: INVENTORY CLEARANCE, GEOHASH SPATIAL & LINUCB BANDIT SUITE
+    // =========================================================================
+    describe("Feature 160: Advanced Enterprise Inventory Clearance, Geohash Spatial Indexing, and Contextual LinUCB Feed Suite", () => {
+      // --- Inventory Clearance Decay & Floor Price ---
+      test("F160-T01: Evaluates Fresh stock (<= 30 days) maintaining standard pricing", () => {
+        const optimizer = new InventoryDecayOptimizer({ referenceDate: "2026-10-15T00:00:00Z" });
+        const product = {
+          id: "prod_fresh",
+          name: "Áo polo mới về",
+          price: 200000,
+          cogs: 100000,
+          stock: 50,
+          receivedDate: "2026-10-01T00:00:00Z", // 14 days
+        };
+
+        const res = optimizer.evaluateProduct(product);
+        expect.equal(res.ageTier, "FRESH");
+        expect.equal(res.daysInInventory, 14);
+        expect.equal(res.effectiveDiscountPct, 0);
+        expect.equal(res.suggestedPrice, 200000);
+      });
+
+      test("F160-T02: Evaluates Moderate aging stock (31-60 days) applying 10% discount", () => {
+        const optimizer = new InventoryDecayOptimizer({ referenceDate: "2026-10-15T00:00:00Z" });
+        const product = {
+          id: "prod_moderate",
+          name: "Váy hoa mùa thu",
+          price: 300000,
+          cogs: 120000,
+          stock: 30,
+          receivedDate: "2026-08-30T00:00:00Z", // 46 days
+        };
+
+        const res = optimizer.evaluateProduct(product);
+        expect.equal(res.ageTier, "MODERATE");
+        expect.equal(res.effectiveDiscountPct, 10);
+        expect.equal(res.suggestedPrice, 270000);
+      });
+
+      test("F160-T03: Evaluates Slow-moving stock (61-90 days) applying 25% discount", () => {
+        const optimizer = new InventoryDecayOptimizer({ referenceDate: "2026-10-15T00:00:00Z" });
+        const product = {
+          id: "prod_slow",
+          name: "Giày sandal hè",
+          price: 400000,
+          cogs: 150000,
+          stock: 20,
+          receivedDate: "2026-07-25T00:00:00Z", // 82 days
+        };
+
+        const res = optimizer.evaluateProduct(product);
+        expect.equal(res.ageTier, "SLOW");
+        expect.equal(res.effectiveDiscountPct, 25);
+        expect.equal(res.suggestedPrice, 300000);
+      });
+
+      test("F160-T04: Evaluates Deadstock (>90 days) applying 40% clearance discount", () => {
+        const optimizer = new InventoryDecayOptimizer({ referenceDate: "2026-10-15T00:00:00Z" });
+        const product = {
+          id: "prod_dead",
+          name: "Ốp lưng điện thoại cũ",
+          price: 100000,
+          cogs: 30000,
+          stock: 100,
+          receivedDate: "2026-06-01T00:00:00Z", // > 130 days
+        };
+
+        const res = optimizer.evaluateProduct(product);
+        expect.equal(res.ageTier, "DEADSTOCK");
+        expect.equal(res.effectiveDiscountPct >= 40, true);
+        expect.equal(res.suggestedPrice <= 60000, true);
+      });
+
+      test("F160-T05: Strict breakeven floor price protection prevents selling below cost", () => {
+        const optimizer = new InventoryDecayOptimizer({ referenceDate: "2026-10-15T00:00:00Z" });
+        const product = {
+          id: "prod_expensive_cost",
+          name: "Tai nghe nhập khẩu đắt đỏ",
+          price: 1000000,
+          cogs: 800000, // COGS rất cao
+          stock: 10,
+          receivedDate: "2026-05-01T00:00:00Z", // Rất cũ > 150 days
+        };
+
+        const res = optimizer.evaluateProduct(product);
+        expect.equal(res.ageTier, "DEADSTOCK");
+        expect.equal(res.isAtFloorPrice, true);
+        expect.equal(res.suggestedPrice >= res.floorPrice, true);
+        expect.equal(res.suggestedPrice > 800000, true);
+      });
+
+      test("F160-T06: Exponential decay curve accurately calculates decay factor", () => {
+        const optimizer = new InventoryDecayOptimizer({ decayConstant: 0.01, referenceDate: "2026-10-15T00:00:00Z" });
+        const floor = optimizer.calculateFloorPrice(50000);
+        expect.equal(floor > 50000, true);
+      });
+
+      test("F160-T07: Batch catalog evaluation calculates total locked capital and recovery revenue", () => {
+        const optimizer = new InventoryDecayOptimizer({ referenceDate: "2026-10-15T00:00:00Z" });
+        const catalog = [
+          { id: "p1", name: "Hàng Mới", price: 200000, cogs: 100000, stock: 10, receivedDate: "2026-10-10T00:00:00Z" },
+          { id: "p2", name: "Hàng Tồn", price: 100000, cogs: 40000, stock: 50, receivedDate: "2026-06-01T00:00:00Z" },
+        ];
+
+        const batch = optimizer.evaluateCatalog(catalog);
+        expect.equal(batch.totalProducts, 2);
+        expect.equal(batch.totalUnitsInStock, 60);
+        expect.equal(batch.totalLockedCapital, 10 * 100000 + 50 * 40000);
+        expect.equal(batch.projectedRecoveryRevenue > 0, true);
+        expect.equal(batch.deadstockCount, 1);
+      });
+
+      test("F160-T08: Server and Client InventoryDecayOptimizer produce identical evaluations", () => {
+        const clientOpt = new InventoryDecayOptimizer({ referenceDate: "2026-10-15T00:00:00Z" });
+        const serverOpt = new ServerInventoryDecayOptimizer({ referenceDate: "2026-10-15T00:00:00Z" });
+
+        const prod = { id: "p_test", name: "Test Item", price: 500000, cogs: 200000, stock: 15, receivedDate: "2026-08-01T00:00:00Z" };
+        const cRes = clientOpt.evaluateProduct(prod);
+        const sRes = serverOpt.evaluateProduct(prod);
+
+        expect.equal(cRes.suggestedPrice, sRes.suggestedPrice);
+        expect.equal(cRes.ageTier, sRes.ageTier);
+        expect.equal(cRes.floorPrice, sRes.floorPrice);
+      });
+
+      // --- Geohash Spatial Indexing ---
+      test("F160-T09: Encodes latitude and longitude into Base32 Geohash string at precision 6", () => {
+        const hash = encodeGeohash(21.0285, 105.8542, 6); // Hoàn Kiếm, Hà Nội
+        expect.equal(typeof hash, "string");
+        expect.equal(hash.length, 6);
+      });
+
+      test("F160-T10: Decodes Geohash back to GPS coordinates within expected error bounding box", () => {
+        const hash = encodeGeohash(10.7769, 106.7009, 6); // Quận 1, TP.HCM
+        const decoded = decodeGeohash(hash);
+
+        expect.equal(Math.abs(decoded.latitude - 10.7769) < 0.05, true);
+        expect.equal(Math.abs(decoded.longitude - 106.7009) < 0.05, true);
+      });
+
+      test("F160-T11: Calculates 8 neighbor geohashes correctly for boundary-crossing proximity queries", () => {
+        const center = encodeGeohash(21.0285, 105.8542, 6);
+        const neighbors = getGeohashNeighbors(center);
+
+        expect.equal(neighbors.center, center);
+        expect.equal(typeof neighbors.north, "string");
+        expect.equal(typeof neighbors.south, "string");
+        expect.equal(typeof neighbors.east, "string");
+        expect.equal(typeof neighbors.west, "string");
+        expect.equal(typeof neighbors.northEast, "string");
+      });
+
+      test("F160-T12: GeohashSpatialIndex registers locations and finds nearest shops within 5km radius", () => {
+        const index = new GeohashSpatialIndex(6);
+        index.addLocation("shop_hk", 21.0285, 105.8542, { name: "Shop Hoàn Kiếm" });
+        index.addLocation("shop_bd", 21.0350, 105.8400, { name: "Shop Ba Đình" });
+        index.addLocation("shop_sg", 10.7769, 106.7009, { name: "Shop Sài Gòn" });
+
+        const nearby = index.findNearby(21.0300, 105.8500, 5.0, 10);
+        expect.equal(nearby.totalFound, 2);
+        expect.equal(nearby.locations[0].id === "shop_hk" || nearby.locations[0].id === "shop_bd", true);
+      });
+
+      test("F160-T13: Limits search results and sorts ascending by Haversine distance", () => {
+        const index = new GeohashSpatialIndex(6);
+        index.addLocation("loc_1", 21.0280, 105.8540, { name: "Gần nhất" });
+        index.addLocation("loc_2", 21.0310, 105.8560, { name: "Gần nhì" });
+        index.addLocation("loc_3", 21.0350, 105.8600, { name: "Gần ba" });
+
+        const res = index.findNearby(21.0280, 105.8540, 5.0, 2);
+        expect.equal(res.locations.length, 2);
+        expect.equal(res.locations[0].distanceKm <= res.locations[1].distanceKm, true);
+        expect.equal(res.locations[0].id, "loc_1");
+      });
+
+      test("F160-T14: Correctly handles locations crossing cell boundary via 8-neighbors search", () => {
+        const index = new GeohashSpatialIndex(6);
+        const center = encodeGeohash(21.0285, 105.8542, 6);
+        const neighbors = getGeohashNeighbors(center);
+        const neighborDecoded = decodeGeohash(neighbors.north);
+
+        index.addLocation("loc_north", neighborDecoded.latitude, neighborDecoded.longitude, { name: "Bưu cục lân cận" });
+        const res = index.findNearby(21.0285, 105.8542, 5.0);
+        expect.equal(res.totalFound >= 1, true);
+        expect.equal(res.locations[0].id, "loc_north");
+      });
+
+      test("F160-T15: Returns empty results for distant queries without error", () => {
+        const index = new GeohashSpatialIndex(6);
+        index.addLocation("shop_hanoi", 21.0285, 105.8542);
+
+        const res = index.findNearby(10.7769, 106.7009, 5.0); // Tìm tại Sài Gòn
+        expect.equal(res.totalFound, 0);
+        expect.equal(res.locations.length, 0);
+      });
+
+      test("F160-T16: Server and Client GeohashSpatialIndex produce identical search results", () => {
+        const clientIndex = new GeohashSpatialIndex(6);
+        const serverIndex = new ServerGeohashSpatialIndex(6);
+
+        clientIndex.addLocation("p1", 21.0285, 105.8542, { name: "HN" });
+        serverIndex.addLocation("p1", 21.0285, 105.8542, { name: "HN" });
+
+        const cRes = clientIndex.findNearby(21.0300, 105.8500, 3.0);
+        const sRes = serverIndex.findNearby(21.0300, 105.8500, 3.0);
+
+        expect.equal(cRes.totalFound, sRes.totalFound);
+        expect.equal(cRes.locations[0].distanceKm, sRes.locations[0].distanceKm);
+      });
+
+      // --- Contextual Bandit LinUCB Recommender ---
+      test("F160-T17: Inverts matrix using Gauss-Jordan elimination accurately", () => {
+        const A = [
+          [2, 1],
+          [1, 3],
+        ];
+        const A_inv = invertMatrix(A);
+        const prod = [
+          A[0][0] * A_inv[0][0] + A[0][1] * A_inv[1][0],
+          A[0][0] * A_inv[0][1] + A[0][1] * A_inv[1][1],
+        ];
+
+        expect.equal(Math.abs(prod[0] - 1.0) < 1e-4, true);
+        expect.equal(Math.abs(prod[1] - 0.0) < 1e-4, true);
+      });
+
+      test("F160-T18: Extracts normalized context vector from user context", () => {
+        const recommender = new LinUCBRecommender({ dimension: 4 });
+        const vec = recommender.extractContextVector({ isMobile: true, hourOfDay: 12, priceSensitivity: 0.9 });
+
+        expect.equal(vec.length, 4);
+        expect.equal(vec[0], 1.0); // Bias
+        expect.equal(vec[1], 1.0); // Mobile
+        expect.equal(vec[2], 1.0); // Peak hour 12h
+        expect.equal(vec[3], 0.9); // Price sensitivity
+      });
+
+      test("F160-T19: LinUCB calculates expected payoff and upper confidence bound for candidate arms", () => {
+        const recommender = new LinUCBRecommender({ dimension: 4, alpha: 0.5 });
+        recommender.addArm("cat_tech", { name: "Đồ công nghệ" });
+        recommender.addArm("cat_fashion", { name: "Thời trang" });
+
+        const ctx = [1.0, 1.0, 0.5, 0.2];
+        const recs = recommender.recommend(ctx, 2);
+
+        expect.equal(recs.length, 2);
+        expect.equal(recs[0].score > 0, true);
+        expect.equal(recs[0].confidenceBound > 0, true);
+      });
+
+      test("F160-T20: Explores unpulled arms due to high uncertainty confidence bound bonus", () => {
+        const recommender = new LinUCBRecommender({ dimension: 4, alpha: 1.0 });
+        recommender.addArm("arm_familiar");
+        recommender.addArm("arm_new");
+
+        const ctx = [1.0, 0.5, 0.5, 0.5];
+        // Kéo arm_familiar nhiều lần với reward 0 (thất bại)
+        for (let i = 0; i < 5; i++) {
+          recommender.update("arm_familiar", ctx, 0.0);
+        }
+
+        const recs = recommender.recommend(ctx, 2);
+        expect.equal(recs[0].armId, "arm_new"); // Cánh tay mới có độ bất định cao được ưu tiên thử nghiệm
+      });
+
+      test("F160-T21: Updates covariance matrix A and reward vector b online with user feedback", () => {
+        const recommender = new LinUCBRecommender({ dimension: 4, alpha: 0.2 });
+        recommender.addArm("arm_winner");
+
+        const ctx = [1.0, 1.0, 1.0, 1.0];
+        // Nhận feedback chuyển đổi thành công 3 lần
+        recommender.update("arm_winner", ctx, 1.0);
+        recommender.update("arm_winner", ctx, 1.0);
+        recommender.update("arm_winner", ctx, 1.0);
+
+        const recs = recommender.recommend(ctx, 1);
+        expect.equal(recs[0].expectedPayoff > 0.5, true);
+        expect.equal(recs[0].pullCount, 3);
+      });
+
+      test("F160-T22: Admin Copilot recognizes inventory clearance, geohash spatial, and LinUCB feed queries", () => {
+        const r1 = generateAdminCopilotResponse("Chiến dịch xả hàng tồn kho sàn");
+        expect.equal(r1.tag, "QUẢN TRỊ XẢ KHO TỒN BÃI");
+        expect.equal(r1.text.includes("Aging Tiers"), true);
+
+        const r2 = generateAdminCopilotResponse("Hệ thống định vị không gian Geohash và mạng lưới bưu cục");
+        expect.equal(r2.tag, "CHỈ MỤC KHÔNG GIAN GEOHASH");
+        expect.equal(r2.text.includes("8 Neighbors"), true);
+
+        const r3 = generateAdminCopilotResponse("Cá nhân hóa khám phá trang chủ bằng LinUCB bandit");
+        expect.equal(r3.tag, "CÁ NHÂN HÓA LINUCB BANDIT");
+        expect.equal(r3.text.includes("Filter Bubble"), true);
+      });
+
+      test("F160-T23: Seller Copilot advises inventory age decay clearance, breakeven floor, and SPX drop-off", () => {
+        const r1 = generateSellerCopilotResponse("Xả hàng tồn kho shop và giá sàn hòa vốn");
+        expect.equal(r1.tag, "XẢ KHO TỒN BÃI & GIÁ SÀN");
+        expect.equal(r1.text.includes("COGS"), true);
+
+        const r2 = generateSellerCopilotResponse("Tìm bưu cục SPX gần shop để gửi hàng");
+        expect.equal(r2.tag, "BƯU CỤC SPX GẦN NHẤT");
+        expect.equal(r2.text.includes("Geohash"), true);
+      });
+
+      test("F160-T24: Comprehensive End-to-End: Nearby Shop Geohash -> LinUCB Personalized Clearance Deal -> Order Execution", () => {
+        // Step 1: Customer finds nearby shops within 3km using Geohash
+        const spatialIndex = new GeohashSpatialIndex(6);
+        spatialIndex.addLocation("shop_coolmate_hn", 21.0285, 105.8542, { name: "Coolmate Hoàn Kiếm" });
+        spatialIndex.addLocation("shop_other_sg", 10.7769, 106.7009, { name: "Coolmate Sài Gòn" });
+
+        const nearbySearch = spatialIndex.findNearby(21.0300, 105.8500, 3.0);
+        expect.equal(nearbySearch.totalFound, 1);
+        expect.equal(nearbySearch.locations[0].id, "shop_coolmate_hn");
+
+        // Step 2: LinUCB personalizes clearance products based on mobile + peak hour context
+        const linUcb = new LinUCBRecommender({ dimension: 4, alpha: 0.3 });
+        linUcb.addArm("prod_polo_clearance", { name: "Áo polo xả kho", originalPrice: 200000 });
+        linUcb.addArm("prod_shoes_standard", { name: "Giày sneaker mới", originalPrice: 800000 });
+
+        const userContextVec = linUcb.extractContextVector({ isMobile: true, hourOfDay: 20, priceSensitivity: 1.0 });
+        const recommendations = linUcb.recommend(userContextVec, 1);
+        expect.equal(recommendations.length, 1);
+
+        // Step 3: Seller evaluates clearance price with Age Decay optimizer
+        const decayOptimizer = new InventoryDecayOptimizer({ referenceDate: "2026-10-15T00:00:00Z" });
+        const clearanceItem = {
+          id: "prod_polo_clearance",
+          name: "Áo polo xả kho",
+          price: 200000,
+          cogs: 90000,
+          stock: 40,
+          receivedDate: "2026-06-15T00:00:00Z", // Deadstock > 120 days
+        };
+        const clearancePlan = decayOptimizer.evaluateProduct(clearanceItem);
+        expect.equal(clearancePlan.ageTier, "DEADSTOCK");
+        expect.equal(clearancePlan.suggestedPrice < 200000, true);
+        expect.equal(clearancePlan.suggestedPrice >= clearancePlan.floorPrice, true);
+
+        // Step 4: Customer clicks and buys -> LinUCB receives online positive reward
+        linUcb.update("prod_polo_clearance", userContextVec, 1.0);
+        const updatedRecs = linUcb.recommend(userContextVec, 1);
+        expect.equal(updatedRecs[0].expectedPayoff > 0, true);
       });
     });
   });

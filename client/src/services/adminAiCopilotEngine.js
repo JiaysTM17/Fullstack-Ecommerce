@@ -818,7 +818,64 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 30. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
+  // 30. Quản Trị Hàng Tồn Kho Chậm Luân Chuyển & Xả Kho Sàn (Phase 13 - Feature 160)
+  if (/xả hàng tồn kho sàn|deadstock|tuổi tồn kho|hàng chậm luân chuyển|chiến dịch xả kho/i.test(raw)) {
+    return {
+      text: `📦 **QUẢN TRỊ TUỔI TỒN KHO & CHIẾN DỊCH XẢ KHO TOÀN SÀN (INVENTORY AGE DECAY)**:
+- **Phân tầng tuổi tồn kho (Aging Tiers)**:
+  - **Fresh Stock ($0-30$ ngày)**: Hàng mới nhập, tốc độ luân chuyển tốt.
+  - **Moderate ($31-60$ ngày)**: Bắt đầu chậm lại, khuyến nghị giảm nhẹ 10% trong Flash Sale.
+  - **Slow-moving ($61-90$ ngày)**: Đề xuất gói Mua Kèm Deal Sốc bằng FP-Growth với chiết khấu 25%.
+  - **Deadstock ($>90$ ngày)**: Hàng ứ đọng, kích hoạt chiến dịch Xả Hàng Tồn Kho toàn sàn giảm đến 40%.
+- **Bảo vệ giá sàn hòa vốn ($P_{\\text{floor}}$)**: Tự động khóa mức giá tối thiểu $= \\text{COGS} / (1 - 0.05 - 0.025)$ để bảo toàn vốn lưu động cho các nhà bán hàng.`,
+      type: 'algorithm',
+      tag: 'QUẢN TRỊ XẢ KHO TỒN BÃI',
+      suggestions: [
+        'Định vị Geohash bưu cục SPX',
+        'Cá nhân hóa LinUCB Feed',
+        'Báo cáo GMV toàn sàn'
+      ]
+    };
+  }
+
+  // 31. Chỉ Mục Không Gian Geohash & Mạng Lưới Bưu Cục SPX (Phase 13 - Feature 160)
+  if (/geohash|định vị không gian|bưu cục lân cận|tìm kiếm theo bán kính|bán kính bưu cục/i.test(raw)) {
+    return {
+      text: `📍 **HỆ THỐNG ĐỊNH VỊ KHÔNG GIAN GEOHASH & ĐIỂM GỬI HÀNG SPX**:
+- **Cấu trúc phân cấp Geohash Base32**: Mã hóa tọa độ GPS thành chuỗi ký tự phân cấp.
+  - **Precision 6 (~1.2km x 0.6km)**: Phục vụ tối ưu giao hỏa tốc nội đô và tìm bưu cục SPX Drop-off gần nhất.
+  - **Precision 7 (~152m x 152m)**: Định vị tọa độ bưu tá thời gian thực.
+- **Thuật toán quét 8 ô lân cận (8 Neighbors Search)**: Quét ô trung tâm và 8 ô kề cạnh (N, NE, E, SE, S, SW, W, NW) để triệt tiêu hiệu ứng biên (Edge boundary effect) trong thời gian $O(1)$.`,
+      type: 'algorithm',
+      tag: 'CHỈ MỤC KHÔNG GIAN GEOHASH',
+      suggestions: [
+        'Định tuyến chuỗi cung ứng SPX',
+        'Cá nhân hóa LinUCB Feed',
+        'Quản trị xả kho tồn bãi'
+      ]
+    };
+  }
+
+  // 32. Cá Nhân Hóa Khám Phá Trang Chủ Bằng Contextual Bandit LinUCB (Phase 13 - Feature 160)
+  if (/linucb|gợi ý trang chủ linucb|contextual bandit|cá nhân hóa trang chủ|daily discover/i.test(raw)) {
+    return {
+      text: `🎯 **BỘ MÁY GỢI Ý CÁ NHÂN HÓA TRANG CHỦ BẰNG LINUCB BANDIT**:
+- **Khắc phục bẫy bong bóng lọc (Filter Bubble)**: LinUCB cân bằng giữa Khám phá sản phẩm tiềm năng mới (Exploration) và Khai thác sản phẩm chuyển đổi cao (Exploitation) thông qua hệ số $\\alpha$.
+- **Mô hình hồi quy tuyến tính theo ngữ cảnh**:
+  - Vector ngữ cảnh $x \\in \\mathbb{R}^4$: Thiết bị truy cập, khung giờ Flash Sale, mức độ nhạy cảm về giá, lịch sử danh mục.
+  - Điểm UCB: $p_a = x^\\top \\hat{\\theta}_a + \\alpha \\sqrt{x^\\top A_a^{-1} x}$.
+  - Cập nhật trực tuyến $A_a \\leftarrow A_a + x x^\\top, b_a \\leftarrow b_a + r x$ ngay khi khách hàng click hoặc bỏ qua.`,
+      type: 'algorithm',
+      tag: 'CÁ NHÂN HÓA LINUCB BANDIT',
+      suggestions: [
+        'Chỉ mục không gian Geohash',
+        'Quản trị xả kho tồn bãi',
+        'Báo cáo doanh số GMV toàn sàn'
+      ]
+    };
+  }
+
+  // 33. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
       text: `🤖 **CƠ CHẾ HOẠT ĐỘNG CỦA ADMIN SENTINEL COPILOT (MINH BẠCH AI & DỮ LIỆU)**:

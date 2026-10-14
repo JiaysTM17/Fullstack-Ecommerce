@@ -656,6 +656,39 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // -------------------------------------------------------------
+  // PHASE 13: INVENTORY CLEARANCE, GEOHASH NEARBY & LINUCB FEED
+  // -------------------------------------------------------------
+
+  // 13. Săn Deal Xả Kho Giá Sốc Về Giá Sàn (CLEARANCE_DEALS_EXPLORE)
+  if (/săn hàng xả kho|deal xả kho|hàng giảm giá sâu|xả tồn kho|xả hàng đón mẫu mới/i.test(lower)) {
+    return {
+      intent: 'CLEARANCE_DEALS_EXPLORE',
+      replyText: `**[CHỢ XẢ KHO MINI SHOPEE] GIẢM ĐẾN 40% - 50% VỀ SÁT GIÁ GỐC!**\n\n• **Thanh lý tồn kho chính hãng**: Các sản phẩm tồn kho được giảm giá sâu theo thuật toán suy giảm tuổi tồn kho (Inventory Age Decay) để nhường chỗ cho bộ sưu tập mới.\n• **Cam kết chất lượng**: 100% hàng mới nguyên seal, chính hãng từ các Shop Mall uy tín với chính sách bảo hành và đổi trả 15 ngày miễn phí!`,
+      products: searchSmartProducts('xả kho giảm giá rẻ').slice(0, 3),
+      suggestions: ['Xem đồ gia dụng xả kho', 'Thời trang xả kho', 'Lấy voucher Freeship'],
+    };
+  }
+
+  // 14. Tìm Bưu Cục SPX & Điểm Gửi Hàng Gần Nhất Bằng Geohash (GEOHASH_NEARBY_SPX_POST)
+  if (/bưu cục spx gần tôi|điểm gửi hàng spx gần nhất|tìm bưu cục gần đây|spx drop-off gần/i.test(lower)) {
+    return {
+      intent: 'GEOHASH_NEARBY_SPX_POST',
+      replyText: `**[ĐỊNH VỊ BƯU CỤC SPX GEOHASH] TÌM ĐIỂM GỬI & NHẬN HÀNG TRONG BÁN KÍNH 3KM!**\n\n• **Chỉ mục không gian Geohash**: Hệ thống tự động xác định vị trí của bạn và quét 8 ô lân cận để hiển thị các bưu cục SPX Express và điểm gửi hàng Drop-off Post gần nhất.\n• **Giờ làm việc**: Mở cửa từ 07:30 - 21:00 hàng ngày (kể cả Thứ 7 & Chủ Nhật) để bạn gửi và nhận hàng hỏa tốc thuận tiện nhất!`,
+      suggestions: ['Xem bản đồ bưu cục', 'Tra cứu mã vận đơn SPX', 'Gặp CSKH'],
+    };
+  }
+
+  // 15. Gợi Ý Hôm Nay Cá Nhân Hóa LinUCB (LINUCB_PERSONALIZED_FEED)
+  if (/gợi ý hôm nay|sản phẩm dành riêng cho tôi|daily discover|cá nhân hóa|đề xuất cho tôi/i.test(lower)) {
+    return {
+      intent: 'LINUCB_PERSONALIZED_FEED',
+      replyText: `**[DAILY DISCOVER LINUCB] BỘ SƯU TẬP ĐƯỢC CHỌN LỌC RIÊNG CHO BẠN!**\n\n• **AI LinUCB đa ngữ cảnh**: Phân tích khung giờ truy cập, thiết bị và sở thích danh mục của bạn để đề xuất các sản phẩm phù hợp nhất trong tầm giá.\n• **Ưu đãi kèm theo**: Các sản phẩm được cá nhân hóa kèm mã giảm giá độc quyền dành riêng cho tài khoản của bạn!`,
+      products: searchSmartProducts('hot bán chạy mới').slice(0, 3),
+      suggestions: ['Gợi ý thêm sản phẩm', 'Lấy voucher giảm 15%', 'Xem deal Flash Sale'],
+    };
+  }
+
+  // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH
   // -------------------------------------------------------------
   const matchingProducts = searchSmartProducts(lower);
