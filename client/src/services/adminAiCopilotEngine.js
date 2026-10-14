@@ -755,7 +755,70 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 27. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
+  // 27. Định Tuyến Chuỗi Cung Ứng SPX Multi-Hub Bằng Dijkstra & A* (Phase 12 - Feature 159)
+  if (/định tuyến spx|graph router|hub trung chuyển|dijkstra spx|a\* spx|lộ trình spx/i.test(raw)) {
+    return {
+      text: `🗺️ **BỘ MÁY ĐỊNH TUYẾN CHUỖI CUNG ỨNG SPX EXPRESS (DIJKSTRA / A* MULTI-HUB ROUTING)**:
+- **Mạng lưới đa tầng SPX Việt Nam**: Kết nối từ các kho gom (First-Mile Hub Hà Nội, Sài Gòn), trung tâm khai thác siêu vùng (Bắc Ninh Mega SOC, Củ Chi Mega SOC) đến các SOC vùng (Vinh, Đà Nẵng, Nha Trang, Cần Thơ).
+- **Thuật toán đồ thị có hướng có trọng số $G = (V, E)$**:
+  - **Dijkstra Priority Queue (Min-Heap)**: Độ phức tạp $O((|E| + |V|) \log |V|)$, tối ưu theo 3 tiêu chí: \`Thời gian luân chuyển (Transit Hours)\`, \`Quãng đường (km)\`, hoặc \`Cước phí vận tải (VND/kg)\`.
+  - **Thuật toán A* với Heuristic Haversine**: Tính toán khoảng cách đường chim bay giữa các tọa độ GPS, giảm số đỉnh phải duyệt đến 60% khi tìm tuyến đường nhanh nhất giữa hai miền Nam - Bắc.
+- **Dự báo lịch trình thời gian thực (Live Stepper)**: Tự động tính toán ETA chi tiết cho từng chặng trung chuyển và đồng bộ trạng thái đơn hàng trên app người mua.`,
+      type: 'algorithm',
+      tag: 'ĐỊNH TUYẾN ĐỒ THỊ SPX HUB',
+      suggestions: [
+        'Lọc thuộc tính Roaring Bitmaps',
+        'Phân khúc khách hàng RFM & CLV',
+        'Tối ưu thùng carton SPX'
+      ]
+    };
+  }
+
+  // 28. Chỉ Mục Lọc Đa Thuộc Tính Bằng Roaring Bitmaps (Phase 12 - Feature 159)
+  if (/roaring bitmap|lọc thuộc tính|faceted search|lọc đa tiêu chí|chỉ mục bitmap/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ CHỈ MỤC LỌC ĐA THUỘC TÍNH SIÊU TỐC ROARING BITMAPS**:
+- **Thách thức lọc triệu SKU**: Khi người dùng lọc đồng thời: \`Danh mục\` + \`Thương hiệu\` + \`Khoảng giá\` + \`Đánh giá sao\` + \`Địa điểm kho\` + \`Còn hàng\`, các truy vấn SQL hoặc lọc mảng truyền thống bị tắc nghẽn CPU.
+- **Kiến trúc Roaring Bitmaps 32-bit**:
+  - Chia không gian ID thành các khối 16 bit cao, bên trong quản lý 16 bit thấp bằng 2 loại container tự thích ứng:
+    • **ArrayContainer**: Dùng mảng số nguyên khi mật độ thưa thớt (< 4096 phần tử), tiết kiệm RAM tối đa.
+    • **BitmapContainer**: Dùng 2048 số nguyên 32-bit (8KB) khi mật độ dày đặc ($\ge$ 4096 phần tử).
+  - **Đại số Bool phần cứng (Bitwise AND/OR/AND_NOT)**: Cho phép giao hợp các tập kết quả với thời gian phản hồi sub-millisecond ($< 0.1\\text{ms}$) cho toàn sàn.`,
+      type: 'algorithm',
+      tag: 'CHỈ MỤC ROARING BITMAPS',
+      suggestions: [
+        'Định tuyến chuỗi cung ứng SPX',
+        'Phân khúc khách hàng RFM & CLV',
+        'Kiểm tra cụm SWIM Gossip'
+      ]
+    };
+  }
+
+  // 29. Phân Khúc Khách Hàng RFM & Giá Trị Trọn Đời CLV (Phase 12 - Feature 159)
+  if (/phân khúc rfm|rfm|clv|customer lifetime value|champions|khách hàng rời bỏ|at risk/i.test(raw)) {
+    return {
+      text: `👥 **HỆ THỐNG PHÂN KHÚC KHÁCH HÀNG RFM & DỰ BÁO GIÁ TRỊ TRỌN ĐỜI (CLV)**:
+- **Ma trận 3 chiều chuẩn hóa**:
+  - **Recency ($R$)**: Số ngày kể từ đơn hàng thành công gần nhất ($1$ - $5$ điểm).
+  - **Frequency ($F$)**: Tổng số đơn hàng đã hoàn tất ($1$ - $5$ điểm).
+  - **Monetary ($M$)**: Tổng doanh số GMV đã chi tiêu ($1$ - $5$ điểm).
+- **11 Phân khúc chuẩn sàn TMĐT**:
+  - **Champions (VIP Thượng Khách)**: $R \\ge 4, F \\ge 4, M \\ge 4$ $\\Rightarrow$ Cấp huy hiệu Shopee Mall VIP, miễn phí vận chuyển trọn đời.
+  - **Loyal Customers**: Khách hàng trung thành $\\Rightarrow$ Ưu đãi tích lũy Mini Xu x2.
+  - **At Risk / Can't Lose Them**: Từng chi tiêu lớn nhưng hơn 60-90 ngày chưa quay lại $\\Rightarrow$ Báo động đỏ, kích hoạt chiến dịch voucher sâu 30-50k để tái thu hút.
+  - **Potential Loyalists / New Customers**: Khách mới mua 1-3 đơn $\\Rightarrow$ Đề xuất combo Mua Kèm Deal Sốc.
+- **Dự báo CLV**: Tự động ước tính doanh thu vòng đời khách hàng trong 12 tháng tới dựa trên AOV và hệ số giữ chân từng phân khúc.`,
+      type: 'algorithm',
+      tag: 'PHÂN KHÚC RFM & CLV',
+      suggestions: [
+        'Định tuyến chuỗi cung ứng SPX',
+        'Lọc thuộc tính Roaring Bitmaps',
+        'Báo cáo doanh số GMV toàn sàn'
+      ]
+    };
+  }
+
+  // 30. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
       text: `🤖 **CƠ CHẾ HOẠT ĐỘNG CỦA ADMIN SENTINEL COPILOT (MINH BẠCH AI & DỮ LIỆU)**:

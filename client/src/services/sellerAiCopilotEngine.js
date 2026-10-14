@@ -119,7 +119,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 5. Quản Lý Đơn Hàng & Xử Lý Giao SPX (Order Fulfillment)
-  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
+  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
     const pendingCount = shopOrders.filter(o => o.status === 'pending').length;
     return {
       text: `📦 **TIẾN ĐỘ XỬ LÝ ĐƠN HÀNG GIAN HÀNG**:
@@ -363,6 +363,46 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Kiểm tra tồn kho Flash Sale',
         'Thiết lập combo FP-Growth',
         'Xem báo cáo bán hàng'
+      ]
+    };
+  }
+
+  // 18. Lộ Trình Vận Chuyển Đa Hub SPX (Phase 12 - Feature 159)
+  if (/lộ trình.*spx|vận chuyển.*spx|tuyến đường.*spx|liên tỉnh.*spx|hub spx|gửi hàng liên tỉnh|thời gian giao hàng spx/i.test(raw)) {
+    return {
+      text: `🚚 **LỘ TRÌNH VẬN CHUYỂN LIÊN TỈNH SPX EXPRESS (${currentShop.name})**:
+- **Tối ưu chặng trung chuyển (Dijkstra / A* Graph Routing)**:
+  - Khi bưu tá SPX lấy hàng từ kho shop của bạn, kiện hàng được đưa về First-Mile Hub gần nhất, trung chuyển qua Bắc Ninh Mega SOC (miền Bắc) hoặc Củ Chi Mega SOC (miền Nam).
+  - Thuật toán tự động tìm tuyến đường ngắn nhất, tiết kiệm 12-24 giờ luân chuyển so với điều phối thủ công.
+- **Dự báo thời gian giao hàng (ETA)**:
+  - Tuyến nội tỉnh / cùng miền: Giao trong 24 giờ.
+  - Tuyến liên tỉnh Bắc - Nam: Giao trong 48 - 72 giờ qua mạng lưới trục chính SOC liên vùng.`,
+      type: 'logistics',
+      tag: 'LỘ TRÌNH SPX GRAPH ROUTER',
+      suggestions: [
+        'Tối ưu thùng carton SPX',
+        'Phân khúc khách hàng shop RFM',
+        'Cảnh báo kho hết hàng'
+      ]
+    };
+  }
+
+  // 19. Phân Khúc Khách Hàng Gian Hàng Theo RFM (Phase 12 - Feature 159)
+  if (/phân khúc khách hàng shop|rfm shop|khách vip shop|khách sắp rời bỏ|chăm sóc khách cũ/i.test(raw)) {
+    return {
+      text: `👥 **CHIẾN LƯỢC PHÂN KHÚC KHÁCH HÀNG RFM DÀNH CHO SHOP (${currentShop.name})**:
+- **Nhóm Champions & Khách VIP (R $\\ge$ 4, F $\\ge$ 4)**:
+  - Tặng quà kèm bí mật trong kiện hàng, gửi mã voucher tri ân giảm 10% độc quyền.
+- **Nhóm Tiềm Năng (Potential Loyalists - Khách mua 2-3 lần)**:
+  - Gợi ý gói Mua Kèm Deal Sốc bằng thuật toán FP-Growth để nâng giá trị vòng đời (CLV).
+- **Nhóm Có Nguy Cơ Rời Bỏ (At Risk - Đã 2 tháng chưa mua lại)**:
+  - Kích hoạt tin nhắn thông báo sản phẩm mới kèm mã giảm giá 20k thời hạn 48 giờ để kéo khách quay lại.`,
+      type: 'marketing',
+      tag: 'PHÂN KHÚC KHÁCH HÀNG RFM',
+      suggestions: [
+        'Thiết lập combo FP-Growth',
+        'Lộ trình vận chuyển SPX',
+        'Phân tích biên lợi nhuận P&L'
       ]
     };
   }

@@ -3461,6 +3461,10 @@ export class PriorityQueue {
     return this.data.length;
   }
 
+  isEmpty() {
+    return this.data.length === 0;
+  }
+
   values() {
     return [...this.data];
   }
@@ -5526,6 +5530,1026 @@ export class SwimCluster {
   }
 }
 
+// ==========================================
+// PHASE 12: SPX GRAPH ROUTING, ROARING BITMAPS, RFM SEGMENTATION
+// ==========================================
+
+export const SPX_DEFAULT_HUBS = [
+  { id: "HUB_HN", name: "SPX Hà Nội First-Mile Hub", city: "Hà Nội", lat: 21.0285, lng: 105.8542, type: "FIRST_MILE" },
+  { id: "SOC_BN", name: "SPX Bắc Ninh Mega SOC", city: "Bắc Ninh", lat: 21.1861, lng: 106.0763, type: "MEGA_SOC" },
+  { id: "SOC_VINH", name: "SPX Vinh Regional SOC", city: "Nghệ An", lat: 18.6734, lng: 105.6923, type: "REGIONAL_SOC" },
+  { id: "SOC_DNG", name: "SPX Đà Nẵng Central SOC", city: "Đà Nẵng", lat: 16.0544, lng: 108.2022, type: "REGIONAL_SOC" },
+  { id: "SOC_NTR", name: "SPX Nha Trang Coastal SOC", city: "Khánh Hòa", lat: 12.2388, lng: 109.1967, type: "REGIONAL_SOC" },
+  { id: "SOC_CUCHI", name: "SPX Củ Chi Mega SOC", city: "TP. Hồ Chí Minh", lat: 11.0067, lng: 106.5133, type: "MEGA_SOC" },
+  { id: "HUB_SG", name: "SPX Sài Gòn Hub", city: "TP. Hồ Chí Minh", lat: 10.7769, lng: 106.7009, type: "LAST_MILE" },
+  { id: "SOC_CT", name: "SPX Cần Thơ Mekong SOC", city: "Cần Thơ", lat: 10.0452, lng: 105.7469, type: "REGIONAL_SOC" },
+];
+
+export const SPX_DEFAULT_ROUTES = [
+  { from: "HUB_HN", to: "SOC_BN", distanceKm: 35, transitHours: 1.5, baseCostVnd: 5000 },
+  { from: "SOC_BN", to: "SOC_VINH", distanceKm: 310, transitHours: 6.0, baseCostVnd: 12000 },
+  { from: "SOC_BN", to: "SOC_DNG", distanceKm: 760, transitHours: 14.0, baseCostVnd: 22000 },
+  { from: "SOC_VINH", to: "SOC_DNG", distanceKm: 470, transitHours: 9.0, baseCostVnd: 15000 },
+  { from: "SOC_DNG", to: "SOC_NTR", distanceKm: 530, transitHours: 10.0, baseCostVnd: 16000 },
+  { from: "SOC_DNG", to: "SOC_CUCHI", distanceKm: 940, transitHours: 17.0, baseCostVnd: 25000 },
+  { from: "SOC_NTR", to: "SOC_CUCHI", distanceKm: 420, transitHours: 8.0, baseCostVnd: 14000 },
+  { from: "SOC_CUCHI", to: "HUB_SG", distanceKm: 40, transitHours: 2.0, baseCostVnd: 6000 },
+  { from: "HUB_SG", to: "SOC_CT", distanceKm: 170, transitHours: 4.0, baseCostVnd: 10000 },
+  { from: "SOC_BN", to: "HUB_HN", distanceKm: 35, transitHours: 1.5, baseCostVnd: 5000 },
+  { from: "SOC_VINH", to: "SOC_BN", distanceKm: 310, transitHours: 6.0, baseCostVnd: 12000 },
+  { from: "SOC_DNG", to: "SOC_BN", distanceKm: 760, transitHours: 14.0, baseCostVnd: 22000 },
+  { from: "SOC_DNG", to: "SOC_VINH", distanceKm: 470, transitHours: 9.0, baseCostVnd: 15000 },
+  { from: "SOC_NTR", to: "SOC_DNG", distanceKm: 530, transitHours: 10.0, baseCostVnd: 16000 },
+  { from: "SOC_CUCHI", to: "SOC_DNG", distanceKm: 940, transitHours: 17.0, baseCostVnd: 25000 },
+  { from: "SOC_CUCHI", to: "SOC_NTR", distanceKm: 420, transitHours: 8.0, baseCostVnd: 14000 },
+  { from: "HUB_SG", to: "SOC_CUCHI", distanceKm: 40, transitHours: 2.0, baseCostVnd: 6000 },
+  { from: "SOC_CT", to: "HUB_SG", distanceKm: 170, transitHours: 4.0, baseCostVnd: 10000 },
+];
+
+export class SPXHubGraphRouter {
+  constructor(hubs = SPX_DEFAULT_HUBS, routes = SPX_DEFAULT_ROUTES) {
+    this.hubs = new Map();
+    this.adjacencyList = new Map();
+
+    for (const h of hubs) {
+      this.addHub(h);
+    }
+    for (const r of routes) {
+      this.addRoute(r);
+    }
+  }
+
+  addHub(hub) {
+    this.hubs.set(hub.id, { ...hub });
+    if (!this.adjacencyList.has(hub.id)) {
+      this.adjacencyList.set(hub.id, []);
+    }
+  }
+
+  addRoute(route) {
+    if (!this.adjacencyList.has(route.from)) {
+      this.adjacencyList.set(route.from, []);
+    }
+    this.adjacencyList.get(route.from).push({
+      to: route.to,
+      distanceKm: Number(route.distanceKm) || 0,
+      transitHours: Number(route.transitHours) || 1,
+      baseCostVnd: Number(route.baseCostVnd) || 0,
+    });
+  }
+
+  findOptimalPath(sourceId, targetId, criterion = "time") {
+    if (!this.hubs.has(sourceId) || !this.hubs.has(targetId)) {
+      return {
+        found: false,
+        reason: `Trạm nguồn ${sourceId} hoặc trạm đích ${targetId} không tồn tại trên đồ thị.`,
+      };
+    }
+
+    if (sourceId === targetId) {
+      const hub = this.hubs.get(sourceId);
+      return {
+        found: true,
+        criterion,
+        source: hub,
+        target: hub,
+        path: [hub],
+        totalDistanceKm: 0,
+        totalTransitHours: 0,
+        totalBaseCostVnd: 0,
+        segments: [],
+      };
+    }
+
+    const distances = new Map();
+    const previous = new Map();
+    const edgeUsed = new Map();
+    const pq = new PriorityQueue((a, b) => a.priority - b.priority);
+
+    for (const [id] of this.hubs) {
+      distances.set(id, Infinity);
+    }
+    distances.set(sourceId, 0);
+    pq.push({ id: sourceId, priority: 0 });
+
+    while (!pq.isEmpty()) {
+      const { id: u, priority: currentDist } = pq.pop();
+
+      if (u === targetId) break;
+      if (currentDist > distances.get(u)) continue;
+
+      const neighbors = this.adjacencyList.get(u) || [];
+      for (const edge of neighbors) {
+        let weight = edge.transitHours;
+        if (criterion === "distance") weight = edge.distanceKm;
+        else if (criterion === "cost") weight = edge.baseCostVnd;
+
+        const newDist = currentDist + weight;
+        if (newDist < distances.get(edge.to)) {
+          distances.set(edge.to, newDist);
+          previous.set(edge.to, u);
+          edgeUsed.set(edge.to, edge);
+          pq.push({ id: edge.to, priority: newDist });
+        }
+      }
+    }
+
+    if (!previous.has(targetId)) {
+      return {
+        found: false,
+        reason: `Không tìm thấy tuyến đường kết nối khả dụng từ ${sourceId} đến ${targetId}.`,
+      };
+    }
+
+    const pathIds = [];
+    const segments = [];
+    let curr = targetId;
+
+    while (curr !== sourceId) {
+      pathIds.unshift(curr);
+      segments.unshift(edgeUsed.get(curr));
+      curr = previous.get(curr);
+    }
+    pathIds.unshift(sourceId);
+
+    const fullPath = pathIds.map((id) => this.hubs.get(id));
+    const totalDistanceKm = segments.reduce((acc, s) => acc + s.distanceKm, 0);
+    const totalTransitHours = segments.reduce((acc, s) => acc + s.transitHours, 0);
+    const totalBaseCostVnd = segments.reduce((acc, s) => acc + s.baseCostVnd, 0);
+
+    return {
+      found: true,
+      criterion,
+      source: this.hubs.get(sourceId),
+      target: this.hubs.get(targetId),
+      path: fullPath,
+      segments,
+      totalDistanceKm: Number(totalDistanceKm.toFixed(1)),
+      totalTransitHours: Number(totalTransitHours.toFixed(1)),
+      totalBaseCostVnd,
+      estimatedDays: Number((totalTransitHours / 24).toFixed(1)),
+    };
+  }
+
+  findAStarPath(sourceId, targetId, averageSpeedKmh = 60) {
+    if (!this.hubs.has(sourceId) || !this.hubs.has(targetId)) {
+      return { found: false, reason: "Trạm nguồn hoặc trạm đích không tồn tại." };
+    }
+
+    const targetHub = this.hubs.get(targetId);
+    const gScore = new Map();
+    const fScore = new Map();
+    const cameFrom = new Map();
+    const edgeUsed = new Map();
+
+    for (const [id] of this.hubs) {
+      gScore.set(id, Infinity);
+      fScore.set(id, Infinity);
+    }
+
+    const heuristic = (hubId) => {
+      const hub = this.hubs.get(hubId);
+      if (!hub || !targetHub) return 0;
+      const distKm = calculateHaversineDistance(hub.lat, hub.lng, targetHub.lat, targetHub.lng);
+      return distKm / averageSpeedKmh;
+    };
+
+    gScore.set(sourceId, 0);
+    fScore.set(sourceId, heuristic(sourceId));
+
+    const pq = new PriorityQueue((a, b) => a.f - b.f);
+    pq.push({ id: sourceId, f: fScore.get(sourceId) });
+
+    while (!pq.isEmpty()) {
+      const { id: current } = pq.pop();
+
+      if (current === targetId) {
+        const path = [];
+        const segments = [];
+        let curr = targetId;
+
+        while (curr !== sourceId) {
+          path.unshift(this.hubs.get(curr));
+          segments.unshift(edgeUsed.get(curr));
+          curr = cameFrom.get(curr);
+        }
+        path.unshift(this.hubs.get(sourceId));
+
+        const totalDist = segments.reduce((acc, s) => acc + s.distanceKm, 0);
+        const totalHours = segments.reduce((acc, s) => acc + s.transitHours, 0);
+        const totalCost = segments.reduce((acc, s) => acc + s.baseCostVnd, 0);
+
+        return {
+          found: true,
+          source: this.hubs.get(sourceId),
+          target: targetHub,
+          path,
+          segments,
+          totalDistanceKm: Number(totalDist.toFixed(1)),
+          totalTransitHours: Number(totalHours.toFixed(1)),
+          totalBaseCostVnd: totalCost,
+        };
+      }
+
+      const neighbors = this.adjacencyList.get(current) || [];
+      for (const edge of neighbors) {
+        const tentativeG = gScore.get(current) + edge.transitHours;
+        if (tentativeG < gScore.get(edge.to)) {
+          cameFrom.set(edge.to, current);
+          edgeUsed.set(edge.to, edge);
+          gScore.set(edge.to, tentativeG);
+          const f = tentativeG + heuristic(edge.to);
+          fScore.set(edge.to, f);
+          pq.push({ id: edge.to, f });
+        }
+      }
+    }
+
+    return { found: false, reason: "Không tìm thấy đường đi tới đích bằng A*." };
+  }
+
+  generateLiveTrackingSchedule(routePlan, startTime = new Date()) {
+    if (!routePlan || !routePlan.found || !routePlan.path) {
+      return [];
+    }
+
+    const steps = [];
+    let currentTimestamp = new Date(startTime).getTime();
+
+    for (let i = 0; i < routePlan.path.length; i++) {
+      const hub = routePlan.path[i];
+      let status = "COMPLETED";
+      let description = "";
+
+      if (i === 0) {
+        description = `Đơn hàng đã nhập kho phát hành tại ${hub.name} (${hub.city})`;
+      } else if (i === routePlan.path.length - 1) {
+        description = `Đơn hàng đã đến trạm giao chặng cuối tại ${hub.name} (${hub.city}). Đang chuẩn bị phân phối bưu tá.`;
+        status = "PENDING";
+      } else {
+        description = `Gói hàng đang được điều phối trung chuyển tại ${hub.name} (${hub.city})`;
+      }
+
+      steps.push({
+        stepIndex: i + 1,
+        hubId: hub.id,
+        hubName: hub.name,
+        city: hub.city,
+        type: hub.type,
+        timestamp: new Date(currentTimestamp).toISOString(),
+        status,
+        description,
+      });
+
+      if (i < routePlan.segments.length) {
+        const seg = routePlan.segments[i];
+        currentTimestamp += seg.transitHours * 3600 * 1000;
+      }
+    }
+
+    return steps;
+  }
+}
+
+// Roaring Bitmaps Faceted Filter
+const MAX_ARRAY_CARDINALITY = 4096;
+
+function getHighBits(val) {
+  return (val >>> 16) & 0xffff;
+}
+
+function getLowBits(val) {
+  return val & 0xffff;
+}
+
+export class ArrayContainer {
+  constructor(initialValues = []) {
+    this.values = [...initialValues].sort((a, b) => a - b);
+  }
+
+  cardinality() {
+    return this.values.length;
+  }
+
+  contains(val) {
+    let low = 0;
+    let high = this.values.length - 1;
+    while (low <= high) {
+      const mid = (low + high) >>> 1;
+      const midVal = this.values[mid];
+      if (midVal === val) return true;
+      if (midVal < val) low = mid + 1;
+      else high = mid - 1;
+    }
+    return false;
+  }
+
+  add(val) {
+    let low = 0;
+    let high = this.values.length - 1;
+    while (low <= high) {
+      const mid = (low + high) >>> 1;
+      const midVal = this.values[mid];
+      if (midVal === val) return;
+      if (midVal < val) low = mid + 1;
+      else high = mid - 1;
+    }
+    this.values.splice(low, 0, val);
+  }
+
+  remove(val) {
+    let low = 0;
+    let high = this.values.length - 1;
+    while (low <= high) {
+      const mid = (low + high) >>> 1;
+      const midVal = this.values[mid];
+      if (midVal === val) {
+        this.values.splice(mid, 1);
+        return;
+      }
+      if (midVal < val) low = mid + 1;
+      else high = mid - 1;
+    }
+  }
+
+  toArray() {
+    return [...this.values];
+  }
+
+  and(other) {
+    const res = [];
+    const a = this.values;
+    const b = other.toArray();
+    let i = 0;
+    let j = 0;
+    while (i < a.length && j < b.length) {
+      if (a[i] === b[j]) {
+        res.push(a[i]);
+        i++;
+        j++;
+      } else if (a[i] < b[j]) {
+        i++;
+      } else {
+        j++;
+      }
+    }
+    return new ArrayContainer(res);
+  }
+
+  or(other) {
+    const res = [];
+    const a = this.values;
+    const b = other.toArray();
+    let i = 0;
+    let j = 0;
+    while (i < a.length && j < b.length) {
+      if (a[i] === b[j]) {
+        res.push(a[i]);
+        i++;
+        j++;
+      } else if (a[i] < b[j]) {
+        res.push(a[i]);
+        i++;
+      } else {
+        res.push(b[j]);
+        j++;
+      }
+    }
+    while (i < a.length) res.push(a[i++]);
+    while (j < b.length) res.push(b[j++]);
+
+    if (res.length >= MAX_ARRAY_CARDINALITY) {
+      const bitmap = new BitmapContainer();
+      for (const v of res) bitmap.add(v);
+      return bitmap;
+    }
+    return new ArrayContainer(res);
+  }
+
+  andNot(other) {
+    const res = [];
+    const a = this.values;
+    const b = other.toArray();
+    let i = 0;
+    let j = 0;
+    while (i < a.length && j < b.length) {
+      if (a[i] === b[j]) {
+        i++;
+        j++;
+      } else if (a[i] < b[j]) {
+        res.push(a[i]);
+        i++;
+      } else {
+        j++;
+      }
+    }
+    while (i < a.length) res.push(a[i++]);
+    return new ArrayContainer(res);
+  }
+}
+
+export class BitmapContainer {
+  constructor() {
+    this.words = new Uint32Array(2048);
+    this._cardinality = 0;
+  }
+
+  cardinality() {
+    return this._cardinality;
+  }
+
+  contains(val) {
+    const wordIdx = val >>> 5;
+    const bitIdx = val & 31;
+    return (this.words[wordIdx] & (1 << bitIdx)) !== 0;
+  }
+
+  add(val) {
+    const wordIdx = val >>> 5;
+    const bitIdx = val & 31;
+    const mask = 1 << bitIdx;
+    if ((this.words[wordIdx] & mask) === 0) {
+      this.words[wordIdx] |= mask;
+      this._cardinality++;
+    }
+  }
+
+  remove(val) {
+    const wordIdx = val >>> 5;
+    const bitIdx = val & 31;
+    const mask = 1 << bitIdx;
+    if ((this.words[wordIdx] & mask) !== 0) {
+      this.words[wordIdx] &= ~mask;
+      this._cardinality--;
+    }
+  }
+
+  toArray() {
+    const res = [];
+    for (let i = 0; i < 2048; i++) {
+      let w = this.words[i];
+      if (w !== 0) {
+        for (let b = 0; b < 32; b++) {
+          if ((w & (1 << b)) !== 0) {
+            res.push(i * 32 + b);
+          }
+        }
+      }
+    }
+    return res;
+  }
+
+  and(other) {
+    if (other instanceof ArrayContainer) {
+      return other.and(this);
+    }
+    const res = new BitmapContainer();
+    for (let i = 0; i < 2048; i++) {
+      const w = this.words[i] & other.words[i];
+      res.words[i] = w;
+      if (w !== 0) {
+        for (let b = 0; b < 32; b++) {
+          if ((w & (1 << b)) !== 0) res._cardinality++;
+        }
+      }
+    }
+    if (res._cardinality < MAX_ARRAY_CARDINALITY) {
+      return new ArrayContainer(res.toArray());
+    }
+    return res;
+  }
+
+  or(other) {
+    const res = new BitmapContainer();
+    if (other instanceof ArrayContainer) {
+      for (let i = 0; i < 2048; i++) res.words[i] = this.words[i];
+      res._cardinality = this._cardinality;
+      for (const v of other.toArray()) res.add(v);
+      return res;
+    }
+    for (let i = 0; i < 2048; i++) {
+      const w = this.words[i] | other.words[i];
+      res.words[i] = w;
+      if (w !== 0) {
+        for (let b = 0; b < 32; b++) {
+          if ((w & (1 << b)) !== 0) res._cardinality++;
+        }
+      }
+    }
+    return res;
+  }
+
+  andNot(other) {
+    const res = new BitmapContainer();
+    if (other instanceof ArrayContainer) {
+      for (let i = 0; i < 2048; i++) res.words[i] = this.words[i];
+      res._cardinality = this._cardinality;
+      for (const v of other.toArray()) res.remove(v);
+      return res;
+    }
+    for (let i = 0; i < 2048; i++) {
+      const w = this.words[i] & ~other.words[i];
+      res.words[i] = w;
+      if (w !== 0) {
+        for (let b = 0; b < 32; b++) {
+          if ((w & (1 << b)) !== 0) res._cardinality++;
+        }
+      }
+    }
+    if (res._cardinality < MAX_ARRAY_CARDINALITY) {
+      return new ArrayContainer(res.toArray());
+    }
+    return res;
+  }
+}
+
+export class RoaringBitmap {
+  constructor(initialIds = []) {
+    this.containers = new Map();
+    for (const id of initialIds) {
+      this.add(id);
+    }
+  }
+
+  cardinality() {
+    let total = 0;
+    for (const [, c] of this.containers) {
+      total += c.cardinality();
+    }
+    return total;
+  }
+
+  isEmpty() {
+    return this.cardinality() === 0;
+  }
+
+  contains(id) {
+    const key = getHighBits(id);
+    const low = getLowBits(id);
+    const c = this.containers.get(key);
+    return c ? c.contains(low) : false;
+  }
+
+  add(id) {
+    const key = getHighBits(id);
+    const low = getLowBits(id);
+    let c = this.containers.get(key);
+    if (!c) {
+      c = new ArrayContainer();
+      this.containers.set(key, c);
+    }
+
+    c.add(low);
+
+    if (c instanceof ArrayContainer && c.cardinality() >= MAX_ARRAY_CARDINALITY) {
+      const bitmap = new BitmapContainer();
+      for (const val of c.toArray()) {
+        bitmap.add(val);
+      }
+      this.containers.set(key, bitmap);
+    }
+  }
+
+  remove(id) {
+    const key = getHighBits(id);
+    const low = getLowBits(id);
+    const c = this.containers.get(key);
+    if (!c) return;
+
+    c.remove(low);
+    if (c.cardinality() === 0) {
+      this.containers.delete(key);
+    }
+  }
+
+  toArray() {
+    const result = [];
+    const sortedKeys = [...this.containers.keys()].sort((a, b) => a - b);
+    for (const key of sortedKeys) {
+      const c = this.containers.get(key);
+      const lowVals = c.toArray();
+      const base = key << 16;
+      for (const low of lowVals) {
+        result.push(base + low);
+      }
+    }
+    return result;
+  }
+
+  and(other) {
+    const result = new RoaringBitmap();
+    for (const [key, c1] of this.containers) {
+      const c2 = other.containers.get(key);
+      if (c2) {
+        const intersection = c1.and(c2);
+        if (intersection.cardinality() > 0) {
+          result.containers.set(key, intersection);
+        }
+      }
+    }
+    return result;
+  }
+
+  or(other) {
+    const result = new RoaringBitmap();
+    const allKeys = new Set([...this.containers.keys(), ...other.containers.keys()]);
+    for (const key of allKeys) {
+      const c1 = this.containers.get(key);
+      const c2 = other.containers.get(key);
+      if (c1 && c2) {
+        result.containers.set(key, c1.or(c2));
+      } else if (c1) {
+        result.containers.set(key, c1);
+      } else if (c2) {
+        result.containers.set(key, c2);
+      }
+    }
+    return result;
+  }
+
+  andNot(other) {
+    const result = new RoaringBitmap();
+    for (const [key, c1] of this.containers) {
+      const c2 = other.containers.get(key);
+      if (c2) {
+        const diff = c1.andNot(c2);
+        if (diff.cardinality() > 0) {
+          result.containers.set(key, diff);
+        }
+      } else {
+        result.containers.set(key, c1);
+      }
+    }
+    return result;
+  }
+}
+
+export class FacetedCatalogIndex {
+  constructor() {
+    this.indexes = new Map();
+    this.allProducts = new RoaringBitmap();
+    this.productDetails = new Map();
+    this.codeToIdMap = new Map();
+    this.nextNumericId = 1;
+  }
+
+  indexProduct(product) {
+    let numericId = product.numericId;
+    if (!numericId) {
+      const code = String(product.id || `prod_${this.nextNumericId}`);
+      if (this.codeToIdMap.has(code)) {
+        numericId = this.codeToIdMap.get(code);
+      } else {
+        numericId = this.nextNumericId++;
+        this.codeToIdMap.set(code, numericId);
+      }
+    }
+
+    const item = { ...product, numericId };
+    this.productDetails.set(numericId, item);
+    this.allProducts.add(numericId);
+
+    if (item.category) {
+      this._addToFacet("category", String(item.category).toLowerCase(), numericId);
+    }
+
+    if (item.brand) {
+      this._addToFacet("brand", String(item.brand).toLowerCase(), numericId);
+    }
+
+    const price = Number(item.price) || 0;
+    if (price < 100000) this._addToFacet("priceTier", "UNDER_100K", numericId);
+    else if (price <= 300000) this._addToFacet("priceTier", "100K_300K", numericId);
+    else if (price <= 1000000) this._addToFacet("priceTier", "300K_1M", numericId);
+    else this._addToFacet("priceTier", "OVER_1M", numericId);
+
+    const rating = Math.floor(Number(item.rating) || 5);
+    for (let r = 1; r <= rating; r++) {
+      this._addToFacet("minRating", `${r}_STAR`, numericId);
+    }
+
+    if (item.location) {
+      this._addToFacet("location", String(item.location).toLowerCase(), numericId);
+    }
+
+    const stock = Number(item.stock) || 0;
+    if (stock > 0) {
+      this._addToFacet("inStock", "TRUE", numericId);
+    } else {
+      this._addToFacet("inStock", "FALSE", numericId);
+    }
+
+    return numericId;
+  }
+
+  _addToFacet(field, val, id) {
+    if (!this.indexes.has(field)) {
+      this.indexes.set(field, new Map());
+    }
+    const valMap = this.indexes.get(field);
+    if (!valMap.has(val)) {
+      valMap.set(val, new RoaringBitmap());
+    }
+    valMap.get(val).add(id);
+  }
+
+  filter(query = {}) {
+    let resultBitmap = this.allProducts;
+
+    if (query.category) {
+      const b = this._getFacetBitmap("category", String(query.category).toLowerCase());
+      resultBitmap = resultBitmap.and(b);
+    }
+
+    if (query.brand) {
+      const b = this._getFacetBitmap("brand", String(query.brand).toLowerCase());
+      resultBitmap = resultBitmap.and(b);
+    }
+
+    if (query.priceTier) {
+      const b = this._getFacetBitmap("priceTier", query.priceTier);
+      resultBitmap = resultBitmap.and(b);
+    }
+
+    if (query.minRating) {
+      const b = this._getFacetBitmap("minRating", `${query.minRating}_STAR`);
+      resultBitmap = resultBitmap.and(b);
+    }
+
+    if (query.location) {
+      const b = this._getFacetBitmap("location", String(query.location).toLowerCase());
+      resultBitmap = resultBitmap.and(b);
+    }
+
+    if (query.inStock !== undefined) {
+      const b = this._getFacetBitmap("inStock", query.inStock ? "TRUE" : "FALSE");
+      resultBitmap = resultBitmap.and(b);
+    }
+
+    const matchedIds = resultBitmap.toArray();
+    const matchedProducts = matchedIds.map((id) => this.productDetails.get(id)).filter(Boolean);
+
+    return {
+      totalMatches: matchedIds.length,
+      matchedIds,
+      products: matchedProducts,
+    };
+  }
+
+  _getFacetBitmap(field, val) {
+    const fieldMap = this.indexes.get(field);
+    if (!fieldMap || !fieldMap.has(val)) {
+      return new RoaringBitmap();
+    }
+    return fieldMap.get(val);
+  }
+}
+
+// RFM Segmentation & Customer Lifetime Value (CLV)
+export const RFM_SEGMENT_RULES = [
+  {
+    code: "CHAMPIONS",
+    title: "Khách Hàng Thượng Khách (Champions)",
+    description: "Khách hàng mua thường xuyên nhất, chi tiêu lớn nhất và vừa đặt hàng gần đây.",
+    action: "Tri ân quà tặng đặc biệt, cấp huy hiệu VIP Shopee Mall, quyền lợi miễn phí vận chuyển trọn đời.",
+    match: (r, f, m) => r >= 4 && f >= 4 && m >= 4,
+  },
+  {
+    code: "LOYAL_CUSTOMERS",
+    title: "Khách Hàng Trung Thành (Loyal Customers)",
+    description: "Mua sắm đều đặn, phản hồi tích cực và có giá trị đơn hàng ổn định.",
+    action: "Upsell các sản phẩm phân khúc cao hơn, tích điểm Mini Xu x2, mời đánh giá sản phẩm có quà.",
+    match: (r, f, m) => r >= 3 && f >= 3 && m >= 3,
+  },
+  {
+    code: "POTENTIAL_LOYALISTS",
+    title: "Khách Hàng Tiềm Năng (Potential Loyalists)",
+    description: "Khách hàng mới mua 2-3 đơn gần đây với số tiền khá tốt.",
+    action: "Gợi ý gói combo Mua Kèm Deal Sốc, tặng voucher bậc thang cho đơn kế tiếp.",
+    match: (r, f, m) => r >= 4 && f >= 2 && f <= 3,
+  },
+  {
+    code: "NEW_CUSTOMERS",
+    title: "Khách Hàng Mới (New Customers)",
+    description: "Vừa có đơn hàng đầu tiên gần đây, đang trải nghiệm sàn.",
+    action: "Hỗ trợ hướng dẫn sử dụng, gửi voucher tân thủ giảm 15% cho đơn thứ hai.",
+    match: (r, f, m) => r >= 4 && f === 1,
+  },
+  {
+    code: "PROMISING",
+    title: "Khách Hàng Triển Vọng (Promising)",
+    description: "Đã mua đơn hàng cách đây không lâu, giá trị đơn hàng trung bình.",
+    action: "Tặng voucher Freeship Max và thông báo Flash Sale hàng ngày để tạo thói quen mở app.",
+    match: (r, f, m) => r === 3 && f <= 2,
+  },
+  {
+    code: "NEED_ATTENTION",
+    title: "Khách Hàng Cần Chú Ý (Need Attention)",
+    description: "Đã từng mua nhiều đơn nhưng tần suất đang chậm lại hơn 1 tháng qua.",
+    action: "Gửi thông báo đẩy về các sản phẩm mới trong danh mục yêu thích, ưu đãi có thời hạn 48h.",
+    match: (r, f, m) => r === 3 && f >= 3,
+  },
+  {
+    code: "ABOUT_TO_SLEEP",
+    title: "Khách Hàng Sắp Ngủ Đông (About to Sleep)",
+    description: "Đã hơn 2 tháng chưa phát sinh đơn mới, nguy cơ quên mất sàn.",
+    action: "Gửi thông báo 'Mini Shopee nhớ bạn' kèm voucher độc quyền giảm 20k.",
+    match: (r, f, m) => r === 2 && f <= 2,
+  },
+  {
+    code: "AT_RISK",
+    title: "Khách Hàng Nguy Cơ Rời Bỏ (At Risk)",
+    description: "Từng mua rất nhiều đơn và chi nhiều tiền, nhưng đã lâu không quay lại.",
+    action: "Cảnh báo khẩn cấp: Gửi voucher chiết khấu sâu 30-50k, nhân viên CSKH liên hệ chăm sóc.",
+    match: (r, f, m) => r <= 2 && f >= 3 && m >= 3,
+  },
+  {
+    code: "CANT_LOSE_THEM",
+    title: "Khách VIP Không Thể Mất (Can't Lose Them)",
+    description: "Từng là khách hàng chi tiêu lớn nhất sàn, nhưng thời gian qua hoàn toàn vắng bóng.",
+    action: "Kích hoạt chiến dịch Re-engagement đặc quyền: Tặng combo quà tặng trực tiếp từ sàn.",
+    match: (r, f, m) => r === 1 && f >= 4 && m >= 4,
+  },
+  {
+    code: "HIBERNATING",
+    title: "Khách Hàng Ngủ Đông (Hibernating)",
+    description: "Lần mua cuối cách đây nhiều tháng, tần suất mua ít và chi tiêu thấp.",
+    action: "Chỉ gửi thông báo các chiến dịch Mega Sale lớn (11.11, 12.12), sản phẩm xả kho giá sốc.",
+    match: (r, f, m) => r <= 2 && f <= 2,
+  },
+  {
+    code: "LOST",
+    title: "Khách Hàng Đã Mất (Lost)",
+    description: "Chỉ mua 1 đơn cách đây rất lâu với giá trị thấp và không bao giờ quay lại.",
+    action: "Không lãng phí ngân sách quảng cáo cá nhân hóa. Chỉ tiếp cận qua chiến dịch tiếp thị đại trà.",
+    match: (r, f, m) => true,
+  },
+];
+
+export class RFMSegmentationEngine {
+  constructor(referenceDate = new Date()) {
+    this.referenceDate = new Date(referenceDate);
+  }
+
+  calculateRecencyScore(daysSinceLastPurchase) {
+    const days = Math.max(0, Number(daysSinceLastPurchase) || 0);
+    if (days <= 14) return 5;
+    if (days <= 30) return 4;
+    if (days <= 60) return 3;
+    if (days <= 90) return 2;
+    return 1;
+  }
+
+  calculateFrequencyScore(orderCount) {
+    const count = Math.max(0, Number(orderCount) || 0);
+    if (count >= 15) return 5;
+    if (count >= 8) return 4;
+    if (count >= 4) return 3;
+    if (count >= 2) return 2;
+    if (count === 1) return 1;
+    return 1;
+  }
+
+  calculateMonetaryScore(totalSpentVnd) {
+    const spent = Math.max(0, Number(totalSpentVnd) || 0);
+    if (spent >= 5000000) return 5;
+    if (spent >= 2000000) return 4;
+    if (spent >= 800000) return 3;
+    if (spent >= 300000) return 2;
+    return 1;
+  }
+
+  analyzeCustomer(customer) {
+    const customerId = customer.id || customer._id || "anon";
+    const customerName = customer.name || customer.fullName || "Khách Hàng";
+    const orders = (customer.orders || []).filter(
+      (o) => o.status === "DELIVERED" || o.status === "COMPLETED" || !o.status
+    );
+
+    if (orders.length === 0) {
+      return {
+        customerId,
+        customerName,
+        recencyDays: Infinity,
+        orderCount: 0,
+        totalSpentVnd: 0,
+        averageOrderValue: 0,
+        rScore: 1,
+        fScore: 1,
+        mScore: 1,
+        rfmCode: "111",
+        rfmScore: 3,
+        segment: RFM_SEGMENT_RULES.find((s) => s.code === "LOST"),
+        projectedCLV: 0,
+      };
+    }
+
+    let latestOrderDate = new Date(0);
+    let totalSpent = 0;
+
+    for (const o of orders) {
+      const orderDate = new Date(o.createdAt || o.date || this.referenceDate);
+      if (orderDate > latestOrderDate) {
+        latestOrderDate = orderDate;
+      }
+      totalSpent += Number(o.totalAmount || o.total || 0);
+    }
+
+    const diffTime = Math.max(0, this.referenceDate.getTime() - latestOrderDate.getTime());
+    const recencyDays = Math.floor(diffTime / (1000 * 3600 * 24));
+    const orderCount = orders.length;
+    const averageOrderValue = Math.round(totalSpent / orderCount);
+
+    const rScore = this.calculateRecencyScore(recencyDays);
+    const fScore = this.calculateFrequencyScore(orderCount);
+    const mScore = this.calculateMonetaryScore(totalSpent);
+
+    let matchedSegment = RFM_SEGMENT_RULES.find((rule) => rule.match(rScore, fScore, mScore));
+    if (!matchedSegment) {
+      matchedSegment = RFM_SEGMENT_RULES[RFM_SEGMENT_RULES.length - 1];
+    }
+
+    const retentionMultipliers = {
+      CHAMPIONS: 1.8,
+      LOYAL_CUSTOMERS: 1.5,
+      POTENTIAL_LOYALISTS: 1.3,
+      NEW_CUSTOMERS: 1.1,
+      PROMISING: 1.0,
+      NEED_ATTENTION: 0.7,
+      ABOUT_TO_SLEEP: 0.4,
+      AT_RISK: 0.3,
+      CANT_LOSE_THEM: 0.2,
+      HIBERNATING: 0.1,
+      LOST: 0.05,
+    };
+
+    const multiplier = retentionMultipliers[matchedSegment.code] || 1.0;
+    const projectedAnnualOrders = Math.max(1, Math.round(orderCount * multiplier));
+    const projectedCLV = averageOrderValue * projectedAnnualOrders;
+
+    return {
+      customerId,
+      customerName,
+      recencyDays,
+      orderCount,
+      totalSpentVnd: totalSpent,
+      averageOrderValue,
+      rScore,
+      fScore,
+      mScore,
+      rfmCode: `${rScore}${fScore}${mScore}`,
+      rfmScore: rScore + fScore + mScore,
+      segment: {
+        code: matchedSegment.code,
+        title: matchedSegment.title,
+        description: matchedSegment.description,
+        recommendedAction: matchedSegment.action,
+      },
+      projectedCLV,
+    };
+  }
+
+  analyzeBatch(customers = []) {
+    const analysisList = customers.map((c) => this.analyzeCustomer(c));
+    const segmentCounts = {};
+    let totalGMV = 0;
+    let totalProjectedCLV = 0;
+
+    for (const rule of RFM_SEGMENT_RULES) {
+      segmentCounts[rule.code] = 0;
+    }
+
+    for (const a of analysisList) {
+      segmentCounts[a.segment.code] = (segmentCounts[a.segment.code] || 0) + 1;
+      totalGMV += a.totalSpentVnd;
+      totalProjectedCLV += a.projectedCLV;
+    }
+
+    const totalCustomers = analysisList.length;
+    const segmentBreakdown = Object.keys(segmentCounts).map((code) => {
+      const rule = RFM_SEGMENT_RULES.find((r) => r.code === code);
+      const count = segmentCounts[code];
+      const pct = totalCustomers > 0 ? Number(((count / totalCustomers) * 100).toFixed(1)) : 0;
+      return {
+        code,
+        title: rule ? rule.title : code,
+        count,
+        percentage: pct,
+        recommendedAction: rule ? rule.action : "",
+      };
+    });
+
+    return {
+      totalCustomers,
+      totalHistoricalGMV: totalGMV,
+      totalProjectedCLV,
+      averageCLV: totalCustomers > 0 ? Math.round(totalProjectedCLV / totalCustomers) : 0,
+      segmentBreakdown,
+      customers: analysisList,
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -5593,4 +6617,14 @@ export default {
   ClusterMember,
   SwimNode,
   SwimCluster,
+  // Phase 12 Enterprise Algorithms
+  SPX_DEFAULT_HUBS,
+  SPX_DEFAULT_ROUTES,
+  SPXHubGraphRouter,
+  ArrayContainer,
+  BitmapContainer,
+  RoaringBitmap,
+  FacetedCatalogIndex,
+  RFM_SEGMENT_RULES,
+  RFMSegmentationEngine,
 };

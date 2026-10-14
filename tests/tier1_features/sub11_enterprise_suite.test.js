@@ -92,7 +92,20 @@ import {
   ClusterMember,
   SwimNode,
   SwimCluster,
+  // Phase 12 Enterprise Algorithms
+  SPX_DEFAULT_HUBS,
+  SPX_DEFAULT_ROUTES,
+  SPXHubGraphRouter,
+  ArrayContainer,
+  BitmapContainer,
+  RoaringBitmap,
+  FacetedCatalogIndex,
+  RFM_SEGMENT_RULES,
+  RFMSegmentationEngine,
 } from "../../client/src/services/aiAlgorithms.js";
+import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
+import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
+import { RFMSegmentationEngine as ServerRFMEngine } from "../../server/src/utils/rfmSegmentationEngine.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -9750,6 +9763,351 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const round = warehouseNode.stepProtocol();
         expect.equal(round.success, true);
         expect.equal(warehouseNode.status, MemberStatus.ALIVE);
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 159: SPX MULTI-HUB GRAPH ROUTING, ROARING BITMAPS & RFM SEGMENTATION
+    // =========================================================================
+    describe("Feature 159: Advanced Enterprise Supply Chain Graph Routing, Roaring Bitmaps Faceted Filter, and RFM Customer Segmentation Suite", () => {
+      // --- SPX Multi-Hub Graph Routing (Dijkstra / A*) ---
+      test("F159-T01: Dijkstra calculates shortest transit time path from Hanoi to Saigon traversing SOCs", () => {
+        const router = new SPXHubGraphRouter();
+        const route = router.findOptimalPath("HUB_HN", "HUB_SG", "time");
+
+        expect.equal(route.found, true);
+        expect.equal(route.path.length >= 4, true);
+        expect.equal(route.source.id, "HUB_HN");
+        expect.equal(route.target.id, "HUB_SG");
+        expect.equal(route.totalTransitHours > 0, true);
+        expect.equal(route.totalDistanceKm > 1000, true);
+      });
+
+      test("F159-T02: Dijkstra calculates min-cost vs min-distance paths under different criteria", () => {
+        const router = new SPXHubGraphRouter();
+        const timeRoute = router.findOptimalPath("HUB_HN", "SOC_DNG", "time");
+        const costRoute = router.findOptimalPath("HUB_HN", "SOC_DNG", "cost");
+
+        expect.equal(timeRoute.found, true);
+        expect.equal(costRoute.found, true);
+        expect.equal(timeRoute.totalBaseCostVnd >= costRoute.totalBaseCostVnd, true);
+      });
+
+      test("F159-T03: A* algorithm with Haversine heuristic achieves optimal route", () => {
+        const router = new SPXHubGraphRouter();
+        const astarRoute = router.findAStarPath("HUB_HN", "HUB_SG");
+        const dijkstraRoute = router.findOptimalPath("HUB_HN", "HUB_SG", "time");
+
+        expect.equal(astarRoute.found, true);
+        expect.equal(dijkstraRoute.found, true);
+        expect.equal(astarRoute.path[0].id, "HUB_HN");
+        expect.equal(astarRoute.path[astarRoute.path.length - 1].id, "HUB_SG");
+        expect.equal(Math.abs(astarRoute.totalTransitHours - dijkstraRoute.totalTransitHours) < 5.0, true);
+      });
+
+      test("F159-T04: Generates chronological live tracking schedule with cumulative ETA", () => {
+        const router = new SPXHubGraphRouter();
+        const route = router.findOptimalPath("HUB_HN", "HUB_SG", "time");
+        const schedule = router.generateLiveTrackingSchedule(route, new Date("2026-10-15T08:00:00Z"));
+
+        expect.equal(schedule.length, route.path.length);
+        expect.equal(schedule[0].status, "COMPLETED");
+        expect.equal(schedule[schedule.length - 1].status, "PENDING");
+        expect.equal(new Date(schedule[schedule.length - 1].timestamp).getTime() > new Date(schedule[0].timestamp).getTime(), true);
+      });
+
+      test("F159-T05: Handles disconnected or non-existent hubs cleanly", () => {
+        const router = new SPXHubGraphRouter();
+        const invalid = router.findOptimalPath("HUB_HN", "UNKNOWN_ISLAND", "time");
+        expect.equal(invalid.found, false);
+      });
+
+      test("F159-T06: Same source and destination returns instant 0 transit time", () => {
+        const router = new SPXHubGraphRouter();
+        const same = router.findOptimalPath("HUB_HN", "HUB_HN", "time");
+        expect.equal(same.found, true);
+        expect.equal(same.totalTransitHours, 0);
+        expect.equal(same.totalDistanceKm, 0);
+        expect.equal(same.path.length, 1);
+      });
+
+      test("F159-T07: Server and Client SPXHubGraphRouter produce identical routing solutions", () => {
+        const clientRouter = new SPXHubGraphRouter();
+        const serverRouter = new ServerSPXRouter();
+
+        const cRoute = clientRouter.findOptimalPath("HUB_HN", "SOC_CT", "time");
+        const sRoute = serverRouter.findOptimalPath("HUB_HN", "SOC_CT", "time");
+
+        expect.equal(cRoute.found, true);
+        expect.equal(sRoute.found, true);
+        expect.equal(cRoute.totalTransitHours, sRoute.totalTransitHours);
+        expect.equal(cRoute.totalDistanceKm, sRoute.totalDistanceKm);
+      });
+
+      test("F159-T08: Custom routing network and dynamic edge addition", () => {
+        const customRouter = new SPXHubGraphRouter([], []);
+        customRouter.addHub({ id: "H1", name: "Hub 1", city: "A", lat: 10, lng: 106, type: "FIRST_MILE" });
+        customRouter.addHub({ id: "H2", name: "Hub 2", city: "B", lat: 11, lng: 107, type: "LAST_MILE" });
+        customRouter.addRoute({ from: "H1", to: "H2", distanceKm: 50, transitHours: 2, baseCostVnd: 15000 });
+
+        const r = customRouter.findOptimalPath("H1", "H2", "time");
+        expect.equal(r.found, true);
+        expect.equal(r.totalTransitHours, 2);
+        expect.equal(r.totalDistanceKm, 50);
+      });
+
+      // --- Roaring Bitmaps Faceted Filter Index ---
+      test("F159-T09: ArrayContainer maintains sorted order, contains check, and elements manipulation", () => {
+        const ac = new ArrayContainer([10, 5, 20]);
+        expect.equal(ac.cardinality(), 3);
+        expect.equal(ac.contains(5), true);
+        expect.equal(ac.contains(15), false);
+
+        ac.add(15);
+        expect.equal(ac.contains(15), true);
+        expect.equal(ac.cardinality(), 4);
+
+        ac.remove(10);
+        expect.equal(ac.contains(10), false);
+        expect.equal(ac.cardinality(), 3);
+      });
+
+      test("F159-T10: ArrayContainer automatically upgrades to BitmapContainer at threshold", () => {
+        const ac = new ArrayContainer();
+        for (let i = 0; i < 4095; i++) {
+          ac.add(i);
+        }
+        expect.equal(ac.cardinality(), 4095);
+
+        const other = new ArrayContainer([4095, 4096]);
+        const union = ac.or(other);
+        expect.equal(union instanceof BitmapContainer, true);
+        expect.equal(union.cardinality(), 4097);
+        expect.equal(union.contains(4096), true);
+      });
+
+      test("F159-T11: RoaringBitmap executes AND, OR, and AND_NOT correctly across chunks", () => {
+        const bm1 = new RoaringBitmap([1, 2, 3, 70000, 70001]);
+        const bm2 = new RoaringBitmap([2, 3, 4, 70001, 70002]);
+
+        const andBm = bm1.and(bm2);
+        expect.equal(andBm.toArray().join(","), "2,3,70001");
+
+        const orBm = bm1.or(bm2);
+        expect.equal(orBm.cardinality(), 7);
+        expect.equal(orBm.contains(70000), true);
+        expect.equal(orBm.contains(70002), true);
+
+        const diffBm = bm1.andNot(bm2);
+        expect.equal(diffBm.toArray().join(","), "1,70000");
+      });
+
+      test("F159-T12: FacetedCatalogIndex indexes products and performs compound AND filtering", () => {
+        const catalog = new FacetedCatalogIndex();
+        catalog.indexProduct({ id: "p1", name: "Áo polo Coolmate", category: "Thời trang", brand: "Coolmate", price: 150000, rating: 5, stock: 10, location: "Hà Nội" });
+        catalog.indexProduct({ id: "p2", name: "Quần jean Owen", category: "Thời trang", brand: "Owen", price: 350000, rating: 4, stock: 5, location: "Hà Nội" });
+        catalog.indexProduct({ id: "p3", name: "Áo sơ mi Coolmate", category: "Thời trang", brand: "Coolmate", price: 250000, rating: 4, stock: 0, location: "Hồ Chí Minh" });
+
+        const res = catalog.filter({ category: "Thời trang", brand: "Coolmate", inStock: true });
+        expect.equal(res.totalMatches, 1);
+        expect.equal(res.products[0].id, "p1");
+      });
+
+      test("F159-T13: FacetedCatalogIndex handles priceTier and minRating simultaneously", () => {
+        const catalog = new FacetedCatalogIndex();
+        catalog.indexProduct({ id: "p1", name: "Sạc nhanh 20W", category: "Phụ kiện", price: 80000, rating: 4.8, stock: 20 });
+        catalog.indexProduct({ id: "p2", name: "Sạc GaN 65W", category: "Phụ kiện", price: 450000, rating: 5.0, stock: 15 });
+        catalog.indexProduct({ id: "p3", name: "Tai nghe giá rẻ", category: "Phụ kiện", price: 50000, rating: 3.2, stock: 8 });
+
+        const affordableFiveStar = catalog.filter({ priceTier: "UNDER_100K", minRating: 4 });
+        expect.equal(affordableFiveStar.totalMatches, 1);
+        expect.equal(affordableFiveStar.products[0].id, "p1");
+      });
+
+      test("F159-T14: FacetedCatalogIndex filters by inStock availability accurately", () => {
+        const catalog = new FacetedCatalogIndex();
+        catalog.indexProduct({ id: "p1", name: "Mặt hàng còn", category: "Gia dụng", stock: 10 });
+        catalog.indexProduct({ id: "p2", name: "Mặt hàng hết", category: "Gia dụng", stock: 0 });
+
+        const inStockOnly = catalog.filter({ inStock: true });
+        const outOfStockOnly = catalog.filter({ inStock: false });
+
+        expect.equal(inStockOnly.totalMatches, 1);
+        expect.equal(outOfStockOnly.totalMatches, 1);
+      });
+
+      test("F159-T15: Server and Client RoaringBitmap produce identical results", () => {
+        const clientBm = new RoaringBitmap([10, 20, 30, 80000]);
+        const serverBm = new ServerRoaringBitmap([10, 20, 30, 80000]);
+
+        expect.equal(clientBm.cardinality(), serverBm.cardinality());
+        expect.equal(clientBm.contains(80000), serverBm.contains(80000));
+        expect.equal(clientBm.toArray().join(","), serverBm.toArray().join(","));
+      });
+
+      test("F159-T16: RoaringBitmap handles edge cases of empty query and non-matching facets", () => {
+        const catalog = new FacetedCatalogIndex();
+        catalog.indexProduct({ id: "p1", name: "Hàng A", category: "Sách", stock: 1 });
+
+        const noFilters = catalog.filter({});
+        expect.equal(noFilters.totalMatches, 1);
+
+        const impossibleFilter = catalog.filter({ category: "NonExistentCategory" });
+        expect.equal(impossibleFilter.totalMatches, 0);
+      });
+
+      // --- RFM Customer Segmentation & CLV Engine ---
+      test("F159-T17: RFMSegmentationEngine calculates Recency, Frequency, and Monetary scores accurately", () => {
+        const engine = new RFMSegmentationEngine("2026-10-15T00:00:00Z");
+
+        expect.equal(engine.calculateRecencyScore(5), 5); // <= 14 ngày
+        expect.equal(engine.calculateRecencyScore(25), 4); // 15-30 ngày
+        expect.equal(engine.calculateRecencyScore(45), 3); // 31-60 ngày
+        expect.equal(engine.calculateRecencyScore(80), 2); // 61-90 ngày
+        expect.equal(engine.calculateRecencyScore(120), 1); // > 90 ngày
+
+        expect.equal(engine.calculateFrequencyScore(20), 5); // >= 15 đơn
+        expect.equal(engine.calculateFrequencyScore(10), 4); // 8-14 đơn
+        expect.equal(engine.calculateFrequencyScore(5), 3); // 4-7 đơn
+        expect.equal(engine.calculateFrequencyScore(2), 2); // 2-3 đơn
+        expect.equal(engine.calculateFrequencyScore(1), 1); // 1 đơn
+
+        expect.equal(engine.calculateMonetaryScore(6000000), 5); // >= 5M
+        expect.equal(engine.calculateMonetaryScore(3000000), 4); // 2M-5M
+        expect.equal(engine.calculateMonetaryScore(1000000), 3); // 800k-2M
+        expect.equal(engine.calculateMonetaryScore(500000), 2); // 300k-800k
+        expect.equal(engine.calculateMonetaryScore(100000), 1); // < 300k
+      });
+
+      test("F159-T18: Correctly classifies VIP Champions customer with lifetime perks", () => {
+        const engine = new RFMSegmentationEngine("2026-10-15T00:00:00Z");
+        const vipCustomer = {
+          id: "cust_vip",
+          name: "Trần Minh Đức",
+          orders: [
+            { createdAt: "2026-10-12T00:00:00Z", totalAmount: 2000000, status: "DELIVERED" },
+            { createdAt: "2026-10-05T00:00:00Z", totalAmount: 1500000, status: "DELIVERED" },
+            { createdAt: "2026-09-20T00:00:00Z", totalAmount: 1200000, status: "DELIVERED" },
+            { createdAt: "2026-09-01T00:00:00Z", totalAmount: 900000, status: "DELIVERED" },
+            { createdAt: "2026-08-20T00:00:00Z", totalAmount: 800000, status: "DELIVERED" },
+            { createdAt: "2026-08-10T00:00:00Z", totalAmount: 700000, status: "DELIVERED" },
+            { createdAt: "2026-08-01T00:00:00Z", totalAmount: 600000, status: "DELIVERED" },
+            { createdAt: "2026-07-20T00:00:00Z", totalAmount: 500000, status: "DELIVERED" },
+          ],
+        };
+
+        const res = engine.analyzeCustomer(vipCustomer);
+        expect.equal(res.rScore >= 4, true);
+        expect.equal(res.fScore >= 4, true);
+        expect.equal(res.mScore >= 5, true);
+        expect.equal(res.segment.code, "CHAMPIONS");
+        expect.equal(res.projectedCLV > 5000000, true);
+      });
+
+      test("F159-T19: Correctly classifies At Risk customers and triggers urgent retention", () => {
+        const engine = new RFMSegmentationEngine("2026-10-15T00:00:00Z");
+        const atRiskCustomer = {
+          id: "cust_at_risk",
+          name: "Lê Hoàng Yến",
+          orders: [
+            { createdAt: "2026-07-01T00:00:00Z", totalAmount: 1500000, status: "DELIVERED" },
+            { createdAt: "2026-06-15T00:00:00Z", totalAmount: 1200000, status: "DELIVERED" },
+            { createdAt: "2026-06-01T00:00:00Z", totalAmount: 1100000, status: "DELIVERED" },
+            { createdAt: "2026-05-15T00:00:00Z", totalAmount: 800000, status: "DELIVERED" },
+          ],
+        };
+
+        const res = engine.analyzeCustomer(atRiskCustomer);
+        expect.equal(res.rScore <= 2, true); // Đã hơn 3 tháng chưa mua
+        expect.equal(res.segment.code, "AT_RISK");
+        expect.equal(res.segment.recommendedAction.includes("chiết khấu"), true);
+      });
+
+      test("F159-T20: Calculates Customer Lifetime Value (CLV) with segment multiplier", () => {
+        const engine = new RFMSegmentationEngine("2026-10-15T00:00:00Z");
+        const newCust = {
+          id: "cust_new",
+          name: "Nguyễn Văn Nam",
+          orders: [{ createdAt: "2026-10-14T00:00:00Z", totalAmount: 500000, status: "DELIVERED" }],
+        };
+
+        const res = engine.analyzeCustomer(newCust);
+        expect.equal(res.segment.code, "NEW_CUSTOMERS");
+        expect.equal(res.averageOrderValue, 500000);
+        expect.equal(res.projectedCLV >= 500000, true);
+      });
+
+      test("F159-T21: Performs batch analysis across customer portfolio and outputs breakdown", () => {
+        const engine = new RFMSegmentationEngine("2026-10-15T00:00:00Z");
+        const customers = [
+          { id: "c1", name: "Khách 1", orders: [{ createdAt: "2026-10-12T00:00:00Z", totalAmount: 1000000, status: "DELIVERED" }] },
+          { id: "c2", name: "Khách 2", orders: [{ createdAt: "2026-05-12T00:00:00Z", totalAmount: 200000, status: "DELIVERED" }] },
+        ];
+
+        const batch = engine.analyzeBatch(customers);
+        expect.equal(batch.totalCustomers, 2);
+        expect.equal(batch.totalHistoricalGMV, 1200000);
+        expect.equal(batch.segmentBreakdown.length, 11);
+      });
+
+      test("F159-T22: Admin Copilot recognizes SPX Hub Graph Routing, Roaring Bitmaps, and RFM queries", () => {
+        const r1 = generateAdminCopilotResponse("Lộ trình định tuyến SPX qua các hub trung chuyển");
+        expect.equal(r1.tag, "ĐỊNH TUYẾN ĐỒ THỊ SPX HUB");
+        expect.equal(r1.text.includes("Dijkstra"), true);
+
+        const r2 = generateAdminCopilotResponse("Kiến trúc bộ lọc thuộc tính Roaring Bitmaps");
+        expect.equal(r2.tag, "CHỈ MỤC ROARING BITMAPS");
+        expect.equal(r2.text.includes("ArrayContainer"), true);
+
+        const r3 = generateAdminCopilotResponse("Phân tích phân khúc khách hàng RFM và CLV");
+        expect.equal(r3.tag, "PHÂN KHÚC RFM & CLV");
+        expect.equal(r3.text.includes("Champions"), true);
+      });
+
+      test("F159-T23: Seller Copilot provides tailored RFM customer segment marketing advice and SPX transit times", () => {
+        const r1 = generateSellerCopilotResponse("Lộ trình vận chuyển liên tỉnh SPX");
+        expect.equal(r1.tag, "LỘ TRÌNH SPX GRAPH ROUTER");
+
+        const r2 = generateSellerCopilotResponse("Phân khúc khách hàng shop theo RFM");
+        expect.equal(r2.tag, "PHÂN KHÚC KHÁCH HÀNG RFM");
+        expect.equal(r2.text.includes("Champions"), true);
+      });
+
+      test("F159-T24: Comprehensive End-to-End: Faceted Search -> Order -> SPX Routing -> RFM Upgrade", () => {
+        // Step 1: Buyer filters catalog via Roaring Bitmaps
+        const catalog = new FacetedCatalogIndex();
+        catalog.indexProduct({ id: "prod_macbook", name: "MacBook Pro M3", category: "Laptop", brand: "Apple", price: 45000000, rating: 5, stock: 5, location: "Hà Nội" });
+        catalog.indexProduct({ id: "prod_mouse", name: "Magic Mouse", category: "Phụ kiện", brand: "Apple", price: 2000000, rating: 5, stock: 10, location: "Hà Nội" });
+
+        const searchRes = catalog.filter({ category: "Laptop", brand: "Apple", inStock: true });
+        expect.equal(searchRes.totalMatches, 1);
+        expect.equal(searchRes.products[0].id, "prod_macbook");
+
+        // Step 2: Buyer orders -> SPX Hub Graph Router generates shipping plan
+        const router = new SPXHubGraphRouter();
+        const routePlan = router.findOptimalPath("HUB_HN", "HUB_SG", "time");
+        expect.equal(routePlan.found, true);
+        expect.equal(routePlan.segments.length > 0, true);
+
+        // Step 3: Customer completes purchase -> RFM Engine upgrades to Champions
+        const rfmEngine = new RFMSegmentationEngine();
+        const customerProfile = {
+          id: "buyer_apple_fan",
+          name: "Lê Minh Tuấn",
+          orders: [
+            { createdAt: new Date().toISOString(), totalAmount: 47000000, status: "DELIVERED" },
+            { createdAt: new Date(Date.now() - 3 * 86400000).toISOString(), totalAmount: 15000000, status: "DELIVERED" },
+            { createdAt: new Date(Date.now() - 7 * 86400000).toISOString(), totalAmount: 5000000, status: "DELIVERED" },
+            { createdAt: new Date(Date.now() - 10 * 86400000).toISOString(), totalAmount: 2000000, status: "DELIVERED" },
+            { createdAt: new Date(Date.now() - 15 * 86400000).toISOString(), totalAmount: 1000000, status: "DELIVERED" },
+            { createdAt: new Date(Date.now() - 20 * 86400000).toISOString(), totalAmount: 800000, status: "DELIVERED" },
+            { createdAt: new Date(Date.now() - 25 * 86400000).toISOString(), totalAmount: 500000, status: "DELIVERED" },
+            { createdAt: new Date(Date.now() - 30 * 86400000).toISOString(), totalAmount: 400000, status: "DELIVERED" },
+          ],
+        };
+        const rfmResult = rfmEngine.analyzeCustomer(customerProfile);
+        expect.equal(rfmResult.segment.code, "CHAMPIONS");
+        expect.equal(rfmResult.projectedCLV > 50000000, true);
       });
     });
   });

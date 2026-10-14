@@ -624,6 +624,38 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // -------------------------------------------------------------
+  // PHASE 12: SPX GRAPH ROUTING, ROARING BITMAPS & VIP RFM TIERS
+  // -------------------------------------------------------------
+
+  // 10. Lộ Trình Vận Chuyển Liên Tỉnh SPX Multi-Hub (SPX_MULTI_HUB_ROUTING)
+  if (/lộ trình vận chuyển spx|spx chuyển qua đâu|các trạm trung chuyển spx|thời gian giao hàng liên tỉnh|định tuyến spx/i.test(lower)) {
+    return {
+      intent: 'SPX_MULTI_HUB_ROUTING',
+      replyText: `**[SPX EXPRESS MULTI-HUB ROUTING] LỘ TRÌNH ĐIỀU PHỐI THÔNG MINH DIJKSTRA / A*:**\n\n• **Mạng lưới trạm trung chuyển toàn quốc**: Đơn hàng của bạn được luân chuyển qua các trung tâm khai thác quy mô lớn (Bắc Ninh Mega SOC, Vinh SOC, Đà Nẵng SOC, Củ Chi Mega SOC) theo lộ trình tối ưu thời gian di chuyển.\n• **Cập nhật từng trạm (Live Stepper)**: Mỗi khi gói hàng nhập và xuất kho trạm trung chuyển, hệ thống sẽ gửi thông báo đẩy và cập nhật ngay trên bản đồ theo dõi đơn hàng của bạn!`,
+      suggestions: ['Tra cứu đơn hàng của tôi', 'Xem kích thước kiện hàng', 'Liên hệ bưu tá'],
+    };
+  }
+
+  // 11. Bộ Lọc Đa Thuộc Tính Siêu Tốc (ROARING_BITMAPS_FACETED_FILTER)
+  if (/lọc sản phẩm thông minh|tìm đồ theo nhiều tiêu chí|lọc theo giá và đánh giá|bộ lọc roaring/i.test(lower)) {
+    return {
+      intent: 'ROARING_BITMAPS_FACETED_FILTER',
+      replyText: `**[TÌM KIẾM ĐA TIÊU CHÍ ROARING BITMAPS] TÌM ĐÚNG MÓN ĐỒ BẠN CẦN TRONG CHỚP MẮT!**\n\n• **Chỉ mục lọc siêu tốc**: Hệ thống áp dụng cấu trúc dữ liệu Roaring Bitmaps giúp bạn kết hợp đồng thời nhiều bộ lọc: Danh mục, Thương hiệu chính hãng, Khoảng giá, Đánh giá sao và Tỉnh thành kho hàng.\n• **Phản hồi tức thì**: Kết quả lọc hiển thị ngay lập tức không có độ trễ, giúp bạn nhanh chóng chọn được sản phẩm ưng ý với giá hời nhất!`,
+      products: searchSmartProducts('thời trang công nghệ chính hãng').slice(0, 3),
+      suggestions: ['Lọc hàng dưới 200k', 'Săn hàng Mall 5 sao', 'Lấy voucher Freeship'],
+    };
+  }
+
+  // 12. Quyền Lợi Hạng Thành Viên & Khách Thân Thiết RFM (VIP_RFM_BENEFITS)
+  if (/quyền lợi khách vip|hạng thành viên|khách hàng thân thiết|mini xu vip|champions shopee/i.test(lower)) {
+    return {
+      intent: 'VIP_RFM_BENEFITS',
+      replyText: `**[HẠNG THÀNH VIÊN VIP MINI SHOPEE] ĐẶC QUYỀN MUA SẮM KHÔNG GIỚI HẠN!**\n\n• **Phân hạng tự động RFM**: Dựa trên tần suất mua sắm và tổng giá trị đơn hàng, hệ thống tự động thăng hạng khách hàng lên **Loyal** hoặc **Champions**.\n• **Đặc quyền độc quyền**: Tích lũy Mini Xu x2 cho mọi đơn hàng, mã hoàn xu 20%, voucher Freeship trọn đời và ưu tiên hỗ trợ trực tiếp từ Chuyên viên CSKH 24/7!`,
+      suggestions: ['Xem số dư Mini Xu', 'Vào kho voucher của tôi', 'Quay vòng quay may mắn'],
+    };
+  }
+
+  // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH
   // -------------------------------------------------------------
   const matchingProducts = searchSmartProducts(lower);
