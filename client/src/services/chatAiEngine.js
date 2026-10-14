@@ -483,7 +483,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (/giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -518,7 +518,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (/voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -565,6 +565,38 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'BUYER_AI_TRANSPARENCY',
       replyText: `**[MINH BẠCH DỮ LIỆU & CƠ CHẾ TRỢ LÝ AI]:**\n\n• **Dữ liệu thực tế 100%**: AI đọc trực tiếp danh mục **109 sản phẩm**, kho voucher đang mở, giỏ hàng cá nhân và trạng thái đơn hàng SPX Express của chính bạn.\n• **Tốc độ phản hồi tức thì**: Sử dụng engine AI suy luận biên (Client-side Inference) giúp phân tích ý định và tìm kiếm sản phẩm trong vòng mili-giây mà không làm gián đoạn trải nghiệm mua sắm.\n• **Gợi ý chuẩn xác**: Kết hợp thuật toán lọc cộng tác (Item Affinity) và lọc từ cấm an toàn, đảm bảo bạn luôn nhận được sản phẩm chính hãng với giá tốt nhất!`,
       suggestions: ['Gợi ý sản phẩm hot', 'Lấy voucher giảm giá', 'Kiểm tra đơn hàng'],
+    };
+  }
+
+  // -------------------------------------------------------------
+  // PHASE 10: ADVANCED DISTRIBUTED & HEURISTIC ALGORITHMS SUITE
+  // -------------------------------------------------------------
+
+  // 5. Tìm Kiếm Bằng Ảnh & Sản Phẩm Tương Tự Vector HNSW (VISUAL_IMAGE_SEARCH_HNSW)
+  if (/tìm bằng ảnh|tìm kiếm bằng hình ảnh|visual search|sản phẩm tương tự bằng ảnh|quét ảnh tìm đồ/i.test(lower)) {
+    return {
+      intent: 'VISUAL_IMAGE_SEARCH_HNSW',
+      replyText: `**[TÌM KIẾM HÌNH ẢNH VECTOR HNSW] TÌM ĐỒ CHUẨN XÁC CHỈ SAU 1 CÚ NHẤP!**\n\n• **Công nghệ HNSW Vector Search**: Hệ thống trích xuất vector đặc trưng hình ảnh (CLIP Embedding 128 chiều) và tìm kiếm trên đồ thị phân tầng HNSW với độ trễ siêu tốc dưới 5 mili-giây.\n• **Độ tương đồng cao**: Bạn chỉ cần tải ảnh mẫu hoặc chụp món đồ yêu thích, AI sẽ tự động gợi ý các sản phẩm có cùng kiểu dáng, màu sắc và chất liệu chính hãng với giá tốt nhất!`,
+      products: searchSmartProducts('thời trang giày áo túi xách').slice(0, 3),
+      suggestions: ['Tải ảnh tìm kiếm', 'Gợi ý sản phẩm hot', 'Săn voucher 15%'],
+    };
+  }
+
+  // 6. Giao Hỏa Tốc 2H & Ghép Bưu Tá Tối Ưu Hungarian (EXPRESS_COURIER_DISPATCH_HUNGARIAN)
+  if (/giao hỏa tốc 2h|ghép bưu tá|shipper giao nhanh|tại sao giao hàng nhanh|spx hungarian/i.test(lower)) {
+    return {
+      intent: 'EXPRESS_COURIER_DISPATCH_HUNGARIAN',
+      replyText: `**[SPX EXPRESS 2H] ĐIỀU PHỐI BƯU TÁ TỐI ƯU HUNGARIAN:**\n\n• **Ghép bưu tá thông minh**: Thuật toán Hungarian Algorithm tự động gán bưu tá SPX đang ở gần Shop nhất và có lộ trình di chuyển tối ưu tới địa chỉ nhận của bạn.\n• **Đảm bảo SLA giao hàng 2h**: Giảm tối đa thời gian chờ lấy hàng và tránh tắc đường, đảm bảo gói hàng được giao hỏa tốc tận tay đúng cam kết.\n• **Theo dõi trực tiếp**: Bạn có thể theo dõi vị trí bưu tá di chuyển từng phút trên bản đồ GPS của đơn hàng!`,
+      suggestions: ['Tra cứu đơn hàng của tôi', 'Xem chính sách SPX 2H', 'Liên hệ CSKH'],
+    };
+  }
+
+  // 7. Bảo Đảm Công Bằng & Không Bán Vượt Kho Flash Sale Raft (FLASH_SALE_CONSENSUS_FAIR_QUEUE)
+  if (/giật deal flash sale|săn deal không sợ ảo|hết hàng flash sale|bảo đảm tồn kho flash sale|raft flash sale/i.test(lower)) {
+    return {
+      intent: 'FLASH_SALE_CONSENSUS_FAIR_QUEUE',
+      replyText: `**[BẢO ĐẢM CÔNG BẰNG FLASH SALE RAFT CONSENSUS]:**\n\n• **Chống bán vượt kho (Zero Overselling)**: Cụm máy chủ phân tán đồng thuận qua thuật toán Raft Consensus, đảm bảo chỉ những đơn hàng hợp lệ được ghi nhận vào Quorum mới xác nhận thành công.\n• **Xếp hàng công bằng tuyệt đối**: Triệt tiêu hiện tượng bot gian lận hoặc lỗi phân mảnh não đôi (Split-Brain). Mỗi chiếc deal sốc 1,000₫ đều được trao minh bạch cho người mua nhanh tay nhất!`,
+      suggestions: ['Xem khung giờ Flash Sale', 'Nạp ví Mini Xu', 'Săn voucher Freeship'],
     };
   }
 

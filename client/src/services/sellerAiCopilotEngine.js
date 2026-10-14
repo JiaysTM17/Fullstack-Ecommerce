@@ -25,7 +25,7 @@ export function generateSellerCopilotResponse(query, context = {}) {
   const raw = query.toLowerCase().trim();
 
   // 1. Cảnh Báo Tồn Kho & Đề Xuất Nhập PO (Restock Radar & Safety Stock)
-  if (/tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
+  if (!/raft/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
     const lowStockItems = shopProducts.filter(p => p.stock <= (typeof p.safetyThreshold === 'number' ? p.safetyThreshold : 10));
     const outOfStockItems = shopProducts.filter(p => p.stock === 0);
 
@@ -80,7 +80,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 3. Tư Vấn Chiến Dịch Flash Sale Shop (Flash Sale Optimization)
-  if (/flash sale|khung giờ|giảm giá|săn deal|deal chớp nhoáng|khuyến mãi/i.test(raw)) {
+  if (!/raft/i.test(raw) && /flash sale|khung giờ|giảm giá|săn deal|deal chớp nhoáng|khuyến mãi/i.test(raw)) {
     return {
       text: `⚡ **CHIẾN LƯỢC THIẾT LẬP FLASH SALE SHOP ĐỘC QUYỀN**:
 - **Khung giờ vàng đề xuất**: 
@@ -119,7 +119,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 5. Quản Lý Đơn Hàng & Xử Lý Giao SPX (Order Fulfillment)
-  if (/đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
+  if (!/hungarian/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
     const pendingCount = shopOrders.filter(o => o.status === 'pending').length;
     return {
       text: `📦 **TIẾN ĐỘ XỬ LÝ ĐƠN HÀNG GIAN HÀNG**:
@@ -258,6 +258,60 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem báo cáo vi phạm bản quyền',
         'Tối ưu đấu thầu từ khóa GSP',
         'Kiểm tra cảnh báo tồn kho'
+      ]
+    };
+  }
+
+  // 12. Tìm Kiếm Bằng Hình Ảnh & Ngữ Nghĩa HNSW (Visual & Semantic Search Discovery)
+  if (/tìm kiếm hình ảnh|visual search|hnsw shop|tìm kiếm ngữ nghĩa sản phẩm|tìm kiếm vector/i.test(raw)) {
+    return {
+      text: `📸 **TĂNG TRƯỞNG LƯỢT TIẾP CẬN TỪ TÌM KIẾM HÌNH ẢNH HNSW (${currentShop.name})**:
+- **Cơ chế HNSW Vector Search**: Đồ thị phân tầng HNSW lập chỉ mục vector nhúng hình ảnh sản phẩm đa chiều (CLIP 128-d). Khi khách hàng tải ảnh mẫu lên để tìm đồ tương tự, sản phẩm của shop sẽ xuất hiện trong Top kết quả chỉ sau vài mili-giây.
+- **Mẹo tối ưu tỷ lệ xuất hiện**:
+  1. Sử dụng ảnh chụp sản phẩm độ phân giải cao, phông nền đơn sắc rõ nét.
+  2. Bổ sung nhiều góc chụp (mặt trước, chi tiết chất liệu, ảnh chụp mẫu mặc thực tế).
+  3. Mô tả chi tiết các thuộc tính vật lý (màu sắc, kiểu dáng, chất liệu) để kết hợp tìm kiếm ngữ nghĩa Hybrid Search.`,
+      type: 'marketing',
+      tag: 'TÌM KIẾM HÌNH ẢNH HNSW',
+      suggestions: [
+        'Tối ưu hình ảnh sản phẩm',
+        'Xem điều phối lấy hàng SPX',
+        'Tư vấn chiến lược Flash Sale'
+      ]
+    };
+  }
+
+  // 13. Tối Ưu Lấy Hàng Hỏa Tốc Qua Thuật Toán Hungarian (SPX Express Dispatch)
+  if (/bưu tá lấy hàng|spx hungarian|tối ưu lấy hàng|shipper đến lấy|hungarian shop|điều phối lấy hàng/i.test(raw)) {
+    return {
+      text: `⚡ **TỐI ƯU HÓA ĐIỀU PHỐI BƯU TÁ SPX HUNGARIAN (${currentShop.name})**:
+- **Cơ chế gán bưu tá thông minh**: Thuật toán Hungarian (Kuhn-Munkres) tự động tính toán vị trí GPS thời gian thực của bưu tá SPX gần nhất đang có tải trọng xe phù hợp để ghé gian hàng bạn nhận đơn.
+- **Lợi ích vận hành cho shop**:
+  - Giảm 40% thời gian chờ bưu tá đến lấy hàng (Pickup Wait Time).
+  - Tránh tình trạng bưu tá từ chối nhận hàng do cồng kềnh/quá tải trọng xe máy.
+  - Tăng tỷ lệ giao đúng hẹn SLA, duy trì chuẩn sao quả tạ = 0 điểm.`,
+      type: 'logistics',
+      tag: 'TỐI ƯU ĐIỀU PHỐI BƯU TÁ',
+      suggestions: [
+        'Xem tiến độ điều phối SPX',
+        'Bảo vệ tồn kho Flash Sale Raft',
+        'Cảnh báo sản phẩm sắp hết hàng'
+      ]
+    };
+  }
+
+  // 14. Bảo Vệ Tồn Kho Flash Sale Bằng Đồng Thuận Phân Tán Raft (Raft Distributed Consensus)
+  if (/bảo vệ tồn kho flash sale|raft shop|chống bán vượt kho|quản lý kho phân tán|đồng thuận raft/i.test(raw)) {
+    return {
+      text: `🛡️ **BẢO VỆ TỒN KHO FLASH SALE BẰNG ĐỒNG THUẬN PHÂN TÁN RAFT (${currentShop.name})**:
+- **Chống bán vượt kho tuyệt đối (Zero Overselling)**: Khi chiến dịch Flash Sale bùng nổ hàng nghìn lượt mua cùng lúc, thuật toán Raft Consensus đảm bảo mỗi suất trừ kho phải được xác nhận trên đa số nút Quorum trước khi xác nhận đơn.
+- **Không lo đơn hàng ảo / rớt hàng**: Tồn kho của shop được bảo toàn chính xác từng đơn vị; khi người mua hủy đơn, suất đặt trước tự động hoàn trả kho tức thì không bị thất thoát.`,
+      type: 'security',
+      tag: 'BẢO VỆ TỒN KHO FLASH SALE RAFT',
+      suggestions: [
+        'Cấu hình số lượng Flash Sale',
+        'Tối ưu hình ảnh sản phẩm HNSW',
+        'Xem báo cáo bán hàng'
       ]
     };
   }

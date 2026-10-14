@@ -374,7 +374,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 14. Thuật toán Tối ưu Lộ trình Giao hàng Chặng Cuối (TSP Nearest Neighbor & 2-Opt)
-  if (/tsp|lộ trình giao hàng|tối ưu tuyến đường|nearest neighbor|2-opt|bưu tá spx|giao hàng chặng cuối/i.test(raw)) {
+  if (!/hungarian/i.test(raw) && /tsp|lộ trình giao hàng|tối ưu tuyến đường|nearest neighbor|2-opt|bưu tá spx|giao hàng chặng cuối/i.test(raw)) {
     return {
       text: `🚚 **THUẬT TOÁN TỐI ƯU TUYẾN ĐƯỜNG GIAO VẬN SPX (TSP NEAREST NEIGHBOR & 2-OPT)**:
 - **Mục đích thiết kế**: Giải bài toán người du lịch (Traveling Salesperson Problem) cho bưu tá SPX, giảm thiểu quãng đường di chuyển và hạ tỷ lệ giao trễ LSR xuống mức tối thiểu ($< 2\\%$).
@@ -632,6 +632,67 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem thống kê giỏ hàng toàn sàn',
         'Kiểm tra radar sao chép LSH',
         'Xem đấu thầu từ khóa GSP'
+      ]
+    };
+  }
+
+  // 27. Tìm Kiếm Ngữ Nghĩa & Hình Ảnh Đa Chiều HNSW (Hierarchical Navigable Small World Graph)
+  if (/hnsw|vector search|tìm kiếm vector|ann search|đồ thị phân tầng|hierarchical navigable|visual search/i.test(raw)) {
+    return {
+      text: `🔍 **TÌM KIẾM VECTOR ĐA CHIỀU HNSW (Hierarchical Navigable Small World)**:
+- **Mục đích**: Thay thế phép quét tuyến tính vét cạn $O(N \\times D)$ bằng tìm kiếm xấp xỉ láng giềng gần nhất (ANN) đạt tốc độ $O(\\log N)$ với độ chính xác Recall@10 $\\ge 98\\%$.
+- **Cấu trúc đồ thị phân tầng đa mức**:
+  - **Tầng cao (High Layers)**: Chứa các cạnh nối xa đóng vai trò như mạng lưới đường cao tốc (Skip-List Graph).
+  - **Tầng đáy (Layer 0)**: Chứa toàn bộ các vector sản phẩm với liên kết láng giềng dày đặc ($M_0 = 2M$).
+- **Ứng dụng thực tế trên sàn**:
+  - **Visual Search**: Tìm kiếm sản phẩm thông qua ảnh chụp / vector nhúng CLIP 128-d / 512-d.
+  - **Semantic Hybrid Search**: Tìm kiếm kết hợp từ khóa ngữ nghĩa và gợi ý sản phẩm thay thế thời gian thực (< 5ms).`,
+      type: 'algorithm',
+      tag: 'TÌM KIẾM VECTOR HNSW',
+      suggestions: [
+        'Kiểm tra hiệu năng HNSW Index',
+        'Xem điều phối bưu tá Hungarian',
+        'Kiểm toán đồng thuận Raft'
+      ]
+    };
+  }
+
+  // 28. Điều Phối Bưu Tá SPX Tối Ưu Đa Tiêu Chí (Hungarian Algorithm - Kuhn-Munkres)
+  if (/hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
+    return {
+      text: `🚚 **ĐIỀU PHỐI BƯU TÁ TỐI ƯU HUNGARIAN (Kuhn-Munkres $O(V^3)$)**:
+- **Mục đích**: Thuật toán Hungarian (Kuhn-Munkres) ghép cặp tự động và tối ưu cực tiểu tổng chi phí giao vận giữa $N$ bưu tá SPX Express và $M$ đơn hàng hỏa tốc.
+- **Hàm chi phí tổ hợp đa chiều**:
+  - **Quãng đường GPS Haversine**: Bưu tá $\\to$ Shop lấy hàng $\\to$ Người mua nhận hàng.
+  - **Áp lực cam kết SLA**: Phạt nặng nếu thời gian giao hàng dự kiến sát hạn chót cam kết 2h.
+  - **Tải trọng xe máy**: Cảnh báo và tính phí phạt vượt tải trọng tối đa ($> 30\\text{kg}$).
+  - **Hệ số tin cậy bưu tá**: Bưu tá đạt chuẩn 5 sao được ưu tiên nhận đơn gần và thưởng chiết khấu.
+- **Hiệu quả kinh tế**: Giảm 32% tổng quãng đường di chuyển rỗng, nâng tỷ lệ giao đúng hạn SLA lên 99.2%.`,
+      type: 'logistics',
+      tag: 'ĐIỀU PHỐI BƯU TÁ HUNGARIAN',
+      suggestions: [
+        'Xem bản đồ điều phối SPX',
+        'Kiểm tra đồng thuận phân tán Raft',
+        'Tra cứu chỉ mục HNSW'
+      ]
+    };
+  }
+
+  // 29. Đồng Thuận Phân Tán Cụm Flash Sale (Raft Distributed Consensus & Quorum State Machine)
+  if (/raft|đồng thuận phân tán|leader election|quorum|bầu chọn leader|split-brain|sao chép nhật ký/i.test(raw)) {
+    return {
+      text: `⚡ **ĐỒNG THUẬN PHÂN TÁN RAFT & MÁY TRẠNG THÁI QUORUM**:
+- **Thuật toán Raft Consensus**: Bảo chứng Flash Sale triệu traffic, ngăn chặn hoàn toàn bán vượt kho (Zero Overselling) và phân mảnh cụm não đôi (Zero Split-Brain).
+- **Cơ chế hoạt động cốt lõi**:
+  - **Bầu chọn Leader**: Đồng hồ ngẫu nhiên (Randomized Election Timeout) phòng ngừa chia phiếu; đắc cử khi đạt đa số phiếu tuyệt đối (Quorum: $\\lfloor N/2 \\rfloor + 1$).
+  - **Sao chép nhật ký (Log Replication)**: Mọi thao tác trừ tồn kho/khóa giao dịch phải được xác nhận trên Quorum trước khi cam kết (Commit).
+  - **Tính an toàn bất biến**: Leader Completeness và Log Matching đảm bảo dữ liệu tồn kho luôn nhất quán trên mọi nút khi có sự cố đứt gãy mạng (Network Partition).`,
+      type: 'algorithm',
+      tag: 'ĐỒNG THUẬN PHÂN TÁN RAFT',
+      suggestions: [
+        'Kiểm tra trạng thái cụm Raft',
+        'Xem điều phối bưu tá Hungarian',
+        'Tra cứu vector index HNSW'
       ]
     };
   }

@@ -219,7 +219,10 @@ export function analyzeSentiment(text) {
   }
 
   for (const neg of NEGATIVE_LEXICON) {
-    if (normalized.includes(neg)) {
+    const isMatched = neg.length <= 3
+      ? new RegExp(`(^|\\s|[.,!?;:])${neg}($|\\s|[.,!?;:])`, "i").test(normalized)
+      : normalized.includes(neg);
+    if (isMatched) {
       let weight = -1.2; // Negative weight is slightly heavier in e-commerce
       for (const intensifier of INTENSIFIERS) {
         if (normalized.includes(`${intensifier} ${neg}`)) weight = -1.8;
@@ -3396,6 +3399,1116 @@ export class CrdtCart {
   }
 }
 
+// ------------------------------------------------------------------------------
+// PHASE 10 ALGORITHM 1: HNSW (Hierarchical Navigable Small World Graph)
+// ------------------------------------------------------------------------------
+export function cosineDistance(vecA, vecB) {
+  if (!vecA || !vecB || vecA.length !== vecB.length || vecA.length === 0) {
+    return 1.0;
+  }
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
+  const len = vecA.length;
+
+  for (let i = 0; i < len; i++) {
+    const a = vecA[i];
+    const b = vecB[i];
+    dot += a * b;
+    normA += a * a;
+    normB += b * b;
+  }
+
+  if (normA === 0 || normB === 0) return 1.0;
+  const similarity = dot / (Math.sqrt(normA) * Math.sqrt(normB));
+  const clampedSim = Math.max(-1, Math.min(1, similarity));
+  return 1 - clampedSim;
+}
+
+export function euclideanDistance(vecA, vecB) {
+  if (!vecA || !vecB || vecA.length !== vecB.length || vecA.length === 0) {
+    return Infinity;
+  }
+  let sum = 0;
+  const len = vecA.length;
+  for (let i = 0; i < len; i++) {
+    const diff = vecA[i] - vecB[i];
+    sum += diff * diff;
+  }
+  return Math.sqrt(sum);
+}
+
+export class PriorityQueue {
+  constructor(comparator = (a, b) => a.dist - b.dist) {
+    this.comparator = comparator;
+    this.data = [];
+  }
+
+  push(item) {
+    this.data.push(item);
+    this.data.sort(this.comparator);
+  }
+
+  pop() {
+    return this.data.shift();
+  }
+
+  peek() {
+    return this.data[0];
+  }
+
+  get size() {
+    return this.data.length;
+  }
+
+  values() {
+    return [...this.data];
+  }
+}
+
+export class HNSWNode {
+  constructor(id, vector, level, metadata = {}) {
+    this.id = String(id);
+    this.vector = Array.from(vector);
+    this.level = level;
+    this.metadata = metadata;
+    this.neighborsByLevel = Array.from({ length: level + 1 }, () => new Set());
+  }
+}
+
+export class HNSWIndex {
+  constructor({
+    dim = 128,
+    M = 16,
+    efConstruction = 64,
+    efSearch = 32,
+    metric = "cosine",
+    randomSeed = null,
+  } = {}) {
+    this.dim = dim;
+    this.M = Math.max(4, Number(M) || 16);
+    this.M0 = 2 * this.M;
+    this.efConstruction = Math.max(this.M, Number(efConstruction) || 64);
+    this.efSearch = Math.max(1, Number(efSearch) || 32);
+    this.metric = metric === "euclidean" ? "euclidean" : "cosine";
+    this.distanceFn = this.metric === "euclidean" ? euclideanDistance : cosineDistance;
+    this.mL = 1 / Math.log(this.M);
+
+    this.nodes = new Map();
+    this.entryPointId = null;
+    this.maxLevel = -1;
+    this._rng = this._createRng(randomSeed);
+  }
+
+  _createRng(seed) {
+    if (seed == null) {
+      return Math.random;
+    }
+    let s = Number(seed) || 1;
+    return () => {
+      s = (s * 16807) % 2147483647;
+      return (s - 1) / 2147483646;
+    };
+  }
+
+  _randomLevel() {
+    const r = Math.max(1e-7, this._rng());
+    const level = Math.floor(-Math.log(r) * this.mL);
+    return Math.min(level, 16);
+  }
+
+  get size() {
+    return this.nodes.size;
+  }
+
+  insert(id, vector, metadata = {}) {
+    const strId = String(id);
+    if (!vector || vector.length !== this.dim) {
+      throw new Error(`Vector dimension mismatch. Expected ${this.dim}, got ${vector ? vector.length : 0}`);
+    }
+
+    if (this.nodes.has(strId)) {
+      this.remove(strId);
+    }
+
+    const nodeLevel = this._randomLevel();
+    const newNode = new HNSWNode(strId, vector, nodeLevel, metadata);
+    this.nodes.set(strId, newNode);
+
+    if (this.entryPointId === null) {
+      this.entryPointId = strId;
+      this.maxLevel = nodeLevel;
+      return newNode;
+    }
+
+    let currObj = this.nodes.get(this.entryPointId);
+    let currDist = this.distanceFn(vector, currObj.vector);
+
+    for (let l = this.maxLevel; l > nodeLevel; l--) {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        const neighbors = currObj.neighborsByLevel[l] || new Set();
+        for (const neighborId of neighbors) {
+          const neighborNode = this.nodes.get(neighborId);
+          if (!neighborNode) continue;
+          const d = this.distanceFn(vector, neighborNode.vector);
+          if (d < currDist) {
+            currDist = d;
+            currObj = neighborNode;
+            changed = true;
+          }
+        }
+      }
+    }
+
+    let enterNodes = [currObj];
+    const topLevel = Math.min(this.maxLevel, nodeLevel);
+
+    for (let l = topLevel; l >= 0; l--) {
+      const candidates = this._searchLayer(vector, enterNodes, this.efConstruction, l);
+      const maxM = l === 0 ? this.M0 : this.M;
+      const selectedNeighbors = this._selectNeighbors(candidates, maxM);
+
+      for (const n of selectedNeighbors) {
+        const neighborNode = this.nodes.get(n.id);
+        if (!neighborNode) continue;
+
+        newNode.neighborsByLevel[l].add(n.id);
+        neighborNode.neighborsByLevel[l].add(strId);
+
+        const nLimit = l === 0 ? this.M0 : this.M;
+        if (neighborNode.neighborsByLevel[l].size > nLimit) {
+          this._shrinkNeighbors(neighborNode, l, nLimit);
+        }
+      }
+
+      enterNodes = selectedNeighbors.map((sn) => this.nodes.get(sn.id));
+    }
+
+    if (nodeLevel > this.maxLevel) {
+      this.maxLevel = nodeLevel;
+      this.entryPointId = strId;
+    }
+
+    return newNode;
+  }
+
+  _searchLayer(queryVector, enterNodes, ef, level) {
+    const visited = new Set();
+    const candidates = new PriorityQueue((a, b) => a.dist - b.dist);
+    const w = new PriorityQueue((a, b) => b.dist - a.dist);
+
+    for (const en of enterNodes) {
+      if (!en) continue;
+      const d = this.distanceFn(queryVector, en.vector);
+      visited.add(en.id);
+      candidates.push({ id: en.id, dist: d });
+      w.push({ id: en.id, dist: d });
+    }
+
+    while (candidates.size > 0) {
+      const current = candidates.pop();
+      const furthestInW = w.peek();
+
+      if (current.dist > furthestInW.dist) {
+        break;
+      }
+
+      const currentNode = this.nodes.get(current.id);
+      if (!currentNode) continue;
+
+      const neighbors = currentNode.neighborsByLevel[level] || new Set();
+      for (const nId of neighbors) {
+        if (!visited.has(nId)) {
+          visited.add(nId);
+          const neighborNode = this.nodes.get(nId);
+          if (!neighborNode) continue;
+
+          const d = this.distanceFn(queryVector, neighborNode.vector);
+          const worstW = w.peek();
+
+          if (d < worstW.dist || w.size < ef) {
+            candidates.push({ id: nId, dist: d });
+            w.push({ id: nId, dist: d });
+
+            if (w.size > ef) {
+              w.pop();
+            }
+          }
+        }
+      }
+    }
+
+    return w.values().sort((a, b) => a.dist - b.dist);
+  }
+
+  _selectNeighbors(candidates, maxM) {
+    return candidates.slice(0, maxM);
+  }
+
+  _shrinkNeighbors(node, level, maxM) {
+    const neighbors = Array.from(node.neighborsByLevel[level]).map((nId) => {
+      const nNode = this.nodes.get(nId);
+      return {
+        id: nId,
+        dist: nNode ? this.distanceFn(node.vector, nNode.vector) : Infinity,
+      };
+    });
+
+    neighbors.sort((a, b) => a.dist - b.dist);
+    const kept = neighbors.slice(0, maxM);
+    node.neighborsByLevel[level] = new Set(kept.map((k) => k.id));
+  }
+
+  searchKNN(queryVector, k = 10, efSearch = null) {
+    if (this.nodes.size === 0 || !this.entryPointId) {
+      return [];
+    }
+
+    if (!queryVector || queryVector.length !== this.dim) {
+      throw new Error(`Query vector dimension mismatch. Expected ${this.dim}, got ${queryVector ? queryVector.length : 0}`);
+    }
+
+    const ef = Math.max(k, efSearch || this.efSearch);
+    let currObj = this.nodes.get(this.entryPointId);
+    let currDist = this.distanceFn(queryVector, currObj.vector);
+
+    for (let l = this.maxLevel; l > 0; l--) {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        const neighbors = currObj.neighborsByLevel[l] || new Set();
+        for (const nId of neighbors) {
+          const nNode = this.nodes.get(nId);
+          if (!nNode) continue;
+          const d = this.distanceFn(queryVector, nNode.vector);
+          if (d < currDist) {
+            currDist = d;
+            currObj = nNode;
+            changed = true;
+          }
+        }
+      }
+    }
+
+    const candidates = this._searchLayer(queryVector, [currObj], ef, 0);
+    const topK = candidates.slice(0, k);
+
+    return topK.map((item) => {
+      const node = this.nodes.get(item.id);
+      const similarity = this.metric === "cosine" ? Math.max(0, 1 - item.dist) : 1 / (1 + item.dist);
+      return {
+        id: item.id,
+        distance: Number(item.dist.toFixed(6)),
+        similarity: Number(similarity.toFixed(4)),
+        metadata: node ? node.metadata : {},
+      };
+    });
+  }
+
+  remove(id) {
+    const strId = String(id);
+    const node = this.nodes.get(strId);
+    if (!node) return false;
+
+    for (let l = 0; l <= node.level; l++) {
+      for (const nId of node.neighborsByLevel[l]) {
+        const neighbor = this.nodes.get(nId);
+        if (neighbor && neighbor.neighborsByLevel[l]) {
+          neighbor.neighborsByLevel[l].delete(strId);
+        }
+      }
+    }
+
+    this.nodes.delete(strId);
+
+    if (this.entryPointId === strId) {
+      if (this.nodes.size === 0) {
+        this.entryPointId = null;
+        this.maxLevel = -1;
+      } else {
+        let highestLevel = -1;
+        let newEntry = null;
+        for (const [remId, remNode] of this.nodes.entries()) {
+          if (remNode.level > highestLevel) {
+            highestLevel = remNode.level;
+            newEntry = remId;
+          }
+        }
+        this.entryPointId = newEntry;
+        this.maxLevel = highestLevel;
+      }
+    }
+
+    return true;
+  }
+
+  toJSON() {
+    const nodesData = [];
+    for (const [id, node] of this.nodes.entries()) {
+      nodesData.push({
+        id,
+        vector: node.vector,
+        level: node.level,
+        metadata: node.metadata,
+        neighborsByLevel: node.neighborsByLevel.map((set) => Array.from(set)),
+      });
+    }
+
+    return {
+      dim: this.dim,
+      M: this.M,
+      M0: this.M0,
+      efConstruction: this.efConstruction,
+      efSearch: this.efSearch,
+      metric: this.metric,
+      maxLevel: this.maxLevel,
+      entryPointId: this.entryPointId,
+      nodes: nodesData,
+    };
+  }
+
+  static fromJSON(data) {
+    if (!data) return new HNSWIndex();
+    const index = new HNSWIndex({
+      dim: data.dim,
+      M: data.M,
+      efConstruction: data.efConstruction,
+      efSearch: data.efSearch,
+      metric: data.metric,
+    });
+
+    index.maxLevel = data.maxLevel;
+    index.entryPointId = data.entryPointId;
+
+    if (Array.isArray(data.nodes)) {
+      for (const n of data.nodes) {
+        const node = new HNSWNode(n.id, n.vector, n.level, n.metadata);
+        if (Array.isArray(n.neighborsByLevel)) {
+          node.neighborsByLevel = n.neighborsByLevel.map((arr) => new Set(arr));
+        }
+        index.nodes.set(n.id, node);
+      }
+    }
+
+    return index;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 10 ALGORITHM 2: Hungarian Algorithm (Kuhn-Munkres) & SPX Courier Dispatch
+// ------------------------------------------------------------------------------
+export function solveHungarian(costMatrix) {
+  if (!costMatrix || costMatrix.length === 0 || !costMatrix[0] || costMatrix[0].length === 0) {
+    return { assignments: [], totalCost: 0, workerToTask: [], taskToWorker: [] };
+  }
+
+  const numRows = costMatrix.length;
+  const numCols = costMatrix[0].length;
+  const dim = Math.max(numRows, numCols);
+
+  let maxVal = 0;
+  for (let r = 0; r < numRows; r++) {
+    for (let c = 0; c < numCols; c++) {
+      if (Number.isFinite(costMatrix[r][c]) && costMatrix[r][c] > maxVal) {
+        maxVal = costMatrix[r][c];
+      }
+    }
+  }
+  const dummyCost = maxVal * 10 + 10000;
+
+  const matrix = Array.from({ length: dim }, (_, r) =>
+    Array.from({ length: dim }, (_, c) => {
+      if (r < numRows && c < numCols) {
+        return Number.isFinite(costMatrix[r][c]) ? costMatrix[r][c] : dummyCost;
+      }
+      return dummyCost;
+    })
+  );
+
+  const u = new Array(dim + 1).fill(0);
+  const v = new Array(dim + 1).fill(0);
+  const p = new Array(dim + 1).fill(0);
+  const way = new Array(dim + 1).fill(0);
+
+  for (let i = 1; i <= dim; i++) {
+    p[0] = i;
+    let j0 = 0;
+    const minv = new Array(dim + 1).fill(Infinity);
+    const used = new Array(dim + 1).fill(false);
+
+    do {
+      used[j0] = true;
+      const i0 = p[j0];
+      let delta = Infinity;
+      let j1 = 0;
+
+      for (let j = 1; j <= dim; j++) {
+        if (!used[j]) {
+          const cur = matrix[i0 - 1][j - 1] - u[i0] - v[j];
+          if (cur < minv[j]) {
+            minv[j] = cur;
+            way[j] = j0;
+          }
+          if (minv[j] < delta) {
+            delta = minv[j];
+            j1 = j;
+          }
+        }
+      }
+
+      for (let j = 0; j <= dim; j++) {
+        if (used[j]) {
+          u[p[j]] += delta;
+          v[j] -= delta;
+        } else {
+          minv[j] -= delta;
+        }
+      }
+
+      j0 = j1;
+    } while (p[j0] !== 0);
+
+    do {
+      const j1 = way[j0];
+      p[j0] = p[j1];
+      j0 = j1;
+    } while (j0 !== 0);
+  }
+
+  const workerToTask = new Array(numRows).fill(-1);
+  const taskToWorker = new Array(numCols).fill(-1);
+  const assignments = [];
+  let totalCost = 0;
+
+  for (let j = 1; j <= dim; j++) {
+    const r = p[j] - 1;
+    const c = j - 1;
+    if (r < numRows && c < numCols) {
+      workerToTask[r] = c;
+      taskToWorker[c] = r;
+      const realCost = costMatrix[r][c];
+      assignments.push({
+        workerIndex: r,
+        taskIndex: c,
+        cost: realCost,
+      });
+      totalCost += realCost;
+    }
+  }
+
+  assignments.sort((a, b) => a.workerIndex - b.workerIndex);
+
+  return {
+    assignments,
+    totalCost: Number(totalCost.toFixed(2)),
+    workerToTask,
+    taskToWorker,
+  };
+}
+
+export class SPXDispatchEngine {
+  constructor({
+    distanceWeight = 1.0,
+    urgencyWeight = 2.5,
+    capacityPenaltyWeight = 5000,
+    ratingWeight = 200,
+  } = {}) {
+    this.distanceWeight = distanceWeight;
+    this.urgencyWeight = urgencyWeight;
+    this.capacityPenaltyWeight = capacityPenaltyWeight;
+    this.ratingWeight = ratingWeight;
+  }
+
+  calculateAssignmentCost(courier, order) {
+    const pickupDist = calculateHaversineDistance(
+      courier.lat, courier.lng,
+      order.shopLat, order.shopLng
+    );
+    const deliveryDist = calculateHaversineDistance(
+      order.shopLat, order.shopLng,
+      order.buyerLat, order.buyerLng
+    );
+    const totalDist = pickupDist + deliveryDist;
+    const distanceCost = totalDist * this.distanceWeight * 5000;
+
+    const slaRemaining = Math.max(1, Number(order.slaUrgencyMinutes) || 60);
+    const estimatedPickupTimeMin = (pickupDist / 25) * 60;
+    const urgencyRatio = estimatedPickupTimeMin / slaRemaining;
+    const urgencyCost = urgencyRatio > 0.5
+      ? (urgencyRatio - 0.5) * this.urgencyWeight * 10000
+      : 0;
+
+    const maxCap = courier.capacityKg || 30;
+    const currentLoad = courier.currentLoadKg || 0;
+    const orderWeight = order.weightKg || 1.0;
+    const projectedLoad = currentLoad + orderWeight;
+    const overloadKg = Math.max(0, projectedLoad - maxCap);
+    const capacityCost = overloadKg * this.capacityPenaltyWeight;
+
+    const rating = Math.max(1, Math.min(5, Number(courier.rating) || 4.5));
+    const ratingDiscount = (rating - 3.0) * this.ratingWeight;
+
+    const totalAssignmentCost = Math.max(
+      1000,
+      distanceCost + urgencyCost + capacityCost - ratingDiscount
+    );
+
+    return {
+      totalCost: Math.round(totalAssignmentCost),
+      details: {
+        pickupDistKm: Number(pickupDist.toFixed(2)),
+        deliveryDistKm: Number(deliveryDist.toFixed(2)),
+        totalDistKm: Number(totalDist.toFixed(2)),
+        urgencyCost: Math.round(urgencyCost),
+        capacityCost: Math.round(capacityCost),
+        ratingDiscount: Math.round(ratingDiscount),
+        overloadKg: Number(overloadKg.toFixed(2)),
+      },
+    };
+  }
+
+  dispatch(couriers = [], orders = []) {
+    if (!couriers || couriers.length === 0 || !orders || orders.length === 0) {
+      return {
+        matchedAssignments: [],
+        totalDispatchCost: 0,
+        unassignedOrders: orders || [],
+        idleCouriers: couriers || [],
+        dispatchSummary: {
+          couriersCount: couriers ? couriers.length : 0,
+          ordersCount: orders ? orders.length : 0,
+          matchedCount: 0,
+        },
+      };
+    }
+
+    const costMatrix = [];
+    const costDetailsMatrix = [];
+
+    for (let r = 0; r < couriers.length; r++) {
+      const row = [];
+      const detailsRow = [];
+      for (let c = 0; c < orders.length; c++) {
+        const costObj = this.calculateAssignmentCost(couriers[r], orders[c]);
+        row.push(costObj.totalCost);
+        detailsRow.push(costObj.details);
+      }
+      costMatrix.push(row);
+      costDetailsMatrix.push(detailsRow);
+    }
+
+    const hungarianResult = solveHungarian(costMatrix);
+
+    const matchedAssignments = [];
+    const assignedCourierIndices = new Set();
+    const assignedOrderIndices = new Set();
+
+    for (const a of hungarianResult.assignments) {
+      const courier = couriers[a.workerIndex];
+      const order = orders[a.taskIndex];
+      const details = costDetailsMatrix[a.workerIndex][a.taskIndex];
+
+      assignedCourierIndices.add(a.workerIndex);
+      assignedOrderIndices.add(a.taskIndex);
+
+      matchedAssignments.push({
+        courierId: courier.id,
+        courierName: courier.name,
+        orderId: order.id,
+        orderCode: order.orderCode || order.id,
+        assignmentCost: a.cost,
+        metrics: details,
+      });
+    }
+
+    const unassignedOrders = orders.filter((_, idx) => !assignedOrderIndices.has(idx));
+    const idleCouriers = couriers.filter((_, idx) => !assignedCourierIndices.has(idx));
+
+    return {
+      matchedAssignments,
+      totalDispatchCost: hungarianResult.totalCost,
+      unassignedOrders,
+      idleCouriers,
+      dispatchSummary: {
+        couriersCount: couriers.length,
+        ordersCount: orders.length,
+        matchedCount: matchedAssignments.length,
+        unassignedOrdersCount: unassignedOrders.length,
+        idleCouriersCount: idleCouriers.length,
+      },
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 10 ALGORITHM 3: Raft Distributed Consensus & Flash Sale Quorum State Machine
+// ------------------------------------------------------------------------------
+export const NodeRole = {
+  FOLLOWER: "FOLLOWER",
+  CANDIDATE: "CANDIDATE",
+  LEADER: "LEADER",
+};
+
+export class FlashSaleStateMachine {
+  constructor() {
+    this.stocks = new Map();
+    this.reservations = new Map();
+    this.lastResult = null;
+  }
+
+  initStock(productId, initialStock) {
+    this.stocks.set(String(productId), Math.max(0, Number(initialStock) || 0));
+  }
+
+  apply(command) {
+    if (!command || !command.action) {
+      this.lastResult = { error: "INVALID_COMMAND" };
+      return this.lastResult;
+    }
+
+    const { action, productId, orderId, quantity = 1 } = command;
+    const pId = String(productId);
+    const oId = String(orderId);
+    const qty = Math.max(1, Number(quantity) || 1);
+
+    switch (action) {
+      case "INIT_STOCK":
+        this.initStock(pId, qty);
+        this.lastResult = { action, productId: pId, stock: this.stocks.get(pId) };
+        break;
+
+      case "RESERVE_STOCK": {
+        const currentStock = this.stocks.get(pId) || 0;
+        if (currentStock >= qty) {
+          this.stocks.set(pId, currentStock - qty);
+          this.reservations.set(oId, {
+            productId: pId,
+            quantity: qty,
+            status: "RESERVED",
+          });
+          this.lastResult = {
+            success: true,
+            action,
+            orderId: oId,
+            remainingStock: this.stocks.get(pId),
+          };
+        } else {
+          this.lastResult = {
+            success: false,
+            action,
+            error: "OUT_OF_STOCK",
+            availableStock: currentStock,
+            requested: qty,
+          };
+        }
+        break;
+      }
+
+      case "RELEASE_STOCK": {
+        const reservation = this.reservations.get(oId);
+        if (reservation && reservation.status === "RESERVED") {
+          reservation.status = "CANCELLED";
+          const currentStock = this.stocks.get(reservation.productId) || 0;
+          this.stocks.set(reservation.productId, currentStock + reservation.quantity);
+          this.lastResult = {
+            success: true,
+            action,
+            orderId: oId,
+            restoredStock: this.stocks.get(reservation.productId),
+          };
+        } else {
+          this.lastResult = { success: false, action, error: "NO_ACTIVE_RESERVATION" };
+        }
+        break;
+      }
+
+      default:
+        this.lastResult = { error: `UNKNOWN_ACTION_${action}` };
+    }
+
+    return this.lastResult;
+  }
+
+  getLastResult() {
+    return this.lastResult;
+  }
+
+  getStock(productId) {
+    return this.stocks.get(String(productId)) || 0;
+  }
+
+  getState() {
+    const stockObj = {};
+    for (const [k, v] of this.stocks.entries()) {
+      stockObj[k] = v;
+    }
+    return {
+      stocks: stockObj,
+      reservationsCount: this.reservations.size,
+    };
+  }
+}
+
+export class RaftNode {
+  constructor({
+    id,
+    cluster = null,
+    peers = [],
+    stateMachine = null,
+  } = {}) {
+    this.id = String(id);
+    this.cluster = cluster;
+    this.peers = Array.from(peers).filter((p) => p !== this.id);
+
+    this.currentTerm = 0;
+    this.votedFor = null;
+    this.log = [{ term: 0, index: 0, command: null }];
+
+    this.role = NodeRole.FOLLOWER;
+    this.commitIndex = 0;
+    this.lastApplied = 0;
+    this.leaderId = null;
+
+    this.nextIndex = new Map();
+    this.matchIndex = new Map();
+
+    this.stateMachine = stateMachine || new FlashSaleStateMachine();
+    this.appliedCommands = [];
+  }
+
+  get lastLogIndex() {
+    return this.log.length - 1;
+  }
+
+  get lastLogTerm() {
+    return this.log[this.lastLogIndex].term;
+  }
+
+  startElection() {
+    this.role = NodeRole.CANDIDATE;
+    this.currentTerm += 1;
+    this.votedFor = this.id;
+    this.leaderId = null;
+
+    let votesGranted = 1;
+    const quorum = Math.floor((this.peers.length + 1) / 2) + 1;
+
+    for (const peerId of this.peers) {
+      if (!this.cluster) continue;
+      const peer = this.cluster.getNode(peerId);
+      if (!peer || !this.cluster.canCommunicate(this.id, peerId)) continue;
+
+      const reply = peer.handleRequestVote({
+        term: this.currentTerm,
+        candidateId: this.id,
+        lastLogIndex: this.lastLogIndex,
+        lastLogTerm: this.lastLogTerm,
+      });
+
+      if (reply.term > this.currentTerm) {
+        this._stepDown(reply.term);
+        return false;
+      }
+
+      if (reply.voteGranted) {
+        votesGranted += 1;
+      }
+    }
+
+    if (votesGranted >= quorum && this.role === NodeRole.CANDIDATE) {
+      this.role = NodeRole.LEADER;
+      this.leaderId = this.id;
+
+      for (const peerId of this.peers) {
+        this.nextIndex.set(peerId, this.lastLogIndex + 1);
+        this.matchIndex.set(peerId, 0);
+      }
+
+      this.broadcastHeartbeat();
+      return true;
+    }
+
+    return false;
+  }
+
+  handleRequestVote({ term, candidateId, lastLogIndex, lastLogTerm }) {
+    if (term < this.currentTerm) {
+      return { term: this.currentTerm, voteGranted: false };
+    }
+
+    if (term > this.currentTerm) {
+      this._stepDown(term);
+    }
+
+    const isLogUpToDate =
+      lastLogTerm > this.lastLogTerm ||
+      (lastLogTerm === this.lastLogTerm && lastLogIndex >= this.lastLogIndex);
+
+    const canVote =
+      (this.votedFor === null || this.votedFor === candidateId) && isLogUpToDate;
+
+    if (canVote) {
+      this.votedFor = candidateId;
+      return { term: this.currentTerm, voteGranted: true };
+    }
+
+    return { term: this.currentTerm, voteGranted: false };
+  }
+
+  propose(command) {
+    if (this.role !== NodeRole.LEADER) {
+      return {
+        success: false,
+        error: "NOT_LEADER",
+        leaderId: this.leaderId,
+      };
+    }
+
+    const entryIndex = this.log.length;
+    const entry = {
+      term: this.currentTerm,
+      index: entryIndex,
+      command,
+    };
+    this.log.push(entry);
+
+    const quorum = Math.floor((this.peers.length + 1) / 2) + 1;
+    let matchCount = 1;
+
+    for (const peerId of this.peers) {
+      if (!this.cluster) continue;
+      const peer = this.cluster.getNode(peerId);
+      if (!peer || !this.cluster.canCommunicate(this.id, peerId)) continue;
+
+      const prevIndex = (this.nextIndex.get(peerId) || 1) - 1;
+      const prevTerm = this.log[prevIndex] ? this.log[prevIndex].term : 0;
+      const entriesToSend = this.log.slice(prevIndex + 1);
+
+      const reply = peer.handleAppendEntries({
+        term: this.currentTerm,
+        leaderId: this.id,
+        prevLogIndex: prevIndex,
+        prevLogTerm: prevTerm,
+        entries: entriesToSend,
+        leaderCommit: this.commitIndex,
+      });
+
+      if (reply.term > this.currentTerm) {
+        this._stepDown(reply.term);
+        return { success: false, error: "STEPPED_DOWN" };
+      }
+
+      if (reply.success) {
+        this.nextIndex.set(peerId, entryIndex + 1);
+        this.matchIndex.set(peerId, entryIndex);
+        matchCount += 1;
+      } else {
+        const curNext = this.nextIndex.get(peerId) || 1;
+        this.nextIndex.set(peerId, Math.max(1, curNext - 1));
+      }
+    }
+
+    if (matchCount >= quorum) {
+      this.commitIndex = entryIndex;
+      this._applyLogs();
+      // Thông báo commitIndex đã cập nhật tới toàn bộ followers
+      this.broadcastHeartbeat();
+      return {
+        success: true,
+        committedIndex: this.commitIndex,
+        commandResult: this.stateMachine.getLastResult(),
+      };
+    }
+
+    return {
+      success: false,
+      error: "QUORUM_NOT_REACHED",
+      replicatedNodes: matchCount,
+      requiredQuorum: quorum,
+    };
+  }
+
+  handleAppendEntries({
+    term,
+    leaderId,
+    prevLogIndex,
+    prevLogTerm,
+    entries = [],
+    leaderCommit = 0,
+  }) {
+    if (term < this.currentTerm) {
+      return { term: this.currentTerm, success: false };
+    }
+
+    if (term > this.currentTerm || this.role === NodeRole.CANDIDATE) {
+      this._stepDown(term);
+    }
+    this.leaderId = leaderId;
+
+    if (prevLogIndex > 0) {
+      if (prevLogIndex >= this.log.length) {
+        return { term: this.currentTerm, success: false };
+      }
+      if (this.log[prevLogIndex].term !== prevLogTerm) {
+        return { term: this.currentTerm, success: false };
+      }
+    }
+
+    let insertIndex = prevLogIndex + 1;
+    for (const newEntry of entries) {
+      if (insertIndex < this.log.length) {
+        if (this.log[insertIndex].term !== newEntry.term) {
+          this.log = this.log.slice(0, insertIndex);
+          this.log.push(newEntry);
+        }
+      } else {
+        this.log.push(newEntry);
+      }
+      insertIndex += 1;
+    }
+
+    if (leaderCommit > this.commitIndex) {
+      this.commitIndex = Math.min(leaderCommit, this.log.length - 1);
+      this._applyLogs();
+    }
+
+    return { term: this.currentTerm, success: true };
+  }
+
+  broadcastHeartbeat() {
+    if (this.role !== NodeRole.LEADER) return;
+    for (const peerId of this.peers) {
+      if (!this.cluster) continue;
+      const peer = this.cluster.getNode(peerId);
+      if (!peer || !this.cluster.canCommunicate(this.id, peerId)) continue;
+
+      const prevIndex = (this.nextIndex.get(peerId) || 1) - 1;
+      const prevTerm = this.log[prevIndex] ? this.log[prevIndex].term : 0;
+      const entriesToSend = this.log.slice(prevIndex + 1);
+
+      const reply = peer.handleAppendEntries({
+        term: this.currentTerm,
+        leaderId: this.id,
+        prevLogIndex: prevIndex,
+        prevLogTerm: prevTerm,
+        entries: entriesToSend,
+        leaderCommit: this.commitIndex,
+      });
+
+      if (reply.term > this.currentTerm) {
+        this._stepDown(reply.term);
+        return;
+      }
+
+      if (reply.success) {
+        this.nextIndex.set(peerId, this.log.length);
+        this.matchIndex.set(peerId, this.log.length - 1);
+      }
+    }
+  }
+
+  _stepDown(newTerm) {
+    this.currentTerm = newTerm;
+    this.role = NodeRole.FOLLOWER;
+    this.votedFor = null;
+    this.leaderId = null;
+  }
+
+  _applyLogs() {
+    while (this.lastApplied < this.commitIndex) {
+      this.lastApplied += 1;
+      const entry = this.log[this.lastApplied];
+      if (entry && entry.command) {
+        const result = this.stateMachine.apply(entry.command);
+        this.appliedCommands.push({
+          index: this.lastApplied,
+          term: entry.term,
+          command: entry.command,
+          result,
+        });
+      }
+    }
+  }
+
+  getState() {
+    return {
+      id: this.id,
+      role: this.role,
+      currentTerm: this.currentTerm,
+      votedFor: this.votedFor,
+      leaderId: this.leaderId,
+      commitIndex: this.commitIndex,
+      lastApplied: this.lastApplied,
+      logLength: this.log.length,
+      lastLogIndex: this.lastLogIndex,
+      lastLogTerm: this.lastLogTerm,
+      stockState: this.stateMachine.getState(),
+    };
+  }
+}
+
+export class RaftCluster {
+  constructor({ nodeCount = 3 } = {}) {
+    this.nodes = new Map();
+    this.partitions = [];
+
+    const count = Math.max(3, Number(nodeCount) || 3);
+    const nodeIds = Array.from({ length: count }, (_, i) => `node_${i + 1}`);
+
+    for (const id of nodeIds) {
+      const node = new RaftNode({
+        id,
+        cluster: this,
+        peers: nodeIds.filter((nid) => nid !== id),
+      });
+      this.nodes.set(id, node);
+    }
+  }
+
+  getNode(id) {
+    return this.nodes.get(String(id));
+  }
+
+  getAllNodes() {
+    return Array.from(this.nodes.values());
+  }
+
+  getLeader() {
+    for (const node of this.nodes.values()) {
+      if (node.role === NodeRole.LEADER) {
+        return node;
+      }
+    }
+    return null;
+  }
+
+  partition(groupA = [], groupB = []) {
+    this.partitions = [new Set(groupA.map(String)), new Set(groupB.map(String))];
+  }
+
+  heal() {
+    this.partitions = [];
+  }
+
+  canCommunicate(nodeAId, nodeBId) {
+    if (this.partitions.length === 0) return true;
+    for (const part of this.partitions) {
+      if (part.has(nodeAId) && part.has(nodeBId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  initClusterStock(productId, stockQty) {
+    for (const node of this.nodes.values()) {
+      node.stateMachine.initStock(productId, stockQty);
+    }
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -3439,6 +4552,19 @@ export default {
   PNCounter,
   LWWElementSet,
   CrdtCart,
+  // Phase 10 Enterprise Distributed Algorithms
+  cosineDistance,
+  euclideanDistance,
+  PriorityQueue,
+  HNSWNode,
+  HNSWIndex,
+  solveHungarian,
+  SPXDispatchEngine,
+  NodeRole,
+  RaftNode,
+  FlashSaleStateMachine,
+  RaftCluster,
 };
+
 
 

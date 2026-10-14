@@ -68,6 +68,18 @@ import {
   PNCounter,
   LWWElementSet,
   CrdtCart,
+  // Phase 10 Enterprise Distributed Algorithms
+  cosineDistance,
+  euclideanDistance,
+  PriorityQueue,
+  HNSWNode,
+  HNSWIndex,
+  solveHungarian,
+  SPXDispatchEngine,
+  NodeRole,
+  RaftNode,
+  FlashSaleStateMachine,
+  RaftCluster,
 } from "../../client/src/services/aiAlgorithms.js";
 import fs from "fs";
 
@@ -8755,6 +8767,553 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.equal(sponsoredRes.intent, "SPONSORED_ADS_TRANSPARENCY");
         expect.ok(sponsoredRes.replyText.includes("Tài trợ"));
         expect.ok(sponsoredRes.replyText.includes("GSP"));
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 157: Phase 10 Advanced Enterprise Distributed Algorithms Suite (22 Tests)
+  // 1. Hierarchical Navigable Small World (HNSW) Vector ANN Search
+  // 2. Hungarian Algorithm (Kuhn-Munkres) for Optimal SPX Courier Dispatch
+  // 3. Raft Distributed Consensus Engine & Flash Sale Quorum State Machine
+  // 4. Deep Tri-Role AI Copilots Training for Phase 10 Suite
+  // =========================================================================
+  describe("Feature 157: Phase 10 Enterprise Distributed & Heuristic Algorithms Suite", () => {
+
+    // --- 1. HNSW Vector Embedding ANN Search (6 Tests) ---
+    describe("HNSW Vector Index (Approximate Nearest Neighbors)", () => {
+      test("F157-T01: Distance functions compute exact metrics and guard against dimension mismatches", () => {
+        const v1 = [1, 0, 0];
+        const v2 = [1, 0, 0];
+        const v3 = [0, 1, 0];
+        const v4 = [-1, 0, 0];
+
+        // Cosine distance
+        expect.equal(cosineDistance(v1, v2), 0);
+        expect.equal(cosineDistance(v1, v3), 1);
+        expect.equal(cosineDistance(v1, v4), 2);
+
+        // Euclidean distance
+        expect.equal(euclideanDistance(v1, v2), 0);
+        expect.equal(Number(euclideanDistance(v1, v3).toFixed(4)), 1.4142);
+        expect.equal(euclideanDistance(v1, v4), 2);
+
+        // Safety fallback on mismatched length
+        expect.equal(cosineDistance([1, 2], [1, 2, 3]), 1.0);
+        expect.equal(euclideanDistance([1, 2], [1, 2, 3]), Infinity);
+      });
+
+      test("F157-T02: PriorityQueue correctly handles Min-Heap and Max-Heap ordering and capacity management", () => {
+        const minQ = new PriorityQueue((a, b) => a.dist - b.dist);
+        minQ.push({ id: "p1", dist: 10 });
+        minQ.push({ id: "p2", dist: 2 });
+        minQ.push({ id: "p3", dist: 5 });
+
+        expect.equal(minQ.size, 3);
+        expect.equal(minQ.peek().id, "p2");
+        expect.equal(minQ.pop().id, "p2");
+        expect.equal(minQ.pop().id, "p3");
+        expect.equal(minQ.pop().id, "p1");
+
+        const maxQ = new PriorityQueue((a, b) => b.dist - a.dist);
+        maxQ.push({ id: "a", dist: 1 });
+        maxQ.push({ id: "b", dist: 99 });
+        maxQ.push({ id: "c", dist: 40 });
+
+        expect.equal(maxQ.peek().id, "b");
+        expect.equal(maxQ.pop().id, "b");
+      });
+
+      test("F157-T03: HNSWIndex inserts vectors, dynamically samples geometric levels, and maintains entryPoint", () => {
+        const index = new HNSWIndex({ dim: 4, M: 4, efConstruction: 16, efSearch: 16, randomSeed: 42 });
+
+        const nodeA = index.insert("prod_a", [1, 0, 0, 0], { name: "Áo polo nam" });
+        const nodeB = index.insert("prod_b", [0.9, 0.1, 0, 0], { name: "Áo thun nam" });
+        const nodeC = index.insert("prod_c", [0, 0, 1, 0], { name: "Tai nghe bluetooth" });
+
+        expect.equal(index.size, 3);
+        expect.ok(index.entryPointId !== null);
+        expect.ok(index.maxLevel >= 0);
+        expect.ok(nodeA.level >= 0 && nodeA.level <= 16);
+        expect.ok(nodeB.level >= 0);
+        expect.ok(nodeC.level >= 0);
+      });
+
+      test("F157-T04: HNSWIndex exact vs approximate K-NN query returns expected nearest products ranked by similarity", () => {
+        const index = new HNSWIndex({ dim: 3, M: 8, efConstruction: 32, efSearch: 16, metric: "cosine", randomSeed: 123 });
+
+        index.insert("shoe_red", [1, 0.1, 0], { name: "Giày sneaker đỏ", category: "Giày" });
+        index.insert("shoe_crimson", [0.95, 0.2, 0], { name: "Giày chạy bộ đỏ thắm", category: "Giày" });
+        index.insert("phone_black", [0, 0, 1], { name: "Điện thoại thông minh đen", category: "Điện tử" });
+        index.insert("phone_grey", [0.05, 0.05, 0.95], { name: "Điện thoại xám titan", category: "Điện tử" });
+
+        // Querying for something very close to red shoe
+        const query = [0.98, 0.15, 0];
+        const results = index.searchKNN(query, 2);
+
+        expect.equal(results.length, 2);
+        expect.ok(results[0].id === "shoe_red" || results[0].id === "shoe_crimson");
+        expect.ok(results[0].similarity > 0.95);
+        expect.ok(results[1].similarity > 0.9);
+      });
+
+      test("F157-T05: HNSWIndex node deletion updates neighbor sets and safely elects replacement entryPoint", () => {
+        const index = new HNSWIndex({ dim: 2, M: 4, randomSeed: 777 });
+
+        index.insert("p1", [1, 0], { name: "P1" });
+        index.insert("p2", [0, 1], { name: "P2" });
+        index.insert("p3", [1, 1], { name: "P3" });
+
+        const originalEntry = index.entryPointId;
+        expect.equal(index.size, 3);
+
+        const removed = index.remove(originalEntry);
+        expect.equal(removed, true);
+        expect.equal(index.size, 2);
+        expect.ok(index.entryPointId !== originalEntry);
+        expect.ok(index.nodes.has(index.entryPointId));
+      });
+
+      test("F157-T06: HNSWIndex JSON serialization and deserialization preserves graph connectivity and search accuracy", () => {
+        const index = new HNSWIndex({ dim: 3, M: 6, randomSeed: 99 });
+        index.insert("cam_sony", [0.8, 0.2, 0.1], { name: "Sony A7" });
+        index.insert("cam_canon", [0.75, 0.25, 0.15], { name: "Canon R6" });
+        index.insert("lens_50mm", [0.1, 0.8, 0.3], { name: "Lens 50mm" });
+
+        const json = index.toJSON();
+        const restored = HNSWIndex.fromJSON(json);
+
+        expect.equal(restored.size, 3);
+        expect.equal(restored.dim, 3);
+        expect.equal(restored.entryPointId, index.entryPointId);
+
+        const query = [0.78, 0.22, 0.12];
+        const origResults = index.searchKNN(query, 2);
+        const restoredResults = restored.searchKNN(query, 2);
+
+        expect.equal(restoredResults.length, origResults.length);
+        expect.equal(restoredResults[0].id, origResults[0].id);
+        expect.equal(restoredResults[0].distance, origResults[0].distance);
+      });
+    });
+
+    // --- 2. Hungarian Algorithm & SPX Courier Dispatch (6 Tests) ---
+    describe("Hungarian Algorithm & SPX Express Dispatch", () => {
+      test("F157-T07: solveHungarian finds exact global minimum assignment for balanced 3x3 cost matrix", () => {
+        // Classic textbook Hungarian problem
+        const costMatrix = [
+          [250, 400, 350],
+          [400, 600, 350],
+          [200, 400, 250],
+        ];
+
+        const result = solveHungarian(costMatrix);
+        expect.equal(result.assignments.length, 3);
+        // Optimal assignment:
+        // Worker 0 -> Task 1 (400) or Task 0 (250) + Worker 1 -> Task 2 (350) + Worker 2 -> Task 0 (200) = 950
+        expect.equal(result.totalCost, 950);
+        expect.equal(result.workerToTask[0], 1);
+        expect.equal(result.workerToTask[1], 2);
+        expect.equal(result.workerToTask[2], 0);
+      });
+
+      test("F157-T08: solveHungarian correctly solves rectangular unbalanced matrices via dummy padding", () => {
+        // 4 couriers, 2 orders
+        const moreCouriersMatrix = [
+          [10, 20],
+          [5,  15],
+          [30, 40],
+          [8,   9],
+        ];
+
+        const res1 = solveHungarian(moreCouriersMatrix);
+        expect.equal(res1.assignments.length, 2);
+        // Best: Courier 1 -> Order 0 (5), Courier 3 -> Order 1 (9) => totalCost = 14
+        expect.equal(res1.totalCost, 14);
+
+        // 2 couriers, 4 orders
+        const moreOrdersMatrix = [
+          [12, 10, 19, 11],
+          [15, 17, 13, 20],
+        ];
+        const res2 = solveHungarian(moreOrdersMatrix);
+        expect.equal(res2.assignments.length, 2);
+        // Courier 0 -> Order 1 (10), Courier 1 -> Order 2 (13) => totalCost = 23
+        expect.equal(res2.totalCost, 23);
+      });
+
+      test("F157-T09: SPXDispatchEngine calculates composite assignment cost combining GPS, SLA, load, and rating", () => {
+        const engine = new SPXDispatchEngine();
+
+        const courier = {
+          id: "c_01",
+          name: "Nguyễn Văn Shipper",
+          lat: 21.0285,
+          lng: 105.8542, // Hoàn Kiếm, HN
+          capacityKg: 30,
+          currentLoadKg: 10,
+          rating: 4.8,
+        };
+
+        const order = {
+          id: "ord_01",
+          orderCode: "SPX_HN_001",
+          shopLat: 21.0300,
+          shopLng: 105.8500, // Ba Đình, HN (~0.5km)
+          buyerLat: 21.0350,
+          buyerLng: 105.8450, // Cầu Giấy, HN (~0.8km)
+          weightKg: 2.0,
+          slaUrgencyMinutes: 45,
+        };
+
+        const costObj = engine.calculateAssignmentCost(courier, order);
+        expect.ok(costObj.totalCost > 0);
+        expect.ok(costObj.details.totalDistKm > 0);
+        expect.equal(costObj.details.overloadKg, 0);
+        expect.ok(costObj.details.ratingDiscount > 0);
+      });
+
+      test("F157-T10: SPXDispatchEngine dispatches multiple couriers to multiple urgent orders minimizing total cost", () => {
+        const engine = new SPXDispatchEngine();
+
+        const couriers = [
+          { id: "c1", name: "Shipper 1", lat: 21.01, lng: 105.81, capacityKg: 25, currentLoadKg: 5, rating: 5.0 },
+          { id: "c2", name: "Shipper 2", lat: 21.05, lng: 105.85, capacityKg: 30, currentLoadKg: 0, rating: 4.5 },
+          { id: "c3", name: "Shipper 3", lat: 21.09, lng: 105.89, capacityKg: 20, currentLoadKg: 10, rating: 4.0 },
+        ];
+
+        const orders = [
+          { id: "o1", orderCode: "ORD_01", shopLat: 21.012, shopLng: 105.812, buyerLat: 21.015, buyerLng: 105.815, weightKg: 1, slaUrgencyMinutes: 30 },
+          { id: "o2", orderCode: "ORD_02", shopLat: 21.052, shopLng: 105.852, buyerLat: 21.055, buyerLng: 105.855, weightKg: 2, slaUrgencyMinutes: 25 },
+        ];
+
+        const dispatchResult = engine.dispatch(couriers, orders);
+
+        expect.equal(dispatchResult.matchedAssignments.length, 2);
+        expect.equal(dispatchResult.unassignedOrders.length, 0);
+        expect.equal(dispatchResult.idleCouriers.length, 1);
+        expect.equal(dispatchResult.idleCouriers[0].id, "c3");
+
+        // Shipper 1 should get Order 1 and Shipper 2 should get Order 2 due to close proximity
+        const assign1 = dispatchResult.matchedAssignments.find(a => a.orderId === "o1");
+        const assign2 = dispatchResult.matchedAssignments.find(a => a.orderId === "o2");
+        expect.equal(assign1.courierId, "c1");
+        expect.equal(assign2.courierId, "c2");
+      });
+
+      test("F157-T11: SPXDispatchEngine handles empty inputs gracefully without exceptions", () => {
+        const engine = new SPXDispatchEngine();
+        const res = engine.dispatch([], []);
+        expect.equal(res.matchedAssignments.length, 0);
+        expect.equal(res.totalDispatchCost, 0);
+
+        const res2 = engine.dispatch(null, null);
+        expect.equal(res2.matchedAssignments.length, 0);
+      });
+
+      test("F157-T12: Overloaded courier penalty ensures lighter suitable courier is prioritized for heavy bulk parcel", () => {
+        const engine = new SPXDispatchEngine({ capacityPenaltyWeight: 10000 });
+
+        // Courier A is closer to shop but already carrying 28kg (capacity 30kg)
+        const courierA = {
+          id: "cA",
+          name: "Courier Gần nhưng đầy tải",
+          lat: 21.02,
+          lng: 105.82,
+          capacityKg: 30,
+          currentLoadKg: 28,
+          rating: 4.5,
+        };
+
+        // Courier B is slightly farther but completely empty (0kg)
+        const courierB = {
+          id: "cB",
+          name: "Courier Xa hơn chút nhưng rỗng tải",
+          lat: 21.025,
+          lng: 105.825,
+          capacityKg: 30,
+          currentLoadKg: 0,
+          rating: 4.5,
+        };
+
+        // Heavy parcel: 10kg. Courier A would overload by 8kg!
+        const heavyOrder = {
+          id: "o_heavy",
+          orderCode: "HEAVY_10KG",
+          shopLat: 21.02,
+          shopLng: 105.82,
+          buyerLat: 21.03,
+          buyerLng: 105.83,
+          weightKg: 10,
+          slaUrgencyMinutes: 60,
+        };
+
+        const result = engine.dispatch([courierA, courierB], [heavyOrder]);
+        expect.equal(result.matchedAssignments.length, 1);
+        expect.equal(result.matchedAssignments[0].courierId, "cB");
+      });
+    });
+
+    // --- 3. Raft Distributed Consensus Engine & Flash Sale Quorum State Machine (6 Tests) ---
+    describe("Raft Distributed Consensus & Flash Sale Quorum State Machine", () => {
+      test("F157-T13: RaftNode starts election, achieves majority Quorum, and transitions to LEADER", () => {
+        const cluster = new RaftCluster({ nodeCount: 3 });
+        const node1 = cluster.getNode("node_1");
+        const node2 = cluster.getNode("node_2");
+        const node3 = cluster.getNode("node_3");
+
+        expect.equal(node1.role, NodeRole.FOLLOWER);
+        expect.equal(node2.role, NodeRole.FOLLOWER);
+
+        // Node 1 triggers election
+        const elected = node1.startElection();
+        expect.equal(elected, true);
+        expect.equal(node1.role, NodeRole.LEADER);
+        expect.equal(node1.currentTerm, 1);
+        expect.equal(node1.leaderId, "node_1");
+
+        // Followers recognize node_1 as leader
+        expect.equal(node2.currentTerm, 1);
+        expect.equal(node2.votedFor, "node_1");
+        expect.equal(node3.votedFor, "node_1");
+      });
+
+      test("F157-T14: RaftNode enforces Log Up-To-Dateness rule and rejects candidate with stale log", () => {
+        const cluster = new RaftCluster({ nodeCount: 3 });
+        const node1 = cluster.getNode("node_1");
+        const node2 = cluster.getNode("node_2");
+
+        // Give node 2 a higher term and log entry
+        node2.currentTerm = 3;
+        node2.log.push({ term: 3, index: 1, command: { action: "INIT_STOCK" } });
+
+        // Node 1 attempts election with term 2 and stale log
+        const reply = node2.handleRequestVote({
+          term: 2,
+          candidateId: "node_1",
+          lastLogIndex: 0,
+          lastLogTerm: 0,
+        });
+
+        expect.equal(reply.voteGranted, false);
+      });
+
+      test("F157-T15: RaftLeader proposes command, replicates to quorum followers, and executes Flash Sale state machine", () => {
+        const cluster = new RaftCluster({ nodeCount: 3 });
+        const leader = cluster.getNode("node_1");
+        leader.startElection();
+
+        // 1. Initialize stock across state machines
+        cluster.initClusterStock("ip15", 50);
+        expect.equal(leader.stateMachine.getStock("ip15"), 50);
+
+        // 2. Propose stock reservation
+        const propResult = leader.propose({
+          action: "RESERVE_STOCK",
+          productId: "ip15",
+          orderId: "order_fs_01",
+          quantity: 2,
+        });
+
+        expect.equal(propResult.success, true);
+        expect.equal(propResult.committedIndex, 1);
+        expect.equal(leader.stateMachine.getStock("ip15"), 48);
+
+        // Verify followers replicated and applied the commit
+        const node2 = cluster.getNode("node_2");
+        expect.equal(node2.commitIndex, 1);
+        expect.equal(node2.stateMachine.getStock("ip15"), 48);
+      });
+
+      test("F157-T16: FlashSaleStateMachine enforces zero overselling and supports order cancellation release", () => {
+        const sm = new FlashSaleStateMachine();
+        sm.initStock("deal_1k", 3);
+
+        const res1 = sm.apply({ action: "RESERVE_STOCK", productId: "deal_1k", orderId: "o1", quantity: 2 });
+        expect.equal(res1.success, true);
+        expect.equal(sm.getStock("deal_1k"), 1);
+
+        // Attempt to reserve 2 when only 1 is left -> Out of stock
+        const res2 = sm.apply({ action: "RESERVE_STOCK", productId: "deal_1k", orderId: "o2", quantity: 2 });
+        expect.equal(res2.success, false);
+        expect.equal(res2.error, "OUT_OF_STOCK");
+        expect.equal(sm.getStock("deal_1k"), 1);
+
+        // Release order o1 -> stock restored to 3
+        const res3 = sm.apply({ action: "RELEASE_STOCK", productId: "deal_1k", orderId: "o1" });
+        expect.equal(res3.success, true);
+        expect.equal(sm.getStock("deal_1k"), 3);
+      });
+
+      test("F157-T17: RaftCluster network partition prevents minority partition from committing writes (Zero Split-Brain)", () => {
+        const cluster = new RaftCluster({ nodeCount: 5 });
+        const leader = cluster.getNode("node_1");
+        leader.startElection();
+        cluster.initClusterStock("voucher_super", 100);
+
+        // Partition network: Group A (node_1, node_2 - Minority of 2) vs Group B (node_3, node_4, node_5 - Majority of 3)
+        cluster.partition(["node_1", "node_2"], ["node_3", "node_4", "node_5"]);
+
+        // Leader node_1 in minority tries to commit a reservation
+        const minorResult = leader.propose({
+          action: "RESERVE_STOCK",
+          productId: "voucher_super",
+          orderId: "ord_minor_01",
+          quantity: 1,
+        });
+
+        // Fails because Quorum (3 of 5) cannot be reached in minority partition!
+        expect.equal(minorResult.success, false);
+        expect.equal(minorResult.error, "QUORUM_NOT_REACHED");
+        expect.equal(minorResult.replicatedNodes, 2);
+
+        // Group B elects a new leader and can commit safely!
+        const node3 = cluster.getNode("node_3");
+        const bElected = node3.startElection();
+        expect.equal(bElected, true);
+        expect.equal(node3.role, NodeRole.LEADER);
+
+        const majorResult = node3.propose({
+          action: "RESERVE_STOCK",
+          productId: "voucher_super",
+          orderId: "ord_major_01",
+          quantity: 5,
+        });
+
+        expect.equal(majorResult.success, true);
+        expect.equal(node3.stateMachine.getStock("voucher_super"), 95);
+      });
+
+      test("F157-T18: RaftCluster healing allows partitioned nodes to resynchronize logs with the cluster leader", () => {
+        const cluster = new RaftCluster({ nodeCount: 3 });
+        const leader = cluster.getNode("node_1");
+        leader.startElection();
+        cluster.initClusterStock("flash_deal", 20);
+
+        // Partition node_3
+        cluster.partition(["node_1", "node_2"], ["node_3"]);
+
+        leader.propose({ action: "RESERVE_STOCK", productId: "flash_deal", orderId: "ord_sync_1", quantity: 4 });
+        expect.equal(leader.stateMachine.getStock("flash_deal"), 16);
+
+        // Node 3 still has old stock
+        const node3 = cluster.getNode("node_3");
+        expect.equal(node3.stateMachine.getStock("flash_deal"), 20);
+
+        // Heal partition
+        cluster.heal();
+
+        // Leader broadcasts heartbeat / next log
+        leader.broadcastHeartbeat();
+
+        // Node 3 synchronizes commitIndex and applies pending entries
+        expect.equal(node3.commitIndex, leader.commitIndex);
+        expect.equal(node3.stateMachine.getStock("flash_deal"), 16);
+      });
+    });
+
+    // --- 4. Deep Tri-Role AI Copilots Training for Phase 10 Suite (4 Tests) ---
+    describe("AI Copilot Training for Phase 10 Algorithms", () => {
+      test("F157-T19: Admin Sentinel Copilot AI explains HNSW Vector Search, Hungarian SPX Dispatch, and Raft Consensus", () => {
+        const hnswRes = generateAdminCopilotResponse("Kiểm tra hiệu năng tìm kiếm vector HNSW ANN đa chiều");
+        expect.equal(hnswRes.tag, "TÌM KIẾM VECTOR HNSW");
+        expect.ok(hnswRes.text.includes("HNSW"));
+        expect.ok(hnswRes.text.includes("Skip-List"));
+        expect.ok(hnswRes.text.includes("O(\\log N)"));
+
+        const hungarianRes = generateAdminCopilotResponse("Báo cáo thuật toán Hungarian điều phối bưu tá SPX Express");
+        expect.equal(hungarianRes.tag, "ĐIỀU PHỐI BƯU TÁ HUNGARIAN");
+        expect.ok(hungarianRes.text.includes("Hungarian"));
+        expect.ok(hungarianRes.text.includes("Kuhn-Munkres"));
+        expect.ok(hungarianRes.text.includes("Haversine"));
+
+        const raftRes = generateAdminCopilotResponse("Kiểm toán đồng thuận phân tán Raft và Quorum Flash Sale");
+        expect.equal(raftRes.tag, "ĐỒNG THUẬN PHÂN TÁN RAFT");
+        expect.ok(raftRes.text.includes("Raft"));
+        expect.ok(raftRes.text.includes("Quorum"));
+        expect.ok(raftRes.text.includes("Zero Split-Brain"));
+      });
+
+      test("F157-T20: Seller ShopSmart Copilot AI advises on HNSW Visual Search discovery, Hungarian pickup, and Raft inventory protection", () => {
+        const currentShop = { id: "shop_01", name: "Ananas Official Store" };
+
+        const visualRes = generateSellerCopilotResponse("Tư vấn tối ưu tìm kiếm hình ảnh Visual Search HNSW cho gian hàng", currentShop);
+        expect.equal(visualRes.tag, "TÌM KIẾM HÌNH ẢNH HNSW");
+        expect.ok(visualRes.text.includes("HNSW"));
+        expect.ok(visualRes.text.includes("CLIP"));
+
+        const pickupRes = generateSellerCopilotResponse("Thuật toán bưu tá lấy hàng SPX Hungarian tối ưu ra sao?", currentShop);
+        expect.equal(pickupRes.tag, "TỐI ƯU ĐIỀU PHỐI BƯU TÁ");
+        expect.ok(pickupRes.text.includes("Hungarian"));
+        expect.ok(pickupRes.text.includes("SPX"));
+
+        const raftRes = generateSellerCopilotResponse("Cơ chế bảo vệ tồn kho Flash Sale bằng đồng thuận Raft", currentShop);
+        expect.equal(raftRes.tag, "BẢO VỆ TỒN KHO FLASH SALE RAFT");
+        expect.ok(raftRes.text.includes("Raft"));
+        expect.ok(raftRes.text.includes("Zero Overselling"));
+      });
+
+      test("F157-T21: Buyer Shopping Assistant AI recognizes visual image search, SPX 2H rush courier dispatch, and Raft fair queue queries", () => {
+        const visualRes = generateAiChatResponse("Tìm kiếm bằng hình ảnh sản phẩm tương tự trên sàn");
+        expect.equal(visualRes.intent, "VISUAL_IMAGE_SEARCH_HNSW");
+        expect.ok(visualRes.replyText.includes("HNSW"));
+        expect.ok(visualRes.replyText.includes("hình ảnh"));
+
+        const dispatchRes = generateAiChatResponse("Giao hỏa tốc 2h ghép bưu tá như thế nào?");
+        expect.equal(dispatchRes.intent, "EXPRESS_COURIER_DISPATCH_HUNGARIAN");
+        expect.ok(dispatchRes.replyText.includes("Hungarian"));
+        expect.ok(dispatchRes.replyText.includes("SPX"));
+
+        const fairQueueRes = generateAiChatResponse("Giật deal flash sale có bị ảo hay hết hàng vô lý không?");
+        expect.equal(fairQueueRes.intent, "FLASH_SALE_CONSENSUS_FAIR_QUEUE");
+        expect.ok(fairQueueRes.replyText.includes("Raft"));
+        expect.ok(fairQueueRes.replyText.includes("Zero Overselling"));
+      });
+
+      test("F157-T22: Full End-to-End Enterprise Journey: HNSW Vector Search -> SPX Hungarian Dispatch -> Raft Quorum Stock Lock", () => {
+        // 1. Vector Search locates product
+        const vectorIndex = new HNSWIndex({ dim: 3, M: 4, randomSeed: 101 });
+        vectorIndex.insert("prod_deal", [0.9, 0.1, 0], { name: "Tai nghe True Wireless Flash Sale", price: 1000 });
+        const searchHits = vectorIndex.searchKNN([0.89, 0.11, 0], 1);
+        expect.equal(searchHits.length, 1);
+        expect.equal(searchHits[0].id, "prod_deal");
+
+        // 2. Raft Cluster reserves inventory on Quorum
+        const cluster = new RaftCluster({ nodeCount: 3 });
+        const leader = cluster.getNode("node_1");
+        leader.startElection();
+        cluster.initClusterStock("prod_deal", 10);
+
+        const reservation = leader.propose({
+          action: "RESERVE_STOCK",
+          productId: "prod_deal",
+          orderId: "order_e2e_001",
+          quantity: 1,
+        });
+        expect.equal(reservation.success, true);
+        expect.equal(leader.stateMachine.getStock("prod_deal"), 9);
+
+        // 3. SPX Courier Dispatch allocates optimal courier via Hungarian Algorithm
+        const dispatcher = new SPXDispatchEngine();
+        const couriers = [
+          { id: "c_fast", name: "Bưu tá Hỏa Tốc", lat: 21.02, lng: 105.82, capacityKg: 30, currentLoadKg: 2, rating: 4.9 },
+          { id: "c_busy", name: "Bưu tá Đang Tải Nặng", lat: 21.02, lng: 105.82, capacityKg: 30, currentLoadKg: 29, rating: 4.2 },
+        ];
+        const order = {
+          id: "order_e2e_001",
+          orderCode: "SPX_E2E_001",
+          shopLat: 21.021,
+          shopLng: 105.821,
+          buyerLat: 21.025,
+          buyerLng: 105.825,
+          weightKg: 1.5,
+          slaUrgencyMinutes: 30,
+        };
+
+        const dispatchPlan = dispatcher.dispatch(couriers, [order]);
+        expect.equal(dispatchPlan.matchedAssignments.length, 1);
+        expect.equal(dispatchPlan.matchedAssignments[0].courierId, "c_fast");
+        expect.equal(dispatchPlan.matchedAssignments[0].orderId, "order_e2e_001");
       });
     });
   });
