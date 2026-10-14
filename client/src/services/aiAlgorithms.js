@@ -7451,6 +7451,445 @@ export class ImageHashIndex {
   }
 }
 
+// ==========================================
+// Phase 15: Price Elasticity, Hopcroft-Karp Matching & LSM-Tree Suite
+// ==========================================
+
+export class PriceElasticitySimulator {
+  static calculateElasticity(p1, q1, p2, q2) {
+    if (p1 <= 0 || p2 <= 0 || q1 < 0 || q2 < 0) {
+      throw new Error("Giá và sản lượng phải là số dương hợp lệ.");
+    }
+
+    if (p1 === p2) {
+      return { elasticity: 0, type: "PERFECTLY_INELASTIC", description: "Giá không đổi" };
+    }
+
+    const deltaQ = q2 - q1;
+    const avgQ = (q1 + q2) / 2;
+    const pctChangeQ = avgQ > 0 ? deltaQ / avgQ : 0;
+
+    const deltaP = p2 - p1;
+    const avgP = (p1 + p2) / 2;
+    const pctChangeP = deltaP / avgP;
+
+    const elasticity = Number((pctChangeQ / pctChangeP).toFixed(3));
+    const absElasticity = Math.abs(elasticity);
+
+    let type = "UNITARY";
+    let advice = "";
+
+    if (absElasticity > 1.2) {
+      type = "ELASTIC";
+      advice = "Nhu cầu rất nhạy cảm với giá. Giảm giá trong Flash Sale sẽ kích thích sức mua mạnh và làm tăng tổng doanh số.";
+    } else if (absElasticity < 0.8) {
+      type = "INELASTIC";
+      advice = "Nhu cầu ít co giãn theo giá (khách hàng có lòng trung thành cao hoặc sản phẩm độc quyền). Không nên giảm giá sâu vì sẽ bào mòn lợi nhuận.";
+    } else {
+      type = "UNITARY";
+      advice = "Độ co giãn xấp xỉ đơn vị (|ε| ≈ 1.0). Đây là điểm cân bằng hoàn hảo, tối đa hóa tổng doanh thu!";
+    }
+
+    return {
+      p1,
+      q1,
+      p2,
+      q2,
+      pctChangeP: Number((pctChangeP * 100).toFixed(2)),
+      pctChangeQ: Number((pctChangeQ * 100).toFixed(2)),
+      elasticity,
+      absElasticity,
+      type,
+      advice
+    };
+  }
+
+  static simulateDiscounts({
+    basePrice,
+    baseVolume,
+    cogs = 0,
+    assumedElasticity = -1.6,
+    discountRates = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4]
+  }) {
+    if (basePrice <= 0 || baseVolume <= 0) {
+      throw new Error("Giá gốc và sản lượng cơ sở phải lớn hơn 0.");
+    }
+
+    const scenarios = [];
+    let bestScenario = null;
+    let maxGrossProfit = -Infinity;
+
+    for (const rate of discountRates) {
+      const discountedPrice = Math.round(basePrice * (1 - rate));
+      const pctChangeQ = assumedElasticity * (-rate);
+      const projectedVolume = Math.round(baseVolume * (1 + pctChangeQ));
+      
+      const projectedRevenue = discountedPrice * projectedVolume;
+      const totalCogs = cogs * projectedVolume;
+      const platformFee = Math.round(projectedRevenue * 0.05);
+      const grossProfit = projectedRevenue - totalCogs - platformFee;
+
+      const scenario = {
+        discountRate: rate,
+        discountPercent: `${Math.round(rate * 100)}%`,
+        price: discountedPrice,
+        volume: projectedVolume,
+        projectedRevenue,
+        projectedGrossProfit: grossProfit,
+        profitMargin: Number(((grossProfit / projectedRevenue) * 100).toFixed(1))
+      };
+
+      scenarios.push(scenario);
+
+      if (grossProfit > maxGrossProfit) {
+        maxGrossProfit = grossProfit;
+        bestScenario = scenario;
+      }
+    }
+
+    return {
+      basePrice,
+      baseVolume,
+      cogs,
+      assumedElasticity,
+      scenarios,
+      optimalScenario: bestScenario,
+      recommendation: `Mức chiết khấu ${bestScenario.discountPercent} mang lại lợi nhuận gộp cao nhất (${bestScenario.projectedGrossProfit.toLocaleString('vi-VN')}₫) với sản lượng dự kiến ${bestScenario.volume} đơn hàng.`
+    };
+  }
+}
+
+export class HopcroftKarpMatching {
+  constructor() {
+    this.shippers = new Set();
+    this.orders = new Set();
+    this.adj = new Map();
+    this.pairU = new Map();
+    this.pairV = new Map();
+    this.dist = new Map();
+  }
+
+  addShipper(shipperId) {
+    if (!this.shippers.has(shipperId)) {
+      this.shippers.add(shipperId);
+      this.adj.set(shipperId, []);
+      this.pairU.set(shipperId, null);
+    }
+    return this;
+  }
+
+  addOrder(orderId) {
+    if (!this.orders.has(orderId)) {
+      this.orders.add(orderId);
+      this.pairV.set(orderId, null);
+    }
+    return this;
+  }
+
+  addEdge(shipperId, orderId) {
+    this.addShipper(shipperId);
+    this.addOrder(orderId);
+    this.adj.get(shipperId).push(orderId);
+    return this;
+  }
+
+  _bfs() {
+    const queue = [];
+    for (const u of this.shippers) {
+      if (this.pairU.get(u) === null) {
+        this.dist.set(u, 0);
+        queue.push(u);
+      } else {
+        this.dist.set(u, Infinity);
+      }
+    }
+
+    this.dist.set(null, Infinity);
+
+    while (queue.length > 0) {
+      const u = queue.shift();
+      if (this.dist.get(u) < this.dist.get(null)) {
+        const neighbors = this.adj.get(u) || [];
+        for (const v of neighbors) {
+          const nextU = this.pairV.get(v);
+          if (this.dist.get(nextU) === Infinity) {
+            this.dist.set(nextU, this.dist.get(u) + 1);
+            queue.push(nextU);
+          }
+        }
+      }
+    }
+
+    return this.dist.get(null) !== Infinity;
+  }
+
+  _dfs(u) {
+    if (u !== null) {
+      const neighbors = this.adj.get(u) || [];
+      for (const v of neighbors) {
+        const nextU = this.pairV.get(v);
+        if (this.dist.get(nextU) === this.dist.get(u) + 1) {
+          if (this._dfs(nextU)) {
+            this.pairV.set(v, u);
+            this.pairU.set(u, v);
+            return true;
+          }
+        }
+      }
+      this.dist.set(u, Infinity);
+      return false;
+    }
+    return true;
+  }
+
+  computeMaxMatching() {
+    for (const u of this.shippers) this.pairU.set(u, null);
+    for (const v of this.orders) this.pairV.set(v, null);
+
+    let matchingSize = 0;
+
+    while (this._bfs()) {
+      for (const u of this.shippers) {
+        if (this.pairU.get(u) === null) {
+          if (this._dfs(u)) {
+            matchingSize++;
+          }
+        }
+      }
+    }
+
+    const assignments = [];
+    for (const [u, v] of this.pairU.entries()) {
+      if (v !== null) {
+        assignments.push({ shipperId: u, orderId: v });
+      }
+    }
+
+    const unassignedOrders = [];
+    for (const [v, u] of this.pairV.entries()) {
+      if (u === null) {
+        unassignedOrders.push(v);
+      }
+    }
+
+    const totalOrders = this.orders.size;
+    const fulfillmentRate = totalOrders > 0 ? Number(((matchingSize / totalOrders) * 100).toFixed(1)) : 100;
+
+    return {
+      matchingSize,
+      totalShippers: this.shippers.size,
+      totalOrders,
+      fulfillmentRate,
+      assignments,
+      unassignedOrders
+    };
+  }
+}
+
+export class LSMTreeClickstream {
+  constructor({ maxMemTableSize = 100, bloomFilterBits = 1024 } = {}) {
+    this.maxMemTableSize = maxMemTableSize;
+    this.bloomFilterBits = bloomFilterBits;
+    this.memTable = new Map();
+    this.sstables = [];
+    this.sstableCounter = 0;
+  }
+
+  _hashKey(key, seed = 0) {
+    let hash = seed;
+    for (let i = 0; i < key.length; i++) {
+      hash = (Math.imul(31, hash) + key.charCodeAt(i)) >>> 0;
+    }
+    return hash % this.bloomFilterBits;
+  }
+
+  _createBloomFilter(records) {
+    const bits = new Uint8Array(Math.ceil(this.bloomFilterBits / 8));
+    const setBit = (idx) => {
+      bits[Math.floor(idx / 8)] |= (1 << (idx % 8));
+    };
+
+    for (const { key } of records) {
+      setBit(this._hashKey(key, 0x9747b28c));
+      setBit(this._hashKey(key, 0x517cc1b7));
+      setBit(this._hashKey(key, 0xee6b27eb));
+    }
+
+    return {
+      bits,
+      mayContain: (key) => {
+        const h1 = this._hashKey(key, 0x9747b28c);
+        const h2 = this._hashKey(key, 0x517cc1b7);
+        const h3 = this._hashKey(key, 0xee6b27eb);
+
+        const checkBit = (idx) => (bits[Math.floor(idx / 8)] & (1 << (idx % 8))) !== 0;
+        return checkBit(h1) && checkBit(h2) && checkBit(h3);
+      }
+    };
+  }
+
+  put(key, value) {
+    if (!key) throw new Error("Key sự kiện không được để trống.");
+
+    this.memTable.set(key, {
+      value,
+      timestamp: Date.now(),
+      isDeleted: false
+    });
+
+    if (this.memTable.size >= this.maxMemTableSize) {
+      this.flushMemTable();
+    }
+  }
+
+  delete(key) {
+    if (!key) return;
+    this.memTable.set(key, {
+      value: null,
+      timestamp: Date.now(),
+      isDeleted: true
+    });
+
+    if (this.memTable.size >= this.maxMemTableSize) {
+      this.flushMemTable();
+    }
+  }
+
+  get(key) {
+    if (!key) return null;
+
+    if (this.memTable.has(key)) {
+      const entry = this.memTable.get(key);
+      if (entry.isDeleted) return null;
+      return entry.value;
+    }
+
+    for (let i = this.sstables.length - 1; i >= 0; i--) {
+      const sstable = this.sstables[i];
+
+      if (key < sstable.minKey || key > sstable.maxKey) {
+        continue;
+      }
+
+      if (!sstable.bloomFilter.mayContain(key)) {
+        continue;
+      }
+
+      const record = this._binarySearchRecord(sstable.records, key);
+      if (record) {
+        if (record.isDeleted) return null;
+        return record.value;
+      }
+    }
+
+    return null;
+  }
+
+  _binarySearchRecord(records, targetKey) {
+    let low = 0;
+    let high = records.length - 1;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const currKey = records[mid].key;
+
+      if (currKey === targetKey) {
+        return records[mid];
+      } else if (currKey < targetKey) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    return null;
+  }
+
+  flushMemTable() {
+    if (this.memTable.size === 0) return null;
+
+    const sortedEntries = Array.from(this.memTable.entries())
+      .map(([key, data]) => ({ key, ...data }))
+      .sort((a, b) => a.key.localeCompare(b.key));
+
+    const sstableId = `sstable_${++this.sstableCounter}`;
+    const bloomFilter = this._createBloomFilter(sortedEntries);
+
+    const sstable = {
+      id: sstableId,
+      records: sortedEntries,
+      bloomFilter,
+      recordCount: sortedEntries.length,
+      minKey: sortedEntries[0].key,
+      maxKey: sortedEntries[sortedEntries.length - 1].key,
+      createdAt: Date.now()
+    };
+
+    this.sstables.push(sstable);
+    this.memTable.clear();
+
+    return sstable;
+  }
+
+  compact() {
+    if (this.sstables.length <= 1) {
+      return { compactedCount: this.sstables.length, totalRecords: this.sstables[0]?.records.length || 0 };
+    }
+
+    const mergedMap = new Map();
+
+    for (const sstable of this.sstables) {
+      for (const record of sstable.records) {
+        const existing = mergedMap.get(record.key);
+        if (!existing || record.timestamp >= existing.timestamp) {
+          mergedMap.set(record.key, record);
+        }
+      }
+    }
+
+    const aliveRecords = Array.from(mergedMap.values())
+      .filter(r => !r.isDeleted)
+      .sort((a, b) => a.key.localeCompare(b.key));
+
+    if (aliveRecords.length === 0) {
+      this.sstables = [];
+      return { compactedCount: 0, totalRecords: 0 };
+    }
+
+    const compactedId = `sstable_compacted_${++this.sstableCounter}`;
+    const compactedBloom = this._createBloomFilter(aliveRecords);
+
+    const compactedTable = {
+      id: compactedId,
+      records: aliveRecords,
+      bloomFilter: compactedBloom,
+      recordCount: aliveRecords.length,
+      minKey: aliveRecords[0].key,
+      maxKey: aliveRecords[aliveRecords.length - 1].key,
+      createdAt: Date.now()
+    };
+
+    const previousTableCount = this.sstables.length;
+    this.sstables = [compactedTable];
+
+    return {
+      previousTableCount,
+      compactedCount: 1,
+      totalRecords: aliveRecords.length
+    };
+  }
+
+  getStats() {
+    const sstableRecordCount = this.sstables.reduce((sum, t) => sum + t.records.length, 0);
+    return {
+      memTableSize: this.memTable.size,
+      sstableCount: this.sstables.length,
+      sstableRecordCount,
+      totalRecordsTracked: this.memTable.size + sstableRecordCount
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -7545,5 +7984,10 @@ export default {
   EdmondsKarpMaxFlow,
   PerceptualImageHash,
   ImageHashIndex,
+  // Phase 15 Enterprise Algorithms
+  PriceElasticitySimulator,
+  HopcroftKarpMatching,
+  LSMTreeClickstream,
 };
+
 

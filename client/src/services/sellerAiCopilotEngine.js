@@ -80,7 +80,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 3. Tư Vấn Chiến Dịch Flash Sale Shop (Flash Sale Optimization)
-  if (!/raft/i.test(raw) && /flash sale|khung giờ|giảm giá|săn deal|deal chớp nhoáng|khuyến mãi/i.test(raw)) {
+  if (!/raft|co giãn|elasticity/i.test(raw) && /flash sale|khung giờ|giảm giá|săn deal|deal chớp nhoáng|khuyến mãi/i.test(raw)) {
     return {
       text: `⚡ **CHIẾN LƯỢC THIẾT LẬP FLASH SALE SHOP ĐỘC QUYỀN**:
 - **Khung giờ vàng đề xuất**: 
@@ -185,7 +185,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 8. Tổng Quan Doanh Số & Tình Hình Bán Hàng (Shop Revenue Overview)
-  if (/doanh số|doanh thu|tổng quan|bán hàng/i.test(raw)) {
+  if (!/co giãn|elasticity/i.test(raw) && /doanh số|doanh thu|tổng quan|bán hàng/i.test(raw)) {
     return {
       text: `📈 **TỔNG QUAN DOANH SỐ GIAN HÀNG (${currentShop.name})**:
 - **Tổng doanh thu thực tế**: **${(totalRevenue).toLocaleString('vi-VN')}₫**
@@ -474,6 +474,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
       suggestions: [
         'Vận hành đơn hàng',
         'Cảnh báo sản phẩm sắp hết hàng',
+        'Điều khiển giá thầu PID'
+      ]
+    };
+  }
+
+  // 24. Mô Phỏng Độ Co Giãn Của Cầu & Khối Lượng Flash Sale (Phase 15 - Feature 162)
+  if (/độ co giãn giá|price elasticity|co giãn của cầu|mô phỏng chiết khấu flash sale|hệ số co giãn/i.test(raw)) {
+    return {
+      text: `📊 **MÔ PHỎNG ĐỘ CO GIÃN CỦA CẦU THEO GIÁ (PRICE ELASTICITY) (${currentShop.name})**:
+- **Công thức tính hệ số co giãn trung điểm**:
+  $\\varepsilon_d = \\frac{\\%\\Delta Q}{\\%\\Delta P} = \\frac{(Q_2 - Q_1) / \\bar{Q}}{(P_2 - P_1) / \\bar{P}}$
+- **3 Trạng thái co giãn thực tiễn**:
+  - **Cầu co giãn mạnh ($|\\varepsilon_d| > 1.2$)**: Giảm giá $15-20\\%$ sẽ kích thích sản lượng bán vọt lên $>35\\%$, làm TĂNG tổng doanh thu và lợi nhuận gộp.
+  - **Cầu kém co giãn ($|\\varepsilon_d| < 0.8$)**: Hàng độc quyền hoặc khách quen, KHÔNG nên giảm giá sâu vì sản lượng không tăng tương xứng.
+  - **Co giãn đơn vị ($|\\varepsilon_d| \\approx 1.0$)**: Điểm tối ưu tuyệt đối mang lại doanh thu cực đại!`,
+      type: 'marketing',
+      tag: 'MÔ PHỎNG CO GIÃN GIÁ',
+      suggestions: [
+        'Tư vấn chiến lược Flash Sale',
+        'Phân tích biên lợi nhuận P&L',
         'Điều khiển giá thầu PID'
       ]
     };

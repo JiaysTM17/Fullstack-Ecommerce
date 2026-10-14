@@ -483,7 +483,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (!/hungarian|ghép bưu tá|nghẽn|thông lượng|edmonds-karp/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá|nghẽn|thông lượng|edmonds-karp|hopcroft/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -693,6 +693,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     return {
       intent: 'SPX_MAX_FLOW_LOGISTICS',
       replyText: `**[MẠNG LƯỚI SPX SIÊU TỐC] TẠI SAO ĐƠN HÀNG LUÔN THÔNG SUỐT NGAY CẢ MÙA SIÊU SALE?**\n\n• **Điều phối thông lượng cực đại**: Hệ thống SPX áp dụng thuật toán luồng cực đại (Edmonds-Karp Max Flow) kết hợp giám sát nút thắt cổ chai Min-Cut theo thời gian thực.\n• **Tự động giải phóng ách tắc**: Khi các trung tâm phân loại chính có nguy cơ quá tải, kiện hàng của bạn sẽ được tự động phân luồng qua các tuyến dự phòng để bảo đảm đúng hẹn giao nhận 100%!`,
+      suggestions: ['Tra cứu mã vận đơn SPX', 'Xem bưu cục gần tôi', 'Gặp CSKH'],
+    };
+  }
+
+  // 17. Ghép Shipper Siêu Tốc SPX (SPX_BATCH_DISPATCH_HOPCROFT)
+  if (/ghép shipper tự động|tại sao shipper nhận đơn nhanh|spx hopcroft/i.test(lower)) {
+    return {
+      intent: 'SPX_BATCH_DISPATCH_HOPCROFT',
+      replyText: `**[SPX TỰ ĐỘNG GHÉP SHIPPER] THUẬT TOÁN GHÉP CẶP LƯỠNG PHÂN HOPCROFT-KARP:**\n\n• **Gán đơn trong 3 giây**: Hệ thống tự động ghép đồng thời hàng trăm bưu tá đang trống chuyến với các gói hàng lân cận trong bán kính 3-5km.\n• **Tối đa hóa tỷ lệ giao thành công**: Loại bỏ thời gian shipper chờ đơn lẻ tẻ, đảm bảo đơn hỏa tốc của bạn được nhận và giao ngay trong 120 phút!`,
       suggestions: ['Tra cứu mã vận đơn SPX', 'Xem bưu cục gần tôi', 'Gặp CSKH'],
     };
   }

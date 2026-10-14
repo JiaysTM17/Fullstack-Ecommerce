@@ -118,6 +118,9 @@ import {
   EdmondsKarpMaxFlow,
   PerceptualImageHash,
   ImageHashIndex,
+  PriceElasticitySimulator,
+  HopcroftKarpMatching,
+  LSMTreeClickstream,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -128,6 +131,9 @@ import { LinUCBRecommender as ServerLinUCBRecommender } from "../../server/src/u
 import { PidBiddingController as ServerPidController } from "../../server/src/utils/pidBiddingController.js";
 import { EdmondsKarpMaxFlow as ServerEdmondsKarp } from "../../server/src/utils/edmondsKarpMaxFlow.js";
 import { PerceptualImageHash as ServerPerceptualHash, ImageHashIndex as ServerImageHashIndex } from "../../server/src/utils/perceptualImageHash.js";
+import { PriceElasticitySimulator as ServerPriceElasticity } from "../../server/src/utils/volatilityPricingSimulator.js";
+import { HopcroftKarpMatching as ServerHopcroftKarp } from "../../server/src/utils/hopcroftKarpMatching.js";
+import { LSMTreeClickstream as ServerLSMTree } from "../../server/src/utils/lsmTreeClickstream.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -10817,7 +10823,319 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       });
     });
   });
+
+  // =========================================================================
+  // FEATURE 162: Price Elasticity, Hopcroft-Karp & LSM-Tree Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 162: Price Elasticity, Hopcroft-Karp Bipartite Matching & LSM-Tree Suite", () => {
+    // -----------------------------------------------------------------------
+    // PART 1: Price Elasticity Simulator (F162-T01 to F162-T08)
+    // -----------------------------------------------------------------------
+    describe("Part 1: Price Elasticity Simulator (F162-T01 to F162-T08)", () => {
+      test("F162-T01: Calculates midpoint price elasticity accurately for elastic demand", () => {
+        // Giá giảm từ 200,000 xuống 160,000 (-22.2%)
+        // Lượng bán tăng từ 100 lên 150 (+40.0%)
+        const res = PriceElasticitySimulator.calculateElasticity(200000, 100, 160000, 150);
+        expect.equal(res.type, "ELASTIC");
+        expect.equal(res.absElasticity > 1.2, true);
+        expect.equal(res.pctChangeP < 0, true);
+        expect.equal(res.pctChangeQ > 0, true);
+      });
+
+      test("F162-T02: Identifies inelastic demand when price reduction fails to stimulate sufficient demand", () => {
+        // Giá giảm 50% nhưng lượng bán chỉ tăng 10%
+        const res = ServerPriceElasticity.calculateElasticity(100000, 50, 50000, 55);
+        expect.equal(res.type, "INELASTIC");
+        expect.equal(res.absElasticity < 0.8, true);
+        expect.equal(res.advice.includes("Không nên giảm giá sâu"), true);
+      });
+
+      test("F162-T03: Classifies unitary elasticity when elasticity is approximately 1.0", () => {
+        // Giá giảm 10% và lượng bán tăng tương xứng ~10%
+        const res = PriceElasticitySimulator.calculateElasticity(100000, 100, 90000, 111);
+        expect.equal(res.type, "UNITARY");
+        expect.equal(res.advice.includes("tối đa"), true);
+      });
+
+      test("F162-T04: Safely throws error when prices or volumes are zero or negative", () => {
+        let hasError = false;
+        try {
+          PriceElasticitySimulator.calculateElasticity(0, 10, 50000, 20);
+        } catch (e) {
+          hasError = true;
+        }
+        expect.equal(hasError, true);
+      });
+
+      test("F162-T05: Returns PERFECTLY_INELASTIC when prices are unchanged (p1 === p2)", () => {
+        const res = ServerPriceElasticity.calculateElasticity(100000, 50, 100000, 50);
+        expect.equal(res.type, "PERFECTLY_INELASTIC");
+        expect.equal(res.elasticity, 0);
+      });
+
+      test("F162-T06: Simulates multiple Flash Sale discount scenarios with COGS and 5% fee", () => {
+        const simulation = PriceElasticitySimulator.simulateDiscounts({
+          basePrice: 200000,
+          baseVolume: 100,
+          cogs: 90000,
+          assumedElasticity: -1.8,
+          discountRates: [0.1, 0.2, 0.3]
+        });
+
+        expect.equal(simulation.scenarios.length, 3);
+        const scenario20 = simulation.scenarios.find(s => s.discountRate === 0.2);
+        expect.equal(scenario20.price, 160000);
+        expect.equal(scenario20.volume > 100, true);
+        expect.equal(scenario20.projectedGrossProfit > 0, true);
+      });
+
+      test("F162-T07: Automatically identifies optimal discount scenario maximizing gross profit", () => {
+        const simulation = ServerPriceElasticity.simulateDiscounts({
+          basePrice: 500000,
+          baseVolume: 50,
+          cogs: 200000,
+          assumedElasticity: -2.0
+        });
+
+        expect.equal(simulation.optimalScenario !== null, true);
+        expect.equal(simulation.recommendation.includes(simulation.optimalScenario.discountPercent), true);
+      });
+
+      test("F162-T08: Server and client implementations produce identical elasticity calculations", () => {
+        const clientRes = PriceElasticitySimulator.calculateElasticity(150000, 80, 120000, 120);
+        const serverRes = ServerPriceElasticity.calculateElasticity(150000, 80, 120000, 120);
+
+        expect.equal(clientRes.elasticity, serverRes.elasticity);
+        expect.equal(clientRes.type, serverRes.type);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // PART 2: Hopcroft-Karp Bipartite Matching for SPX Logistics (F162-T09 to F162-T16)
+    // -----------------------------------------------------------------------
+    describe("Part 2: Hopcroft-Karp SPX Batch Dispatch (F162-T09 to F162-T16)", () => {
+      test("F162-T09: Initializes bipartite graph with shippers and orders successfully", () => {
+        const hk = new HopcroftKarpMatching();
+        hk.addEdge("SHIPPER_A", "ORDER_1");
+        hk.addEdge("SHIPPER_B", "ORDER_2");
+
+        expect.equal(hk.shippers.size, 2);
+        expect.equal(hk.orders.size, 2);
+      });
+
+      test("F162-T10: Finds perfect matching when each shipper has exactly one distinct available order", () => {
+        const hk = new HopcroftKarpMatching();
+        hk.addEdge("S1", "O1");
+        hk.addEdge("S2", "O2");
+        hk.addEdge("S3", "O3");
+
+        const result = hk.computeMaxMatching();
+        expect.equal(result.matchingSize, 3);
+        expect.equal(result.fulfillmentRate, 100);
+        expect.equal(result.unassignedOrders.length, 0);
+      });
+
+      test("F162-T11: Resolves complex overlapping butterfly bipartite matching optimally", () => {
+        // S1 can do O1, O2
+        // S2 can do O1, O2
+        // S3 can do O2, O3
+        const hk = new ServerHopcroftKarp();
+        hk.addEdge("S1", "O1");
+        hk.addEdge("S1", "O2");
+        hk.addEdge("S2", "O1");
+        hk.addEdge("S2", "O2");
+        hk.addEdge("S3", "O2");
+        hk.addEdge("S3", "O3");
+
+        const result = hk.computeMaxMatching();
+        expect.equal(result.matchingSize, 3);
+        expect.equal(result.assignments.length, 3);
+      });
+
+      test("F162-T12: Handles shipper shortage when order demand exceeds available fleet", () => {
+        const hk = new HopcroftKarpMatching();
+        hk.addEdge("S1", "O1");
+        hk.addEdge("S1", "O2");
+        hk.addEdge("S2", "O2");
+        hk.addEdge("S2", "O3");
+        hk.addOrder("O4"); // 4 orders, only 2 shippers
+
+        const result = hk.computeMaxMatching();
+        expect.equal(result.matchingSize, 2);
+        expect.equal(result.fulfillmentRate, 50.0);
+        expect.equal(result.unassignedOrders.length, 2);
+      });
+
+      test("F162-T13: Correctly identifies all unassigned orders for queue prioritization", () => {
+        const hk = new ServerHopcroftKarp();
+        hk.addEdge("S1", "O1");
+        hk.addOrder("O_UNASSIGNED_1");
+        hk.addOrder("O_UNASSIGNED_2");
+
+        const result = hk.computeMaxMatching();
+        expect.equal(result.matchingSize, 1);
+        expect.equal(result.unassignedOrders.includes("O_UNASSIGNED_1"), true);
+        expect.equal(result.unassignedOrders.includes("O_UNASSIGNED_2"), true);
+      });
+
+      test("F162-T14: Empty bipartite graph returns zero matching without throwing exception", () => {
+        const hk = new HopcroftKarpMatching();
+        const result = hk.computeMaxMatching();
+
+        expect.equal(result.matchingSize, 0);
+        expect.equal(result.fulfillmentRate, 100);
+        expect.equal(result.assignments.length, 0);
+      });
+
+      test("F162-T15: Re-running computeMaxMatching idempotently resets previous pairs", () => {
+        const hk = new HopcroftKarpMatching();
+        hk.addEdge("S1", "O1");
+        const res1 = hk.computeMaxMatching();
+        const res2 = hk.computeMaxMatching();
+
+        expect.equal(res1.matchingSize, 1);
+        expect.equal(res2.matchingSize, 1);
+      });
+
+      test("F162-T16: Server Hopcroft-Karp scales smoothly on 10 shippers and 12 orders graph", () => {
+        const hk = new ServerHopcroftKarp();
+        for (let i = 1; i <= 10; i++) {
+          hk.addEdge(`SHIPPER_${i}`, `ORDER_${i}`);
+          if (i < 10) hk.addEdge(`SHIPPER_${i}`, `ORDER_${i + 1}`);
+        }
+        hk.addOrder("ORDER_11");
+        hk.addOrder("ORDER_12");
+
+        const result = hk.computeMaxMatching();
+        expect.equal(result.matchingSize, 10);
+        expect.equal(result.unassignedOrders.length, 2);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // PART 3: LSM-Tree Clickstream Engine & Tri-Role Copilots (F162-T17 to F162-T24)
+    // -----------------------------------------------------------------------
+    describe("Part 3: LSM-Tree Clickstream & Copilots (F162-T17 to F162-T24)", () => {
+      test("F162-T17: Writes clickstream telemetry to MemTable and retrieves immediately in RAM", () => {
+        const lsm = new LSMTreeClickstream({ maxMemTableSize: 50 });
+        lsm.put("click:user_1:prod_101", { action: "VIEW_PDP", durationMs: 1200 });
+
+        const data = lsm.get("click:user_1:prod_101");
+        expect.equal(data.action, "VIEW_PDP");
+        expect.equal(data.durationMs, 1200);
+      });
+
+      test("F162-T18: Automatically flushes MemTable to immutable SSTable when reaching size limit", () => {
+        const lsm = new LSMTreeClickstream({ maxMemTableSize: 3 });
+        lsm.put("k1", "v1");
+        lsm.put("k2", "v2");
+        lsm.put("k3", "v3"); // Kích hoạt Flush ngay lập tức
+
+        const stats = lsm.getStats();
+        expect.equal(stats.memTableSize, 0);
+        expect.equal(stats.sstableCount, 1);
+        expect.equal(lsm.get("k2"), "v2");
+      });
+
+      test("F162-T19: Bloom Filter accelerates negative lookups avoiding binary search in SSTable", () => {
+        const lsm = new ServerLSMTree({ maxMemTableSize: 2 });
+        lsm.put("item_alpha", 1);
+        lsm.put("item_beta", 2); // Flushed to SSTable
+
+        // Khóa hoàn toàn không tồn tại
+        const notFound = lsm.get("item_completely_missing_xyz");
+        expect.equal(notFound, null);
+      });
+
+      test("F162-T20: Tombstone deletion hides record from subsequent queries", () => {
+        const lsm = new LSMTreeClickstream({ maxMemTableSize: 5 });
+        lsm.put("session_token_123", { active: true });
+        expect.equal(lsm.get("session_token_123") !== null, true);
+
+        lsm.delete("session_token_123");
+        expect.equal(lsm.get("session_token_123"), null);
+      });
+
+      test("F162-T21: Compaction merges multiple SSTables and purges tombstoned records", () => {
+        const lsm = new ServerLSMTree({ maxMemTableSize: 2 });
+        lsm.put("a", 10);
+        lsm.put("b", 20); // Table 1
+
+        lsm.put("c", 30);
+        lsm.delete("a");  // Table 2 (Tombstone a)
+
+        expect.equal(lsm.sstables.length, 2);
+        const compResult = lsm.compact();
+
+        expect.equal(compResult.compactedCount, 1);
+        expect.equal(lsm.get("a"), null); // 'a' bị dọn sạch
+        expect.equal(lsm.get("b"), 20);
+        expect.equal(lsm.get("c"), 30);
+      });
+
+      test("F162-T22: getStats reports accurate counts across MemTable and SSTables", () => {
+        const lsm = new LSMTreeClickstream({ maxMemTableSize: 5 });
+        lsm.put("k1", 1);
+        lsm.put("k2", 2);
+        lsm.put("k3", 3);
+
+        const stats = lsm.getStats();
+        expect.equal(stats.memTableSize, 3);
+        expect.equal(stats.sstableCount, 0);
+        expect.equal(stats.totalRecordsTracked, 3);
+      });
+
+      test("F162-T23: Tri-role Copilots accurately respond to Phase 15 algorithm inquiries", () => {
+        // Admin Sentinel Copilot
+        const adminHkRes = generateAdminCopilotResponse("Phân tích thuật toán ghép cặp lưỡng phân Hopcroft-Karp", {});
+        expect.equal(adminHkRes.tag, "GHÉP CẶP HOPCROFT-KARP");
+
+        const adminLsmRes = generateAdminCopilotResponse("Kiến trúc cây ghi dữ liệu LSM-Tree cho telemetry Flash Sale", {});
+        expect.equal(adminLsmRes.tag, "CẤU TRÚC CÂY LSM-TREE");
+
+        // Seller ShopSmart Copilot
+        const sellerElasticityRes = generateSellerCopilotResponse("Mô phỏng độ co giãn giá Flash Sale tối ưu doanh thu", {});
+        expect.equal(sellerElasticityRes.tag, "MÔ PHỎNG CO GIÃN GIÁ");
+
+        // Buyer Shopping AI
+        const buyerHkRes = generateAiChatResponse("Tại sao shipper nhận đơn nhanh qua SPX Hopcroft");
+        expect.equal(buyerHkRes.intent, "SPX_BATCH_DISPATCH_HOPCROFT");
+      });
+
+      test("F162-T24: E2E Lifecycle: Price Elasticity Modeling -> LSM Clickstream -> Hopcroft-Karp Batch Dispatch", () => {
+        // Step 1: Seller simulates price elasticity to pick optimal 20% discount
+        const elasticitySim = PriceElasticitySimulator.simulateDiscounts({
+          basePrice: 200000,
+          baseVolume: 100,
+          cogs: 80000,
+          assumedElasticity: -1.7
+        });
+        expect.equal(elasticitySim.optimalScenario !== null, true);
+        const flashPrice = elasticitySim.optimalScenario.price;
+
+        // Step 2: Flash sale goes live, customer clicks and orders recorded in LSM-Tree
+        const telemetryLsm = new LSMTreeClickstream({ maxMemTableSize: 10 });
+        telemetryLsm.put("order_placed:ord_flash_999", {
+          price: flashPrice,
+          buyerId: "usr_alice",
+          timestamp: Date.now()
+        });
+        expect.equal(telemetryLsm.get("order_placed:ord_flash_999").price, flashPrice);
+
+        // Step 3: Orders dispatched via Hopcroft-Karp batch bipartite matching
+        const dispatcher = new HopcroftKarpMatching();
+        dispatcher.addEdge("SPX_SHIPPER_HUNG", "ord_flash_999");
+        dispatcher.addEdge("SPX_SHIPPER_MINH", "ord_flash_999");
+        dispatcher.addEdge("SPX_SHIPPER_MINH", "ord_flash_1000");
+
+        const matchResult = dispatcher.computeMaxMatching();
+        expect.equal(matchResult.matchingSize, 2);
+        expect.equal(matchResult.fulfillmentRate, 100);
+      });
+    });
+  });
 });
+
 
 
 
