@@ -896,6 +896,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 39. Chống Gian Lận Vòng Kín Johnson, Tồn Kho Đa Chiều Matrix & Gợi Ý Ưu Đãi Actor-Critic (WASH_TRADE_MATRIX_ACTOR_CRITIC_ASSIST)
+  if (/chống giao dịch ảo johnson|chu trình johnson|tồn kho đa chiều matrix segment tree|matrix segment tree|phân bổ voucher actor-critic|actor-critic/i.test(lower)) {
+    return {
+      intent: 'WASH_TRADE_MATRIX_ACTOR_CRITIC_ASSIST',
+      replyText: `**[HỆ THỐNG AN NINH & GỢI Ý MUA SẮM THÔNG MINH]:**\n\n• **Chống gian lận vòng kín Johnson**: Sàn tự động phát hiện và ngăn chặn các tài khoản đặt đơn ảo thổi phồng đánh giá, giúp bạn luôn đọc được review thật 100% từ người mua thực tế!\n• **Kho hàng thông suốt 2D Matrix Segment Tree**: Tồn kho tại các kho gần bạn nhất được cập nhật theo mili-giây, đảm bảo hàng luôn sẵn sàng giao ngay không lo bị hủy đơn.\n• **Ưu đãi may đo riêng Actor-Critic**: Trợ lý AI tự động tính toán gói voucher phù hợp nhất với giỏ hàng của bạn (Freeship hoặc giảm giá trực tiếp) để bạn tiết kiệm tối đa khi thanh toán!`,
+      suggestions: ['Nhận voucher may đo riêng', 'Xem sản phẩm kho gần nhất', 'Kiểm tra giỏ hàng'],
+    };
+  }
+
 
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH

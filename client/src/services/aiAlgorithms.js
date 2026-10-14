@@ -17508,6 +17508,533 @@ export class DoubleQLearningPricing {
   }
 }
 
+// =========================================================================
+// PHASE 37 ENTERPRISE ALGORITHMS: Circular Wash-Trade, Matrix Segment Tree, Actor-Critic
+// =========================================================================
+
+export class CircularWashTradeDetector {
+  constructor(options = {}) {
+    this.maxCycleLength = Math.max(2, options.maxCycleLength || 6);
+    this.minCycleLength = Math.max(2, options.minCycleLength || 2);
+    this.highRiskThreshold = options.highRiskThreshold || 3;
+    this.adj = new Map();
+    this.edgeMetadata = new Map();
+    this.nodes = new Set();
+  }
+
+  addTransaction(fromId, toId, amount = 0, metadata = {}) {
+    const u = String(fromId);
+    const v = String(toId);
+    if (u === v) return;
+    this.nodes.add(u);
+    this.nodes.add(v);
+
+    if (!this.adj.has(u)) this.adj.set(u, new Set());
+    this.adj.get(u).add(v);
+
+    const edgeKey = `${u}->${v}`;
+    if (!this.edgeMetadata.has(edgeKey)) {
+      this.edgeMetadata.set(edgeKey, []);
+    }
+    this.edgeMetadata.get(edgeKey).push({
+      amount: Number(amount) || 0,
+      timestamp: Date.now(),
+      metadata,
+    });
+  }
+
+  _getSCCs(vertexList, sIndex) {
+    const validNodes = new Set(vertexList.slice(sIndex));
+    let index = 0;
+    const stack = [];
+    const inStack = new Set();
+    const indices = new Map();
+    const lowlinks = new Map();
+    const sccs = [];
+
+    const strongConnect = (v) => {
+      indices.set(v, index);
+      lowlinks.set(v, index);
+      index++;
+      stack.push(v);
+      inStack.add(v);
+
+      const neighbors = this.adj.get(v) || new Set();
+      for (const w of neighbors) {
+        if (!validNodes.has(w)) continue;
+        if (!indices.has(w)) {
+          strongConnect(w);
+          lowlinks.set(v, Math.min(lowlinks.get(v), lowlinks.get(w)));
+        } else if (inStack.has(w)) {
+          lowlinks.set(v, Math.min(lowlinks.get(v), indices.get(w)));
+        }
+      }
+
+      if (lowlinks.get(v) === indices.get(v)) {
+        const scc = new Set();
+        let w;
+        do {
+          w = stack.pop();
+          inStack.delete(w);
+          scc.add(w);
+        } while (w !== v);
+        sccs.push(scc);
+      }
+    };
+
+    for (const v of validNodes) {
+      if (!indices.has(v)) {
+        strongConnect(v);
+      }
+    }
+
+    return sccs;
+  }
+
+  findWashTradeCycles() {
+    const vertexList = Array.from(this.nodes);
+    const n = vertexList.length;
+    if (n < this.minCycleLength) return [];
+
+    const cycles = [];
+    let sIndex = 0;
+
+    while (sIndex < n) {
+      const sccs = this._getSCCs(vertexList, sIndex);
+      let minVertexIndex = n;
+      let targetSCC = null;
+
+      for (const scc of sccs) {
+        if (scc.size > 1) {
+          for (let i = sIndex; i < n; i++) {
+            if (scc.has(vertexList[i])) {
+              if (i < minVertexIndex) {
+                minVertexIndex = i;
+                targetSCC = scc;
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      if (targetSCC === null || minVertexIndex >= n) break;
+
+      sIndex = minVertexIndex;
+      const s = vertexList[sIndex];
+
+      const blocked = new Set();
+      const B = new Map();
+      const path = [];
+
+      const unblock = (u) => {
+        blocked.delete(u);
+        const bSet = B.get(u);
+        if (bSet) {
+          for (const w of bSet) {
+            bSet.delete(w);
+            if (blocked.has(w)) {
+              unblock(w);
+            }
+          }
+        }
+      };
+
+      const circuit = (v) => {
+        let f = false;
+        path.push(v);
+        blocked.add(v);
+
+        if (path.length > this.maxCycleLength) {
+          path.pop();
+          blocked.delete(v);
+          return false;
+        }
+
+        const neighbors = this.adj.get(v) || new Set();
+        for (const w of neighbors) {
+          if (!targetSCC.has(w)) continue;
+
+          if (w === s) {
+            if (path.length >= this.minCycleLength) {
+              cycles.push([...path, s]);
+              f = true;
+            }
+          } else if (!blocked.has(w)) {
+            if (circuit(w)) {
+              f = true;
+            }
+          }
+        }
+
+        if (f) {
+          unblock(v);
+        } else {
+          for (const w of neighbors) {
+            if (!targetSCC.has(w)) continue;
+            if (!B.has(w)) B.set(w, new Set());
+            B.get(w).add(v);
+          }
+        }
+
+        path.pop();
+        return f;
+      };
+
+      circuit(s);
+      sIndex++;
+    }
+
+    return cycles;
+  }
+
+  evaluateRingRisk(cycle) {
+    if (!cycle || cycle.length < 2) return null;
+
+    let totalVolume = 0;
+    let minEdgeVolume = Infinity;
+    const ringNodes = cycle.slice(0, -1);
+
+    for (let i = 0; i < cycle.length - 1; i++) {
+      const u = cycle[i];
+      const v = cycle[i + 1];
+      const key = `${u}->${v}`;
+      const records = this.edgeMetadata.get(key) || [];
+      const edgeSum = records.reduce((sum, r) => sum + r.amount, 0);
+
+      totalVolume += edgeSum;
+      if (edgeSum < minEdgeVolume) minEdgeVolume = edgeSum;
+    }
+
+    const ringLength = ringNodes.length;
+    const volumeBalanceRatio = totalVolume > 0 ? (minEdgeVolume * ringLength) / totalVolume : 1.0;
+    const riskScore = Math.min(
+      100,
+      Math.round(
+        (ringLength >= 3 ? 40 : 25) +
+        Math.min(30, (totalVolume / 1000000) * 5) +
+        (volumeBalanceRatio > 0.7 ? 30 : 15)
+      )
+    );
+
+    return {
+      cycleNodes: ringNodes,
+      ringLength,
+      totalVolume,
+      minEdgeVolume: minEdgeVolume === Infinity ? 0 : minEdgeVolume,
+      volumeBalanceRatio: Math.round(volumeBalanceRatio * 100) / 100,
+      riskScore,
+      isHighRisk: riskScore >= 70,
+    };
+  }
+
+  getFlaggedRings() {
+    const rawCycles = this.findWashTradeCycles();
+    const evaluated = rawCycles.map(c => this.evaluateRingRisk(c)).filter(Boolean);
+    return evaluated.sort((a, b) => b.riskScore - a.riskScore);
+  }
+
+  getStats() {
+    return {
+      totalAccounts: this.nodes.size,
+      totalTransactions: Array.from(this.edgeMetadata.values()).reduce((s, arr) => s + arr.length, 0),
+      maxCycleLength: this.maxCycleLength,
+    };
+  }
+}
+
+export class MatrixSegmentTree {
+  constructor(rows = 8, cols = 8, initialData = null) {
+    this.R = Math.max(1, rows);
+    this.C = Math.max(1, cols);
+    this.treeSum = Array.from({ length: 4 * this.R }, () => new Float64Array(4 * this.C));
+    this.treeMax = Array.from({ length: 4 * this.R }, () => new Float64Array(4 * this.C).fill(-Infinity));
+    this.matrix = Array.from({ length: this.R }, () => new Float64Array(this.C));
+
+    if (initialData && Array.isArray(initialData)) {
+      this.build(initialData);
+    }
+  }
+
+  build(data) {
+    for (let r = 0; r < Math.min(this.R, data.length); r++) {
+      for (let c = 0; c < Math.min(this.C, data[r].length); c++) {
+        this.set(r, c, Number(data[r][c]) || 0);
+      }
+    }
+  }
+
+  _updateCol(vx, lx, rx, vy, ly, ry, x, y, val) {
+    if (ly === ry) {
+      if (lx === rx) {
+        this.treeSum[vx][vy] = val;
+        this.treeMax[vx][vy] = val;
+      } else {
+        this.treeSum[vx][vy] = this.treeSum[vx * 2][vy] + this.treeSum[vx * 2 + 1][vy];
+        this.treeMax[vx][vy] = Math.max(this.treeMax[vx * 2][vy], this.treeMax[vx * 2 + 1][vy]);
+      }
+      return;
+    }
+
+    const my = (ly + ry) >> 1;
+    if (y <= my) {
+      this._updateCol(vx, lx, rx, vy * 2, ly, my, x, y, val);
+    } else {
+      this._updateCol(vx, lx, rx, vy * 2 + 1, my + 1, ry, x, y, val);
+    }
+
+    this.treeSum[vx][vy] = this.treeSum[vx][vy * 2] + this.treeSum[vx][vy * 2 + 1];
+    this.treeMax[vx][vy] = Math.max(this.treeMax[vx][vy * 2], this.treeMax[vx][vy * 2 + 1]);
+  }
+
+  _updateRow(vx, lx, rx, x, y, val) {
+    if (lx !== rx) {
+      const mx = (lx + rx) >> 1;
+      if (x <= mx) {
+        this._updateRow(vx * 2, lx, mx, x, y, val);
+      } else {
+        this._updateRow(vx * 2 + 1, mx + 1, rx, x, y, val);
+      }
+    }
+    this._updateCol(vx, lx, rx, 1, 0, this.C - 1, x, y, val);
+  }
+
+  set(r, c, value) {
+    if (r < 0 || r >= this.R || c < 0 || c >= this.C) return;
+    const v = Number(value) || 0;
+    this.matrix[r][c] = v;
+    this._updateRow(1, 0, this.R - 1, r, c, v);
+  }
+
+  add(r, c, delta) {
+    if (r < 0 || r >= this.R || c < 0 || c >= this.C) return;
+    const current = this.matrix[r][c];
+    this.set(r, c, current + (Number(delta) || 0));
+  }
+
+  _querySumY(vx, vy, tly, try_, ly, ry) {
+    if (ly > ry) return 0;
+    if (ly === tly && ry === try_) return this.treeSum[vx][vy];
+    const tmy = (tly + try_) >> 1;
+    return (
+      this._querySumY(vx, vy * 2, tly, tmy, ly, Math.min(ry, tmy)) +
+      this._querySumY(vx, vy * 2 + 1, tmy + 1, try_, Math.max(ly, tmy + 1), ry)
+    );
+  }
+
+  _querySumX(vx, tlx, trx, lx, rx, ly, ry) {
+    if (lx > rx) return 0;
+    if (lx === tlx && rx === trx) {
+      return this._querySumY(vx, 1, 0, this.C - 1, ly, ry);
+    }
+    const tmx = (tlx + trx) >> 1;
+    return (
+      this._querySumX(vx * 2, tlx, tmx, lx, Math.min(rx, tmx), ly, ry) +
+      this._querySumX(vx * 2 + 1, tmx + 1, trx, Math.max(lx, tmx + 1), rx, ly, ry)
+    );
+  }
+
+  querySum(r1, c1, r2, c2) {
+    const minR = Math.max(0, Math.min(r1, r2));
+    const maxR = Math.min(this.R - 1, Math.max(r1, r2));
+    const minC = Math.max(0, Math.min(c1, c2));
+    const maxC = Math.min(this.C - 1, Math.max(c1, c2));
+
+    if (minR > maxR || minC > maxC) return 0;
+    return this._querySumX(1, 0, this.R - 1, minR, maxR, minC, maxC);
+  }
+
+  _queryMaxY(vx, vy, tly, try_, ly, ry) {
+    if (ly > ry) return -Infinity;
+    if (ly === tly && ry === try_) return this.treeMax[vx][vy];
+    const tmy = (tly + try_) >> 1;
+    return Math.max(
+      this._queryMaxY(vx, vy * 2, tly, tmy, ly, Math.min(ry, tmy)),
+      this._queryMaxY(vx, vy * 2 + 1, tmy + 1, try_, Math.max(ly, tmy + 1), ry)
+    );
+  }
+
+  _queryMaxX(vx, tlx, trx, lx, rx, ly, ry) {
+    if (lx > rx) return -Infinity;
+    if (lx === tlx && rx === trx) {
+      return this._queryMaxY(vx, 1, 0, this.C - 1, ly, ry);
+    }
+    const tmx = (tlx + trx) >> 1;
+    return Math.max(
+      this._queryMaxX(vx * 2, tlx, tmx, lx, Math.min(rx, tmx), ly, ry),
+      this._queryMaxX(vx * 2 + 1, tmx + 1, trx, Math.max(lx, tmx + 1), rx, ly, ry)
+    );
+  }
+
+  queryMax(r1, c1, r2, c2) {
+    const minR = Math.max(0, Math.min(r1, r2));
+    const maxR = Math.min(this.R - 1, Math.max(r1, r2));
+    const minC = Math.max(0, Math.min(c1, c2));
+    const maxC = Math.min(this.C - 1, Math.max(c1, c2));
+
+    if (minR > maxR || minC > maxC) return -Infinity;
+    const res = this._queryMaxX(1, 0, this.R - 1, minR, maxR, minC, maxC);
+    return res === -Infinity ? 0 : res;
+  }
+
+  get(r, c) {
+    if (r < 0 || r >= this.R || c < 0 || c >= this.C) return 0;
+    return this.matrix[r][c];
+  }
+
+  getMatrix() {
+    return this.matrix.map(row => Array.from(row));
+  }
+
+  getStats() {
+    return {
+      rows: this.R,
+      cols: this.C,
+      totalCells: this.R * this.C,
+      grandTotal: this.querySum(0, 0, this.R - 1, this.C - 1),
+      peakValue: this.queryMax(0, 0, this.R - 1, this.C - 1),
+    };
+  }
+}
+
+export class ActorCriticIncentiveRouter {
+  constructor(options = {}) {
+    this.actions = options.actions || ["FREESHIP_MAX", "DISCOUNT_10", "DISCOUNT_20", "COIN_CASHBACK"];
+    this.dim = Math.max(1, options.dim || 4);
+    this.alphaActor = options.alphaActor || 0.05;
+    this.alphaCritic = options.alphaCritic || 0.1;
+    this.gamma = options.gamma !== undefined ? options.gamma : 0.95;
+
+    this.criticWeights = new Float64Array(this.dim).fill(0.0);
+    this.actorWeights = Array.from({ length: this.actions.length }, () => new Float64Array(this.dim).fill(0.0));
+    this.totalSteps = 0;
+  }
+
+  _dot(w, x) {
+    let sum = 0;
+    const len = Math.min(w.length, x.length);
+    for (let i = 0; i < len; i++) {
+      sum += w[i] * x[i];
+    }
+    return sum;
+  }
+
+  predictValue(stateVector) {
+    if (!stateVector || stateVector.length === 0) return 0;
+    return this._dot(this.criticWeights, stateVector);
+  }
+
+  getActionProbabilities(stateVector) {
+    if (!stateVector || stateVector.length === 0) {
+      return Array(this.actions.length).fill(1 / this.actions.length);
+    }
+
+    const logits = new Float64Array(this.actions.length);
+    let maxLogit = -Infinity;
+
+    for (let a = 0; a < this.actions.length; a++) {
+      logits[a] = this._dot(this.actorWeights[a], stateVector);
+      if (logits[a] > maxLogit) maxLogit = logits[a];
+    }
+
+    let sumExp = 0;
+    const probs = new Float64Array(this.actions.length);
+    for (let a = 0; a < this.actions.length; a++) {
+      probs[a] = Math.exp(logits[a] - maxLogit);
+      sumExp += probs[a];
+    }
+
+    if (sumExp === 0) {
+      return Array(this.actions.length).fill(1 / this.actions.length);
+    }
+
+    for (let a = 0; a < this.actions.length; a++) {
+      probs[a] /= sumExp;
+    }
+
+    return Array.from(probs);
+  }
+
+  selectAction(stateVector, isEvaluating = false) {
+    const probs = this.getActionProbabilities(stateVector);
+
+    if (isEvaluating) {
+      let bestIdx = 0;
+      let maxP = -Infinity;
+      for (let i = 0; i < probs.length; i++) {
+        if (probs[i] > maxP) {
+          maxP = probs[i];
+          bestIdx = i;
+        }
+      }
+      return this.actions[bestIdx];
+    }
+
+    let r = Math.random();
+    let cumulative = 0;
+    for (let i = 0; i < probs.length; i++) {
+      cumulative += probs[i];
+      if (r <= cumulative) return this.actions[i];
+    }
+
+    return this.actions[this.actions.length - 1];
+  }
+
+  update(state, action, reward, nextState, done = false) {
+    if (!state || state.length === 0) return 0;
+
+    const actionIdx = this.actions.indexOf(String(action));
+    if (actionIdx === -1) return 0;
+
+    const vS = this.predictValue(state);
+    const vSNext = done || !nextState ? 0 : this.predictValue(nextState);
+
+    const tdError = (Number(reward) || 0) + this.gamma * vSNext - vS;
+
+    const len = Math.min(this.dim, state.length);
+    for (let d = 0; d < len; d++) {
+      this.criticWeights[d] += this.alphaCritic * tdError * state[d];
+    }
+
+    const probs = this.getActionProbabilities(state);
+    for (let a = 0; a < this.actions.length; a++) {
+      const gradMultiplier = (a === actionIdx ? 1.0 : 0.0) - probs[a];
+      const step = this.alphaActor * tdError * gradMultiplier;
+      for (let d = 0; d < len; d++) {
+        this.actorWeights[a][d] += step * state[d];
+      }
+    }
+
+    this.totalSteps++;
+    return Math.round(tdError * 1000) / 1000;
+  }
+
+  getActionDistribution(stateVector) {
+    const probs = this.getActionProbabilities(stateVector);
+    const distribution = {};
+    for (let i = 0; i < this.actions.length; i++) {
+      distribution[this.actions[i]] = Math.round(probs[i] * 1000) / 1000;
+    }
+
+    return {
+      distribution,
+      bestAction: this.selectAction(stateVector, true),
+      predictedValue: Math.round(this.predictValue(stateVector) * 100) / 100,
+    };
+  }
+
+  getStats() {
+    return {
+      totalSteps: this.totalSteps,
+      actionsCount: this.actions.length,
+      dimension: this.dim,
+      alphaActor: this.alphaActor,
+      alphaCritic: this.alphaCritic,
+      gamma: this.gamma,
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -17708,6 +18235,10 @@ export default {
   CosineLshSignatures,
   HNSWMultiProbeGraph,
   DoubleQLearningPricing,
+  // Phase 37 Enterprise Algorithms
+  CircularWashTradeDetector,
+  MatrixSegmentTree,
+  ActorCriticIncentiveRouter,
 };
 
 

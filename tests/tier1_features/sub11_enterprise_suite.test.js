@@ -216,6 +216,10 @@ import {
   CosineLshSignatures,
   HNSWMultiProbeGraph,
   DoubleQLearningPricing,
+  // Phase 37 Enterprise Algorithms
+  CircularWashTradeDetector,
+  MatrixSegmentTree,
+  ActorCriticIncentiveRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -292,6 +296,9 @@ import ServerParetoFrontierRanker from "../../server/src/utils/paretoFrontierRan
 import ServerCosineLshSignatures from "../../server/src/utils/cosineLshSignatures.js";
 import ServerHNSWMultiProbeGraph from "../../server/src/utils/hnswMultiProbeGraph.js";
 import ServerDoubleQLearningPricing from "../../server/src/utils/doubleQLearningPricing.js";
+import ServerCircularWashTradeDetector from "../../server/src/utils/circularWashTradeDetector.js";
+import ServerMatrixSegmentTree from "../../server/src/utils/matrixSegmentTree.js";
+import ServerActorCriticRouter from "../../server/src/utils/actorCriticIncentiveRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -18041,6 +18048,341 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       }
       const bestDiscount = pricingAgent.selectAction("FLASH_MIDNIGHT", true);
       expect.equal(bestDiscount, "DISCOUNT_10");
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 184: Phase 37 Enterprise Algorithms Suite (24 Tests)
+  // Circular Wash Trade, Matrix Segment Tree, Actor-Critic Incentive Router
+  // =========================================================================
+  describe("Feature 184: Phase 37 Enterprise Algorithms Suite", () => {
+    // -----------------------------------------------------------------------
+    // PART 1: Circular Wash Trade Detector (Johnson's Algorithm) (6 Tests)
+    // -----------------------------------------------------------------------
+    test("F184-T01: Builds directed transaction graph and registers node/edge metadata correctly", () => {
+      const detector = new CircularWashTradeDetector({ maxCycleLength: 5, minCycleLength: 2 });
+      detector.addTransaction("USER_A", "USER_B", 500000, { orderId: "ORD_1" });
+      detector.addTransaction("USER_B", "USER_C", 500000, { orderId: "ORD_2" });
+      const stats = detector.getStats();
+
+      expect.equal(stats.totalAccounts, 3);
+      expect.equal(stats.totalTransactions, 2);
+      expect.equal(stats.maxCycleLength, 5);
+    });
+
+    test("F184-T02: Finds 2-node reciprocal wash-trading loops (A -> B -> A)", () => {
+      const detector = new CircularWashTradeDetector({ minCycleLength: 2 });
+      detector.addTransaction("SHOP_X", "BUYER_Y", 1000000);
+      detector.addTransaction("BUYER_Y", "SHOP_X", 1000000);
+
+      const cycles = detector.findWashTradeCycles();
+      expect.equal(cycles.length, 1);
+      expect.equal(cycles[0].length, 3); // ["SHOP_X", "BUYER_Y", "SHOP_X"]
+      expect.equal(cycles[0][0], cycles[0][2]);
+    });
+
+    test("F184-T03: Finds multi-node circular wash-trading loops (A -> B -> C -> A, A -> B -> C -> D -> A)", () => {
+      const detector = new CircularWashTradeDetector({ maxCycleLength: 6, minCycleLength: 3 });
+      detector.addTransaction("ACC_1", "ACC_2", 200000);
+      detector.addTransaction("ACC_2", "ACC_3", 210000);
+      detector.addTransaction("ACC_3", "ACC_4", 205000);
+      detector.addTransaction("ACC_4", "ACC_1", 200000);
+
+      const cycles = detector.findWashTradeCycles();
+      expect.equal(cycles.length, 1);
+      expect.equal(cycles[0].length, 5); // 4 nodes + closed loop
+      expect.equal(cycles[0][0], "ACC_1");
+      expect.equal(cycles[0][4], "ACC_1");
+    });
+
+    test("F184-T04: Calculates volume balance ratio and assigns high-risk scores to circular fraud rings", () => {
+      const detector = new CircularWashTradeDetector({ minCycleLength: 2 });
+      detector.addTransaction("MALL_SHOP", "SHILL_1", 10000000);
+      detector.addTransaction("SHILL_1", "SHILL_2", 9900000);
+      detector.addTransaction("SHILL_2", "MALL_SHOP", 10100000);
+
+      const flagged = detector.getFlaggedRings();
+      expect.ok(flagged.length >= 1);
+      expect.equal(flagged[0].ringLength, 3);
+      expect.ok(flagged[0].totalVolume > 29000000);
+      expect.ok(flagged[0].volumeBalanceRatio > 0.9);
+      expect.ok(flagged[0].riskScore >= 70);
+      expect.equal(flagged[0].isHighRisk, true);
+    });
+
+    test("F184-T05: ServerCircularWashTradeDetector mirrors client CircularWashTradeDetector behavior", () => {
+      const serverDet = new ServerCircularWashTradeDetector();
+      serverDet.addTransaction("SRV_A", "SRV_B", 300000);
+      serverDet.addTransaction("SRV_B", "SRV_C", 300000);
+      serverDet.addTransaction("SRV_C", "SRV_A", 300000);
+
+      const cycles = serverDet.findWashTradeCycles();
+      expect.equal(cycles.length, 1);
+      const evalRes = serverDet.evaluateRingRisk(cycles[0]);
+      expect.equal(evalRes.ringLength, 3);
+      expect.equal(evalRes.totalVolume, 900000);
+    });
+
+    test("F184-T06: Handles acyclic graphs (DAG), self-loops, and maxCycleLength boundary limits gracefully", () => {
+      const detector = new CircularWashTradeDetector({ maxCycleLength: 3 });
+      detector.addTransaction("SELF", "SELF", 100); // self-loop ignored
+      expect.equal(detector.getStats().totalAccounts, 0);
+
+      // Linear chain without cycles
+      detector.addTransaction("L1", "L2", 100);
+      detector.addTransaction("L2", "L3", 100);
+      detector.addTransaction("L3", "L4", 100);
+      expect.equal(detector.findWashTradeCycles().length, 0);
+
+      // Loop of length 4, but maxCycleLength is 3 -> Should not be found
+      detector.addTransaction("L4", "L1", 100);
+      const cycles = detector.findWashTradeCycles();
+      expect.equal(cycles.length, 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // PART 2: 2D Matrix Segment Tree (6 Tests)
+    // -----------------------------------------------------------------------
+    test("F184-T07: Initializes 2D Segment Tree with R rows and C columns, supporting zero initialization and build from matrix", () => {
+      const tree = new MatrixSegmentTree(4, 4);
+      const stats = tree.getStats();
+      expect.equal(stats.rows, 4);
+      expect.equal(stats.cols, 4);
+      expect.equal(stats.totalCells, 16);
+      expect.equal(stats.grandTotal, 0);
+      expect.equal(stats.peakValue, 0);
+
+      const preloaded = new MatrixSegmentTree(2, 2, [[10, 20], [30, 40]]);
+      expect.equal(preloaded.querySum(0, 0, 1, 1), 100);
+      expect.equal(preloaded.queryMax(0, 0, 1, 1), 40);
+    });
+
+    test("F184-T08: Updates single cell (set and add) with O(log R * log C) complexity", () => {
+      const tree = new MatrixSegmentTree(4, 4);
+      tree.set(2, 3, 50);
+      expect.equal(tree.get(2, 3), 50);
+      expect.equal(tree.querySum(2, 3, 2, 3), 50);
+
+      tree.add(2, 3, 25);
+      expect.equal(tree.get(2, 3), 75);
+      expect.equal(tree.querySum(2, 3, 2, 3), 75);
+    });
+
+    test("F184-T09: Computes range sum querySum(r1, c1, r2, c2) accurately across sub-matrices", () => {
+      const tree = new MatrixSegmentTree(4, 4);
+      // Fill a 3x3 region with stock
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          tree.set(r, c, 10);
+        }
+      }
+      expect.equal(tree.querySum(0, 0, 2, 2), 90);
+      expect.equal(tree.querySum(0, 0, 1, 1), 40);
+      expect.equal(tree.querySum(1, 1, 2, 2), 40);
+      expect.equal(tree.querySum(0, 0, 0, 2), 30);
+    });
+
+    test("F184-T10: Computes range maximum queryMax(r1, c1, r2, c2) accurately across multi-warehouse SKU categories", () => {
+      const tree = new MatrixSegmentTree(3, 3);
+      tree.set(0, 0, 15);
+      tree.set(1, 1, 99);
+      tree.set(2, 2, 42);
+
+      expect.equal(tree.queryMax(0, 0, 2, 2), 99);
+      expect.equal(tree.queryMax(0, 0, 0, 2), 15);
+      expect.equal(tree.queryMax(2, 0, 2, 2), 42);
+    });
+
+    test("F184-T11: ServerMatrixSegmentTree parity with client MatrixSegmentTree", () => {
+      const serverTree = new ServerMatrixSegmentTree(3, 3);
+      serverTree.set(0, 1, 120);
+      serverTree.set(2, 1, 80);
+
+      expect.equal(serverTree.querySum(0, 0, 2, 2), 200);
+      expect.equal(serverTree.queryMax(0, 0, 2, 2), 120);
+      expect.equal(serverTree.getStats().grandTotal, 200);
+    });
+
+    test("F184-T12: Handles out-of-bounds coordinates, inverted rectangles (r1 > r2), and single-cell queries safely", () => {
+      const tree = new MatrixSegmentTree(4, 4);
+      tree.set(1, 1, 50);
+
+      // Inverted coordinates should normalize automatically
+      expect.equal(tree.querySum(2, 2, 0, 0), 50);
+      expect.equal(tree.queryMax(2, 2, 0, 0), 50);
+
+      // Completely out-of-bounds coordinates should return 0 / safe fallback
+      tree.set(10, 10, 100); // ignored
+      expect.equal(tree.get(10, 10), 0);
+      expect.equal(tree.querySum(5, 5, 8, 8), 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // PART 3: Advantage Actor-Critic (A2C) Incentive Router (6 Tests)
+    // -----------------------------------------------------------------------
+    test("F184-T13: Initializes linear Critic weights and Softmax Actor matrix across discrete voucher incentives", () => {
+      const router = new ActorCriticIncentiveRouter({
+        actions: ["FREESHIP_MAX", "DISCOUNT_10", "COIN_BACK"],
+        dim: 4,
+        alphaActor: 0.05,
+        alphaCritic: 0.1,
+      });
+
+      const stats = router.getStats();
+      expect.equal(stats.actionsCount, 3);
+      expect.equal(stats.dimension, 4);
+      expect.equal(stats.totalSteps, 0);
+
+      expect.equal(router.criticWeights.length, 4);
+      expect.equal(router.actorWeights.length, 3);
+    });
+
+    test("F184-T14: Computes valid Softmax action probabilities summing to 1.0 and state-value predictions", () => {
+      const router = new ActorCriticIncentiveRouter({ dim: 3 });
+      const state = [1.0, 0.5, 0.2];
+      const probs = router.getActionProbabilities(state);
+
+      expect.equal(probs.length, 4);
+      const sumP = probs.reduce((s, p) => s + p, 0);
+      expect.closeTo(sumP, 1.0, 0.001);
+
+      const initVal = router.predictValue(state);
+      expect.equal(initVal, 0.0);
+    });
+
+    test("F184-T15: Selects actions via stochastic categorical sampling in exploration and argmax in evaluation", () => {
+      const router = new ActorCriticIncentiveRouter({
+        actions: ["LOW_VOUCHER", "HIGH_VOUCHER"],
+        dim: 2,
+      });
+
+      // Manually set Actor weights for action HIGH_VOUCHER to be much larger
+      router.actorWeights[1][0] = 10.0;
+      router.actorWeights[1][1] = 10.0;
+
+      const evalAction = router.selectAction([1.0, 1.0], true);
+      expect.equal(evalAction, "HIGH_VOUCHER");
+    });
+
+    test("F184-T16: Advantage update: computes TD error and updates Critic weights and Actor preference vectors", () => {
+      const router = new ActorCriticIncentiveRouter({
+        actions: ["TIER_A", "TIER_B"],
+        dim: 2,
+        alphaActor: 0.1,
+        alphaCritic: 0.2,
+        gamma: 0.9,
+      });
+
+      const s = [1.0, 0.0];
+      const sNext = [1.0, 0.0];
+      const tdErr = router.update(s, "TIER_A", 10.0, sNext, false);
+
+      expect.equal(router.totalSteps, 1);
+      expect.ok(tdErr !== 0);
+      // Critic should have adjusted upwards towards reward 10
+      expect.ok(router.criticWeights[0] > 0);
+    });
+
+    test("F184-T17: ServerActorCriticRouter matches client ActorCriticIncentiveRouter behavior and stats", () => {
+      const srvRouter = new ServerActorCriticRouter({ dim: 3 });
+      srvRouter.update([1, 1, 1], "FREESHIP_MAX", 5.0, [1, 1, 1], false);
+
+      const dist = srvRouter.getActionDistribution([1, 1, 1]);
+      expect.ok(dist.distribution["FREESHIP_MAX"] > 0);
+      expect.equal(typeof dist.bestAction, "string");
+      expect.ok(dist.predictedValue > 0);
+    });
+
+    test("F184-T18: Convergence test: repeated positive rewards for specific user feature state pushes policy towards optimal voucher perk", () => {
+      const router = new ActorCriticIncentiveRouter({
+        actions: ["FREESHIP", "DISCOUNT_30", "GIFT"],
+        dim: 2,
+        alphaActor: 0.2,
+        alphaCritic: 0.1,
+      });
+
+      const stateCartHigh = [1.0, 1.0]; // High cart value state
+      // Reward DISCOUNT_30 with 50, others with 0
+      for (let i = 0; i < 40; i++) {
+        router.update(stateCartHigh, "DISCOUNT_30", 50, stateCartHigh, false);
+      }
+
+      const evalBest = router.selectAction(stateCartHigh, true);
+      expect.equal(evalBest, "DISCOUNT_30");
+      const dist = router.getActionDistribution(stateCartHigh);
+      expect.ok(dist.distribution["DISCOUNT_30"] > dist.distribution["FREESHIP"]);
+      expect.ok(dist.distribution["DISCOUNT_30"] > dist.distribution["GIFT"]);
+    });
+
+    // -----------------------------------------------------------------------
+    // PART 4: Copilot & E2E System Integration (6 Tests)
+    // -----------------------------------------------------------------------
+    test("F184-T19: Admin Copilot Section 92 responds to Johnson wash trade cycle queries", () => {
+      const res = generateAdminCopilotResponse("Phát hiện mạng lưới giao dịch ảo vòng tròn bằng chu trình johnson wash-trading");
+      expect.equal(res.tag, "RADAR CHU TRÌNH JOHNSON WASH-TRADE");
+      expect.ok(res.text.includes("CHU TRÌNH JOHNSON"));
+      expect.ok(res.text.includes("Elementary Circuits"));
+    });
+
+    test("F184-T20: Admin Copilot Section 93 responds to 2D Matrix Segment Tree inventory queries", () => {
+      const res = generateAdminCopilotResponse("Quản lý tồn kho đa chiều bằng cây đoạn 2 chiều matrix segment tree");
+      expect.equal(res.tag, "CÂY ĐOẠN MA TRẬN 2D");
+      expect.ok(res.text.includes("MATRIX SEGMENT TREE"));
+      expect.ok(res.text.includes("querySum"));
+    });
+
+    test("F184-T21: Admin Copilot Section 94 responds to Actor-Critic incentive routing queries", () => {
+      const res = generateAdminCopilotResponse("Tối ưu phân bổ voucher bằng advantage actor-critic policy gradient");
+      expect.equal(res.tag, "ĐỊNH TUYẾN ƯU ĐÃI ACTOR-CRITIC");
+      expect.ok(res.text.includes("ACTOR-CRITIC"));
+      expect.ok(res.text.includes("Policy Gradient"));
+    });
+
+    test("F184-T22: Seller Copilot Section 46 delivers actionable advice on circular order protection, 2D inventory & A2C vouchers", () => {
+      const res = generateSellerCopilotResponse("Tư vấn bảo vệ shop khỏi giao dịch ảo vòng tròn chu trình johnson, ma trận tồn kho 2 chiều và voucher actor-critic");
+      expect.equal(res.tag, "JOHNSON WASH-TRADE, MATRIX TREE & ACTOR-CRITIC");
+      expect.ok(res.text.includes("Johnson"));
+      expect.ok(res.text.includes("Matrix Segment Tree"));
+      expect.ok(res.text.includes("Actor-Critic"));
+    });
+
+    test("F184-T23: Buyer Chat AI Intent 39 guides users on authentic reviews, nearest warehouse stock & tailored voucher perks", () => {
+      const res = generateAiChatResponse("Hỏi về chống giao dịch ảo johnson và tồn kho đa chiều matrix segment tree");
+      expect.equal(res.intent, "WASH_TRADE_MATRIX_ACTOR_CRITIC_ASSIST");
+      expect.ok(res.replyText.includes("Johnson"));
+      expect.ok(res.replyText.includes("Matrix Segment Tree"));
+      expect.ok(res.replyText.includes("Actor-Critic"));
+    });
+
+    test("F184-T24: E2E Lifecycle: Johnson detector neutralizes wash-trading rings -> 2D Matrix tree verifies regional stock availability -> Actor-Critic routes optimal tailored voucher perk", () => {
+      // Step 1: Detect circular fraud loop
+      const detector = new CircularWashTradeDetector();
+      detector.addTransaction("BAD_SHOP_A", "SHILL_B", 5000000);
+      detector.addTransaction("SHILL_B", "SHILL_C", 5000000);
+      detector.addTransaction("SHILL_C", "BAD_SHOP_A", 5000000);
+      const rings = detector.getFlaggedRings();
+      expect.equal(rings[0].ringLength, 3);
+      expect.equal(rings[0].isHighRisk, true);
+
+      // Step 2: 2D Matrix Tree for authentic stock check across 4 Hubs x 4 Categories
+      const stockTree = new MatrixSegmentTree(4, 4);
+      stockTree.set(0, 0, 150); // North Hub - Electronics
+      stockTree.set(1, 0, 200); // Central Hub - Electronics
+      stockTree.set(2, 0, 350); // South Hub - Electronics
+      const totalElectronicsStock = stockTree.querySum(0, 0, 3, 0);
+      expect.equal(totalElectronicsStock, 700);
+
+      // Step 3: Route customized voucher perk using Actor-Critic
+      const router = new ActorCriticIncentiveRouter({
+        actions: ["FREESHIP_MAX", "DISCOUNT_15", "CASHBACK_COIN"],
+        dim: 3,
+      });
+      // Train for active buyer [cartVal: 1, session: 1, repeat: 1] to receive DISCOUNT_15
+      for (let t = 0; t < 25; t++) {
+        router.update([1, 1, 1], "DISCOUNT_15", 30, [1, 1, 1], false);
+      }
+      const tailoredPerk = router.selectAction([1, 1, 1], true);
+      expect.equal(tailoredPerk, "DISCOUNT_15");
     });
   });
 });

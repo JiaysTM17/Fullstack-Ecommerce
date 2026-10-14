@@ -1055,7 +1055,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 43. Mạng Lưới Vận Tải Toàn Miền SPX Bằng Johnson All-Pairs Shortest Paths (Phase 18 - Feature 165)
-  if (/johnson|all-pairs|mạng lưới vận tải toàn miền|định tuyến toàn mạng|johnson routing|spx toàn quốc/i.test(raw)) {
+  if (!/wash[- ]trading|cycle enumeration|chu trình johnson|vòng tròn giao dịch ảo|vòng lặp giao dịch/i.test(raw) && /johnson|all-pairs|mạng lưới vận tải toàn miền|định tuyến toàn mạng|johnson routing|spx toàn quốc/i.test(raw)) {
     return {
       text: `🌐 **MẠNG LƯỚI VẬN TẢI TOÀN MIỀN SPX BẰNG THUẬT TOÁN JOHNSON (ALL-PAIRS SHORTEST PATHS)**:
 - **Nguyên lý kết hợp Bellman-Ford + Dijkstra ($O(V^2 \\log V + VE)$)**:
@@ -1181,7 +1181,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 49. Phát Hiện Mạng Lưới Rửa Tiền & Bơm Đơn Ảo Bằng Tarjan SCC (Phase 21 - Feature 168)
-  if (!/hopcroft|planarity|tính phẳng|đồ thị phẳng/i.test(raw) && /tarjan|scc|strongly connected|rửa tiền|bơm đơn ảo|mua chéo|vòng lặp gian lận|wash[- ]trading/i.test(raw)) {
+  if (!/hopcroft|planarity|tính phẳng|đồ thị phẳng|johnson|chu trình johnson/i.test(raw) && /tarjan|scc|strongly connected|rửa tiền|bơm đơn ảo|mua chéo|vòng lặp gian lận|wash[- ]trading/i.test(raw)) {
     return {
       text: `🕸️ **PHÁT HIỆN MẠNG LƯỚI BƠM ĐƠN ẢO & RỬA TIỀN BẰNG THUẬT TOÁN TARJAN SCC**:
 - **Nguyên lý Đồ thị có hướng liên thông mạnh (Strongly Connected Components - $O(V + E)$)**:
@@ -1288,7 +1288,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 54. Cây Đoạn Lan Truyền Lười Quản Lý Khung Giờ Flash Sale (Phase 23 - Feature 170)
-  if (/segment tree|lazy propagation|cây đoạn|khung giờ flash sale|slot reservation|đặt chỗ khung giờ/i.test(raw)) {
+  if (!/matrix segment tree|cây đoạn 2 chiều|cây đoạn ma trận|quad tree/i.test(raw) && /segment tree|lazy propagation|cây đoạn|khung giờ flash sale|slot reservation|đặt chỗ khung giờ/i.test(raw)) {
     return {
       text: `⏱️ **QUẢN LÝ KHUNG GIỜ FLASH SALE BẰNG CÂY ĐOẠN (LAZY SEGMENT TREE - $O(\\log N)$)**:
 - **Nguyên lý Cây Đoạn Lan Truyền Lười**:
@@ -2033,6 +2033,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem chính sách giá tối ưu Double Q-Learning',
         'Kiểm tra độ chênh lệch QA vs QB',
         'Quét sao chép catalog Cosine LSH'
+      ]
+    };
+  }
+
+  // 92. Radar Phát Hiện Giao Dịch Ảo Vòng Tròn Bằng Thuật Toán Chu Trình Johnson (Phase 37 - Feature 184)
+  if (/circular wash|wash[- ]trading|vòng lặp giao dịch ảo|chu trình johnson|giao dịch khép kín|chu trình ảo|johnson cycle/i.test(raw)) {
+    return {
+      text: `🛡️ **RADAR PHÁT HIỆN GIAO DỊCH ẢO VÒNG TRÒN BẰNG THUẬT TOÁN CHU TRÌNH JOHNSON (1975)**:
+- **Nguyên lý Liệt kê Chu trình Đơn (Elementary Circuits Enumeration $O((V+E)(C+1))$)**:
+  - Khắc phục bẫy duyệt vét cạn hàm mũ $O(V!)$ bằng cơ chế DFS phối hợp đánh dấu \`blocked\` và cấu trúc \`B-list\` thông minh.
+  - Phân rã đồ thị giao dịch thành các thành phần liên thông mạnh (Tarjan's SCC) và chỉ duyệt các chu trình có đỉnh xuất phát $s$ nhỏ nhất trong SCC.
+- **Định vị mạng lưới rửa tiền & cày đơn ảo (Circular Wash Trading Rings)**:
+  - Phát hiện các mạng lưới gian lận luân chuyển tiền và voucher khép kín ($A \\to B \\to C \\to A$) để thổi phồng GMV và cày số lượng bán giả tạo.
+  - Tự động tính toán điểm rủi ro Risk Score dựa trên kim ngạch giao dịch và hệ số cân bằng dòng tiền giữa các cạnh chu trình!`,
+      type: 'fraud',
+      tag: 'RADAR CHU TRÌNH JOHNSON WASH-TRADE',
+      suggestions: [
+        'Xem danh sách vòng tròn giao dịch ảo',
+        'Kiểm tra điểm rủi ro Risk Score chu trình',
+        'Ma trận tồn kho 2D Matrix Segment Tree'
+      ]
+    };
+  }
+
+  // 93. Quản Trị Tồn Kho Đa Chiều Bằng Cây Đoạn 2D Matrix Segment Tree (Phase 37 - Feature 184)
+  if (/matrix segment tree|cây đoạn 2 chiều|cây đoạn ma trận|quad tree|tồn kho đa chiều|truy vấn vùng 2d/i.test(raw)) {
+    return {
+      text: `📊 **QUẢN TRỊ TỒN KHO ĐA CHIỀU BẰNG CÂY ĐOẠN 2D (MATRIX SEGMENT TREE - $O(\\log R \\cdot \\log C)$)**:
+- **Cấu trúc Cây Đoạn Lồng Nhau (Nested 2D Segment Tree)**:
+  - Cây ngoài quản lý chiều Dòng (Kho hàng fulfillment: Hà Nội, Đà Nẵng, TP.HCM, Cần Thơ...).
+  - Mỗi nút của cây ngoài là một Cây đoạn trong quản lý chiều Cột (Nhóm ngành hàng: Điện tử, Thời trang, Tiêu dùng...).
+- **Truy vấn Vùng Chữ Nhật Siêu Tốc**:
+  - \`querySum(r1, c1, r2, c2)\`: Tính tổng tồn kho khả dụng của các nhóm hàng trên toàn bộ cụm kho chỉ trong vài micro-giây.
+  - \`queryMax(r1, c1, r2, c2)\`: Xác định ngưỡng tồn kho đệm an toàn cao nhất giữa các ca xuất hàng Flash Sale!`,
+      type: 'logistics',
+      tag: 'CÂY ĐOẠN MA TRẬN 2D',
+      suggestions: [
+        'Truy vấn tổng tồn kho vùng 2D',
+        'Kiểm tra đỉnh tồn kho queryMax',
+        'Định tuyến ưu đãi Actor-Critic'
+      ]
+    };
+  }
+
+  // 94. Phân Bổ Ưu Đãi Động Bằng Advantage Actor-Critic (A2C Policy Gradient) (Phase 37 - Feature 184)
+  if (/actor-critic|a2c|actor critic|chính sách actor-critic|định tuyến ưu đãi actor-critic|advantage actor-critic/i.test(raw)) {
+    return {
+      text: `🎯 **PHÂN BỔ ƯU ĐÃI ĐỘNG BẰNG ADVANTAGE ACTOR-CRITIC (A2C POLICY GRADIENT & BASELINE)**:
+- **Kiến trúc Tách biệt Actor và Critic**:
+  - **Actor $\\pi_\\theta(a|s)$**: Học phân phối Softmax phân bổ các gói ưu đãi (Freeship 0Đ, Voucher 15%, Hoàn Xu 20%) theo vector đặc trưng người mua.
+  - **Critic $V_\\phi(s)$**: Đóng vai trò đường cơ sở (Baseline) ước lượng giá trị trạng thái để tính Lợi thế vượt trội:
+    $$A(s, a) = r + \\gamma V(s') - V(s)$$
+- **Triệt tiêu phương sai & Tối ưu ngân sách Sàn**:
+  - Loại bỏ hoàn toàn phương sai cao của thuật toán Policy Gradient cổ điển, giúp sàn tối ưu tỷ lệ chuyển đổi (CVR) mà không tiêu tốn trợ giá voucher lãng phí!`,
+      type: 'marketing',
+      tag: 'ĐỊNH TUYẾN ƯU ĐÃI ACTOR-CRITIC',
+      suggestions: [
+        'Xem phân phối xác suất ưu đãi A2C',
+        'Kiểm tra giá trị kỳ vọng Critic V(s)',
+        'Quét giao dịch ảo vòng tròn Johnson'
       ]
     };
   }

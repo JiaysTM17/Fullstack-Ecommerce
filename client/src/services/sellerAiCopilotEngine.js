@@ -25,7 +25,7 @@ export function generateSellerCopilotResponse(query, context = {}) {
   const raw = query.toLowerCase().trim();
 
   // 1. Cảnh Báo Tồn Kho & Đề Xuất Nhập PO (Restock Radar & Safety Stock)
-  if (!/raft|xả hàng|xả kho|holt-winters|mùa vụ/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
+  if (!/raft|xả hàng|xả kho|holt-winters|mùa vụ|matrix segment tree|cây đoạn 2 chiều|actor-critic|chu trình johnson/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
     const lowStockItems = shopProducts.filter(p => p.stock <= (typeof p.safetyThreshold === 'number' ? p.safetyThreshold : 10));
     const outOfStockItems = shopProducts.filter(p => p.stock === 0);
 
@@ -648,7 +648,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 32. Phân Bổ Slot Flash Sale Bằng Lazy Segment Tree & Phân Cụm Khách Hàng p-Stable LSH (Phase 23 - Feature 170)
-  if (/segment tree|lazy propagation|khung giờ flash sale|slot flash sale|p-stable|lsh vector|phân cụm khách hàng/i.test(raw)) {
+  if (!/matrix segment tree|cây đoạn 2 chiều/i.test(raw) && /segment tree|lazy propagation|khung giờ flash sale|slot flash sale|p-stable|lsh vector|phân cụm khách hàng/i.test(raw)) {
     return {
       text: `🎯 **PHÂN BỔ SLOT FLASH SALE LAZY SEGMENT TREE & PHÂN CỤM KHÁCH HÀNG P-STABLE LSH (${currentShop.name})**:
 - **Quản trị khung giờ Flash Sale bằng Cây Đoạn (Lazy Segment Tree)**:
@@ -923,6 +923,27 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Quét sao chép catalog Cosine LSH',
         'Tối ưu hiển thị ảnh HNSW Multi-Probe',
         'Khai thác định giá Flash Sale Double Q-Learning'
+      ]
+    };
+  }
+
+  // 46. Radar Gian Lận Johnson Wash-Trade, Ma Trận Tồn Kho 2D & Điều Phối Ưu Đãi Actor-Critic (Phase 37 - Feature 184)
+  if (/circular wash|chu trình johnson|giao dịch ảo vòng tròn|matrix segment tree|cây đoạn 2 chiều|actor-critic|a2c/i.test(raw)) {
+    return {
+      text: `🚀 **RADAR CHU TRÌNH JOHNSON WASH-TRADE, MA TRẬN TỒN KHO 2D & ĐIỀU PHỐI ƯU ĐÃI ACTOR-CRITIC (${currentShop.name})**:
+- **Bảo vệ shop khỏi các vòng lặp đơn ảo cản trở tồn kho (Johnson's Cycle Detector)**:
+  - Tự động quét và phát hiện các mạng lưới tài khoản ảo cố tình đặt đơn xoay vòng để chiếm giữ hạn ngạch sản phẩm hot của shop.
+- **Tối ưu hóa tồn kho đa kho bằng Cây Đoạn 2D (Matrix Segment Tree)**:
+  - Cho phép shop theo dõi chính xác ma trận hàng hóa: Kho hàng x Nhóm SKU trong $O(\\log R \\cdot \\log C)$.
+  - Truy vấn tức thì tổng tồn kho và kiểm tra kho nào đang dư thừa để điều chuyển tức thì trước đợt Mega Sale.
+- **Tối ưu tỷ lệ chuyển đổi khách quen bằng Actor-Critic Policy Gradient**:
+  - Không phát voucher bừa bãi! Thuật toán A2C tự động học đặc trưng khách vào shop và chỉ tặng gói voucher vừa đủ kích thích chốt đơn, tối đa hóa biên lãi ròng!`,
+      type: 'recommendation',
+      tag: 'JOHNSON WASH-TRADE, MATRIX TREE & ACTOR-CRITIC',
+      suggestions: [
+        'Quét giao dịch ảo vòng tròn Johnson',
+        'Quản lý ma trận tồn kho 2D Segment Tree',
+        'Phân bổ ưu đãi mua hàng Actor-Critic'
       ]
     };
   }
