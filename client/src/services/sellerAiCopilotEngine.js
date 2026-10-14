@@ -728,7 +728,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 36. Theo Dõi SKU Heavy Hitters Bằng Conservative CMS & Đẩy Sản Phẩm Đỉnh Treap (Phase 27 - Feature 174)
-  if (/heavy hitters|conservative cms|sku.*heavy hitters|treap|cây treap|điểm tài trợ.*treap/i.test(raw)) {
+  if (!/interval treap|simrank/i.test(raw) && /heavy hitters|conservative cms|sku.*heavy hitters|treap|cây treap|điểm tài trợ.*treap/i.test(raw)) {
     return {
       text: `🔥 **THEO DÕI SKU HEAVY HITTERS BẰNG CONSERVATIVE CMS & TỐI ƯU HIỂN THỊ TREAP**:
 - **Bắt trúng mặt hàng Heavy Hitters thời gian thực**:
@@ -763,6 +763,25 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Tra cứu phân vị doanh thu của shop',
         'Lọc danh sách SKU cần restock khẩn cấp',
         'Tạo chiến dịch Flash Sale xả hàng đọng vốn'
+      ]
+    };
+  }
+
+  // 38. Mạng Lưới Shop Tương Đồng SimRank & Bắt Trúng Khách Bằng Interval Treap (Phase 29 - Feature 176)
+  if (/simrank|shop tương đồng|đối thủ tương đồng|interval treap|chuông báo giá.*flash sale|cảnh báo giá.*treap/i.test(raw)) {
+    return {
+      text: `🌐 **MẠNG LƯỚI SHOP TƯƠNG ĐỒNG SIMRANK & CHUÔNG BÁO GIÁ INTERVAL TREAP**:
+- **Phát hiện mạng lưới shop cạnh tranh qua SimRank**:
+  - Dựa trên hành vi mua hàng chéo của tệp khách, SimRank tìm ra các shop có độ tương đồng cấu trúc cao nhất với shop bạn (${currentShop.name}).
+  - Giúp shop theo dõi chính sách giá và chương trình khuyến mãi của đối thủ trực diện để đưa ra mức chiết khấu cạnh tranh.
+- **Kích hoạt chuông báo giá Interval Treap**:
+  - Khi shop bạn giảm giá sản phẩm trong đợt Flash Sale, hệ thống Interval Treap tự động quét khớp với hàng ngàn người mua đã đăng ký nhận thông báo trong khoảng giá đó, mang lại tỷ lệ chuyển đổi đơn hàng tăng vọt!`,
+      type: 'network',
+      tag: 'MẠNG LƯỚI SHOP SIMRANK & BÁO GIÁ TREAP',
+      suggestions: [
+        'Xem danh sách shop đối thủ có SimRank cao',
+        'Cài đặt mức giá Flash Sale khớp chuông báo',
+        'Tối ưu ngân sách quảng cáo theo tệp khách tương đồng'
       ]
     };
   }

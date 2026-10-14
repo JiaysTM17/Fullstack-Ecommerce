@@ -13879,6 +13879,329 @@ export class MinMaxInventoryHeap {
   }
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 51: SimRank Graph Similarity Algorithm for Cross-Shop Networks
+// ------------------------------------------------------------------------------
+export class SimRankGraphSimilarity {
+  constructor({ decayFactor = 0.8, maxIterations = 5, tolerance = 0.001 } = {}) {
+    this.decayFactor = Math.max(0.1, Math.min(0.99, decayFactor));
+    this.maxIterations = Math.max(1, maxIterations);
+    this.tolerance = tolerance;
+    this.inNeighbors = new Map();
+    this.nodes = new Set();
+    this.simMatrix = new Map();
+  }
+
+  addEdge(fromNode, toNode) {
+    if (!fromNode || !toNode) return;
+    this.nodes.add(fromNode);
+    this.nodes.add(toNode);
+
+    if (!this.inNeighbors.has(toNode)) {
+      this.inNeighbors.set(toNode, new Set());
+    }
+    this.inNeighbors.get(toNode).add(fromNode);
+  }
+
+  addBipartiteEdge(nodeA, nodeB) {
+    this.addEdge(nodeA, nodeB);
+    this.addEdge(nodeB, nodeA);
+  }
+
+  compute() {
+    const nodeList = Array.from(this.nodes);
+    const n = nodeList.length;
+
+    let currentSim = new Map();
+    for (const u of nodeList) {
+      currentSim.set(u, new Map());
+      for (const v of nodeList) {
+        currentSim.get(u).set(v, u === v ? 1.0 : 0.0);
+      }
+    }
+
+    let iterationsRun = 0;
+    let converged = false;
+
+    for (let it = 0; it < this.maxIterations; it++) {
+      iterationsRun++;
+      const nextSim = new Map();
+      let maxDiff = 0;
+
+      for (let i = 0; i < n; i++) {
+        const u = nodeList[i];
+        nextSim.set(u, new Map());
+
+        for (let j = 0; j < n; j++) {
+          const v = nodeList[j];
+          if (u === v) {
+            nextSim.get(u).set(v, 1.0);
+            continue;
+          }
+
+          const inU = Array.from(this.inNeighbors.get(u) || []);
+          const inV = Array.from(this.inNeighbors.get(v) || []);
+
+          if (inU.length === 0 || inV.length === 0) {
+            nextSim.get(u).set(v, 0.0);
+            continue;
+          }
+
+          let sumSim = 0;
+          for (const x of inU) {
+            for (const y of inV) {
+              sumSim += currentSim.get(x)?.get(y) || 0;
+            }
+          }
+
+          const score = (this.decayFactor / (inU.length * inV.length)) * sumSim;
+          nextSim.get(u).set(v, score);
+
+          const diff = Math.abs(score - (currentSim.get(u)?.get(v) || 0));
+          if (diff > maxDiff) maxDiff = diff;
+        }
+      }
+
+      currentSim = nextSim;
+      if (maxDiff < this.tolerance) {
+        converged = true;
+        break;
+      }
+    }
+
+    this.simMatrix = currentSim;
+    return { iterationsRun, converged };
+  }
+
+  getSimilarity(nodeA, nodeB) {
+    if (nodeA === nodeB) return 1.0;
+    const score = this.simMatrix.get(nodeA)?.get(nodeB);
+    return score !== undefined ? Math.round(score * 10000) / 10000 : 0.0;
+  }
+
+  getTopSimilar(targetNode, k = 5) {
+    if (!this.nodes.has(targetNode)) return [];
+    const results = [];
+
+    for (const other of this.nodes) {
+      if (other !== targetNode) {
+        const sim = this.getSimilarity(targetNode, other);
+        if (sim > 0) {
+          results.push({ node: other, similarity: sim });
+        }
+      }
+    }
+
+    results.sort((a, b) => b.similarity - a.similarity);
+    return results.slice(0, k);
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 52: Vitter Reservoir Sampler with Exponential Skip (Algorithm L)
+// ------------------------------------------------------------------------------
+export class VitterReservoirSampler {
+  constructor(reservoirSize = 100, randomFn = Math.random) {
+    this.k = Math.max(1, reservoirSize);
+    this.random = randomFn;
+    this.reservoir = [];
+    this.streamCount = 0;
+    this.w = 0;
+    this.skipDistance = 0;
+  }
+
+  _nextRandom() {
+    return Math.max(1e-12, Math.min(1 - 1e-12, this.random()));
+  }
+
+  _computeSkip() {
+    const u = this._nextRandom();
+    const s = Math.floor(Math.log(u) / Math.log(1 - this.w));
+    return Math.max(0, s);
+  }
+
+  add(item) {
+    this.streamCount++;
+
+    if (this.reservoir.length < this.k) {
+      this.reservoir.push(item);
+      if (this.reservoir.length === this.k) {
+        this.w = Math.exp(Math.log(this._nextRandom()) / this.k);
+        this.skipDistance = this._computeSkip();
+      }
+      return true;
+    }
+
+    if (this.skipDistance > 0) {
+      this.skipDistance--;
+      return false;
+    }
+
+    const replaceIdx = Math.floor(this._nextRandom() * this.k);
+    this.reservoir[replaceIdx] = item;
+
+    this.w = this.w * Math.exp(Math.log(this._nextRandom()) / this.k);
+    this.skipDistance = this._computeSkip();
+    return true;
+  }
+
+  addBatch(items) {
+    if (!Array.isArray(items)) return 0;
+    let accepted = 0;
+    for (const item of items) {
+      if (this.add(item)) accepted++;
+    }
+    return accepted;
+  }
+
+  getSamples() {
+    return [...this.reservoir];
+  }
+
+  getStats() {
+    return {
+      reservoirCapacity: this.k,
+      currentSampleSize: this.reservoir.length,
+      totalStreamCount: this.streamCount,
+      samplingRate: this.streamCount > 0
+        ? Math.round((Math.min(this.k, this.streamCount) / this.streamCount) * 10000) / 100
+        : 100
+    };
+  }
+
+  reset() {
+    this.reservoir = [];
+    this.streamCount = 0;
+    this.w = 0;
+    this.skipDistance = 0;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 53: Treap Interval Range Tree for Real-Time Price Drop Alarms
+// ------------------------------------------------------------------------------
+export class IntervalNode {
+  constructor(low, high, data = {}, priority = Math.random()) {
+    this.low = Number(low);
+    this.high = Number(high);
+    this.data = data;
+    this.priority = priority;
+    this.maxHigh = this.high;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+export class TreapIntervalRangeTree {
+  constructor() {
+    this.root = null;
+    this._size = 0;
+  }
+
+  size() {
+    return this._size;
+  }
+
+  isEmpty() {
+    return this._size === 0;
+  }
+
+  _getMaxHigh(node) {
+    return node ? node.maxHigh : -Infinity;
+  }
+
+  _updateMaxHigh(node) {
+    if (!node) return;
+    node.maxHigh = Math.max(
+      node.high,
+      this._getMaxHigh(node.left),
+      this._getMaxHigh(node.right)
+    );
+  }
+
+  _rotateRight(y) {
+    const x = y.left;
+    y.left = x.right;
+    x.right = y;
+    this._updateMaxHigh(y);
+    this._updateMaxHigh(x);
+    return x;
+  }
+
+  _rotateLeft(x) {
+    const y = x.right;
+    x.right = y.left;
+    y.left = x;
+    this._updateMaxHigh(x);
+    this._updateMaxHigh(y);
+    return y;
+  }
+
+  insert(low, high, data = {}, priority = Math.random()) {
+    const l = Math.min(Number(low), Number(high));
+    const h = Math.max(Number(low), Number(high));
+    const newNode = new IntervalNode(l, h, data, priority);
+
+    const insertNode = (node) => {
+      if (!node) {
+        this._size++;
+        return newNode;
+      }
+
+      if (l < node.low || (l === node.low && h < node.high)) {
+        node.left = insertNode(node.left);
+        if (node.left.priority > node.priority) {
+          node = this._rotateRight(node);
+        }
+      } else {
+        node.right = insertNode(node.right);
+        if (node.right.priority > node.priority) {
+          node = this._rotateLeft(node);
+        }
+      }
+
+      this._updateMaxHigh(node);
+      return node;
+    };
+
+    this.root = insertNode(this.root);
+  }
+
+  queryOverlapping(qLow, qHigh = qLow) {
+    const minQ = Math.min(Number(qLow), Number(qHigh));
+    const maxQ = Math.max(Number(qLow), Number(qHigh));
+    const results = [];
+
+    const search = (node) => {
+      if (!node) return;
+
+      if (node.left && node.left.maxHigh >= minQ) {
+        search(node.left);
+      }
+
+      if (node.low <= maxQ && minQ <= node.high) {
+        results.push({
+          low: node.low,
+          high: node.high,
+          data: node.data
+        });
+      }
+
+      if (node.low <= maxQ && node.right) {
+        search(node.right);
+      }
+    };
+
+    search(this.root);
+    return results;
+  }
+
+  clear() {
+    this.root = null;
+    this._size = 0;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -14041,6 +14364,11 @@ export default {
   SHAPER_PRIORITY,
   LeakyBucketTrafficShaper,
   MinMaxInventoryHeap,
+  // Phase 29 Enterprise Algorithms
+  SimRankGraphSimilarity,
+  VitterReservoirSampler,
+  IntervalNode,
+  TreapIntervalRangeTree,
 };
 
 

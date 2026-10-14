@@ -253,7 +253,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 9. Soạn thảo thông báo phát sóng toàn sàn (Broadcast Assistant)
-  if (/soạn|phát sóng|thông báo|gửi tin nhắn|banner/i.test(raw)) {
+  if (!/interval treap|bắn thông báo giá|cảnh báo khoảng giá/i.test(raw) && /soạn|phát sóng|thông báo|gửi tin nhắn|banner/i.test(raw)) {
     const isMaintenance = /bảo trì|nâng cấp|hệ thống/i.test(raw);
     const isMegaSale = /sale|siêu hội|khuyến mãi/i.test(raw);
 
@@ -976,7 +976,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 38. Lấy Mẫu Hồ Chứa Reservoir Sampling Cho Báo Cáo Stream (Phase 16 - Feature 163)
-  if (/reservoir sampling|lấy mẫu hồ chứa|lấy mẫu ngẫu nhiên đồng đều|thuật toán r vitter|stream telemetry/i.test(raw)) {
+  if (!/algorithm l|exponential skip/i.test(raw) && /reservoir sampling|lấy mẫu hồ chứa|lấy mẫu ngẫu nhiên đồng đều|thuật toán r vitter|stream telemetry/i.test(raw)) {
     return {
       text: `🎯 **LẤY MẪU HỒ CHỨA RESERVOIR SAMPLING (ALGORITHM R - JEFFREY VITTER)**:
 - **Giải bài toán dòng chảy không giới hạn (Unbounded Stream)**:
@@ -1487,7 +1487,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 64. Chỉ Mục Ưu Tiên Giá Bán & Điểm Tài Trợ Bằng Cây Treap (Cartesian Tree)
-  if (/treap|cartesian tree|cây treap|chỉ mục treap|lọc khoảng giá.*treap|ưu tiên giá bán treap/i.test(raw)) {
+  if (!/interval treap|bắn thông báo giá|cảnh báo khoảng giá/i.test(raw) && /treap|cartesian tree|cây treap|chỉ mục treap|lọc khoảng giá.*treap|ưu tiên giá bán treap/i.test(raw)) {
     return {
       text: `🌳 **CHỈ MỤC ƯU TIÊN GIÁ BÁN & ĐIỂM TÀI TRỢ BẰNG CÂY TREAP (CARTESIAN TREE)**:
 - **Cấu trúc dữ liệu lai nhị phân (Aragon & Seidel 1989)**:
@@ -1560,6 +1560,63 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Tra cứu SKU bán chạy nhất ở Max-Level',
         'Tra cứu SKU đọng kho ở Min-Level',
         'Xem trước hai đầu tồn kho bằng peekBoth()'
+      ]
+    };
+  }
+
+  // 68. Đo Lường Tương Đồng Cấu Trúc Shop Bằng SimRank (Phase 29 - Feature 176)
+  if (/simrank|tương đồng cấu trúc|simrank graph|mạng lưới shop tương đồng/i.test(raw)) {
+    return {
+      text: `🌐 **ĐO LƯỜNG TƯƠNG ĐỒNG CẤU TRÚC SHOP BẰNG SIMRANK (GRAPH SIMILARITY)**:
+- **Triết lý toán học SimRank (Jeh & Widom 2002)**:
+  - "Hai thực thể là tương đồng nếu chúng liên kết tới các thực thể tương đồng".
+  - Trong đồ thị lưỡng phân Khách hàng - Gian hàng (User-Shop), SimRank tính toán điểm tương đồng cấu trúc $s(u, v) \\in [0, 1]$ qua phép lặp ma trận suy giảm $C = 0.8$.
+- **Ứng dụng quản trị sàn**:
+  - Tự động nhận diện các cụm gian hàng cạnh tranh trực tiếp hoặc các chuỗi cửa hàng clone phân phối cùng tệp sản phẩm, hỗ trợ điều hướng luồng tìm kiếm và gợi ý shop thay thế cho người mua!`,
+      type: 'network',
+      tag: 'ĐỘ TƯƠNG ĐỒNG SIMRANK',
+      suggestions: [
+        'Tính ma trận tương đồng SimRank các shop',
+        'Tìm top shop tương đồng với shop chỉ định',
+        'Đo lường độ hội tụ SimRank sau N vòng lặp'
+      ]
+    };
+  }
+
+  // 69. Lấy Mẫu Luồng Big Data Siêu Tốc Bằng Vitter Algorithm L (Phase 29 - Feature 176)
+  if (/vitter|lấy mẫu vitter|algorithm l|exponential skip reservoir|lấy mẫu telemetry/i.test(raw)) {
+    return {
+      text: `⚡ **LẤY MẪU HỒ CHỨA VITTER ALGORITHM L (EXPONENTIAL SKIP RESERVOIR)**:
+- **Đột phá hiệu năng so với Algorithm R cổ điển**:
+  - Không sinh số ngẫu nhiên cho từng bản ghi $O(N)$, thuật toán Vitter tính trước bước nhảy hàm mũ $S = \\lfloor \\ln(U) / \\ln(1 - W) \\rfloor$.
+  - Bỏ qua hàng ngàn sự kiện clickstream một lúc trong $O(1)$, giảm số lần gọi hàm ngẫu nhiên xuống $O(K \\log(N/K))$.
+- **Bảo chứng phân phối không thiên lệch (Uniform Unbiased)**:
+  - Đảm bảo mỗi giao dịch hoặc log telemetry đều có xác suất chính xác $K / N$ được giữ lại trong hồ chứa để phân tích BI và giám sát tải hệ thống!`,
+      type: 'analytics',
+      tag: 'LẤY MẪU HỒ CHỨA VITTER',
+      suggestions: [
+        'Kiểm tra kích thước hồ chứa mẫu K hiện tại',
+        'Xem tỷ lệ lấy mẫu stream count thực tế',
+        'Thiết lập lấy mẫu telemetry clickstream'
+      ]
+    };
+  }
+
+  // 70. Quản Lý Cảnh Báo Giảm Giá Khoảng Bằng Cây Interval Treap (Phase 29 - Feature 176)
+  if (/interval treap|cây khoảng giá|cảnh báo giảm giá flash sale|bắn thông báo giá|cảnh báo khoảng giá/i.test(raw)) {
+    return {
+      text: `🔔 **QUẢN TRỊ CẢNH BÁO GIẢM GIÁ FLASH SALE BẰNG CÂY INTERVAL TREAP**:
+- **Cấu trúc cây khoảng giá Interval Treap**:
+  - Mỗi nút lưu một khoảng giá đăng ký $[P_{\\min}, P_{\\max}]$ của khách hàng, mở rộng thêm trường \`maxHigh\` của cây con.
+  - Cân bằng Max-Heap ngẫu nhiên giúp cây duy trì độ cao kỳ vọng $O(\\log N)$.
+- **Bắn thông báo trúng đích trong $O(\\log N + K)$**:
+  - Khi một sản phẩm bất ngờ bước vào khung giờ Flash Sale với mức giá $[P_{\\text{sale}}, P_{\\text{sale}}]$, cây Interval Treap lập tức quét ra toàn bộ $K$ khách hàng đã đặt chuông báo giá giao nhau để gửi Push Notification theo thời gian thực!`,
+      type: 'alert',
+      tag: 'CẢNH BÁO KHOẢNG GIÁ INTERVAL TREAP',
+      suggestions: [
+        'Đăng ký khoảng cảnh báo giá người mua',
+        'Truy vấn các cảnh báo giao với giá Flash Sale',
+        'Đo thời gian phản hồi quét chuông thông báo'
       ]
     };
   }

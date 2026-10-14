@@ -331,7 +331,8 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
 
   // 1. Kết hợp Tìm sản phẩm + Xin Voucher / Freeship
   if (
-    (/mua|tìm|sản phẩm|áo|quần|tai nghe|chuột|bàn phím|nồi|son|giày/i.test(lower)) &&
+    !/chuông báo|báo giá|interval treap|simrank/i.test(lower) &&
+    (/mua|tìm|sản phẩm|\báo\b|\bquần\b|tai nghe|chuột|bàn phím|nồi|son|giày/i.test(lower)) &&
     (/voucher|mã|giảm giá|freeship|miễn phí ship/i.test(lower))
   ) {
     const foundProds = searchSmartProducts(lower);
@@ -518,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -820,6 +821,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'LEAKY_BUCKET_MIN_MAX_DEALS',
       replyText: `**[SĂN DEAL ÊM DỊU & HÀNG ĐỢI LEAKY BUCKET] TRẢI NGHIỆM ĐẶT HÀNG KHÔNG GIẬT LAG:**\n\n• **Bộ điều tiết Leaky Bucket**: Khi có hàng triệu lượt tranh mua Flash Sale cùng lúc, hệ thống điều tiết lưu lượng mượt mà theo nhịp đều đặn, đảm bảo đơn hàng và thanh toán VietQR của bạn không bao giờ bị nghẽn hay lỗi mạng!\n• **Cấu trúc Min-Max Heap**: Tự động hiển thị các món đồ bán chạy nhất (Top Velocity) và các deal xả hàng cực sốc (Dead Stock Clearance) với mức chiết khấu lên đến 70%!`,
       suggestions: ['Săn deal xả hàng 70%', 'Đặt hàng Flash Sale mượt mà', 'Xem giỏ hàng ưu tiên'],
+    };
+  }
+
+  // 31. Khám Phá Shop Tương Đồng SimRank & Đặt Chuông Báo Giá Interval Treap (SIMRANK_INTERVAL_ALERT_ASSIST)
+  if (/simrank|shop tương đồng.*mua|chuông báo giá|đặt thông báo giảm giá|interval treap|báo giá flash sale/i.test(lower)) {
+    return {
+      intent: 'SIMRANK_INTERVAL_ALERT_ASSIST',
+      replyText: `**[SHOP TƯƠNG ĐỒNG & CHUÔNG BÁO GIÁ] TRẢI NGHIỆM MUA SẮM CHỦ ĐỘNG:**\n\n• **Gợi ý Shop tương đồng SimRank**: Hệ thống tự động tìm các gian hàng có chung phong cách và tệp khách hàng yêu thích với shop bạn đang xem, giúp bạn có thêm nhiều lựa chọn đa dạng và giá cả cạnh tranh!\n• **Chuông báo giá Interval Treap**: Đặt khoảng ngân sách bạn mong muốn (ví dụ: 150.000₫ - 200.000₫). Ngay khi sản phẩm giảm giá lọt vào khoảng này, bạn sẽ nhận được thông báo tức thì để săn deal kịp lúc!`,
+      suggestions: ['Đặt chuông báo giảm giá', 'Khám phá shop tương đồng', 'Xem danh sách Flash Sale'],
     };
   }
 

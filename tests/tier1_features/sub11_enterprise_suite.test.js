@@ -179,6 +179,10 @@ import {
   SHAPER_PRIORITY,
   LeakyBucketTrafficShaper,
   MinMaxInventoryHeap,
+  SimRankGraphSimilarity,
+  VitterReservoirSampler,
+  IntervalNode,
+  TreapIntervalRangeTree,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -231,6 +235,9 @@ import ServerTreapIndex from "../../server/src/utils/treapPriorityIndex.js";
 import ServerFenwickRankTree from "../../server/src/utils/fenwickRankTree.js";
 import ServerLeakyBucketShaper, { SHAPER_PRIORITY as ServerShaperPriority } from "../../server/src/utils/leakyBucketTrafficShaper.js";
 import ServerMinMaxInventoryHeap from "../../server/src/utils/minMaxInventoryHeap.js";
+import ServerSimRank from "../../server/src/utils/simRankGraphSimilarity.js";
+import ServerVitterSampler from "../../server/src/utils/vitterReservoirSampler.js";
+import ServerTreapIntervalTree, { IntervalNode as ServerIntervalNode } from "../../server/src/utils/treapIntervalRangeTree.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -15482,6 +15489,350 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const peek = heap.peekBoth();
         expect.equal(peek.fastMovingMax.skuId, "SKU_AIRPODS");
         expect.equal(peek.deadStockMin.skuId, "SKU_TSHIRT_OLD");
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 176: Enterprise Algorithms Suite - Phase 29 (24 Tests)
+  // SimRank Graph Similarity, Vitter Reservoir Sampler, Treap Interval Range Tree
+  // =========================================================================
+  describe("Feature 176: Enterprise Algorithms Suite - Phase 29 (SimRank, Vitter Sampler, Interval Treap)", () => {
+    // --- NHÓM 1: SimRank Graph Similarity (F176-T01 -> F176-T06) ---
+    describe("Nhóm 1: SimRank Graph Similarity", () => {
+      test("F176-T01: Initial state creates graph with decayFactor 0.8, empty nodes/edges, and self-similarity 1.0", () => {
+        const sim = new SimRankGraphSimilarity({ decayFactor: 0.8 });
+        expect.equal(sim.decayFactor, 0.8);
+        expect.equal(sim.nodes.size, 0);
+        expect.equal(sim.getSimilarity("SHOP_A", "SHOP_A"), 1.0);
+        expect.equal(sim.getSimilarity("SHOP_A", "SHOP_B"), 0.0);
+      });
+
+      test("F176-T02: addEdge(from, to) correctly builds inNeighbors adjacency maps and bipartite topology", () => {
+        const sim = new SimRankGraphSimilarity();
+        sim.addEdge("USER_1", "SHOP_A");
+        sim.addEdge("USER_1", "SHOP_B");
+        sim.addEdge("USER_2", "SHOP_B");
+
+        expect.equal(sim.nodes.size, 4);
+        expect.equal(sim.inNeighbors.get("SHOP_A").size, 1);
+        expect.equal(sim.inNeighbors.get("SHOP_B").size, 2);
+        expect.equal(sim.inNeighbors.get("SHOP_A").has("USER_1"), true);
+      });
+
+      test("F176-T03: compute() converges on bipartite User-Shop graph, assigning higher similarity to shops sharing same buyers", () => {
+        const sim = new SimRankGraphSimilarity({ decayFactor: 0.8, maxIterations: 10 });
+        // User 1 buys from Shop A, B, C
+        sim.addBipartiteEdge("U1", "SHOP_A");
+        sim.addBipartiteEdge("U1", "SHOP_B");
+        sim.addBipartiteEdge("U1", "SHOP_C");
+        // User 2 buys from Shop A, B
+        sim.addBipartiteEdge("U2", "SHOP_A");
+        sim.addBipartiteEdge("U2", "SHOP_B");
+        // User 4 buys from Shop C (unshared)
+        sim.addBipartiteEdge("U4", "SHOP_C");
+        // User 3 buys only from Shop D (isolated)
+        sim.addBipartiteEdge("U3", "SHOP_D");
+
+        const res = sim.compute();
+        expect.equal(res.iterationsRun > 0, true);
+
+        const simAB = sim.getSimilarity("SHOP_A", "SHOP_B");
+        const simAC = sim.getSimilarity("SHOP_A", "SHOP_C");
+        const simAD = sim.getSimilarity("SHOP_A", "SHOP_D");
+
+        // Shop A and B share both U1 and U2 -> higher similarity than A and C (share only U1)
+        expect.equal(simAB > simAC, true);
+        // Shop D shares no users with Shop A -> similarity = 0
+        expect.equal(simAD, 0.0);
+      });
+
+      test("F176-T04: Disconnected nodes or nodes with 0 in-neighbors yield 0.0 similarity", () => {
+        const sim = new SimRankGraphSimilarity();
+        sim.addEdge("U1", "P1");
+        sim.compute();
+        expect.equal(sim.getSimilarity("P1", "NON_EXISTENT"), 0.0);
+        expect.equal(sim.getSimilarity("U1", "P1"), 0.0); // No in-neighbors for U1
+      });
+
+      test("F176-T05: getTopSimilar(target, k) returns sorted descending array of most structurally similar shops", () => {
+        const sim = new SimRankGraphSimilarity({ decayFactor: 0.8, maxIterations: 5 });
+        sim.addEdge("U1", "SHOP_A");
+        sim.addEdge("U1", "SHOP_B");
+        sim.addEdge("U1", "SHOP_C");
+        sim.addEdge("U2", "SHOP_A");
+        sim.addEdge("U2", "SHOP_B");
+
+        sim.compute();
+        const topShops = sim.getTopSimilar("SHOP_A", 2);
+        expect.equal(topShops.length, 2);
+        expect.equal(topShops[0].node, "SHOP_B"); // Highest similarity
+        expect.equal(topShops[0].similarity >= topShops[1].similarity, true);
+      });
+
+      test("F176-T06: Client and server SimRank implementations produce identical similarity scores and top-k rankings", () => {
+        const cSim = new SimRankGraphSimilarity({ decayFactor: 0.85, maxIterations: 8 });
+        const sSim = new ServerSimRank({ decayFactor: 0.85, maxIterations: 8 });
+
+        const edges = [
+          ["U1", "S1"], ["U1", "S2"], ["U2", "S1"], ["U2", "S2"],
+          ["U3", "S2"], ["U3", "S3"], ["U4", "S3"]
+        ];
+
+        for (const [u, s] of edges) {
+          cSim.addEdge(u, s);
+          sSim.addEdge(u, s);
+        }
+
+        cSim.compute();
+        sSim.compute();
+
+        expect.equal(cSim.getSimilarity("S1", "S2"), sSim.getSimilarity("S1", "S2"));
+        expect.equal(cSim.getSimilarity("S1", "S3"), sSim.getSimilarity("S1", "S3"));
+        expect.equal(cSim.getTopSimilar("S2", 2)[0].node, sSim.getTopSimilar("S2", 2)[0].node);
+      });
+    });
+
+    // --- NHÓM 2: Vitter Reservoir Sampler with Exponential Skip (F176-T07 -> F176-T12) ---
+    describe("Nhóm 2: Vitter Reservoir Sampler with Exponential Skip (Algorithm L)", () => {
+      test("F176-T07: Initial state fills reservoir with first K elements deterministically", () => {
+        const sampler = new VitterReservoirSampler(5);
+        for (let i = 1; i <= 5; i++) {
+          const accepted = sampler.add(`ITEM_${i}`);
+          expect.equal(accepted, true);
+        }
+        expect.equal(sampler.reservoir.length, 5);
+        expect.equal(sampler.streamCount, 5);
+        expect.equal(sampler.w > 0, true);
+      });
+
+      test("F176-T08: Vitter Algorithm L computes geometric skip distance S >= 0, skipping elements efficiently", () => {
+        // Mock random generator: fixed sequence
+        let call = 0;
+        const mockRandom = () => {
+          const seq = [0.5, 0.3, 0.8, 0.2, 0.6, 0.4, 0.7, 0.1];
+          return seq[(call++) % seq.length];
+        };
+
+        const sampler = new VitterReservoirSampler(3, mockRandom);
+        sampler.add("A");
+        sampler.add("B");
+        sampler.add("C");
+        expect.equal(sampler.reservoir.length, 3);
+
+        const stats = sampler.getStats();
+        expect.equal(stats.reservoirCapacity, 3);
+        expect.equal(stats.currentSampleSize, 3);
+      });
+
+      test("F176-T09: After skip distance expires, incoming element replaces a random index and updates W", () => {
+        const sampler = new VitterReservoirSampler(2, () => 0.5);
+        sampler.add("ITEM_1");
+        sampler.add("ITEM_2");
+        // Force skipDistance to 0 to test replacement
+        sampler.skipDistance = 0;
+        const replaced = sampler.add("ITEM_NEW");
+        expect.equal(replaced, true);
+        expect.equal(sampler.reservoir.includes("ITEM_NEW"), true);
+      });
+
+      test("F176-T10: addBatch(items) correctly ingests high-throughput array of items and maintains reservoir capacity K", () => {
+        const sampler = new VitterReservoirSampler(10);
+        const stream = Array.from({ length: 500 }, (_, i) => ({ id: `EVENT_${i}`, val: i }));
+        const acceptedCount = sampler.addBatch(stream);
+
+        expect.equal(sampler.reservoir.length, 10);
+        expect.equal(sampler.streamCount, 500);
+        expect.equal(acceptedCount >= 10, true);
+      });
+
+      test("F176-T11: getStats() provides totalStreamCount, reservoirCapacity, currentSampleSize, and samplingRate", () => {
+        const sampler = new VitterReservoirSampler(20);
+        for (let i = 0; i < 100; i++) {
+          sampler.add(`LOG_${i}`);
+        }
+        const stats = sampler.getStats();
+        expect.equal(stats.reservoirCapacity, 20);
+        expect.equal(stats.currentSampleSize, 20);
+        expect.equal(stats.totalStreamCount, 100);
+        expect.equal(stats.samplingRate, 20.0);
+      });
+
+      test("F176-T12: Client and server Vitter samplers with identical seed function produce identical reservoir contents", () => {
+        let cSeed = 42;
+        let sSeed = 42;
+        const pseudoRandomC = () => {
+          cSeed = (cSeed * 16807) % 2147483647;
+          return (cSeed - 1) / 2147483646;
+        };
+        const pseudoRandomS = () => {
+          sSeed = (sSeed * 16807) % 2147483647;
+          return (sSeed - 1) / 2147483646;
+        };
+
+        const cSampler = new VitterReservoirSampler(5, pseudoRandomC);
+        const sSampler = new ServerVitterSampler(5, pseudoRandomS);
+
+        const items = Array.from({ length: 50 }, (_, i) => `STREAM_${i}`);
+        cSampler.addBatch(items);
+        sSampler.addBatch(items);
+
+        expect.equal(JSON.stringify(cSampler.getSamples()), JSON.stringify(sSampler.getSamples()));
+        expect.equal(cSampler.streamCount, sSampler.streamCount);
+      });
+    });
+
+    // --- NHÓM 3: Treap Interval Range Tree (F176-T13 -> F176-T18) ---
+    describe("Nhóm 3: Treap Interval Range Tree for Price Drop Alarms", () => {
+      test("F176-T13: Initial state creates empty interval tree with size 0 and null root", () => {
+        const tree = new TreapIntervalRangeTree();
+        expect.equal(tree.size(), 0);
+        expect.equal(tree.isEmpty(), true);
+        expect.equal(tree.queryOverlapping(100, 200).length, 0);
+      });
+
+      test("F176-T14: insert(low, high, data) maintains BST order on low, max-heap on priority, and updates maxHigh in all ancestors", () => {
+        const tree = new TreapIntervalRangeTree();
+        tree.insert(100, 200, { alertId: "A1" }, 0.5);
+        tree.insert(50, 150, { alertId: "A2" }, 0.8); // Higher priority -> becomes root
+        tree.insert(120, 300, { alertId: "A3" }, 0.3);
+
+        expect.equal(tree.size(), 3);
+        expect.equal(tree.root.low, 50); // Root has highest priority 0.8
+        expect.equal(tree.root.maxHigh >= 300, true);
+      });
+
+      test("F176-T15: queryOverlapping(qLow, qHigh) finds overlapping price drop alert intervals in O(log N + K)", () => {
+        const tree = new TreapIntervalRangeTree();
+        tree.insert(100000, 200000, { user: "U1", alert: "100k-200k" });
+        tree.insert(250000, 350000, { user: "U2", alert: "250k-350k" });
+        tree.insert(180000, 220000, { user: "U3", alert: "180k-220k" });
+        tree.insert(500000, 600000, { user: "U4", alert: "500k-600k" });
+
+        // Flash sale price dropped to [190.000, 210.000] -> overlaps with U1 ([100k, 200k]) and U3 ([180k, 220k])
+        const alerts = tree.queryOverlapping(190000, 210000);
+        expect.equal(alerts.length, 2);
+        const users = alerts.map(a => a.data.user).sort();
+        expect.equal(JSON.stringify(users), JSON.stringify(["U1", "U3"]));
+      });
+
+      test("F176-T16: Single point price drop query [P, P] retrieves all user alerts whose range contains P", () => {
+        const tree = new TreapIntervalRangeTree();
+        tree.insert(50000, 150000, { id: "ALERT_A" });
+        tree.insert(120000, 250000, { id: "ALERT_B" });
+        tree.insert(300000, 400000, { id: "ALERT_C" });
+
+        // Product on Flash sale at exactly 130.000đ
+        const matches = tree.queryOverlapping(130000);
+        expect.equal(matches.length, 2);
+        const ids = matches.map(m => m.data.id).sort();
+        expect.equal(JSON.stringify(ids), JSON.stringify(["ALERT_A", "ALERT_B"]));
+      });
+
+      test("F176-T17: Disjoint query interval outside all registered ranges returns empty array without false positives", () => {
+        const tree = new TreapIntervalRangeTree();
+        tree.insert(100, 200);
+        tree.insert(300, 400);
+
+        // Query in gap [210, 290] -> no overlaps
+        expect.equal(tree.queryOverlapping(210, 290).length, 0);
+        // Query above max [500, 600]
+        expect.equal(tree.queryOverlapping(500, 600).length, 0);
+      });
+
+      test("F176-T18: Client and server TreapIntervalRangeTree produce identical overlapping search results", () => {
+        const cTree = new TreapIntervalRangeTree();
+        const sTree = new ServerTreapIntervalTree();
+
+        const intervals = [
+          { low: 10, high: 50, id: "1" },
+          { low: 30, high: 80, id: "2" },
+          { low: 70, high: 120, id: "3" },
+          { low: 150, high: 200, id: "4" }
+        ];
+
+        for (const it of intervals) {
+          cTree.insert(it.low, it.high, { id: it.id }, 0.5);
+          sTree.insert(it.low, it.high, { id: it.id }, 0.5);
+        }
+
+        const cRes = cTree.queryOverlapping(40, 75).map(r => r.data.id).sort();
+        const sRes = sTree.queryOverlapping(40, 75).map(r => r.data.id).sort();
+
+        expect.equal(JSON.stringify(cRes), JSON.stringify(sRes));
+        expect.equal(cRes.length, 3); // 1, 2, 3 overlap with [40, 75]
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Enterprise Lifecycle (F176-T19 -> F176-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Enterprise Lifecycle", () => {
+      test("F176-T19: Admin Sentinel Copilot answers SimRank graph similarity and competitor network queries", () => {
+        const res = generateAdminCopilotResponse("Phân tích mạng lưới shop tương đồng bằng thuật toán simrank graph similarity");
+        expect.equal(res.tag, "ĐỘ TƯƠNG ĐỒNG SIMRANK");
+        expect.equal(res.type, "network");
+        expect.equal(res.text.includes("SIMRANK"), true);
+        expect.equal(res.text.includes("Jeh & Widom"), true);
+      });
+
+      test("F176-T20: Admin Sentinel Copilot answers Vitter Algorithm L big data reservoir sampling queries", () => {
+        const res = generateAdminCopilotResponse("Lấy mẫu luồng telemetry big data bằng thuật toán vitter algorithm l exponential skip reservoir");
+        expect.equal(res.tag, "LẤY MẪU HỒ CHỨA VITTER");
+        expect.equal(res.type, "analytics");
+        expect.equal(res.text.includes("VITTER ALGORITHM L"), true);
+        expect.equal(/exponential skip/i.test(res.text), true);
+      });
+
+      test("F176-T21: Admin Sentinel Copilot answers Interval Treap price drop alarm queries", () => {
+        const res = generateAdminCopilotResponse("Bắn thông báo giá và quét cảnh báo khoảng giá bằng cây interval treap");
+        expect.equal(res.tag, "CẢNH BÁO KHOẢNG GIÁ INTERVAL TREAP");
+        expect.equal(res.type, "alert");
+        expect.equal(res.text.includes("INTERVAL TREAP"), true);
+        expect.equal(res.text.includes("maxHigh"), true);
+      });
+
+      test("F176-T22: Seller ShopSmart Copilot advises on SimRank competitor shop discovery and Interval Treap price alerts", () => {
+        const res = generateSellerCopilotResponse("Khám phá đối thủ tương đồng simrank và kích hoạt chuông báo giá interval treap");
+        expect.equal(res.tag, "MẠNG LƯỚI SHOP SIMRANK & BÁO GIÁ TREAP");
+        expect.equal(res.type, "network");
+        expect.equal(res.text.includes("SimRank"), true);
+        expect.equal(res.text.includes("Interval Treap"), true);
+      });
+
+      test("F176-T23: Buyer AI Assistant explains SimRank shop recommendations and Interval Treap price-drop notifications", () => {
+        const res = generateAiChatResponse("Làm sao để đặt thông báo giảm giá chuông báo giá khi flash sale");
+        expect.equal(res.intent, "SIMRANK_INTERVAL_ALERT_ASSIST");
+        expect.equal(res.replyText.includes("SimRank"), true);
+        expect.equal(res.replyText.includes("Interval Treap"), true);
+      });
+
+      test("F176-T24: E2E Lifecycle: User-Shop network mapped via SimRank -> Telemetry clickstream sampled via Vitter Sampler -> Flash Sale price drop triggers Interval Treap alerts", () => {
+        // 1. SimRank identifies correlated shop network
+        const sim = new SimRankGraphSimilarity({ decayFactor: 0.8, maxIterations: 5 });
+        sim.addBipartiteEdge("BUYER_1", "SHOP_TECH_PRO");
+        sim.addBipartiteEdge("BUYER_1", "SHOP_AUDIO_VN");
+        sim.addBipartiteEdge("BUYER_2", "SHOP_TECH_PRO");
+        sim.addBipartiteEdge("BUYER_2", "SHOP_AUDIO_VN");
+        sim.compute();
+        expect.equal(sim.getSimilarity("SHOP_TECH_PRO", "SHOP_AUDIO_VN") > 0.35, true);
+
+        // 2. High traffic telemetry sampled with Vitter Algorithm L
+        const sampler = new VitterReservoirSampler(5);
+        for (let i = 0; i < 50; i++) {
+          sampler.add({ event: "CLICK_SKU", id: i });
+        }
+        expect.equal(sampler.reservoir.length, 5);
+        expect.equal(sampler.getStats().totalStreamCount, 50);
+
+        // 3. Buyer subscribes to price alert [1.200.000đ - 1.500.000đ]
+        const intervalTree = new TreapIntervalRangeTree();
+        intervalTree.insert(1200000, 1500000, { userId: "USER_888", sku: "AIRPODS_PRO" });
+        intervalTree.insert(2000000, 2500000, { userId: "USER_999", sku: "AIRPODS_MAX" });
+
+        // Flash sale drops price of AirPods Pro to 1.350.000đ
+        const triggeredAlerts = intervalTree.queryOverlapping(1350000);
+        expect.equal(triggeredAlerts.length, 1);
+        expect.equal(triggeredAlerts[0].data.userId, "USER_888");
+        expect.equal(triggeredAlerts[0].data.sku, "AIRPODS_PRO");
       });
     });
   });
