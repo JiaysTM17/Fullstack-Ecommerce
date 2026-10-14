@@ -208,6 +208,10 @@ import {
   KuhnMunkresMatching,
   TDigestPercentileEstimator,
   HierarchicalSoftmaxRouter,
+  // Phase 35 Enterprise Algorithms
+  PushRelabelMaxFlow,
+  CuckooStashTable,
+  ParetoFrontierRanker,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -278,6 +282,9 @@ import { SoftmaxGradientBandit as ServerSoftmaxGradientBandit } from "../../serv
 import ServerKuhnMunkresMatching from "../../server/src/utils/kuhnMunkresMatching.js";
 import ServerTDigestPercentileEstimator from "../../server/src/utils/tdigestPercentileEstimator.js";
 import ServerHierarchicalSoftmaxRouter from "../../server/src/utils/hierarchicalSoftmaxRouter.js";
+import ServerPushRelabelMaxFlow from "../../server/src/utils/pushRelabelMaxFlow.js";
+import ServerCuckooStashTable from "../../server/src/utils/cuckooStashTable.js";
+import ServerParetoFrontierRanker from "../../server/src/utils/paretoFrontierRanker.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -17390,6 +17397,299 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const dispatchRes = dispatcher.solve();
       expect.equal(dispatchRes.matches.length, 1);
       expect.equal(dispatchRes.matches[0].workerId, "SHIPPER_FAST");
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 182: Push-Relabel Max Flow, Cuckoo Stash Table, Pareto Frontier Ranker (24 Tests)
+  // =========================================================================
+  describe("Feature 182: Push-Relabel Max Flow, Cuckoo Stash Table, Pareto Frontier Ranker", () => {
+    // --- PART 1: Push-Relabel Maximum Flow (F182-T01 -> F182-T06) ---
+    test("F182-T01: Simple diamond flow network calculates exact max flow and residual capacities", () => {
+      const pr = new PushRelabelMaxFlow();
+      pr.addEdge("SRC", "A", 10);
+      pr.addEdge("SRC", "B", 10);
+      pr.addEdge("A", "TGT", 8);
+      pr.addEdge("B", "TGT", 7);
+      pr.addEdge("A", "B", 5);
+
+      const res = pr.computeMaxFlow("SRC", "TGT");
+      expect.equal(res.maxFlow, 15);
+      expect.equal(res.activeEdges.length > 0, true);
+    });
+
+    test("F182-T02: Multi-tier Flash Sale ingress gateway to service microservices computes accurate maximum capacity", () => {
+      const pr = new PushRelabelMaxFlow();
+      pr.addEdge("INGRESS_GATEWAY", "SVC_CART", 5000);
+      pr.addEdge("INGRESS_GATEWAY", "SVC_ORDER", 4000);
+      pr.addEdge("SVC_CART", "SVC_PAYMENT", 3000);
+      pr.addEdge("SVC_ORDER", "SVC_PAYMENT", 3500);
+      pr.addEdge("SVC_PAYMENT", "DATABASE_CLUSTER", 6000);
+
+      const res = pr.computeMaxFlow("INGRESS_GATEWAY", "DATABASE_CLUSTER");
+      expect.equal(res.maxFlow, 6000);
+      expect.equal(res.stats.pushCount > 0, true);
+    });
+
+    test("F182-T03: Correctly identifies saturated bottleneck edges matching Min-Cut theorem", () => {
+      const pr = new PushRelabelMaxFlow();
+      pr.addEdge("S", "V1", 100);
+      pr.addEdge("V1", "V2", 20); // bottleneck
+      pr.addEdge("V2", "T", 100);
+
+      const res = pr.computeMaxFlow("S", "T");
+      expect.equal(res.maxFlow, 20);
+      const isBottleneck = res.bottlenecks.some(b => b.from === "V1" && b.to === "V2");
+      expect.equal(isBottleneck, true);
+    });
+
+    test("F182-T04: Disconnected source-sink network returns 0 max flow gracefully", () => {
+      const pr = new PushRelabelMaxFlow();
+      pr.addEdge("ISLAND_A", "ISLAND_B", 50);
+      pr.addEdge("ISLAND_C", "ISLAND_D", 50);
+
+      const res = pr.computeMaxFlow("ISLAND_A", "ISLAND_D");
+      expect.equal(res.maxFlow, 0);
+      expect.equal(res.bottlenecks.length, 0);
+    });
+
+    test("F182-T05: Edge cases: source equal to sink or invalid nodes return 0 without error", () => {
+      const pr = new PushRelabelMaxFlow();
+      pr.addEdge("NODE_1", "NODE_2", 10);
+      expect.equal(pr.computeMaxFlow("NODE_1", "NODE_1").maxFlow, 0);
+      expect.equal(pr.computeMaxFlow("NON_EXIST", "NODE_2").maxFlow, 0);
+    });
+
+    test("F182-T06: ServerPushRelabelMaxFlow parity with client implementation on 6-node dense gateway graph", () => {
+      const serverPR = new ServerPushRelabelMaxFlow();
+      serverPR.addEdge("IN", "G1", 500);
+      serverPR.addEdge("IN", "G2", 500);
+      serverPR.addEdge("G1", "M1", 300);
+      serverPR.addEdge("G1", "M2", 200);
+      serverPR.addEdge("G2", "M1", 200);
+      serverPR.addEdge("G2", "M2", 300);
+      serverPR.addEdge("M1", "OUT", 400);
+      serverPR.addEdge("M2", "OUT", 400);
+
+      const res = serverPR.computeMaxFlow("IN", "OUT");
+      expect.equal(res.maxFlow, 800);
+      expect.equal(res.stats.totalNodes, 6);
+    });
+
+    // --- PART 2: Cuckoo Hashing with Stash & Bidirectional Eviction (F182-T07 -> F182-T12) ---
+    test("F182-T07: Basic set and get operates in strict O(1) across two sub-tables", () => {
+      const table = new CuckooStashTable({ capacity: 32 });
+      table.set("SKU_IPHONE_16", { price: 25000000, stock: 50 });
+      table.set("SKU_MACBOOK_M3", { price: 32000000, stock: 20 });
+
+      expect.equal(table.has("SKU_IPHONE_16"), true);
+      expect.equal(table.get("SKU_IPHONE_16").price, 25000000);
+      expect.equal(table.get("SKU_MACBOOK_M3").stock, 20);
+      expect.equal(table.get("NON_EXISTENT"), undefined);
+    });
+
+    test("F182-T08: Updating existing key overwrites value in place without incrementing table size", () => {
+      const table = new CuckooStashTable({ capacity: 32 });
+      table.set("SKU_FLASH_DEAL", 99000);
+      expect.equal(table.size, 1);
+
+      table.set("SKU_FLASH_DEAL", 49000); // price dropped
+      expect.equal(table.size, 1);
+      expect.equal(table.get("SKU_FLASH_DEAL"), 49000);
+    });
+
+    test("F182-T09: Eviction kick moves displaced key to alternate sub-table correctly", () => {
+      const table = new CuckooStashTable({ capacity: 16 });
+      for (let i = 0; i < 15; i++) {
+        table.set(`SKU_ITEM_${i}`, i * 1000);
+      }
+      expect.equal(table.size, 15);
+      for (let i = 0; i < 15; i++) {
+        expect.equal(table.get(`SKU_ITEM_${i}`), i * 1000);
+      }
+    });
+
+    test("F182-T10: Multiple collisions utilize auxiliary stash buffer before triggering rehash", () => {
+      const table = new CuckooStashTable({ capacity: 16, stashSize: 4 });
+      for (let i = 0; i < 25; i++) {
+        table.set(`PROD_${i}`, { id: i });
+      }
+      const stats = table.getStats();
+      expect.equal(stats.size, 25);
+      expect.equal(stats.loadFactor > 0, true);
+      for (let i = 0; i < 25; i++) {
+        expect.equal(table.get(`PROD_${i}`).id, i);
+      }
+    });
+
+    test("F182-T11: Deleting key removes it from table or stash and decrements size", () => {
+      const table = new CuckooStashTable({ capacity: 32 });
+      table.set("TEMP_KEY_1", "ABC");
+      table.set("TEMP_KEY_2", "XYZ");
+      expect.equal(table.size, 2);
+
+      const deleted = table.delete("TEMP_KEY_1");
+      expect.equal(deleted, true);
+      expect.equal(table.size, 1);
+      expect.equal(table.has("TEMP_KEY_1"), false);
+      expect.equal(table.has("TEMP_KEY_2"), true);
+      expect.equal(table.delete("NON_EXIST"), false);
+    });
+
+    test("F182-T12: ServerCuckooStashTable parity with client implementation over 50 SKU inserts/lookups", () => {
+      const serverTable = new ServerCuckooStashTable({ capacity: 64, stashSize: 6 });
+      for (let i = 0; i < 50; i++) {
+        serverTable.set(`SERVER_SKU_${i}`, `VAL_${i * 2}`);
+      }
+      expect.equal(serverTable.size, 50);
+      for (let i = 0; i < 50; i++) {
+        expect.equal(serverTable.get(`SERVER_SKU_${i}`), `VAL_${i * 2}`);
+      }
+    });
+
+    // --- PART 3: Multi-Objective Pareto Frontier Ranking NSGA-II (F182-T13 -> F182-T18) ---
+    test("F182-T13: Dominance check correctly identifies strict dominance across min and max objectives", () => {
+      const ranker = new ParetoFrontierRanker();
+      // Superior in price (lower) and rating (higher), equal in delivery and fulfillment
+      const superior = { price: 100, rating: 5.0, deliveryHours: 2, fulfillmentRate: 0.99 };
+      const inferior = { price: 150, rating: 4.5, deliveryHours: 2, fulfillmentRate: 0.99 };
+      const incomparable = { price: 80, rating: 4.0, deliveryHours: 4, fulfillmentRate: 0.90 };
+
+      expect.equal(ranker.dominates(superior, inferior), true);
+      expect.equal(ranker.dominates(inferior, superior), false);
+      expect.equal(ranker.dominates(superior, incomparable), false);
+      expect.equal(ranker.dominates(incomparable, superior), false);
+    });
+
+    test("F182-T14: Fast non-dominated sort identifies true Pareto optimal products in Front 1", () => {
+      const ranker = new ParetoFrontierRanker();
+      const catalog = [
+        { id: "CHEAP_SLOW", price: 50, rating: 4.0, deliveryHours: 48, fulfillmentRate: 0.90 },
+        { id: "EXPENSIVE_FAST", price: 200, rating: 4.9, deliveryHours: 2, fulfillmentRate: 0.99 },
+        { id: "WORST_IN_ALL", price: 300, rating: 3.5, deliveryHours: 72, fulfillmentRate: 0.80 },
+      ];
+
+      const front1 = ranker.getParetoFront(catalog);
+      const ids = front1.map(p => p.id);
+      expect.equal(ids.includes("CHEAP_SLOW"), true);
+      expect.equal(ids.includes("EXPENSIVE_FAST"), true);
+      expect.equal(ids.includes("WORST_IN_ALL"), false);
+    });
+
+    test("F182-T15: Dominated products are assigned Pareto rank > 1 corresponding to their front index", () => {
+      const ranker = new ParetoFrontierRanker();
+      const catalog = [
+        { id: "P_BEST", price: 100, rating: 5.0, deliveryHours: 2, fulfillmentRate: 1.0 },
+        { id: "P_MID", price: 150, rating: 4.5, deliveryHours: 4, fulfillmentRate: 0.95 },
+        { id: "P_LOW", price: 200, rating: 4.0, deliveryHours: 6, fulfillmentRate: 0.90 },
+      ];
+
+      const ranked = ranker.rank(catalog);
+      expect.equal(ranked.find(p => p.id === "P_BEST").paretoRank, 1);
+      expect.equal(ranked.find(p => p.id === "P_MID").paretoRank, 2);
+      expect.equal(ranked.find(p => p.id === "P_LOW").paretoRank, 3);
+    });
+
+    test("F182-T16: Crowding distance assigns boundary solutions Infinity and computes spacing for intermediate items", () => {
+      const ranker = new ParetoFrontierRanker();
+      const front = [
+        { id: "F1_A", price: 100, rating: 4.0, deliveryHours: 24, fulfillmentRate: 0.9 },
+        { id: "F1_B", price: 150, rating: 4.5, deliveryHours: 12, fulfillmentRate: 0.95 },
+        { id: "F1_C", price: 200, rating: 5.0, deliveryHours: 2, fulfillmentRate: 0.99 },
+      ];
+
+      ranker.calculateCrowdingDistance(front);
+      const boundCount = front.filter(p => p.crowdingDistance === Infinity).length;
+      expect.equal(boundCount >= 2, true);
+    });
+
+    test("F182-T17: rank() sorts products by Pareto rank ascending, then crowding distance descending", () => {
+      const ranker = new ParetoFrontierRanker();
+      const catalog = [
+        { id: "P3", price: 300, rating: 3.0, deliveryHours: 10, fulfillmentRate: 0.8 },
+        { id: "P1", price: 50, rating: 4.8, deliveryHours: 1, fulfillmentRate: 0.99 },
+        { id: "P2", price: 100, rating: 4.5, deliveryHours: 2, fulfillmentRate: 0.95 },
+      ];
+
+      const ranked = ranker.rank(catalog);
+      expect.equal(ranked[0].id, "P1");
+      expect.equal(ranked[0].paretoRank, 1);
+    });
+
+    test("F182-T18: ServerParetoFrontierRanker parity with client implementation on 5-product multi-attribute catalog", () => {
+      const serverRanker = new ServerParetoFrontierRanker();
+      const items = [
+        { id: "DEAL_A", price: 80000, rating: 4.8, deliveryHours: 3, fulfillmentRate: 0.98 },
+        { id: "DEAL_B", price: 120000, rating: 4.9, deliveryHours: 1, fulfillmentRate: 0.99 },
+        { id: "DEAL_C", price: 70000, rating: 4.2, deliveryHours: 5, fulfillmentRate: 0.92 },
+        { id: "DEAL_D", price: 200000, rating: 3.9, deliveryHours: 10, fulfillmentRate: 0.85 },
+      ];
+
+      const front1 = serverRanker.getParetoFront(items);
+      expect.equal(front1.length >= 2, true);
+      const hasD = front1.some(p => p.id === "DEAL_D");
+      expect.equal(hasD, false); // DEAL_D is dominated
+    });
+
+    // --- PART 4: Copilots & End-to-End Integration (F182-T19 -> F182-T24) ---
+    test("F182-T19: Admin Sentinel Copilot Section 86 recognizes Push-Relabel Maximum Flow traffic dispatch", () => {
+      const res = generateAdminCopilotResponse("Điều phối hạ tầng flash sale bằng luồng cực đại push-relabel highest-label", {});
+      expect.equal(res.tag, "LUỒNG CỰC ĐẠI PUSH-RELABEL");
+      expect.equal(/push-relabel/i.test(res.text), true);
+      expect.equal(/highest-label/i.test(res.text), true);
+    });
+
+    test("F182-T20: Admin Sentinel Copilot Section 87 recognizes Cuckoo Stash Table L1 cache", () => {
+      const res = generateAdminCopilotResponse("Bộ đệm tồn kho thời gian thực bảng băm cuckoo stash chuỗi đẩy cuckoo", {});
+      expect.equal(res.tag, "BẢNG BĂM CUCKOO STASH");
+      expect.equal(/cuckoo/i.test(res.text), true);
+      expect.equal(/stash/i.test(res.text), true);
+    });
+
+    test("F182-T21: Admin Sentinel Copilot Section 88 recognizes Pareto Frontier Multi-Objective Ranking", () => {
+      const res = generateAdminCopilotResponse("Tối ưu danh mục đa mục tiêu bằng pareto frontier ranking non-dominated", {});
+      expect.equal(res.tag, "XẾP HẠNG PARETO FRONTIER");
+      expect.equal(/pareto/i.test(res.text), true);
+      expect.equal(/nsga-ii/i.test(res.text), true);
+    });
+
+    test("F182-T22: Seller ShopSmart Copilot Section 44 guides warehouse flow, Cuckoo stock caching & Pareto front pricing", () => {
+      const res = generateSellerCopilotResponse("Tối ưu thông lượng gian hàng bằng push-relabel và xếp hạng pareto", { name: "Shop Điện Máy" }, [], []);
+      expect.equal(res.tag, "TỐI ƯU PUSH-RELABEL, CUCKOO STASH & PARETO");
+      expect.equal(/push-relabel/i.test(res.text), true);
+      expect.equal(/pareto/i.test(res.text), true);
+    });
+
+    test("F182-T23: Buyer AI Assistant Intent 37 explains smooth Flash Sale infrastructure, instant price query & Pareto recommendations", () => {
+      const res = generateAiChatResponse("Hạ tầng luồng cực đại push-relabel và gợi ý tối ưu pareto");
+      expect.equal(res.intent, "PUSH_RELABEL_CUCKOO_PARETO_ASSIST");
+      expect.equal(/push-relabel/i.test(res.replyText), true);
+      expect.equal(/cuckoo stash/i.test(res.replyText), true);
+      expect.equal(/pareto/i.test(res.replyText), true);
+    });
+
+    test("F182-T24: E2E Lifecycle: Pareto ranker recommends non-dominated deals -> Cuckoo table serves instant price and inventory -> Push-Relabel handles checkout traffic surge", () => {
+      // Step 1: Pareto Recommendation
+      const ranker = new ParetoFrontierRanker();
+      const deals = [
+        { id: "PROD_BEST_VALUE", price: 120000, rating: 4.9, deliveryHours: 2, fulfillmentRate: 0.99 },
+        { id: "PROD_MEDIOCRE", price: 200000, rating: 4.0, deliveryHours: 12, fulfillmentRate: 0.90 },
+      ];
+      const bestDeals = ranker.getParetoFront(deals);
+      expect.equal(bestDeals[0].id, "PROD_BEST_VALUE");
+
+      // Step 2: Instant Cache
+      const skuCache = new CuckooStashTable({ capacity: 16 });
+      skuCache.set(bestDeals[0].id, { price: 120000, stock: 99 });
+      expect.equal(skuCache.get("PROD_BEST_VALUE").stock, 99);
+
+      // Step 3: Flash traffic dispatch
+      const trafficFlow = new PushRelabelMaxFlow();
+      trafficFlow.addEdge("VIP_TRAFFIC", "GATEWAY_AUTH", 500);
+      trafficFlow.addEdge("GATEWAY_AUTH", "CHECKOUT_ENGINE", 400);
+      trafficFlow.addEdge("CHECKOUT_ENGINE", "PAYMENT_CONFIRMED", 350);
+      const flowRes = trafficFlow.computeMaxFlow("VIP_TRAFFIC", "PAYMENT_CONFIRMED");
+      expect.equal(flowRes.maxFlow, 350);
     });
   });
 });

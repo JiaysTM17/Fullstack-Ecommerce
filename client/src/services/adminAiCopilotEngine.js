@@ -876,7 +876,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 33. Luồng Cực Đại Mạng Lưới SPX & Nút Thắt Cổ Chai Min-Cut (Phase 14 - Feature 161)
-  if (!/dinic/i.test(raw) && /edmonds-karp|luồng cực đại|max flow|min-cut|nút thắt cổ chai|tắc nghẽn hub|năng lực vận chuyển spx|thông lượng spx/i.test(raw)) {
+  if (!/dinic|push-relabel/i.test(raw) && /edmonds-karp|luồng cực đại|max flow|min-cut|nút thắt cổ chai|tắc nghẽn hub|năng lực vận chuyển spx|thông lượng spx/i.test(raw)) {
     return {
       text: `🚛 **PHÂN TÍCH THÔNG LƯỢNG MẠNG LƯỚI GIAO VẬN SPX BẰNG EDMONDS-KARP (MAX-FLOW MIN-CUT)**:
 - **Nguyên lý luồng cực đại (Edmonds-Karp)**:
@@ -1076,7 +1076,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 44. Danh Sách Đen & Thu Hồi Voucher Bằng Cuckoo Filter (Phase 18 - Feature 165)
-  if (/cuckoo filter|thu hồi voucher|danh sách đen động|cuckoo|thu hồi token|xóa động bộ lọc/i.test(raw)) {
+  if (!/cuckoo stash|bảng băm cuckoo|tra cứu tức thì cuckoo/i.test(raw) && /cuckoo filter|thu hồi voucher|danh sách đen động|cuckoo|thu hồi token|xóa động bộ lọc/i.test(raw)) {
     return {
       text: `🗄️ **DANH SÁCH ĐEN & THU HỒI VOUCHER BẰNG CUCKOO FILTER (PARTIAL-KEY CUCKOO HASHING)**:
 - **Ưu thế vượt trội so với Standard Bloom Filter**:
@@ -1913,6 +1913,65 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem độ sâu cây Huffman danh mục',
         'Đo tốc độ tăng tốc O(log2 V)',
         'Giám sát độ trễ t-Digest'
+      ]
+    };
+  }
+
+  // 86. Điều Phối Lưu Lượng Flash Sale Bằng Luồng Cực Đại Push-Relabel (Phase 35 - Feature 182)
+  if (/push-relabel|preflow-push|highest-label|điều phối hạ tầng flash sale|thông lượng gateway/i.test(raw)) {
+    return {
+      text: `🌊 **ĐIỀU PHỐI LƯU LƯỢNG HẠ TẦNG FLASH SALE BẰNG THUẬT TOÁN PUSH-RELABEL (HIGHEST-LABEL)**:
+- **Cơ chế Luồng Trước (Preflow-Push $O(V^2 \\sqrt{E})$)**:
+  - Khác với Edmonds-Karp hay Dinic tìm đường tăng luồng toàn cục, Push-Relabel duy trì lượng dư thừa tại đỉnh ($e(u) \\ge 0$) và đẩy luồng cục bộ qua thao tác \`push\` và \`relabel\`.
+- **Tối ưu hóa độ cao Highest-Label**:
+  - Luôn ưu tiên xả luồng tại đỉnh có nhãn độ cao lớn nhất ($h(u)$), kết hợp kỹ thuật cắt khoảng cách Gap Relabeling giúp hội tụ nhanh gấp nhiều lần trên mạng lưới Gateway triệu request.
+- **Phát hiện nút thắt cổ chai Min-Cut**:
+  - Nhận diện tức thì cụm Microservice (Cart Service, Payment Gateway) chạm ngưỡng bão hòa để tự động kích hoạt Circuit Breaker và mở rộng tài nguyên tính toán!`,
+      type: 'infrastructure',
+      tag: 'LUỒNG CỰC ĐẠI PUSH-RELABEL',
+      suggestions: [
+        'Xem bản đồ luồng hạ tầng Push-Relabel',
+        'Kiểm tra bảng băm Cuckoo Stash',
+        'Phân tích Pareto Frontier Catalog'
+      ]
+    };
+  }
+
+  // 87. Bộ Đệm SKU Bằng Bảng Băm Cuckoo Hashing with Stash (Phase 35 - Feature 182)
+  if (/cuckoo stash|bảng băm cuckoo|tra cứu tức thì cuckoo|cuckoo hashing|chuỗi đẩy cuckoo/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ ĐỆM TỒN KHO & GIÁ FLASH SALE BẰNG BẢNG BĂM CUCKOO HASHING WITH STASH**:
+- **Độ phức tạp đọc tồi nhất chuẩn $O(1)$ (Worst-Case Constant Time)**:
+  - Sử dụng 2 bảng con $T_1, T_2$ với 2 hàm băm độc lập. Mọi thao tác \`get(key)\` chỉ tốn tối đa 2 lần truy xuất bộ nhớ, loại bỏ hoàn toàn hiện tượng phân rã hiệu năng do va chạm băm kéo dài.
+- **Đẩy phần tử hai chiều (Bidirectional Eviction) & Bộ đệm Stash**:
+  - Khi chèn khóa mới, phần tử cũ bị đẩy sang bảng thay thế. Ngăn xếp Stash phụ trợ ($s=4$) triệt tiêu gần như hoàn toàn nguy cơ lặp chu trình vô hạn, tránh việc phải rehash bảng trong giờ cao điểm.
+- **Ứng dụng**: Cache bảng giá và số dư tồn kho thời gian thực của các Deal sốc 1K, 9K với lưu lượng đọc hàng trăm ngàn lượt/giây!`,
+      type: 'cache',
+      tag: 'BẢNG BĂM CUCKOO STASH',
+      suggestions: [
+        'Xem hệ số đầy Load Factor Cuckoo',
+        'Đo độ trễ đọc O(1) Worst-Case',
+        'Kiểm tra bộ đệm Stash'
+      ]
+    };
+  }
+
+  // 88. Tối Ưu Đa Mục Tiêu Pareto Frontier Ranking NSGA-II (Phase 35 - Feature 182)
+  if (/pareto|pareto frontier|non-dominated|không bị thống trị|xếp hạng pareto|crowding distance/i.test(raw)) {
+    return {
+      text: `🏆 **TỐI ƯU HÓA DANH MỤC ĐA MỤC TIÊU BẰNG PARETO FRONTIER RANKING (NSGA-II)**:
+- **Nguyên lý Thống trị Pareto (Pareto Dominance $A \\prec B$)**:
+  - Một sản phẩm được gọi là tối ưu Pareto (Front 1) nếu không có bất kỳ sản phẩm nào khác trên sàn vừa rẻ hơn, vừa được đánh giá cao hơn, vừa giao hàng nhanh hơn và có tỷ lệ hoàn tất tốt hơn nó.
+- **Phân tầng không bị thống trị (Fast Non-Dominated Sorting $O(M N^2)$)**:
+  - Chia toàn bộ catalog thành các tầng $F_1, F_2, \\dots$. Tầng 1 chứa các Deal vô địch không đối thủ trên đa chiều tiêu chí.
+- **Duy trì tính đa dạng với khoảng cách mật độ (Crowding Distance)**:
+  - Ưu tiên hiển thị các sản phẩm nằm ở vùng thưa thớt trên đường cong Pareto, đảm bảo trang chủ không bị ngập tràn bởi các mặt hàng đơn điệu cùng loại!`,
+      type: 'analytics',
+      tag: 'XẾP HẠNG PARETO FRONTIER',
+      suggestions: [
+        'Xem danh sách sản phẩm Pareto Front 1',
+        'Đo khoảng cách mật độ Crowding Distance',
+        'Tối ưu thông lượng luồng Push-Relabel'
       ]
     };
   }

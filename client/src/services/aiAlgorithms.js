@@ -16606,6 +16606,455 @@ export class HierarchicalSoftmaxRouter {
   }
 }
 
+// =========================================================================
+// PHASE 35 ENTERPRISE ALGORITHMS: Push-Relabel Max Flow, Cuckoo Stash Table, Pareto Frontier Ranker
+// =========================================================================
+
+class ClientFlowEdge {
+  constructor(to, rev, capacity) {
+    this.to = to;
+    this.rev = rev;
+    this.capacity = capacity;
+    this.flow = 0;
+  }
+}
+
+export class PushRelabelMaxFlow {
+  constructor() {
+    this.nodeMap = new Map();
+    this.nodeNames = [];
+    this.adj = [];
+  }
+
+  _getNodeIndex(name) {
+    const key = String(name);
+    if (!this.nodeMap.has(key)) {
+      const idx = this.nodeNames.length;
+      this.nodeMap.set(key, idx);
+      this.nodeNames.push(key);
+      this.adj.push([]);
+    }
+    return this.nodeMap.get(key);
+  }
+
+  addEdge(from, to, capacity) {
+    if (capacity <= 0) return;
+    const u = this._getNodeIndex(from);
+    const v = this._getNodeIndex(to);
+    const a = new ClientFlowEdge(v, this.adj[v].length, capacity);
+    const b = new ClientFlowEdge(u, this.adj[u].length, 0);
+    this.adj[u].push(a);
+    this.adj[v].push(b);
+  }
+
+  computeMaxFlow(sourceName, sinkName) {
+    const s = this.nodeMap.get(String(sourceName));
+    const t = this.nodeMap.get(String(sinkName));
+    if (s === undefined || t === undefined || s === t) {
+      return { maxFlow: 0, activeEdges: [], bottlenecks: [], stats: { nodes: this.nodeNames.length } };
+    }
+
+    const n = this.nodeNames.length;
+    const height = Array(n).fill(0);
+    const excess = Array(n).fill(0);
+    const count = Array(2 * n + 1).fill(0);
+
+    height[s] = n;
+    count[n] = 1;
+    count[0] = n - 1;
+
+    for (const edge of this.adj[s]) {
+      if (edge.capacity > 0) {
+        const flow = edge.capacity;
+        edge.flow += flow;
+        this.adj[edge.to][edge.rev].flow -= flow;
+        excess[edge.to] += flow;
+        excess[s] -= flow;
+      }
+    }
+
+    const activeBuckets = Array.from({ length: 2 * n + 1 }, () => []);
+    const inBucket = Array(n).fill(false);
+    let maxHeight = 0;
+
+    const enqueue = (u) => {
+      if (!inBucket[u] && u !== s && u !== t && excess[u] > 0) {
+        inBucket[u] = true;
+        const h = height[u];
+        activeBuckets[h].push(u);
+        if (h > maxHeight) maxHeight = h;
+      }
+    };
+
+    for (let i = 0; i < n; i++) {
+      if (i !== s && i !== t && excess[i] > 0) enqueue(i);
+    }
+
+    const push = (u, edge) => {
+      const v = edge.to;
+      const send = Math.min(excess[u], edge.capacity - edge.flow);
+      if (send <= 0) return;
+      edge.flow += send;
+      this.adj[v][edge.rev].flow -= send;
+      excess[u] -= send;
+      excess[v] += send;
+      enqueue(v);
+    };
+
+    const relabel = (u) => {
+      count[height[u]]--;
+      let minH = Infinity;
+      for (const edge of this.adj[u]) {
+        if (edge.capacity - edge.flow > 0 && height[edge.to] < minH) {
+          minH = height[edge.to];
+        }
+      }
+      height[u] = minH < Infinity ? minH + 1 : 2 * n;
+      count[height[u]] = (count[height[u]] || 0) + 1;
+      enqueue(u);
+    };
+
+    let pushCount = 0;
+    let relabelCount = 0;
+
+    while (maxHeight >= 0) {
+      if (activeBuckets[maxHeight].length === 0) {
+        maxHeight--;
+        continue;
+      }
+      const u = activeBuckets[maxHeight].pop();
+      inBucket[u] = false;
+
+      while (excess[u] > 0) {
+        let pushed = false;
+        for (const edge of this.adj[u]) {
+          if (edge.capacity - edge.flow > 0 && height[u] === height[edge.to] + 1) {
+            push(u, edge);
+            pushCount++;
+            pushed = true;
+            if (excess[u] === 0) break;
+          }
+        }
+        if (!pushed) {
+          relabel(u);
+          relabelCount++;
+          break;
+        }
+      }
+    }
+
+    const maxFlow = excess[t];
+    const activeEdges = [];
+    const bottlenecks = [];
+
+    for (let u = 0; u < n; u++) {
+      for (const edge of this.adj[u]) {
+        if (edge.capacity > 0 && edge.flow > 0) {
+          const uName = this.nodeNames[u];
+          const vName = this.nodeNames[edge.to];
+          activeEdges.push({
+            from: uName,
+            to: vName,
+            flow: edge.flow,
+            capacity: edge.capacity,
+            utilizationPercent: Math.round((edge.flow / edge.capacity) * 100),
+          });
+          if (edge.flow === edge.capacity) {
+            bottlenecks.push({ from: uName, to: vName, capacity: edge.capacity });
+          }
+        }
+      }
+    }
+
+    return {
+      maxFlow,
+      activeEdges,
+      bottlenecks,
+      stats: { totalNodes: n, pushCount, relabelCount },
+    };
+  }
+}
+
+export class CuckooStashTable {
+  constructor(options = {}) {
+    this.capacity = Math.max(16, options.capacity || 128);
+    this.stashSize = Math.max(2, options.stashSize || 4);
+    this.maxKicks = options.maxKicks || 500;
+    this.table1 = Array(this.capacity).fill(null);
+    this.table2 = Array(this.capacity).fill(null);
+    this.stash = [];
+    this.size = 0;
+    this.seed1 = 0x9e3779b9;
+    this.seed2 = 0x85ebca6b;
+  }
+
+  _hash1(key) {
+    let h = this.seed1 ^ key.length;
+    for (let i = 0; i < key.length; i++) {
+      h = Math.imul(h ^ key.charCodeAt(i), 0x5bd1e995);
+      h ^= h >>> 15;
+    }
+    return (h >>> 0) % this.capacity;
+  }
+
+  _hash2(key) {
+    let h = this.seed2;
+    for (let i = 0; i < key.length; i++) {
+      h ^= key.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return (h >>> 0) % this.capacity;
+  }
+
+  get(key) {
+    const k = String(key);
+    const idx1 = this._hash1(k);
+    if (this.table1[idx1] && this.table1[idx1].key === k) return this.table1[idx1].value;
+    const idx2 = this._hash2(k);
+    if (this.table2[idx2] && this.table2[idx2].key === k) return this.table2[idx2].value;
+    for (let i = 0; i < this.stash.length; i++) {
+      if (this.stash[i].key === k) return this.stash[i].value;
+    }
+    return undefined;
+  }
+
+  has(key) {
+    return this.get(key) !== undefined;
+  }
+
+  set(key, value) {
+    const k = String(key);
+    const idx1 = this._hash1(k);
+    if (this.table1[idx1] && this.table1[idx1].key === k) {
+      this.table1[idx1].value = value;
+      return true;
+    }
+    const idx2 = this._hash2(k);
+    if (this.table2[idx2] && this.table2[idx2].key === k) {
+      this.table2[idx2].value = value;
+      return true;
+    }
+    for (let i = 0; i < this.stash.length; i++) {
+      if (this.stash[i].key === k) {
+        this.stash[i].value = value;
+        return true;
+      }
+    }
+
+    let cur = { key: k, value };
+    let curTable = 1;
+
+    for (let kick = 0; kick < this.maxKicks; kick++) {
+      if (curTable === 1) {
+        const pos = this._hash1(cur.key);
+        const existing = this.table1[pos];
+        this.table1[pos] = cur;
+        if (!existing) {
+          this.size++;
+          return true;
+        }
+        cur = existing;
+        curTable = 2;
+      } else {
+        const pos = this._hash2(cur.key);
+        const existing = this.table2[pos];
+        this.table2[pos] = cur;
+        if (!existing) {
+          this.size++;
+          return true;
+        }
+        cur = existing;
+        curTable = 1;
+      }
+    }
+
+    if (this.stash.length < this.stashSize) {
+      this.stash.push(cur);
+      this.size++;
+      return true;
+    }
+
+    this._rehash(this.capacity * 2);
+    return this.set(cur.key, cur.value);
+  }
+
+  delete(key) {
+    const k = String(key);
+    const idx1 = this._hash1(k);
+    if (this.table1[idx1] && this.table1[idx1].key === k) {
+      this.table1[idx1] = null;
+      this.size--;
+      return true;
+    }
+    const idx2 = this._hash2(k);
+    if (this.table2[idx2] && this.table2[idx2].key === k) {
+      this.table2[idx2] = null;
+      this.size--;
+      return true;
+    }
+    for (let i = 0; i < this.stash.length; i++) {
+      if (this.stash[i].key === k) {
+        this.stash.splice(i, 1);
+        this.size--;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  _rehash(newCapacity) {
+    const oldEntries = [];
+    for (const e of this.table1) if (e) oldEntries.push(e);
+    for (const e of this.table2) if (e) oldEntries.push(e);
+    for (const e of this.stash) oldEntries.push(e);
+
+    this.capacity = newCapacity;
+    this.table1 = Array(this.capacity).fill(null);
+    this.table2 = Array(this.capacity).fill(null);
+    this.stash = [];
+    this.size = 0;
+
+    for (const entry of oldEntries) {
+      this.set(entry.key, entry.value);
+    }
+  }
+
+  getStats() {
+    const totalSlots = this.capacity * 2;
+    return {
+      size: this.size,
+      capacityPerTable: this.capacity,
+      totalSlots,
+      stashUsed: this.stash.length,
+      stashCapacity: this.stashSize,
+      loadFactor: Number((this.size / totalSlots).toFixed(4)),
+    };
+  }
+}
+
+export class ParetoFrontierRanker {
+  constructor(objectiveConfig = {}) {
+    this.objectives = {
+      price: "min",
+      rating: "max",
+      deliveryHours: "min",
+      fulfillmentRate: "max",
+      ...objectiveConfig,
+    };
+  }
+
+  dominates(a, b) {
+    let betterInAtLeastOne = false;
+    for (const [key, direction] of Object.entries(this.objectives)) {
+      const valA = Number(a[key]) || 0;
+      const valB = Number(b[key]) || 0;
+      if (direction === "min") {
+        if (valA > valB) return false;
+        if (valA < valB) betterInAtLeastOne = true;
+      } else {
+        if (valA < valB) return false;
+        if (valA > valB) betterInAtLeastOne = true;
+      }
+    }
+    return betterInAtLeastOne;
+  }
+
+  fastNonDominatedSort(items) {
+    if (!items || items.length === 0) return [];
+    const n = items.length;
+    const S = Array.from({ length: n }, () => []);
+    const dominationCount = Array(n).fill(0);
+    const fronts = [[]];
+
+    for (let p = 0; p < n; p++) {
+      for (let q = 0; q < n; q++) {
+        if (p === q) continue;
+        if (this.dominates(items[p], items[q])) {
+          S[p].push(q);
+        } else if (this.dominates(items[q], items[p])) {
+          dominationCount[p]++;
+        }
+      }
+      if (dominationCount[p] === 0) {
+        items[p].paretoRank = 1;
+        fronts[0].push(p);
+      }
+    }
+
+    let i = 0;
+    while (fronts[i].length > 0) {
+      const nextFront = [];
+      for (const p of fronts[i]) {
+        for (const q of S[p]) {
+          dominationCount[q]--;
+          if (dominationCount[q] === 0) {
+            items[q].paretoRank = i + 2;
+            nextFront.push(q);
+          }
+        }
+      }
+      i++;
+      if (nextFront.length > 0) fronts.push(nextFront);
+      else break;
+    }
+
+    return fronts.map(frontIndices => frontIndices.map(idx => items[idx]));
+  }
+
+  calculateCrowdingDistance(front) {
+    const l = front.length;
+    if (l <= 2) {
+      for (const item of front) item.crowdingDistance = Infinity;
+      return;
+    }
+    for (const item of front) item.crowdingDistance = 0;
+
+    for (const [key] of Object.entries(this.objectives)) {
+      front.sort((a, b) => (Number(a[key]) || 0) - (Number(b[key]) || 0));
+      const minVal = Number(front[0][key]) || 0;
+      const maxVal = Number(front[l - 1][key]) || 0;
+      const range = maxVal - minVal;
+
+      front[0].crowdingDistance = Infinity;
+      front[l - 1].crowdingDistance = Infinity;
+
+      if (range > 0) {
+        for (let i = 1; i < l - 1; i++) {
+          if (front[i].crowdingDistance !== Infinity) {
+            const prevVal = Number(front[i - 1][key]) || 0;
+            const nextVal = Number(front[i + 1][key]) || 0;
+            front[i].crowdingDistance += (nextVal - prevVal) / range;
+          }
+        }
+      }
+    }
+  }
+
+  rank(items, topK) {
+    if (!items || items.length === 0) return [];
+    const cloned = items.map(it => ({ ...it }));
+    const fronts = this.fastNonDominatedSort(cloned);
+    const ranked = [];
+
+    for (const front of fronts) {
+      this.calculateCrowdingDistance(front);
+      front.sort((a, b) => {
+        if (a.crowdingDistance === Infinity && b.crowdingDistance !== Infinity) return -1;
+        if (b.crowdingDistance === Infinity && a.crowdingDistance !== Infinity) return 1;
+        return (b.crowdingDistance || 0) - (a.crowdingDistance || 0);
+      });
+      for (const item of front) ranked.push(item);
+    }
+
+    return topK ? ranked.slice(0, topK) : ranked;
+  }
+
+  getParetoFront(items) {
+    const ranked = this.rank(items);
+    return ranked.filter(it => it.paretoRank === 1);
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -16798,6 +17247,10 @@ export default {
   KuhnMunkresMatching,
   TDigestPercentileEstimator,
   HierarchicalSoftmaxRouter,
+  // Phase 35 Enterprise Algorithms
+  PushRelabelMaxFlow,
+  CuckooStashTable,
+  ParetoFrontierRanker,
 };
 
 

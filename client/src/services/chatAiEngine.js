@@ -878,6 +878,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 37. Thông Lượng Push-Relabel, Bộ Đệm Cuckoo Stash & Gợi Ý Đa Mục Tiêu Pareto (PUSH_RELABEL_CUCKOO_PARETO_ASSIST)
+  if (/luồng cực đại push-relabel|push-relabel|bảng băm cuckoo stash|cuckoo stash|gợi ý tối ưu pareto|pareto frontier/i.test(lower)) {
+    return {
+      intent: 'PUSH_RELABEL_CUCKOO_PARETO_ASSIST',
+      replyText: `**[HẠ TẦNG PUSH-RELABEL, BỘ ĐỆM CUCKOO STASH & GỢI Ý ĐA MỤC TIÊU PARETO]:**\n\n• **Hạ tầng Flash Sale không nghẽn Push-Relabel**: Thuật toán Preflow-Push điều phối lưu lượng thanh toán thông suốt, đảm bảo bạn săn Deal sốc 11.11 mượt mà không lo bị lỗi mạng!\n• **Tra cứu giá tức thì Cuckoo Stash**: Giá bán và tồn kho các sản phẩm Hot được phản hồi ngay trong $O(1)$ mili-giây, giúp bạn xem và chốt đơn ngay không cần tải lại trang.\n• **Gợi ý chuẩn xác Pareto Front 1**: AI tự động lọc ra các sản phẩm tốt nhất toàn diện (giá rẻ nhất, đánh giá cao nhất và giao nhanh nhất) để bạn mua sắm thông thái nhất!`,
+      suggestions: ['Săn Deal Flash Sale mượt mà', 'Xem sản phẩm Pareto tốt nhất', 'Kiểm tra giỏ hàng'],
+    };
+  }
+
 
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH

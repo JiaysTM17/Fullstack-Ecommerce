@@ -886,6 +886,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 44. Tối Ưu Thông Lượng Push-Relabel, Bảng Băm Cuckoo Stash & Xếp Hạng Đa Tiêu Chí Pareto (Phase 35 - Feature 182)
+  if (/push-relabel|cuckoo stash|pareto frontier|không bị thống trị|xếp hạng pareto|thông lượng gian hàng/i.test(raw)) {
+    return {
+      text: `🚀 **TỐI ƯU THÔNG LƯỢNG PUSH-RELABEL, CUCKOO STASH & XẾP HẠNG PARETO (${currentShop.name})**:
+- **Khơi thông dòng đơn hàng bằng Luồng Cực Đại Push-Relabel**:
+  - Tối ưu hóa phân bổ hạn ngạch xử lý đơn hàng hỏa tốc giữa các ca nhân viên kho trong giờ cao điểm Flash Sale, hạn chế tối đa nghẽn cổ chai tại khâu in phiếu đóng gói.
+- **Cache giá và số dư tồn kho thời gian thực với Cuckoo Hashing**:
+  - Đảm bảo thời gian đọc tồn kho $O(1)$ tuyệt đối, không bao giờ bị đứng máy hay delay hiển thị khi hàng nghìn khách đồng loạt bấm Mua Ngay.
+- **Đưa sản phẩm của shop vào Top Pareto Front 1**:
+  - Tư vấn cân bằng giữa giá bán, thời gian chuẩn bị hàng và điểm dịch vụ để sản phẩm của bạn luôn nằm trong nhóm không bị đối thủ thống trị trên trang tìm kiếm!`,
+      type: 'recommendation',
+      tag: 'TỐI ƯU PUSH-RELABEL, CUCKOO STASH & PARETO',
+      suggestions: [
+        'Kiểm tra phân bổ luồng đơn hàng Push-Relabel',
+        'Đo tốc độ tra cứu tồn kho Cuckoo Stash',
+        'Xem đề xuất tối ưu hóa Pareto Front 1'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
