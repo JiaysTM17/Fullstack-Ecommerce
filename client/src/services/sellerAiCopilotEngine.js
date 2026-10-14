@@ -569,7 +569,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 28. Bắt Kịp Xu Hướng Bằng Thuật Toán Space-Saving Heavy Hitters (Phase 19 - Feature 166)
-  if (/space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
+  if (!/conservative|treap/i.test(raw) && /space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
     return {
       text: `🔥 **BẮT KỊP XU HƯỚNG BÁN CHẠY BẰNG SPACE-SAVING HEAVY HITTERS (TOP-K STREAMING)**:
 - **Cơ chế bắt sóng Real-Time với bộ nhớ cố định $O(K)$**:
@@ -723,6 +723,25 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem danh sách SKU hot từ Splay Tree',
         'Kiểm tra trạng thái bưu tá nhận đơn shop',
         'Cài đặt mức chiết khấu Flash Sale tức thì'
+      ]
+    };
+  }
+
+  // 36. Theo Dõi SKU Heavy Hitters Bằng Conservative CMS & Đẩy Sản Phẩm Đỉnh Treap (Phase 27 - Feature 174)
+  if (/heavy hitters|conservative cms|sku.*heavy hitters|treap|cây treap|điểm tài trợ.*treap/i.test(raw)) {
+    return {
+      text: `🔥 **THEO DÕI SKU HEAVY HITTERS BẰNG CONSERVATIVE CMS & TỐI ƯU HIỂN THỊ TREAP**:
+- **Bắt trúng mặt hàng Heavy Hitters thời gian thực**:
+  - Thuật toán Conservative Count-Min Sketch giúp shop lọc ra chính xác các sản phẩm đang được người mua click xem và thêm giỏ hàng nhiều nhất mà không bị sai số thổi phồng.
+  - Tự động cảnh báo nguy cơ "cháy hàng" (Stockout) trước khi SKU chạm đáy tồn kho an toàn!
+- **Tăng thứ hạng hiển thị nhờ Cây Treap**:
+  - Cơ chế Max-Heap Priority trong cây Treap giúp sản phẩm của shop khi tham gia chương trình tài trợ Flash Sale được tự động ưu tiên xuất hiện ở vị trí đầu tiên trong mọi truy vấn khoảng giá của người mua!`,
+      type: 'recommendation',
+      tag: 'HEAVY HITTERS SKU & CHỈ MỤC TREAP',
+      suggestions: [
+        'Xem danh sách SKU Heavy Hitters của shop',
+        'Tối ưu điểm tài trợ Flash Sale cho SKU hot',
+        'Cài đặt cảnh báo tồn kho an toàn'
       ]
     };
   }

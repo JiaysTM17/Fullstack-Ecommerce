@@ -12933,6 +12933,535 @@ export class ScalableBloomFilter {
   }
 }
 
+// ==============================================================================
+// PHASE 27: Conservative Count-Min Sketch, ALT Landmark Router & Treap Index
+// ==============================================================================
+
+export class ConservativeCountMinSketch {
+  constructor(width = 2000, depth = 5, topKCapacity = 50) {
+    this.w = Math.max(10, width);
+    this.d = Math.max(2, depth);
+    this.topKCapacity = Math.max(5, topKCapacity);
+    this.table = Array.from({ length: this.d }, () => new Int32Array(this.w));
+    this.seeds = [0x7feb352d, 0x846ca68b, 0x9e3779b9, 0x1b873593, 0x85ebca6b, 0xc2b2ae35, 0x27d4eb2f];
+    while (this.seeds.length < this.d) {
+      this.seeds.push((this.seeds[this.seeds.length - 1] * 31 + 17) >>> 0);
+    }
+    this.totalEvents = 0;
+    this.heavyHitters = new Map();
+  }
+
+  _hash(str, seed) {
+    const s = String(str);
+    let h1 = seed >>> 0;
+    const c1 = 0xcc9e2d51;
+    const c2 = 0x1b873593;
+    let i = 0;
+    const len = s.length;
+
+    while (i + 4 <= len) {
+      let k1 = (s.charCodeAt(i) & 0xff) |
+               ((s.charCodeAt(i + 1) & 0xff) << 8) |
+               ((s.charCodeAt(i + 2) & 0xff) << 16) |
+               ((s.charCodeAt(i + 3) & 0xff) << 24);
+      i += 4;
+      k1 = Math.imul(k1, c1);
+      k1 = (k1 << 15) | (k1 >>> 17);
+      k1 = Math.imul(k1, c2);
+
+      h1 ^= k1;
+      h1 = (h1 << 13) | (h1 >>> 19);
+      h1 = (Math.imul(h1, 5) + 0xe6546b64) >>> 0;
+    }
+
+    let k1 = 0;
+    const rem = len - i;
+    if (rem === 3) k1 ^= (s.charCodeAt(i + 2) & 0xff) << 16;
+    if (rem >= 2) k1 ^= (s.charCodeAt(i + 1) & 0xff) << 8;
+    if (rem >= 1) {
+      k1 ^= (s.charCodeAt(i) & 0xff);
+      k1 = Math.imul(k1, c1);
+      k1 = (k1 << 15) | (k1 >>> 17);
+      k1 = Math.imul(k1, c2);
+      h1 ^= k1;
+    }
+
+    h1 ^= len;
+    h1 ^= h1 >>> 16;
+    h1 = Math.imul(h1, 0x85ebca6b);
+    h1 ^= h1 >>> 13;
+    h1 = Math.imul(h1, 0xc2b2ae35);
+    h1 ^= h1 >>> 16;
+
+    return (h1 >>> 0) % this.w;
+  }
+
+  add(item, count = 1) {
+    if (item === undefined || item === null) return;
+    const str = String(item);
+    const inc = Math.max(1, Math.floor(count));
+    this.totalEvents += inc;
+
+    const indices = new Int32Array(this.d);
+    let minVal = Infinity;
+
+    for (let i = 0; i < this.d; i++) {
+      indices[i] = this._hash(str, this.seeds[i]);
+      const current = this.table[i][indices[i]];
+      if (current < minVal) {
+        minVal = current;
+      }
+    }
+
+    const targetVal = minVal + inc;
+    for (let i = 0; i < this.d; i++) {
+      const idx = indices[i];
+      if (this.table[i][idx] < targetVal) {
+        this.table[i][idx] = targetVal;
+      }
+    }
+
+    this._updateHeavyHitters(str, targetVal);
+  }
+
+  estimate(item) {
+    if (item === undefined || item === null) return 0;
+    const str = String(item);
+    let minVal = Infinity;
+
+    for (let i = 0; i < this.d; i++) {
+      const idx = this._hash(str, this.seeds[i]);
+      const val = this.table[i][idx];
+      if (val < minVal) {
+        minVal = val;
+      }
+    }
+
+    return minVal === Infinity ? 0 : minVal;
+  }
+
+  _updateHeavyHitters(item, estCount) {
+    this.heavyHitters.set(item, estCount);
+    if (this.heavyHitters.size > this.topKCapacity * 2) {
+      const sorted = Array.from(this.heavyHitters.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, this.topKCapacity);
+      this.heavyHitters = new Map(sorted);
+    }
+  }
+
+  getTopHeavyHitters(k = 10) {
+    const list = Array.from(this.heavyHitters.entries()).map(([item, freq]) => ({
+      item,
+      frequency: this.estimate(item)
+    }));
+    list.sort((a, b) => b.frequency - a.frequency);
+    return list.slice(0, k);
+  }
+
+  getStats() {
+    return {
+      width: this.w,
+      depth: this.d,
+      totalEventsProcessed: this.totalEvents,
+      topKTrackedCount: this.heavyHitters.size,
+      topKCapacity: this.topKCapacity,
+      memoryBytes: this.d * this.w * 4,
+      relativeErrorBound: Number((Math.E / this.w).toFixed(6)),
+      confidencePercent: Number(((1 - Math.exp(-this.d)) * 100).toFixed(2))
+    };
+  }
+
+  clear() {
+    for (let i = 0; i < this.d; i++) {
+      this.table[i].fill(0);
+    }
+    this.totalEvents = 0;
+    this.heavyHitters.clear();
+  }
+}
+
+export class ALTLandmarkRouter {
+  constructor() {
+    this.hubs = new Map();
+    this.adj = new Map();
+    this.revAdj = new Map();
+    this.landmarks = [];
+    this.distFromLandmark = new Map();
+    this.distToLandmark = new Map();
+    this.isPrecomputed = false;
+  }
+
+  addHub(id, meta = {}) {
+    const hubId = String(id);
+    this.hubs.set(hubId, { id: hubId, name: meta.name || hubId, ...meta });
+    if (!this.adj.has(hubId)) this.adj.set(hubId, []);
+    if (!this.revAdj.has(hubId)) this.revAdj.set(hubId, []);
+    this.isPrecomputed = false;
+  }
+
+  addRoute(u, v, weight, bidirectional = true) {
+    const uId = String(u);
+    const vId = String(v);
+    const w = Math.max(0.1, Number(weight) || 1);
+
+    if (!this.hubs.has(uId)) this.addHub(uId);
+    if (!this.hubs.has(vId)) this.addHub(vId);
+
+    this.adj.get(uId).push({ target: vId, weight: w });
+    this.revAdj.get(vId).push({ target: uId, weight: w });
+
+    if (bidirectional) {
+      this.adj.get(vId).push({ target: uId, weight: w });
+      this.revAdj.get(uId).push({ target: vId, weight: w });
+    }
+    this.isPrecomputed = false;
+  }
+
+  setLandmarks(landmarkIds = []) {
+    this.landmarks = landmarkIds.map(String).filter(id => this.hubs.has(id));
+    this.isPrecomputed = false;
+  }
+
+  _dijkstraAll(startId, graph) {
+    const dist = new Map();
+    for (const id of this.hubs.keys()) {
+      dist.set(id, Infinity);
+    }
+    dist.set(startId, 0);
+
+    const visited = new Set();
+    const queue = [{ id: startId, d: 0 }];
+
+    while (queue.length > 0) {
+      queue.sort((a, b) => a.d - b.d);
+      const { id: u, d } = queue.shift();
+
+      if (visited.has(u)) continue;
+      visited.add(u);
+
+      const neighbors = graph.get(u) || [];
+      for (const edge of neighbors) {
+        const v = edge.target;
+        const newD = d + edge.weight;
+        if (newD < dist.get(v)) {
+          dist.set(v, newD);
+          queue.push({ id: v, d: newD });
+        }
+      }
+    }
+
+    return dist;
+  }
+
+  precompute() {
+    if (this.landmarks.length === 0) {
+      const allHubIds = Array.from(this.hubs.keys());
+      this.landmarks = allHubIds.slice(0, Math.min(4, allHubIds.length));
+    }
+
+    this.distFromLandmark.clear();
+    this.distToLandmark.clear();
+
+    for (const L of this.landmarks) {
+      const fromDist = this._dijkstraAll(L, this.adj);
+      this.distFromLandmark.set(L, fromDist);
+
+      const toDist = this._dijkstraAll(L, this.revAdj);
+      this.distToLandmark.set(L, toDist);
+    }
+
+    this.isPrecomputed = true;
+  }
+
+  _heuristicALT(u, target) {
+    if (!this.isPrecomputed) return 0;
+    let maxH = 0;
+
+    for (const L of this.landmarks) {
+      const fromL = this.distFromLandmark.get(L);
+      const toL = this.distToLandmark.get(L);
+
+      if (fromL && toL) {
+        const d_Lt = fromL.get(target);
+        const d_Lu = fromL.get(u);
+        if (d_Lt !== Infinity && d_Lu !== Infinity) {
+          const h1 = d_Lt - d_Lu;
+          if (h1 > maxH) maxH = h1;
+        }
+
+        const d_uL = toL.get(u);
+        const d_tL = toL.get(target);
+        if (d_uL !== Infinity && d_tL !== Infinity) {
+          const h2 = d_uL - d_tL;
+          if (h2 > maxH) maxH = h2;
+        }
+      }
+    }
+
+    return Math.max(0, maxH);
+  }
+
+  findShortestRoute(sourceId, targetId) {
+    const s = String(sourceId);
+    const t = String(targetId);
+
+    if (!this.hubs.has(s) || !this.hubs.has(t)) {
+      return { path: [], totalCost: Infinity, nodesVisited: 0, found: false };
+    }
+
+    if (s === t) {
+      return { path: [s], totalCost: 0, nodesVisited: 1, found: true };
+    }
+
+    if (!this.isPrecomputed) {
+      this.precompute();
+    }
+
+    const gScore = new Map();
+    const fScore = new Map();
+    const parent = new Map();
+    const closedSet = new Set();
+
+    for (const id of this.hubs.keys()) {
+      gScore.set(id, Infinity);
+      fScore.set(id, Infinity);
+    }
+
+    gScore.set(s, 0);
+    const initialH = this._heuristicALT(s, t);
+    fScore.set(s, initialH);
+
+    const openSet = [{ id: s, f: initialH }];
+    let nodesVisited = 0;
+
+    while (openSet.length > 0) {
+      openSet.sort((a, b) => a.f - b.f);
+      const current = openSet.shift().id;
+      nodesVisited++;
+
+      if (current === t) {
+        const path = [];
+        let curr = t;
+        while (curr) {
+          path.unshift(curr);
+          curr = parent.get(curr);
+        }
+        return {
+          path,
+          totalCost: gScore.get(t),
+          nodesVisited,
+          landmarksUsed: this.landmarks.length,
+          found: true
+        };
+      }
+
+      closedSet.add(current);
+
+      const neighbors = this.adj.get(current) || [];
+      for (const edge of neighbors) {
+        const neighbor = edge.target;
+        if (closedSet.has(neighbor)) continue;
+
+        const tentativeG = gScore.get(current) + edge.weight;
+        if (tentativeG < gScore.get(neighbor)) {
+          parent.set(neighbor, current);
+          gScore.set(neighbor, tentativeG);
+          const h = this._heuristicALT(neighbor, t);
+          const f = tentativeG + h;
+          fScore.set(neighbor, f);
+
+          const existing = openSet.find(item => item.id === neighbor);
+          if (existing) {
+            existing.f = f;
+          } else {
+            openSet.push({ id: neighbor, f });
+          }
+        }
+      }
+    }
+
+    return { path: [], totalCost: Infinity, nodesVisited, found: false };
+  }
+
+  clear() {
+    this.hubs.clear();
+    this.adj.clear();
+    this.revAdj.clear();
+    this.landmarks = [];
+    this.distFromLandmark.clear();
+    this.distToLandmark.clear();
+    this.isPrecomputed = false;
+  }
+}
+
+export class TreapNode {
+  constructor(key, priority, value) {
+    this.key = key;
+    this.priority = priority ?? Math.random();
+    this.value = value;
+    this.left = null;
+    this.right = null;
+    this.size = 1;
+  }
+}
+
+export class TreapPriorityIndex {
+  constructor() {
+    this.root = null;
+  }
+
+  _size(node) {
+    return node ? node.size : 0;
+  }
+
+  _update(node) {
+    if (node) {
+      node.size = 1 + this._size(node.left) + this._size(node.right);
+    }
+  }
+
+  _rotateRight(y) {
+    const x = y.left;
+    if (!x) return y;
+    y.left = x.right;
+    x.right = y;
+    this._update(y);
+    this._update(x);
+    return x;
+  }
+
+  _rotateLeft(x) {
+    const y = x.right;
+    if (!y) return x;
+    x.right = y.left;
+    y.left = x;
+    this._update(x);
+    this._update(y);
+    return y;
+  }
+
+  insert(key, priority, value) {
+    const prio = typeof priority === 'number' ? priority : Math.random();
+
+    const insertNode = (node, k, p, val) => {
+      if (!node) {
+        return new TreapNode(k, p, val);
+      }
+
+      if (k === node.key) {
+        node.value = val;
+        node.priority = p;
+        return node;
+      }
+
+      if (k < node.key) {
+        node.left = insertNode(node.left, k, p, val);
+        if (node.left.priority > node.priority) {
+          node = this._rotateRight(node);
+        }
+      } else {
+        node.right = insertNode(node.right, k, p, val);
+        if (node.right.priority > node.priority) {
+          node = this._rotateLeft(node);
+        }
+      }
+
+      this._update(node);
+      return node;
+    };
+
+    this.root = insertNode(this.root, key, prio, value);
+  }
+
+  search(key) {
+    let curr = this.root;
+    while (curr) {
+      if (key === curr.key) return curr.value;
+      if (key < curr.key) curr = curr.left;
+      else curr = curr.right;
+    }
+    return null;
+  }
+
+  delete(key) {
+    let found = false;
+
+    const deleteNode = (node, k) => {
+      if (!node) return null;
+
+      if (k < node.key) {
+        node.left = deleteNode(node.left, k);
+      } else if (k > node.key) {
+        node.right = deleteNode(node.right, k);
+      } else {
+        found = true;
+        if (!node.left) return node.right;
+        if (!node.right) return node.left;
+
+        if (node.left.priority > node.right.priority) {
+          node = this._rotateRight(node);
+          node.right = deleteNode(node.right, k);
+        } else {
+          node = this._rotateLeft(node);
+          node.left = deleteNode(node.left, k);
+        }
+      }
+
+      this._update(node);
+      return node;
+    };
+
+    this.root = deleteNode(this.root, key);
+    return found;
+  }
+
+  rangeQuery(minKey, maxKey) {
+    const results = [];
+
+    const traverse = (node) => {
+      if (!node) return;
+
+      if (node.key >= minKey) {
+        traverse(node.left);
+      }
+
+      if (node.key >= minKey && node.key <= maxKey) {
+        results.push({
+          key: node.key,
+          priority: node.priority,
+          value: node.value
+        });
+      }
+
+      if (node.key <= maxKey) {
+        traverse(node.right);
+      }
+    };
+
+    traverse(this.root);
+    results.sort((a, b) => b.priority - a.priority);
+    return results;
+  }
+
+  getMaxPriorityItem() {
+    if (!this.root) return null;
+    return {
+      key: this.root.key,
+      priority: this.root.priority,
+      value: this.root.value
+    };
+  }
+
+  size() {
+    return this._size(this.root);
+  }
+
+  clear() {
+    this.root = null;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -13085,6 +13614,11 @@ export default {
   BipartiteCourierBatcher,
   BloomSlice,
   ScalableBloomFilter,
+  // Phase 27 Enterprise Algorithms
+  ConservativeCountMinSketch,
+  ALTLandmarkRouter,
+  TreapNode,
+  TreapPriorityIndex,
 };
 
 

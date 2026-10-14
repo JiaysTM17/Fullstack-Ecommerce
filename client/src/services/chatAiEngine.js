@@ -805,6 +805,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 29. Định Tuyến Bưu Kiện ALT & Lọc Sản Phẩm Theo Khoảng Giá Treap (ALT_ROUTING_TREAP_PRIORITY_ASSIST)
+  if (/alt.*(định tuyến|router)|định tuyến.*alt|treap|cây treap|ưu tiên khoảng giá.*treap|lọc giá.*treap/i.test(lower)) {
+    return {
+      intent: 'ALT_ROUTING_TREAP_PRIORITY_ASSIST',
+      replyText: `**[ĐỊNH TUYẾN ALT & CHỈ MỤC TREAP] TRẢI NGHIỆM GIAO NHẬN VÀ TÌM KIẾM TỐI TÂN:**\n\n• **Định tuyến bưu kiện ALT**: Sử dụng các trạm mốc chiến lược giúp hàng hóa của bạn luân chuyển giữa các Hub tỉnh thành theo tuyến đường ngắn nhất, giảm 1 ngày thời gian nhận hàng!\n• **Cây ưu tiên Treap**: Lọc chớp nhoáng các sản phẩm trong đúng mức ngân sách của bạn và tự động đưa các deal uy tín có điểm đánh giá cao nhất lên đầu!`,
+      suggestions: ['Lọc khoảng giá sản phẩm', 'Tra cứu lộ trình đơn hàng', 'Khám phá sản phẩm tài trợ'],
+    };
+  }
+
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH
   // -------------------------------------------------------------

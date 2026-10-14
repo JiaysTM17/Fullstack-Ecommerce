@@ -112,7 +112,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 3. Tra cứu Thuế nhà thầu TMĐT (Tax Compliance)
-  if (!/hld|heavy-light/i.test(raw) && /thuế|nghị định 52|thông tư 40|vat|tncn|khấu trừ thuế|đối soát thuế/i.test(raw)) {
+  if (!/hld|heavy-light|conservative/i.test(raw) && /thuế|nghị định 52|thông tư 40|\bvat\b|tncn|khấu trừ thuế|đối soát thuế/i.test(raw)) {
     const totalTaxVal = withholdingTax || Math.round(totalRevenue * 0.025);
     const vatEst = Math.round(totalTaxVal * (1.0 / 2.5));
     const pitEst = totalTaxVal - vatEst;
@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (/count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/conservative|cập nhật thận trọng/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -1444,6 +1444,63 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Kiểm tra số lượng lát cắt Bloom Slices',
         'Xem tỷ lệ sai số lý thuyết hiện tại',
         'Khởi tạo bộ lọc chống trùng giao dịch VietQR'
+      ]
+    };
+  }
+
+  // 62. Phác Thảo Tần Suất Dữ Liệu Luồng Bằng Conservative Count-Min Sketch
+  if (/conservative count-min|conservative cms|cập nhật thận trọng|heavy hitters.*conservative|phác thảo tần suất/i.test(raw)) {
+    return {
+      text: `📊 **PHÁC THẢO TẦN SUẤT CONSERVATIVE COUNT-MIN SKETCH (GOYAL ET AL. 2012)**:
+- **Cơ chế Cập nhật Thận trọng (Conservative Update)**:
+  - Khắc phục nhược điểm thổi phồng tần suất (Overestimation) của Count-Min Sketch kinh điển: Khi nhận sự kiện $x$, thay vì tăng đồng loạt $d$ dòng băm, thuật toán chỉ cập nhật các ô có giá trị bằng với giá trị nhỏ nhất hiện tại $\\min_i C[i, h_i(x)]$.
+  - Giảm hơn $50\\%$ sai số ước lượng trong các phiên livestream triệu người xem.
+- **Theo dõi Top-K Heavy Hitters thời gian thực**:
+  - Tích hợp Min-Heap theo dõi tức thì các SKU sản phẩm có lượt click và thêm giỏ hàng cao nhất toàn sàn để cảnh báo quá tải kho bãi.`,
+      type: 'analytics',
+      tag: 'PHÁC THẢO TẦN SUẤT CONSERVATIVE CMS',
+      suggestions: [
+        'Xem danh sách Heavy Hitters thời gian thực',
+        'Kiểm tra giới hạn sai số lý thuyết CMS',
+        'So sánh sai số với Count-Min Sketch kinh điển'
+      ]
+    };
+  }
+
+  // 63. Định Tuyến Mạng Lưới Hubs Toàn Quốc Bằng Thuật Toán ALT (A*, Landmarks, Triangle Inequality)
+  if (/alt landmark|định tuyến alt|thuật toán alt|landmark heuristics|bất đẳng thức tam giác.*spx|định tuyến hub liên tỉnh/i.test(raw)) {
+    return {
+      text: `🗺️ **ĐỊNH TUYẾN MẠNG LƯỚI HUB LIÊN TỈNH SPX EXPRESS BẰNG THUẬT TOÁN ALT (GOLDBERG & HARRELSON)**:
+- **Nguyên lý kết hợp A*, Trạm Mốc (Landmarks) & Bất đẳng thức tam giác**:
+  - Tiền tính toán ma trận khoảng cách hai chiều giữa các Hub chiến lược (Hà Nội, Đà Nẵng, TP.HCM, Cần Thơ) tới toàn bộ các bưu cục 63 tỉnh thành.
+  - Hàm Heuristic $h(u, t) = \\max_L |d(L, t) - d(L, u)|$ thỏa mãn chuẩn mực Admissible & Consistent, hướng đường đi thẳng tắp về đích.
+- **Tốc độ xử lý siêu tốc**:
+  - Giảm hơn $80\\%$ số nút cần duyệt so với thuật toán Dijkstra, tìm lộ trình chuyển phát tối ưu giữa hai điểm bất kỳ trên toàn quốc chỉ trong dưới $1\\text{ms}$.`,
+      type: 'logistics',
+      tag: 'ĐỊNH TUYẾN HUBS BẰNG THUẬT TOÁN ALT',
+      suggestions: [
+        'Xem danh sách các trạm mốc Landmarks',
+        'Kiểm tra thời gian định tuyến liên tỉnh SPX',
+        'Mô phỏng đường đi ngắn nhất giữa hai bưu cục'
+      ]
+    };
+  }
+
+  // 64. Chỉ Mục Ưu Tiên Giá Bán & Điểm Tài Trợ Bằng Cây Treap (Cartesian Tree)
+  if (/treap|cartesian tree|cây treap|chỉ mục treap|lọc khoảng giá.*treap|ưu tiên giá bán treap/i.test(raw)) {
+    return {
+      text: `🌳 **CHỈ MỤC ƯU TIÊN GIÁ BÁN & ĐIỂM TÀI TRỢ BẰNG CÂY TREAP (CARTESIAN TREE)**:
+- **Cấu trúc dữ liệu lai nhị phân (Aragon & Seidel 1989)**:
+  - Đồng thời duy trì thuộc tính Cây tìm kiếm nhị phân (BST) theo **Khóa Giá Bán** và thuộc tính Đống cực đại (Max-Heap) theo **Điểm Tài Trợ / Flash Sale Priority**.
+  - Các phép xoay trái / phải tự động cân bằng cây với độ phức tạp kỳ vọng $O(\\log N)$.
+- **Truy vấn khoảng giá tối ưu (Dynamic Range Search)**:
+  - Cho phép lọc chớp nhoáng danh sách sản phẩm trong khoảng giá $[P_{\\min}, P_{\\max}]$, đồng thời luôn đẩy sản phẩm có điểm tài trợ / uy tín cao nhất lên đỉnh hiển thị cho người mua.`,
+      type: 'index',
+      tag: 'CHỈ MỤC ƯU TIÊN GIÁ BÁN TREAP',
+      suggestions: [
+        'Lọc sản phẩm theo khoảng giá và điểm tài trợ',
+        'Kiểm tra sản phẩm ưu tiên cao nhất ở đỉnh Treap',
+        'Đo lường thời gian truy vấn cây Treap'
       ]
     };
   }

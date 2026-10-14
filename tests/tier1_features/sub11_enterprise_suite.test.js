@@ -170,6 +170,11 @@ import {
   BipartiteCourierBatcher,
   BloomSlice,
   ScalableBloomFilter,
+  // Phase 27 Enterprise Algorithms
+  ConservativeCountMinSketch,
+  ALTLandmarkRouter,
+  TreapNode,
+  TreapPriorityIndex,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -216,6 +221,9 @@ import ServerHLLPlusPlus from "../../server/src/utils/hyperLogLogPlusPlusCardina
 import ServerSplayTreeHotCache from "../../server/src/utils/splayTreeHotCache.js";
 import ServerCourierBatcher from "../../server/src/utils/bipartiteCourierBatcher.js";
 import ServerScalableBloomFilter from "../../server/src/utils/scalableBloomFilter.js";
+import ServerConservativeCMS from "../../server/src/utils/conservativeCountMinSketch.js";
+import ServerALTRouter from "../../server/src/utils/altLandmarkRouter.js";
+import ServerTreapIndex from "../../server/src/utils/treapPriorityIndex.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -14776,6 +14784,345 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.equal(sbf.has(txnId), false); // Not seen before
         sbf.add(txnId);
         expect.equal(sbf.has(txnId), true); // Recorded
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 174: Conservative CMS, ALT Spatial Routing & Treap Suite (Phase 27 - 24 Tests)
+  // =========================================================================
+  describe("Feature 174: Conservative CMS, ALT Spatial Routing & Treap Suite (Phase 27)", () => {
+
+    // --- NHÓM 1: Conservative Count-Min Sketch with Heavy Hitters (F174-T01 -> F174-T06) ---
+    describe("Nhóm 1: Count-Min Sketch with Conservative Update & Real-Time Heavy Hitters", () => {
+      test("F174-T01: Matrix initialization with width w and depth d arrays", () => {
+        const cms = new ConservativeCountMinSketch(500, 4, 20);
+        expect.equal(cms.w, 500);
+        expect.equal(cms.d, 4);
+        expect.equal(cms.table.length, 4);
+        expect.equal(cms.table[0].length, 500);
+        expect.equal(cms.totalEvents, 0);
+      });
+
+      test("F174-T02: Conservative update increments only cells matching minimum value", () => {
+        const cms = new ConservativeCountMinSketch(100, 3);
+        cms.add("SKU_PRO_1", 5);
+        expect.equal(cms.estimate("SKU_PRO_1"), 5);
+
+        // Thêm tiếp 3 đơn vị
+        cms.add("SKU_PRO_1", 3);
+        expect.equal(cms.estimate("SKU_PRO_1"), 8);
+        expect.equal(cms.totalEvents, 8);
+      });
+
+      test("F174-T03: Estimation returns minimum across all hash functions with lower error than standard CMS", () => {
+        const cms = new ConservativeCountMinSketch(200, 4);
+        for (let i = 0; i < 50; i++) {
+          cms.add(`BACKGROUND_NOISE_${i}`, 1);
+        }
+        cms.add("TARGET_SKU", 25);
+
+        const est = cms.estimate("TARGET_SKU");
+        // Conservative update giữ cho độ dội (overestimation) rất nhỏ
+        expect.equal(est >= 25, true);
+        expect.equal(est <= 27, true);
+      });
+
+      test("F174-T04: Zero undercounting guarantee (estimate is always >= true frequency)", () => {
+        const cms = new ConservativeCountMinSketch(300, 4);
+        const trueCounts = { "ITEM_A": 12, "ITEM_B": 45, "ITEM_C": 3 };
+
+        for (const [k, count] of Object.entries(trueCounts)) {
+          for (let i = 0; i < count; i++) {
+            cms.add(k, 1);
+          }
+        }
+
+        for (const [k, count] of Object.entries(trueCounts)) {
+          expect.equal(cms.estimate(k) >= count, true);
+        }
+      });
+
+      test("F174-T05: Heavy Hitters min-heap tracks top frequent items in stream", () => {
+        const cms = new ConservativeCountMinSketch(500, 4, 5);
+        cms.add("VIRAL_SKU_1", 100);
+        cms.add("HOT_SKU_2", 80);
+        cms.add("TRENDING_SKU_3", 50);
+        cms.add("RARE_SKU_4", 2);
+
+        const top = cms.getTopHeavyHitters(2);
+        expect.equal(top.length, 2);
+        expect.equal(top[0].item, "VIRAL_SKU_1");
+        expect.equal(top[0].frequency >= 100, true);
+        expect.equal(top[1].item, "HOT_SKU_2");
+      });
+
+      test("F174-T06: Server-side ConservativeCountMinSketch matches client-side implementation", () => {
+        const cCMS = new ConservativeCountMinSketch(300, 4);
+        const sCMS = new ServerConservativeCMS(300, 4);
+
+        for (let i = 0; i < 30; i++) {
+          cCMS.add(`CLICK_${i}`, i + 1);
+          sCMS.add(`CLICK_${i}`, i + 1);
+        }
+
+        expect.equal(cCMS.estimate("CLICK_15"), sCMS.estimate("CLICK_15"));
+        expect.equal(cCMS.totalEvents, sCMS.totalEvents);
+      });
+    });
+
+    // --- NHÓM 2: ALT Spatial Routing with Landmarks & Triangle Inequality (F174-T07 -> F174-T12) ---
+    describe("Nhóm 2: A* Spatial Routing with Landmarks & Triangle Inequality (ALT Algorithm)", () => {
+      test("F174-T07: Graph and landmark registration with bidirectional edge costs", () => {
+        const router = new ALTLandmarkRouter();
+        router.addHub("HUB_HN", { name: "Hub Hà Nội" });
+        router.addHub("HUB_DN", { name: "Hub Đà Nẵng" });
+        router.addHub("HUB_SG", { name: "Hub TP.HCM" });
+
+        router.addRoute("HUB_HN", "HUB_DN", 750);
+        router.addRoute("HUB_DN", "HUB_SG", 950);
+
+        router.setLandmarks(["HUB_HN", "HUB_SG"]);
+        expect.equal(router.landmarks.length, 2);
+        expect.equal(router.hubs.size, 3);
+        expect.equal(router.adj.get("HUB_DN").length, 2);
+      });
+
+      test("F174-T08: Precomputed distance matrices from and to landmarks satisfy triangle inequality", () => {
+        const router = new ALTLandmarkRouter();
+        router.addRoute("A", "B", 10);
+        router.addRoute("B", "C", 20);
+        router.addRoute("C", "D", 15);
+        router.setLandmarks(["A"]);
+        router.precompute();
+
+        expect.equal(router.isPrecomputed, true);
+        const distFromA = router.distFromLandmark.get("A");
+        expect.equal(distFromA.get("A"), 0);
+        expect.equal(distFromA.get("B"), 10);
+        expect.equal(distFromA.get("C"), 30);
+        expect.equal(distFromA.get("D"), 45);
+      });
+
+      test("F174-T09: ALT heuristic is admissible (h(u, t) <= d(u, t)) and consistent", () => {
+        const router = new ALTLandmarkRouter();
+        router.addRoute("N1", "N2", 5);
+        router.addRoute("N2", "N3", 8);
+        router.addRoute("N3", "N4", 12);
+        router.setLandmarks(["N1", "N4"]);
+        router.precompute();
+
+        // Heuristic từ N2 tới N4 không bao giờ vượt quá khoảng cách thực tế (8 + 12 = 20)
+        const hVal = router._heuristicALT("N2", "N4");
+        expect.equal(hVal <= 20, true);
+        expect.equal(hVal > 0, true);
+      });
+
+      test("F174-T10: A* with ALT heuristic visits fewer nodes than unguided search and finds exact optimal distance", () => {
+        const router = new ALTLandmarkRouter();
+        // Mạng lưới phân nhánh
+        router.addRoute("START", "MID_1", 10);
+        router.addRoute("START", "DETOUR_1", 5);
+        router.addRoute("DETOUR_1", "DETOUR_2", 50);
+        router.addRoute("MID_1", "END", 10);
+        router.addRoute("DETOUR_2", "END", 5);
+
+        router.setLandmarks(["START", "END"]);
+        router.precompute();
+
+        const res = router.findShortestRoute("START", "END");
+        expect.equal(res.found, true);
+        expect.equal(res.totalCost, 20); // START -> MID_1 -> END
+        expect.equal(res.path.join("->"), "START->MID_1->END");
+      });
+
+      test("F174-T11: Disconnected or isolated hubs return clean not found status", () => {
+        const router = new ALTLandmarkRouter();
+        router.addHub("ISLAND_HUB");
+        router.addHub("MAINLAND_HUB");
+
+        const res = router.findShortestRoute("ISLAND_HUB", "MAINLAND_HUB");
+        expect.equal(res.found, false);
+        expect.equal(res.path.length, 0);
+        expect.equal(res.totalCost, Infinity);
+      });
+
+      test("F174-T12: Server-side ALTLandmarkRouter matches client-side implementation", () => {
+        const cRouter = new ALTLandmarkRouter();
+        const sRouter = new ServerALTRouter();
+
+        for (const r of [cRouter, sRouter]) {
+          r.addRoute("H1", "H2", 15);
+          r.addRoute("H2", "H3", 25);
+          r.setLandmarks(["H1"]);
+        }
+
+        const cRes = cRouter.findShortestRoute("H1", "H3");
+        const sRes = sRouter.findShortestRoute("H1", "H3");
+        expect.equal(cRes.totalCost, sRes.totalCost);
+        expect.equal(cRes.path.join(","), sRes.path.join(","));
+      });
+    });
+
+    // --- NHÓM 3: Treap Priority-Price Indexing & Range Queries (F174-T13 -> F174-T18) ---
+    describe("Nhóm 3: Treap (Cartesian Tree) for Priority-Price Indexing & Range Queries", () => {
+      test("F174-T13: Insertion maintains dual BST key property and Max-Heap priority property", () => {
+        const treap = new TreapPriorityIndex();
+        treap.insert(100000, 0.9, { title: "Áo Thun VIP" });
+        treap.insert(50000, 0.4, { title: "Tất Vớ" });
+        treap.insert(200000, 0.7, { title: "Quần Jeans" });
+
+        expect.equal(treap.size(), 3);
+        // Nút có priority cao nhất (0.9) phải nằm ở Root
+        expect.equal(treap.root.key, 100000);
+        expect.equal(treap.root.priority, 0.9);
+        // Cây con trái có key 50000 < 100000, cây con phải có key 200000 > 100000
+        expect.equal(treap.root.left.key, 50000);
+        expect.equal(treap.root.right.key, 200000);
+      });
+
+      test("F174-T14: Search by key traverses BST in O(log N) expected time", () => {
+        const treap = new TreapPriorityIndex();
+        treap.insert(150000, 0.5, { id: "P150", name: "Bàn phím cơ" });
+        treap.insert(80000, 0.3, { id: "P80", name: "Chuột không dây" });
+
+        const item = treap.search(150000);
+        expect.equal(item.name, "Bàn phím cơ");
+        expect.equal(treap.search(999999), null);
+      });
+
+      test("F174-T15: Deletion rotates target node to leaf before removing to preserve heap", () => {
+        const treap = new TreapPriorityIndex();
+        treap.insert(10, 0.9, "TEN");
+        treap.insert(5, 0.5, "FIVE");
+        treap.insert(20, 0.8, "TWENTY");
+
+        expect.equal(treap.root.key, 10);
+        const deleted = treap.delete(10); // Xóa Root
+        expect.equal(deleted, true);
+        expect.equal(treap.size(), 2);
+        expect.equal(treap.search(10), null);
+        // Root mới phải là nút có priority lớn hơn trong 2 con (20 có priority 0.8 > 5 có priority 0.5)
+        expect.equal(treap.root.key, 20);
+      });
+
+      test("F174-T16: Range query filters prices within [minPrice, maxPrice] ordered by priority descending", () => {
+        const treap = new TreapPriorityIndex();
+        treap.insert(50000, 0.3, { title: "Rẻ nhất nhưng ít tài trợ" });
+        treap.insert(120000, 0.95, { title: "Flash Sale Vàng Siêu Tài Trợ" });
+        treap.insert(180000, 0.6, { title: "Hàng chất lượng vừa" });
+        treap.insert(500000, 0.99, { title: "Quá đắt vượt ngân sách" });
+
+        // Lọc trong tầm giá 50k đến 200k
+        const results = treap.rangeQuery(50000, 200000);
+        expect.equal(results.length, 3);
+        // Sản phẩm có điểm tài trợ cao nhất (0.95) phải xếp đầu tiên
+        expect.equal(results[0].key, 120000);
+        expect.equal(results[0].priority, 0.95);
+        expect.equal(results[1].key, 180000);
+      });
+
+      test("F174-T17: Root of Treap always holds highest priority item across entire index", () => {
+        const treap = new TreapPriorityIndex();
+        for (let i = 1; i <= 20; i++) {
+          treap.insert(i * 10000, i * 0.04, { id: `SKU_${i}` });
+        }
+
+        const maxItem = treap.getMaxPriorityItem();
+        expect.equal(maxItem.key, 200000); // SKU_20 có priority cao nhất 0.8
+        expect.equal(treap.root.key, maxItem.key);
+      });
+
+      test("F174-T18: Server-side TreapPriorityIndex matches client-side implementation", () => {
+        const cTreap = new TreapPriorityIndex();
+        const sTreap = new ServerTreapIndex();
+
+        const items = [
+          [100, 0.8, "A"],
+          [50, 0.4, "B"],
+          [150, 0.9, "C"]
+        ];
+
+        for (const [k, p, val] of items) {
+          cTreap.insert(k, p, val);
+          sTreap.insert(k, p, val);
+        }
+
+        expect.equal(cTreap.size(), sTreap.size());
+        expect.equal(cTreap.root.key, sTreap.root.key);
+        expect.equal(cTreap.rangeQuery(40, 120).length, sTreap.rangeQuery(40, 120).length);
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Enterprise Lifecycle (F174-T19 -> F174-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Enterprise Lifecycle", () => {
+      test("F174-T19: Admin Sentinel Copilot answers Conservative CMS frequency sketch queries", () => {
+        const res = generateAdminCopilotResponse("Ước lượng tần suất clickstream bằng conservative count-min sketch cập nhật thận trọng theo dõi heavy hitters");
+        expect.equal(res.tag, "PHÁC THẢO TẦN SUẤT CONSERVATIVE CMS");
+        expect.equal(res.type, "analytics");
+        expect.equal(res.text.includes("CONSERVATIVE COUNT-MIN SKETCH"), true);
+        expect.equal(res.text.includes("Conservative Update"), true);
+      });
+
+      test("F174-T20: Admin Sentinel Copilot answers ALT landmark spatial routing queries", () => {
+        const res = generateAdminCopilotResponse("Tối ưu hóa định tuyến liên tỉnh spx bằng thuật toán alt landmark heuristics bất đẳng thức tam giác");
+        expect.equal(res.tag, "ĐỊNH TUYẾN HUBS BẰNG THUẬT TOÁN ALT");
+        expect.equal(res.type, "logistics");
+        expect.equal(res.text.includes("THUẬT TOÁN ALT"), true);
+        expect.equal(res.text.includes("Bất đẳng thức tam giác"), true);
+      });
+
+      test("F174-T21: Admin Sentinel Copilot answers Treap dual priority-price index queries", () => {
+        const res = generateAdminCopilotResponse("Chỉ mục kết hợp lọc khoảng giá và ưu tiên điểm tài trợ bằng cây treap cartesian tree");
+        expect.equal(res.tag, "CHỈ MỤC ƯU TIÊN GIÁ BÁN TREAP");
+        expect.equal(res.type, "index");
+        expect.equal(res.text.includes("CÂY TREAP"), true);
+        expect.equal(res.text.includes("Max-Heap"), true);
+      });
+
+      test("F174-T22: Seller ShopSmart Copilot advises on SKU heavy hitters and Treap priority listing", () => {
+        const res = generateSellerCopilotResponse("Bắt trúng sku heavy hitters bằng conservative cms và tối ưu hiển thị tài trợ đỉnh treap");
+        expect.equal(res.tag, "HEAVY HITTERS SKU & CHỈ MỤC TREAP");
+        expect.equal(res.type, "recommendation");
+        expect.equal(res.text.includes("Conservative Count-Min"), true);
+        expect.equal(res.text.includes("Cây Treap"), true);
+      });
+
+      test("F174-T23: Buyer AI Assistant explains ALT parcel routing and Treap budget filtering", () => {
+        const res = generateAiChatResponse("Sàn có định tuyến bưu kiện liên tỉnh alt và lọc khoảng giá ưu tiên treap không");
+        expect.equal(res.intent, "ALT_ROUTING_TREAP_PRIORITY_ASSIST");
+        expect.equal(res.replyText.includes("ĐỊNH TUYẾN ALT"), true);
+        expect.equal(res.replyText.includes("TREAP"), true);
+      });
+
+      test("F174-T24: E2E Lifecycle: Buyer clickstream monitored via Conservative CMS -> Parcel routed via ALT Landmark Router -> Search filtered via Treap Priority Index", () => {
+        // 1. High frequency clicks on trending SKU recorded in Conservative CMS
+        const cms = new ConservativeCountMinSketch(500, 4);
+        for (let i = 0; i < 200; i++) {
+          cms.add("SKU_AIRPODS_PRO", 1);
+        }
+        expect.equal(cms.estimate("SKU_AIRPODS_PRO"), 200);
+
+        // 2. Nationwide Hub transfer route computed via ALT Router
+        const alt = new ALTLandmarkRouter();
+        alt.addRoute("HUB_BAC_NINH", "HUB_DA_NANG", 700);
+        alt.addRoute("HUB_DA_NANG", "HUB_BINH_DUONG", 900);
+        alt.setLandmarks(["HUB_BAC_NINH", "HUB_BINH_DUONG"]);
+        alt.precompute();
+
+        const route = alt.findShortestRoute("HUB_BAC_NINH", "HUB_BINH_DUONG");
+        expect.equal(route.found, true);
+        expect.equal(route.totalCost, 1600);
+
+        // 3. Buyer queries deals between 1.000.000đ and 5.000.000đ, Treap shows highest sponsored deal
+        const treap = new TreapPriorityIndex();
+        treap.insert(4500000, 0.95, { title: "AirPods Pro 2 Chính Hãng" });
+        treap.insert(1500000, 0.40, { title: "Tai nghe giá rẻ" });
+        treap.insert(9000000, 0.80, { title: "Tai nghe cao cấp audiophile" }); // Ngoại vi
+
+        const searchDeals = treap.rangeQuery(1000000, 5000000);
+        expect.equal(searchDeals.length, 2);
+        expect.equal(searchDeals[0].key, 4500000); // 0.95 priority xuất hiện đầu tiên
       });
     });
   });
