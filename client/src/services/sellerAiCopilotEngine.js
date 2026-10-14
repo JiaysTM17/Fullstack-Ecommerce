@@ -687,6 +687,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 34. Phân Tích Bán Kính Khách Hàng Bằng K-D Tree & Thống Kê UV Gian Hàng Bằng HLL++ (Phase 25 - Feature 172)
+  if (/k-d tree|kd tree|cây k-d|bán kính khách hàng|hyperloglog\+\+|hll\+\+|đếm uv shop|khách ghé thăm shop/i.test(raw)) {
+    return {
+      text: `📍 **PHÂN TÍCH BÁN KÍNH KHÁCH HÀNG K-D TREE & ĐO LƯỜNG UV BẰNG HLL++ (${currentShop.name})**:
+- **Tìm kiếm không gian đa thuộc tính bằng Cây K-D (K-D Tree)**:
+  - Cho phép Shop khoanh vùng các khách hàng tiềm năng sinh sống trong bán kính 3km - 10km quanh kho hàng của bạn.
+  - Tối ưu hóa các chiến dịch "Giao Hỏa Tốc 2H" và nhắm mục tiêu quảng cáo vị trí địa lý chuẩn xác với độ phức tạp $O(\\log N)$.
+- **Thống kê lượng khách ghé thăm độc nhất (UV) bằng HyperLogLog++**:
+  - Đo lường chính xác số lượng tài khoản/thiết bị riêng biệt đã ghé thăm gian hàng của bạn trong ngày mà không bị đếm trùng lặp.
+  - Tự động tính toán tỷ lệ chuyển đổi thực tế: $\\text{CVR} = \\frac{\\text{Số đơn hàng}}{\\text{Unique Visitors (HLL++)}}$, giúp bạn đánh giá chuẩn xác hiệu quả trang trí gian hàng và hình ảnh sản phẩm!`,
+      type: 'recommendation',
+      tag: 'BÁN KÍNH K-D TREE & HLL++',
+      suggestions: [
+        'Phân tích khách hàng trong bán kính 5km',
+        'Đo lường lượng khách UV ghé thăm',
+        'Tối ưu tỷ lệ chuyển đổi CVR gian hàng'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

@@ -506,7 +506,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // GIAN HÀNG CHÍNH HÃNG SHOPEE MALL
   // -------------------------------------------------------------
-  if (/gian hàng|shop|cửa hàng|mall|chính hãng|hãng/i.test(lower)) {
+  if (!/k-d tree|kd tree|bán kính|quanh đây/i.test(lower) && /gian hàng|shop|cửa hàng|mall|chính hãng|hãng/i.test(lower)) {
     return {
       intent: 'MALL_STORES',
       replyText: `**[SHOPEE MALL] 12 GIAN HÀNG CHÍNH HÃNG ĐỘC QUYỀN:**\n\n100% hàng chính hãng, hóa đơn VAT đầy đủ, chính sách đổi trả 7 ngày tận nhà. Dưới đây là các gian hàng uy tín nhất:`,
@@ -784,6 +784,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'TRENDING_DEALS_RESERVOIR_ASSIST',
       replyText: `**[XU HƯỚNG MUA SẮM & CÂY DANH MỤC] RESERVOIR SAMPLING & HLD:**\n\n• **Deal Hot Thời Gian Thực**: Thuật toán lấy mẫu hồ chứa có trọng số suy giảm (Time-Decayed Reservoir Sampling) bắt trúng các sản phẩm đang được người mua săn lùng nhiều nhất trong những phút vừa qua, giúp bạn không bỏ lỡ bất kỳ xu hướng mua sắm hot nào!\n• **Cây Danh Mục Đa Tầng Siêu Tốc**: Hệ thống phân rã cây nặng-nhẹ (HLD) hỗ trợ bạn lướt mượt mà qua các danh mục hàng sâu nhất với mức chiết khấu và phụ phí minh bạch tuyệt đối!`,
       suggestions: ['Khám phá Deal Hot Xu Hướng', 'Xem cây danh mục sản phẩm', 'Lấy voucher độc quyền'],
+    };
+  }
+
+  // 27. Tìm Kiếm Shop & Món Quanh Đây Theo Bán Kính Bằng K-D Tree (NEARBY_RADIUS_KDTREE_ASSIST)
+  if (/quanh đây|bán kính.*km|gần nhất.*giá|tìm kiếm theo bán kính|k-d tree|kd tree/i.test(lower)) {
+    return {
+      intent: 'NEARBY_RADIUS_KDTREE_ASSIST',
+      replyText: `**[TÌM KIẾM QUANH ĐÂY] CÔNG NGHỆ CÂY KHÔNG GIAN K-D TREE (K-DIMENSIONAL TREE):**\n\n• **Lọc đa chiều siêu tốc**: Cấu trúc cây K-D Tree giúp bạn tìm thấy ngay các gian hàng gần bạn nhất (trong bán kính 1km - 5km) thỏa mãn đồng thời mức giá mong muốn và điểm đánh giá uy tín (Rating $\\ge 4.5\\star$).\n• **Giao Hỏa Tốc Siêu Tiết Kiệm**: Mua sắm từ các Shop lân cận giúp giảm tối đa cước phí vận chuyển và nhận hàng thần tốc trong vòng 30 - 60 phút qua SPX Now!`,
+      suggestions: ['Tìm shop gần trong 3km', 'Xem ưu đãi ship hỏa tốc', 'Khám phá quán hot quanh đây'],
     };
   }
 

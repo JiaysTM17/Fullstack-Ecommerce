@@ -415,7 +415,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 16. Ước Lượng Số Lượng Phần Tử Duy Nhất (HyperLogLog Cardinality Estimation)
-  if (/hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
+  if (!/hll\+\+|hyperloglog\+\+|sparse/i.test(raw) && /hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN HYPERLOGLOG (MASSIVE CARDINALITY ESTIMATION)**:
 - **Mục đích thiết kế**: Đếm hàng chục triệu người xem Shopee Live độc nhất (Unique Viewers) hoặc người dùng hoạt động DAU với dung lượng bộ nhớ cố định **dưới 12 KB RAM** (thay vì hàng GB nếu dùng Hash Set).
@@ -876,7 +876,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 33. Luồng Cực Đại Mạng Lưới SPX & Nút Thắt Cổ Chai Min-Cut (Phase 14 - Feature 161)
-  if (/edmonds-karp|luồng cực đại|max flow|min-cut|nút thắt cổ chai|tắc nghẽn hub|năng lực vận chuyển spx|thông lượng spx/i.test(raw)) {
+  if (!/dinic/i.test(raw) && /edmonds-karp|luồng cực đại|max flow|min-cut|nút thắt cổ chai|tắc nghẽn hub|năng lực vận chuyển spx|thông lượng spx/i.test(raw)) {
     return {
       text: `🚛 **PHÂN TÍCH THÔNG LƯỢNG MẠNG LƯỚI GIAO VẬN SPX BẰNG EDMONDS-KARP (MAX-FLOW MIN-CUT)**:
 - **Nguyên lý luồng cực đại (Edmonds-Karp)**:
@@ -1344,6 +1344,46 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Tối ưu quãng đường nhặt hàng Picker',
         'Xem điều phối đội xe VRP',
         'Báo cáo hiệu suất kho fulfillment'
+      ]
+    };
+  }
+
+  // 57. Tối Ưu Hóa Mạng Lưới Phân Phối Bằng Thuật Toán Dinic (Dinic's Maximum Flow)
+  if (/dinic|blocking flow|level graph|luồng cực đại.*dinic|mạng lưới fulfillment.*dinic|thông lượng mạng lưới/i.test(raw)) {
+    return {
+      text: `🌊 **TỐI ĐA HÓA THÔNG LƯỢNG MẠNG LƯỚI FULFILLMENT BẰNG THUẬT TOÁN DINIC**:
+- **Mục đích thiết kế**: Giải bài toán phân bổ luồng hàng hóa từ $M$ tổng kho xuất hàng qua các trạm trung chuyển đến $N$ bưu cục phát hàng chặng cuối, tìm luồng cực đại (Maximum Flow) và nút thắt cổ chai (Min-Cut Bottlenecks).
+- **Cơ chế hoạt động vượt trội**:
+  - **Đồ thị phân tầng (Level Graph qua BFS)**: Phân cấp khoảng cách từ Siêu Nguồn đến Siêu Đích trong $O(V + E)$.
+  - **Luồng chặn (Blocking Flow qua DFS)**: Tìm đồng thời nhiều đường tăng luồng ngắn nhất cùng lúc, giảm số lần duyệt đồ thị.
+  - **Độ phức tạp $O(V^2 E)$**: Nhanh hơn vượt trội so với Edmonds-Karp $O(V E^2)$ khi mở rộng quy mô toàn quốc 63 tỉnh thành.
+- **Phát hiện nút thắt cổ chai (Min-Cut Bottleneck Detection)**: Tự động cảnh báo các tuyến đường trung chuyển bị quá tải 100% công suất để Admin kịp thời điều phối tăng cường xe tải chuyển phát!`,
+      type: 'logistics',
+      tag: 'LUỒNG CỰC ĐẠI DINIC',
+      suggestions: [
+        'Xem báo cáo nút thắt luồng hàng hóa Min-Cut',
+        'Điều phối đội xe VRP Green Logistics',
+        'Cấu hình công suất các trạm Hub trung chuyển'
+      ]
+    };
+  }
+
+  // 58. Đếm Lượng Khách UV Độc Nhất Bằng HyperLogLog++ (Google HLL++)
+  if (/hll\+\+|hyperloglog\+\+|sparse representation|chế độ thưa|đếm uv|lượng truy cập độc nhất/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG LƯỢNG KHÁCH ĐỘC NHẤT HYPERLOGLOG++ (CARDINALITY ESTIMATION) CHUẨN GOOGLE HLL++**:
+- **Mục đích thiết kế**: Thống kê số lượng người mua độc nhất (Unique Visitors - UVs) và số thiết bị truy cập phiên Flash Sale thời gian thực với độ chính xác cao và tiết kiệm $99.9\\%$ RAM.
+- **Cải tiến của HyperLogLog++ (Heule et al. 2013)**:
+  - **Chế độ Thưa (Sparse Representation)**: Sử dụng Set nén khi số lượng UV dưới 1.000, chỉ tốn vài trăm bytes RAM.
+  - **Tự động chuyển Chế độ Dày (Dense Mode)**: Chuyển sang mảng thanh ghi $m = 2^p$ ($p=12 \to 4.096$ registers) khi lượng traffic tăng vọt.
+  - **Bổ chính sai số thực nghiệm (Empirical Bias Correction)**: Kết hợp công thức Linear Counting $E = m \\ln(m / V)$ loại bỏ hoàn toàn sai số phi tuyến tính khi mẫu nhỏ, duy trì sai số chuẩn dưới $1.6\\%$.
+  - **Gộp song song (HyperLogLog Merge)**: Cho phép cộng dồn UV giữa các cụm server mà không cần truyền tải hàng triệu ID người dùng!`,
+      type: 'analytics',
+      tag: 'THỐNG KÊ UV HLL++',
+      suggestions: [
+        'Xem biểu đồ UV truy cập thời gian thực',
+        'Kiểm tra sai số chuẩn HLL++',
+        'Gộp dữ liệu UV giữa các cụm máy chủ'
       ]
     };
   }

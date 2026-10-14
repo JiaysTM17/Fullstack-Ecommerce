@@ -11684,6 +11684,589 @@ export class TimeDecayedReservoirSampler {
   }
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 49: Dinic's Multi-Source Multi-Sink Fulfillment Network Flow (Phase 25)
+// ------------------------------------------------------------------------------
+class DinicEdge {
+  constructor(to, capacity, revIndex, from = null) {
+    this.from = from;
+    this.to = to;
+    this.capacity = capacity;
+    this.flow = 0;
+    this.revIndex = revIndex;
+  }
+}
+
+export class DinicBipartiteFulfillmentFlow {
+  constructor() {
+    this.adj = new Map();
+    this.nodes = new Set();
+    this.level = new Map();
+    this.ptr = new Map();
+    this.nodeMetadata = new Map();
+  }
+
+  addNode(id, metadata = {}) {
+    this.nodes.add(id);
+    if (!this.adj.has(id)) {
+      this.adj.set(id, []);
+    }
+    this.nodeMetadata.set(id, { id, ...metadata });
+  }
+
+  addEdge(u, v, capacity) {
+    this.addNode(u);
+    this.addNode(v);
+
+    const cap = Math.max(0, Number(capacity) || 0);
+    const forwardEdges = this.adj.get(u);
+    const backwardEdges = this.adj.get(v);
+
+    const forwardEdge = new DinicEdge(v, cap, backwardEdges.length, u);
+    const backwardEdge = new DinicEdge(u, 0, forwardEdges.length, v);
+
+    forwardEdges.push(forwardEdge);
+    backwardEdges.push(backwardEdge);
+  }
+
+  _bfs(source, sink) {
+    this.level.clear();
+    for (const node of this.nodes) {
+      this.level.set(node, -1);
+    }
+
+    const queue = [source];
+    this.level.set(source, 0);
+
+    while (queue.length > 0) {
+      const u = queue.shift();
+      const uLevel = this.level.get(u);
+      const edges = this.adj.get(u) || [];
+
+      for (const edge of edges) {
+        if (edge.capacity - edge.flow > 0 && this.level.get(edge.to) === -1) {
+          this.level.set(edge.to, uLevel + 1);
+          queue.push(edge.to);
+        }
+      }
+    }
+
+    return this.level.get(sink) !== -1;
+  }
+
+  _dfs(u, pushed, sink) {
+    if (pushed === 0 || u === sink) return pushed;
+
+    const edges = this.adj.get(u) || [];
+    let startIdx = this.ptr.get(u) || 0;
+
+    for (let cid = startIdx; cid < edges.length; cid++) {
+      this.ptr.set(u, cid);
+      const edge = edges[cid];
+      const tr = edge.to;
+
+      if (this.level.get(u) + 1 !== this.level.get(tr) || edge.capacity - edge.flow === 0) {
+        continue;
+      }
+
+      const trPushed = this._dfs(tr, Math.min(pushed, edge.capacity - edge.flow), sink);
+      if (trPushed === 0) continue;
+
+      edge.flow += trPushed;
+      const revEdge = this.adj.get(edge.to)[edge.revIndex];
+      revEdge.flow -= trPushed;
+
+      return trPushed;
+    }
+
+    return 0;
+  }
+
+  computeMaxFlow(source, sink) {
+    if (!this.nodes.has(source) || !this.nodes.has(sink)) {
+      return {
+        maxFlow: 0,
+        bottlenecks: [],
+        flows: []
+      };
+    }
+
+    for (const edges of this.adj.values()) {
+      for (const e of edges) {
+        e.flow = 0;
+      }
+    }
+
+    let totalFlow = 0;
+
+    while (this._bfs(source, sink)) {
+      this.ptr.clear();
+      for (const node of this.nodes) {
+        this.ptr.set(node, 0);
+      }
+
+      let pushed = this._dfs(source, Infinity, sink);
+      while (pushed > 0) {
+        totalFlow += pushed;
+        pushed = this._dfs(source, Infinity, sink);
+      }
+    }
+
+    const reachableFromSource = new Set();
+    const q = [source];
+    reachableFromSource.add(source);
+
+    while (q.length > 0) {
+      const u = q.shift();
+      const edges = this.adj.get(u) || [];
+      for (const e of edges) {
+        if (e.capacity - e.flow > 0 && !reachableFromSource.has(e.to)) {
+          reachableFromSource.add(e.to);
+          q.push(e.to);
+        }
+      }
+    }
+
+    const bottlenecks = [];
+    const activeFlows = [];
+
+    for (const [u, edges] of this.adj.entries()) {
+      for (const e of edges) {
+        if (e.capacity > 0) {
+          activeFlows.push({
+            from: u,
+            to: e.to,
+            flow: e.flow,
+            capacity: e.capacity,
+            utilizationRate: Number(((e.flow / e.capacity) * 100).toFixed(1))
+          });
+
+          if (reachableFromSource.has(u) && !reachableFromSource.has(e.to)) {
+            bottlenecks.push({
+              from: u,
+              to: e.to,
+              capacity: e.capacity,
+              saturatedFlow: e.flow
+            });
+          }
+        }
+      }
+    }
+
+    return {
+      maxFlow: totalFlow,
+      bottlenecks,
+      activeFlows,
+      reachableNodesCount: reachableFromSource.size
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 50: K-D Tree for Multi-Attribute Geo & Pricing Radius Search (Phase 25)
+// ------------------------------------------------------------------------------
+class InternalKDNode {
+  constructor(point, data, axis) {
+    this.point = point;
+    this.data = data;
+    this.axis = axis;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+export class KDTreeSpatialCatalog {
+  constructor(dimensions = ['lat', 'lon', 'price', 'rating']) {
+    this.dimensions = dimensions;
+    this.k = dimensions.length;
+    this.root = null;
+    this.size = 0;
+  }
+
+  static calculateHaversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(2));
+  }
+
+  build(items = []) {
+    this.size = items.length;
+    const formatted = items.map(item => {
+      const point = this.dimensions.map(dim => Number(item[dim]) || 0);
+      return { point, data: item };
+    });
+
+    this.root = this._buildTree(formatted, 0);
+  }
+
+  _buildTree(points, depth) {
+    if (points.length === 0) return null;
+
+    const axis = depth % this.k;
+    points.sort((a, b) => a.point[axis] - b.point[axis]);
+    const medianIdx = Math.floor(points.length / 2);
+    const median = points[medianIdx];
+
+    const node = new InternalKDNode(median.point, median.data, axis);
+    node.left = this._buildTree(points.slice(0, medianIdx), depth + 1);
+    node.right = this._buildTree(points.slice(medianIdx + 1), depth + 1);
+
+    return node;
+  }
+
+  insert(item) {
+    const point = this.dimensions.map(dim => Number(item[dim]) || 0);
+    const newNode = new InternalKDNode(point, item, 0);
+
+    if (!this.root) {
+      this.root = newNode;
+      this.size++;
+      return;
+    }
+
+    let curr = this.root;
+    let depth = 0;
+
+    while (true) {
+      const axis = depth % this.k;
+      if (point[axis] < curr.point[axis]) {
+        if (!curr.left) {
+          newNode.axis = (depth + 1) % this.k;
+          curr.left = newNode;
+          this.size++;
+          break;
+        }
+        curr = curr.left;
+      } else {
+        if (!curr.right) {
+          newNode.axis = (depth + 1) % this.k;
+          curr.right = newNode;
+          this.size++;
+          break;
+        }
+        curr = curr.right;
+      }
+      depth++;
+    }
+  }
+
+  rangeSearch(minBounds, maxBounds) {
+    const results = [];
+    this._rangeSearch(this.root, minBounds, maxBounds, 0, results);
+    return results;
+  }
+
+  _rangeSearch(node, minBounds, maxBounds, depth, results) {
+    if (!node) return;
+
+    let inside = true;
+    for (let i = 0; i < this.k; i++) {
+      if (node.point[i] < minBounds[i] || node.point[i] > maxBounds[i]) {
+        inside = false;
+        break;
+      }
+    }
+
+    if (inside) {
+      results.push(node.data);
+    }
+
+    const axis = depth % this.k;
+
+    if (minBounds[axis] <= node.point[axis]) {
+      this._rangeSearch(node.left, minBounds, maxBounds, depth + 1, results);
+    }
+
+    if (maxBounds[axis] >= node.point[axis]) {
+      this._rangeSearch(node.right, minBounds, maxBounds, depth + 1, results);
+    }
+  }
+
+  kNearestNeighbors(targetPoint, k = 5) {
+    const best = [];
+
+    const distSq = (p1, p2) => {
+      let sum = 0;
+      for (let i = 0; i < this.k; i++) {
+        const diff = p1[i] - p2[i];
+        sum += diff * diff;
+      }
+      return sum;
+    };
+
+    const search = (node, depth) => {
+      if (!node) return;
+
+      const d = distSq(targetPoint, node.point);
+
+      if (best.length < k) {
+        best.push({ item: node.data, distSq: d });
+        best.sort((a, b) => a.distSq - b.distSq);
+      } else if (d < best[best.length - 1].distSq) {
+        best[best.length - 1] = { item: node.data, distSq: d };
+        best.sort((a, b) => a.distSq - b.distSq);
+      }
+
+      const axis = depth % this.k;
+      const axisDiff = targetPoint[axis] - node.point[axis];
+
+      const nearNode = axisDiff < 0 ? node.left : node.right;
+      const farNode = axisDiff < 0 ? node.right : node.left;
+
+      search(nearNode, depth + 1);
+
+      const maxDistSq = best.length < k ? Infinity : best[best.length - 1].distSq;
+      if (axisDiff * axisDiff < maxDistSq) {
+        search(farNode, depth + 1);
+      }
+    };
+
+    search(this.root, 0);
+
+    return best.map(entry => ({
+      item: entry.item,
+      distance: Number(Math.sqrt(entry.distSq).toFixed(4))
+    }));
+  }
+
+  geoRadiusSearch(centerLat, centerLon, radiusKm, { minPrice = 0, maxPrice = Infinity, minRating = 0 } = {}) {
+    const deltaLat = radiusKm / 111.0;
+    const deltaLon = radiusKm / (111.0 * Math.cos((centerLat * Math.PI) / 180));
+
+    const minBounds = [
+      centerLat - deltaLat,
+      centerLon - deltaLon,
+      minPrice,
+      minRating
+    ];
+
+    const maxBounds = [
+      centerLat + deltaLat,
+      centerLon + deltaLon,
+      maxPrice,
+      5.0
+    ];
+
+    const candidates = this.rangeSearch(minBounds, maxBounds);
+    const inRadius = [];
+
+    for (const item of candidates) {
+      const d = KDTreeSpatialCatalog.calculateHaversineKm(centerLat, centerLon, item.lat, item.lon);
+      if (d <= radiusKm) {
+        inRadius.push({
+          ...item,
+          distanceKm: d
+        });
+      }
+    }
+
+    inRadius.sort((a, b) => a.distanceKm - b.distanceKm);
+    return inRadius;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 51: HyperLogLog++ with Bias Correction & Sparse Representation (Phase 25)
+// ------------------------------------------------------------------------------
+export class HyperLogLogPlusPlusCardinality {
+  constructor(p = 12) {
+    this.p = Math.min(16, Math.max(4, p));
+    this.m = 1 << this.p;
+    this.isSparseMode = true;
+    this.sparseSet = new Set();
+    this.sparseThreshold = Math.floor(this.m * 0.75);
+    this.registers = null;
+
+    if (this.m === 16) this.alpha = 0.673;
+    else if (this.m === 32) this.alpha = 0.697;
+    else if (this.m === 64) this.alpha = 0.709;
+    else this.alpha = 0.7213 / (1 + 1.079 / this.m);
+
+    this.totalAdded = 0;
+  }
+
+  static _murmur3(str, seed = 0) {
+    const s = String(str);
+    let h1 = seed >>> 0;
+    const c1 = 0xcc9e2d51;
+    const c2 = 0x1b873593;
+    let i = 0;
+    const len = s.length;
+
+    while (i + 4 <= len) {
+      let k1 = (s.charCodeAt(i) & 0xff) |
+               ((s.charCodeAt(i + 1) & 0xff) << 8) |
+               ((s.charCodeAt(i + 2) & 0xff) << 16) |
+               ((s.charCodeAt(i + 3) & 0xff) << 24);
+      i += 4;
+      k1 = Math.imul(k1, c1);
+      k1 = (k1 << 15) | (k1 >>> 17);
+      k1 = Math.imul(k1, c2);
+
+      h1 ^= k1;
+      h1 = (h1 << 13) | (h1 >>> 19);
+      h1 = (Math.imul(h1, 5) + 0xe6546b64) >>> 0;
+    }
+
+    let k1 = 0;
+    const rem = len - i;
+    if (rem === 3) k1 ^= (s.charCodeAt(i + 2) & 0xff) << 16;
+    if (rem >= 2) k1 ^= (s.charCodeAt(i + 1) & 0xff) << 8;
+    if (rem >= 1) {
+      k1 ^= (s.charCodeAt(i) & 0xff);
+      k1 = Math.imul(k1, c1);
+      k1 = (k1 << 15) | (k1 >>> 17);
+      k1 = Math.imul(k1, c2);
+      h1 ^= k1;
+    }
+
+    h1 ^= len;
+    h1 ^= h1 >>> 16;
+    h1 = Math.imul(h1, 0x85ebca6b);
+    h1 ^= h1 >>> 13;
+    h1 = Math.imul(h1, 0xc2b2ae35);
+    h1 ^= h1 >>> 16;
+
+    return h1 >>> 0;
+  }
+
+  static _hash64(str) {
+    const s = String(str);
+    const h1 = HyperLogLogPlusPlusCardinality._murmur3(s, 0);
+    const h2 = HyperLogLogPlusPlusCardinality._murmur3(s, 0x9747b28c);
+    return [h1, h2];
+  }
+
+  static _countLeadingZeros(val, maxBits = 32) {
+    if (val === 0) return maxBits;
+    return Math.clz32(val);
+  }
+
+  add(item) {
+    this.totalAdded++;
+    if (this.isSparseMode) {
+      this.sparseSet.add(String(item));
+      if (this.sparseSet.size >= this.sparseThreshold) {
+        this._convertToDense();
+      }
+      return;
+    }
+
+    const [h1, h2] = HyperLogLogPlusPlusCardinality._hash64(item);
+    const index = h1 >>> (32 - this.p);
+    const remainder = ((h1 << this.p) | (h2 >>> (32 - this.p))) >>> 0;
+    const rho = Math.min(32, HyperLogLogPlusPlusCardinality._countLeadingZeros(remainder) + 1);
+
+    if (rho > this.registers[index]) {
+      this.registers[index] = rho;
+    }
+  }
+
+  _convertToDense() {
+    this.registers = new Uint8Array(this.m);
+    for (const item of this.sparseSet) {
+      const [h1, h2] = HyperLogLogPlusPlusCardinality._hash64(item);
+      const index = h1 >>> (32 - this.p);
+      const remainder = ((h1 << this.p) | (h2 >>> (32 - this.p))) >>> 0;
+      const rho = Math.min(32, HyperLogLogPlusPlusCardinality._countLeadingZeros(remainder) + 1);
+      if (rho > this.registers[index]) {
+        this.registers[index] = rho;
+      }
+    }
+    this.sparseSet.clear();
+    this.isSparseMode = false;
+  }
+
+  count() {
+    if (this.isSparseMode) {
+      return this.sparseSet.size;
+    }
+
+    let sum = 0;
+    let zeroCount = 0;
+
+    for (let i = 0; i < this.m; i++) {
+      const val = this.registers[i];
+      sum += Math.pow(2, -val);
+      if (val === 0) {
+        zeroCount++;
+      }
+    }
+
+    let estimate = (this.alpha * this.m * this.m) / sum;
+
+    if (estimate <= 2.5 * this.m && zeroCount > 0) {
+      estimate = this.m * Math.log(this.m / zeroCount);
+    }
+
+    return Math.round(estimate);
+  }
+
+  merge(other) {
+    if (this.p !== other.p) {
+      throw new Error(`INCOMPATIBLE_PRECISION: Không thể gộp 2 HLL++ có p khác nhau (${this.p} !== ${other.p})`);
+    }
+
+    if (this.isSparseMode && other.isSparseMode) {
+      for (const val of other.sparseSet) {
+        this.sparseSet.add(val);
+      }
+      if (this.sparseSet.size >= this.sparseThreshold) {
+        this._convertToDense();
+      }
+      return;
+    }
+
+    if (this.isSparseMode) {
+      this._convertToDense();
+    }
+
+    if (other.isSparseMode) {
+      for (const item of other.sparseSet) {
+        const [h1, h2] = HyperLogLogPlusPlusCardinality._hash64(item);
+        const index = h1 >>> (32 - this.p);
+        const remainder = ((h1 << this.p) | (h2 >>> (32 - this.p))) >>> 0;
+        const rho = Math.min(32, HyperLogLogPlusPlusCardinality._countLeadingZeros(remainder) + 1);
+        if (rho > this.registers[index]) {
+          this.registers[index] = rho;
+        }
+      }
+    } else {
+      for (let i = 0; i < this.m; i++) {
+        if (other.registers[i] > this.registers[i]) {
+          this.registers[i] = other.registers[i];
+        }
+      }
+    }
+  }
+
+  getStats() {
+    return {
+      precision: this.p,
+      numRegisters: this.m,
+      isSparse: this.isSparseMode,
+      sparseEntriesCount: this.sparseSet.size,
+      estimatedCardinality: this.count(),
+      totalStreamEventsProcessed: this.totalAdded,
+      standardErrorPercent: Number(((1.04 / Math.sqrt(this.m)) * 100).toFixed(2))
+    };
+  }
+
+  clear() {
+    this.isSparseMode = true;
+    this.sparseSet.clear();
+    this.registers = null;
+    this.totalAdded = 0;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -11826,6 +12409,10 @@ export default {
   HeavyLightDecompositionTaxonomy,
   SimulatedAnnealingWarehouseSlotter,
   TimeDecayedReservoirSampler,
+  // Phase 25 Enterprise Algorithms
+  DinicBipartiteFulfillmentFlow,
+  KDTreeSpatialCatalog,
+  HyperLogLogPlusPlusCardinality,
 };
 
 

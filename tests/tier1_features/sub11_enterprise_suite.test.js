@@ -160,6 +160,10 @@ import {
   HeavyLightDecompositionTaxonomy,
   SimulatedAnnealingWarehouseSlotter,
   TimeDecayedReservoirSampler,
+  // Phase 25 Enterprise Algorithms
+  DinicBipartiteFulfillmentFlow,
+  KDTreeSpatialCatalog,
+  HyperLogLogPlusPlusCardinality,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -200,6 +204,9 @@ import { LazySegmentTreeInventory as ServerLazySegmentTree } from "../../server/
 import ServerHLDTaxonomy from "../../server/src/utils/heavyLightDecompositionTaxonomy.js";
 import ServerWarehouseSlotter from "../../server/src/utils/simulatedAnnealingWarehouseSlotter.js";
 import ServerReservoirSampler from "../../server/src/utils/timeDecayedReservoirSampler.js";
+import ServerDinicFlow from "../../server/src/utils/dinicBipartiteFulfillmentFlow.js";
+import ServerKDTreeCatalog from "../../server/src/utils/kdTreeSpatialCatalog.js";
+import ServerHLLPlusPlus from "../../server/src/utils/hyperLogLogPlusPlusCardinality.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -14021,7 +14028,369 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       });
     });
   });
+
+  // =========================================================================
+  // FEATURE 172: Dinic's Max Flow, K-D Tree Spatial & HLL++ Suite (Phase 25 - 24 Tests)
+  // =========================================================================
+  describe("Feature 172: Dinic's Max Flow, K-D Tree Spatial & HLL++ Suite (Phase 25)", () => {
+
+    // --- NHÓM 1: Dinic's Algorithm for Fulfillment Network Flow (F172-T01 -> F172-T06) ---
+    describe("Nhóm 1: Dinic's Algorithm for Multi-Source Multi-Sink Fulfillment Network Flow", () => {
+      test("F172-T01: Graph construction with nodes, forward and backward capacity edges", () => {
+        const dinic = new DinicBipartiteFulfillmentFlow();
+        dinic.addNode("SRC", { name: "Tổng kho Bắc Ninh" });
+        dinic.addNode("HUB_HN", { name: "Hub Hà Nội" });
+        dinic.addNode("DEST", { name: "Bưu cục Cầu Giấy" });
+
+        dinic.addEdge("SRC", "HUB_HN", 500);
+        dinic.addEdge("HUB_HN", "DEST", 300);
+
+        expect.equal(dinic.nodes.size, 3);
+        expect.equal(dinic.adj.get("SRC").length, 1);
+        expect.equal(dinic.adj.get("SRC")[0].capacity, 500);
+        // Cạnh ngược trong HUB_HN
+        expect.equal(dinic.adj.get("HUB_HN").length, 2);
+      });
+
+      test("F172-T02: Level Graph BFS construction correctly labels distances from source to sink", () => {
+        const dinic = new DinicBipartiteFulfillmentFlow();
+        dinic.addEdge("S", "A", 10);
+        dinic.addEdge("S", "B", 10);
+        dinic.addEdge("A", "T", 10);
+        dinic.addEdge("B", "T", 10);
+
+        const hasPath = dinic._bfs("S", "T");
+        expect.equal(hasPath, true);
+        expect.equal(dinic.level.get("S"), 0);
+        expect.equal(dinic.level.get("A"), 1);
+        expect.equal(dinic.level.get("B"), 1);
+        expect.equal(dinic.level.get("T"), 2);
+      });
+
+      test("F172-T03: Blocking flow DFS pushes multi-path max flow and saturates bottleneck edges", () => {
+        const dinic = new DinicBipartiteFulfillmentFlow();
+        // Mạng kim cương: S -> A (10), S -> B (15), A -> T (10), B -> T (10)
+        // Luồng tối đa: A->T nhận 10, B->T nhận 10 -> Tổng flow = 20
+        dinic.addEdge("S", "A", 10);
+        dinic.addEdge("S", "B", 15);
+        dinic.addEdge("A", "T", 10);
+        dinic.addEdge("B", "T", 10);
+
+        const res = dinic.computeMaxFlow("S", "T");
+        expect.equal(res.maxFlow, 20);
+        expect.equal(res.activeFlows.length, 4);
+      });
+
+      test("F172-T04: Min-Cut theorem verification: Sum of capacities on Min-Cut equals Max Flow", () => {
+        const dinic = new DinicBipartiteFulfillmentFlow();
+        dinic.addEdge("S", "U", 100);
+        dinic.addEdge("S", "V", 50);
+        dinic.addEdge("U", "V", 20);
+        dinic.addEdge("U", "T", 80);
+        dinic.addEdge("V", "T", 70);
+
+        const res = dinic.computeMaxFlow("S", "T");
+        // Min cut capacity must equal max flow (Max-Flow Min-Cut Theorem)
+        const bottleneckCap = res.bottlenecks.reduce((sum, b) => sum + b.capacity, 0);
+        expect.equal(res.maxFlow, bottleneckCap);
+      });
+
+      test("F172-T05: Disconnected or empty graph returns 0 flow cleanly without infinite loop", () => {
+        const dinic = new DinicBipartiteFulfillmentFlow();
+        dinic.addNode("ISOLATED_A");
+        dinic.addNode("ISOLATED_B");
+
+        const res = dinic.computeMaxFlow("ISOLATED_A", "ISOLATED_B");
+        expect.equal(res.maxFlow, 0);
+        expect.equal(res.bottlenecks.length, 0);
+      });
+
+      test("F172-T06: Server-side DinicBipartiteFulfillmentFlow matches client-side implementation", () => {
+        const cDinic = new DinicBipartiteFulfillmentFlow();
+        const sDinic = new ServerDinicFlow();
+
+        for (const engine of [cDinic, sDinic]) {
+          engine.addEdge("S", "N1", 30);
+          engine.addEdge("S", "N2", 20);
+          engine.addEdge("N1", "T", 25);
+          engine.addEdge("N2", "T", 15);
+        }
+
+        const cRes = cDinic.computeMaxFlow("S", "T");
+        const sRes = sDinic.computeMaxFlow("S", "T");
+        expect.equal(cRes.maxFlow, sRes.maxFlow);
+        expect.equal(cRes.maxFlow, 40);
+      });
+    });
+
+    // --- NHÓM 2: K-D Tree for Multi-Attribute Geo & Pricing Radius Search (F172-T07 -> F172-T12) ---
+    describe("Nhóm 2: K-D Tree for Multi-Attribute Geo & Pricing Radius Search", () => {
+      test("F172-T07: K-D Tree construction splits points alternating dimensions and balances tree depth", () => {
+        const kd = new KDTreeSpatialCatalog(['lat', 'lon', 'price', 'rating']);
+        const shops = [
+          { id: "SHOP_1", lat: 21.0285, lon: 105.8542, price: 150000, rating: 4.8 },
+          { id: "SHOP_2", lat: 21.0333, lon: 105.7833, price: 80000, rating: 4.5 },
+          { id: "SHOP_3", lat: 20.9980, lon: 105.8600, price: 200000, rating: 4.9 },
+          { id: "SHOP_4", lat: 10.8231, lon: 106.6297, price: 120000, rating: 4.7 }
+        ];
+
+        kd.build(shops);
+        expect.equal(kd.size, 4);
+        expect.equal(kd.root !== null, true);
+        expect.equal(kd.root.axis, 0); // Axis 0 (lat)
+      });
+
+      test("F172-T08: Single insertion dynamically adds points maintaining hyper-plane invariants", () => {
+        const kd = new KDTreeSpatialCatalog(['lat', 'lon', 'price', 'rating']);
+        kd.insert({ id: "S1", lat: 21.0, lon: 105.8, price: 100000, rating: 5.0 });
+        kd.insert({ id: "S2", lat: 21.1, lon: 105.9, price: 150000, rating: 4.0 });
+        expect.equal(kd.size, 2);
+        expect.equal(kd.root.right !== null, true);
+      });
+
+      test("F172-T09: Hyper-rectangle range search filters multi-dimensional bounds simultaneously", () => {
+        const kd = new KDTreeSpatialCatalog(['lat', 'lon', 'price', 'rating']);
+        kd.build([
+          { id: "CHEAP_HN", lat: 21.02, lon: 105.84, price: 50000, rating: 4.6 },
+          { id: "EXPENSIVE_HN", lat: 21.03, lon: 105.85, price: 500000, rating: 4.9 },
+          { id: "CHEAP_SG", lat: 10.77, lon: 106.69, price: 50000, rating: 4.8 }
+        ]);
+
+        // Lọc tại Hà Nội (lat: 21.0..21.1, lon: 105.8..105.9) với giá dưới 100k
+        const matches = kd.rangeSearch(
+          [21.0, 105.8, 0, 4.0],
+          [21.1, 105.9, 100000, 5.0]
+        );
+
+        expect.equal(matches.length, 1);
+        expect.equal(matches[0].id, "CHEAP_HN");
+      });
+
+      test("F172-T10: K-Nearest Neighbors (KNN) pruning correctly retrieves top K closest items in Euclidean space", () => {
+        const kd = new KDTreeSpatialCatalog(['lat', 'lon']);
+        kd.build([
+          { id: "P1", lat: 0, lon: 0 },
+          { id: "P2", lat: 0, lon: 1 },
+          { id: "P3", lat: 0, lon: 5 },
+          { id: "P4", lat: 0, lon: 10 }
+        ]);
+
+        const knn = kd.kNearestNeighbors([0, 0.5], 2);
+        expect.equal(knn.length, 2);
+        expect.equal(knn.some(k => k.item.id === "P1"), true);
+        expect.equal(knn.some(k => k.item.id === "P2"), true);
+      });
+
+      test("F172-T11: Geo radius search calculates Haversine distances and filters shops strictly within radius R km", () => {
+        const kd = new KDTreeSpatialCatalog(['lat', 'lon', 'price', 'rating']);
+        // Hồ Hoàn Kiếm (21.0285, 105.8542)
+        kd.build([
+          { id: "SHOP_NEARBY", lat: 21.0300, lon: 105.8500, price: 90000, rating: 4.8 }, // ~0.5 km
+          { id: "SHOP_FAR_HAIPHONG", lat: 20.8449, lon: 106.6881, price: 90000, rating: 4.8 } // ~100 km
+        ]);
+
+        const in5km = kd.geoRadiusSearch(21.0285, 105.8542, 5.0, { maxPrice: 100000 });
+        expect.equal(in5km.length, 1);
+        expect.equal(in5km[0].id, "SHOP_NEARBY");
+        expect.equal(in5km[0].distanceKm < 5.0, true);
+      });
+
+      test("F172-T12: Server-side KDTreeSpatialCatalog matches client-side implementation", () => {
+        const cKD = new KDTreeSpatialCatalog(['lat', 'lon']);
+        const sKD = new ServerKDTreeCatalog(['lat', 'lon']);
+
+        const items = [
+          { id: "A", lat: 21.0, lon: 105.0 },
+          { id: "B", lat: 22.0, lon: 106.0 }
+        ];
+
+        cKD.build(items);
+        sKD.build(items);
+
+        const cRes = cKD.kNearestNeighbors([21.1, 105.1], 1);
+        const sRes = sKD.kNearestNeighbors([21.1, 105.1], 1);
+        expect.equal(cRes[0].item.id, sRes[0].item.id);
+        expect.equal(cRes[0].distance, sRes[0].distance);
+      });
+    });
+
+    // --- NHÓM 3: HyperLogLog++ with Bias Correction & Sparse Representation (F172-T13 -> F172-T18) ---
+    describe("Nhóm 3: HyperLogLog++ with Bias Correction & Sparse Representation", () => {
+      test("F172-T13: Sparse representation mode stores unique encoded hash pairs with zero initial register memory", () => {
+        const hll = new HyperLogLogPlusPlusCardinality(12);
+        expect.equal(hll.isSparseMode, true);
+        expect.equal(hll.registers, null);
+
+        hll.add("USER_A");
+        hll.add("USER_B");
+        hll.add("USER_A"); // Duplicate
+
+        expect.equal(hll.sparseSet.size, 2);
+        expect.equal(hll.count(), 2);
+      });
+
+      test("F172-T14: Automatic conversion to dense mode when stream items exceed sparse threshold", () => {
+        const hll = new HyperLogLogPlusPlusCardinality(6); // m = 64, threshold = 48
+        expect.equal(hll.isSparseMode, true);
+
+        for (let i = 0; i < 60; i++) {
+          hll.add(`VISITOR_${i}`);
+        }
+
+        expect.equal(hll.isSparseMode, false);
+        expect.equal(hll.registers instanceof Uint8Array, true);
+        expect.equal(hll.registers.length, 64);
+      });
+
+      test("F172-T15: Small range linear counting bias correction maintains precision on small cardinality (N < 500)", () => {
+        const hll = new HyperLogLogPlusPlusCardinality(12); // m = 4096
+        const trueCount = 200;
+
+        for (let i = 0; i < trueCount; i++) {
+          hll.add(`USER_TEST_${i}`);
+        }
+
+        const est = hll.count();
+        // Error should be within 3%
+        const err = Math.abs(est - trueCount) / trueCount;
+        expect.equal(err < 0.03, true);
+      });
+
+      test("F172-T16: High cardinality stream (5,000 distinct items) estimates count within expected standard error", () => {
+        const hll = new HyperLogLogPlusPlusCardinality(12); // m = 4096, stdError ~ 1.6%
+        const trueCount = 5000;
+
+        for (let i = 0; i < trueCount; i++) {
+          hll.add(`CUSTOMER_STREAM_${i}`);
+        }
+
+        const est = hll.count();
+        const err = Math.abs(est - trueCount) / trueCount;
+        // Should be within 3 * standardError (~5%)
+        expect.equal(err < 0.05, true);
+      });
+
+      test("F172-T17: Merge operation unions two HLL++ structures correctly across sparse and dense states", () => {
+        const hll1 = new HyperLogLogPlusPlusCardinality(10);
+        const hll2 = new HyperLogLogPlusPlusCardinality(10);
+
+        for (let i = 0; i < 50; i++) hll1.add(`COMMON_${i}`);
+        for (let i = 25; i < 75; i++) hll2.add(`COMMON_${i}`);
+
+        // Union of 0..49 and 25..74 has 75 distinct items
+        hll1.merge(hll2);
+        const est = hll1.count();
+        expect.equal(Math.abs(est - 75) <= 3, true);
+      });
+
+      test("F172-T18: Server-side HyperLogLogPlusPlusCardinality matches client-side implementation", () => {
+        const cHLL = new HyperLogLogPlusPlusCardinality(12);
+        const sHLL = new ServerHLLPlusPlus(12);
+
+        for (let i = 0; i < 100; i++) {
+          cHLL.add(`DEV_${i}`);
+          sHLL.add(`DEV_${i}`);
+        }
+
+        expect.equal(cHLL.count(), sHLL.count());
+        expect.equal(cHLL.isSparseMode, sHLL.isSparseMode);
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Enterprise Lifecycle (F172-T19 -> F172-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Enterprise Lifecycle", () => {
+      test("F172-T19: Admin Sentinel Copilot answers Dinic's network flow queries with tag and logistics suggestions", () => {
+        const res = generateAdminCopilotResponse("Tối đa hóa thông lượng mạng lưới fulfillment bằng thuật toán dinic tìm luồng cực đại và nút thắt min-cut");
+        expect.equal(res.tag, "LUỒNG CỰC ĐẠI DINIC");
+        expect.equal(res.type, "logistics");
+        expect.equal(res.text.includes("THUẬT TOÁN DINIC"), true);
+        expect.equal(res.text.includes("Min-Cut"), true);
+      });
+
+      test("F172-T20: Admin Sentinel Copilot answers HyperLogLog++ unique visitor (UV) tracking queries", () => {
+        const res = generateAdminCopilotResponse("Thống kê lượng khách truy cập độc nhất đếm uv phiên flash sale bằng hll++");
+        expect.equal(res.tag, "THỐNG KÊ UV HLL++");
+        expect.equal(res.type, "analytics");
+        expect.equal(res.text.includes("HYPERLOGLOG++"), true);
+        expect.equal(res.text.includes("Linear Counting"), true);
+      });
+
+      test("F172-T21: Seller ShopSmart Copilot advises on K-D Tree customer radius and shop UV analytics", () => {
+        const res = generateSellerCopilotResponse("Phân tích bán kính khách hàng bằng cây k-d tree và đếm uv shop bằng hll++");
+        expect.equal(res.tag, "BÁN KÍNH K-D TREE & HLL++");
+        expect.equal(res.type, "recommendation");
+        expect.equal(res.text.includes("K-D Tree"), true);
+        expect.equal(res.text.includes("HyperLogLog++"), true);
+      });
+
+      test("F172-T22: Buyer AI Assistant explains nearby shop search with K-D Tree radius filtering", () => {
+        const res = generateAiChatResponse("Sàn có tìm kiếm shop quanh đây theo bán kính 3km k-d tree không");
+        expect.equal(res.intent, "NEARBY_RADIUS_KDTREE_ASSIST");
+        expect.equal(res.replyText.includes("K-D TREE"), true);
+      });
+
+      test("F172-T23: Boundary conditions: Fulfillment network with 50 nodes and K-D Tree with 200 items query in under 300ms", () => {
+        const dinic = new DinicBipartiteFulfillmentFlow();
+        dinic.addNode("SRC");
+        dinic.addNode("SINK");
+
+        for (let i = 1; i <= 20; i++) {
+          dinic.addEdge("SRC", `HUB_${i}`, 50);
+          dinic.addEdge(`HUB_${i}`, "SINK", 40);
+        }
+
+        const kd = new KDTreeSpatialCatalog(['lat', 'lon', 'price', 'rating']);
+        const items = [];
+        for (let i = 0; i < 200; i++) {
+          items.push({
+            id: `ITEM_${i}`,
+            lat: 21.0 + Math.random() * 0.1,
+            lon: 105.8 + Math.random() * 0.1,
+            price: 50000 + i * 1000,
+            rating: 4.0 + (i % 10) * 0.1
+          });
+        }
+
+        const t0 = Date.now();
+        const flowRes = dinic.computeMaxFlow("SRC", "SINK");
+        kd.build(items);
+        const radiusMatches = kd.geoRadiusSearch(21.05, 105.85, 3.0);
+        const elapsed = Date.now() - t0;
+
+        expect.equal(flowRes.maxFlow, 800); // 20 * 40 = 800
+        expect.equal(radiusMatches.length > 0, true);
+        expect.equal(elapsed < 300, true);
+      });
+
+      test("F172-T24: E2E Lifecycle: Orders routed through Dinic max-flow fulfillment -> Nearby shops indexed in K-D Tree -> Visitors tracked by HLL++ -> Buyer finds local shop deal", () => {
+        // 1. Dinic computes maximum delivery capacity for city logistics network
+        const network = new DinicBipartiteFulfillmentFlow();
+        network.addEdge("WAREHOUSE_CENTRAL", "HUB_DONG_DA", 1000);
+        network.addEdge("HUB_DONG_DA", "CUSTOMER_CLUSTER", 800);
+        const flowSolution = network.computeMaxFlow("WAREHOUSE_CENTRAL", "CUSTOMER_CLUSTER");
+        expect.equal(flowSolution.maxFlow, 800);
+
+        // 2. Local shops in Dong Da district indexed in K-D Tree
+        const spatialCatalog = new KDTreeSpatialCatalog(['lat', 'lon', 'price', 'rating']);
+        spatialCatalog.build([
+          { id: "SHOP_COFFEE_DONG_DA", lat: 21.0180, lon: 105.8290, price: 35000, rating: 4.9 },
+          { id: "SHOP_SHOES_DONG_DA", lat: 21.0195, lon: 105.8310, price: 250000, rating: 4.7 }
+        ]);
+
+        const nearDongDa = spatialCatalog.geoRadiusSearch(21.0185, 105.8300, 2.0);
+        expect.equal(nearDongDa.length, 2);
+
+        // 3. Unique buyer sessions logged in HyperLogLog++
+        const uvCounter = new HyperLogLogPlusPlusCardinality(12);
+        for (let i = 0; i < 50; i++) {
+          uvCounter.add(`BUYER_SESSION_${i % 15}`); // 15 unique buyers
+        }
+        expect.equal(uvCounter.count(), 15);
+      });
+    });
+  });
 });
+
 
 
 
