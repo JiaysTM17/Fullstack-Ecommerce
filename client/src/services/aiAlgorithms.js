@@ -9754,6 +9754,545 @@ export class RetePromotionEngine {
   }
 }
 
+// =========================================================================
+// PHASE 21 ENTERPRISE ALGORITHMS SUITE (Feature 168)
+// 1. Hierarchical Navigable Small World (HNSW) Dynamic Multi-Layer Re-ranking
+// 2. Tarjan's Strongly Connected Components (SCC) Wash-Trading Fraud Detector
+// 3. Timsort Adaptive Hybrid Sorting Algorithm (Partially Ordered Catalog Sorter)
+// =========================================================================
+
+export class HNSWVectorReranker {
+  constructor({ maxLayers = 4, m = 6, efConstruction = 16, mL = 0.62 } = {}) {
+    this.maxLayers = maxLayers;
+    this.m = m;
+    this.efConstruction = efConstruction;
+    this.mL = mL;
+    this.nodes = new Map();
+    this.entryPoint = null;
+    this.maxLevel = -1;
+  }
+
+  static cosineSimilarity(v1 = [], v2 = []) {
+    if (!v1.length || !v2.length || v1.length !== v2.length) return 0;
+    let dot = 0, normA = 0, normB = 0;
+    for (let i = 0; i < v1.length; i++) {
+      dot += v1[i] * v2[i];
+      normA += v1[i] * v1[i];
+      normB += v2[i] * v2[i];
+    }
+    if (normA === 0 || normB === 0) return 0;
+    return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+  }
+
+  static cosineDistance(v1 = [], v2 = []) {
+    return 1 - HNSWVectorReranker.cosineSimilarity(v1, v2);
+  }
+
+  _getRandomLevel() {
+    let r = Math.random();
+    if (r === 0) r = 0.0000001;
+    const level = Math.floor(-Math.log(r) * this.mL);
+    return Math.min(level, this.maxLayers - 1);
+  }
+
+  addNode(id, vector, metadata = {}) {
+    if (!id || !Array.isArray(vector) || vector.length === 0) {
+      throw new Error("Invalid id or vector for HNSW node");
+    }
+
+    const nodeLevel = this._getRandomLevel();
+    const nodeLayers = [];
+    for (let l = 0; l <= nodeLevel; l++) {
+      nodeLayers.push(new Set());
+    }
+
+    const newNode = {
+      id,
+      vector,
+      metadata: { ...metadata },
+      level: nodeLevel,
+      layers: nodeLayers
+    };
+
+    this.nodes.set(id, newNode);
+
+    if (this.entryPoint === null) {
+      this.entryPoint = id;
+      this.maxLevel = nodeLevel;
+      return newNode;
+    }
+
+    let currObj = this.nodes.get(this.entryPoint);
+    let currDist = HNSWVectorReranker.cosineDistance(vector, currObj.vector);
+
+    for (let level = this.maxLevel; level > nodeLevel; level--) {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        const neighbors = currObj.layers[level] ? Array.from(currObj.layers[level]) : [];
+        for (const neighborId of neighbors) {
+          const neighbor = this.nodes.get(neighborId);
+          if (!neighbor) continue;
+          const d = HNSWVectorReranker.cosineDistance(vector, neighbor.vector);
+          if (d < currDist) {
+            currDist = d;
+            currObj = neighbor;
+            changed = true;
+          }
+        }
+      }
+    }
+
+    const topConnectLevel = Math.min(nodeLevel, this.maxLevel);
+    for (let level = topConnectLevel; level >= 0; level--) {
+      const candidates = this._searchLayer(currObj, vector, this.efConstruction, level);
+      const neighborsToConnect = candidates.slice(0, this.m);
+
+      for (const { id: candId } of neighborsToConnect) {
+        if (candId === id) continue;
+        const candNode = this.nodes.get(candId);
+        if (candNode && candNode.layers[level]) {
+          newNode.layers[level].add(candId);
+          candNode.layers[level].add(id);
+
+          if (candNode.layers[level].size > this.m) {
+            this._pruneNeighbors(candNode, level);
+          }
+        }
+      }
+      if (neighborsToConnect.length > 0) {
+        currObj = this.nodes.get(neighborsToConnect[0].id) || currObj;
+      }
+    }
+
+    if (nodeLevel > this.maxLevel) {
+      this.maxLevel = nodeLevel;
+      this.entryPoint = id;
+    }
+
+    return newNode;
+  }
+
+  _searchLayer(entryNode, queryVector, ef, level) {
+    const vEntry = entryNode.vector;
+    const dEntry = HNSWVectorReranker.cosineDistance(queryVector, vEntry);
+
+    const visited = new Set([entryNode.id]);
+    let candidates = [{ id: entryNode.id, dist: dEntry }];
+    let results = [{ id: entryNode.id, dist: dEntry }];
+
+    while (candidates.length > 0) {
+      const current = candidates.shift();
+      const furthestResult = results[results.length - 1];
+
+      if (current.dist > furthestResult.dist && results.length >= ef) {
+        break;
+      }
+
+      const currNode = this.nodes.get(current.id);
+      if (!currNode || !currNode.layers[level]) continue;
+
+      const neighbors = Array.from(currNode.layers[level]);
+      for (const neighborId of neighbors) {
+        if (visited.has(neighborId)) continue;
+        visited.add(neighborId);
+
+        const neighborNode = this.nodes.get(neighborId);
+        if (!neighborNode) continue;
+
+        const d = HNSWVectorReranker.cosineDistance(queryVector, neighborNode.vector);
+        if (d < furthestResult.dist || results.length < ef) {
+          candidates.push({ id: neighborId, dist: d });
+          candidates.sort((a, b) => a.dist - b.dist);
+
+          results.push({ id: neighborId, dist: d });
+          results.sort((a, b) => a.dist - b.dist);
+
+          if (results.length > ef) {
+            results.pop();
+          }
+        }
+      }
+    }
+
+    return results;
+  }
+
+  _pruneNeighbors(node, level) {
+    const neighbors = Array.from(node.layers[level]);
+    if (neighbors.length <= this.m) return;
+
+    const scored = neighbors.map(nId => {
+      const nNode = this.nodes.get(nId);
+      const d = nNode ? HNSWVectorReranker.cosineDistance(node.vector, nNode.vector) : Infinity;
+      return { id: nId, dist: d };
+    });
+
+    scored.sort((a, b) => a.dist - b.dist);
+    node.layers[level] = new Set(scored.slice(0, this.m).map(s => s.id));
+  }
+
+  searchKnn(queryVector, k = 5, efSearch = 16) {
+    if (!this.entryPoint || this.nodes.size === 0) {
+      return [];
+    }
+
+    let currObj = this.nodes.get(this.entryPoint);
+    let currDist = HNSWVectorReranker.cosineDistance(queryVector, currObj.vector);
+
+    for (let level = this.maxLevel; level > 0; level--) {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        const neighbors = currObj.layers[level] ? Array.from(currObj.layers[level]) : [];
+        for (const neighborId of neighbors) {
+          const neighbor = this.nodes.get(neighborId);
+          if (!neighbor) continue;
+          const d = HNSWVectorReranker.cosineDistance(queryVector, neighbor.vector);
+          if (d < currDist) {
+            currDist = d;
+            currObj = neighbor;
+            changed = true;
+          }
+        }
+      }
+    }
+
+    const rawResults = this._searchLayer(currObj, queryVector, Math.max(k, efSearch), 0);
+    const topK = rawResults.slice(0, k);
+
+    return topK.map(({ id, dist }) => {
+      const node = this.nodes.get(id);
+      const similarity = Math.max(0, 1 - dist);
+      return {
+        id,
+        distance: Number(dist.toFixed(4)),
+        similarity: Number(similarity.toFixed(4)),
+        score: Number(similarity.toFixed(4)),
+        metadata: node ? node.metadata : {}
+      };
+    });
+  }
+
+  dynamicRerank(queryVector, { k = 10, alpha = 0.65, beta = 0.35 } = {}) {
+    const knnCandidates = this.searchKnn(queryVector, k * 2, 24);
+    if (knnCandidates.length === 0) return [];
+
+    let maxSales = 1;
+    let maxRating = 5;
+
+    for (const c of knnCandidates) {
+      const sales = c.metadata.salesCount || 0;
+      if (sales > maxSales) maxSales = sales;
+    }
+
+    const reranked = knnCandidates.map(c => {
+      const meta = c.metadata;
+      const normRating = (meta.rating || 4.0) / maxRating;
+      const normSales = (meta.salesCount || 0) / maxSales;
+      const isMallBonus = meta.isMall ? 0.1 : 0.0;
+      const businessScore = Math.min(1.0, 0.5 * normRating + 0.4 * normSales + isMallBonus);
+
+      const finalScore = Number((alpha * c.similarity + beta * businessScore).toFixed(4));
+
+      return {
+        id: c.id,
+        finalScore,
+        semanticScore: c.similarity,
+        businessScore: Number(businessScore.toFixed(4)),
+        metadata: meta
+      };
+    });
+
+    reranked.sort((a, b) => b.finalScore - a.finalScore);
+    return reranked.slice(0, k);
+  }
+
+  size() {
+    return this.nodes.size;
+  }
+}
+
+export class TarjanSccFraudDetector {
+  constructor() {
+    this.adjacencyList = new Map();
+    this.edgeMetadata = new Map();
+    this.nodes = new Set();
+  }
+
+  addNode(nodeId) {
+    if (!this.nodes.has(nodeId)) {
+      this.nodes.add(nodeId);
+      this.adjacencyList.set(nodeId, new Set());
+    }
+  }
+
+  addTransaction(fromId, toId, metadata = {}) {
+    if (!fromId || !toId) return;
+
+    this.addNode(fromId);
+    this.addNode(toId);
+
+    this.adjacencyList.get(fromId).add(toId);
+
+    const edgeKey = `${fromId}->${toId}`;
+    if (!this.edgeMetadata.has(edgeKey)) {
+      this.edgeMetadata.set(edgeKey, []);
+    }
+    this.edgeMetadata.get(edgeKey).push({
+      amount: metadata.amount || 0,
+      orderId: metadata.orderId || `TX_${Date.now()}`,
+      timestamp: metadata.timestamp || new Date().toISOString()
+    });
+  }
+
+  findStronglyConnectedComponents() {
+    let index = 0;
+    const indices = new Map();
+    const lowlink = new Map();
+    const onStack = new Map();
+    const stack = [];
+    const sccs = [];
+
+    const strongConnect = (v) => {
+      indices.set(v, index);
+      lowlink.set(v, index);
+      index++;
+      stack.push(v);
+      onStack.set(v, true);
+
+      const neighbors = this.adjacencyList.get(v) || new Set();
+      for (const w of neighbors) {
+        if (!indices.has(w)) {
+          strongConnect(w);
+          lowlink.set(v, Math.min(lowlink.get(v), lowlink.get(w)));
+        } else if (onStack.get(w)) {
+          lowlink.set(v, Math.min(lowlink.get(v), indices.get(w)));
+        }
+      }
+
+      if (lowlink.get(v) === indices.get(v)) {
+        const component = [];
+        let w = null;
+        do {
+          w = stack.pop();
+          onStack.set(w, false);
+          component.push(w);
+        } while (w !== v);
+
+        sccs.push(component);
+      }
+    };
+
+    for (const node of this.nodes) {
+      if (!indices.has(node)) {
+        strongConnect(node);
+      }
+    }
+
+    return sccs;
+  }
+
+  detectWashTradingRings({ minSize = 2 } = {}) {
+    const sccs = this.findStronglyConnectedComponents();
+    const suspiciousRings = [];
+
+    for (const component of sccs) {
+      const hasMultiNodeCycle = component.length >= minSize;
+      const hasSelfLoop = component.length === 1 && (this.adjacencyList.get(component[0])?.has(component[0]) ?? false);
+
+      if (hasMultiNodeCycle || hasSelfLoop) {
+        let totalWashVolume = 0;
+        let transactionCount = 0;
+        const internalEdges = [];
+
+        for (const u of component) {
+          const neighbors = this.adjacencyList.get(u) || new Set();
+          for (const v of neighbors) {
+            if (component.includes(v)) {
+              const edgeKey = `${u}->${v}`;
+              const txs = this.edgeMetadata.get(edgeKey) || [];
+              internalEdges.push({ from: u, to: v, count: txs.length });
+              for (const tx of txs) {
+                totalWashVolume += tx.amount;
+                transactionCount++;
+              }
+            }
+          }
+        }
+
+        let riskLevel = "MEDIUM";
+        if (component.length >= 3 || totalWashVolume > 10000000 || transactionCount >= 10) {
+          riskLevel = "CRITICAL";
+        } else if (component.length >= 2 || totalWashVolume > 2000000) {
+          riskLevel = "HIGH";
+        }
+
+        suspiciousRings.push({
+          ringId: `RING_SCC_${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          nodes: component,
+          nodeCount: component.length,
+          riskLevel,
+          totalWashVolume,
+          transactionCount,
+          internalEdges,
+          recommendedAction: riskLevel === "CRITICAL"
+            ? "QUARANTINE_SHOPS_AND_REVERSE_ESCROW"
+            : "FLAG_ACCOUNTS_FOR_AUDIT"
+        });
+      }
+    }
+
+    suspiciousRings.sort((a, b) => b.totalWashVolume - a.totalWashVolume);
+    return suspiciousRings;
+  }
+
+  getStats() {
+    let edgeCount = 0;
+    for (const [, neighbors] of this.adjacencyList) {
+      edgeCount += neighbors.size;
+    }
+    return {
+      nodeCount: this.nodes.size,
+      edgeCount,
+      txCount: Array.from(this.edgeMetadata.values()).reduce((sum, list) => sum + list.length, 0)
+    };
+  }
+}
+
+export class TimsortCatalogSorter {
+  static MIN_MERGE = 32;
+
+  static computeMinRun(n) {
+    let r = 0;
+    while (n >= TimsortCatalogSorter.MIN_MERGE) {
+      r |= (n & 1);
+      n >>= 1;
+    }
+    return n + r;
+  }
+
+  static binaryInsertionSort(arr, left, right, compareFn) {
+    for (let i = left + 1; i <= right; i++) {
+      const pivot = arr[i];
+      let low = left;
+      let high = i - 1;
+
+      while (low <= high) {
+        const mid = (low + high) >> 1;
+        if (compareFn(pivot, arr[mid]) < 0) {
+          high = mid - 1;
+        } else {
+          low = mid + 1;
+        }
+      }
+
+      for (let j = i - 1; j >= low; j--) {
+        arr[j + 1] = arr[j];
+      }
+      arr[low] = pivot;
+    }
+  }
+
+  static merge(arr, left, mid, right, compareFn) {
+    const len1 = mid - left + 1;
+    const len2 = right - mid;
+
+    const leftArr = new Array(len1);
+    const rightArr = new Array(len2);
+
+    for (let i = 0; i < len1; i++) leftArr[i] = arr[left + i];
+    for (let i = 0; i < len2; i++) rightArr[i] = arr[mid + 1 + i];
+
+    let i = 0;
+    let j = 0;
+    let k = left;
+
+    while (i < len1 && j < len2) {
+      if (compareFn(leftArr[i], rightArr[j]) <= 0) {
+        arr[k++] = leftArr[i++];
+      } else {
+        arr[k++] = rightArr[j++];
+      }
+    }
+
+    while (i < len1) arr[k++] = leftArr[i++];
+    while (j < len2) arr[k++] = rightArr[j++];
+  }
+
+  static sort(array = [], compareFn = (a, b) => (a < b ? -1 : a > b ? 1 : 0)) {
+    if (!Array.isArray(array) || array.length <= 1) return array;
+
+    const n = array.length;
+    const minRun = TimsortCatalogSorter.computeMinRun(n);
+
+    for (let i = 0; i < n; i += minRun) {
+      const end = Math.min(i + minRun - 1, n - 1);
+      TimsortCatalogSorter.binaryInsertionSort(array, i, end, compareFn);
+    }
+
+    for (let size = minRun; size < n; size = 2 * size) {
+      for (let left = 0; left < n; left += 2 * size) {
+        const mid = left + size - 1;
+        const right = Math.min(left + 2 * size - 1, n - 1);
+
+        if (mid < right) {
+          TimsortCatalogSorter.merge(array, left, mid, right, compareFn);
+        }
+      }
+    }
+
+    return array;
+  }
+
+  static countNaturalRuns(array = [], compareFn = (a, b) => (a < b ? -1 : a > b ? 1 : 0)) {
+    if (!array || array.length === 0) return 0;
+    if (array.length === 1) return 1;
+
+    let runs = 1;
+    let isAsc = compareFn(array[1], array[0]) >= 0;
+
+    for (let i = 2; i < array.length; i++) {
+      const currAsc = compareFn(array[i], array[i - 1]) >= 0;
+      if (currAsc !== isAsc) {
+        runs++;
+        isAsc = currAsc;
+      }
+    }
+    return runs;
+  }
+
+  static sortCatalog(products = [], { sortBy = "price", order = "asc", secondarySortBy = "rating" } = {}) {
+    const cloned = [...products];
+
+    const compareFn = (a, b) => {
+      let valA = a[sortBy];
+      let valB = b[sortBy];
+
+      if (typeof valA === "string" && typeof valB === "string") {
+        const comp = valA.localeCompare(valB, "vi");
+        if (comp !== 0) return order === "desc" ? -comp : comp;
+      } else {
+        valA = Number(valA || 0);
+        valB = Number(valB || 0);
+        if (valA !== valB) {
+          return order === "desc" ? valB - valA : valA - valB;
+        }
+      }
+
+      if (secondarySortBy && a[secondarySortBy] !== undefined && b[secondarySortBy] !== undefined) {
+        const secA = Number(a[secondarySortBy] || 0);
+        const secB = Number(b[secondarySortBy] || 0);
+        return secB - secA;
+      }
+
+      return 0;
+    };
+
+    return TimsortCatalogSorter.sort(cloned, compareFn);
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -9879,6 +10418,10 @@ export default {
   AlphaNode,
   PromotionRule,
   RetePromotionEngine,
+  // Phase 21 Enterprise Algorithms
+  HNSWVectorReranker,
+  TarjanSccFraudDetector,
+  TimsortCatalogSorter,
 };
 
 

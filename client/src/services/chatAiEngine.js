@@ -751,6 +751,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 23. Tìm Kiếm Ngữ Nghĩa & Đề Xuất Đa Tầng HNSW (SEMANTIC_SEARCH_HNSW_ASSIST)
+  if (/hnsw|semantic search|tìm kiếm ngữ nghĩa|sản phẩm tương tự|re-ranking/i.test(lower)) {
+    return {
+      intent: 'SEMANTIC_SEARCH_HNSW_ASSIST',
+      replyText: `**[TÌM KIẾM THÔNG MINH] HỆ THỐNG GỢI Ý NGỮ NGHĨA HNSW MULTI-LAYER:**\n\n• **Hiểu ý định tự nhiên**: Bạn có thể tìm kiếm bằng ngôn ngữ đời thường (ví dụ: "đồ đi biển", "củ sạc du lịch nhỏ gọn"), hệ thống tự động ánh xạ vector ngữ nghĩa để tìm ra món đồ ưng ý nhất.\n• **Tái xếp hạng ưu tiên chất lượng**: Tự động đưa các sản phẩm có đánh giá cao $\\ge 4.8$ sao, tỷ lệ phản hồi nhanh và gian hàng Mall lên đầu trang để bạn mua sắm an tâm nhất!`,
+      suggestions: ['Gợi ý đồ công nghệ hot', 'Xem sản phẩm bán chạy', 'Lấy mã giảm giá'],
+    };
+  }
+
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH
   // -------------------------------------------------------------

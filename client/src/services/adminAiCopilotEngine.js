@@ -136,7 +136,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 4. Radar phát hiện gian lận & Người mua bất thường (Fraud Radar / Buyer Abuse)
-  if (!/sybil|dsu|disjoint set|lsh|minhash|catalog clone|sao chép catalog|bản quyền ảnh|phash|dhash|hamming|bellman-ford|chu trình âm|simhash|review spam/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
+  if (!/sybil|dsu|disjoint set|lsh|minhash|catalog clone|sao chép catalog|bản quyền ảnh|phash|dhash|hamming|bellman-ford|chu trình âm|simhash|review spam|tarjan|scc|wash[- ]trading/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
     const anomalyCount = fraudAnomaliesCount || (fraudData?.criticalCount ?? 0) || (fraudData?.mediumCount ?? 1);
     return {
       text: `🚨 **RADAR PHÁT HIỆN GIAN LẬN TOÀN SÀN (AI FRAUD GUARD)**:
@@ -474,7 +474,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 19. Radar Phát Hiện Mạng Lưới Gian Lận Tài Khoản Ảo (Disjoint Set Union - DSU Sybil Ring)
-  if (/sybil ring|mạng lưới gian lận|dsu|disjoint set union|liên minh gian lận|tài khoản chung thiết bị|cụm sybil/i.test(raw)) {
+  if (!/tarjan|scc|wash[- ]trading/i.test(raw) && /sybil ring|mạng lưới gian lận|dsu|disjoint set union|liên minh gian lận|tài khoản chung thiết bị|cụm sybil/i.test(raw)) {
     return {
       text: `🕸️ **RADAR MẠNG LƯỚI GIAN LẬN SYBIL RING (DISJOINT SET UNION - DSU)**:
 - **Mục đích thiết kế**: Phát hiện và phong tỏa các cụm tài khoản ảo (Sybil Farm) chuyên dùng chung thiết bị, dải IP, thẻ ngân hàng hoặc số điện thoại để trục lợi mã giảm giá tân thủ.
@@ -637,7 +637,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 27. Tìm Kiếm Ngữ Nghĩa & Hình Ảnh Đa Chiều HNSW (Hierarchical Navigable Small World Graph)
-  if (/hnsw|vector search|tìm kiếm vector|ann search|đồ thị phân tầng|hierarchical navigable|visual search/i.test(raw)) {
+  if (!/re-ranking|tái xếp hạng|multi-layer re-ranking/i.test(raw) && /hnsw|vector search|tìm kiếm vector|ann search|đồ thị phân tầng|hierarchical navigable|visual search/i.test(raw)) {
     return {
       text: `🔍 **TÌM KIẾM VECTOR ĐA CHIỀU HNSW (Hierarchical Navigable Small World)**:
 - **Mục đích**: Thay thế phép quét tuyến tính vét cạn $O(N \\times D)$ bằng tìm kiếm xấp xỉ láng giềng gần nhất (ANN) đạt tốc độ $O(\\log N)$ với độ chính xác Recall@10 $\\ge 98\\%$.
@@ -1176,6 +1176,51 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Minh bạch quay thưởng Fisher-Yates',
         'Phân bổ voucher Dancing Links',
         'Tối ưu giỏ hàng Knapsack'
+      ]
+    };
+  }
+
+  // 49. Phát Hiện Mạng Lưới Rửa Tiền & Bơm Đơn Ảo Bằng Tarjan SCC (Phase 21 - Feature 168)
+  if (/tarjan|scc|strongly connected|rửa tiền|bơm đơn ảo|mua chéo|vòng lặp gian lận|wash[- ]trading/i.test(raw)) {
+    return {
+      text: `🕸️ **PHÁT HIỆN MẠNG LƯỚI BƠM ĐƠN ẢO & RỬA TIỀN BẰNG THUẬT TOÁN TARJAN SCC**:
+- **Nguyên lý Đồ thị có hướng liên thông mạnh (Strongly Connected Components - $O(V + E)$)**:
+  - Sử dụng thuật toán DFS tuyến tính với chỉ số khám phá (\`index\`) và liên kết thấp nhất (\`lowlink\`) để phát hiện các chu trình khép kín giữa các gian hàng.
+- **Mô hình gian lận vòng kín (Circular Wash-Trading)**:
+  - Nhận diện các liên minh gian lận tinh vi: **Shop A ➔ Shop B ➔ Shop C ➔ Shop A** (mua chéo luân chuyển tiền nhằm giả mạo số lượng bán và đẩy vị trí hiển thị lên top tìm kiếm).
+  - Tự động gắn cờ cả hành vi tự mua của chính mình (Self-Loop: Shop A ➔ Shop A bằng tài khoản ảo).
+- **Hành động phản ứng tự động của Admin Sentinel**:
+  - Gắn nhãn rủi ro \`CRITICAL\` khi chu trình có $\\ge 3$ shop hoặc kim ngạch rửa tiền vượt $10.000.000₫$.
+  - Tự động đóng băng số dư ký quỹ Escrow và đề xuất thu hồi điểm phạt Sao Quả Tạ!`,
+      type: 'security',
+      tag: 'RADAR TARJAN SCC',
+      suggestions: [
+        'Tái xếp hạng vector ngữ nghĩa HNSW',
+        'Phát hiện gian lận DSU Sybil',
+        'Minh bạch quay thưởng Fisher-Yates'
+      ]
+    };
+  }
+
+  // 50. Tái Xếp Hạng Đa Tầng Động & Tìm Kiếm Ngữ Nghĩa HNSW (Phase 21 - Feature 168)
+  if (/hnsw|small world|semantic search|tìm kiếm ngữ nghĩa|vector search|re-ranking|tái xếp hạng đa tầng/i.test(raw)) {
+    return {
+      text: `🔍 **TÌM KIẾM NGỮ NGHĨA & TÁI XẾP HẠNG ĐA TẦNG BẰNG ĐỒ THỊ HNSW**:
+- **Kiến trúc Đồ thị Thế giới nhỏ phân tầng (Hierarchical Navigable Small World - $O(\\log N)$)**:
+  - Tầng trên cùng thưa thớt (sparse skip-graph) định vị nhanh vùng lân cận với bước nhảy dài.
+  - Tầng 0 chứa toàn bộ vector đặc trưng đa chiều (Cosine Similarity) tìm kiếm K láng giềng gần nhất (k-NN) dưới $2\\text{ms}$.
+- **Tái xếp hạng đa mục tiêu động (Dynamic Multi-Layer Re-ranking)**:
+  - Kết hợp hài hòa giữa **Điểm tương đồng ngữ nghĩa (Semantic Vector Score - 65%)** và **Tín hiệu kinh doanh thực tế (Business Signals - 35%)**:
+    • Tốc độ bán (Sales Velocity) & số lượt mua thành công.
+    • Đánh giá sao uy tín của gian hàng (Storefront Rating).
+    • Ưu tiên nhãn Shopee Mall chính hãng.
+- **Tối đa hóa tỷ lệ chuyển đổi (Conversion Rate)**: Khách hàng tìm thấy đúng sản phẩm mong muốn ngay cả khi gõ từ khóa tự nhiên hoặc miêu tả tính năng mà không nhớ chính xác tên sản phẩm!`,
+      type: 'algorithm',
+      tag: 'TÌM KIẾM HNSW',
+      suggestions: [
+        'Radar rửa tiền Tarjan SCC',
+        'Sắp xếp danh mục Timsort',
+        'Bộ máy quy tắc khuyến mãi Rete'
       ]
     };
   }

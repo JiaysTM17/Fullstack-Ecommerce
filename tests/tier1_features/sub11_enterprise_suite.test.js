@@ -143,6 +143,10 @@ import {
   AlphaNode,
   PromotionRule,
   RetePromotionEngine,
+  // Phase 21 Enterprise Algorithms
+  HNSWVectorReranker,
+  TarjanSccFraudDetector,
+  TimsortCatalogSorter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -171,6 +175,9 @@ import { KademliaDhtRouting as ServerKademliaDHT } from "../../server/src/utils/
 import { FisherYatesFairRaffle as ServerFisherYates } from "../../server/src/utils/fisherYatesFairRaffle.js";
 import { PrefixSpanSequentialMining as ServerPrefixSpan } from "../../server/src/utils/prefixSpanSequentialMining.js";
 import { RetePromotionEngine as ServerReteEngine } from "../../server/src/utils/retePromotionEngine.js";
+import { HNSWVectorReranker as ServerHNSWVectorReranker } from "../../server/src/utils/hnswVectorReranker.js";
+import { TarjanSccFraudDetector as ServerTarjanScc } from "../../server/src/utils/tarjanSccFraudDetector.js";
+import { TimsortCatalogSorter as ServerTimsort } from "../../server/src/utils/timsortCatalogSorter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -12627,6 +12634,330 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.equal(["1000_XU", "5000_XU", "JACKPOT_VOUCHER_100K"].includes(draw.winner.id), true);
         const verified = FisherYatesFairRaffle.verifyFairness("SERVER_SECRET_MEGA_SALE", "CLIENT_BUYER_SEED_ORDER_123", draw.nonce, draw.commitmentHash);
         expect.equal(verified, true);
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 168: HNSW Re-ranking, Tarjan SCC Wash-Trading & Timsort Suite (Phase 21 - 24 Tests)
+  // =========================================================================
+  describe("Feature 168: HNSW Re-ranking, Tarjan SCC Wash-Trading & Timsort Suite (Phase 21)", () => {
+
+    // --- NHÓM 1: Hierarchical Navigable Small World (HNSW) Vector Search & Multi-Layer Re-ranking (F168-T01 -> F168-T06) ---
+    describe("Nhóm 1: Hierarchical Navigable Small World (HNSW) Vector Search & Multi-Layer Re-ranking", () => {
+      test("F168-T01: Initial state and cosine similarity / distance calculation bounds ([-1, 1] and [0, 2])", () => {
+        const hnsw = new HNSWVectorReranker();
+        expect.equal(hnsw.size(), 0);
+        expect.equal(hnsw.entryPoint, null);
+
+        const simIdentical = HNSWVectorReranker.cosineSimilarity([1, 0, 0], [1, 0, 0]);
+        const distIdentical = HNSWVectorReranker.cosineDistance([1, 0, 0], [1, 0, 0]);
+        expect.equal(simIdentical, 1);
+        expect.equal(distIdentical, 0);
+
+        const simOrthogonal = HNSWVectorReranker.cosineSimilarity([1, 0, 0], [0, 1, 0]);
+        const distOrthogonal = HNSWVectorReranker.cosineDistance([1, 0, 0], [0, 1, 0]);
+        expect.equal(simOrthogonal, 0);
+        expect.equal(distOrthogonal, 1);
+      });
+
+      test("F168-T02: Inserting vector embeddings builds multi-layer skip-graph structure and assigns valid levels", () => {
+        const hnsw = new HNSWVectorReranker({ maxLayers: 4 });
+        hnsw.addNode("P1", [0.9, 0.1, 0.0], { title: "Áo Polo Nam" });
+        hnsw.addNode("P2", [0.85, 0.15, 0.0], { title: "Áo Thun Nam" });
+        hnsw.addNode("P3", [0.0, 0.9, 0.1], { title: "Váy Nữ" });
+
+        expect.equal(hnsw.size(), 3);
+        expect.equal(hnsw.entryPoint !== null, true);
+        const node1 = hnsw.nodes.get("P1");
+        expect.equal(node1.level >= 0 && node1.level < 4, true);
+        expect.equal(node1.layers[0] instanceof Set, true);
+      });
+
+      test("F168-T03: searchKnn accurately retrieves top-K nearest neighbors based on vector similarity", () => {
+        const hnsw = new HNSWVectorReranker();
+        hnsw.addNode("TECH_PHONE", [1.0, 0.0, 0.0], { title: "Điện thoại thông minh" });
+        hnsw.addNode("TECH_TABLET", [0.95, 0.05, 0.0], { title: "Máy tính bảng" });
+        hnsw.addNode("FASHION_DRESS", [0.0, 1.0, 0.0], { title: "Đầm xòe công sở" });
+
+        const results = hnsw.searchKnn([0.98, 0.02, 0.0], 2);
+        expect.equal(results.length, 2);
+        expect.equal(results[0].id, "TECH_PHONE");
+        expect.equal(results[1].id, "TECH_TABLET");
+        expect.equal(results[0].similarity > results[1].similarity, true);
+      });
+
+      test("F168-T04: dynamicRerank successfully combines semantic similarity with business signals (sales, rating, mall bonus)", () => {
+        const hnsw = new HNSWVectorReranker();
+        // Sản phẩm 1: Độ tương đồng ngữ nghĩa cực cao nhưng doanh số thấp, không phải Mall
+        hnsw.addNode("P_EXACT", [1.0, 0.0], { salesCount: 5, rating: 4.2, isMall: false });
+        // Sản phẩm 2: Độ tương đồng ngữ nghĩa tương đối cao nhưng doanh số khủng, 5 sao, Mall chính hãng
+        hnsw.addNode("P_POPULAR_MALL", [0.92, 0.08], { salesCount: 5000, rating: 4.9, isMall: true });
+
+        const reranked = hnsw.dynamicRerank([1.0, 0.0], { k: 2, alpha: 0.5, beta: 0.5 });
+        expect.equal(reranked.length, 2);
+        // Sản phẩm P_POPULAR_MALL vươn lên nhờ điểm kinh doanh vượt trội
+        expect.equal(reranked[0].id, "P_POPULAR_MALL");
+        expect.equal(reranked[0].businessScore > reranked[1].businessScore, true);
+      });
+
+      test("F168-T05: searchKnn and dynamicRerank return empty array for empty graph without crashing", () => {
+        const emptyHnsw = new HNSWVectorReranker();
+        expect.equal(emptyHnsw.searchKnn([1, 0]).length, 0);
+        expect.equal(emptyHnsw.dynamicRerank([1, 0]).length, 0);
+      });
+
+      test("F168-T06: Server-side HNSWVectorReranker matches client-side implementation", () => {
+        const clientHnsw = new HNSWVectorReranker();
+        const serverHnsw = new ServerHNSWVectorReranker();
+
+        const vQuery = [0.8, 0.2];
+        for (const h of [clientHnsw, serverHnsw]) {
+          h.addNode("SKU_1", [0.85, 0.15], { salesCount: 100, rating: 4.5 });
+          h.addNode("SKU_2", [0.1, 0.9], { salesCount: 10, rating: 4.0 });
+        }
+
+        const cKnn = clientHnsw.searchKnn(vQuery, 1);
+        const sKnn = serverHnsw.searchKnn(vQuery, 1);
+        expect.equal(cKnn[0].id, sKnn[0].id);
+        expect.equal(cKnn[0].similarity, sKnn[0].similarity);
+      });
+    });
+
+    // --- NHÓM 2: Tarjan's Strongly Connected Components (SCC) Wash-Trading Fraud Detector (F168-T07 -> F168-T12) ---
+    describe("Nhóm 2: Tarjan's Strongly Connected Components (SCC) Wash-Trading Fraud Detector", () => {
+      test("F168-T07: Initial graph stats and empty graph handling", () => {
+        const detector = new TarjanSccFraudDetector();
+        const stats = detector.getStats();
+        expect.equal(stats.nodeCount, 0);
+        expect.equal(stats.edgeCount, 0);
+        expect.equal(stats.txCount, 0);
+        expect.equal(detector.findStronglyConnectedComponents().length, 0);
+        expect.equal(detector.detectWashTradingRings().length, 0);
+      });
+
+      test("F168-T08: Directed acyclic transactions produce separate single-node SCCs without false positive wash-trading", () => {
+        const detector = new TarjanSccFraudDetector();
+        // Chuỗi mua bán bình thường một chiều: User -> Shop A -> Supplier B
+        detector.addTransaction("USER_1", "SHOP_A", { amount: 200000 });
+        detector.addTransaction("SHOP_A", "SUPPLIER_B", { amount: 150000 });
+
+        const sccs = detector.findStronglyConnectedComponents();
+        expect.equal(sccs.length, 3);
+        // Mỗi node là 1 SCC riêng lẻ kích thước 1
+        for (const scc of sccs) {
+          expect.equal(scc.length, 1);
+        }
+        // Không có vòng lặp wash-trading nào bị bắt nhầm
+        const rings = detector.detectWashTradingRings();
+        expect.equal(rings.length, 0);
+      });
+
+      test("F168-T09: 2-node circular trading (Shop A <-> Shop B) is accurately identified as an SCC cycle", () => {
+        const detector = new TarjanSccFraudDetector();
+        detector.addTransaction("SHOP_ALPHA", "SHOP_BETA", { amount: 1500000 });
+        detector.addTransaction("SHOP_BETA", "SHOP_ALPHA", { amount: 1450000 });
+
+        const sccs = detector.findStronglyConnectedComponents();
+        const cycle = sccs.find(c => c.length === 2);
+        expect.equal(cycle !== undefined, true);
+        expect.equal(cycle.includes("SHOP_ALPHA"), true);
+        expect.equal(cycle.includes("SHOP_BETA"), true);
+
+        const rings = detector.detectWashTradingRings();
+        expect.equal(rings.length, 1);
+        expect.equal(rings[0].nodeCount, 2);
+        expect.equal(rings[0].totalWashVolume, 2950000);
+        expect.equal(rings[0].riskLevel, "HIGH");
+      });
+
+      test("F168-T10: 3-node complex circular wash-trading (A -> B -> C -> A) is clustered and flagged with high/critical risk level", () => {
+        const detector = new TarjanSccFraudDetector();
+        detector.addTransaction("SHOP_A", "SHOP_B", { amount: 4000000 });
+        detector.addTransaction("SHOP_B", "SHOP_C", { amount: 4000000 });
+        detector.addTransaction("SHOP_C", "SHOP_A", { amount: 4000000 });
+
+        const rings = detector.detectWashTradingRings();
+        expect.equal(rings.length, 1);
+        expect.equal(rings[0].nodeCount, 3);
+        expect.equal(rings[0].totalWashVolume, 12000000);
+        expect.equal(rings[0].riskLevel, "CRITICAL");
+        expect.equal(rings[0].recommendedAction, "QUARANTINE_SHOPS_AND_REVERSE_ESCROW");
+      });
+
+      test("F168-T11: Self-loop wash-trading (Shop A -> Shop A via burner buyer) is correctly identified and quarantined", () => {
+        const detector = new TarjanSccFraudDetector();
+        detector.addTransaction("FRAUD_SHOP", "FRAUD_SHOP", { amount: 800000 });
+
+        const rings = detector.detectWashTradingRings();
+        expect.equal(rings.length, 1);
+        expect.equal(rings[0].nodes[0], "FRAUD_SHOP");
+        expect.equal(rings[0].transactionCount, 1);
+      });
+
+      test("F168-T12: Server-side TarjanSccFraudDetector matches client-side implementation", () => {
+        const cDetector = new TarjanSccFraudDetector();
+        const sDetector = new ServerTarjanScc();
+
+        for (const d of [cDetector, sDetector]) {
+          d.addTransaction("X", "Y", { amount: 500000 });
+          d.addTransaction("Y", "Z", { amount: 500000 });
+          d.addTransaction("Z", "X", { amount: 500000 });
+        }
+
+        const cRings = cDetector.detectWashTradingRings();
+        const sRings = sDetector.detectWashTradingRings();
+        expect.equal(cRings.length, sRings.length);
+        expect.equal(cRings[0].riskLevel, sRings[0].riskLevel);
+        expect.equal(cRings[0].totalWashVolume, sRings[0].totalWashVolume);
+      });
+    });
+
+    // --- NHÓM 3: Timsort Adaptive Hybrid Sorting Algorithm (F168-T13 -> F168-T18) ---
+    describe("Nhóm 3: Timsort Adaptive Hybrid Sorting Algorithm", () => {
+      test("F168-T13: computeMinRun produces valid minRun lengths in accordance with array size", () => {
+        expect.equal(TimsortCatalogSorter.computeMinRun(15), 15);
+        const minRun64 = TimsortCatalogSorter.computeMinRun(64);
+        expect.equal(minRun64 >= 16 && minRun64 <= 32, true);
+        const minRun1000 = TimsortCatalogSorter.computeMinRun(1000);
+        expect.equal(minRun1000 >= 16 && minRun1000 <= 32, true);
+      });
+
+      test("F168-T14: binaryInsertionSort sorts small subarrays accurately in O(N^2) worst case and O(N) best case", () => {
+        const arr = [5, 2, 9, 1, 7];
+        TimsortCatalogSorter.binaryInsertionSort(arr, 0, arr.length - 1, (a, b) => a - b);
+        expect.equal(arr.join(","), "1,2,5,7,9");
+      });
+
+      test("F168-T15: Timsort stable sort preserves the relative order of duplicate keys (stability property)", () => {
+        const items = [
+          { id: 1, price: 100, tag: "A" },
+          { id: 2, price: 50, tag: "B" },
+          { id: 3, price: 100, tag: "C" },
+          { id: 4, price: 50, tag: "D" },
+          { id: 5, price: 100, tag: "E" }
+        ];
+
+        TimsortCatalogSorter.sort(items, (a, b) => a.price - b.price);
+
+        // Các phần tử cùng giá 50 phải giữ nguyên thứ tự ban đầu (B trước D)
+        const fifties = items.filter(i => i.price === 50);
+        expect.equal(fifties[0].tag, "B");
+        expect.equal(fifties[1].tag, "D");
+
+        // Các phần tử cùng giá 100 phải giữ nguyên thứ tự ban đầu (A trước C trước E)
+        const hundreds = items.filter(i => i.price === 100);
+        expect.equal(hundreds[0].tag, "A");
+        expect.equal(hundreds[1].tag, "C");
+        expect.equal(hundreds[2].tag, "E");
+      });
+
+      test("F168-T16: countNaturalRuns identifies existing natural monotonic runs in partially sorted datasets", () => {
+        // [1, 2, 3] (Run 1 tăng dần) + [9, 8, 7] (Run 2 giảm dần)
+        const arr = [1, 2, 3, 9, 8, 7];
+        const runs = TimsortCatalogSorter.countNaturalRuns(arr);
+        expect.equal(runs, 2);
+      });
+
+      test("F168-T17: sortCatalog correctly sorts products by primary and secondary criteria (price asc/desc, rating)", () => {
+        const catalog = [
+          { id: "P1", price: 200000, rating: 4.5 },
+          { id: "P2", price: 100000, rating: 4.0 },
+          { id: "P3", price: 200000, rating: 4.9 },
+          { id: "P4", price: 50000, rating: 4.8 }
+        ];
+
+        const sortedAsc = TimsortCatalogSorter.sortCatalog(catalog, { sortBy: "price", order: "asc", secondarySortBy: "rating" });
+        expect.equal(sortedAsc[0].id, "P4"); // 50k
+        expect.equal(sortedAsc[1].id, "P2"); // 100k
+        // 200k trùng giá -> rating cao hơn (4.9) xếp trước (4.5)
+        expect.equal(sortedAsc[2].id, "P3");
+        expect.equal(sortedAsc[3].id, "P1");
+
+        const sortedDesc = TimsortCatalogSorter.sortCatalog(catalog, { sortBy: "price", order: "desc" });
+        expect.equal(sortedDesc[0].price, 200000);
+        expect.equal(sortedDesc[sortedDesc.length - 1].price, 50000);
+      });
+
+      test("F168-T18: Server-side TimsortCatalogSorter matches client-side implementation", () => {
+        const items = [40, 10, 80, 20, 50, 70, 30, 60];
+        const cSorted = TimsortCatalogSorter.sort([...items]);
+        const sSorted = ServerTimsort.sort([...items]);
+        expect.equal(cSorted.join(","), sSorted.join(","));
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Enterprise Lifecycle (F168-T19 -> F168-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Enterprise Lifecycle", () => {
+      test("F168-T19: Admin Sentinel Copilot answers Tarjan SCC wash-trading queries with accurate tag and suggestions", () => {
+        const res = generateAdminCopilotResponse("Quét mạng lưới gian lận vòng lặp rửa tiền bằng thuật toán tarjan scc");
+        expect.equal(res.tag, "RADAR TARJAN SCC");
+        expect.equal(res.type, "security");
+        expect.equal(res.text.includes("TARJAN SCC"), true);
+        expect.equal(res.text.includes("Circular Wash-Trading"), true);
+      });
+
+      test("F168-T20: Admin Sentinel Copilot answers HNSW multi-layer re-ranking and semantic search queries", () => {
+        const res = generateAdminCopilotResponse("Tối ưu tìm kiếm ngữ nghĩa và re-ranking bằng đồ thị hnsw");
+        expect.equal(res.tag, "TÌM KIẾM HNSW");
+        expect.equal(res.type, "algorithm");
+        expect.equal(res.text.includes("HNSW"), true);
+        expect.equal(res.text.includes("Dynamic Multi-Layer Re-ranking"), true);
+      });
+
+      test("F168-T21: Seller ShopSmart Copilot advises on Timsort catalog sorting and HNSW search visibility", () => {
+        const res = generateSellerCopilotResponse("Tối ưu sắp xếp danh mục sản phẩm và tìm kiếm ngữ nghĩa bằng timsort");
+        expect.equal(res.tag, "TỐI ƯU TIMSORT & HNSW");
+        expect.equal(res.type, "recommendation");
+        expect.equal(res.text.includes("Timsort"), true);
+        expect.equal(res.text.includes("Natural Runs"), true);
+      });
+
+      test("F168-T22: Buyer AI Assistant explains HNSW semantic search and quality re-ranking", () => {
+        const res = generateAiChatResponse("Sàn có tìm kiếm ngữ nghĩa thông minh hnsw không");
+        expect.equal(res.intent, "SEMANTIC_SEARCH_HNSW_ASSIST");
+        expect.equal(res.replyText.includes("HNSW MULTI-LAYER"), true);
+      });
+
+      test("F168-T23: Boundary conditions: large catalog (100 items) sorting with Timsort completes with 100% sort correctness", () => {
+        const largeCatalog = [];
+        for (let i = 0; i < 100; i++) {
+          largeCatalog.push({
+            id: `PROD_${i}`,
+            price: Math.floor(Math.random() * 1000000) + 10000,
+            rating: Number((Math.random() * 2 + 3).toFixed(1))
+          });
+        }
+        const sorted = TimsortCatalogSorter.sortCatalog(largeCatalog, { sortBy: "price", order: "asc" });
+        expect.equal(sorted.length, 100);
+        for (let i = 1; i < sorted.length; i++) {
+          expect.equal(sorted[i].price >= sorted[i - 1].price, true);
+        }
+      });
+
+      test("F168-T24: E2E Lifecycle: User searches via HNSW vector semantic query -> Catalog sorted adaptively by Timsort -> Order placed -> Tarjan SCC monitors transaction graph and confirms zero circular fraud", () => {
+        // 1. Semantic HNSW search for "Thời trang thể thao nam"
+        const hnsw = new HNSWVectorReranker();
+        hnsw.addNode("POLO_ACTIVE", [0.95, 0.05], { title: "Áo Polo Thể Thao", salesCount: 1500, rating: 4.9, isMall: true });
+        hnsw.addNode("JEANS_FORMAL", [0.2, 0.8], { title: "Quần Jeans Công Sở", salesCount: 200, rating: 4.5, isMall: false });
+        const searchResults = hnsw.dynamicRerank([1.0, 0.0], { k: 2 });
+        expect.equal(searchResults[0].id, "POLO_ACTIVE");
+
+        // 2. Adaptive Timsort sorts product catalog for Buyer view
+        const shopProducts = [
+          { id: "POLO_ACTIVE", price: 189000, rating: 4.9 },
+          { id: "SOCKS_ACTIVE", price: 35000, rating: 4.8 },
+          { id: "CAP_ACTIVE", price: 99000, rating: 4.7 }
+        ];
+        const sortedDisplay = TimsortCatalogSorter.sortCatalog(shopProducts, { sortBy: "price", order: "asc" });
+        expect.equal(sortedDisplay[0].id, "SOCKS_ACTIVE");
+        expect.equal(sortedDisplay[2].id, "POLO_ACTIVE");
+
+        // 3. Buyer places genuine order -> Tarjan SCC transaction graph analysis
+        const detector = new TarjanSccFraudDetector();
+        detector.addTransaction("GENUINE_BUYER", "SPORT_SHOP_HN", { amount: 224000 });
+        const fraudRings = detector.detectWashTradingRings();
+        expect.equal(fraudRings.length, 0); // No circular wash trading detected
       });
     });
   });

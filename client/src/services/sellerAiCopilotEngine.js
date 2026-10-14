@@ -607,6 +607,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 30. Sắp Xếp Danh Mục Thích Ứng Timsort & Tìm Kiếm Ngữ Nghĩa HNSW (Phase 21 - Feature 168)
+  if (/timsort|sắp xếp danh mục|adaptive hybrid sort|thứ tự bán phần|natural runs|hnsw|tìm kiếm ngữ nghĩa sản phẩm/i.test(raw)) {
+    return {
+      text: `⚡ **TỐI ƯU DANH MỤC SẢN PHẨM BẰNG TIMSORT & TÌM KIẾM NGỮ NGHĨA HNSW**:
+- **Thuật toán Sắp xếp Thích ứng Lai Timsort ($O(N)$ Best Case)**:
+  - Tận dụng triệt để các đoạn thứ tự tự nhiên (Natural Runs) trong kho hàng của shop: khi khách chuyển đổi giữa lọc theo Giá, Doanh số, hay Đánh giá, Timsort giữ nguyên trật tự ổn định (Stable Sort) và phản hồi tức thì dưới $1\\text{ms}$.
+- **Tìm kiếm Ngữ nghĩa HNSW cho Gian hàng (${currentShop.name})**:
+  - Khách hàng tìm thấy sản phẩm của shop ngay cả khi họ gõ từ đồng nghĩa, mô tả công dụng (Ví dụ: "áo mặc đi biển mát mẻ" ➔ gợi ý ngay các mẫu Áo Hawaii, Linen của Shop).
+- **Chiến lược tối ưu hóa doanh số**:
+  - Duy trì điểm đánh giá $\\ge 4.8$ sao và thời gian chuẩn bị hàng dưới $12\\text{h}$ để thuật toán HNSW Dynamic Re-ranking tự động đẩy sản phẩm của Shop lên top kết quả tìm kiếm!`,
+      type: 'recommendation',
+      tag: 'TỐI ƯU TIMSORT & HNSW',
+      suggestions: [
+        'Dự báo giỏ hàng PrefixSpan',
+        'Phân tích biên lợi nhuận P&L',
+        'Tối ưu đấu thầu từ khóa GSP'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
