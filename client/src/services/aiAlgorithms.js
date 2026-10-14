@@ -10293,6 +10293,412 @@ export class TimsortCatalogSorter {
   }
 }
 
+// =========================================================================
+// PHASE 22 ENTERPRISE ALGORITHMS SUITE (Feature 169)
+// 1. Holt-Winters Triple Exponential Smoothing Demand & Seasonality Forecaster
+// 2. Gale-Shapley Stable Matching Algorithm (Two-Sided Deferred Acceptance)
+// 3. Radix Tree (Patricia Trie) with Compact Edge Compression for Category Taxonomies
+// =========================================================================
+
+export class HoltWintersDemandForecaster {
+  constructor({ seasonLength = 7, alpha = 0.3, beta = 0.1, gamma = 0.2 } = {}) {
+    if (seasonLength < 2) throw new Error("seasonLength must be >= 2");
+    this.seasonLength = seasonLength;
+    this.alpha = alpha;
+    this.beta = beta;
+    this.gamma = gamma;
+    this.level = 0;
+    this.trend = 0;
+    this.seasonal = [];
+  }
+
+  _initModel(history = []) {
+    const m = this.seasonLength;
+    if (history.length < 2 * m) {
+      throw new Error(`History length must be at least 2 * seasonLength (${2 * m}) for initialization`);
+    }
+
+    let sumSeason1 = 0;
+    for (let i = 0; i < m; i++) sumSeason1 += history[i];
+    this.level = sumSeason1 / m;
+
+    let sumSeason2 = 0;
+    for (let i = m; i < 2 * m; i++) sumSeason2 += history[i];
+    this.trend = (sumSeason2 / m - this.level) / m;
+
+    this.seasonal = new Array(m);
+    for (let i = 0; i < m; i++) {
+      this.seasonal[i] = history[i] - this.level;
+    }
+  }
+
+  fit(history = []) {
+    if (!Array.isArray(history) || history.length < 2 * this.seasonLength) {
+      throw new Error(`Insufficient history data. Need at least ${2 * this.seasonLength} data points.`);
+    }
+
+    this._initModel(history);
+    const m = this.seasonLength;
+
+    for (let t = 0; t < history.length; t++) {
+      const y = history[t];
+      const sIndex = t % m;
+      const prevLevel = this.level;
+      const prevTrend = this.trend;
+      const prevSeasonal = this.seasonal[sIndex];
+
+      this.level = this.alpha * (y - prevSeasonal) + (1 - this.alpha) * (prevLevel + prevTrend);
+      this.trend = this.beta * (this.level - prevLevel) + (1 - this.beta) * prevTrend;
+      this.seasonal[sIndex] = this.gamma * (y - this.level) + (1 - this.gamma) * prevSeasonal;
+    }
+
+    return this;
+  }
+
+  predict(steps = 7) {
+    const m = this.seasonLength;
+    const predictions = [];
+
+    for (let h = 1; h <= steps; h++) {
+      const sIndex = (h - 1) % m;
+      const rawForecast = this.level + h * this.trend + this.seasonal[sIndex];
+      const forecastVal = Math.max(0, Math.round(rawForecast));
+      const margin = Math.round(forecastVal * 0.15);
+
+      predictions.push({
+        step: h,
+        forecast: forecastVal,
+        lowerBound: Math.max(0, forecastVal - margin),
+        upperBound: forecastVal + margin
+      });
+    }
+
+    return predictions;
+  }
+
+  calculateRestockRecommendation({ currentStock = 0, safetyStock = 10, leadTimeDays = 2, planningHorizonDays = 7 } = {}) {
+    const predictions = this.predict(planningHorizonDays + leadTimeDays);
+    const totalForecastDemand = predictions.reduce((sum, p) => sum + p.forecast, 0);
+
+    const reorderPoint = safetyStock + predictions.slice(0, leadTimeDays).reduce((sum, p) => sum + p.forecast, 0);
+    const needsReorder = currentStock <= reorderPoint;
+    const recommendedOrderQty = needsReorder ? Math.max(0, totalForecastDemand + safetyStock - currentStock) : 0;
+
+    return {
+      currentStock,
+      safetyStock,
+      reorderPoint,
+      needsReorder,
+      recommendedOrderQty,
+      forecastDemand: totalForecastDemand,
+      dailyForecasts: predictions.slice(0, planningHorizonDays)
+    };
+  }
+}
+
+export class GaleShapleyStableMatcher {
+  constructor() {
+    this.proposers = new Map();
+    this.acceptors = new Map();
+  }
+
+  addProposer(id, preferences = []) {
+    if (!id || !Array.isArray(preferences)) return;
+    this.proposers.set(id, { id, preferences: [...preferences] });
+  }
+
+  addAcceptor(id, preferences = []) {
+    if (!id || !Array.isArray(preferences)) return;
+    const ranking = new Map();
+    preferences.forEach((propId, rank) => {
+      ranking.set(propId, rank);
+    });
+    this.acceptors.set(id, { id, preferences: [...preferences], ranking });
+  }
+
+  match() {
+    const freeProposers = Array.from(this.proposers.keys());
+    const nextProposalIndex = new Map();
+    for (const pId of freeProposers) {
+      nextProposalIndex.set(pId, 0);
+    }
+
+    const currentMatches = new Map();
+    let iterations = 0;
+    const maxIterations = (this.proposers.size * this.acceptors.size) + 10;
+
+    while (freeProposers.length > 0 && iterations < maxIterations) {
+      iterations++;
+      const pId = freeProposers.shift();
+      const pObj = this.proposers.get(pId);
+      const propIndex = nextProposalIndex.get(pId);
+
+      if (propIndex >= pObj.preferences.length) {
+        continue;
+      }
+
+      const preferredAcceptorId = pObj.preferences[propIndex];
+      nextProposalIndex.set(pId, propIndex + 1);
+
+      const acceptorObj = this.acceptors.get(preferredAcceptorId);
+      if (!acceptorObj) {
+        freeProposers.unshift(pId);
+        continue;
+      }
+
+      const currentPartnerId = currentMatches.get(preferredAcceptorId);
+
+      if (!currentPartnerId) {
+        currentMatches.set(preferredAcceptorId, pId);
+      } else {
+        const currentRank = acceptorObj.ranking.has(currentPartnerId)
+          ? acceptorObj.ranking.get(currentPartnerId)
+          : Infinity;
+        const newRank = acceptorObj.ranking.has(pId)
+          ? acceptorObj.ranking.get(pId)
+          : Infinity;
+
+        if (newRank < currentRank) {
+          currentMatches.set(preferredAcceptorId, pId);
+          freeProposers.push(currentPartnerId);
+        } else {
+          freeProposers.unshift(pId);
+        }
+      }
+    }
+
+    const matches = new Map();
+    for (const [accId, propId] of currentMatches.entries()) {
+      matches.set(propId, accId);
+    }
+
+    return {
+      matches,
+      reverseMatches: currentMatches,
+      iterations,
+      matchedCount: matches.size,
+      totalProposers: this.proposers.size,
+      totalAcceptors: this.acceptors.size
+    };
+  }
+
+  isStable(matches) {
+    for (const [pId, aId] of matches.entries()) {
+      const pObj = this.proposers.get(pId);
+      if (!pObj) continue;
+
+      const currentAcceptorRank = pObj.preferences.indexOf(aId);
+      const preferredAcceptors = currentAcceptorRank > 0
+        ? pObj.preferences.slice(0, currentAcceptorRank)
+        : [];
+
+      for (const prefAccId of preferredAcceptors) {
+        const accObj = this.acceptors.get(prefAccId);
+        if (!accObj) continue;
+
+        let partnerOfPrefAcc = null;
+        for (const [prop, acc] of matches.entries()) {
+          if (acc === prefAccId) {
+            partnerOfPrefAcc = prop;
+            break;
+          }
+        }
+
+        if (!partnerOfPrefAcc) {
+          return false;
+        }
+
+        const rankOfCurrent = accObj.ranking.get(partnerOfPrefAcc);
+        const rankOfP = accObj.ranking.get(pId);
+
+        if (rankOfP !== undefined && rankOfCurrent !== undefined && rankOfP < rankOfCurrent) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+}
+
+export class PatriciaNode {
+  constructor(edgeLabel = "") {
+    this.edgeLabel = edgeLabel;
+    this.children = new Map();
+    this.isEndOfWord = false;
+    this.data = null;
+  }
+}
+
+export class PatriciaTrieCategoryRouter {
+  constructor() {
+    this.root = new PatriciaNode("");
+    this._size = 0;
+  }
+
+  static _commonPrefixLength(s1 = "", s2 = "") {
+    let i = 0;
+    const maxLen = Math.min(s1.length, s2.length);
+    while (i < maxLen && s1[i] === s2[i]) {
+      i++;
+    }
+    return i;
+  }
+
+  insert(key, data = {}) {
+    if (typeof key !== "string" || key.length === 0) return;
+
+    let curr = this.root;
+    let remaining = key;
+
+    while (remaining.length > 0) {
+      const firstChar = remaining[0];
+
+      if (!curr.children.has(firstChar)) {
+        const newNode = new PatriciaNode(remaining);
+        newNode.isEndOfWord = true;
+        newNode.data = { ...data, key };
+        curr.children.set(firstChar, newNode);
+        this._size++;
+        return;
+      }
+
+      const child = curr.children.get(firstChar);
+      const edge = child.edgeLabel;
+      const commonLen = PatriciaTrieCategoryRouter._commonPrefixLength(edge, remaining);
+
+      if (commonLen === edge.length) {
+        curr = child;
+        remaining = remaining.substring(commonLen);
+        if (remaining.length === 0) {
+          if (!curr.isEndOfWord) {
+            curr.isEndOfWord = true;
+            this._size++;
+          }
+          curr.data = { ...data, key };
+          return;
+        }
+      } else {
+        const splitPrefix = edge.substring(0, commonLen);
+        const splitSuffixEdge = edge.substring(commonLen);
+        const splitSuffixRem = remaining.substring(commonLen);
+
+        const splitNode = new PatriciaNode(splitPrefix);
+        curr.children.set(firstChar, splitNode);
+
+        child.edgeLabel = splitSuffixEdge;
+        splitNode.children.set(splitSuffixEdge[0], child);
+
+        if (splitSuffixRem.length === 0) {
+          splitNode.isEndOfWord = true;
+          splitNode.data = { ...data, key };
+          this._size++;
+        } else {
+          const newNode = new PatriciaNode(splitSuffixRem);
+          newNode.isEndOfWord = true;
+          newNode.data = { ...data, key };
+          splitNode.children.set(splitSuffixRem[0], newNode);
+          this._size++;
+        }
+        return;
+      }
+    }
+  }
+
+  search(key) {
+    if (typeof key !== "string" || key.length === 0) return null;
+
+    let curr = this.root;
+    let remaining = key;
+
+    while (remaining.length > 0) {
+      const firstChar = remaining[0];
+      if (!curr.children.has(firstChar)) return null;
+
+      const child = curr.children.get(firstChar);
+      const edge = child.edgeLabel;
+
+      if (!remaining.startsWith(edge)) return null;
+
+      remaining = remaining.substring(edge.length);
+      curr = child;
+    }
+
+    return curr.isEndOfWord ? curr.data : null;
+  }
+
+  startsWith(prefix = "") {
+    let curr = this.root;
+    let remaining = prefix;
+
+    while (remaining.length > 0) {
+      const firstChar = remaining[0];
+      if (!curr.children.has(firstChar)) return [];
+
+      const child = curr.children.get(firstChar);
+      const edge = child.edgeLabel;
+
+      if (remaining.length <= edge.length) {
+        if (!edge.startsWith(remaining)) return [];
+        curr = child;
+        break;
+      } else {
+        if (!remaining.startsWith(edge)) return [];
+        remaining = remaining.substring(edge.length);
+        curr = child;
+      }
+    }
+
+    const results = [];
+    const collect = (node) => {
+      if (node.isEndOfWord && node.data) {
+        results.push(node.data);
+      }
+      for (const child of node.children.values()) {
+        collect(child);
+      }
+    };
+    collect(curr);
+
+    return results;
+  }
+
+  getBreadcrumb(path = "") {
+    const parts = path.split("/").filter(Boolean);
+    const breadcrumb = [];
+    let cumulative = "";
+
+    for (const part of parts) {
+      cumulative = cumulative ? `${cumulative}/${part}` : part;
+      const match = this.search(cumulative);
+      breadcrumb.push({
+        slug: part,
+        path: cumulative,
+        title: match ? match.title || part : part,
+        exists: match !== null
+      });
+    }
+
+    return breadcrumb;
+  }
+
+  countNodes() {
+    let count = 0;
+    const dfs = (node) => {
+      count++;
+      for (const child of node.children.values()) {
+        dfs(child);
+      }
+    };
+    dfs(this.root);
+    return count;
+  }
+
+  size() {
+    return this._size;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -10422,6 +10828,11 @@ export default {
   HNSWVectorReranker,
   TarjanSccFraudDetector,
   TimsortCatalogSorter,
+  // Phase 22 Enterprise Algorithms
+  HoltWintersDemandForecaster,
+  GaleShapleyStableMatcher,
+  PatriciaNode,
+  PatriciaTrieCategoryRouter,
 };
 
 

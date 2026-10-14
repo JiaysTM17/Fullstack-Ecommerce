@@ -147,6 +147,11 @@ import {
   HNSWVectorReranker,
   TarjanSccFraudDetector,
   TimsortCatalogSorter,
+  // Phase 22 Enterprise Algorithms
+  HoltWintersDemandForecaster,
+  GaleShapleyStableMatcher,
+  PatriciaNode,
+  PatriciaTrieCategoryRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -178,6 +183,9 @@ import { RetePromotionEngine as ServerReteEngine } from "../../server/src/utils/
 import { HNSWVectorReranker as ServerHNSWVectorReranker } from "../../server/src/utils/hnswVectorReranker.js";
 import { TarjanSccFraudDetector as ServerTarjanScc } from "../../server/src/utils/tarjanSccFraudDetector.js";
 import { TimsortCatalogSorter as ServerTimsort } from "../../server/src/utils/timsortCatalogSorter.js";
+import { HoltWintersDemandForecaster as ServerHoltWinters } from "../../server/src/utils/holtWintersDemandForecaster.js";
+import { GaleShapleyStableMatcher as ServerGaleShapley } from "../../server/src/utils/galeShapleyStableMatcher.js";
+import { PatriciaTrieCategoryRouter as ServerPatriciaTrie } from "../../server/src/utils/patriciaTrieCategoryRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -12958,6 +12966,347 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         detector.addTransaction("GENUINE_BUYER", "SPORT_SHOP_HN", { amount: 224000 });
         const fraudRings = detector.detectWashTradingRings();
         expect.equal(fraudRings.length, 0); // No circular wash trading detected
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 169: Holt-Winters Forecaster, Gale-Shapley Matching & Patricia Trie (Phase 22 - 24 Tests)
+  // =========================================================================
+  describe("Feature 169: Holt-Winters Forecaster, Gale-Shapley Matching & Patricia Trie (Phase 22)", () => {
+
+    // --- NHÓM 1: Holt-Winters Demand & Seasonality Forecaster (F169-T01 -> F169-T06) ---
+    describe("Nhóm 1: Holt-Winters Triple Exponential Smoothing Forecaster", () => {
+      test("F169-T01: Initial parameter configuration and error handling for insufficient history", () => {
+        const forecaster = new HoltWintersDemandForecaster({ seasonLength: 7 });
+        expect.equal(forecaster.seasonLength, 7);
+        expect.equal(forecaster.alpha, 0.3);
+        expect.throws(() => forecaster.fit([10, 20, 30])); // cần ít nhất 2 * seasonLength = 14
+      });
+
+      test("F169-T02: Model fitting calculates Level, Trend, and Seasonal components accurately", () => {
+        const forecaster = new HoltWintersDemandForecaster({ seasonLength: 4 });
+        // 8 điểm dữ liệu với chu kỳ 4
+        const salesHistory = [10, 20, 30, 40, 15, 25, 35, 45];
+        forecaster.fit(salesHistory);
+
+        expect.equal(typeof forecaster.level, "number");
+        expect.equal(typeof forecaster.trend, "number");
+        expect.equal(forecaster.seasonal.length, 4);
+        expect.equal(forecaster.level > 0, true);
+      });
+
+      test("F169-T03: Future demand prediction captures cyclical seasonality peaks (e.g. weekend peaks)", () => {
+        const forecaster = new HoltWintersDemandForecaster({ seasonLength: 7 });
+        // 14 ngày (2 tuần), ngày 6 và 7 luôn tăng vọt do cuối tuần
+        const history = [
+          10, 12, 11, 13, 15, 30, 35,
+          11, 13, 12, 14, 16, 32, 38
+        ];
+        forecaster.fit(history);
+        const preds = forecaster.predict(7);
+
+        expect.equal(preds.length, 7);
+        // Ngày thứ 6 và 7 dự báo phải cao hơn ngày trong tuần
+        expect.equal(preds[5].forecast > preds[0].forecast, true);
+        expect.equal(preds[6].forecast > preds[1].forecast, true);
+        expect.equal(preds[0].upperBound >= preds[0].forecast, true);
+        expect.equal(preds[0].lowerBound <= preds[0].forecast, true);
+      });
+
+      test("F169-T04: calculateRestockRecommendation computes reorderPoint and recommendedOrderQty based on safety stock and lead time", () => {
+        const forecaster = new HoltWintersDemandForecaster({ seasonLength: 7 });
+        const history = [
+          20, 22, 21, 23, 25, 40, 45,
+          21, 23, 22, 24, 26, 42, 48
+        ];
+        forecaster.fit(history);
+
+        const restock = forecaster.calculateRestockRecommendation({
+          currentStock: 30,
+          safetyStock: 15,
+          leadTimeDays: 2,
+          planningHorizonDays: 7
+        });
+
+        expect.equal(restock.needsReorder, true);
+        expect.equal(restock.reorderPoint > 30, true);
+        expect.equal(restock.recommendedOrderQty > 0, true);
+        expect.equal(restock.dailyForecasts.length, 7);
+      });
+
+      test("F169-T05: When current stock is abundantly above reorder point, needsReorder is false and recommendedOrderQty is 0", () => {
+        const forecaster = new HoltWintersDemandForecaster({ seasonLength: 4 });
+        forecaster.fit([10, 10, 10, 10, 10, 10, 10, 10]);
+
+        const restock = forecaster.calculateRestockRecommendation({
+          currentStock: 500,
+          safetyStock: 10,
+          leadTimeDays: 1,
+          planningHorizonDays: 4
+        });
+
+        expect.equal(restock.needsReorder, false);
+        expect.equal(restock.recommendedOrderQty, 0);
+      });
+
+      test("F169-T06: Server-side HoltWintersDemandForecaster matches client-side implementation", () => {
+        const clientF = new HoltWintersDemandForecaster({ seasonLength: 4 });
+        const serverF = new ServerHoltWinters({ seasonLength: 4 });
+        const history = [12, 18, 25, 30, 14, 20, 28, 33];
+
+        clientF.fit(history);
+        serverF.fit(history);
+
+        const cPred = clientF.predict(3);
+        const sPred = serverF.predict(3);
+
+        expect.equal(cPred[0].forecast, sPred[0].forecast);
+        expect.equal(cPred[2].forecast, sPred[2].forecast);
+      });
+    });
+
+    // --- NHÓM 2: Gale-Shapley Stable Matching Algorithm (F169-T07 -> F169-T12) ---
+    describe("Nhóm 2: Gale-Shapley Stable Matching Algorithm (Two-Sided Deferred Acceptance)", () => {
+      test("F169-T07: Initial state and handling of empty sets", () => {
+        const matcher = new GaleShapleyStableMatcher();
+        const res = matcher.match();
+        expect.equal(res.matchedCount, 0);
+        expect.equal(res.matches.size, 0);
+      });
+
+      test("F169-T08: Standard 2x2 two-sided matching achieves stable assignment without blocking pairs", () => {
+        const matcher = new GaleShapleyStableMatcher();
+        // 2 Đơn hàng (Proposers) chọn 2 Shipper (Acceptors)
+        matcher.addProposer("ORD_1", ["SHIPPER_A", "SHIPPER_B"]);
+        matcher.addProposer("ORD_2", ["SHIPPER_A", "SHIPPER_B"]);
+
+        matcher.addAcceptor("SHIPPER_A", ["ORD_1", "ORD_2"]);
+        matcher.addAcceptor("SHIPPER_B", ["ORD_2", "ORD_1"]);
+
+        const res = matcher.match();
+        expect.equal(res.matchedCount, 2);
+        expect.equal(res.matches.get("ORD_1"), "SHIPPER_A");
+        expect.equal(res.matches.get("ORD_2"), "SHIPPER_B");
+        expect.equal(matcher.isStable(res.matches), true);
+      });
+
+      test("F169-T09: 3x3 logistics assignment (3 Orders to 3 SPX Couriers) terminates with 100% matched count and verified stability", () => {
+        const matcher = new GaleShapleyStableMatcher();
+        matcher.addProposer("O1", ["S1", "S2", "S3"]);
+        matcher.addProposer("O2", ["S2", "S1", "S3"]);
+        matcher.addProposer("O3", ["S1", "S3", "S2"]);
+
+        matcher.addAcceptor("S1", ["O2", "O1", "O3"]);
+        matcher.addAcceptor("S2", ["O1", "O2", "O3"]);
+        matcher.addAcceptor("S3", ["O1", "O2", "O3"]);
+
+        const res = matcher.match();
+        expect.equal(res.matchedCount, 3);
+        expect.equal(matcher.isStable(res.matches), true);
+      });
+
+      test("F169-T10: Displaced proposer correctly re-proposes to next preference and recovers stable assignment", () => {
+        const matcher = new GaleShapleyStableMatcher();
+        matcher.addProposer("SHOP_A", ["SLOT_MEGA", "SLOT_FLASH"]);
+        matcher.addProposer("SHOP_B", ["SLOT_MEGA", "SLOT_FLASH"]);
+
+        // SLOT_MEGA thích SHOP_B hơn SHOP_A
+        matcher.addAcceptor("SLOT_MEGA", ["SHOP_B", "SHOP_A"]);
+        matcher.addAcceptor("SLOT_FLASH", ["SHOP_A", "SHOP_B"]);
+
+        const res = matcher.match();
+        expect.equal(res.matches.get("SHOP_B"), "SLOT_MEGA");
+        expect.equal(res.matches.get("SHOP_A"), "SLOT_FLASH");
+        expect.equal(matcher.isStable(res.matches), true);
+      });
+
+      test("F169-T11: isStable verification function detects instability if matches are artificially swapped to create blocking pairs", () => {
+        const matcher = new GaleShapleyStableMatcher();
+        matcher.addProposer("P1", ["A1", "A2"]);
+        matcher.addProposer("P2", ["A2", "A1"]);
+
+        matcher.addAcceptor("A1", ["P1", "P2"]);
+        matcher.addAcceptor("A2", ["P2", "P1"]);
+
+        const correctMatches = new Map([["P1", "A1"], ["P2", "A2"]]);
+        expect.equal(matcher.isStable(correctMatches), true);
+
+        // Đổi chỗ tạo thành blocking pair (P1 và A1 đều thích nhau hơn đối tác bị gán)
+        const unstableMatches = new Map([["P1", "A2"], ["P2", "A1"]]);
+        expect.equal(matcher.isStable(unstableMatches), false);
+      });
+
+      test("F169-T12: Server-side GaleShapleyStableMatcher matches client-side implementation", () => {
+        const cMatcher = new GaleShapleyStableMatcher();
+        const sMatcher = new ServerGaleShapley();
+
+        for (const m of [cMatcher, sMatcher]) {
+          m.addProposer("P_ALPHA", ["A_1", "A_2"]);
+          m.addProposer("P_BETA", ["A_1", "A_2"]);
+          m.addAcceptor("A_1", ["P_ALPHA", "P_BETA"]);
+          m.addAcceptor("A_2", ["P_ALPHA", "P_BETA"]);
+        }
+
+        const cRes = cMatcher.match();
+        const sRes = sMatcher.match();
+        expect.equal(cRes.matches.get("P_ALPHA"), sRes.matches.get("P_ALPHA"));
+        expect.equal(cRes.matches.get("P_BETA"), sRes.matches.get("P_BETA"));
+      });
+    });
+
+    // --- NHÓM 3: Radix Tree (Patricia Trie) with Compact Edge Compression (F169-T13 -> F169-T18) ---
+    describe("Nhóm 3: Radix Tree (Patricia Trie) Category Taxonomies", () => {
+      test("F169-T13: Initial state and basic insertion of single keys", () => {
+        const trie = new PatriciaTrieCategoryRouter();
+        expect.equal(trie.size(), 0);
+        expect.equal(trie.countNodes(), 1); // root node
+        trie.insert("thoi-trang", { title: "Thời Trang" });
+        expect.equal(trie.size(), 1);
+        expect.equal(trie.search("thoi-trang").title, "Thời Trang");
+      });
+
+      test("F169-T14: Edge compression and edge splitting: Inserting keys with common prefix splits edge correctly", () => {
+        const trie = new PatriciaTrieCategoryRouter();
+        trie.insert("thoi-trang/nam", { title: "Thời Trang Nam" });
+        trie.insert("thoi-trang/nu", { title: "Thời Trang Nữ" });
+
+        // Cây phải chia tách tại tiền tố chung "thoi-trang/n"
+        expect.equal(trie.size(), 2);
+        expect.equal(trie.search("thoi-trang/nam").title, "Thời Trang Nam");
+        expect.equal(trie.search("thoi-trang/nu").title, "Thời Trang Nữ");
+      });
+
+      test("F169-T15: search accurately retrieves exact path and returns associated category metadata", () => {
+        const trie = new PatriciaTrieCategoryRouter();
+        trie.insert("dien-thoai/apple/iphone-15", { price: 22000000 });
+        trie.insert("dien-thoai/samsung/galaxy-s24", { price: 21000000 });
+
+        expect.equal(trie.search("dien-thoai/apple/iphone-15").price, 22000000);
+        expect.equal(trie.search("dien-thoai/xiaomi"), null);
+      });
+
+      test("F169-T16: startsWith retrieves all child subcategories matching a given prefix", () => {
+        const trie = new PatriciaTrieCategoryRouter();
+        trie.insert("thoi-trang/nam/ao-thun", { id: "CAT_1" });
+        trie.insert("thoi-trang/nam/ao-polo", { id: "CAT_2" });
+        trie.insert("thoi-trang/nu/dam-xoe", { id: "CAT_3" });
+
+        const menCategories = trie.startsWith("thoi-trang/nam");
+        expect.equal(menCategories.length, 2);
+        const allFashion = trie.startsWith("thoi-trang");
+        expect.equal(allFashion.length, 3);
+        const tech = trie.startsWith("dien-tu");
+        expect.equal(tech.length, 0);
+      });
+
+      test("F169-T17: getBreadcrumb resolves full hierarchical breadcrumb path array for nested URLs", () => {
+        const trie = new PatriciaTrieCategoryRouter();
+        trie.insert("thoi-trang", { title: "Thời Trang" });
+        trie.insert("thoi-trang/nam", { title: "Nam" });
+        trie.insert("thoi-trang/nam/ao-polo", { title: "Áo Polo" });
+
+        const crumbs = trie.getBreadcrumb("thoi-trang/nam/ao-polo");
+        expect.equal(crumbs.length, 3);
+        expect.equal(crumbs[0].title, "Thời Trang");
+        expect.equal(crumbs[1].title, "Nam");
+        expect.equal(crumbs[2].title, "Áo Polo");
+      });
+
+      test("F169-T18: Server-side PatriciaTrieCategoryRouter matches client-side implementation", () => {
+        const clientT = new PatriciaTrieCategoryRouter();
+        const serverT = new ServerPatriciaTrie();
+
+        for (const t of [clientT, serverT]) {
+          t.insert("a/b/c", { val: 100 });
+          t.insert("a/b/d", { val: 200 });
+        }
+
+        expect.equal(clientT.search("a/b/c").val, serverT.search("a/b/c").val);
+        expect.equal(clientT.startsWith("a/b").length, serverT.startsWith("a/b").length);
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Enterprise Lifecycle (F169-T19 -> F169-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Enterprise Lifecycle", () => {
+      test("F169-T19: Admin Sentinel Copilot answers Gale-Shapley stable matching queries with tag and logistics suggestions", () => {
+        const res = generateAdminCopilotResponse("Tối ưu phân bổ bưu tá giao hàng bằng thuật toán gale-shapley stable matching");
+        expect.equal(res.tag, "GHÉP ĐÔI GALE-SHAPLEY");
+        expect.equal(res.type, "logistics");
+        expect.equal(res.text.includes("GALE-SHAPLEY"), true);
+        expect.equal(res.text.includes("Deferred Acceptance"), true);
+      });
+
+      test("F169-T20: Admin Sentinel Copilot answers Holt-Winters seasonal forecasting queries", () => {
+        const res = generateAdminCopilotResponse("Dự báo nhu cầu tồn kho mega sale bằng mô hình chuỗi thời gian holt-winters");
+        expect.equal(res.tag, "DỰ BÁO HOLT-WINTERS");
+        expect.equal(res.type, "algorithm");
+        expect.equal(res.text.includes("HOLT-WINTERS"), true);
+      });
+
+      test("F169-T21: Seller ShopSmart Copilot advises on Holt-Winters seasonal inventory replenishment and Patricia Trie navigation", () => {
+        const res = generateSellerCopilotResponse("Kế hoạch dự báo nhập hàng mùa vụ bằng holt-winters và cây danh mục patricia trie");
+        expect.equal(res.tag, "KẾ HOẠCH HOLT-WINTERS & TRIE");
+        expect.equal(res.type, "recommendation");
+        expect.equal(res.text.includes("Holt-Winters"), true);
+        expect.equal(res.text.includes("Patricia Trie"), true);
+      });
+
+      test("F169-T22: Buyer AI Assistant explains Patricia Trie category navigation and Gale-Shapley matching", () => {
+        const res = generateAiChatResponse("Sàn có điều hướng danh mục thông minh patricia và ghép đôi gale-shapley không");
+        expect.equal(res.intent, "CATEGORY_ROUTER_PATRICIA_ASSIST");
+        expect.equal(res.replyText.includes("PATRICIA TRIE"), true);
+      });
+
+      test("F169-T23: Boundary conditions: Holt-Winters forecasting with 30-day history predicts 14-day horizon with valid positive values", () => {
+        const forecaster = new HoltWintersDemandForecaster({ seasonLength: 7 });
+        const history30 = [];
+        for (let i = 0; i < 30; i++) {
+          history30.push(50 + (i % 7) * 10 + Math.floor(i / 7) * 5);
+        }
+        forecaster.fit(history30);
+        const preds14 = forecaster.predict(14);
+        expect.equal(preds14.length, 14);
+        for (const p of preds14) {
+          expect.equal(p.forecast >= 0, true);
+          expect.equal(p.upperBound >= p.forecast, true);
+        }
+      });
+
+      test("F169-T24: E2E Lifecycle: User navigates category via Patricia Trie -> Seller forecasts Mega Sale demand via Holt-Winters -> Multiple urgent orders stably dispatched to SPX couriers via Gale-Shapley matching", () => {
+        // 1. User navigates category taxonomy with Patricia Trie
+        const categoryRouter = new PatriciaTrieCategoryRouter();
+        categoryRouter.insert("dien-tu/phu-kien/sac-nhanh", { title: "Củ Sạc Nhanh GaN 65W", categoryId: "CAT_CHARGER" });
+        const matchedCategory = categoryRouter.search("dien-tu/phu-kien/sac-nhanh");
+        expect.equal(matchedCategory.categoryId, "CAT_CHARGER");
+
+        // 2. Seller forecasts demand for GaN 65W chargers ahead of 11.11 Mega Sale
+        const forecaster = new HoltWintersDemandForecaster({ seasonLength: 7 });
+        const sales = [
+          50, 55, 52, 58, 65, 90, 110,
+          55, 60, 58, 64, 70, 98, 120
+        ];
+        forecaster.fit(sales);
+        const recommendation = forecaster.calculateRestockRecommendation({
+          currentStock: 100,
+          safetyStock: 30,
+          leadTimeDays: 2,
+          planningHorizonDays: 7
+        });
+        expect.equal(recommendation.needsReorder, true);
+        expect.equal(recommendation.recommendedOrderQty > 0, true);
+
+        // 3. 2 Urgent Orders matched stably with 2 SPX Couriers via Gale-Shapley
+        const matcher = new GaleShapleyStableMatcher();
+        matcher.addProposer("ORD_URGENT_1", ["COURIER_SPX_HN1", "COURIER_SPX_HN2"]);
+        matcher.addProposer("ORD_URGENT_2", ["COURIER_SPX_HN1", "COURIER_SPX_HN2"]);
+        matcher.addAcceptor("COURIER_SPX_HN1", ["ORD_URGENT_1", "ORD_URGENT_2"]);
+        matcher.addAcceptor("COURIER_SPX_HN2", ["ORD_URGENT_2", "ORD_URGENT_1"]);
+
+        const dispatch = matcher.match();
+        expect.equal(dispatch.matchedCount, 2);
+        expect.equal(matcher.isStable(dispatch.matches), true);
+        expect.equal(dispatch.matches.get("ORD_URGENT_1"), "COURIER_SPX_HN1");
       });
     });
   });

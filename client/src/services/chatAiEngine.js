@@ -760,6 +760,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 24. Điều Hướng Cây Danh Mục Nén Patricia Trie (CATEGORY_ROUTER_PATRICIA_ASSIST)
+  if (/patricia|cây danh mục|điều hướng danh mục|breadcrumb|gale-shapley|ghép đôi người bán/i.test(lower)) {
+    return {
+      intent: 'CATEGORY_ROUTER_PATRICIA_ASSIST',
+      replyText: `**[ĐIỀU HƯỚNG DANH MỤC THÔNG MINH] CẤU TRÚC PATRICIA TRIE & GHÉP ĐÔI GALE-SHAPLEY:**\n\n• **Duyệt cây danh mục siêu tốc**: Áp dụng cây tiền tố nén Patricia Trie giúp bạn chuyển đổi mượt mà giữa các ngành hàng đa tầng (Thời trang ➔ Nam ➔ Áo polo ➔ Đồ thể thao) với độ trễ phản hồi dưới $1\\text{ms}$.\n• **Gợi ý Shop phù hợp nhất**: Thuật toán Gale-Shapley tự động ghép bạn với các gian hàng có khoảng cách gần nhất, giao hàng hỏa tốc 2h và có sẵn voucher ưu đãi cao nhất!`,
+      suggestions: ['Khám phá danh mục hot', 'Xem sản phẩm bán chạy', 'Lấy mã giảm giá'],
+    };
+  }
+
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH
   // -------------------------------------------------------------

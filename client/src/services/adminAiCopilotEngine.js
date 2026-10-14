@@ -1225,6 +1225,48 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
+  // 51. Ghép Đôi Ổn Định Hai Phía Gale-Shapley (Phase 22 - Feature 169)
+  if (/gale-shapley|gale shapley|stable matching|ghép đôi ổn định|deferred acceptance|chấp nhận trì hoãn|phân bổ bưu tá gale/i.test(raw)) {
+    return {
+      text: `🤝 **THUẬT TOÁN GHÉP ĐÔI ỔN ĐỊNH GALE-SHAPLEY (NOBEL KINH TẾ 2012)**:
+- **Nguyên lý Chấp nhận Trì hoãn (Deferred Acceptance - $O(N^2)$)**:
+  - Giải bài toán tối ưu hóa thị trường ghép đôi hai phía (Two-Sided Matching):
+    • **Đơn hàng hỏa tốc SPX 2h** ⟷ **Đội ngũ bưu tá giao vận SPX Express**.
+    • **Gian hàng Shopee Mall** ⟷ **Gói tài trợ độc quyền Mega Sale & KOL Affiliate**.
+- **Tính chất cốt lõi (Zero Blocking Pairs)**:
+  - Đảm bảo tính ổn định tối ưu: Không bao giờ xảy ra tình trạng tài xế và đơn hàng tự ý hủy ghép cặp để bắt tay ngoài luồng.
+  - Tối ưu hóa tuyệt đối lợi ích cho bên đề xuất (Proposer-Optimal) mà vẫn đảm bảo độ hài lòng cao nhất cho toàn mạng lưới logistics!`,
+      type: 'logistics',
+      tag: 'GHÉP ĐÔI GALE-SHAPLEY',
+      suggestions: [
+        'Dự báo nhu cầu mùa vụ Holt-Winters',
+        'Điều phối bưu tá Hungarian',
+        'Định tuyến toàn mạng SPX Johnson'
+      ]
+    };
+  }
+
+  // 52. Dự Báo Nhu Cầu Tồn Kho Mùa Vụ Bằng Holt-Winters (Phase 22 - Feature 169)
+  if (/holt-winters|holt winters|exponential smoothing|dự báo mùa vụ|seasonality|dự báo tồn kho mega sale|chuỗi thời gian/i.test(raw)) {
+    return {
+      text: `📈 **DỰ BÁO NHU CẦU TỒN KHO MÙA VỤ BẰNG HOLT-WINTERS (TRIPLE EXPONENTIAL SMOOTHING)**:
+- **Mô hình chuỗi thời gian 3 thành phần thích ứng**:
+  - **Mức cơ sở (Level - $\\alpha$)**: Nắm bắt lượng bán thực tế trung bình tức thời.
+  - **Xu hướng (Trend - $\\beta$)**: Nhận diện đà tăng/giảm trưởng tự nhiên của danh mục.
+  - **Mùa vụ (Seasonality - $\\gamma$)**: Dự báo chính xác đỉnh điểm đơn hàng trong chu kỳ tuần (Thứ 7 - Chủ Nhật) và các đợt Mega Sale lớn (11.11, 12.12, Tết).
+- **Ứng dụng quản trị sàn TMĐT**:
+  - Dự báo trước nhu cầu tải kho bãi để Admin và Seller chủ động nhập hàng trước 7 - 14 ngày.
+  - Tự động tính điểm đặt hàng lại (Reorder Point) có bù trừ hệ số mùa vụ, ngăn chặn hoàn toàn nguy cơ đứt gãy hàng hóa!`,
+      type: 'algorithm',
+      tag: 'DỰ BÁO HOLT-WINTERS',
+      suggestions: [
+        'Ghép đôi ổn định Gale-Shapley',
+        'Tái xếp hạng vector ngữ nghĩa HNSW',
+        'Mạng so khớp khuyến mãi Rete'
+      ]
+    };
+  }
+
   // 39. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
