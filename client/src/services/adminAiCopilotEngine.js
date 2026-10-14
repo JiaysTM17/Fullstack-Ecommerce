@@ -697,6 +697,64 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
+  // 30. Khai Phá Mẫu Mua Hàng & Luật Kết Hợp Combo (FP-Growth Frequent Pattern Mining)
+  if (/fp-growth|khai phá mẫu phổ biến|luật kết hợp|association rules|mua kèm deal sốc fp|lift combo/i.test(raw)) {
+    return {
+      text: `🛒 **KHAI PHÁ MẪU PHỔ BIẾN FP-GROWTH & KIỂM TOÁN COMBO TOÀN SÀN**:
+- **Thuật toán FP-Growth (Frequent Pattern Tree)**: Nén toàn bộ giao dịch giỏ hàng thành cây tiền tố gọn nhẹ, khai phá tập phổ biến đệ quy với thời gian vượt trội gấp $10\\times$ so với thuật toán Apriori truyền thống.
+- **Quy tắc sinh luật kết hợp (Association Rules)**:
+  - **Độ hỗ trợ (Support)**: Tần suất giỏ hàng chứa đồng thời bộ sản phẩm $[A, B]$ trên toàn sàn.
+  - **Độ tin cậy (Confidence)**: Xác suất khách đã mua $A$ sẽ tiếp tục bỏ $B$ vào giỏ hàng.
+  - **Độ nâng (Lift $\\ge 2.0$)**: Mức độ tương quan thực sự (chứng minh $A$ kích cầu mua $B$ thay vì chỉ là ngẫu nhiên).
+- **Ứng dụng kiểm toán sàn**: Tự động gợi ý các gói "Mua Kèm Deal Sốc", tối ưu hiển thị Cross-selling trên trang Checkout và cảnh báo các hành vi tạo combo ảo thao túng doanh số.`,
+      type: 'algorithm',
+      tag: 'KIỂM TOÁN COMBO FP-GROWTH',
+      suggestions: [
+        'Tối ưu thể tích đóng thùng SPX',
+        'Giám sát cụm SWIM Gossip',
+        'Kiểm tra đồng thuận Raft'
+      ]
+    };
+  }
+
+  // 31. Tối Ưu Thể Tích Đóng Gói Kiện Hàng SPX (Maximal Rectangles 2D/3D Bin Packing)
+  if (/bin packing|đóng thùng tối ưu|thể tích hộp spx|quy đổi thể tích|tiết kiệm thùng carton/i.test(raw)) {
+    return {
+      text: `📦 **TỐI ƯU HÓA ĐÓNG THÙNG CARTON SPX BẰNG BIN PACKING**:
+- **Thuật toán Maximal Rectangles & Guillotine Split**: Sắp đặt tối ưu các sản phẩm trong đơn hàng vào thùng carton tiêu chuẩn SPX (Hộp XS, S, M, L, XL) đạt mật độ lấp đầy không gian $\\ge 75\\%$.
+- **Giảm cước quy đổi thể tích (Volumetric Weight)**:
+  - Công thức tính cước vận chuyển hàng không/đường bộ: $W_{\\text{quy đổi}} = \\frac{\\text{Dài} \\times \\text{Rộng} \\times \\text{Cao}}{5000}$.
+  - Thuật toán tự động xoay lật 3 chiều $(L, W, H)$ và phân tách không gian thừa (Free Rectangles Splitting) giúp giảm tới $28\\%$ chi phí cước vận chuyển cồng kềnh cho người bán và người mua.
+- **Tự động hóa kho bãi**: Sinh hướng dẫn đóng gói trực quan (Packing Manifest) từng bước cho nhân viên kho SPX Fulfillment.`,
+      type: 'algorithm',
+      tag: 'TỐI ƯU ĐÓNG THÙNG SPX',
+      suggestions: [
+        'Kiểm toán mẫu phổ biến FP-Growth',
+        'Giám sát cụm SWIM Gossip',
+        'Xem điều phối bưu tá Hungarian'
+      ]
+    };
+  }
+
+  // 32. Giám Sát Sức Khỏe Cụm Phân Tán Bằng Giao Thức SWIM (SWIM Gossip Membership Protocol)
+  if (/swim gossip|giao thức swim|gossip protocol|phát hiện nút chết|ping-req|suspicion mechanism/i.test(raw)) {
+    return {
+      text: `📡 **GIÁM SÁT CỤM PHÂN TÁN BẰNG GIAO THỨC SWIM GOSSIP**:
+- **Giao thức SWIM (Structured Weakly-Consistent Infection-Style Membership)**: Duy trì danh bạ và trạng thái các nút dịch vụ trong cụm đám mây với băng thông mạng ổn định $O(1)$ trên mỗi nút bất kể quy mô cụm mở rộng hàng nghìn máy chủ tính toán.
+- **Cơ chế chống báo động giả hai lớp**:
+  - **Indirect Ping-Req**: Khi thăm dò trực tiếp thất bại, gửi yêu cầu qua $k$ nút trung gian để kiểm tra lại trước khi đưa ra kết luận.
+  - **Cơ chế nghi ngờ (Suspicion Mechanism)**: Nút chưa bị phán tử ngay mà chuyển sang trạng thái \`SUSPECT\` với cửa sổ đếm ngược (Suspicion Timeout).
+  - **Tự thanh minh (Incarnation Refutation)**: Nếu nút chỉ bị khựng tạm thời do Stop-The-World Garbage Collection (GC pause), nó sẽ tăng số hiệu \`incarnation\` và phát sóng thông điệp \`ALIVE\` để hủy bỏ án phạt.`,
+      type: 'algorithm',
+      tag: 'GIÁM SÁT CỤM SWIM GOSSIP',
+      suggestions: [
+        'Kiểm tra trạng thái cụm Raft',
+        'Khai phá mẫu FP-Growth',
+        'Tối ưu thùng carton SPX'
+      ]
+    };
+  }
+
   // 27. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

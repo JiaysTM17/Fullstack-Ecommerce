@@ -385,7 +385,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 2. Cháy deal / Săn sale
-  if (/cháy deal|hết deal|deal sốc|săn sale|khung giờ sale/i.test(lower)) {
+  if (!/mua kèm|combo|bundle|fp-growth/i.test(lower) && /cháy deal|hết deal|deal sốc|săn sale|khung giờ sale/i.test(lower)) {
     return {
       intent: 'FLASH_SALE_TIPS',
       replyText: `**[MẸO SĂN DEAL] BÍ KÍP KHÔNG BỊ "CHÁY DEAL" TẠI MINI SHOPEE:**\n\n• **3 Khung Giờ Vàng Mỗi Ngày:** **00:00** (Siêu Deal Nửa Đêm) | **12:00** (Chính Ngọ Freeship) | **20:00** (Xả Kho Shopee Mall).\n• **Mẹo giật voucher 150k:** Cho sản phẩm vào giỏ trước 5 phút -> Canh đúng giây thứ 00 bấm Thanh toán với mã lưu sẵn.\n• Áp dụng cùng lúc **Dual Voucher** (Mã Đơn + Mã Ship) để đạt giá đáy!`,
@@ -404,7 +404,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 4. Tư vấn phối đồ & Gợi ý Combo mua kèm (Cross-sell & Bundle)
-  if (/phối đồ|combo|mua kèm|set đồ|mix đồ|đi cùng|phù hợp với/i.test(lower)) {
+  if (!/deal sốc|tiết kiệm|fp-growth|lift/i.test(lower) && /phối đồ|combo|mua kèm|set đồ|mix đồ|đi cùng|phù hợp với/i.test(lower)) {
     const isFashion = /áo|quần|giày|đầm|váy/i.test(lower);
     const isTech = /sạc|tai nghe|chuột|bàn phím|laptop/i.test(lower);
 
@@ -518,7 +518,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -597,6 +597,29 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'FLASH_SALE_CONSENSUS_FAIR_QUEUE',
       replyText: `**[BẢO ĐẢM CÔNG BẰNG FLASH SALE RAFT CONSENSUS]:**\n\n• **Chống bán vượt kho (Zero Overselling)**: Cụm máy chủ phân tán đồng thuận qua thuật toán Raft Consensus, đảm bảo chỉ những đơn hàng hợp lệ được ghi nhận vào Quorum mới xác nhận thành công.\n• **Xếp hàng công bằng tuyệt đối**: Triệt tiêu hiện tượng bot gian lận hoặc lỗi phân mảnh não đôi (Split-Brain). Mỗi chiếc deal sốc 1,000₫ đều được trao minh bạch cho người mua nhanh tay nhất!`,
       suggestions: ['Xem khung giờ Flash Sale', 'Nạp ví Mini Xu', 'Săn voucher Freeship'],
+    };
+  }
+
+  // -------------------------------------------------------------
+  // PHASE 11: PATTERN MINING, BIN PACKING & GOSSIP PROTOCOL
+  // -------------------------------------------------------------
+
+  // 8. Mua Kèm Deal Sốc & Gợi Ý Combo Tiết Kiệm (COMBO_BUNDLE_FP_GROWTH)
+  if (/mua kèm deal sốc|combo tiết kiệm|mua chung giảm giá|gợi ý combo|deal sốc mua kèm/i.test(lower)) {
+    return {
+      intent: 'COMBO_BUNDLE_FP_GROWTH',
+      replyText: `**[MUA KÈM DEAL SỐC FP-GROWTH] TIẾT KIỆM TỐI ĐA KHI MUA THEO BỘ!**\n\n• **Gợi ý thông minh từ giỏ hàng**: Thuật toán FP-Growth tự động nhận diện các sản phẩm thường được mua cùng nhau với hệ số tương quan cao (Lift ≥ 2.0).\n• **Ưu đãi kép**: Mua kèm phụ kiện hoặc sản phẩm bổ trợ với mức giảm thêm từ 10% - 20%, áp dụng chồng đồng thời với voucher toàn sàn và mã Freeship 30k!`,
+      products: searchSmartProducts('phụ kiện cáp sạc ốp lưng chuột').slice(0, 3),
+      suggestions: ['Xem các gói combo hot', 'Lấy voucher 15%', 'Thêm vào giỏ hàng'],
+    };
+  }
+
+  // 9. Quy Chuẩn Đóng Gói & Kích Thước Kiện Hàng SPX Box (SPX_PACKING_BOX_STANDARDS)
+  if (/kích thước kiện hàng|quy chuẩn đóng gói spx|hộp carton spx|cước quy đổi thể tích/i.test(lower)) {
+    return {
+      intent: 'SPX_PACKING_BOX_STANDARDS',
+      replyText: `**[QUY CHUẨN ĐÓNG GÓI SPX BOX] TỐI ƯU HÓA THỂ TÍCH & BẢO VỆ ĐƠN HÀNG:**\n\n• **Thùng carton chuẩn SPX**: Hệ thống áp dụng thuật toán Bin Packing xếp đặt hàng hóa vào các hộp tiêu chuẩn (Hộp S: 15x12x10cm, Hộp M: 25x20x15cm, Hộp L: 35x25x20cm) đảm bảo an toàn tuyệt đối chống va đập.\n• **Không lo đội cước**: Giữ tỷ lệ lấp đầy ≥ 75% giúp giảm tối đa trọng lượng quy đổi thể tích ($V/5000$), mang lại giá cước vận chuyển tiết kiệm nhất cho bạn!`,
+      suggestions: ['Tra cứu cước vận chuyển', 'Xem tiến độ đơn hàng', 'Chính sách đổi trả hàng'],
     };
   }
 

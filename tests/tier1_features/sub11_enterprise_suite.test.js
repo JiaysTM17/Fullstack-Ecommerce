@@ -80,6 +80,18 @@ import {
   RaftNode,
   FlashSaleStateMachine,
   RaftCluster,
+  // Phase 11 Enterprise Algorithms
+  FPNode,
+  FPTree,
+  FPGrowthBundler,
+  SPX_STANDARD_BOXES,
+  calculateVolumetricWeight,
+  MaximalRectanglesPacker,
+  SPXBoxOptimizer,
+  MemberStatus,
+  ClusterMember,
+  SwimNode,
+  SwimCluster,
 } from "../../client/src/services/aiAlgorithms.js";
 import fs from "fs";
 
@@ -9317,7 +9329,432 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       });
     });
   });
+
+  // =========================================================================
+  // FEATURE 158: Enterprise Pattern Mining, Bin Packing & SWIM Gossip Suite (Phase 11)
+  // =========================================================================
+  describe("Feature 158: Enterprise Pattern Mining, Bin Packing & SWIM Gossip Suite", () => {
+    
+    // --- 1. FP-Growth Frequent Pattern Mining & Association Rules ---
+    describe("FP-Growth Frequent Pattern Mining & Combo Bundler", () => {
+      test("F158-T1: Builds FP-Tree and headers table with accurate item frequencies", () => {
+        const transactions = [
+          ["ao_so_mi", "ca_vat", "that_lung"],
+          ["ao_so_mi", "ca_vat"],
+          ["ao_so_mi", "quan_au"],
+          ["ca_vat", "that_lung"],
+          ["ao_so_mi", "ca_vat", "that_lung", "giay_tay"],
+        ];
+
+        const bundler = new FPGrowthBundler({ minSupport: 2, minConfidence: 0.5 });
+        const result = bundler.fit(transactions);
+
+        expect.equal(result.totalTransactions, 5);
+        expect.equal(result.frequentItemsets.length > 0, true);
+        
+        // "ao_so_mi" appears 4 times, "ca_vat" appears 4 times, "that_lung" appears 3 times
+        const aoItemset = result.frequentItemsets.find((fi) => fi.items.length === 1 && fi.items[0] === "ao_so_mi");
+        expect.equal(aoItemset.support, 4);
+      });
+
+      test("F158-T2: Recursively mines frequent patterns above minSupport threshold", () => {
+        const transactions = [
+          ["iphone", "op_lung", "cu_sac"],
+          ["iphone", "op_lung"],
+          ["iphone", "cu_sac"],
+          ["op_lung", "cu_sac"],
+          ["iphone", "op_lung", "cu_sac", "tai_nghe"],
+        ];
+
+        const bundler = new FPGrowthBundler({ minSupport: 3, minConfidence: 0.5 });
+        const res = bundler.fit(transactions);
+
+        // Frequent pairs with support >= 3
+        const iphoneOpLung = res.frequentItemsets.find(
+          (fi) => fi.items.length === 2 && fi.items.includes("iphone") && fi.items.includes("op_lung")
+        );
+        expect.equal(Boolean(iphoneOpLung), true);
+        expect.equal(iphoneOpLung.support >= 3, true);
+      });
+
+      test("F158-T3: Generates association rules with correct Support, Confidence, and Lift", () => {
+        const transactions = [
+          ["laptop", "chuot", "ban_phim"],
+          ["laptop", "chuot"],
+          ["laptop", "chuot", "balo"],
+          ["chuot", "ban_phim"],
+          ["laptop", "ban_phim"],
+        ];
+
+        const bundler = new FPGrowthBundler({ minSupport: 2, minConfidence: 0.4 });
+        const res = bundler.fit(transactions);
+
+        expect.equal(res.rules.length > 0, true);
+        const rule = res.rules.find((r) => r.antecedent.includes("laptop") && r.consequent.includes("chuot"));
+        expect.equal(Boolean(rule), true);
+        expect.equal(rule.support, 3);
+        expect.equal(rule.confidence >= 0.75, true); // 3 / 4 = 0.75
+        expect.equal(rule.lift > 0, true);
+      });
+
+      test("F158-T4: Filters and ranks high-converting Deal Sốc combos with Lift >= 1.2", () => {
+        const transactions = [
+          ["may_anh", "the_nho", "tui_dung"],
+          ["may_anh", "the_nho"],
+          ["may_anh", "the_nho", "chan_may"],
+          ["binh_nuoc", "khan_lau"],
+          ["may_anh", "the_nho"],
+        ];
+
+        const bundler = new FPGrowthBundler({ minSupport: 2, minConfidence: 0.5 });
+        bundler.fit(transactions);
+        const combos = bundler.getDealSocCombos({ minLift: 1.1, limit: 5 });
+
+        expect.equal(combos.length > 0, true);
+        expect.equal(combos[0].lift >= 1.1, true);
+        expect.equal(combos[0].bundleName.includes("Combo Mua Kèm"), true);
+      });
+
+      test("F158-T5: Generates tailored cross-sell bundle recommendations for target item", () => {
+        const transactions = [
+          ["skincare_serum", "kem_chong_nang"],
+          ["skincare_serum", "kem_chong_nang", "sua_rua_mat"],
+          ["skincare_serum", "kem_chong_nang", "toner"],
+          ["son_moi", "phan_phu"],
+          ["skincare_serum", "sua_rua_mat"],
+        ];
+
+        const bundler = new FPGrowthBundler({ minSupport: 2, minConfidence: 0.4 });
+        bundler.fit(transactions);
+        const recommendations = bundler.recommendAddons("skincare_serum", { minLift: 1.0, limit: 3 });
+
+        expect.equal(recommendations.length > 0, true);
+        expect.equal(recommendations[0].recommendedItem, "kem_chong_nang");
+        expect.equal(recommendations[0].confidence >= 0.75, true);
+      });
+
+      test("F158-T6: Gracefully handles empty transactions or impossible minSupport", () => {
+        const bundler = new FPGrowthBundler({ minSupport: 10 });
+        const res = bundler.fit([]);
+        expect.equal(res.frequentItemsets.length, 0);
+        expect.equal(res.rules.length, 0);
+
+        const recs = bundler.recommendAddons("non_existent_item");
+        expect.equal(recs.length, 0);
+      });
+    });
+
+    // --- 2. Maximal Rectangles Bin Packing & SPX Carton Optimization ---
+    describe("Maximal Rectangles Bin Packing & SPX Box Optimizer", () => {
+      test("F158-T7: Accurately calculates standard IATA/SPX volumetric weight", () => {
+        // Hộp M: 25cm x 20cm x 15cm -> Thể tích = 7500 cm3
+        // Trọng lượng quy đổi = 7500 / 5000 = 1.5 kg
+        const volWeight = calculateVolumetricWeight(25, 20, 15);
+        expect.equal(volWeight, 1.5);
+
+        const volWeightSmall = calculateVolumetricWeight(10, 10, 10);
+        expect.equal(volWeightSmall, 0.2);
+      });
+
+      test("F158-T8: Packs items into 2D bin using Best Short Side Fit heuristic", () => {
+        const packer = new MaximalRectanglesPacker(20, 20); // 20x20 sheet
+        const items = [
+          { id: "item_1", width: 10, height: 10 },
+          { id: "item_2", width: 10, height: 10 },
+          { id: "item_3", width: 10, height: 10 },
+          { id: "item_4", width: 10, height: 10 },
+        ];
+
+        const res = packer.pack(items);
+        expect.equal(res.packed.length, 4);
+        expect.equal(res.unpacked.length, 0);
+        expect.equal(res.occupancyRate, 1.0); // 400 / 400 = 100%
+      });
+
+      test("F158-T9: Guillotine splitting prevents rectangle overlap during packing", () => {
+        const packer = new MaximalRectanglesPacker(30, 20);
+        const items = [
+          { id: "it_a", width: 15, height: 10 },
+          { id: "it_b", width: 10, height: 15 },
+          { id: "it_c", width: 10, height: 10 },
+        ];
+
+        const res = packer.pack(items);
+        expect.equal(res.packed.length, 3);
+
+        // Kiểm tra không chồng lấn tọa độ
+        for (let i = 0; i < res.packed.length; i++) {
+          for (let j = i + 1; j < res.packed.length; j++) {
+            const a = res.packed[i];
+            const b = res.packed[j];
+            const isOverlap =
+              a.x < b.x + b.width &&
+              a.x + a.width > b.x &&
+              a.y < b.y + b.height &&
+              a.y + a.height > b.y;
+            expect.equal(isOverlap, false);
+          }
+        }
+      });
+
+      test("F158-T10: Automatically selects optimal smallest SPX carton for order items", () => {
+        const optimizer = new SPXBoxOptimizer();
+        const items = [
+          { id: "prod_phone", name: "Điện thoại mini", length: 12, width: 8, height: 1, weightKg: 0.2 },
+          { id: "prod_charger", name: "Củ sạc GaN", length: 6, width: 4, height: 3, weightKg: 0.1 },
+        ];
+
+        const packingPlan = optimizer.optimizePacking(items);
+        expect.equal(packingPlan.success, true);
+        expect.equal(packingPlan.selectedBox.code === "SPX_BOX_XS" || packingPlan.selectedBox.code === "SPX_BOX_S", true);
+        expect.equal(packingPlan.unpackedItems.length, 0);
+      });
+
+      test("F158-T11: Achieves space utilization and prevents volumetric freight penalty", () => {
+        const optimizer = new SPXBoxOptimizer();
+        const items = [
+          { id: "prod_shoes", name: "Giày Sneaker", length: 28, width: 18, height: 11, weightKg: 0.8 },
+          { id: "prod_socks", name: "Vớ thể thao", length: 10, width: 8, height: 3, weightKg: 0.05 },
+        ];
+
+        const plan = optimizer.optimizePacking(items);
+        expect.equal(plan.success, true);
+        expect.equal(plan.selectedBox.code === "SPX_BOX_M" || plan.selectedBox.code === "SPX_BOX_L", true);
+        expect.equal(plan.volumetricWeightKg > 0, true);
+        expect.equal(plan.chargeableWeightKg >= 0.85, true);
+      });
+
+      test("F158-T12: Throws or reports unpacked when item exceeds maximum SPX_BOX_XL limits", () => {
+        const optimizer = new SPXBoxOptimizer();
+        const oversizedItem = [
+          { id: "prod_tv", name: "TV 75 inch siêu bự", length: 180, width: 110, height: 30, weightKg: 25 },
+        ];
+
+        const plan = optimizer.optimizePacking(oversizedItem);
+        expect.equal(plan.success, false);
+        expect.equal(plan.unpackedItems.length, 1);
+        expect.equal(plan.unpackedItems[0].id, "prod_tv");
+      });
+
+      test("F158-T13: Generates detailed warehouse packing manifest with coordinates", () => {
+        const optimizer = new SPXBoxOptimizer();
+        const items = [
+          { id: "prod_book1", name: "Sách Lập Trình", length: 20, width: 14, height: 2, weightKg: 0.4 },
+          { id: "prod_book2", name: "Sách Thuật Toán", length: 20, width: 14, height: 2, weightKg: 0.4 },
+        ];
+
+        const plan = optimizer.optimizePacking(items);
+        expect.equal(plan.manifest.length, 2);
+        expect.equal(typeof plan.manifest[0].x, "number");
+        expect.equal(typeof plan.manifest[0].y, "number");
+        expect.equal(typeof plan.manifest[0].layer, "number");
+      });
+    });
+
+    // --- 3. SWIM Gossip Membership Protocol ---
+    describe("SWIM Gossip Membership Protocol with Suspicion Mechanism", () => {
+      test("F158-T14: Initializes SWIM cluster with all members ALIVE and incarnation 0", () => {
+        const cluster = new SwimCluster({ nodeCount: 4 });
+        const nodes = cluster.getAllNodes();
+
+        expect.equal(nodes.length, 4);
+        for (const node of nodes) {
+          expect.equal(node.status, MemberStatus.ALIVE);
+          expect.equal(node.incarnation, 0);
+          expect.equal(node.memberList.size, 4);
+        }
+      });
+
+      test("F158-T15: Direct ping round succeeds when target node is healthy", () => {
+        const cluster = new SwimCluster({ nodeCount: 3 });
+        const node1 = cluster.getNode("swim_node_1");
+
+        const result = node1.stepProtocol();
+        expect.equal(result.type, "DIRECT_PING");
+        expect.equal(result.success, true);
+      });
+
+      test("F158-T16: Falls back to indirect ping-req when direct ping fails", () => {
+        const cluster = new SwimCluster({ nodeCount: 4 });
+        const node1 = cluster.getNode("swim_node_1");
+        const node4 = cluster.getNode("swim_node_4");
+
+        // Isolate node4 from node1 only (direct link broken, but node2 and node3 can reach node4)
+        cluster.setDroppedLink("swim_node_1", "swim_node_4", true);
+        cluster.setDroppedLink("swim_node_4", "swim_node_1", true);
+
+        // Force node1 to probe node4
+        node1.probeIndex = node1.memberListArray.findIndex((m) => m.id === "swim_node_4");
+        const result = node1.stepProtocol();
+
+        expect.equal(result.type, "INDIRECT_PING_REQ");
+        expect.equal(result.success, true); // indirect through node2/3 succeeded
+      });
+
+      test("F158-T17: Transitions node to SUSPECT when both direct and indirect pings fail", () => {
+        const cluster = new SwimCluster({ nodeCount: 4 });
+        const node1 = cluster.getNode("swim_node_1");
+        const targetNode = cluster.getNode("swim_node_4");
+
+        // Completely isolate targetNode from the entire network
+        cluster.isolateNode("swim_node_4");
+
+        // Force node1 to probe node4
+        node1.probeIndex = node1.memberListArray.findIndex((m) => m.id === "swim_node_4");
+        const result = node1.stepProtocol();
+
+        expect.equal(result.type, "INDIRECT_PING_REQ");
+        expect.equal(result.success, false);
+        expect.equal(result.newStatus, MemberStatus.SUSPECT);
+
+        const memberRecord = node1.memberList.get("swim_node_4");
+        expect.equal(memberRecord.status, MemberStatus.SUSPECT);
+      });
+
+      test("F158-T18: Suspicion refutation allows GC-paused node to self-refute with increased incarnation", () => {
+        const cluster = new SwimCluster({ nodeCount: 3 });
+        const node1 = cluster.getNode("swim_node_1");
+        const node2 = cluster.getNode("swim_node_2");
+
+        // Manually place node2 into SUSPECT inside node1's list
+        node1.applyMemberUpdate({
+          id: "swim_node_2",
+          status: MemberStatus.SUSPECT,
+          incarnation: 0,
+        });
+        expect.equal(node1.memberList.get("swim_node_2").status, MemberStatus.SUSPECT);
+
+        // Node2 detects it is being suspected with incarnation 0 -> self-refutes!
+        node2.refuteSuspicion(0);
+        expect.equal(node2.incarnation, 1);
+        expect.equal(node2.status, MemberStatus.ALIVE);
+
+        // Send gossip update back to node1
+        node1.applyMemberUpdate({
+          id: "swim_node_2",
+          status: MemberStatus.ALIVE,
+          incarnation: 1,
+        });
+
+        // Node1 updates node2 back to ALIVE because incarnation 1 > incarnation 0
+        expect.equal(node1.memberList.get("swim_node_2").status, MemberStatus.ALIVE);
+      });
+
+      test("F158-T19: Marks node DEAD when suspicion timeout expires without refutation", () => {
+        const cluster = new SwimCluster({ nodeCount: 3, suspicionTimeoutRounds: 2 });
+        const node1 = cluster.getNode("swim_node_1");
+
+        // Mark node3 as SUSPECT
+        node1.applyMemberUpdate({
+          id: "swim_node_3",
+          status: MemberStatus.SUSPECT,
+          incarnation: 0,
+        });
+
+        // Run 2 suspicion check rounds without node3 replying
+        node1.checkSuspicionTimeouts();
+        node1.checkSuspicionTimeouts();
+
+        expect.equal(node1.memberList.get("swim_node_3").status, MemberStatus.DEAD);
+      });
+
+      test("F158-T20: Piggybacks gossip updates across cluster rounds to achieve membership convergence", () => {
+        const cluster = new SwimCluster({ nodeCount: 4 });
+        const node1 = cluster.getNode("swim_node_1");
+
+        // Simulate new member joining through node1
+        node1.joinMember("swim_node_5");
+        expect.equal(node1.memberList.has("swim_node_5"), true);
+
+        // Run cluster gossip rounds
+        cluster.runRounds(10);
+
+        // All nodes should now have heard the gossip and added swim_node_5
+        for (const node of cluster.getAllNodes()) {
+          expect.equal(node.memberList.has("swim_node_5"), true);
+        }
+      });
+    });
+
+    // --- 4. Tri-Role AI Copilots & End-to-End Suite ---
+    describe("Tri-Role AI Copilots & End-to-End Enterprise Suite", () => {
+      test("F158-T21: Admin Copilot explains FP-Growth audit, SPX Bin Packing, and SWIM Gossip", () => {
+        const resFp = generateAdminCopilotResponse("Kiểm toán luật kết hợp fp-growth và combo sàn");
+        expect.equal(resFp.tag, "KIỂM TOÁN COMBO FP-GROWTH");
+        expect.equal(resFp.text.includes("FP-Growth"), true);
+        expect.equal(resFp.text.includes("Lift"), true);
+
+        const resBin = generateAdminCopilotResponse("Tối ưu hóa thể tích đóng thùng carton spx bin packing");
+        expect.equal(resBin.tag, "TỐI ƯU ĐÓNG THÙNG SPX");
+        expect.equal(resBin.text.includes("Guillotine Split"), true);
+        expect.equal(resBin.text.includes("5000"), true);
+
+        const resSwim = generateAdminCopilotResponse("Giám sát sức khỏe cụm phân tán bằng swim gossip protocol");
+        expect.equal(resSwim.tag, "GIÁM SÁT CỤM SWIM GOSSIP");
+        expect.equal(resSwim.text.includes("Ping-Req"), true);
+        expect.equal(resSwim.text.includes("Incarnation"), true);
+      });
+
+      test("F158-T22: Seller Copilot provides tailored FP-Growth combo advice and SPX carton savings", () => {
+        const resSellerFp = generateSellerCopilotResponse("Tư vấn thiết lập combo mua kèm deal sốc fp-growth cho shop");
+        expect.equal(resSellerFp.tag, "THIẾT LẬP COMBO DEAL SỐC FP-GROWTH");
+        expect.equal(resSellerFp.text.includes("Lift"), true);
+
+        const resSellerBox = generateSellerCopilotResponse("Hướng dẫn đóng gói tiết kiệm cước thùng carton spx");
+        expect.equal(resSellerBox.tag, "TỐI ƯU ĐÓNG GÓI SPX BOX");
+        expect.equal(resSellerBox.text.includes("Bin Packing"), true);
+
+        const resSellerSwim = generateSellerCopilotResponse("Đồng bộ cụm phân tán shop gossip");
+        expect.equal(resSellerSwim.tag, "ĐỒNG BỘ CỤM PHÂN TÁN GOSSIP");
+      });
+
+      test("F158-T23: Buyer Chat AI guides deal combos and SPX packing standards", () => {
+        const resBuyerCombo = generateAiChatResponse("Gợi ý mua kèm deal sốc combo tiết kiệm");
+        expect.equal(resBuyerCombo.intent, "COMBO_BUNDLE_FP_GROWTH");
+        expect.equal(resBuyerCombo.replyText.includes("FP-Growth"), true);
+
+        const resBuyerBox = generateAiChatResponse("Quy chuẩn đóng gói spx kích thước kiện hàng");
+        expect.equal(resBuyerBox.intent, "SPX_PACKING_BOX_STANDARDS");
+        expect.equal(resBuyerBox.replyText.includes("Bin Packing"), true);
+      });
+
+      test("F158-T24: Comprehensive End-to-End: Frequent combo mining -> SPX Carton packing -> Cluster health monitoring", () => {
+        // Step 1: Mine frequent bundle using FP-Growth
+        const transactions = [
+          ["laptop_dell", "chuot_khong_day", "lot_chuot"],
+          ["laptop_dell", "chuot_khong_day"],
+          ["laptop_dell", "chuot_khong_day", "balo_chong_soc"],
+          ["chuot_khong_day", "lot_chuot"],
+          ["laptop_dell", "chuot_khong_day"],
+        ];
+        const bundler = new FPGrowthBundler({ minSupport: 2, minConfidence: 0.5 });
+        bundler.fit(transactions);
+        const combos = bundler.getDealSocCombos();
+        expect.equal(combos.length > 0, true);
+
+        // Step 2: Customer orders the combo -> Pack items into optimal SPX carton
+        const orderItems = [
+          { id: "laptop_dell", name: "Laptop Dell", length: 36, width: 25, height: 2, weightKg: 1.8 },
+          { id: "chuot_khong_day", name: "Chuột không dây", length: 11, width: 6, height: 4, weightKg: 0.1 },
+          { id: "lot_chuot", name: "Lót chuột", length: 25, width: 20, height: 0.3, weightKg: 0.05 },
+        ];
+        const boxOptimizer = new SPXBoxOptimizer();
+        const packingResult = boxOptimizer.optimizePacking(orderItems);
+        expect.equal(packingResult.success, true);
+        expect.equal(packingResult.unpackedItems.length, 0);
+        expect.equal(packingResult.selectedBox.code === "SPX_BOX_L" || packingResult.selectedBox.code === "SPX_BOX_XL", true);
+
+        // Step 3: Cluster SWIM Gossip protocol confirms warehouse fulfillment services are alive
+        const swimCluster = new SwimCluster({ nodeCount: 3 });
+        const warehouseNode = swimCluster.getNode("swim_node_1");
+        const round = warehouseNode.stepProtocol();
+        expect.equal(round.success, true);
+        expect.equal(warehouseNode.status, MemberStatus.ALIVE);
+      });
+    });
+  });
 });
+
 
 
 

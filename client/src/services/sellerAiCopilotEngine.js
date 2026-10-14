@@ -119,7 +119,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 5. Quản Lý Đơn Hàng & Xử Lý Giao SPX (Order Fulfillment)
-  if (!/hungarian/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
+  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
     const pendingCount = shopOrders.filter(o => o.status === 'pending').length;
     return {
       text: `📦 **TIẾN ĐỘ XỬ LÝ ĐƠN HÀNG GIAN HÀNG**:
@@ -311,6 +311,57 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
       suggestions: [
         'Cấu hình số lượng Flash Sale',
         'Tối ưu hình ảnh sản phẩm HNSW',
+        'Xem báo cáo bán hàng'
+      ]
+    };
+  }
+
+  // 15. Thiết Lập Combo Mua Kèm Deal Sốc Bằng FP-Growth (Frequent Pattern Mining Combo)
+  if (/combo mua kèm deal sốc|thiết lập combo|fp-growth shop|gợi ý combo|luật kết hợp shop|lift sản phẩm/i.test(raw)) {
+    return {
+      text: `🎁 **TƯ VẤN THIẾT LẬP COMBO MUA KÈM DEAL SỐC FP-GROWTH (${currentShop.name})**:
+- **Khai phá giỏ hàng khách mua**: Thuật toán FP-Growth rà soát lịch sử ${shopOrders.length} đơn hàng của shop để tìm các cặp sản phẩm thường xuyên được mua cùng nhau.
+- **Tiêu chí tạo Deal Sốc hiệu quả**:
+  - **Chỉ số Lift $\\ge 2.0$**: Đảm bảo khách mua sản phẩm chính (ví dụ Áo sơ mi) có xác suất mua kèm sản phẩm phụ (Cà vạt, Quần âu) cao gấp đôi bình thường.
+  - **Chiết khấu an toàn**: Giảm từ 10% - 20% cho món mua kèm giúp tăng giá trị trung bình giỏ hàng (AOV) thêm 35% mà vẫn đảm bảo biên lợi nhuận gộp toàn đơn $\\ge 30%$.`,
+      type: 'marketing',
+      tag: 'THIẾT LẬP COMBO DEAL SỐC FP-GROWTH',
+      suggestions: [
+        'Tối ưu đóng gói thùng carton SPX',
+        'Đồng bộ cụm phân tán SWIM',
+        'Xem báo cáo P&L từng SKU'
+      ]
+    };
+  }
+
+  // 16. Hướng Dẫn Đóng Gói Thùng Carton SPX Tiết Kiệm Cước (Bin Packing SPX Box)
+  if (/đóng gói tiết kiệm cước|tối ưu kích thước hộp|chọn hộp spx|giảm cước quy đổi|bin packing shop/i.test(raw)) {
+    return {
+      text: `📦 **HƯỚNG DẪN ĐÓNG GÓI THÙNG CARTON SPX TIẾT KIỆM CƯỚC (${currentShop.name})**:
+- **Tối ưu hóa không gian 3 chiều**: Thuật toán Bin Packing Maximal Rectangles giúp shop lựa chọn kích cỡ thùng chuẩn SPX (Hộp S: $15\\times 12\\times 10\\text{cm}$, Hộp M: $25\\times 20\\times 15\\text{cm}$) vừa vặn nhất với bộ sản phẩm.
+- **Tránh bị phạt cước thể tích**:
+  - Hàng cồng kềnh nhẹ cân thường bị SPX tính cước theo thể tích ($V/5000$).
+  - Bằng cách xoay lật đa chiều và đóng gói lấp đầy $\\ge 75\\%$, shop tiết kiệm trung bình 12.000₫ - 25.000₫ cước vận chuyển trên mỗi đơn hàng!`,
+      type: 'logistics',
+      tag: 'TỐI ƯU ĐÓNG GÓI SPX BOX',
+      suggestions: [
+        'Tạo combo mua kèm FP-Growth',
+        'Cảnh báo tồn kho an toàn',
+        'Xem chi phí vận chuyển'
+      ]
+    };
+  }
+
+  // 17. Đồng Bộ Cụm Phân Tán SWIM Gossip Cho Gian Hàng (SWIM Membership Protocol)
+  if (/cụm phân tán shop|gossip shop|swim node/i.test(raw)) {
+    return {
+      text: `🌐 **ĐỒNG BỘ CỤM PHÂN TÁN GOSSIP SWIM (${currentShop.name})**:
+- **Vận hành không gián đoạn (High Availability)**: Dịch vụ gian hàng của bạn được đồng bộ qua giao thức SWIM Gossip, giúp cập nhật trạng thái kho và đơn hàng tức thì trên các vùng dữ liệu mà không bị treo gián đoạn khi máy chủ bảo trì.`,
+      type: 'infrastructure',
+      tag: 'ĐỒNG BỘ CỤM PHÂN TÁN GOSSIP',
+      suggestions: [
+        'Kiểm tra tồn kho Flash Sale',
+        'Thiết lập combo FP-Growth',
         'Xem báo cáo bán hàng'
       ]
     };

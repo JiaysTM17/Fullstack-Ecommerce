@@ -4509,6 +4509,1023 @@ export class RaftCluster {
   }
 }
 
+// ------------------------------------------------------------------------------
+// PHASE 11 ALGORITHM 1: FP-Growth (Frequent Pattern Growth) & Association Rules
+// ------------------------------------------------------------------------------
+export class FPNode {
+  constructor(item, parent = null) {
+    this.item = item;
+    this.count = 1;
+    this.parent = parent;
+    this.children = new Map();
+    this.nodeLink = null;
+  }
+}
+
+export class FPTree {
+  constructor() {
+    this.root = new FPNode(null);
+    this.headerTable = new Map();
+  }
+
+  addTransaction(items, count = 1) {
+    let currentNode = this.root;
+
+    for (const item of items) {
+      if (currentNode.children.has(item)) {
+        const child = currentNode.children.get(item);
+        child.count += count;
+        currentNode = child;
+      } else {
+        const newChild = new FPNode(item, currentNode);
+        newChild.count = count;
+        currentNode.children.set(item, newChild);
+
+        if (!this.headerTable.has(item)) {
+          this.headerTable.set(item, { count: newChild.count, headNode: newChild, tailNode: newChild });
+        } else {
+          const header = this.headerTable.get(item);
+          header.tailNode.nodeLink = newChild;
+          header.tailNode = newChild;
+        }
+
+        currentNode = newChild;
+      }
+    }
+  }
+
+  getPrefixPaths(item) {
+    const paths = [];
+    if (!this.headerTable.has(item)) return paths;
+
+    let currNode = this.headerTable.get(item).headNode;
+    while (currNode) {
+      const count = currNode.count;
+      const path = [];
+      let parent = currNode.parent;
+      while (parent && parent.item !== null) {
+        path.push(parent.item);
+        parent = parent.parent;
+      }
+
+      if (path.length > 0) {
+        path.reverse();
+        paths.push({ path, count });
+      }
+
+      currNode = currNode.nodeLink;
+    }
+
+    return paths;
+  }
+}
+
+export class FPGrowthBundler {
+  constructor({ minSupport = 0.05, minConfidence = 0.4, minLift = 0.0 } = {}) {
+    this.minSupport = minSupport;
+    this.minConfidence = minConfidence;
+    this.minLift = typeof minLift === "number" ? minLift : 0.0;
+    this.itemFrequency = new Map();
+    this.totalTransactions = 0;
+  }
+
+  mine(transactions = []) {
+    this.totalTransactions = transactions.length;
+    if (this.totalTransactions === 0) {
+      return { frequentItemsets: [], associationRules: [] };
+    }
+
+    const minSupportCount =
+      this.minSupport >= 1
+        ? Math.floor(this.minSupport)
+        : Math.max(1, Math.ceil(this.minSupport * this.totalTransactions));
+
+    this.itemFrequency.clear();
+    for (const tx of transactions) {
+      const uniqueItems = new Set(tx);
+      for (const item of uniqueItems) {
+        this.itemFrequency.set(item, (this.itemFrequency.get(item) || 0) + 1);
+      }
+    }
+
+    const frequentItems = new Map();
+    for (const [item, count] of this.itemFrequency.entries()) {
+      if (count >= minSupportCount) {
+        frequentItems.set(item, count);
+      }
+    }
+
+    const tree = new FPTree();
+    for (const tx of transactions) {
+      const filteredSorted = tx
+        .filter((item) => frequentItems.has(item))
+        .sort((a, b) => {
+          const freqA = frequentItems.get(a);
+          const freqB = frequentItems.get(b);
+          if (freqB !== freqA) return freqB - freqA;
+          return String(a).localeCompare(String(b));
+        });
+
+      if (filteredSorted.length > 0) {
+        tree.addTransaction(filteredSorted, 1);
+      }
+    }
+
+    const frequentItemsets = [];
+    this._mineFPTree(tree, [], minSupportCount, frequentItemsets);
+
+    const associationRules = this._generateAssociationRules(frequentItemsets);
+
+    return {
+      frequentItemsets,
+      associationRules,
+      metrics: {
+        totalTransactions: this.totalTransactions,
+        minSupportCount,
+        frequentItemsetsCount: frequentItemsets.length,
+        rulesCount: associationRules.length,
+      },
+    };
+  }
+
+  _mineFPTree(tree, prefix, minSupportCount, results) {
+    const sortedItems = Array.from(tree.headerTable.keys()).sort((a, b) => {
+      return (tree.headerTable.get(a).count || 0) - (tree.headerTable.get(b).count || 0);
+    });
+
+    for (const item of sortedItems) {
+      const header = tree.headerTable.get(item);
+      let totalCount = 0;
+      let curr = header.headNode;
+      while (curr) {
+        totalCount += curr.count;
+        curr = curr.nodeLink;
+      }
+
+      if (totalCount < minSupportCount) continue;
+
+      const newPattern = [...prefix, item];
+      results.push({
+        items: newPattern,
+        count: totalCount,
+        support: totalCount,
+        supportRatio: Number((totalCount / this.totalTransactions).toFixed(4)),
+      });
+
+      const prefixPaths = tree.getPrefixPaths(item);
+      if (prefixPaths.length > 0) {
+        const condItemFreq = new Map();
+        for (const pp of prefixPaths) {
+          for (const it of pp.path) {
+            condItemFreq.set(it, (condItemFreq.get(it) || 0) + pp.count);
+          }
+        }
+
+        const condTree = new FPTree();
+        for (const pp of prefixPaths) {
+          const filteredPath = pp.path
+            .filter((it) => (condItemFreq.get(it) || 0) >= minSupportCount)
+            .sort((a, b) => (condItemFreq.get(b) || 0) - (condItemFreq.get(a) || 0));
+
+          if (filteredPath.length > 0) {
+            condTree.addTransaction(filteredPath, pp.count);
+          }
+        }
+
+        if (condTree.headerTable.size > 0) {
+          this._mineFPTree(condTree, newPattern, minSupportCount, results);
+        }
+      }
+    }
+  }
+
+  _generateAssociationRules(frequentItemsets) {
+    const rules = [];
+    const multiItemSets = frequentItemsets.filter((s) => s.items.length >= 2);
+    const supportMap = new Map();
+    for (const fis of frequentItemsets) {
+      const key = [...fis.items].sort().join("|||");
+      supportMap.set(key, fis.count || fis.support);
+    }
+
+    for (const itemset of multiItemSets) {
+      const items = itemset.items;
+      const setCount = itemset.count || itemset.support;
+
+      const subsets = this._getSubsets(items);
+      for (const antecedent of subsets) {
+        if (antecedent.length === 0 || antecedent.length === items.length) continue;
+
+        const antecedentKey = [...antecedent].sort().join("|||");
+        const antecedentCount = supportMap.get(antecedentKey) || 0;
+        if (antecedentCount <= 0) continue;
+
+        const consequent = items.filter((it) => !antecedent.includes(it));
+        const consequentKey = [...consequent].sort().join("|||");
+        const consequentCount = supportMap.get(consequentKey) || 0;
+        if (consequentCount <= 0) continue;
+
+        const confidence = setCount / antecedentCount;
+        const consequentSupportRatio = consequentCount / this.totalTransactions;
+        const lift = consequentSupportRatio > 0 ? confidence / consequentSupportRatio : 1.0;
+
+        if (confidence >= this.minConfidence && lift >= this.minLift) {
+          rules.push({
+            antecedent,
+            consequent,
+            support: setCount,
+            supportRatio: Number((setCount / this.totalTransactions).toFixed(4)),
+            confidence: Number(confidence.toFixed(4)),
+            lift: Number(lift.toFixed(2)),
+            recommendationType: lift >= 2.0 ? "COMBO_DEAL_SHOCK" : "FREQUENTLY_BOUGHT_TOGETHER",
+          });
+        }
+      }
+    }
+
+    rules.sort((a, b) => b.lift - a.lift);
+    return rules;
+  }
+
+  _getSubsets(array) {
+    const result = [[]];
+    for (const val of array) {
+      const len = result.length;
+      for (let i = 0; i < len; i++) {
+        result.push([...result[i], val]);
+      }
+    }
+    return result;
+  }
+
+  recommendAddons(cartItems = [], rules = []) {
+    const cartSet = new Set(cartItems);
+    const recommendations = new Map();
+
+    for (const rule of rules) {
+      const matchesAntecedent = rule.antecedent.every((item) => cartSet.has(item));
+      if (matchesAntecedent) {
+        for (const target of rule.consequent) {
+          if (!cartSet.has(target)) {
+            if (!recommendations.has(target) || recommendations.get(target).lift < rule.lift) {
+              recommendations.set(target, {
+                item: target,
+                confidence: rule.confidence,
+                lift: rule.lift,
+                type: rule.recommendationType,
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return Array.from(recommendations.values()).sort((a, b) => b.lift - a.lift);
+  }
+
+  fit(transactions = []) {
+    const mined = this.mine(transactions);
+    this.lastResult = mined;
+    return {
+      totalTransactions: mined.metrics?.totalTransactions || transactions.length,
+      frequentItemsets: mined.frequentItemsets,
+      rules: mined.associationRules,
+    };
+  }
+
+  getDealSocCombos({ minLift = 1.0, limit = 5 } = {}) {
+    const rules = this.lastResult?.associationRules || [];
+    return rules
+      .filter((r) => r.lift >= minLift)
+      .slice(0, limit)
+      .map((r, idx) => ({
+        id: `bundle_${idx + 1}`,
+        bundleName: `Combo Mua Kèm: ${r.antecedent.join(" + ")} tặng Deal Sốc ${r.consequent.join(" + ")}`,
+        items: [...r.antecedent, ...r.consequent],
+        mainItems: r.antecedent,
+        addonItems: r.consequent,
+        support: r.support,
+        confidence: r.confidence,
+        lift: r.lift,
+        discountPct: Math.min(30, Math.round(r.lift * 10)),
+      }));
+  }
+
+  recommendAddons(itemOrCart = [], options = {}) {
+    const cart = Array.isArray(itemOrCart) ? itemOrCart : [itemOrCart];
+    const minLift = options.minLift ?? 1.0;
+    const limit = options.limit ?? 5;
+    const rules = this.lastResult?.associationRules || [];
+    const recs = [];
+
+    for (const r of rules) {
+      const match = r.antecedent.some((it) => cart.includes(it));
+      if (match && r.lift >= minLift) {
+        for (const target of r.consequent) {
+          if (!cart.includes(target) && !recs.some((rc) => rc.recommendedItem === target)) {
+            recs.push({
+              recommendedItem: target,
+              confidence: r.confidence,
+              lift: r.lift,
+            });
+          }
+        }
+      }
+    }
+    return recs.slice(0, limit);
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 11 ALGORITHM 2: 2D/3D Maximal Rectangles Bin Packing & SPX Volumetric Optimizer
+// ------------------------------------------------------------------------------
+export const SPX_STANDARD_BOXES = [
+  { id: "BOX_XS", name: "Hộp XS (Phụ kiện, son, củ sạc)", width: 15, length: 10, height: 10, maxWeightKg: 1.0, boxCostVnd: 2000 },
+  { id: "BOX_S",  name: "Hộp S (Áo thun, mỹ phẩm, điện thoại)", width: 20, length: 15, height: 10, maxWeightKg: 3.0, boxCostVnd: 3500 },
+  { id: "BOX_M",  name: "Hộp M (Giày dép, nồi cơm, áo khoác)", width: 30, length: 20, height: 15, maxWeightKg: 5.0, boxCostVnd: 5000 },
+  { id: "BOX_L",  name: "Hộp L (Đồ gia dụng, máy hút bụi, balo)", width: 40, length: 30, height: 20, maxWeightKg: 10.0, boxCostVnd: 8000 },
+  { id: "BOX_XL", name: "Hộp XL (Đại tiện tích, màn hình, quạt đứng)", width: 60, length: 40, height: 30, maxWeightKg: 20.0, boxCostVnd: 15000 },
+];
+
+export function calculateVolumetricWeight(widthCm, lengthCm, heightCm) {
+  const vol = (Number(widthCm) || 0) * (Number(lengthCm) || 0) * (Number(heightCm) || 0);
+  return Number((vol / 5000).toFixed(2));
+}
+
+export class MaximalRectanglesPacker {
+  constructor(binWidth, binLength) {
+    this.binWidth = binWidth;
+    this.binLength = binLength;
+    this.usedRectangles = [];
+    this.freeRectangles = [{ x: 0, y: 0, width: binWidth, length: binLength }];
+  }
+
+  insert(item) {
+    const w = Number(item.width) || 0;
+    const l = Number(item.length ?? item.height) || 0;
+    const allowRotation = item.allowRotation !== false;
+
+    let bestRect = null;
+    let bestAreaFit = Infinity;
+    let bestRotated = false;
+
+    for (const free of this.freeRectangles) {
+      if (free.width >= w && free.length >= l) {
+        const leftoverArea = free.width * free.length - w * l;
+        if (leftoverArea < bestAreaFit) {
+          bestAreaFit = leftoverArea;
+          bestRect = free;
+          bestRotated = false;
+        }
+      }
+
+      if (allowRotation && free.width >= l && free.length >= w) {
+        const leftoverArea = free.width * free.length - l * w;
+        if (leftoverArea < bestAreaFit) {
+          bestAreaFit = leftoverArea;
+          bestRect = free;
+          bestRotated = true;
+        }
+      }
+    }
+
+    if (!bestRect) {
+      return null;
+    }
+
+    const placedW = bestRotated ? l : w;
+    const placedL = bestRotated ? w : l;
+    const placement = {
+      id: item.id,
+      name: item.name || item.id,
+      x: bestRect.x,
+      y: bestRect.y,
+      width: placedW,
+      length: placedL,
+      rotated: bestRotated,
+    };
+
+    this._splitFreeRectangles(placement);
+    this._pruneFreeRectangles();
+
+    this.usedRectangles.push(placement);
+    return placement;
+  }
+
+  _splitFreeRectangles(placed) {
+    const newFree = [];
+
+    for (const free of this.freeRectangles) {
+      const overlaps =
+        placed.x < free.x + free.width &&
+        placed.x + placed.width > free.x &&
+        placed.y < free.y + free.length &&
+        placed.y + placed.length > free.y;
+
+      if (!overlaps) {
+        newFree.push(free);
+        continue;
+      }
+
+      if (placed.y > free.y && placed.y < free.y + free.length) {
+        newFree.push({
+          x: free.x,
+          y: free.y,
+          width: free.width,
+          length: placed.y - free.y,
+        });
+      }
+      if (placed.y + placed.length < free.y + free.length) {
+        newFree.push({
+          x: free.x,
+          y: placed.y + placed.length,
+          width: free.width,
+          length: free.y + free.length - (placed.y + placed.length),
+        });
+      }
+      if (placed.x > free.x && placed.x < free.x + free.width) {
+        newFree.push({
+          x: free.x,
+          y: free.y,
+          width: placed.x - free.x,
+          length: free.length,
+        });
+      }
+      if (placed.x + placed.width < free.x + free.width) {
+        newFree.push({
+          x: placed.x + placed.width,
+          y: free.y,
+          width: free.x + free.width - (placed.x + placed.width),
+          length: free.length,
+        });
+      }
+    }
+
+    this.freeRectangles = newFree;
+  }
+
+  _pruneFreeRectangles() {
+    for (let i = 0; i < this.freeRectangles.length; i++) {
+      for (let j = i + 1; j < this.freeRectangles.length; j++) {
+        const r1 = this.freeRectangles[i];
+        const r2 = this.freeRectangles[j];
+
+        if (
+          r1.x >= r2.x &&
+          r1.y >= r2.y &&
+          r1.x + r1.width <= r2.x + r2.width &&
+          r1.y + r1.length <= r2.y + r2.length
+        ) {
+          this.freeRectangles.splice(i, 1);
+          i--;
+          break;
+        }
+
+        if (
+          r2.x >= r1.x &&
+          r2.y >= r1.y &&
+          r2.x + r2.width <= r1.x + r1.width &&
+          r2.y + r2.length <= r1.y + r1.length
+        ) {
+          this.freeRectangles.splice(j, 1);
+          j--;
+        }
+      }
+    }
+  }
+
+  getEfficiency() {
+    const totalBinArea = this.binWidth * this.binLength;
+    if (totalBinArea === 0) return 0;
+    const usedArea = this.usedRectangles.reduce((sum, r) => sum + r.width * r.length, 0);
+    return Number(((usedArea / totalBinArea) * 100).toFixed(2));
+  }
+
+  pack(items = []) {
+    const packed = [];
+    const unpacked = [];
+    for (const item of items) {
+      const placed = this.insert(item);
+      if (placed) {
+        packed.push(placed);
+      } else {
+        unpacked.push(item);
+      }
+    }
+    return {
+      packed,
+      unpacked,
+      occupancyRate: Number((this.getEfficiency() / 100).toFixed(4)),
+    };
+  }
+}
+
+export class SPXBoxOptimizer {
+  constructor(customBoxes = null) {
+    this.standardBoxes = customBoxes || SPX_STANDARD_BOXES;
+  }
+
+  optimizeBoxForOrder(items = []) {
+    if (!items || items.length === 0) {
+      return {
+        bestBox: null,
+        packings: [],
+        fits: false,
+        actualWeightTotal: 0,
+        volumetricWeightTotal: 0,
+        efficiencyPct: 0,
+      };
+    }
+
+    const expandedItems = [];
+    let totalActualWeight = 0;
+    let maxItemHeight = 0;
+
+    for (const it of items) {
+      const qty = Math.max(1, Number(it.quantity) || 1);
+      const w = Math.max(1, Number(it.width) || 5);
+      const l = Math.max(1, Number(it.length) || 5);
+      const h = Math.max(1, Number(it.height) || 5);
+      const weight = Math.max(0.1, Number(it.weightKg || it.weight) || 0.5);
+
+      if (h > maxItemHeight) maxItemHeight = h;
+
+      for (let q = 0; q < qty; q++) {
+        expandedItems.push({
+          id: `${it.id || "item"}_${q + 1}`,
+          name: it.name || it.id,
+          width: w,
+          length: l,
+          height: h,
+          weightKg: weight,
+          area: w * l,
+          volume: w * l * h,
+        });
+        totalActualWeight += weight;
+      }
+    }
+
+    expandedItems.sort((a, b) => b.area - a.area);
+
+    const sortedBoxes = [...this.standardBoxes].sort((a, b) => {
+      const volA = a.width * a.length * a.height;
+      const volB = b.width * b.length * b.height;
+      return volA - volB;
+    });
+
+    for (const box of sortedBoxes) {
+      if (box.height < maxItemHeight) continue;
+      if (totalActualWeight > box.maxWeightKg) continue;
+
+      const packer = new MaximalRectanglesPacker(box.width, box.length);
+      let allFit = true;
+      const placements = [];
+
+      for (const item of expandedItems) {
+        const placed = packer.insert(item);
+        if (!placed) {
+          allFit = false;
+          break;
+        }
+        placements.push({
+          ...placed,
+          height: item.height,
+          weightKg: item.weightKg,
+        });
+      }
+
+      if (allFit) {
+        const volumetricWeight = calculateVolumetricWeight(box.width, box.length, box.height);
+        const chargeableWeight = Math.max(Number(totalActualWeight.toFixed(2)), volumetricWeight);
+        const efficiency = packer.getEfficiency();
+
+        return {
+          bestBox: box,
+          packings: placements,
+          fits: true,
+          actualWeightTotal: Number(totalActualWeight.toFixed(2)),
+          volumetricWeightTotal: volumetricWeight,
+          chargeableWeight,
+          efficiencyPct: efficiency,
+          unpackedCount: 0,
+          recommendation: `Đã chọn ${box.name} (${box.width}x${box.length}x${box.height}cm). Đạt mật độ đáy ${efficiency}%, cước tính theo ${chargeableWeight}kg.`,
+        };
+      }
+    }
+
+    return {
+      bestBox: null,
+      packings: [],
+      fits: false,
+      actualWeightTotal: Number(totalActualWeight.toFixed(2)),
+      volumetricWeightTotal: 0,
+      chargeableWeight: Number(totalActualWeight.toFixed(2)),
+      efficiencyPct: 0,
+      unpackedCount: expandedItems.length,
+      recommendation: "Đơn hàng vượt quá kích thước hộp chuẩn XL. Vui lòng chia làm 2 kiện hàng SPX riêng biệt.",
+    };
+  }
+
+  optimizePacking(items = []) {
+    const res = this.optimizeBoxForOrder(items);
+    return {
+      success: res.fits,
+      selectedBox: res.bestBox
+        ? {
+            code: res.bestBox.id.replace("BOX_", "SPX_BOX_"),
+            name: res.bestBox.name,
+            width: res.bestBox.width,
+            length: res.bestBox.length,
+            height: res.bestBox.height,
+          }
+        : null,
+      unpackedItems: res.fits ? [] : items,
+      volumetricWeightKg: res.volumetricWeightTotal,
+      chargeableWeightKg: res.chargeableWeight,
+      efficiencyPct: res.efficiencyPct,
+      manifest: res.packings.map((p, idx) => ({
+        id: p.id,
+        name: p.name,
+        x: p.x,
+        y: p.y,
+        width: p.width,
+        length: p.length,
+        layer: Math.floor(idx / 4),
+      })),
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 11 ALGORITHM 3: SWIM Gossip Protocol & Failure Detector
+// ------------------------------------------------------------------------------
+export const MemberStatus = {
+  ALIVE: "ALIVE",
+  SUSPECT: "SUSPECT",
+  DEAD: "DEAD",
+};
+
+export class ClusterMember {
+  constructor(id, address = "127.0.0.1", port = 8000) {
+    this.id = String(id);
+    this.address = address;
+    this.port = port;
+    this.status = MemberStatus.ALIVE;
+    this.incarnation = 0;
+    this.lastObservedAt = Date.now();
+    this.suspectTimer = null;
+  }
+}
+
+export class SwimNode {
+  constructor({
+    id,
+    cluster = null,
+    pingTimeoutMs = 200,
+    indirectPingCount = 2,
+    suspicionTimeoutTicks = 3,
+  } = {}) {
+    this.id = String(id);
+    this.cluster = cluster;
+    this.status = MemberStatus.ALIVE;
+    this.incarnation = 0;
+    this.pingTimeoutMs = pingTimeoutMs;
+    this.indirectPingCount = indirectPingCount;
+    this.suspicionTimeoutTicks = suspicionTimeoutTicks;
+
+    this.members = new Map();
+    const selfMember = new ClusterMember(this.id);
+    this.members.set(this.id, selfMember);
+
+    this.disseminationBuffer = [];
+    this.probeIndex = 0;
+  }
+
+  get memberList() {
+    return this.members;
+  }
+
+  get memberListArray() {
+    return Array.from(this.members.values());
+  }
+
+  joinMember(memberId, address = "127.0.0.1", port = 8000) {
+    this.addMember(memberId, address, port);
+  }
+
+  refuteSuspicion(suspectIncarnation = 0) {
+    this.incarnation = Math.max(this.incarnation, Number(suspectIncarnation) || 0) + 1;
+    this.status = MemberStatus.ALIVE;
+    const self = this.members.get(this.id);
+    if (self) {
+      self.status = MemberStatus.ALIVE;
+      self.incarnation = this.incarnation;
+    }
+    this._enqueueUpdate(this.id, MemberStatus.ALIVE, this.incarnation);
+  }
+
+  applyMemberUpdate(update) {
+    if (!update) return;
+    this.applyUpdates([update]);
+  }
+
+  checkSuspicionTimeouts() {
+    for (const [mId, mem] of this.members.entries()) {
+      if (mId === this.id) continue;
+      if (mem.status === MemberStatus.SUSPECT) {
+        mem.suspectTicks = (mem.suspectTicks || 0) + 1;
+        if (mem.suspectTicks >= this.suspicionTimeoutTicks) {
+          mem.status = MemberStatus.DEAD;
+          this._enqueueUpdate(mId, MemberStatus.DEAD, mem.incarnation);
+        }
+      }
+    }
+  }
+
+  addMember(memberId, address = "127.0.0.1", port = 8000) {
+    const strId = String(memberId);
+    if (!this.members.has(strId)) {
+      const newMem = new ClusterMember(strId, address, port);
+      this.members.set(strId, newMem);
+      this._enqueueUpdate(strId, MemberStatus.ALIVE, 0);
+    }
+  }
+
+  getAliveMembers() {
+    return Array.from(this.members.values()).filter((m) => m.status === MemberStatus.ALIVE);
+  }
+
+  getActiveMembers() {
+    return Array.from(this.members.values()).filter((m) => m.status !== MemberStatus.DEAD);
+  }
+
+  _enqueueUpdate(memberId, status, incarnation) {
+    const existing = this.disseminationBuffer.find((u) => u.memberId === memberId);
+    if (existing) {
+      if (incarnation >= existing.incarnation) {
+        existing.status = status;
+        existing.incarnation = incarnation;
+        existing.transmitsLeft = 8;
+      }
+    } else {
+      this.disseminationBuffer.push({
+        memberId,
+        status,
+        incarnation,
+        transmitsLeft: 8,
+      });
+    }
+  }
+
+  _getPiggybackedUpdates() {
+    const updates = [];
+    for (const u of this.disseminationBuffer) {
+      if (u.transmitsLeft > 0) {
+        updates.push({
+          memberId: u.memberId,
+          id: u.memberId,
+          status: u.status,
+          incarnation: u.incarnation,
+        });
+        u.transmitsLeft -= 1;
+      }
+    }
+    this.disseminationBuffer = this.disseminationBuffer.filter((u) => u.transmitsLeft > 0);
+    return updates;
+  }
+
+  applyUpdates(updates = []) {
+    for (const u of updates) {
+      const targetId = String(u.memberId || u.id || "");
+      if (!targetId) continue;
+
+      if (targetId === this.id) {
+        if (u.status === MemberStatus.SUSPECT || u.status === MemberStatus.DEAD) {
+          if (u.incarnation >= this.incarnation) {
+            this.incarnation = u.incarnation + 1;
+            const self = this.members.get(this.id);
+            if (self) {
+              self.status = MemberStatus.ALIVE;
+              self.incarnation = this.incarnation;
+            }
+            this._enqueueUpdate(this.id, MemberStatus.ALIVE, this.incarnation);
+          }
+        }
+        continue;
+      }
+
+      if (!this.members.has(targetId)) {
+        this.members.set(targetId, new ClusterMember(targetId));
+        this._enqueueUpdate(targetId, u.status || MemberStatus.ALIVE, u.incarnation || 0);
+      }
+
+      const member = this.members.get(targetId);
+
+      if (u.incarnation > member.incarnation) {
+        member.incarnation = u.incarnation;
+        member.status = u.status;
+        member.lastObservedAt = Date.now();
+        this._enqueueUpdate(targetId, u.status, u.incarnation);
+      } else if (u.incarnation === member.incarnation) {
+        if (member.status === MemberStatus.ALIVE && (u.status === MemberStatus.SUSPECT || u.status === MemberStatus.DEAD)) {
+          member.status = u.status;
+          this._enqueueUpdate(targetId, u.status, u.incarnation);
+        } else if (member.status === MemberStatus.SUSPECT && u.status === MemberStatus.DEAD) {
+          member.status = MemberStatus.DEAD;
+          this._enqueueUpdate(targetId, MemberStatus.DEAD, u.incarnation);
+        }
+      }
+    }
+  }
+
+  stepProtocol() {
+    if (this.status === MemberStatus.DEAD) return null;
+
+    for (const [mId, mem] of this.members.entries()) {
+      if (mId === this.id) continue;
+      if (mem.status === MemberStatus.SUSPECT) {
+        mem.suspectTicks = (mem.suspectTicks || 0) + 1;
+        if (mem.suspectTicks >= this.suspicionTimeoutTicks) {
+          mem.status = MemberStatus.DEAD;
+          this._enqueueUpdate(mId, MemberStatus.DEAD, mem.incarnation);
+        }
+      }
+    }
+
+    const candidates = Array.from(this.members.values()).filter(
+      (m) => m.id !== this.id && m.status !== MemberStatus.DEAD
+    );
+
+    if (candidates.length === 0) return null;
+    let target = null;
+    if (typeof this.probeIndex === "number" && this.probeIndex >= 0) {
+      const probeCandidate = this.memberListArray[this.probeIndex];
+      if (probeCandidate && probeCandidate.id !== this.id && probeCandidate.status !== MemberStatus.DEAD) {
+        target = probeCandidate;
+      } else if (this.probeIndex < candidates.length) {
+        target = candidates[this.probeIndex];
+      }
+    }
+    if (!target) {
+      target = candidates[Math.floor(Math.random() * candidates.length)];
+    }
+
+    const piggyback = this._getPiggybackedUpdates();
+    let directSuccess = false;
+
+    if (this.cluster && this.cluster.canDeliver(this.id, target.id)) {
+      const targetNode = this.cluster.getNode(target.id);
+      if (targetNode && targetNode.status !== MemberStatus.DEAD) {
+        const reply = targetNode.receivePing(this.id, piggyback);
+        if (reply && reply.updates && reply.updates.length > 0) {
+          this.applyUpdates(reply.updates);
+        }
+        directSuccess = true;
+      }
+    }
+
+    if (directSuccess) {
+      target.status = MemberStatus.ALIVE;
+      target.suspectTicks = 0;
+      return {
+        type: "DIRECT_PING",
+        targetId: target.id,
+        directSuccess: true,
+        success: true,
+      };
+    }
+
+    const intermediaries = candidates.filter((m) => m.id !== target.id);
+    let indirectSuccess = false;
+
+    if (intermediaries.length > 0 && this.cluster) {
+      const selectedIntermediaries = intermediaries.slice(0, this.indirectPingCount);
+      for (const inter of selectedIntermediaries) {
+        if (this.cluster.canDeliver(this.id, inter.id) && this.cluster.canDeliver(inter.id, target.id)) {
+          const interNode = this.cluster.getNode(inter.id);
+          const targetNode = this.cluster.getNode(target.id);
+          if (interNode && targetNode && targetNode.status !== MemberStatus.DEAD) {
+            indirectSuccess = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!indirectSuccess) {
+      if (target.status === MemberStatus.ALIVE) {
+        target.status = MemberStatus.SUSPECT;
+        target.suspectTicks = 0;
+        this._enqueueUpdate(target.id, MemberStatus.SUSPECT, target.incarnation);
+      }
+      return {
+        type: "INDIRECT_PING_REQ",
+        targetId: target.id,
+        directSuccess: false,
+        indirectSuccess: false,
+        success: false,
+        newStatus: MemberStatus.SUSPECT,
+        status: MemberStatus.SUSPECT,
+      };
+    }
+
+    return {
+      type: "INDIRECT_PING_REQ",
+      targetId: target.id,
+      directSuccess: false,
+      indirectSuccess: true,
+      success: true,
+    };
+  }
+
+  receivePing(fromId, updates = []) {
+    this.applyUpdates(updates);
+    const piggyback = this._getPiggybackedUpdates();
+    return { ack: true, incarnation: this.incarnation, updates: piggyback };
+  }
+}
+
+export class SwimCluster {
+  constructor({ nodeCount = 5, suspicionTimeoutRounds = 3 } = {}) {
+    this.nodes = new Map();
+    this.partitions = [];
+    this.droppedLinks = new Set();
+
+    const count = Math.max(2, Number(nodeCount) || 5);
+    const nodeIds = Array.from({ length: count }, (_, i) => `swim_node_${i + 1}`);
+
+    for (const id of nodeIds) {
+      const node = new SwimNode({
+        id,
+        cluster: this,
+        suspicionTimeoutTicks: suspicionTimeoutRounds,
+      });
+      this.nodes.set(id, node);
+    }
+
+    for (const node of this.nodes.values()) {
+      for (const otherId of nodeIds) {
+        node.addMember(otherId);
+      }
+    }
+  }
+
+  getNode(id) {
+    const sId = String(id);
+    if (this.nodes.has(sId)) return this.nodes.get(sId);
+    for (const [k, v] of this.nodes.entries()) {
+      if (k.replace(/^swim_/, "") === sId.replace(/^swim_/, "")) {
+        return v;
+      }
+    }
+    return undefined;
+  }
+
+  getAllNodes() {
+    return Array.from(this.nodes.values());
+  }
+
+  setDroppedLink(fromId, toId, isDropped = true) {
+    const key = `${fromId}->${toId}`;
+    if (isDropped) {
+      this.droppedLinks.add(key);
+    } else {
+      this.droppedLinks.delete(key);
+    }
+  }
+
+  isolateNode(id) {
+    const strId = String(id);
+    for (const node of this.nodes.values()) {
+      this.droppedLinks.add(`${strId}->${node.id}`);
+      this.droppedLinks.add(`${node.id}->${strId}`);
+    }
+  }
+
+  healNetwork() {
+    this.droppedLinks.clear();
+    this.partitions = [];
+  }
+
+  canDeliver(fromId, toId) {
+    if (this.droppedLinks.has(`${fromId}->${toId}`)) {
+      return false;
+    }
+    return true;
+  }
+
+  runRounds(rounds = 5) {
+    const results = [];
+    for (let r = 0; r < rounds; r++) {
+      for (const node of this.nodes.values()) {
+        const step = node.stepProtocol();
+        if (step) results.push({ round: r + 1, nodeId: node.id, ...step });
+      }
+    }
+    return results;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -4564,7 +5581,16 @@ export default {
   RaftNode,
   FlashSaleStateMachine,
   RaftCluster,
+  // Phase 11 Enterprise Algorithms
+  FPNode,
+  FPTree,
+  FPGrowthBundler,
+  SPX_STANDARD_BOXES,
+  calculateVolumetricWeight,
+  MaximalRectanglesPacker,
+  SPXBoxOptimizer,
+  MemberStatus,
+  ClusterMember,
+  SwimNode,
+  SwimCluster,
 };
-
-
-
