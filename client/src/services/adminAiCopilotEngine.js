@@ -313,7 +313,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 11. Phân tích Thuật toán Băm Nhất Quán (Consistent Hashing with Virtual Nodes)
-  if (/consistent hashing|băm nhất quán|virtual nodes|sharding|hash ring|chia tải phân tán|điểm băm ảo/i.test(raw)) {
+  if (!/kademlia|dht/i.test(raw) && /consistent hashing|băm nhất quán|virtual nodes|sharding|hash ring|chia tải phân tán|điểm băm ảo/i.test(raw)) {
     return {
       text: `🔄 **THUẬT TOÁN BĂM NHẤT QUÁN KÈM VIRTUAL NODES (CONSISTENT HASHING RING)**:
 - **Mục đích thiết kế**: Phân vùng dữ liệu (Sharding) cho Giỏ hàng, Phiên đăng nhập và Bộ nhớ đệm phân tán mà không bị sập nguồn khi quy mô cụm máy chủ thay đổi.
@@ -1095,6 +1095,46 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Mạng lưới vận tải toàn miền Johnson',
         'Quét radar tài khoản gian lận',
         'Cấu trúc xác suất Bloom Filter'
+      ]
+    };
+  }
+
+  // 45. Phân Bổ Voucher Độc Quyền Bằng Dancing Links DLX Algorithm X (Phase 19 - Feature 166)
+  if (/dancing links|dlx|algorithm x|che phủ chính xác|exact cover|voucher độc quyền|xếp chồng không xung đột/i.test(raw)) {
+    return {
+      text: `💃 **PHÂN BỔ VOUCHER ĐỘC QUYỀN BẰNG DANCING LINKS DLX & ALGORITHM X (DONALD KNUTH)**:
+- **Giải bài toán Che Phủ Chính Xác (Exact Cover Problem - NP-Complete)**:
+  - Khi người mua áp dụng nhiều voucher độc quyền cho giỏ hàng gồm $N$ sản phẩm, mỗi sản phẩm chỉ được giảm giá bởi ĐÚNG MỘT voucher (không được hưởng trùng lặp nhiều mã độc quyền cùng lúc).
+  - Thuật toán Dancing Links sử dụng ma trận liên kết đôi 4 hướng hình xuyến (Toroidal Doubly Linked Lists), cho phép \`cover(col)\` và \`uncover(col)\` cực nhanh bằng cách "nhảy múa" các con trỏ $O(1)$.
+- **Hiệu năng & Tối ưu hóa**:
+  - Heuristic MRV (Minimum Remaining Values): Luôn chọn cột có ít ứng viên nhất để cắt tỉa không gian tìm kiếm (Branch & Bound).
+  - Tự động tìm ra tổ hợp voucher che phủ tối đa số sản phẩm với tổng số tiền chiết khấu lớn nhất mà không vi phạm quy tắc độc quyền!`,
+      type: 'algorithm',
+      tag: 'VOUCHER ĐỘC QUYỀN DANCING LINKS',
+      suggestions: [
+        'Thu hồi voucher bằng Cuckoo Filter',
+        'Định tuyến phân tán Kademlia DHT',
+        'Tối ưu hóa giỏ hàng Knapsack'
+      ]
+    };
+  }
+
+  // 46. Định Tuyến Microservices & Sharding Bằng Kademlia DHT (Phase 19 - Feature 166)
+  if (/kademlia|dht|xor distance|định tuyến phân tán|k-bucket|bảng băm phân tán|sharding microservices/i.test(raw)) {
+    return {
+      text: `🌐 **ĐỊNH TUYẾN MICROSERVICES & SHARDING BẰNG KADEMLIA DHT (XOR METRIC)**:
+- **Nguyên lý khoảng cách toán học XOR ($d(x, y) = x \\oplus y$)**:
+  - Không gian định danh $2^{32}$ (hoặc $2^{160}$) phẳng, đối xứng và đơn hướng: khoảng cách từ $A$ đến $B$ bằng khoảng cách từ $B$ đến $A$.
+  - Bảng định tuyến K-Buckets lưu trữ tối đa $k$ node ở các khoảng cách lũy thừa của 2, cho phép tìm kiếm bất kỳ shard dữ liệu nào chỉ trong $O(\\log N)$ bước nhảy (hops).
+- **Ứng dụng hạ tầng Mini Shopee**:
+  - Phân tán lưu trữ Session/Giỏ hàng người mua và Shard danh mục sản phẩm giữa hàng chục container microservices mà không cần một cụm Master tập trung (Decentralized Masterless Architecture).
+  - Khả năng chịu lỗi cao: Tự động phát hiện và loại trừ node chết khỏi k-bucket khi timeout.`,
+      type: 'architecture',
+      tag: 'ĐỊNH TUYẾN KADEMLIA DHT',
+      suggestions: [
+        'Mạng lưới vận tải toàn miền Johnson',
+        'Phân bổ voucher Dancing Links',
+        'Đồng thuận phân tán Raft Cluster'
       ]
     };
   }

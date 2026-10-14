@@ -9000,6 +9000,419 @@ export class CuckooFilterRevocation {
   }
 }
 
+// =========================================================================
+// PHASE 19: ENTERPRISE EXACT COVER, HEAVY HITTERS & DHT ROUTING SUITE
+// =========================================================================
+
+export class DLXNode {
+  constructor(colHeader = null) {
+    this.left = this;
+    this.right = this;
+    this.up = this;
+    this.down = this;
+    this.col = colHeader || this;
+    this.rowId = -1;
+    this.size = 0;
+    this.name = "";
+  }
+}
+
+export class DancingLinksExactCover {
+  constructor() {
+    this.root = new DLXNode();
+    this.columns = [];
+    this.columnMap = new Map();
+    this.solutions = [];
+    this.rows = [];
+  }
+
+  initColumns(items = []) {
+    this.root = new DLXNode();
+    this.columns = [];
+    this.columnMap.clear();
+    this.solutions = [];
+    this.rows = [];
+
+    let prev = this.root;
+    for (const item of items) {
+      const col = new DLXNode();
+      col.name = String(item);
+      col.size = 0;
+
+      col.left = prev;
+      col.right = this.root;
+      prev.right = col;
+      this.root.left = col;
+
+      prev = col;
+      this.columns.push(col);
+      this.columnMap.set(String(item), col);
+    }
+  }
+
+  addRow(rowId, coveredItems = [], meta = {}) {
+    const validItems = coveredItems.filter(item => this.columnMap.has(String(item)));
+    if (validItems.length === 0) return;
+
+    const rowIndex = this.rows.length;
+    this.rows.push({ rowId, coveredItems: validItems, meta });
+
+    let firstNode = null;
+    let prevNode = null;
+
+    for (const item of validItems) {
+      const col = this.columnMap.get(String(item));
+      const newNode = new DLXNode(col);
+      newNode.rowId = rowIndex;
+
+      newNode.up = col.up;
+      newNode.down = col;
+      col.up.down = newNode;
+      col.up = newNode;
+      col.size++;
+
+      if (!firstNode) {
+        firstNode = newNode;
+        prevNode = newNode;
+      } else {
+        newNode.left = prevNode;
+        newNode.right = firstNode;
+        prevNode.right = newNode;
+        firstNode.left = newNode;
+        prevNode = newNode;
+      }
+    }
+  }
+
+  cover(col) {
+    col.right.left = col.left;
+    col.left.right = col.right;
+
+    for (let row = col.down; row !== col; row = row.down) {
+      for (let node = row.right; node !== row; node = node.right) {
+        node.down.up = node.up;
+        node.up.down = node.down;
+        node.col.size--;
+      }
+    }
+  }
+
+  uncover(col) {
+    for (let row = col.up; row !== col; row = row.up) {
+      for (let node = row.left; node !== row; node = node.left) {
+        node.col.size++;
+        node.down.up = node;
+        node.up.down = node;
+      }
+    }
+    col.right.left = col;
+    col.left.right = col;
+  }
+
+  solve(maxSolutions = 10) {
+    this.solutions = [];
+    if (this.columns.length === 0) return [];
+    const currentSolution = [];
+
+    const search = () => {
+      if (this.solutions.length >= maxSolutions) return;
+
+      if (this.root.right === this.root) {
+        const solRows = currentSolution.map(node => this.rows[node.rowId]);
+        this.solutions.push(solRows);
+        return;
+      }
+
+      let minCol = this.root.right;
+      let minSize = minCol.size;
+
+      for (let col = minCol.right; col !== this.root; col = col.right) {
+        if (col.size < minSize) {
+          minSize = col.size;
+          minCol = col;
+        }
+      }
+
+      if (minSize === 0) return;
+
+      this.cover(minCol);
+
+      for (let row = minCol.down; row !== minCol; row = row.down) {
+        currentSolution.push(row);
+
+        for (let node = row.right; node !== row; node = node.right) {
+          this.cover(node.col);
+        }
+
+        search();
+
+        currentSolution.pop();
+        for (let node = row.left; node !== row; node = node.left) {
+          this.uncover(node.col);
+        }
+      }
+
+      this.uncover(minCol);
+    };
+
+    search();
+    return this.solutions;
+  }
+
+  findOptimalVoucherCombination() {
+    const allSolutions = this.solve(20);
+    if (allSolutions.length === 0) return null;
+
+    let bestSolution = null;
+    let maxDiscount = -1;
+
+    for (const sol of allSolutions) {
+      const totalDiscount = sol.reduce((sum, item) => sum + (Number(item.meta?.discountAmount) || 0), 0);
+      if (totalDiscount > maxDiscount) {
+        maxDiscount = totalDiscount;
+        bestSolution = {
+          vouchers: sol,
+          totalDiscount,
+          coveredItemsCount: sol.reduce((acc, v) => acc + v.coveredItems.length, 0)
+        };
+      }
+    }
+
+    return bestSolution;
+  }
+}
+
+export class StreamEntry {
+  constructor(item, count = 1, error = 0) {
+    this.item = String(item);
+    this.count = count;
+    this.error = error;
+    this.lastUpdated = Date.now();
+  }
+}
+
+export class SpaceSavingHeavyHitters {
+  constructor(capacity = 20) {
+    this.capacity = Math.max(1, capacity);
+    this.entries = new Map();
+    this.totalStreamCount = 0;
+  }
+
+  update(item, weight = 1) {
+    const key = String(item);
+    const w = Math.max(1, Number(weight) || 1);
+    this.totalStreamCount += w;
+
+    if (this.entries.has(key)) {
+      const entry = this.entries.get(key);
+      entry.count += w;
+      entry.lastUpdated = Date.now();
+      return entry;
+    }
+
+    if (this.entries.size < this.capacity) {
+      const entry = new StreamEntry(key, w, 0);
+      this.entries.set(key, entry);
+      return entry;
+    }
+
+    let minKey = null;
+    let minCount = Infinity;
+
+    for (const [k, entry] of this.entries.entries()) {
+      if (entry.count < minCount) {
+        minCount = entry.count;
+        minKey = k;
+      }
+    }
+
+    this.entries.delete(minKey);
+    const newEntry = new StreamEntry(key, minCount + w, minCount);
+    this.entries.set(key, newEntry);
+    return newEntry;
+  }
+
+  getTopK(limit = 10) {
+    const list = Array.from(this.entries.values()).map(e => ({
+      item: e.item,
+      estimatedCount: e.count,
+      maxError: e.error,
+      minGuaranteedCount: Math.max(1, e.count - e.error),
+      relativeFrequency: Number((e.count / Math.max(1, this.totalStreamCount)).toFixed(4))
+    }));
+
+    list.sort((a, b) => b.estimatedCount - a.estimatedCount);
+    return list.slice(0, limit);
+  }
+
+  estimateFrequency(item) {
+    const key = String(item);
+    if (this.entries.has(key)) {
+      const e = this.entries.get(key);
+      return {
+        item: key,
+        isInTopK: true,
+        estimatedCount: e.count,
+        maxError: e.error,
+        lowerBound: Math.max(1, e.count - e.error),
+        upperBound: e.count
+      };
+    }
+
+    let minCount = 0;
+    if (this.entries.size > 0) {
+      minCount = Math.min(...Array.from(this.entries.values()).map(e => e.count));
+    }
+
+    return {
+      item: key,
+      isInTopK: false,
+      estimatedCount: 0,
+      maxError: minCount,
+      lowerBound: 0,
+      upperBound: minCount
+    };
+  }
+
+  getTotalStreamCount() {
+    return this.totalStreamCount;
+  }
+
+  reset() {
+    this.entries.clear();
+    this.totalStreamCount = 0;
+  }
+}
+
+export class KademliaContact {
+  constructor(nodeId, metadata = {}) {
+    this.nodeId = String(nodeId);
+    this.numericId = KademliaDhtRouting.hashToId(this.nodeId);
+    this.metadata = metadata;
+    this.lastSeen = Date.now();
+  }
+}
+
+export class KademliaDhtRouting {
+  constructor(localNodeId, k = 8, idBits = 32) {
+    this.localNodeId = String(localNodeId);
+    this.localNumericId = KademliaDhtRouting.hashToId(this.localNodeId);
+    this.k = Math.max(2, k);
+    this.idBits = idBits;
+
+    this.buckets = Array.from({ length: this.idBits }, () => []);
+    this.storage = new Map();
+  }
+
+  static hashToId(str) {
+    let hash = 2166136261;
+    const s = String(str);
+    for (let i = 0; i < s.length; i++) {
+      hash ^= s.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  static xorDistance(id1, id2) {
+    const n1 = typeof id1 === "number" ? id1 : KademliaDhtRouting.hashToId(id1);
+    const n2 = typeof id2 === "number" ? id2 : KademliaDhtRouting.hashToId(id2);
+    return (n1 ^ n2) >>> 0;
+  }
+
+  _getBucketIndex(dist) {
+    if (dist === 0) return 0;
+    const idx = 31 - Math.clz32(dist);
+    return Math.min(this.idBits - 1, Math.max(0, idx));
+  }
+
+  addNode(nodeId, meta = {}) {
+    if (String(nodeId) === this.localNodeId) return false;
+
+    const contact = new KademliaContact(nodeId, meta);
+    const dist = KademliaDhtRouting.xorDistance(this.localNumericId, contact.numericId);
+    const bIndex = this._getBucketIndex(dist);
+    const bucket = this.buckets[bIndex];
+
+    const existingIdx = bucket.findIndex(c => c.nodeId === contact.nodeId);
+    if (existingIdx !== -1) {
+      bucket.splice(existingIdx, 1);
+      contact.lastSeen = Date.now();
+      bucket.push(contact);
+      return true;
+    }
+
+    if (bucket.length < this.k) {
+      bucket.push(contact);
+      return true;
+    }
+
+    return false;
+  }
+
+  removeNode(nodeId) {
+    const numeric = KademliaDhtRouting.hashToId(nodeId);
+    const dist = KademliaDhtRouting.xorDistance(this.localNumericId, numeric);
+    const bIndex = this._getBucketIndex(dist);
+    const bucket = this.buckets[bIndex];
+
+    const idx = bucket.findIndex(c => c.nodeId === String(nodeId));
+    if (idx !== -1) {
+      bucket.splice(idx, 1);
+      return true;
+    }
+    return false;
+  }
+
+  findClosestNodes(targetKey, count = this.k) {
+    const targetNumeric = typeof targetKey === "number" ? targetKey : KademliaDhtRouting.hashToId(targetKey);
+    const allContacts = [];
+
+    allContacts.push({
+      nodeId: this.localNodeId,
+      numericId: this.localNumericId,
+      metadata: { isLocal: true },
+      distance: KademliaDhtRouting.xorDistance(this.localNumericId, targetNumeric)
+    });
+
+    for (const bucket of this.buckets) {
+      for (const contact of bucket) {
+        allContacts.push({
+          nodeId: contact.nodeId,
+          numericId: contact.numericId,
+          metadata: contact.metadata,
+          distance: KademliaDhtRouting.xorDistance(contact.numericId, targetNumeric)
+        });
+      }
+    }
+
+    allContacts.sort((a, b) => a.distance - b.distance);
+    return allContacts.slice(0, count);
+  }
+
+  store(key, value) {
+    const k = String(key);
+    this.storage.set(k, {
+      value,
+      publisher: this.localNodeId,
+      timestamp: Date.now()
+    });
+    return true;
+  }
+
+  lookup(key) {
+    const k = String(key);
+    if (this.storage.has(k)) {
+      return this.storage.get(k).value;
+    }
+    return null;
+  }
+
+  getTotalKnownNodes() {
+    return this.buckets.reduce((acc, b) => acc + b.length, 0);
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -9112,6 +9525,13 @@ export default {
   SAMState,
   SuffixAutomatonDeduplicator,
   CuckooFilterRevocation,
+  // Phase 19 Enterprise Algorithms
+  DLXNode,
+  DancingLinksExactCover,
+  StreamEntry,
+  SpaceSavingHeavyHitters,
+  KademliaContact,
+  KademliaDhtRouting,
 };
 
 

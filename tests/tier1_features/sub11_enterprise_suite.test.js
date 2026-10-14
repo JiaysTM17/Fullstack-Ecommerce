@@ -132,6 +132,12 @@ import {
   SAMState,
   SuffixAutomatonDeduplicator,
   CuckooFilterRevocation,
+  DLXNode,
+  DancingLinksExactCover,
+  StreamEntry,
+  SpaceSavingHeavyHitters,
+  KademliaContact,
+  KademliaDhtRouting,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -154,6 +160,9 @@ import { BellmanFordArbitrage as ServerBellmanFord } from "../../server/src/util
 import { JohnsonGraphRouting as ServerJohnsonGraphRouting } from "../../server/src/utils/johnsonGraphRouting.js";
 import { SuffixAutomatonDeduplicator as ServerSuffixAutomaton } from "../../server/src/utils/suffixAutomatonDeduplicator.js";
 import { CuckooFilterRevocation as ServerCuckooFilter } from "../../server/src/utils/cuckooFilterRevocation.js";
+import { DancingLinksExactCover as ServerDLX } from "../../server/src/utils/dancingLinksExactCover.js";
+import { SpaceSavingHeavyHitters as ServerSpaceSaving } from "../../server/src/utils/spaceSavingHeavyHitters.js";
+import { KademliaDhtRouting as ServerKademliaDHT } from "../../server/src/utils/kademliaDhtRouting.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -12006,6 +12015,291 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         securityFilter.delete("TOKEN_SHOP_SCAM_789");
         expect.equal(securityFilter.lookup("TOKEN_SHOP_SCAM_789"), false);
         expect.equal(securityFilter.lookup("VOUCHER_EXPLOIT_BUG"), true);
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 166: Exact Cover DLX, Streaming Heavy Hitters & Kademlia DHT Suite (Phase 19 - 24 Tests)
+  // =========================================================================
+  describe("Feature 166: Exact Cover DLX, Streaming Heavy Hitters & Kademlia DHT Suite (Phase 19)", () => {
+
+    // --- NHÓM 1: Dancing Links (DLX) & Algorithm X Exclusive Voucher Allocation (F166-T01 -> F166-T06) ---
+    describe("Nhóm 1: Dancing Links (DLX) & Algorithm X Exclusive Voucher Allocation", () => {
+      test("F166-T01: Initial DLX matrix with empty items produces no solutions", () => {
+        const dlx = new DancingLinksExactCover();
+        dlx.initColumns([]);
+        const sols = dlx.solve();
+        expect.equal(sols.length, 0);
+      });
+
+      test("F166-T02: Classic 3-item, 3-row exact cover solvable with unique combination", () => {
+        const dlx = new DancingLinksExactCover();
+        dlx.initColumns(["item1", "item2", "item3"]);
+        dlx.addRow("v1", ["item1", "item2"]);
+        dlx.addRow("v2", ["item3"]);
+        dlx.addRow("v3", ["item2", "item3"]);
+        const sols = dlx.solve();
+        expect.equal(sols.length, 1);
+        expect.equal(sols[0].length, 2);
+        expect.equal(sols[0][0].rowId, "v1");
+        expect.equal(sols[0][1].rowId, "v2");
+      });
+
+      test("F166-T03: Non-overlapping exclusive vouchers covering multi-item cart (P1, P2, P3, P4)", () => {
+        const dlx = new DancingLinksExactCover();
+        dlx.initColumns(["P1", "P2", "P3", "P4"]);
+        dlx.addRow("V_TECH", ["P1", "P2"], { discountAmount: 50000 });
+        dlx.addRow("V_FASHION", ["P3", "P4"], { discountAmount: 60000 });
+        dlx.addRow("V_COMBO_BAD", ["P2", "P3"], { discountAmount: 30000 });
+        const optimal = dlx.findOptimalVoucherCombination();
+        expect.equal(optimal.totalDiscount, 110000);
+        expect.equal(optimal.vouchers.length, 2);
+        expect.equal(optimal.coveredItemsCount, 4);
+      });
+
+      test("F166-T04: Multiple candidate solutions with MRV tie-break and findOptimalVoucherCombination() finding max discount", () => {
+        const dlx = new DancingLinksExactCover();
+        dlx.initColumns(["A", "B", "C"]);
+        // Solution 1: V1 + V2 = 40k + 30k = 70k
+        dlx.addRow("V1", ["A", "B"], { discountAmount: 40000 });
+        dlx.addRow("V2", ["C"], { discountAmount: 30000 });
+        // Solution 2: V3 + V4 = 20k + 80k = 100k
+        dlx.addRow("V3", ["A"], { discountAmount: 20000 });
+        dlx.addRow("V4", ["B", "C"], { discountAmount: 80000 });
+        const opt = dlx.findOptimalVoucherCombination();
+        expect.equal(opt.totalDiscount, 100000);
+        expect.equal(opt.vouchers.map(v => v.rowId).sort().join(","), "V3,V4");
+      });
+
+      test("F166-T05: Disjoint/unsolvable set of vouchers returns empty solutions without hanging or crash", () => {
+        const dlx = new DancingLinksExactCover();
+        dlx.initColumns(["X", "Y", "Z"]);
+        dlx.addRow("V_PARTIAL_1", ["X"]);
+        dlx.addRow("V_PARTIAL_2", ["Y"]);
+        // No voucher covers Z!
+        const sols = dlx.solve();
+        expect.equal(sols.length, 0);
+        expect.equal(dlx.findOptimalVoucherCombination(), null);
+      });
+
+      test("F166-T06: Server-side DLX matches client-side DancingLinksExactCover implementation", () => {
+        const clientDlx = new DancingLinksExactCover();
+        const serverDlx = new ServerDLX();
+        for (const d of [clientDlx, serverDlx]) {
+          d.initColumns(["1", "2"]);
+          d.addRow("r1", ["1"], { discountAmount: 10 });
+          d.addRow("r2", ["2"], { discountAmount: 20 });
+        }
+        const cOpt = clientDlx.findOptimalVoucherCombination();
+        const sOpt = serverDlx.findOptimalVoucherCombination();
+        expect.equal(cOpt.totalDiscount, sOpt.totalDiscount);
+        expect.equal(cOpt.vouchers.length, sOpt.vouchers.length);
+      });
+    });
+
+    // --- NHÓM 2: Space-Saving Heavy Hitters Real-Time Streaming (F166-T07 -> F166-T13) ---
+    describe("Nhóm 2: Space-Saving Heavy Hitters Real-Time Streaming", () => {
+      test("F166-T07: Initial state, capacity constraint, and basic entry insertion", () => {
+        const ss = new SpaceSavingHeavyHitters(3);
+        expect.equal(ss.getTotalStreamCount(), 0);
+        const e = ss.update("P_LAPTOP", 2);
+        expect.equal(e.item, "P_LAPTOP");
+        expect.equal(e.count, 2);
+        expect.equal(e.error, 0);
+        expect.equal(ss.getTotalStreamCount(), 2);
+      });
+
+      test("F166-T08: Updating existing items increments count and maintains error=0", () => {
+        const ss = new SpaceSavingHeavyHitters(5);
+        ss.update("SKU_A", 3);
+        ss.update("SKU_A", 4);
+        const freq = ss.estimateFrequency("SKU_A");
+        expect.equal(freq.isInTopK, true);
+        expect.equal(freq.estimatedCount, 7);
+        expect.equal(freq.maxError, 0);
+      });
+
+      test("F166-T09: Stream overflow triggers min-item eviction, assigns minCount to error and minCount+1 to count", () => {
+        const ss = new SpaceSavingHeavyHitters(2);
+        ss.update("ITEM_1", 5);
+        ss.update("ITEM_2", 3);
+        // Capacity 2 reached. Adding ITEM_3 must evict ITEM_2 (min count 3)
+        const e3 = ss.update("ITEM_3", 1);
+        expect.equal(e3.item, "ITEM_3");
+        expect.equal(e3.count, 4); // 3 + 1
+        expect.equal(e3.error, 3);
+        expect.equal(ss.estimateFrequency("ITEM_2").isInTopK, false);
+      });
+
+      test("F166-T10: Heavy hitter guarantee: Item with > N/K stream arrivals stays in Top-K table", () => {
+        const ss = new SpaceSavingHeavyHitters(4); // K = 4
+        // Stream 100 items: HEAVY_DEAL appears 35 times (> 100/4 = 25)
+        for (let i = 0; i < 35; i++) ss.update("HEAVY_DEAL");
+        for (let i = 0; i < 65; i++) ss.update(`NOISE_${i % 20}`);
+        const top = ss.getTopK(4);
+        const heavy = top.find(t => t.item === "HEAVY_DEAL");
+        expect.equal(heavy !== undefined, true);
+        expect.equal(heavy.estimatedCount >= 35, true);
+      });
+
+      test("F166-T11: getTopK returns properly sorted items with relative frequencies and guaranteed bounds", () => {
+        const ss = new SpaceSavingHeavyHitters(5);
+        ss.update("A", 10);
+        ss.update("B", 20);
+        ss.update("C", 5);
+        const top = ss.getTopK(2);
+        expect.equal(top.length, 2);
+        expect.equal(top[0].item, "B");
+        expect.equal(top[1].item, "A");
+        expect.equal(top[0].relativeFrequency > top[1].relativeFrequency, true);
+      });
+
+      test("F166-T12: estimateFrequency returns accurate bounds for both tracked and untracked items", () => {
+        const ss = new SpaceSavingHeavyHitters(2);
+        ss.update("P1", 10);
+        ss.update("P2", 8);
+        const fP1 = ss.estimateFrequency("P1");
+        expect.equal(fP1.lowerBound, 10);
+        expect.equal(fP1.upperBound, 10);
+        const fUnknown = ss.estimateFrequency("UNKNOWN");
+        expect.equal(fUnknown.isInTopK, false);
+        expect.equal(fUnknown.upperBound, 8); // minCount in table
+      });
+
+      test("F166-T13: Server-side SpaceSavingHeavyHitters matches client-side implementation", () => {
+        const cSs = new SpaceSavingHeavyHitters(3);
+        const sSs = new ServerSpaceSaving(3);
+        for (const s of [cSs, sSs]) {
+          s.update("A", 5);
+          s.update("B", 3);
+          s.update("C", 2);
+          s.update("D", 4);
+        }
+        expect.equal(cSs.getTotalStreamCount(), sSs.getTotalStreamCount());
+        expect.equal(cSs.getTopK(1)[0].item, sSs.getTopK(1)[0].item);
+      });
+    });
+
+    // --- NHÓM 3: Kademlia DHT Distance Routing Engine (F166-T14 -> F166-T20) ---
+    describe("Nhóm 3: Kademlia DHT Distance Routing Engine", () => {
+      test("F166-T14: XOR distance mathematical properties: d(x, x) = 0, d(x, y) = d(y, x), triangle inequality", () => {
+        expect.equal(KademliaDhtRouting.xorDistance(12345, 12345), 0);
+        expect.equal(KademliaDhtRouting.xorDistance(50, 100), KademliaDhtRouting.xorDistance(100, 50));
+        const d_xy = KademliaDhtRouting.xorDistance(10, 20);
+        const d_yz = KademliaDhtRouting.xorDistance(20, 30);
+        const d_xz = KademliaDhtRouting.xorDistance(10, 30);
+        expect.equal(d_xz <= (d_xy ^ d_yz), true);
+      });
+
+      test("F166-T15: hashToId produces deterministic 32-bit positive integers", () => {
+        const id1 = KademliaDhtRouting.hashToId("NODE_HN_1");
+        const id2 = KademliaDhtRouting.hashToId("NODE_HN_1");
+        expect.equal(id1, id2);
+        expect.equal(typeof id1, "number");
+        expect.equal(id1 >= 0, true);
+      });
+
+      test("F166-T16: Adding nodes allocates them into appropriate k-buckets based on prefix distance", () => {
+        const dht = new KademliaDhtRouting("LOCAL_NODE_0", 4);
+        dht.addNode("PEER_NODE_1", { region: "Hanoi" });
+        dht.addNode("PEER_NODE_2", { region: "Saigon" });
+        expect.equal(dht.getTotalKnownNodes(), 2);
+        expect.equal(dht.addNode("LOCAL_NODE_0"), false); // cannot add self
+      });
+
+      test("F166-T17: findClosestNodes returns the k nearest nodes sorted by XOR distance", () => {
+        const dht = new KademliaDhtRouting("LOCAL_CLUSTER", 5);
+        for (let i = 1; i <= 10; i++) {
+          dht.addNode(`SHARD_NODE_${i}`, { shardId: i });
+        }
+        const closest = dht.findClosestNodes("CART_USER_12345", 3);
+        expect.equal(closest.length, 3);
+        expect.equal(closest[0].distance <= closest[1].distance, true);
+        expect.equal(closest[1].distance <= closest[2].distance, true);
+      });
+
+      test("F166-T18: Local DHT store and lookup functions properly for microservice data shards", () => {
+        const dht = new KademliaDhtRouting("NODE_STORAGE", 8);
+        dht.store("SESSION_KEY_ABC", { userId: "U1", cartTotal: 500000 });
+        const val = dht.lookup("SESSION_KEY_ABC");
+        expect.equal(val.userId, "U1");
+        expect.equal(val.cartTotal, 500000);
+        expect.equal(dht.lookup("NON_EXISTENT"), null);
+      });
+
+      test("F166-T19: Removing node from k-bucket updates routing table properly", () => {
+        const dht = new KademliaDhtRouting("NODE_A", 4);
+        dht.addNode("NODE_B");
+        expect.equal(dht.getTotalKnownNodes(), 1);
+        const removed = dht.removeNode("NODE_B");
+        expect.equal(removed, true);
+        expect.equal(dht.getTotalKnownNodes(), 0);
+        expect.equal(dht.removeNode("NODE_B"), false);
+      });
+
+      test("F166-T20: Server-side KademliaDHT matches client-side implementation", () => {
+        const cDht = new KademliaDhtRouting("NODE_TEST", 4);
+        const sDht = new ServerKademliaDHT("NODE_TEST", 4);
+        cDht.addNode("NODE_PEER");
+        sDht.addNode("NODE_PEER");
+        expect.equal(cDht.getTotalKnownNodes(), sDht.getTotalKnownNodes());
+        const cClosest = cDht.findClosestNodes("KEY_X", 1);
+        const sClosest = sDht.findClosestNodes("KEY_X", 1);
+        expect.equal(cClosest[0].distance, sClosest[0].distance);
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Lifecycle (F166-T21 -> F166-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Lifecycle", () => {
+      test("F166-T21: Admin Sentinel Copilot handles Dancing Links DLX and Kademlia DHT intents", () => {
+        const resDlx = generateAdminCopilotResponse("Phân bổ voucher độc quyền bằng dancing links dlx algorithm x");
+        expect.equal(resDlx.tag, "VOUCHER ĐỘC QUYỀN DANCING LINKS");
+        expect.equal(resDlx.type, "algorithm");
+        expect.equal(resDlx.text.includes("DONALD KNUTH"), true);
+
+        const resDht = generateAdminCopilotResponse("Định tuyến microservices và sharding catalog bằng kademlia dht xor distance");
+        expect.equal(resDht.tag, "ĐỊNH TUYẾN KADEMLIA DHT");
+        expect.equal(resDht.type, "architecture");
+        expect.equal(resDht.text.includes("XOR"), true);
+      });
+
+      test("F166-T22: Seller ShopSmart Copilot advises on Space-Saving Heavy Hitters trending products", () => {
+        const resSeller = generateSellerCopilotResponse("Bắt kịp xu hướng sản phẩm trending bán chạy bằng space-saving heavy hitters");
+        expect.equal(resSeller.tag, "XU HƯỚNG SPACE-SAVING");
+        expect.equal(resSeller.type, "trending");
+        expect.equal(resSeller.text.includes("Heavy Hitters"), true);
+      });
+
+      test("F166-T23: Buyer AI Assistant explains exclusive non-overlapping vouchers using DLX", () => {
+        const resBuyer = generateAiChatResponse("Voucher độc quyền dancing links exact cover");
+        expect.equal(resBuyer.intent, "EXCLUSIVE_VOUCHER_EXACT_COVER");
+        expect.equal(resBuyer.replyText.includes("DANCING LINKS"), true);
+      });
+
+      test("F166-T24: E2E Enterprise Lifecycle: Kademlia DHT Node Discovery -> Space-Saving Heavy Hitters -> DLX Voucher Allocation", () => {
+        // 1. DHT Microservice node discovery for catalog
+        const dht = new KademliaDhtRouting("CATALOG_GATEWAY", 5);
+        dht.addNode("CATALOG_SHARD_HN", { dc: "HN" });
+        dht.addNode("CATALOG_SHARD_SG", { dc: "SG" });
+        const nodes = dht.findClosestNodes("HOT_DEAL_GA_N_65W", 1);
+        expect.equal(nodes.length, 1);
+
+        // 2. Real-time Heavy Hitters stream identifies top trending product
+        const heavyHitters = new SpaceSavingHeavyHitters(5);
+        for (let i = 0; i < 20; i++) heavyHitters.update("HOT_DEAL_GA_N_65W");
+        for (let i = 0; i < 10; i++) heavyHitters.update("ACCESSORY_CABLE");
+        const top1 = heavyHitters.getTopK(1);
+        expect.equal(top1[0].item, "HOT_DEAL_GA_N_65W");
+
+        // 3. Buyer cart checkout with non-overlapping DLX exclusive vouchers
+        const dlx = new DancingLinksExactCover();
+        dlx.initColumns(["HOT_DEAL_GA_N_65W", "ACCESSORY_CABLE"]);
+        dlx.addRow("V_COMBO_65W", ["HOT_DEAL_GA_N_65W", "ACCESSORY_CABLE"], { discountAmount: 45000 });
+        dlx.addRow("V_SINGLE_CABLE", ["ACCESSORY_CABLE"], { discountAmount: 10000 });
+        const bestVoucher = dlx.findOptimalVoucherCombination();
+        expect.equal(bestVoucher.totalDiscount, 45000);
+        expect.equal(bestVoucher.vouchers[0].rowId, "V_COMBO_65W");
       });
     });
   });

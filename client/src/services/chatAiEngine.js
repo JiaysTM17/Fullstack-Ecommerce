@@ -518,7 +518,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -730,6 +730,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'SPX_INTERPROVINCE_ROUTING_JOHNSON',
       replyText: `**[SPX TOÀN QUỐC] ĐỊNH TUYẾN TỐI ƯU TOÀN MẠNG BẰNG THUẬT TOÁN JOHNSON:**\n\n• **Tối ưu cước phí toàn quốc**: Hệ thống tính trước ma trận luân chuyển tối ưu giữa tất cả các trung tâm phân loại Bắc - Trung - Nam, giúp giảm cước vận chuyển liên tỉnh đến 25%.\n• **Đảm bảo lộ trình nhanh nhất**: Kết hợp Bellman-Ford và Dijkstra tự động lựa chọn các tuyến luân chuyển có trợ giá và hạ tầng cao tốc thông suốt, giao hàng an toàn chỉ từ 24 - 48h!`,
       suggestions: ['Tra cứu mã vận đơn SPX', 'Lấy voucher Freeship 30k', 'Xem bưu cục gần tôi'],
+    };
+  }
+
+  // 21. Gợi Ý Xếp Chồng Voucher Độc Quyền Bằng Dancing Links (EXCLUSIVE_VOUCHER_EXACT_COVER)
+  if (/voucher độc quyền|dancing links|exact cover|xếp chồng voucher không xung đột|tối ưu voucher độc quyền/i.test(lower)) {
+    return {
+      intent: 'EXCLUSIVE_VOUCHER_EXACT_COVER',
+      replyText: `**[XẾP CHỒNG VOUCHER ĐỘC QUYỀN] THUẬT TOÁN DANCING LINKS (DLX):**\n\n• **Tối đa hóa mức giảm giá**: Khi bạn có nhiều mã giảm giá độc quyền cho các nhóm sản phẩm khác nhau, thuật toán Dancing Links tự động tìm ra sự kết hợp hoàn hảo phủ trọn giỏ hàng của bạn mà không có món đồ nào bị xung đột hay bỏ phí.\n• **Tiết kiệm tối đa trong 1-chạm**: Hệ thống sẽ tự động ghép mã giảm giá sâu nhất cho từng sản phẩm phù hợp để đơn hàng đạt mức thanh toán thấp nhất có thể!`,
+      suggestions: ['Xem giỏ hàng của tôi', 'Kiểm tra kho voucher', 'Tiếp tục mua sắm'],
     };
   }
 

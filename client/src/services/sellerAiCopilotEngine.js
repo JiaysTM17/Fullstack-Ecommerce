@@ -568,6 +568,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 28. Bắt Kịp Xu Hướng Bằng Thuật Toán Space-Saving Heavy Hitters (Phase 19 - Feature 166)
+  if (/space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
+    return {
+      text: `🔥 **BẮT KỊP XU HƯỚNG BÁN CHẠY BẰNG SPACE-SAVING HEAVY HITTERS (TOP-K STREAMING)**:
+- **Cơ chế bắt sóng Real-Time với bộ nhớ cố định $O(K)$**:
+  - Trong hàng triệu lượt tìm kiếm và click mỗi giờ trên sàn, thuật toán Space-Saving liên tục duy trì danh sách Top-$K$ sản phẩm đang sốt nhất với sai số có chặn trên $\\epsilon = 1/K$.
+  - Bất kỳ mặt hàng nào có tần suất xuất hiện $> N/K$ đều được cam kết chắc chắn 100% lọt vào bảng xếp hạng xu hướng.
+- **Chiến lược hành động cho shop (${currentShop.name})**:
+  - **Nhập hàng đón đầu**: Nếu danh mục hàng thời trang hoặc công nghệ của shop có sản phẩm tiệm cận Top Heavy Hitters, hãy đẩy mạnh ngân sách Shopee Ads để đón sóng.
+  - **Tối ưu hiển thị Flash Sale**: Đưa các SKU Heavy Hitters vào khung giờ Flash Sale vàng để kéo lượt truy cập (traffic) tự nhiên về toàn bộ gian hàng!`,
+      type: 'trending',
+      tag: 'XU HƯỚNG SPACE-SAVING',
+      suggestions: [
+        'Tối ưu đấu thầu từ khóa GSP',
+        'Tư vấn chiến lược Flash Sale',
+        'Cảnh báo sản phẩm sắp hết hàng'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
