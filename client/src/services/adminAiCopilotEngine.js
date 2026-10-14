@@ -253,7 +253,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 9. Soạn thảo thông báo phát sóng toàn sàn (Broadcast Assistant)
-  if (!/interval treap|bắn thông báo giá|cảnh báo khoảng giá/i.test(raw) && /soạn|phát sóng|thông báo|gửi tin nhắn|banner/i.test(raw)) {
+  if (!/interval treap|bắn thông báo giá|cảnh báo khoảng giá|softmax|gradient bandit/i.test(raw) && /soạn|phát sóng|thông báo|gửi tin nhắn|banner/i.test(raw)) {
     const isMaintenance = /bảo trì|nâng cấp|hệ thống/i.test(raw);
     const isMegaSale = /sale|siêu hội|khuyến mãi/i.test(raw);
 
@@ -637,7 +637,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 27. Tìm Kiếm Ngữ Nghĩa & Hình Ảnh Đa Chiều HNSW (Hierarchical Navigable Small World Graph)
-  if (!/re-ranking|tái xếp hạng|multi-layer re-ranking/i.test(raw) && /hnsw|vector search|tìm kiếm vector|ann search|đồ thị phân tầng|hierarchical navigable|visual search/i.test(raw)) {
+  if (!/re-ranking|tái xếp hạng|multi-layer re-ranking|product quantiz|pq|lượng tử hóa|adc/i.test(raw) && /hnsw|vector search|tìm kiếm vector|ann search|đồ thị phân tầng|hierarchical navigable|visual search/i.test(raw)) {
     return {
       text: `🔍 **TÌM KIẾM VECTOR ĐA CHIỀU HNSW (Hierarchical Navigable Small World)**:
 - **Mục đích**: Thay thế phép quét tuyến tính vét cạn $O(N \\times D)$ bằng tìm kiếm xấp xỉ láng giềng gần nhất (ANN) đạt tốc độ $O(\\log N)$ với độ chính xác Recall@10 $\\ge 98\\%$.
@@ -1181,7 +1181,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 49. Phát Hiện Mạng Lưới Rửa Tiền & Bơm Đơn Ảo Bằng Tarjan SCC (Phase 21 - Feature 168)
-  if (/tarjan|scc|strongly connected|rửa tiền|bơm đơn ảo|mua chéo|vòng lặp gian lận|wash[- ]trading/i.test(raw)) {
+  if (!/hopcroft|planarity|tính phẳng|đồ thị phẳng/i.test(raw) && /tarjan|scc|strongly connected|rửa tiền|bơm đơn ảo|mua chéo|vòng lặp gian lận|wash[- ]trading/i.test(raw)) {
     return {
       text: `🕸️ **PHÁT HIỆN MẠNG LƯỚI BƠM ĐƠN ẢO & RỬA TIỀN BẰNG THUẬT TOÁN TARJAN SCC**:
 - **Nguyên lý Đồ thị có hướng liên thông mạnh (Strongly Connected Components - $O(V + E)$)**:
@@ -1203,7 +1203,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 50. Tái Xếp Hạng Đa Tầng Động & Tìm Kiếm Ngữ Nghĩa HNSW (Phase 21 - Feature 168)
-  if (/hnsw|small world|semantic search|tìm kiếm ngữ nghĩa|vector search|re-ranking|tái xếp hạng đa tầng/i.test(raw)) {
+  if (!/product quantiz|pq|lượng tử hóa|adc/i.test(raw) && /hnsw|small world|semantic search|tìm kiếm ngữ nghĩa|vector search|re-ranking|tái xếp hạng đa tầng/i.test(raw)) {
     return {
       text: `🔍 **TÌM KIẾM NGỮ NGHĨA & TÁI XẾP HẠNG ĐA TẦNG BẰNG ĐỒ THỊ HNSW**:
 - **Kiến trúc Đồ thị Thế giới nhỏ phân tầng (Hierarchical Navigable Small World - $O(\\log N)$)**:
@@ -1794,6 +1794,65 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Chọn ưu đãi tối ưu theo ngữ cảnh giỏ hàng',
         'Cập nhật phản hồi người mua bằng Sherman-Morrison',
         'Xem trọng số đặc trưng học được của từng voucher'
+      ]
+    };
+  }
+
+  // 80. Kiểm Tra Tính Phẳng Mạng Lưới Phân Phối Hopcroft-Tarjan (Phase 33 - Feature 180)
+  if (/hopcroft-tarjan|tính phẳng|planarity|đồ thị phẳng|hành lang không giao cắt|cross-free|kuratowski/i.test(raw)) {
+    return {
+      text: `🗺️ **KIỂM TRA TÍNH PHẲNG MẠNG LƯỚI PHÂN PHỐI HOPCROFT-TARJAN (CROSS-FREE LOGISTICS CORRIDORS)**:
+- **Tối ưu hóa hành lang giao thông không giao cắt**:
+  - Khi thiết kế luồng di chuyển giữa các trạm trung chuyển Mega SOC và Hub nội đô, các giao lộ cắt mức mặt đất (Grade Crossings) gây tắc nghẽn nghiêm trọng và va chạm xe tải chở hàng.
+- **Thuật toán Hopcroft-Tarjan (1974) & Định lý Kuratowski**:
+  - Kiểm tra bất đẳng thức Euler $E \\le 3V - 6$ và phân rã DFS Palm Trees để phát hiện đồ thị con không phẳng $K_5$ hoặc $K_{3,3}$ trong $O(V + E)$.
+  - Tự động phát hiện các điểm giao cắt hình học giữa các tuyến luân chuyển và tính toán số mặt phẳng phân vùng $F = 2 - V + E$.`,
+      type: 'logistics',
+      tag: 'TÍNH PHẲNG ĐỒ THỊ HOPCROFT-TARJAN',
+      suggestions: [
+        'Kiểm tra tính phẳng của mạng lưới Hub SPX',
+        'Phát hiện giao lộ chéo giữa các tuyến vận tải',
+        'Xem số mặt phẳng phân vùng Euler'
+      ]
+    };
+  }
+
+  // 81. Nén Vector Đa Thức Lượng Tử Hóa Tích HNSW Product Quantizer (Phase 33 - Feature 180)
+  if (/product quantiz|lượng tử hóa tích|hnsw pq|nén vector pq|adc distance|asymmetric distance/i.test(raw)) {
+    return {
+      text: `⚡ **NÉN VECTOR ĐA THỨC BẰNG LƯỢNG TỬ HÓA TÍCH (HNSW PRODUCT QUANTIZATION & ADC)**:
+- **Thách thức bùng nổ bộ nhớ Vector RAM**:
+  - Hàng triệu vector hình ảnh/văn bản 128 chiều tiêu tốn hàng chục Gigabyte RAM quý giá khi lưu trữ số thực Float32 đầy đủ.
+- **Cơ chế Product Quantization (Jegou et al. 2011)**:
+  - Chia vector $D$ chiều thành $M$ vector con $D/M$ chiều, mỗi không gian con được ánh xạ về $K$ tâm cụm centroid (mã hóa chỉ bằng $M$ byte).
+  - Tiết kiệm tới **93.75% bộ nhớ RAM** cho toàn bộ kho vector sản phẩm sàn TMĐT.
+- **Tra cứu khoảng cách bất đối xứng (Asymmetric Distance Computation - ADC)**:
+  - Tính trước bảng khoảng cách $T[M][K]$ cho query và tính tổng khoảng cách xấp xỉ trong $O(M)$ chỉ bằng các phép tra bảng RAM, không tốn nhân ma trận!`,
+      type: 'analytics',
+      tag: 'LƯỢNG TỬ HÓA TÍCH HNSW PQ',
+      suggestions: [
+        'Xem tỷ lệ nén bộ nhớ Product Quantizer',
+        'Tra cứu bảng khoảng cách bất đối xứng ADC',
+        'Đo độ chính xác tìm kiếm ảnh tương đồng'
+      ]
+    };
+  }
+
+  // 82. Phân Bổ Banner Flash Sale Bằng Stochastic Gradient Bandit (Phase 33 - Feature 180)
+  if (/softmax gradient bandit|gradient bandit|chính sách softmax|running baseline|đường cơ sở phần thưởng|gradient đa cánh tay/i.test(raw)) {
+    return {
+      text: `🎯 **PHÂN BỔ BANNER FLASH SALE BẰNG STOCHASTIC GRADIENT BANDIT (SOFTMAX POLICY & BASELINE)**:
+- **Cơ chế Gradient Ascent trên không gian chính sách**:
+  - Thay vì ước lượng giá trị tuyệt đối của từng cánh tay, thuật toán duy trì sở thích hành động $H(a)$ và chuyển đổi thành xác suất hiển thị qua hàm Softmax: $\\pi(a) = \\frac{e^{H(a)}}{\\sum_b e^{H(b)}}$.
+- **Đường cơ sở trung bình động (Reward Baseline $\\bar{R}_t$)**:
+  - Cập nhật sở thích theo đạo hàm hàm mục tiêu: $H_{t+1}(a) = H_t(a) + \\alpha (R_t - \\bar{R}_t)(1 - \\pi(a))$.
+  - Nếu một Banner đem lại doanh thu cao hơn mức trung bình toàn sàn ($R_t > \\bar{R}_t$), tỷ lệ hiển thị lập tức tăng vọt. Triệt tiêu phương sai và thích nghi tức thì với biến động thị trường!`,
+      type: 'marketing',
+      tag: 'GRADIENT BANDIT SOFTMAX',
+      suggestions: [
+        'Xem phân phối xác suất Softmax các Banner Hero',
+        'Cập nhật doanh thu và đo đạc lợi thế Advantage',
+        'Kiểm tra đường cơ sở phần thưởng Running Baseline'
       ]
     };
   }

@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -753,7 +753,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 23. Tìm Kiếm Ngữ Nghĩa & Đề Xuất Đa Tầng HNSW (SEMANTIC_SEARCH_HNSW_ASSIST)
-  if (/hnsw|semantic search|tìm kiếm ngữ nghĩa|sản phẩm tương tự|re-ranking/i.test(lower)) {
+  if (!/pq|product quantiz|hopcroft|tuyến không giao cắt/i.test(lower) && /hnsw|semantic search|tìm kiếm ngữ nghĩa|sản phẩm tương tự|re-ranking/i.test(lower)) {
     return {
       intent: 'SEMANTIC_SEARCH_HNSW_ASSIST',
       replyText: `**[TÌM KIẾM THÔNG MINH] HỆ THỐNG GỢI Ý NGỮ NGHĨA HNSW MULTI-LAYER:**\n\n• **Hiểu ý định tự nhiên**: Bạn có thể tìm kiếm bằng ngôn ngữ đời thường (ví dụ: "đồ đi biển", "củ sạc du lịch nhỏ gọn"), hệ thống tự động ánh xạ vector ngữ nghĩa để tìm ra món đồ ưng ý nhất.\n• **Tái xếp hạng ưu tiên chất lượng**: Tự động đưa các sản phẩm có đánh giá cao $\\ge 4.8$ sao, tỷ lệ phản hồi nhanh và gian hàng Mall lên đầu trang để bạn mua sắm an tâm nhất!`,
@@ -857,6 +857,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'WAVELET_VORONOI_BANDIT_ASSIST',
       replyText: `**[PHÂN VỊ GIÁ WAVELET, BƯU CỤC VORONOI & ƯU ĐÃI LINTS] MUA SẮM THÔNG MINH CÙNG AI:**\n\n• **Phân vị giá Wavelet Matrix**: Hệ thống tính toán tức thì mức giá trung vị (Median P50) và phân khúc giá phổ biến trên toàn sàn, giúp bạn an tâm mua đúng giá tốt nhất mà không sợ bị mua đắt!\n• **Bưu cục SPX Voronoi gần nhất**: Tự động xác định trung tâm giao nhận SPX gần địa chỉ giao hàng của bạn nhất theo bản đồ tam giác Delaunay & ô Voronoi, rút ngắn tối đa thời gian giao vận chặng cuối.\n• **Ưu đãi may đo Contextual Bandit**: Thuật toán LinTS phân tích giỏ hàng để tự động cấp mã giảm giá phù hợp nhất (Freeship Max, Giảm 20% hoặc Quà tặng), giúp bạn tối đa hóa số tiền tiết kiệm được!`,
       suggestions: ['Xem phân khúc giá tốt nhất', 'Kiểm tra bưu cục SPX gần nhất', 'Nhận ưu đãi dành riêng cho bạn'],
+    };
+  }
+
+  // 35. Tuyến Vận Tải Không Giao Cắt Hopcroft-Tarjan, Nén Ảnh HNSW PQ & Banner Softmax (PLANAR_PQ_SOFTMAX_ASSIST)
+  if (/tuyến không giao cắt|hopcroft-tarjan|tìm kiếm ảnh hnsw pq|nén ảnh pq|banner flash sale thông minh|softmax bandit/i.test(lower)) {
+    return {
+      intent: 'PLANAR_PQ_SOFTMAX_ASSIST',
+      replyText: `**[HÀNH LANG SPX KHÔNG GIAO CẮT, NÉN ẢNH HNSW PQ & BANNER DEAL THÔNG MINH]:**\n\n• **Lộ trình không xung đột Hopcroft-Tarjan**: Tuyến luân chuyển SPX liên tỉnh được thiết kế theo cấu trúc đồ thị phẳng (Planar Corridors), triệt tiêu các nút giao cắt mặt đất giúp kiện hàng về tay bạn nhanh chóng mà không lo tắc đường!\n• **Tìm kiếm bằng ảnh siêu tốc HNSW PQ**: Công nghệ nén lượng tử hóa tích Product Quantization cho phép bạn tìm đồ bằng ảnh ngay tức thì trong 2 mili-giây với độ chính xác cao.\n• **Gợi ý Deal hot qua Softmax Bandit**: Sàn tự động phân tích thị hiếu của người mua để đẩy những sản phẩm Flash Sale và mẫu Banner chất lượng nhất lên trang chủ!`,
+      suggestions: ['Tìm kiếm bằng ảnh ngay', 'Xem lộ trình bưu kiện SPX', 'Săn banner Deal hot'],
     };
   }
 

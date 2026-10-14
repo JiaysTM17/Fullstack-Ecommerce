@@ -200,6 +200,10 @@ import {
   WaveletMatrixIndex,
   DelaunayVoronoiLogistics,
   ContextualBanditEngine,
+  // Phase 33 Enterprise Algorithms
+  HopcroftTarjanPlanarity,
+  HNSWProductQuantizer,
+  SoftmaxGradientBandit,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -264,6 +268,9 @@ import ServerCoDelQueue from "../../server/src/utils/codelActiveQueue.js";
 import { WaveletMatrixIndex as ServerWaveletMatrixIndex, BitVector as ServerBitVector } from "../../server/src/utils/waveletMatrixIndex.js";
 import { DelaunayVoronoiLogistics as ServerDelaunayVoronoi } from "../../server/src/utils/delaunayVoronoiLogistics.js";
 import { ContextualBanditEngine as ServerContextualBandit } from "../../server/src/utils/contextualBanditEngine.js";
+import { HopcroftTarjanPlanarity as ServerHopcroftTarjan } from "../../server/src/utils/hopcroftTarjanPlanarity.js";
+import { HNSWProductQuantizer as ServerHNSWProductQuantizer } from "../../server/src/utils/hnswProductQuantizer.js";
+import { SoftmaxGradientBandit as ServerSoftmaxGradientBandit } from "../../server/src/utils/softmaxGradientBandit.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -16749,6 +16756,311 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       }
       const tailoredOffer = bandit.selectArm([1.0, 1.0, 0.8]);
       expect.equal(tailoredOffer.selectedArm, "VOUCHER_20PCT");
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 180: Hopcroft-Tarjan Planarity, HNSW Product Quantizer, and Softmax Bandit Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 180: Hopcroft-Tarjan Planarity, HNSW Product Quantizer, and Softmax Bandit Suite", () => {
+    // --- PART 1: Hopcroft-Tarjan Planarity Testing (F180-T01 -> F180-T06) ---
+    test("F180-T01: Trivial logistics network (V <= 4) is always planar", () => {
+      const planarity = new HopcroftTarjanPlanarity();
+      planarity.addCorridor("HN", "HP");
+      planarity.addCorridor("HP", "ND");
+      planarity.addCorridor("ND", "HN");
+
+      const res = planarity.isPlanar();
+      expect.equal(res.isPlanar, true);
+      expect.equal(res.verticesCount, 3);
+      expect.equal(res.corridorsCount, 3);
+      expect.equal(res.facesCount, 2);
+    });
+
+    test("F180-T02: Planar logistics grid satisfies Euler inequality E <= 3V - 6", () => {
+      const planarity = new HopcroftTarjanPlanarity();
+      const hubs = ["H1", "H2", "H3", "H4", "H5", "H6"];
+      for (let i = 0; i < 6; i++) {
+        planarity.addCorridor(hubs[i], hubs[(i + 1) % 6]);
+        planarity.addCorridor("CENTER", hubs[i]);
+      }
+      const res = planarity.isPlanar();
+      expect.equal(res.isPlanar, true);
+      expect.equal(res.verticesCount, 7);
+      expect.equal(res.corridorsCount, 12);
+      expect.equal(res.facesCount, 7);
+    });
+
+    test("F180-T03: Dense network violating Euler inequality E > 3V - 6 is immediately non-planar", () => {
+      const planarity = new HopcroftTarjanPlanarity();
+      const v = ["A", "B", "C", "D", "E"];
+      for (let i = 0; i < 5; i++) {
+        for (let j = i + 1; j < 5; j++) {
+          planarity.addCorridor(v[i], v[j]);
+        }
+      }
+      const res = planarity.isPlanar();
+      expect.equal(res.isPlanar, false);
+      expect.equal(/Euler/i.test(res.reason), true);
+    });
+
+    test("F180-T04: Complete graph K5 is recognized as non-planar Kuratowski minor", () => {
+      const planarity = new HopcroftTarjanPlanarity();
+      const nodes = ["K1", "K2", "K3", "K4", "K5"];
+      for (let i = 0; i < 5; i++) {
+        for (let j = i + 1; j < 5; j++) {
+          planarity.addCorridor(nodes[i], nodes[j]);
+        }
+      }
+      const res = planarity.isPlanar();
+      expect.equal(res.isPlanar, false);
+    });
+
+    test("F180-T05: Complete bipartite graph K3,3 is recognized as non-planar Kuratowski minor", () => {
+      const planarity = new HopcroftTarjanPlanarity();
+      const setA = ["A1", "A2", "A3"];
+      const setB = ["B1", "B2", "B3"];
+      for (const a of setA) {
+        for (const b of setB) {
+          planarity.addCorridor(a, b);
+        }
+      }
+      const res = planarity.isPlanar();
+      expect.equal(res.isPlanar, false);
+      expect.equal(/K3,3/i.test(res.reason), true);
+    });
+
+    test("F180-T06: detectCrossings identifies physical crossing corridors; Server parity", () => {
+      const planarity = new HopcroftTarjanPlanarity();
+      planarity.addCorridor("HUB_NW", "HUB_SE");
+      planarity.addCorridor("HUB_NE", "HUB_SW");
+
+      const coords = {
+        HUB_NW: { x: 0, y: 10 },
+        HUB_SE: { x: 10, y: 0 },
+        HUB_NE: { x: 10, y: 10 },
+        HUB_SW: { x: 0, y: 0 },
+      };
+
+      const crossings = planarity.detectCrossings(coords);
+      expect.equal(crossings.length, 1);
+
+      const serverP = new ServerHopcroftTarjan();
+      serverP.addCorridor("A", "B");
+      serverP.addCorridor("B", "C");
+      serverP.addCorridor("C", "A");
+      expect.equal(serverP.isPlanar().isPlanar, true);
+    });
+
+    // --- PART 2: HNSW Product Quantizer (PQ & ADC) (F180-T07 -> F180-T12) ---
+    test("F180-T07: HNSWProductQuantizer initializes with valid dimensions and validates divisibility", () => {
+      const pq = new HNSWProductQuantizer({ dim: 8, numSubspaces: 2, numCentroids: 4 });
+      expect.equal(pq.dim, 8);
+      expect.equal(pq.M, 2);
+      expect.equal(pq.subDim, 4);
+      expect.equal(pq.K, 4);
+
+      expect.throws(() => new HNSWProductQuantizer({ dim: 7, numSubspaces: 2 }));
+    });
+
+    test("F180-T08: trainCodebook builds M codebooks with K centroids each", () => {
+      const pq = new HNSWProductQuantizer({ dim: 6, numSubspaces: 2, numCentroids: 3 });
+      const vectors = [
+        [1, 2, 3, 4, 5, 6],
+        [1.1, 1.9, 3.2, 3.9, 5.1, 6.2],
+        [2, 3, 4, 5, 6, 7],
+        [10, 11, 12, 13, 14, 15],
+        [10.2, 10.8, 12.1, 13.2, 14.1, 15.3],
+        [20, 21, 22, 23, 24, 25],
+      ];
+      pq.trainCodebook(vectors);
+      expect.equal(pq.isTrained, true);
+      expect.equal(pq.codebook.length, 2);
+      expect.equal(pq.codebook[0].length, 3);
+      expect.equal(pq.codebook[0][0].length, 3);
+    });
+
+    test("F180-T09: encodeVector produces M-byte discrete centroid indices", () => {
+      const pq = new HNSWProductQuantizer({ dim: 4, numSubspaces: 2, numCentroids: 2 });
+      pq.codebook = [
+        [[0, 0], [10, 10]],
+        [[0, 0], [20, 20]],
+      ];
+      pq.isTrained = true;
+
+      const codeNearZero = pq.encodeVector([0.5, 0.2, 1.0, 0.8]);
+      expect.equal(codeNearZero[0], 0);
+      expect.equal(codeNearZero[1], 0);
+
+      const codeNearTenTwenty = pq.encodeVector([9.5, 9.8, 19.5, 20.1]);
+      expect.equal(codeNearTenTwenty[0], 1);
+      expect.equal(codeNearTenTwenty[1], 1);
+    });
+
+    test("F180-T10: search uses Asymmetric Distance Computation (ADC) with precomputed distance table", () => {
+      const pq = new HNSWProductQuantizer({ dim: 4, numSubspaces: 2, numCentroids: 2 });
+      pq.codebook = [
+        [[0, 0], [10, 10]],
+        [[0, 0], [10, 10]],
+      ];
+      pq.isTrained = true;
+
+      pq.add("SKU_A", [0.1, 0.1, 0.1, 0.1], { name: "Áo thun basic" });
+      pq.add("SKU_B", [9.9, 9.9, 9.9, 9.9], { name: "Tai nghe bluetooth" });
+
+      const results = pq.search([0.0, 0.0, 0.0, 0.0], 2);
+      expect.equal(results.length, 2);
+      expect.equal(results[0].id, "SKU_A");
+      expect.equal(results[0].distance < results[1].distance, true);
+    });
+
+    test("F180-T11: getMemorySavings calculates substantial compression ratio", () => {
+      const pq = new HNSWProductQuantizer({ dim: 16, numSubspaces: 2, numCentroids: 4 });
+      for (let i = 0; i < 10; i++) {
+        pq.add(`ITEM_${i}`, new Array(16).fill(i));
+      }
+      const savings = pq.getMemorySavings();
+      expect.equal(savings.uncompressedBytesPerItem, 64);
+      expect.equal(savings.compressedBytesPerItem, 2);
+      expect.equal(savings.compressionRatioPercent >= 90, true);
+    });
+
+    test("F180-T12: ServerHNSWProductQuantizer parity with client implementation", () => {
+      const serverPQ = new ServerHNSWProductQuantizer({ dim: 4, numSubspaces: 2, numCentroids: 2 });
+      serverPQ.codebook = [
+        [[1, 1], [5, 5]],
+        [[2, 2], [8, 8]],
+      ];
+      serverPQ.isTrained = true;
+      serverPQ.add("P1", [1.1, 1.2, 2.1, 2.0]);
+      serverPQ.add("P2", [4.9, 5.1, 7.8, 8.2]);
+
+      const found = serverPQ.search([5.0, 5.0, 8.0, 8.0], 1);
+      expect.equal(found[0].id, "P2");
+    });
+
+    // --- PART 3: Stochastic Gradient Multi-Armed Bandit (F180-T13 -> F180-T18) ---
+    test("F180-T13: SoftmaxGradientBandit initializes preferences to zero and uniform probabilities", () => {
+      const bandit = new SoftmaxGradientBandit(["B1", "B2", "B3", "B4"]);
+      const probs = bandit.getProbabilities();
+      expect.equal(probs["B1"], 0.25);
+      expect.equal(probs["B2"], 0.25);
+      expect.equal(probs["B3"], 0.25);
+      expect.equal(probs["B4"], 0.25);
+    });
+
+    test("F180-T14: selectArm samples valid arm from candidate set", () => {
+      const bandit = new SoftmaxGradientBandit(["HERO_1", "HERO_2"]);
+      const picked = bandit.selectArm();
+      expect.equal(["HERO_1", "HERO_2"].includes(picked), true);
+    });
+
+    test("F180-T15: update applies gradient ascent and tracks running average reward baseline", () => {
+      const bandit = new SoftmaxGradientBandit(["DEAL_A", "DEAL_B"], { alpha: 0.1, useBaseline: true });
+      bandit.update("DEAL_A", 10.0);
+      expect.equal(bandit.totalSteps, 1);
+      expect.equal(bandit.averageReward, 10.0);
+
+      bandit.update("DEAL_B", 2.0);
+      expect.equal(bandit.totalSteps, 2);
+      expect.equal(bandit.averageReward, 6.0);
+    });
+
+    test("F180-T16: High reward above baseline increases arm preference while lowering unchosen arms", () => {
+      const bandit = new SoftmaxGradientBandit(["ARM_WIN", "ARM_LOSE"], { alpha: 0.2, useBaseline: true });
+      bandit.averageReward = 5.0;
+      bandit.totalSteps = 1;
+
+      bandit.update("ARM_WIN", 15.0);
+      const stats = bandit.getArmStats().arms;
+      expect.equal(stats["ARM_WIN"].preference > 0, true);
+      expect.equal(stats["ARM_LOSE"].preference < 0, true);
+      expect.equal(stats["ARM_WIN"].probability > stats["ARM_LOSE"].probability, true);
+    });
+
+    test("F180-T17: Gradient bandit converges towards best-performing arm over 40 steps", () => {
+      const bandit = new SoftmaxGradientBandit(["BANNER_FLASH", "BANNER_REGULAR"], { alpha: 0.1 });
+      for (let i = 0; i < 40; i++) {
+        bandit.update("BANNER_FLASH", 100.0);
+        bandit.update("BANNER_REGULAR", 10.0);
+      }
+      const probs = bandit.getProbabilities();
+      expect.equal(probs["BANNER_FLASH"] > 0.9, true);
+      expect.equal(probs["BANNER_REGULAR"] < 0.1, true);
+    });
+
+    test("F180-T18: ServerSoftmaxGradientBandit parity with client implementation", () => {
+      const serverBandit = new ServerSoftmaxGradientBandit(["SRV_A", "SRV_B"], { alpha: 0.15 });
+      serverBandit.update("SRV_A", 50.0);
+      const stats = serverBandit.getArmStats();
+      expect.equal(stats.totalSteps, 1);
+      expect.equal(stats.arms["SRV_A"].pulls, 1);
+      expect.equal(stats.arms["SRV_A"].probability > stats.arms["SRV_B"].probability, true);
+    });
+
+    // --- PART 4: Copilots & E2E Lifecycle (F180-T19 -> F180-T24) ---
+    test("F180-T19: Admin Sentinel Copilot Section 80 recognizes Hopcroft-Tarjan Planarity", () => {
+      const res = generateAdminCopilotResponse("Kiểm tra tính phẳng mạng lưới hopcroft-tarjan kuratowski", {});
+      expect.equal(res.tag, "TÍNH PHẲNG ĐỒ THỊ HOPCROFT-TARJAN");
+      expect.equal(/hopcroft-tarjan/i.test(res.text), true);
+      expect.equal(/kuratowski/i.test(res.text), true);
+    });
+
+    test("F180-T20: Admin Sentinel Copilot Section 81 recognizes HNSW Product Quantizer PQ ADC", () => {
+      const res = generateAdminCopilotResponse("Nén vector đa thức bằng lượng tử hóa tích hnsw product quantiz adc", {});
+      expect.equal(res.tag, "LƯỢNG TỬ HÓA TÍCH HNSW PQ");
+      expect.equal(/product quantiz/i.test(res.text), true);
+      expect.equal(/adc/i.test(res.text), true);
+    });
+
+    test("F180-T21: Admin Sentinel Copilot Section 82 recognizes Softmax Gradient Bandit", () => {
+      const res = generateAdminCopilotResponse("Phân bổ banner hero bằng softmax gradient bandit running baseline", {});
+      expect.equal(res.tag, "GRADIENT BANDIT SOFTMAX");
+      expect.equal(/softmax/i.test(res.text), true);
+      expect.equal(/baseline/i.test(res.text), true);
+    });
+
+    test("F180-T22: Seller ShopSmart Copilot Section 42 guides Planar routes, HNSW PQ image compression & Banner Softmax", () => {
+      const res = generateSellerCopilotResponse("Tối ưu tính phẳng hopcroft-tarjan và nén ảnh hnsw pq", { name: "Shop Thời Trang" }, [], []);
+      expect.equal(res.tag, "TỐI ƯU PLANARITY, HNSW PQ & BANNER SOFTMAX");
+      expect.equal(/hopcroft-tarjan/i.test(res.text), true);
+      expect.equal(/hnsw pq/i.test(res.text), true);
+    });
+
+    test("F180-T23: Buyer AI Assistant Intent 35 explains cross-free logistics, instant visual search & smart Flash Sale banners", () => {
+      const res = generateAiChatResponse("Tuyến không giao cắt hopcroft-tarjan và tìm kiếm ảnh hnsw pq");
+      expect.equal(res.intent, "PLANAR_PQ_SOFTMAX_ASSIST");
+      expect.equal(/hopcroft-tarjan/i.test(res.replyText), true);
+      expect.equal(/hnsw pq/i.test(res.replyText), true);
+    });
+
+    test("F180-T24: E2E Lifecycle: Hopcroft-Tarjan validates hub network planarity -> HNSW PQ matches visual query -> Softmax Bandit optimizes hero deal placement", () => {
+      const logisticsNet = new HopcroftTarjanPlanarity();
+      logisticsNet.addCorridor("HN_MEGA_SOC", "BAC_NINH_HUB");
+      logisticsNet.addCorridor("BAC_NINH_HUB", "HAI_PHONG_HUB");
+      logisticsNet.addCorridor("HAI_PHONG_HUB", "HN_MEGA_SOC");
+      const planarityRes = logisticsNet.isPlanar();
+      expect.equal(planarityRes.isPlanar, true);
+
+      const visualSearch = new HNSWProductQuantizer({ dim: 4, numSubspaces: 2, numCentroids: 2 });
+      visualSearch.codebook = [
+        [[1, 0], [0, 1]],
+        [[1, 0], [0, 1]],
+      ];
+      visualSearch.isTrained = true;
+      visualSearch.add("BAG_LUXURY", [0.9, 0.1, 0.95, 0.05], { category: "Túi xách da" });
+      visualSearch.add("SHOES_SPORT", [0.05, 0.95, 0.1, 0.9], { category: "Giày thể thao" });
+
+      const matched = visualSearch.search([1.0, 0.0, 1.0, 0.0], 1);
+      expect.equal(matched[0].id, "BAG_LUXURY");
+
+      const heroBandit = new SoftmaxGradientBandit(["BANNER_VOUCHER_50K", "BANNER_FLASH_SALE_HANDBAG"], { alpha: 0.2 });
+      for (let i = 0; i < 25; i++) {
+        heroBandit.update("BANNER_FLASH_SALE_HANDBAG", 250000);
+        heroBandit.update("BANNER_VOUCHER_50K", 50000);
+      }
+      const bestBanner = heroBandit.selectArm();
+      expect.equal(bestBanner, "BANNER_FLASH_SALE_HANDBAG");
     });
   });
 });

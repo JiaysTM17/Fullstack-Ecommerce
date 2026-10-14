@@ -608,7 +608,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 30. Sắp Xếp Danh Mục Thích Ứng Timsort & Tìm Kiếm Ngữ Nghĩa HNSW (Phase 21 - Feature 168)
-  if (/timsort|sắp xếp danh mục|adaptive hybrid sort|thứ tự bán phần|natural runs|hnsw|tìm kiếm ngữ nghĩa sản phẩm/i.test(raw)) {
+  if (!/product quantiz|pq|hopcroft|planarity/i.test(raw) && /timsort|sắp xếp danh mục|adaptive hybrid sort|thứ tự bán phần|natural runs|hnsw|tìm kiếm ngữ nghĩa sản phẩm/i.test(raw)) {
     return {
       text: `⚡ **TỐI ƯU DANH MỤC SẢN PHẨM BẰNG TIMSORT & TÌM KIẾM NGỮ NGHĨA HNSW**:
 - **Thuật toán Sắp xếp Thích ứng Lai Timsort ($O(N)$ Best Case)**:
@@ -842,6 +842,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Tra cứu phân vị giá sản phẩm Wavelet Matrix',
         'Định vị trạm Hub tiếp nhận Voronoi gần nhất',
         'Kích hoạt phân bổ ưu đãi Contextual Bandit'
+      ]
+    };
+  }
+
+  // 42. Tối Ưu Mạng Lưới Hopcroft-Tarjan, Nén Ảnh HNSW PQ & Phân Bổ Banner Softmax Bandit (Phase 33 - Feature 180)
+  if (/hopcroft-tarjan|tính phẳng|hnsw pq|nén vector pq|lượng tử hóa tích|softmax bandit|chính sách softmax/i.test(raw)) {
+    return {
+      text: `🚀 **TỐI ƯU MẠNG LƯỚI HOPCROFT-TARJAN, NÉN ẢNH HNSW PQ & BANNER SOFTMAX BANDIT (${currentShop.name})**:
+- **Thiết kế tuyến giao nhận không giao cắt (Hopcroft-Tarjan Planarity)**:
+  - Phân tích luồng vận tải từ các kho hàng vệ tinh của shop đến các trạm gom hàng SPX, đảm bảo không có xung đột giao lộ mức mặt đất giúp bưu tá lấy hàng nhanh chóng.
+- **Nén vector sản phẩm bằng HNSW Product Quantizer (PQ)**:
+  - Nén toàn bộ embedding ảnh và văn bản của các SKU trong shop với tỷ lệ tiết kiệm 93.75% RAM, tối ưu tốc độ gợi ý sản phẩm tương tự bằng ảnh.
+- **Tối ưu hóa hiển thị Banner Hero bằng Softmax Gradient Bandit**:
+  - Tự động học chính sách phân bổ xác suất hiển thị các mẫu Banner Flash Sale của shop theo doanh thu mang lại (Reward Advantage $R - \\bar{R}$), tối đa hóa tỷ lệ click mua hàng!`,
+      type: 'recommendation',
+      tag: 'TỐI ƯU PLANARITY, HNSW PQ & BANNER SOFTMAX',
+      suggestions: [
+        'Kiểm tra tính phẳng tuyến luân chuyển kho hàng',
+        'Nén vector hình ảnh sản phẩm bằng HNSW PQ',
+        'Xem phân phối xác suất hiển thị Banner Hero'
       ]
     };
   }
