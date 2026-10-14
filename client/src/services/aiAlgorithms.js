@@ -6980,6 +6980,477 @@ export class LinUCBRecommender {
   }
 }
 
+// ==========================================
+// Phase 14: Enterprise Bidding, Logistics Flow & Image Copyright Suite
+// ==========================================
+
+export class PidBiddingController {
+  constructor({
+    kp = 0.5,
+    ki = 0.05,
+    kd = 0.1,
+    targetRoas = 3.5,
+    minBid = 500,
+    maxBid = 20000,
+    antiWindupLimit = 50
+  } = {}) {
+    this.kp = kp;
+    this.ki = ki;
+    this.kd = kd;
+    this.targetRoas = targetRoas;
+    this.minBid = minBid;
+    this.maxBid = maxBid;
+    this.antiWindupLimit = antiWindupLimit;
+
+    this.integral = 0;
+    this.previousError = 0;
+    this.lastTimestamp = null;
+  }
+
+  reset() {
+    this.integral = 0;
+    this.previousError = 0;
+    this.lastTimestamp = null;
+  }
+
+  computeBidAdjustment(currentRoas, currentBid, dt = 1.0) {
+    if (dt <= 0) dt = 1.0;
+
+    const rawError = currentRoas - this.targetRoas;
+    const normalizedError = rawError / Math.max(1, this.targetRoas);
+
+    const pTerm = this.kp * normalizedError;
+
+    this.integral += normalizedError * dt;
+    if (this.integral > this.antiWindupLimit) this.integral = this.antiWindupLimit;
+    if (this.integral < -this.antiWindupLimit) this.integral = -this.antiWindupLimit;
+    const iTerm = this.ki * this.integral;
+
+    const derivative = (normalizedError - this.previousError) / dt;
+    const dTerm = this.kd * derivative;
+
+    this.previousError = normalizedError;
+
+    const controlEffort = pTerm + iTerm + dTerm;
+    const deltaBid = currentBid * controlEffort;
+    let proposedBid = Math.round(currentBid + deltaBid);
+
+    const clampedBid = Math.max(this.minBid, Math.min(this.maxBid, proposedBid));
+
+    return {
+      currentRoas,
+      targetRoas: this.targetRoas,
+      error: Number(normalizedError.toFixed(4)),
+      pTerm: Number(pTerm.toFixed(4)),
+      iTerm: Number(iTerm.toFixed(4)),
+      dTerm: Number(dTerm.toFixed(4)),
+      controlEffort: Number(controlEffort.toFixed(4)),
+      currentBid,
+      proposedBid: clampedBid,
+      isClamped: clampedBid !== proposedBid,
+      action: clampedBid > currentBid ? 'INCREASE' : clampedBid < currentBid ? 'DECREASE' : 'HOLD'
+    };
+  }
+
+  computeBudgetPacingAdjustment(dailyBudget, spentBudget, currentHour, currentBid) {
+    if (dailyBudget <= 0) {
+      return { action: 'PAUSE', proposedBid: 0, reason: 'Ngân sách không hợp lệ' };
+    }
+
+    if (spentBudget >= dailyBudget) {
+      return { action: 'PAUSE', proposedBid: 0, reason: 'Đã cạn kiệt ngân sách ngày' };
+    }
+
+    const timeFraction = Math.max(0.01, Math.min(1.0, (currentHour + 1) / 24));
+    const expectedSpend = dailyBudget * timeFraction;
+    const spendPacingRatio = spentBudget / expectedSpend;
+
+    let multiplier = 1.0;
+    let pacingStatus = 'ON_TRACK';
+
+    if (spendPacingRatio > 1.25) {
+      multiplier = Math.max(0.7, 1 - (spendPacingRatio - 1) * 0.5);
+      pacingStatus = 'SPENDING_TOO_FAST';
+    } else if (spendPacingRatio < 0.75) {
+      multiplier = Math.min(1.4, 1 + (1 - spendPacingRatio) * 0.4);
+      pacingStatus = 'SPENDING_TOO_SLOW';
+    }
+
+    const proposedBid = Math.max(this.minBid, Math.min(this.maxBid, Math.round(currentBid * multiplier)));
+
+    return {
+      dailyBudget,
+      spentBudget,
+      currentHour,
+      timeFraction: Number(timeFraction.toFixed(2)),
+      expectedSpend: Math.round(expectedSpend),
+      spendPacingRatio: Number(spendPacingRatio.toFixed(3)),
+      pacingStatus,
+      currentBid,
+      proposedBid,
+      multiplier: Number(multiplier.toFixed(3))
+    };
+  }
+}
+
+export class EdmondsKarpMaxFlow {
+  constructor() {
+    this.nodes = new Map();
+    this.capacities = new Map();
+    this.adjList = new Map();
+  }
+
+  addNode(id, label = id, type = 'hub') {
+    if (!this.nodes.has(id)) {
+      this.nodes.set(id, { id, label, type });
+      this.capacities.set(id, new Map());
+      this.adjList.set(id, new Set());
+    }
+    return this;
+  }
+
+  addEdge(from, to, capacity) {
+    if (capacity <= 0) return this;
+
+    this.addNode(from);
+    this.addNode(to);
+
+    const currentCap = this.capacities.get(from).get(to) || 0;
+    this.capacities.get(from).set(to, currentCap + capacity);
+
+    this.adjList.get(from).add(to);
+    this.adjList.get(to).add(from);
+
+    if (!this.capacities.get(to).has(from)) {
+      this.capacities.get(to).set(from, 0);
+    }
+
+    return this;
+  }
+
+  _bfsAugmentingPath(source, sink, residual) {
+    const parent = new Map();
+    const visited = new Set();
+    const queue = [source];
+    visited.add(source);
+
+    while (queue.length > 0) {
+      const u = queue.shift();
+      if (u === sink) break;
+
+      const neighbors = this.adjList.get(u) || new Set();
+      for (const v of neighbors) {
+        const resCap = (residual.get(u) && residual.get(u).get(v)) || 0;
+        if (!visited.has(v) && resCap > 0) {
+          visited.add(v);
+          parent.set(v, u);
+          queue.push(v);
+        }
+      }
+    }
+
+    if (!visited.has(sink)) {
+      return null;
+    }
+
+    const path = [];
+    let curr = sink;
+    let bottleneck = Infinity;
+
+    while (curr !== source) {
+      const prev = parent.get(curr);
+      const cap = residual.get(prev).get(curr);
+      bottleneck = Math.min(bottleneck, cap);
+      path.unshift({ from: prev, to: curr });
+      curr = prev;
+    }
+
+    return { path, bottleneck };
+  }
+
+  computeMaxFlow(source, sink) {
+    if (!this.nodes.has(source) || !this.nodes.has(sink)) {
+      throw new Error(`Điểm nguồn (${source}) hoặc điểm đích (${sink}) không tồn tại trong mạng lưới.`);
+    }
+
+    const residual = new Map();
+    for (const [u, map] of this.capacities.entries()) {
+      residual.set(u, new Map(map));
+    }
+
+    const flows = new Map();
+    for (const [u, map] of this.capacities.entries()) {
+      flows.set(u, new Map());
+      for (const [v, cap] of map.entries()) {
+        if (cap > 0) flows.get(u).set(v, 0);
+      }
+    }
+
+    let maxFlow = 0;
+    const augmentedPaths = [];
+
+    while (true) {
+      const result = this._bfsAugmentingPath(source, sink, residual);
+      if (!result) break;
+
+      const { path, bottleneck } = result;
+      maxFlow += bottleneck;
+      augmentedPaths.push({ path, flowAdded: bottleneck });
+
+      for (const edge of path) {
+        const { from, to } = edge;
+        const forwardCap = residual.get(from).get(to);
+        residual.get(from).set(to, forwardCap - bottleneck);
+
+        const backwardCap = residual.get(to).get(from) || 0;
+        residual.get(to).set(from, backwardCap + bottleneck);
+
+        if (this.capacities.get(from) && this.capacities.get(from).get(to) > 0) {
+          flows.get(from).set(to, (flows.get(from).get(to) || 0) + bottleneck);
+        } else {
+          flows.get(to).set(from, (flows.get(to).get(from) || 0) - bottleneck);
+        }
+      }
+    }
+
+    const edgeDetails = [];
+    for (const [from, map] of this.capacities.entries()) {
+      for (const [to, originalCap] of map.entries()) {
+        if (originalCap > 0) {
+          const usedFlow = Math.max(0, flows.get(from).get(to) || 0);
+          const utilizationRate = originalCap > 0 ? Number((usedFlow / originalCap).toFixed(3)) : 0;
+          edgeDetails.push({
+            from,
+            to,
+            capacity: originalCap,
+            flow: usedFlow,
+            utilizationRate,
+            isSaturated: usedFlow === originalCap
+          });
+        }
+      }
+    }
+
+    return {
+      source,
+      sink,
+      maxFlow,
+      totalPathsFound: augmentedPaths.length,
+      edgeDetails,
+      residual
+    };
+  }
+
+  findBottlenecks(source, sink) {
+    const flowResult = this.computeMaxFlow(source, sink);
+    const { residual, maxFlow } = flowResult;
+
+    const reachable = new Set();
+    const queue = [source];
+    reachable.add(source);
+
+    while (queue.length > 0) {
+      const u = queue.shift();
+      const neighbors = this.adjList.get(u) || new Set();
+      for (const v of neighbors) {
+        const resCap = (residual.get(u) && residual.get(u).get(v)) || 0;
+        if (!reachable.has(v) && resCap > 0) {
+          reachable.add(v);
+          queue.push(v);
+        }
+      }
+    }
+
+    const bottlenecks = [];
+    let cutCapacity = 0;
+
+    for (const u of reachable) {
+      const capMap = this.capacities.get(u) || new Map();
+      for (const [v, originalCap] of capMap.entries()) {
+        if (originalCap > 0 && !reachable.has(v)) {
+          bottlenecks.push({
+            from: u,
+            fromLabel: (this.nodes.get(u) && this.nodes.get(u).label) || u,
+            to: v,
+            toLabel: (this.nodes.get(v) && this.nodes.get(v).label) || v,
+            capacity: originalCap,
+            recommendation: `Tăng công suất xe tải/bưu tá thêm tối thiểu 30-50% cho tuyến ${u} -> ${v} để giải phóng nút thắt.`
+          });
+          cutCapacity += originalCap;
+        }
+      }
+    }
+
+    return {
+      source,
+      sink,
+      maxFlow,
+      cutCapacity,
+      isMinCutVerified: maxFlow === cutCapacity,
+      bottleneckCount: bottlenecks.length,
+      bottlenecks
+    };
+  }
+}
+
+export class PerceptualImageHash {
+  static popcount32(n) {
+    n = n - ((n >>> 1) & 0x55555555);
+    n = (n & 0x33333333) + ((n >>> 2) & 0x33333333);
+    return (((n + (n >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24;
+  }
+
+  static hammingDistance(hashA, hashB) {
+    if (!hashA || !hashB || typeof hashA !== 'string' || typeof hashB !== 'string') {
+      return 64;
+    }
+
+    const cleanA = hashA.trim().toLowerCase().padStart(16, '0').slice(-16);
+    const cleanB = hashB.trim().toLowerCase().padStart(16, '0').slice(-16);
+
+    const highA = parseInt(cleanA.slice(0, 8), 16) || 0;
+    const lowA = parseInt(cleanA.slice(8, 16), 16) || 0;
+
+    const highB = parseInt(cleanB.slice(0, 8), 16) || 0;
+    const lowB = parseInt(cleanB.slice(8, 16), 16) || 0;
+
+    const xorHigh = (highA ^ highB) >>> 0;
+    const xorLow = (lowA ^ lowB) >>> 0;
+
+    return this.popcount32(xorHigh) + this.popcount32(xorLow);
+  }
+
+  static computeSimilarity(hashA, hashB) {
+    const dist = this.hammingDistance(hashA, hashB);
+    return Number(Math.max(0, (64 - dist) / 64).toFixed(4));
+  }
+
+  static computeDHash(input) {
+    if (typeof input === 'string') {
+      return this._generateHashFromString(input);
+    }
+
+    let bits = '';
+    if (Array.isArray(input)) {
+      if (Array.isArray(input[0]) && input.length >= 8 && input[0].length >= 9) {
+        for (let row = 0; row < 8; row++) {
+          for (let col = 0; col < 8; col++) {
+            const left = input[row][col];
+            const right = input[row][col + 1];
+            bits += left < right ? '1' : '0';
+          }
+        }
+      } else {
+        for (let i = 0; i < 64; i++) {
+          const val = input[i] || 0;
+          const nextVal = input[i + 1] || 0;
+          bits += val < nextVal ? '1' : '0';
+        }
+      }
+    }
+
+    if (bits.length < 64) {
+      bits = bits.padEnd(64, '0');
+    }
+
+    let hex = '';
+    for (let i = 0; i < 64; i += 4) {
+      const nibble = parseInt(bits.substring(i, i + 4), 2);
+      hex += nibble.toString(16);
+    }
+
+    return hex.padStart(16, '0');
+  }
+
+  static _generateHashFromString(str) {
+    let h1 = 0xdeadbeef ^ str.length;
+    let h2 = 0x41c6ce57 ^ str.length;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = (Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909)) >>> 0;
+    h2 = (Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909)) >>> 0;
+    return (h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0')).slice(0, 16);
+  }
+}
+
+export class ImageHashIndex {
+  constructor() {
+    this.images = new Map();
+  }
+
+  registerImage({ imageId, productId, shopId, isMall = false, hashHex }) {
+    if (!imageId || !hashHex) return;
+    this.images.set(imageId, {
+      imageId,
+      productId,
+      shopId,
+      isMall,
+      hashHex: hashHex.trim().toLowerCase()
+    });
+  }
+
+  findMatches(queryHashHex, maxHammingDistance = 5) {
+    const matches = [];
+
+    for (const record of this.images.values()) {
+      const dist = PerceptualImageHash.hammingDistance(queryHashHex, record.hashHex);
+      if (dist <= maxHammingDistance) {
+        const similarity = PerceptualImageHash.computeSimilarity(queryHashHex, record.hashHex);
+        let matchType = 'DISTINCT';
+        if (dist === 0) matchType = 'EXACT_DUPLICATE';
+        else if (dist <= 3) matchType = 'NEAR_DUPLICATE_WATERMARKED';
+        else if (dist <= maxHammingDistance) matchType = 'HIGHLY_SIMILAR';
+
+        matches.push({
+          ...record,
+          hammingDistance: dist,
+          similarity,
+          matchType
+        });
+      }
+    }
+
+    return matches.sort((a, b) => a.hammingDistance - b.hammingDistance);
+  }
+
+  auditCopyrightInfringement(candidate) {
+    const { shopId, productId, hashHex } = candidate;
+    const matches = this.findMatches(hashHex, 5);
+
+    const mallViolations = matches.filter(m => m.shopId !== shopId && m.isMall);
+    const regularViolations = matches.filter(m => m.shopId !== shopId && !m.isMall);
+
+    const isInfringing = mallViolations.length > 0 || regularViolations.length > 0;
+    const highestRiskMatch = mallViolations[0] || regularViolations[0] || null;
+
+    let actionRequired = 'ALLOW';
+    let riskLevel = 'LOW';
+
+    if (mallViolations.length > 0) {
+      actionRequired = 'FLAG_FOR_TAKEDOWN';
+      riskLevel = 'CRITICAL';
+    } else if (regularViolations.length > 0) {
+      actionRequired = 'WARN_DUPLICATE_CATALOG';
+      riskLevel = 'MEDIUM';
+    }
+
+    return {
+      shopId,
+      productId,
+      hashHex,
+      isInfringing,
+      riskLevel,
+      actionRequired,
+      mallViolationsCount: mallViolations.length,
+      regularViolationsCount: regularViolations.length,
+      highestRiskMatch
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -7069,4 +7540,10 @@ export default {
   matrixVectorMultiply,
   dotProduct,
   LinUCBRecommender,
+  // Phase 14 Enterprise Algorithms
+  PidBiddingController,
+  EdmondsKarpMaxFlow,
+  PerceptualImageHash,
+  ImageHashIndex,
 };
+

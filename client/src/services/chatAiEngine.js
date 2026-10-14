@@ -483,7 +483,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (!/hungarian|ghép bưu tá/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá|nghẽn|thông lượng|edmonds-karp/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -685,6 +685,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       replyText: `**[DAILY DISCOVER LINUCB] BỘ SƯU TẬP ĐƯỢC CHỌN LỌC RIÊNG CHO BẠN!**\n\n• **AI LinUCB đa ngữ cảnh**: Phân tích khung giờ truy cập, thiết bị và sở thích danh mục của bạn để đề xuất các sản phẩm phù hợp nhất trong tầm giá.\n• **Ưu đãi kèm theo**: Các sản phẩm được cá nhân hóa kèm mã giảm giá độc quyền dành riêng cho tài khoản của bạn!`,
       products: searchSmartProducts('hot bán chạy mới').slice(0, 3),
       suggestions: ['Gợi ý thêm sản phẩm', 'Lấy voucher giảm 15%', 'Xem deal Flash Sale'],
+    };
+  }
+
+  // 16. Thông Lượng Mạng Lưới Vận Chuyển SPX (SPX_MAX_FLOW_LOGISTICS)
+  if (/mạng lưới spx|thông lượng spx|tại sao spx không bị nghẽn|giao hàng mùa sale|edmonds-karp/i.test(lower)) {
+    return {
+      intent: 'SPX_MAX_FLOW_LOGISTICS',
+      replyText: `**[MẠNG LƯỚI SPX SIÊU TỐC] TẠI SAO ĐƠN HÀNG LUÔN THÔNG SUỐT NGAY CẢ MÙA SIÊU SALE?**\n\n• **Điều phối thông lượng cực đại**: Hệ thống SPX áp dụng thuật toán luồng cực đại (Edmonds-Karp Max Flow) kết hợp giám sát nút thắt cổ chai Min-Cut theo thời gian thực.\n• **Tự động giải phóng ách tắc**: Khi các trung tâm phân loại chính có nguy cơ quá tải, kiện hàng của bạn sẽ được tự động phân luồng qua các tuyến dự phòng để bảo đảm đúng hẹn giao nhận 100%!`,
+      suggestions: ['Tra cứu mã vận đơn SPX', 'Xem bưu cục gần tôi', 'Gặp CSKH'],
     };
   }
 

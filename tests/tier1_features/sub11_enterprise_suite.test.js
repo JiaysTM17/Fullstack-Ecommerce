@@ -114,6 +114,10 @@ import {
   matrixVectorMultiply,
   dotProduct,
   LinUCBRecommender,
+  PidBiddingController,
+  EdmondsKarpMaxFlow,
+  PerceptualImageHash,
+  ImageHashIndex,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -121,6 +125,9 @@ import { RFMSegmentationEngine as ServerRFMEngine } from "../../server/src/utils
 import { InventoryDecayOptimizer as ServerInventoryDecayOptimizer } from "../../server/src/utils/inventoryDecayClearance.js";
 import { GeohashSpatialIndex as ServerGeohashSpatialIndex } from "../../server/src/utils/geohashSpatialIndex.js";
 import { LinUCBRecommender as ServerLinUCBRecommender } from "../../server/src/utils/linUcbRecommender.js";
+import { PidBiddingController as ServerPidController } from "../../server/src/utils/pidBiddingController.js";
+import { EdmondsKarpMaxFlow as ServerEdmondsKarp } from "../../server/src/utils/edmondsKarpMaxFlow.js";
+import { PerceptualImageHash as ServerPerceptualHash, ImageHashIndex as ServerImageHashIndex } from "../../server/src/utils/perceptualImageHash.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -10472,7 +10479,346 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       });
     });
   });
+
+  // =========================================================================
+  // FEATURE 161: Enterprise PID Bidding, SPX Edmonds-Karp & Image Hash Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 161: Enterprise Dynamic Bidding, Network Max-Flow & Image Copyright Suite", () => {
+    // -----------------------------------------------------------------------
+    // PART 1: PID Feedback Controller for Dynamic Ad Bidding (8 Tests)
+    // -----------------------------------------------------------------------
+    describe("Part 1: PID Feedback Controller (F161-T01 to F161-T08)", () => {
+      test("F161-T01: Initializes PID controller with default gains and target ROAS", () => {
+        const controller = new PidBiddingController({ targetRoas: 4.0 });
+        expect.equal(controller.targetRoas, 4.0);
+        expect.equal(controller.kp, 0.5);
+        expect.equal(controller.ki, 0.05);
+        expect.equal(controller.kd, 0.1);
+        expect.equal(controller.integral, 0);
+      });
+
+      test("F161-T02: Increases bid when current ROAS exceeds target (high campaign profitability)", () => {
+        const controller = new PidBiddingController({ targetRoas: 3.5, kp: 0.6, ki: 0.05, kd: 0.1 });
+        const currentBid = 2000;
+        const currentRoas = 5.0; // Cao hơn mục tiêu 3.5
+        const result = controller.computeBidAdjustment(currentRoas, currentBid);
+
+        expect.equal(result.action, "INCREASE");
+        expect.equal(result.proposedBid > currentBid, true);
+        expect.equal(result.error > 0, true);
+        expect.equal(result.pTerm > 0, true);
+      });
+
+      test("F161-T03: Decreases bid when current ROAS falls below target (campaign losing money)", () => {
+        const controller = new ServerPidController({ targetRoas: 4.0, kp: 0.5, ki: 0.05, kd: 0.1 });
+        const currentBid = 3000;
+        const currentRoas = 2.0; // Rất thấp so với mục tiêu 4.0
+        const result = controller.computeBidAdjustment(currentRoas, currentBid);
+
+        expect.equal(result.action, "DECREASE");
+        expect.equal(result.proposedBid < currentBid, true);
+        expect.equal(result.error < 0, true);
+      });
+
+      test("F161-T04: Anti-windup limit caps integral term accumulation during prolonged errors", () => {
+        const controller = new PidBiddingController({ targetRoas: 3.0, antiWindupLimit: 10 });
+        // Chạy 50 chu kỳ với lỗi âm liên tục
+        for (let i = 0; i < 50; i++) {
+          controller.computeBidAdjustment(1.0, 2000);
+        }
+        // Sai số tích phân không được vượt quá antiWindupLimit = 10
+        expect.equal(controller.integral, -10);
+      });
+
+      test("F161-T05: Proposed bid is strictly clamped within [minBid, maxBid] boundaries", () => {
+        const controller = new ServerPidController({ minBid: 500, maxBid: 10000 });
+        // Thử kích giá cực đại
+        const maxResult = controller.computeBidAdjustment(100.0, 9500);
+        expect.equal(maxResult.proposedBid, 10000);
+        expect.equal(maxResult.isClamped, true);
+
+        // Thử dìm giá cực tiểu
+        const minResult = controller.computeBidAdjustment(0.1, 600);
+        expect.equal(minResult.proposedBid, 500);
+      });
+
+      test("F161-T06: Budget pacing reduces bid when spending too fast early in the day", () => {
+        const controller = new PidBiddingController();
+        const dailyBudget = 1000000; // 1 triệu
+        const spentBudget = 400000;  // Đã tiêu 400k (40%)
+        const currentHour = 3;       // Nhưng mới 3h sáng (dự kiến tiêu ~16.6%)
+        const currentBid = 2000;
+
+        const pacing = controller.computeBudgetPacingAdjustment(dailyBudget, spentBudget, currentHour, currentBid);
+        expect.equal(pacing.pacingStatus, "SPENDING_TOO_FAST");
+        expect.equal(pacing.proposedBid < currentBid, true);
+        expect.equal(pacing.multiplier < 1.0, true);
+      });
+
+      test("F161-T07: Budget pacing boosts bid when spending too slow to capture available traffic", () => {
+        const controller = new ServerPidController();
+        const dailyBudget = 1000000;
+        const spentBudget = 100000;  // Mới tiêu 100k (10%)
+        const currentHour = 15;      // Đã 15h chiều (dự kiến tiêu ~66.7%)
+        const currentBid = 2000;
+
+        const pacing = controller.computeBudgetPacingAdjustment(dailyBudget, spentBudget, currentHour, currentBid);
+        expect.equal(pacing.pacingStatus, "SPENDING_TOO_SLOW");
+        expect.equal(pacing.proposedBid > currentBid, true);
+        expect.equal(pacing.multiplier > 1.0, true);
+      });
+
+      test("F161-T08: Budget pacing automatically triggers PAUSE when daily budget is exhausted", () => {
+        const controller = new PidBiddingController();
+        const dailyBudget = 500000;
+        const spentBudget = 500000; // Đã cạn kiệt
+        const pacing = controller.computeBudgetPacingAdjustment(dailyBudget, spentBudget, 12, 1500);
+
+        expect.equal(pacing.action, "PAUSE");
+        expect.equal(pacing.proposedBid, 0);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // PART 2: Edmonds-Karp Maximum Flow Network for SPX Logistics (8 Tests)
+    // -----------------------------------------------------------------------
+    describe("Part 2: Edmonds-Karp SPX Maximum Flow (F161-T09 to F161-T16)", () => {
+      test("F161-T09: Adds logistics hubs and capacity-bounded routes successfully", () => {
+        const network = new EdmondsKarpMaxFlow();
+        network.addNode("HUB_HN", "Tổng kho Hà Nội", "source");
+        network.addNode("STATION_HD", "Bưu cục Hoàn Kiếm", "sink");
+        network.addEdge("HUB_HN", "STATION_HD", 500);
+
+        expect.equal(network.nodes.size, 2);
+        expect.equal(network.capacities.get("HUB_HN").get("STATION_HD"), 500);
+      });
+
+      test("F161-T10: Computes exact maximum flow for 4-node diamond network", () => {
+        // S -> A (10), S -> B (10)
+        // A -> T (10), B -> T (10), A -> B (5)
+        // Max Flow kỳ vọng = 20
+        const network = new EdmondsKarpMaxFlow();
+        network.addEdge("S", "A", 10);
+        network.addEdge("S", "B", 10);
+        network.addEdge("A", "B", 5);
+        network.addEdge("A", "T", 10);
+        network.addEdge("B", "T", 10);
+
+        const result = network.computeMaxFlow("S", "T");
+        expect.equal(result.maxFlow, 20);
+        expect.equal(result.totalPathsFound >= 2, true);
+      });
+
+      test("F161-T11: Parallel multi-path SPX network routes parcels up to aggregate capacity", () => {
+        const network = new ServerEdmondsKarp();
+        network.addEdge("KHO_TONG", "HUB_BAC", 1000);
+        network.addEdge("KHO_TONG", "HUB_NAM", 1200);
+        network.addEdge("HUB_BAC", "LAST_MILE", 800);
+        network.addEdge("HUB_NAM", "LAST_MILE", 900);
+
+        // Max Flow = min(1000, 800) + min(1200, 900) = 800 + 900 = 1700
+        const result = network.computeMaxFlow("KHO_TONG", "LAST_MILE");
+        expect.equal(result.maxFlow, 1700);
+      });
+
+      test("F161-T12: Max-Flow Min-Cut Theorem holds: Max Flow equals Min-Cut Capacity", () => {
+        const network = new EdmondsKarpMaxFlow();
+        network.addEdge("SOURCE", "H1", 300);
+        network.addEdge("SOURCE", "H2", 200);
+        network.addEdge("H1", "H2", 100);
+        network.addEdge("H1", "SINK", 200);
+        network.addEdge("H2", "SINK", 300);
+
+        const cutResult = network.findBottlenecks("SOURCE", "SINK");
+        expect.equal(cutResult.isMinCutVerified, true);
+        expect.equal(cutResult.maxFlow, cutResult.cutCapacity);
+      });
+
+      test("F161-T13: Identifies exact saturated bottleneck edges limiting SPX throughput", () => {
+        const network = new ServerEdmondsKarp();
+        network.addEdge("KHO", "HUB_A", 1000);
+        network.addEdge("HUB_A", "TRAM_PHAT", 300); // Nút thắt cổ chai hẹp chỉ 300
+
+        const cutResult = network.findBottlenecks("KHO", "TRAM_PHAT");
+        expect.equal(cutResult.bottleneckCount, 1);
+        expect.equal(cutResult.bottlenecks[0].from, "HUB_A");
+        expect.equal(cutResult.bottlenecks[0].to, "TRAM_PHAT");
+        expect.equal(cutResult.bottlenecks[0].capacity, 300);
+      });
+
+      test("F161-T14: Generates actionable recommendations for logistics capacity expansion", () => {
+        const network = new EdmondsKarpMaxFlow();
+        network.addEdge("HUB_HCM", "STATION_Q1", 250);
+
+        const cutResult = network.findBottlenecks("HUB_HCM", "STATION_Q1");
+        expect.equal(cutResult.bottlenecks[0].recommendation.includes("Tăng công suất"), true);
+      });
+
+      test("F161-T15: Safely throws error when source or sink does not exist in graph", () => {
+        const network = new EdmondsKarpMaxFlow();
+        network.addNode("A");
+        let hasError = false;
+        try {
+          network.computeMaxFlow("A", "NON_EXISTENT");
+        } catch (e) {
+          hasError = true;
+        }
+        expect.equal(hasError, true);
+      });
+
+      test("F161-T16: Residual capacity and edge utilization rate are correctly reported", () => {
+        const network = new ServerEdmondsKarp();
+        network.addEdge("A", "B", 100);
+        network.addEdge("B", "C", 50);
+
+        const flow = network.computeMaxFlow("A", "C");
+        const edgeAB = flow.edgeDetails.find(e => e.from === "A" && e.to === "B");
+        const edgeBC = flow.edgeDetails.find(e => e.from === "B" && e.to === "C");
+
+        expect.equal(edgeAB.flow, 50);
+        expect.equal(edgeAB.utilizationRate, 0.5);
+        expect.equal(edgeBC.isSaturated, true);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // PART 3: Perceptual Image Hash & Copyright Fraud Radar (8 Tests)
+    // -----------------------------------------------------------------------
+    describe("Part 3: Perceptual Image Hash & Copyright Radar (F161-T17 to F161-T24)", () => {
+      test("F161-T17: popcount32 counts active bits correctly using Brian Kernighan algorithm", () => {
+        expect.equal(PerceptualImageHash.popcount32(0), 0);
+        expect.equal(PerceptualImageHash.popcount32(1), 1);
+        expect.equal(PerceptualImageHash.popcount32(0b1011001), 4);
+        expect.equal(PerceptualImageHash.popcount32(0xFFFFFFFF >>> 0), 32);
+      });
+
+      test("F161-T18: Identical hash strings yield zero Hamming distance and 1.0 similarity", () => {
+        const hash = "a1b2c3d4e5f60718";
+        const dist = PerceptualImageHash.hammingDistance(hash, hash);
+        const sim = PerceptualImageHash.computeSimilarity(hash, hash);
+
+        expect.equal(dist, 0);
+        expect.equal(sim, 1.0);
+      });
+
+      test("F161-T19: Computes accurate Hamming distance and similarity for slight image differences", () => {
+        // Hash A: ...0000 (0x0)
+        // Hash B: ...000f (0xF: 4 bits 1)
+        const hashA = "0000000000000000";
+        const hashB = "000000000000000f";
+        const dist = ServerPerceptualHash.hammingDistance(hashA, hashB);
+        const sim = ServerPerceptualHash.computeSimilarity(hashA, hashB);
+
+        expect.equal(dist, 4);
+        expect.equal(sim, 0.9375); // (64 - 4) / 64 = 0.9375
+      });
+
+      test("F161-T20: Computes 16-char hex dHash from 8x9 luminance gradient matrix", () => {
+        // Ma trận 8x9: Cột sau luôn lớn hơn cột trước -> toàn bộ 64 bits = 1 -> Hex: ffffffffffffffff
+        const matrixAscending = Array.from({ length: 8 }, () => [10, 20, 30, 40, 50, 60, 70, 80, 90]);
+        const hashAllOnes = PerceptualImageHash.computeDHash(matrixAscending);
+        expect.equal(hashAllOnes, "ffffffffffffffff");
+
+        // Ma trận 8x9: Cột sau luôn nhỏ hơn cột trước -> toàn bộ 64 bits = 0 -> Hex: 0000000000000000
+        const matrixDescending = Array.from({ length: 8 }, () => [90, 80, 70, 60, 50, 40, 30, 20, 10]);
+        const hashAllZeros = PerceptualImageHash.computeDHash(matrixDescending);
+        expect.equal(hashAllZeros, "0000000000000000");
+      });
+
+      test("F161-T21: ImageHashIndex registers and finds near-duplicate images sorted by distance", () => {
+        const index = new ImageHashIndex();
+        index.registerImage({ imageId: "img_mall_1", productId: "p1", shopId: "shop_mall", isMall: true, hashHex: "0000000000000000" });
+        index.registerImage({ imageId: "img_other_2", productId: "p2", shopId: "shop_2", isMall: false, hashHex: "0000000000000003" }); // 2 bits diff
+        index.registerImage({ imageId: "img_far_3", productId: "p3", shopId: "shop_3", isMall: false, hashHex: "ffffffffffffffff" });   // 64 bits diff
+
+        const matches = index.findMatches("0000000000000001", 5); // 1 bit diff from img_mall_1, 1 bit diff from img_other_2
+        expect.equal(matches.length, 2);
+        expect.equal(matches[0].hammingDistance <= matches[1].hammingDistance, true);
+      });
+
+      test("F161-T22: Copyright radar flags takedown when third-party shop copies Shopee Mall image", () => {
+        const index = new ServerImageHashIndex();
+        index.registerImage({
+          imageId: "img_apple_mall",
+          productId: "prod_iphone_16",
+          shopId: "shop_apple_official",
+          isMall: true,
+          hashHex: "a1a2a3a4b1b2b3b4"
+        });
+
+        // Gian hàng rác sao chép ảnh đóng thêm watermark mờ (lệch 2 bit)
+        const audit = index.auditCopyrightInfringement({
+          shopId: "shop_fake_phone",
+          productId: "prod_fake_16",
+          hashHex: "a1a2a3a4b1b2b3b6" // Lệch đúng 1 bit
+        });
+
+        expect.equal(audit.isInfringing, true);
+        expect.equal(audit.riskLevel, "CRITICAL");
+        expect.equal(audit.actionRequired, "FLAG_FOR_TAKEDOWN");
+        expect.equal(audit.mallViolationsCount, 1);
+      });
+
+      test("F161-T23: Tri-role AI Copilots accurately respond to Phase 14 algorithm inquiries", () => {
+        // Admin Sentinel Copilot
+        const adminFlowRes = generateAdminCopilotResponse("Phân tích luồng cực đại Edmonds-Karp mạng lưới SPX", {});
+        expect.equal(adminFlowRes.tag, "LUỒNG CỰC ĐẠI EDMONDS-KARP");
+
+        const adminCopyrightRes = generateAdminCopilotResponse("Quét radar bản quyền ảnh vi phạm Shopee Mall bằng pHash", {});
+        expect.equal(adminCopyrightRes.tag, "RADAR BẢN QUYỀN HÌNH ẢNH");
+
+        // Seller ShopSmart Copilot
+        const sellerPidRes = generateSellerCopilotResponse("Cấu hình bộ điều khiển PID tối ưu giá thầu Shopee Ads", {});
+        expect.equal(sellerPidRes.tag, "ĐIỀU KHIỂN GIÁ THẦU PID");
+
+        const sellerCopyRes = generateSellerCopilotResponse("Kiểm tra bản quyền ảnh trước khi đăng sản phẩm", {});
+        expect.equal(sellerCopyRes.tag, "KIỂM TRA BẢN QUYỀN ẢNH");
+
+        // Buyer Shopping AI
+        const buyerFlowRes = generateAiChatResponse("Tại sao SPX không bị nghẽn giao hàng mùa sale");
+        expect.equal(buyerFlowRes.intent, "SPX_MAX_FLOW_LOGISTICS");
+      });
+
+      test("F161-T24: E2E Lifecycle: Dynamic PID Bidding -> Copyright Verification -> SPX Max Flow Dispatch", () => {
+        // Step 1: Seller optimizes Shopee Ads CPC bidding with PID controller
+        const pid = new PidBiddingController({ targetRoas: 3.5, kp: 0.5 });
+        const bidResult = pid.computeBidAdjustment(4.2, 2500);
+        expect.equal(bidResult.action, "INCREASE");
+        expect.equal(bidResult.proposedBid > 2500, true);
+
+        // Step 2: Upload new product image and verify copyright safety
+        const copyrightIndex = new ImageHashIndex();
+        copyrightIndex.registerImage({
+          imageId: "img_mall_original",
+          productId: "mall_macbook",
+          shopId: "apple_store",
+          isMall: true,
+          hashHex: "12345678abcdef01"
+        });
+        const uploadAudit = copyrightIndex.auditCopyrightInfringement({
+          shopId: "my_shop",
+          productId: "my_laptop",
+          hashHex: "8888888877777777" // Ảnh độc lập không trùng
+        });
+        expect.equal(uploadAudit.isInfringing, false);
+        expect.equal(uploadAudit.actionRequired, "ALLOW");
+
+        // Step 3: Orders generated from ad -> dispatch via SPX Network with Max Flow
+        const spxNetwork = new EdmondsKarpMaxFlow();
+        spxNetwork.addEdge("KHO_SHOP", "HUB_TRUNG_CHUYEN", 500);
+        spxNetwork.addEdge("HUB_TRUNG_CHUYEN", "TRAM_PHAT_BUYER", 400);
+
+        const dispatchFlow = spxNetwork.computeMaxFlow("KHO_SHOP", "TRAM_PHAT_BUYER");
+        expect.equal(dispatchFlow.maxFlow, 400);
+
+        const bottlenecks = spxNetwork.findBottlenecks("KHO_SHOP", "TRAM_PHAT_BUYER");
+        expect.equal(bottlenecks.bottleneckCount, 1);
+        expect.equal(bottlenecks.bottlenecks[0].to, "TRAM_PHAT_BUYER");
+      });
+    });
+  });
 });
+
 
 
 

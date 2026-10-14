@@ -136,7 +136,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 4. Radar phát hiện gian lận & Người mua bất thường (Fraud Radar / Buyer Abuse)
-  if (!/sybil|dsu|disjoint set|lsh|minhash|catalog clone|sao chép catalog/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
+  if (!/sybil|dsu|disjoint set|lsh|minhash|catalog clone|sao chép catalog|bản quyền ảnh|phash|dhash|hamming/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
     const anomalyCount = fraudAnomaliesCount || (fraudData?.criticalCount ?? 0) || (fraudData?.mediumCount ?? 1);
     return {
       text: `🚨 **RADAR PHÁT HIỆN GIAN LẬN TOÀN SÀN (AI FRAUD GUARD)**:
@@ -875,7 +875,48 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
-  // 33. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
+  // 33. Luồng Cực Đại Mạng Lưới SPX & Nút Thắt Cổ Chai Min-Cut (Phase 14 - Feature 161)
+  if (/edmonds-karp|luồng cực đại|max flow|min-cut|nút thắt cổ chai|tắc nghẽn hub|năng lực vận chuyển spx|thông lượng spx/i.test(raw)) {
+    return {
+      text: `🚛 **PHÂN TÍCH THÔNG LƯỢNG MẠNG LƯỚI GIAO VẬN SPX BẰNG EDMONDS-KARP (MAX-FLOW MIN-CUT)**:
+- **Nguyên lý luồng cực đại (Edmonds-Karp)**:
+  - Sử dụng thuật toán tìm kiếm theo chiều rộng (BFS) trên đồ thị thặng dư để tìm đường tăng luồng ngắn nhất trong thời gian $O(V \\cdot E^2)$.
+  - Tự động tính toán tổng số kiện hàng tối đa/giờ có thể luân chuyển từ kho xuất hàng qua các trạm trung chuyển (Sorting Hubs) đến tay người mua trong ngày Siêu Sale.
+- **Định lý Lát cắt hẹp nhất (Min-Cut Bottleneck Detection)**:
+  - Xác định chính xác các cung đường đạt 100% tải trọng gây tắc nghẽn luồng hàng toàn mạng lưới.
+  - Tự động kiến nghị Admin: "Tăng công suất xe tải/bưu tá thêm 30-50% cho tuyến xung yếu để giải phóng thông lượng hệ thống".`,
+      type: 'logistics',
+      tag: 'LUỒNG CỰC ĐẠI EDMONDS-KARP',
+      suggestions: [
+        'Định tuyến chuỗi cung ứng SPX',
+        'Tối ưu thể tích thùng carton',
+        'Điều phối bưu tá Hungarian'
+      ]
+    };
+  }
+
+  // 34. Thanh Tra Vi Phạm Bản Quyền Ảnh & Sao Chép Shopee Mall (Phase 14 - Feature 161)
+  if (/bản quyền ảnh|sao chép ảnh|perceptual hash|phash|dhash|khoảng cách hamming|ăn cắp ảnh mall|trùng lặp hình ảnh|watermark gian lận/i.test(raw)) {
+    return {
+      text: `🛡️ **RADAR THANH TRA BẢN QUYỀN HÌNH ẢNH & SAO CHÉP MALL BẰNG PHASH (64-BIT DHASH)**:
+- **Cơ chế băm cảm nhận Perceptual Hash (dHash)**:
+  - Trích xuất ma trận gradient độ sáng $8 \\times 9$ thành chuỗi băm quang học 64-bit (16 ký tự Hex).
+  - Bất biến trước các thao tác nén JPEG, đổi độ phân giải, đổi tông màu nhẹ hoặc chèn mờ watermark.
+- **Đo lường bằng Khoảng cách Hamming ($D_H$)**:
+  - $D_H = 0$: Trùng khớp tuyệt đối $100\\%$.
+  - $1 \\le D_H \\le 5$: Trùng lặp cảm nhận $\\ge 92.2\\%$ (ảnh chụp lại hoặc chèn watermark).
+- **Hành động xử lý tự động**: Khi phát hiện gian hàng thường lấy ảnh của Shopee Mall ($D_H \\le 5$), hệ thống tự động gắn nhãn \`CRITICAL_COPYRIGHT_INFRINGEMENT\` và kiến nghị Admin hạ gỡ sản phẩm ngay lập tức (\`FLAG_FOR_TAKEDOWN\`).`,
+      type: 'security',
+      tag: 'RADAR BẢN QUYỀN HÌNH ẢNH',
+      suggestions: [
+        'Bảo vệ catalog LSH MinHash',
+        'Quét radar tài khoản gian lận',
+        'Đánh giá Trust Score và kỷ luật shop'
+      ]
+    };
+  }
+
+  // 35. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
       text: `🤖 **CƠ CHẾ HOẠT ĐỘNG CỦA ADMIN SENTINEL COPILOT (MINH BẠCH AI & DỮ LIỆU)**:

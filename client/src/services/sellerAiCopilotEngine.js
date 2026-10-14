@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (!/gsp|quality score|điểm chất lượng|ad rank/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -439,6 +439,42 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Lộ trình vận chuyển SPX',
         'Xả kho tồn bãi & giá sàn',
         'Vận hành đơn hàng'
+      ]
+    };
+  }
+
+  // 22. Tối Ưu Giá Thầu Tự Động Bằng Bộ Điều Khiển PID (Phase 14 - Feature 161)
+  if (/pid|bộ điều khiển pid|điều chỉnh giá thầu pid|pacing ngân sách|tốc độ tiêu ngân sách|anti-windup|tự động chỉnh bid/i.test(raw)) {
+    return {
+      text: `🎯 **BỘ ĐIỀU KHIỂN GIÁ THẦU TỰ ĐỘNG PID CONTROLLER (${currentShop.name})**:
+- **Cơ chế điều khiển hồi tiếp vi tích phân tỉ lệ**:
+  - **Khâu Tỉ lệ ($P$)**: Phản ứng tức thì khi ROAS thực tế lệch khỏi mục tiêu (VD: Mục tiêu ROAS 3.5x).
+  - **Khâu Tích phân ($I$) & Anti-Windup**: Bù đắp lưu lượng khi sáng sớm vắng khách, khóa giới hạn chống tràn tích lũy sai số.
+  - **Khâu Vi phân ($D$)**: Dự báo biến động đột biến trong các khung giờ vàng Flash Sale (12h, 20h) để không bị vọt lố (Overshoot).
+- **Budget Pacing thông minh**: Tự động giảm giá thầu nếu ngân sách ngày bị tiêu quá nhanh (>25% so với tiến độ giờ) và tăng giá thầu khi tiêu quá chậm để gom đủ khách mua.`,
+      type: 'marketing',
+      tag: 'ĐIỀU KHIỂN GIÁ THẦU PID',
+      suggestions: [
+        'Đánh giá hiệu quả Shopee Ads',
+        'Phân tích biên lợi nhuận P&L',
+        'Kiểm tra bản quyền ảnh sản phẩm'
+      ]
+    };
+  }
+
+  // 23. Kiểm Tra Bản Quyền Hình Ảnh & Chống Khóa Shop (Phase 14 - Feature 161)
+  if (/bản quyền ảnh|sao chép ảnh|perceptual hash|phash|dhash|ăn cắp ảnh|trùng ảnh shop khác|kiểm tra ảnh trước khi đăng/i.test(raw)) {
+    return {
+      text: `🖼️ **KIỂM TRA BẢN QUYỀN HÌNH ẢNH SẢN PHẨM (PERCEPTUAL DHASH) (${currentShop.name})**:
+- **Bảo vệ gian hàng**: Hệ thống sử dụng thuật toán băm cảm nhận dHash 64-bit và khoảng cách Hamming ($D_H$).
+- **Nguy cơ bị khóa**: Nếu sản phẩm mới tải lên có hình ảnh trùng lặp ($D_H \\le 5$) với các gian hàng Shopee Mall hoặc thương hiệu chính hãng, sản phẩm sẽ bị hệ thống gắn cờ vi phạm bản quyền (\`FLAG_FOR_TAKEDOWN\`) và có thể bị tính điểm Sao Quả Tạ.
+- **Lời khuyên**: Hãy tự chụp ảnh thật của shop, gắn logo mờ chính chủ của gian hàng để vừa tăng tính tin cậy vừa tránh bị cảnh báo bản quyền tự động.`,
+      type: 'security',
+      tag: 'KIỂM TRA BẢN QUYỀN ẢNH',
+      suggestions: [
+        'Vận hành đơn hàng',
+        'Cảnh báo sản phẩm sắp hết hàng',
+        'Điều khiển giá thầu PID'
       ]
     };
   }
