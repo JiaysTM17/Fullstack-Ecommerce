@@ -753,7 +753,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 23. Tìm Kiếm Ngữ Nghĩa & Đề Xuất Đa Tầng HNSW (SEMANTIC_SEARCH_HNSW_ASSIST)
-  if (!/pq|product quantiz|hopcroft|tuyến không giao cắt/i.test(lower) && /hnsw|semantic search|tìm kiếm ngữ nghĩa|sản phẩm tương tự|re-ranking/i.test(lower)) {
+  if (!/pq|product quantiz|hopcroft|tuyến không giao cắt|multi-probe|chùm tia|cosine lsh/i.test(lower) && /hnsw|semantic search|tìm kiếm ngữ nghĩa|sản phẩm tương tự|re-ranking/i.test(lower)) {
     return {
       intent: 'SEMANTIC_SEARCH_HNSW_ASSIST',
       replyText: `**[TÌM KIẾM THÔNG MINH] HỆ THỐNG GỢI Ý NGỮ NGHĨA HNSW MULTI-LAYER:**\n\n• **Hiểu ý định tự nhiên**: Bạn có thể tìm kiếm bằng ngôn ngữ đời thường (ví dụ: "đồ đi biển", "củ sạc du lịch nhỏ gọn"), hệ thống tự động ánh xạ vector ngữ nghĩa để tìm ra món đồ ưng ý nhất.\n• **Tái xếp hạng ưu tiên chất lượng**: Tự động đưa các sản phẩm có đánh giá cao $\\ge 4.8$ sao, tỷ lệ phản hồi nhanh và gian hàng Mall lên đầu trang để bạn mua sắm an tâm nhất!`,
@@ -884,6 +884,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'PUSH_RELABEL_CUCKOO_PARETO_ASSIST',
       replyText: `**[HẠ TẦNG PUSH-RELABEL, BỘ ĐỆM CUCKOO STASH & GỢI Ý ĐA MỤC TIÊU PARETO]:**\n\n• **Hạ tầng Flash Sale không nghẽn Push-Relabel**: Thuật toán Preflow-Push điều phối lưu lượng thanh toán thông suốt, đảm bảo bạn săn Deal sốc 11.11 mượt mà không lo bị lỗi mạng!\n• **Tra cứu giá tức thì Cuckoo Stash**: Giá bán và tồn kho các sản phẩm Hot được phản hồi ngay trong $O(1)$ mili-giây, giúp bạn xem và chốt đơn ngay không cần tải lại trang.\n• **Gợi ý chuẩn xác Pareto Front 1**: AI tự động lọc ra các sản phẩm tốt nhất toàn diện (giá rẻ nhất, đánh giá cao nhất và giao nhanh nhất) để bạn mua sắm thông thái nhất!`,
       suggestions: ['Săn Deal Flash Sale mượt mà', 'Xem sản phẩm Pareto tốt nhất', 'Kiểm tra giỏ hàng'],
+    };
+  }
+
+  // 38. Radar Bản Quyền Cosine LSH, Tìm Kiếm Ảnh HNSW Multi-Probe & Giá Động Double Q-Learning (COSINE_HNSW_DOUBLE_Q_ASSIST)
+  if (/chống sao chép cosine lsh|cosine lsh|tìm kiếm ảnh hnsw multi-probe|hnsw multi-probe|giá flash sale double q|double q-learning/i.test(lower)) {
+    return {
+      intent: 'COSINE_HNSW_DOUBLE_Q_ASSIST',
+      replyText: `**[TRỢ LÝ MUA SẮM THÔNG MINH - BẢO VỆ BẢN QUYỀN, TÌM KIẾM ẢNH & SĂN GIÁ DEAL SỐC]:**\n\n• **An tâm mua sắm chuẩn gốc với Cosine LSH**: Sàn quét và loại bỏ các sản phẩm giả mạo, nhái catalog để bạn luôn mua đúng hàng chính hãng chất lượng cao.\n• **Tìm kiếm hình ảnh thông minh HNSW Multi-Probe**: Chụp hoặc tải ảnh món đồ bạn yêu thích, hệ thống dò tìm chùm tia vector sẽ tìm đúng sản phẩm trong chớp mắt với độ chính xác cao.\n• **Giá sốc Flash Sale tối ưu từ Double Q-Learning**: Trợ lý AI định giá động mang đến mức chiết khấu cực sâu cho bạn mà shop vẫn duy trì khuyến mãi bền vững!`,
+      suggestions: ['Tìm kiếm bằng hình ảnh', 'Săn giá sốc Flash Sale', 'Xem sản phẩm chính hãng'],
     };
   }
 

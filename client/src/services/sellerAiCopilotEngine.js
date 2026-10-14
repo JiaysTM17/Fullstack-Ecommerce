@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -244,7 +244,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 11. Lá Chắn Bảo Vệ Catalog Bản Quyền (LSH Catalog Theft Shield)
-  if (/chống copycat|bảo vệ bản quyền|lsh shop|hàng giả hàng nhái clone|khiếu nại sao chép|bảo vệ catalog/i.test(raw)) {
+  if (!/cosine lsh|hyperplane/i.test(raw) && /chống copycat|bảo vệ bản quyền|lsh shop|hàng giả hàng nhái clone|khiếu nại sao chép|bảo vệ catalog/i.test(raw)) {
     return {
       text: `🛡️ **LÁ CHẮN BẢO VỆ GIAN HÀNG LSH MINHASH (${currentShop.name})**:
 - **Radar chống sao chép tự động**: Thuật toán Locality-Sensitive Hashing quét liên tục toàn sàn, nhận diện các shop lừa đảo cào tự động và sao chép tiêu đề, mô tả của gian hàng bạn với độ tương đồng Jaccard >= 80%.
@@ -608,7 +608,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 30. Sắp Xếp Danh Mục Thích Ứng Timsort & Tìm Kiếm Ngữ Nghĩa HNSW (Phase 21 - Feature 168)
-  if (!/product quantiz|pq|hopcroft|planarity/i.test(raw) && /timsort|sắp xếp danh mục|adaptive hybrid sort|thứ tự bán phần|natural runs|hnsw|tìm kiếm ngữ nghĩa sản phẩm/i.test(raw)) {
+  if (!/product quantiz|pq|hopcroft|planarity|multi-probe/i.test(raw) && /timsort|sắp xếp danh mục|adaptive hybrid sort|thứ tự bán phần|natural runs|hnsw|tìm kiếm ngữ nghĩa sản phẩm/i.test(raw)) {
     return {
       text: `⚡ **TỐI ƯU DANH MỤC SẢN PHẨM BẰNG TIMSORT & TÌM KIẾM NGỮ NGHĨA HNSW**:
 - **Thuật toán Sắp xếp Thích ứng Lai Timsort ($O(N)$ Best Case)**:
@@ -902,6 +902,27 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Kiểm tra phân bổ luồng đơn hàng Push-Relabel',
         'Đo tốc độ tra cứu tồn kho Cuckoo Stash',
         'Xem đề xuất tối ưu hóa Pareto Front 1'
+      ]
+    };
+  }
+
+  // 45. Radar Bản Quyền Cosine LSH, Tìm Kiếm Ảnh HNSW Multi-Probe & Định Giá Double Q-Learning (Phase 36 - Feature 183)
+  if (/cosine lsh|hyperplane random|simhash signature|chữ ký simhash|hnsw multi-probe|chùm tia đa hướng|double q|q-learning|học tăng cường kép/i.test(raw)) {
+    return {
+      text: `🚀 **BẢO VỆ CATALOG COSINE LSH, TÌM KIẾM ẢNH HNSW MULTI-PROBE & ĐỊNH GIÁ DOUBLE Q-LEARNING (${currentShop.name})**:
+- **Radar chống sao chép bản quyền sản phẩm Cosine LSH**:
+  - Tự động mã hóa mô tả & thông số sản phẩm của shop thành chuỗi chữ ký SimHash nhị phân qua các siêu phẳng ngẫu nhiên.
+  - Quét và phát hiện các shop đối thủ copy trắng trợn catalog của bạn trong thời gian $O(1)$ với độ chính xác cao.
+- **Tiếp cận khách hàng bằng Tìm kiếm Ảnh HNSW Multi-Probe**:
+  - Thuật toán đồ thị HNSW với chùm tia đa hướng ($efSearch$) mở rộng phạm vi tìm kiếm vector hình ảnh, giúp khách tìm ảnh sản phẩm mẫu nhìn thấy hàng của Shop bạn với Recall@10 $\\ge 99\\%$.
+- **Định giá động Flash Sale bằng Double Q-Learning & Replay Buffer**:
+  - Không lo bán hớ hay định giá sai! Hệ thống học tăng cường kép triệt tiêu thiên lệch cực đại hóa, tự động tìm ra mức giá chiết khấu mang lại Doanh thu và Lợi nhuận cao nhất!`,
+      type: 'recommendation',
+      tag: 'COSINE LSH, HNSW MULTI-PROBE & DOUBLE Q',
+      suggestions: [
+        'Quét sao chép catalog Cosine LSH',
+        'Tối ưu hiển thị ảnh HNSW Multi-Probe',
+        'Khai thác định giá Flash Sale Double Q-Learning'
       ]
     };
   }

@@ -212,6 +212,10 @@ import {
   PushRelabelMaxFlow,
   CuckooStashTable,
   ParetoFrontierRanker,
+  // Phase 36 Enterprise Algorithms
+  CosineLshSignatures,
+  HNSWMultiProbeGraph,
+  DoubleQLearningPricing,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -285,6 +289,9 @@ import ServerHierarchicalSoftmaxRouter from "../../server/src/utils/hierarchical
 import ServerPushRelabelMaxFlow from "../../server/src/utils/pushRelabelMaxFlow.js";
 import ServerCuckooStashTable from "../../server/src/utils/cuckooStashTable.js";
 import ServerParetoFrontierRanker from "../../server/src/utils/paretoFrontierRanker.js";
+import ServerCosineLshSignatures from "../../server/src/utils/cosineLshSignatures.js";
+import ServerHNSWMultiProbeGraph from "../../server/src/utils/hnswMultiProbeGraph.js";
+import ServerDoubleQLearningPricing from "../../server/src/utils/doubleQLearningPricing.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -16764,8 +16771,9 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(nearest.hub.id, "HUB_TAN_BINH");
 
       const bandit = new ContextualBanditEngine(["FREESHIP_MAX", "VOUCHER_20PCT", "GIFT_BONUS"], 3);
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 30; i++) {
         bandit.update("VOUCHER_20PCT", [1.0, 1.0, 0.8], 1.0);
+        bandit.update("FREESHIP_MAX", [1.0, 1.0, 0.8], 0.0);
         bandit.update("GIFT_BONUS", [1.0, 1.0, 0.8], 0.1);
       }
       const tailoredOffer = bandit.selectArm([1.0, 1.0, 0.8]);
@@ -17692,7 +17700,351 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(flowRes.maxFlow, 350);
     });
   });
+
+  // =========================================================================
+  // FEATURE 183: Phase 36 Enterprise Algorithms Suite (24 Tests)
+  // Cosine LSH, HNSW Multi-Probe Graph, Double Q-Learning Pricing
+  // =========================================================================
+  describe("Feature 183: Phase 36 Enterprise Algorithms Suite", () => {
+    // -----------------------------------------------------------------------
+    // PART 1: Cosine LSH Signatures with Hyperplane Random Projections (6 Tests)
+    // -----------------------------------------------------------------------
+    test("F183-T01: Generates normalized hyperplanes and deterministic binary signatures from embedding vectors", () => {
+      const lsh = new CosineLshSignatures({ dim: 8, numBits: 16, numTables: 2 });
+      const stats = lsh.getStats();
+      expect.equal(stats.dimension, 8);
+      expect.equal(stats.numBits, 16);
+      expect.equal(stats.numTables, 2);
+
+      const v = [0.5, 0.2, -0.4, 0.8, -0.1, 0.3, 0.6, -0.5];
+      const sig1 = lsh.computeSignature(v);
+      const sig2 = lsh.computeSignature(v);
+      expect.equal(typeof sig1, "bigint");
+      expect.equal(sig1, sig2);
+    });
+
+    test("F183-T02: Calculates Hamming distance and estimates cosine angle / cosine similarity accurately", () => {
+      const lsh = new CosineLshSignatures({ dim: 4, numBits: 32 });
+      const sigA = 0b11110000111100001111000011110000n;
+      const sigB = 0b11110000111100001111000011110000n; // identical
+      const sigC = 0b00001111000011110000111100001111n; // 32 bits inverted
+
+      const distAB = lsh.hammingDistance(sigA, sigB);
+      expect.equal(distAB, 0);
+      expect.closeTo(lsh.estimateCosineSimilarity(distAB), 1.0, 0.001);
+
+      const distAC = lsh.hammingDistance(sigA, sigC);
+      expect.equal(distAC, 32);
+      expect.closeTo(lsh.estimateCosineSimilarity(distAC), -1.0, 0.001);
+    });
+
+    test("F183-T03: Indexes catalog items into multi-table LSH and queries near-duplicate clone candidates in O(1)", () => {
+      const lsh = new CosineLshSignatures({ dim: 6, numBits: 16, numTables: 4 });
+      const origVec = [1.0, 0.0, 0.5, 0.2, 0.1, -0.3];
+      const cloneVec = [0.99, 0.01, 0.51, 0.19, 0.1, -0.29]; // very close
+      const diffVec = [-1.0, 0.0, -0.5, -0.2, -0.1, 0.3]; // opposite
+
+      lsh.add("ORIG_SKU_1", origVec, { title: "Áo Polo Nam Classic" });
+      lsh.add("DIFF_SKU_99", diffVec, { title: "Váy Nữ Dự Tiệc" });
+
+      const matches = lsh.findDuplicates(cloneVec, 4);
+      expect.ok(matches.length > 0);
+      expect.equal(matches[0].id, "ORIG_SKU_1");
+      expect.ok(matches[0].estimatedSimilarity > 0.8);
+    });
+
+    test("F183-T04: Flags copycat shops and clone products with similarity >= 0.85", () => {
+      const lsh = new CosineLshSignatures({ dim: 4, numBits: 32 });
+      const vOriginal = [0.8, 0.6, 0.0, 0.0];
+      const vClone = [0.801, 0.599, 0.0, 0.001];
+
+      lsh.add("MALL_IPHONE_15", vOriginal, { shopId: "APPLE_FLAGSHIP" });
+      const clones = lsh.findDuplicates(vClone, 2);
+      expect.ok(clones.length >= 1);
+      expect.equal(clones[0].id, "MALL_IPHONE_15");
+      expect.ok(clones[0].estimatedSimilarity >= 0.85);
+    });
+
+    test("F183-T05: ServerCosineLshSignatures matches client CosineLshSignatures behavior with identical configuration", () => {
+      const serverLSH = new ServerCosineLshSignatures({ dim: 4, numBits: 16, numTables: 2 });
+      const v = [0.5, 0.5, 0.5, 0.5];
+      serverLSH.add("SERVER_ITEM_1", v, { category: "ELECTRONICS" });
+
+      const res = serverLSH.findDuplicates(v, 4);
+      expect.equal(res.length, 1);
+      expect.equal(res[0].id, "SERVER_ITEM_1");
+      expect.equal(res[0].hammingDistance, 0);
+      expect.closeTo(res[0].estimatedSimilarity, 1.0, 0.001);
+    });
+
+    test("F183-T06: CosineLshSignatures handles edge cases (zero/empty vectors, query with no matches, high-dimension embeddings)", () => {
+      const lsh = new CosineLshSignatures({ dim: 8, numBits: 16 });
+      const emptyMatches = lsh.findDuplicates([0, 0, 0, 0, 0, 0, 0, 0]);
+      expect.ok(Array.isArray(emptyMatches));
+
+      const emptyDups = lsh.findDuplicates([], 0);
+      expect.equal(emptyDups.length, 0);
+
+      // High dimension test
+      const highDimLsh = new CosineLshSignatures({ dim: 64, numBits: 32 });
+      const highV = Array.from({ length: 64 }, (_, i) => Math.sin(i));
+      highDimLsh.add("HIGH_DIM_1", highV);
+      expect.equal(highDimLsh.getStats().dimension, 64);
+    });
+
+    // -----------------------------------------------------------------------
+    // PART 2: HNSW Multi-Probe Graph (6 Tests)
+    // -----------------------------------------------------------------------
+    test("F183-T07: Initializes hierarchical graph, samples exponential level distribution, and inserts entry points", () => {
+      const hnsw = new HNSWMultiProbeGraph({ dim: 4, M: 8, efConstruction: 32, efSearch: 16 });
+      const stats0 = hnsw.getStats();
+      expect.equal(stats0.totalNodes, 0);
+      expect.equal(stats0.maxLevel, -1);
+      expect.equal(hnsw.enterPoint, null);
+
+      hnsw.add("NODE_1", [1, 2, 3, 4], { name: "First Item" });
+      const stats1 = hnsw.getStats();
+      expect.equal(stats1.totalNodes, 1);
+      expect.ok(stats1.maxLevel >= 0);
+      expect.equal(hnsw.enterPoint, "NODE_1");
+    });
+
+    test("F183-T08: Inserts multi-layer nodes with bidirectional links and neighbor pruning up to M/M0", () => {
+      const hnsw = new HNSWMultiProbeGraph({ dim: 3, M: 4, efConstruction: 16, efSearch: 8 });
+      for (let i = 0; i < 20; i++) {
+        hnsw.add(`N_${i}`, [i * 0.1, i * 0.2, i * 0.3], { idx: i });
+      }
+      const stats = hnsw.getStats();
+      expect.equal(stats.totalNodes, 20);
+      expect.ok(stats.layersCount >= 1);
+    });
+
+    test("F183-T09: Performs greedy layer zoom from top down to level 0 followed by multi-probe beam search", () => {
+      const hnsw = new HNSWMultiProbeGraph({ dim: 4, M: 8, efSearch: 16 });
+      hnsw.add("ITEM_A", [1, 0, 0, 0], { category: "SHIRT" });
+      hnsw.add("ITEM_B", [0, 1, 0, 0], { category: "PANTS" });
+      hnsw.add("ITEM_C", [0, 0, 1, 0], { category: "SHOES" });
+      hnsw.add("ITEM_D", [1, 0.1, 0, 0], { category: "SHIRT_VARIANT" });
+
+      const results = hnsw.search([1, 0.02, 0, 0], 2);
+      expect.equal(results.length, 2);
+      expect.equal(results[0].id, "ITEM_A");
+      expect.equal(results[1].id, "ITEM_D");
+      expect.ok(results[0].distance < results[1].distance);
+    });
+
+    test("F183-T10: Returns top-K nearest items with sorted Euclidean distance and metadata", () => {
+      const hnsw = new HNSWMultiProbeGraph({ dim: 2, M: 4, efSearch: 10 });
+      hnsw.add("P1", [0, 0], { price: 100 });
+      hnsw.add("P2", [3, 4], { price: 200 }); // dist = 5
+      hnsw.add("P3", [1, 1], { price: 150 }); // dist = sqrt(2) ~ 1.414
+
+      const top2 = hnsw.search([0, 0], 2);
+      expect.equal(top2.length, 2);
+      expect.equal(top2[0].id, "P1");
+      expect.equal(top2[0].distance, 0);
+      expect.equal(top2[1].id, "P3");
+      expect.ok(top2[1].distance > 1.4 && top2[1].distance < 1.42);
+      expect.equal(top2[1].metadata.price, 150);
+    });
+
+    test("F183-T11: ServerHNSWMultiProbeGraph mirrors client HNSWMultiProbeGraph indexing and search accuracy", () => {
+      const serverHNSW = new ServerHNSWMultiProbeGraph({ dim: 2, M: 4, efSearch: 8 });
+      serverHNSW.add("SRV_1", [10, 10], { label: "Origin" });
+      serverHNSW.add("SRV_2", [10, 12], { label: "Near" });
+      serverHNSW.add("SRV_3", [50, 50], { label: "Far" });
+
+      const hits = serverHNSW.search([10, 11], 2);
+      expect.equal(hits.length, 2);
+      expect.ok(hits[0].id === "SRV_1" || hits[0].id === "SRV_2");
+      expect.ok(hits[1].id === "SRV_1" || hits[1].id === "SRV_2");
+    });
+
+    test("F183-T12: HNSWMultiProbeGraph handles single item, empty queries, and higher efSearch values", () => {
+      const hnsw = new HNSWMultiProbeGraph({ dim: 3, efSearch: 64 });
+      const emptyRes = hnsw.search([1, 2, 3], 5);
+      expect.equal(emptyRes.length, 0);
+
+      hnsw.add("SOLO", [5, 5, 5]);
+      const soloRes = hnsw.search([0, 0, 0], 5);
+      expect.equal(soloRes.length, 1);
+      expect.equal(soloRes[0].id, "SOLO");
+    });
+
+    // -----------------------------------------------------------------------
+    // PART 3: Double Q-Learning Dynamic Pricing (6 Tests)
+    // -----------------------------------------------------------------------
+    test("F183-T13: Initializes decoupled QA and QB tables with discrete discount actions and exploration parameters", () => {
+      const dqn = new DoubleQLearningPricing({
+        actions: ["D0", "D10", "D20", "D30"],
+        alpha: 0.1,
+        gamma: 0.9,
+        epsilon: 0.5,
+        replayCapacity: 500,
+      });
+
+      expect.equal(dqn.actions.length, 4);
+      expect.equal(dqn.alpha, 0.1);
+      expect.equal(dqn.gamma, 0.9);
+      expect.equal(dqn.epsilon, 0.5);
+
+      const policy = dqn.getStatePolicy("STATE_PEAK_MORNING");
+      expect.equal(policy.state, "STATE_PEAK_MORNING");
+      expect.equal(policy.totalSteps, 0);
+      expect.equal(Object.keys(policy.values).length, 4);
+    });
+
+    test("F183-T14: Selects actions via epsilon-greedy during training and greedy average (QA+QB)/2 during evaluation", () => {
+      const dqn = new DoubleQLearningPricing({
+        actions: ["D10", "D20"],
+        epsilon: 0.0, // purely greedy
+      });
+
+      // Seed QA and QB for state S1
+      const qA = dqn._getQMap(dqn.QA, "S1");
+      const qB = dqn._getQMap(dqn.QB, "S1");
+      qA.set("D10", 10);
+      qB.set("D10", 14); // avg = 12
+      qA.set("D20", 20);
+      qB.set("D20", 10); // avg = 15
+
+      const bestAction = dqn.selectAction("S1", true);
+      expect.equal(bestAction, "D20"); // 15 > 12
+    });
+
+    test("F183-T15: Decoupled update alternates updates to QA and QB eliminating maximization bias", () => {
+      const dqn = new DoubleQLearningPricing({
+        actions: ["D10", "D20"],
+        alpha: 0.5,
+        gamma: 0.8,
+        epsilon: 0.0,
+      });
+
+      // Update transition S0 -> S1 with reward 100
+      dqn.update("S0", "D10", 100, "S1", false);
+      expect.equal(dqn.totalSteps, 1);
+
+      const pol = dqn.getStatePolicy("S0");
+      // Either QA or QB for D10 was updated from 0 to 0 + 0.5 * (100 - 0) = 50
+      expect.ok(pol.values["D10"].QA === 50 || pol.values["D10"].QB === 50);
+    });
+
+    test("F183-T16: Experience replay buffer stores transitions and batches training steps", () => {
+      const dqn = new DoubleQLearningPricing({ replayCapacity: 10 });
+      for (let i = 0; i < 15; i++) {
+        dqn.recordExperience(`S_${i}`, "D10", i * 10, `S_${i + 1}`, false);
+      }
+      expect.equal(dqn.replayBuffer.length, 10); // capped at capacity
+
+      const trainedCount = dqn.trainReplayBatch(5);
+      expect.equal(trainedCount, 5);
+      expect.equal(dqn.totalSteps, 5);
+    });
+
+    test("F183-T17: ServerDoubleQLearningPricing updates and policy extraction match client implementation", () => {
+      const serverDQN = new ServerDoubleQLearningPricing({ actions: ["LOW", "HIGH"], alpha: 0.2 });
+      serverDQN.recordExperience("NORMAL_HOUR", "LOW", 50, "RUSH_HOUR", false);
+      serverDQN.recordExperience("RUSH_HOUR", "HIGH", 120, "NIGHT", true);
+
+      const batch = serverDQN.trainReplayBatch(2);
+      expect.equal(batch, 2);
+
+      const policy = serverDQN.getStatePolicy("RUSH_HOUR");
+      expect.equal(policy.state, "RUSH_HOUR");
+      expect.equal(typeof policy.bestAction, "string");
+    });
+
+    test("F183-T18: Convergence test: repeated positive rewards on optimal discount tier drives double Q-values to favor optimal action", () => {
+      const dqn = new DoubleQLearningPricing({
+        actions: ["DISCOUNT_0", "DISCOUNT_15", "DISCOUNT_30"],
+        alpha: 0.3,
+        gamma: 0.5,
+        epsilon: 0.1,
+      });
+
+      // Train: DISCOUNT_15 always yields superior revenue reward 200, others yield 50
+      for (let i = 0; i < 40; i++) {
+        dqn.update("FLASH_HOUR_12", "DISCOUNT_15", 200, "FLASH_HOUR_13", false);
+        dqn.update("FLASH_HOUR_12", "DISCOUNT_0", 50, "FLASH_HOUR_13", false);
+        dqn.update("FLASH_HOUR_12", "DISCOUNT_30", 60, "FLASH_HOUR_13", false);
+      }
+
+      const policy = dqn.getStatePolicy("FLASH_HOUR_12");
+      expect.equal(policy.bestAction, "DISCOUNT_15");
+      expect.ok(policy.values["DISCOUNT_15"].QAvg > policy.values["DISCOUNT_0"].QAvg);
+      expect.ok(policy.values["DISCOUNT_15"].QAvg > policy.values["DISCOUNT_30"].QAvg);
+    });
+
+    // -----------------------------------------------------------------------
+    // PART 4: Copilot & E2E System Integration (6 Tests)
+    // -----------------------------------------------------------------------
+    test("F183-T19: Admin Copilot Section 89 responds to Cosine LSH and clone catalog queries", () => {
+      const res = generateAdminCopilotResponse("Quét phát hiện sao chép catalog bằng cosine lsh và hyperplane random");
+      expect.equal(res.tag, "RADAR COSINE LSH CLONE");
+      expect.ok(res.text.includes("COSINE LSH"));
+      expect.ok(res.text.includes("Charikar"));
+    });
+
+    test("F183-T20: Admin Copilot Section 90 responds to HNSW Multi-Probe beam search queries", () => {
+      const res = generateAdminCopilotResponse("Tìm kiếm vector đồ thị bằng hnsw multi-probe beam search");
+      expect.equal(res.tag, "TÌM KIẾM HNSW MULTI-PROBE");
+      expect.ok(res.text.includes("HNSW MULTI-PROBE"));
+      expect.ok(res.text.includes("Malkov & Yashunin"));
+    });
+
+    test("F183-T21: Admin Copilot Section 91 responds to Double Q-Learning pricing queries", () => {
+      const res = generateAdminCopilotResponse("Tối ưu định giá flash sale bằng double q-learning triệt tiêu maximization bias");
+      expect.equal(res.tag, "ĐỊNH GIÁ DOUBLE Q-LEARNING");
+      expect.ok(res.text.includes("DOUBLE Q-LEARNING"));
+      expect.ok(res.text.includes("Maximization Bias"));
+    });
+
+    test("F183-T22: Seller Copilot Section 45 delivers actionable catalog protection, image search & pricing advice", () => {
+      const res = generateSellerCopilotResponse("Tư vấn bảo vệ bản quyền cosine lsh, tìm kiếm ảnh hnsw multi-probe và định giá double q-learning");
+      expect.equal(res.tag, "COSINE LSH, HNSW MULTI-PROBE & DOUBLE Q");
+      expect.ok(res.text.includes("COSINE LSH"));
+      expect.ok(res.text.includes("HNSW Multi-Probe"));
+      expect.ok(res.text.includes("Double Q-Learning"));
+    });
+
+    test("F183-T23: Buyer Chat AI Intent 38 guides users on authentic catalog, image visual search & dynamic deal pricing", () => {
+      const res = generateAiChatResponse("Hướng dẫn chống sao chép cosine lsh và tìm kiếm ảnh hnsw multi-probe");
+      expect.equal(res.intent, "COSINE_HNSW_DOUBLE_Q_ASSIST");
+      expect.ok(res.replyText.includes("Cosine LSH"));
+      expect.ok(res.replyText.includes("HNSW Multi-Probe"));
+    });
+
+    test("F183-T24: E2E Lifecycle: Cosine LSH weeds out copycats -> HNSW Multi-Probe finds authentic matches -> Double Q-Learning sets optimal flash discount", () => {
+      // Step 1: Detect copycat catalog with Cosine LSH
+      const lsh = new CosineLshSignatures({ dim: 4, numBits: 32 });
+      const authenticEmbedding = [0.9, 0.4, 0.1, 0.05];
+      const copycatEmbedding = [0.899, 0.401, 0.101, 0.049];
+      lsh.add("AUTHENTIC_IPHONE_15", authenticEmbedding, { official: true });
+      const duplicates = lsh.findDuplicates(copycatEmbedding, 2);
+      expect.equal(duplicates[0].id, "AUTHENTIC_IPHONE_15");
+
+      // Step 2: Customer image search via HNSW Multi-Probe
+      const hnsw = new HNSWMultiProbeGraph({ dim: 4, efSearch: 16 });
+      hnsw.add("AUTHENTIC_IPHONE_15", authenticEmbedding, { name: "iPhone 15 Pro Max", price: 29990000 });
+      hnsw.add("SAMSUNG_S24", [0.1, 0.9, 0.3, 0.2], { name: "Samsung Galaxy S24 Ultra", price: 27990000 });
+      const searchRes = hnsw.search([0.88, 0.42, 0.09, 0.06], 1);
+      expect.equal(searchRes[0].id, "AUTHENTIC_IPHONE_15");
+
+      // Step 3: Optimal pricing via Double Q-Learning
+      const pricingAgent = new DoubleQLearningPricing({
+        actions: ["DISCOUNT_5", "DISCOUNT_10", "DISCOUNT_15"],
+        alpha: 0.2,
+      });
+      for (let t = 0; t < 20; t++) {
+        pricingAgent.update("FLASH_MIDNIGHT", "DISCOUNT_10", 350, "FLASH_MORNING", false);
+        pricingAgent.update("FLASH_MIDNIGHT", "DISCOUNT_5", 100, "FLASH_MORNING", false);
+      }
+      const bestDiscount = pricingAgent.selectAction("FLASH_MIDNIGHT", true);
+      expect.equal(bestDiscount, "DISCOUNT_10");
+    });
+  });
 });
+
 
 
 

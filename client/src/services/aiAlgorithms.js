@@ -17055,6 +17055,459 @@ export class ParetoFrontierRanker {
   }
 }
 
+// =========================================================================
+// PHASE 36 ENTERPRISE ALGORITHMS: Cosine LSH, HNSW Multi-Probe, Double Q-Learning
+// =========================================================================
+
+export class CosineLshSignatures {
+  constructor(options = {}) {
+    this.dim = Math.max(2, options.dim || 16);
+    this.numBits = Math.max(8, options.numBits || 32);
+    this.numTables = Math.max(1, options.numTables || 4);
+    this.hyperplanes = this._generateHyperplanes();
+    this.tables = Array.from({ length: this.numTables }, () => new Map());
+    this.itemSignatures = new Map();
+    this.itemMetadata = new Map();
+  }
+
+  _gaussianRandom() {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  }
+
+  _generateHyperplanes() {
+    const planes = [];
+    for (let i = 0; i < this.numBits; i++) {
+      const plane = [];
+      let norm = 0;
+      for (let d = 0; d < this.dim; d++) {
+        const val = this._gaussianRandom();
+        plane.push(val);
+        norm += val * val;
+      }
+      norm = Math.sqrt(norm) || 1;
+      planes.push(plane.map(v => v / norm));
+    }
+    return planes;
+  }
+
+  computeSignature(vector) {
+    let signature = 0n;
+    for (let i = 0; i < this.numBits; i++) {
+      const plane = this.hyperplanes[i];
+      let dot = 0;
+      const len = Math.min(plane.length, vector.length);
+      for (let d = 0; d < len; d++) {
+        dot += plane[d] * vector[d];
+      }
+      if (dot >= 0) signature |= (1n << BigInt(i));
+    }
+    return signature;
+  }
+
+  hammingDistance(sig1, sig2) {
+    let xor = sig1 ^ sig2;
+    let dist = 0;
+    while (xor > 0n) {
+      if ((xor & 1n) === 1n) dist++;
+      xor >>= 1n;
+    }
+    return dist;
+  }
+
+  estimateCosineSimilarity(hammingDist) {
+    const angle = (hammingDist * Math.PI) / this.numBits;
+    return Math.cos(angle);
+  }
+
+  add(id, vector, metadata = {}) {
+    const itemId = String(id);
+    const signature = this.computeSignature(vector);
+    this.itemSignatures.set(itemId, signature);
+    this.itemMetadata.set(itemId, metadata);
+
+    const bitsPerTable = Math.floor(this.numBits / this.numTables);
+    for (let t = 0; t < this.numTables; t++) {
+      const shift = BigInt(t * bitsPerTable);
+      const mask = (1n << BigInt(bitsPerTable)) - 1n;
+      const bucketKey = Number((signature >> shift) & mask);
+      if (!this.tables[t].has(bucketKey)) this.tables[t].set(bucketKey, new Set());
+      this.tables[t].get(bucketKey).add(itemId);
+    }
+  }
+
+  findDuplicates(queryVector, maxHammingDistance = 3) {
+    const querySig = this.computeSignature(queryVector);
+    const candidateIds = new Set();
+    const bitsPerTable = Math.floor(this.numBits / this.numTables);
+    for (let t = 0; t < this.numTables; t++) {
+      const shift = BigInt(t * bitsPerTable);
+      const mask = (1n << BigInt(bitsPerTable)) - 1n;
+      const bucketKey = Number((querySig >> shift) & mask);
+      const bucket = this.tables[t].get(bucketKey);
+      if (bucket) {
+        for (const id of bucket) candidateIds.add(id);
+      }
+    }
+
+    const results = [];
+    for (const id of candidateIds) {
+      const sig = this.itemSignatures.get(id);
+      const dist = this.hammingDistance(querySig, sig);
+      if (dist <= maxHammingDistance) {
+        results.push({
+          id,
+          hammingDistance: dist,
+          estimatedSimilarity: Math.round(this.estimateCosineSimilarity(dist) * 10000) / 10000,
+          metadata: this.itemMetadata.get(id) || {},
+        });
+      }
+    }
+    return results.sort((a, b) => a.hammingDistance - b.hammingDistance);
+  }
+
+  getStats() {
+    return {
+      totalItems: this.itemSignatures.size,
+      dimension: this.dim,
+      numBits: this.numBits,
+      numTables: this.numTables,
+    };
+  }
+}
+
+export class HNSWMultiProbeGraph {
+  constructor(options = {}) {
+    this.dim = Math.max(2, options.dim || 16);
+    this.M = Math.max(4, options.M || 16);
+    this.M0 = 2 * this.M;
+    this.efConstruction = options.efConstruction || 64;
+    this.efSearch = options.efSearch || 32;
+    this.mL = options.mL || (1 / Math.log(this.M));
+    this.nodes = new Map();
+    this.layers = [];
+    this.enterPoint = null;
+    this.maxLevel = -1;
+  }
+
+  _dist(v1, v2) {
+    let sum = 0;
+    const len = Math.min(v1.length, v2.length);
+    for (let i = 0; i < len; i++) {
+      const diff = v1[i] - v2[i];
+      sum += diff * diff;
+    }
+    return sum;
+  }
+
+  _randomLevel() {
+    let r = Math.random();
+    while (r === 0) r = Math.random();
+    return Math.floor(-Math.log(r) * this.mL);
+  }
+
+  _searchLayer(query, entryPoints, ef, level) {
+    const visited = new Set(entryPoints);
+    const candidates = [];
+    const results = [];
+
+    for (const ep of entryPoints) {
+      const node = this.nodes.get(ep);
+      if (!node) continue;
+      const d = this._dist(query, node.vector);
+      candidates.push({ id: ep, dist: d });
+      results.push({ id: ep, dist: d });
+    }
+
+    candidates.sort((a, b) => a.dist - b.dist);
+    results.sort((a, b) => b.dist - a.dist);
+    const layerAdj = this.layers[level];
+
+    while (candidates.length > 0) {
+      const curr = candidates.shift();
+      const furthestResultDist = results[0]?.dist || Infinity;
+      if (curr.dist > furthestResultDist) break;
+
+      const neighbors = layerAdj?.get(curr.id) || new Set();
+      for (const neighborId of neighbors) {
+        if (!visited.has(neighborId)) {
+          visited.add(neighborId);
+          const neighborNode = this.nodes.get(neighborId);
+          if (!neighborNode) continue;
+          const d = this._dist(query, neighborNode.vector);
+          const maxDist = results[0]?.dist || Infinity;
+
+          if (d < maxDist || results.length < ef) {
+            candidates.push({ id: neighborId, dist: d });
+            results.push({ id: neighborId, dist: d });
+            candidates.sort((a, b) => a.dist - b.dist);
+            results.sort((a, b) => b.dist - a.dist);
+            if (results.length > ef) results.shift();
+          }
+        }
+      }
+    }
+    return results.sort((a, b) => a.dist - b.dist);
+  }
+
+  add(id, vector, metadata = {}) {
+    const nodeId = String(id);
+    const level = this._randomLevel();
+
+    while (this.layers.length <= level) this.layers.push(new Map());
+    const newNode = { id: nodeId, vector, level, metadata };
+    this.nodes.set(nodeId, newNode);
+
+    if (this.enterPoint === null) {
+      this.enterPoint = nodeId;
+      this.maxLevel = level;
+      for (let l = 0; l <= level; l++) this.layers[l].set(nodeId, new Set());
+      return;
+    }
+
+    let currObj = this.enterPoint;
+    const epNode = this.nodes.get(currObj);
+    let currDist = this._dist(vector, epNode.vector);
+
+    for (let l = this.maxLevel; l > level; l--) {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        const neighbors = this.layers[l]?.get(currObj) || new Set();
+        for (const neighborId of neighbors) {
+          const nNode = this.nodes.get(neighborId);
+          if (!nNode) continue;
+          const d = this._dist(vector, nNode.vector);
+          if (d < currDist) {
+            currDist = d;
+            currObj = neighborId;
+            changed = true;
+          }
+        }
+      }
+    }
+
+    let enterPoints = [currObj];
+    const topL = Math.min(level, this.maxLevel);
+
+    for (let l = topL; l >= 0; l--) {
+      const candidates = this._searchLayer(vector, enterPoints, this.efConstruction, l);
+      const maxConn = l === 0 ? this.M0 : this.M;
+      const selected = candidates.slice(0, maxConn);
+
+      if (!this.layers[l].has(nodeId)) this.layers[l].set(nodeId, new Set());
+
+      for (const neighbor of selected) {
+        this.layers[l].get(nodeId).add(neighbor.id);
+        if (!this.layers[l].has(neighbor.id)) this.layers[l].set(neighbor.id, new Set());
+        this.layers[l].get(neighbor.id).add(nodeId);
+
+        if (this.layers[l].get(neighbor.id).size > maxConn) {
+          const nbrList = Array.from(this.layers[l].get(neighbor.id));
+          nbrList.pop();
+          this.layers[l].set(neighbor.id, new Set(nbrList));
+        }
+      }
+      enterPoints = selected.map(s => s.id);
+    }
+
+    if (level > this.maxLevel) {
+      this.maxLevel = level;
+      this.enterPoint = nodeId;
+    }
+  }
+
+  search(queryVector, k = 5) {
+    if (this.enterPoint === null) return [];
+    let currObj = this.enterPoint;
+    const epNode = this.nodes.get(currObj);
+    let currDist = this._dist(queryVector, epNode.vector);
+
+    for (let l = this.maxLevel; l > 0; l--) {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        const neighbors = this.layers[l]?.get(currObj) || new Set();
+        for (const neighborId of neighbors) {
+          const nNode = this.nodes.get(neighborId);
+          if (!nNode) continue;
+          const d = this._dist(queryVector, nNode.vector);
+          if (d < currDist) {
+            currDist = d;
+            currObj = neighborId;
+            changed = true;
+          }
+        }
+      }
+    }
+
+    const candidates = this._searchLayer(queryVector, [currObj], Math.max(k, this.efSearch), 0);
+    return candidates.slice(0, k).map(c => {
+      const node = this.nodes.get(c.id);
+      return {
+        id: c.id,
+        distance: Math.round(Math.sqrt(c.dist) * 1000) / 1000,
+        metadata: node?.metadata || {},
+      };
+    });
+  }
+
+  getStats() {
+    return {
+      totalNodes: this.nodes.size,
+      maxLevel: this.maxLevel,
+      layersCount: this.layers.length,
+      M: this.M,
+      efSearch: this.efSearch,
+    };
+  }
+}
+
+export class DoubleQLearningPricing {
+  constructor(options = {}) {
+    this.actions = options.actions || ["D0", "D5", "D10", "D15", "D20", "D30"];
+    this.alpha = options.alpha || 0.1;
+    this.gamma = options.gamma !== undefined ? options.gamma : 0.95;
+    this.epsilon = options.epsilon !== undefined ? options.epsilon : 0.2;
+    this.epsilonDecay = options.epsilonDecay || 0.995;
+    this.minEpsilon = options.minEpsilon || 0.01;
+    this.replayCapacity = options.replayCapacity || 1000;
+
+    this.QA = new Map();
+    this.QB = new Map();
+    this.replayBuffer = [];
+    this.totalSteps = 0;
+  }
+
+  _getQMap(table, state) {
+    const s = String(state);
+    if (!table.has(s)) {
+      const actionMap = new Map();
+      for (const a of this.actions) actionMap.set(String(a), 0.0);
+      table.set(s, actionMap);
+    }
+    return table.get(s);
+  }
+
+  _argmax(table, state) {
+    const qMap = this._getQMap(table, state);
+    let bestAction = this.actions[0];
+    let maxVal = -Infinity;
+    for (const a of this.actions) {
+      const aKey = String(a);
+      const val = qMap.get(aKey);
+      if (val > maxVal) {
+        maxVal = val;
+        bestAction = aKey;
+      }
+    }
+    return bestAction;
+  }
+
+  selectAction(state, isEvaluating = false) {
+    const s = String(state);
+    if (!isEvaluating && Math.random() < this.epsilon) {
+      const rndIdx = Math.floor(Math.random() * this.actions.length);
+      return String(this.actions[rndIdx]);
+    }
+    const qMapA = this._getQMap(this.QA, s);
+    const qMapB = this._getQMap(this.QB, s);
+    let bestAction = String(this.actions[0]);
+    let maxAvg = -Infinity;
+    for (const a of this.actions) {
+      const aKey = String(a);
+      const avgQ = (qMapA.get(aKey) + qMapB.get(aKey)) / 2.0;
+      if (avgQ > maxAvg) {
+        maxAvg = avgQ;
+        bestAction = aKey;
+      }
+    }
+    return bestAction;
+  }
+
+  recordExperience(state, action, reward, nextState, done = false) {
+    this.replayBuffer.push({
+      state: String(state),
+      action: String(action),
+      reward: Number(reward) || 0,
+      nextState: String(nextState),
+      done: Boolean(done),
+    });
+    if (this.replayBuffer.length > this.replayCapacity) {
+      this.replayBuffer.shift();
+    }
+  }
+
+  update(state, action, reward, nextState, done = false) {
+    const s = String(state);
+    const a = String(action);
+    const nextS = String(nextState);
+    const r = Number(reward) || 0;
+
+    if (Math.random() < 0.5) {
+      const qMapA = this._getQMap(this.QA, s);
+      const curVal = qMapA.get(a);
+      let targetVal = r;
+      if (!done) {
+        const bestNextAction = this._argmax(this.QA, nextS);
+        const qMapBNext = this._getQMap(this.QB, nextS);
+        targetVal += this.gamma * qMapBNext.get(bestNextAction);
+      }
+      qMapA.set(a, curVal + this.alpha * (targetVal - curVal));
+    } else {
+      const qMapB = this._getQMap(this.QB, s);
+      const curVal = qMapB.get(a);
+      let targetVal = r;
+      if (!done) {
+        const bestNextAction = this._argmax(this.QB, nextS);
+        const qMapANext = this._getQMap(this.QA, nextS);
+        targetVal += this.gamma * qMapANext.get(bestNextAction);
+      }
+      qMapB.set(a, curVal + this.alpha * (targetVal - curVal));
+    }
+
+    this.totalSteps++;
+    if (this.epsilon > this.minEpsilon) {
+      this.epsilon = Math.max(this.minEpsilon, this.epsilon * this.epsilonDecay);
+    }
+  }
+
+  trainReplayBatch(batchSize = 16) {
+    if (this.replayBuffer.length === 0) return 0;
+    const actualBatch = Math.min(batchSize, this.replayBuffer.length);
+    for (let i = 0; i < actualBatch; i++) {
+      const rndIdx = Math.floor(Math.random() * this.replayBuffer.length);
+      const exp = this.replayBuffer[rndIdx];
+      this.update(exp.state, exp.action, exp.reward, exp.nextState, exp.done);
+    }
+    return actualBatch;
+  }
+
+  getStatePolicy(state) {
+    const s = String(state);
+    const qMapA = this._getQMap(this.QA, s);
+    const qMapB = this._getQMap(this.QB, s);
+    const values = {};
+    for (const a of this.actions) {
+      const aKey = String(a);
+      values[aKey] = {
+        QA: Math.round(qMapA.get(aKey) * 100) / 100,
+        QB: Math.round(qMapB.get(aKey) * 100) / 100,
+        QAvg: Math.round(((qMapA.get(aKey) + qMapB.get(aKey)) / 2) * 100) / 100,
+      };
+    }
+    return {
+      state: s,
+      bestAction: this.selectAction(s, true),
+      epsilon: Math.round(this.epsilon * 1000) / 1000,
+      totalSteps: this.totalSteps,
+      values,
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -17251,6 +17704,10 @@ export default {
   PushRelabelMaxFlow,
   CuckooStashTable,
   ParetoFrontierRanker,
+  // Phase 36 Enterprise Algorithms
+  CosineLshSignatures,
+  HNSWMultiProbeGraph,
+  DoubleQLearningPricing,
 };
 
 

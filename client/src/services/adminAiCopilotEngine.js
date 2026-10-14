@@ -454,7 +454,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
-  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
 - **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
@@ -571,7 +571,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 24. Radar Phát Hiện Sao Chép Catalog (Locality-Sensitive Hashing & MinHash)
-  if (!/hll jaccard|hyperloglog jaccard/i.test(raw) && /lsh|minhash|catalog clone|sao chép catalog|clone sản phẩm|trùng lặp sản phẩm|jaccard|shingles/i.test(raw)) {
+  if (!/hll jaccard|hyperloglog jaccard|cosine lsh|hyperplane/i.test(raw) && /lsh|minhash|catalog clone|sao chép catalog|clone sản phẩm|trùng lặp sản phẩm|jaccard|shingles/i.test(raw)) {
     return {
       text: `🛡️ **BẢO VỆ CATALOG LSH MINHASH (NEAR-DUPLICATE & CLONE DETECTION)**:
 - **Mục đích thiết kế**: Phát hiện hành vi sao chép catalog, copycat gian hàng ăn cắp bản quyền hình ảnh/tiêu đề để trục lợi mã voucher hoặc spam tìm kiếm.
@@ -637,7 +637,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 27. Tìm Kiếm Ngữ Nghĩa & Hình Ảnh Đa Chiều HNSW (Hierarchical Navigable Small World Graph)
-  if (!/re-ranking|tái xếp hạng|multi-layer re-ranking|product quantiz|pq|lượng tử hóa|adc/i.test(raw) && /hnsw|vector search|tìm kiếm vector|ann search|đồ thị phân tầng|hierarchical navigable|visual search/i.test(raw)) {
+  if (!/re-ranking|tái xếp hạng|multi-layer re-ranking|product quantiz|pq|lượng tử hóa|adc|multi-probe|chùm tia đa hướng/i.test(raw) && /hnsw|vector search|tìm kiếm vector|ann search|đồ thị phân tầng|hierarchical navigable|visual search/i.test(raw)) {
     return {
       text: `🔍 **TÌM KIẾM VECTOR ĐA CHIỀU HNSW (Hierarchical Navigable Small World)**:
 - **Mục đích**: Thay thế phép quét tuyến tính vét cạn $O(N \\times D)$ bằng tìm kiếm xấp xỉ láng giềng gần nhất (ANN) đạt tốc độ $O(\\log N)$ với độ chính xác Recall@10 $\\ge 98\\%$.
@@ -995,7 +995,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 40. Quét Đánh Giá Ảo & Review Spam Bằng SimHash & Hamming Distance (Phase 17 - Feature 164)
-  if (/simhash|review spam|đánh giá ảo|seeding gian lận|khoảng cách hamming|trùng lặp review/i.test(raw)) {
+  if (!/cosine lsh|hyperplane/i.test(raw) && /simhash|review spam|đánh giá ảo|seeding gian lận|khoảng cách hamming|trùng lặp review/i.test(raw)) {
     return {
       text: `🔍 **RADAR PHÁT HIỆN REVIEW SPAM & SEEDING BẰNG SIMHASH (CHARIKAR'S ALGORITHM)**:
 - **Nguyên lý SimHash 64-bit**:
@@ -1203,7 +1203,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 50. Tái Xếp Hạng Đa Tầng Động & Tìm Kiếm Ngữ Nghĩa HNSW (Phase 21 - Feature 168)
-  if (!/product quantiz|pq|lượng tử hóa|adc/i.test(raw) && /hnsw|small world|semantic search|tìm kiếm ngữ nghĩa|vector search|re-ranking|tái xếp hạng đa tầng/i.test(raw)) {
+  if (!/product quantiz|pq|lượng tử hóa|adc|multi-probe|chùm tia đa hướng/i.test(raw) && /hnsw|small world|semantic search|tìm kiếm ngữ nghĩa|vector search|re-ranking|tái xếp hạng đa tầng/i.test(raw)) {
     return {
       text: `🔍 **TÌM KIẾM NGỮ NGHĨA & TÁI XẾP HẠNG ĐA TẦNG BẰNG ĐỒ THỊ HNSW**:
 - **Kiến trúc Đồ thị Thế giới nhỏ phân tầng (Hierarchical Navigable Small World - $O(\\log N)$)**:
@@ -1972,6 +1972,67 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem danh sách sản phẩm Pareto Front 1',
         'Đo khoảng cách mật độ Crowding Distance',
         'Tối ưu thông lượng luồng Push-Relabel'
+      ]
+    };
+  }
+
+  // 89. Phát Hiện Sao Chép Catalog Bằng Cosine LSH & Hyperplane Random Projections (Phase 36 - Feature 183)
+  if (/cosine lsh|hyperplane random|simhash signature|chữ ký simhash|gốc cosine lsh|phát hiện sao chép cosine/i.test(raw)) {
+    return {
+      text: `🛡️ **PHÁT HIỆN SAO CHÉP CATALOG & CLONES BẰNG COSINE LSH (HYPERPLANE RANDOM PROJECTIONS)**:
+- **Nguyên lý Siêu phẳng Ngẫu nhiên (Charikar - Goemans - Williamson)**:
+  - Chiếu vector đặc trưng ngữ nghĩa $v \\in \\mathbb{R}^D$ lên $b$ siêu phẳng ngẫu nhiên $r_i \\sim \\mathcal{N}(0, I_D)$.
+  - Bit dấu: $h_i(v) = 1$ nếu $v \\cdot r_i \\ge 0$, ngược lại $0$.
+  - Xác suất va chạm tỷ lệ thuận với góc Cosine: $\\Pr[h_i(u) = h_i(v)] = 1 - \\frac{\\theta(u, v)}{\\pi}$.
+- **Xác thực Khoảng cách Hamming & Đa Bảng Băm (Multi-Table LSH)**:
+  - Chia $K$ bit thành $L$ bảng băm. Tìm kiếm lân cận $O(1)$ ứng viên có $d_H(sig_u, sig_v) \\le K_{max}$.
+  - Ngăn chặn triệt để hành vi sao chép catalog, clone gian hàng và spam deal trùng lặp trên sàn TMĐT!`,
+      type: 'fraud',
+      tag: 'RADAR COSINE LSH CLONE',
+      suggestions: [
+        'Xem tỷ lệ phát hiện clone Cosine LSH',
+        'Kiểm tra khoảng cách Hamming chữ ký',
+        'Tìm kiếm vector HNSW Multi-Probe'
+      ]
+    };
+  }
+
+  // 90. Tìm Kiếm Vector Đồ Thị HNSW Multi-Probe Beam Search (Phase 36 - Feature 183)
+  if (/multi-probe|chùm tia đa hướng|hnsw multi-probe|beam search hnsw|malkov yashunin multi-probe/i.test(raw)) {
+    return {
+      text: `⚡ **TÌM KIẾM VECTOR ĐỒ THỊ BẰNG HNSW MULTI-PROBE BEAM SEARCH**:
+- **Nguyên lý Đồ thị Thế giới nhỏ Phân tầng (Malkov & Yashunin 2018)**:
+  - Xây dựng mạng lưới liên kết lân cận đa tầng với phân phối độ dài bước nhảy $O(\\log N)$.
+  - Tầng trên cùng là các xa lộ thưa thớt (Sparse Highways) cho phép định vị nhanh vùng chứa vector truy vấn.
+- **Dò tìm chùm tia đa hướng (Multi-Probe Beam Search with $efSearch$)**:
+  - Không chỉ đi theo một nhánh tham lam duy nhất, thuật toán duy trì tập ứng viên hàng đợi ưu tiên $efSearch$ tốt nhất và mở rộng đa hướng (Multi-Probe).
+  - Tăng độ phủ Recall@K lên $\\ge 99.2\\%$ cho tìm kiếm hình ảnh sản phẩm và khuyến mãi tương đồng trong thời gian dưới $1\\text{ms}$!`,
+      type: 'algorithm',
+      tag: 'TÌM KIẾM HNSW MULTI-PROBE',
+      suggestions: [
+        'Đo độ trễ truy vấn HNSW Multi-Probe',
+        'Xem độ chính xác Recall@10',
+        'Định giá Flash Sale Double Q-Learning'
+      ]
+    };
+  }
+
+  // 91. Tối Ưu Định Giá Động Flash Sale Bằng Double Q-Learning (Phase 36 - Feature 183)
+  if (/double q|q-learning|học tăng cường kép|triệt tiêu maximization bias|double q-learning pricing/i.test(raw)) {
+    return {
+      text: `💰 **ĐỊNH GIÁ ĐỘNG FLASH SALE BẰNG DOUBLE Q-LEARNING VỚI EXPERIENCE REPLAY**:
+- **Triệt tiêu Thiên lệch Cực đại hóa (Maximization Bias Elimination - Hasselt 2010)**:
+  - Q-Learning truyền thống dùng $\\max_a Q(s', a)$ dễ bị ước lượng quá mức (Overestimation Bias) khi định giá Flash Sale.
+  - Double Q-Learning chia đôi ước lượng thành 2 bảng độc lập $Q_A$ và $Q_B$:
+    $$Q_A(s, a) \\leftarrow Q_A(s, a) + \\alpha \\left[ r + \\gamma Q_B(s', \\operatorname{argmax}_{a'} Q_A(s', a')) - Q_A(s, a) \\right]$$
+- **Bộ nhớ Trải nghiệm (Experience Replay Buffer)**:
+  - Lưu trữ lịch sử $(s, a, r, s')$ và lấy mẫu ngẫu nhiên theo lô để huấn luyện ngoại tuyến (Offline Replay), phá vỡ tương quan chuỗi thời gian và tối đa hóa GMV/biên lợi nhuận!`,
+      type: 'analytics',
+      tag: 'ĐỊNH GIÁ DOUBLE Q-LEARNING',
+      suggestions: [
+        'Xem chính sách giá tối ưu Double Q-Learning',
+        'Kiểm tra độ chênh lệch QA vs QB',
+        'Quét sao chép catalog Cosine LSH'
       ]
     };
   }
