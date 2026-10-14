@@ -454,7 +454,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
-  if (!/skiplist|danh sách nhảy/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
 - **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
@@ -857,7 +857,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 32. Cá Nhân Hóa Khám Phá Trang Chủ Bằng Contextual Bandit LinUCB (Phase 13 - Feature 160)
-  if (/linucb|gợi ý trang chủ linucb|contextual bandit|cá nhân hóa trang chủ|daily discover/i.test(raw)) {
+  if (!/lints|linear bandit|thompson|sherman/i.test(raw) && /linucb|gợi ý trang chủ linucb|contextual bandit|cá nhân hóa trang chủ|daily discover/i.test(raw)) {
     return {
       text: `🎯 **BỘ MÁY GỢI Ý CÁ NHÂN HÓA TRANG CHỦ BẰNG LINUCB BANDIT**:
 - **Khắc phục bẫy bong bóng lọc (Filter Bubble)**: LinUCB cân bằng giữa Khám phá sản phẩm tiềm năng mới (Exploration) và Khai thác sản phẩm chuyển đổi cao (Exploitation) thông qua hệ số $\\alpha$.
@@ -1739,6 +1739,64 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
+  // 77. Chỉ Mục Nén Tóm Tắt Wavelet Matrix Cho Phân Vị & Tần Suất Giá (Phase 32 - Feature 179)
+  if (/wavelet matrix|ma trận wavelet|succinct index|truy vấn phân vị|rank select|wavelet rank/i.test(raw)) {
+    return {
+      text: `🌊 **CHỈ MỤC NÉN TÓM TẮT WAVELET MATRIX (SUCCINCT RANK-SELECT & QUANTILE ENGINE)**:
+- **Thách thức Big Data Analytics**:
+  - Khi phân tích hàng triệu mức giá sản phẩm hoặc lượt đánh giá sao, việc sắp xếp mảng hay dựng cây Segment Tree 2D tiêu tốn hàng trăm MB RAM và độ trễ cao.
+- **Cấu trúc Wavelet Matrix (Claude & Munro 2012)**:
+  - Nén toàn bộ dãy dữ liệu thành $\\lceil \\log_2 \\Sigma \\rceil$ tầng BitVector với cấu trúc Rank-Select $O(1)$.
+  - **Truy vấn phân vị \`quantile(left, right, k)\`**: Tìm giá trị nhỏ thứ $k$ (Median / P95 price) trong khoảng thời gian $[\\text{left}, \\text{right}]$ với độ phức tạp $O(\\log \\Sigma)$ mà không cần sắp xếp.
+  - **Truy vấn tần suất \`rangeFreq(left, right, minVal, maxVal)\`**: Đếm số sản phẩm trong phân khúc giá cụ thể tức thì!`,
+      type: 'analytics',
+      tag: 'CHỈ MỤC WAVELET MATRIX',
+      suggestions: [
+        'Truy vấn giá trung vị Median P50 bằng Wavelet',
+        'Đếm tần suất sản phẩm trong khoảng giá',
+        'Đo hiệu năng nén Succinct Data Structure'
+      ]
+    };
+  }
+
+  // 78. Phân Vùng Phủ Sóng Logistics Voronoi & Tam Giác Hóa Delaunay (Phase 32 - Feature 179)
+  if (/delaunay|voronoi|phân vùng voronoi|tam giác delaunay|vùng phủ sóng hub|logistics gap|điểm mù logistics/i.test(raw)) {
+    return {
+      text: `🗺️ **PHÂN VÙNG PHỦ SÓNG LOGISTICS VORONOI & TAM GIÁC HÓA DELAUNAY (SPX COVERAGE)**:
+- **Nguyên lý Tam giác hóa Delaunay (Bowyer-Watson Algorithm)**:
+  - Kết nối mạng lưới các Hub bưu cục SPX trên bản đồ 2D sao cho đường tròn ngoại tiếp của bất kỳ tam giác nào cũng không chứa điểm bưu cục khác (Empty Circumcircle Property).
+  - Tự động sinh ra các hành lang vận tải trực tiếp (Delaunay Adjacency Corridors) tối ưu giữa các trạm trung chuyển.
+- **Phân ô Voronoi & Phát hiện Điểm mù (Logistics Blind Spots)**:
+  - Tự động gán bất kỳ tọa độ đơn hàng nào về Hub gần nhất mà không cần quét toàn bộ danh sách bưu cục.
+  - Quét các tam giác Delaunay có bán kính ngoại tiếp lớn (\`coverageRadius > R\`) để định vị chính xác các vùng trũng dịch vụ thiếu Hub nhằm lập kế hoạch mở thêm trạm SPX mới.`,
+      type: 'logistics',
+      tag: 'PHÂN VÙNG VORONOI DELAUNAY',
+      suggestions: [
+        'Quét điểm mù thiếu trạm Hub bưu cục SPX',
+        'Xác định Hub phục vụ gần nhất cho tọa độ giao hàng',
+        'Xem đồ thị kết nối hành lang Delaunay'
+      ]
+    };
+  }
+
+  // 79. Phân Bổ Ưu Đãi Ngữ Cảnh Bằng Contextual Thompson Sampling (LinTS) (Phase 32 - Feature 179)
+  if (/contextual bandit|linear bandit|lints|thompson sampling theo ngữ cảnh|sherman morrison|cá nhân hóa ưu đãi theo ngữ cảnh/i.test(raw)) {
+    return {
+      text: `🎯 **PHÂN BỔ ƯU ĐÃI THEO NGỮ CẢNH BẰNG CONTEXTUAL THOMPSON SAMPLING (LINEAR BANDIT - LINTS)**:
+- **Cá nhân hóa ưu đãi đa biến (Personalized Incentive Allocation)**:
+  - Thay vì phát voucher cào bằng, LinTS nhận vector ngữ cảnh $x$ của khách hàng (Giá trị giỏ hàng, Loại thiết bị, Lịch sử mua) và dự báo phần thưởng kỳ vọng $r_a = x^T \\theta_a$.
+- **Lấy mẫu Bayesian với Cập nhật Ma trận Sherman-Morrison**:
+  - Tham số ẩn $\\theta_a$ được lấy mẫu từ phân phối chuẩn đa biến $\\mathcal{N}(\\hat{\\mu}_a, v^2 B_a^{-1})$.
+  - Cập nhật ma trận nghịch đảo $B_a^{-1}$ tức thì bằng Sherman-Morrison rank-1 update trong độ phức tạp $O(d^2)$ thay vì đảo ma trận $O(d^3)$, đảm bảo khả năng học tăng cường trực tuyến (Online Reinforcement Learning) siêu tốc!`,
+      type: 'marketing',
+      tag: 'CONTEXTUAL BANDIT LINTS',
+      suggestions: [
+        'Chọn ưu đãi tối ưu theo ngữ cảnh giỏ hàng',
+        'Cập nhật phản hồi người mua bằng Sherman-Morrison',
+        'Xem trọng số đặc trưng học được của từng voucher'
+      ]
+    };
+  }
 
   // 39. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {

@@ -15019,6 +15019,640 @@ export class CoDelActiveQueue {
   }
 }
 
+// =========================================================================
+// PHASE 32 ENTERPRISE ALGORITHMS: Wavelet Matrix, Delaunay Voronoi, Contextual Bandit
+// =========================================================================
+
+export class BitVector {
+  constructor(bits = []) {
+    this.bits = bits.slice();
+    this.prefixPopcount = new Int32Array(this.bits.length + 1);
+    let count = 0;
+    for (let i = 0; i < this.bits.length; i++) {
+      this.prefixPopcount[i] = count;
+      if (this.bits[i] === 1) count++;
+    }
+    this.prefixPopcount[this.bits.length] = count;
+    this.totalOnes = count;
+  }
+
+  access(pos) {
+    if (pos < 0 || pos >= this.bits.length) return 0;
+    return this.bits[pos];
+  }
+
+  rank1(pos) {
+    if (pos <= 0) return 0;
+    if (pos >= this.bits.length) return this.totalOnes;
+    return this.prefixPopcount[pos];
+  }
+
+  rank0(pos) {
+    if (pos <= 0) return 0;
+    const clampedPos = Math.min(pos, this.bits.length);
+    return clampedPos - this.rank1(clampedPos);
+  }
+
+  select1(k) {
+    if (k <= 0 || k > this.totalOnes) return -1;
+    let low = 0, high = this.bits.length;
+    let ans = -1;
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      if (this.rank1(mid) >= k) {
+        ans = mid - 1;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return ans;
+  }
+
+  select0(k) {
+    const totalZeroes = this.bits.length - this.totalOnes;
+    if (k <= 0 || k > totalZeroes) return -1;
+    let low = 0, high = this.bits.length;
+    let ans = -1;
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      if (this.rank0(mid) >= k) {
+        ans = mid - 1;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return ans;
+  }
+}
+
+export class WaveletMatrixIndex {
+  constructor(data = [], maxAlphabet = 256) {
+    this.length = data.length;
+    this.maxAlphabet = Math.max(2, maxAlphabet);
+    this.numLevels = Math.ceil(Math.log2(this.maxAlphabet));
+    this.layers = [];
+    this.zeroCounts = [];
+
+    this._build(data);
+  }
+
+  _build(data) {
+    if (this.length === 0) {
+      for (let d = this.numLevels - 1; d >= 0; d--) {
+        this.layers.push(new BitVector([]));
+        this.zeroCounts.push(0);
+      }
+      return;
+    }
+
+    let current = data.map((val) => Math.max(0, Math.floor(val)));
+
+    for (let d = this.numLevels - 1; d >= 0; d--) {
+      const bitMask = 1 << d;
+      const bits = new Array(this.length);
+      const zeroes = [];
+      const ones = [];
+
+      for (let i = 0; i < this.length; i++) {
+        const bit = (current[i] & bitMask) !== 0 ? 1 : 0;
+        bits[i] = bit;
+        if (bit === 0) {
+          zeroes.push(current[i]);
+        } else {
+          ones.push(current[i]);
+        }
+      }
+
+      this.layers.push(new BitVector(bits));
+      this.zeroCounts.push(zeroes.length);
+      current = zeroes.concat(ones);
+    }
+  }
+
+  access(pos) {
+    if (pos < 0 || pos >= this.length) return null;
+    let curPos = pos;
+    let val = 0;
+
+    for (let l = 0; l < this.numLevels; l++) {
+      const bitVec = this.layers[l];
+      const zCount = this.zeroCounts[l];
+      const bit = bitVec.access(curPos);
+      const d = this.numLevels - 1 - l;
+
+      if (bit === 1) {
+        val |= (1 << d);
+        curPos = zCount + bitVec.rank1(curPos);
+      } else {
+        curPos = bitVec.rank0(curPos);
+      }
+    }
+    return val;
+  }
+
+  rank(val, pos) {
+    if (pos <= 0 || this.length === 0) return 0;
+    if (val < 0 || val >= this.maxAlphabet) return 0;
+
+    let curPos = Math.min(pos, this.length);
+    for (let l = 0; l < this.numLevels; l++) {
+      const bitVec = this.layers[l];
+      const zCount = this.zeroCounts[l];
+      const d = this.numLevels - 1 - l;
+      const bit = (val & (1 << d)) !== 0 ? 1 : 0;
+
+      if (bit === 1) {
+        curPos = zCount + bitVec.rank1(curPos);
+      } else {
+        curPos = bitVec.rank0(curPos);
+      }
+    }
+
+    let start = 0;
+    for (let l = 0; l < this.numLevels; l++) {
+      const bitVec = this.layers[l];
+      const zCount = this.zeroCounts[l];
+      const d = this.numLevels - 1 - l;
+      const bit = (val & (1 << d)) !== 0 ? 1 : 0;
+      if (bit === 1) {
+        start = zCount + bitVec.rank1(start);
+      } else {
+        start = bitVec.rank0(start);
+      }
+    }
+
+    return Math.max(0, curPos - start);
+  }
+
+  countInRange(val, left, right) {
+    if (left > right) return 0;
+    return this.rank(val, right + 1) - this.rank(val, left);
+  }
+
+  quantile(left, right, k) {
+    const lClamped = Math.max(0, left);
+    const rClamped = Math.min(this.length - 1, right);
+    if (lClamped > rClamped || k < 0 || k > (rClamped - lClamped)) return null;
+
+    let curLeft = lClamped;
+    let curRight = rClamped + 1;
+    let curK = k;
+    let val = 0;
+
+    for (let l = 0; l < this.numLevels; l++) {
+      const bitVec = this.layers[l];
+      const zCount = this.zeroCounts[l];
+      const d = this.numLevels - 1 - l;
+
+      const zerosLeft = bitVec.rank0(curLeft);
+      const zerosRight = bitVec.rank0(curRight);
+      const zerosInRange = zerosRight - zerosLeft;
+
+      if (curK < zerosInRange) {
+        curLeft = zerosLeft;
+        curRight = zerosRight;
+      } else {
+        val |= (1 << d);
+        curK -= zerosInRange;
+        const onesLeft = bitVec.rank1(curLeft);
+        const onesRight = bitVec.rank1(curRight);
+        curLeft = zCount + onesLeft;
+        curRight = zCount + onesRight;
+      }
+    }
+
+    return val;
+  }
+
+  rangeFreq(left, right, minVal, maxVal) {
+    if (left > right || minVal > maxVal) return 0;
+    const lClamped = Math.max(0, left);
+    const rClamped = Math.min(this.length - 1, right);
+    if (lClamped > rClamped) return 0;
+
+    const countLessOrEqual = (boundary) => {
+      if (boundary < 0) return 0;
+      if (boundary >= this.maxAlphabet - 1) return rClamped - lClamped + 1;
+
+      let curLeft = lClamped;
+      let curRight = rClamped + 1;
+      let count = 0;
+
+      for (let l = 0; l < this.numLevels; l++) {
+        const bitVec = this.layers[l];
+        const zCount = this.zeroCounts[l];
+        const d = this.numLevels - 1 - l;
+        const bit = (boundary & (1 << d)) !== 0 ? 1 : 0;
+
+        const zerosLeft = bitVec.rank0(curLeft);
+        const zerosRight = bitVec.rank0(curRight);
+        const zerosInRange = zerosRight - zerosLeft;
+
+        if (bit === 1) {
+          count += zerosInRange;
+          const onesLeft = bitVec.rank1(curLeft);
+          const onesRight = bitVec.rank1(curRight);
+          curLeft = zCount + onesLeft;
+          curRight = zCount + onesRight;
+        } else {
+          curLeft = zerosLeft;
+          curRight = zerosRight;
+        }
+      }
+      count += (curRight - curLeft);
+      return count;
+    };
+
+    return countLessOrEqual(maxVal) - countLessOrEqual(minVal - 1);
+  }
+}
+
+export class DelaunayVoronoiLogistics {
+  constructor() {
+    this.hubs = new Map();
+    this.triangles = [];
+    this.adjacency = new Map();
+  }
+
+  addHub(id, x, y, meta = {}) {
+    this.hubs.set(id, {
+      id,
+      x: Number(x),
+      y: Number(y),
+      name: meta.name || id,
+      province: meta.province || "",
+      capacity: meta.capacity || 1000,
+      ...meta,
+    });
+    this.triangles = [];
+    this.adjacency.clear();
+    return this;
+  }
+
+  getHub(id) {
+    return this.hubs.get(id) || null;
+  }
+
+  _circumcircle(p1, p2, p3) {
+    const d = 2 * (p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y));
+    if (Math.abs(d) < 1e-9) {
+      return null;
+    }
+
+    const p1Sq = p1.x * p1.x + p1.y * p1.y;
+    const p2Sq = p2.x * p2.x + p2.y * p2.y;
+    const p3Sq = p3.x * p3.x + p3.y * p3.y;
+
+    const ux = (p1Sq * (p2.y - p3.y) + p2Sq * (p3.y - p1.y) + p3Sq * (p1.y - p2.y)) / d;
+    const uy = (p1Sq * (p3.x - p2.x) + p2Sq * (p1.x - p3.x) + p3Sq * (p2.x - p1.x)) / d;
+
+    const rSq = (p1.x - ux) * (p1.x - ux) + (p1.y - uy) * (p1.y - uy);
+    return { x: ux, y: uy, rSq, r: Math.sqrt(rSq) };
+  }
+
+  triangulate() {
+    const points = Array.from(this.hubs.values());
+    if (points.length < 3) {
+      this.triangles = [];
+      this.adjacency.clear();
+      if (points.length === 2) {
+        this._addEdge(points[0].id, points[1].id);
+      }
+      return this.triangles;
+    }
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const p of points) {
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
+
+    const dx = maxX - minX || 10;
+    const dy = maxY - minY || 10;
+    const deltaMax = Math.max(dx, dy) * 20;
+    const midX = (minX + maxX) / 2;
+    const midY = (minY + maxY) / 2;
+
+    const st1 = { id: "__ST1__", x: midX - 2 * deltaMax, y: midY - deltaMax };
+    const st2 = { id: "__ST2__", x: midX, y: midY + 2 * deltaMax };
+    const st3 = { id: "__ST3__", x: midX + 2 * deltaMax, y: midY - deltaMax };
+
+    let currentTriangles = [
+      {
+        a: st1,
+        b: st2,
+        c: st3,
+        circle: this._circumcircle(st1, st2, st3)
+      }
+    ];
+
+    for (const point of points) {
+      const badTriangles = [];
+
+      for (const tri of currentTriangles) {
+        if (!tri.circle) continue;
+        const distSq = (point.x - tri.circle.x) ** 2 + (point.y - tri.circle.y) ** 2;
+        if (distSq <= tri.circle.rSq + 1e-9) {
+          badTriangles.push(tri);
+        }
+      }
+
+      const edgeCount = new Map();
+      const edgeKey = (u, v) => (u.id < v.id ? `${u.id}:::${v.id}` : `${v.id}:::${u.id}`);
+
+      for (const tri of badTriangles) {
+        const edges = [
+          [tri.a, tri.b],
+          [tri.b, tri.c],
+          [tri.c, tri.a]
+        ];
+        for (const [u, v] of edges) {
+          const key = edgeKey(u, v);
+          if (!edgeCount.has(key)) {
+            edgeCount.set(key, { u, v, count: 1 });
+          } else {
+            edgeCount.get(key).count += 1;
+          }
+        }
+      }
+
+      const polygonEdges = [];
+      for (const val of edgeCount.values()) {
+        if (val.count === 1) {
+          polygonEdges.push([val.u, val.v]);
+        }
+      }
+
+      currentTriangles = currentTriangles.filter((t) => !badTriangles.includes(t));
+
+      for (const [u, v] of polygonEdges) {
+        const circle = this._circumcircle(u, v, point);
+        currentTriangles.push({
+          a: u,
+          b: v,
+          c: point,
+          circle
+        });
+      }
+    }
+
+    const isSuperVertex = (p) => p.id === "__ST1__" || p.id === "__ST2__" || p.id === "__ST3__";
+    this.triangles = currentTriangles
+      .filter((t) => !isSuperVertex(t.a) && !isSuperVertex(t.b) && !isSuperVertex(t.c))
+      .map((t) => ({
+        a: t.a.id,
+        b: t.b.id,
+        c: t.c.id,
+        circumcenter: { x: t.circle.x, y: t.circle.y },
+        circumRadius: t.circle.r,
+      }));
+
+    this.adjacency.clear();
+    for (const t of this.triangles) {
+      this._addEdge(t.a, t.b);
+      this._addEdge(t.b, t.c);
+      this._addEdge(t.c, t.a);
+    }
+
+    return this.triangles;
+  }
+
+  _addEdge(uId, vId) {
+    if (!this.adjacency.has(uId)) this.adjacency.set(uId, new Set());
+    if (!this.adjacency.has(vId)) this.adjacency.set(vId, new Set());
+    this.adjacency.get(uId).add(vId);
+    this.adjacency.get(vId).add(uId);
+  }
+
+  getAdjacencyGraph() {
+    if (this.adjacency.size === 0 && this.hubs.size > 0) {
+      this.triangulate();
+    }
+    const result = {};
+    for (const [id, neighbors] of this.adjacency.entries()) {
+      result[id] = Array.from(neighbors);
+    }
+    return result;
+  }
+
+  findNearestHub(x, y) {
+    let nearest = null;
+    let minDistSq = Infinity;
+
+    for (const hub of this.hubs.values()) {
+      const distSq = (hub.x - x) ** 2 + (hub.y - y) ** 2;
+      if (distSq < minDistSq) {
+        minDistSq = distSq;
+        nearest = hub;
+      }
+    }
+
+    return nearest ? { hub: nearest, distance: Math.sqrt(minDistSq) } : null;
+  }
+
+  detectLogisticsGaps(minRadius = 15) {
+    if (this.triangles.length === 0) this.triangulate();
+    const gaps = [];
+    for (const tri of this.triangles) {
+      if (tri.circumRadius >= minRadius) {
+        gaps.push({
+          regionCenter: tri.circumcenter,
+          coverageRadius: tri.circumRadius,
+          boundaryHubs: [tri.a, tri.b, tri.c],
+          severity: tri.circumRadius > minRadius * 1.5 ? "HIGH" : "MEDIUM"
+        });
+      }
+    }
+    return gaps.sort((a, b) => b.coverageRadius - a.coverageRadius);
+  }
+}
+
+export class ContextualBanditEngine {
+  constructor(armIds = ["VOUCHER_10", "VOUCHER_20", "FREESHIP_MAX", "GIFT_BONUS"], featureDim = 3, options = {}) {
+    this.armIds = armIds.slice();
+    this.d = Math.max(1, featureDim);
+    this.v = options.v !== undefined ? Number(options.v) : 0.5;
+    this.lambda = options.lambda !== undefined ? Number(options.lambda) : 1.0;
+
+    this.arms = new Map();
+    for (const armId of this.armIds) {
+      this._initArm(armId);
+    }
+  }
+
+  _initArm(armId) {
+    const B_inv = [];
+    for (let i = 0; i < this.d; i++) {
+      const row = new Array(this.d).fill(0);
+      row[i] = 1.0 / this.lambda;
+      B_inv.push(row);
+    }
+
+    this.arms.set(armId, {
+      id: armId,
+      pulls: 0,
+      totalReward: 0,
+      f: new Array(this.d).fill(0),
+      mu: new Array(this.d).fill(0),
+      B_inv
+    });
+  }
+
+  _cholesky(matrix) {
+    const n = this.d;
+    const L = Array.from({ length: n }, () => new Array(n).fill(0));
+
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j <= i; j++) {
+        let sum = 0;
+        for (let k = 0; k < j; k++) {
+          sum += L[i][k] * L[j][k];
+        }
+        if (i === j) {
+          const val = matrix[i][i] - sum;
+          L[i][j] = Math.sqrt(Math.max(val, 1e-12));
+        } else {
+          L[i][j] = (matrix[i][j] - sum) / (L[j][j] || 1e-6);
+        }
+      }
+    }
+    return L;
+  }
+
+  _sampleGaussian() {
+    const u1 = Math.max(1e-15, Math.random());
+    const u2 = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+  }
+
+  _sampleTheta(arm) {
+    const L = this._cholesky(arm.B_inv);
+    const z = Array.from({ length: this.d }, () => this._sampleGaussian());
+    const theta = new Array(this.d).fill(0);
+
+    for (let i = 0; i < this.d; i++) {
+      let noise = 0;
+      for (let j = 0; j <= i; j++) {
+        noise += L[i][j] * z[j];
+      }
+      theta[i] = arm.mu[i] + this.v * noise;
+    }
+    return theta;
+  }
+
+  _dot(vecA, vecB) {
+    let sum = 0;
+    for (let i = 0; i < this.d; i++) {
+      sum += (vecA[i] || 0) * (vecB[i] || 0);
+    }
+    return sum;
+  }
+
+  selectArm(contextVector = []) {
+    const x = contextVector.slice(0, this.d);
+    while (x.length < this.d) x.push(0);
+
+    let bestArmId = this.armIds[0];
+    let maxSampledValue = -Infinity;
+    const predictions = {};
+
+    for (const armId of this.armIds) {
+      const arm = this.arms.get(armId);
+      const thetaSample = this._sampleTheta(arm);
+      const sampledScore = this._dot(x, thetaSample);
+      const expectedScore = this._dot(x, arm.mu);
+
+      predictions[armId] = {
+        sampledScore,
+        expectedScore,
+        pulls: arm.pulls
+      };
+
+      if (sampledScore > maxSampledValue) {
+        maxSampledValue = sampledScore;
+        bestArmId = armId;
+      }
+    }
+
+    return {
+      selectedArm: bestArmId,
+      sampledValue: maxSampledValue,
+      predictions
+    };
+  }
+
+  update(armId, contextVector = [], reward = 0) {
+    const arm = this.arms.get(armId);
+    if (!arm) return false;
+
+    const x = contextVector.slice(0, this.d);
+    while (x.length < this.d) x.push(0);
+    const r = Number(reward);
+
+    const u = new Array(this.d).fill(0);
+    for (let i = 0; i < this.d; i++) {
+      let sum = 0;
+      for (let j = 0; j < this.d; j++) {
+        sum += arm.B_inv[i][j] * x[j];
+      }
+      u[i] = sum;
+    }
+
+    let xTu = 0;
+    for (let i = 0; i < this.d; i++) {
+      xTu += x[i] * u[i];
+    }
+    const denom = 1.0 + xTu;
+
+    for (let i = 0; i < this.d; i++) {
+      for (let j = 0; j < this.d; j++) {
+        arm.B_inv[i][j] -= (u[i] * u[j]) / denom;
+      }
+    }
+
+    for (let i = 0; i < this.d; i++) {
+      arm.f[i] += r * x[i];
+    }
+
+    for (let i = 0; i < this.d; i++) {
+      let sum = 0;
+      for (let j = 0; j < this.d; j++) {
+        sum += arm.B_inv[i][j] * arm.f[j];
+      }
+      arm.mu[i] = sum;
+    }
+
+    arm.pulls += 1;
+    arm.totalReward += r;
+    return true;
+  }
+
+  predictExpectedReward(armId, contextVector = []) {
+    const arm = this.arms.get(armId);
+    if (!arm) return 0;
+    const x = contextVector.slice(0, this.d);
+    while (x.length < this.d) x.push(0);
+    return this._dot(x, arm.mu);
+  }
+
+  getArmStats() {
+    const stats = {};
+    for (const [id, arm] of this.arms.entries()) {
+      stats[id] = {
+        pulls: arm.pulls,
+        totalReward: arm.totalReward,
+        avgReward: arm.pulls > 0 ? arm.totalReward / arm.pulls : 0,
+        weights: arm.mu.slice()
+      };
+    }
+    return stats;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -15198,6 +15832,11 @@ export default {
   SuurballeDisjointRouter,
   Fenwick2DRangeTree,
   CoDelActiveQueue,
+  // Phase 32 Enterprise Algorithms
+  BitVector,
+  WaveletMatrixIndex,
+  DelaunayVoronoiLogistics,
+  ContextualBanditEngine,
 };
 
 

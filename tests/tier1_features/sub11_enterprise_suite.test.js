@@ -195,6 +195,11 @@ import {
   SuurballeDisjointRouter,
   Fenwick2DRangeTree,
   CoDelActiveQueue,
+  // Phase 32 Enterprise Algorithms
+  BitVector,
+  WaveletMatrixIndex,
+  DelaunayVoronoiLogistics,
+  ContextualBanditEngine,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -256,6 +261,9 @@ import ServerHLLJaccardEstimator, { HLLSketch as ServerHLLSketch } from "../../s
 import ServerSuurballeRouter from "../../server/src/utils/suurballeDisjointRouter.js";
 import ServerFenwick2DTree from "../../server/src/utils/fenwick2DRangeTree.js";
 import ServerCoDelQueue from "../../server/src/utils/codelActiveQueue.js";
+import { WaveletMatrixIndex as ServerWaveletMatrixIndex, BitVector as ServerBitVector } from "../../server/src/utils/waveletMatrixIndex.js";
+import { DelaunayVoronoiLogistics as ServerDelaunayVoronoi } from "../../server/src/utils/delaunayVoronoiLogistics.js";
+import { ContextualBanditEngine as ServerContextualBandit } from "../../server/src/utils/contextualBanditEngine.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -16458,6 +16466,289 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const totalTier3 = gmvMatrix.queryRange(3, 4, 3, 5);
         expect.equal(totalTier3, 270000);
       });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 179: Wavelet Matrix Index, Delaunay Voronoi Logistics, and Contextual Bandit Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 179: Wavelet Matrix, Delaunay Voronoi Logistics, and Contextual Bandit Suite", () => {
+    // --- PART 1: Wavelet Matrix (Rank-Select Succinct Indexing) (F179-T01 -> F179-T06) ---
+    test("F179-T01: BitVector supports access, rank0, rank1, select0, and select1 correctly", () => {
+      const bv = new BitVector([0, 1, 1, 0, 1, 0, 0, 1]);
+      expect.equal(bv.access(0), 0);
+      expect.equal(bv.access(1), 1);
+      expect.equal(bv.access(2), 1);
+      expect.equal(bv.rank1(4), 2);
+      expect.equal(bv.rank0(4), 2);
+      expect.equal(bv.rank1(8), 4);
+      expect.equal(bv.rank0(8), 4);
+      expect.equal(bv.select1(1), 1);
+      expect.equal(bv.select1(2), 2);
+      expect.equal(bv.select0(1), 0);
+      expect.equal(bv.select0(2), 3);
+    });
+
+    test("F179-T02: WaveletMatrixIndex initialization, length, and access across elements", () => {
+      const data = [3, 1, 4, 1, 5, 9, 2, 6];
+      const wm = new WaveletMatrixIndex(data, 16);
+      expect.equal(wm.length, 8);
+      for (let i = 0; i < data.length; i++) {
+        expect.equal(wm.access(i), data[i]);
+      }
+    });
+
+    test("F179-T03: WaveletMatrixIndex rank occurrences and countInRange", () => {
+      const data = [5, 2, 5, 5, 1, 3, 5, 2];
+      const wm = new WaveletMatrixIndex(data, 16);
+      expect.equal(wm.rank(5, 0), 0);
+      expect.equal(wm.rank(5, 1), 1);
+      expect.equal(wm.rank(5, 4), 3);
+      expect.equal(wm.rank(5, 8), 4);
+      expect.equal(wm.rank(2, 8), 2);
+      expect.equal(wm.rank(9, 8), 0);
+      expect.equal(wm.countInRange(5, 1, 6), 3);
+    });
+
+    test("F179-T04: WaveletMatrixIndex quantile finds k-th smallest element and median in ranges", () => {
+      const data = [10, 5, 8, 3, 12, 1, 7, 20];
+      const wm = new WaveletMatrixIndex(data, 32);
+      expect.equal(wm.quantile(1, 6, 0), 1);
+      expect.equal(wm.quantile(1, 6, 1), 3);
+      expect.equal(wm.quantile(1, 6, 2), 5);
+      expect.equal(wm.quantile(1, 6, 3), 7);
+      expect.equal(wm.quantile(1, 6, 5), 12);
+    });
+
+    test("F179-T05: WaveletMatrixIndex rangeFreq counts elements within [minVal, maxVal]", () => {
+      const data = [2, 15, 7, 10, 4, 18, 9, 12, 6, 3];
+      const wm = new WaveletMatrixIndex(data, 32);
+      expect.equal(wm.rangeFreq(1, 7, 5, 11), 3);
+      expect.equal(wm.rangeFreq(0, 9, 0, 30), 10);
+      expect.equal(wm.rangeFreq(0, 9, 25, 30), 0);
+    });
+
+    test("F179-T06: ServerWaveletMatrixIndex parity with client implementation", () => {
+      const data = [4, 2, 7, 2, 5, 1];
+      const serverWM = new ServerWaveletMatrixIndex(data, 16);
+      expect.equal(serverWM.access(2), 7);
+      expect.equal(serverWM.rank(2, 6), 2);
+      expect.equal(serverWM.quantile(0, 5, 0), 1);
+      expect.equal(serverWM.quantile(0, 5, 5), 7);
+      expect.equal(serverWM.rangeFreq(0, 5, 2, 5), 4);
+    });
+
+    // --- PART 2: Delaunay Triangulation & SPX Voronoi Logistics Partitioning (F179-T07 -> F179-T12) ---
+    test("F179-T07: DelaunayVoronoiLogistics registers hubs and calculates circumcircle accurately", () => {
+      const logistics = new DelaunayVoronoiLogistics();
+      logistics.addHub("HUB_HN", 0, 0, { name: "Hà Nội Mega Hub" });
+      logistics.addHub("HUB_HP", 10, 0, { name: "Hải Phòng Hub" });
+      logistics.addHub("HUB_ND", 0, 10, { name: "Nam Định Hub" });
+
+      expect.equal(logistics.hubs.size, 3);
+      expect.equal(logistics.getHub("HUB_HN").name, "Hà Nội Mega Hub");
+
+      const circle = logistics._circumcircle({ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 0, y: 10 });
+      expect.equal(circle !== null, true);
+      expect.equal(Math.round(circle.x), 5);
+      expect.equal(Math.round(circle.y), 5);
+      expect.equal(Math.round(circle.rSq), 50);
+    });
+
+    test("F179-T08: Triangulation produces non-empty Delaunay triangles connecting hubs", () => {
+      const logistics = new DelaunayVoronoiLogistics();
+      logistics.addHub("H1", 0, 0);
+      logistics.addHub("H2", 20, 0);
+      logistics.addHub("H3", 20, 20);
+      logistics.addHub("H4", 0, 20);
+
+      const triangles = logistics.triangulate();
+      expect.equal(triangles.length >= 2, true);
+      for (const tri of triangles) {
+        expect.equal(tri.circumRadius > 0, true);
+        expect.equal(tri.a !== tri.b && tri.b !== tri.c && tri.c !== tri.a, true);
+      }
+    });
+
+    test("F179-T09: Delaunay Adjacency graph connects direct neighboring logistics corridors", () => {
+      const logistics = new DelaunayVoronoiLogistics();
+      logistics.addHub("HN", 0, 0);
+      logistics.addHub("VINH", 0, 15);
+      logistics.addHub("HUE", 0, 30);
+      logistics.addHub("DN", 10, 35);
+
+      const adj = logistics.getAdjacencyGraph();
+      expect.equal(Array.isArray(adj["HN"]), true);
+      expect.equal(adj["HN"].length >= 1, true);
+      expect.equal(adj["DN"].length >= 1, true);
+    });
+
+    test("F179-T10: findNearestHub identifies the closest Voronoi coverage center for delivery coordinates", () => {
+      const logistics = new DelaunayVoronoiLogistics();
+      logistics.addHub("HUB_BAC_NINH", 10, 10, { province: "Bắc Ninh" });
+      logistics.addHub("HUB_HA_NOI", 0, 0, { province: "Hà Nội" });
+      logistics.addHub("HUB_HAI_DUONG", 20, 0, { province: "Hải Dương" });
+
+      const nearestToOrigin = logistics.findNearestHub(1, 2);
+      expect.equal(nearestToOrigin.hub.id, "HUB_HA_NOI");
+      expect.equal(nearestToOrigin.distance < 3, true);
+
+      const nearestToBN = logistics.findNearestHub(9, 11);
+      expect.equal(nearestToBN.hub.id, "HUB_BAC_NINH");
+    });
+
+    test("F179-T11: detectLogisticsGaps locates large empty circumcircles indicating underserved areas", () => {
+      const logistics = new DelaunayVoronoiLogistics();
+      logistics.addHub("HUB_NORTH", 0, 100);
+      logistics.addHub("HUB_SOUTH", 0, -100);
+      logistics.addHub("HUB_EAST", 100, 0);
+
+      const gaps = logistics.detectLogisticsGaps(40);
+      expect.equal(gaps.length >= 1, true);
+      expect.equal(gaps[0].coverageRadius >= 40, true);
+      expect.equal(gaps[0].boundaryHubs.length, 3);
+    });
+
+    test("F179-T12: ServerDelaunayVoronoi parity with client implementation", () => {
+      const serverLogistics = new ServerDelaunayVoronoi();
+      serverLogistics.addHub("KHO_SG", 106.66, 10.76, { name: "Kho Sài Gòn" });
+      serverLogistics.addHub("KHO_BD", 106.70, 10.98, { name: "Kho Bình Dương" });
+      serverLogistics.addHub("KHO_DN", 106.85, 10.95, { name: "Kho Đồng Nai" });
+
+      const tris = serverLogistics.triangulate();
+      expect.equal(tris.length >= 1, true);
+
+      const nearest = serverLogistics.findNearestHub(106.67, 10.77);
+      expect.equal(nearest.hub.id, "KHO_SG");
+    });
+
+    // --- PART 3: Contextual Thompson Sampling (LinTS) (F179-T13 -> F179-T18) ---
+    test("F179-T13: ContextualBanditEngine initializes arms, dimensions, and identity inverse precision", () => {
+      const arms = ["VOUCHER_10K", "FREESHIP_MAX", "GIFT_BONUS"];
+      const bandit = new ContextualBanditEngine(arms, 3, { v: 0.2, lambda: 1.0 });
+
+      expect.equal(bandit.armIds.length, 3);
+      expect.equal(bandit.d, 3);
+      const stats = bandit.getArmStats();
+      expect.equal(stats["VOUCHER_10K"].pulls, 0);
+      expect.equal(stats["VOUCHER_10K"].weights.length, 3);
+      expect.equal(stats["VOUCHER_10K"].weights.every((w) => w === 0), true);
+    });
+
+    test("F179-T14: selectArm returns a candidate arm, sampled score, and predictions for context vector", () => {
+      const bandit = new ContextualBanditEngine(["A1", "A2"], 2);
+      const res = bandit.selectArm([1.0, 0.5]);
+      expect.equal(["A1", "A2"].includes(res.selectedArm), true);
+      expect.equal(typeof res.sampledValue, "number");
+      expect.equal(res.predictions["A1"] !== undefined, true);
+      expect.equal(res.predictions["A2"] !== undefined, true);
+    });
+
+    test("F179-T15: update performs Sherman-Morrison rank-1 update and updates mean weights mu", () => {
+      const bandit = new ContextualBanditEngine(["VOUCHER"], 2, { lambda: 1.0 });
+      expect.equal(bandit.getArmStats()["VOUCHER"].weights[0], 0);
+
+      bandit.update("VOUCHER", [1.0, 0.0], 10.0);
+      const stats = bandit.getArmStats()["VOUCHER"];
+      expect.equal(stats.pulls, 1);
+      expect.equal(stats.totalReward, 10.0);
+      expect.equal(stats.weights[0] > 0, true);
+    });
+
+    test("F179-T16: Contextual bandit learns to prefer correlated arm over 50 iterations", () => {
+      const bandit = new ContextualBanditEngine(["OFFER_MOBILE", "OFFER_DESKTOP"], 2, { v: 0.1 });
+
+      for (let i = 0; i < 30; i++) {
+        bandit.update("OFFER_MOBILE", [1, 0], 1.0);
+        bandit.update("OFFER_DESKTOP", [1, 0], 0.0);
+
+        bandit.update("OFFER_MOBILE", [0, 1], 0.0);
+        bandit.update("OFFER_DESKTOP", [0, 1], 1.0);
+      }
+
+      const mobilePred = bandit.predictExpectedReward("OFFER_MOBILE", [1, 0]);
+      const desktopPred = bandit.predictExpectedReward("OFFER_DESKTOP", [1, 0]);
+      expect.equal(mobilePred > desktopPred, true);
+
+      const desktopContextMob = bandit.predictExpectedReward("OFFER_MOBILE", [0, 1]);
+      const desktopContextDesk = bandit.predictExpectedReward("OFFER_DESKTOP", [0, 1]);
+      expect.equal(desktopContextDesk > desktopContextMob, true);
+    });
+
+    test("F179-T17: predictExpectedReward computes inner product of context vector with learned mu", () => {
+      const bandit = new ContextualBanditEngine(["PROMO"], 3);
+      const arm = bandit.arms.get("PROMO");
+      arm.mu = [2.0, 3.0, 4.0];
+
+      const score = bandit.predictExpectedReward("PROMO", [1.0, 2.0, 0.5]);
+      expect.equal(score, 10.0);
+    });
+
+    test("F179-T18: ServerContextualBandit parity with client implementation", () => {
+      const serverBandit = new ServerContextualBandit(["ARM_X", "ARM_Y"], 2, { v: 0.2 });
+      serverBandit.update("ARM_X", [1.0, 1.0], 5.0);
+      expect.equal(serverBandit.getArmStats()["ARM_X"].pulls, 1);
+      const selected = serverBandit.selectArm([1.0, 1.0]);
+      expect.equal(["ARM_X", "ARM_Y"].includes(selected.selectedArm), true);
+    });
+
+    // --- PART 4: Copilots & E2E Lifecycle (F179-T19 -> F179-T24) ---
+    test("F179-T19: Admin Sentinel Copilot Section 77 recognizes Wavelet Matrix succinct index", () => {
+      const res = generateAdminCopilotResponse("Phân tích phân vị giá wavelet matrix succinct index", {});
+      expect.equal(res.tag, "CHỈ MỤC WAVELET MATRIX");
+      expect.equal(/wavelet/i.test(res.text), true);
+      expect.equal(/quantile/i.test(res.text), true);
+    });
+
+    test("F179-T20: Admin Sentinel Copilot Section 78 recognizes Delaunay Voronoi logistics partitioning", () => {
+      const res = generateAdminCopilotResponse("Phân vùng bưu cục voronoi tam giác delaunay quét điểm mù", {});
+      expect.equal(res.tag, "PHÂN VÙNG VORONOI DELAUNAY");
+      expect.equal(/voronoi/i.test(res.text), true);
+      expect.equal(/delaunay/i.test(res.text), true);
+    });
+
+    test("F179-T21: Admin Sentinel Copilot Section 79 recognizes Contextual Thompson Sampling LinTS", () => {
+      const res = generateAdminCopilotResponse("Cá nhân hóa ưu đãi theo ngữ cảnh contextual bandit lints", {});
+      expect.equal(res.tag, "CONTEXTUAL BANDIT LINTS");
+      expect.equal(/contextual/i.test(res.text), true);
+      expect.equal(/sherman-morrison/i.test(res.text), true);
+    });
+
+    test("F179-T22: Seller ShopSmart Copilot Section 41 guides Wavelet price tiers & Voronoi Hub handover", () => {
+      const res = generateSellerCopilotResponse("Tra cứu phân vị wavelet và định vị bưu cục voronoi hub gần nhất", { name: "Shop Điện Tử" }, [], []);
+      expect.equal(res.tag, "PHÂN VỊ WAVELET & ƯU ĐÃI NGỮ CẢNH LINTS");
+      expect.equal(/wavelet/i.test(res.text), true);
+      expect.equal(/voronoi/i.test(res.text), true);
+    });
+
+    test("F179-T23: Buyer AI Assistant Intent 34 explains Wavelet median price & tailored LinTS vouchers", () => {
+      const res = generateAiChatResponse("Phân vị giá wavelet và bưu cục voronoi gần nhất ưu đãi riêng cho tôi");
+      expect.equal(res.intent, "WAVELET_VORONOI_BANDIT_ASSIST");
+      expect.equal(/wavelet/i.test(res.replyText), true);
+      expect.equal(/voronoi/i.test(res.replyText), true);
+    });
+
+    test("F179-T24: E2E Lifecycle: Wavelet computes median price -> Voronoi assigns regional hub -> LinTS selects tailored promotion", () => {
+      const priceCatalog = [15, 8, 25, 12, 30, 9, 18, 40];
+      const wm = new WaveletMatrixIndex(priceCatalog, 64);
+      const medianPrice = wm.quantile(0, 7, 3);
+      expect.equal(medianPrice, 15);
+
+      const logistics = new DelaunayVoronoiLogistics();
+      logistics.addHub("HUB_CU_CHI", 11.00, 106.50, { name: "Củ Chi Mega SOC" });
+      logistics.addHub("HUB_TAN_BINH", 10.80, 106.65, { name: "Tân Bình Delivery Hub" });
+      logistics.addHub("HUB_THU_DUC", 10.85, 106.77, { name: "Thủ Đức Delivery Hub" });
+
+      const nearest = logistics.findNearestHub(10.82, 106.69);
+      expect.equal(nearest.hub.id, "HUB_TAN_BINH");
+
+      const bandit = new ContextualBanditEngine(["FREESHIP_MAX", "VOUCHER_20PCT", "GIFT_BONUS"], 3);
+      for (let i = 0; i < 20; i++) {
+        bandit.update("VOUCHER_20PCT", [1.0, 1.0, 0.8], 1.0);
+        bandit.update("GIFT_BONUS", [1.0, 1.0, 0.8], 0.1);
+      }
+      const tailoredOffer = bandit.selectArm([1.0, 1.0, 0.8]);
+      expect.equal(tailoredOffer.selectedArm, "VOUCHER_20PCT");
     });
   });
 });

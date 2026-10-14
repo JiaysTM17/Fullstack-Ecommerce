@@ -825,6 +825,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 41. Phân Tích Phân Vị Wavelet, Bưu Cục Voronoi & Ưu Đãi Ngữ Cảnh Contextual Bandit (Phase 32 - Feature 179)
+  if (/wavelet matrix|phân vị wavelet|voronoi logistics|hub gần nhất|contextual bandit|lin-?ts|ưu đãi cá nhân hóa/i.test(raw)) {
+    return {
+      text: `🚀 **PHÂN VỊ WAVELET, ĐỊNH VỊ BƯU CỤC VORONOI & ƯU ĐÃI NGỮ CẢNH LINTS (${currentShop.name})**:
+- **Chỉ mục nén Wavelet Matrix cho SKU của shop**:
+  - Tra cứu tức thì phân vị giá bán (Median P50, P90) và xếp hạng số sao đánh giá trong từng khoảng thời gian khuyến mãi.
+  - So sánh giá của shop với phổ giá toàn ngành để định vị phân khúc cạnh tranh chính xác.
+- **Định vị trạm Hub SPX bàn giao qua ô Voronoi**:
+  - Tự động kết nối kho hàng của shop tới Hub bưu cục Voronoi tối ưu gần nhất, đảm bảo kiện hàng được nhập trạm trong 30 phút đầu.
+- **Tối ưu hóa ưu đãi khách hàng bằng Contextual Bandit**:
+  - Sử dụng thuật toán học máy LinTS để tự động lựa chọn ưu đãi phù hợp nhất (Voucher 10%, Freeship Max hay Quà tặng kèm) tùy theo giỏ hàng và thiết bị của từng khách ghé thăm gian hàng!`,
+      type: 'recommendation',
+      tag: 'PHÂN VỊ WAVELET & ƯU ĐÃI NGỮ CẢNH LINTS',
+      suggestions: [
+        'Tra cứu phân vị giá sản phẩm Wavelet Matrix',
+        'Định vị trạm Hub tiếp nhận Voronoi gần nhất',
+        'Kích hoạt phân bổ ưu đãi Contextual Bandit'
+      ]
+    };
+  }
 
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {

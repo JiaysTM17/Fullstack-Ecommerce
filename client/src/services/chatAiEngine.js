@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -848,6 +848,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'SUURBALLE_CODEL_ASSIST',
       replyText: `**[LỘ TRÌNH DỰ PHÒNG SUURBALLE & HÀNG ĐỢI CODEL] ĐẶT HÀNG NHANH VÀ GIAO ĐÚNG HẸN:**\n\n• **Lộ trình dự phòng Suurballe**: Đơn hàng liên tỉnh của bạn luôn được hệ thống SPX tính toán sẵn 2 tuyến đường song song không trùng cạnh. Nếu tuyến cao tốc chính gặp sự cố thời tiết, gói hàng sẽ tự động chuyển hướng qua tuyến dự phòng để giao tận tay bạn đúng hẹn!\n• **Thanh toán tức thì CoDel**: Hàng đợi thông minh CoDel kiểm soát thời gian lưu trú (Sojourn Time) dưới 5ms, xử lý hàng triệu lượt quét mã VietQR và xác nhận đơn hàng chỉ trong tích tắc!`,
       suggestions: ['Theo dõi lộ trình giao hàng', 'Thanh toán đơn hàng nhanh', 'Săn deal Flash Sale'],
+    };
+  }
+
+  // 34. Phân Vị Wavelet, Bưu Cục Voronoi & Ưu Đãi Ngữ Cảnh Contextual Bandit (WAVELET_VORONOI_BANDIT_ASSIST)
+  if (/wavelet|phân vị giá.*wavelet|delaunay|voronoi|bưu cục voronoi|hub gần nhất.*voronoi|contextual bandit|ưu đãi riêng cho tôi/i.test(lower)) {
+    return {
+      intent: 'WAVELET_VORONOI_BANDIT_ASSIST',
+      replyText: `**[PHÂN VỊ GIÁ WAVELET, BƯU CỤC VORONOI & ƯU ĐÃI LINTS] MUA SẮM THÔNG MINH CÙNG AI:**\n\n• **Phân vị giá Wavelet Matrix**: Hệ thống tính toán tức thì mức giá trung vị (Median P50) và phân khúc giá phổ biến trên toàn sàn, giúp bạn an tâm mua đúng giá tốt nhất mà không sợ bị mua đắt!\n• **Bưu cục SPX Voronoi gần nhất**: Tự động xác định trung tâm giao nhận SPX gần địa chỉ giao hàng của bạn nhất theo bản đồ tam giác Delaunay & ô Voronoi, rút ngắn tối đa thời gian giao vận chặng cuối.\n• **Ưu đãi may đo Contextual Bandit**: Thuật toán LinTS phân tích giỏ hàng để tự động cấp mã giảm giá phù hợp nhất (Freeship Max, Giảm 20% hoặc Quà tặng), giúp bạn tối đa hóa số tiền tiết kiệm được!`,
+      suggestions: ['Xem phân khúc giá tốt nhất', 'Kiểm tra bưu cục SPX gần nhất', 'Nhận ưu đãi dành riêng cho bạn'],
     };
   }
 
