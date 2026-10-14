@@ -468,7 +468,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VÒNG QUAY MAY MẮN & MINI XU (GAMIFICATION RULES)
   // -------------------------------------------------------------
-  if (/vòng quay|quay thưởng|lượt quay|mini xu|xu|điểm danh|thưởng/i.test(lower)) {
+  if (!/fisher-yates|provably fair/i.test(lower) && /vòng quay|quay thưởng|lượt quay|mini xu|xu|điểm danh|thưởng/i.test(lower)) {
     return {
       intent: 'GAMIFICATION_INFO',
       replyText: `**[ĐẶC QUYỀN] QUY TẮC VÒNG QUAY MAY MẮN & MINI XU CHUẨN XÁC:**\n\n• **Hoàn toàn miễn phí, TUYỆT ĐỐI KHÔNG trừ xu khi quay** (Xu được giữ để giảm giá khi mua sắm).\n• **1 lượt quay miễn phí mỗi ngày** (làm mới tự động vào 00:00 nửa đêm).\n• **Tặng thêm +1 lượt quay cho MỖI ĐƠN HÀNG đặt thành công**!\n• 100% cơ hội trúng quà: Xu thưởng khủng tới 5.000 Xu, Voucher 10%, Freeship 30k.\n\n**Số dư của bạn:** **${userCoins.toLocaleString('vi-VN')} Xu** | **Lượt quay:** **${totalSpins} lượt**`,
@@ -739,6 +739,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'EXCLUSIVE_VOUCHER_EXACT_COVER',
       replyText: `**[XẾP CHỒNG VOUCHER ĐỘC QUYỀN] THUẬT TOÁN DANCING LINKS (DLX):**\n\n• **Tối đa hóa mức giảm giá**: Khi bạn có nhiều mã giảm giá độc quyền cho các nhóm sản phẩm khác nhau, thuật toán Dancing Links tự động tìm ra sự kết hợp hoàn hảo phủ trọn giỏ hàng của bạn mà không có món đồ nào bị xung đột hay bỏ phí.\n• **Tiết kiệm tối đa trong 1-chạm**: Hệ thống sẽ tự động ghép mã giảm giá sâu nhất cho từng sản phẩm phù hợp để đơn hàng đạt mức thanh toán thấp nhất có thể!`,
       suggestions: ['Xem giỏ hàng của tôi', 'Kiểm tra kho voucher', 'Tiếp tục mua sắm'],
+    };
+  }
+
+  // 22. Cam Kết Minh Bạch & Công Bằng Vòng Quay May Mắn (LUCKY_WHEEL_PROVABLY_FAIR)
+  if (/fisher-yates|provably fair|vòng quay.*minh bạch|quay thưởng.*công bằng|kiểm chứng lượt quay/i.test(lower)) {
+    return {
+      intent: 'LUCKY_WHEEL_PROVABLY_FAIR',
+      replyText: `**[MINH BẠCH 100%] VÒNG QUAY MAY MẮN ÁP DỤNG THUẬT TOÁN FISHER-YATES (PROVABLY FAIR):**\n\n• **Tuyệt đối không can thiệp**: Mọi kết quả quay thưởng đều được sinh ngẫu nhiên từ cặp Server Seed và Client Seed bằng thuật toán xáo trộn Fisher-Yates chuẩn mật mã.\n• **Kiểm toán công khai**: Bạn hoàn toàn có thể sao chép mã Hash cam kết trước lượt quay để tự mình kiểm chứng tính trung thực sau khi nhận giải!`,
+      suggestions: ['Mở vòng quay may mắn', 'Xem bảng phần thưởng', 'Tiếp tục mua sắm'],
     };
   }
 

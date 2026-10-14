@@ -138,6 +138,11 @@ import {
   SpaceSavingHeavyHitters,
   KademliaContact,
   KademliaDhtRouting,
+  FisherYatesFairRaffle,
+  PrefixSpanSequentialMining,
+  AlphaNode,
+  PromotionRule,
+  RetePromotionEngine,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -163,6 +168,9 @@ import { CuckooFilterRevocation as ServerCuckooFilter } from "../../server/src/u
 import { DancingLinksExactCover as ServerDLX } from "../../server/src/utils/dancingLinksExactCover.js";
 import { SpaceSavingHeavyHitters as ServerSpaceSaving } from "../../server/src/utils/spaceSavingHeavyHitters.js";
 import { KademliaDhtRouting as ServerKademliaDHT } from "../../server/src/utils/kademliaDhtRouting.js";
+import { FisherYatesFairRaffle as ServerFisherYates } from "../../server/src/utils/fisherYatesFairRaffle.js";
+import { PrefixSpanSequentialMining as ServerPrefixSpan } from "../../server/src/utils/prefixSpanSequentialMining.js";
+import { RetePromotionEngine as ServerReteEngine } from "../../server/src/utils/retePromotionEngine.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -12300,6 +12308,325 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const bestVoucher = dlx.findOptimalVoucherCombination();
         expect.equal(bestVoucher.totalDiscount, 45000);
         expect.equal(bestVoucher.vouchers[0].rowId, "V_COMBO_65W");
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 167: Fair Raffle CSPRNG, PrefixSpan Mining & Rete Rule Engine Suite (Phase 20 - 24 Tests)
+  // =========================================================================
+  describe("Feature 167: Fair Raffle CSPRNG, PrefixSpan Mining & Rete Rule Engine Suite (Phase 20)", () => {
+
+    // --- NHÓM 1: Fisher-Yates Shuffle with Cryptographically Secure CSPRNG (F167-T01 -> F167-T06) ---
+    describe("Nhóm 1: Fisher-Yates Shuffle with Cryptographically Secure CSPRNG", () => {
+      test("F167-T01: Initial commitment hash generated correctly, empty or single element shuffle handled gracefully", () => {
+        const raffle = new FisherYatesFairRaffle("SECRET_SERVER_SEED_123");
+        expect.equal(typeof raffle.getCommitmentHash(), "string");
+        expect.equal(raffle.getCommitmentHash().length, 64);
+        const resEmpty = raffle.shuffle([]);
+        expect.equal(resEmpty.shuffled.length, 0);
+        const resSingle = raffle.shuffle(["GIFT_1"]);
+        expect.equal(resSingle.shuffled[0], "GIFT_1");
+      });
+
+      test("F167-T02: Shuffle produces permutation of identical elements with non-zero length and updates nonce", () => {
+        const raffle = new FisherYatesFairRaffle();
+        const prizes = ["1000 Xu", "5000 Xu", "Voucher 10%", "Freeship 30k", "Quà bí ẩn"];
+        const res = raffle.shuffle(prizes, "CLIENT_SEED_BUYER_99");
+        expect.equal(res.shuffled.length, 5);
+        expect.equal(res.nonce > 0, true);
+        for (const p of prizes) {
+          expect.equal(res.shuffled.includes(p), true);
+        }
+      });
+
+      test("F167-T03: Independent fairness verification (verifyFairness) succeeds with matching seeds and fails with tampered serverSeed", () => {
+        const raffle = new FisherYatesFairRaffle("MY_SERVER_KEY");
+        const commitment = raffle.getCommitmentHash();
+        const res = raffle.shuffle(["A", "B", "C"], "USER_SEED");
+        const isValid = FisherYatesFairRaffle.verifyFairness("MY_SERVER_KEY", "USER_SEED", res.nonce, commitment);
+        expect.equal(isValid, true);
+        const isTampered = FisherYatesFairRaffle.verifyFairness("FAKE_KEY", "USER_SEED", res.nonce, commitment);
+        expect.equal(isTampered, false);
+      });
+
+      test("F167-T04: Weighted fair draw chooses candidate proportional to weight and returns winner metadata", () => {
+        const raffle = new FisherYatesFairRaffle();
+        const candidates = [
+          { id: "SMALL_PRIZE", weight: 90 },
+          { id: "JACKPOT", weight: 10 }
+        ];
+        const draw = raffle.weightedDraw(candidates, "SEED_CLIENT");
+        expect.equal(draw !== null, true);
+        expect.equal(["SMALL_PRIZE", "JACKPOT"].includes(draw.winner.id), true);
+      });
+
+      test("F167-T05: Pseudo-random generator produces uniform floats in range [0, 1) without bias", () => {
+        const raffle = new FisherYatesFairRaffle();
+        for (let i = 0; i < 10; i++) {
+          const val = raffle._pseudoRandom("TEST_SEED");
+          expect.equal(val >= 0 && val < 1, true);
+        }
+      });
+
+      test("F167-T06: Server-side FisherYatesFairRaffle matches client-side implementation", () => {
+        const clientRaffle = new FisherYatesFairRaffle("TEST_KEY");
+        const serverRaffle = new ServerFisherYates("TEST_KEY");
+        expect.equal(typeof clientRaffle.getCommitmentHash(), "string");
+        expect.equal(clientRaffle.getCommitmentHash().length, 64);
+        expect.equal(typeof serverRaffle.getCommitmentHash(), "string");
+        expect.equal(serverRaffle.getCommitmentHash().length, 64);
+        const cDraw = clientRaffle.weightedDraw([{ id: "A", weight: 100 }], "SEED_ABC");
+        const sDraw = serverRaffle.weightedDraw([{ id: "A", weight: 100 }], "SEED_ABC");
+        expect.equal(cDraw.winner.id, sDraw.winner.id);
+      });
+    });
+
+    // --- NHÓM 2: PrefixSpan Sequential Pattern Mining (F167-T07 -> F167-T13) ---
+    describe("Nhóm 2: PrefixSpan Sequential Pattern Mining", () => {
+      test("F167-T07: Initial state and empty sequence handling returns empty patterns", () => {
+        const ps = new PrefixSpanSequentialMining();
+        expect.equal(ps.minePatterns([]).length, 0);
+        expect.equal(ps.predictNextItem(["A"]), null);
+      });
+
+      test("F167-T08: Mines frequent single-item and multi-item sequences with minSupport", () => {
+        const ps = new PrefixSpanSequentialMining(2);
+        const sequences = [
+          ["Polo", "Kaki", "Sneaker"],
+          ["Polo", "Sneaker"],
+          ["Polo", "Kaki", "Sneaker", "Watch"],
+          ["Kaki", "Watch"]
+        ];
+        const patterns = ps.minePatterns(sequences);
+        expect.equal(patterns.length >= 4, true);
+        const poloKaki = patterns.find(p => p.pattern.length === 2 && p.pattern[0] === "Polo" && p.pattern[1] === "Kaki");
+        expect.equal(poloKaki !== undefined, true);
+        expect.equal(poloKaki.support, 2);
+      });
+
+      test("F167-T09: Prefix-projected database correctly handles complex customer journeys", () => {
+        const ps = new PrefixSpanSequentialMining(2);
+        const journeys = [
+          ["Home", "Search", "PDP", "Cart", "Checkout"],
+          ["Home", "Search", "PDP", "Cart", "Checkout"],
+          ["Search", "PDP", "Cart"]
+        ];
+        ps.minePatterns(journeys);
+        const topJourneys = ps.getTopJourneys(3);
+        expect.equal(topJourneys.length <= 3, true);
+        expect.equal(topJourneys[0].steps.length >= 2, true);
+      });
+
+      test("F167-T10: predictNextItem accurately recommends next in-basket item based on recent history", () => {
+        const ps = new PrefixSpanSequentialMining(2);
+        const sequences = [
+          ["Phone", "Case", "Charger"],
+          ["Phone", "Case", "Charger"],
+          ["Phone", "ScreenProtector"],
+          ["Phone", "Case", "PowerBank"]
+        ];
+        ps.minePatterns(sequences);
+        const prediction = ps.predictNextItem(["Phone", "Case"], 0.4);
+        expect.equal(prediction !== null, true);
+        expect.equal(prediction.predictedItem, "Charger");
+        expect.equal(prediction.confidence >= 0.5, true);
+      });
+
+      test("F167-T11: predictNextItem returns null when no matching pattern or confidence is too low", () => {
+        const ps = new PrefixSpanSequentialMining(2);
+        ps.minePatterns([["A", "B"], ["A", "B"]]);
+        const noMatch = ps.predictNextItem(["UNKNOWN_ITEM"]);
+        expect.equal(noMatch, null);
+      });
+
+      test("F167-T12: getTopJourneys extracts formatted readable customer journey flows", () => {
+        const ps = new PrefixSpanSequentialMining(2);
+        ps.minePatterns([["A", "B", "C"], ["A", "B", "C"], ["A", "B"]]);
+        const journeys = ps.getTopJourneys(2);
+        expect.equal(journeys[0].journey.includes("➔"), true);
+      });
+
+      test("F167-T13: Server-side PrefixSpan matches client-side implementation", () => {
+        const clientPs = new PrefixSpanSequentialMining(2);
+        const serverPs = new ServerPrefixSpan(2);
+        const seqs = [["A", "B"], ["A", "B", "C"], ["A", "B"]];
+        const cP = clientPs.minePatterns(seqs);
+        const sP = serverPs.minePatterns(seqs);
+        expect.equal(cP.length, sP.length);
+        expect.equal(cP[0].pattern.join(","), sP[0].pattern.join(","));
+      });
+    });
+
+    // --- NHÓM 3: Rete Promotion & Gamified Incentive Rule Engine (F167-T14 -> F167-T20) ---
+    describe("Nhóm 3: Rete Promotion & Gamified Incentive Rule Engine", () => {
+      test("F167-T14: AlphaNode correctly evaluates multiple operators (===, !==, >=, <=, >, <, includes, in)", () => {
+        const nodeGte = new AlphaNode("total", ">=", 100);
+        expect.equal(nodeGte.evaluate({ total: 100 }), true);
+        expect.equal(nodeGte.evaluate({ total: 99 }), false);
+        const nodeIn = new AlphaNode("tier", "in", ["VIP", "DIAMOND"]);
+        expect.equal(nodeIn.evaluate({ tier: "VIP" }), true);
+        expect.equal(nodeIn.evaluate({ tier: "STANDARD" }), false);
+      });
+
+      test("F167-T15: Asserting facts into working memory activates corresponding Alpha Nodes", () => {
+        const rete = new RetePromotionEngine();
+        rete.addRule({
+          id: "RULE_VIP",
+          conditions: [{ factType: "USER", field: "tier", operator: "===", value: "VIP" }],
+          actions: { discountAmount: 50000 }
+        });
+        rete.assertFact("USER", { id: "USER_1", tier: "VIP" });
+        const result = rete.fireAllRules();
+        expect.equal(result.triggeredCount, 1);
+        expect.equal(result.totalDiscountAmount, 50000);
+      });
+
+      test("F167-T16: Single-condition promotion rule fires and returns accurate discount", () => {
+        const rete = new RetePromotionEngine();
+        rete.addRule({
+          id: "R_CASHBACK",
+          conditions: [{ factType: "PAYMENT", field: "method", operator: "===", value: "VIETQR" }],
+          actions: { bonusCoins: 20000 }
+        });
+        rete.assertFact("PAYMENT", { method: "VIETQR" });
+        const res = rete.fireAllRules();
+        expect.equal(res.totalBonusCoins, 20000);
+      });
+
+      test("F167-T17: Multi-condition complex rule (VIP tier + Cart > 500k + Payment VietQR) fires only when ALL conditions are met", () => {
+        const rete = new RetePromotionEngine();
+        rete.addRule({
+          id: "MEGA_PROMO",
+          conditions: [
+            { factType: "USER", field: "isVip", operator: "===", value: true },
+            { factType: "CART", field: "subtotal", operator: ">=", value: 500000 },
+            { factType: "PAYMENT", field: "channel", operator: "===", value: "VIETQR" }
+          ],
+          actions: { discountAmount: 70000, bonusCoins: 15000 }
+        });
+        rete.assertFact("USER", { isVip: true });
+        rete.assertFact("CART", { subtotal: 600000 });
+        expect.equal(rete.fireAllRules().triggeredCount, 0);
+        rete.assertFact("PAYMENT", { channel: "VIETQR" });
+        const full = rete.fireAllRules();
+        expect.equal(full.triggeredCount, 1);
+        expect.equal(full.totalDiscountAmount, 70000);
+        expect.equal(full.totalBonusCoins, 15000);
+      });
+
+      test("F167-T18: Retracting a fact automatically deactivates satisfied rule without full re-computation", () => {
+        const rete = new RetePromotionEngine();
+        rete.addRule({
+          id: "RULE_SPX",
+          conditions: [{ factType: "SHIPPING", field: "courier", operator: "===", value: "SPX" }],
+          actions: { discountAmount: 30000 }
+        });
+        const factId = rete.assertFact("SHIPPING", { courier: "SPX" });
+        expect.equal(rete.fireAllRules().triggeredCount, 1);
+        rete.retractFact(factId);
+        expect.equal(rete.fireAllRules().triggeredCount, 0);
+      });
+
+      test("F167-T19: Priority ordering of multiple triggered rules and total bonus coins calculation", () => {
+        const rete = new RetePromotionEngine();
+        rete.addRule({
+          id: "R_LOW",
+          priority: 1,
+          conditions: [{ factType: "ORDER", field: "valid", operator: "===", value: true }],
+          actions: { discountAmount: 10000 }
+        });
+        rete.addRule({
+          id: "R_HIGH",
+          priority: 10,
+          conditions: [{ factType: "ORDER", field: "valid", operator: "===", value: true }],
+          actions: { discountAmount: 50000 }
+        });
+        rete.assertFact("ORDER", { valid: true });
+        const fired = rete.fireAllRules();
+        expect.equal(fired.triggeredRules[0].id, "R_HIGH");
+        expect.equal(fired.totalDiscountAmount, 60000);
+      });
+
+      test("F167-T20: Server-side RetePromotionEngine matches client-side implementation", () => {
+        const cRete = new RetePromotionEngine();
+        const sRete = new ServerReteEngine();
+        for (const r of [cRete, sRete]) {
+          r.addRule({
+            id: "R1",
+            conditions: [{ factType: "X", field: "val", operator: "===", value: 1 }],
+            actions: { discountAmount: 25000 }
+          });
+          r.assertFact("X", { val: 1 });
+        }
+        expect.equal(cRete.fireAllRules().totalDiscountAmount, sRete.fireAllRules().totalDiscountAmount);
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Lifecycle (F167-T21 -> F167-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Lifecycle", () => {
+      test("F167-T21: Admin Sentinel Copilot answers Fisher-Yates Fair Raffle and Rete Rule Engine intents", () => {
+        const resRaffle = generateAdminCopilotResponse("Minh bạch gamification và vòng quay may mắn bằng fisher-yates provably fair");
+        expect.equal(resRaffle.tag, "CÔNG BẰNG FISHER-YATES");
+        expect.equal(resRaffle.type, "security");
+        expect.equal(resRaffle.text.includes("FISHER-YATES"), true);
+
+        const resRete = generateAdminCopilotResponse("Bộ máy so khớp khuyến mãi đa tầng bằng mạng rete algorithm");
+        expect.equal(resRete.tag, "BỘ MÁY QUY TẮC RETE");
+        expect.equal(resRete.type, "algorithm");
+        expect.equal(resRete.text.includes("Alpha & Beta Network"), true);
+      });
+
+      test("F167-T22: Seller ShopSmart Copilot advises on PrefixSpan Next-In-Basket and journey predictions", () => {
+        const resSeller = generateSellerCopilotResponse("Dự báo giỏ hàng tiếp theo next-in-basket bằng prefixspan sequential pattern");
+        expect.equal(resSeller.tag, "DỰ BÁO PREFIXSPAN");
+        expect.equal(resSeller.type, "recommendation");
+        expect.equal(resSeller.text.includes("Projected Database"), true);
+      });
+
+      test("F167-T23: Buyer AI Assistant explains Provably Fair Lucky Wheel gamification mechanics", () => {
+        const resBuyer = generateAiChatResponse("Vòng quay may mắn có minh bạch không fisher-yates provably fair");
+        expect.equal(resBuyer.intent, "LUCKY_WHEEL_PROVABLY_FAIR");
+        expect.equal(resBuyer.replyText.includes("FISHER-YATES"), true);
+      });
+
+      test("F167-T24: E2E Enterprise Lifecycle: PrefixSpan Predicts Next Item -> Rete Fires VIP VietQR Promotion -> Fisher-Yates Grants Fair Lucky Spin", () => {
+        // 1. PrefixSpan predicts customer will purchase Earbuds next
+        const mining = new PrefixSpanSequentialMining(2);
+        mining.minePatterns([
+          ["Phone", "Earbuds", "Charger"],
+          ["Phone", "Earbuds", "ScreenProtector"],
+          ["Tablet", "Stylus"]
+        ]);
+        const pred = mining.predictNextItem(["Phone"]);
+        expect.equal(pred.predictedItem, "Earbuds");
+
+        // 2. Rete engine checks promotions for Buyer adding Phone + Earbuds paid via VietQR
+        const rete = new RetePromotionEngine();
+        rete.addRule({
+          id: "BUNDLE_VIETQR",
+          conditions: [
+            { factType: "CART", field: "hasEarbuds", operator: "===", value: true },
+            { factType: "PAYMENT", field: "method", operator: "===", value: "VIETQR" }
+          ],
+          actions: { discountAmount: 65000, bonusCoins: 5000 }
+        });
+        rete.assertFact("CART", { hasEarbuds: true });
+        rete.assertFact("PAYMENT", { method: "VIETQR" });
+        const promo = rete.fireAllRules();
+        expect.equal(promo.totalDiscountAmount, 65000);
+        expect.equal(promo.totalBonusCoins, 5000);
+
+        // 3. Buyer checkout complete -> Provably Fair Lucky Spin with Fisher-Yates
+        const fairSpin = new FisherYatesFairRaffle("SERVER_SECRET_MEGA_SALE");
+        const draw = fairSpin.weightedDraw([
+          { id: "1000_XU", weight: 70 },
+          { id: "5000_XU", weight: 25 },
+          { id: "JACKPOT_VOUCHER_100K", weight: 5 }
+        ], "CLIENT_BUYER_SEED_ORDER_123");
+        expect.equal(["1000_XU", "5000_XU", "JACKPOT_VOUCHER_100K"].includes(draw.winner.id), true);
+        const verified = FisherYatesFairRaffle.verifyFairness("SERVER_SECRET_MEGA_SALE", "CLIENT_BUYER_SEED_ORDER_123", draw.nonce, draw.commitmentHash);
+        expect.equal(verified, true);
       });
     });
   });

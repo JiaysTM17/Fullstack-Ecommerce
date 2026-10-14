@@ -588,6 +588,25 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 29. Dự Báo Giỏ Hàng Tiếp Theo Bằng PrefixSpan Sequential Mining (Phase 20 - Feature 167)
+  if (/prefixspan|chuỗi hành vi|hành trình mua sắm|next-in-basket|dự báo mua kèm tiếp theo|sequential pattern/i.test(raw)) {
+    return {
+      text: `🛒 **DỰ BÁO GIỎ HÀNG TIẾP THEO BẰNG PREFIXSPAN (SEQUENTIAL PATTERN MINING)**:
+- **Nguyên lý chiếu cơ sở dữ liệu con (Projected Database)**:
+  - Khai phá các chuỗi hành vi mua sắm nối tiếp phổ biến của khách hàng (Ví dụ: $\\langle \\text{Áo sơ mi} \\to \\text{Cà vạt} \\to \\text{Giày tây} \\rangle$) mà không sinh tổ hợp ứng viên $O(2^N)$ bùng nổ.
+- **Tối ưu hóa doanh thu cho Shop (${currentShop.name})**:
+  - **Cross-Selling thông minh**: Khi khách thêm sản phẩm $A$ vào giỏ hàng, tự động đề xuất sản phẩm $B$ với độ tin cậy Confidence $\\ge 60\\%$.
+  - **Nhắc mua định kỳ chuẩn xác**: Dựa trên chu kỳ hành trình, gửi thông báo nhắc khách đặt lại phụ kiện (như lưỡi dao cạo, cáp sạc, lõi lọc) trước khi cạn kiệt!`,
+      type: 'recommendation',
+      tag: 'DỰ BÁO PREFIXSPAN',
+      suggestions: [
+        'Xu hướng sản phẩm Space-Saving',
+        'Tối ưu đấu thầu từ khóa GSP',
+        'Phân tích biên lợi nhuận P&L'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

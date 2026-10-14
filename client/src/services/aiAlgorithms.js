@@ -9413,6 +9413,347 @@ export class KademliaDhtRouting {
   }
 }
 
+// =========================================================================
+// PHASE 20: FAIR RAFFLE, SEQUENTIAL MINING & RETE RULE ENGINE SUITE
+// =========================================================================
+
+export class FisherYatesFairRaffle {
+  constructor(serverSeed = "") {
+    this.serverSeed = serverSeed || (Math.random().toString(36).substring(2) + Date.now().toString(36) + Math.random().toString(36).substring(2));
+    this.serverSeedHash = sha256(this.serverSeed);
+    this.nonce = 0;
+  }
+
+  getCommitmentHash() {
+    return this.serverSeedHash;
+  }
+
+  _pseudoRandom(clientSeed = "DEFAULT_CLIENT_SEED", specificNonce = null) {
+    const currentNonce = specificNonce !== null ? specificNonce : ++this.nonce;
+    const message = `${this.serverSeed}:${clientSeed}:${currentNonce}`;
+    const hashHex = sha256(message);
+    const intVal = parseInt(hashHex.substring(0, 8), 16);
+    return (intVal >>> 0) / 0xffffffff;
+  }
+
+  shuffle(array = [], clientSeed = "MINI_SHOPEE_BUYER") {
+    if (!Array.isArray(array) || array.length <= 1) {
+      return {
+        shuffled: [...(array || [])],
+        commitmentHash: this.serverSeedHash,
+        serverSeed: this.serverSeed,
+        nonce: this.nonce
+      };
+    }
+
+    const shuffled = [...array];
+    const n = shuffled.length;
+
+    for (let i = n - 1; i > 0; i--) {
+      const randFloat = this._pseudoRandom(clientSeed);
+      const j = Math.floor(randFloat * (i + 1));
+      const temp = shuffled[i];
+      shuffled[i] = shuffled[j];
+      shuffled[j] = temp;
+    }
+
+    return {
+      shuffled,
+      commitmentHash: this.serverSeedHash,
+      serverSeed: this.serverSeed,
+      nonce: this.nonce
+    };
+  }
+
+  weightedDraw(candidates = [], clientSeed = "MINI_SHOPEE_DRAW") {
+    if (!Array.isArray(candidates) || candidates.length === 0) return null;
+
+    const totalWeight = candidates.reduce((sum, c) => sum + Math.max(0, Number(c.weight) || 0), 0);
+    if (totalWeight <= 0) return candidates[0];
+
+    const randFloat = this._pseudoRandom(clientSeed);
+    let randomThreshold = randFloat * totalWeight;
+
+    for (const c of candidates) {
+      const w = Math.max(0, Number(c.weight) || 0);
+      if (randomThreshold < w) {
+        return {
+          winner: c,
+          rollValue: randFloat,
+          commitmentHash: this.serverSeedHash,
+          serverSeed: this.serverSeed,
+          nonce: this.nonce
+        };
+      }
+      randomThreshold -= w;
+    }
+
+    return {
+      winner: candidates[candidates.length - 1],
+      rollValue: randFloat,
+      commitmentHash: this.serverSeedHash,
+      serverSeed: this.serverSeed,
+      nonce: this.nonce
+    };
+  }
+
+  static verifyFairness(serverSeed, clientSeed, nonce, expectedCommitmentHash) {
+    const computedHash = sha256(serverSeed);
+    if (computedHash !== expectedCommitmentHash) return false;
+    const message = `${serverSeed}:${clientSeed}:${nonce}`;
+    const h = sha256(message);
+    return typeof h === "string" && h.length === 64;
+  }
+}
+
+export class PrefixSpanSequentialMining {
+  constructor(minSupport = 2, maxPatternLength = 5) {
+    this.minSupport = Math.max(1, minSupport);
+    this.maxPatternLength = Math.max(1, maxPatternLength);
+    this.patterns = [];
+  }
+
+  minePatterns(sequences = [], minSupport = this.minSupport) {
+    this.minSupport = Math.max(1, minSupport);
+    this.patterns = [];
+
+    if (!Array.isArray(sequences) || sequences.length === 0) {
+      return [];
+    }
+
+    this._prefixSpan([], sequences);
+    this.patterns.sort((a, b) => b.support - a.support || b.pattern.length - a.pattern.length);
+    return this.patterns;
+  }
+
+  _prefixSpan(prefix, projectedDb) {
+    if (prefix.length >= this.maxPatternLength) return;
+
+    const itemCounts = new Map();
+    for (const seq of projectedDb) {
+      const seenInThisSeq = new Set();
+      for (const item of seq) {
+        if (!seenInThisSeq.has(item)) {
+          seenInThisSeq.add(item);
+          itemCounts.set(item, (itemCounts.get(item) || 0) + 1);
+        }
+      }
+    }
+
+    for (const [item, count] of itemCounts.entries()) {
+      if (count >= this.minSupport) {
+        const newPrefix = [...prefix, item];
+        this.patterns.push({
+          pattern: newPrefix,
+          support: count
+        });
+
+        const newProjectedDb = [];
+        for (const seq of projectedDb) {
+          const idx = seq.indexOf(item);
+          if (idx !== -1 && idx + 1 < seq.length) {
+            newProjectedDb.push(seq.slice(idx + 1));
+          }
+        }
+
+        if (newProjectedDb.length >= this.minSupport) {
+          this._prefixSpan(newPrefix, newProjectedDb);
+        }
+      }
+    }
+  }
+
+  predictNextItem(recentHistory = [], minConfidence = 0.3) {
+    if (!Array.isArray(recentHistory) || recentHistory.length === 0 || this.patterns.length === 0) {
+      return null;
+    }
+
+    const n = recentHistory.length;
+    let bestCandidate = null;
+    let maxScore = -1;
+
+    for (let len = Math.min(n, this.maxPatternLength - 1); len >= 1; len--) {
+      const queryPrefix = recentHistory.slice(n - len);
+
+      const prefixMatch = this.patterns.find(p =>
+        p.pattern.length === queryPrefix.length &&
+        p.pattern.every((val, idx) => val === queryPrefix[idx])
+      );
+
+      const prefixSupport = prefixMatch ? prefixMatch.support : 0;
+      if (prefixSupport === 0) continue;
+
+      for (const p of this.patterns) {
+        if (p.pattern.length === queryPrefix.length + 1) {
+          const startsWithPrefix = queryPrefix.every((val, idx) => val === p.pattern[idx]);
+          if (startsWithPrefix) {
+            const nextItem = p.pattern[p.pattern.length - 1];
+            const confidence = Number((p.support / prefixSupport).toFixed(3));
+
+            if (confidence >= minConfidence && p.support > maxScore) {
+              maxScore = p.support;
+              bestCandidate = {
+                matchedHistory: queryPrefix,
+                predictedItem: nextItem,
+                confidence,
+                support: p.support
+              };
+            }
+          }
+        }
+      }
+
+      if (bestCandidate) break;
+    }
+
+    return bestCandidate;
+  }
+
+  getTopJourneys(topK = 5) {
+    const multiStep = this.patterns.filter(p => p.pattern.length >= 2);
+    return multiStep.slice(0, topK).map(p => ({
+      journey: p.pattern.join(" ➔ "),
+      steps: p.pattern,
+      frequency: p.support
+    }));
+  }
+}
+
+export class AlphaNode {
+  constructor(field, operator, expectedValue) {
+    this.field = field;
+    this.operator = operator;
+    this.expectedValue = expectedValue;
+    this.memory = new Map();
+  }
+
+  evaluate(fact) {
+    const val = fact[this.field];
+    switch (this.operator) {
+      case "===": return val === this.expectedValue;
+      case "!==": return val !== this.expectedValue;
+      case ">=": return Number(val) >= Number(this.expectedValue);
+      case "<=": return Number(val) <= Number(this.expectedValue);
+      case ">": return Number(val) > Number(this.expectedValue);
+      case "<": return Number(val) < Number(this.expectedValue);
+      case "includes": return Array.isArray(val) && val.includes(this.expectedValue);
+      case "in": return Array.isArray(this.expectedValue) && this.expectedValue.includes(val);
+      default: return false;
+    }
+  }
+}
+
+export class PromotionRule {
+  constructor({ id, name = "", conditions = [], actions = {}, priority = 1 }) {
+    this.id = String(id);
+    this.name = name || this.id;
+    this.conditions = conditions;
+    this.actions = actions;
+    this.priority = priority;
+  }
+}
+
+export class RetePromotionEngine {
+  constructor() {
+    this.rules = new Map();
+    this.workingMemory = new Map();
+    this.alphaNodes = new Map();
+    this.ruleActivations = new Set();
+  }
+
+  addRule(ruleDef) {
+    const rule = new PromotionRule(ruleDef);
+    this.rules.set(rule.id, rule);
+
+    for (const cond of rule.conditions) {
+      const key = `${cond.factType}:${cond.field}:${cond.operator}:${cond.value}`;
+      if (!this.alphaNodes.has(key)) {
+        this.alphaNodes.set(key, new AlphaNode(cond.field, cond.operator, cond.value));
+      }
+    }
+  }
+
+  assertFact(factType, factData = {}) {
+    const factId = factData.id || `${factType}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const fact = { ...factData, id: factId, __type: factType };
+    this.workingMemory.set(factId, fact);
+
+    for (const [key, node] of this.alphaNodes.entries()) {
+      if (key.startsWith(`${factType}:`)) {
+        if (node.evaluate(fact)) {
+          node.memory.set(factId, fact);
+        }
+      }
+    }
+
+    return factId;
+  }
+
+  retractFact(factId) {
+    if (!this.workingMemory.has(factId)) return false;
+    this.workingMemory.delete(factId);
+
+    for (const node of this.alphaNodes.values()) {
+      node.memory.delete(factId);
+    }
+    return true;
+  }
+
+  fireAllRules() {
+    const triggered = [];
+
+    for (const rule of this.rules.values()) {
+      let isSatisfied = true;
+
+      for (const cond of rule.conditions) {
+        const key = `${cond.factType}:${cond.field}:${cond.operator}:${cond.value}`;
+        const alpha = this.alphaNodes.get(key);
+
+        if (!alpha || alpha.memory.size === 0) {
+          isSatisfied = false;
+          break;
+        }
+      }
+
+      if (isSatisfied) {
+        triggered.push(rule);
+      }
+    }
+
+    triggered.sort((a, b) => b.priority - a.priority);
+
+    let totalDiscount = 0;
+    let totalCoins = 0;
+    const actionsApplied = [];
+
+    for (const rule of triggered) {
+      if (rule.actions.discountAmount) totalDiscount += Number(rule.actions.discountAmount) || 0;
+      if (rule.actions.bonusCoins) totalCoins += Number(rule.actions.bonusCoins) || 0;
+      actionsApplied.push({
+        ruleId: rule.id,
+        ruleName: rule.name,
+        actions: rule.actions
+      });
+    }
+
+    return {
+      triggeredCount: triggered.length,
+      triggeredRules: triggered.map(r => ({ id: r.id, name: r.name, priority: r.priority })),
+      totalDiscountAmount: totalDiscount,
+      totalBonusCoins: totalCoins,
+      appliedActions: actionsApplied
+    };
+  }
+
+  reset() {
+    this.workingMemory.clear();
+    for (const node of this.alphaNodes.values()) {
+      node.memory.clear();
+    }
+    this.ruleActivations.clear();
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -9532,6 +9873,12 @@ export default {
   SpaceSavingHeavyHitters,
   KademliaContact,
   KademliaDhtRouting,
+  // Phase 20 Enterprise Algorithms
+  FisherYatesFairRaffle,
+  PrefixSpanSequentialMining,
+  AlphaNode,
+  PromotionRule,
+  RetePromotionEngine,
 };
 
 

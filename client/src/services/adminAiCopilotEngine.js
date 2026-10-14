@@ -1139,6 +1139,47 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
+  // 47. Minh Bạch Gamification & Vòng Quay May Mắn Bằng Fisher-Yates CSPRNG (Phase 20 - Feature 167)
+  if (/fisher-yates|provably fair|vòng quay may mắn|xổ số săn deal|minh bạch quay thưởng|kiểm toán kết quả quay/i.test(raw)) {
+    return {
+      text: `🎲 **MINH BẠCH GAMIFICATION BẰNG THUẬT TOÁN FISHER-YATES (PROVABLY FAIR SYSTEM)**:
+- **Nguyên lý xáo trộn Knuth không thiên lệch $O(N)$**:
+  - Mọi hoán vị trong $N!$ kết quả đều có xác suất xảy ra chính xác $1 / N!$, loại bỏ triệt để hiện tượng thiên lệch (Zero Sampling Bias).
+- **Cơ chế cam kết mã hóa (Cryptographic Commitment Scheme)**:
+  - Trước khi bắt đầu lượt quay, hệ thống công bố mã băm \`Commitment Hash = SHA256(ServerSeed)\`.
+  - Kết quả quay được tính toán từ \`HMAC-SHA256(ServerSeed, ClientSeed:Nonce)\`.
+  - Sau sự kiện, sàn công khai \`ServerSeed\` để Quản trị viên và người mua có thể đối soát và kiểm chứng độc lập $100\\%$ tính công bằng, không một ai (kể cả Super Admin) có thể gian lận hoặc can thiệp trước kết quả!`,
+      type: 'security',
+      tag: 'CÔNG BẰNG FISHER-YATES',
+      suggestions: [
+        'Mạng so khớp khuyến mãi Rete',
+        'Định tuyến phân tán Kademlia DHT',
+        'Kiểm toán số dư Escrow Vault'
+      ]
+    };
+  }
+
+  // 48. Mạng So Khớp Khuyến Mãi Đa Tầng Bằng Rete Algorithm (Phase 20 - Feature 167)
+  if (/rete|mạng rete|khớp mẫu khuyến mãi|rule engine|khuyến mãi đa tầng|alpha network|beta network/i.test(raw)) {
+    return {
+      text: `⚙️ **BỘ MÁY SO KHỚP KHUYẾN MÃI ĐA TẦNG BẰNG THUẬT TOÁN RETE (CHARLES FORGY)**:
+- **Ưu thế vượt trội trong Siêu Sale Flash Sale**:
+  - Thay vì phải quét lại hàng trăm quy tắc $O(R \\times W)$ mỗi khi khách thêm món đồ vào giỏ hàng, thuật toán Rete xây dựng đồ thị có hướng lưu nhớ trạng thái (State Retention).
+- **Kiến trúc Alpha & Beta Network**:
+  - **Alpha Network**: Lọc tức thì các điều kiện đơn lẻ (Ví dụ: \`Hạng thành viên VIP\`, \`Giỏ hàng > 500k\`, \`Thanh toán VietQR\`).
+  - **Beta Join Network**: Ghép nối các điều kiện đa thực thể mà không tốn chi phí tính toán lại.
+- **Tự động kích hoạt hành động (Action Firing)**:
+  - Tự động cộng dồn chiết khấu đơn hàng + thưởng Mini Xu + tặng voucher Freeship trong thời gian thực dưới $1\\text{ms}$!`,
+      type: 'algorithm',
+      tag: 'BỘ MÁY QUY TẮC RETE',
+      suggestions: [
+        'Minh bạch quay thưởng Fisher-Yates',
+        'Phân bổ voucher Dancing Links',
+        'Tối ưu giỏ hàng Knapsack'
+      ]
+    };
+  }
+
   // 39. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
