@@ -11158,6 +11158,532 @@ export class LazySegmentTreeInventory {
   }
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 46: Heavy-Light Decomposition (HLD) on Deep Category Taxonomies (Phase 24)
+// ------------------------------------------------------------------------------
+class HLDSegmentTree {
+  constructor(size) {
+    this.n = size;
+    this.treeMax = new Float64Array(4 * Math.max(1, size));
+    this.lazy = new Float64Array(4 * Math.max(1, size));
+  }
+
+  _push(node) {
+    if (this.lazy[node] !== 0) {
+      const val = this.lazy[node];
+      this.lazy[2 * node] += val;
+      this.treeMax[2 * node] += val;
+      this.lazy[2 * node + 1] += val;
+      this.treeMax[2 * node + 1] += val;
+      this.lazy[node] = 0;
+    }
+  }
+
+  updateRange(node, start, end, l, r, val) {
+    if (l > end || r < start) return;
+    if (l <= start && end <= r) {
+      this.treeMax[node] += val;
+      this.lazy[node] += val;
+      return;
+    }
+    this._push(node);
+    const mid = Math.floor((start + end) / 2);
+    this.updateRange(2 * node, start, mid, l, r, val);
+    this.updateRange(2 * node + 1, mid + 1, end, l, r, val);
+    this.treeMax[node] = Math.max(this.treeMax[2 * node], this.treeMax[2 * node + 1]);
+  }
+
+  queryRange(node, start, end, l, r) {
+    if (l > end || r < start) return -Infinity;
+    if (l <= start && end <= r) return this.treeMax[node];
+    this._push(node);
+    const mid = Math.floor((start + end) / 2);
+    const leftVal = this.queryRange(2 * node, start, mid, l, r);
+    const rightVal = this.queryRange(2 * node + 1, mid + 1, end, l, r);
+    return Math.max(leftVal, rightVal);
+  }
+}
+
+export class HeavyLightDecompositionTaxonomy {
+  constructor() {
+    this.nodes = new Map();
+    this.adj = new Map();
+    this.rootId = null;
+    this.built = false;
+
+    this.parent = new Map();
+    this.depth = new Map();
+    this.size = new Map();
+    this.heavy = new Map();
+    this.head = new Map();
+    this.pos = new Map();
+    this.nodeAtPos = [];
+    this.curPos = 0;
+    this.segTree = null;
+  }
+
+  addCategory(id, name, parentId = null, initialFeeRate = 0) {
+    this.nodes.set(id, {
+      id,
+      name,
+      parentId,
+      feeRate: Number(initialFeeRate) || 0
+    });
+
+    if (!this.adj.has(id)) {
+      this.adj.set(id, []);
+    }
+
+    if (parentId === null) {
+      this.rootId = id;
+    } else {
+      if (!this.adj.has(parentId)) {
+        this.adj.set(parentId, []);
+      }
+      this.adj.get(parentId).push(id);
+    }
+    this.built = false;
+  }
+
+  build() {
+    if (!this.rootId && this.nodes.size > 0) {
+      for (const [id, node] of this.nodes.entries()) {
+        if (!node.parentId || !this.nodes.has(node.parentId)) {
+          this.rootId = id;
+          break;
+        }
+      }
+    }
+
+    if (!this.rootId) return;
+
+    this.curPos = 0;
+    this.nodeAtPos = new Array(this.nodes.size);
+
+    this._dfsSize(this.rootId, null, 0);
+    this._dfsHld(this.rootId, this.rootId);
+
+    this.segTree = new HLDSegmentTree(this.nodes.size);
+    for (const [id, node] of this.nodes.entries()) {
+      const p = this.pos.get(id);
+      if (p !== undefined && node.feeRate !== 0) {
+        this.segTree.updateRange(1, 0, this.nodes.size - 1, p, p, node.feeRate);
+      }
+    }
+
+    this.built = true;
+  }
+
+  _dfsSize(u, p, d) {
+    this.parent.set(u, p);
+    this.depth.set(u, d);
+    this.size.set(u, 1);
+    this.heavy.set(u, null);
+
+    let maxChildSize = 0;
+    const children = this.adj.get(u) || [];
+
+    for (const v of children) {
+      if (v === p) continue;
+      this._dfsSize(v, u, d + 1);
+      const subSize = this.size.get(v);
+      this.size.set(u, this.size.get(u) + subSize);
+
+      if (subSize > maxChildSize) {
+        maxChildSize = subSize;
+        this.heavy.set(u, v);
+      }
+    }
+  }
+
+  _dfsHld(u, h) {
+    this.head.set(u, h);
+    this.pos.set(u, this.curPos);
+    this.nodeAtPos[this.curPos] = u;
+    this.curPos++;
+
+    const heavyChild = this.heavy.get(u);
+    if (heavyChild) {
+      this._dfsHld(heavyChild, h);
+    }
+
+    const children = this.adj.get(u) || [];
+    for (const v of children) {
+      if (v !== this.parent.get(u) && v !== heavyChild) {
+        this._dfsHld(v, v);
+      }
+    }
+  }
+
+  _ensureBuilt() {
+    if (!this.built) {
+      this.build();
+    }
+  }
+
+  updateSubtree(rootId, deltaFee) {
+    this._ensureBuilt();
+    if (!this.pos.has(rootId)) return;
+
+    const p = this.pos.get(rootId);
+    const sz = this.size.get(rootId);
+    this.segTree.updateRange(1, 0, this.nodes.size - 1, p, p + sz - 1, deltaFee);
+  }
+
+  querySubtreeMax(rootId) {
+    this._ensureBuilt();
+    if (!this.pos.has(rootId)) return 0;
+
+    const p = this.pos.get(rootId);
+    const sz = this.size.get(rootId);
+    const res = this.segTree.queryRange(1, 0, this.nodes.size - 1, p, p + sz - 1);
+    return res === -Infinity ? 0 : Number(res.toFixed(4));
+  }
+
+  updatePath(u, v, deltaFee) {
+    this._ensureBuilt();
+    if (!this.pos.has(u) || !this.pos.has(v)) return;
+
+    let currU = u;
+    let currV = v;
+
+    while (this.head.get(currU) !== this.head.get(currV)) {
+      if (this.depth.get(this.head.get(currU)) > this.depth.get(this.head.get(currV))) {
+        const h = this.head.get(currU);
+        this.segTree.updateRange(1, 0, this.nodes.size - 1, this.pos.get(h), this.pos.get(currU), deltaFee);
+        currU = this.parent.get(h);
+      } else {
+        const h = this.head.get(currV);
+        this.segTree.updateRange(1, 0, this.nodes.size - 1, this.pos.get(h), this.pos.get(currV), deltaFee);
+        currV = this.parent.get(h);
+      }
+    }
+
+    const pU = this.pos.get(currU);
+    const pV = this.pos.get(currV);
+    this.segTree.updateRange(1, 0, this.nodes.size - 1, Math.min(pU, pV), Math.max(pU, pV), deltaFee);
+  }
+
+  queryPathMax(u, v) {
+    this._ensureBuilt();
+    if (!this.pos.has(u) || !this.pos.has(v)) return 0;
+
+    let currU = u;
+    let currV = v;
+    let maxVal = -Infinity;
+
+    while (this.head.get(currU) !== this.head.get(currV)) {
+      if (this.depth.get(this.head.get(currU)) > this.depth.get(this.head.get(currV))) {
+        const h = this.head.get(currU);
+        const val = this.segTree.queryRange(1, 0, this.nodes.size - 1, this.pos.get(h), this.pos.get(currU));
+        maxVal = Math.max(maxVal, val);
+        currU = this.parent.get(h);
+      } else {
+        const h = this.head.get(currV);
+        const val = this.segTree.queryRange(1, 0, this.nodes.size - 1, this.pos.get(h), this.pos.get(currV));
+        maxVal = Math.max(maxVal, val);
+        currV = this.parent.get(h);
+      }
+    }
+
+    const pU = this.pos.get(currU);
+    const pV = this.pos.get(currV);
+    const val = this.segTree.queryRange(1, 0, this.nodes.size - 1, Math.min(pU, pV), Math.max(pU, pV));
+    maxVal = Math.max(maxVal, val);
+
+    return maxVal === -Infinity ? 0 : Number(maxVal.toFixed(4));
+  }
+
+  getLCA(u, v) {
+    this._ensureBuilt();
+    if (!this.pos.has(u) || !this.pos.has(v)) return null;
+
+    let currU = u;
+    let currV = v;
+
+    while (this.head.get(currU) !== this.head.get(currV)) {
+      if (this.depth.get(this.head.get(currU)) > this.depth.get(this.head.get(currV))) {
+        currU = this.parent.get(this.head.get(currU));
+      } else {
+        currV = this.parent.get(this.head.get(currV));
+      }
+    }
+
+    return this.depth.get(currU) < this.depth.get(currV) ? currU : currV;
+  }
+
+  getBreadcrumb(u) {
+    this._ensureBuilt();
+    if (!this.nodes.has(u)) return [];
+
+    const path = [];
+    let curr = u;
+    while (curr) {
+      const node = this.nodes.get(curr);
+      if (node) path.unshift({ id: node.id, name: node.name });
+      curr = this.parent.get(curr);
+    }
+    return path;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 47: Simulated Annealing Warehouse Slotting Optimizer (Phase 24)
+// ------------------------------------------------------------------------------
+export class SimulatedAnnealingWarehouseSlotter {
+  constructor(options = {}) {
+    this.initialTemperature = options.initialTemperature || 1000;
+    this.coolingRate = options.coolingRate || 0.95;
+    this.minTemperature = options.minTemperature || 1e-3;
+    this.iterationsPerTemp = options.iterationsPerTemp || 20;
+
+    this.slots = new Map();
+    this.skus = new Map();
+    this.affinities = new Map();
+  }
+
+  addSlot(id, { distToPacking, shelf = 1, aisle = 1 }) {
+    this.slots.set(id, {
+      id,
+      distToPacking: Number(distToPacking),
+      shelf: Number(shelf),
+      aisle: Number(aisle)
+    });
+  }
+
+  addSku(id, { name = "", picksPerDay = 1, weightKg = 1 }) {
+    this.skus.set(id, {
+      id,
+      name,
+      picksPerDay: Math.max(1, Number(picksPerDay)),
+      weightKg: Math.max(0.1, Number(weightKg))
+    });
+  }
+
+  addAffinity(skuA, skuB, coPickCount) {
+    const key = [skuA, skuB].sort().join("::");
+    this.affinities.set(key, (this.affinities.get(key) || 0) + Number(coPickCount));
+  }
+
+  calculateEnergy(skuToSlot) {
+    let travelEnergy = 0;
+    let ergonomicsPenalty = 0;
+    let affinityEnergy = 0;
+
+    const slotMap = this.slots;
+
+    for (const [skuId, slotId] of skuToSlot.entries()) {
+      const sku = this.skus.get(skuId);
+      const slot = slotMap.get(slotId);
+      if (!sku || !slot) continue;
+
+      travelEnergy += sku.picksPerDay * slot.distToPacking;
+
+      if (sku.weightKg > 5 && slot.shelf > 1) {
+        ergonomicsPenalty += sku.weightKg * (slot.shelf - 1) * 15;
+      }
+    }
+
+    for (const [pairKey, count] of this.affinities.entries()) {
+      const [skuA, skuB] = pairKey.split("::");
+      const slotAId = skuToSlot.get(skuA);
+      const slotBId = skuToSlot.get(skuB);
+
+      if (slotAId && slotBId) {
+        const slotA = slotMap.get(slotAId);
+        const slotB = slotMap.get(slotBId);
+        const dist = Math.abs(slotA.distToPacking - slotB.distToPacking) + Math.abs(slotA.aisle - slotB.aisle) * 10;
+        affinityEnergy += count * dist;
+      }
+    }
+
+    return travelEnergy + ergonomicsPenalty + affinityEnergy * 0.5;
+  }
+
+  optimize() {
+    const skuIds = Array.from(this.skus.keys());
+    const slotIds = Array.from(this.slots.keys());
+
+    if (skuIds.length === 0 || slotIds.length === 0) {
+      return {
+        assignment: new Map(),
+        initialEnergy: 0,
+        finalEnergy: 0,
+        improvementPercent: 0,
+        iterations: 0
+      };
+    }
+
+    if (slotIds.length < skuIds.length) {
+      throw new Error("INSUFFICIENT_SLOTS: Số lượng vị trí kho ít hơn số lượng SKU cần xếp!");
+    }
+
+    let currentAssignment = new Map();
+    for (let i = 0; i < skuIds.length; i++) {
+      currentAssignment.set(skuIds[i], slotIds[i]);
+    }
+
+    let currentEnergy = this.calculateEnergy(currentAssignment);
+    const initialEnergy = currentEnergy;
+
+    let bestAssignment = new Map(currentAssignment);
+    let bestEnergy = currentEnergy;
+
+    let T = this.initialTemperature;
+    let totalIterations = 0;
+
+    while (T > this.minTemperature) {
+      for (let iter = 0; iter < this.iterationsPerTemp; iter++) {
+        totalIterations++;
+
+        const nextAssignment = new Map(currentAssignment);
+
+        const idxA = Math.floor(Math.random() * skuIds.length);
+        const skuA = skuIds[idxA];
+
+        if (Math.random() < 0.5 && skuIds.length > 1) {
+          let idxB = Math.floor(Math.random() * skuIds.length);
+          while (idxB === idxA) {
+            idxB = Math.floor(Math.random() * skuIds.length);
+          }
+          const skuB = skuIds[idxB];
+          const slotA = nextAssignment.get(skuA);
+          const slotB = nextAssignment.get(skuB);
+          nextAssignment.set(skuA, slotB);
+          nextAssignment.set(skuB, slotA);
+        } else {
+          const randomSlotId = slotIds[Math.floor(Math.random() * slotIds.length)];
+          let occupantSku = null;
+          for (const [sId, slId] of nextAssignment.entries()) {
+            if (slId === randomSlotId && sId !== skuA) {
+              occupantSku = sId;
+              break;
+            }
+          }
+
+          const oldSlotA = nextAssignment.get(skuA);
+          nextAssignment.set(skuA, randomSlotId);
+          if (occupantSku) {
+            nextAssignment.set(occupantSku, oldSlotA);
+          }
+        }
+
+        const nextEnergy = this.calculateEnergy(nextAssignment);
+        const deltaEnergy = nextEnergy - currentEnergy;
+
+        if (deltaEnergy < 0 || Math.random() < Math.exp(-deltaEnergy / T)) {
+          currentAssignment = nextAssignment;
+          currentEnergy = nextEnergy;
+
+          if (currentEnergy < bestEnergy) {
+            bestEnergy = currentEnergy;
+            bestAssignment = new Map(currentAssignment);
+          }
+        }
+      }
+
+      T *= this.coolingRate;
+    }
+
+    const improvementPercent = initialEnergy > 0
+      ? Number((((initialEnergy - bestEnergy) / initialEnergy) * 100).toFixed(2))
+      : 0;
+
+    return {
+      assignment: bestAssignment,
+      initialEnergy: Math.round(initialEnergy),
+      finalEnergy: Math.round(bestEnergy),
+      improvementPercent: Math.max(0, improvementPercent),
+      iterations: totalIterations
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 48: Time-Decayed Reservoir Sampling for Live Hot Deals Stream (Phase 24)
+// ------------------------------------------------------------------------------
+export class TimeDecayedReservoirSampler {
+  constructor(capacity = 10, { decayLambda = 0.0001 } = {}) {
+    this.capacity = Math.max(1, capacity);
+    this.decayLambda = Math.max(1e-8, decayLambda);
+    this.reservoir = [];
+    this.totalProcessed = 0;
+  }
+
+  _computeKey(baseWeight, timestamp, referenceTime) {
+    const u = Math.random();
+    const safeU = Math.max(1e-7, Math.min(0.9999999, u));
+    const ageSeconds = Math.max(0, (referenceTime - timestamp) / 1000);
+    const decayedWeight = Math.max(1e-6, baseWeight * Math.exp(-this.decayLambda * ageSeconds));
+
+    return Math.pow(safeU, 1.0 / decayedWeight);
+  }
+
+  addItem(item, timestamp = Date.now(), baseWeight = 1.0) {
+    this.totalProcessed++;
+    const now = Date.now();
+    const key = this._computeKey(baseWeight, timestamp, now);
+
+    const entry = {
+      item,
+      key,
+      timestamp,
+      baseWeight: Number(baseWeight) || 1.0,
+      id: item.id || `ITEM_${this.totalProcessed}`
+    };
+
+    if (this.reservoir.length < this.capacity) {
+      this.reservoir.push(entry);
+      this.reservoir.sort((a, b) => a.key - b.key);
+      return true;
+    }
+
+    if (key > this.reservoir[0].key) {
+      this.reservoir[0] = entry;
+      this.reservoir.sort((a, b) => a.key - b.key);
+      return true;
+    }
+
+    return false;
+  }
+
+  getSample() {
+    return [...this.reservoir]
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .map(entry => ({
+        ...entry.item,
+        sampledKey: Number(entry.key.toFixed(6)),
+        timestamp: entry.timestamp,
+        ageSeconds: Math.round((Date.now() - entry.timestamp) / 1000)
+      }));
+  }
+
+  getTrendingDeals(topK = 5) {
+    const now = Date.now();
+    return [...this.reservoir]
+      .map(entry => {
+        const ageSec = Math.max(0, (now - entry.timestamp) / 1000);
+        const currentEffectiveWeight = entry.baseWeight * Math.exp(-this.decayLambda * ageSec);
+        return {
+          ...entry.item,
+          effectiveWeight: Number(currentEffectiveWeight.toFixed(4)),
+          ageSeconds: Math.round(ageSec)
+        };
+      })
+      .sort((a, b) => b.effectiveWeight - a.effectiveWeight)
+      .slice(0, topK);
+  }
+
+  clear() {
+    this.reservoir = [];
+    this.totalProcessed = 0;
+  }
+
+  get size() {
+    return this.reservoir.length;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -11296,6 +11822,10 @@ export default {
   PStableLSHVectorQuantizer,
   MultiDepotVRPRouter,
   LazySegmentTreeInventory,
+  // Phase 24 Enterprise Algorithms
+  HeavyLightDecompositionTaxonomy,
+  SimulatedAnnealingWarehouseSlotter,
+  TimeDecayedReservoirSampler,
 };
 
 

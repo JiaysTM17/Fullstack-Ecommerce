@@ -468,7 +468,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VÒNG QUAY MAY MẮN & MINI XU (GAMIFICATION RULES)
   // -------------------------------------------------------------
-  if (!/fisher-yates|provably fair/i.test(lower) && /vòng quay|quay thưởng|lượt quay|mini xu|xu|điểm danh|thưởng/i.test(lower)) {
+  if (!/fisher-yates|provably fair|xu hướng|reservoir|hld/i.test(lower) && /vòng quay|quay thưởng|lượt quay|mini xu|\bxu\b|điểm danh|thưởng/i.test(lower)) {
     return {
       intent: 'GAMIFICATION_INFO',
       replyText: `**[ĐẶC QUYỀN] QUY TẮC VÒNG QUAY MAY MẮN & MINI XU CHUẨN XÁC:**\n\n• **Hoàn toàn miễn phí, TUYỆT ĐỐI KHÔNG trừ xu khi quay** (Xu được giữ để giảm giá khi mua sắm).\n• **1 lượt quay miễn phí mỗi ngày** (làm mới tự động vào 00:00 nửa đêm).\n• **Tặng thêm +1 lượt quay cho MỖI ĐƠN HÀNG đặt thành công**!\n• 100% cơ hội trúng quà: Xu thưởng khủng tới 5.000 Xu, Voucher 10%, Freeship 30k.\n\n**Số dư của bạn:** **${userCoins.toLocaleString('vi-VN')} Xu** | **Lượt quay:** **${totalSpins} lượt**`,
@@ -518,7 +518,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -761,7 +761,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 24. Điều Hướng Cây Danh Mục Nén Patricia Trie (CATEGORY_ROUTER_PATRICIA_ASSIST)
-  if (/patricia|cây danh mục|điều hướng danh mục|breadcrumb|gale-shapley|ghép đôi người bán/i.test(lower)) {
+  if (!/hld|reservoir/i.test(lower) && /patricia|cây danh mục|điều hướng danh mục|breadcrumb|gale-shapley|ghép đôi người bán/i.test(lower)) {
     return {
       intent: 'CATEGORY_ROUTER_PATRICIA_ASSIST',
       replyText: `**[ĐIỀU HƯỚNG DANH MỤC THÔNG MINH] CẤU TRÚC PATRICIA TRIE & GHÉP ĐÔI GALE-SHAPLEY:**\n\n• **Duyệt cây danh mục siêu tốc**: Áp dụng cây tiền tố nén Patricia Trie giúp bạn chuyển đổi mượt mà giữa các ngành hàng đa tầng (Thời trang ➔ Nam ➔ Áo polo ➔ Đồ thể thao) với độ trễ phản hồi dưới $1\\text{ms}$.\n• **Gợi ý Shop phù hợp nhất**: Thuật toán Gale-Shapley tự động ghép bạn với các gian hàng có khoảng cách gần nhất, giao hàng hỏa tốc 2h và có sẵn voucher ưu đãi cao nhất!`,
@@ -775,6 +775,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'GREEN_LOGISTICS_VRP_ASSIST',
       replyText: `**[VẬN CHUYỂN XANH SPX & FLASH SALE] THUẬT TOÁN ĐỊNH TUYẾN ĐỘI XE VRP & CÂY ĐOẠN:**\n\n• **Logistics Thân Thiện Môi Trường**: Thuật toán định tuyến đa kho (MULTI-DEPOT VRP) tự động tối ưu các điểm dừng giao hàng theo vòng cung ngắn nhất, cắt giảm trung bình 25% quãng đường di chuyển và giảm phát thải khí carbon (CO₂) cho mỗi kiện hàng của bạn!\n• **Săn Deal Khung Giờ Vàng**: Công nghệ Cây Đoạn (Lazy Segment Tree) bảo đảm bạn đặt mua thành công đúng số lượng hàng giảm giá trong các khung giờ vàng (00h, 12h, 20h) mà không bao giờ bị báo ảo hay hủy đơn vì thiếu hàng!`,
       suggestions: ['Xem khung giờ Flash Sale', 'Tra cứu mã vận đơn SPX', 'Lấy voucher Freeship'],
+    };
+  }
+
+  // 26. Gợi Ý Xu Hướng Trực Tiếp (Time-Decayed Reservoir Sampling) & Cây Danh Mục Đa Tầng HLD (TRENDING_DEALS_RESERVOIR_ASSIST)
+  if (/deal hot xu hướng|bắt trend mua sắm|hồ chứa suy giảm|reservoir sampling|mẫu thời gian thực|cây danh mục hld|phân rã cây danh mục/i.test(lower)) {
+    return {
+      intent: 'TRENDING_DEALS_RESERVOIR_ASSIST',
+      replyText: `**[XU HƯỚNG MUA SẮM & CÂY DANH MỤC] RESERVOIR SAMPLING & HLD:**\n\n• **Deal Hot Thời Gian Thực**: Thuật toán lấy mẫu hồ chứa có trọng số suy giảm (Time-Decayed Reservoir Sampling) bắt trúng các sản phẩm đang được người mua săn lùng nhiều nhất trong những phút vừa qua, giúp bạn không bỏ lỡ bất kỳ xu hướng mua sắm hot nào!\n• **Cây Danh Mục Đa Tầng Siêu Tốc**: Hệ thống phân rã cây nặng-nhẹ (HLD) hỗ trợ bạn lướt mượt mà qua các danh mục hàng sâu nhất với mức chiết khấu và phụ phí minh bạch tuyệt đối!`,
+      suggestions: ['Khám phá Deal Hot Xu Hướng', 'Xem cây danh mục sản phẩm', 'Lấy voucher độc quyền'],
     };
   }
 

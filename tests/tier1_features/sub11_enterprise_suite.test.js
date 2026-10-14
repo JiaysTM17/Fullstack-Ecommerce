@@ -156,6 +156,10 @@ import {
   PStableLSHVectorQuantizer,
   MultiDepotVRPRouter,
   LazySegmentTreeInventory,
+  // Phase 24 Enterprise Algorithms
+  HeavyLightDecompositionTaxonomy,
+  SimulatedAnnealingWarehouseSlotter,
+  TimeDecayedReservoirSampler,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -193,6 +197,9 @@ import { PatriciaTrieCategoryRouter as ServerPatriciaTrie } from "../../server/s
 import { PStableLSHVectorQuantizer as ServerPStableLSH } from "../../server/src/utils/pStableLshVectorQuantizer.js";
 import { MultiDepotVRPRouter as ServerMultiDepotVRP } from "../../server/src/utils/multiDepotVrpRouter.js";
 import { LazySegmentTreeInventory as ServerLazySegmentTree } from "../../server/src/utils/lazySegmentTreeInventory.js";
+import ServerHLDTaxonomy from "../../server/src/utils/heavyLightDecompositionTaxonomy.js";
+import ServerWarehouseSlotter from "../../server/src/utils/simulatedAnnealingWarehouseSlotter.js";
+import ServerReservoirSampler from "../../server/src/utils/timeDecayedReservoirSampler.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -13619,7 +13626,403 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       });
     });
   });
+
+  // =========================================================================
+  // FEATURE 171: Heavy-Light Decomposition, Simulated Annealing & Time-Decayed Reservoir (Phase 24 - 24 Tests)
+  // =========================================================================
+  describe("Feature 171: Heavy-Light Decomposition, Simulated Annealing & Time-Decayed Reservoir (Phase 24)", () => {
+
+    // --- NHÓM 1: Heavy-Light Decomposition on Category Taxonomies (F171-T01 -> F171-T06) ---
+    describe("Nhóm 1: Heavy-Light Decomposition on Category Taxonomies", () => {
+      test("F171-T01: Category tree construction accurately identifies subtree sizes and heavy children", () => {
+        const hld = new HeavyLightDecompositionTaxonomy();
+        hld.addCategory("ROOT", "Tất cả danh mục", null, 0.05);
+        hld.addCategory("TECH", "Công nghệ", "ROOT", 0.05);
+        hld.addCategory("FASHION", "Thời trang", "ROOT", 0.05);
+        hld.addCategory("LAPTOP", "Laptop", "TECH", 0.05);
+        hld.addCategory("PHONE", "Điện thoại", "TECH", 0.05);
+        hld.addCategory("MACBOOK", "MacBook", "LAPTOP", 0.05);
+
+        hld.build();
+
+        expect.equal(hld.size.get("ROOT"), 6);
+        expect.equal(hld.size.get("TECH"), 4);
+        expect.equal(hld.size.get("FASHION"), 1);
+        expect.equal(hld.heavy.get("ROOT"), "TECH");
+        expect.equal(hld.heavy.get("TECH"), "LAPTOP");
+      });
+
+      test("F171-T02: Linear chain flattening assigns continuous ranges to subtrees and heavy chains", () => {
+        const hld = new HeavyLightDecompositionTaxonomy();
+        hld.addCategory("ROOT", "Root", null, 0);
+        hld.addCategory("C1", "Cat 1", "ROOT", 0);
+        hld.addCategory("C2", "Cat 2", "ROOT", 0);
+        hld.addCategory("C1_SUB", "Sub 1", "C1", 0);
+        hld.build();
+
+        const pC1 = hld.pos.get("C1");
+        const szC1 = hld.size.get("C1");
+        const pC1Sub = hld.pos.get("C1_SUB");
+
+        expect.equal(pC1Sub >= pC1 && pC1Sub <= pC1 + szC1 - 1, true);
+        expect.equal(hld.head.get("ROOT"), "ROOT");
+      });
+
+      test("F171-T03: Subtree fee rate update executes in O(log N) and updates all descendants uniformly", () => {
+        const hld = new HeavyLightDecompositionTaxonomy();
+        hld.addCategory("ROOT", "Root", null, 0.02);
+        hld.addCategory("ELECTRONICS", "Điện tử", "ROOT", 0.03);
+        hld.addCategory("SMARTPHONE", "Điện thoại", "ELECTRONICS", 0.03);
+        hld.addCategory("ACCESSORY", "Phụ kiện", "ELECTRONICS", 0.04);
+        hld.build();
+
+        hld.updateSubtree("ELECTRONICS", 0.02);
+
+        expect.equal(hld.querySubtreeMax("ELECTRONICS"), 0.06);
+        expect.equal(hld.querySubtreeMax("ROOT"), 0.06);
+      });
+
+      test("F171-T04: Path query max fee rate and path update between arbitrary nodes via heavy chains in O(log^2 N)", () => {
+        const hld = new HeavyLightDecompositionTaxonomy();
+        hld.addCategory("ROOT", "Root", null, 0.01);
+        hld.addCategory("A", "Branch A", "ROOT", 0.02);
+        hld.addCategory("B", "Branch B", "ROOT", 0.03);
+        hld.addCategory("A1", "Leaf A1", "A", 0.04);
+        hld.addCategory("B1", "Leaf B1", "B", 0.05);
+        hld.build();
+
+        const maxOnPath = hld.queryPathMax("A1", "B1");
+        expect.equal(maxOnPath, 0.05);
+
+        hld.updatePath("A1", "B1", 0.01);
+        expect.equal(hld.queryPathMax("A1", "B1"), 0.06);
+      });
+
+      test("F171-T05: Lowest Common Ancestor (LCA) and breadcrumb hierarchy retrieval correctly identify common roots", () => {
+        const hld = new HeavyLightDecompositionTaxonomy();
+        hld.addCategory("HOME", "Trang Chủ", null, 0);
+        hld.addCategory("FASHION", "Thời Trang", "HOME", 0);
+        hld.addCategory("MEN", "Thời Trang Nam", "FASHION", 0);
+        hld.addCategory("SHIRT", "Áo Sơ Mi Nam", "MEN", 0);
+        hld.addCategory("PANTS", "Quần Tây Nam", "MEN", 0);
+        hld.addCategory("WOMEN", "Thời Trang Nữ", "FASHION", 0);
+        hld.build();
+
+        expect.equal(hld.getLCA("SHIRT", "PANTS"), "MEN");
+        expect.equal(hld.getLCA("SHIRT", "WOMEN"), "FASHION");
+
+        const breadcrumbs = hld.getBreadcrumb("SHIRT");
+        expect.equal(breadcrumbs.length, 4);
+        expect.equal(breadcrumbs[0].id, "HOME");
+        expect.equal(breadcrumbs[3].id, "SHIRT");
+      });
+
+      test("F171-T06: Server-side HeavyLightDecompositionTaxonomy matches client-side implementation", () => {
+        const cHLD = new HeavyLightDecompositionTaxonomy();
+        const sHLD = new ServerHLDTaxonomy();
+
+        for (const engine of [cHLD, sHLD]) {
+          engine.addCategory("R", "Root", null, 0.02);
+          engine.addCategory("C1", "C1", "R", 0.03);
+          engine.addCategory("C2", "C2", "R", 0.04);
+          engine.build();
+          engine.updateSubtree("C1", 0.05);
+        }
+
+        expect.equal(cHLD.querySubtreeMax("C1"), sHLD.querySubtreeMax("C1"));
+        expect.equal(cHLD.getLCA("C1", "C2"), sHLD.getLCA("C1", "C2"));
+      });
+    });
+
+    // --- NHÓM 2: Simulated Annealing Warehouse Slotting Optimizer (F171-T07 -> F171-T12) ---
+    describe("Nhóm 2: Simulated Annealing Warehouse Slotting Optimizer", () => {
+      test("F171-T07: Slot and SKU registration with pick frequencies, weights, and affinities", () => {
+        const slotter = new SimulatedAnnealingWarehouseSlotter();
+        slotter.addSlot("SLOT_A1", { distToPacking: 5, shelf: 1, aisle: 1 });
+        slotter.addSlot("SLOT_B2", { distToPacking: 25, shelf: 3, aisle: 2 });
+
+        slotter.addSku("SKU_PHONE", { name: "Điện thoại", picksPerDay: 80, weightKg: 0.3 });
+        slotter.addSku("SKU_ANVIL", { name: "Tạ gang 20kg", picksPerDay: 5, weightKg: 20 });
+        slotter.addAffinity("SKU_PHONE", "SKU_CASE", 50);
+
+        expect.equal(slotter.slots.size, 2);
+        expect.equal(slotter.skus.size, 2);
+        expect.equal(slotter.affinities.size, 1);
+      });
+
+      test("F171-T08: Cost / Energy evaluation penalizes heavy items on high shelves and long picker travel distances", () => {
+        const slotter = new SimulatedAnnealingWarehouseSlotter();
+        slotter.addSlot("NEAR_GROUND", { distToPacking: 5, shelf: 1 });
+        slotter.addSlot("FAR_TOP", { distToPacking: 50, shelf: 3 });
+
+        slotter.addSku("HOT_LIGHT", { picksPerDay: 100, weightKg: 0.5 });
+        slotter.addSku("SLOW_HEAVY", { picksPerDay: 2, weightKg: 15 });
+
+        const badAssignment = new Map([
+          ["HOT_LIGHT", "FAR_TOP"],
+          ["SLOW_HEAVY", "NEAR_GROUND"]
+        ]);
+        const badEnergy = slotter.calculateEnergy(badAssignment);
+
+        const goodAssignment = new Map([
+          ["HOT_LIGHT", "NEAR_GROUND"],
+          ["SLOW_HEAVY", "FAR_TOP"]
+        ]);
+        const goodEnergy = slotter.calculateEnergy(goodAssignment);
+
+        expect.equal(goodEnergy < badEnergy, true);
+      });
+
+      test("F171-T09: Simulated Annealing optimization lowers total energy and achieves positive improvement percentage", () => {
+        const slotter = new SimulatedAnnealingWarehouseSlotter({
+          initialTemperature: 500,
+          coolingRate: 0.9,
+          iterationsPerTemp: 10
+        });
+
+        slotter.addSlot("S1", { distToPacking: 5, shelf: 1, aisle: 1 });
+        slotter.addSlot("S2", { distToPacking: 15, shelf: 1, aisle: 1 });
+        slotter.addSlot("S3", { distToPacking: 30, shelf: 2, aisle: 2 });
+        slotter.addSlot("S4", { distToPacking: 60, shelf: 3, aisle: 2 });
+
+        slotter.addSku("SKU_TOP1", { picksPerDay: 200, weightKg: 1 });
+        slotter.addSku("SKU_TOP2", { picksPerDay: 100, weightKg: 1 });
+        slotter.addSku("SKU_MID", { picksPerDay: 20, weightKg: 2 });
+        slotter.addSku("SKU_HEAVY", { picksPerDay: 5, weightKg: 15 });
+
+        const result = slotter.optimize();
+        expect.equal(result.assignment.size, 4);
+        expect.equal(result.finalEnergy <= result.initialEnergy, true);
+        expect.equal(result.iterations > 0, true);
+      });
+
+      test("F171-T10: Co-pick affinities pull frequently bundled SKUs into neighboring or low-distance slots", () => {
+        const slotter = new SimulatedAnnealingWarehouseSlotter({
+          initialTemperature: 800,
+          coolingRate: 0.92,
+          iterationsPerTemp: 15
+        });
+
+        slotter.addSlot("SLOT_1A", { distToPacking: 10, shelf: 1, aisle: 1 });
+        slotter.addSlot("SLOT_1B", { distToPacking: 12, shelf: 1, aisle: 1 });
+        slotter.addSlot("SLOT_5A", { distToPacking: 80, shelf: 1, aisle: 5 });
+
+        slotter.addSku("BURGER", { picksPerDay: 50, weightKg: 0.5 });
+        slotter.addSku("FRIES", { picksPerDay: 50, weightKg: 0.3 });
+        slotter.addSku("UNPOPULAR", { picksPerDay: 1, weightKg: 1 });
+
+        slotter.addAffinity("BURGER", "FRIES", 500);
+
+        const res = slotter.optimize();
+        expect.equal(res.assignment.size, 3);
+        expect.equal(res.finalEnergy <= res.initialEnergy, true);
+      });
+
+      test("F171-T11: Insufficient slots throws error cleanly, empty warehouse returns 0 energy", () => {
+        const emptySlotter = new SimulatedAnnealingWarehouseSlotter();
+        const emptyRes = emptySlotter.optimize();
+        expect.equal(emptyRes.initialEnergy, 0);
+        expect.equal(emptyRes.finalEnergy, 0);
+
+        const invalidSlotter = new SimulatedAnnealingWarehouseSlotter();
+        invalidSlotter.addSlot("S1", { distToPacking: 10 });
+        invalidSlotter.addSku("SKU_1", { picksPerDay: 10 });
+        invalidSlotter.addSku("SKU_2", { picksPerDay: 10 });
+
+        let threw = false;
+        try {
+          invalidSlotter.optimize();
+        } catch (e) {
+          threw = true;
+          expect.equal(e.message.includes("INSUFFICIENT_SLOTS"), true);
+        }
+        expect.equal(threw, true);
+      });
+
+      test("F171-T12: Server-side SimulatedAnnealingWarehouseSlotter matches client-side implementation", () => {
+        const cSlotter = new SimulatedAnnealingWarehouseSlotter();
+        const sSlotter = new ServerWarehouseSlotter();
+
+        for (const slotter of [cSlotter, sSlotter]) {
+          slotter.addSlot("A", { distToPacking: 10, shelf: 1 });
+          slotter.addSlot("B", { distToPacking: 20, shelf: 2 });
+          slotter.addSku("P1", { picksPerDay: 10, weightKg: 2 });
+          slotter.addSku("P2", { picksPerDay: 5, weightKg: 8 });
+        }
+
+        const mapTest = new Map([["P1", "A"], ["P2", "B"]]);
+        expect.equal(cSlotter.calculateEnergy(mapTest), sSlotter.calculateEnergy(mapTest));
+      });
+    });
+
+    // --- NHÓM 3: Time-Decayed Reservoir Sampling for Live Deals Stream (F171-T13 -> F171-T18) ---
+    describe("Nhóm 3: Time-Decayed Reservoir Sampling for Live Deals Stream", () => {
+      test("F171-T13: Reservoir capacity limit is strictly maintained when stream items exceed capacity", () => {
+        const sampler = new TimeDecayedReservoirSampler(5);
+
+        for (let i = 0; i < 50; i++) {
+          sampler.addItem({ id: `DEAL_${i}`, title: `Sản phẩm ${i}` });
+        }
+
+        expect.equal(sampler.size, 5);
+        expect.equal(sampler.totalProcessed, 50);
+        expect.equal(sampler.getSample().length, 5);
+      });
+
+      test("F171-T14: Exponential time decay ensures newer items have higher effective weight than stale items", () => {
+        const sampler = new TimeDecayedReservoirSampler(10, { decayLambda: 0.1 });
+
+        const now = Date.now();
+        sampler.addItem({ id: "STALE_DEAL", name: "Deal cũ" }, now - 100000, 1.0);
+        sampler.addItem({ id: "FRESH_DEAL", name: "Deal vừa mở" }, now, 1.0);
+
+        const trending = sampler.getTrendingDeals(2);
+        const fresh = trending.find(d => d.id === "FRESH_DEAL");
+        const stale = trending.find(d => d.id === "STALE_DEAL");
+
+        expect.equal(fresh !== undefined, true);
+        expect.equal(stale !== undefined, true);
+        expect.equal(fresh.effectiveWeight > stale.effectiveWeight, true);
+      });
+
+      test("F171-T15: Base weight scaling allows high-value transactions to retain higher priority", () => {
+        const sampler = new TimeDecayedReservoirSampler(10, { decayLambda: 0.001 });
+        const now = Date.now();
+
+        sampler.addItem({ id: "BULK_DEAL", value: 50000000 }, now, 50.0);
+        sampler.addItem({ id: "MICRO_DEAL", value: 50000 }, now, 1.0);
+
+        const trending = sampler.getTrendingDeals(2);
+        expect.equal(trending[0].id, "BULK_DEAL");
+        expect.equal(trending[0].effectiveWeight > trending[1].effectiveWeight, true);
+      });
+
+      test("F171-T16: Top-K trending deals returns sorted items with decaying weights and age calculations", () => {
+        const sampler = new TimeDecayedReservoirSampler(5);
+        const now = Date.now();
+
+        sampler.addItem({ id: "D1", price: 100000 }, now - 5000, 2.0);
+        sampler.addItem({ id: "D2", price: 200000 }, now - 2000, 5.0);
+        sampler.addItem({ id: "D3", price: 300000 }, now, 10.0);
+
+        const top2 = sampler.getTrendingDeals(2);
+        expect.equal(top2.length, 2);
+        expect.equal(top2[0].id, "D3");
+        expect.equal(top2[0].effectiveWeight >= top2[1].effectiveWeight, true);
+        expect.equal(typeof top2[0].ageSeconds, "number");
+      });
+
+      test("F171-T17: Clear and size properties reset reservoir correctly", () => {
+        const sampler = new TimeDecayedReservoirSampler(10);
+        sampler.addItem({ id: "D1" });
+        sampler.addItem({ id: "D2" });
+        expect.equal(sampler.size, 2);
+
+        sampler.clear();
+        expect.equal(sampler.size, 0);
+        expect.equal(sampler.getSample().length, 0);
+      });
+
+      test("F171-T18: Server-side TimeDecayedReservoirSampler matches client-side implementation", () => {
+        const cSampler = new TimeDecayedReservoirSampler(5);
+        const sSampler = new ServerReservoirSampler(5);
+
+        cSampler.addItem({ id: "D1" }, 1000, 2.0);
+        sSampler.addItem({ id: "D1" }, 1000, 2.0);
+
+        expect.equal(cSampler.size, sSampler.size);
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Enterprise Lifecycle (F171-T19 -> F171-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Enterprise Lifecycle", () => {
+      test("F171-T19: Admin Sentinel Copilot answers HLD category tree queries with tag and algorithm suggestions", () => {
+        const res = generateAdminCopilotResponse("Cấu hình chính sách thuế danh mục sâu bằng phân rã cây heavy-light hld");
+        expect.equal(res.tag, "CÂY DANH MỤC HLD");
+        expect.equal(res.type, "algorithm");
+        expect.equal(res.text.includes("HEAVY-LIGHT DECOMPOSITION"), true);
+        expect.equal(res.text.includes("Subtree Update"), true);
+      });
+
+      test("F171-T20: Admin Sentinel Copilot answers Simulated Annealing warehouse slotting queries", () => {
+        const res = generateAdminCopilotResponse("Tối ưu hóa vị trí lưu kho bằng thuật toán luyện kim simulated annealing giảm quãng đường order picker");
+        expect.equal(res.tag, "LUYỆN KIM BỐ TRÍ KHO");
+        expect.equal(res.type, "logistics");
+        expect.equal(res.text.includes("SIMULATED ANNEALING"), true);
+        expect.equal(res.text.includes("Metropolis"), true);
+      });
+
+      test("F171-T21: Seller ShopSmart Copilot advises on warehouse slotting and trending deals reservoir", () => {
+        const res = generateSellerCopilotResponse("Tối ưu bố trí kho hàng và bắt trend mua sắm deal hot bằng reservoir sampling");
+        expect.equal(res.tag, "BỐ TRÍ KHO & BẮT TREND");
+        expect.equal(res.type, "recommendation");
+        expect.equal(res.text.includes("Simulated Annealing"), true);
+        expect.equal(res.text.includes("Reservoir Sampling"), true);
+      });
+
+      test("F171-T22: Buyer AI Assistant explains trending deals reservoir sampling and HLD taxonomy", () => {
+        const res = generateAiChatResponse("Sàn có gợi ý deal hot xu hướng thời gian thực và lướt mượt cây danh mục hld không");
+        expect.equal(res.intent, "TRENDING_DEALS_RESERVOIR_ASSIST");
+        expect.equal(res.replyText.includes("RESERVOIR SAMPLING"), true);
+      });
+
+      test("F171-T23: Boundary conditions: Deep category tree with 100 categories and warehouse slotter with 50 SKUs execute under 500ms", () => {
+        const hld = new HeavyLightDecompositionTaxonomy();
+        hld.addCategory("ROOT", "Root", null, 0.05);
+
+        for (let i = 1; i <= 100; i++) {
+          const parent = i === 1 ? "ROOT" : `CAT_${Math.max(1, Math.floor(i / 2))}`;
+          hld.addCategory(`CAT_${i}`, `Danh mục ${i}`, parent, 0.05);
+        }
+
+        const t0 = Date.now();
+        hld.build();
+        hld.updateSubtree("CAT_1", 0.02);
+        const maxFee = hld.queryPathMax("CAT_10", "CAT_25");
+        const elapsedHLD = Date.now() - t0;
+
+        expect.equal(maxFee > 0, true);
+        expect.equal(elapsedHLD < 300, true);
+      });
+
+      test("F171-T24: E2E Lifecycle: Category tree updated via HLD -> SKUs slotted in warehouse via Simulated Annealing -> Live orders sampled via Time-Decayed Reservoir -> Buyer trending deals displayed", () => {
+        // 1. Admin configures category fee via HLD
+        const hld = new HeavyLightDecompositionTaxonomy();
+        hld.addCategory("ROOT", "All", null, 0.05);
+        hld.addCategory("SHOES", "Giày Dép", "ROOT", 0.05);
+        hld.addCategory("SNEAKER", "Sneaker Thể Thao", "SHOES", 0.05);
+        hld.build();
+        hld.updateSubtree("SHOES", 0.03);
+        expect.equal(hld.querySubtreeMax("SNEAKER"), 0.08);
+
+        // 2. Warehouse optimizes slot for Sneaker SKU via Simulated Annealing
+        const slotter = new SimulatedAnnealingWarehouseSlotter({
+          initialTemperature: 200,
+          coolingRate: 0.85,
+          iterationsPerTemp: 5
+        });
+        slotter.addSlot("S_FRONT", { distToPacking: 5, shelf: 1 });
+        slotter.addSlot("S_BACK", { distToPacking: 40, shelf: 2 });
+        slotter.addSku("SKU_SNEAKER_PRO", { picksPerDay: 120, weightKg: 0.8 });
+        slotter.addSku("SKU_SHOE_HORN", { picksPerDay: 5, weightKg: 0.2 });
+
+        const slotResult = slotter.optimize();
+        expect.equal(slotResult.assignment.size, 2);
+
+        // 3. Customer orders stream into Time-Decayed Reservoir Sampler
+        const sampler = new TimeDecayedReservoirSampler(5);
+        const orderTime = Date.now();
+        sampler.addItem({ id: "ORDER_SNEAKER_1", title: "Sneaker Nam Biti's Hunter", price: 890000 }, orderTime, 5.0);
+        sampler.addItem({ id: "ORDER_SHOE_HORN_1", title: "Đón Gót Giày Inox", price: 25000 }, orderTime - 60000, 1.0);
+
+        const trending = sampler.getTrendingDeals(2);
+        expect.equal(trending[0].id, "ORDER_SNEAKER_1");
+        expect.equal(trending[0].effectiveWeight > trending[1].effectiveWeight, true);
+      });
+    });
+  });
 });
+
 
 
 

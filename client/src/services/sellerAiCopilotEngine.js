@@ -549,7 +549,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 27. Tối Ưu SEO & Chống Đạo Nhái Mô Tả Bằng Suffix Automaton (Phase 18 - Feature 165)
-  if (/suffix automaton|sam|lcs|keyword stuffing|sao chép mô tả|đạo nhái bài đăng|tối ưu seo sam/i.test(raw)) {
+  if (/suffix automaton|\bsam\b|lcs|keyword stuffing|sao chép mô tả|đạo nhái bài đăng|tối ưu seo sam/i.test(raw)) {
     return {
       text: `📝 **TỐI ƯU SEO & CHỐNG ĐẠO NHÁI MÔ TẢ BẰNG SUFFIX AUTOMATON (SAM $O(N)$)**:
 - **Nguyên lý Suffix Automaton (Máy hữu hạn hậu tố tuyến tính)**:
@@ -663,6 +663,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Kế hoạch nhập hàng Holt-Winters',
         'Tối ưu danh mục Timsort',
         'Phân tích biên lợi nhuận P&L'
+      ]
+    };
+  }
+
+  // 33. Tối Ưu Bố Trí Kho (Simulated Annealing) & Mẫu Hồ Chứa Bắt Trend Deal Hot (Reservoir Sampling) (Phase 24 - Feature 171)
+  if (/luyện kim|simulated annealing|bố trí kho|warehouse slotting|reservoir sampling|deal hot xu hướng|hồ chứa suy giảm|bắt trend/i.test(raw)) {
+    return {
+      text: `📦 **TỐI ƯU VỊ TRÍ LƯU KHO & BẮT TREND DEAL HOT BẰNG AI (${currentShop.name})**:
+- **Tối ưu vị trí lưu kho (Simulated Annealing Slotting)**:
+  - Thuật toán luyện kim mô phỏng giúp sắp xếp các mặt hàng bán chạy (High Pick Frequency) ở gần lối đi chính, giảm 35% thời gian lấy hàng của nhân viên đóng gói.
+  - Gom các sản phẩm combo thường bán kèm (Co-pick affinity) vào cùng một kệ để hoàn tất đơn nhanh hơn.
+- **Bắt trend mua sắm trực tiếp (Time-Decayed Reservoir Sampling)**:
+  - Lấy mẫu hồ chứa suy giảm theo thời gian thực giúp Shop nhận diện ngay các mặt hàng đang "viral" hoặc vừa có lượng đặt mua tăng đột biến trong 15-30 phút qua.
+  - Tự động gợi ý Shop bổ sung thêm quà tặng hoặc kích hoạt Flash Sale tức thì để đón đầu sóng mua sắm!`,
+      type: 'recommendation',
+      tag: 'BỐ TRÍ KHO & BẮT TREND',
+      suggestions: [
+        'Tối ưu hóa vị trí lưu kho Simulated Annealing',
+        'Xem danh sách Deal hot bắt trend',
+        'Phân tích tồn kho an toàn Safety Stock'
       ]
     };
   }

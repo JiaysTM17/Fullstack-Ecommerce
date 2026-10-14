@@ -112,7 +112,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 3. Tra cứu Thuế nhà thầu TMĐT (Tax Compliance)
-  if (/thuế|nghị định 52|thông tư 40|vat|tncn|khấu trừ thuế|đối soát thuế/i.test(raw)) {
+  if (!/hld|heavy-light/i.test(raw) && /thuế|nghị định 52|thông tư 40|vat|tncn|khấu trừ thuế|đối soát thuế/i.test(raw)) {
     const totalTaxVal = withholdingTax || Math.round(totalRevenue * 0.025);
     const vatEst = Math.round(totalTaxVal * (1.0 / 2.5));
     const pitEst = totalTaxVal - vatEst;
@@ -1302,6 +1302,48 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Định tuyến đội xe VRP',
         'Dự báo mùa vụ Holt-Winters',
         'Bộ máy quy tắc khuyến mãi Rete'
+      ]
+    };
+  }
+
+  // 55. Quản Trị Cây Phân Cấp Danh Mục Sâu Bằng Heavy-Light Decomposition (HLD)
+  if (/hld|heavy-light|phân rã cây|cây danh mục sâu|thuế danh mục|lca|đường đi danh mục/i.test(raw)) {
+    return {
+      text: `🌳 **QUẢN TRỊ CÂY PHÂN CẤP DANH MỤC SÂU (HEAVY-LIGHT DECOMPOSITION - HLD)**:
+- **Mục đích thiết kế**: Quản trị cấu trúc danh mục sản phẩm đa tầng sâu (Root ➔ Ngành hàng ➔ Nhóm hàng ➔ Phân loại chi tiết) với khả năng cập nhật chính sách thuế, phí sàn hoặc chiết khấu trên đường đi hoặc toàn bộ cây con siêu tốc.
+- **Nguyên lý hoạt động**:
+  - **Phân rã chuỗi xích nặng (Heavy Chains)**: Biến đổi cây phân cấp thành các đoạn liên tiếp trên một mảng phẳng (Segment Tree bên dưới).
+  - **Cập nhật cây con (Subtree Update)**: Thực hiện đồng loạt cho hàng nghìn danh mục con chỉ trong $O(\\log N)$ vì toàn bộ cây con tương ứng với một đoạn liên tục duy nhất $[\\text{pos}[u], \\text{pos}[u] + \\text{size}[u] - 1]$.
+  - **Cập nhật và truy vấn đường đi (Path Query / Update)**: Tính toán mức phí sàn lớn nhất hoặc tăng/giảm phí giữa 2 danh mục bất kỳ $(u, v)$ trong $O(\\log^2 N)$ thông qua tối đa $O(\\log N)$ chuỗi xích nặng.
+  - **Tìm tổ tiên chung gần nhất (LCA)**: Xác định danh mục gốc chung trong $O(\\log N)$ để áp dụng chính sách kế thừa thuộc tính.`,
+      type: 'algorithm',
+      tag: 'CÂY DANH MỤC HLD',
+      suggestions: [
+        'Xem phân rã cây Heavy-Light Decomposition',
+        'Kiểm tra cấu trúc cây nén Patricia Trie',
+        'Cấu hình chính sách thuế sàn TMĐT'
+      ]
+    };
+  }
+
+  // 56. Tối Ưu Hóa Bố Trí Kho Hàng Bằng Luyện Kim Mô Phỏng (Simulated Annealing Warehouse Slotting)
+  if (/luyện kim|simulated annealing|bố trí kho|warehouse slotting|order picker|quãng đường nhặt hàng/i.test(raw)) {
+    return {
+      text: `🏭 **TỐI ƯU HÓA BỐ TRÍ VỊ TRÍ LƯU KHO (SIMULATED ANNEALING WAREHOUSE SLOTTING)**:
+- **Mục đích thiết kế**: Giải bài toán bố trí vị trí hàng ngàn mã sản phẩm (SKU Slotting) trong các trung tâm hoàn tất đơn hàng (Fulfillment Hubs) nhằm giảm thiểu quãng đường di chuyển của nhân viên lấy hàng (Order Pickers).
+- **Nguyên lý Luyện Kim Mô Phỏng (Simulated Annealing)**:
+  - Bắt đầu từ nhiệt độ cao $T_0 = 1000^\\circ\\text{C}$ và giảm dần theo hệ số làm nguội $\\alpha = 0.95$ qua các bước lặp.
+  - **Tiêu chuẩn Metropolis**: Chấp nhận bước chuyển đổi vị trí SKU có hàm chi phí thấp hơn (Energy Reduction), đồng thời cho phép chấp nhận lời giải xấu hơn với xác suất $P = e^{-\\Delta E / T}$ ở giai đoạn đầu để thoát khỏi cực tiểu cục bộ (Local Minima).
+- **Hàm tối ưu đa mục tiêu (Multi-Objective Energy)**:
+  1. **Travel Distance**: Ưu tiên đặt các SKU có tần suất xuất kho cao (High Picks/Day) ở gần cửa xuất và bàn đóng gói.
+  2. **Ergonomics Penalty**: Đặt hàng nặng ($>5\\text{kg}$) ở tầng trệt/thấp (Shelf 1) để đảm bảo an toàn lao động.
+  3. **Co-Pick Affinity**: Gom cụm các sản phẩm thường xuyên mua cùng nhau vào cùng một lối đi hoặc kệ lân cận, cắt giảm 30-40% thời gian gom đơn!`,
+      type: 'logistics',
+      tag: 'LUYỆN KIM BỐ TRÍ KHO',
+      suggestions: [
+        'Tối ưu quãng đường nhặt hàng Picker',
+        'Xem điều phối đội xe VRP',
+        'Báo cáo hiệu suất kho fulfillment'
       ]
     };
   }
