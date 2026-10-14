@@ -553,7 +553,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 23. Điều Phối Xuất Kho Đa Điểm Tối Ưu Chi Phí (Multi-Warehouse Fulfillment Dispatch)
-  if (/đa kho|multi-warehouse|xuất kho tối ưu|chia gói hàng|điều phối xuất kho|fulfillment dispatch|kho hà nội.*đà nẵng/i.test(raw)) {
+  if (!/vrp|định tuyến|đội xe/i.test(raw) && /đa kho|multi-warehouse|xuất kho tối ưu|chia gói hàng|điều phối xuất kho|fulfillment dispatch|kho hà nội.*đà nẵng/i.test(raw)) {
     return {
       text: `📦 **ĐIỀU PHỐI XUẤT KHO ĐA ĐIỂM FULFILLMENT (MIN-COST DISPATCH HEURISTIC)**:
 - **Mục đích thiết kế**: Tự động chỉ định trung tâm hoàn tất đơn hàng (Kho Hà Nội, Đà Nẵng, TP.HCM, Cần Thơ) để giảm thiểu tổng chi phí đóng gói và cước vận chuyển giao hàng chặng cuối.
@@ -1263,6 +1263,45 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Ghép đôi ổn định Gale-Shapley',
         'Tái xếp hạng vector ngữ nghĩa HNSW',
         'Mạng so khớp khuyến mãi Rete'
+      ]
+    };
+  }
+
+  // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
+  if (/vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+    return {
+      text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
+- **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
+  - **Gom cụm đa kho (Depot Clustering)**: Phân bổ từng đơn hàng vào trung tâm phân loại / kho xuất phát gần nhất có đủ tải trọng.
+  - **Chèn gần nhất & 2-Opt Local Search**: Khử bỏ các nút thắt giao cắt (Uncrossing paths), tối ưu thứ tự giao hàng trên từng xe bưu tá.
+- **Lợi ích vận hành & Môi trường**:
+  - Cắt giảm **20 - 35%** tổng quãng đường di chuyển của toàn đội xe giao vận SPX Express.
+  - Tiết kiệm nhiên liệu và giảm phát thải khí carbon (Green Logistics) trung bình **0.18 kg CO₂** trên mỗi km tối ưu!`,
+      type: 'logistics',
+      tag: 'ĐỊNH TUYẾN ĐỘI XE VRP',
+      suggestions: [
+        'Cây đoạn khung giờ Flash Sale',
+        'Ghép đôi ổn định Gale-Shapley',
+        'Định tuyến toàn mạng SPX Johnson'
+      ]
+    };
+  }
+
+  // 54. Cây Đoạn Lan Truyền Lười Quản Lý Khung Giờ Flash Sale (Phase 23 - Feature 170)
+  if (/segment tree|lazy propagation|cây đoạn|khung giờ flash sale|slot reservation|đặt chỗ khung giờ/i.test(raw)) {
+    return {
+      text: `⏱️ **QUẢN LÝ KHUNG GIỜ FLASH SALE BẰNG CÂY ĐOẠN (LAZY SEGMENT TREE - $O(\\log N)$)**:
+- **Nguyên lý Cây Đoạn Lan Truyền Lười**:
+  - Quản lý liên tục 24 khung giờ Flash Sale hoặc 100 slot chiến dịch mà không cần duyệt tuyến tính $O(N)$.
+  - Kỹ thuật **Lazy Propagation (Push Down)**: Cập nhật chiết khấu giá hoặc phân bổ tồn kho trong đoạn giờ $[L, R]$ với thời gian thực dưới $1\\text{ms}$.
+- **Bảo chứng giao dịch (Atomic Reservation)**:
+  - Cho phép người mua đặt trước chỗ (Slot Pre-booking) và sàn kiểm tra ngay tồn kho tối thiểu \`minStock >= qty\` bảo đảm tuyệt đối không bán vượt kho (Zero Overselling)!`,
+      type: 'algorithm',
+      tag: 'CÂY ĐOẠN KHUNG GIỜ',
+      suggestions: [
+        'Định tuyến đội xe VRP',
+        'Dự báo mùa vụ Holt-Winters',
+        'Bộ máy quy tắc khuyến mãi Rete'
       ]
     };
   }

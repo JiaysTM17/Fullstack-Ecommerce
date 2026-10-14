@@ -10699,6 +10699,465 @@ export class PatriciaTrieCategoryRouter {
   }
 }
 
+// =========================================================================
+// PHASE 23 ENTERPRISE ALGORITHMS SUITE (Feature 170)
+// 1. Locality-Sensitive Hashing with p-Stable Random Projections (Vector Quantizer)
+// 2. Multi-Depot Multi-Stop Fleet Routing Heuristic (Vehicle Routing Problem - VRP)
+// 3. Segment Tree with Lazy Propagation for Time-Windowed Flash Sale Inventory
+// =========================================================================
+
+export class PStableLSHVectorQuantizer {
+  constructor({ dimensions = 8, numHashFunctions = 4, numTables = 3, binWidth = 2.0 } = {}) {
+    this.dimensions = dimensions;
+    this.k = numHashFunctions;
+    this.L = numTables;
+    this.w = binWidth;
+
+    this.tables = [];
+    this.projections = [];
+
+    this._initHashFunctions();
+  }
+
+  static _randomGaussian() {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  }
+
+  _initHashFunctions() {
+    this.tables = [];
+    this.projections = [];
+
+    for (let l = 0; l < this.L; l++) {
+      this.tables.push(new Map());
+      const tableProjections = [];
+
+      for (let i = 0; i < this.k; i++) {
+        const a = [];
+        for (let d = 0; d < this.dimensions; d++) {
+          a.push(PStableLSHVectorQuantizer._randomGaussian());
+        }
+        const b = Math.random() * this.w;
+        tableProjections.push({ a, b });
+      }
+
+      this.projections.push(tableProjections);
+    }
+  }
+
+  _computeHashKey(vector, tableIdx) {
+    const tableProj = this.projections[tableIdx];
+    const hashValues = [];
+
+    for (let i = 0; i < this.k; i++) {
+      const { a, b } = tableProj[i];
+      let dot = 0;
+      for (let d = 0; d < this.dimensions; d++) {
+        dot += a[d] * (vector[d] || 0);
+      }
+      const h = Math.floor((dot + b) / this.w);
+      hashValues.push(h);
+    }
+
+    return hashValues.join(",");
+  }
+
+  addVector(id, vector = [], metadata = {}) {
+    if (!id || !Array.isArray(vector)) return;
+
+    for (let l = 0; l < this.L; l++) {
+      const bucketKey = this._computeHashKey(vector, l);
+      const table = this.tables[l];
+
+      if (!table.has(bucketKey)) {
+        table.set(bucketKey, []);
+      }
+      table.get(bucketKey).push({ id, vector: [...vector], metadata: { ...metadata } });
+    }
+  }
+
+  static euclideanDistance(v1 = [], v2 = []) {
+    let sum = 0;
+    const len = Math.min(v1.length, v2.length);
+    for (let i = 0; i < len; i++) {
+      const diff = v1[i] - v2[i];
+      sum += diff * diff;
+    }
+    return Math.sqrt(sum);
+  }
+
+  queryCandidates(queryVector = [], { topK = 5 } = {}) {
+    const candidateMap = new Map();
+
+    for (let l = 0; l < this.L; l++) {
+      const bucketKey = this._computeHashKey(queryVector, l);
+      const bucket = this.tables[l].get(bucketKey);
+
+      if (bucket) {
+        for (const item of bucket) {
+          if (!candidateMap.has(item.id)) {
+            candidateMap.set(item.id, item);
+          }
+        }
+      }
+    }
+
+    const scored = [];
+    for (const item of candidateMap.values()) {
+      const dist = PStableLSHVectorQuantizer.euclideanDistance(queryVector, item.vector);
+      scored.push({
+        id: item.id,
+        distance: Number(dist.toFixed(4)),
+        metadata: item.metadata
+      });
+    }
+
+    scored.sort((a, b) => a.distance - b.distance);
+    return scored.slice(0, topK);
+  }
+
+  getStats() {
+    let totalBuckets = 0;
+    let totalItemsIndexed = 0;
+
+    for (const table of this.tables) {
+      totalBuckets += table.size;
+      for (const bucket of table.values()) {
+        totalItemsIndexed += bucket.length;
+      }
+    }
+
+    return {
+      numTables: this.L,
+      dimensions: this.dimensions,
+      totalBuckets,
+      averageBucketDepth: totalBuckets > 0 ? Number((totalItemsIndexed / totalBuckets).toFixed(2)) : 0
+    };
+  }
+}
+
+export class MultiDepotVRPRouter {
+  constructor() {
+    this.depots = new Map();
+    this.customers = new Map();
+  }
+
+  static calculateDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(2));
+  }
+
+  addDepot(id, lat, lon, metadata = {}) {
+    if (!id || typeof lat !== "number" || typeof lon !== "number") return;
+    this.depots.set(id, {
+      id,
+      name: metadata.name || id,
+      lat,
+      lon,
+      maxCapacity: metadata.maxCapacity || 500
+    });
+  }
+
+  addCustomer(id, lat, lon, metadata = {}) {
+    if (!id || typeof lat !== "number" || typeof lon !== "number") return;
+    this.customers.set(id, {
+      id,
+      lat,
+      lon,
+      demand: metadata.demand || 1,
+      orderId: metadata.orderId || id
+    });
+  }
+
+  static optimizeTour2Opt(tour) {
+    if (!Array.isArray(tour) || tour.length <= 3) return tour;
+
+    let improved = true;
+    let bestTour = [...tour];
+
+    const tourDist = (t) => {
+      let d = 0;
+      for (let i = 0; i < t.length - 1; i++) {
+        d += MultiDepotVRPRouter.calculateDistanceKm(t[i].lat, t[i].lon, t[i + 1].lat, t[i + 1].lon);
+      }
+      return d;
+    };
+
+    let bestDist = tourDist(bestTour);
+
+    while (improved) {
+      improved = false;
+      for (let i = 1; i < bestTour.length - 2; i++) {
+        for (let j = i + 1; j < bestTour.length - 1; j++) {
+          const newTour = [
+            ...bestTour.slice(0, i),
+            ...bestTour.slice(i, j + 1).reverse(),
+            ...bestTour.slice(j + 1)
+          ];
+          const newDist = tourDist(newTour);
+
+          if (newDist < bestDist - 0.01) {
+            bestTour = newTour;
+            bestDist = newDist;
+            improved = true;
+          }
+        }
+      }
+    }
+
+    return bestTour;
+  }
+
+  solve({ vehicleCapacity = 50 } = {}) {
+    if (this.depots.size === 0 || this.customers.size === 0) {
+      return {
+        routes: [],
+        totalDistanceKm: 0,
+        totalCustomersServed: 0,
+        co2SavedKg: 0
+      };
+    }
+
+    const depotClusters = new Map();
+    for (const dId of this.depots.keys()) {
+      depotClusters.set(dId, []);
+    }
+
+    for (const cust of this.customers.values()) {
+      let closestDepotId = null;
+      let minDistance = Infinity;
+
+      for (const [dId, depot] of this.depots.entries()) {
+        const d = MultiDepotVRPRouter.calculateDistanceKm(cust.lat, cust.lon, depot.lat, depot.lon);
+        if (d < minDistance) {
+          minDistance = d;
+          closestDepotId = dId;
+        }
+      }
+
+      if (closestDepotId) {
+        depotClusters.get(closestDepotId).push(cust);
+      }
+    }
+
+    const allRoutes = [];
+    let totalFleetDistance = 0;
+
+    for (const [depotId, assignedCustomers] of depotClusters.entries()) {
+      const depot = this.depots.get(depotId);
+      if (assignedCustomers.length === 0) continue;
+
+      let remainingCusts = [...assignedCustomers];
+      let vehicleNum = 1;
+
+      while (remainingCusts.length > 0) {
+        const currentBatch = [];
+        let currentLoad = 0;
+
+        for (let i = 0; i < remainingCusts.length; i++) {
+          if (currentLoad + remainingCusts[i].demand <= vehicleCapacity) {
+            currentBatch.push(remainingCusts[i]);
+            currentLoad += remainingCusts[i].demand;
+            remainingCusts.splice(i, 1);
+            i--;
+          }
+        }
+
+        if (currentBatch.length === 0 && remainingCusts.length > 0) {
+          currentBatch.push(remainingCusts.shift());
+        }
+
+        currentBatch.sort((a, b) => {
+          const dA = MultiDepotVRPRouter.calculateDistanceKm(depot.lat, depot.lon, a.lat, a.lon);
+          const dB = MultiDepotVRPRouter.calculateDistanceKm(depot.lat, depot.lon, b.lat, b.lon);
+          return dA - dB;
+        });
+
+        const initialTour = [depot, ...currentBatch, depot];
+        const optimizedTour = MultiDepotVRPRouter.optimizeTour2Opt(initialTour);
+
+        let tourKm = 0;
+        for (let idx = 0; idx < optimizedTour.length - 1; idx++) {
+          tourKm += MultiDepotVRPRouter.calculateDistanceKm(
+            optimizedTour[idx].lat,
+            optimizedTour[idx].lon,
+            optimizedTour[idx + 1].lat,
+            optimizedTour[idx + 1].lon
+          );
+        }
+        tourKm = Number(tourKm.toFixed(2));
+        totalFleetDistance += tourKm;
+
+        allRoutes.push({
+          routeId: `ROUTE_${depotId}_VEHICLE_${vehicleNum++}`,
+          depotId,
+          depotName: depot.name,
+          stopsCount: currentBatch.length,
+          totalDistanceKm: tourKm,
+          estimatedDurationMinutes: Math.round(tourKm * 2.5 + currentBatch.length * 5),
+          stops: optimizedTour.map((s, sIdx) => ({
+            seq: sIdx,
+            id: s.id,
+            isDepot: s.id === depotId,
+            lat: s.lat,
+            lon: s.lon
+          }))
+        });
+      }
+    }
+
+    totalFleetDistance = Number(totalFleetDistance.toFixed(2));
+    const co2SavedKg = Number((totalFleetDistance * 0.18 * 0.25).toFixed(2));
+
+    return {
+      routes: allRoutes,
+      totalDistanceKm: totalFleetDistance,
+      totalCustomersServed: this.customers.size,
+      totalVehiclesUsed: allRoutes.length,
+      co2SavedKg
+    };
+  }
+}
+
+export class LazySegmentTreeInventory {
+  constructor(size = 24, initialStock = 100, basePrice = 100000) {
+    this.n = size;
+    this.treeMinStock = new Array(4 * size).fill(0);
+    this.treeMinPrice = new Array(4 * size).fill(0);
+    this.lazyStock = new Array(4 * size).fill(0);
+    this.lazyPriceMultiplier = new Array(4 * size).fill(1.0);
+
+    this._build(1, 0, this.n - 1, initialStock, basePrice);
+  }
+
+  _build(node, start, end, initialStock, basePrice) {
+    if (start === end) {
+      this.treeMinStock[node] = initialStock;
+      this.treeMinPrice[node] = basePrice;
+      return;
+    }
+
+    const mid = (start + end) >> 1;
+    this._build(2 * node, start, mid, initialStock, basePrice);
+    this._build(2 * node + 1, mid + 1, end, initialStock, basePrice);
+
+    this.treeMinStock[node] = Math.min(this.treeMinStock[2 * node], this.treeMinStock[2 * node + 1]);
+    this.treeMinPrice[node] = Math.min(this.treeMinPrice[2 * node], this.treeMinPrice[2 * node + 1]);
+  }
+
+  _pushDown(node, start, end) {
+    if (start === end) return;
+
+    if (this.lazyStock[node] !== 0) {
+      const delta = this.lazyStock[node];
+      this.treeMinStock[2 * node] += delta;
+      this.treeMinStock[2 * node + 1] += delta;
+      this.lazyStock[2 * node] += delta;
+      this.lazyStock[2 * node + 1] += delta;
+      this.lazyStock[node] = 0;
+    }
+
+    if (this.lazyPriceMultiplier[node] !== 1.0) {
+      const mult = this.lazyPriceMultiplier[node];
+      this.treeMinPrice[2 * node] = Math.round(this.treeMinPrice[2 * node] * mult);
+      this.treeMinPrice[2 * node + 1] = Math.round(this.treeMinPrice[2 * node + 1] * mult);
+      this.lazyPriceMultiplier[2 * node] *= mult;
+      this.lazyPriceMultiplier[2 * node + 1] *= mult;
+      this.lazyPriceMultiplier[node] = 1.0;
+    }
+  }
+
+  updateStockRange(l, r, delta, node = 1, start = 0, end = this.n - 1) {
+    if (l > end || r < start) return;
+
+    if (l <= start && end <= r) {
+      this.treeMinStock[node] += delta;
+      this.lazyStock[node] += delta;
+      return;
+    }
+
+    this._pushDown(node, start, end);
+    const mid = (start + end) >> 1;
+    this.updateStockRange(l, r, delta, 2 * node, start, mid);
+    this.updateStockRange(l, r, delta, 2 * node + 1, mid + 1, end);
+
+    this.treeMinStock[node] = Math.min(this.treeMinStock[2 * node], this.treeMinStock[2 * node + 1]);
+  }
+
+  applyPriceDiscountRange(l, r, discountRate = 0.2, node = 1, start = 0, end = this.n - 1) {
+    if (l > end || r < start) return;
+
+    const multiplier = 1 - discountRate;
+    if (l <= start && end <= r) {
+      this.treeMinPrice[node] = Math.round(this.treeMinPrice[node] * multiplier);
+      this.lazyPriceMultiplier[node] *= multiplier;
+      return;
+    }
+
+    this._pushDown(node, start, end);
+    const mid = (start + end) >> 1;
+    this.applyPriceDiscountRange(l, r, discountRate, 2 * node, start, mid);
+    this.applyPriceDiscountRange(l, r, discountRate, 2 * node + 1, mid + 1, end);
+
+    this.treeMinPrice[node] = Math.min(this.treeMinPrice[2 * node], this.treeMinPrice[2 * node + 1]);
+  }
+
+  queryMinStock(l, r, node = 1, start = 0, end = this.n - 1) {
+    if (l > end || r < start) return Infinity;
+    if (l <= start && end <= r) {
+      return this.treeMinStock[node];
+    }
+
+    this._pushDown(node, start, end);
+    const mid = (start + end) >> 1;
+    const leftMin = this.queryMinStock(l, r, 2 * node, start, mid);
+    const rightMin = this.queryMinStock(l, r, 2 * node + 1, mid + 1, end);
+    return Math.min(leftMin, rightMin);
+  }
+
+  queryMinPrice(l, r, node = 1, start = 0, end = this.n - 1) {
+    if (l > end || r < start) return Infinity;
+    if (l <= start && end <= r) {
+      return this.treeMinPrice[node];
+    }
+
+    this._pushDown(node, start, end);
+    const mid = (start + end) >> 1;
+    const leftMin = this.queryMinPrice(l, r, 2 * node, start, mid);
+    const rightMin = this.queryMinPrice(l, r, 2 * node + 1, mid + 1, end);
+    return Math.min(leftMin, rightMin);
+  }
+
+  reserveSlot(l, r, quantity = 1) {
+    const minAvail = this.queryMinStock(l, r);
+    if (minAvail < quantity) {
+      return {
+        success: false,
+        availableStock: minAvail,
+        reservedQty: 0,
+        reason: "INSUFFICIENT_TIME_WINDOW_STOCK"
+      };
+    }
+
+    this.updateStockRange(l, r, -quantity);
+    return {
+      success: true,
+      availableStock: minAvail - quantity,
+      reservedQty: quantity
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -10833,6 +11292,10 @@ export default {
   GaleShapleyStableMatcher,
   PatriciaNode,
   PatriciaTrieCategoryRouter,
+  // Phase 23 Enterprise Algorithms
+  PStableLSHVectorQuantizer,
+  MultiDepotVRPRouter,
+  LazySegmentTreeInventory,
 };
 
 

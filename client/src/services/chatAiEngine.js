@@ -483,7 +483,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (!/hungarian|ghép bưu tá|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -766,6 +766,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'CATEGORY_ROUTER_PATRICIA_ASSIST',
       replyText: `**[ĐIỀU HƯỚNG DANH MỤC THÔNG MINH] CẤU TRÚC PATRICIA TRIE & GHÉP ĐÔI GALE-SHAPLEY:**\n\n• **Duyệt cây danh mục siêu tốc**: Áp dụng cây tiền tố nén Patricia Trie giúp bạn chuyển đổi mượt mà giữa các ngành hàng đa tầng (Thời trang ➔ Nam ➔ Áo polo ➔ Đồ thể thao) với độ trễ phản hồi dưới $1\\text{ms}$.\n• **Gợi ý Shop phù hợp nhất**: Thuật toán Gale-Shapley tự động ghép bạn với các gian hàng có khoảng cách gần nhất, giao hàng hỏa tốc 2h và có sẵn voucher ưu đãi cao nhất!`,
       suggestions: ['Khám phá danh mục hot', 'Xem sản phẩm bán chạy', 'Lấy mã giảm giá'],
+    };
+  }
+
+  // 25. Lộ Trình Giao Hàng Xanh SPX & Khung Giờ Flash Sale (GREEN_LOGISTICS_VRP_ASSIST)
+  if (/vrp|giao hàng xanh|green logistics|giảm co2|tiết kiệm phát thải|lộ trình spx|khung giờ flash sale/i.test(lower)) {
+    return {
+      intent: 'GREEN_LOGISTICS_VRP_ASSIST',
+      replyText: `**[VẬN CHUYỂN XANH SPX & FLASH SALE] THUẬT TOÁN ĐỊNH TUYẾN ĐỘI XE VRP & CÂY ĐOẠN:**\n\n• **Logistics Thân Thiện Môi Trường**: Thuật toán định tuyến đa kho (MULTI-DEPOT VRP) tự động tối ưu các điểm dừng giao hàng theo vòng cung ngắn nhất, cắt giảm trung bình 25% quãng đường di chuyển và giảm phát thải khí carbon (CO₂) cho mỗi kiện hàng của bạn!\n• **Săn Deal Khung Giờ Vàng**: Công nghệ Cây Đoạn (Lazy Segment Tree) bảo đảm bạn đặt mua thành công đúng số lượng hàng giảm giá trong các khung giờ vàng (00h, 12h, 20h) mà không bao giờ bị báo ảo hay hủy đơn vì thiếu hàng!`,
+      suggestions: ['Xem khung giờ Flash Sale', 'Tra cứu mã vận đơn SPX', 'Lấy voucher Freeship'],
     };
   }
 

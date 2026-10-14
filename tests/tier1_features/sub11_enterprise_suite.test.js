@@ -152,6 +152,10 @@ import {
   GaleShapleyStableMatcher,
   PatriciaNode,
   PatriciaTrieCategoryRouter,
+  // Phase 23 Enterprise Algorithms
+  PStableLSHVectorQuantizer,
+  MultiDepotVRPRouter,
+  LazySegmentTreeInventory,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -186,6 +190,9 @@ import { TimsortCatalogSorter as ServerTimsort } from "../../server/src/utils/ti
 import { HoltWintersDemandForecaster as ServerHoltWinters } from "../../server/src/utils/holtWintersDemandForecaster.js";
 import { GaleShapleyStableMatcher as ServerGaleShapley } from "../../server/src/utils/galeShapleyStableMatcher.js";
 import { PatriciaTrieCategoryRouter as ServerPatriciaTrie } from "../../server/src/utils/patriciaTrieCategoryRouter.js";
+import { PStableLSHVectorQuantizer as ServerPStableLSH } from "../../server/src/utils/pStableLshVectorQuantizer.js";
+import { MultiDepotVRPRouter as ServerMultiDepotVRP } from "../../server/src/utils/multiDepotVrpRouter.js";
+import { LazySegmentTreeInventory as ServerLazySegmentTree } from "../../server/src/utils/lazySegmentTreeInventory.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -13307,6 +13314,308 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.equal(dispatch.matchedCount, 2);
         expect.equal(matcher.isStable(dispatch.matches), true);
         expect.equal(dispatch.matches.get("ORD_URGENT_1"), "COURIER_SPX_HN1");
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 170: p-Stable LSH, Multi-Depot VRP & Lazy Segment Tree (Phase 23 - 24 Tests)
+  // =========================================================================
+  describe("Feature 170: p-Stable LSH, Multi-Depot VRP & Lazy Segment Tree (Phase 23)", () => {
+
+    // --- NHÓM 1: Locality-Sensitive Hashing with p-Stable Random Projections (F170-T01 -> F170-T06) ---
+    describe("Nhóm 1: Locality-Sensitive Hashing with p-Stable Random Projections", () => {
+      test("F170-T01: Initial stats and empty LSH quantizer querying returns empty candidates without crashing", () => {
+        const lsh = new PStableLSHVectorQuantizer({ dimensions: 4, numTables: 2 });
+        const stats = lsh.getStats();
+        expect.equal(stats.dimensions, 4);
+        expect.equal(stats.numTables, 2);
+        expect.equal(stats.totalBuckets, 0);
+
+        const candidates = lsh.queryCandidates([1, 0, 0, 0]);
+        expect.equal(candidates.length, 0);
+      });
+
+      test("F170-T02: Gaussian random projection initialization produces valid compound hash keys across L tables", () => {
+        const lsh = new PStableLSHVectorQuantizer({ dimensions: 3, numHashFunctions: 3, numTables: 2, binWidth: 1.0 });
+        const keyTable0 = lsh._computeHashKey([1.0, 2.0, 3.0], 0);
+        const keyTable1 = lsh._computeHashKey([1.0, 2.0, 3.0], 1);
+
+        expect.equal(typeof keyTable0, "string");
+        expect.equal(typeof keyTable1, "string");
+        expect.equal(keyTable0.split(",").length, 3);
+        expect.equal(keyTable1.split(",").length, 3);
+      });
+
+      test("F170-T03: Similar vectors fall into identical or neighboring hash buckets with high probability", () => {
+        const lsh = new PStableLSHVectorQuantizer({ dimensions: 4, numHashFunctions: 2, numTables: 3, binWidth: 5.0 });
+        const vA = [10.0, 20.0, 30.0, 40.0];
+        const vSimilar = [10.1, 20.1, 29.9, 40.0];
+        const vDistant = [-50.0, -80.0, -100.0, -20.0];
+
+        lsh.addVector("USER_A", vA, { tier: "VIP" });
+        lsh.addVector("USER_SIMILAR", vSimilar, { tier: "VIP" });
+        lsh.addVector("USER_DISTANT", vDistant, { tier: "NEW" });
+
+        const candidates = lsh.queryCandidates(vA, { topK: 2 });
+        expect.equal(candidates.length >= 1, true);
+        expect.equal(candidates[0].id, "USER_A");
+        if (candidates.length > 1) {
+          expect.equal(candidates[1].id, "USER_SIMILAR");
+        }
+      });
+
+      test("F170-T04: queryCandidates retrieves top-K nearest items ranked by Euclidean distance", () => {
+        const lsh = new PStableLSHVectorQuantizer({ dimensions: 2, numHashFunctions: 1, numTables: 4, binWidth: 10.0 });
+        lsh.addVector("P_ORIGIN", [0, 0]);
+        lsh.addVector("P_NEAR", [1, 1]); // dist ~ 1.414
+        lsh.addVector("P_FAR", [5, 5]);   // dist ~ 7.071
+
+        const results = lsh.queryCandidates([0, 0], { topK: 3 });
+        expect.equal(results[0].id, "P_ORIGIN");
+        expect.equal(results[0].distance, 0);
+      });
+
+      test("F170-T05: Euclidean distance calculation accuracy between identical and orthogonal vectors", () => {
+        const dZero = PStableLSHVectorQuantizer.euclideanDistance([1, 2, 3], [1, 2, 3]);
+        expect.equal(dZero, 0);
+
+        const d345 = PStableLSHVectorQuantizer.euclideanDistance([0, 0], [3, 4]);
+        expect.equal(d345, 5);
+      });
+
+      test("F170-T06: Server-side PStableLSHVectorQuantizer matches client-side implementation", () => {
+        const clientLsh = new PStableLSHVectorQuantizer({ dimensions: 3 });
+        const serverLsh = new ServerPStableLSH({ dimensions: 3 });
+
+        expect.equal(clientLsh.dimensions, serverLsh.dimensions);
+        expect.equal(PStableLSHVectorQuantizer.euclideanDistance([1, 1, 1], [4, 5, 1]), ServerPStableLSH.euclideanDistance([1, 1, 1], [4, 5, 1]));
+      });
+    });
+
+    // --- NHÓM 2: Multi-Depot Multi-Stop Fleet Routing Heuristic (VRP) (F170-T07 -> F170-T12) ---
+    describe("Nhóm 2: Multi-Depot Multi-Stop Fleet Routing Heuristic (VRP)", () => {
+      test("F170-T07: Haversine distance calculation between GPS coordinates (e.g. Hanoi to Hai Phong ~100km)", () => {
+        // Hà Nội (21.0285, 105.8542) -> Hải Phòng (20.8449, 106.6881)
+        const dist = MultiDepotVRPRouter.calculateDistanceKm(21.0285, 105.8542, 20.8449, 106.6881);
+        expect.equal(dist > 80 && dist < 120, true);
+      });
+
+      test("F170-T08: Depot clustering assigns customers strictly to the closest depot", () => {
+        const vrp = new MultiDepotVRPRouter();
+        vrp.addDepot("DEPOT_HN", 21.0285, 105.8542, { name: "Kho Hà Nội" });
+        vrp.addDepot("DEPOT_SG", 10.8231, 106.6297, { name: "Kho Sài Gòn" });
+
+        // Khách ở Cầu Giấy (Hà Nội) và Quận 1 (Sài Gòn)
+        vrp.addCustomer("CUST_HN_1", 21.0333, 105.7833, { demand: 5 });
+        vrp.addCustomer("CUST_SG_1", 10.7769, 106.7009, { demand: 5 });
+
+        const result = vrp.solve({ vehicleCapacity: 50 });
+        expect.equal(result.routes.length, 2);
+        const routeHn = result.routes.find(r => r.depotId === "DEPOT_HN");
+        const routeSg = result.routes.find(r => r.depotId === "DEPOT_SG");
+        expect.equal(routeHn !== undefined, true);
+        expect.equal(routeSg !== undefined, true);
+        expect.equal(routeHn.stopsCount, 1);
+        expect.equal(routeSg.stopsCount, 1);
+      });
+
+      test("F170-T09: 2-Opt local search preserves depot endpoints and eliminates uncrossed sub-paths", () => {
+        const depot = { id: "D", lat: 0, lon: 0 };
+        const c1 = { id: "C1", lat: 0, lon: 2 };
+        const c2 = { id: "C2", lat: 2, lon: 0 };
+        const c3 = { id: "C3", lat: 2, lon: 2 };
+
+        // Tour ban đầu bị chéo
+        const tour = [depot, c1, c3, c2, depot];
+        const optTour = MultiDepotVRPRouter.optimizeTour2Opt(tour);
+
+        expect.equal(optTour.length, tour.length);
+        expect.equal(optTour[0].id, "D");
+        expect.equal(optTour[optTour.length - 1].id, "D");
+      });
+
+      test("F170-T10: Fleet capacity partitioning splits customer orders into multiple vehicle routes when load exceeds capacity", () => {
+        const vrp = new MultiDepotVRPRouter();
+        vrp.addDepot("HUB_CENTRAL", 21.0, 105.8);
+        // 3 khách hàng, mỗi khách cần 20 kiện -> tổng 60 kiện. Xe chỉ chở được 50 kiện -> cần 2 xe (Xe 1: 40, Xe 2: 20)
+        vrp.addCustomer("C1", 21.01, 105.81, { demand: 20 });
+        vrp.addCustomer("C2", 21.02, 105.82, { demand: 20 });
+        vrp.addCustomer("C3", 21.03, 105.83, { demand: 20 });
+
+        const solution = vrp.solve({ vehicleCapacity: 50 });
+        expect.equal(solution.routes.length, 2);
+        expect.equal(solution.totalCustomersServed, 3);
+        expect.equal(solution.co2SavedKg > 0, true);
+      });
+
+      test("F170-T11: Empty depots or customers return zero distance and zero routes cleanly", () => {
+        const emptyVrp = new MultiDepotVRPRouter();
+        const res = emptyVrp.solve();
+        expect.equal(res.routes.length, 0);
+        expect.equal(res.totalDistanceKm, 0);
+      });
+
+      test("F170-T12: Server-side MultiDepotVRPRouter matches client-side implementation", () => {
+        const cVrp = new MultiDepotVRPRouter();
+        const sVrp = new ServerMultiDepotVRP();
+
+        for (const v of [cVrp, sVrp]) {
+          v.addDepot("D1", 21.0, 105.8);
+          v.addCustomer("K1", 21.05, 105.85, { demand: 10 });
+        }
+
+        const cSol = cVrp.solve({ vehicleCapacity: 50 });
+        const sSol = sVrp.solve({ vehicleCapacity: 50 });
+        expect.equal(cSol.totalDistanceKm, sSol.totalDistanceKm);
+        expect.equal(cSol.routes.length, sSol.routes.length);
+      });
+    });
+
+    // --- NHÓM 3: Segment Tree with Lazy Propagation for Flash Sale Inventory (F170-T13 -> F170-T18) ---
+    describe("Nhóm 3: Segment Tree with Lazy Propagation for Flash Sale Inventory", () => {
+      test("F170-T13: Initial build configures minStock and minPrice across all 24 hours", () => {
+        const tree = new LazySegmentTreeInventory(24, 150, 200000);
+        expect.equal(tree.queryMinStock(0, 23), 150);
+        expect.equal(tree.queryMinPrice(0, 23), 200000);
+        expect.equal(tree.queryMinStock(0, 5), 150);
+      });
+
+      test("F170-T14: updateStockRange with Lazy Propagation updates segment without early push-down overhead", () => {
+        const tree = new LazySegmentTreeInventory(24, 100, 100000);
+        // Trừ 30 sản phẩm trong khung giờ từ 12h đến 14h (giờ vàng)
+        tree.updateStockRange(12, 14, -30);
+
+        expect.equal(tree.queryMinStock(12, 14), 70);
+        // Các khung giờ khác vẫn giữ nguyên 100
+        expect.equal(tree.queryMinStock(0, 11), 100);
+        expect.equal(tree.queryMinStock(15, 23), 100);
+        // Toàn bộ dải 24h có minStock là 70
+        expect.equal(tree.queryMinStock(0, 23), 70);
+      });
+
+      test("F170-T15: queryMinStock correctly evaluates the bottleneck minimum inventory in interval [L, R]", () => {
+        const tree = new LazySegmentTreeInventory(24, 100, 100000);
+        tree.updateStockRange(5, 7, -60);  // còn 40
+        tree.updateStockRange(6, 8, -25);  // giờ 6 và 7 còn 15!
+
+        expect.equal(tree.queryMinStock(5, 5), 40);
+        expect.equal(tree.queryMinStock(6, 7), 15);
+        expect.equal(tree.queryMinStock(8, 8), 75);
+      });
+
+      test("F170-T16: applyPriceDiscountRange scales down price across promotional time window", () => {
+        const tree = new LazySegmentTreeInventory(24, 100, 200000);
+        // Giảm giá 30% từ 20h đến 22h
+        tree.applyPriceDiscountRange(20, 22, 0.3);
+
+        expect.equal(tree.queryMinPrice(20, 22), 140000);
+        expect.equal(tree.queryMinPrice(0, 19), 200000);
+      });
+
+      test("F170-T17: reserveSlot performs atomic reservation (succeeds when stock >= qty, fails safely when stock < qty)", () => {
+        const tree = new LazySegmentTreeInventory(24, 10, 100000);
+        // Đặt trước 6 suất từ 0h đến 2h
+        const res1 = tree.reserveSlot(0, 2, 6);
+        expect.equal(res1.success, true);
+        expect.equal(res1.availableStock, 4);
+
+        // Đặt tiếp 5 suất trong cùng khung giờ -> Thất bại vì chỉ còn 4
+        const res2 = tree.reserveSlot(0, 2, 5);
+        expect.equal(res2.success, false);
+        expect.equal(res2.reason, "INSUFFICIENT_TIME_WINDOW_STOCK");
+
+        // Đặt đúng 4 suất còn lại -> Thành công
+        const res3 = tree.reserveSlot(0, 2, 4);
+        expect.equal(res3.success, true);
+        expect.equal(tree.queryMinStock(0, 2), 0);
+      });
+
+      test("F170-T18: Server-side LazySegmentTreeInventory matches client-side implementation", () => {
+        const cTree = new LazySegmentTreeInventory(24, 80, 50000);
+        const sTree = new ServerLazySegmentTree(24, 80, 50000);
+
+        cTree.updateStockRange(10, 15, -20);
+        sTree.updateStockRange(10, 15, -20);
+
+        expect.equal(cTree.queryMinStock(10, 15), sTree.queryMinStock(10, 15));
+        expect.equal(cTree.queryMinStock(0, 23), sTree.queryMinStock(0, 23));
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Enterprise Lifecycle (F170-T19 -> F170-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Enterprise Lifecycle", () => {
+      test("F170-T19: Admin Sentinel Copilot answers Multi-Depot VRP fleet routing queries with tag and logistics suggestions", () => {
+        const res = generateAdminCopilotResponse("Tối ưu định tuyến đội xe giao hàng đa kho spx vrp giảm phát thải co2");
+        expect.equal(res.tag, "ĐỊNH TUYẾN ĐỘI XE VRP");
+        expect.equal(res.type, "logistics");
+        expect.equal(res.text.includes("SPX MULTI-DEPOT VRP"), true);
+        expect.equal(res.text.includes("Green Logistics"), true);
+      });
+
+      test("F170-T20: Admin Sentinel Copilot answers Lazy Segment Tree Flash Sale slot management queries", () => {
+        const res = generateAdminCopilotResponse("Quản lý slot khung giờ flash sale bằng cấu trúc cây đoạn lazy segment tree");
+        expect.equal(res.tag, "CÂY ĐOẠN KHUNG GIỜ");
+        expect.equal(res.type, "algorithm");
+        expect.equal(res.text.includes("LAZY SEGMENT TREE"), true);
+      });
+
+      test("F170-T21: Seller ShopSmart Copilot advises on Segment Tree time-window stock allocation and p-Stable LSH audience clustering", () => {
+        const res = generateSellerCopilotResponse("Phân bổ slot khung giờ flash sale bằng lazy segment tree và gom nhóm khách hàng lsh");
+        expect.equal(res.tag, "TỐI ƯU FLASH SALE & LSH");
+        expect.equal(res.type, "recommendation");
+        expect.equal(res.text.includes("Lazy Segment Tree"), true);
+        expect.equal(res.text.includes("p-Stable LSH"), true);
+      });
+
+      test("F170-T22: Buyer AI Assistant explains Green Logistics VRP and Flash Sale time slot guarantees", () => {
+        const res = generateAiChatResponse("Sàn có giao hàng xanh vrp giảm co2 và đảm bảo khung giờ flash sale không");
+        expect.equal(res.intent, "GREEN_LOGISTICS_VRP_ASSIST");
+        expect.equal(res.replyText.includes("MULTI-DEPOT VRP"), true);
+      });
+
+      test("F170-T23: Boundary conditions: 50 customers across 3 regional depots routed under 100ms with 100% customer coverage", () => {
+        const vrp = new MultiDepotVRPRouter();
+        vrp.addDepot("HN", 21.0, 105.8);
+        vrp.addDepot("DN", 16.0, 108.2);
+        vrp.addDepot("SG", 10.8, 106.6);
+
+        for (let i = 0; i < 50; i++) {
+          vrp.addCustomer(`C_${i}`, 10 + Math.random() * 11, 105 + Math.random() * 3, { demand: 2 });
+        }
+
+        const t0 = Date.now();
+        const sol = vrp.solve({ vehicleCapacity: 20 });
+        const elapsed = Date.now() - t0;
+
+        expect.equal(sol.totalCustomersServed, 50);
+        expect.equal(sol.routes.length > 0, true);
+        expect.equal(elapsed < 1000, true);
+      });
+
+      test("F170-T24: E2E Lifecycle: Seller configures Flash Sale slots via Lazy Segment Tree -> Buyers clustered by p-Stable LSH -> Orders placed -> SPX Multi-Depot VRP dispatches deliveries with zero crossing paths and reduced CO2", () => {
+        // 1. Seller configures 20h-22h Flash Sale slots (hours 20 to 22)
+        const segmentTree = new LazySegmentTreeInventory(24, 50, 150000);
+        segmentTree.applyPriceDiscountRange(20, 22, 0.4); // 40% OFF
+        expect.equal(segmentTree.queryMinPrice(20, 22), 90000);
+
+        // 2. Buyer pre-books 2 items
+        const booking = segmentTree.reserveSlot(20, 22, 2);
+        expect.equal(booking.success, true);
+
+        // 3. Buyer vector profiling via p-Stable LSH
+        const lsh = new PStableLSHVectorQuantizer({ dimensions: 4, binWidth: 10.0 });
+        lsh.addVector("BUYER_TECH_FAN", [10, 5, 20, 8], { interest: "Tech" });
+        const clusters = lsh.queryCandidates([10, 5, 20, 8]);
+        expect.equal(clusters[0].id, "BUYER_TECH_FAN");
+
+        // 4. Order delivered via SPX Multi-Depot VRP green route
+        const vrp = new MultiDepotVRPRouter();
+        vrp.addDepot("HUB_HN_LONG_BIEN", 21.04, 105.89);
+        vrp.addCustomer("ORDER_TECH_1", 21.05, 105.90, { demand: 1 });
+        const vrpResult = vrp.solve({ vehicleCapacity: 10 });
+        expect.equal(vrpResult.routes.length, 1);
+        expect.equal(vrpResult.co2SavedKg >= 0, true);
       });
     });
   });

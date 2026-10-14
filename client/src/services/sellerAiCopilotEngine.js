@@ -80,7 +80,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 3. Tư Vấn Chiến Dịch Flash Sale Shop (Flash Sale Optimization)
-  if (!/raft|co giãn|elasticity/i.test(raw) && /flash sale|khung giờ|giảm giá|săn deal|deal chớp nhoáng|khuyến mãi/i.test(raw)) {
+  if (!/raft|co giãn|elasticity|segment tree|cây đoạn|lsh|p-stable/i.test(raw) && /flash sale|khung giờ|giảm giá|săn deal|deal chớp nhoáng|khuyến mãi/i.test(raw)) {
     return {
       text: `⚡ **CHIẾN LƯỢC THIẾT LẬP FLASH SALE SHOP ĐỘC QUYỀN**:
 - **Khung giờ vàng đề xuất**: 
@@ -641,6 +641,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
       tag: 'KẾ HOẠCH HOLT-WINTERS & TRIE',
       suggestions: [
         'Dự báo tốc độ bán và ngày còn hàng (DIR)',
+        'Tối ưu danh mục Timsort',
+        'Phân tích biên lợi nhuận P&L'
+      ]
+    };
+  }
+
+  // 32. Phân Bổ Slot Flash Sale Bằng Lazy Segment Tree & Phân Cụm Khách Hàng p-Stable LSH (Phase 23 - Feature 170)
+  if (/segment tree|lazy propagation|khung giờ flash sale|slot flash sale|p-stable|lsh vector|phân cụm khách hàng/i.test(raw)) {
+    return {
+      text: `🎯 **PHÂN BỔ SLOT FLASH SALE LAZY SEGMENT TREE & PHÂN CỤM KHÁCH HÀNG P-STABLE LSH (${currentShop.name})**:
+- **Quản trị khung giờ Flash Sale bằng Cây Đoạn (Lazy Segment Tree)**:
+  - Cho phép Shop bạn đăng ký và điều chỉnh số lượng hàng xả theo từng khung giờ (00h-02h, 12h-14h, 20h-22h) trong độ phức tạp $O(\\log N)$.
+  - Bảo đảm kiểm tra tức thì mức tồn khả dụng, tránh tuyệt đối tình trạng phạt Sao Quả Tạ do giao thiếu hàng!
+- **Phân cụm khách hàng mục tiêu bằng p-Stable LSH**:
+  - Tự động gom nhóm các tệp người mua có cùng sở thích chi tiêu và giỏ hàng trong không gian vector liên tục.
+  - Hướng dẫn điều chỉnh giá thầu Shopee Ads nhắm trúng tệp khách hàng tiềm năng có tỷ lệ chốt đơn cao nhất!`,
+      type: 'recommendation',
+      tag: 'TỐI ƯU FLASH SALE & LSH',
+      suggestions: [
+        'Kế hoạch nhập hàng Holt-Winters',
         'Tối ưu danh mục Timsort',
         'Phân tích biên lợi nhuận P&L'
       ]
