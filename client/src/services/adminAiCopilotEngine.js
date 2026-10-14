@@ -90,7 +90,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   const raw = query.toLowerCase().trim();
 
   // 2. Tra cứu Tài chính & Hoa hồng sàn (GMV, Commission, Doanh thu)
-  if (/doanh số|gmv|doanh thu|hoa hồng|tiền sàn|phí sàn|lợi nhuận sàn/i.test(raw)) {
+  if (!/fenwick|cây fenwick/i.test(raw) && /doanh số|gmv|doanh thu|hoa hồng|tiền sàn|phí sàn|lợi nhuận sàn/i.test(raw)) {
     const commVnd = commission || Math.round(totalRevenue * 0.05);
     return {
       text: `📊 **BÁO CÁO TÀI CHÍNH & HOA HỒNG TOÀN SÀN**:
@@ -1501,6 +1501,65 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Lọc sản phẩm theo khoảng giá và điểm tài trợ',
         'Kiểm tra sản phẩm ưu tiên cao nhất ở đỉnh Treap',
         'Đo lường thời gian truy vấn cây Treap'
+      ]
+    };
+  }
+
+  // 65. Xếp Hạng Doanh Số & Phân Vị GMV Bằng Cây Fenwick (BIT) (Phase 28 - Feature 175)
+  if (/fenwick|cây fenwick|binary indexed tree|\bbit\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
+    return {
+      text: `📊 **XẾP HẠNG DOANH SỐ & PHÂN VỊ GMV BẰNG CÂY FENWICK (BINARY INDEXED TREE - BIT)**:
+- **Cấu trúc dữ liệu Fenwick Tree (Peter Fenwick 1994)**:
+  - Cho phép cập nhật điểm doanh số người bán \`update(rank, gmv)\` và truy vấn tổng tiền tích lũy \`query(rank)\` đều đạt hiệu năng tối ưu $O(\\log M)$.
+  - Sử dụng phép toán bit \`i & (-i)\` (Least Significant Bit - LSB) để nhảy bước lũy tiến cực nhanh trong bộ nhớ.
+- **Xác định ngưỡng phân vị và Top Người Bán (Binary Lifting trên BIT)**:
+  - Tìm kiếm nhị phân $O(\\log M)$ chỉ số bucket đạt mốc phân vị mong muốn (ví dụ: Top 10% GMV hoặc Median Bucket), giúp sàn áp dụng chính sách thưởng hoa hồng hoặc gắn huy hiệu Shop Yêu Thích chuẩn xác!`,
+      type: 'analytics',
+      tag: 'PHÂN VỊ GMV CÂY FENWICK',
+      suggestions: [
+        'Tra cứu phân vị GMV người bán trên cây Fenwick',
+        'Cập nhật doanh số merchant vào Fenwick Tree',
+        'Xác định ngưỡng phân vị Top 10% doanh số'
+      ]
+    };
+  }
+
+  // 66. Định Hình Lưu Lượng Bounded Leaky Bucket & Chống Sập Flash Sale (Phase 28 - Feature 175)
+  if (/leaky bucket|định hình lưu lượng|traffic shaper|chống burst flash sale|fair queue|hàng đợi rò rỉ/i.test(raw)) {
+    return {
+      text: `🌊 **ĐỊNH HÌNH LƯU LƯỢNG LEAKY BUCKET & BẢO VỆ CỔNG THANH TOÁN (BOUNDED BUFFER)**:
+- **Nguyên lý làm mượt lưu lượng (Traffic Shaping)**:
+  - Khắc phục nhược điểm của Token Bucket (cho phép burst dòng dữ liệu đột ngột), Leaky Bucket giải phóng các yêu cầu đặt hàng và thanh toán theo tốc độ không đổi (Leak Rate $R$ requests/s).
+  - Ngăn ngừa tình trạng sập đột ngột (Cascading Outage) tại tầng cơ sở dữ liệu và cổng thanh toán VietQR khi triệu khách hàng giật Deal 0đ.
+- **Hàng đợi công bằng (Fair Queueing) & Chính sách Drop**:
+  - Hỗ trợ chính sách \`PRIORITY_DROP\` ưu tiên giữ lại các gói tin thanh toán đơn hàng (HIGH) và loại bỏ telemetry/log (LOW) khi bộ đệm chạm ngưỡng \`capacity\`.`,
+      type: 'security',
+      tag: 'ĐỊNH HÌNH LƯU LƯỢNG LEAKY BUCKET',
+      suggestions: [
+        'Xem tốc độ rò rỉ (leak rate) hiện tại',
+        'Kiểm tra tỷ lệ drop request theo từng shop',
+        'Điều chỉnh sức chứa hàng đợi đệm capacity'
+      ]
+    };
+  }
+
+  // 67. Hàng Đợi Ưu Tiên Kép Min-Max Heap Tồn Kho Hai Đầu (Phase 28 - Feature 175)
+  if (/min-max heap|hàng đợi ưu tiên kép|double-ended priority queue|depqueue|tồn kho hai đầu|min-max tồn kho/i.test(raw)) {
+    return {
+      text: `⚖️ **QUẢN TRỊ TỒN KHO HAI ĐẦU BẰNG HÀNG ĐỢI ƯU TIÊN KÉP (MIN-MAX HEAP)**:
+- **Cấu trúc Min-Max Heap (Atkinson et al. 1986)**:
+  - Cây nhị phân hoàn chỉnh lưu trên mảng phẳng với các tầng chẵn là Min-Level và các tầng lẻ là Max-Level.
+  - Cho phép truy cập tức thời $O(1)$ cả hai đầu:
+    • **Mặt hàng bán chạy nhất (Fast Moving - Max Velocity)** tại \`getMax()\` để cảnh báo nhập thêm kho.
+    • **Mặt hàng tồn đọng lâu nhất (Dead Stock - Min Velocity)** tại \`getMin()\` để tự động đề xuất xả hàng tồn.
+- **Hiệu năng thao tác cân bằng**:
+  - Thêm mới \`insert\` và trích xuất \`extractMin\` / \`extractMax\` đều đạt $O(\\log N)$, tiết kiệm bộ nhớ so với việc duy trì 2 heap độc lập.`,
+      type: 'inventory',
+      tag: 'HÀNG ĐỢI KÉP MIN-MAX HEAP',
+      suggestions: [
+        'Tra cứu SKU bán chạy nhất ở Max-Level',
+        'Tra cứu SKU đọng kho ở Min-Level',
+        'Xem trước hai đầu tồn kho bằng peekBoth()'
       ]
     };
   }

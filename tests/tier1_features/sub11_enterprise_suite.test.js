@@ -175,6 +175,10 @@ import {
   ALTLandmarkRouter,
   TreapNode,
   TreapPriorityIndex,
+  FenwickRankTree,
+  SHAPER_PRIORITY,
+  LeakyBucketTrafficShaper,
+  MinMaxInventoryHeap,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -224,6 +228,9 @@ import ServerScalableBloomFilter from "../../server/src/utils/scalableBloomFilte
 import ServerConservativeCMS from "../../server/src/utils/conservativeCountMinSketch.js";
 import ServerALTRouter from "../../server/src/utils/altLandmarkRouter.js";
 import ServerTreapIndex from "../../server/src/utils/treapPriorityIndex.js";
+import ServerFenwickRankTree from "../../server/src/utils/fenwickRankTree.js";
+import ServerLeakyBucketShaper, { SHAPER_PRIORITY as ServerShaperPriority } from "../../server/src/utils/leakyBucketTrafficShaper.js";
+import ServerMinMaxInventoryHeap from "../../server/src/utils/minMaxInventoryHeap.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -15123,6 +15130,358 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const searchDeals = treap.rangeQuery(1000000, 5000000);
         expect.equal(searchDeals.length, 2);
         expect.equal(searchDeals[0].key, 4500000); // 0.95 priority xuất hiện đầu tiên
+      });
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 175: Enterprise Algorithms Suite - Phase 28 (24 Tests)
+  // Fenwick Rank Tree, Leaky Bucket Traffic Shaper, Min-Max Inventory Heap
+  // =========================================================================
+  describe("Feature 175: Enterprise Algorithms Suite - Phase 28 (Fenwick Tree, Leaky Bucket Shaper, Min-Max Heap)", () => {
+    // --- NHÓM 1: Fenwick Rank Tree (Binary Indexed Tree) (F175-T01 -> F175-T06) ---
+    describe("Nhóm 1: Fenwick Rank Tree (Binary Indexed Tree)", () => {
+      test("F175-T01: Initial state creates tree with correct maxSize and 0 total records/GMV", () => {
+        const bit = new FenwickRankTree(1000);
+        expect.equal(bit.maxSize, 1000);
+        expect.equal(bit.totalRecords, 0);
+        expect.equal(bit.totalGmv, 0);
+        expect.equal(bit.query(500), 0);
+      });
+
+      test("F175-T02: update(idx, delta) correctly updates BIT prefix sums and bounds out-of-range indices", () => {
+        const bit = new FenwickRankTree(100);
+        expect.equal(bit.update(0, 1000), false); // 1-based index guard
+        expect.equal(bit.update(101, 1000), false);
+        expect.equal(bit.update(10, NaN), false);
+
+        expect.equal(bit.update(5, 50000), true);
+        expect.equal(bit.update(10, 30000), true);
+        expect.equal(bit.update(15, 20000), true);
+
+        expect.equal(bit.query(4), 0);
+        expect.equal(bit.query(5), 50000);
+        expect.equal(bit.query(9), 50000);
+        expect.equal(bit.query(10), 80000);
+        expect.equal(bit.query(20), 100000);
+      });
+
+      test("F175-T03: rangeQuery(left, right) accurately calculates subsegment GMV sum O(log M)", () => {
+        const bit = new FenwickRankTree(50);
+        for (let i = 1; i <= 20; i++) {
+          bit.update(i, i * 1000); // 1000, 2000, ..., 20000
+        }
+
+        // Sum 5..10: 5000 + 6000 + 7000 + 8000 + 9000 + 10000 = 45000
+        expect.equal(bit.rangeQuery(5, 10), 45000);
+        expect.equal(bit.rangeQuery(10, 5), 0); // Invalid range
+        expect.equal(bit.rangeQuery(1, 1), 1000);
+      });
+
+      test("F175-T04: recordMerchantSales(bucket, gmv) updates both GMV sum and merchant counts", () => {
+        const bit = new FenwickRankTree(100);
+        bit.recordMerchantSales(10, 1500000);
+        bit.recordMerchantSales(10, 2500000);
+        bit.recordMerchantSales(25, 5000000);
+
+        expect.equal(bit.totalRecords, 3);
+        expect.equal(bit.totalGmv, 9000000);
+        expect.equal(bit.countMerchantsUpTo(10), 2);
+        expect.equal(bit.countMerchantsUpTo(25), 3);
+        expect.equal(bit.getPercentile(10), 66.67);
+      });
+
+      test("F175-T05: findBucketForGmv(targetGmv) binary lifting finds exact percentile threshold in O(log M)", () => {
+        const bit = new FenwickRankTree(100);
+        bit.update(10, 100000);
+        bit.update(20, 200000);
+        bit.update(30, 300000);
+        // Prefix sums: [1..9]=0, [10..19]=100000, [20..29]=300000, [30..100]=600000
+
+        expect.equal(bit.findBucketForGmv(50000), 10);
+        expect.equal(bit.findBucketForGmv(100000), 10);
+        expect.equal(bit.findBucketForGmv(100001), 20);
+        expect.equal(bit.findBucketForGmv(300000), 20);
+        expect.equal(bit.findBucketForGmv(300001), 30);
+        expect.equal(bit.findBucketForGmv(999999), 100);
+      });
+
+      test("F175-T06: Client and server implementations produce identical prefix sums, counts, and percentiles", () => {
+        const cBit = new FenwickRankTree(200);
+        const sBit = new ServerFenwickRankTree(200);
+
+        const testData = [
+          { bucket: 5, gmv: 50000 },
+          { bucket: 15, gmv: 150000 },
+          { bucket: 35, gmv: 350000 },
+          { bucket: 75, gmv: 750000 }
+        ];
+
+        for (const d of testData) {
+          cBit.recordMerchantSales(d.bucket, d.gmv);
+          sBit.recordMerchantSales(d.bucket, d.gmv);
+        }
+
+        expect.equal(cBit.query(50), sBit.query(50));
+        expect.equal(cBit.rangeQuery(10, 80), sBit.rangeQuery(10, 80));
+        expect.equal(cBit.findBucketForGmv(500000), sBit.findBucketForGmv(500000));
+        expect.equal(cBit.getPercentile(35), sBit.getPercentile(35));
+      });
+    });
+
+    // --- NHÓM 2: Bounded-Buffer Leaky Bucket Traffic Shaper (F175-T07 -> F175-T12) ---
+    describe("Nhóm 2: Bounded-Buffer Leaky Bucket Traffic Shaper", () => {
+      test("F175-T07: Valid items enqueue successfully and update buffer queue length", () => {
+        const shaper = new LeakyBucketTrafficShaper({ capacity: 5, leakRatePerSec: 10 });
+        expect.equal(shaper.enqueue({ id: "REQ_1", shopId: "shop_01", priority: SHAPER_PRIORITY.NORMAL }).accepted, true);
+        expect.equal(shaper.enqueue({ id: "REQ_2", shopId: "shop_02", priority: SHAPER_PRIORITY.HIGH }).accepted, true);
+        expect.equal(shaper.queue.length, 2);
+        expect.equal(shaper.enqueue(null).accepted, false);
+      });
+
+      test("F175-T08: Buffer overflow under TAIL_DROP rejects new incoming request and records shop drop count", () => {
+        const shaper = new LeakyBucketTrafficShaper({ capacity: 2, dropPolicy: 'TAIL_DROP' });
+        shaper.enqueue({ id: "REQ_1", shopId: "shop_01" });
+        shaper.enqueue({ id: "REQ_2", shopId: "shop_01" });
+
+        const overflow = shaper.enqueue({ id: "REQ_3", shopId: "shop_02" });
+        expect.equal(overflow.accepted, false);
+        expect.equal(overflow.reason, "BUFFER_OVERFLOW");
+        expect.equal(shaper.totalDropped, 1);
+        expect.equal(shaper.shopDropCounts["shop_02"], 1);
+      });
+
+      test("F175-T09: Buffer overflow under PRIORITY_DROP evicts lower priority item (LOW) to accept incoming HIGH packet", () => {
+        const shaper = new LeakyBucketTrafficShaper({ capacity: 2, dropPolicy: 'PRIORITY_DROP' });
+        shaper.enqueue({ id: "REQ_LOW", shopId: "shop_01", priority: SHAPER_PRIORITY.LOW });
+        shaper.enqueue({ id: "REQ_NORMAL", shopId: "shop_02", priority: SHAPER_PRIORITY.NORMAL });
+
+        // HIGH priority request comes in -> REQ_LOW should be evicted
+        const highRes = shaper.enqueue({ id: "REQ_HIGH", shopId: "shop_03", priority: SHAPER_PRIORITY.HIGH });
+        expect.equal(highRes.accepted, true);
+        expect.equal(highRes.droppedId, "REQ_LOW");
+        expect.equal(shaper.queue.length, 2);
+        expect.equal(shaper.queue.some(p => p.id === "REQ_HIGH"), true);
+        expect.equal(shaper.queue.some(p => p.id === "REQ_LOW"), false);
+      });
+
+      test("F175-T10: leak(now) strictly regulates output count based on elapsed time and leakRatePerSec, prioritizing HIGH requests", () => {
+        const shaper = new LeakyBucketTrafficShaper({ capacity: 10, leakRatePerSec: 2 });
+        const t0 = 1000000;
+        shaper.lastLeakTime = t0;
+
+        shaper.enqueue({ id: "REQ_1", priority: SHAPER_PRIORITY.NORMAL });
+        shaper.enqueue({ id: "REQ_2", priority: SHAPER_PRIORITY.HIGH });
+        shaper.enqueue({ id: "REQ_3", priority: SHAPER_PRIORITY.LOW });
+
+        // 1 second passes -> leakRate=2 -> leaks 2 items (REQ_2 HIGH first, then REQ_1 NORMAL)
+        const leaked = shaper.leak(t0 + 1000);
+        expect.equal(leaked.length, 2);
+        expect.equal(leaked[0].id, "REQ_2"); // HIGH priority first
+        expect.equal(leaked[1].id, "REQ_1");
+        expect.equal(shaper.queue.length, 1);
+        expect.equal(shaper.queue[0].id, "REQ_3");
+      });
+
+      test("F175-T11: getMetrics() provides per-shop fair queue distribution, drop counts, and average wait time", () => {
+        const shaper = new LeakyBucketTrafficShaper({ capacity: 10, leakRatePerSec: 5 });
+        shaper.enqueue({ id: "R1", shopId: "shop_A" });
+        shaper.enqueue({ id: "R2", shopId: "shop_A" });
+        shaper.enqueue({ id: "R3", shopId: "shop_B" });
+
+        const metrics = shaper.getMetrics();
+        expect.equal(metrics.capacity, 10);
+        expect.equal(metrics.currentLength, 3);
+        expect.equal(metrics.shopQueueDistribution["shop_A"], 2);
+        expect.equal(metrics.shopQueueDistribution["shop_B"], 1);
+        expect.equal(typeof metrics.avgWaitMs, "number");
+      });
+
+      test("F175-T12: Client and server shapers maintain identical capacity, leak rates, and drop behavior", () => {
+        const cShaper = new LeakyBucketTrafficShaper({ capacity: 3, leakRatePerSec: 5, dropPolicy: 'PRIORITY_DROP' });
+        const sShaper = new ServerLeakyBucketShaper({ capacity: 3, leakRatePerSec: 5, dropPolicy: 'PRIORITY_DROP' });
+
+        cShaper.enqueue({ id: "A", priority: SHAPER_PRIORITY.LOW });
+        cShaper.enqueue({ id: "B", priority: SHAPER_PRIORITY.NORMAL });
+        cShaper.enqueue({ id: "C", priority: SHAPER_PRIORITY.NORMAL });
+        const cDrop = cShaper.enqueue({ id: "D", priority: SHAPER_PRIORITY.HIGH });
+
+        sShaper.enqueue({ id: "A", priority: ServerShaperPriority.LOW });
+        sShaper.enqueue({ id: "B", priority: ServerShaperPriority.NORMAL });
+        sShaper.enqueue({ id: "C", priority: ServerShaperPriority.NORMAL });
+        const sDrop = sShaper.enqueue({ id: "D", priority: ServerShaperPriority.HIGH });
+
+        expect.equal(cDrop.droppedId, sDrop.droppedId);
+        expect.equal(cShaper.queue.length, sShaper.queue.length);
+        expect.equal(cShaper.totalDropped, sShaper.totalDropped);
+      });
+    });
+
+    // --- NHÓM 3: Min-Max Priority Queue (Double-Ended Heap) (F175-T13 -> F175-T18) ---
+    describe("Nhóm 3: Min-Max Priority Queue (Double-Ended Heap)", () => {
+      test("F175-T13: Initial state returns size 0 and null for getMin() / getMax()", () => {
+        const heap = new MinMaxInventoryHeap();
+        expect.equal(heap.size(), 0);
+        expect.equal(heap.isEmpty(), true);
+        expect.equal(heap.getMin(), null);
+        expect.equal(heap.getMax(), null);
+      });
+
+      test("F175-T14: isMinLevel(idx) correctly partitions 1-based indices into alternate min and max levels", () => {
+        const heap = new MinMaxInventoryHeap();
+        // Level 0: index 1 -> MIN
+        expect.equal(heap.isMinLevel(1), true);
+        // Level 1: indices 2, 3 -> MAX
+        expect.equal(heap.isMinLevel(2), false);
+        expect.equal(heap.isMinLevel(3), false);
+        // Level 2: indices 4..7 -> MIN
+        expect.equal(heap.isMinLevel(4), true);
+        expect.equal(heap.isMinLevel(7), true);
+        // Level 3: indices 8..15 -> MAX
+        expect.equal(heap.isMinLevel(8), false);
+        expect.equal(heap.isMinLevel(15), false);
+      });
+
+      test("F175-T15: Insert maintains Min-Max heap invariant: getMin() returns minimum velocity and getMax() returns maximum velocity in O(1)", () => {
+        const heap = new MinMaxInventoryHeap();
+        const items = [
+          { skuId: "SKU_MED", velocity: 50 },
+          { skuId: "SKU_MIN", velocity: 10 },
+          { skuId: "SKU_MAX", velocity: 90 },
+          { skuId: "SKU_LOW", velocity: 20 },
+          { skuId: "SKU_HIGH", velocity: 80 }
+        ];
+
+        for (const item of items) {
+          heap.insert(item);
+        }
+
+        expect.equal(heap.size(), 5);
+        expect.equal(heap.getMin().skuId, "SKU_MIN");
+        expect.equal(heap.getMin().velocity, 10);
+        expect.equal(heap.getMax().skuId, "SKU_MAX");
+        expect.equal(heap.getMax().velocity, 90);
+      });
+
+      test("F175-T16: extractMin() correctly removes root and restores min-max heap property in O(log N)", () => {
+        const heap = new MinMaxInventoryHeap();
+        const velocities = [45, 10, 80, 20, 95, 5, 60, 30];
+        for (const v of velocities) {
+          heap.insert({ skuId: `SKU_${v}`, velocity: v });
+        }
+
+        const extractedMin = [];
+        while (!heap.isEmpty()) {
+          extractedMin.push(heap.extractMin().velocity);
+        }
+
+        // Expected sorted in ascending order
+        expect.equal(JSON.stringify(extractedMin), JSON.stringify([5, 10, 20, 30, 45, 60, 80, 95]));
+      });
+
+      test("F175-T17: extractMax() correctly removes max element from level 1 and restores heap property in O(log N)", () => {
+        const heap = new MinMaxInventoryHeap();
+        const velocities = [45, 10, 80, 20, 95, 5, 60, 30];
+        for (const v of velocities) {
+          heap.insert({ skuId: `SKU_${v}`, velocity: v });
+        }
+
+        const extractedMax = [];
+        while (!heap.isEmpty()) {
+          extractedMax.push(heap.extractMax().velocity);
+        }
+
+        // Expected sorted in descending order
+        expect.equal(JSON.stringify(extractedMax), JSON.stringify([95, 80, 60, 45, 30, 20, 10, 5]));
+      });
+
+      test("F175-T18: Client and server MinMaxInventoryHeap produce identical elements and extraction order", () => {
+        const cHeap = new MinMaxInventoryHeap();
+        const sHeap = new ServerMinMaxInventoryHeap();
+
+        const data = [70, 15, 85, 30, 99, 12, 45, 66];
+        for (const v of data) {
+          cHeap.insert({ skuId: `SKU_${v}`, velocity: v });
+          sHeap.insert({ skuId: `SKU_${v}`, velocity: v });
+        }
+
+        expect.equal(cHeap.size(), sHeap.size());
+        expect.equal(cHeap.getMin().velocity, sHeap.getMin().velocity);
+        expect.equal(cHeap.getMax().velocity, sHeap.getMax().velocity);
+        expect.equal(cHeap.extractMin().velocity, sHeap.extractMin().velocity);
+        expect.equal(cHeap.extractMax().velocity, sHeap.extractMax().velocity);
+      });
+    });
+
+    // --- NHÓM 4: AI Copilots & E2E Enterprise Lifecycle (F175-T19 -> F175-T24) ---
+    describe("Nhóm 4: AI Copilots & E2E Enterprise Lifecycle", () => {
+      test("F175-T19: Admin Sentinel Copilot answers Fenwick Tree ranking and GMV percentile queries", () => {
+        const res = generateAdminCopilotResponse("Xếp hạng doanh số toàn sàn bằng cây fenwick binary indexed tree tra cứu phân vị gmv");
+        expect.equal(res.tag, "PHÂN VỊ GMV CÂY FENWICK");
+        expect.equal(res.type, "analytics");
+        expect.equal(res.text.includes("CÂY FENWICK"), true);
+        expect.equal(res.text.includes("Binary Lifting"), true);
+      });
+
+      test("F175-T20: Admin Sentinel Copilot answers Leaky Bucket traffic shaping and fair queue protection queries", () => {
+        const res = generateAdminCopilotResponse("Bảo vệ hệ thống flash sale bằng bộ định hình lưu lượng leaky bucket và fair queue");
+        expect.equal(res.tag, "ĐỊNH HÌNH LƯU LƯỢNG LEAKY BUCKET");
+        expect.equal(res.type, "security");
+        expect.equal(res.text.includes("LEAKY BUCKET"), true);
+        expect.equal(res.text.includes("PRIORITY_DROP"), true);
+      });
+
+      test("F175-T21: Admin Sentinel Copilot answers Min-Max Heap inventory double-ended management queries", () => {
+        const res = generateAdminCopilotResponse("Quản trị tồn kho hai đầu bằng hàng đợi ưu tiên kép min-max heap");
+        expect.equal(res.tag, "HÀNG ĐỢI KÉP MIN-MAX HEAP");
+        expect.equal(res.type, "inventory");
+        expect.equal(res.text.includes("MIN-MAX HEAP"), true);
+        expect.equal(res.text.includes("Fast Moving"), true);
+      });
+
+      test("F175-T22: Seller ShopSmart Copilot advises on Fenwick shop percentile and Min-Max inventory reordering/clearance", () => {
+        const res = generateSellerCopilotResponse("Tra cứu phân vị doanh số shop trên fenwick và lọc kho hai đầu min-max heap");
+        expect.equal(res.tag, "PHÂN VỊ DOANH SỐ & TỒN KHO HAI ĐẦU");
+        expect.equal(res.type, "inventory");
+        expect.equal(res.text.includes("Cây Fenwick"), true);
+        expect.equal(res.text.includes("Min-Max Heap"), true);
+      });
+
+      test("F175-T23: Buyer AI Assistant explains Leaky Bucket smooth checkout and Min-Max hot deal clearance", () => {
+        const res = generateAiChatResponse("Sàn có cơ chế xếp hàng đặt deal chống nghẽn thanh toán bằng leaky bucket không");
+        expect.equal(res.intent, "LEAKY_BUCKET_MIN_MAX_DEALS");
+        expect.equal(res.replyText.includes("LEAKY BUCKET"), true);
+        expect.equal(res.replyText.includes("Min-Max Heap"), true);
+      });
+
+      test("F175-T24: E2E Lifecycle: Merchant sales recorded in Fenwick Tree -> Flash Sale burst shaped by Leaky Bucket -> Warehouse inventory partitioned by Min-Max Heap", () => {
+        // 1. Merchant sales recorded into Fenwick Tree
+        const bit = new FenwickRankTree(100);
+        bit.recordMerchantSales(10, 5000000);
+        bit.recordMerchantSales(20, 15000000);
+        bit.recordMerchantSales(30, 30000000);
+        expect.equal(bit.totalGmv, 50000000);
+        expect.equal(bit.getPercentile(20), 66.67);
+
+        // 2. Flash Sale burst arrives -> Shaped by Leaky Bucket
+        const shaper = new LeakyBucketTrafficShaper({ capacity: 5, leakRatePerSec: 2, dropPolicy: 'PRIORITY_DROP' });
+        shaper.enqueue({ id: "ORD_LOW", priority: SHAPER_PRIORITY.LOW });
+        shaper.enqueue({ id: "ORD_PAY", priority: SHAPER_PRIORITY.HIGH });
+        shaper.enqueue({ id: "ORD_PAY2", priority: SHAPER_PRIORITY.HIGH });
+
+        const leaked = shaper.leak(Date.now() + 1000);
+        expect.equal(leaked.length, 2);
+        expect.equal(leaked[0].priority, SHAPER_PRIORITY.HIGH);
+
+        // 3. Warehouse inventory buffered in Min-Max Heap
+        const heap = new MinMaxInventoryHeap();
+        heap.insert({ skuId: "SKU_AIRPODS", velocity: 95 }); // Top moving
+        heap.insert({ skuId: "SKU_TSHIRT_OLD", velocity: 5 });  // Dead stock
+        heap.insert({ skuId: "SKU_JEANS", velocity: 40 });
+
+        const peek = heap.peekBoth();
+        expect.equal(peek.fastMovingMax.skuId, "SKU_AIRPODS");
+        expect.equal(peek.deadStockMin.skuId, "SKU_TSHIRT_OLD");
       });
     });
   });

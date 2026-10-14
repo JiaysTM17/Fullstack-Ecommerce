@@ -13462,6 +13462,423 @@ export class TreapPriorityIndex {
   }
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 48: Fenwick Tree (Binary Indexed Tree) for Dynamic Percentile Ranking
+// ------------------------------------------------------------------------------
+export class FenwickRankTree {
+  constructor(maxSize = 10000) {
+    this.maxSize = Math.max(16, maxSize);
+    this.tree = new Float64Array(this.maxSize + 1);
+    this.counts = new Int32Array(this.maxSize + 1);
+    this.totalRecords = 0;
+    this.totalGmv = 0;
+  }
+
+  update(idx, delta) {
+    if (idx < 1 || idx > this.maxSize || isNaN(delta)) return false;
+    let i = idx;
+    while (i <= this.maxSize) {
+      this.tree[i] += delta;
+      i += i & (-i);
+    }
+    this.totalGmv += delta;
+    return true;
+  }
+
+  query(idx) {
+    if (idx < 1) return 0;
+    const cappedIdx = Math.min(idx, this.maxSize);
+    let sum = 0;
+    let i = cappedIdx;
+    while (i > 0) {
+      sum += this.tree[i];
+      i -= i & (-i);
+    }
+    return sum;
+  }
+
+  rangeQuery(left, right) {
+    if (left > right) return 0;
+    const l = Math.max(1, left);
+    const r = Math.min(right, this.maxSize);
+    return this.query(r) - this.query(l - 1);
+  }
+
+  recordMerchantSales(rankBucket, gmv) {
+    const bucket = Math.max(1, Math.min(this.maxSize, Math.floor(rankBucket)));
+    this.update(bucket, gmv);
+
+    let i = bucket;
+    while (i <= this.maxSize) {
+      this.counts[i] += 1;
+      i += i & (-i);
+    }
+    this.totalRecords += 1;
+  }
+
+  countMerchantsUpTo(idx) {
+    if (idx < 1) return 0;
+    const cappedIdx = Math.min(idx, this.maxSize);
+    let count = 0;
+    let i = cappedIdx;
+    while (i > 0) {
+      count += this.counts[i];
+      i -= i & (-i);
+    }
+    return count;
+  }
+
+  findBucketForGmv(targetGmv) {
+    if (targetGmv <= 0) return 1;
+    if (targetGmv > this.totalGmv) return this.maxSize;
+
+    let idx = 0;
+    let currentAccum = 0;
+    let p = 1;
+    while (p * 2 <= this.maxSize) {
+      p *= 2;
+    }
+
+    for (let step = p; step > 0; step >>= 1) {
+      if (idx + step <= this.maxSize && currentAccum + this.tree[idx + step] < targetGmv) {
+        idx += step;
+        currentAccum += this.tree[idx];
+      }
+    }
+    return idx + 1;
+  }
+
+  getPercentile(bucket) {
+    if (this.totalRecords === 0) return 0;
+    const merchantsBelow = this.countMerchantsUpTo(bucket);
+    return Math.round((merchantsBelow / this.totalRecords) * 10000) / 100;
+  }
+
+  getSummary() {
+    return {
+      maxSize: this.maxSize,
+      totalRecords: this.totalRecords,
+      totalGmv: Math.round(this.totalGmv * 100) / 100,
+      medianBucket: this.totalRecords > 0 ? this.findBucketForGmv(this.totalGmv / 2) : 1
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 49: Bounded-Buffer Leaky Bucket Traffic Shaper & Fair Queue
+// ------------------------------------------------------------------------------
+export const SHAPER_PRIORITY = {
+  HIGH: 3,
+  NORMAL: 2,
+  LOW: 1
+};
+
+export class LeakyBucketTrafficShaper {
+  constructor({ capacity = 100, leakRatePerSec = 10, dropPolicy = 'TAIL_DROP' } = {}) {
+    this.capacity = Math.max(1, capacity);
+    this.leakRatePerSec = Math.max(1, leakRatePerSec);
+    this.dropPolicy = dropPolicy;
+    this.queue = [];
+    this.lastLeakTime = Date.now();
+    this.totalEnqueued = 0;
+    this.totalLeaked = 0;
+    this.totalDropped = 0;
+    this.shopDropCounts = {};
+  }
+
+  enqueue(item) {
+    if (!item || !item.id) {
+      return { accepted: false, queueLength: this.queue.length, reason: 'INVALID_ITEM' };
+    }
+
+    const priority = item.priority || SHAPER_PRIORITY.NORMAL;
+    const packet = {
+      id: item.id,
+      shopId: item.shopId || 'platform',
+      priority,
+      payload: item.payload || null,
+      enqueuedAt: Date.now()
+    };
+
+    if (this.queue.length >= this.capacity) {
+      if (this.dropPolicy === 'PRIORITY_DROP') {
+        let lowestIdx = -1;
+        let lowestPriority = priority;
+
+        for (let i = 0; i < this.queue.length; i++) {
+          if (this.queue[i].priority < lowestPriority) {
+            lowestPriority = this.queue[i].priority;
+            lowestIdx = i;
+          }
+        }
+
+        if (lowestIdx !== -1) {
+          const dropped = this.queue.splice(lowestIdx, 1)[0];
+          this.queue.push(packet);
+          this.totalDropped += 1;
+          this.totalEnqueued += 1;
+          this.shopDropCounts[dropped.shopId] = (this.shopDropCounts[dropped.shopId] || 0) + 1;
+          return { accepted: true, queueLength: this.queue.length, droppedId: dropped.id };
+        }
+      }
+
+      this.totalDropped += 1;
+      this.shopDropCounts[packet.shopId] = (this.shopDropCounts[packet.shopId] || 0) + 1;
+      return { accepted: false, queueLength: this.queue.length, reason: 'BUFFER_OVERFLOW' };
+    }
+
+    this.queue.push(packet);
+    this.totalEnqueued += 1;
+    return { accepted: true, queueLength: this.queue.length };
+  }
+
+  leak(now = Date.now()) {
+    const elapsedSec = Math.max(0, (now - this.lastLeakTime) / 1000);
+    const quota = Math.floor(elapsedSec * this.leakRatePerSec);
+
+    if (quota <= 0 || this.queue.length === 0) {
+      if (quota > 0) {
+        this.lastLeakTime = now;
+      }
+      return [];
+    }
+
+    const itemsToLeak = Math.min(quota, this.queue.length);
+    this.queue.sort((a, b) => b.priority - a.priority || a.enqueuedAt - b.enqueuedAt);
+
+    const leaked = this.queue.splice(0, itemsToLeak);
+    this.totalLeaked += leaked.length;
+    this.lastLeakTime = now;
+
+    return leaked;
+  }
+
+  getMetrics() {
+    const shopQueueDistribution = {};
+    for (const item of this.queue) {
+      shopQueueDistribution[item.shopId] = (shopQueueDistribution[item.shopId] || 0) + 1;
+    }
+
+    const now = Date.now();
+    const waitTimes = this.queue.map(p => now - p.enqueuedAt);
+    const avgWaitMs = waitTimes.length > 0
+      ? Math.round(waitTimes.reduce((a, b) => a + b, 0) / waitTimes.length)
+      : 0;
+
+    return {
+      capacity: this.capacity,
+      currentLength: this.queue.length,
+      leakRatePerSec: this.leakRatePerSec,
+      totalEnqueued: this.totalEnqueued,
+      totalLeaked: this.totalLeaked,
+      totalDropped: this.totalDropped,
+      avgWaitMs,
+      shopQueueDistribution,
+      shopDropCounts: { ...this.shopDropCounts }
+    };
+  }
+
+  clear() {
+    this.queue = [];
+    this.lastLeakTime = Date.now();
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 50: Min-Max Priority Queue (DEPQueue) for Dynamic Inventory Buffer
+// ------------------------------------------------------------------------------
+export class MinMaxInventoryHeap {
+  constructor() {
+    this.heap = [null];
+  }
+
+  isMinLevel(idx) {
+    if (idx < 1) return true;
+    const level = Math.floor(Math.log2(idx));
+    return level % 2 === 0;
+  }
+
+  size() {
+    return this.heap.length - 1;
+  }
+
+  isEmpty() {
+    return this.size() === 0;
+  }
+
+  getMin() {
+    if (this.isEmpty()) return null;
+    return this.heap[1];
+  }
+
+  getMax() {
+    const n = this.size();
+    if (n === 0) return null;
+    if (n === 1) return this.heap[1];
+    if (n === 2) return this.heap[2];
+    return this.heap[2].velocity >= this.heap[3].velocity ? this.heap[2] : this.heap[3];
+  }
+
+  insert(item) {
+    if (!item || item.velocity === undefined) return;
+    const element = {
+      skuId: item.skuId,
+      velocity: Number(item.velocity),
+      data: item.data || {}
+    };
+
+    this.heap.push(element);
+    this._pushUp(this.size());
+  }
+
+  extractMin() {
+    const n = this.size();
+    if (n === 0) return null;
+    if (n === 1) return this.heap.pop();
+
+    const minItem = this.heap[1];
+    this.heap[1] = this.heap.pop();
+    this._pushDown(1);
+    return minItem;
+  }
+
+  extractMax() {
+    const n = this.size();
+    if (n === 0) return null;
+    if (n === 1) return this.heap.pop();
+    if (n === 2) return this.heap.pop();
+
+    const maxIdx = (n === 2 || this.heap[2].velocity >= this.heap[3].velocity) ? 2 : 3;
+    const maxItem = this.heap[maxIdx];
+
+    const lastItem = this.heap.pop();
+    if (maxIdx < this.heap.length) {
+      this.heap[maxIdx] = lastItem;
+      this._pushDown(maxIdx);
+    }
+    return maxItem;
+  }
+
+  peekBoth() {
+    return {
+      deadStockMin: this.getMin(),
+      fastMovingMax: this.getMax(),
+      totalSkus: this.size()
+    };
+  }
+
+  _swap(i, j) {
+    const temp = this.heap[i];
+    this.heap[i] = this.heap[j];
+    this.heap[j] = temp;
+  }
+
+  _pushUp(i) {
+    if (i <= 1) return;
+    const p = Math.floor(i / 2);
+
+    if (this.isMinLevel(i)) {
+      if (this.heap[i].velocity > this.heap[p].velocity) {
+        this._swap(i, p);
+        this._pushUpMax(p);
+      } else {
+        this._pushUpMin(i);
+      }
+    } else {
+      if (this.heap[i].velocity < this.heap[p].velocity) {
+        this._swap(i, p);
+        this._pushUpMin(p);
+      } else {
+        this._pushUpMax(i);
+      }
+    }
+  }
+
+  _pushUpMin(i) {
+    const gp = Math.floor(i / 4);
+    if (gp >= 1 && this.heap[i].velocity < this.heap[gp].velocity) {
+      this._swap(i, gp);
+      this._pushUpMin(gp);
+    }
+  }
+
+  _pushUpMax(i) {
+    const gp = Math.floor(i / 4);
+    if (gp >= 1 && this.heap[i].velocity > this.heap[gp].velocity) {
+      this._swap(i, gp);
+      this._pushUpMax(gp);
+    }
+  }
+
+  _pushDown(i) {
+    if (this.isMinLevel(i)) {
+      this._pushDownMin(i);
+    } else {
+      this._pushDownMax(i);
+    }
+  }
+
+  _pushDownMin(i) {
+    const n = this.size();
+    if (2 * i > n) return;
+
+    let m = 2 * i;
+    if (2 * i + 1 <= n && this.heap[2 * i + 1].velocity < this.heap[m].velocity) {
+      m = 2 * i + 1;
+    }
+    for (let k = 4 * i; k <= Math.min(n, 4 * i + 3); k++) {
+      if (this.heap[k].velocity < this.heap[m].velocity) {
+        m = k;
+      }
+    }
+
+    if (m >= 4 * i) {
+      if (this.heap[m].velocity < this.heap[i].velocity) {
+        this._swap(m, i);
+        const p = Math.floor(m / 2);
+        if (this.heap[m].velocity > this.heap[p].velocity) {
+          this._swap(m, p);
+        }
+        this._pushDownMin(m);
+      }
+    } else {
+      if (this.heap[m].velocity < this.heap[i].velocity) {
+        this._swap(m, i);
+      }
+    }
+  }
+
+  _pushDownMax(i) {
+    const n = this.size();
+    if (2 * i > n) return;
+
+    let m = 2 * i;
+    if (2 * i + 1 <= n && this.heap[2 * i + 1].velocity > this.heap[m].velocity) {
+      m = 2 * i + 1;
+    }
+    for (let k = 4 * i; k <= Math.min(n, 4 * i + 3); k++) {
+      if (this.heap[k].velocity > this.heap[m].velocity) {
+        m = k;
+      }
+    }
+
+    if (m >= 4 * i) {
+      if (this.heap[m].velocity > this.heap[i].velocity) {
+        this._swap(m, i);
+        const p = Math.floor(m / 2);
+        if (this.heap[m].velocity < this.heap[p].velocity) {
+          this._swap(m, p);
+        }
+        this._pushDownMax(m);
+      }
+    } else {
+      if (this.heap[m].velocity > this.heap[i].velocity) {
+        this._swap(m, i);
+      }
+    }
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -13619,6 +14036,11 @@ export default {
   ALTLandmarkRouter,
   TreapNode,
   TreapPriorityIndex,
+  // Phase 28 Enterprise Algorithms
+  FenwickRankTree,
+  SHAPER_PRIORITY,
+  LeakyBucketTrafficShaper,
+  MinMaxInventoryHeap,
 };
 
 

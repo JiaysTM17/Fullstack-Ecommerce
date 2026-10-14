@@ -495,7 +495,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // PHƯƠNG THỨC THANH TOÁN & ĐỒNG KIỂM COD
   // -------------------------------------------------------------
-  if (/thanh toán|chuyển khoản|vietqr|momo|zalopay|thẻ|visa|cod|đồng kiểm/i.test(lower)) {
+  if (!/leaky bucket/i.test(lower) && /thanh toán|chuyển khoản|vietqr|momo|zalopay|thẻ|visa|cod|đồng kiểm/i.test(lower)) {
     return {
       intent: 'PAYMENT_INFO',
       replyText: `**[THANH TOÁN] PHƯƠNG THỨC THANH TOÁN TIỆN LỢI & AN TOÀN:**\n\n1. **VietQR Ngân Hàng:** Quét mã QR tự động điền tiền & nội dung, xác nhận sau 3 giây.\n2. **Ví MoMo & ZaloPay:** Thanh toán 1-chạm cực nhanh.\n3. **Thẻ Quốc Tế Visa/MasterCard:** Bảo mật chuẩn PCI-DSS.\n4. **Thanh toán khi nhận hàng (COD):** Được **đồng kiểm ngoại quan** cùng shipper trước khi thanh toán.`,
@@ -518,7 +518,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -811,6 +811,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'ALT_ROUTING_TREAP_PRIORITY_ASSIST',
       replyText: `**[ĐỊNH TUYẾN ALT & CHỈ MỤC TREAP] TRẢI NGHIỆM GIAO NHẬN VÀ TÌM KIẾM TỐI TÂN:**\n\n• **Định tuyến bưu kiện ALT**: Sử dụng các trạm mốc chiến lược giúp hàng hóa của bạn luân chuyển giữa các Hub tỉnh thành theo tuyến đường ngắn nhất, giảm 1 ngày thời gian nhận hàng!\n• **Cây ưu tiên Treap**: Lọc chớp nhoáng các sản phẩm trong đúng mức ngân sách của bạn và tự động đưa các deal uy tín có điểm đánh giá cao nhất lên đầu!`,
       suggestions: ['Lọc khoảng giá sản phẩm', 'Tra cứu lộ trình đơn hàng', 'Khám phá sản phẩm tài trợ'],
+    };
+  }
+
+  // 30. Trải Nghiệm Giật Deal Mượt Mà Leaky Bucket & Săn Hàng Hot Min-Max Heap (LEAKY_BUCKET_MIN_MAX_DEALS)
+  if (/leaky bucket|xếp hàng đặt deal|chống nghẽn thanh toán|min-max heap|deal bán chạy nhất.*đọng kho|săn deal êm dịu/i.test(lower)) {
+    return {
+      intent: 'LEAKY_BUCKET_MIN_MAX_DEALS',
+      replyText: `**[SĂN DEAL ÊM DỊU & HÀNG ĐỢI LEAKY BUCKET] TRẢI NGHIỆM ĐẶT HÀNG KHÔNG GIẬT LAG:**\n\n• **Bộ điều tiết Leaky Bucket**: Khi có hàng triệu lượt tranh mua Flash Sale cùng lúc, hệ thống điều tiết lưu lượng mượt mà theo nhịp đều đặn, đảm bảo đơn hàng và thanh toán VietQR của bạn không bao giờ bị nghẽn hay lỗi mạng!\n• **Cấu trúc Min-Max Heap**: Tự động hiển thị các món đồ bán chạy nhất (Top Velocity) và các deal xả hàng cực sốc (Dead Stock Clearance) với mức chiết khấu lên đến 70%!`,
+      suggestions: ['Săn deal xả hàng 70%', 'Đặt hàng Flash Sale mượt mà', 'Xem giỏ hàng ưu tiên'],
     };
   }
 

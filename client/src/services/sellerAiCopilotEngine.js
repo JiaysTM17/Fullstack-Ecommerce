@@ -185,7 +185,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 8. Tổng Quan Doanh Số & Tình Hình Bán Hàng (Shop Revenue Overview)
-  if (!/co giãn|elasticity/i.test(raw) && /doanh số|doanh thu|tổng quan|bán hàng/i.test(raw)) {
+  if (!/co giãn|elasticity|fenwick|phân vị/i.test(raw) && /doanh số|doanh thu|tổng quan|bán hàng/i.test(raw)) {
     return {
       text: `📈 **TỔNG QUAN DOANH SỐ GIAN HÀNG (${currentShop.name})**:
 - **Tổng doanh thu thực tế**: **${(totalRevenue).toLocaleString('vi-VN')}₫**
@@ -742,6 +742,27 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem danh sách SKU Heavy Hitters của shop',
         'Tối ưu điểm tài trợ Flash Sale cho SKU hot',
         'Cài đặt cảnh báo tồn kho an toàn'
+      ]
+    };
+  }
+
+  // 37. Phân Vị Doanh Số Fenwick & Quản Lý Tồn Kho Hai Đầu Min-Max Heap (Phase 28 - Feature 175)
+  if (/fenwick|phân vị shop|phân vị doanh số|xếp hạng doanh số fenwick|min-max heap|tồn kho hai đầu|đọng kho.*bán chạy/i.test(raw)) {
+    return {
+      text: `📈 **ĐO LƯỜNG PHÂN VỊ FENWICK & ĐIỀU PHỐI TỒN KHO HAI ĐẦU MIN-MAX HEAP**:
+- **Xác định vị thế cạnh tranh trên cây Fenwick (BIT)**:
+  - Cây Fenwick toàn sàn tính toán ngay lập tức phân vị doanh thu của shop (${currentShop.name}) trong phân khúc ngành hàng.
+  - Biết chính xác shop đang nằm ở Top 10%, Top 25% hay Median để đưa ra chiến lược đẩy số kịp thời.
+- **Tối ưu hóa tồn kho hai đầu bằng Min-Max Heap**:
+  - Tự động tách bạch hai nhóm sản phẩm đối nghịch:
+    • **Nhóm Bán Chạy (Max-Level)**: Báo động tái nhập kho (Restock) trước khi cạn hàng.
+    • **Nhóm Đọng Vốn (Min-Level)**: Tự động gom vào gói Flash Sale xả hàng tồn để giải phóng dòng tiền!`,
+      type: 'inventory',
+      tag: 'PHÂN VỊ DOANH SỐ & TỒN KHO HAI ĐẦU',
+      suggestions: [
+        'Tra cứu phân vị doanh thu của shop',
+        'Lọc danh sách SKU cần restock khẩn cấp',
+        'Tạo chiến dịch Flash Sale xả hàng đọng vốn'
       ]
     };
   }
