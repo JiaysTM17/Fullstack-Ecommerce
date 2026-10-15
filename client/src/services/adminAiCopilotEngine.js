@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -2648,7 +2648,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 123. Tối Ưu Hóa Đấu Thầu Shopee Ads Bằng Twin Delayed DDPG (TD3) (Phase 47 - Feature 194)
-  if (/td3|twin delayed|clipped double[- ]q|target policy smoothing|đấu thầu td3/i.test(raw)) {
+  if (!/td3\+bc|td3-bc/i.test(raw) && /td3|twin delayed|clipped double[- ]q|target policy smoothing|đấu thầu td3/i.test(raw)) {
     return {
       text: `🎯 **TỐI ƯU HÓA ĐẤU THẦU SHOPEE ADS BẰNG TWIN DELAYED DDPG (TD3 - FUJIMOTO ET AL. 2018)**:
 - **Đột Phá 3 Cơ Chế Khắc Phục Lỗi Xấp Xỉ Giá Trị Của DDPG**:
@@ -2927,7 +2927,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 137. Ước Lượng Tập Khách Hàng Bằng K-Minimum Values Sketch (Phase 52 - Feature 199)
-  if (/kmv sketch|k-minimum values|ước lượng kmv|jaccard kmv|cardinality kmv/i.test(raw)) {
+  if (!/akmv/i.test(raw) && /kmv sketch|k-minimum values|ước lượng kmv|jaccard kmv|cardinality kmv/i.test(raw)) {
     return {
       text: `📊 **ƯỚC LƯỢNG SỐ LƯỢNG TRUY CẬP & ĐỘ TƯƠNG ĐỒNG BẰNG K-MINIMUM VALUES (KMV) SKETCH (BAR-YOSSEF 2002, BEYER 2007)**:
 - **Nguyên Lý Toán Học Không Thiên Lệch**:
@@ -2984,6 +2984,68 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình xe van trung chuyển CDC',
         'Xem lộ trình xe máy điện giao chặng cuối',
         'Ước lượng lượng truy cập bằng KMV Sketch'
+      ]
+    };
+  }
+
+  // 140. Ước Lượng Thích Ứng AKMV Sketch (Phase 53 - Feature 200)
+  if (/akmv|adaptive kmv|adaptive k-minimum|ước lượng akmv|akmv sketch/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG TẬP KHÁCH HÀNG THÍCH ỨNG BẰNG ADAPTIVE K-MINIMUM VALUES (AKMV) SKETCH (BEYER ET AL. / COHEN & KAPLAN)**:
+- **Cơ Chế Tự Động Co Giãn Dung Lượng (Adaptive Sample Scaling)**:
+  - Tự động điều chỉnh kích thước $k$ theo sai số mục tiêu $\\epsilon$: $k \\approx (1/\\epsilon)^2 + 2$ (ví dụ $\\epsilon = 5\\% \\Rightarrow k = 402$).
+  - Khi luồng dữ liệu nhỏ: hoạt động ở chế độ Exact Counting (đếm tuyệt đối), tiết kiệm $100\\%$ bộ nhớ heap.
+  - Khi luồng dữ liệu bùng nổ hàng triệu lượt xem: tự động phân tầng (Threshold Eviction) và ước lượng: $\\hat{N} = \\frac{k - 1}{U_{(k)}}$.
+- **Phân Tích Độ Trùng Lặp Khách Hàng Tức Thì**:
+  - Tính toán hệ số Jaccard thích ứng $\\hat{J}(A, B)$ trực tiếp trên 2 luồng Flash Sale độc lập mà không cần truy xuất dữ liệu cá nhân!`,
+      type: 'analytics',
+      tag: 'AKMV ADAPTIVE SKETCH',
+      suggestions: [
+        'Ước lượng tập khách bằng AKMV Sketch',
+        'Định giá ngoại tuyến bằng TD3+BC',
+        'Định tuyến đổi pin siêu tốc EVRP-BSS'
+      ]
+    };
+  }
+
+  // 141. Định Giá Bán Ngoại Tuyến Nhân Bản Hành Vi TD3+BC (Phase 53 - Feature 200)
+  if (/td3\+bc|td3-bc|behavioral cloning pricing|nhân bản hành vi định giá|td3 bc/i.test(raw)) {
+    return {
+      text: `💰 **ĐỊNH GIÁ BÁN NGOẠI TUYẾN MINIMALIST BẰNG TD3+BC (SCOTT FUJIMOTO & SHIXIANG GU, NEURIPS 2021)**:
+- **Chuẩn Hóa Đạo Hàm Nhân Bản Hành Vi (Normalized BC Regularization)**:
+  - Hàm mục tiêu Actor cân bằng hoàn hảo giữa việc tối đa hóa Q-value và trung thành với dữ liệu giao dịch thành công trong quá khứ:
+    $$\\pi = \\arg\\max_\\pi \\mathbb{E}_{(s, a) \\sim \\mathcal{D}} \\left[ \\lambda Q(s, \\pi(s)) - (\\pi(s) - a)^2 \\right]$$
+  - Hệ số thích ứng tự chuẩn hóa $\\lambda = \\frac{\\alpha}{\\frac{1}{N}\\sum |Q(s, a)|}$ loại bỏ hoàn toàn các quyết định định giá phi lý trí hoặc bán phá giá.
+- **Twin Critic Chống Thổi Phồng Doanh Thu**:
+  - $Q_1, Q_2$ với cơ chế Delayed Policy Updates đem lại sự ổn định tuyệt đối cho các chiến dịch Flash Sale.
+- **Khóa Sàn An Toàn**:
+  - Bảo đảm $\\text{Price}_{\\min} = \\text{COGS} \\times 1.05$, giữ vững $100\\%$ biên lợi nhuận sàn.`,
+      type: 'finance',
+      tag: 'TD3+BC OFFLINE PRICING',
+      suggestions: [
+        'Định giá an toàn bằng TD3+BC',
+        'Tối ưu hóa giá Flash Sale',
+        'Định tuyến bưu tá xe điện EVRP-BSS'
+      ]
+    };
+  }
+
+  // 142. Định Tuyến Xe Điện Kết Hợp Đổi Pin Động Siêu Tốc EVRP-TW-BSS-ND (Phase 53 - Feature 200)
+  if (/evrp-bss|đổi pin động|dynamic battery swap|trạm đổi pin siêu tốc|đổi pin 3 phút/i.test(raw)) {
+    return {
+      text: `⚡ **ĐỊNH TUYẾN GIAO VẬN XE ĐIỆN VỚI TRẠM ĐỔI PIN ĐỘNG SIÊU TỐC EVRP-BSS (EVRP-TW-BSS-ND - MONTOYA ET AL. 2017, PELLETIER 2017)**:
+- **Đổi Pin Thần Tốc Đúng 3 Phút (Zero Charging Idle Time)**:
+  - Thay vì chờ sạc dây mất 2 - 4 tiếng, bưu tá xe máy điện ghé các trạm đổi pin BSS (VinFast/SPX) thay pin 100% SoC chỉ trong 180 giây!
+- **Tiêu Hao Năng Lượng Phi Tuyến Theo Tải Trọng**:
+  - Tiêu hao năng lượng tỉ lệ thuận với khối lượng hàng hóa trên xe: $e = e_{\\text{base}} + e_{\\text{load}} \\times \\frac{\\text{Payload}}{\\text{Capacity}}$.
+- **Cơ Chế Tự Động Ghé Trạm Khi Pin Dưới 20%**:
+  - Hệ thống tự động chèn trạm BSS gần nhất vào lộ trình khi lượng pin dự kiến $\\text{SoC} < 20\\%$, đảm bảo bưu tá không bao giờ hết pin giữa đường!`,
+      type: 'logistics',
+      tag: 'EVRP-BSS DYNAMIC SWAPPING ROUTING',
+      suggestions: [
+        'Xem mạng lưới trạm đổi pin BSS Hà Nội',
+        'Lập lịch giao hàng xe máy điện xanh',
+        'Ước lượng lượng truy cập bằng AKMV'
       ]
     };
   }

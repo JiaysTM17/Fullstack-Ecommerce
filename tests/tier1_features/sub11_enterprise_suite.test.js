@@ -293,6 +293,11 @@ import {
   CQLContinuousPricing,
   DEFAULT_SATELLITE_CROSS_DOCKS,
   TwoEchelonVRPTWRouter,
+  // Phase 53 Enterprise Algorithms
+  AKMVSketchEstimator,
+  TD3BCPricing,
+  DEFAULT_DYNAMIC_BSS_STATIONS,
+  EVRPBssDynamicRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -417,6 +422,9 @@ import { TDVRPTWRouter as ServerTDVRPTWRouter, TRAFFIC_PERIODS as ServerTrafficP
 import { KMVSketchEstimator as ServerKMVSketchEstimator } from "../../server/src/utils/kmvSketchEstimator.js";
 import { CQLContinuousPricing as ServerCQLContinuousPricing } from "../../server/src/utils/cqlContinuousPricing.js";
 import { TwoEchelonVRPTWRouter as ServerTwoEchelonVRPTWRouter, DEFAULT_SATELLITE_CROSS_DOCKS as ServerDefaultCrossDocks } from "../../server/src/utils/twoEchelonVrptwRouter.js";
+import { AKMVSketchEstimator as ServerAKMVSketchEstimator } from "../../server/src/utils/akmvSketchEstimator.js";
+import { TD3BCPricing as ServerTD3BCPricing } from "../../server/src/utils/td3bcPricing.js";
+import { EVRPBssDynamicRouter as ServerEVRPBssDynamicRouter, DEFAULT_DYNAMIC_BSS_STATIONS as ServerDefaultDynamicBSS } from "../../server/src/utils/evrpBssDynamicRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -23328,6 +23336,374 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(plan.status, '2E_VRPTW_CD_OPTIMAL_SCHEDULED');
       expect.equal(plan.fulfilledOrders, 1);
       expect.ok(plan.totalKm > 0);
+      expect.ok(plan.totalCo2SavedKg > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 200: Phase 53 AKMV Sketch, TD3+BC Behavioral Cloning Pricing & EVRP-TW-BSS-ND Dynamic Battery Swap Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 200: AKMV Sketch, TD3+BC Behavioral Cloning Pricing, and EVRP-TW-BSS-ND Dynamic Battery Swap Suite", () => {
+    // -----------------------------------------------------------------------
+    // AKMV ADAPTIVE SKETCH ESTIMATOR (Tests 1-6)
+    // -----------------------------------------------------------------------
+    test("F200-T01: AKMVSketchEstimator exact mode for small sets (N < k) returns exact count without estimation", () => {
+      const akmv = new ServerAKMVSketchEstimator({ targetError: 0.1 }); // k = 100
+      expect.equal(akmv.isExactMode(), true);
+      const items = ['buyer_u1', 'buyer_u2', 'buyer_u3', 'buyer_u4', 'buyer_u5'];
+      for (const item of items) akmv.add(item);
+      expect.equal(akmv.size(), 5);
+      expect.equal(akmv.estimate(), 5);
+      expect.equal(akmv.isExactMode(), true);
+      expect.equal(akmv.standardError(), 0);
+    });
+
+    test("F200-T02: AKMVSketchEstimator dynamically increases k to satisfy tighter target error", () => {
+      const akmv = new ServerAKMVSketchEstimator({ targetError: 0.1 }); // k = 100
+      expect.equal(akmv.k, 100);
+      const adaptedK = akmv.adaptTargetError(0.05); // 1 / 0.05^2 = 400
+      expect.equal(adaptedK, 400);
+      expect.equal(akmv.k, 400);
+      expect.ok(akmv.standardError() <= 0.05);
+    });
+
+    test("F200-T03: AKMVSketchEstimator maintains k-minimum values and threshold eviction correctly for large stream", () => {
+      const akmv = new ServerAKMVSketchEstimator({ targetError: 0.1 }); // k = 100
+      for (let i = 0; i < 2000; i++) {
+        akmv.add(`customer_stream_${i}`);
+      }
+      expect.equal(akmv.isExactMode(), false);
+      expect.equal(akmv.size(), 100);
+      expect.ok(akmv.getThreshold() < 1.0);
+      const est = akmv.estimate();
+      expect.ok(est >= 1200 && est <= 3200);
+    });
+
+    test("F200-T04: AKMVSketchEstimator merges two sketches with different k and adapts to minimum k correctly", () => {
+      const akmvA = new ServerAKMVSketchEstimator({ targetError: 0.1 }); // k = 100
+      const akmvB = new ServerAKMVSketchEstimator({ targetError: 0.05 }); // k = 400
+      for (let i = 0; i < 500; i++) akmvA.add(`buyer_segment_a_${i}`);
+      for (let i = 0; i < 500; i++) akmvB.add(`buyer_segment_b_${i}`);
+      
+      const merged = akmvA.merge(akmvB);
+      expect.equal(merged.k, 100); // min(100, 400)
+      expect.equal(merged.size(), 100);
+      const mergedEst = merged.estimate();
+      expect.ok(mergedEst >= 600 && mergedEst <= 1600);
+    });
+
+    test("F200-T05: AKMVSketchEstimator computes adaptive Jaccard similarity accurately between audience segments", () => {
+      const akmv1 = new ServerAKMVSketchEstimator({ targetError: 0.1 });
+      const akmv2 = new ServerAKMVSketchEstimator({ targetError: 0.1 });
+      for (let i = 0; i < 400; i++) akmv1.add(`shared_vip_buyer_${i}`);
+      for (let i = 200; i < 600; i++) akmv2.add(`shared_vip_buyer_${i}`); // 200 shared out of 600 total (J ~ 0.33)
+
+      const jaccard = akmv1.jaccardSimilarity(akmv2);
+      expect.ok(jaccard >= 0.10 && jaccard <= 0.60);
+    });
+
+    test("F200-T06: AKMVSketchEstimator handles duplicates idempotently without distorting sketch values", () => {
+      const akmv = new ServerAKMVSketchEstimator({ targetError: 0.1 });
+      for (let i = 0; i < 30; i++) {
+        akmv.add(`repeat_buyer_${i}`);
+        akmv.add(`repeat_buyer_${i}`);
+        akmv.add(`repeat_buyer_${i}`);
+      }
+      expect.equal(akmv.size(), 30);
+      expect.equal(akmv.estimate(), 30);
+      expect.equal(akmv.isExactMode(), true);
+    });
+
+    // -----------------------------------------------------------------------
+    // TD3+BC BEHAVIORAL CLONING PRICING (Tests 7-12)
+    // -----------------------------------------------------------------------
+    test("F200-T07: TD3BCPricing optimizes markdown price with Twin Critic Q-ensemble and normalized BC penalty", () => {
+      const pricer = new ServerTD3BCPricing({ alpha: 2.5 });
+      const result = pricer.optimizePrice({
+        cogs: 400000,
+        currentPrice: 600000,
+        competitorPrice: 550000,
+        historicalDiscount: 0.15,
+        demandIndex: 1.3,
+        inventoryDays: 45
+      });
+      expect.equal(result.status, 'TD3BC_OPTIMAL_PRICED');
+      expect.ok(result.recommendedPrice >= 400000 * 1.05);
+      expect.ok(result.recommendedPrice <= 550000 * 1.10);
+      expect.ok(result.grossMarginPercent > 0);
+      expect.ok(result.qMin > 0);
+      expect.ok(result.bcPenalty >= 0);
+    });
+
+    test("F200-T08: TD3BCPricing adjusts normalization factor lambda adaptively based on critic scale", () => {
+      const pricer = new ServerTD3BCPricing({ alpha: 2.5 });
+      const result = pricer.optimizePrice({
+        cogs: 200000,
+        currentPrice: 300000,
+        competitorPrice: 280000,
+        historicalDiscount: 0.10
+      });
+      expect.ok(result.lambdaNorm > 0);
+      expect.ok(Number.isFinite(result.lambdaNorm));
+    });
+
+    test("F200-T09: TD3BCPricing enforces strict COGS floor protection preventing negative margins", () => {
+      const pricer = new ServerTD3BCPricing({ cogsFloorMultiplier: 1.05 });
+      const result = pricer.optimizePrice({
+        cogs: 500000,
+        currentPrice: 510000,
+        competitorPrice: 420000, // aggressive competitor undercutting COGS
+        historicalDiscount: 0.50, // huge historical discount
+        demandIndex: 0.5,
+        inventoryDays: 120
+      });
+      expect.equal(result.recommendedPrice, 525000); // 500,000 * 1.05
+      expect.equal(result.isFloorConstrained, true);
+      expect.ok(result.grossMarginPercent >= 4.7);
+    });
+
+    test("F200-T10: TD3BCPricing caps maximum price at competitor price +10% ceiling", () => {
+      const pricer = new ServerTD3BCPricing();
+      const result = pricer.optimizePrice({
+        cogs: 100000,
+        currentPrice: 500000,
+        competitorPrice: 200000,
+        historicalDiscount: 0.0,
+        demandIndex: 2.0,
+        inventoryDays: 5
+      });
+      expect.ok(result.recommendedPrice <= 200000 * 1.10);
+    });
+
+    test("F200-T11: TD3BCPricing optimizes multiple SKUs batch pricing with gross margin and discount metrics", () => {
+      const pricer = new ServerTD3BCPricing();
+      const skus = [
+        { id: 'SKU_1', cogs: 150000, currentPrice: 250000, competitorPrice: 230000, historicalDiscount: 0.10 },
+        { id: 'SKU_2', cogs: 800000, currentPrice: 1200000, competitorPrice: 1100000, historicalDiscount: 0.15 },
+        { id: 'SKU_3', cogs: 50000, currentPrice: 70000, competitorPrice: 60000, historicalDiscount: 0.20 }
+      ];
+      const batchResult = pricer.optimizeBatch(skus);
+      expect.equal(batchResult.status, 'BATCH_TD3BC_COMPLETED');
+      expect.equal(batchResult.totalSkus, 3);
+      expect.ok(batchResult.averageGrossMarginPercent > 0);
+      for (const item of batchResult.results) {
+        expect.ok(item.recommendedPrice >= item.cogsFloor);
+      }
+    });
+
+    test("F200-T12: TD3BCPricing logs transitions to replay buffer and samples mini-batches for offline training", () => {
+      const pricer = new ServerTD3BCPricing({ bufferCapacity: 50 });
+      for (let i = 0; i < 20; i++) {
+        pricer.recordTransition({
+          state: [i * 10, i * 20],
+          action: 0.1 + i * 0.01,
+          reward: 500 + i * 50,
+          nextState: [(i + 1) * 10, (i + 1) * 20],
+          done: false
+        });
+      }
+      expect.equal(pricer.getBufferSize(), 20);
+      const batch = pricer.sampleBatch(8);
+      expect.equal(batch.length, 8);
+      expect.ok(batch[0].action >= 0.1);
+    });
+
+    // -----------------------------------------------------------------------
+    // EVRP-TW-BSS-ND DYNAMIC BATTERY SWAP ROUTER (Tests 13-18)
+    // -----------------------------------------------------------------------
+    test("F200-T13: EVRPBssDynamicRouter calculates nonlinear load-dependent energy consumption accurately", () => {
+      const router = new ServerEVRPBssDynamicRouter();
+      const distKm = 10;
+      const energyEmpty = router.calculateEnergyConsumption(distKm, 0);
+      const energyHalf = router.calculateEnergyConsumption(distKm, 15);
+      const energyFull = router.calculateEnergyConsumption(distKm, 30);
+      expect.ok(energyEmpty < energyHalf);
+      expect.ok(energyHalf < energyFull);
+      expect.ok(energyFull > energyEmpty * 1.15); // significant load effect
+    });
+
+    test("F200-T14: EVRPBssDynamicRouter triggers 3-minute BSS battery swap when SoC drops below critical reserve (20%)", () => {
+      const router = new ServerEVRPBssDynamicRouter();
+      // Orders far from SPX Ba Đình depot that require battery swap to fulfill
+      const orders = [
+        { id: 'ORD_FAR_1', lat: 20.970, lng: 105.800, weightKg: 10, earlyMinutes: 480, lateMinutes: 660, serviceMinutes: 10 },
+        { id: 'ORD_FAR_2', lat: 20.950, lng: 105.780, weightKg: 10, earlyMinutes: 480, lateMinutes: 660, serviceMinutes: 10 },
+        { id: 'ORD_FAR_3', lat: 20.940, lng: 105.760, weightKg: 10, earlyMinutes: 480, lateMinutes: 660, serviceMinutes: 10 }
+      ];
+      const plan = router.planEVRPRoutes(orders, { startMinute: 420, initialSocPercent: 25.0 });
+      expect.equal(plan.status, 'EVRP_BSS_DYNAMIC_SCHEDULED');
+      expect.ok(plan.totalSwaps >= 1);
+      expect.ok(plan.totalSwapDurationMinutes >= 3);
+    });
+
+    test("F200-T15: EVRPBssDynamicRouter fully restores SoC to 100% and resets battery capacity upon swap completion", () => {
+      const router = new ServerEVRPBssDynamicRouter();
+      const orders = [
+        { id: 'SWAP_ORD_1', lat: 20.970, lng: 105.800, weightKg: 12, earlyMinutes: 480, lateMinutes: 660, serviceMinutes: 10 }
+      ];
+      const plan = router.planEVRPRoutes(orders, { startMinute: 420, initialSocPercent: 25.0 });
+      const routeWithSwap = plan.routes.find(r => r.swaps > 0);
+      expect.ok(routeWithSwap);
+      const swapStep = routeWithSwap.steps.find(s => s.type === 'BSS_SWAP');
+      expect.ok(swapStep);
+      expect.equal(swapStep.socAfterPercent, 100);
+      expect.equal(swapStep.durationMinutes, 3);
+    });
+
+    test("F200-T16: EVRPBssDynamicRouter routes orders across Hanoi dynamic BSS network respecting customer time windows", () => {
+      const router = new ServerEVRPBssDynamicRouter();
+      const orders = [
+        { id: 'ORD_HN_1', lat: 21.028, lng: 105.854, weightKg: 5, earlyMinutes: 450, lateMinutes: 540, serviceMinutes: 5 },
+        { id: 'ORD_HN_2', lat: 21.036, lng: 105.783, weightKg: 8, earlyMinutes: 500, lateMinutes: 600, serviceMinutes: 5 }
+      ];
+      const plan = router.planEVRPRoutes(orders, { startMinute: 420 });
+      expect.equal(plan.fulfilledOrders, 2);
+      expect.ok(plan.totalDistKm > 0);
+      expect.ok(plan.vehiclesUsed >= 1);
+    });
+
+    test("F200-T17: EVRPBssDynamicRouter tracks CO2 emissions saved compared to internal combustion engine motorbikes", () => {
+      const router = new ServerEVRPBssDynamicRouter();
+      const orders = [
+        { id: 'GREEN_ORD_1', lat: 21.030, lng: 105.850, weightKg: 4, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 5 }
+      ];
+      const plan = router.planEVRPRoutes(orders);
+      expect.ok(plan.totalCo2SavedKg > 0);
+      expect.ok(plan.totalEnergyKWh > 0);
+    });
+
+    test("F200-T18: EVRPBssDynamicRouter applies soft SLA penalty for late deliveries when charging detour causes delay", () => {
+      const router = new ServerEVRPBssDynamicRouter();
+      // Tight late window that will incur late penalty
+      const orders = [
+        { id: 'TIGHT_ORD_1', lat: 20.970, lng: 105.800, weightKg: 8, earlyMinutes: 420, lateMinutes: 425, serviceMinutes: 5 }
+      ];
+      const plan = router.planEVRPRoutes(orders, { startMinute: 420 });
+      expect.equal(plan.fulfilledOrders, 1);
+      expect.ok(plan.totalLateMinutes > 0);
+      expect.ok(plan.slaAdherencePercent < 100);
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT VS SERVER CONSISTENCY (Tests 19-21)
+    // -----------------------------------------------------------------------
+    test("F200-T19: Client and Server AKMVSketchEstimator produce identical threshold, values, and estimates", () => {
+      const clientAKMV = new AKMVSketchEstimator({ targetError: 0.1 });
+      const serverAKMV = new ServerAKMVSketchEstimator({ targetError: 0.1 });
+      for (let i = 0; i < 250; i++) {
+        const item = `sync_customer_id_${i}`;
+        clientAKMV.add(item);
+        serverAKMV.add(item);
+      }
+      expect.equal(clientAKMV.size(), serverAKMV.size());
+      expect.equal(clientAKMV.estimate(), serverAKMV.estimate());
+      expect.equal(clientAKMV.getThreshold(), serverAKMV.getThreshold());
+      expect.equal(clientAKMV.standardError(), serverAKMV.standardError());
+    });
+
+    test("F200-T20: Client and Server TD3BCPricing produce identical pricing recommendations and gross margins", () => {
+      const clientPricer = new TD3BCPricing({ alpha: 2.5 });
+      const serverPricer = new ServerTD3BCPricing({ alpha: 2.5 });
+      const params = {
+        cogs: 350000,
+        currentPrice: 500000,
+        competitorPrice: 470000,
+        historicalDiscount: 0.12,
+        demandIndex: 1.15,
+        inventoryDays: 35
+      };
+      const clientResult = clientPricer.optimizePrice(params);
+      const serverResult = serverPricer.optimizePrice(params);
+      expect.equal(clientResult.recommendedPrice, serverResult.recommendedPrice);
+      expect.equal(clientResult.grossMarginPercent, serverResult.grossMarginPercent);
+      expect.equal(clientResult.discountPercent, serverResult.discountPercent);
+      expect.equal(clientResult.cogsFloor, serverResult.cogsFloor);
+      expect.equal(clientResult.lambdaNorm, serverResult.lambdaNorm);
+    });
+
+    test("F200-T21: Client and Server EVRPBssDynamicRouter produce identical battery swap schedules and route plans", () => {
+      const clientRouter = new EVRPBssDynamicRouter();
+      const serverRouter = new ServerEVRPBssDynamicRouter();
+      const orders = [
+        { id: 'ORD_SYNC_1', lat: 21.028, lng: 105.854, weightKg: 6, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 10 },
+        { id: 'ORD_SYNC_2', lat: 20.970, lng: 105.800, weightKg: 10, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 10 }
+      ];
+      const clientPlan = clientRouter.planEVRPRoutes(orders, { startMinute: 420 });
+      const serverPlan = serverRouter.planEVRPRoutes(orders, { startMinute: 420 });
+      expect.equal(clientPlan.fulfilledOrders, serverPlan.fulfilledOrders);
+      expect.equal(clientPlan.totalDistKm, serverPlan.totalDistKm);
+      expect.equal(clientPlan.totalSwaps, serverPlan.totalSwaps);
+      expect.equal(clientPlan.totalEnergyKWh, serverPlan.totalEnergyKWh);
+      expect.equal(clientPlan.totalCo2SavedKg, serverPlan.totalCo2SavedKg);
+    });
+
+    // -----------------------------------------------------------------------
+    // COPILOT INTEGRATION (Tests 22-23)
+    // -----------------------------------------------------------------------
+    test("F200-T22: Admin Sentinel Copilot (Sections 140, 141, 142) responds to AKMV, TD3+BC, and EVRP-BSS queries", () => {
+      const resAKMV = generateAdminCopilotResponse("ước lượng truy cập bằng akmv sketch thích ứng");
+      expect.equal(resAKMV.tag, "AKMV ADAPTIVE SKETCH");
+      expect.ok(resAKMV.text.includes("AKMV"));
+
+      const resTD3BC = generateAdminCopilotResponse("tối ưu hóa định giá td3+bc nhân bản hành vi");
+      expect.equal(resTD3BC.tag, "TD3+BC OFFLINE PRICING");
+      expect.ok(resTD3BC.text.includes("TD3+BC"));
+
+      const resEVRP = generateAdminCopilotResponse("mô hình giao hàng đổi pin siêu tốc 3 phút evrp-bss");
+      expect.equal(resEVRP.tag, "EVRP-BSS DYNAMIC SWAPPING ROUTING");
+      expect.ok(resEVRP.text.includes("EVRP-BSS"));
+    });
+
+    test("F200-T23: Seller ShopSmart Copilot (Section 62) and Buyer Assistant (Intent 55) handle Phase 53 queries", () => {
+      const resSeller = generateSellerCopilotResponse("tư vấn định giá td3+bc, akmv và đổi pin siêu tốc evrp-bss cho gian hàng");
+      expect.equal(resSeller.tag, "AKMV, TD3+BC & DYNAMIC BSS BATTERY SWAP LOGISTICS");
+      expect.ok(resSeller.text.includes("AKMV"));
+      expect.ok(resSeller.text.includes("TD3+BC"));
+      expect.ok(resSeller.text.includes("EVRP-BSS"));
+
+      const resBuyer = generateAiChatResponse("cho tôi biết về xe điện đổi pin siêu tốc 3 phút evrp-bss");
+      expect.equal(resBuyer.intent, "AKMV_TD3BC_BSS_ASSIST");
+      expect.ok(resBuyer.replyText.includes("EVRP-BSS"));
+    });
+
+    // -----------------------------------------------------------------------
+    // PIPELINE E2E INTEGRATION (Test 24)
+    // -----------------------------------------------------------------------
+    test("F200-T24: End-to-End Pipeline: AKMV audience estimation -> TD3+BC margin pricing -> EVRP-BSS dynamic swap fulfillment", () => {
+      // Step 1: AKMV estimates unique interested buyers and computes audience overlap
+      const akmvSale1 = new ServerAKMVSketchEstimator({ targetError: 0.05 });
+      const akmvSale2 = new ServerAKMVSketchEstimator({ targetError: 0.05 });
+      for (let i = 0; i < 600; i++) akmvSale1.add(`buyer_flash_${i}`);
+      for (let i = 300; i < 900; i++) akmvSale2.add(`buyer_flash_${i}`);
+      const audience1 = akmvSale1.estimate();
+      const audience2 = akmvSale2.estimate();
+      expect.ok(audience1 >= 350 && audience1 <= 1000);
+      expect.ok(audience2 >= 350 && audience2 <= 1000);
+      const jaccard = akmvSale1.jaccardSimilarity(akmvSale2);
+      expect.ok(jaccard >= 0.10 && jaccard <= 0.70);
+
+      // Step 2: TD3+BC optimizes pricing with strict 5% margin floor
+      const pricer = new ServerTD3BCPricing({ alpha: 2.5 });
+      const pricing = pricer.optimizePrice({
+        cogs: 600000,
+        currentPrice: 850000,
+        competitorPrice: 780000,
+        historicalDiscount: 0.15,
+        demandIndex: 1.25,
+        inventoryDays: 30
+      });
+      expect.equal(pricing.status, 'TD3BC_OPTIMAL_PRICED');
+      expect.ok(pricing.recommendedPrice >= 600000 * 1.05);
+      expect.ok(pricing.grossMarginPercent > 0);
+
+      // Step 3: EVRP-BSS schedules green delivery with 3-minute battery swap
+      const router = new ServerEVRPBssDynamicRouter();
+      const plan = router.planEVRPRoutes([
+        { id: 'E2E_EVRP_ORD_1', lat: 20.970, lng: 105.800, weightKg: 8.5, earlyMinutes: 480, lateMinutes: 660, serviceMinutes: 10 }
+      ], { startMinute: 420 });
+      expect.equal(plan.status, 'EVRP_BSS_DYNAMIC_SCHEDULED');
+      expect.equal(plan.fulfilledOrders, 1);
+      expect.ok(plan.totalDistKm > 0);
       expect.ok(plan.totalCo2SavedKg > 0);
     });
   });

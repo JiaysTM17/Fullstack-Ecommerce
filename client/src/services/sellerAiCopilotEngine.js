@@ -119,7 +119,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 5. Quản Lý Đơn Hàng & Xử Lý Giao SPX (Order Fulfillment)
-  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router|bưu cục|drop-off|gần shop|geohash|sdvrptw|split delivery|chia nhỏ đơn hàng|count[- ]sketch|td3|hfvrptw|evrptw|mdevrp|tdvrptw|mopo|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
+  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router|bưu cục|drop-off|gần shop|geohash|sdvrptw|split delivery|chia nhỏ đơn hàng|count[- ]sketch|td3|hfvrptw|evrptw|mdevrp|tdvrptw|mopo|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
     const pendingCount = shopOrders.filter(o => o.status === 'pending').length;
     return {
       text: `📦 **TIẾN ĐỘ XỬ LÝ ĐƠN HÀNG GIAN HÀNG**:
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1132,7 +1132,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 56. Biến Động Ròng Count-Sketch, Đấu Thầu TD3 & Giao Hàng Chia Kiện SDVRPTW (Phase 47 - Feature 194)
-  if (/count[- ]sketch|count sketch|td3|đấu thầu td3|sdvrptw|split delivery|chia nhỏ đơn hàng sdvrptw/i.test(raw)) {
+  if (!/td3\+bc|td3-bc/i.test(raw) && /count[- ]sketch|count sketch|td3|đấu thầu td3|sdvrptw|split delivery|chia nhỏ đơn hàng sdvrptw/i.test(raw)) {
     return {
       text: `🎯 **BIẾN ĐỘNG RÒNG COUNT-SKETCH, ĐẤU THẦU TD3 & GIAO HÀNG CHIA KIỆN SDVRPTW (${currentShop.name})**:
 - **Theo dõi biến động bán ròng chính xác không thiên lệch (Count-Sketch Median)**:
@@ -1247,6 +1247,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Đo lường tập khách bằng KMV Sketch',
         'Tối ưu giá liên tục bằng CQL Continuous',
         'Mạng lưới giao vận hai tầng 2E-VRPTW'
+      ]
+    };
+  }
+
+  // 62. Bộ Ba Thuật Toán AKMV Sketch, TD3+BC Pricing & EVRP-BSS Đổi Pin Động (Phase 53 - Feature 200)
+  if (/akmv|adaptive kmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút/i.test(raw)) {
+    return {
+      text: `🌟 **KỶ NIỆM FEATURE 200: BỘ BA THUẬT TOÁN ĐO LƯỜNG THÍCH ỨNG, ĐỊNH GIÁ NHÂN BẢN HÀNH VI & ĐỔI PIN ĐỘNG SIÊU TỐC (${currentShop.name})**:
+- **Đo lường dung lượng khách hàng thích ứng AKMV (Adaptive K-Minimum Values)**:
+  - Tự động co giãn kích thước mẫu $k$ theo quy mô chiến dịch và sai số mục tiêu $\\epsilon \\le 5\\%$, đảm bảo theo dõi chính xác từng lượt xem deal Flash Sale mà không hao tốn tài nguyên.
+- **Định giá bán ngoại tuyến nhân bản hành vi TD3+BC (Scott Fujimoto & Shixiang Gu)**:
+  - Kết hợp học tăng cường với chuẩn hóa nhân bản hành vi quá khứ của shop, loại bỏ hoàn toàn các quyết định định giá phi lý trí, khóa cứng sàn an toàn $\\text{COGS} \\times 1.05$.
+- **Định tuyến giao hàng xe điện đổi pin siêu tốc 3 phút EVRP-BSS (EVRP-TW-BSS-ND)**:
+  - Bưu tá xe máy điện đổi pin 100% dung lượng trong đúng 180 giây tại trạm BSS dọc tuyến, hoàn toàn không có thời gian chết chờ sạc, giao nhanh thần tốc đến tay khách hàng!`,
+      type: 'recommendation',
+      tag: 'AKMV, TD3+BC & DYNAMIC BSS BATTERY SWAP LOGISTICS',
+      suggestions: [
+        'Đo lường tập khách bằng AKMV',
+        'Tối ưu giá ngoại tuyến bằng TD3+BC',
+        'Định tuyến bưu tá đổi pin siêu tốc EVRP-BSS'
       ]
     };
   }
