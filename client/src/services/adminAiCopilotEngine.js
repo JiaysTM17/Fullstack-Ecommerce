@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (!/conservative|cập nhật thận trọng/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -454,7 +454,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
-  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
 - **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
@@ -2566,6 +2566,64 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình điều phối xe đa kho MDPDPTW',
         'Kiểm tra vi phạm cửa sổ thời gian giao hàng',
         'Tối ưu hóa giá thầu SAC-Auto'
+      ]
+    };
+  }
+
+  // 119. Nén Bộ Đếm Tần Suất SKU Bằng Count-Min-Log Sketch (Phase 46 - Feature 193)
+  if (/count[- ]min[- ]log|cml sketch|bộ đếm logarit|đếm tần suất cml|count-min-log sketch/i.test(raw)) {
+    return {
+      text: `📊 **NÉN BỘ ĐẾM TẦN SUẤT SKU BẰNG COUNT-MIN-LOG SKETCH (PAVAN & TIRTHAPURA 2017, TING 2018)**:
+- **Đột Phá Tiết Kiệm 75% Bộ Nhớ RAM So Với Count-Min Truyền Thống**:
+  - Count-Min Sketch chuẩn sử dụng 32-bit counter (4 bytes) cho mỗi ô bảng băm. Với hàng chục triệu sự kiện click/xem SKU trong ngày Mega Sale, RAM nhanh chóng cạn kiệt.
+  - Count-Min-Log (CML) Sketch nén counter xuống **8-bit logarit** ($1\\text{ byte}$), biểu diễn giá trị xấp xỉ $\\hat{N} = \\frac{\\gamma^c - 1}{\\gamma - 1}$ với cơ số $\\gamma = 1.08$.
+- **Cơ Chế Cập Nhật Ngẫu Nhiên $P = \\gamma^{-c}$**:
+  - Khi một SKU xuất hiện, thanh ghi chỉ tăng $c \\leftarrow c + 1$ với xác suất giảm dần theo hàm mũ $P = \\gamma^{-c}$.
+  - Hỗ trợ gộp đồ thị streaming đa luồng (Pointwise Maximum Merge) mà không làm suy giảm độ chính xác ước lượng tần suất!`,
+      type: 'analytics',
+      tag: 'COUNT-MIN-LOG SKETCH COMPRESSION',
+      suggestions: [
+        'Đo lường độ nén bộ nhớ CML Sketch',
+        'Kiểm tra định giá Flash Sale TQPO',
+        'Xem điều phối gom đơn D-DARP'
+      ]
+    };
+  }
+
+  // 120. Định Giá Flash Sale An Toàn Cắt Ngọn Phân Vị TQPO (Phase 46 - Feature 193)
+  if (/tqpo|truncated quantile|định giá flash sale tqpo|cắt ngọn phân vị|giá vốn cogs sàn/i.test(raw)) {
+    return {
+      text: `🏷️ **ĐỊNH GIÁ FLASH SALE AN TOÀN BẰNG TRUNCATED QUANTILE POLICY OPTIMIZATION (TQPO - KUZNETSOV 2020)**:
+- **Khắc Phục Thiên Lệch Ước Lượng Quá Mức (Overestimation Bias)**:
+  - Các thuật toán học tăng cường định giá thông thường dễ bị ảo tưởng doanh thu do nhiễu số liệu, dẫn đến việc hạ giá quá sâu làm sụt giảm biên lợi nhuận.
+  - TQPO duy trì quần thể phân vị $Q_k(s, a)$ và chủ động **cắt ngọn $M$ phân vị thấp nhất** ($k \\in [M+1, K]$) để đánh giá kỳ vọng thận trọng, đảm bảo ước lượng doanh thu luôn sát thực tế.
+- **Lưới Bảo Hiểm Không Bán Dưới Giá Vốn (COGS Floor Guard)**:
+  - Tự động áp trần mức chiết khấu Flash Sale: Giá bán đề xuất bắt buộc phải thỏa mãn $P \\ge \\text{COGS} \\times (1 + \\text{MinMargin})$, bảo vệ 100% dòng tiền cho nhà bán hàng!`,
+      type: 'recommendation',
+      tag: 'TQPO FLASH SALE PRICING & COGS FLOOR',
+      suggestions: [
+        'Xem mức giá Flash Sale tối ưu TQPO',
+        'Kiểm tra ngưỡng bảo vệ giá vốn COGS',
+        'Nén tần suất lượt xem bằng CML Sketch'
+      ]
+    };
+  }
+
+  // 121. Điều Phối Gom Đơn Hỏa Tốc Dial-a-Ride Động D-DARP (Phase 46 - Feature 193)
+  if (/dynamic darp|d[- ]darp|dial[- ]a[- ]ride|gom đơn hỏa tốc|điều phối ghép chuyến d-darp/i.test(raw)) {
+    return {
+      text: `⚡ **ĐIỀU PHỐI GOM ĐƠN HỎA TỐC DIAL-A-RIDE ĐỘNG CÓ CỬA SỔ THỜI GIAN (D-DARP - CORDEAU 2007, BERBEGLIA 2010)**:
+- **Tối Ưu Hóa Ghép Đơn SPX Pooled Express Chống Cháy Hàng**:
+  - Gom các đơn giao hỏa tốc 2H có lộ trình tương đồng vào cùng một chuyến xe của bưu tá để tiết kiệm chi phí xăng xe và nhân lực.
+  - Ràng buộc **Thời gian lưu hành tối đa ($L_\\max \\le 75\\text{ phút}$)**: Đảm bảo đồ ăn, hoa tươi và hàng công nghệ nhạy cảm không bị giữ trên thùng xe quá lâu.
+- **Ràng Buộc Thời Gian Chờ ($W_i \\le 15\\text{ phút}$) & Tải Trọng Thùng Xe**:
+  - Không để khách hàng phải chờ bưu tá quá hạn cam kết, tự động chèn điểm lấy/giao tối ưu theo hàm chi phí tổ hợp $C = c_1 \\cdot D + c_2 \\cdot T + c_3 \\cdot P_{\\text{wait}}$!`,
+      type: 'logistics',
+      tag: 'DYNAMIC DIAL-A-RIDE POOLED DISPATCH',
+      suggestions: [
+        'Xem lộ trình gom đơn hỏa tốc D-DARP',
+        'Kiểm tra giới hạn thời gian chở hàng Max Ride Time',
+        'Tối ưu hóa giá Flash Sale TQPO'
       ]
     };
   }

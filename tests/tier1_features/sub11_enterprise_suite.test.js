@@ -259,6 +259,10 @@ import {
   SACAutoBiddingEngine,
   MDPDPVehicle,
   MDPDPTRouter,
+  // Phase 46 Enterprise Algorithms
+  CountMinLogSketch,
+  TQPOFlashSalePricing,
+  DynamicDARPRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -362,6 +366,9 @@ import { BendersMultiEchelonInventory as ServerBendersMultiEchelonInventory } fr
 import { LogLogBetaCardinality as ServerLogLogBetaCardinality } from "../../server/src/utils/logLogBetaCardinality.js";
 import { SACAutoBiddingEngine as ServerSACAutoBiddingEngine } from "../../server/src/utils/sacAutoBiddingEngine.js";
 import { MDPDPTRouter as ServerMDPDPTRouter, MDPDPVehicle as ServerMDPDPVehicle } from "../../server/src/utils/mdpdptwRouter.js";
+import { CountMinLogSketch as ServerCountMinLogSketch } from "../../server/src/utils/countMinLogSketch.js";
+import { TQPOFlashSalePricing as ServerTQPOFlashSalePricing } from "../../server/src/utils/tqpoFlashSalePricing.js";
+import { DynamicDARPRouter as ServerDynamicDARPRouter } from "../../server/src/utils/dynamicDarpRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -20941,6 +20948,339 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       ], 1);
       expect.equal(dispatchPlan.status, 'MDPDPTW_OPTIMAL_SCHEDULED');
       expect.equal(dispatchPlan.assignedCount, 1);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 193: Count-Min-Log Sketch, TQPO Flash Sale Pricing & D-DARP Pooled Delivery Suite (Phase 46 - 24 Tests)
+  // =========================================================================
+  describe("Feature 193: Count-Min-Log Sketch, TQPO Flash Sale Pricing & D-DARP Pooled Delivery Suite", () => {
+    // 1. Count-Min-Log Sketch (CML Sketch) Tests (F193-T01 to F193-T08)
+    test("F193-T01: Initial state has 0 frequency for unobserved items", () => {
+      const cml = new CountMinLogSketch({ depth: 4, width: 256, gamma: 1.08 });
+      expect.equal(cml.estimate("NON_EXISTENT_SKU"), 0);
+      expect.equal(cml.estimate(""), 0);
+    });
+
+    test("F193-T02: Adding events increments 8-bit log counters probabilistically with gamma base", () => {
+      const cml = new CountMinLogSketch({ depth: 4, width: 256, gamma: 1.08 });
+      cml.add("SKU_IPHONE_16", 50);
+      const est = cml.estimate("SKU_IPHONE_16");
+      expect.ok(est > 0);
+      expect.ok(typeof est === "number");
+    });
+
+    test("F193-T03: Estimate recovers higher values for frequent items vs rare items", () => {
+      const cml = new ServerCountMinLogSketch({ depth: 4, width: 512, gamma: 1.08 });
+      for (let i = 0; i < 100; i++) cml.add("HOT_TRENDING_SKU");
+      for (let i = 0; i < 5; i++) cml.add("COLD_RARE_SKU");
+
+      const hotEst = cml.estimate("HOT_TRENDING_SKU");
+      const coldEst = cml.estimate("COLD_RARE_SKU");
+      expect.ok(hotEst >= coldEst);
+    });
+
+    test("F193-T04: Pointwise maximum merge of two sketches preserves lower bounds", () => {
+      const c1 = new CountMinLogSketch({ depth: 4, width: 256 });
+      const c2 = new CountMinLogSketch({ depth: 4, width: 256 });
+      c1.add("SKU_NODE_A", 30);
+      c2.add("SKU_NODE_B", 40);
+
+      c1.merge(c2);
+      expect.ok(c1.estimate("SKU_NODE_A") > 0);
+      expect.ok(c1.estimate("SKU_NODE_B") > 0);
+    });
+
+    test("F193-T05: Sketch reset clears all counters to 0", () => {
+      const cml = new CountMinLogSketch({ depth: 4, width: 256 });
+      cml.add("SKU_CLEAR_ME", 25);
+      expect.ok(cml.estimate("SKU_CLEAR_ME") > 0);
+      cml.reset();
+      expect.equal(cml.estimate("SKU_CLEAR_ME"), 0);
+    });
+
+    test("F193-T06: Memory footprint is exactly depth * width bytes in Uint8Array (75% savings over Int32Array)", () => {
+      const depth = 4;
+      const width = 1024;
+      const cml = new CountMinLogSketch({ depth, width });
+      expect.equal(cml.table.length, depth);
+      expect.equal(cml.table[0].byteLength, width);
+
+      const totalBytes = cml.table.reduce((sum, row) => sum + row.byteLength, 0);
+      expect.equal(totalBytes, 4096);
+      const standardCmsBytes = depth * width * 4;
+      const savingsPercent = Math.round(((standardCmsBytes - totalBytes) / standardCmsBytes) * 100);
+      expect.equal(savingsPercent, 75);
+    });
+
+    test("F193-T07: Mismatched dimensions on merge throws an error", () => {
+      const c1 = new CountMinLogSketch({ depth: 4, width: 256 });
+      const c2 = new CountMinLogSketch({ depth: 2, width: 256 });
+      expect.throws(() => c1.merge(c2));
+    });
+
+    test("F193-T08: Client and server CountMinLogSketch have identical interface and behavior", () => {
+      const clientCml = new CountMinLogSketch({ depth: 4, width: 256, gamma: 1.08 });
+      const serverCml = new ServerCountMinLogSketch({ depth: 4, width: 256, gamma: 1.08 });
+      expect.equal(clientCml.depth, serverCml.depth);
+      expect.equal(clientCml.width, serverCml.width);
+      expect.equal(clientCml.gamma, serverCml.gamma);
+      expect.equal(clientCml.estimate("ABSENT"), serverCml.estimate("ABSENT"));
+    });
+
+    // 2. Truncated Quantile Policy Optimization (TQPO) Tests (F193-T09 to F193-T16)
+    test("F193-T09: Initialized with default 8 quantiles and truncation cutoff", () => {
+      const tqpo = new TQPOFlashSalePricing({ numQuantiles: 8, truncationCutoff: 2 });
+      expect.equal(tqpo.numQuantiles, 8);
+      expect.equal(tqpo.truncationCutoff, 2);
+      expect.equal(tqpo.stateDim, 5);
+    });
+
+    test("F193-T10: PredictAction outputs discount percent bounded within [0.05, 0.50]", () => {
+      const tqpo = new TQPOFlashSalePricing();
+      const state = [0.8, 1.2, 0.5, 0.8, 0.4];
+      const action = tqpo.predictAction(state, true);
+      expect.ok(action >= 0.05);
+      expect.ok(action <= 0.50);
+    });
+
+    test("F193-T11: Truncated expectation drops lowest k quantiles for conservative return", () => {
+      const tqpo = new TQPOFlashSalePricing({ numQuantiles: 8, truncationCutoff: 2 });
+      const state = [0.6, 0.8, 0.6, 0.8, 0.5];
+      const expVal = tqpo.truncatedExpectation(state, 0.25, false);
+      expect.ok(typeof expVal === "number");
+      expect.ok(!Number.isNaN(expVal));
+    });
+
+    test("F193-T12: RecordExperience and TrainStep with Polyak target updates train the critic", () => {
+      const tqpo = new TQPOFlashSalePricing();
+      for (let i = 0; i < 20; i++) {
+        tqpo.recordExperience([0.8, 0.5, 0.5, 0.8, 0.4], 0.2, 10.0, [0.7, 0.6, 0.4, 0.8, 0.4], false);
+      }
+      expect.equal(tqpo.replayBuffer.length, 20);
+      const trainRes = tqpo.trainStep(8);
+      expect.equal(trainRes.trained, true);
+      expect.ok(typeof trainRes.avgLoss === "number");
+    });
+
+    test("F193-T13: optimizeFlashSalePrice strictly guarantees price floor >= COGS * 1.05", () => {
+      const tqpo = new TQPOFlashSalePricing();
+      const plan = tqpo.optimizeFlashSalePrice({
+        originalPrice: 1000000,
+        cogs: 600000,
+        currentStock: 80,
+        initialStock: 100,
+        elapsedMinutes: 30,
+        totalDurationMinutes: 120
+      });
+
+      expect.equal(plan.isFloorGuaranteed, true);
+      expect.ok(plan.flashPrice >= Math.round(600000 * 1.05));
+      expect.ok(plan.grossMarginPercent >= 4.5);
+    });
+
+    test("F193-T14: Strategy selects DEEP_LIQUIDATION_SURGE when stock is high and time is running out", () => {
+      const tqpo = new TQPOFlashSalePricing();
+      const plan = tqpo.optimizeFlashSalePrice({
+        originalPrice: 800000,
+        cogs: 300000,
+        currentStock: 90,
+        initialStock: 100,
+        elapsedMinutes: 90,
+        totalDurationMinutes: 120
+      });
+      expect.equal(plan.strategy, 'DEEP_LIQUIDATION_SURGE');
+    });
+
+    test("F193-T15: Strategy selects PROFIT_MARGIN_PROTECTION when stock is scarce", () => {
+      const tqpo = new TQPOFlashSalePricing();
+      const plan = tqpo.optimizeFlashSalePrice({
+        originalPrice: 500000,
+        cogs: 200000,
+        currentStock: 15,
+        initialStock: 100,
+        elapsedMinutes: 20,
+        totalDurationMinutes: 120
+      });
+      expect.equal(plan.strategy, 'PROFIT_MARGIN_PROTECTION');
+    });
+
+    test("F193-T16: Client and server TQPOFlashSalePricing have identical pricing guarantees", () => {
+      const clientTqpo = new TQPOFlashSalePricing();
+      const serverTqpo = new ServerTQPOFlashSalePricing();
+      const ctx = { originalPrice: 400000, cogs: 220000 };
+      const p1 = clientTqpo.optimizeFlashSalePrice(ctx);
+      const p2 = serverTqpo.optimizeFlashSalePrice(ctx);
+      expect.equal(p1.isFloorGuaranteed, true);
+      expect.equal(p2.isFloorGuaranteed, true);
+    });
+
+    // 3. Dynamic Dial-a-Ride Problem Router (D-DARP) Tests (F193-T17 to F193-T21)
+    test("F193-T17: Haversine distance and travel time calculation between GPS coordinates", () => {
+      const router = new DynamicDARPRouter({ speedKmPerHour: 35 });
+      const dist = router.getDistance({ lat: 21.0285, lng: 105.8542 }, { lat: 21.0385, lng: 105.8642 });
+      expect.ok(dist > 0);
+      const travel = router._travelMinutes(dist);
+      expect.ok(travel >= 0);
+    });
+
+    test("F193-T18: Insertion evaluation enforces Precedence (Pickup before Dropoff)", () => {
+      const router = new DynamicDARPRouter();
+      const courier = {
+        id: 'C_TEST',
+        capacity: 25,
+        baseLocation: { lat: 21.028, lng: 105.854 },
+        route: [],
+        startShiftMinutes: 0
+      };
+      const req = {
+        id: 'REQ_01',
+        pickup: { lat: 21.03, lng: 105.85, earlyMinutes: 0, lateMinutes: 60, serviceTimeMinutes: 5 },
+        dropoff: { lat: 21.04, lng: 105.86, earlyMinutes: 10, lateMinutes: 120, serviceTimeMinutes: 5 },
+        weightKg: 4,
+        maxRideMinutes: 60
+      };
+
+      const evalRes = router.evaluateDarpInsertion(courier, req, 0, 0);
+      expect.equal(evalRes.feasible, true);
+      expect.equal(evalRes.proposedRoute[0].type, 'PICKUP');
+      expect.equal(evalRes.proposedRoute[1].type, 'DROPOFF');
+    });
+
+    test("F193-T19: Insertion evaluation rejects routes exceeding courier load capacity", () => {
+      const router = new DynamicDARPRouter({ defaultCourierCapacity: 20 });
+      const courier = {
+        id: 'C_CAP',
+        capacity: 15,
+        baseLocation: { lat: 21.028, lng: 105.854 },
+        route: [],
+        startShiftMinutes: 0
+      };
+      const heavyReq = {
+        id: 'REQ_HEAVY',
+        pickup: { lat: 21.03, lng: 105.85, earlyMinutes: 0, lateMinutes: 60 },
+        dropoff: { lat: 21.04, lng: 105.86, earlyMinutes: 10, lateMinutes: 120 },
+        weightKg: 20 // Exceeds courier capacity 15kg
+      };
+
+      const evalRes = router.evaluateDarpInsertion(courier, heavyReq, 0, 0);
+      expect.equal(evalRes.feasible, false);
+      expect.equal(evalRes.reason, 'OVER_CAPACITY');
+    });
+
+    test("F193-T20: Ride time penalty applied if duration between pickup and dropoff exceeds maxRideMinutes", () => {
+      const router = new DynamicDARPRouter({ penaltyPerExcessRideMinute: 5000 });
+      const courier = {
+        id: 'C_RIDE',
+        capacity: 30,
+        baseLocation: { lat: 21.0, lng: 105.8 },
+        route: [],
+        startShiftMinutes: 0
+      };
+      const strictReq = {
+        id: 'REQ_STRICT',
+        pickup: { lat: 21.01, lng: 105.81, earlyMinutes: 0, lateMinutes: 30, serviceTimeMinutes: 5 },
+        dropoff: { lat: 21.50, lng: 106.20, earlyMinutes: 60, lateMinutes: 300, serviceTimeMinutes: 5 },
+        weightKg: 3,
+        maxRideMinutes: 1 // Impossible 1 min ride time -> penalty
+      };
+
+      const evalRes = router.evaluateDarpInsertion(courier, strictReq, 0, 0);
+      expect.equal(evalRes.feasible, true);
+      expect.ok(evalRes.excessRidePenalty > 0);
+    });
+
+    test("F193-T21: dispatchPooledOrders assigns pooled orders to best couriers with D_DARP_OPTIMAL_DISPATCHED", () => {
+      const router = new ServerDynamicDARPRouter();
+      const couriers = [
+        { id: 'SPX_POOLED_1', name: 'Bưu Tá Nam', capacity: 25, location: { lat: 21.0285, lng: 105.8542 } }
+      ];
+      const orders = [
+        {
+          id: 'EXPRESS_ORDER_101',
+          pickup: { id: 'P101', lat: 21.03, lng: 105.85, earlyMinutes: 0, lateMinutes: 60, serviceTimeMinutes: 5 },
+          dropoff: { id: 'D101', lat: 21.04, lng: 105.86, earlyMinutes: 15, lateMinutes: 120, serviceTimeMinutes: 5 },
+          weightKg: 2,
+          maxRideMinutes: 60
+        }
+      ];
+
+      const res = router.dispatchPooledOrders(couriers, orders);
+      expect.equal(res.status, 'D_DARP_OPTIMAL_DISPATCHED');
+      expect.equal(res.pooledAssignedCount, 1);
+      expect.equal(res.unassignedCount, 0);
+      expect.equal(res.activeCouriers.length, 1);
+      expect.equal(res.activeCouriers[0].stopsCount, 2);
+    });
+
+    // 4. Tri-Role AI Copilot & E2E Pipeline Integration Tests (F193-T22 to F193-T24)
+    test("F193-T22: Admin Sentinel Copilot Sections 119, 120, 121 respond with respective tags", () => {
+      const res119 = generateAdminCopilotResponse("báo cáo nén bộ đếm logarit tần suất cml sketch");
+      expect.equal(res119.tag, "COUNT-MIN-LOG SKETCH COMPRESSION");
+      expect.ok(res119.text.includes("COUNT-MIN-LOG SKETCH"));
+
+      const res120 = generateAdminCopilotResponse("tối ưu định giá flash sale tqpo cắt ngọn phân vị bảo vệ giá vốn cogs");
+      expect.equal(res120.tag, "TQPO FLASH SALE PRICING & COGS FLOOR");
+      expect.ok(res120.text.includes("TRUNCATED QUANTILE POLICY OPTIMIZATION"));
+
+      const res121 = generateAdminCopilotResponse("kế hoạch điều phối ghép chuyến d-darp gom đơn hỏa tốc");
+      expect.equal(res121.tag, "DYNAMIC DIAL-A-RIDE POOLED DISPATCH");
+      expect.ok(res121.text.includes("DIAL-A-RIDE"));
+    });
+
+    test("F193-T23: Seller ShopSmart Copilot Section 55 responds with CML FREQUENCY, TQPO PRICING & D-DARP DISPATCH tag", () => {
+      const res = generateSellerCopilotResponse("tư vấn đếm tần suất cml sketch, định giá tqpo và gom đơn d-darp");
+      expect.equal(res.tag, "CML FREQUENCY, TQPO PRICING & D-DARP DISPATCH");
+      expect.ok(res.text.includes("Count-Min-Log Sketch"));
+      expect.ok(res.text.includes("TQPO"));
+      expect.ok(res.text.includes("D-DARP"));
+    });
+
+    test("F193-T24: Buyer AI Assistant Intent 48 advises on click frequency, deals & pooled delivery, and E2E Pipeline coordinates all 3 algorithms", () => {
+      // 1. Buyer AI responds to Intent 48
+      const res = generateAiChatResponse("tần suất xem cml sketch và deal flash sale tqpo gom đơn hỏa tốc d-darp thế nào?", []);
+      expect.equal(res.intent, "CML_TQPO_DDARP_ASSIST");
+      expect.ok(res.replyText.includes("CML Sketch"));
+      expect.ok(res.replyText.includes("TQPO"));
+      expect.ok(res.replyText.includes("D-DARP"));
+
+      // 2. E2E Pipeline Coordination:
+      // Step A: CML Sketch tracks heavy clickstream of Flash Sale SKU in 8-bit counters
+      const cml = new ServerCountMinLogSketch({ depth: 4, width: 512, gamma: 1.08 });
+      for (let i = 0; i < 70; i++) {
+        cml.add("SKU_PROMO_HERO_99");
+      }
+      const trackedFreq = cml.estimate("SKU_PROMO_HERO_99");
+      expect.ok(trackedFreq >= 30);
+
+      // Step B: TQPO computes dynamic markdown ensuring Gross Margin >= COGS + 5%
+      const tqpo = new ServerTQPOFlashSalePricing();
+      const pricing = tqpo.optimizeFlashSalePrice({
+        originalPrice: 450000,
+        cogs: 220000,
+        currentStock: 65,
+        initialStock: 100,
+        elapsedMinutes: 45,
+        totalDurationMinutes: 120
+      });
+      expect.equal(pricing.isFloorGuaranteed, true);
+      expect.ok(pricing.flashPrice >= Math.round(220000 * 1.05));
+
+      // Step C: D-DARP pools instant express deliveries with Max Ride Time constraint
+      const darp = new ServerDynamicDARPRouter({ maxRideMinutes: 75 });
+      const dispatch = darp.dispatchPooledOrders([
+        { id: 'SHIPPER_SPX_01', name: 'Bưu Tá Tuấn', capacity: 30, location: { lat: 21.028, lng: 105.854 } }
+      ], [
+        {
+          id: 'EXPRESS_E2E_01',
+          pickup: { id: 'P_WH', lat: 21.03, lng: 105.85, earlyMinutes: 0, lateMinutes: 60, serviceTimeMinutes: 5 },
+          dropoff: { id: 'D_HOME', lat: 21.05, lng: 105.87, earlyMinutes: 15, lateMinutes: 120, serviceTimeMinutes: 5 },
+          weightKg: 3,
+          maxRideMinutes: 75
+        }
+      ]);
+      expect.equal(dispatch.status, 'D_DARP_OPTIMAL_DISPATCHED');
+      expect.equal(dispatch.pooledAssignedCount, 1);
     });
   });
 });

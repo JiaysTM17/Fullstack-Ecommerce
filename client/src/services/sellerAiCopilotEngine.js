@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1107,6 +1107,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem thống kê UV LogLog-Beta',
         'Tối ưu hóa giá thầu Shopee Ads SAC-Auto',
         'Kiểm tra lịch lấy hàng SPX MDPDPTW'
+      ]
+    };
+  }
+
+  // 55. Đếm Tần Suất SKU CML, Giá Flash Sale An Toàn TQPO & Gom Đơn Hỏa Tốc D-DARP (Phase 46 - Feature 193)
+  if (/count[- ]min[- ]log|cml sketch|tqpo|định giá tqpo|d[- ]darp|dynamic darp|gom đơn d-darp/i.test(raw)) {
+    return {
+      text: `⚡ **ĐẾM TẦN SUẤT SKU CML, GIÁ FLASH SALE AN TOÀN TQPO & GOM ĐƠN HỎA TỐC D-DARP (${currentShop.name})**:
+- **Theo dõi tần suất click/xem SKU siêu tiết kiệm RAM (Count-Min-Log Sketch)**:
+  - Với kỹ thuật nén counter logarit $\\gamma = 1.08$, shop bạn có thể theo dõi hàng triệu lượt tương tác trên từng phân loại hàng (size, màu sắc) ngay trên trình duyệt mà không gây lag giật.
+- **Định giá Flash Sale an toàn không bao giờ thủng giá vốn (TQPO)**:
+  - Thuật toán Truncated Quantile cắt bỏ các phân vị ước lượng xấu, tự động khóa giá bán sàn $P \\ge \\text{COGS} \\times 1.05$, đảm bảo doanh thu tăng vọt nhưng biên lãi gộp luôn dương!
+- **Gom đơn hỏa tốc 2H tiết kiệm cước phí bưu tá (D-DARP)**:
+  - Các đơn hàng nội thành của shop được gom chuyến thông minh với lộ trình SPX Express, cam kết thời gian hàng nằm trên thùng xe không quá 75 phút, bảo đảm chất lượng nguyên vẹn khi tới tay khách!`,
+      type: 'recommendation',
+      tag: 'CML FREQUENCY, TQPO PRICING & D-DARP DISPATCH',
+      suggestions: [
+        'Theo dõi tần suất SKU bằng CML Sketch',
+        'Tối ưu hóa giá bán Flash Sale TQPO',
+        'Kiểm tra gom đơn hỏa tốc D-DARP'
       ]
     };
   }

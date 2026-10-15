@@ -331,7 +331,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
 
   // 1. Kết hợp Tìm sản phẩm + Xin Voucher / Freeship
   if (
-    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw/i.test(lower) &&
+    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp/i.test(lower) &&
     (/mua|tìm|sản phẩm|\báo\b|\bquần\b|tai nghe|chuột|bàn phím|nồi|son|giày/i.test(lower)) &&
     (/voucher|mã|giảm giá|freeship|miễn phí ship/i.test(lower))
   ) {
@@ -438,7 +438,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // ĐƠN HÀNG, TIẾN ĐỘ VẬN ĐƠN, KHIẾU NẠI GIAO TRỄ
   // -------------------------------------------------------------
-  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
+  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
     const orders = lookupCustomerOrders(lower);
     if (orders.length > 0) {
       return {
@@ -484,7 +484,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2|branch[- ]and[- ]cut|vrptw|contraction|benders|mdpdptw|d[- ]darp|dynamic darp|tqpo|cml|count[- ]min[- ]log/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -974,6 +974,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'LOGLOGBETA_SACAUTO_MDPDPTW_ASSIST',
       replyText: `**[ĐO LƯỜNG LƯỢT XEM LOGLOG-BETA, GIÁ THẦU TỐI ƯU SAC-AUTO & GIAO HỎA TỐC HAI CHIỀU MDPDPTW]:**\n\n• **Lượt xem thật, người dùng thật (LogLog-Beta)**: Thuật toán LogLog-Beta đếm chính xác số lượng người xem duy nhất trên toàn sàn, đảm bảo bạn luôn nhìn thấy con số uy tín thật không bị ảo!\n• **Giá deal cạnh tranh nhất (SAC-Auto)**: Hệ thống tự động cân đối giá thầu Shopee Ads để các nhà bán uy tín mang đến mức giá ưu đãi nhất cho bạn mà không bị đẩy chi phí lên cao.\n• **Lấy hàng tận nơi & Giao tận tay đúng hẹn (MDPDPTW)**: Lịch trình giao nhận hai chiều giữa shop và người mua được SPX Express tối ưu hóa theo khung giờ bạn chọn, đảm bảo kiện hàng đến tay đúng lúc không phải chờ đợi!`,
       suggestions: ['Xem deal giá hời nhất', 'Kiểm tra lượt xem thật sản phẩm', 'Chọn khung giờ nhận hàng'],
+    };
+  }
+
+  // 48. Đếm Lượt Click CML, Giá Flash Sale Sốc TQPO & Giao Hỏa Tốc Gom Chuyến D-DARP (CML_TQPO_DDARP_ASSIST)
+  if (/count[- ]min[- ]log|cml sketch|tqpo|deal flash sale tqpo|d[- ]darp|dynamic darp|gom đơn hỏa tốc d-darp/i.test(lower)) {
+    return {
+      intent: 'CML_TQPO_DDARP_ASSIST',
+      replyText: `**[TẦN SUẤT XEM CML, DEAL AN TOÀN TQPO & GIAO HỎA TỐC GHÉP CHUYẾN D-DARP]:**\n\n• **Lượt tương tác chuẩn xác triệu người dùng (CML Sketch)**: Nén bộ đếm logarit 8-bit giúp cập nhật tức thời các sản phẩm đang được hàng triệu người thêm vào giỏ hàng mà không lo nghẽn mạng!\n• **Giá Flash Sale rẻ vô địch mà chuẩn chất lượng (TQPO)**: Định giá cắt ngọn phân vị bảo vệ giá trị sản phẩm, đảm bảo bạn nhận trọn vẹn Deal sốc mà không sợ hàng cận date hay giảm chất lượng.\n• **Giao hỏa tốc 2H ghép chuyến SPX siêu tiết kiệm (D-DARP)**: Đơn hàng hỏa tốc được gom chuyến tối ưu, cam kết thời gian bưu tá giao tới tay bạn trong vòng 75 phút mà cước phí ship cực rẻ!`,
+      suggestions: ['Săn Deal Flash Sale TQPO', 'Đặt giao hỏa tốc 2H SPX', 'Xem sản phẩm tương tác cao CML'],
     };
   }
 

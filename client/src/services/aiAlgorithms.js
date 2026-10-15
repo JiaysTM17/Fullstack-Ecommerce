@@ -22556,6 +22556,408 @@ export class MDPDPTRouter {
   }
 }
 
+// ------------------------------------------------------------------------------
+// PHASE 46 ALGORITHM 1: Count-Min-Log Sketch (Pavan & Tirthapura 2017)
+// ------------------------------------------------------------------------------
+export class CountMinLogSketch {
+  constructor(options = {}) {
+    this.depth = options.depth || 4;
+    this.width = options.width || 1024;
+    this.gamma = options.gamma || 1.08;
+    this.table = Array.from({ length: this.depth }, () => new Uint8Array(this.width));
+  }
+
+  _hash(key, seed = 0) {
+    let h = 0x811c9dc5 ^ seed;
+    const str = String(key);
+    for (let i = 0; i < str.length; i++) {
+      let k = str.charCodeAt(i);
+      k = Math.imul(k, 0xcc9e2d51);
+      k = (k << 15) | (k >>> 17);
+      k = Math.imul(k, 0x1b873593);
+      h ^= k;
+      h = (h << 13) | (h >>> 19);
+      h = Math.imul(h, 5) + 0xe6546b64;
+    }
+    h ^= str.length;
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13;
+    h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
+    return (h >>> 0) % this.width;
+  }
+
+  _logValueToFrequency(c) {
+    if (c === 0) return 0;
+    return Math.round((Math.pow(this.gamma, c) - 1) / (this.gamma - 1));
+  }
+
+  add(item, count = 1) {
+    if (!item || count <= 0) return;
+
+    for (let c = 0; c < count; c++) {
+      for (let i = 0; i < this.depth; i++) {
+        const col = this._hash(item, i * 7919 + 31);
+        const currentVal = this.table[i][col];
+
+        if (currentVal < 255) {
+          const p = Math.pow(this.gamma, -currentVal);
+          if (Math.random() < p) {
+            this.table[i][col]++;
+          }
+        }
+      }
+    }
+  }
+
+  estimate(item) {
+    if (!item) return 0;
+
+    let minLogVal = 255;
+    for (let i = 0; i < this.depth; i++) {
+      const col = this._hash(item, i * 7919 + 31);
+      const val = this.table[i][col];
+      if (val < minLogVal) {
+        minLogVal = val;
+      }
+    }
+
+    if (minLogVal === 0) return 0;
+    return this._logValueToFrequency(minLogVal);
+  }
+
+  merge(other) {
+    if (!other || other.depth !== this.depth || other.width !== this.width) {
+      throw new Error("Cannot merge CML sketches of mismatched dimensions");
+    }
+    for (let i = 0; i < this.depth; i++) {
+      for (let j = 0; j < this.width; j++) {
+        if (other.table[i][j] > this.table[i][j]) {
+          this.table[i][j] = other.table[i][j];
+        }
+      }
+    }
+  }
+
+  reset() {
+    for (let i = 0; i < this.depth; i++) {
+      this.table[i].fill(0);
+    }
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 46 ALGORITHM 2: Truncated Quantile Policy Optimization (Kuznetsov 2020)
+// ------------------------------------------------------------------------------
+export class TQPOFlashSalePricing {
+  constructor(options = {}) {
+    this.numQuantiles = options.numQuantiles || 8;
+    this.stateDim = options.stateDim || 5;
+    this.gamma = options.gamma || 0.95;
+    this.lr = options.lr || 0.02;
+    this.truncationCutoff = options.truncationCutoff || 2;
+
+    this.actorWeights = new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.criticWeights = Array.from({ length: this.numQuantiles }, () =>
+      new Array(this.stateDim + 1).fill(0).map(() => (Math.random() - 0.5) * 0.1)
+    );
+
+    this.targetCriticWeights = JSON.parse(JSON.stringify(this.criticWeights));
+    this.replayBuffer = [];
+  }
+
+  predictAction(state, deterministic = true) {
+    let raw = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      raw += (state[i] || 0) * this.actorWeights[i];
+    }
+    const sigmoid = 1.0 / (1.0 + Math.exp(-raw));
+    const discount = 0.05 + 0.45 * sigmoid;
+    return Number(discount.toFixed(3));
+  }
+
+  _predictQuantiles(weights, state, action) {
+    const quantiles = [];
+    for (let q = 0; q < this.numQuantiles; q++) {
+      let val = 0;
+      for (let i = 0; i < this.stateDim; i++) {
+        val += (state[i] || 0) * weights[q][i];
+      }
+      val += action * weights[q][this.stateDim];
+      quantiles.push(val);
+    }
+    return quantiles.sort((a, b) => a - b);
+  }
+
+  truncatedExpectation(state, action, useTarget = false) {
+    const weights = useTarget ? this.targetCriticWeights : this.criticWeights;
+    const quantiles = this._predictQuantiles(weights, state, action);
+    const retained = quantiles.slice(this.truncationCutoff);
+    const sum = retained.reduce((a, b) => a + b, 0);
+    return sum / retained.length;
+  }
+
+  recordExperience(state, action, reward, nextState, done = false) {
+    this.replayBuffer.push({
+      state: [...state],
+      action: Number(action),
+      reward: Number(reward),
+      nextState: [...nextState],
+      done: Boolean(done)
+    });
+    if (this.replayBuffer.length > 500) {
+      this.replayBuffer.shift();
+    }
+  }
+
+  trainStep(batchSize = 16) {
+    if (this.replayBuffer.length < 4) {
+      return { trained: false, loss: 0 };
+    }
+
+    const size = Math.min(batchSize, this.replayBuffer.length);
+    let totalLoss = 0;
+
+    for (let b = 0; b < size; b++) {
+      const idx = Math.floor(Math.random() * this.replayBuffer.length);
+      const { state, action, reward, nextState, done } = this.replayBuffer[idx];
+
+      const nextAction = this.predictAction(nextState, true);
+      const targetTruncatedQ = this.truncatedExpectation(nextState, nextAction, true);
+      const targetVal = reward + (done ? 0 : this.gamma * targetTruncatedQ);
+
+      const currentQuantiles = this._predictQuantiles(this.criticWeights, state, action);
+
+      for (let q = 0; q < this.numQuantiles; q++) {
+        const err = targetVal - currentQuantiles[q];
+        totalLoss += Math.abs(err);
+
+        for (let i = 0; i < this.stateDim; i++) {
+          this.criticWeights[q][i] += this.lr * err * (state[i] || 0) * 0.05;
+        }
+        this.criticWeights[q][this.stateDim] += this.lr * err * action * 0.05;
+      }
+
+      const currentTruncatedQ = this.truncatedExpectation(state, action, false);
+      for (let i = 0; i < this.stateDim; i++) {
+        this.actorWeights[i] += this.lr * currentTruncatedQ * (state[i] || 0) * 0.02;
+      }
+    }
+
+    for (let q = 0; q < this.numQuantiles; q++) {
+      for (let i = 0; i <= this.stateDim; i++) {
+        this.targetCriticWeights[q][i] =
+          0.05 * this.criticWeights[q][i] + 0.95 * this.targetCriticWeights[q][i];
+      }
+    }
+
+    return {
+      trained: true,
+      avgLoss: Number((totalLoss / (size * this.numQuantiles)).toFixed(4))
+    };
+  }
+
+  optimizeFlashSalePrice(itemContext) {
+    const {
+      originalPrice = 500000,
+      cogs = 250000,
+      currentStock = 100,
+      initialStock = 100,
+      elapsedMinutes = 30,
+      totalDurationMinutes = 120,
+      salesVelocity = 1.2
+    } = itemContext;
+
+    const stockRatio = Math.min(1.0, currentStock / Math.max(1, initialStock));
+    const timeRemainingRatio = Math.max(0, 1.0 - elapsedMinutes / totalDurationMinutes);
+    const cogsRatio = Math.min(1.0, cogs / originalPrice);
+
+    const state = [
+      stockRatio,
+      Math.min(2.0, salesVelocity / 2.0),
+      timeRemainingRatio,
+      0.8,
+      cogsRatio
+    ];
+
+    const predictedDiscount = this.predictAction(state, true);
+    const minSafePrice = Math.round(cogs * 1.05);
+    const maxSafeDiscount = Number(((originalPrice - minSafePrice) / originalPrice).toFixed(3));
+    const appliedDiscount = Math.min(predictedDiscount, maxSafeDiscount);
+
+    const flashPrice = Math.round(originalPrice * (1.0 - appliedDiscount));
+    const grossMarginPercent = Number((((flashPrice - cogs) / flashPrice) * 100).toFixed(1));
+
+    return {
+      originalPrice,
+      cogs,
+      flashPrice,
+      discountPercent: Math.round(appliedDiscount * 100),
+      grossMarginPercent,
+      isFloorGuaranteed: flashPrice >= minSafePrice,
+      strategy: stockRatio > 0.7 && timeRemainingRatio < 0.4
+        ? 'DEEP_LIQUIDATION_SURGE'
+        : stockRatio < 0.3
+        ? 'PROFIT_MARGIN_PROTECTION'
+        : 'BALANCED_FLASH_VELOCITY'
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 46 ALGORITHM 3: Dynamic Dial-a-Ride Problem (Cordeau 2007)
+// ------------------------------------------------------------------------------
+export class DynamicDARPRouter {
+  constructor(options = {}) {
+    this.speedKmPerHour = options.speedKmPerHour || 35;
+    this.maxRideMinutes = options.maxRideMinutes || 75;
+    this.defaultCourierCapacity = options.defaultCourierCapacity || 25;
+    this.penaltyPerLateMinute = options.penaltyPerLateMinute || 3000;
+    this.penaltyPerExcessRideMinute = options.penaltyPerExcessRideMinute || 5000;
+  }
+
+  _haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(2));
+  }
+
+  _travelMinutes(distKm) {
+    return Math.round((distKm / this.speedKmPerHour) * 60);
+  }
+
+  getDistance(locA, locB) {
+    return this._haversineKm(locA.lat, locA.lng, locB.lat, locB.lng);
+  }
+
+  evaluateDarpInsertion(courier, req, pIdx, dIdx) {
+    const route = [...courier.route];
+    route.splice(pIdx, 0, { ...req.pickup, reqId: req.id, type: 'PICKUP', weight: req.weightKg });
+    route.splice(dIdx + 1, 0, { ...req.dropoff, reqId: req.id, type: 'DROPOFF', weight: -req.weightKg });
+
+    let currentTime = courier.startShiftMinutes || 0;
+    let currentLoad = 0;
+    let totalDist = 0;
+    let totalLatePenalty = 0;
+    let excessRidePenalty = 0;
+
+    const pickupTimes = new Map();
+    let prevLoc = courier.baseLocation;
+
+    for (const stop of route) {
+      const dist = this.getDistance(prevLoc, stop);
+      const travel = this._travelMinutes(dist);
+      totalDist += dist;
+      currentTime += travel;
+
+      if (currentTime < stop.earlyMinutes) {
+        currentTime = stop.earlyMinutes;
+      } else if (currentTime > stop.lateMinutes) {
+        totalLatePenalty += (currentTime - stop.lateMinutes) * this.penaltyPerLateMinute;
+      }
+
+      currentTime += (stop.serviceTimeMinutes || 5);
+      currentLoad += stop.weight;
+      if (currentLoad > (courier.capacity || this.defaultCourierCapacity)) {
+        return { feasible: false, reason: 'OVER_CAPACITY' };
+      }
+
+      if (stop.type === 'PICKUP') {
+        pickupTimes.set(stop.reqId, currentTime);
+      } else if (stop.type === 'DROPOFF') {
+        const pTime = pickupTimes.get(stop.reqId) || currentTime;
+        const rideDuration = currentTime - pTime;
+        const maxAllowedRide = req.maxRideMinutes || this.maxRideMinutes;
+
+        if (rideDuration > maxAllowedRide) {
+          excessRidePenalty += (rideDuration - maxAllowedRide) * this.penaltyPerExcessRideMinute;
+        }
+      }
+
+      prevLoc = stop;
+    }
+
+    const totalCost = totalDist * 10000 + totalLatePenalty + excessRidePenalty;
+
+    return {
+      feasible: true,
+      cost: totalCost,
+      totalDistKm: Number(totalDist.toFixed(1)),
+      totalTimeMinutes: currentTime - (courier.startShiftMinutes || 0),
+      excessRidePenalty,
+      proposedRoute: route
+    };
+  }
+
+  dispatchPooledOrders(couriers, requests) {
+    const courierState = couriers.map(c => ({
+      id: c.id,
+      name: c.name || `Shipper ${c.id}`,
+      capacity: c.capacity || this.defaultCourierCapacity,
+      baseLocation: c.location || { lat: 21.0285, lng: 105.8542 },
+      startShiftMinutes: c.startShiftMinutes || 0,
+      route: []
+    }));
+
+    const assigned = [];
+    const unassigned = [];
+
+    for (const req of requests) {
+      let bestCost = Infinity;
+      let bestCourier = null;
+      let bestRoute = null;
+
+      for (const courier of courierState) {
+        const rLen = courier.route.length;
+        for (let p = 0; p <= rLen; p++) {
+          for (let d = p; d <= rLen; d++) {
+            const evalRes = this.evaluateDarpInsertion(courier, req, p, d);
+            if (evalRes.feasible && evalRes.cost < bestCost) {
+              bestCost = evalRes.cost;
+              bestCourier = courier;
+              bestRoute = evalRes.proposedRoute;
+            }
+          }
+        }
+      }
+
+      if (bestCourier && bestRoute) {
+        bestCourier.route = bestRoute;
+        assigned.push({
+          orderId: req.id,
+          courierId: bestCourier.id,
+          status: 'POOLED_ASSIGNED'
+        });
+      } else {
+        unassigned.push({
+          orderId: req.id,
+          status: 'UNASSIGNED_RIDE_TIME_VIOLATION'
+        });
+      }
+    }
+
+    return {
+      status: 'D_DARP_OPTIMAL_DISPATCHED',
+      totalOrders: requests.length,
+      pooledAssignedCount: assigned.length,
+      unassignedCount: unassigned.length,
+      activeCouriers: courierState.filter(c => c.route.length > 0).map(c => ({
+        courierId: c.id,
+        name: c.name,
+        stopsCount: c.route.length,
+        routeSummary: c.route.map(s => `${s.type}:${s.id || s.reqId}`)
+      }))
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -22801,6 +23203,10 @@ export default {
   SACAutoBiddingEngine,
   MDPDPVehicle,
   MDPDPTRouter,
+  // Phase 46 Enterprise Algorithms
+  CountMinLogSketch,
+  TQPOFlashSalePricing,
+  DynamicDARPRouter,
 };
 
 
