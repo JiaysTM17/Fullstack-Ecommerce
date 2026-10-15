@@ -20842,6 +20842,679 @@ export class BranchAndCutVrptwRouter {
   }
 }
 
+// ------------------------------------------------------------------------------
+// PHASE 43 ALGORITHM 1: Compact Suffix Tree via Ukkonen's Algorithm O(N)
+// ------------------------------------------------------------------------------
+export class UkkonenSuffixNode {
+  constructor(start = -1, end = null) {
+    this.start = start;
+    this.end = end;
+    this.children = new Map();
+    this.suffixLink = null;
+    this.suffixIndex = -1;
+  }
+
+  edgeLength(currentEnd) {
+    const endVal = typeof this.end === 'number' ? this.end : currentEnd.val;
+    return endVal - this.start + 1;
+  }
+}
+
+export class UkkonenSuffixTree {
+  constructor() {
+    this.text = '';
+    this.root = null;
+    this.activeNode = null;
+    this.activeEdge = -1;
+    this.activeLength = 0;
+    this.remainingSuffixCount = 0;
+    this.leafEnd = { val: -1 };
+    this.size = 0;
+  }
+
+  build(text) {
+    if (!text || typeof text !== 'string') return this;
+    let raw = text;
+    if (!raw.endsWith('$')) raw += '$';
+    this.text = raw;
+
+    this.root = new UkkonenSuffixNode(-1, -1);
+    this.activeNode = this.root;
+    this.activeEdge = -1;
+    this.activeLength = 0;
+    this.remainingSuffixCount = 0;
+    this.leafEnd = { val: -1 };
+    this.size = 1;
+
+    for (let i = 0; i < this.text.length; i++) {
+      this._extend(i);
+    }
+
+    this._setSuffixIndexByDFS(this.root, 0);
+    return this;
+  }
+
+  _extend(pos) {
+    this.leafEnd.val = pos;
+    this.remainingSuffixCount++;
+    let lastNewNode = null;
+
+    while (this.remainingSuffixCount > 0) {
+      if (this.activeLength === 0) {
+        this.activeEdge = pos;
+      }
+
+      const activeChar = this.text[this.activeEdge];
+
+      if (!this.activeNode.children.has(activeChar)) {
+        const leaf = new UkkonenSuffixNode(pos, this.leafEnd);
+        this.activeNode.children.set(activeChar, leaf);
+        this.size++;
+
+        if (lastNewNode !== null) {
+          lastNewNode.suffixLink = this.activeNode;
+          lastNewNode = null;
+        }
+      } else {
+        const nextNode = this.activeNode.children.get(activeChar);
+        const edgeLen = nextNode.edgeLength(this.leafEnd);
+
+        if (this.activeLength >= edgeLen) {
+          this.activeEdge += edgeLen;
+          this.activeLength -= edgeLen;
+          this.activeNode = nextNode;
+          continue;
+        }
+
+        if (this.text[nextNode.start + this.activeLength] === this.text[pos]) {
+          if (lastNewNode !== null && this.activeNode !== this.root) {
+            lastNewNode.suffixLink = this.activeNode;
+            lastNewNode = null;
+          }
+          this.activeLength++;
+          break;
+        }
+
+        const split = new UkkonenSuffixNode(nextNode.start, nextNode.start + this.activeLength - 1);
+        this.activeNode.children.set(activeChar, split);
+        this.size++;
+
+        const leaf = new UkkonenSuffixNode(pos, this.leafEnd);
+        split.children.set(this.text[pos], leaf);
+        this.size++;
+
+        nextNode.start += this.activeLength;
+        split.children.set(this.text[nextNode.start], nextNode);
+
+        if (lastNewNode !== null) {
+          lastNewNode.suffixLink = split;
+        }
+        lastNewNode = split;
+      }
+
+      this.remainingSuffixCount--;
+
+      if (this.activeNode === this.root && this.activeLength > 0) {
+        this.activeLength--;
+        this.activeEdge = pos - this.remainingSuffixCount + 1;
+      } else if (this.activeNode !== this.root) {
+        this.activeNode = this.activeNode.suffixLink || this.root;
+      }
+    }
+  }
+
+  _setSuffixIndexByDFS(node, labelHeight) {
+    if (!node) return;
+    let isLeaf = true;
+
+    for (const [, child] of node.children.entries()) {
+      isLeaf = false;
+      const edgeLen = child.edgeLength(this.leafEnd);
+      this._setSuffixIndexByDFS(child, labelHeight + edgeLen);
+    }
+
+    if (isLeaf) {
+      node.suffixIndex = this.text.length - labelHeight;
+    }
+  }
+
+  contains(pattern) {
+    if (!pattern || !this.root) return false;
+    let currNode = this.root;
+    let i = 0;
+
+    while (i < pattern.length) {
+      const ch = pattern[i];
+      if (!currNode.children.has(ch)) return false;
+
+      const edgeNode = currNode.children.get(ch);
+      const edgeLen = edgeNode.edgeLength(this.leafEnd);
+
+      for (let j = 0; j < edgeLen && i < pattern.length; j++) {
+        if (this.text[edgeNode.start + j] !== pattern[i]) {
+          return false;
+        }
+        i++;
+      }
+      currNode = edgeNode;
+    }
+
+    return true;
+  }
+
+  static findLongestCommonSubstring(s1, s2) {
+    if (!s1 || !s2) return '';
+    const combined = `${s1}#${s2}$`;
+    const separatorIndex = s1.length;
+    const tree = new UkkonenSuffixTree();
+    tree.build(combined);
+
+    let maxLen = 0;
+    let longestSub = '';
+
+    function dfs(node, currentDepth, currentStr) {
+      let mask = 0;
+
+      if (node.suffixIndex !== -1) {
+        if (node.suffixIndex < separatorIndex) mask |= 1;
+        else if (node.suffixIndex > separatorIndex) mask |= 2;
+      }
+
+      for (const [, child] of node.children.entries()) {
+        const edgeLen = child.edgeLength(tree.leafEnd);
+        const edgeChars = tree.text.substring(child.start, child.start + edgeLen);
+        const childMask = dfs(child, currentDepth + edgeLen, currentStr + edgeChars);
+        mask |= childMask;
+      }
+
+      if (mask === 3) {
+        const cleanStr = currentStr.split('#')[0].split('$')[0];
+        if (cleanStr.length > maxLen) {
+          maxLen = cleanStr.length;
+          longestSub = cleanStr;
+        }
+      }
+
+      return mask;
+    }
+
+    dfs(tree.root, 0, '');
+    return longestSub;
+  }
+
+  static detectReviewPlagiarism(review1, review2, minMatchLength = 15) {
+    const lcs = UkkonenSuffixTree.findLongestCommonSubstring(review1, review2);
+    const len1 = review1.length || 1;
+    const len2 = review2.length || 1;
+    const similarity = Number(((2 * lcs.length) / (len1 + len2)).toFixed(2));
+
+    return {
+      longestCommonSubstring: lcs,
+      matchLength: lcs.length,
+      similarityScore: similarity,
+      isCollusionDetected: lcs.length >= minMatchLength && similarity >= 0.35
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 43 ALGORITHM 2: Generalized Advantage Estimation (GAE) Flash Sale Scheduler
+// ------------------------------------------------------------------------------
+export class GaeFlashSaleScheduler {
+  constructor(options = {}) {
+    this.numSlots = options.numSlots || 6;
+    this.stateDim = options.stateDim || 5;
+    this.actionDim = this.numSlots;
+
+    this.gamma = options.gamma || 0.99;
+    this.lambda = options.lambda || 0.95;
+    this.actorLr = options.actorLr || 0.02;
+    this.criticLr = options.criticLr || 0.05;
+
+    this.actorWeights = Array.from({ length: this.actionDim }, () =>
+      new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.1)
+    );
+
+    this.criticWeights = new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.criticBias = 0.0;
+    this.trajectories = [];
+  }
+
+  getPolicyDistribution(state) {
+    const logits = [];
+    let maxLogit = -Infinity;
+
+    for (let a = 0; a < this.actionDim; a++) {
+      let z = 0;
+      for (let s = 0; s < this.stateDim; s++) {
+        z += (state[s] || 0) * (this.actorWeights[a][s] || 0);
+      }
+      logits.push(z);
+      if (z > maxLogit) maxLogit = z;
+    }
+
+    const expVals = logits.map(z => Math.exp(Math.max(-20, Math.min(20, z - maxLogit))));
+    const sumExp = expVals.reduce((a, b) => a + b, 0) || 1;
+    return expVals.map(v => v / sumExp);
+  }
+
+  evaluateValue(state) {
+    let val = this.criticBias;
+    for (let s = 0; s < this.stateDim; s++) {
+      val += (state[s] || 0) * (this.criticWeights[s] || 0);
+    }
+    return val;
+  }
+
+  selectSlot(state, deterministic = false) {
+    const probs = this.getPolicyDistribution(state);
+
+    let chosenSlot = 0;
+    if (deterministic) {
+      let maxP = -1;
+      for (let a = 0; a < probs.length; a++) {
+        if (probs[a] > maxP) {
+          maxP = probs[a];
+          chosenSlot = a;
+        }
+      }
+    } else {
+      const rand = Math.random();
+      let cum = 0;
+      for (let a = 0; a < probs.length; a++) {
+        cum += probs[a];
+        if (rand <= cum) {
+          chosenSlot = a;
+          break;
+        }
+      }
+    }
+
+    const slotNames = ['00:00 - 02:00', '09:00 - 11:00', '12:00 - 14:00', '15:00 - 17:00', '18:00 - 20:00', '21:00 - 23:00'];
+    return {
+      slotIndex: chosenSlot,
+      slotTime: slotNames[chosenSlot] || `Slot ${chosenSlot + 1}`,
+      probability: Number(probs[chosenSlot].toFixed(4)),
+      allProbabilities: probs.map(p => Number(p.toFixed(4)))
+    };
+  }
+
+  recordStep(state, action, reward, nextState, done = false) {
+    this.trajectories.push({
+      state: [...state],
+      action: Number(action),
+      reward: Number(reward),
+      nextState: [...nextState],
+      done: Boolean(done)
+    });
+  }
+
+  computeGae() {
+    const T = this.trajectories.length;
+    const advantages = new Array(T).fill(0);
+    const returns = new Array(T).fill(0);
+    let gae = 0;
+
+    for (let t = T - 1; t >= 0; t--) {
+      const step = this.trajectories[t];
+      const nextVal = step.done ? 0 : this.evaluateValue(step.nextState);
+      const currVal = this.evaluateValue(step.state);
+
+      const delta = step.reward + this.gamma * nextVal - currVal;
+      gae = delta + this.gamma * this.lambda * (step.done ? 0 : gae);
+      advantages[t] = gae;
+      returns[t] = advantages[t] + currVal;
+    }
+
+    return { advantages, returns };
+  }
+
+  trainBatch() {
+    if (this.trajectories.length === 0) {
+      return { trained: false, actorLoss: 0, criticLoss: 0 };
+    }
+
+    const { advantages, returns } = this.computeGae();
+    let totalActorLoss = 0;
+    let totalCriticLoss = 0;
+
+    for (let t = 0; t < this.trajectories.length; t++) {
+      const step = this.trajectories[t];
+      const probs = this.getPolicyDistribution(step.state);
+      const adv = advantages[t];
+
+      totalActorLoss -= Math.log(Math.max(1e-6, probs[step.action])) * adv;
+
+      for (let s = 0; s < this.stateDim; s++) {
+        for (let a = 0; a < this.actionDim; a++) {
+          const indicator = (a === step.action ? 1 : 0);
+          const grad = (indicator - probs[a]) * adv * (step.state[s] || 0);
+          this.actorWeights[a][s] += this.actorLr * grad * 0.1;
+        }
+      }
+
+      const currentV = this.evaluateValue(step.state);
+      const vError = returns[t] - currentV;
+      totalCriticLoss += vError * vError;
+
+      for (let s = 0; s < this.stateDim; s++) {
+        this.criticWeights[s] += this.criticLr * vError * (step.state[s] || 0);
+      }
+      this.criticBias += this.criticLr * vError;
+    }
+
+    const n = this.trajectories.length;
+    this.trajectories = [];
+
+    return {
+      trained: true,
+      avgActorLoss: Number((totalActorLoss / n).toFixed(4)),
+      avgCriticLoss: Number((totalCriticLoss / n).toFixed(4))
+    };
+  }
+
+  scheduleFlashSale(shopContext) {
+    const {
+      trafficSurge = 1.8,
+      stock = 150,
+      historicConversion = 0.08,
+      hourOfDay = 11,
+      categoryMargin = 0.40
+    } = shopContext;
+
+    const state = [
+      Math.min(3.0, trafficSurge),
+      Math.min(2.0, stock / 100),
+      Math.min(1.0, historicConversion * 5),
+      Math.min(1.0, hourOfDay / 24),
+      Math.min(1.0, categoryMargin)
+    ];
+
+    const decision = this.selectSlot(state, true);
+    const recommendedDiscount = Math.round(categoryMargin * 0.6 * 100);
+
+    return {
+      recommendedSlot: decision.slotTime,
+      slotIndex: decision.slotIndex,
+      confidence: decision.probability,
+      recommendedDiscountPercent: recommendedDiscount,
+      expectedConversionRate: Number((historicConversion * (1 + trafficSurge * 0.2)).toFixed(3)),
+      strategy: trafficSurge > 1.5 ? 'MEGA_PEAK_SURGE' : 'STEADY_DEMAND'
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 43 ALGORITHM 3: Contraction Hierarchies (CH) Nationwide Logistics Router
+// ------------------------------------------------------------------------------
+class CHPriorityMinQueue {
+  constructor() {
+    this.heap = [];
+  }
+
+  push(item, priority) {
+    this.heap.push({ item, priority });
+    this._bubbleUp(this.heap.length - 1);
+  }
+
+  pop() {
+    if (this.heap.length === 0) return null;
+    const top = this.heap[0];
+    const bottom = this.heap.pop();
+    if (this.heap.length > 0) {
+      this.heap[0] = bottom;
+      this._bubbleDown(0);
+    }
+    return top.item;
+  }
+
+  isEmpty() {
+    return this.heap.length === 0;
+  }
+
+  _bubbleUp(idx) {
+    while (idx > 0) {
+      const parentIdx = Math.floor((idx - 1) / 2);
+      if (this.heap[idx].priority < this.heap[parentIdx].priority) {
+        const tmp = this.heap[idx];
+        this.heap[idx] = this.heap[parentIdx];
+        this.heap[parentIdx] = tmp;
+        idx = parentIdx;
+      } else break;
+    }
+  }
+
+  _bubbleDown(idx) {
+    const len = this.heap.length;
+    while (true) {
+      let left = 2 * idx + 1;
+      let right = 2 * idx + 2;
+      let smallest = idx;
+
+      if (left < len && this.heap[left].priority < this.heap[smallest].priority) {
+        smallest = left;
+      }
+      if (right < len && this.heap[right].priority < this.heap[smallest].priority) {
+        smallest = right;
+      }
+
+      if (smallest !== idx) {
+        const tmp = this.heap[idx];
+        this.heap[idx] = this.heap[smallest];
+        this.heap[smallest] = tmp;
+        idx = smallest;
+      } else break;
+    }
+  }
+}
+
+export class ContractionHierarchiesRouter {
+  constructor() {
+    this.nodes = new Set();
+    this.adjForward = new Map();
+    this.adjBackward = new Map();
+    this.nodeOrder = new Map();
+    this.shortcuts = [];
+    this.isContracted = false;
+  }
+
+  addNode(id) {
+    this.nodes.add(id);
+    if (!this.adjForward.has(id)) this.adjForward.set(id, []);
+    if (!this.adjBackward.has(id)) this.adjBackward.set(id, []);
+  }
+
+  addEdge(u, v, weight, bidirectional = true) {
+    this.addNode(u);
+    this.addNode(v);
+    const w = Number(weight) || 1;
+
+    this.adjForward.get(u).push({ to: v, weight: w, middleNode: null });
+    this.adjBackward.get(v).push({ from: u, weight: w, middleNode: null });
+
+    if (bidirectional) {
+      this.adjForward.get(v).push({ to: u, weight: w, middleNode: null });
+      this.adjBackward.get(u).push({ from: v, weight: w, middleNode: null });
+    }
+  }
+
+  preprocessContraction() {
+    const nodeList = Array.from(this.nodes);
+    nodeList.sort((a, b) => {
+      const degA = (this.adjForward.get(a)?.length || 0) + (this.adjBackward.get(a)?.length || 0);
+      const degB = (this.adjForward.get(b)?.length || 0) + (this.adjBackward.get(b)?.length || 0);
+      return degA - degB;
+    });
+
+    for (let rank = 0; rank < nodeList.length; rank++) {
+      const u = nodeList[rank];
+      this.nodeOrder.set(u, rank);
+    }
+
+    for (let rank = 0; rank < nodeList.length; rank++) {
+      const v = nodeList[rank];
+      const inEdges = this.adjBackward.get(v) || [];
+      const outEdges = this.adjForward.get(v) || [];
+
+      for (const inE of inEdges) {
+        const u = inE.from;
+        if ((this.nodeOrder.get(u) || 0) >= rank) continue;
+
+        for (const outE of outEdges) {
+          const w = outE.to;
+          if ((this.nodeOrder.get(w) || 0) >= rank || u === w) continue;
+
+          const shortcutWeight = inE.weight + outE.weight;
+
+          let existingDirectWeight = Infinity;
+          for (const e of this.adjForward.get(u) || []) {
+            if (e.to === w) {
+              existingDirectWeight = Math.min(existingDirectWeight, e.weight);
+            }
+          }
+
+          if (shortcutWeight < existingDirectWeight) {
+            this.adjForward.get(u).push({ to: w, weight: shortcutWeight, middleNode: v });
+            this.adjBackward.get(w).push({ from: u, weight: shortcutWeight, middleNode: v });
+            this.shortcuts.push({ from: u, to: w, weight: shortcutWeight, middleNode: v });
+          }
+        }
+      }
+    }
+
+    this.isContracted = true;
+    return this;
+  }
+
+  queryShortestPath(source, target) {
+    if (!this.nodes.has(source) || !this.nodes.has(target)) {
+      return { distance: Infinity, path: [], status: 'NODE_NOT_FOUND' };
+    }
+
+    if (source === target) {
+      return { distance: 0, path: [source], status: 'SAME_NODE' };
+    }
+
+    if (!this.isContracted) {
+      this.preprocessContraction();
+    }
+
+    const distF = new Map();
+    const distB = new Map();
+    const parentF = new Map();
+    const parentB = new Map();
+
+    for (const n of this.nodes) {
+      distF.set(n, Infinity);
+      distB.set(n, Infinity);
+    }
+
+    const pqF = new CHPriorityMinQueue();
+    const pqB = new CHPriorityMinQueue();
+
+    distF.set(source, 0);
+    pqF.push(source, 0);
+
+    distB.set(target, 0);
+    pqB.push(target, 0);
+
+    let bestDistance = Infinity;
+    let meetingNode = null;
+
+    while (!pqF.isEmpty() || !pqB.isEmpty()) {
+      if (!pqF.isEmpty()) {
+        const u = pqF.pop();
+        const d_u = distF.get(u);
+
+        if (d_u <= bestDistance) {
+          const uRank = this.nodeOrder.get(u) || 0;
+          for (const edge of this.adjForward.get(u) || []) {
+            const v = edge.to;
+            const vRank = this.nodeOrder.get(v) || 0;
+
+            if (vRank > uRank) {
+              const newDist = d_u + edge.weight;
+              if (newDist < distF.get(v)) {
+                distF.set(v, newDist);
+                parentF.set(v, { prev: u, middleNode: edge.middleNode });
+                pqF.push(v, newDist);
+
+                const totalDist = newDist + distB.get(v);
+                if (totalDist < bestDistance) {
+                  bestDistance = totalDist;
+                  meetingNode = v;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (!pqB.isEmpty()) {
+        const w = pqB.pop();
+        const d_w = distB.get(w);
+
+        if (d_w <= bestDistance) {
+          const wRank = this.nodeOrder.get(w) || 0;
+          for (const edge of this.adjBackward.get(w) || []) {
+            const v = edge.from;
+            const vRank = this.nodeOrder.get(v) || 0;
+
+            if (vRank > wRank) {
+              const newDist = d_w + edge.weight;
+              if (newDist < distB.get(v)) {
+                distB.set(v, newDist);
+                parentB.set(v, { next: w, middleNode: edge.middleNode });
+                pqB.push(v, newDist);
+
+                const totalDist = newDist + distF.get(v);
+                if (totalDist < bestDistance) {
+                  bestDistance = totalDist;
+                  meetingNode = v;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (bestDistance === Infinity || meetingNode === null) {
+      return { distance: Infinity, path: [], status: 'NO_PATH' };
+    }
+
+    const fullPath = this._reconstructPath(source, target, meetingNode, parentF, parentB);
+
+    return {
+      status: 'OPTIMAL_HIGHWAY',
+      distance: bestDistance,
+      meetingNode,
+      totalHops: fullPath.length - 1,
+      path: fullPath
+    };
+  }
+
+  _reconstructPath(source, target, meetingNode, parentF, parentB) {
+    const forwardPart = [];
+    let curr = meetingNode;
+    while (curr !== source && parentF.has(curr)) {
+      forwardPart.push(curr);
+      curr = parentF.get(curr).prev;
+    }
+    forwardPart.push(source);
+    forwardPart.reverse();
+
+    const backwardPart = [];
+    curr = meetingNode;
+    while (curr !== target && parentB.has(curr)) {
+      curr = parentB.get(curr).next;
+      backwardPart.push(curr);
+    }
+
+    return [...forwardPart, ...backwardPart];
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -21072,6 +21745,11 @@ export default {
   FMIndexCatalogSearch,
   CQLBudgetOptimizer,
   BranchAndCutVrptwRouter,
+  // Phase 43 Enterprise Algorithms
+  UkkonenSuffixNode,
+  UkkonenSuffixTree,
+  GaeFlashSaleScheduler,
+  ContractionHierarchiesRouter,
 };
 
 

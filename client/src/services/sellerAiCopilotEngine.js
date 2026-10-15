@@ -80,7 +80,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 3. Tư Vấn Chiến Dịch Flash Sale Shop (Flash Sale Optimization)
-  if (!/raft|co giãn|elasticity|segment tree|cây đoạn|lsh|p-stable/i.test(raw) && /flash sale|khung giờ|giảm giá|săn deal|deal chớp nhoáng|khuyến mãi/i.test(raw)) {
+  if (!/raft|co giãn|elasticity|segment tree|cây đoạn|lsh|p-stable|gae|ukkonen|contraction/i.test(raw) && /flash sale|khung giờ|giảm giá|săn deal|deal chớp nhoáng|khuyến mãi/i.test(raw)) {
     return {
       text: `⚡ **CHIẾN LƯỢC THIẾT LẬP FLASH SALE SHOP ĐỘC QUYỀN**:
 - **Khung giờ vàng đề xuất**: 
@@ -648,7 +648,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 32. Phân Bổ Slot Flash Sale Bằng Lazy Segment Tree & Phân Cụm Khách Hàng p-Stable LSH (Phase 23 - Feature 170)
-  if (!/matrix segment tree|cây đoạn 2 chiều/i.test(raw) && /segment tree|lazy propagation|khung giờ flash sale|slot flash sale|p-stable|lsh vector|phân cụm khách hàng/i.test(raw)) {
+  if (!/matrix segment tree|cây đoạn 2 chiều|gae|ukkonen|contraction/i.test(raw) && /segment tree|lazy propagation|khung giờ flash sale|slot flash sale|p-stable|lsh vector|phân cụm khách hàng/i.test(raw)) {
     return {
       text: `🎯 **PHÂN BỔ SLOT FLASH SALE LAZY SEGMENT TREE & PHÂN CỤM KHÁCH HÀNG P-STABLE LSH (${currentShop.name})**:
 - **Quản trị khung giờ Flash Sale bằng Cây Đoạn (Lazy Segment Tree)**:
@@ -1047,6 +1047,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Tra cứu mã linh kiện bằng FM-Index',
         'Tối ưu hóa ngân sách voucher CQL',
         'Kiểm tra lộ trình giao hẹn giờ VRPTW'
+      ]
+    };
+  }
+
+  // 52. Lá Chắn Đánh Giá Ảo Ukkonen, Khung Giờ Flash Sale GAE & Vận Chuyển Liên Tỉnh CH (Phase 43 - Feature 190)
+  if (/ukkonen|suffix tree|đánh giá ảo ukkonen|lcs spam|gae flash sale|khung giờ flash sale gae|contraction hierarchies|định tuyến liên tỉnh ch/i.test(raw)) {
+    return {
+      text: `🛡️ **LÁ CHẮN ĐÁNH GIÁ ẢO UKKONEN, KHUNG GIỜ FLASH SALE GAE & LOGISTICS LIÊN TỈNH CH (${currentShop.name})**:
+- **Bảo vệ gian hàng khỏi spam đánh giá xấu có tổ chức (Ukkonen Suffix Tree)**:
+  - Cây hậu tố $O(N)$ quét chuỗi con chung LCS giữa các bài đánh giá, lập tức phát hiện các nick seeding bẩn copy nội dung bôi nhọ shop bạn và tự động khiếu nại lên ban quản trị sàn.
+- **Tư vấn khung giờ vàng mở bán Flash Sale bằng GAE (Generalized Advantage Estimation)**:
+  - AI đánh giá độ co giãn khách truy cập theo từng ngày để gợi ý khung giờ mở bán (0h, 12h, 21h) và mức giảm an toàn theo biên lãi gộp, tối đa hóa GMV bùng nổ cho shop!
+- **Vận chuyển liên tỉnh thần tốc SPX qua Contraction Hierarchies (CH)**:
+  - Các đơn hàng giao liên tỉnh (Bắc - Nam) của shop được định tuyến trên đồ thị nén shortcut edges trong dưới $100\\mu\\text{s}$, rút ngắn thời gian giao hàng toàn trình xuống 24h!`,
+      type: 'recommendation',
+      tag: 'UKKONEN SHIELD, GAE FLASH SALE & CH LOGISTICS',
+      suggestions: [
+        'Quét đánh giá nghi vấn bằng Ukkonen',
+        'Tư vấn khung giờ Flash Sale GAE',
+        'Kiểm tra lộ trình liên tỉnh CH'
       ]
     };
   }

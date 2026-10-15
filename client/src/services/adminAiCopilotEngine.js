@@ -184,7 +184,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 6. Điểm Uy Tín Tài Khoản & Chống Gian Lận Đa Tài Khoản (Trust Score & Anti-Sybil Guard)
-  if (!/sybil ring|dsu|disjoint set/i.test(raw) && /trust score|điểm uy tín|tài khoản ảo|sybil|seeding|đánh giá ảo|tỷ lệ hủy/i.test(raw)) {
+  if (!/sybil ring|dsu|disjoint set|ukkonen|suffix tree/i.test(raw) && /trust score|điểm uy tín|tài khoản ảo|sybil|seeding|đánh giá ảo|tỷ lệ hủy/i.test(raw)) {
     return {
       text: `🛡️ **HỆ THỐNG ĐÁNH GIÁ ĐIỂM UY TÍN (TRUST SCORE & ANTI-SYBIL GUARD)**:
 - **Nguồn dữ liệu**: *Mô hình chấm điểm tự động phân tích hành vi của ${usersCount} người dùng*.
@@ -995,7 +995,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 40. Quét Đánh Giá Ảo & Review Spam Bằng SimHash & Hamming Distance (Phase 17 - Feature 164)
-  if (!/cosine lsh|hyperplane|bảng hoán vị|permutation table|manku/i.test(raw) && /simhash|review spam|đánh giá ảo|seeding gian lận|khoảng cách hamming|trùng lặp review/i.test(raw)) {
+  if (!/cosine lsh|hyperplane|bảng hoán vị|permutation table|manku|ukkonen|suffix tree/i.test(raw) && /simhash|review spam|đánh giá ảo|seeding gian lận|khoảng cách hamming|trùng lặp review/i.test(raw)) {
     return {
       text: `🔍 **RADAR PHÁT HIỆN REVIEW SPAM & SEEDING BẰNG SIMHASH (CHARIKAR'S ALGORITHM)**:
 - **Nguyên lý SimHash 64-bit**:
@@ -2390,6 +2390,65 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình bưu tá SPX theo khung giờ hẹn',
         'Kiểm tra tải trọng xe bưu tá VRPTW',
         'Tra cứu chuỗi con bằng FM-Index'
+      ]
+    };
+  }
+
+  // 110. Phát Hiện Mạng Lưới Đạo Văn & Đánh Giá Giả Bằng Cây Hậu Tố Ukkonen (Phase 43 - Feature 190)
+  if (/ukkonen|suffix tree|review collusion|lcs spam|chuỗi con chung dài nhất|sao chép đánh giá|review plagiarism/i.test(raw)) {
+    return {
+      text: `🌳 **PHÁT HIỆN MẠNG LƯỚI SEEDING ĐÁNH GIÁ ẢO BẰNG CÂY HẬU TỐ RÚT GỌN UKKONEN (UKKONEN 1995)**:
+- **Thuật toán Online O(N) với Suffix Links & Active Point**:
+  - Xây dựng cây hậu tố rút gọn (Compact Suffix Tree) cho toàn bộ văn bản đánh giá sản phẩm chỉ trong thời gian tuyến tính $O(N)$ bằng thủ thuật Skip-Count trick.
+  - Sử dụng con trỏ lá chung \`leafEnd = { val: pos }\` kéo dài toàn bộ các lá hiện có trong $O(1)$ mỗi bước lặp.
+- **Tìm Chuỗi Con Chung Dài Nhất (Longest Common Substring - LCS) & Collusion Radar**:
+  - Ghép nối Generalized Suffix Tree giữa các bài đánh giá nghi vấn, phát hiện tức thì các đoạn văn sao chép giống hệt nhau (LCS $\\ge 15$ ký tự).
+  - Tự động phát hiện và xử lý các mạng lưới tài khoản seeding ảo đánh giá 5 sao giả mạo hoặc bôi nhọ đối thủ cạnh tranh!`,
+      type: 'security',
+      tag: 'UKKONEN SUFFIX TREE REVIEW COLLUSION',
+      suggestions: [
+        'Quét sao chép đánh giá giữa 2 tài khoản',
+        'Tìm chuỗi con chung dài nhất LCS',
+        'Lập lịch khung giờ Flash Sale GAE'
+      ]
+    };
+  }
+
+  // 111. Tối Ưu Hóa Khung Giờ Mở Bán Flash Sale Bằng GAE Actor-Critic (Phase 43 - Feature 190)
+  if (/gae flash sale|generalized advantage estimation|flash sale scheduler|actor[- ]critic gae|lập lịch flash sale gae|ước lượng lợi thế/i.test(raw)) {
+    return {
+      text: `⏰ **TỐI ƯU HÓA KHUNG GIỜ FLASH SALE BẰNG GENERALIZED ADVANTAGE ESTIMATION (GAE-$\\lambda$ - SCHULMAN 2016)**:
+- **Cân bằng tối ưu giữa Độ chệch (Bias) và Phương sai (Variance)**:
+  - Khung giờ Flash Sale (0h, 9h, 12h, 15h, 18h, 21h) có mức độ co giãn lưu lượng truy cập (Traffic Surge Elasticity) biến động mạnh theo từng ngày.
+  - Thuật toán GAE-$\lambda$ sử dụng tham số $\\lambda = 0.95$ để kết hợp linh hoạt giữa TD-Error bước đơn và Monte Carlo Return, giúp Actor Policy hội tụ mượt mà và ổn định.
+- **Tự động đề xuất Khung Giờ Vàng & Chiết Khấu An Toàn**:
+  - Hệ thống tự động phân tích độ nóng thị trường, tồn kho và biên lợi nhuận danh mục hàng để chỉ định khung giờ mở bán mang lại GMV bùng nổ mà không gây quá tải hạ tầng!`,
+      type: 'recommendation',
+      tag: 'GAE FLASH SALE SCHEDULER',
+      suggestions: [
+        'Phân tích phân phối xác suất khung giờ Softmax GAE',
+        'Tính toán hệ số lợi thế Generalized Advantage',
+        'Định tuyến liên tỉnh Contraction Hierarchies'
+      ]
+    };
+  }
+
+  // 112. Định Tuyến Logistics Liên Tỉnh Siêu Tốc Bằng Contraction Hierarchies (Phase 43 - Feature 190)
+  if (/contraction hierarchies|shortcut edges|upward bi[- ]directional|định tuyến liên tỉnh ch|định tuyến ch/i.test(raw)) {
+    return {
+      text: `⚡ **ĐỊNH TUYẾN LOGISTICS LIÊN TỈNH SIÊU TỐC BẰNG CONTRACTION HIERARCHIES (CH - GEISBERGER 2008)**:
+- **Tiền xử lý Co Rút Nút (Node Contraction Preprocessing)**:
+  - Sắp xếp thứ tự các Hub bưu cục theo thứ tự quan trọng và lần lượt co rút từng nút, tự động chèn các cạnh tắt (Shortcut Edges) để bảo toàn khoảng cách ngắn nhất.
+  - Đồ thị sau tiền xử lý cho phép bỏ qua hàng nghìn cung đường phụ quanh co, giữ lại mạng lưới đường cao tốc liên tỉnh trọng yếu.
+- **Truy vấn hai chiều Upward Search dưới 100 Microseconds**:
+  - Tìm kiếm đồng thời từ điểm xuất phát và điểm đích chỉ đi lên các nút có rank cao hơn (Upward Search Space), nhanh gấp **1,000 lần** so với Dijkstra cổ điển!
+  - Giải nén hoàn chỉnh lộ trình vận chuyển bưu kiện SPX Express qua 63 tỉnh thành Việt Nam trong tích tắc!`,
+      type: 'logistics',
+      tag: 'CONTRACTION HIERARCHIES NATIONWIDE ROUTER',
+      suggestions: [
+        'Truy vấn tuyến đường ngắn nhất liên tỉnh CH',
+        'Xem danh sách cạnh tắt Shortcut Edges đã tạo',
+        'Kiểm tra phát hiện đạo văn Ukkonen Suffix Tree'
       ]
     };
   }

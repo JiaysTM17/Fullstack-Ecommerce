@@ -246,6 +246,10 @@ import {
   FMIndexCatalogSearch,
   CQLBudgetOptimizer,
   BranchAndCutVrptwRouter,
+  // Phase 43 Enterprise Algorithms
+  UkkonenSuffixTree,
+  GaeFlashSaleScheduler,
+  ContractionHierarchiesRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -340,6 +344,9 @@ import { MultiCommodityCirculationRouter as ServerMultiCommodityCirculationRoute
 import { FMIndexCatalogSearch as ServerFMIndexCatalogSearch } from "../../server/src/utils/fmIndexCatalogSearch.js";
 import { CQLBudgetOptimizer as ServerCQLBudgetOptimizer } from "../../server/src/utils/cqlBudgetOptimizer.js";
 import { BranchAndCutVrptwRouter as ServerBranchAndCutVrptwRouter } from "../../server/src/utils/branchAndCutVrptwRouter.js";
+import { UkkonenSuffixTree as ServerUkkonenSuffixTree } from "../../server/src/utils/ukkonenSuffixTree.js";
+import { GaeFlashSaleScheduler as ServerGaeFlashSaleScheduler } from "../../server/src/utils/gaeFlashSaleScheduler.js";
+import { ContractionHierarchiesRouter as ServerContractionHierarchiesRouter } from "../../server/src/utils/contractionHierarchiesRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -20031,6 +20038,286 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const routePlan = vrp.solve();
       expect.equal(routePlan.status, 'OPTIMAL_ROUTING');
       expect.equal(routePlan.totalOrdersDelivered, 1);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 190: Compact Suffix Tree (Ukkonen), GAE-lambda Flash Sale Scheduler & Contraction Hierarchies Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 190: Phase 43 Ukkonen Suffix Tree, GAE Flash Sale Scheduler & Contraction Hierarchies Suite", () => {
+    // --- Ukkonen Suffix Tree & Review Collusion Radar Tests ---
+    test("F190-T01: Server UkkonenSuffixTree builds compact suffix tree in linear O(N) time", () => {
+      const tree = new ServerUkkonenSuffixTree();
+      tree.build("bananas");
+      expect.ok(tree.size > 1);
+      expect.equal(tree.text, "bananas$");
+      expect.ok(tree.root !== null);
+    });
+
+    test("F190-T02: Server UkkonenSuffixTree correctly checks pattern containment", () => {
+      const tree = new ServerUkkonenSuffixTree();
+      tree.build("shopee_chinh_hang_sieu_sale");
+      expect.equal(tree.contains("chinh_hang"), true);
+      expect.equal(tree.contains("sieu_sale"), true);
+      expect.equal(tree.contains("shopee"), true);
+    });
+
+    test("F190-T03: Server UkkonenSuffixTree returns false for absent substrings", () => {
+      const tree = new ServerUkkonenSuffixTree();
+      tree.build("ao_so_mi_nam_cao_cap");
+      expect.equal(tree.contains("vay_dam_nu"), false);
+      expect.equal(tree.contains("dien_thoai"), false);
+    });
+
+    test("F190-T04: Server UkkonenSuffixTree finds Longest Common Substring (LCS) across two texts", () => {
+      const s1 = "San pham chinh hang 100% bao hanh 24 thang toan quoc";
+      const s2 = "Mua san pham chinh hang 100% bao hanh 24 thang nhe ca nha";
+      const lcs = ServerUkkonenSuffixTree.findLongestCommonSubstring(s1, s2);
+      expect.ok(lcs.includes("chinh hang 100% bao hanh 24 thang"));
+      expect.ok(lcs.length >= 30);
+    });
+
+    test("F190-T05: Server UkkonenSuffixTree detects review plagiarism and spam collusion", () => {
+      const r1 = "Hang dong goi can than, giao hang sieu nhanh, shop tu van nhiet tinh 5 sao";
+      const r2 = "Hang dong goi can than, giao hang sieu nhanh, shipper rat than thien";
+      const detection = ServerUkkonenSuffixTree.detectReviewPlagiarism(r1, r2, 20);
+      expect.equal(detection.isCollusionDetected, true);
+      expect.ok(detection.longestCommonSubstring.includes("Hang dong goi can than, giao hang sieu nhanh"));
+      expect.ok(detection.similarityScore >= 0.35);
+    });
+
+    test("F190-T06: Client UkkonenSuffixTree builds and analyzes review collusion in browser", () => {
+      const clientTree = new UkkonenSuffixTree();
+      clientTree.build("combo_cong_nghe_anker_65w");
+      expect.equal(clientTree.contains("anker_65w"), true);
+
+      const rA = "Ao mac rat mat, vai day dan khong bi xo vai";
+      const rB = "Ao mac rat mat, vai day dan khong bi xo vai, se ung ho shop";
+      const check = UkkonenSuffixTree.detectReviewPlagiarism(rA, rB, 15);
+      expect.equal(check.isCollusionDetected, true);
+    });
+
+    // --- GAE Flash Sale Scheduler Tests ---
+    test("F190-T07: Server GaeFlashSaleScheduler initializes actor-critic weights and hyperparameters", () => {
+      const scheduler = new ServerGaeFlashSaleScheduler({ numSlots: 6, stateDim: 5, gamma: 0.99, lambda: 0.95 });
+      expect.equal(scheduler.actionDim, 6);
+      expect.equal(scheduler.stateDim, 5);
+      expect.equal(scheduler.actorWeights.length, 6);
+      expect.equal(scheduler.criticWeights.length, 5);
+    });
+
+    test("F190-T08: Server GaeFlashSaleScheduler computes valid softmax policy distribution across slots", () => {
+      const scheduler = new ServerGaeFlashSaleScheduler();
+      const state = [1.8, 1.2, 0.4, 0.5, 0.35];
+      const probs = scheduler.getPolicyDistribution(state);
+      expect.equal(probs.length, 6);
+      const sum = probs.reduce((a, b) => a + b, 0);
+      expect.ok(Math.abs(sum - 1.0) < 1e-4);
+    });
+
+    test("F190-T09: Server GaeFlashSaleScheduler records trajectory steps and evaluates V(s)", () => {
+      const scheduler = new ServerGaeFlashSaleScheduler();
+      const s0 = [1.0, 1.0, 0.3, 0.4, 0.3];
+      const s1 = [1.2, 0.8, 0.35, 0.5, 0.3];
+      scheduler.recordStep(s0, 2, 15000000, s1, false);
+      expect.equal(scheduler.trajectories.length, 1);
+      const v = scheduler.evaluateValue(s0);
+      expect.ok(typeof v === 'number');
+    });
+
+    test("F190-T10: Server GaeFlashSaleScheduler calculates Generalized Advantage Estimation (GAE)", () => {
+      const scheduler = new ServerGaeFlashSaleScheduler({ gamma: 0.99, lambda: 0.95 });
+      for (let t = 0; t < 5; t++) {
+        scheduler.recordStep(
+          [1.0 + t * 0.1, 1.0, 0.3, 0.4, 0.3],
+          t % 6,
+          (t + 1) * 10000000,
+          [1.1 + t * 0.1, 0.9, 0.35, 0.45, 0.3],
+          t === 4
+        );
+      }
+      const { advantages, returns } = scheduler.computeGae();
+      expect.equal(advantages.length, 5);
+      expect.equal(returns.length, 5);
+      expect.ok(typeof advantages[0] === 'number');
+    });
+
+    test("F190-T11: Server GaeFlashSaleScheduler trains policy and value networks with GAE batch updates", () => {
+      const scheduler = new ServerGaeFlashSaleScheduler();
+      for (let t = 0; t < 10; t++) {
+        scheduler.recordStep(
+          [1.2, 1.0, 0.4, 0.5, 0.35],
+          2,
+          50000000,
+          [1.3, 0.8, 0.45, 0.55, 0.35],
+          t === 9
+        );
+      }
+      const trainRes = scheduler.trainBatch();
+      expect.equal(trainRes.trained, true);
+      expect.ok(typeof trainRes.avgActorLoss === 'number');
+      expect.ok(typeof trainRes.avgCriticLoss === 'number');
+    });
+
+    test("F190-T12: Server GaeFlashSaleScheduler provides optimal slot scheduling and safe discounts", () => {
+      const scheduler = new ServerGaeFlashSaleScheduler();
+      const plan = scheduler.scheduleFlashSale({
+        trafficSurge: 2.2,
+        stock: 300,
+        historicConversion: 0.12,
+        hourOfDay: 12,
+        categoryMargin: 0.45
+      });
+      expect.ok(plan.recommendedSlot.length > 0);
+      expect.ok(plan.slotIndex >= 0 && plan.slotIndex < 6);
+      expect.equal(plan.recommendedDiscountPercent, Math.round(0.45 * 0.6 * 100));
+      expect.equal(plan.strategy, 'MEGA_PEAK_SURGE');
+    });
+
+    test("F190-T13: Client GaeFlashSaleScheduler schedules flash sale slots with high confidence", () => {
+      const clientScheduler = new GaeFlashSaleScheduler();
+      const plan = clientScheduler.scheduleFlashSale({
+        trafficSurge: 1.1,
+        stock: 80,
+        historicConversion: 0.05,
+        hourOfDay: 9,
+        categoryMargin: 0.30
+      });
+      expect.ok(plan.confidence > 0);
+      expect.equal(plan.strategy, 'STEADY_DEMAND');
+      expect.equal(plan.recommendedDiscountPercent, 18);
+    });
+
+    // --- Contraction Hierarchies (CH) Router Tests ---
+    test("F190-T14: Server ContractionHierarchiesRouter builds bidirectional transport network", () => {
+      const router = new ServerContractionHierarchiesRouter();
+      router.addEdge('HUB_HN', 'HUB_DN', 760);
+      router.addEdge('HUB_DN', 'HUB_SG', 960);
+      expect.equal(router.nodes.size, 3);
+      expect.equal(router.adjForward.get('HUB_HN').length, 1);
+      expect.equal(router.adjForward.get('HUB_DN').length, 2);
+    });
+
+    test("F190-T15: Server ContractionHierarchiesRouter preprocesses node contraction and inserts shortcut edges", () => {
+      const router = new ServerContractionHierarchiesRouter();
+      router.addEdge('A', 'B', 10);
+      router.addEdge('B', 'C', 15);
+      router.preprocessContraction();
+      expect.equal(router.isContracted, true);
+      expect.ok(router.nodeOrder.size === 3);
+    });
+
+    test("F190-T16: Server ContractionHierarchiesRouter queries shortest path with Upward Bi-directional Search", () => {
+      const router = new ServerContractionHierarchiesRouter();
+      router.addEdge('HN', 'TH', 150);
+      router.addEdge('TH', 'VINH', 140);
+      router.addEdge('VINH', 'HUE', 370);
+      router.addEdge('HUE', 'DN', 100);
+      router.preprocessContraction();
+      const res = router.queryShortestPath('HN', 'DN');
+      expect.equal(res.status, 'OPTIMAL_HIGHWAY');
+      expect.equal(res.distance, 150 + 140 + 370 + 100);
+      expect.ok(res.totalHops >= 1);
+    });
+
+    test("F190-T17: Server ContractionHierarchiesRouter reconstructs full multi-hop path through meeting node", () => {
+      const router = new ServerContractionHierarchiesRouter();
+      router.addEdge('S', 'M', 5);
+      router.addEdge('M', 'T', 5);
+      const res = router.queryShortestPath('S', 'T');
+      expect.equal(res.status, 'OPTIMAL_HIGHWAY');
+      expect.equal(res.distance, 10);
+      expect.ok(res.path.includes('S'));
+      expect.ok(res.path.includes('T'));
+    });
+
+    test("F190-T18: Server ContractionHierarchiesRouter handles same node and non-existent node safely", () => {
+      const router = new ServerContractionHierarchiesRouter();
+      router.addEdge('N1', 'N2', 50);
+      const sameRes = router.queryShortestPath('N1', 'N1');
+      expect.equal(sameRes.status, 'SAME_NODE');
+      expect.equal(sameRes.distance, 0);
+
+      const notFoundRes = router.queryShortestPath('N1', 'UNKNOWN_NODE');
+      expect.equal(notFoundRes.status, 'NODE_NOT_FOUND');
+      expect.equal(notFoundRes.distance, Infinity);
+    });
+
+    test("F190-T19: Client ContractionHierarchiesRouter contracts nationwide hubs and performs highway queries", () => {
+      const clientRouter = new ContractionHierarchiesRouter();
+      clientRouter.addEdge('SPX_HN_SOC', 'SPX_BN_SOC', 35);
+      clientRouter.addEdge('SPX_BN_SOC', 'SPX_DN_SOC', 780);
+      clientRouter.addEdge('SPX_DN_SOC', 'SPX_SG_SOC', 950);
+      const res = clientRouter.queryShortestPath('SPX_HN_SOC', 'SPX_SG_SOC');
+      expect.equal(res.status, 'OPTIMAL_HIGHWAY');
+      expect.equal(res.distance, 35 + 780 + 950);
+      expect.equal(res.path[0], 'SPX_HN_SOC');
+      expect.equal(res.path[res.path.length - 1], 'SPX_SG_SOC');
+    });
+
+    // --- Tri-Role AI Copilot Knowledge Integration Tests ---
+    test("F190-T20: Admin Sentinel Copilot Section 110 explains Ukkonen Suffix Tree Review Collusion Radar", () => {
+      const res = generateAdminCopilotResponse("phát hiện đánh giá ảo bằng ukkonen suffix tree review collusion", {});
+      expect.equal(res.tag, "UKKONEN SUFFIX TREE REVIEW COLLUSION");
+      expect.ok(res.text.includes("UKKONEN 1995"));
+      expect.ok(res.text.includes("Longest Common Substring"));
+      expect.ok(res.text.includes("Skip-Count"));
+    });
+
+    test("F190-T21: Admin Sentinel Copilot Sections 111 & 112 explain GAE Flash Sale & Contraction Hierarchies", () => {
+      const res111 = generateAdminCopilotResponse("tối ưu hóa khung giờ mở bán flash sale gae generalized advantage estimation", {});
+      expect.equal(res111.tag, "GAE FLASH SALE SCHEDULER");
+      expect.ok(res111.text.includes("SCHULMAN 2016"));
+      expect.ok(res111.text.includes("Bias"));
+
+      const res112 = generateAdminCopilotResponse("định tuyến liên tỉnh ch contraction hierarchies shortcut edges", {});
+      expect.equal(res112.tag, "CONTRACTION HIERARCHIES NATIONWIDE ROUTER");
+      expect.ok(res112.text.includes("GEISBERGER 2008"));
+      expect.ok(res112.text.includes("Upward Search"));
+    });
+
+    test("F190-T22: Seller ShopSmart Copilot Section 52 advises on Ukkonen Review Shield, GAE Sale & CH Logistics", () => {
+      const currentShop = { id: "shop_mall", name: "Anker Official Mall" };
+      const res = generateSellerCopilotResponse("tư vấn lá chắn đánh giá ảo ukkonen và khung giờ flash sale gae", currentShop, [], []);
+      expect.equal(res.tag, "UKKONEN SHIELD, GAE FLASH SALE & CH LOGISTICS");
+      expect.ok(res.text.includes("Ukkonen Suffix Tree"));
+      expect.ok(res.text.includes("GAE"));
+      expect.ok(res.text.includes("Contraction Hierarchies"));
+    });
+
+    test("F190-T23: Buyer AI Assistant Intent 45 assists with real reviews, gold hour Flash Sale & 24h express shipping", () => {
+      const res = generateAiChatResponse("sao biết đánh giá thật bằng lá chắn đánh giá ảo ukkonen và định tuyến liên tỉnh ch?", []);
+      expect.equal(res.intent, "UKKONEN_GAE_CH_ASSIST");
+      expect.ok(res.replyText.includes("Ukkonen"));
+      expect.ok(res.replyText.includes("GAE"));
+      expect.ok(res.replyText.includes("Contraction Hierarchies"));
+    });
+
+    test("F190-T24: E2E Pipeline coordinates Ukkonen Review Verification, GAE Flash Sale Scheduling & CH Nationwide Routing", () => {
+      // 1. Ukkonen detects review spam similarity
+      const rev1 = "San pham rat dep, chat luong tot, dong goi chac chan 10/10";
+      const rev2 = "San pham rat dep, chat luong tot, shop phuc vu chu dao 10/10";
+      const plagiarism = ServerUkkonenSuffixTree.detectReviewPlagiarism(rev1, rev2, 15);
+      expect.equal(plagiarism.isCollusionDetected, true);
+
+      // 2. GAE schedules optimal flash sale slot
+      const gae = new ServerGaeFlashSaleScheduler();
+      const salePlan = gae.scheduleFlashSale({
+        trafficSurge: 2.5,
+        stock: 500,
+        categoryMargin: 0.35
+      });
+      expect.ok(salePlan.recommendedDiscountPercent > 0);
+      expect.equal(salePlan.strategy, 'MEGA_PEAK_SURGE');
+
+      // 3. Contraction Hierarchies routes parcel from central warehouse to buyer province
+      const ch = new ServerContractionHierarchiesRouter();
+      ch.addEdge('KHO_TONG_HN', 'HUB_THANH_HOA', 160);
+      ch.addEdge('HUB_THANH_HOA', 'HUB_NGHE_AN', 140);
+      ch.addEdge('HUB_NGHE_AN', 'HUB_DA_NANG', 450);
+      const deliveryRoute = ch.queryShortestPath('KHO_TONG_HN', 'HUB_DA_NANG');
+      expect.equal(deliveryRoute.status, 'OPTIMAL_HIGHWAY');
+      expect.equal(deliveryRoute.distance, 750);
     });
   });
 });

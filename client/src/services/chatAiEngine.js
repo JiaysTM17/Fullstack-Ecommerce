@@ -331,7 +331,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
 
   // 1. Kết hợp Tìm sản phẩm + Xin Voucher / Freeship
   if (
-    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw/i.test(lower) &&
+    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction/i.test(lower) &&
     (/mua|tìm|sản phẩm|\báo\b|\bquần\b|tai nghe|chuột|bàn phím|nồi|son|giày/i.test(lower)) &&
     (/voucher|mã|giảm giá|freeship|miễn phí ship/i.test(lower))
   ) {
@@ -438,7 +438,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // ĐƠN HÀNG, TIẾN ĐỘ VẬN ĐƠN, KHIẾU NẠI GIAO TRỄ
   // -------------------------------------------------------------
-  if (!/fm[- ]index|burrows|cql|vrptw/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
+  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
     const orders = lookupCustomerOrders(lower);
     if (orders.length > 0) {
       return {
@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -947,6 +947,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'FM_INDEX_CQL_VRPTW_ASSIST',
       replyText: `**[TÌM KIẾM MÃ LINH KIỆN FM-INDEX, VOUCHER TOÀN SÀN & GIAO HÀNG ĐÚNG HẸN]:**\n\n• **Tìm mã sản phẩm, model chuẩn xác (FM-Index)**: Công nghệ nén toàn văn BWT giúp bạn tìm kiếm mọi mã linh kiện, model chi tiết trong tích tắc với độ chính xác tuyệt đối!\n• **Kho voucher trợ giá khủng (CQL)**: Hệ thống học tăng cường ngoại tuyến tự động cấp ngân sách ưu đãi cho các ngành hàng hot nhất, giúp bạn luôn có mã giảm sâu khi chốt đơn.\n• **Giao đúng khung giờ bạn chọn (VRPTW)**: Lựa chọn khung giờ nhận hàng thuận tiện (Sáng, Chiều, Tối), shipper SPX sẽ có mặt chính xác theo lịch hẹn cam kết!`,
       suggestions: ['Tìm theo mã linh kiện', 'Nhận voucher ngành hàng', 'Chọn khung giờ nhận hàng'],
+    };
+  }
+
+  // 45. Lá Chắn Đánh Giá Ảo Ukkonen, Khung Giờ Flash Sale GAE & Vận Chuyển Liên Tỉnh CH (UKKONEN_GAE_CH_ASSIST)
+  if (/ukkonen|suffix tree|đánh giá ảo ukkonen|lcs spam|gae flash sale|khung giờ flash sale gae|contraction hierarchies|định tuyến liên tỉnh ch/i.test(lower)) {
+    return {
+      intent: 'UKKONEN_GAE_CH_ASSIST',
+      replyText: `**[LÁ CHẮN ĐÁNH GIÁ THẬT UKKONEN, FLASH SALE KHỦNG & GIAO HÀNG LIÊN TỈNH SIÊU TỐC]:**\n\n• **Bảo vệ bạn khỏi đánh giá ảo (Ukkonen)**: Thuật toán cây hậu tố rút gọn phát hiện các đoạn văn bản seeding sao chép, giúp bạn chỉ đọc các đánh giá thật 100% từ người mua thực tế!\n• **Săn Deal Vàng đúng khung giờ vàng (GAE)**: AI phân tích lưu lượng để mở bán Flash Sale giảm sâu tới 50% vào các khung giờ vàng (0h, 12h, 21h) với ưu đãi độc quyền dành riêng cho bạn.\n• **Giao hàng liên tỉnh Bắc - Nam siêu tốc (Contraction Hierarchies)**: Công nghệ định tuyến đường cao tốc thông minh giúp kiện hàng SPX Express luân chuyển xuyên Việt và giao đến tận cửa nhà bạn chỉ trong 24h!`,
+      suggestions: ['Xem sản phẩm có đánh giá chuẩn', 'Săn Flash Sale khung giờ vàng', 'Tra cứu hành trình đơn liên tỉnh'],
     };
   }
 
