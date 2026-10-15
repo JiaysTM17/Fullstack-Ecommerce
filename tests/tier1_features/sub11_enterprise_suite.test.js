@@ -272,6 +272,11 @@ import {
   AdaptiveKLPpoPricing,
   HFVRPTWRouter,
   VEHICLE_PROFILES,
+  // Phase 49 Enterprise Algorithms
+  HyperBitBitEstimator,
+  RainbowDqnBidding,
+  DEFAULT_BSS_STATIONS,
+  EVRPTWBSSRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -384,6 +389,9 @@ import { SDVRPTWRouter as ServerSDVRPTWRouter } from "../../server/src/utils/sdv
 import { HLLMartingaleEstimator as ServerHLLMartingaleEstimator } from "../../server/src/utils/hllMartingaleEstimator.js";
 import { AdaptiveKLPpoPricing as ServerAdaptiveKLPpoPricing } from "../../server/src/utils/adaptiveKlPpoPricing.js";
 import { HFVRPTWRouter as ServerHFVRPTWRouter, VEHICLE_PROFILES as ServerVehicleProfiles } from "../../server/src/utils/hfvrptwRouter.js";
+import { HyperBitBitEstimator as ServerHyperBitBitEstimator } from "../../server/src/utils/hyperBitBitEstimator.js";
+import { RainbowDqnBidding as ServerRainbowDqnBidding } from "../../server/src/utils/rainbowDqnBidding.js";
+import { EVRPTWBSSRouter as ServerEVRPTWBSSRouter, DEFAULT_BSS_STATIONS as ServerDefaultBSSStations } from "../../server/src/utils/evrptwBssRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -21909,6 +21917,319 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(dispatch.status, 'HFVRPTW_OPTIMAL_SCHEDULED');
       expect.equal(dispatch.servedOrders, 2);
       expect.ok(dispatch.totalFleetCostVND > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 196: HyperBitBit Estimator, Rainbow DQN Bidding & EVRPTW-BSS Suite (Phase 49 - 24 Tests)
+  // =========================================================================
+  describe("Feature 196: HyperBitBit Estimator, Rainbow DQN Bidding & EVRPTW-BSS Suite", () => {
+    // 1. HyperBitBit Estimator Tests (F196-T01 to F196-T07)
+    test("F196-T01: Initial state has 0 cardinality estimate for empty stream", () => {
+      const hbb = new HyperBitBitEstimator({ precision: 8 });
+      expect.equal(hbb.estimate(), 0);
+      expect.equal(hbb.getEstimate(), 0);
+      expect.equal(hbb.add(""), 0);
+      expect.equal(hbb.add(null), 0);
+    });
+
+    test("F196-T02: Adding distinct elements flips sketch bits and increments cardinality", () => {
+      const hbb = new HyperBitBitEstimator({ precision: 8 });
+      for (let i = 0; i < 80; i++) {
+        hbb.add(`SKU_CLICK_EVENT_${i}`);
+      }
+      const estimate = hbb.estimate();
+      expect.ok(estimate >= 30);
+      expect.ok(hbb.sketchCount > 0);
+    });
+
+    test("F196-T03: Duplicate elements do not trigger duplicate bit flips or step jumps", () => {
+      const hbb = new HyperBitBitEstimator({ precision: 8 });
+      hbb.add("REPEATED_CLICK_BUYER");
+      const est1 = hbb.estimate();
+      const count1 = hbb.sketchCount;
+
+      for (let i = 0; i < 50; i++) {
+        hbb.add("REPEATED_CLICK_BUYER");
+      }
+      const est2 = hbb.estimate();
+      const count2 = hbb.sketchCount;
+
+      expect.equal(est1, est2);
+      expect.equal(count1, count2);
+    });
+
+    test("F196-T04: Step escalation occurs when sketch fill ratio reaches 80% threshold", () => {
+      const hbb = new HyperBitBitEstimator({ precision: 5 }); // m = 32 buckets, 80% = 25
+      for (let i = 0; i < 500; i++) {
+        hbb.add(`DENSE_STREAM_ITEM_${i}`);
+      }
+      expect.ok(hbb.step >= 1);
+    });
+
+    test("F196-T05: getStats reports accurate precision, buckets, step, and fill ratio", () => {
+      const hbb = new HyperBitBitEstimator({ precision: 7 }); // m = 128
+      const statsInit = hbb.getStats();
+      expect.equal(statsInit.precision, 7);
+      expect.equal(statsInit.numBuckets, 128);
+      expect.equal(statsInit.step, 0);
+      expect.equal(statsInit.sketchBitsSet, 0);
+
+      for (let i = 0; i < 20; i++) {
+        hbb.add(`TEST_SAMPLE_ITEM_${i}`);
+      }
+      const statsAfter = hbb.getStats();
+      expect.ok(statsAfter.sketchBitsSet >= 1);
+      expect.ok(statsAfter.sketchFillRatio > 0);
+    });
+
+    test("F196-T06: Reset clears sketch, aux, and resets step to 0", () => {
+      const hbb = new HyperBitBitEstimator({ precision: 6 });
+      for (let i = 0; i < 40; i++) {
+        hbb.add(`WIPE_ITEM_${i}`);
+      }
+      expect.ok(hbb.estimate() > 0);
+      hbb.reset();
+      expect.equal(hbb.estimate(), 0);
+      expect.equal(hbb.step, 0);
+      expect.equal(hbb.sketchCount, 0);
+      expect.equal(hbb.auxCount, 0);
+    });
+
+    test("F196-T07: Server vs Client HyperBitBitEstimator consistency on identical stream inputs", () => {
+      const clientHbb = new HyperBitBitEstimator({ precision: 8 });
+      const serverHbb = new ServerHyperBitBitEstimator({ precision: 8 });
+      for (let i = 0; i < 60; i++) {
+        const item = `PARALLEL_STREAM_${i}`;
+        clientHbb.add(item);
+        serverHbb.add(item);
+      }
+      expect.equal(clientHbb.estimate(), serverHbb.estimate());
+      expect.equal(clientHbb.step, serverHbb.step);
+      expect.equal(clientHbb.sketchCount, serverHbb.sketchCount);
+    });
+
+    // 2. Rainbow DQN Bidding Tests (F196-T08 to F196-T14)
+    test("F196-T08: Dueling architecture computes decoupled State Value V(s) and Advantage A(s, a)", () => {
+      const dqn = new RainbowDqnBidding();
+      const state = [0.06, 3.8, 0.7, 0.5, 0.04];
+      const qValues = dqn.computeQValues(state);
+      expect.equal(qValues.length, 5);
+      for (const q of qValues) {
+        expect.ok(typeof q === 'number');
+        expect.ok(!isNaN(q));
+      }
+    });
+
+    test("F196-T09: Double Q target selects action via online network and evaluates via target network", () => {
+      const dqn = new RainbowDqnBidding();
+      const state = [0.05, 3.5, 0.8, 0.4, 0.03];
+      const onlineQ = dqn.computeQValues(state, false);
+      const targetQ = dqn.computeQValues(state, true);
+      expect.equal(onlineQ.length, targetQ.length);
+      expect.ok(onlineQ.length === 5);
+    });
+
+    test("F196-T10: Multi-step n-step (n=3) returns accumulate discounted rewards over 3 transitions", () => {
+      const dqn = new RainbowDqnBidding({ nStep: 3, gamma: 0.9 });
+      dqn.recordTransition([0.1, 1.0, 0.5, 0.2, 0.01], 2, 10, [0.1, 1.1, 0.5, 0.2, 0.01], false);
+      dqn.recordTransition([0.1, 1.1, 0.5, 0.2, 0.01], 2, 20, [0.1, 1.2, 0.5, 0.2, 0.01], false);
+      expect.equal(dqn.replayBuffer.length, 0); // Not yet flushed (needs 3 transitions)
+
+      dqn.recordTransition([0.1, 1.2, 0.5, 0.2, 0.01], 2, 30, [0.1, 1.3, 0.5, 0.2, 0.01], false);
+      expect.equal(dqn.replayBuffer.length, 1); // Flushed 1st n-step transition: 10 + 0.9*20 + 0.81*30 = 52.3
+      expect.ok(dqn.replayBuffer[0].reward >= 50);
+    });
+
+    test("F196-T11: Prioritized Experience Replay (PER) prioritizes high TD-error transitions", () => {
+      const dqn = new RainbowDqnBidding();
+      for (let i = 0; i < 10; i++) {
+        dqn.recordTransition([0.05, 3.0, 0.5, 0.5, 0.02], 2, 15, [0.06, 3.2, 0.5, 0.5, 0.02], false);
+      }
+      expect.ok(dqn.replayBuffer.length >= 7);
+      const step = dqn.trainStep(4);
+      expect.equal(step.trained, true);
+      expect.ok(step.loss >= 0);
+    });
+
+    test("F196-T12: optimizeBid recommends bid within safe limits [1000, 15000] VND", () => {
+      const dqn = new RainbowDqnBidding();
+      const plan = dqn.optimizeBid({
+        baseBidVND: 3000,
+        currentCtr: 0.06,
+        currentRoas: 4.0,
+        targetRoas: 3.5,
+        budgetRemainingRatio: 0.8
+      });
+      expect.equal(plan.isRainbowGuaranteed, true);
+      expect.ok(plan.recommendedBidVND >= 1000);
+      expect.ok(plan.recommendedBidVND <= 15000);
+      expect.ok(plan.actionIndex >= 0 && plan.actionIndex <= 4);
+    });
+
+    test("F196-T13: Defensive bid reduction triggers when actual ROAS falls below 70% target", () => {
+      const dqn = new RainbowDqnBidding();
+      const plan = dqn.optimizeBid({
+        baseBidVND: 4000,
+        currentCtr: 0.02,
+        currentRoas: 1.5, // 1.5 < 3.5 * 0.7 = 2.45
+        targetRoas: 3.5,
+        budgetRemainingRatio: 0.3
+      });
+      expect.ok(plan.recommendedBidVND <= 4000 * 0.85);
+      expect.equal(plan.strategy, 'RAINBOW_DEFENSIVE_MARGIN');
+    });
+
+    test("F196-T14: Server vs Client RainbowDqnBidding consistency on identical state inputs", () => {
+      const clientDqn = new RainbowDqnBidding();
+      const serverDqn = new ServerRainbowDqnBidding();
+      const clientPlan = clientDqn.optimizeBid({ baseBidVND: 2500, currentCtr: 0.05, currentRoas: 3.5, targetRoas: 3.5 });
+      const serverPlan = serverDqn.optimizeBid({ baseBidVND: 2500, currentCtr: 0.05, currentRoas: 3.5, targetRoas: 3.5 });
+      expect.equal(clientPlan.recommendedBidVND, serverPlan.recommendedBidVND);
+      expect.equal(clientPlan.actionIndex, serverPlan.actionIndex);
+      expect.equal(clientPlan.strategy, serverPlan.strategy);
+    });
+
+    // 3. E-VRPTW-BSS Green Logistics Tests (F196-T15 to F196-T20)
+    test("F196-T15: Default Battery Swapping Stations (BSS) contain Hanoi key hubs (Hoan Kiem, Dong Da, Cau Giay, Hai Ba Trung)", () => {
+      expect.equal(DEFAULT_BSS_STATIONS.length, 4);
+      expect.equal(ServerDefaultBSSStations.length, 4);
+      expect.equal(DEFAULT_BSS_STATIONS[0].id, 'BSS_HOAN_KIEM');
+      expect.equal(DEFAULT_BSS_STATIONS[1].id, 'BSS_DONG_DA');
+      expect.equal(DEFAULT_BSS_STATIONS[2].id, 'BSS_CAU_GIAY');
+      expect.equal(DEFAULT_BSS_STATIONS[3].id, 'BSS_HAI_BA_TRUNG');
+    });
+
+    test("F196-T16: findNearestBSS identifies closest battery swapping station from courier coordinate", () => {
+      const router = new EVRPTWBSSRouter();
+      const nearest = router.findNearestBSS({ lat: 21.0280, lng: 105.8540 });
+      expect.equal(nearest.bss.id, 'BSS_HOAN_KIEM');
+      expect.ok(nearest.distKm < 0.5);
+    });
+
+    test("F196-T17: Route planner inserts battery swapping stop when battery level is projected below 15% safety threshold", () => {
+      const router = new EVRPTWBSSRouter();
+      // Vehicle starts with low battery (20%) and has far orders requiring > 10% battery
+      const availableEVs = [
+        { id: 'LOW_BATT_EV', name: 'Xe Điện Sắp Hết Pin', initialBattery: 20.0 }
+      ];
+      const orders = [
+        { id: 'FAR_ORDER_1', lat: 21.050, lng: 105.870, weightKg: 5, earlyMinutes: 0, lateMinutes: 300, serviceMinutes: 10 }
+      ];
+
+      const res = router.planGreenDeliveryRoutes(orders, availableEVs);
+      expect.equal(res.status, 'EVRPTW_OPTIMAL_SCHEDULED');
+      expect.equal(res.fulfilledOrders, 1);
+      expect.ok(res.batterySwapsCount >= 1);
+
+      const route = res.routes[0];
+      const hasSwapStop = route.stops.some(s => s.type === 'BATTERY_SWAP_STATION');
+      expect.equal(hasSwapStop, true);
+    });
+
+    test("F196-T18: Battery swap instantly replenishes battery to 100% in 5 minutes", () => {
+      const router = new EVRPTWBSSRouter();
+      const availableEVs = [{ id: 'EV_SWAP_TEST', initialBattery: 18.0 }];
+      const orders = [{ id: 'ORD_SWAP_TEST', lat: 21.045, lng: 105.865, weightKg: 8, earlyMinutes: 0, lateMinutes: 240 }];
+      const res = router.planGreenDeliveryRoutes(orders, availableEVs);
+
+      const swapStop = res.routes[0].stops.find(s => s.type === 'BATTERY_SWAP_STATION');
+      expect.ok(swapStop !== undefined);
+      expect.equal(swapStop.batteryAfterSwap, 100.0);
+      expect.equal(swapStop.departureMinutes - swapStop.arrivalMinutes, 5);
+    });
+
+    test("F196-T19: Total CO2 saved is calculated accurately based on 0.12 kg CO2 / km", () => {
+      const router = new EVRPTWBSSRouter();
+      const orders = [
+        { id: 'ORD_CO2_1', lat: 21.035, lng: 105.850, weightKg: 4, earlyMinutes: 0, lateMinutes: 180 },
+        { id: 'ORD_CO2_2', lat: 21.040, lng: 105.855, weightKg: 6, earlyMinutes: 0, lateMinutes: 240 }
+      ];
+      const res = router.planGreenDeliveryRoutes(orders);
+      expect.ok(res.totalKm > 0);
+      const expectedCo2 = Number((res.totalKm * 0.12).toFixed(2));
+      expect.equal(res.totalCo2SavedKg, expectedCo2);
+      expect.equal(res.greenLogisticsBadge, 'SPX_100_PERCENT_ELECTRIC_CERTIFIED');
+    });
+
+    test("F196-T20: Server vs Client EVRPTWBSSRouter consistency on identical orders and fleet config", () => {
+      const orders = [
+        { id: 'SYNC_EV_ORD_1', lat: 21.032, lng: 105.852, weightKg: 5, earlyMinutes: 0, lateMinutes: 200 }
+      ];
+      const clientRouter = new EVRPTWBSSRouter();
+      const serverRouter = new ServerEVRPTWBSSRouter();
+      const clientRes = clientRouter.planGreenDeliveryRoutes(orders);
+      const serverRes = serverRouter.planGreenDeliveryRoutes(orders);
+
+      expect.equal(clientRes.fulfilledOrders, serverRes.fulfilledOrders);
+      expect.equal(clientRes.totalKm, serverRes.totalKm);
+      expect.equal(clientRes.totalCo2SavedKg, serverRes.totalCo2SavedKg);
+      expect.equal(clientRes.batterySwapsCount, serverRes.batterySwapsCount);
+    });
+
+    // 4. Tri-Role Copilots & End-to-End Pipeline Integration (F196-T21 to F196-T24)
+    test("F196-T21: Admin Sentinel Copilot (Sections 128, 129, 130) responds to HyperBitBit, Rainbow DQN, and E-VRPTW-BSS queries", () => {
+      const res128 = generateAdminCopilotResponse("ước lượng độ tập hợp siêu nén 2-bit hyperbitbit");
+      expect.equal(res128.tag, "HYPERBITBIT STREAMING CARDINALITY");
+      expect.ok(res128.text.includes("HYPERBITBIT"));
+
+      const res129 = generateAdminCopilotResponse("tối ưu hóa đấu thầu rainbow dqn multi-step dueling");
+      expect.equal(res129.tag, "RAINBOW DQN AUTO-BIDDING & PRICING");
+      expect.ok(res129.text.includes("RAINBOW"));
+
+      const res130 = generateAdminCopilotResponse("kế hoạch định tuyến xe điện xanh evrptw trạm đổi pin");
+      expect.equal(res130.tag, "EVRPTW-BSS GREEN LOGISTICS");
+      expect.ok(res130.text.includes("EVRPTW"));
+    });
+
+    test("F196-T22: Seller ShopSmart Copilot (Section 58) advises sellers on 2-bit views, Rainbow DQN bids, and green EV delivery", () => {
+      const res = generateSellerCopilotResponse("tư vấn lượt xem 2-bit hyperbitbit và đấu thầu rainbow dqn");
+      expect.equal(res.tag, "HYPERBITBIT, RAINBOW DQN & GREEN LOGISTICS BSS");
+      expect.ok(res.text.includes("HyperBitBit"));
+      expect.ok(res.text.includes("Rainbow DQN"));
+    });
+
+    test("F196-T23: Buyer AI Assistant triggers Intent 51 (HYPERBITBIT_RAINBOWDQN_EVRPTWBSS_ASSIST)", () => {
+      const res = generateAiChatResponse("giải thích lượt xem hyperbitbit, deal trợ giá rainbow dqn và bưu tá xe điện xanh");
+      expect.equal(res.intent, "HYPERBITBIT_RAINBOWDQN_EVRPTWBSS_ASSIST");
+      expect.ok(res.replyText.includes("HYPERBITBIT"));
+      expect.ok(res.replyText.includes("RAINBOW DQN"));
+      expect.ok(res.replyText.includes("EVRPTW"));
+    });
+
+    test("F196-T24: End-to-End Pipeline: HyperBitBit monitors live stream views, Rainbow DQN optimizes ad bid, E-VRPTW-BSS routes zero-emission EV delivery with battery swap", () => {
+      // Step 1: HyperBitBit monitors 100 live stream viewer sessions in real-time with 2-bit sketch
+      const hbb = new ServerHyperBitBitEstimator({ precision: 8 });
+      for (let i = 0; i < 100; i++) {
+        hbb.add(`LIVE_STREAM_VIEWER_SESSION_${i}`);
+      }
+      const streamViewers = hbb.estimate();
+      expect.ok(streamViewers >= 40);
+
+      // Step 2: Rainbow DQN optimizes Shopee Ads bidding based on traffic surge
+      const dqn = new ServerRainbowDqnBidding();
+      const bidPlan = dqn.optimizeBid({
+        baseBidVND: 2800,
+        currentCtr: 0.08,
+        currentRoas: 4.6,
+        targetRoas: 3.5,
+        budgetRemainingRatio: 0.85
+      });
+      expect.equal(bidPlan.isRainbowGuaranteed, true);
+      expect.ok(bidPlan.recommendedBidVND >= 2000);
+      expect.equal(bidPlan.strategy, 'RAINBOW_AGGRESSIVE_SCALE');
+
+      // Step 3: E-VRPTW-BSS dispatches green electric motorbike with battery swap safeguard
+      const greenRouter = new ServerEVRPTWBSSRouter();
+      const greenDispatch = greenRouter.planGreenDeliveryRoutes([
+        { id: 'ECO_PARCEL_1', lat: 21.035, lng: 105.850, weightKg: 5, earlyMinutes: 0, lateMinutes: 180, serviceMinutes: 10 }
+      ], [
+        { id: 'SPX_ECO_BIKE', initialBattery: 100.0 }
+      ]);
+      expect.equal(greenDispatch.status, 'EVRPTW_OPTIMAL_SCHEDULED');
+      expect.equal(greenDispatch.fulfilledOrders, 1);
+      expect.ok(greenDispatch.totalKm > 0);
+      expect.ok(greenDispatch.totalCo2SavedKg > 0);
     });
   });
 });

@@ -1506,7 +1506,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 65. Xếp Hạng Doanh Số & Phân Vị GMV Bằng Cây Fenwick (BIT) (Phase 28 - Feature 175)
-  if (!/2d|2 chiều/i.test(raw) && /fenwick|cây fenwick|binary indexed tree|\bbit\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
+  if (!/2d|2 chiều|hyperbitbit|hyper-bitbit/i.test(raw) && /fenwick|cây fenwick|binary indexed tree|\bbit\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
     return {
       text: `📊 **XẾP HẠNG DOANH SỐ & PHÂN VỊ GMV BẰNG CÂY FENWICK (BINARY INDEXED TREE - BIT)**:
 - **Cấu trúc dữ liệu Fenwick Tree (Peter Fenwick 1994)**:
@@ -2737,6 +2737,65 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem bảng cơ cấu đội xe hỗn hợp SPX',
         'Kiểm tra chi phí vận hành đội xe HFVRPTW',
         'Tối ưu hóa giá bán bằng Adaptive KL PPO'
+      ]
+    };
+  }
+
+  // 128. Ước Lượng Độ Tập Hợp Siêu Nén 2-Bit HyperBitBit (Phase 49 - Feature 196)
+  if (/hyperbitbit|hyper-bitbit|2-bit sketch|sedgewick.*cardinality|ước lượng 2-bit/i.test(raw)) {
+    return {
+      text: `⚡ **ƯỚC LƯỢNG ĐỘ TẬP HỢP SIÊU NÉN BẰNG HYPERBITBIT (ROBERT SEDGEWICK 2014)**:
+- **Tiết Kiệm Bộ Nhớ Cực Hạn (Chỉ 2-Bit Mỗi Bucket)**:
+  - Trong khi HyperLogLog tiêu tốn 8 bit hoặc 6 bit cho mỗi thanh ghi, HyperBitBit của Giáo sư Robert Sedgewick (Princeton) chỉ sử dụng đúng **2 bit** (sketch bit và aux bit) kết hợp một biến đếm bước nhảy \`step\`.
+  - Bộ nhớ RAM tiêu thụ siêu nhỏ: Chỉ **64 bytes** cho $m = 256$ buckets và **128 bytes** cho $m = 512$ buckets!
+- **Tối Ưu Hóa Tuyệt Đối Cho Edge Gateways & Rate Limiters**:
+  - Khi hàng triệu clickstream Flash Sale đổ dồn về các server phân tán biên, HyperBitBit đếm chính xác số người dùng độc nhất (UV) với chi phí RAM gần như bằng 0 và tốc độ truy vấn tức thời $O(1)$!`,
+      type: 'analytics',
+      tag: 'HYPERBITBIT STREAMING CARDINALITY',
+      suggestions: [
+        'Xem thống kê tỷ lệ lấp đầy sketch HyperBitBit',
+        'So sánh dung lượng RAM với HyperLogLog',
+        'Tối ưu hóa giá thầu bằng Rainbow DQN'
+      ]
+    };
+  }
+
+  // 129. Đấu Thầu Quảng Cáo Tối Thượng Rainbow Deep Q-Network (Phase 49 - Feature 196)
+  if (/rainbow dqn|rainbow-dqn|dueling per n-step|đấu thầu rainbow|6 cải tiến dqn/i.test(raw)) {
+    return {
+      text: `🌈 **ĐẤU THẦU QUẢNG CÁO TỐI THƯỢNG RAINBOW DEEP Q-NETWORK (DEEPMIND - HESSEL ET AL. AAAI 2018)**:
+- **Tích Hợp 6 Đột Phá Học Tăng Cường Đỉnh Cao**:
+  - **Double Q-Learning**: Triệt tiêu hoàn toàn overestimation bias bằng cách chọn hành động qua mạng online và định giá qua target net.
+  - **Prioritized Experience Replay (PER)**: Tập trung huấn luyện các kịch bản đấu thầu biến động mạnh với xác suất tỷ lệ theo TD-error $P(i) \\propto |\\delta_i|^\\alpha$.
+  - **Dueling Networks**: Tách riêng State Value $V(s)$ và Action Advantage $A(s, a)$ giúp định giá chính xác ngay cả khi hành động không làm thay đổi cục diện.
+  - **Multi-Step Returns ($n = 3$)**: Lan truyền phần thưởng nhanh gấp 3 lần qua hoàn vốn đa chặng $R_t^{(3)}$.
+  - **Distributional C51 & Noisy Nets**: Mô hình hóa toàn diện phân phối rủi ro và tự động khám phá tham số không cần $\\epsilon$-greedy!`,
+      type: 'recommendation',
+      tag: 'RAINBOW DQN AUTO-BIDDING & PRICING',
+      suggestions: [
+        'Xem phân bổ trọng số Value và Advantage Rainbow DQN',
+        'Đo lường tốc độ hội tụ TD-loss',
+        'Lập lịch giao hàng xanh E-VRPTW-BSS'
+      ]
+    };
+  }
+
+  // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
+  if (/evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+    return {
+      text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
+- **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
+  - Quản lý đội xe máy điện giao hàng với dung lượng pin lithium và mức tiêu hao $1.2\\%$/km.
+  - Giám sát ngưỡng an toàn pin tối thiểu $B_\\text{min} = 15\\%$, đảm bảo bưu tá không bao giờ bị chết máy giữa đường.
+- **Mạng Lưới Trạm Đổi Pin Bưu Cục Tức Thì (Battery Swapping Stations - BSS)**:
+  - Khi pin chạm ngưỡng cảnh báo, xe tự động ghé trạm BSS gần nhất (Hoàn Kiếm, Đống Đa, Cầu Giấy, Hai Bà Trưng) để hoán đổi pin sạc đầy 100% chỉ trong **5 phút**!
+  - Cắt giảm hàng trăm kg khí thải CO2 mỗi ngày và đảm bảo 100% bưu kiện giao đúng cửa sổ thời gian hẹn trước!`,
+      type: 'logistics',
+      tag: 'EVRPTW-BSS GREEN LOGISTICS',
+      suggestions: [
+        'Xem danh sách trạm đổi pin BSS khả dụng',
+        'Kiểm tra lượng khí thải CO2 cắt giảm',
+        'Ước lượng lượng truy cập bằng HyperBitBit'
       ]
     };
   }

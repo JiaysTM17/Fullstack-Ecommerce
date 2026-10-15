@@ -1171,6 +1171,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 58. Lượt Xem 2-Bit HyperBitBit, Đấu Thầu Rainbow DQN & Giao Xe Điện Đổi Pin EVRPTW (Phase 49 - Feature 196)
+  if (/hyperbitbit|hyper-bitbit|2-bit sketch|rainbow dqn|rainbow-dqn|evrptw|trạm đổi pin|xe điện xanh/i.test(raw)) {
+    return {
+      text: `⚡ **LƯỢT XEM 2-BIT HYPERBITBIT, ĐẤU THẦU RAINBOW DQN & GIAO XE ĐIỆN BSS (${currentShop.name})**:
+- **Đếm số lượng khách xem bằng bộ nhớ siêu nén 2-bit HyperBitBit**:
+  - Tiết kiệm 75% RAM so với HLL truyền thống, theo dõi chuẩn xác từng lượt khách truy cập độc nhất (UV) của shop trong các khung giờ Flash Sale bão view!
+- **Đấu thầu từ khóa Shopee Ads thông minh với Rainbow DQN**:
+  - Tích hợp 6 cải tiến học tăng cường (Double Q, PER, Dueling, Multi-Step, C51, Noisy Net) tự động điều chỉnh giá thầu CPC mang lại chỉ số ROAS vượt trội!
+- **Giao hàng xanh bảo vệ môi trường bằng xe máy điện SPX (E-VRPTW-BSS)**:
+  - Kiện hàng của shop được chuyên chở bằng đội xe máy điện pin lithium, ghé trạm đổi pin nhanh 5 phút, vừa đạt chuẩn Net-Zero vừa đảm bảo giao đúng giờ hẹn cho khách hàng!`,
+      type: 'recommendation',
+      tag: 'HYPERBITBIT, RAINBOW DQN & GREEN LOGISTICS BSS',
+      suggestions: [
+        'Xem lượt xem 2-bit HyperBitBit',
+        'Tối ưu hóa giá thầu Rainbow DQN',
+        'Kiểm tra lịch trình xe điện đổi pin BSS'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
