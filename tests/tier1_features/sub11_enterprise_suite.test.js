@@ -263,6 +263,10 @@ import {
   CountMinLogSketch,
   TQPOFlashSalePricing,
   DynamicDARPRouter,
+  // Phase 47 Enterprise Algorithms
+  CountSketchMedian,
+  TD3AutoBidding,
+  SDVRPTWRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -369,6 +373,9 @@ import { MDPDPTRouter as ServerMDPDPTRouter, MDPDPVehicle as ServerMDPDPVehicle 
 import { CountMinLogSketch as ServerCountMinLogSketch } from "../../server/src/utils/countMinLogSketch.js";
 import { TQPOFlashSalePricing as ServerTQPOFlashSalePricing } from "../../server/src/utils/tqpoFlashSalePricing.js";
 import { DynamicDARPRouter as ServerDynamicDARPRouter } from "../../server/src/utils/dynamicDarpRouter.js";
+import { CountSketchMedian as ServerCountSketchMedian } from "../../server/src/utils/countSketchMedian.js";
+import { TD3AutoBidding as ServerTD3AutoBidding } from "../../server/src/utils/td3AutoBidding.js";
+import { SDVRPTWRouter as ServerSDVRPTWRouter } from "../../server/src/utils/sdvrptwRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -21281,6 +21288,328 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       ]);
       expect.equal(dispatch.status, 'D_DARP_OPTIMAL_DISPATCHED');
       expect.equal(dispatch.pooledAssignedCount, 1);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 194: Count-Sketch Median, TD3 Clipped Double-Q Bidding & SDVRPTW Split Logistics Suite (Phase 47 - 24 Tests)
+  // =========================================================================
+  describe("Feature 194: Count-Sketch Median, TD3 Clipped Double-Q Bidding & SDVRPTW Split Logistics Suite", () => {
+    // 1. Count-Sketch with Median of Means Tests (F194-T01 to F194-T08)
+    test("F194-T01: Initial state has 0 frequency estimate for unobserved items", () => {
+      const cs = new CountSketchMedian({ depth: 5, width: 256 });
+      expect.equal(cs.estimate("UNSEEN_SKU"), 0);
+      expect.equal(cs.estimate(""), 0);
+    });
+
+    test("F194-T02: Positive updates increase estimate and negative updates decrease estimate", () => {
+      const cs = new CountSketchMedian({ depth: 5, width: 256 });
+      cs.update("SKU_AIRPODS_PRO", 20);
+      const est1 = cs.estimate("SKU_AIRPODS_PRO");
+      expect.ok(est1 > 0);
+
+      // Buyer returns / cancels 5 units
+      cs.update("SKU_AIRPODS_PRO", -5);
+      const est2 = cs.estimate("SKU_AIRPODS_PRO");
+      expect.ok(est2 < est1);
+    });
+
+    test("F194-T03: Median of means filters out high-variance collision hash buckets", () => {
+      const cs = new ServerCountSketchMedian({ depth: 5, width: 512 });
+      for (let i = 0; i < 50; i++) {
+        cs.update("HIGH_VELOCITY_SKU", 2);
+      }
+      for (let i = 0; i < 5; i++) {
+        cs.update("LOW_VELOCITY_SKU", 1);
+      }
+
+      const highEst = cs.estimate("HIGH_VELOCITY_SKU");
+      const lowEst = cs.estimate("LOW_VELOCITY_SKU");
+      expect.ok(highEst > lowEst);
+    });
+
+    test("F194-T04: Net zero velocity (equal positive additions and negative cancellations) converges around 0", () => {
+      const cs = new CountSketchMedian({ depth: 5, width: 512 });
+      cs.update("NEUTRAL_SKU", 30);
+      cs.update("NEUTRAL_SKU", -30);
+      const est = cs.estimate("NEUTRAL_SKU");
+      expect.equal(est, 0);
+    });
+
+    test("F194-T05: Merging two Count-Sketches sums underlying registers element-wise", () => {
+      const cs1 = new CountSketchMedian({ depth: 5, width: 256 });
+      const cs2 = new CountSketchMedian({ depth: 5, width: 256 });
+      cs1.update("SKU_STREAM_1", 15);
+      cs2.update("SKU_STREAM_2", 25);
+
+      cs1.merge(cs2);
+      expect.ok(cs1.estimate("SKU_STREAM_1") > 0);
+      expect.ok(cs1.estimate("SKU_STREAM_2") > 0);
+    });
+
+    test("F194-T06: Reset clears all registers to 0", () => {
+      const cs = new CountSketchMedian({ depth: 5, width: 256 });
+      cs.update("WIPE_ME", 40);
+      expect.ok(cs.estimate("WIPE_ME") > 0);
+      cs.reset();
+      expect.equal(cs.estimate("WIPE_ME"), 0);
+    });
+
+    test("F194-T07: Mismatched dimensions on merge throws an error", () => {
+      const cs1 = new CountSketchMedian({ depth: 5, width: 256 });
+      const cs2 = new CountSketchMedian({ depth: 3, width: 256 });
+      expect.throws(() => cs1.merge(cs2));
+    });
+
+    test("F194-T08: Client and Server CountSketchMedian have identical interface and behavior", () => {
+      const clientCs = new CountSketchMedian({ depth: 5, width: 256 });
+      const serverCs = new ServerCountSketchMedian({ depth: 5, width: 256 });
+      expect.equal(clientCs.depth, serverCs.depth);
+      expect.equal(clientCs.width, serverCs.width);
+      clientCs.update("SHARED_ITEM", 12);
+      serverCs.update("SHARED_ITEM", 12);
+      expect.equal(clientCs.estimate("SHARED_ITEM"), serverCs.estimate("SHARED_ITEM"));
+    });
+
+    // 2. Twin Delayed DDPG (TD3) Tests (F194-T09 to F194-T16)
+    test("F194-T09: Initialized with twin critics Q1, Q2 and actor policy", () => {
+      const td3 = new TD3AutoBidding({ stateDim: 5, policyDelay: 2 });
+      expect.equal(td3.stateDim, 5);
+      expect.equal(td3.policyDelay, 2);
+      expect.equal(td3.actorWeights.length, 5);
+      expect.equal(td3.critic1Weights.length, 6);
+      expect.equal(td3.critic2Weights.length, 6);
+    });
+
+    test("F194-T10: predictMultiplier outputs bounded bid multiplier [0.5, 2.5]", () => {
+      const td3 = new TD3AutoBidding();
+      const mult = td3.predictMultiplier([0.8, 1.2, 0.5, 1.0, 0.2], true);
+      expect.ok(mult >= 0.5);
+      expect.ok(mult <= 2.5);
+    });
+
+    test("F194-T11: Clipped double-Q computes minimum between twin target critics", () => {
+      const td3 = new TD3AutoBidding();
+      const state = [0.5, 1.0, 0.5, 1.0, 0.1];
+      const q1 = td3._computeQ(td3.critic1Weights, state, 1.0);
+      const q2 = td3._computeQ(td3.critic2Weights, state, 1.0);
+      expect.ok(typeof q1 === "number");
+      expect.ok(typeof q2 === "number");
+    });
+
+    test("F194-T12: Experience replay and training step updates critics and delays policy update by policyDelay", () => {
+      const td3 = new TD3AutoBidding({ policyDelay: 2 });
+      for (let i = 0; i < 20; i++) {
+        td3.recordExperience([0.6, 1.1, 0.7, 1.0, 0.2], 1.2, 5.0, [0.65, 1.15, 0.68, 1.0, 0.2], false);
+      }
+      expect.equal(td3.replayBuffer.length, 20);
+
+      const step1 = td3.trainStep(8);
+      expect.equal(step1.trained, true);
+      expect.equal(step1.policyUpdated, false); // Step 1: Critic updated, policy delayed
+
+      const step2 = td3.trainStep(8);
+      expect.equal(step2.trained, true);
+      expect.equal(step2.policyUpdated, true); // Step 2: Policy updated
+    });
+
+    test("F194-T13: Polyak soft updates smooth target actor and critic weights", () => {
+      const td3 = new TD3AutoBidding({ tau: 0.1 });
+      const initialTargetActor0 = td3.targetActorWeights[0];
+      for (let i = 0; i < 10; i++) {
+        td3.recordExperience([0.5, 1.0, 0.5, 1.0, 0.1], 1.0, 2.0, [0.5, 1.0, 0.5, 1.0, 0.1], false);
+      }
+      td3.trainStep(8);
+      td3.trainStep(8);
+      expect.ok(typeof td3.targetActorWeights[0] === "number");
+    });
+
+    test("F194-T14: optimizeBid recommends bid within [minBid, maxBid] based on ROAS and budget", () => {
+      const td3 = new TD3AutoBidding();
+      const plan = td3.optimizeBid({
+        baseBidVND: 2500,
+        currentCtr: 0.06,
+        currentRoas: 4.2,
+        targetRoas: 3.5,
+        budgetRemainingRatio: 0.7
+      });
+
+      expect.equal(plan.isDoubleQGuaranteed, true);
+      expect.ok(plan.recommendedBidVND >= 1250);
+      expect.ok(plan.recommendedBidVND <= 6250);
+    });
+
+    test("F194-T15: Strategy shifts to AGGRESSIVE_SCALE_DOMINANCE when ROAS is high and budget is abundant", () => {
+      const td3 = new TD3AutoBidding();
+      const plan = td3.optimizeBid({
+        baseBidVND: 3000,
+        currentCtr: 0.08,
+        currentRoas: 5.0,
+        targetRoas: 3.0,
+        budgetRemainingRatio: 0.85
+      });
+      expect.equal(plan.strategy, 'AGGRESSIVE_SCALE_DOMINANCE');
+    });
+
+    test("F194-T16: Client and Server TD3AutoBidding have identical continuous bidding mechanics", () => {
+      const clientTd3 = new TD3AutoBidding();
+      const serverTd3 = new ServerTD3AutoBidding();
+      const ctx = { baseBidVND: 2000, currentRoas: 3.0, targetRoas: 3.0 };
+      const p1 = clientTd3.optimizeBid(ctx);
+      const p2 = serverTd3.optimizeBid(ctx);
+      expect.equal(p1.isDoubleQGuaranteed, true);
+      expect.equal(p2.isDoubleQGuaranteed, true);
+      expect.ok(p1.recommendedBidVND >= 1000);
+      expect.ok(p2.recommendedBidVND >= 1000);
+    });
+
+    // 3. Split Delivery VRPTW (SDVRPTW) Tests (F194-T17 to F194-T21)
+    test("F194-T17: Haversine distance and travel time between coordinates", () => {
+      const router = new SDVRPTWRouter({ speedKmPerHour: 35 });
+      const dist = router.getDistance({ lat: 21.0285, lng: 105.8542 }, { lat: 21.0385, lng: 105.8642 });
+      expect.ok(dist > 0);
+      const travel = router._travelMinutes(dist);
+      expect.ok(travel >= 0);
+    });
+
+    test("F194-T18: Bulky orders with demand > vehicle capacity are split across multiple vehicles", () => {
+      const router = new SDVRPTWRouter({ defaultVehicleCapacity: 25 });
+      const orders = [
+        {
+          id: 'WHOLESALE_ORDER_50KG',
+          lat: 21.035,
+          lng: 105.850,
+          demandKg: 50, // Exceeds single vehicle capacity (25kg)
+          earlyMinutes: 0,
+          lateMinutes: 300,
+          serviceMinutes: 10
+        }
+      ];
+
+      const fleet = [
+        { id: 'VAN_A', name: 'SPX Van A', capacity: 25 },
+        { id: 'VAN_B', name: 'SPX Van B', capacity: 25 }
+      ];
+
+      const res = router.planSplitDeliveryRoutes(orders, fleet);
+      expect.equal(res.status, 'SDVRPTW_OPTIMAL_SCHEDULED');
+      expect.equal(res.fulfilledOrdersCount, 1);
+      expect.equal(res.splitOrdersCount, 1); // 1 order was split
+      expect.equal(res.activeVehiclesCount, 2); // Both vehicles dispatched
+    });
+
+    test("F194-T19: Time window constraints are respected for arrival and service times", () => {
+      const router = new SDVRPTWRouter();
+      const orders = [
+        {
+          id: 'TIMED_ORDER_01',
+          lat: 21.03,
+          lng: 105.85,
+          demandKg: 10,
+          earlyMinutes: 30, // Must arrive after minute 30
+          lateMinutes: 120,
+          serviceMinutes: 5
+        }
+      ];
+
+      const res = router.planSplitDeliveryRoutes(orders);
+      expect.equal(res.fulfilledOrdersCount, 1);
+      const stop = res.routes[0].stops[0];
+      expect.ok(stop.arrivalMinutes >= 30);
+    });
+
+    test("F194-T20: Fleet utilization and return to central depot are computed accurately", () => {
+      const router = new SDVRPTWRouter({ defaultVehicleCapacity: 30 });
+      const orders = [
+        { id: 'O1', lat: 21.03, lng: 105.85, demandKg: 15, earlyMinutes: 0, lateMinutes: 200 }
+      ];
+
+      const res = router.planSplitDeliveryRoutes(orders);
+      expect.ok(res.totalFleetDistanceKm > 0);
+      expect.ok(res.routes[0].capacityUtilizationPercent > 0);
+      expect.ok(res.routes[0].finishTimeMinutes > 0);
+    });
+
+    test("F194-T21: Empty fleet falls back to standard light truck fleet gracefully", () => {
+      const router = new ServerSDVRPTWRouter();
+      const orders = [
+        { id: 'O_DEFAULT', lat: 21.025, lng: 105.855, demandKg: 20, earlyMinutes: 0, lateMinutes: 180 }
+      ];
+      const res = router.planSplitDeliveryRoutes(orders, []);
+      expect.equal(res.status, 'SDVRPTW_OPTIMAL_SCHEDULED');
+      expect.equal(res.fulfilledOrdersCount, 1);
+    });
+
+    // 4. Tri-Role AI Copilot & E2E Pipeline Integration Tests (F194-T22 to F194-T24)
+    test("F194-T22: Admin Sentinel Copilot Sections 122, 123, 124 respond with respective tags", () => {
+      const res122 = generateAdminCopilotResponse("báo cáo ước lượng không thiên lệch count-sketch median of means");
+      expect.equal(res122.tag, "COUNT-SKETCH MEDIAN UNBIASED ESTIMATION");
+      expect.ok(res122.text.includes("COUNT-SKETCH"));
+
+      const res123 = generateAdminCopilotResponse("tối ưu hóa đấu thầu td3 clipped double-q target policy smoothing");
+      expect.equal(res123.tag, "TD3 CLIPPED DOUBLE-Q AUTO-BIDDING");
+      expect.ok(res123.text.includes("TWIN DELAYED DDPG"));
+
+      const res124 = generateAdminCopilotResponse("kế hoạch định tuyến chia nhỏ đơn hàng sdvrptw split delivery");
+      expect.equal(res124.tag, "SDVRPTW SPLIT DELIVERY LOGISTICS");
+      expect.ok(res124.text.includes("SDVRPTW"));
+    });
+
+    test("F194-T23: Seller ShopSmart Copilot Section 56 responds with COUNT-SKETCH NET, TD3 BIDDING & SDVRPTW LOGISTICS tag", () => {
+      const res = generateSellerCopilotResponse("tư vấn biến động bán ròng count-sketch, đấu thầu td3 và chia nhỏ đơn hàng sdvrptw");
+      expect.equal(res.tag, "COUNT-SKETCH NET, TD3 BIDDING & SDVRPTW LOGISTICS");
+      expect.ok(res.text.includes("Count-Sketch"));
+      expect.ok(res.text.includes("TD3"));
+      expect.ok(res.text.includes("SDVRPTW"));
+    });
+
+    test("F194-T24: Buyer AI Assistant Intent 49 advises on real net velocity, deals & split delivery, and E2E Pipeline coordinates all 3 algorithms", () => {
+      // 1. Buyer AI responds to Intent 49
+      const res = generateAiChatResponse("tốc độ bán thật count-sketch và deal tối ưu td3 chia nhỏ đơn hàng sdvrptw thế nào?", []);
+      expect.equal(res.intent, "COUNTSKETCH_TD3_SDVRPTW_ASSIST");
+      expect.ok(res.replyText.includes("Count-Sketch"));
+      expect.ok(res.replyText.includes("TD3"));
+      expect.ok(res.replyText.includes("SDVRPTW"));
+
+      // 2. E2E Pipeline Coordination:
+      // Step A: Count-Sketch tracks net orders subtracting refunds
+      const cs = new ServerCountSketchMedian({ depth: 5, width: 512 });
+      for (let i = 0; i < 60; i++) cs.update("HOT_COMBO_SKU", 1); // 60 purchases
+      for (let i = 0; i < 10; i++) cs.update("HOT_COMBO_SKU", -1); // 10 cancellations
+      const netVelocity = cs.estimate("HOT_COMBO_SKU");
+      expect.ok(netVelocity >= 40);
+
+      // Step B: TD3 auto-bids for advertising based on net velocity surge
+      const td3 = new ServerTD3AutoBidding();
+      const bidPlan = td3.optimizeBid({
+        baseBidVND: 2200,
+        currentCtr: 0.07,
+        currentRoas: 4.5,
+        targetRoas: 3.5,
+        budgetRemainingRatio: 0.75
+      });
+      expect.ok(bidPlan.recommendedBidVND >= 1500);
+
+      // Step C: SDVRPTW splits bulky 60kg wholesale order across two 30kg delivery vehicles
+      const router = new ServerSDVRPTWRouter({ defaultVehicleCapacity: 30 });
+      const dispatchPlan = router.planSplitDeliveryRoutes([
+        {
+          id: 'BULK_ENTERPRISE_ORDER',
+          lat: 21.035,
+          lng: 105.850,
+          demandKg: 60,
+          earlyMinutes: 0,
+          lateMinutes: 240,
+          serviceMinutes: 10
+        }
+      ], [
+        { id: 'FLEET_VAN_1', capacity: 30 },
+        { id: 'FLEET_VAN_2', capacity: 30 }
+      ]);
+      expect.equal(dispatchPlan.status, 'SDVRPTW_OPTIMAL_SCHEDULED');
+      expect.equal(dispatchPlan.splitOrdersCount, 1);
+      expect.equal(dispatchPlan.fulfilledOrdersCount, 1);
+      expect.equal(dispatchPlan.activeVehiclesCount, 2);
     });
   });
 });

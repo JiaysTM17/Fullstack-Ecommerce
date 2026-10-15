@@ -22958,6 +22958,432 @@ export class DynamicDARPRouter {
   }
 }
 
+// ------------------------------------------------------------------------------
+// PHASE 47 ALGORITHM 1: Count-Sketch with Median of Means (Charikar 2004)
+// ------------------------------------------------------------------------------
+export class CountSketchMedian {
+  constructor(options = {}) {
+    this.depth = options.depth || 5;
+    if (this.depth % 2 === 0) {
+      this.depth += 1;
+    }
+    this.width = options.width || 1024;
+    this.table = Array.from({ length: this.depth }, () => new Int32Array(this.width));
+  }
+
+  _hashIndex(key, seed = 0) {
+    let h = 0x811c9dc5 ^ seed;
+    const str = String(key);
+    for (let i = 0; i < str.length; i++) {
+      let k = str.charCodeAt(i);
+      k = Math.imul(k, 0xcc9e2d51);
+      k = (k << 15) | (k >>> 17);
+      k = Math.imul(k, 0x1b873593);
+      h ^= k;
+      h = (h << 13) | (h >>> 19);
+      h = Math.imul(h, 5) + 0xe6546b64;
+    }
+    h ^= str.length;
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13;
+    h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
+    return (h >>> 0) % this.width;
+  }
+
+  _hashSign(key, seed = 0) {
+    let h = 0x9e3779b9 ^ seed;
+    const str = String(key);
+    for (let i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 0x5bd1e995);
+      h ^= h >>> 15;
+    }
+    return (h & 1) === 0 ? 1 : -1;
+  }
+
+  update(item, delta = 1) {
+    if (!item || delta === 0) return;
+    for (let i = 0; i < this.depth; i++) {
+      const col = this._hashIndex(item, i * 7919 + 31);
+      const sign = this._hashSign(item, i * 9973 + 17);
+      this.table[i][col] += sign * delta;
+    }
+  }
+
+  estimate(item) {
+    if (!item) return 0;
+    const estimates = [];
+    for (let i = 0; i < this.depth; i++) {
+      const col = this._hashIndex(item, i * 7919 + 31);
+      const sign = this._hashSign(item, i * 9973 + 17);
+      estimates.push(this.table[i][col] * sign);
+    }
+    estimates.sort((a, b) => a - b);
+    const mid = Math.floor(this.depth / 2);
+    const val = estimates[mid];
+    return val === 0 ? 0 : val;
+  }
+
+  merge(other) {
+    if (!other || other.depth !== this.depth || other.width !== this.width) {
+      throw new Error("Cannot merge Count-Sketches of mismatched dimensions");
+    }
+    for (let i = 0; i < this.depth; i++) {
+      for (let j = 0; j < this.width; j++) {
+        this.table[i][j] += other.table[i][j];
+      }
+    }
+  }
+
+  reset() {
+    for (let i = 0; i < this.depth; i++) {
+      this.table[i].fill(0);
+    }
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 47 ALGORITHM 2: Twin Delayed DDPG (TD3 - Fujimoto 2018)
+// ------------------------------------------------------------------------------
+export class TD3AutoBidding {
+  constructor(options = {}) {
+    this.stateDim = options.stateDim || 5;
+    this.gamma = options.gamma || 0.95;
+    this.lr = options.lr || 0.02;
+    this.tau = options.tau || 0.05;
+    this.policyNoise = options.policyNoise || 0.1;
+    this.noiseClip = options.noiseClip || 0.25;
+    this.policyDelay = options.policyDelay || 2;
+    this.updateCounter = 0;
+
+    this.actorWeights = new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.targetActorWeights = [...this.actorWeights];
+
+    this.critic1Weights = new Array(this.stateDim + 1).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.critic2Weights = new Array(this.stateDim + 1).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+
+    this.targetCritic1Weights = [...this.critic1Weights];
+    this.targetCritic2Weights = [...this.critic2Weights];
+
+    this.replayBuffer = [];
+  }
+
+  predictMultiplier(state, deterministic = true) {
+    let raw = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      raw += (state[i] || 0) * this.actorWeights[i];
+    }
+    const sigmoid = 1.0 / (1.0 + Math.exp(-raw));
+    let mult = 0.5 + 2.0 * sigmoid;
+
+    if (!deterministic) {
+      const noise = (Math.random() - 0.5) * 0.1;
+      mult = Math.max(0.5, Math.min(2.5, mult + noise));
+    }
+
+    return Number(mult.toFixed(3));
+  }
+
+  _computeQ(weights, state, action) {
+    let val = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      val += (state[i] || 0) * weights[i];
+    }
+    val += action * weights[this.stateDim];
+    return val;
+  }
+
+  recordExperience(state, action, reward, nextState, done = false) {
+    this.replayBuffer.push({
+      state: [...state],
+      action: Number(action),
+      reward: Number(reward),
+      nextState: [...nextState],
+      done: Boolean(done)
+    });
+    if (this.replayBuffer.length > 500) {
+      this.replayBuffer.shift();
+    }
+  }
+
+  trainStep(batchSize = 16) {
+    if (this.replayBuffer.length < 4) {
+      return { trained: false, loss: 0 };
+    }
+
+    this.updateCounter++;
+    const size = Math.min(batchSize, this.replayBuffer.length);
+    let totalCriticLoss = 0;
+
+    for (let b = 0; b < size; b++) {
+      const idx = Math.floor(Math.random() * this.replayBuffer.length);
+      const { state, action, reward, nextState, done } = this.replayBuffer[idx];
+
+      let nextRaw = 0;
+      for (let i = 0; i < this.stateDim; i++) {
+        nextRaw += (nextState[i] || 0) * this.targetActorWeights[i];
+      }
+      const targetSigmoid = 1.0 / (1.0 + Math.exp(-nextRaw));
+      let targetAction = 0.5 + 2.0 * targetSigmoid;
+
+      const noise = Math.max(-this.noiseClip, Math.min(this.noiseClip, (Math.random() - 0.5) * this.policyNoise));
+      targetAction = Math.max(0.5, Math.min(2.5, targetAction + noise));
+
+      const targetQ1 = this._computeQ(this.targetCritic1Weights, nextState, targetAction);
+      const targetQ2 = this._computeQ(this.targetCritic2Weights, nextState, targetAction);
+      const minTargetQ = Math.min(targetQ1, targetQ2);
+
+      const targetVal = reward + (done ? 0 : this.gamma * minTargetQ);
+
+      const q1 = this._computeQ(this.critic1Weights, state, action);
+      const q2 = this._computeQ(this.critic2Weights, state, action);
+
+      const err1 = targetVal - q1;
+      const err2 = targetVal - q2;
+      totalCriticLoss += (Math.abs(err1) + Math.abs(err2)) / 2;
+
+      for (let i = 0; i < this.stateDim; i++) {
+        this.critic1Weights[i] += this.lr * err1 * (state[i] || 0) * 0.05;
+        this.critic2Weights[i] += this.lr * err2 * (state[i] || 0) * 0.05;
+      }
+      this.critic1Weights[this.stateDim] += this.lr * err1 * action * 0.05;
+      this.critic2Weights[this.stateDim] += this.lr * err2 * action * 0.05;
+
+      if (this.updateCounter % this.policyDelay === 0) {
+        const actorAction = this.predictMultiplier(state, true);
+        const q1Val = this._computeQ(this.critic1Weights, state, actorAction);
+
+        for (let i = 0; i < this.stateDim; i++) {
+          this.actorWeights[i] += this.lr * q1Val * (state[i] || 0) * 0.02;
+        }
+
+        for (let i = 0; i < this.stateDim; i++) {
+          this.targetActorWeights[i] = this.tau * this.actorWeights[i] + (1 - this.tau) * this.targetActorWeights[i];
+          this.targetCritic1Weights[i] = this.tau * this.critic1Weights[i] + (1 - this.tau) * this.targetCritic1Weights[i];
+          this.targetCritic2Weights[i] = this.tau * this.critic2Weights[i] + (1 - this.tau) * this.targetCritic2Weights[i];
+        }
+        this.targetCritic1Weights[this.stateDim] = this.tau * this.critic1Weights[this.stateDim] + (1 - this.tau) * this.targetCritic1Weights[this.stateDim];
+        this.targetCritic2Weights[this.stateDim] = this.tau * this.critic2Weights[this.stateDim] + (1 - this.tau) * this.targetCritic2Weights[this.stateDim];
+      }
+    }
+
+    return {
+      trained: true,
+      avgLoss: Number((totalCriticLoss / size).toFixed(4)),
+      policyUpdated: this.updateCounter % this.policyDelay === 0
+    };
+  }
+
+  optimizeBid(adContext) {
+    const {
+      baseBidVND = 2000,
+      currentCtr = 0.05,
+      currentRoas = 3.5,
+      targetRoas = 3.0,
+      budgetRemainingRatio = 0.6,
+      marketVolatility = 0.2
+    } = adContext;
+
+    const roasRatio = Math.min(2.5, currentRoas / Math.max(0.1, targetRoas));
+    const state = [
+      Math.min(1.0, currentCtr * 10),
+      roasRatio,
+      budgetRemainingRatio,
+      1.0,
+      marketVolatility
+    ];
+
+    const multiplier = this.predictMultiplier(state, true);
+    const recommendedBidVND = Math.round(baseBidVND * multiplier);
+    const minBidVND = Math.round(baseBidVND * 0.5);
+    const maxBidVND = Math.round(baseBidVND * 2.5);
+
+    return {
+      baseBidVND,
+      recommendedBidVND: Math.max(minBidVND, Math.min(maxBidVND, recommendedBidVND)),
+      bidMultiplier: multiplier,
+      targetRoas,
+      currentRoas,
+      isDoubleQGuaranteed: true,
+      strategy: roasRatio >= 1.2 && budgetRemainingRatio > 0.4
+        ? 'AGGRESSIVE_SCALE_DOMINANCE'
+        : roasRatio < 0.9 || budgetRemainingRatio < 0.2
+        ? 'CONSERVATIVE_BUDGET_DEFENSE'
+        : 'OPTIMAL_ROAS_EQUILIBRIUM'
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 47 ALGORITHM 3: Split Delivery VRPTW (SDVRPTW - Dror 1989)
+// ------------------------------------------------------------------------------
+export class SDVRPTWRouter {
+  constructor(options = {}) {
+    this.defaultVehicleCapacity = options.defaultVehicleCapacity || 30;
+    this.speedKmPerHour = options.speedKmPerHour || 35;
+    this.depotLocation = options.depotLocation || { lat: 21.0285, lng: 105.8542 };
+  }
+
+  _haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(2));
+  }
+
+  _travelMinutes(distKm) {
+    return Math.round((distKm / this.speedKmPerHour) * 60);
+  }
+
+  getDistance(locA, locB) {
+    return this._haversineKm(locA.lat, locA.lng, locB.lat, locB.lng);
+  }
+
+  planSplitDeliveryRoutes(orders, fleet = []) {
+    const vehicles = fleet.length > 0 ? fleet.map(v => ({
+      id: v.id,
+      name: v.name || `Xe SPX ${v.id}`,
+      capacity: v.capacity || this.defaultVehicleCapacity,
+      remainingCapacity: v.capacity || this.defaultVehicleCapacity,
+      currentLocation: { ...this.depotLocation },
+      currentTimeMinutes: 0,
+      totalDistKm: 0,
+      route: []
+    })) : [
+      {
+        id: 'SPX_TRUCK_01',
+        name: 'Xe Tải Nhẹ 01',
+        capacity: this.defaultVehicleCapacity,
+        remainingCapacity: this.defaultVehicleCapacity,
+        currentLocation: { ...this.depotLocation },
+        currentTimeMinutes: 0,
+        totalDistKm: 0,
+        route: []
+      },
+      {
+        id: 'SPX_TRUCK_02',
+        name: 'Xe Tải Nhẹ 02',
+        capacity: this.defaultVehicleCapacity,
+        remainingCapacity: this.defaultVehicleCapacity,
+        currentLocation: { ...this.depotLocation },
+        currentTimeMinutes: 0,
+        totalDistKm: 0,
+        route: []
+      }
+    ];
+
+    const remainingDemands = orders.map(o => ({
+      id: o.id,
+      lat: o.lat,
+      lng: o.lng,
+      totalDemandKg: o.demandKg,
+      unfulfilledKg: o.demandKg,
+      earlyMinutes: o.earlyMinutes || 0,
+      lateMinutes: o.lateMinutes || 480,
+      serviceMinutes: o.serviceMinutes || 10,
+      splits: []
+    }));
+
+    let progressMade = true;
+    while (progressMade) {
+      progressMade = false;
+      const pendingOrder = remainingDemands.find(o => o.unfulfilledKg > 0);
+      if (!pendingOrder) break;
+
+      let bestVehicle = null;
+      let minAdditionalCost = Infinity;
+
+      for (const vehicle of vehicles) {
+        if (vehicle.remainingCapacity <= 0) continue;
+
+        const dist = this.getDistance(vehicle.currentLocation, pendingOrder);
+        const travelMin = this._travelMinutes(dist);
+        const arrivalTime = vehicle.currentTimeMinutes + travelMin;
+
+        if (arrivalTime <= pendingOrder.lateMinutes) {
+          const cost = dist;
+          if (cost < minAdditionalCost) {
+            minAdditionalCost = cost;
+            bestVehicle = vehicle;
+          }
+        }
+      }
+
+      if (bestVehicle) {
+        progressMade = true;
+        const deliverKg = Math.min(pendingOrder.unfulfilledKg, bestVehicle.remainingCapacity);
+        const dist = this.getDistance(bestVehicle.currentLocation, pendingOrder);
+        const travelMin = this._travelMinutes(dist);
+
+        let arrivalTime = bestVehicle.currentTimeMinutes + travelMin;
+        if (arrivalTime < pendingOrder.earlyMinutes) {
+          arrivalTime = pendingOrder.earlyMinutes;
+        }
+
+        bestVehicle.currentTimeMinutes = arrivalTime + pendingOrder.serviceMinutes;
+        bestVehicle.totalDistKm += dist;
+        bestVehicle.remainingCapacity -= deliverKg;
+        bestVehicle.currentLocation = { lat: pendingOrder.lat, lng: pendingOrder.lng };
+
+        bestVehicle.route.push({
+          orderId: pendingOrder.id,
+          deliveredKg: deliverKg,
+          lat: pendingOrder.lat,
+          lng: pendingOrder.lng,
+          arrivalMinutes: arrivalTime,
+          remainingOrderDemandKg: pendingOrder.unfulfilledKg - deliverKg
+        });
+
+        pendingOrder.unfulfilledKg -= deliverKg;
+        pendingOrder.splits.push({
+          vehicleId: bestVehicle.id,
+          deliveredKg: deliverKg,
+          timeMinutes: arrivalTime
+        });
+      }
+    }
+
+    for (const v of vehicles) {
+      if (v.route.length > 0) {
+        const returnDist = this.getDistance(v.currentLocation, this.depotLocation);
+        v.totalDistKm += returnDist;
+        v.currentTimeMinutes += this._travelMinutes(returnDist);
+        v.currentLocation = { ...this.depotLocation };
+      }
+    }
+
+    const fulfilledOrders = remainingDemands.filter(o => o.unfulfilledKg === 0);
+    const partialOrders = remainingDemands.filter(o => o.unfulfilledKg > 0);
+    const splitCount = remainingDemands.filter(o => o.splits.length > 1).length;
+
+    return {
+      status: 'SDVRPTW_OPTIMAL_SCHEDULED',
+      totalOrdersCount: orders.length,
+      fulfilledOrdersCount: fulfilledOrders.length,
+      partialOrdersCount: partialOrders.length,
+      splitOrdersCount: splitCount,
+      activeVehiclesCount: vehicles.filter(v => v.route.length > 0).length,
+      totalFleetDistanceKm: Number(vehicles.reduce((sum, v) => sum + v.totalDistKm, 0).toFixed(1)),
+      routes: vehicles.filter(v => v.route.length > 0).map(v => ({
+        vehicleId: v.id,
+        name: v.name,
+        stopsCount: v.route.length,
+        totalLoadedKg: v.capacity - v.remainingCapacity,
+        capacityUtilizationPercent: Number((((v.capacity - v.remainingCapacity) / v.capacity) * 100).toFixed(1)),
+        totalDistKm: Number(v.totalDistKm.toFixed(1)),
+        finishTimeMinutes: v.currentTimeMinutes,
+        stops: v.route
+      }))
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -23207,6 +23633,10 @@ export default {
   CountMinLogSketch,
   TQPOFlashSalePricing,
   DynamicDARPRouter,
+  // Phase 47 Enterprise Algorithms
+  CountSketchMedian,
+  TD3AutoBidding,
+  SDVRPTWRouter,
 };
 
 

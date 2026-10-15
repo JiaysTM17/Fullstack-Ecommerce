@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -119,7 +119,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 5. Quản Lý Đơn Hàng & Xử Lý Giao SPX (Order Fulfillment)
-  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router|bưu cục|drop-off|gần shop|geohash/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
+  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router|bưu cục|drop-off|gần shop|geohash|sdvrptw|split delivery|chia nhỏ đơn hàng|count[- ]sketch|td3/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
     const pendingCount = shopOrders.filter(o => o.status === 'pending').length;
     return {
       text: `📦 **TIẾN ĐỘ XỬ LÝ ĐƠN HÀNG GIAN HÀNG**:
@@ -1127,6 +1127,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Theo dõi tần suất SKU bằng CML Sketch',
         'Tối ưu hóa giá bán Flash Sale TQPO',
         'Kiểm tra gom đơn hỏa tốc D-DARP'
+      ]
+    };
+  }
+
+  // 56. Biến Động Ròng Count-Sketch, Đấu Thầu TD3 & Giao Hàng Chia Kiện SDVRPTW (Phase 47 - Feature 194)
+  if (/count[- ]sketch|count sketch|td3|đấu thầu td3|sdvrptw|split delivery|chia nhỏ đơn hàng sdvrptw/i.test(raw)) {
+    return {
+      text: `🎯 **BIẾN ĐỘNG RÒNG COUNT-SKETCH, ĐẤU THẦU TD3 & GIAO HÀNG CHIA KIỆN SDVRPTW (${currentShop.name})**:
+- **Theo dõi biến động bán ròng chính xác không thiên lệch (Count-Sketch Median)**:
+  - Đếm bù trừ chuẩn xác cả lượt đặt hàng (+1) và lượt hủy/trả hàng (-1) bằng hàm băm Rademacher, giúp shop nắm bắt tốc độ bán ròng thực tế của từng sản phẩm.
+- **Tối ưu hóa giá thầu Shopee Ads bằng Clipped Double-Q (TD3)**:
+  - Hệ thống tự động điều chỉnh hệ số đấu thầu liên tục, triệt tiêu thiên lệch giá thầu ảo, giúp shop bạn giữ vững vị trí Top hiển thị với chi phí CPC tiết kiệm nhất và ROAS đạt mục tiêu!
+- **Giao các đơn hàng sỉ/cồng kềnh bằng thuật toán tách kiện (SDVRPTW)**:
+  - Các đơn hàng số lượng lớn của shop không còn lo bị từ chối do quá tải xe máy, bưu tá SPX được điều phối chia kiện linh hoạt để giao trọn vẹn tới người mua đúng khung giờ cam kết!`,
+      type: 'recommendation',
+      tag: 'COUNT-SKETCH NET, TD3 BIDDING & SDVRPTW LOGISTICS',
+      suggestions: [
+        'Theo dõi tốc độ bán ròng Count-Sketch',
+        'Tối ưu hóa giá thầu Shopee Ads TD3',
+        'Kiểm tra định tuyến chia kiện SDVRPTW'
       ]
     };
   }

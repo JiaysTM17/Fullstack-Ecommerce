@@ -592,7 +592,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 25. Kiểm Toán Đấu Thầu Quảng Cáo Tìm Kiếm & Flash Sale (GSP & VCG Auction Engine)
-  if (/gsp|vcg|đấu giá từ khóa|ad rank|second price|quảng cáo tìm kiếm|thặng dư xã hội|social welfare|giá thầu cpc|đấu thầu/i.test(raw)) {
+  if (!/td3|twin delayed|sac[- ]auto|dueling|pid/i.test(raw) && /gsp|vcg|đấu giá từ khóa|ad rank|second price|quảng cáo tìm kiếm|thặng dư xã hội|social welfare|giá thầu cpc|đấu thầu/i.test(raw)) {
     return {
       text: `🎯 **ĐỘNG CƠ ĐẤU THẦU GSP & VCG (SPONSORED SEARCH & FLASH SALE AUCTION)**:
 - **Mục đích thiết kế**: Phân bổ vị trí hiển thị tìm kiếm (Shopee Ads) và đấu giá vị trí tài trợ độc quyền Flash Sale Hero Banner một cách minh bạch, cạnh tranh lành mạnh.
@@ -2434,7 +2434,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 112. Định Tuyến Logistics Liên Tỉnh Siêu Tốc Bằng Contraction Hierarchies (Phase 43 - Feature 190)
-  if (/contraction hierarchies|shortcut edges|upward bi[- ]directional|định tuyến liên tỉnh ch|định tuyến ch/i.test(raw)) {
+  if (/contraction hierarchies|shortcut edges|upward bi[- ]directional|định tuyến liên tỉnh ch|định tuyến ch\b/i.test(raw)) {
     return {
       text: `⚡ **ĐỊNH TUYẾN LOGISTICS LIÊN TỈNH SIÊU TỐC BẰNG CONTRACTION HIERARCHIES (CH - GEISBERGER 2008)**:
 - **Tiền xử lý Co Rút Nút (Node Contraction Preprocessing)**:
@@ -2624,6 +2624,60 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình gom đơn hỏa tốc D-DARP',
         'Kiểm tra giới hạn thời gian chở hàng Max Ride Time',
         'Tối ưu hóa giá Flash Sale TQPO'
+      ]
+    };
+  }
+
+  // 122. Ước Lượng Dòng Dữ Liệu Không Thiên Lệch Bằng Count-Sketch Trung Vị (Phase 47 - Feature 194)
+  if (/count[- ]sketch|count sketch|ước lượng không thiên lệch|median of means|rademacher/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG DÒNG DỮ LIỆU KHÔNG THIÊN LỆCH BẰNG COUNT-SKETCH TRUNG VỊ (CHARIKAR ET AL. 2004)**:
+- **Khắc Phục Hoàn Toàn Điểm Yếu Dương Tính Của Count-Min Sketch**:
+  - Count-Min Sketch truyền thống luôn ước lượng vượt số thực (Overcounting $\\hat{f} \\ge f$) và không hỗ trợ xử lý số âm khi người mua hủy đơn hoặc trả hàng.
+  - Count-Sketch kết hợp hàm băm chỉ số $h(x)$ và hàm băm dấu Rademacher $s(x) \\in \\{-1, +1\\}$, đảm bảo giá trị kỳ vọng toán học **hoàn toàn không thiên lệch**: $\\mathbb{E}[\\hat{f}(x)] = f(x)$.
+- **Trung Vị Của Các Trung Bình (Median of Means)**:
+  - Lấy giá trị trung vị qua $d$ hàng ($d$ lẻ, ví dụ $d = 5$) giúp triệt tiêu phương sai nhiễu: $\\text{Var}[\\hat{f}(x)] \\le \\frac{1}{w} F_2(A)$ với chuẩn Frobenius $F_2$, theo dõi chuẩn xác biến động ròng (Net Velocity) của sản phẩm!`,
+      type: 'analytics',
+      tag: 'COUNT-SKETCH MEDIAN UNBIASED ESTIMATION',
+      suggestions: [
+        'Đo lường sai số Count-Sketch so với Count-Min',
+        'Kiểm tra đấu thầu tự động TD3',
+        'Xem định tuyến chia nhỏ đơn SDVRPTW'
+      ]
+    };
+  }
+
+  // 123. Tối Ưu Hóa Đấu Thầu Shopee Ads Bằng Twin Delayed DDPG (TD3) (Phase 47 - Feature 194)
+  if (/td3|twin delayed|clipped double[- ]q|target policy smoothing|đấu thầu td3/i.test(raw)) {
+    return {
+      text: `🎯 **TỐI ƯU HÓA ĐẤU THẦU SHOPEE ADS BẰNG TWIN DELAYED DDPG (TD3 - FUJIMOTO ET AL. 2018)**:
+- **Đột Phá 3 Cơ Chế Khắc Phục Lỗi Xấp Xỉ Giá Trị Của DDPG**:
+  - **Clipped Double Q-Learning**: Duy trì 2 mạng Critic $Q_1, Q_2$ song song và lấy cận dưới $\\min(Q_{1,\\text{target}}, Q_{2,\\text{target}})$ loại bỏ hoàn toàn thiên lệch phóng đại giá thầu.
+  - **Delayed Policy Updates**: Trì hoãn cập nhật Actor và Target Networks ($d = 2$ bước Critic mới cập nhật Actor 1 lần) giúp chính sách học ổn định trên bề mặt hàm giá trị ít biến động.
+  - **Target Policy Smoothing**: Thêm nhiễu ngẫu nhiên bị chặn $\\text{clip}(\\epsilon, -c, c)$ vào hành động mục tiêu để làm phẳng hàm mục tiêu tránh rơi vào điểm cực tiểu giả!`,
+      type: 'recommendation',
+      tag: 'TD3 CLIPPED DOUBLE-Q AUTO-BIDDING',
+      suggestions: [
+        'Xem hệ số điều chỉnh giá thầu TD3',
+        'Kiểm tra độ trễ cập nhật Actor Policy',
+        'Theo dõi biến động ròng với Count-Sketch'
+      ]
+    };
+  }
+
+  // 124. Định Tuyến Giao Hàng Chia Nhỏ Đơn Có Cửa Sổ Thời Gian SDVRPTW (Phase 47 - Feature 194)
+  if (/sdvrptw|split delivery|chia nhỏ đơn hàng|giao hàng tách đơn|vận chuyển chia kiện/i.test(raw)) {
+    return {
+      text: `🚚 **ĐỊNH TUYẾN GIAO HÀNG CHIA NHỎ ĐƠN CÓ CỬA SỔ THỜI GIAN (SDVRPTW - DROR 1989, ARCHETTI 2008)**:
+- **Tối Ưu Hóa Logistics Đơn Hàng Cồng Kềnh Vượt Tải Trọng**:
+  - Trong mô hình VRP chuẩn, mỗi khách hàng chỉ được thăm bởi duy nhất 1 xe. Khi đơn hàng sỉ/doanh nghiệp có trọng lượng lớn hơn tải trọng xe máy bưu tá ($q_i > Q_\\max$), hệ thống truyền thống buộc phải từ chối hoặc điều xe tải lớn đắt đỏ.
+  - SDVRPTW phá vỡ rào cản này bằng cách **cho phép chia nhỏ đơn hàng (Split Delivery Relaxation)** cho nhiều xe cùng giao trong cửa sổ thời gian $[e_i, l_i]$, tiết kiệm 15% - 20% tổng quãng đường di chuyển của toàn đội xe SPX Express!`,
+      type: 'logistics',
+      tag: 'SDVRPTW SPLIT DELIVERY LOGISTICS',
+      suggestions: [
+        'Xem kế hoạch tách kiện xe giao SDVRPTW',
+        'Kiểm tra tỷ lệ lấp đầy tải trọng xe fleet',
+        'Tối ưu hóa giá thầu bằng TD3'
       ]
     };
   }
