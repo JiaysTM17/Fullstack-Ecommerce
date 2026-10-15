@@ -18035,6 +18035,660 @@ export class ActorCriticIncentiveRouter {
   }
 }
 
+// ==============================================================================
+// PHASE 38 ENTERPRISE ALGORITHMS SUITE (Feature 185)
+// ==============================================================================
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 1: Spatial Quadtree for Fleet Logistics Dispatch
+// ------------------------------------------------------------------------------
+export class SpatialPoint {
+  constructor(id, lat, lon, data = {}) {
+    this.id = id;
+    this.lat = Number(lat);
+    this.lon = Number(lon);
+    this.data = data;
+  }
+}
+
+export class BoundingBox {
+  constructor(minLat, minLon, maxLat, maxLon) {
+    this.minLat = Number(minLat);
+    this.minLon = Number(minLon);
+    this.maxLat = Number(maxLat);
+    this.maxLon = Number(maxLon);
+  }
+
+  contains(point) {
+    return (
+      point.lat >= this.minLat &&
+      point.lat <= this.maxLat &&
+      point.lon >= this.minLon &&
+      point.lon <= this.maxLon
+    );
+  }
+
+  intersects(other) {
+    return !(
+      other.minLat > this.maxLat ||
+      other.maxLat < this.minLat ||
+      other.minLon > this.maxLon ||
+      other.maxLon < this.minLon
+    );
+  }
+}
+
+export class SpatialQuadtreeNode {
+  constructor(boundary, capacity = 4, depth = 0, maxDepth = 12) {
+    this.boundary = boundary;
+    this.capacity = capacity;
+    this.depth = depth;
+    this.maxDepth = maxDepth;
+    this.points = [];
+    this.isDivided = false;
+
+    this.northWest = null;
+    this.northEast = null;
+    this.southWest = null;
+    this.southEast = null;
+  }
+
+  subdivide() {
+    const { minLat, minLon, maxLat, maxLon } = this.boundary;
+    const midLat = (minLat + maxLat) / 2;
+    const midLon = (minLon + maxLon) / 2;
+
+    this.northWest = new SpatialQuadtreeNode(
+      new BoundingBox(midLat, minLon, maxLat, midLon),
+      this.capacity,
+      this.depth + 1,
+      this.maxDepth
+    );
+    this.northEast = new SpatialQuadtreeNode(
+      new BoundingBox(midLat, midLon, maxLat, maxLon),
+      this.capacity,
+      this.depth + 1,
+      this.maxDepth
+    );
+    this.southWest = new SpatialQuadtreeNode(
+      new BoundingBox(minLat, minLon, midLat, midLon),
+      this.capacity,
+      this.depth + 1,
+      this.maxDepth
+    );
+    this.southEast = new SpatialQuadtreeNode(
+      new BoundingBox(minLat, midLon, midLat, maxLon),
+      this.capacity,
+      this.depth + 1,
+      this.maxDepth
+    );
+
+    this.isDivided = true;
+
+    const oldPoints = this.points;
+    this.points = [];
+    for (const pt of oldPoints) {
+      this.insert(pt);
+    }
+  }
+
+  insert(point) {
+    if (!this.boundary.contains(point)) return false;
+
+    if (!this.isDivided) {
+      if (this.points.length < this.capacity || this.depth >= this.maxDepth) {
+        this.points.push(point);
+        return true;
+      }
+      this.subdivide();
+    }
+
+    return (
+      this.northWest.insert(point) ||
+      this.northEast.insert(point) ||
+      this.southWest.insert(point) ||
+      this.southEast.insert(point)
+    );
+  }
+
+  queryRange(range, found = []) {
+    if (!this.boundary.intersects(range)) return found;
+
+    if (!this.isDivided) {
+      for (const pt of this.points) {
+        if (range.contains(pt)) found.push(pt);
+      }
+      return found;
+    }
+
+    this.northWest.queryRange(range, found);
+    this.northEast.queryRange(range, found);
+    this.southWest.queryRange(range, found);
+    this.southEast.queryRange(range, found);
+
+    return found;
+  }
+}
+
+export class SpatialQuadtreeDispatch {
+  constructor(options = {}) {
+    const {
+      minLat = 8.0,
+      minLon = 102.0,
+      maxLat = 24.0,
+      maxLon = 110.0,
+      capacity = 4,
+      maxDepth = 12
+    } = options;
+
+    this.root = new SpatialQuadtreeNode(
+      new BoundingBox(minLat, minLon, maxLat, maxLon),
+      capacity,
+      0,
+      maxDepth
+    );
+    this.pointIndex = new Map();
+  }
+
+  insert(id, lat, lon, data = {}) {
+    const point = new SpatialPoint(id, lat, lon, data);
+    const success = this.root.insert(point);
+    if (success) {
+      this.pointIndex.set(id, point);
+    }
+    return success;
+  }
+
+  queryBoundingBox(minLat, minLon, maxLat, maxLon) {
+    const box = new BoundingBox(minLat, minLon, maxLat, maxLon);
+    return this.root.queryRange(box);
+  }
+
+  static haversineDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  findNearestNeighbors(targetLat, targetLon, k = 5, maxRadiusKm = 50) {
+    if (k <= 0) return [];
+    const approxDegreeDelta = maxRadiusKm / 111.0;
+    const searchBox = new BoundingBox(
+      targetLat - approxDegreeDelta,
+      targetLon - approxDegreeDelta,
+      targetLat + approxDegreeDelta,
+      targetLon + approxDegreeDelta
+    );
+
+    const candidates = this.root.queryRange(searchBox);
+
+    const scored = candidates.map(pt => {
+      const distanceKm = SpatialQuadtreeDispatch.haversineDistanceKm(
+        targetLat,
+        targetLon,
+        pt.lat,
+        pt.lon
+      );
+      return {
+        id: pt.id,
+        lat: pt.lat,
+        lon: pt.lon,
+        data: pt.data,
+        distanceKm: Math.round(distanceKm * 100) / 100
+      };
+    });
+
+    scored.sort((a, b) => a.distanceKm - b.distanceKm);
+    return scored.filter(s => s.distanceKm <= maxRadiusKm).slice(0, k);
+  }
+
+  dispatchOrderToBestCourier(orderLat, orderLon, options = {}) {
+    const { maxSearchRadiusKm = 15, requiredCapacityKg = 5 } = options;
+    const nearest = this.findNearestNeighbors(orderLat, orderLon, 10, maxSearchRadiusKm);
+
+    const eligible = nearest.filter(c => {
+      if (c.data && c.data.isAvailable === false) return false;
+      if (c.data && typeof c.data.remainingCapacityKg === 'number') {
+        return c.data.remainingCapacityKg >= requiredCapacityKg;
+      }
+      return true;
+    });
+
+    if (eligible.length === 0) {
+      return {
+        success: false,
+        message: 'Không tìm thấy bưu tá phù hợp trong bán kính phục vụ',
+        candidateCount: nearest.length
+      };
+    }
+
+    const bestCourier = eligible[0];
+    const estimatedPickupMinutes = Math.max(3, Math.round(bestCourier.distanceKm * 3.5));
+
+    return {
+      success: true,
+      courierId: bestCourier.id,
+      distanceKm: bestCourier.distanceKm,
+      estimatedPickupMinutes,
+      courierData: bestCourier.data,
+      backupCouriers: eligible.slice(1, 3).map(c => ({ id: c.id, distanceKm: c.distanceKm }))
+    };
+  }
+
+  size() {
+    return this.pointIndex.size;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 2: SimHash Multi-Fingerprint Permutation Table (Manku et al., WWW 2007)
+// ------------------------------------------------------------------------------
+export class SimHashGenerator {
+  static fnv1a(str, seed = 0x811c9dc5) {
+    let hval = seed;
+    for (let i = 0; i < str.length; i++) {
+      hval ^= str.charCodeAt(i);
+      hval = Math.imul(hval, 0x01000193);
+    }
+    return hval >>> 0;
+  }
+
+  static hash64(str) {
+    const high = SimHashGenerator.fnv1a(str, 0x811c9dc5);
+    const low = SimHashGenerator.fnv1a(str, 0x9e3779b9);
+    return high.toString(16).padStart(8, '0') + low.toString(16).padStart(8, '0');
+  }
+
+  static computeSimHash64(text, options = {}) {
+    const { shingleSize = 2 } = options;
+    if (!text || typeof text !== 'string') return '0'.repeat(16);
+
+    const tokens = text
+      .toLowerCase()
+      .replace(/[^\w\s\u00C0-\u1EF9]/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    if (tokens.length === 0) return '0'.repeat(16);
+
+    const shingles = [];
+    for (const t of tokens) {
+      shingles.push(t);
+    }
+    for (let i = 0; i < tokens.length - 1; i++) {
+      shingles.push(tokens[i] + ' ' + tokens[i + 1]);
+    }
+
+    const v = new Array(64).fill(0);
+    for (const shingle of shingles) {
+      const h64 = SimHashGenerator.hash64(shingle);
+      const high = parseInt(h64.slice(0, 8), 16);
+      const low = parseInt(h64.slice(8, 16), 16);
+
+      for (let bit = 0; bit < 32; bit++) {
+        v[bit] += ((high >>> (31 - bit)) & 1) ? 1 : -1;
+        v[bit + 32] += ((low >>> (31 - bit)) & 1) ? 1 : -1;
+      }
+    }
+
+    let highRes = 0;
+    let lowRes = 0;
+    for (let bit = 0; bit < 32; bit++) {
+      if (v[bit] > 0) highRes = (highRes | (1 << (31 - bit))) >>> 0;
+      if (v[bit + 32] > 0) lowRes = (lowRes | (1 << (31 - bit))) >>> 0;
+    }
+
+    return highRes.toString(16).padStart(8, '0') + lowRes.toString(16).padStart(8, '0');
+  }
+
+  static popcount32(n) {
+    n = n - ((n >>> 1) & 0x55555555);
+    n = (n & 0x33333333) + ((n >>> 2) & 0x33333333);
+    return (((n + (n >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24;
+  }
+
+  static hammingDistance64(hexA, hexB) {
+    if (!hexA || !hexB || hexA.length !== 16 || hexB.length !== 16) return 64;
+
+    const aHigh = parseInt(hexA.slice(0, 8), 16);
+    const aLow = parseInt(hexA.slice(8, 16), 16);
+    const bHigh = parseInt(hexB.slice(0, 8), 16);
+    const bLow = parseInt(hexB.slice(8, 16), 16);
+
+    const xorHigh = (aHigh ^ bHigh) >>> 0;
+    const xorLow = (aLow ^ bLow) >>> 0;
+
+    return SimHashGenerator.popcount32(xorHigh) + SimHashGenerator.popcount32(xorLow);
+  }
+}
+
+export class SimHashPermutationTable {
+  constructor(options = {}) {
+    const { numBlocks = 4, maxHammingDistance = 3 } = options;
+    this.numBlocks = numBlocks;
+    this.blockSize = 64 / numBlocks;
+    this.maxHammingDistance = maxHammingDistance;
+
+    this.tables = [];
+    for (let i = 0; i < this.numBlocks; i++) {
+      this.tables.push(new Map());
+    }
+    this.fingerprintIndex = new Map();
+  }
+
+  extractBlockHex(hex64, blockIdx) {
+    const charsPerBlock = 16 / this.numBlocks;
+    const start = blockIdx * charsPerBlock;
+    return hex64.slice(start, start + charsPerBlock);
+  }
+
+  insert(id, hex64, metadata = {}) {
+    if (!hex64 || hex64.length !== 16) {
+      throw new Error('Fingerprint phải là chuỗi hex 16 ký tự (64-bit)');
+    }
+    if (this.fingerprintIndex.has(id)) {
+      this.remove(id);
+    }
+
+    this.fingerprintIndex.set(id, { hex: hex64, metadata });
+    for (let b = 0; b < this.numBlocks; b++) {
+      const blockKey = this.extractBlockHex(hex64, b);
+      if (!this.tables[b].has(blockKey)) {
+        this.tables[b].set(blockKey, new Set());
+      }
+      this.tables[b].get(blockKey).add(id);
+    }
+    return true;
+  }
+
+  insertDocument(id, text, metadata = {}) {
+    const hex64 = SimHashGenerator.computeSimHash64(text);
+    return this.insert(id, hex64, { ...metadata, textSample: text.slice(0, 100) });
+  }
+
+  remove(id) {
+    if (!this.fingerprintIndex.has(id)) return false;
+    const { hex } = this.fingerprintIndex.get(id);
+
+    for (let b = 0; b < this.numBlocks; b++) {
+      const blockKey = this.extractBlockHex(hex, b);
+      const set = this.tables[b].get(blockKey);
+      if (set) {
+        set.delete(id);
+        if (set.size === 0) this.tables[b].delete(blockKey);
+      }
+    }
+
+    this.fingerprintIndex.delete(id);
+    return true;
+  }
+
+  findDuplicates(queryHex64, maxDistance = this.maxHammingDistance) {
+    if (!queryHex64 || queryHex64.length !== 16) return [];
+
+    const candidateIds = new Set();
+    for (let b = 0; b < this.numBlocks; b++) {
+      const blockKey = this.extractBlockHex(queryHex64, b);
+      const bucket = this.tables[b].get(blockKey);
+      if (bucket) {
+        for (const id of bucket) candidateIds.add(id);
+      }
+    }
+
+    const results = [];
+    for (const id of candidateIds) {
+      const entry = this.fingerprintIndex.get(id);
+      if (entry) {
+        const dist = SimHashGenerator.hammingDistance64(queryHex64, entry.hex);
+        if (dist <= maxDistance) {
+          results.push({
+            id,
+            hammingDistance: dist,
+            similarityScore: Math.round(((64 - dist) / 64) * 100) / 100,
+            metadata: entry.metadata
+          });
+        }
+      }
+    }
+
+    results.sort((a, b) => a.hammingDistance - b.hammingDistance);
+    return results;
+  }
+
+  findDuplicateDocuments(text, maxDistance = this.maxHammingDistance) {
+    const queryHex = SimHashGenerator.computeSimHash64(text);
+    return {
+      querySimHash: queryHex,
+      matches: this.findDuplicates(queryHex, maxDistance)
+    };
+  }
+
+  size() {
+    return this.fingerprintIndex.size;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 3: Dueling Deep Q-Network (Dueling DQN) Keyword Bidding Optimizer
+// ------------------------------------------------------------------------------
+export class ReplayBuffer {
+  constructor(capacity = 1000) {
+    this.capacity = capacity;
+    this.buffer = [];
+    this.position = 0;
+  }
+
+  push(state, action, reward, nextState, done) {
+    if (this.buffer.length < this.capacity) {
+      this.buffer.push({ state, action, reward, nextState, done });
+    } else {
+      this.buffer[this.position] = { state, action, reward, nextState, done };
+    }
+    this.position = (this.position + 1) % this.capacity;
+  }
+
+  sample(batchSize) {
+    const size = Math.min(batchSize, this.buffer.length);
+    const samples = [];
+    const indices = new Set();
+    while (samples.length < size) {
+      const idx = Math.floor(Math.random() * this.buffer.length);
+      if (!indices.has(idx)) {
+        indices.add(idx);
+        samples.push(this.buffer[idx]);
+      }
+    }
+    return samples;
+  }
+
+  size() {
+    return this.buffer.length;
+  }
+}
+
+export class DuelingDqnBidding {
+  constructor(options = {}) {
+    const {
+      stateDim = 6,
+      actionMultipliers = [0.8, 0.9, 1.0, 1.1, 1.2],
+      learningRate = 0.01,
+      gamma = 0.95,
+      epsilon = 0.2,
+      epsilonDecay = 0.995,
+      epsilonMin = 0.02,
+      hiddenDim = 16,
+      replayCapacity = 1000
+    } = options;
+
+    this.stateDim = stateDim;
+    this.actionMultipliers = actionMultipliers;
+    this.actionDim = actionMultipliers.length;
+    this.learningRate = learningRate;
+    this.gamma = gamma;
+    this.epsilon = epsilon;
+    this.epsilonDecay = epsilonDecay;
+    this.epsilonMin = epsilonMin;
+    this.hiddenDim = hiddenDim;
+
+    this.actionNames = [
+      'GIẢM_20% (Bảo toàn ngân sách)',
+      'GIẢM_10% (Tối ưu ROAS)',
+      'GIỮ_NGUYÊN_GIÁ_THẦU',
+      'TĂNG_10% (Tăng hiển thị)',
+      'TĂNG_20% (Chiếm top 1 tìm kiếm)'
+    ];
+
+    this.Wh = this._initMatrix(hiddenDim, stateDim);
+    this.bh = new Array(hiddenDim).fill(0.01);
+    this.Wv = new Array(hiddenDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.bv = 0.0;
+    this.Wa = this._initMatrix(this.actionDim, hiddenDim);
+    this.ba = new Array(this.actionDim).fill(0.0);
+
+    this.replayBuffer = new ReplayBuffer(replayCapacity);
+  }
+
+  _initMatrix(rows, cols) {
+    const m = [];
+    for (let r = 0; r < rows; r++) {
+      const row = [];
+      for (let c = 0; c < cols; c++) {
+        row.push((Math.random() - 0.5) * (2 / Math.sqrt(cols)));
+      }
+      m.push(row);
+    }
+    return m;
+  }
+
+  forward(state) {
+    const h = new Array(this.hiddenDim).fill(0);
+    for (let i = 0; i < this.hiddenDim; i++) {
+      let sum = this.bh[i];
+      for (let j = 0; j < this.stateDim; j++) {
+        sum += this.Wh[i][j] * (state[j] || 0);
+      }
+      h[i] = Math.max(0, sum);
+    }
+
+    let V = this.bv;
+    for (let i = 0; i < this.hiddenDim; i++) {
+      V += this.Wv[i] * h[i];
+    }
+
+    const A = new Array(this.actionDim).fill(0);
+    let sumA = 0;
+    for (let a = 0; a < this.actionDim; a++) {
+      let sum = this.ba[a];
+      for (let i = 0; i < this.hiddenDim; i++) {
+        sum += this.Wa[a][i] * h[i];
+      }
+      A[a] = sum;
+      sumA += sum;
+    }
+
+    const meanA = sumA / this.actionDim;
+    const Q = new Array(this.actionDim);
+    for (let a = 0; a < this.actionDim; a++) {
+      Q[a] = V + (A[a] - meanA);
+    }
+
+    return { Q, V, A, h };
+  }
+
+  selectAction(state, explore = true) {
+    if (explore && Math.random() < this.epsilon) {
+      return Math.floor(Math.random() * this.actionDim);
+    }
+    const { Q } = this.forward(state);
+    let bestAction = 0;
+    let maxQ = Q[0];
+    for (let a = 1; a < this.actionDim; a++) {
+      if (Q[a] > maxQ) {
+        maxQ = Q[a];
+        bestAction = a;
+      }
+    }
+    return bestAction;
+  }
+
+  storeTransition(state, action, reward, nextState, done = false) {
+    this.replayBuffer.push(state, action, reward, nextState, done);
+  }
+
+  trainMiniBatch(batchSize = 32) {
+    if (this.replayBuffer.size() < 10) {
+      return { trained: false, loss: 0 };
+    }
+
+    const batch = this.replayBuffer.sample(batchSize);
+    let totalLoss = 0;
+
+    for (const item of batch) {
+      const { state, action, reward, nextState, done } = item;
+      const { Q: currentQ, h } = this.forward(state);
+      const currentVal = currentQ[action];
+
+      let targetVal = reward;
+      if (!done && nextState) {
+        const { Q: nextQ } = this.forward(nextState);
+        const maxNextQ = Math.max(...nextQ);
+        targetVal = reward + this.gamma * maxNextQ;
+      }
+
+      const tdError = targetVal - currentVal;
+      totalLoss += tdError * tdError;
+
+      this.bv += this.learningRate * tdError * 0.5;
+      this.ba[action] += this.learningRate * tdError * 0.5;
+
+      for (let i = 0; i < this.hiddenDim; i++) {
+        this.Wv[i] += this.learningRate * tdError * 0.2 * h[i];
+        this.Wa[action][i] += this.learningRate * tdError * 0.3 * h[i];
+      }
+    }
+
+    this.epsilon = Math.max(this.epsilonMin, this.epsilon * this.epsilonDecay);
+
+    return {
+      trained: true,
+      batchSize: batch.length,
+      avgLoss: Math.round((totalLoss / batch.length) * 1000) / 1000,
+      currentEpsilon: Math.round(this.epsilon * 1000) / 1000
+    };
+  }
+
+  recommendBidOptimization(keyword, currentBid, stateFeatures, options = {}) {
+    const { minBid = 500, maxBid = 50000 } = options;
+    const { Q, V, A } = this.forward(stateFeatures);
+    const actionIdx = this.selectAction(stateFeatures, false);
+    const multiplier = this.actionMultipliers[actionIdx];
+
+    const rawNewBid = Math.round(currentBid * multiplier);
+    const optimizedBid = Math.max(minBid, Math.min(maxBid, rawNewBid));
+
+    return {
+      keyword,
+      currentBid,
+      optimizedBid,
+      adjustmentPercent: Math.round((multiplier - 1.0) * 100),
+      actionName: this.actionNames[actionIdx],
+      stateValueEstimate: Math.round(V * 100) / 100,
+      actionAdvantage: Math.round(A[actionIdx] * 100) / 100,
+      qValues: Q.map(q => Math.round(q * 100) / 100),
+      explanation: `Dueling DQN phân tích giá trị ngữ cảnh V(s)=${V.toFixed(2)} và lợi thế hành động A(s,a)=${A[actionIdx].toFixed(2)}, đề xuất hành động: ${this.actionNames[actionIdx]}.`
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -18239,6 +18893,15 @@ export default {
   CircularWashTradeDetector,
   MatrixSegmentTree,
   ActorCriticIncentiveRouter,
+  // Phase 38 Enterprise Algorithms
+  SpatialPoint,
+  BoundingBox,
+  SpatialQuadtreeNode,
+  SpatialQuadtreeDispatch,
+  SimHashGenerator,
+  SimHashPermutationTable,
+  ReplayBuffer,
+  DuelingDqnBidding,
 };
 
 

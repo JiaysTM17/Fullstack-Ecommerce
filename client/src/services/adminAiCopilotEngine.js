@@ -658,7 +658,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 28. Điều Phối Bưu Tá SPX Tối Ưu Đa Tiêu Chí (Hungarian Algorithm - Kuhn-Munkres)
-  if (!/kuhn-munkres max weight|ghép đôi cực đại hai phía|trọng số nhãn khả thi|công bằng tải bưu tá|workload fairness|kuhn-munkres đối ngẫu/i.test(raw) && /hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
+  if (!/spatial quadtree|quadtree|cây tứ phân|kuhn-munkres max weight|ghép đôi cực đại hai phía|trọng số nhãn khả thi|công bằng tải bưu tá|workload fairness|kuhn-munkres đối ngẫu/i.test(raw) && /hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
     return {
       text: `🚚 **ĐIỀU PHỐI BƯU TÁ TỐI ƯU HUNGARIAN (Kuhn-Munkres $O(V^3)$)**:
 - **Mục đích**: Thuật toán Hungarian (Kuhn-Munkres) ghép cặp tự động và tối ưu cực tiểu tổng chi phí giao vận giữa $N$ bưu tá SPX Express và $M$ đơn hàng hỏa tốc.
@@ -995,7 +995,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 40. Quét Đánh Giá Ảo & Review Spam Bằng SimHash & Hamming Distance (Phase 17 - Feature 164)
-  if (!/cosine lsh|hyperplane/i.test(raw) && /simhash|review spam|đánh giá ảo|seeding gian lận|khoảng cách hamming|trùng lặp review/i.test(raw)) {
+  if (!/cosine lsh|hyperplane|bảng hoán vị|permutation table|manku/i.test(raw) && /simhash|review spam|đánh giá ảo|seeding gian lận|khoảng cách hamming|trùng lặp review/i.test(raw)) {
     return {
       text: `🔍 **RADAR PHÁT HIỆN REVIEW SPAM & SEEDING BẰNG SIMHASH (CHARIKAR'S ALGORITHM)**:
 - **Nguyên lý SimHash 64-bit**:
@@ -2058,7 +2058,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 93. Quản Trị Tồn Kho Đa Chiều Bằng Cây Đoạn 2D Matrix Segment Tree (Phase 37 - Feature 184)
-  if (/matrix segment tree|cây đoạn 2 chiều|cây đoạn ma trận|quad tree|tồn kho đa chiều|truy vấn vùng 2d/i.test(raw)) {
+  if (!/spatial quadtree|bưu tá|điều phối đội xe|fleet|manku|permutation table|dueling dqn/i.test(raw) && /matrix segment tree|cây đoạn 2 chiều|cây đoạn ma trận|tồn kho đa chiều|truy vấn vùng 2d/i.test(raw)) {
     return {
       text: `📊 **QUẢN TRỊ TỒN KHO ĐA CHIỀU BẰNG CÂY ĐOẠN 2D (MATRIX SEGMENT TREE - $O(\\log R \\cdot \\log C)$)**:
 - **Cấu trúc Cây Đoạn Lồng Nhau (Nested 2D Segment Tree)**:
@@ -2093,6 +2093,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem phân phối xác suất ưu đãi A2C',
         'Kiểm tra giá trị kỳ vọng Critic V(s)',
         'Quét giao dịch ảo vòng tròn Johnson'
+      ]
+    };
+  }
+
+  // 95. Điều Phối Đội Xe & Bưu Tá SPX Bằng Spatial Quadtree (Phase 38 - Feature 185)
+  if (/spatial quadtree|cây tứ phân không gian|điều phối bưu tá quadtree|phân vùng không gian|fleet dispatch quadtree|k-nn quadtree/i.test(raw)) {
+    return {
+      text: `🚚 **ĐIỀU PHỐI ĐỘI XE & BƯU TÁ SPX BẰNG CÂY TỨ PHÂN KHÔNG GIAN (SPATIAL QUADTREE)**:
+- **Phân hoạch Đệ quy Không gian 2D (Recursive 2D Spatial Partitioning)**:
+  - Chia bản đồ logistics thành 4 góc phần tư: **NW, NE, SW, SE** với cận trên độ sâu $D=12$ và sức chứa node $C=4$.
+  - Tối ưu hóa truy vấn vùng chữ nhật Bounding Box và k-Bưu tá gần nhất ($k$-NN) trong $O(\\log N + k)$ thay vì quét toàn bộ $O(N)$ tài xế.
+- **Thuật toán Khớp Bưu tá Tối ưu (Optimal Courier Dispatch Heuristic)**:
+  - Tính toán khoảng cách mặt cầu Haversine chuẩn xác tới từng mét.
+  - Tự động sàng lọc điều kiện tải trọng còn lại (\`remainingCapacityKg\`) và trạng thái sẵn sàng để chỉ định bưu tá nhận đơn với thời gian lấy hàng ngắn nhất!`,
+      type: 'logistics',
+      tag: 'SPATIAL QUADTREE DISPATCH',
+      suggestions: [
+        'Truy vấn bưu tá gần nhất k-NN',
+        'Điều phối đơn hàng SPX tự động',
+        'Bảng hoán vị SimHash Manku'
+      ]
+    };
+  }
+
+  // 96. Bảng Hoán Vị SimHash Đa Khối Phát Hiện Trùng Lặp Catalog O(1) (Phase 38 - Feature 185)
+  if (/simhash permutation|bảng hoán vị simhash|manku|permutation table|trùng lặp catalog manku|simhash đa khối/i.test(raw)) {
+    return {
+      text: `🔍 **BẢNG HOÁN VỊ SIMHASH ĐA KHỐI PHÁT HIỆN TRÙNG LẶP CATALOG O(1) (MANKU ET AL., WWW 2007)**:
+- **Nguyên lý Chuồng Bồ Câu (Pigeonhole Principle)**:
+  - Chia mã băm SimHash 64-bit thành $p=4$ khối hoán vị (16-bit mỗi khối).
+  - Khi 2 văn bản có khoảng cách Hamming $d_H \\le 3$, chắc chắn tồn tại ít nhất 1 khối hoàn toàn trùng khớp ($0$ bit lệch).
+- **Độ phức tạp Tra cứu Cực Tốc $O(1)$**:
+  - Dùng bảng băm tra cứu tiền tố khối trong $O(1)$, thu hẹp tập ứng viên từ hàng triệu bản ghi xuống chỉ vài ứng viên trước khi tính khoảng cách Hamming đầy đủ.
+  - Tự động gắn nhãn cảnh báo sao chép tiêu đề và mô tả sản phẩm tinh vi giữa các gian hàng!`,
+      type: 'security',
+      tag: 'SIMHASH PERMUTATION TABLE',
+      suggestions: [
+        'Tra cứu trùng lặp văn bản SimHash',
+        'Quét sao chép catalog Manku',
+        'Tối ưu đấu thầu Dueling DQN'
+      ]
+    };
+  }
+
+  // 97. Tối Ưu Hóa Giá Thầu Shopee Ads Bằng Dueling Deep Q-Network (Phase 38 - Feature 185)
+  if (/dueling dqn|dueling deep q-network|đấu thầu dueling|giá thầu dqn|dueling q-learning|tối ưu shopee ads dueling/i.test(raw)) {
+    return {
+      text: `📈 **TỐI ƯU HÓA GIÁ THẦU SHOPEE ADS BẰNG DUELING DEEP Q-NETWORK (WANG ET AL., ICML 2016)**:
+- **Kiến trúc Dueling Phân Rã (Decoupled Value & Advantage Streams)**:
+  $$Q(s, a) = V(s) + \\left(A(s, a) - \\frac{1}{|\\mathcal{A}|} \\sum_{a' \\in \\mathcal{A}} A(s, a')\\right)$$
+  - **Giá trị trạng thái $V(s)$**: Đánh giá tiềm năng tổng thể của từ khóa (CTR hiện tại, CVR chuyển đổi, ngân sách còn lại).
+  - **Lợi thế hành động $A(s, a)$**: Đo lường mức độ vượt trội của từng bước tăng/giảm giá thầu ($-20\\%, -10\\%, 0\\%, +10\\%, +20\\%$).
+- **Replay Buffer & Huấn luyện Mini-Batch**:
+  - Phá vỡ tương quan chuỗi thời gian bằng bộ đệm lưu trữ trải nghiệm, giúp thuật toán hội tụ mượt mà về mức giá thầu tối đa hóa doanh thu ROAS!`,
+      type: 'marketing',
+      tag: 'DUELING DQN BIDDING',
+      suggestions: [
+        'Khuyến nghị điều chỉnh giá thầu Dueling',
+        'Huấn luyện Mini-Batch Dueling DQN',
+        'Điều phối bưu tá Spatial Quadtree'
       ]
     };
   }

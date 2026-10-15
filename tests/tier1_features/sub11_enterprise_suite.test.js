@@ -220,6 +220,15 @@ import {
   CircularWashTradeDetector,
   MatrixSegmentTree,
   ActorCriticIncentiveRouter,
+  // Phase 38 Enterprise Algorithms
+  SpatialPoint,
+  BoundingBox,
+  SpatialQuadtreeNode,
+  SpatialQuadtreeDispatch,
+  SimHashGenerator,
+  SimHashPermutationTable,
+  ReplayBuffer,
+  DuelingDqnBidding,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -299,6 +308,9 @@ import ServerDoubleQLearningPricing from "../../server/src/utils/doubleQLearning
 import ServerCircularWashTradeDetector from "../../server/src/utils/circularWashTradeDetector.js";
 import ServerMatrixSegmentTree from "../../server/src/utils/matrixSegmentTree.js";
 import ServerActorCriticRouter from "../../server/src/utils/actorCriticIncentiveRouter.js";
+import { SpatialQuadtreeDispatch as ServerSpatialQuadtreeDispatch } from "../../server/src/utils/spatialQuadtreeDispatch.js";
+import { SimHashPermutationTable as ServerSimHashPermutationTable, SimHashGenerator as ServerSimHashGenerator } from "../../server/src/utils/simhashPermutationTable.js";
+import { DuelingDqnBidding as ServerDuelingDqnBidding, ReplayBuffer as ServerReplayBuffer } from "../../server/src/utils/duelingDqnBidding.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -18383,6 +18395,374 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       }
       const tailoredPerk = router.selectAction([1, 1, 1], true);
       expect.equal(tailoredPerk, "DISCOUNT_15");
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 185: Phase 38 Spatial Quadtree, SimHash Permutation, and Dueling DQN Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 185: Phase 38 Spatial Quadtree, SimHash Permutation, and Dueling DQN Suite", () => {
+    // --- 1. SPATIAL QUADTREE FLEET DISPATCH (8 tests) ---
+    test("F185-T01: Inserts points into spatial quadtree and respects boundary constraints", () => {
+      const quadtree = new SpatialQuadtreeDispatch({
+        minLat: 10.0,
+        minLon: 106.0,
+        maxLat: 11.0,
+        maxLon: 107.0,
+      });
+
+      const inBounds = quadtree.insert("RIDER_01", 10.5, 106.5, { name: "Nguyễn Văn A" });
+      const outOfBounds = quadtree.insert("RIDER_OUT", 21.0, 105.0, { name: "Hà Nội" });
+
+      expect.equal(inBounds, true);
+      expect.equal(outOfBounds, false);
+      expect.equal(quadtree.size(), 1);
+    });
+
+    test("F185-T02: Node subdivides into 4 quadrants (NW, NE, SW, SE) when exceeding node capacity", () => {
+      const quadtree = new SpatialQuadtreeDispatch({
+        minLat: 10.0,
+        minLon: 106.0,
+        maxLat: 11.0,
+        maxLon: 107.0,
+        capacity: 2,
+      });
+
+      quadtree.insert("P1", 10.2, 106.2);
+      quadtree.insert("P2", 10.8, 106.8);
+      expect.equal(quadtree.root.isDivided, false);
+
+      // Third point forces subdivision
+      quadtree.insert("P3", 10.25, 106.25);
+      expect.equal(quadtree.root.isDivided, true);
+      expect.ok(quadtree.root.northWest !== null);
+      expect.ok(quadtree.root.northEast !== null);
+      expect.ok(quadtree.root.southWest !== null);
+      expect.ok(quadtree.root.southEast !== null);
+    });
+
+    test("F185-T03: Range query returns all points strictly enclosed within the bounding box", () => {
+      const quadtree = new SpatialQuadtreeDispatch({
+        minLat: 10.0,
+        minLon: 106.0,
+        maxLat: 11.0,
+        maxLon: 107.0,
+      });
+
+      quadtree.insert("DISTRICT_1", 10.77, 106.70);
+      quadtree.insert("DISTRICT_3", 10.78, 106.68);
+      quadtree.insert("THU_DUC", 10.85, 106.75);
+      quadtree.insert("CAN_GIO", 10.40, 106.90);
+
+      const centerBoxResults = quadtree.queryBoundingBox(10.75, 106.65, 10.80, 106.72);
+      expect.equal(centerBoxResults.length, 2);
+      const ids = centerBoxResults.map(p => p.id).sort();
+      expect.deepEqual(ids, ["DISTRICT_1", "DISTRICT_3"]);
+    });
+
+    test("F185-T04: Haversine distance calculates accurate geodesic distance between GPS coordinates in km", () => {
+      // Hanoi (21.0285, 105.8542) to HCMC (10.8231, 106.6297) is ~1130-1170 km
+      const dist = SpatialQuadtreeDispatch.haversineDistanceKm(21.0285, 105.8542, 10.8231, 106.6297);
+      expect.ok(dist >= 1130 && dist <= 1170, `Expected distance ~1150km, got ${dist}`);
+    });
+
+    test("F185-T05: findNearestNeighbors returns top-k nearest couriers sorted in ascending distance", () => {
+      const quadtree = new SpatialQuadtreeDispatch();
+      quadtree.insert("COURIER_1", 10.776, 106.700, { name: "Gần nhất" });
+      quadtree.insert("COURIER_2", 10.780, 106.705, { name: "Gần nhì" });
+      quadtree.insert("COURIER_3", 10.850, 106.780, { name: "Xa" });
+
+      const nearest = quadtree.findNearestNeighbors(10.775, 106.700, 2);
+      expect.equal(nearest.length, 2);
+      expect.equal(nearest[0].id, "COURIER_1");
+      expect.equal(nearest[1].id, "COURIER_2");
+      expect.ok(nearest[0].distanceKm < nearest[1].distanceKm);
+    });
+
+    test("F185-T06: dispatchOrderToBestCourier assigns closest available courier satisfying capacity constraints", () => {
+      const quadtree = new SpatialQuadtreeDispatch();
+      // Courier 1 is very close but busy
+      quadtree.insert("BUSY_SHIPPER", 10.776, 106.701, { isAvailable: false, remainingCapacityKg: 10 });
+      // Courier 2 is close but full
+      quadtree.insert("FULL_SHIPPER", 10.777, 106.702, { isAvailable: true, remainingCapacityKg: 1 });
+      // Courier 3 is available and has capacity
+      quadtree.insert("AVAILABLE_SHIPPER", 10.780, 106.705, { isAvailable: true, remainingCapacityKg: 15 });
+
+      const dispatch = quadtree.dispatchOrderToBestCourier(10.775, 106.700, {
+        requiredCapacityKg: 5,
+        maxSearchRadiusKm: 10,
+      });
+
+      expect.equal(dispatch.success, true);
+      expect.equal(dispatch.courierId, "AVAILABLE_SHIPPER");
+      expect.ok(dispatch.estimatedPickupMinutes > 0);
+    });
+
+    test("F185-T07: Server and client SpatialQuadtree implementations exhibit identical dispatch outputs", () => {
+      const clientTree = new SpatialQuadtreeDispatch();
+      const serverTree = new ServerSpatialQuadtreeDispatch();
+
+      const points = [
+        { id: "S1", lat: 10.76, lon: 106.68, data: { isAvailable: true, remainingCapacityKg: 10 } },
+        { id: "S2", lat: 10.77, lon: 106.69, data: { isAvailable: true, remainingCapacityKg: 20 } },
+        { id: "S3", lat: 10.82, lon: 106.72, data: { isAvailable: true, remainingCapacityKg: 5 } },
+      ];
+
+      for (const p of points) {
+        clientTree.insert(p.id, p.lat, p.lon, p.data);
+        serverTree.insert(p.id, p.lat, p.lon, p.data);
+      }
+
+      const clientDispatch = clientTree.dispatchOrderToBestCourier(10.765, 106.685, { requiredCapacityKg: 8 });
+      const serverDispatch = serverTree.dispatchOrderToBestCourier(10.765, 106.685, { requiredCapacityKg: 8 });
+
+      expect.equal(clientDispatch.courierId, serverDispatch.courierId);
+      expect.equal(clientDispatch.distanceKm, serverDispatch.distanceKm);
+      expect.equal(clientDispatch.estimatedPickupMinutes, serverDispatch.estimatedPickupMinutes);
+    });
+
+    test("F185-T08: Edge cases: Empty quadtree, point out of bounds, k=0, negative radius", () => {
+      const tree = new SpatialQuadtreeDispatch({ minLat: 10, minLon: 100, maxLat: 20, maxLon: 110 });
+      expect.deepEqual(tree.findNearestNeighbors(15, 105, 0), []);
+      expect.equal(tree.dispatchOrderToBestCourier(15, 105).success, false);
+      expect.equal(tree.insert("INVALID", 5, 5), false);
+    });
+
+    // --- 2. SIMHASH PERMUTATION TABLE (8 tests) ---
+    test("F185-T09: SimHashGenerator.computeSimHash64 produces deterministic 64-bit hex fingerprints from text shingles", () => {
+      const text = "Áo thun polo nam cotton cao cấp co giãn 4 chiều chính hãng";
+      const h1 = SimHashGenerator.computeSimHash64(text);
+      const h2 = SimHashGenerator.computeSimHash64(text);
+
+      expect.equal(typeof h1, "string");
+      expect.equal(h1.length, 16); // 16 hex chars = 64 bits
+      expect.equal(h1, h2);
+    });
+
+    test("F185-T10: hammingDistance64 computes exact bit differences via popcount between two 64-bit hex strings", () => {
+      const hexA = "0000000000000000";
+      const hexB = "0000000000000007"; // 7 in binary is 0111 => 3 bits set
+      const hexC = "ffffffffffffffff"; // all 64 bits set
+
+      expect.equal(SimHashGenerator.hammingDistance64(hexA, hexB), 3);
+      expect.equal(SimHashGenerator.hammingDistance64(hexA, hexC), 64);
+      expect.equal(SimHashGenerator.hammingDistance64(hexA, hexA), 0);
+    });
+
+    test("F185-T11: SimHashPermutationTable partitions 64-bit keys into 4 blocks of 16-bit permutations", () => {
+      const table = new SimHashPermutationTable({ numBlocks: 4 });
+      const hex64 = "123456789abcdef0";
+
+      expect.equal(table.extractBlockHex(hex64, 0), "1234");
+      expect.equal(table.extractBlockHex(hex64, 1), "5678");
+      expect.equal(table.extractBlockHex(hex64, 2), "9abc");
+      expect.equal(table.extractBlockHex(hex64, 3), "def0");
+    });
+
+    test("F185-T12: Pigeonhole Principle guarantees near-duplicate text (dH <= 3) has at least 1 identical 16-bit block", () => {
+      const table = new SimHashPermutationTable({ numBlocks: 4, maxHammingDistance: 3 });
+      const hexA = "123456789abcdef0";
+      // hexB differs by 3 bits in the 4th block only: 'def0' vs 'def7' (0x0 vs 0x7 is 3 bits)
+      const hexB = "123456789abcdef7";
+
+      const dist = SimHashGenerator.hammingDistance64(hexA, hexB);
+      expect.equal(dist, 3);
+
+      // At least 1 of 4 blocks must match identically
+      let matchedBlock = false;
+      for (let b = 0; b < 4; b++) {
+        if (table.extractBlockHex(hexA, b) === table.extractBlockHex(hexB, b)) {
+          matchedBlock = true;
+          break;
+        }
+      }
+      expect.equal(matchedBlock, true);
+    });
+
+    test("F185-T13: findDuplicates retrieves near-duplicate products in O(1) block lookup instead of O(N) linear scans", () => {
+      const table = new SimHashPermutationTable({ numBlocks: 4, maxHammingDistance: 5 });
+
+      table.insertDocument("PROD_ORIGINAL", "Giày thể thao nam chạy bộ êm ái thoáng khí thời trang cao cấp", { shopId: "SHOP_01" });
+      table.insertDocument("PROD_DIFFERENT", "Nồi chiên không dầu điện tử dung tích lớn 6 lít bảo hành 2 năm", { shopId: "SHOP_02" });
+
+      const nearDupSearch = table.findDuplicateDocuments("Giày thể thao nam chạy bộ êm ái thoáng khí thời trang cao cấp", 3);
+      expect.ok(nearDupSearch.matches.length >= 1);
+      expect.equal(nearDupSearch.matches[0].id, "PROD_ORIGINAL");
+      expect.ok(nearDupSearch.matches[0].similarityScore >= 0.9);
+    });
+
+    test("F185-T14: remove cleanly purges document fingerprints from all permutation block tables", () => {
+      const table = new SimHashPermutationTable();
+      table.insertDocument("DOC_TO_REMOVE", "Tai nghe bluetooth không dây chống ồn chủ động ANC");
+      expect.equal(table.size(), 1);
+
+      const removed = table.remove("DOC_TO_REMOVE");
+      expect.equal(removed, true);
+      expect.equal(table.size(), 0);
+
+      const query = table.findDuplicateDocuments("Tai nghe bluetooth không dây chống ồn");
+      expect.equal(query.matches.length, 0);
+    });
+
+    test("F185-T15: Server and client SimHashPermutationTable produce identical collision and duplicate candidate sets", () => {
+      const clientTable = new SimHashPermutationTable();
+      const serverTable = new ServerSimHashPermutationTable();
+
+      const corpus = [
+        { id: "A", text: "Váy nữ dự tiệc phong cách Pháp cổ điển thanh lịch" },
+        { id: "B", text: "Váy đầm nữ dự tiệc dáng Pháp cổ điển sang trọng" },
+        { id: "C", text: "Bàn phím cơ không dây switch đỏ gõ êm Bluetooth" }
+      ];
+
+      for (const item of corpus) {
+        clientTable.insertDocument(item.id, item.text);
+        serverTable.insertDocument(item.id, item.text);
+      }
+
+      const clientRes = clientTable.findDuplicateDocuments("Váy nữ dự tiệc phong cách Pháp cổ điển thanh lịch", 4);
+      const serverRes = serverTable.findDuplicateDocuments("Váy nữ dự tiệc phong cách Pháp cổ điển thanh lịch", 4);
+
+      expect.equal(clientRes.querySimHash, serverRes.querySimHash);
+      expect.equal(clientRes.matches.length, serverRes.matches.length);
+      if (clientRes.matches.length > 0) {
+        expect.equal(clientRes.matches[0].id, serverRes.matches[0].id);
+        expect.equal(clientRes.matches[0].hammingDistance, serverRes.matches[0].hammingDistance);
+      }
+    });
+
+    test("F185-T16: Edge cases: Empty text, whitespace, unicode Vietnamese text, max distance thresholding", () => {
+      const table = new SimHashPermutationTable();
+      const emptyHash = SimHashGenerator.computeSimHash64("");
+      expect.equal(emptyHash, "0000000000000000");
+
+      const whitespaceHash = SimHashGenerator.computeSimHash64("   \t\n  ");
+      expect.equal(whitespaceHash, "0000000000000000");
+
+      table.insert("EMPTY_DOC", "0000000000000000");
+      expect.equal(table.size(), 1);
+    });
+
+    // --- 3. DUELING DEEP Q-NETWORK KEYWORD BIDDING (6 tests) ---
+    test("F185-T17: Forward pass separates State Value stream V(s) and Advantage stream A(s, a)", () => {
+      const dqn = new DuelingDqnBidding({ stateDim: 6 });
+      const state = [0.05, 0.02, 3.2, 0.8, 0.5, 0.75]; // [CTR, CVR, pos, density, budget, time]
+
+      const { Q, V, A } = dqn.forward(state);
+      expect.equal(typeof V, "number");
+      expect.equal(A.length, 5);
+      expect.equal(Q.length, 5);
+    });
+
+    test("F185-T18: Subtracting mean advantage satisfies identifiability constraint: mean(Q) = V(s)", () => {
+      const dqn = new DuelingDqnBidding({ stateDim: 6 });
+      const state = [0.08, 0.04, 1.5, 0.9, 0.7, 0.5];
+
+      const { Q, V, A } = dqn.forward(state);
+      const meanQ = Q.reduce((sum, q) => sum + q, 0) / Q.length;
+
+      // Mathematically sum_a (Q(s, a) - V(s)) = sum_a (A(s, a) - mean(A)) = 0 => mean(Q) === V(s)
+      expect.ok(Math.abs(meanQ - V) < 1e-6, `Expected mean(Q) = V(s), got diff: ${Math.abs(meanQ - V)}`);
+    });
+
+    test("F185-T19: ReplayBuffer stores transitions and uniformly samples mini-batches of size B", () => {
+      const buffer = new ReplayBuffer(100);
+      for (let i = 0; i < 50; i++) {
+        buffer.push([i], 0, i * 10, [i + 1], false);
+      }
+      expect.equal(buffer.size(), 50);
+
+      const batch = buffer.sample(16);
+      expect.equal(batch.length, 16);
+      expect.ok(batch[0].state !== undefined);
+      expect.ok(batch[0].reward !== undefined);
+    });
+
+    test("F185-T20: trainMiniBatch performs TD-error gradient updates reducing loss and decaying epsilon", () => {
+      const dqn = new DuelingDqnBidding({ stateDim: 4, epsilon: 0.5, epsilonDecay: 0.9 });
+      for (let i = 0; i < 20; i++) {
+        dqn.storeTransition([0.1, 0.2, 0.3, 0.4], 2, 10, [0.1, 0.2, 0.3, 0.4], false);
+      }
+
+      const initialEps = dqn.epsilon;
+      const res = dqn.trainMiniBatch(10);
+
+      expect.equal(res.trained, true);
+      expect.ok(res.avgLoss >= 0);
+      expect.ok(dqn.epsilon < initialEps);
+    });
+
+    test("F185-T21: recommendBidOptimization suggests optimal multiplier action and clips bid within [minBid, maxBid]", () => {
+      const dqn = new DuelingDqnBidding({ stateDim: 6 });
+      const rec = dqn.recommendBidOptimization("áo thun polo", 2000, [0.1, 0.05, 1.2, 0.6, 0.8, 0.5], {
+        minBid: 1000,
+        maxBid: 10000,
+      });
+
+      expect.equal(rec.keyword, "áo thun polo");
+      expect.equal(rec.currentBid, 2000);
+      expect.ok(rec.optimizedBid >= 1000 && rec.optimizedBid <= 10000);
+      expect.ok(rec.actionName.length > 0);
+      expect.ok(rec.explanation.includes("Dueling DQN"));
+    });
+
+    test("F185-T22: Server and client DuelingDqnBidding architectures maintain identical state-action dimensions", () => {
+      const clientDqn = new DuelingDqnBidding({ stateDim: 6 });
+      const serverDqn = new ServerDuelingDqnBidding({ stateDim: 6 });
+
+      expect.equal(clientDqn.stateDim, serverDqn.stateDim);
+      expect.equal(clientDqn.actionDim, serverDqn.actionDim);
+      expect.deepEqual(clientDqn.actionMultipliers, serverDqn.actionMultipliers);
+    });
+
+    // --- 4. COPILOT & E2E INTEGRATION (2 tests) ---
+    test("F185-T23: AI Copilot engines integrate Phase 38 Quadtree, Manku SimHash, and Dueling DQN queries", () => {
+      const adminRes1 = generateAdminCopilotResponse("Phân tích điều phối bưu tá bằng spatial quadtree k-nn");
+      expect.equal(adminRes1.tag, "SPATIAL QUADTREE DISPATCH");
+      expect.ok(adminRes1.text.includes("SPATIAL QUADTREE"));
+
+      const adminRes2 = generateAdminCopilotResponse("Quét trùng lặp catalog manku bằng bảng hoán vị simhash");
+      expect.equal(adminRes2.tag, "SIMHASH PERMUTATION TABLE");
+      expect.ok(adminRes2.text.includes("MANKU"));
+
+      const adminRes3 = generateAdminCopilotResponse("Tối ưu hóa giá thầu từ khóa bằng dueling dqn");
+      expect.equal(adminRes3.tag, "DUELING DQN BIDDING");
+      expect.ok(adminRes3.text.includes("DUELING DEEP Q-NETWORK"));
+
+      const sellerRes = generateSellerCopilotResponse("Tư vấn định vị bưu tá quadtree, chống sao chép catalog manku và đấu thầu dueling dqn", {
+        currentShop: { name: "Fashion House" },
+        shopProducts: [{ stock: 15 }],
+        shopOrders: []
+      });
+      expect.equal(sellerRes.tag, "QUADTREE, MANKU SIMHASH & DUELING DQN");
+      expect.ok(sellerRes.text.includes("Fashion House"));
+
+      const chatRes = generateAiChatResponse("Hỏi về giao vận quadtree và tìm kiếm dueling dqn");
+      expect.equal(chatRes.intent, "SPATIAL_QUADTREE_MANKU_DUELING_DQN_ASSIST");
+      expect.ok(chatRes.replyText.includes("Spatial Quadtree"));
+      expect.ok(chatRes.replyText.includes("Dueling DQN"));
+    });
+
+    test("F185-T24: E2E Lifecycle: Spatial Quadtree dispatches local courier -> Manku SimHash table filters plagiarized catalog clone -> Dueling DQN optimizes keyword bid", () => {
+      // 1. Spatial Quadtree dispatches courier for new order in District 1
+      const fleet = new SpatialQuadtreeDispatch();
+      fleet.insert("SPX_RIDER_77", 10.7769, 106.7009, { isAvailable: true, remainingCapacityKg: 12 });
+      const dispatch = fleet.dispatchOrderToBestCourier(10.7765, 106.7005);
+      expect.equal(dispatch.success, true);
+      expect.equal(dispatch.courierId, "SPX_RIDER_77");
+
+      // 2. Manku SimHash Table inspects uploaded product title for clone violation
+      const dedup = new SimHashPermutationTable();
+      dedup.insertDocument("AUTHENTIC_MALL_PROD", "Áo sơ mi lụa công sở cao cấp Ninomaxx chính hãng");
+      const check = dedup.findDuplicateDocuments("Áo sơ mi lụa công sở cao cấp Ninomaxx chính hãng");
+      expect.ok(check.matches.length >= 1);
+      expect.equal(check.matches[0].id, "AUTHENTIC_MALL_PROD");
+
+      // 3. Dueling DQN optimizes keyword bidding during high-traffic flash hour
+      const dqn = new DuelingDqnBidding({ stateDim: 6 });
+      const state = [0.12, 0.06, 1.0, 0.95, 0.8, 1.0]; // High CTR, High CVR, Peak hour
+      const bidRec = dqn.recommendBidOptimization("áo sơ mi lụa công sở", 3500, state);
+      expect.ok(bidRec.optimizedBid >= 500 && bidRec.optimizedBid <= 50000);
+      expect.equal(bidRec.keyword, "áo sơ mi lụa công sở");
     });
   });
 });

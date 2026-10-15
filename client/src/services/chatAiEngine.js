@@ -905,6 +905,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 40. Giao Vận Quadtree Hỏa Tốc, Chống Sao Chép Manku & Trợ Lý Tìm Kiếm Dueling DQN (SPATIAL_QUADTREE_MANKU_DUELING_DQN_ASSIST)
+  if (/giao vận quadtree|điều phối shipper quadtree|spatial quadtree|chống sao chép manku|bảng hoán vị simhash|manku simhash|tìm kiếm dueling dqn|dueling dqn/i.test(lower)) {
+    return {
+      intent: 'SPATIAL_QUADTREE_MANKU_DUELING_DQN_ASSIST',
+      replyText: `**[CÔNG NGHỆ GIAO VẬN & TÌM KIẾM MUA SẮM SIÊU TỐC]:**\n\n• **Bưu tá SPX gõ cửa hỏa tốc (Spatial Quadtree)**: Đơn hàng của bạn được tự động phân vùng và điều phối tức thì cho shipper gần bạn nhất theo thuật toán k-NN và khoảng cách Haversine, giao đến tay chỉ trong chớp mắt!\n• **Mua hàng chuẩn chính hãng (Manku SimHash Deduplication)**: Bảng hoán vị SimHash lọc sạch các sản phẩm copy mạo danh hoặc đạo nhái mô tả, đảm bảo bạn luôn chọn đúng gian hàng uy tín thật sự.\n• **Đề xuất từ khóa thông minh (Dueling DQN)**: Trợ lý tìm kiếm tự động học hỏi nhu cầu và hiển thị những sản phẩm bạn quan tâm nhất với giá tốt nhất trên sàn!`,
+      suggestions: ['Tra cứu shipper giao hàng', 'Xem sản phẩm chính hãng', 'Nhận mã giảm giá độc quyền'],
+    };
+  }
+
 
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH

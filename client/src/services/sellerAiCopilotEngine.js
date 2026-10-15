@@ -25,7 +25,7 @@ export function generateSellerCopilotResponse(query, context = {}) {
   const raw = query.toLowerCase().trim();
 
   // 1. Cảnh Báo Tồn Kho & Đề Xuất Nhập PO (Restock Radar & Safety Stock)
-  if (!/raft|xả hàng|xả kho|holt-winters|mùa vụ|matrix segment tree|cây đoạn 2 chiều|actor-critic|chu trình johnson/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
+  if (!/raft|xả hàng|xả kho|holt-winters|mùa vụ|matrix segment tree|cây đoạn 2 chiều|actor-critic|chu trình johnson|spatial quadtree|manku|dueling dqn/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
     const lowStockItems = shopProducts.filter(p => p.stock <= (typeof p.safetyThreshold === 'number' ? p.safetyThreshold : 10));
     const outOfStockItems = shopProducts.filter(p => p.stock === 0);
 
@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (!/gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -944,6 +944,28 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Quét giao dịch ảo vòng tròn Johnson',
         'Quản lý ma trận tồn kho 2D Segment Tree',
         'Phân bổ ưu đãi mua hàng Actor-Critic'
+      ]
+    };
+  }
+
+  // 47. Tối Ưu Bưu Tá Quadtree, Chống Trùng Lặp Manku & Đấu Thầu Dueling DQN (Phase 38 - Feature 185)
+  if (/spatial quadtree|bưu tá quadtree|điều phối fleet|manku|permutation table|bảng hoán vị simhash|dueling dqn|đấu thầu dueling/i.test(raw)) {
+    return {
+      text: `🚀 **ĐIỀU PHỐI BƯU TÁ QUADTREE, CHỐNG TRÙNG LẶP MANKU & ĐẤU THẦU DUELING DQN (${currentShop.name})**:
+- **Điều phối bưu tá lấy hàng hỏa tốc bằng Spatial Quadtree**:
+  - Tự động định vị shipper SPX gần shop nhất trong bán kính $5\\text{km}$ theo khoảng cách Haversine.
+  - Rút ngắn thời gian bàn giao bưu kiện xuống dưới $15$ phút, nâng cao tỷ lệ giao hàng đúng hạn (LSR)!
+- **Bảo vệ nội dung catalog của shop khỏi đối thủ sao chép (Manku WWW 2007)**:
+  - Tra cứu $O(1)$ qua các khối hoán vị 16-bit SimHash để phát hiện ngay các shop đối thủ copy nguyên văn mô tả hoặc tiêu đề sản phẩm của bạn.
+- **Tối ưu hóa giá thầu Shopee Ads tự động bằng Dueling DQN**:
+  - Không lo cháy ngân sách quảng cáo vô ích! Mạng Dueling tách biệt giá trị ngữ cảnh $V(s)$ và lợi thế điều chỉnh bid $A(s, a)$.
+  - Tự động tăng bid $+10\\%, +20\\%$ vào khung giờ vàng chuyển đổi cao và hạ bid khi tỷ lệ click ảo tăng!`,
+      type: 'recommendation',
+      tag: 'QUADTREE, MANKU SIMHASH & DUELING DQN',
+      suggestions: [
+        'Định vị bưu tá SPX gần nhất Quadtree',
+        'Quét sao chép catalog bằng Manku SimHash',
+        'Tối ưu hóa giá thầu từ khóa Dueling DQN'
       ]
     };
   }
