@@ -25,7 +25,7 @@ export function generateSellerCopilotResponse(query, context = {}) {
   const raw = query.toLowerCase().trim();
 
   // 1. Cảnh Báo Tồn Kho & Đề Xuất Nhập PO (Restock Radar & Safety Stock)
-  if (!/raft|xả hàng|xả kho|holt-winters|mùa vụ|matrix segment tree|cây đoạn 2 chiều|actor-critic|chu trình johnson|spatial quadtree|manku|dueling dqn/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
+  if (!/raft|xả hàng|xả kho|holt-winters|mùa vụ|matrix segment tree|cây đoạn 2 chiều|actor-critic|chu trình johnson|spatial quadtree|manku|dueling dqn|primal[- ]dual|ivf[- ]pq|maddpg/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
     const lowStockItems = shopProducts.filter(p => p.stock <= (typeof p.safetyThreshold === 'number' ? p.safetyThreshold : 10));
     const outOfStockItems = shopProducts.filter(p => p.stock === 0);
 
@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (!/dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -263,7 +263,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 12. Tìm Kiếm Bằng Hình Ảnh & Ngữ Nghĩa HNSW (Visual & Semantic Search Discovery)
-  if (/tìm kiếm hình ảnh|visual search|hnsw shop|tìm kiếm ngữ nghĩa sản phẩm|tìm kiếm vector/i.test(raw)) {
+  if (!/ivf[- ]pq/i.test(raw) && /tìm kiếm hình ảnh|visual search|hnsw shop|tìm kiếm ngữ nghĩa sản phẩm|tìm kiếm vector/i.test(raw)) {
     return {
       text: `📸 **TĂNG TRƯỞNG LƯỢT TIẾP CẬN TỪ TÌM KIẾM HÌNH ẢNH HNSW (${currentShop.name})**:
 - **Cơ chế HNSW Vector Search**: Đồ thị phân tầng HNSW lập chỉ mục vector nhúng hình ảnh sản phẩm đa chiều (CLIP 128-d). Khi khách hàng tải ảnh mẫu lên để tìm đồ tương tự, sản phẩm của shop sẽ xuất hiện trong Top kết quả chỉ sau vài mili-giây.
@@ -966,6 +966,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Định vị bưu tá SPX gần nhất Quadtree',
         'Quét sao chép catalog bằng Manku SimHash',
         'Tối ưu hóa giá thầu từ khóa Dueling DQN'
+      ]
+    };
+  }
+
+  // 48. Bưu Tá Hỏa Tốc Primal-Dual, Tìm Kiếm Vector IVF-PQ & Định Giá Phối Hợp MADDPG (Phase 39 - Feature 186)
+  if (/primal[- ]dual|đối ngẫu sơ cấp|ivf[- ]pq|maddpg|phối hợp giá bán|chiết khấu liên shop|tìm kiếm ivf/i.test(raw)) {
+    return {
+      text: `🚀 **BƯU TÁ HỎA TỐC PRIMAL-DUAL, TÌM KIẾM VECTOR IVF-PQ & ĐỊNH GIÁ PHỐI HỢP MADDPG (${currentShop.name})**:
+- **Bắt cặp bưu tá hỏa tốc theo giá trị kinh tế (Primal-Dual Kuhn-Munkres)**:
+  - Khắc phục tình trạng đơn hàng giá trị cao hoặc sát hạn chót SLA 2h bị shipper bỏ qua; thuật toán gán đơn tối ưu hàm lợi ích tổng hợp giúp giảm 45% tỷ lệ giao trễ!
+- **Tăng tốc tìm kiếm sản phẩm của shop bằng IVF-PQ & Khoảng cách ADC**:
+  - Khách hàng tìm kiếm bằng hình ảnh hoặc mô tả mờ sẽ thấy ngay sản phẩm của shop chỉ trong dưới $2\\text{ms}$ nhờ lượng tử hóa tích phân đoạn.
+- **Định giá bán phối hợp thông minh bằng MADDPG (Multi-Agent DDPG)**:
+  - Actor cục bộ của shop tự động gợi ý mức chiết khấu Flash Sale vừa vặn (0% - 30%) dựa trên tồn kho và tốc độ bán mà không bao giờ bán phá giá làm tổn hại biên lãi gộp!`,
+      type: 'recommendation',
+      tag: 'PRIMAL-DUAL, IVF-PQ & MADDPG PRICING',
+      suggestions: [
+        'Tối ưu hóa gán bưu tá Primal-Dual',
+        'Kiểm tra tốc độ tìm kiếm IVF-PQ',
+        'Đề xuất chiết khấu liên shop MADDPG'
       ]
     };
   }

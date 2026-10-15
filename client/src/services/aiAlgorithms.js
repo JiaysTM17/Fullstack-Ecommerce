@@ -18689,6 +18689,526 @@ export class DuelingDqnBidding {
   }
 }
 
+// ==============================================================================
+// PHASE 39 ENTERPRISE ALGORITHMS SUITE (Feature 186)
+// ==============================================================================
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 1: Primal-Dual Bipartite Logistics Matcher (Kuhn-Munkres Max Weight)
+// ------------------------------------------------------------------------------
+export class PrimalDualLogisticsMatcher {
+  constructor(options = {}) {
+    this.maxPenalty = options.maxPenalty || 100000;
+  }
+
+  match(orders, couriers, weightFn) {
+    const N = orders.length;
+    const M = couriers.length;
+    if (N === 0 || M === 0) {
+      return {
+        assignments: [],
+        totalWeight: 0,
+        matchedCount: 0,
+        unassignedOrders: orders,
+        unassignedCouriers: couriers
+      };
+    }
+
+    const size = Math.max(N, M);
+    const costMatrix = Array.from({ length: size + 1 }, () => new Array(size + 1).fill(0));
+
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < M; j++) {
+        let w = 0;
+        if (typeof weightFn === 'function') {
+          w = weightFn(orders[i], couriers[j]);
+        } else if (Array.isArray(weightFn) && weightFn[i] && weightFn[i][j] !== undefined) {
+          w = weightFn[i][j];
+        }
+        costMatrix[i + 1][j + 1] = Math.max(0, Number(w) || 0);
+      }
+    }
+
+    const u = new Array(size + 1).fill(0);
+    const v = new Array(size + 1).fill(0);
+    const p = new Array(size + 1).fill(0);
+    const way = new Array(size + 1).fill(0);
+
+    for (let i = 1; i <= size; i++) {
+      let maxVal = 0;
+      for (let j = 1; j <= size; j++) {
+        if (costMatrix[i][j] > maxVal) maxVal = costMatrix[i][j];
+      }
+      u[i] = maxVal;
+    }
+
+    for (let i = 1; i <= size; i++) {
+      p[0] = i;
+      let j0 = 0;
+      const minv = new Array(size + 1).fill(Infinity);
+      const used = new Array(size + 1).fill(false);
+
+      do {
+        used[j0] = true;
+        const i0 = p[j0];
+        let delta = Infinity;
+        let j1 = 0;
+
+        for (let j = 1; j <= size; j++) {
+          if (!used[j]) {
+            const cur = u[i0] + v[j] - costMatrix[i0][j];
+            if (cur < minv[j]) {
+              minv[j] = cur;
+              way[j] = j0;
+            }
+            if (minv[j] < delta) {
+              delta = minv[j];
+              j1 = j;
+            }
+          }
+        }
+
+        for (let j = 0; j <= size; j++) {
+          if (used[j]) {
+            u[p[j]] -= delta;
+            v[j] += delta;
+          } else {
+            minv[j] -= delta;
+          }
+        }
+
+        j0 = j1;
+      } while (p[j0] !== 0);
+
+      do {
+        const j1 = way[j0];
+        p[j0] = p[j1];
+        j0 = j1;
+      } while (j0 !== 0);
+    }
+
+    const assignments = [];
+    let totalWeight = 0;
+    const assignedOrders = new Set();
+    const assignedCouriers = new Set();
+
+    for (let j = 1; j <= size; j++) {
+      const orderIdx = p[j] - 1;
+      const courierIdx = j - 1;
+
+      if (orderIdx < N && courierIdx < M) {
+        const score = costMatrix[p[j]][j];
+        if (score > 0) {
+          assignments.push({
+            orderId: orders[orderIdx],
+            courierId: couriers[courierIdx],
+            compositeScore: score
+          });
+          totalWeight += score;
+          assignedOrders.add(orders[orderIdx]);
+          assignedCouriers.add(couriers[courierIdx]);
+        }
+      }
+    }
+
+    return {
+      assignments,
+      totalWeight,
+      matchedCount: assignments.length,
+      unassignedOrders: orders.filter(o => !assignedOrders.has(o)),
+      unassignedCouriers: couriers.filter(c => !assignedCouriers.has(c))
+    };
+  }
+
+  static computeCompositeScore(order, courier, options = {}) {
+    const { maxDistanceKm = 20, maxSlaMinutes = 120 } = options;
+    const distance = Number(order.distanceKm || courier.distanceKm || 5.0);
+    const slaRemaining = Number(order.slaRemainingMinutes || 60);
+    const rating = Number(courier.rating || 4.5);
+    const orderValue = Number(order.orderValue || 100000);
+
+    const distanceScore = Math.max(0, 40 * (1 - distance / maxDistanceKm));
+    const urgencyScore = Math.max(0, 30 * (1 - slaRemaining / maxSlaMinutes));
+    const ratingScore = (Math.min(5, rating) / 5) * 20;
+    const vipBoost = Math.min(10, (orderValue / 1000000) * 10);
+
+    return Math.round((distanceScore + urgencyScore + ratingScore + vipBoost) * 100) / 100;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 2: Inverted File with Product Quantization (IVF-PQ) Index
+// ------------------------------------------------------------------------------
+export class IvfProductQuantizer {
+  constructor(options = {}) {
+    const {
+      dimension = 16,
+      numCentroids = 4,
+      numSubvectors = 4,
+      subvectorK = 8
+    } = options;
+
+    if (dimension % numSubvectors !== 0) {
+      throw new Error(`Dimension (${dimension}) phải chia hết cho numSubvectors (${numSubvectors})`);
+    }
+
+    this.dimension = dimension;
+    this.numCentroids = numCentroids;
+    this.numSubvectors = numSubvectors;
+    this.subvectorDim = dimension / numSubvectors;
+    this.subvectorK = subvectorK;
+
+    this.coarseCentroids = this._initCentroids(numCentroids, dimension);
+    this.invertedLists = new Map();
+    for (let i = 0; i < numCentroids; i++) {
+      this.invertedLists.set(i, []);
+    }
+
+    this.subvectorCodebooks = [];
+    for (let m = 0; m < numSubvectors; m++) {
+      this.subvectorCodebooks.push(this._initCentroids(subvectorK, this.subvectorDim));
+    }
+
+    this.indexedCount = 0;
+  }
+
+  _initCentroids(k, dim) {
+    const centroids = [];
+    for (let i = 0; i < k; i++) {
+      const v = [];
+      for (let d = 0; d < dim; d++) {
+        v.push((Math.random() - 0.5) * 0.5);
+      }
+      centroids.push(v);
+    }
+    return centroids;
+  }
+
+  static euclideanDistanceSq(vecA, vecB) {
+    let sum = 0;
+    const len = Math.min(vecA.length, vecB.length);
+    for (let i = 0; i < len; i++) {
+      const diff = (vecA[i] || 0) - (vecB[i] || 0);
+      sum += diff * diff;
+    }
+    return sum;
+  }
+
+  _findNearestCoarseCentroid(vector) {
+    let bestIdx = 0;
+    let minDist = Infinity;
+    for (let i = 0; i < this.numCentroids; i++) {
+      const d = IvfProductQuantizer.euclideanDistanceSq(vector, this.coarseCentroids[i]);
+      if (d < minDist) {
+        minDist = d;
+        bestIdx = i;
+      }
+    }
+    return { centroidIdx: bestIdx, distanceSq: minDist };
+  }
+
+  _quantizeResidual(residual) {
+    const codes = [];
+    for (let m = 0; m < this.numSubvectors; m++) {
+      const subVec = residual.slice(m * this.subvectorDim, (m + 1) * this.subvectorDim);
+      let bestCode = 0;
+      let minSubDist = Infinity;
+
+      for (let k = 0; k < this.subvectorK; k++) {
+        const d = IvfProductQuantizer.euclideanDistanceSq(subVec, this.subvectorCodebooks[m][k]);
+        if (d < minSubDist) {
+          minSubDist = d;
+          bestCode = k;
+        }
+      }
+      codes.push(bestCode);
+    }
+    return codes;
+  }
+
+  insert(id, vector, metadata = {}) {
+    if (!vector || vector.length !== this.dimension) {
+      throw new Error(`Vector phải có số chiều đúng bằng ${this.dimension}`);
+    }
+
+    const { centroidIdx } = this._findNearestCoarseCentroid(vector);
+    const coarseVec = this.coarseCentroids[centroidIdx];
+
+    const residual = [];
+    for (let i = 0; i < this.dimension; i++) {
+      residual.push((vector[i] || 0) - coarseVec[i]);
+    }
+
+    const codes = this._quantizeResidual(residual);
+    this.invertedLists.get(centroidIdx).push({ id, codes, metadata });
+    this.indexedCount++;
+    return { centroidIdx, codes };
+  }
+
+  search(queryVector, k = 5, nProbe = 2) {
+    if (!queryVector || queryVector.length !== this.dimension) return [];
+
+    const coarseDistances = [];
+    for (let i = 0; i < this.numCentroids; i++) {
+      coarseDistances.push({
+        centroidIdx: i,
+        distanceSq: IvfProductQuantizer.euclideanDistanceSq(queryVector, this.coarseCentroids[i])
+      });
+    }
+    coarseDistances.sort((a, b) => a.distanceSq - b.distanceSq);
+    const probedCentroids = coarseDistances.slice(0, Math.min(nProbe, this.numCentroids));
+
+    const candidates = [];
+    for (const probed of probedCentroids) {
+      const cIdx = probed.centroidIdx;
+      const coarseVec = this.coarseCentroids[cIdx];
+
+      const queryResidual = [];
+      for (let d = 0; d < this.dimension; d++) {
+        queryResidual.push(queryVector[d] - coarseVec[d]);
+      }
+
+      const distTable = [];
+      for (let m = 0; m < this.numSubvectors; m++) {
+        const qSub = queryResidual.slice(m * this.subvectorDim, (m + 1) * this.subvectorDim);
+        const subDist = [];
+        for (let code = 0; code < this.subvectorK; code++) {
+          subDist.push(IvfProductQuantizer.euclideanDistanceSq(qSub, this.subvectorCodebooks[m][code]));
+        }
+        distTable.push(subDist);
+      }
+
+      const items = this.invertedLists.get(cIdx);
+      for (const item of items) {
+        let adcDistSq = 0;
+        for (let m = 0; m < this.numSubvectors; m++) {
+          adcDistSq += distTable[m][item.codes[m]];
+        }
+
+        candidates.push({
+          id: item.id,
+          distanceSq: Math.round(adcDistSq * 1000) / 1000,
+          similarityScore: Math.round((1 / (1 + adcDistSq)) * 100) / 100,
+          coarseCluster: cIdx,
+          metadata: item.metadata
+        });
+      }
+    }
+
+    candidates.sort((a, b) => a.distanceSq - b.distanceSq);
+    return candidates.slice(0, k);
+  }
+
+  size() {
+    return this.indexedCount;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 3: Multi-Agent Deep Deterministic Policy Gradient (MADDPG) Pricing
+// ------------------------------------------------------------------------------
+export class MultiAgentReplayBuffer {
+  constructor(capacity = 1000) {
+    this.capacity = capacity;
+    this.buffer = [];
+    this.position = 0;
+  }
+
+  push(allObs, allActions, allRewards, nextAllObs, done) {
+    if (this.buffer.length < this.capacity) {
+      this.buffer.push({ allObs, allActions, allRewards, nextAllObs, done });
+    } else {
+      this.buffer[this.position] = { allObs, allActions, allRewards, nextAllObs, done };
+    }
+    this.position = (this.position + 1) % this.capacity;
+  }
+
+  sample(batchSize) {
+    const size = Math.min(batchSize, this.buffer.length);
+    const samples = [];
+    const indices = new Set();
+    while (samples.length < size) {
+      const idx = Math.floor(Math.random() * this.buffer.length);
+      if (!indices.has(idx)) {
+        indices.add(idx);
+        samples.push(this.buffer[idx]);
+      }
+    }
+    return samples;
+  }
+
+  size() {
+    return this.buffer.length;
+  }
+}
+
+export class MaddpgPricingCoordinator {
+  constructor(options = {}) {
+    const {
+      numAgents = 3,
+      obsDim = 4,
+      learningRate = 0.01,
+      gamma = 0.95,
+      noiseStd = 0.1,
+      replayCapacity = 1000
+    } = options;
+
+    this.numAgents = numAgents;
+    this.obsDim = obsDim;
+    this.totalObsDim = numAgents * obsDim;
+    this.actionDim = 1;
+    this.learningRate = learningRate;
+    this.gamma = gamma;
+    this.noiseStd = noiseStd;
+
+    this.actorWeights = [];
+    this.actorBiases = [];
+    for (let i = 0; i < numAgents; i++) {
+      const w = [];
+      for (let d = 0; d < obsDim; d++) {
+        w.push((Math.random() - 0.5) * 0.2);
+      }
+      this.actorWeights.push(w);
+      this.actorBiases.push(0.0);
+    }
+
+    this.criticObsWeights = [];
+    this.criticActWeights = [];
+    this.criticBiases = [];
+    for (let i = 0; i < numAgents; i++) {
+      const wo = new Array(this.totalObsDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+      const wa = new Array(numAgents).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+      this.criticObsWeights.push(wo);
+      this.criticActWeights.push(wa);
+      this.criticBiases.push(0.0);
+    }
+
+    this.replayBuffer = new MultiAgentReplayBuffer(replayCapacity);
+  }
+
+  getAgentAction(agentIdx, obs_i, explore = false) {
+    let raw = this.actorBiases[agentIdx];
+    const w = this.actorWeights[agentIdx];
+    for (let d = 0; d < this.obsDim; d++) {
+      raw += w[d] * (obs_i[d] || 0);
+    }
+
+    let action = Math.tanh(raw);
+    if (explore) {
+      const noise = (Math.random() - 0.5) * 2 * this.noiseStd;
+      action = Math.max(-1, Math.min(1, action + noise));
+    }
+    return Math.round(action * 1000) / 1000;
+  }
+
+  getAllActions(allObs, explore = false) {
+    const actions = [];
+    for (let i = 0; i < this.numAgents; i++) {
+      actions.push(this.getAgentAction(i, allObs[i], explore));
+    }
+    return actions;
+  }
+
+  evaluateJointQ(agentIdx, allObsFlat, allActions) {
+    let q = this.criticBiases[agentIdx];
+    const wo = this.criticObsWeights[agentIdx];
+    for (let d = 0; d < this.totalObsDim; d++) {
+      q += wo[d] * (allObsFlat[d] || 0);
+    }
+    const wa = this.criticActWeights[agentIdx];
+    for (let i = 0; i < this.numAgents; i++) {
+      q += wa[i] * (allActions[i] || 0);
+    }
+    return q;
+  }
+
+  storeTransition(allObs, allActions, allRewards, nextAllObs, done = false) {
+    this.replayBuffer.push(allObs, allActions, allRewards, nextAllObs, done);
+  }
+
+  trainMiniBatch(batchSize = 32) {
+    if (this.replayBuffer.size() < 10) {
+      return { trained: false, loss: 0 };
+    }
+
+    const batch = this.replayBuffer.sample(batchSize);
+    let totalLoss = 0;
+
+    for (const sample of batch) {
+      const { allObs, allActions, allRewards, nextAllObs, done } = sample;
+      const flatObs = allObs.flat();
+      const flatNextObs = nextAllObs ? nextAllObs.flat() : null;
+
+      for (let i = 0; i < this.numAgents; i++) {
+        const currentQ = this.evaluateJointQ(i, flatObs, allActions);
+        let targetQ = allRewards[i] || 0;
+
+        if (!done && flatNextObs) {
+          const nextActions = [];
+          for (let j = 0; j < this.numAgents; j++) {
+            nextActions.push(this.getAgentAction(j, nextAllObs[j], false));
+          }
+          const nextQ = this.evaluateJointQ(i, flatNextObs, nextActions);
+          targetQ += this.gamma * nextQ;
+        }
+
+        const tdError = targetQ - currentQ;
+        totalLoss += tdError * tdError;
+
+        this.criticBiases[i] += this.learningRate * tdError * 0.5;
+        for (let d = 0; d < this.totalObsDim; d++) {
+          this.criticObsWeights[i][d] += this.learningRate * tdError * 0.1 * flatObs[d];
+        }
+        for (let j = 0; j < this.numAgents; j++) {
+          this.criticActWeights[i][j] += this.learningRate * tdError * 0.1 * allActions[j];
+        }
+
+        const policyGrad = this.criticActWeights[i][i] * (1 - Math.pow(allActions[i], 2));
+        for (let d = 0; d < this.obsDim; d++) {
+          this.actorWeights[i][d] += this.learningRate * policyGrad * (allObs[i][d] || 0);
+        }
+        this.actorBiases[i] += this.learningRate * policyGrad;
+      }
+    }
+
+    return {
+      trained: true,
+      batchSize: batch.length,
+      avgLoss: Math.round((totalLoss / (batch.length * this.numAgents)) * 1000) / 1000
+    };
+  }
+
+  coordinatePricingRecommendations(shopsData) {
+    const allObs = shopsData.map(s => [
+      s.currentPriceRatio || 1.0,
+      s.stockRemainingRatio || 0.5,
+      s.velocityRate || 0.5,
+      s.targetMarginRatio || 0.3
+    ]);
+
+    const actions = this.getAllActions(allObs, false);
+
+    return shopsData.map((s, idx) => {
+      const act = actions[idx];
+      const discountPercent = Math.max(0, Math.min(30, Math.round((act + 1.0) * 15)));
+      const suggestedPrice = Math.round((s.basePrice || 100000) * (1 - discountPercent / 100));
+
+      return {
+        shopId: s.shopId,
+        basePrice: s.basePrice || 100000,
+        suggestedPrice,
+        discountPercent,
+        actionScore: act,
+        coordinationNote: act > 0.3
+          ? 'Nhu cầu cao & ít xung đột: Cho phép kích hoạt Flash Sale sâu'
+          : act < -0.3
+          ? 'Cạnh tranh gay gắt: Khuyến nghị giữ giá ổn định để bảo vệ biên lãi gộp'
+          : 'Thị trường cân bằng: Áp dụng chiết khấu vừa phải'
+      };
+    });
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -18902,6 +19422,11 @@ export default {
   SimHashPermutationTable,
   ReplayBuffer,
   DuelingDqnBidding,
+  // Phase 39 Enterprise Algorithms
+  PrimalDualLogisticsMatcher,
+  IvfProductQuantizer,
+  MultiAgentReplayBuffer,
+  MaddpgPricingCoordinator,
 };
 
 

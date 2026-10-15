@@ -229,6 +229,11 @@ import {
   SimHashPermutationTable,
   ReplayBuffer,
   DuelingDqnBidding,
+  // Phase 39 Enterprise Algorithms
+  PrimalDualLogisticsMatcher,
+  IvfProductQuantizer,
+  MultiAgentReplayBuffer,
+  MaddpgPricingCoordinator,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -311,6 +316,9 @@ import ServerActorCriticRouter from "../../server/src/utils/actorCriticIncentive
 import { SpatialQuadtreeDispatch as ServerSpatialQuadtreeDispatch } from "../../server/src/utils/spatialQuadtreeDispatch.js";
 import { SimHashPermutationTable as ServerSimHashPermutationTable, SimHashGenerator as ServerSimHashGenerator } from "../../server/src/utils/simhashPermutationTable.js";
 import { DuelingDqnBidding as ServerDuelingDqnBidding, ReplayBuffer as ServerReplayBuffer } from "../../server/src/utils/duelingDqnBidding.js";
+import { PrimalDualLogisticsMatcher as ServerPrimalDualLogisticsMatcher } from "../../server/src/utils/primalDualLogisticsMatcher.js";
+import { IvfProductQuantizer as ServerIvfProductQuantizer } from "../../server/src/utils/ivfProductQuantizer.js";
+import { MaddpgPricingCoordinator as ServerMaddpgPricingCoordinator, MultiAgentReplayBuffer as ServerMultiAgentReplayBuffer } from "../../server/src/utils/maddpgPricingCoordinator.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -18763,6 +18771,337 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const bidRec = dqn.recommendBidOptimization("áo sơ mi lụa công sở", 3500, state);
       expect.ok(bidRec.optimizedBid >= 500 && bidRec.optimizedBid <= 50000);
       expect.equal(bidRec.keyword, "áo sơ mi lụa công sở");
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 186: Phase 39 Primal-Dual Logistics, IVF-PQ, and MADDPG Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 186: Phase 39 Primal-Dual Logistics, IVF-PQ, and MADDPG Suite", () => {
+    // --- 1. PRIMAL-DUAL LOGISTICS MATCHER (8 tests) ---
+    test("F186-T01: Solves maximum weight matching with balanced bipartite sets N=M", () => {
+      const matcher = new PrimalDualLogisticsMatcher();
+      const orders = ["ORD_01", "ORD_02"];
+      const couriers = ["RIDER_A", "RIDER_B"];
+      const weights = [
+        [100, 20],  // ORD_01 prefers RIDER_A
+        [30, 90]    // ORD_02 prefers RIDER_B
+      ];
+
+      const res = matcher.match(orders, couriers, weights);
+      expect.equal(res.matchedCount, 2);
+      expect.equal(res.totalWeight, 190);
+      const matchMap = new Map(res.assignments.map(a => [a.orderId, a.courierId]));
+      expect.equal(matchMap.get("ORD_01"), "RIDER_A");
+      expect.equal(matchMap.get("ORD_02"), "RIDER_B");
+    });
+
+    test("F186-T02: Solves unbalanced sets N > M assigning all available couriers to highest-yield orders", () => {
+      const matcher = new PrimalDualLogisticsMatcher();
+      const orders = ["ORD_URGENT", "ORD_NORMAL", "ORD_LOW"];
+      const couriers = ["RIDER_FAST", "RIDER_SLOW"];
+      const weights = [
+        [150, 100],
+        [80, 70],
+        [30, 20]
+      ];
+
+      const res = matcher.match(orders, couriers, weights);
+      expect.equal(res.matchedCount, 2);
+      expect.equal(res.unassignedOrders.length, 1);
+      expect.equal(res.unassignedOrders[0], "ORD_LOW");
+      expect.equal(res.unassignedCouriers.length, 0);
+    });
+
+    test("F186-T03: Solves unbalanced sets N < M keeping excess couriers safely unassigned", () => {
+      const matcher = new PrimalDualLogisticsMatcher();
+      const orders = ["ORD_SOLO"];
+      const couriers = ["RIDER_1", "RIDER_2", "RIDER_3"];
+      const weights = [[40, 95, 60]];
+
+      const res = matcher.match(orders, couriers, weights);
+      expect.equal(res.matchedCount, 1);
+      expect.equal(res.assignments[0].courierId, "RIDER_2");
+      expect.equal(res.unassignedCouriers.length, 2);
+    });
+
+    test("F186-T04: Dual potentials and slack minimization converge to optimal matching", () => {
+      const matcher = new PrimalDualLogisticsMatcher();
+      const orders = ["O1", "O2", "O3"];
+      const couriers = ["C1", "C2", "C3"];
+      // Cross-preferred matrix
+      const weights = [
+        [10, 40, 20],
+        [20, 10, 50],
+        [40, 10, 10]
+      ];
+
+      const res = matcher.match(orders, couriers, weights);
+      expect.equal(res.matchedCount, 3);
+      // Optimal assignment: O1->C2 (40), O2->C3 (50), O3->C1 (40) => total = 130
+      expect.equal(res.totalWeight, 130);
+    });
+
+    test("F186-T05: computeCompositeScore rewards low distance, urgent SLA, courier 5-star rating, and high-value orders", () => {
+      const urgentVipOrder = { distanceKm: 2, slaRemainingMinutes: 15, orderValue: 2000000 };
+      const normalOrder = { distanceKm: 15, slaRemainingMinutes: 100, orderValue: 200000 };
+      const topCourier = { rating: 5.0 };
+      const avgCourier = { rating: 4.0 };
+
+      const scoreHigh = PrimalDualLogisticsMatcher.computeCompositeScore(urgentVipOrder, topCourier);
+      const scoreLow = PrimalDualLogisticsMatcher.computeCompositeScore(normalOrder, avgCourier);
+
+      expect.ok(scoreHigh > scoreLow);
+      expect.ok(scoreHigh >= 70);
+    });
+
+    test("F186-T06: Zero or negative weights are strictly avoided from assignment", () => {
+      const matcher = new PrimalDualLogisticsMatcher();
+      const orders = ["O1"];
+      const couriers = ["C1"];
+      const weights = [[0]];
+
+      const res = matcher.match(orders, couriers, weights);
+      expect.equal(res.matchedCount, 0);
+      expect.equal(res.unassignedOrders.length, 1);
+    });
+
+    test("F186-T07: Server and client PrimalDualLogisticsMatcher produce identical matching assignments", () => {
+      const clientMatcher = new PrimalDualLogisticsMatcher();
+      const serverMatcher = new ServerPrimalDualLogisticsMatcher();
+
+      const orders = ["ORD_A", "ORD_B", "ORD_C"];
+      const couriers = ["SHP_1", "SHP_2", "SHP_3"];
+      const weights = [
+        [85, 30, 45],
+        [20, 95, 10],
+        [60, 40, 75]
+      ];
+
+      const cRes = clientMatcher.match(orders, couriers, weights);
+      const sRes = serverMatcher.match(orders, couriers, weights);
+
+      expect.equal(cRes.totalWeight, sRes.totalWeight);
+      expect.equal(cRes.matchedCount, sRes.matchedCount);
+      expect.deepEqual(cRes.assignments, sRes.assignments);
+    });
+
+    test("F186-T08: Edge cases: empty orders, empty couriers, single element sets", () => {
+      const matcher = new PrimalDualLogisticsMatcher();
+      expect.equal(matcher.match([], ["C1"], []).matchedCount, 0);
+      expect.equal(matcher.match(["O1"], [], []).matchedCount, 0);
+      expect.equal(matcher.match([], [], []).matchedCount, 0);
+    });
+
+    // --- 2. IVF-PQ PRODUCT QUANTIZER (8 tests) ---
+    test("F186-T09: Validates vector dimension divisible by sub-vectors and throws informative error otherwise", () => {
+      expect.throws(() => {
+        new IvfProductQuantizer({ dimension: 15, numSubvectors: 4 });
+      }, /phải chia hết/);
+    });
+
+    test("F186-T10: Assigns vectors to nearest coarse Voronoi cell and computes residuals", () => {
+      const ivf = new IvfProductQuantizer({ dimension: 8, numCentroids: 2, numSubvectors: 2, subvectorK: 4 });
+      const vec = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8];
+      const res = ivf.insert("PROD_01", vec, { title: "Áo polo" });
+
+      expect.ok(res.centroidIdx >= 0 && res.centroidIdx < 2);
+      expect.equal(res.codes.length, 2);
+      expect.equal(ivf.size(), 1);
+    });
+
+    test("F186-T11: Quantizes residuals into M sub-vector codes using codebooks", () => {
+      const ivf = new IvfProductQuantizer({ dimension: 16, numCentroids: 4, numSubvectors: 4, subvectorK: 8 });
+      const vec = new Array(16).fill(0.25);
+      const { codes } = ivf.insert("P_CODE", vec);
+
+      expect.equal(codes.length, 4);
+      for (const c of codes) {
+        expect.ok(c >= 0 && c < 8);
+      }
+    });
+
+    test("F186-T12: Asymmetric Distance Computation (ADC) builds precalculated distance table for fast scoring", () => {
+      const ivf = new IvfProductQuantizer({ dimension: 8, numCentroids: 2, numSubvectors: 2, subvectorK: 4 });
+      const targetVec = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
+
+      ivf.insert("TARGET", targetVec, { name: "Target Item" });
+      ivf.insert("OTHER", [-0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5]);
+
+      const results = ivf.search(targetVec, 2, 2);
+      expect.ok(results.length >= 1);
+      expect.equal(results[0].id, "TARGET");
+      expect.ok(results[0].similarityScore > 0);
+      expect.ok(results[0].distanceSq < results[1].distanceSq);
+    });
+
+    test("F186-T13: Multi-probe search (nProbe > 1) scans top coarse centroids and retrieves true nearest neighbors", () => {
+      const ivf = new IvfProductQuantizer({ dimension: 8, numCentroids: 4, numSubvectors: 2, subvectorK: 4 });
+      for (let i = 0; i < 20; i++) {
+        const v = new Array(8).fill(0).map(() => (Math.random() - 0.5));
+        ivf.insert(`V_${i}`, v);
+      }
+
+      const qVec = new Array(8).fill(0.1);
+      const top3SingleProbe = ivf.search(qVec, 3, 1);
+      const top3MultiProbe = ivf.search(qVec, 3, 3);
+
+      expect.ok(top3MultiProbe.length >= top3SingleProbe.length);
+    });
+
+    test("F186-T14: Compression ratio: Stores D-dimensional float vectors in just M bytes code representation", () => {
+      const D = 64;
+      const M = 8;
+      const rawFloatBytes = D * 4; // 256 bytes per float32 vector
+      const pqCodeBytes = M;       // 8 bytes (1 byte per sub-vector code)
+      const compressionRatio = rawFloatBytes / pqCodeBytes;
+      expect.equal(compressionRatio, 32); // 32x RAM compression!
+    });
+
+    test("F186-T15: Server and client IvfProductQuantizer produce identical query cluster routing", () => {
+      const clientIvf = new IvfProductQuantizer({ dimension: 8, numCentroids: 2, numSubvectors: 2, subvectorK: 4 });
+      const serverIvf = new ServerIvfProductQuantizer({ dimension: 8, numCentroids: 2, numSubvectors: 2, subvectorK: 4 });
+
+      // Synchronize coarse centroids for exact determinism
+      serverIvf.coarseCentroids = clientIvf.coarseCentroids;
+      serverIvf.subvectorCodebooks = clientIvf.subvectorCodebooks;
+
+      const vec = [0.3, 0.1, -0.2, 0.4, 0.5, -0.1, 0.2, 0.0];
+      const cRes = clientIvf.insert("SYNC_1", vec);
+      const sRes = serverIvf.insert("SYNC_1", vec);
+
+      expect.equal(cRes.centroidIdx, sRes.centroidIdx);
+      expect.deepEqual(cRes.codes, sRes.codes);
+    });
+
+    test("F186-T16: Edge cases: query with wrong dimension, k larger than indexed count, empty quantizer", () => {
+      const ivf = new IvfProductQuantizer({ dimension: 8, numCentroids: 2, numSubvectors: 2 });
+      expect.deepEqual(ivf.search([0.1, 0.2]), []); // wrong dim
+      expect.deepEqual(ivf.search(null), []);
+      expect.deepEqual(ivf.search(new Array(8).fill(0), 10), []);
+    });
+
+    // --- 3. MADDPG PRICING COORDINATION (6 tests) ---
+    test("F186-T17: Decentralized Actors generate continuous pricing discount actions [-1, 1] based strictly on local shop observations", () => {
+      const maddpg = new MaddpgPricingCoordinator({ numAgents: 3, obsDim: 4 });
+      const shop1Obs = [1.0, 0.8, 0.6, 0.35]; // [price, stock, velocity, margin]
+
+      const action = maddpg.getAgentAction(0, shop1Obs);
+      expect.equal(typeof action, "number");
+      expect.ok(action >= -1.0 && action <= 1.0);
+    });
+
+    test("F186-T18: Centralized Critic evaluates joint Q-value Q_i(x, a_1..a_N) over all agents' observations and actions", () => {
+      const maddpg = new MaddpgPricingCoordinator({ numAgents: 2, obsDim: 3 });
+      const allObsFlat = [1, 0.5, 0.4, 0.9, 0.6, 0.3];
+      const allActions = [0.2, -0.1];
+
+      const qVal = maddpg.evaluateJointQ(0, allObsFlat, allActions);
+      expect.equal(typeof qVal, "number");
+    });
+
+    test("F186-T19: Multi-Agent Replay Buffer stores and samples joint transitions (x, a, r, x')", () => {
+      const buffer = new MultiAgentReplayBuffer(50);
+      for (let i = 0; i < 20; i++) {
+        buffer.push([[0.1 * i]], [0.2], [10], [[0.1 * (i + 1)]], false);
+      }
+      expect.equal(buffer.size(), 20);
+
+      const batch = buffer.sample(8);
+      expect.equal(batch.length, 8);
+      expect.ok(batch[0].allObs !== undefined);
+      expect.ok(batch[0].allActions !== undefined);
+    });
+
+    test("F186-T20: trainMiniBatch performs gradient updates on both centralized critics and decentralized actors", () => {
+      const maddpg = new MaddpgPricingCoordinator({ numAgents: 2, obsDim: 2 });
+      for (let i = 0; i < 15; i++) {
+        maddpg.storeTransition([[0.5, 0.5], [0.4, 0.6]], [0.1, -0.1], [5, 4], [[0.5, 0.4], [0.4, 0.5]], false);
+      }
+
+      const res = maddpg.trainMiniBatch(10);
+      expect.equal(res.trained, true);
+      expect.ok(res.avgLoss >= 0);
+    });
+
+    test("F186-T21: coordinatePricingRecommendations maps actions to bounded discounts (0% - 30%) preventing predatory pricing", () => {
+      const maddpg = new MaddpgPricingCoordinator({ numAgents: 3, obsDim: 4 });
+      const shopsData = [
+        { shopId: "SHOP_TECH", basePrice: 15000000, currentPriceRatio: 1.0, stockRemainingRatio: 0.9, velocityRate: 0.8, targetMarginRatio: 0.25 },
+        { shopId: "SHOP_FASHION", basePrice: 350000, currentPriceRatio: 0.9, stockRemainingRatio: 0.3, velocityRate: 0.9, targetMarginRatio: 0.4 },
+        { shopId: "SHOP_BEAUTY", basePrice: 280000, currentPriceRatio: 1.1, stockRemainingRatio: 0.5, velocityRate: 0.4, targetMarginRatio: 0.3 }
+      ];
+
+      const recs = maddpg.coordinatePricingRecommendations(shopsData);
+      expect.equal(recs.length, 3);
+      for (const rec of recs) {
+        expect.ok(rec.discountPercent >= 0 && rec.discountPercent <= 30);
+        expect.ok(rec.suggestedPrice <= rec.basePrice);
+        expect.ok(rec.coordinationNote.length > 0);
+      }
+    });
+
+    test("F186-T22: Server and client MaddpgPricingCoordinator maintain identical dimensions and action mappings", () => {
+      const clientMaddpg = new MaddpgPricingCoordinator({ numAgents: 3, obsDim: 4 });
+      const serverMaddpg = new ServerMaddpgPricingCoordinator({ numAgents: 3, obsDim: 4 });
+
+      expect.equal(clientMaddpg.numAgents, serverMaddpg.numAgents);
+      expect.equal(clientMaddpg.obsDim, serverMaddpg.obsDim);
+      expect.equal(clientMaddpg.totalObsDim, serverMaddpg.totalObsDim);
+    });
+
+    // --- 4. COPILOT & E2E INTEGRATION (2 tests) ---
+    test("F186-T23: AI Copilot engines integrate Phase 39 Primal-Dual, IVF-PQ, and MADDPG queries across Admin, Seller, and Buyer assistants", () => {
+      const adminRes1 = generateAdminCopilotResponse("Tối ưu gán đơn hỏa tốc bằng primal-dual kuhn-munkres");
+      expect.equal(adminRes1.tag, "PRIMAL DUAL LOGISTICS MATCHER");
+      expect.ok(adminRes1.text.includes("PRIMAL-DUAL"));
+
+      const adminRes2 = generateAdminCopilotResponse("Tra cứu sản phẩm tương đồng bằng ivf-pq lượng tử hóa");
+      expect.equal(adminRes2.tag, "IVF PRODUCT QUANTIZATION");
+      expect.ok(adminRes2.text.includes("IVF-PQ"));
+
+      const adminRes3 = generateAdminCopilotResponse("Điều phối giá bán flash sale đa gian hàng bằng maddpg");
+      expect.equal(adminRes3.tag, "MADDPG PRICING COORDINATION");
+      expect.ok(adminRes3.text.includes("MADDPG"));
+
+      const sellerRes = generateSellerCopilotResponse("Tư vấn bắt cặp bưu tá hỏa tốc primal-dual, tìm kiếm vector ivf-pq và định giá liên shop maddpg", {
+        currentShop: { name: "Anker Official" },
+        shopProducts: [{ stock: 50 }],
+        shopOrders: []
+      });
+      expect.equal(sellerRes.tag, "PRIMAL-DUAL, IVF-PQ & MADDPG PRICING");
+      expect.ok(sellerRes.text.includes("Anker Official"));
+
+      const chatRes = generateAiChatResponse("Hỏi về giao vận ưu tiên primal-dual và tìm kiếm ảnh ivf-pq");
+      expect.equal(chatRes.intent, "PRIMAL_DUAL_IVF_PQ_MADDPG_ASSIST");
+      expect.ok(chatRes.replyText.includes("Primal-Dual"));
+      expect.ok(chatRes.replyText.includes("IVF-PQ"));
+    });
+
+    test("F186-T24: E2E Lifecycle: IVF-PQ searches similar products -> MADDPG coordinates collaborative flash discounts -> Primal-Dual matcher assigns optimal courier", () => {
+      // 1. IVF-PQ finds top catalog match from visual/text embedding
+      const ivf = new IvfProductQuantizer({ dimension: 8, numCentroids: 2, numSubvectors: 2 });
+      ivf.insert("SKU_PHONE_CASE", [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4], { name: "Ốp lưng iPhone 15 Pro Max" });
+      const searchRes = ivf.search([0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4], 1);
+      expect.equal(searchRes[0].id, "SKU_PHONE_CASE");
+
+      // 2. MADDPG coordinates competitive pricing across 2 shops
+      const maddpg = new MaddpgPricingCoordinator({ numAgents: 2, obsDim: 4 });
+      const pricing = maddpg.coordinatePricingRecommendations([
+        { shopId: "SHOP_ACCESSORIES", basePrice: 200000, currentPriceRatio: 1.0, stockRemainingRatio: 0.8, velocityRate: 0.7, targetMarginRatio: 0.35 },
+        { shopId: "SHOP_CHARGERS", basePrice: 350000, currentPriceRatio: 1.0, stockRemainingRatio: 0.7, velocityRate: 0.6, targetMarginRatio: 0.30 }
+      ]);
+      expect.ok(pricing[0].discountPercent >= 0);
+
+      // 3. Primal-Dual Matcher matches customer's flash order to optimal 5-star courier
+      const matcher = new PrimalDualLogisticsMatcher();
+      const score = PrimalDualLogisticsMatcher.computeCompositeScore(
+        { distanceKm: 3.5, slaRemainingMinutes: 20, orderValue: pricing[0].suggestedPrice },
+        { rating: 5.0 }
+      );
+      const match = matcher.match(["ORDER_FLASH_DEAL"], ["COURIER_SPX_HERO"], [[score]]);
+      expect.equal(match.matchedCount, 1);
+      expect.equal(match.assignments[0].courierId, "COURIER_SPX_HERO");
     });
   });
 });

@@ -914,6 +914,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 41. Giao Vận Ưu Tiên Primal-Dual, Tìm Kiếm Vector IVF-PQ & Săn Deal Phối Hợp MADDPG (PRIMAL_DUAL_IVF_PQ_MADDPG_ASSIST)
+  if (/giao vận ưu tiên primal[- ]dual|primal[- ]dual|tìm kiếm ảnh ivf[- ]pq|ivf[- ]pq|deal phối hợp maddpg|maddpg/i.test(lower)) {
+    return {
+      intent: 'PRIMAL_DUAL_IVF_PQ_MADDPG_ASSIST',
+      replyText: `**[CÔNG NGHỆ GIAO VẬN HỎA TỐC & SĂN DEAL ĐỈNH CAO]:**\n\n• **Giao vận ưu tiên Primal-Dual**: Đơn hàng gấp và khách hàng VIP được hệ thống tự động gán cho tài xế 5 sao có tốc độ giao nhanh nhất, bảo đảm nhận hàng chuẩn xác đúng hẹn 2h!\n• **Tìm kiếm siêu tốc IVF-PQ**: Tìm sản phẩm bằng hình ảnh hoặc từ khóa tương đồng diễn ra trong chớp mắt nhờ công nghệ lượng tử hóa vector phân đoạn ADC.\n• **Săn deal Flash Sale tốt nhất (MADDPG)**: Thuật toán AI điều phối giá bán giữa các shop đối tác, mang lại cho bạn combo giá hời nhất mà không bị độn giá ảo!`,
+      suggestions: ['Kiểm tra đơn hỏa tốc', 'Tìm sản phẩm tương đồng', 'Xem deal hot hôm nay'],
+    };
+  }
+
 
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH

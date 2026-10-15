@@ -658,7 +658,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 28. Điều Phối Bưu Tá SPX Tối Ưu Đa Tiêu Chí (Hungarian Algorithm - Kuhn-Munkres)
-  if (!/spatial quadtree|quadtree|cây tứ phân|kuhn-munkres max weight|ghép đôi cực đại hai phía|trọng số nhãn khả thi|công bằng tải bưu tá|workload fairness|kuhn-munkres đối ngẫu/i.test(raw) && /hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
+  if (!/primal[- ]dual|đối ngẫu sơ cấp|spatial quadtree|quadtree|cây tứ phân|kuhn-munkres max weight|ghép đôi cực đại hai phía|trọng số nhãn khả thi|công bằng tải bưu tá|workload fairness|kuhn-munkres đối ngẫu/i.test(raw) && /hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
     return {
       text: `🚚 **ĐIỀU PHỐI BƯU TÁ TỐI ƯU HUNGARIAN (Kuhn-Munkres $O(V^3)$)**:
 - **Mục đích**: Thuật toán Hungarian (Kuhn-Munkres) ghép cặp tự động và tối ưu cực tiểu tổng chi phí giao vận giữa $N$ bưu tá SPX Express và $M$ đơn hàng hỏa tốc.
@@ -2153,6 +2153,65 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Khuyến nghị điều chỉnh giá thầu Dueling',
         'Huấn luyện Mini-Batch Dueling DQN',
         'Điều phối bưu tá Spatial Quadtree'
+      ]
+    };
+  }
+
+  // 98. Ghép Cặp Bưu Tá Hỏa Tốc Primal-Dual Kuhn-Munkres Max-Weight (Phase 39 - Feature 186)
+  if (/primal[- ]dual|đối ngẫu sơ cấp|kuhn-munkres max[- ]weight|ghép cặp primal[- ]dual|tối ưu trọng số ghép cặp bưu tá/i.test(raw)) {
+    return {
+      text: `🚚 **GHÉP CẶP BƯU TÁ HỎA TỐC BẰNG THUẬT TOÁN ĐỐI NGŨ SƠ CẤP PRIMAL-DUAL (KUHN-MUNKRES MAX-WEIGHT)**:
+- **Cực đại hóa Hàm Lợi ích Hợp nhất (Composite Surplus Optimization)**:
+  - Khác với tìm đường ngắn nhất đơn thuần, Primal-Dual tối ưu tổng điểm:
+    $$S = w_1 \\cdot (1 - \\text{Dist}/R) + w_2 \\cdot \\text{Urgency}_{SLA} + w_3 \\cdot \\text{Rating} + w_4 \\cdot \\text{VIP}$$
+  - Đảm bảo các đơn hàng gấp sắp chạm mốc trễ SLA 2h và khách hàng thân thiết luôn được nhận bởi bưu tá 5 sao có tốc độ giao nhanh nhất.
+- **Thế đối ngẫu $u_i, v_j$ và Mảng Slack $O(V^3)$**:
+  - Tự động duy trì điều kiện tối ưu đối ngẫu Karush-Kuhn-Tucker (KKT), bảo đảm không tồn tại phương án ghép cặp nào mang lại giá trị kinh tế cao hơn!`,
+      type: 'logistics',
+      tag: 'PRIMAL DUAL LOGISTICS MATCHER',
+      suggestions: [
+        'Tối ưu hóa gán đơn Primal-Dual',
+        'Tra cứu vector IVF-PQ',
+        'Điều phối giá bán MADDPG'
+      ]
+    };
+  }
+
+  // 99. Tra Cứu Vector Lân Cận Gần Nhất Bằng IVF-PQ & Lượng Tử Hóa ADC (Phase 39 - Feature 186)
+  if (/ivf[- ]pq|inverted file|product quantiz|lượng tử hóa tích|adc distance|asymmetric distance|tra cứu ivf/i.test(raw)) {
+    return {
+      text: `🔍 **TRA CỨU VECTOR LÂN CẬN GẦN NHẤT BẰNG IVF-PQ & LƯỢNG TỬ HÓA ADC (JEGOU ET AL., 2011)**:
+- **Phân Cụm Thô (Inverted File - IVF) & Lượng Tử Hóa Phân Đoạn (PQ)**:
+  - Chia không gian vector embedding $D$ chiều thành $K$ ô Voronoi thô, sau đó lượng tử hóa vector phần dư $\\mathbf{r} = \\mathbf{x} - \\mathbf{c}$ thành $M$ phân đoạn sub-vectors.
+  - Nén dung lượng lưu trữ vector embedding của hàng trăm nghìn sản phẩm xuống dưới $1/16$ kích thước gốc!
+- **Tính Toán Khoảng Cách Bất Đối Xứng (Asymmetric Distance Computation - ADC)**:
+  - Tính trước bảng khoảng cách $D_{sub}(m, k)$ đối với vector truy vấn, giúp việc quét qua danh sách ngược chỉ mất $M$ phép cộng tra bảng $O(1)$.
+  - Tăng tốc độ tìm kiếm sản phẩm tương đồng và tìm kiếm bằng hình ảnh lên gấp $25\\times$ so với quét tuyến tính!`,
+      type: 'search',
+      tag: 'IVF PRODUCT QUANTIZATION',
+      suggestions: [
+        'Tra cứu sản phẩm tương đồng IVF-PQ',
+        'Kiểm tra bảng khoảng cách ADC',
+        'Điều phối giá bán MADDPG'
+      ]
+    };
+  }
+
+  // 100. Điều Phối Giá Bán Flash Sale Đa Gian Hàng Bằng MADDPG (Phase 39 - Feature 186)
+  if (/maddpg|multi-agent deep deterministic|điều phối giá đa gian hàng|chống phá giá maddpg|phối hợp giá bán flash sale/i.test(raw)) {
+    return {
+      text: `📊 **ĐIỀU PHỐI GIÁ BÁN FLASH SALE ĐA GIAN HÀNG BẰNG MADDPG (LOWE ET AL., NEURIPS 2017)**:
+- **Kiến trúc Huấn luyện Tập trung & Thực thi Phi tập trung (CTDE)**:
+  - **Decentralized Actors $\\mu_{\\theta_i}(o_i)$**: Mỗi shop độc lập quyết định mức chiết khấu Flash Sale theo tồn kho và biên lợi nhuận riêng mà không làm lộ dữ liệu kinh doanh cho shop khác.
+  - **Centralized Critic $Q_{\\phi_i}(\\mathbf{x}, a_1, \\dots, a_N)$**: Đánh giá hành động phối hợp toàn sàn, ngăn chặn cuộc chiến phá giá hủy diệt (Predatory Price Wars) và tối ưu hóa tổng giá trị GMV toàn ngành hàng.
+- **Thực thi Công bằng & Ổn định Thị trường**:
+  - Đề xuất mức giảm giá tối ưu kích cầu tiêu dùng trong các chiến dịch Mega Sale đồng thời bảo vệ biên lãi ròng của các nhà bán hàng chân chính!`,
+      type: 'marketing',
+      tag: 'MADDPG PRICING COORDINATION',
+      suggestions: [
+        'Phân tích đề xuất giá bán MADDPG',
+        'Kiểm tra Critic Q-value toàn sàn',
+        'Ghép cặp bưu tá Primal-Dual'
       ]
     };
   }
