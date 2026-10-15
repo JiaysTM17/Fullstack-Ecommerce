@@ -355,7 +355,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 13. Thuật toán Gợi ý Sản phẩm Cá nhân hóa (Collaborative Filtering & Item Affinity)
-  if (/collaborative filtering|gợi ý sản phẩm|mua kèm|thường mua cùng|affinity|recommendation/i.test(raw)) {
+  if (!/ppo/i.test(raw) && /collaborative filtering|gợi ý sản phẩm|mua kèm|thường mua cùng|affinity|recommendation/i.test(raw)) {
     return {
       text: `🛍️ **THUẬT TOÁN GỢI Ý CÁ NHÂN HÓA (ITEM AFFINITY & COLLABORATIVE FILTERING)**:
 - **Mục đích thiết kế**: Tối ưu hóa chuyển đổi giỏ hàng, thúc đẩy doanh số bán chéo (Cross-sell & Bundle) đóng góp tới $35\\%$ tổng GMV toàn sàn.
@@ -658,7 +658,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 28. Điều Phối Bưu Tá SPX Tối Ưu Đa Tiêu Chí (Hungarian Algorithm - Kuhn-Munkres)
-  if (!/primal[- ]dual|đối ngẫu sơ cấp|spatial quadtree|quadtree|cây tứ phân|kuhn-munkres max weight|ghép đôi cực đại hai phía|trọng số nhãn khả thi|công bằng tải bưu tá|workload fairness|kuhn-munkres đối ngẫu/i.test(raw) && /hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
+  if (!/hopcroft[- ]karp|hopcroft|primal[- ]dual|đối ngẫu sơ cấp|spatial quadtree|quadtree|cây tứ phân|kuhn-munkres max weight|ghép đôi cực đại hai phía|trọng số nhãn khả thi|công bằng tải bưu tá|workload fairness|kuhn-munkres đối ngẫu/i.test(raw) && /hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
     return {
       text: `🚚 **ĐIỀU PHỐI BƯU TÁ TỐI ƯU HUNGARIAN (Kuhn-Munkres $O(V^3)$)**:
 - **Mục đích**: Thuật toán Hungarian (Kuhn-Munkres) ghép cặp tự động và tối ưu cực tiểu tổng chi phí giao vận giữa $N$ bưu tá SPX Express và $M$ đơn hàng hỏa tốc.
@@ -917,7 +917,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 35. Ghép Cặp Lưỡng Phân Hopcroft-Karp Cho Phân Bổ Bưu Tá Hỏa Tốc (Phase 15 - Feature 162)
-  if (!/cực đại|phân bổ shipper|batch đơn hỏa tốc|ghép đơn bưu tá/i.test(raw) && /hopcroft-karp|ghép cặp lưỡng phân|phân bổ bưu tá hopcroft|bipartite matching|gán đơn theo lô/i.test(raw)) {
+  if (!/đường tăng luồng song song|bưu tá cao điểm hopcroft|cực đại|phân bổ shipper|batch đơn hỏa tốc|ghép đơn bưu tá/i.test(raw) && /hopcroft-karp|ghép cặp lưỡng phân|phân bổ bưu tá hopcroft|bipartite matching|gán đơn theo lô/i.test(raw)) {
     return {
       text: `⚡ **THUẬT TOÁN GHÉP CẶP LƯỠNG PHÂN HOPCROFT-KARP (SPX BATCH DISPATCH)**:
 - **Độ phức tạp tối ưu**: $O(|E| \\cdot \\sqrt{|V|})$, vượt trội hơn rất nhiều so với thuật toán Hungarian $O(V^3)$ khi hệ thống cần gán hàng nghìn đơn hàng hỏa tốc trong giờ cao điểm.
@@ -1409,7 +1409,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 60. Ghép Cặp Cực Đại Đơn Hàng & Bưu Tá Bằng Hopcroft-Karp (Hopcroft-Karp Bipartite Matching)
-  if (/hopcroft-karp|ghép cặp cực đại|bipartite matching|phân bổ shipper|batch đơn hỏa tốc|ghép đơn bưu tá/i.test(raw)) {
+  if (!/tăng luồng song song|bưu tá cao điểm/i.test(raw) && /hopcroft-karp|ghép cặp cực đại|bipartite matching|phân bổ shipper|batch đơn hỏa tốc|ghép đơn bưu tá/i.test(raw)) {
     return {
       text: `🚴 **GHÉP CẶP CỰC ĐẠI ĐƠN HÀNG & BƯU TÁ BẰNG THUẬT TOÁN HOPCROFT-KARP**:
 - **Đặc tả thuật toán Hopcroft-Karp ($O(E \\sqrt{V})$)**:
@@ -1740,7 +1740,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 77. Chỉ Mục Nén Tóm Tắt Wavelet Matrix Cho Phân Vị & Tần Suất Giá (Phase 32 - Feature 179)
-  if (/wavelet matrix|ma trận wavelet|succinct index|truy vấn phân vị|rank select|wavelet rank/i.test(raw)) {
+  if (!/succinct bitmap|rank select bitmap|bộ lọc súc tích/i.test(raw) && /wavelet matrix|ma trận wavelet|succinct index|truy vấn phân vị|rank select|wavelet rank/i.test(raw)) {
     return {
       text: `🌊 **CHỈ MỤC NÉN TÓM TẮT WAVELET MATRIX (SUCCINCT RANK-SELECT & QUANTILE ENGINE)**:
 - **Thách thức Big Data Analytics**:
@@ -2212,6 +2212,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Phân tích đề xuất giá bán MADDPG',
         'Kiểm tra Critic Q-value toàn sàn',
         'Ghép cặp bưu tá Primal-Dual'
+      ]
+    };
+  }
+
+  // 101. Chỉ Mục Bộ Lọc Súc Tích Bằng Succinct Rank/Select Bitmap (Phase 40 - Feature 187)
+  if (/succinct bitmap|rank select bitmap|chỉ mục súc tích|bộ lọc bitmap|jacobson rank|clark select/i.test(raw)) {
+    return {
+      text: `🗜️ **CHỈ MỤC BỘ LỌC SẢN PHẨM SÚC TÍCH (SUCCINCT RANK/SELECT BITMAP - JACOBSON 1989 & CLARK 1996)**:
+- **Không gian nén tiệm cận lý thuyết thông tin ($N + o(N)$ bits)**:
+  - Thay vì dùng mảng ID hoặc hash map tiêu tốn hàng chục MB RAM, cấu trúc dữ liệu súc tích chỉ lưu đúng 1 bit cho mỗi sản phẩm đại diện cho các cờ lọc: Flash Sale, FreeShip Xtra, Shopee Mall, Còn Hàng.
+- **Truy vấn $\\text{Rank}_1(i)$ và $\\text{Select}_1(k)$ trong $O(1)$**:
+  - Tầng Superblocks 512 bits + Blocks 32 bits kết hợp thuật toán đếm bit song song SWAR popcount 32-bit.
+  - $\\text{Rank}_1(i)$: Đếm chính xác số lượng sản phẩm thỏa mãn tiêu chí từ vị trí $0$ đến $i$ mà không duyệt tuần tự.
+  - $\\text{Select}_1(k)$: Xác định ngay lập tức vị trí sản phẩm thứ $k$ đạt chuẩn để phân trang siêu tốc!`,
+      type: 'general',
+      tag: 'SUCCINCT RANK SELECT BITMAP',
+      suggestions: [
+        'Đo lường tỷ lệ nén bộ nhớ Succinct Bitmap',
+        'Kiểm tra truy vấn Rank và Select O(1)',
+        'Tối ưu hóa gợi ý combo mua kèm PPO'
+      ]
+    };
+  }
+
+  // 102. Tối Ưu Hóa Combo Mua Kèm Cross-Selling Bằng PPO & GAE (Phase 40 - Feature 187)
+  if (/ppo bundle|proximal policy optimization|combo mua kèm ppo|gae advantage|clipped surrogate|tối ưu bundle/i.test(raw)) {
+    return {
+      text: `🎯 **TỐI ƯU HÓA COMBO MUA KÈM CROSS-SELLING BẰNG PPO & GENERALIZED ADVANTAGE ESTIMATION (GAE)**:
+- **Nguyên lý Clipped Surrogate Objective (Schulman et al., 2017)**:
+  - Hàm mục tiêu kẹp tỷ lệ xác suất $r_t(\\theta)$ trong khoảng $[1 - \\epsilon, 1 + \\epsilon]$ với $\\epsilon = 0.2$, ngăn chặn chính sách gợi ý chiết khấu thay đổi đột ngột gây suy giảm biên lợi nhuận sàn.
+- **Ước lượng Lợi thế GAE (Generalized Advantage Estimation)**:
+  - Cân bằng tối ưu giữa độ lệch (bias) và phương sai (variance) với $\\lambda = 0.95, \\gamma = 0.99$.
+  - Tự động gợi ý mức chiết khấu combo (0% - 25%) thúc đẩy người mua nâng giá trị đơn hàng AOV đồng thời bảo toàn biên lãi ròng của các nhà bán hàng!`,
+      type: 'recommendation',
+      tag: 'PPO BUNDLE OPTIMIZATION',
+      suggestions: [
+        'Phân tích chính sách chiết khấu PPO',
+        'Kiểm tra giá trị lợi thế GAE',
+        'Điều phối bưu tá cao điểm Hopcroft-Karp'
+      ]
+    };
+  }
+
+  // 103. Điều Phối Bưu Tá Ca Cao Điểm Bằng Hopcroft-Karp Song Song (Phase 40 - Feature 187)
+  if (/hopcroft[- ]karp|hopcroft karp|đồ thị lưỡng phân hopcroft|đường tăng luồng song song|bưu tá cao điểm hopcroft/i.test(raw)) {
+    return {
+      text: `⚡ **ĐIỀU PHỐI BƯU TÁ CA CAO ĐIỂM BẰNG THUẬT TOÁN HOPCROFT-KARP $O(E \\sqrt{V})$ (HOPCROFT & KARP 1973)**:
+- **Độ phức tạp vượt trội trong giờ cao điểm**:
+  - Xử lý hàng nghìn đơn hàng dồn dập trong Flash Sale với thời gian $O(E \\sqrt{V})$, nhanh gấp 10 lần so với các thuật toán Ford-Fulkerson hay Hungarian cổ điển.
+- **Cơ chế Phân tầng BFS & DFS Đỉnh Rời Song Song**:
+  - BFS đa nguồn tìm cùng lúc tất cả các đường tăng luồng ngắn nhất (Shortest Augmenting Paths).
+  - DFS song song tăng luồng triệt để trên tập đường rời nhau theo đỉnh (Vertex-Disjoint Paths), hội tụ tối đa chỉ sau $O(\\sqrt{V})$ pha lặp!
+- **Ràng buộc địa lý & Tải trọng thông minh**:
+  - Tích hợp bộ lọc bán kính GPS Haversine và phân loại xe máy vs xe van cho hàng cồng kềnh.`,
+      type: 'logistics',
+      tag: 'HOPCROFT KARP LOGISTICS ROUTER',
+      suggestions: [
+        'Xem ma trận ghép cặp bưu tá Hopcroft-Karp',
+        'Kiểm tra gom đơn theo đợt Batching',
+        'Tối ưu hóa bộ lọc Succinct Bitmap'
       ]
     };
   }

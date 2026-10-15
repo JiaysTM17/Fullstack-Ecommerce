@@ -19209,6 +19209,555 @@ export class MaddpgPricingCoordinator {
   }
 }
 
+// ============================================================================
+// PHASE 40 ENTERPRISE ALGORITHMS
+// ============================================================================
+
+export class SuccinctRankSelectBitmap {
+  constructor(size = 0, options = {}) {
+    this.size = Math.max(0, Number(size) || 0);
+    this.wordsPerSuperblock = 16;
+    this.words = new Uint32Array(Math.ceil(this.size / 32) || 1);
+    this.numSuperblocks = Math.ceil(this.size / 512) || 1;
+    this.superblocks = new Uint32Array(this.numSuperblocks + 1);
+    this.blocks = new Uint16Array(Math.ceil(this.size / 32) + 1);
+    this.selectSamplingRate = options.selectSamplingRate || 64;
+    this.select1Table = [];
+    this.totalOnes = 0;
+    this.isBuilt = false;
+  }
+
+  static popcount32(x) {
+    let n = x >>> 0;
+    n = n - ((n >>> 1) & 0x55555555);
+    n = (n & 0x33333333) + ((n >>> 2) & 0x33333333);
+    return (((n + (n >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24;
+  }
+
+  set(index, value = true) {
+    if (index < 0 || index >= this.size) return false;
+    const wordIdx = (index / 32) | 0;
+    const bitPos = index % 32;
+    if (value) {
+      this.words[wordIdx] |= (1 << bitPos);
+    } else {
+      this.words[wordIdx] &= ~(1 << bitPos);
+    }
+    this.isBuilt = false;
+    return true;
+  }
+
+  get(index) {
+    if (index < 0 || index >= this.size) return false;
+    const wordIdx = (index / 32) | 0;
+    const bitPos = index % 32;
+    return ((this.words[wordIdx] >>> bitPos) & 1) === 1;
+  }
+
+  build() {
+    let runningTotal = 0;
+    let superblockTotal = 0;
+    this.select1Table = [];
+    const numWords = Math.ceil(this.size / 32);
+
+    for (let w = 0; w < numWords; w++) {
+      const superIdx = (w / this.wordsPerSuperblock) | 0;
+      const wordWithinSuper = w % this.wordsPerSuperblock;
+
+      if (wordWithinSuper === 0) {
+        this.superblocks[superIdx] = runningTotal;
+        superblockTotal = runningTotal;
+      }
+
+      this.blocks[w] = (runningTotal - superblockTotal) & 0xFFFF;
+      const wordVal = this.words[w];
+
+      for (let b = 0; b < 32; b++) {
+        const bitIdx = w * 32 + b;
+        if (bitIdx >= this.size) break;
+        if ((wordVal >>> b) & 1) {
+          runningTotal++;
+          if (runningTotal % this.selectSamplingRate === 1) {
+            this.select1Table.push(bitIdx);
+          }
+        }
+      }
+    }
+
+    this.totalOnes = runningTotal;
+    this.superblocks[this.numSuperblocks] = runningTotal;
+    this.isBuilt = true;
+    return this;
+  }
+
+  rank1(index) {
+    if (index < 0) return 0;
+    if (index >= this.size) return this.totalOnes;
+    if (!this.isBuilt) this.build();
+
+    const wordIdx = (index / 32) | 0;
+    const superIdx = (wordIdx / this.wordsPerSuperblock) | 0;
+    const bitPos = index % 32;
+    const superCount = this.superblocks[superIdx];
+    const blockCount = this.blocks[wordIdx];
+    const mask = bitPos === 31 ? 0xFFFFFFFF : (1 << (bitPos + 1)) - 1;
+    const inWordCount = SuccinctRankSelectBitmap.popcount32(this.words[wordIdx] & mask);
+
+    return superCount + blockCount + inWordCount;
+  }
+
+  rank0(index) {
+    if (index < 0) return 0;
+    if (index >= this.size) return this.size - this.totalOnes;
+    return (index + 1) - this.rank1(index);
+  }
+
+  select1(k) {
+    if (k <= 0 || k > this.totalOnes) return -1;
+    if (!this.isBuilt) this.build();
+
+    const sampleIdx = ((k - 1) / this.selectSamplingRate) | 0;
+    let low = sampleIdx < this.select1Table.length ? this.select1Table[sampleIdx] : 0;
+    let high = this.size - 1;
+    if (sampleIdx + 1 < this.select1Table.length) {
+      high = this.select1Table[sampleIdx + 1];
+    }
+
+    let ans = high;
+    while (low <= high) {
+      const mid = (low + high) >> 1;
+      if (this.rank1(mid) >= k) {
+        ans = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return ans;
+  }
+
+  select0(k) {
+    const totalZeros = this.size - this.totalOnes;
+    if (k <= 0 || k > totalZeros) return -1;
+    if (!this.isBuilt) this.build();
+
+    let low = 0;
+    let high = this.size - 1;
+    let ans = high;
+
+    while (low <= high) {
+      const mid = (low + high) >> 1;
+      if (this.rank0(mid) >= k) {
+        ans = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return ans;
+  }
+
+  getMemoryFootprint() {
+    const bitmapBytes = this.words.byteLength;
+    const superblockBytes = this.superblocks.byteLength;
+    const blockBytes = this.blocks.byteLength;
+    const tableBytes = this.select1Table.length * 4;
+    const totalBytes = bitmapBytes + superblockBytes + blockBytes + tableBytes;
+    const rawArrayBytes = this.size * 4;
+    const compressionRatio = Number((rawArrayBytes / Math.max(1, totalBytes)).toFixed(2));
+
+    return {
+      bitmapBytes,
+      overheadBytes: superblockBytes + blockBytes + tableBytes,
+      totalBytes,
+      compressionRatio
+    };
+  }
+
+  static intersect(bitmapA, bitmapB) {
+    const minSize = Math.min(bitmapA.size, bitmapB.size);
+    const result = new SuccinctRankSelectBitmap(minSize);
+    const numWords = Math.ceil(minSize / 32);
+
+    for (let w = 0; w < numWords; w++) {
+      result.words[w] = (bitmapA.words[w] & bitmapB.words[w]) >>> 0;
+    }
+    result.build();
+    return result;
+  }
+}
+
+export class PpoBundleOptimizer {
+  constructor(options = {}) {
+    this.stateDim = options.stateDim || 4;
+    this.actionDim = options.actionDim || 6;
+    this.discountTiers = options.discountTiers || [0, 5, 10, 15, 20, 25];
+    this.clipEps = options.clipEps || 0.2;
+    this.gamma = options.gamma || 0.99;
+    this.gaeLambda = options.gaeLambda || 0.95;
+    this.actorLr = options.actorLr || 0.01;
+    this.criticLr = options.criticLr || 0.02;
+
+    this.actorWeights = Array.from({ length: this.actionDim }, () =>
+      new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.1)
+    );
+    this.criticWeights = new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.criticBias = 0.0;
+    this.trajectoryBuffer = [];
+  }
+
+  evaluateValue(state) {
+    let val = this.criticBias;
+    for (let i = 0; i < this.stateDim; i++) {
+      val += (state[i] || 0) * this.criticWeights[i];
+    }
+    return val;
+  }
+
+  getPolicyDistribution(state) {
+    const logits = new Array(this.actionDim).fill(0);
+    let maxLogit = -Infinity;
+
+    for (let a = 0; a < this.actionDim; a++) {
+      let sum = 0;
+      for (let s = 0; s < this.stateDim; s++) {
+        sum += (state[s] || 0) * this.actorWeights[a][s];
+      }
+      logits[a] = sum;
+      if (sum > maxLogit) maxLogit = sum;
+    }
+
+    let sumExp = 0;
+    const probs = new Array(this.actionDim);
+    for (let a = 0; a < this.actionDim; a++) {
+      probs[a] = Math.exp(logits[a] - maxLogit);
+      sumExp += probs[a];
+    }
+    for (let a = 0; a < this.actionDim; a++) {
+      probs[a] = probs[a] / (sumExp || 1.0);
+    }
+    return probs;
+  }
+
+  selectAction(state) {
+    const probs = this.getPolicyDistribution(state);
+    const rand = Math.random();
+    let cumulative = 0;
+    let chosenAction = this.actionDim - 1;
+
+    for (let a = 0; a < this.actionDim; a++) {
+      cumulative += probs[a];
+      if (rand <= cumulative) {
+        chosenAction = a;
+        break;
+      }
+    }
+
+    const valueEstimate = this.evaluateValue(state);
+
+    return {
+      action: chosenAction,
+      discountPercent: this.discountTiers[chosenAction],
+      prob: probs[chosenAction],
+      value: valueEstimate,
+      probs
+    };
+  }
+
+  recordStep(state, action, reward, value, prob, done = false) {
+    this.trajectoryBuffer.push({
+      state: [...state],
+      action,
+      reward: Number(reward) || 0,
+      value: Number(value) || 0,
+      prob: Number(prob) || 0.1,
+      done: Boolean(done)
+    });
+  }
+
+  computeGae(nextValue = 0) {
+    const T = this.trajectoryBuffer.length;
+    const advantages = new Array(T).fill(0);
+    const returns = new Array(T).fill(0);
+    let gae = 0;
+
+    for (let t = T - 1; t >= 0; t--) {
+      const step = this.trajectoryBuffer[t];
+      const nextVal = (t === T - 1) ? nextValue : this.trajectoryBuffer[t + 1].value;
+      const nonTerminal = step.done ? 0 : 1;
+      const delta = step.reward + this.gamma * nextVal * nonTerminal - step.value;
+
+      gae = delta + this.gamma * this.gaeLambda * nonTerminal * gae;
+      advantages[t] = gae;
+      returns[t] = advantages[t] + step.value;
+    }
+
+    const meanAdv = advantages.reduce((a, b) => a + b, 0) / (T || 1);
+    const varianceAdv = advantages.reduce((sum, a) => sum + Math.pow(a - meanAdv, 2), 0) / (T || 1);
+    const stdAdv = Math.sqrt(varianceAdv) + 1e-6;
+
+    for (let t = 0; t < T; t++) {
+      advantages[t] = (advantages[t] - meanAdv) / stdAdv;
+    }
+    return { advantages, returns };
+  }
+
+  trainEpoch(epochs = 3) {
+    if (this.trajectoryBuffer.length === 0) {
+      return { trained: false, loss: 0 };
+    }
+
+    const { advantages, returns } = this.computeGae();
+    let totalPolicyLoss = 0;
+    let totalValueLoss = 0;
+
+    for (let ep = 0; ep < epochs; ep++) {
+      for (let t = 0; t < this.trajectoryBuffer.length; t++) {
+        const step = this.trajectoryBuffer[t];
+        const currentProbs = this.getPolicyDistribution(step.state);
+        const currentProb = currentProbs[step.action];
+        const oldProb = step.prob || 1e-6;
+
+        const ratio = currentProb / oldProb;
+        const adv = advantages[t];
+
+        const surr1 = ratio * adv;
+        const clippedRatio = Math.max(1 - this.clipEps, Math.min(1 + this.clipEps, ratio));
+        const surr2 = clippedRatio * adv;
+        const policyLoss = -Math.min(surr1, surr2);
+        totalPolicyLoss += policyLoss;
+
+        const actorGradFactor = (ratio <= 1 + this.clipEps && ratio >= 1 - this.clipEps) ? adv : 0;
+        for (let s = 0; s < this.stateDim; s++) {
+          this.actorWeights[step.action][s] += this.actorLr * actorGradFactor * (step.state[s] || 0);
+        }
+
+        const predVal = this.evaluateValue(step.state);
+        const valError = returns[t] - predVal;
+        totalValueLoss += valError * valError;
+
+        for (let s = 0; s < this.stateDim; s++) {
+          this.criticWeights[s] += this.criticLr * valError * (step.state[s] || 0);
+        }
+        this.criticBias += this.criticLr * valError;
+      }
+    }
+
+    const samples = this.trajectoryBuffer.length * epochs;
+    this.trajectoryBuffer = [];
+
+    return {
+      trained: true,
+      avgPolicyLoss: Number((totalPolicyLoss / samples).toFixed(4)),
+      avgValueLoss: Number((totalValueLoss / samples).toFixed(4))
+    };
+  }
+
+  recommendBundleDiscount(cartContext) {
+    const {
+      cartTotal = 250000,
+      marginPercent = 35,
+      candidatePrice = 80000,
+      userPurchasesCount = 3
+    } = cartContext;
+
+    const state = [
+      Math.min(2.0, cartTotal / 500000),
+      Math.min(1.0, marginPercent / 100),
+      Math.min(1.0, candidatePrice / 200000),
+      Math.min(1.0, userPurchasesCount / 10)
+    ];
+
+    const decision = this.selectAction(state);
+    const candidateDiscountPrice = Math.round(candidatePrice * (1 - decision.discountPercent / 100));
+    const profitBeforeDiscount = candidatePrice * (marginPercent / 100);
+    const profitAfterDiscount = candidateDiscountPrice - (candidatePrice * (1 - marginPercent / 100));
+
+    return {
+      suggestedDiscountPercent: decision.discountPercent,
+      originalPrice: candidatePrice,
+      bundlePrice: candidateDiscountPrice,
+      expectedProfit: Math.max(0, Math.round(profitAfterDiscount)),
+      confidenceScore: Math.round(decision.prob * 100) / 100,
+      stateFeatures: state
+    };
+  }
+}
+
+export class HopcroftKarpLogisticsRouter {
+  constructor(options = {}) {
+    this.maxDistanceKm = options.maxDistanceKm || 12.0;
+    this.infinity = 1e9;
+  }
+
+  static haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(2));
+  }
+
+  buildBipartiteGraph(orders, couriers) {
+    const adj = new Map();
+    orders.forEach(o => adj.set(o.id, []));
+
+    for (const order of orders) {
+      for (const courier of couriers) {
+        if (courier.isBusy) continue;
+        if (order.lat != null && order.lon != null && courier.lat != null && courier.lon != null) {
+          const dist = HopcroftKarpLogisticsRouter.haversineKm(order.lat, order.lon, courier.lat, courier.lon);
+          if (dist > this.maxDistanceKm) continue;
+        }
+        if (order.isBulky && courier.vehicleType === 'bike') {
+          continue;
+        }
+        adj.get(order.id).push(courier.id);
+      }
+    }
+    return adj;
+  }
+
+  solve(orders, couriers) {
+    if (!orders || orders.length === 0 || !couriers || couriers.length === 0) {
+      return {
+        matchedCount: 0,
+        assignments: [],
+        unassignedOrders: (orders || []).map(o => o.id),
+        unassignedCouriers: (couriers || []).map(c => c.id)
+      };
+    }
+
+    const adj = this.buildBipartiteGraph(orders, couriers);
+    const pairU = new Map();
+    const pairV = new Map();
+    const dist = new Map();
+
+    orders.forEach(o => pairU.set(o.id, null));
+    couriers.forEach(c => pairV.set(c.id, null));
+
+    const bfs = () => {
+      const queue = [];
+      for (const order of orders) {
+        if (pairU.get(order.id) === null) {
+          dist.set(order.id, 0);
+          queue.push(order.id);
+        } else {
+          dist.set(order.id, this.infinity);
+        }
+      }
+      dist.set(null, this.infinity);
+
+      while (queue.length > 0) {
+        const u = queue.shift();
+        if (dist.get(u) < dist.get(null)) {
+          const neighbors = adj.get(u) || [];
+          for (const v of neighbors) {
+            const nextU = pairV.get(v);
+            if (dist.get(nextU) === this.infinity) {
+              dist.set(nextU, dist.get(u) + 1);
+              queue.push(nextU);
+            }
+          }
+        }
+      }
+      return dist.get(null) !== this.infinity;
+    };
+
+    const dfs = (u) => {
+      if (u === null) return true;
+      const neighbors = adj.get(u) || [];
+
+      for (const v of neighbors) {
+        const nextU = pairV.get(v);
+        if (dist.get(nextU) === dist.get(u) + 1) {
+          if (dfs(nextU)) {
+            pairV.set(v, u);
+            pairU.set(u, v);
+            return true;
+          }
+        }
+      }
+      dist.set(u, this.infinity);
+      return false;
+    };
+
+    let matching = 0;
+    while (bfs()) {
+      for (const order of orders) {
+        if (pairU.get(order.id) === null) {
+          if (dfs(order.id)) {
+            matching++;
+          }
+        }
+      }
+    }
+
+    const assignments = [];
+    const unassignedOrders = [];
+    const unassignedCouriers = [];
+
+    for (const order of orders) {
+      const matchedCourier = pairU.get(order.id);
+      if (matchedCourier) {
+        assignments.push({ orderId: order.id, courierId: matchedCourier });
+      } else {
+        unassignedOrders.push(order.id);
+      }
+    }
+
+    for (const courier of couriers) {
+      if (pairV.get(courier.id) === null) {
+        unassignedCouriers.push(courier.id);
+      }
+    }
+
+    return {
+      matchedCount: matching,
+      assignments,
+      unassignedOrders,
+      unassignedCouriers
+    };
+  }
+
+  dispatchBatches(orders, couriers, maxOrdersPerCourier = 3) {
+    const remainingOrders = [...orders];
+    const allAssignments = [];
+    const courierLoad = new Map();
+    couriers.forEach(c => courierLoad.set(c.id, []));
+
+    for (let round = 0; round < maxOrdersPerCourier; round++) {
+      if (remainingOrders.length === 0) break;
+      const availableCouriers = couriers.filter(c => (courierLoad.get(c.id) || []).length < maxOrdersPerCourier);
+      if (availableCouriers.length === 0) break;
+
+      const res = this.solve(remainingOrders, availableCouriers);
+      if (res.matchedCount === 0) break;
+
+      for (const item of res.assignments) {
+        courierLoad.get(item.courierId).push(item.orderId);
+        allAssignments.push(item);
+        const idx = remainingOrders.findIndex(o => o.id === item.orderId);
+        if (idx !== -1) remainingOrders.splice(idx, 1);
+      }
+    }
+
+    return {
+      totalDispatched: allAssignments.length,
+      unassignedOrdersCount: remainingOrders.length,
+      courierBatches: Array.from(courierLoad.entries()).map(([courierId, orderIds]) => ({
+        courierId,
+        orderCount: orderIds.length,
+        orderIds
+      }))
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -19427,6 +19976,10 @@ export default {
   IvfProductQuantizer,
   MultiAgentReplayBuffer,
   MaddpgPricingCoordinator,
+  // Phase 40 Enterprise Algorithms
+  SuccinctRankSelectBitmap,
+  PpoBundleOptimizer,
+  HopcroftKarpLogisticsRouter,
 };
 
 

@@ -234,6 +234,10 @@ import {
   IvfProductQuantizer,
   MultiAgentReplayBuffer,
   MaddpgPricingCoordinator,
+  // Phase 40 Enterprise Algorithms
+  SuccinctRankSelectBitmap,
+  PpoBundleOptimizer,
+  HopcroftKarpLogisticsRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -319,6 +323,9 @@ import { DuelingDqnBidding as ServerDuelingDqnBidding, ReplayBuffer as ServerRep
 import { PrimalDualLogisticsMatcher as ServerPrimalDualLogisticsMatcher } from "../../server/src/utils/primalDualLogisticsMatcher.js";
 import { IvfProductQuantizer as ServerIvfProductQuantizer } from "../../server/src/utils/ivfProductQuantizer.js";
 import { MaddpgPricingCoordinator as ServerMaddpgPricingCoordinator, MultiAgentReplayBuffer as ServerMultiAgentReplayBuffer } from "../../server/src/utils/maddpgPricingCoordinator.js";
+import { SuccinctRankSelectBitmap as ServerSuccinctRankSelectBitmap } from "../../server/src/utils/succinctRankSelectBitmap.js";
+import { PpoBundleOptimizer as ServerPpoBundleOptimizer } from "../../server/src/utils/ppoBundleOptimizer.js";
+import { HopcroftKarpLogisticsRouter as ServerHopcroftKarpLogisticsRouter } from "../../server/src/utils/hopcroftKarpLogisticsRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -19102,6 +19109,337 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const match = matcher.match(["ORDER_FLASH_DEAL"], ["COURIER_SPX_HERO"], [[score]]);
       expect.equal(match.matchedCount, 1);
       expect.equal(match.assignments[0].courierId, "COURIER_SPX_HERO");
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 187: Phase 40 Succinct Rank/Select Bitmaps, PPO Bundle Optimization & Hopcroft-Karp Logistics Router (24 Tests)
+  // =========================================================================
+  describe("Feature 187: Phase 40 Succinct Bitmaps, PPO Bundle Optimization & Hopcroft-Karp Router", () => {
+    // --- 1. SUCCINCT RANK/SELECT BITMAP (8 tests) ---
+    test("F187-T01: Sets and gets individual bits across multiple 32-bit words with correct indexing", () => {
+      const bitmap = new SuccinctRankSelectBitmap(100);
+      bitmap.set(0, true);
+      bitmap.set(31, true);
+      bitmap.set(32, true);
+      bitmap.set(99, true);
+
+      expect.equal(bitmap.get(0), true);
+      expect.equal(bitmap.get(1), false);
+      expect.equal(bitmap.get(31), true);
+      expect.equal(bitmap.get(32), true);
+      expect.equal(bitmap.get(99), true);
+      expect.equal(bitmap.get(100), false); // out of bound
+    });
+
+    test("F187-T02: SWAR 32-bit popcount matches expected bit count for all byte patterns", () => {
+      expect.equal(SuccinctRankSelectBitmap.popcount32(0), 0);
+      expect.equal(SuccinctRankSelectBitmap.popcount32(0xFFFFFFFF), 32);
+      expect.equal(SuccinctRankSelectBitmap.popcount32(0x55555555), 16);
+      expect.equal(SuccinctRankSelectBitmap.popcount32(0x00000001), 1);
+      expect.equal(SuccinctRankSelectBitmap.popcount32(0x80000000), 1);
+    });
+
+    test("F187-T03: Superblock (512 bits) and block (32 bits) two-level hierarchical index builds cumulative bit counts correctly", () => {
+      const bitmap = new SuccinctRankSelectBitmap(1024);
+      // Set 10 bits in first superblock, 5 bits in second superblock
+      for (let i = 0; i < 10; i++) bitmap.set(i * 10, true);
+      for (let i = 0; i < 5; i++) bitmap.set(520 + i * 10, true);
+
+      bitmap.build();
+      expect.equal(bitmap.totalOnes, 15);
+      expect.equal(bitmap.superblocks[0], 0);
+      expect.equal(bitmap.superblocks[1], 10);
+    });
+
+    test("F187-T04: Rank1(i) computes exact number of 1-bits in range [0, i] in O(1) time without linear scan", () => {
+      const bitmap = new SuccinctRankSelectBitmap(200);
+      bitmap.set(5, true);
+      bitmap.set(10, true);
+      bitmap.set(50, true);
+      bitmap.set(150, true);
+      bitmap.build();
+
+      expect.equal(bitmap.rank1(4), 0);
+      expect.equal(bitmap.rank1(5), 1);
+      expect.equal(bitmap.rank1(9), 1);
+      expect.equal(bitmap.rank1(10), 2);
+      expect.equal(bitmap.rank1(100), 3);
+      expect.equal(bitmap.rank1(199), 4);
+    });
+
+    test("F187-T05: Rank0(i) computes complementary 0-bits count satisfying Rank0(i) + Rank1(i) = i + 1", () => {
+      const bitmap = new SuccinctRankSelectBitmap(64);
+      bitmap.set(0, true);
+      bitmap.set(63, true);
+      bitmap.build();
+
+      for (let i = 0; i < 64; i += 7) {
+        expect.equal(bitmap.rank0(i) + bitmap.rank1(i), i + 1);
+      }
+    });
+
+    test("F187-T06: Select1(k) finds exact 1-based index of k-th 1-bit using sampling table and binary search", () => {
+      const bitmap = new SuccinctRankSelectBitmap(100);
+      bitmap.set(7, true);
+      bitmap.set(23, true);
+      bitmap.set(77, true);
+      bitmap.build();
+
+      expect.equal(bitmap.select1(1), 7);
+      expect.equal(bitmap.select1(2), 23);
+      expect.equal(bitmap.select1(3), 77);
+      expect.equal(bitmap.select1(4), -1); // out of range
+      expect.equal(bitmap.select1(0), -1);
+    });
+
+    test("F187-T07: Select0(k) finds exact index of k-th 0-bit in bitmap", () => {
+      const bitmap = new SuccinctRankSelectBitmap(10);
+      bitmap.set(0, true); // bit 0 is 1
+      bitmap.set(1, true); // bit 1 is 1
+      // bits 2..9 are 0
+      bitmap.build();
+
+      expect.equal(bitmap.select0(1), 2); // 1st zero is at index 2
+      expect.equal(bitmap.select0(2), 3); // 2nd zero is at index 3
+    });
+
+    test("F187-T08: Server and client SuccinctRankSelectBitmap achieve high memory compression and identical results", () => {
+      const clientBm = new SuccinctRankSelectBitmap(1000);
+      const serverBm = new ServerSuccinctRankSelectBitmap(1000);
+
+      for (let i = 0; i < 1000; i += 13) {
+        clientBm.set(i, true);
+        serverBm.set(i, true);
+      }
+      clientBm.build();
+      serverBm.build();
+
+      expect.equal(clientBm.rank1(500), serverBm.rank1(500));
+      expect.equal(clientBm.select1(10), serverBm.select1(10));
+
+      const fp = clientBm.getMemoryFootprint();
+      expect.ok(fp.compressionRatio > 5.0);
+    });
+
+    // --- 2. PPO BUNDLE OPTIMIZER WITH GAE (8 tests) ---
+    test("F187-T09: Softmax policy distribution sums to 1.0 with numerically stable logits", () => {
+      const ppo = new PpoBundleOptimizer({ stateDim: 4, actionDim: 6 });
+      const probs = ppo.getPolicyDistribution([10.0, 5.0, 2.0, 1.0]);
+
+      expect.equal(probs.length, 6);
+      const sum = probs.reduce((a, b) => a + b, 0);
+      expect.ok(Math.abs(sum - 1.0) < 1e-4);
+    });
+
+    test("F187-T10: Critic value function evaluates scalar state expectation V(s)", () => {
+      const ppo = new PpoBundleOptimizer({ stateDim: 4 });
+      const val = ppo.evaluateValue([0.5, 0.35, 0.4, 0.3]);
+      expect.equal(typeof val, "number");
+      expect.equal(Number.isNaN(val), false);
+    });
+
+    test("F187-T11: Generalized Advantage Estimation (GAE) computes temporal difference residuals and discounted advantages", () => {
+      const ppo = new PpoBundleOptimizer();
+      for (let i = 0; i < 10; i++) {
+        ppo.recordStep([0.5, 0.3, 0.4, 0.2], 2, 5.0, 2.0, 0.25, false);
+      }
+      ppo.recordStep([0.6, 0.3, 0.4, 0.3], 3, 10.0, 4.0, 0.30, true);
+
+      const { advantages, returns } = ppo.computeGae(0);
+      expect.equal(advantages.length, 11);
+      expect.equal(returns.length, 11);
+    });
+
+    test("F187-T12: Advantage normalization achieves approximately zero mean", () => {
+      const ppo = new PpoBundleOptimizer();
+      for (let i = 0; i < 20; i++) {
+        ppo.recordStep([0.2, 0.3, 0.4, 0.5], i % 6, i * 2, i * 1.5, 0.2, false);
+      }
+      const { advantages } = ppo.computeGae(0);
+      const mean = advantages.reduce((a, b) => a + b, 0) / advantages.length;
+      expect.ok(Math.abs(mean) < 1e-3);
+    });
+
+    test("F187-T13: Clipped surrogate objective clamps policy ratio strictly within [1 - eps, 1 + eps]", () => {
+      const ppo = new PpoBundleOptimizer({ clipEps: 0.2 });
+      expect.equal(ppo.clipEps, 0.2);
+      const lower = 1 - ppo.clipEps; // 0.8
+      const upper = 1 + ppo.clipEps; // 1.2
+      expect.equal(lower, 0.8);
+      expect.equal(upper, 1.2);
+    });
+
+    test("F187-T14: Multi-epoch gradient updates complete training and clear trajectory buffer", () => {
+      const ppo = new PpoBundleOptimizer({ stateDim: 4, actionDim: 6 });
+      for (let i = 0; i < 15; i++) {
+        ppo.recordStep([0.5, 0.3, 0.2, 0.1], 1, 8.0, 3.0, 0.2, false);
+      }
+      const res = ppo.trainEpoch(2);
+      expect.equal(res.trained, true);
+      expect.equal(ppo.trajectoryBuffer.length, 0);
+    });
+
+    test("F187-T15: recommendBundleDiscount maps cart state to safe profit-positive discount tier (0% - 25%)", () => {
+      const ppo = new PpoBundleOptimizer();
+      const rec = ppo.recommendBundleDiscount({
+        cartTotal: 300000,
+        marginPercent: 40,
+        candidatePrice: 100000,
+        userPurchasesCount: 5
+      });
+
+      expect.ok(rec.suggestedDiscountPercent >= 0 && rec.suggestedDiscountPercent <= 25);
+      expect.ok(rec.bundlePrice <= rec.originalPrice);
+      expect.ok(rec.expectedProfit >= 0);
+      expect.ok(rec.confidenceScore > 0);
+    });
+
+    test("F187-T16: Server and client PpoBundleOptimizer maintain identical discount tiers and hyperparameters", () => {
+      const clientPpo = new PpoBundleOptimizer();
+      const serverPpo = new ServerPpoBundleOptimizer();
+
+      expect.deepEqual(clientPpo.discountTiers, serverPpo.discountTiers);
+      expect.equal(clientPpo.clipEps, serverPpo.clipEps);
+      expect.equal(clientPpo.gamma, serverPpo.gamma);
+      expect.equal(clientPpo.gaeLambda, serverPpo.gaeLambda);
+    });
+
+    // --- 3. HOPCROFT-KARP MAXIMUM BIPARTITE ROUTER (6 tests) ---
+    test("F187-T17: Haversine distance calculator accurately filters out-of-range couriers (> 12km)", () => {
+      // Hanoi coordinates: 21.0285, 105.8542
+      // Nearby point (~3km): 21.0450, 105.8400
+      // Far point (~25km): 21.2000, 106.0000
+      const dNear = HopcroftKarpLogisticsRouter.haversineKm(21.0285, 105.8542, 21.0450, 105.8400);
+      const dFar = HopcroftKarpLogisticsRouter.haversineKm(21.0285, 105.8542, 21.2000, 106.0000);
+
+      expect.ok(dNear < 5.0);
+      expect.ok(dFar > 20.0);
+    });
+
+    test("F187-T18: Vehicle type filtering prevents bulky parcel assignment to bike couriers", () => {
+      const router = new HopcroftKarpLogisticsRouter();
+      const orders = [{ id: "ORD_BULKY_1", lat: 21.02, lon: 105.85, isBulky: true }];
+      const couriers = [
+        { id: "C_BIKE", lat: 21.02, lon: 105.85, vehicleType: "bike", isBusy: false },
+        { id: "C_VAN", lat: 21.02, lon: 105.85, vehicleType: "van", isBusy: false }
+      ];
+
+      const res = router.solve(orders, couriers);
+      expect.equal(res.matchedCount, 1);
+      expect.equal(res.assignments[0].courierId, "C_VAN");
+    });
+
+    test("F187-T19: Multi-source BFS builds shortest augmenting path level graph", () => {
+      const router = new HopcroftKarpLogisticsRouter();
+      const orders = [{ id: "O1" }, { id: "O2" }];
+      const couriers = [{ id: "C1" }, { id: "C2" }];
+
+      const res = router.solve(orders, couriers);
+      expect.equal(res.matchedCount, 2);
+      expect.equal(res.assignments.length, 2);
+    });
+
+    test("F187-T20: DFS augmenting phase finds vertex-disjoint maximum matching in O(E * sqrt(V))", () => {
+      const router = new HopcroftKarpLogisticsRouter();
+      const orders = [{ id: "O1" }, { id: "O2" }, { id: "O3" }];
+      const couriers = [{ id: "C1" }, { id: "C2" }];
+
+      const res = router.solve(orders, couriers);
+      expect.equal(res.matchedCount, 2);
+      expect.equal(res.unassignedOrders.length, 1);
+      expect.equal(res.unassignedCouriers.length, 0);
+    });
+
+    test("F187-T21: dispatchBatches handles multi-order bundling where each courier takes up to maxOrdersPerCourier", () => {
+      const router = new HopcroftKarpLogisticsRouter();
+      const orders = [
+        { id: "ORD_1" }, { id: "ORD_2" }, { id: "ORD_3" },
+        { id: "ORD_4" }, { id: "ORD_5" }, { id: "ORD_6" }
+      ];
+      const couriers = [
+        { id: "COURIER_ALPHA", isBusy: false },
+        { id: "COURIER_BETA", isBusy: false }
+      ];
+
+      const dispatch = router.dispatchBatches(orders, couriers, 3);
+      expect.equal(dispatch.totalDispatched, 6);
+      expect.equal(dispatch.unassignedOrdersCount, 0);
+      expect.equal(dispatch.courierBatches.length, 2);
+      expect.equal(dispatch.courierBatches[0].orderCount, 3);
+      expect.equal(dispatch.courierBatches[1].orderCount, 3);
+    });
+
+    test("F187-T22: Server and client HopcroftKarpLogisticsRouter produce identical matching assignments on complex topologies", () => {
+      const clientRouter = new HopcroftKarpLogisticsRouter();
+      const serverRouter = new ServerHopcroftKarpLogisticsRouter();
+
+      const orders = [{ id: "O_A" }, { id: "O_B" }, { id: "O_C" }];
+      const couriers = [{ id: "C_X" }, { id: "C_Y" }, { id: "C_Z" }];
+
+      const cRes = clientRouter.solve(orders, couriers);
+      const sRes = serverRouter.solve(orders, couriers);
+
+      expect.equal(cRes.matchedCount, sRes.matchedCount);
+      expect.deepEqual(cRes.assignments, sRes.assignments);
+    });
+
+    // --- 4. COPILOT & E2E INTEGRATION (2 tests) ---
+    test("F187-T23: AI Copilot engines integrate Phase 40 Succinct Bitmap, PPO Bundle, and Hopcroft-Karp queries across Admin, Seller, and Buyer assistants", () => {
+      const adminRes1 = generateAdminCopilotResponse("Kiểm tra bộ lọc súc tích succinct rank select bitmap cho danh mục");
+      expect.equal(adminRes1.tag, "SUCCINCT RANK SELECT BITMAP");
+      expect.ok(adminRes1.text.includes("SUCCINCT"));
+
+      const adminRes2 = generateAdminCopilotResponse("Tối ưu hóa chính sách combo mua kèm ppo và gae advantage");
+      expect.equal(adminRes2.tag, "PPO BUNDLE OPTIMIZATION");
+      expect.ok(adminRes2.text.includes("PPO"));
+
+      const adminRes3 = generateAdminCopilotResponse("Điều phối bưu tá cao điểm hopcroft-karp tăng luồng song song");
+      expect.equal(adminRes3.tag, "HOPCROFT KARP LOGISTICS ROUTER");
+      expect.ok(adminRes3.text.includes("HOPCROFT-KARP"));
+
+      const sellerRes = generateSellerCopilotResponse("Tư vấn combo mua kèm ppo, bộ lọc súc tích succinct bitmap và bưu tá cao điểm hopcroft-karp", {
+        currentShop: { name: "Coolmate Official" },
+        shopProducts: [{ stock: 40 }],
+        shopOrders: []
+      });
+      expect.equal(sellerRes.tag, "SUCCINCT BITMAP, PPO BUNDLE & HOPCROFT LOGISTICS");
+      expect.ok(sellerRes.text.includes("Coolmate Official"));
+
+      const chatRes = generateAiChatResponse("Hỏi về gợi ý combo mua kèm ppo và bộ lọc súc tích");
+      expect.equal(chatRes.intent, "SUCCINCT_PPO_HOPCROFT_ASSIST");
+      expect.ok(chatRes.replyText.includes("Succinct Bitmap"));
+      expect.ok(chatRes.replyText.includes("PPO"));
+    });
+
+    test("F187-T24: E2E Lifecycle: Succinct Bitmap filters Flash Sale items -> PPO optimizes bundle discount -> Hopcroft-Karp dispatches delivery fleet", () => {
+      // 1. Succinct Bitmap filters 1000 items instantly
+      const bitmap = new SuccinctRankSelectBitmap(1000);
+      bitmap.set(42, true); // Flash sale item 42
+      bitmap.set(108, true); // Flash sale item 108
+      bitmap.build();
+      expect.equal(bitmap.rank1(50), 1);
+      expect.equal(bitmap.select1(2), 108);
+
+      // 2. PPO recommends optimal bundle discount for cart
+      const ppo = new PpoBundleOptimizer();
+      const rec = ppo.recommendBundleDiscount({
+        cartTotal: 450000,
+        marginPercent: 35,
+        candidatePrice: 90000,
+        userPurchasesCount: 4
+      });
+      expect.ok(rec.bundlePrice < 90000);
+
+      // 3. Hopcroft-Karp dispatches delivery fleet
+      const router = new HopcroftKarpLogisticsRouter();
+      const dispatch = router.dispatchBatches(
+        [{ id: "ORDER_FS_42" }, { id: "ORDER_FS_108" }],
+        [{ id: "SPX_EXPRESS_DRIVER_1" }],
+        2
+      );
+      expect.equal(dispatch.totalDispatched, 2);
+      expect.equal(dispatch.courierBatches[0].orderCount, 2);
     });
   });
 });

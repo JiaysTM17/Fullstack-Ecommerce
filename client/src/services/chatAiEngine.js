@@ -405,7 +405,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 4. Tư vấn phối đồ & Gợi ý Combo mua kèm (Cross-sell & Bundle)
-  if (!/deal sốc|tiết kiệm|fp-growth|lift/i.test(lower) && /phối đồ|combo|mua kèm|set đồ|mix đồ|đi cùng|phù hợp với/i.test(lower)) {
+  if (!/deal sốc|tiết kiệm|fp-growth|lift|ppo|succinct/i.test(lower) && /phối đồ|combo|mua kèm|set đồ|mix đồ|đi cùng|phù hợp với/i.test(lower)) {
     const isFashion = /áo|quần|giày|đầm|váy/i.test(lower);
     const isTech = /sạc|tai nghe|chuột|bàn phím|laptop/i.test(lower);
 
@@ -606,7 +606,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
 
   // 8. Mua Kèm Deal Sốc & Gợi Ý Combo Tiết Kiệm (COMBO_BUNDLE_FP_GROWTH)
-  if (/mua kèm deal sốc|combo tiết kiệm|mua chung giảm giá|gợi ý combo|deal sốc mua kèm/i.test(lower)) {
+  if (!/ppo|succinct/i.test(lower) && /mua kèm deal sốc|combo tiết kiệm|mua chung giảm giá|gợi ý combo|deal sốc mua kèm/i.test(lower)) {
     return {
       intent: 'COMBO_BUNDLE_FP_GROWTH',
       replyText: `**[MUA KÈM DEAL SỐC FP-GROWTH] TIẾT KIỆM TỐI ĐA KHI MUA THEO BỘ!**\n\n• **Gợi ý thông minh từ giỏ hàng**: Thuật toán FP-Growth tự động nhận diện các sản phẩm thường được mua cùng nhau với hệ số tương quan cao (Lift ≥ 2.0).\n• **Ưu đãi kép**: Mua kèm phụ kiện hoặc sản phẩm bổ trợ với mức giảm thêm từ 10% - 20%, áp dụng chồng đồng thời với voucher toàn sàn và mã Freeship 30k!`,
@@ -920,6 +920,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'PRIMAL_DUAL_IVF_PQ_MADDPG_ASSIST',
       replyText: `**[CÔNG NGHỆ GIAO VẬN HỎA TỐC & SĂN DEAL ĐỈNH CAO]:**\n\n• **Giao vận ưu tiên Primal-Dual**: Đơn hàng gấp và khách hàng VIP được hệ thống tự động gán cho tài xế 5 sao có tốc độ giao nhanh nhất, bảo đảm nhận hàng chuẩn xác đúng hẹn 2h!\n• **Tìm kiếm siêu tốc IVF-PQ**: Tìm sản phẩm bằng hình ảnh hoặc từ khóa tương đồng diễn ra trong chớp mắt nhờ công nghệ lượng tử hóa vector phân đoạn ADC.\n• **Săn deal Flash Sale tốt nhất (MADDPG)**: Thuật toán AI điều phối giá bán giữa các shop đối tác, mang lại cho bạn combo giá hời nhất mà không bị độn giá ảo!`,
       suggestions: ['Kiểm tra đơn hỏa tốc', 'Tìm sản phẩm tương đồng', 'Xem deal hot hôm nay'],
+    };
+  }
+
+  // 42. Bộ Lọc Súc Tích Succinct Bitmap, Combo Mua Kèm PPO & Giao Vận Cao Điểm Hopcroft-Karp (SUCCINCT_PPO_HOPCROFT_ASSIST)
+  if (/bộ lọc súc tích|succinct bitmap|combo mua kèm ppo|ppo bundle|bưu tá cao điểm hopcroft|hopcroft[- ]karp/i.test(lower)) {
+    return {
+      intent: 'SUCCINCT_PPO_HOPCROFT_ASSIST',
+      replyText: `**[MUA SẮM THÔNG MINH, COMBO GIÁ HỜI & GIAO HÀNG SIÊU TỐC]:**\n\n• **Bộ lọc sản phẩm siêu tốc (Succinct Bitmap)**: Lọc hàng trăm nghìn deal Mall, Flash Sale, FreeShip Xtra trong nháy mắt với độ mượt tuyệt đối!\n• **Gợi ý Combo Mua Kèm Hời Nhất (PPO)**: Tự động đề xuất các món đồ hoàn hảo đi kèm (Áo + Quần, Điện thoại + Ốp sạc) với mức giảm giá combo sâu nhất tiết kiệm tối đa cho bạn!\n• **Điều phối giao hàng giờ cao điểm (Hopcroft-Karp)**: Vào các dịp Sale lớn, thuật toán ghép đơn song song giúp bưu tá lấy hàng và giao ngay tới tay bạn mà không bị tắc nghẽn kho!`,
+      suggestions: ['Xem combo mua kèm hot', 'Lọc sản phẩm Flash Sale', 'Theo dõi bưu tá giao hàng'],
     };
   }
 

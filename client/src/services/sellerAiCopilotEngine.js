@@ -25,7 +25,7 @@ export function generateSellerCopilotResponse(query, context = {}) {
   const raw = query.toLowerCase().trim();
 
   // 1. Cảnh Báo Tồn Kho & Đề Xuất Nhập PO (Restock Radar & Safety Stock)
-  if (!/raft|xả hàng|xả kho|holt-winters|mùa vụ|matrix segment tree|cây đoạn 2 chiều|actor-critic|chu trình johnson|spatial quadtree|manku|dueling dqn|primal[- ]dual|ivf[- ]pq|maddpg/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|po/i.test(raw)) {
+  if (!/raft|xả hàng|xả kho|holt-winters|mùa vụ|matrix segment tree|cây đoạn 2 chiều|actor-critic|chu trình johnson|spatial quadtree|manku|dueling dqn|primal[- ]dual|ivf[- ]pq|maddpg|ppo|succinct|hopcroft/i.test(raw) && /tồn kho|hết hàng|nhập kho|nhập hàng|sắp hết|safety stock|ngưỡng an toàn|\bpo\b/i.test(raw)) {
     const lowStockItems = shopProducts.filter(p => p.stock <= (typeof p.safetyThreshold === 'number' ? p.safetyThreshold : 10));
     const outOfStockItems = shopProducts.filter(p => p.stock === 0);
 
@@ -317,7 +317,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 15. Thiết Lập Combo Mua Kèm Deal Sốc Bằng FP-Growth (Frequent Pattern Mining Combo)
-  if (/combo mua kèm deal sốc|thiết lập combo|fp-growth shop|gợi ý combo|luật kết hợp shop|lift sản phẩm/i.test(raw)) {
+  if (!/ppo/i.test(raw) && /combo mua kèm deal sốc|thiết lập combo|fp-growth shop|gợi ý combo|luật kết hợp shop|lift sản phẩm/i.test(raw)) {
     return {
       text: `🎁 **TƯ VẤN THIẾT LẬP COMBO MUA KÈM DEAL SỐC FP-GROWTH (${currentShop.name})**:
 - **Khai phá giỏ hàng khách mua**: Thuật toán FP-Growth rà soát lịch sử ${shopOrders.length} đơn hàng của shop để tìm các cặp sản phẩm thường xuyên được mua cùng nhau.
@@ -708,7 +708,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 35. Tự Động Nhận Diện SKU Hot Bằng Splay Tree & Theo Dõi Ghép Đơn Shipper (Phase 26 - Feature 173)
-  if (/splay|cây splay|sku hot.*splay|ghép đơn.*shipper|bưu tá.*hopcroft|phân bổ bưu tá/i.test(raw)) {
+  if (!/ppo|succinct/i.test(raw) && /splay|cây splay|sku hot.*splay|ghép đơn.*shipper|bưu tá.*hopcroft|phân bổ bưu tá/i.test(raw)) {
     return {
       text: `🚀 **TỰ ĐỘNG BẮT TREND SKU HOT BẰNG SPLAY TREE & TỐI ƯU GHÉP ĐƠN BƯU TÁ**:
 - **Cây tự điều chỉnh Splay Tree cho gian hàng**:
@@ -986,6 +986,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Tối ưu hóa gán bưu tá Primal-Dual',
         'Kiểm tra tốc độ tìm kiếm IVF-PQ',
         'Đề xuất chiết khấu liên shop MADDPG'
+      ]
+    };
+  }
+
+  // 49. Tư Vấn Combo Mua Kèm PPO, Bộ Lọc Súc Tích & Bưu Tá Cao Điểm Hopcroft-Karp (Phase 40 - Feature 187)
+  if (/succinct bitmap|bộ lọc súc tích|ppo bundle|combo mua kèm ppo|hopcroft[- ]karp|hopcroft karp|điều phối hopcroft/i.test(raw)) {
+    return {
+      text: `🛍️ **TƯ VẤN COMBO MUA KÈM PPO, BỘ LỌC SÚC TÍCH & BƯU TÁ CAO ĐIỂM HOPCROFT-KARP (${currentShop.name})**:
+- **Tối ưu hóa Combo Mua Kèm Cross-Selling (PPO & GAE)**:
+  - Khuyến nghị thông minh các gói mua kèm (Áo + Quần, Điện thoại + Phụ kiện) với mức chiết khấu an toàn dựa trên biên lãi ròng của shop, nâng cao giá trị giỏ hàng AOV mà không làm hao hụt lợi nhuận.
+- **Tăng tốc lọc sản phẩm bằng Succinct Rank/Select Bitmap**:
+  - Giúp khách hàng lọc các nhãn Mall, Flash Sale, Freeship của shop chỉ trong tích tắc với độ nén bộ nhớ cực cao (tiết kiệm 95% RAM).
+- **Điều phối bưu tá cao điểm Hopcroft-Karp $O(E \\sqrt{V})$**:
+  - Đơn hàng của shop được tự động ghép cặp song song với bưu tá gần nhất trong đợt Mega Sale, giảm thời gian chờ lấy hàng xuống dưới 15 phút!`,
+      type: 'recommendation',
+      tag: 'SUCCINCT BITMAP, PPO BUNDLE & HOPCROFT LOGISTICS',
+      suggestions: [
+        'Phân tích combo mua kèm PPO',
+        'Kiểm tra bộ lọc Succinct Bitmap',
+        'Điều phối bưu tá Hopcroft-Karp'
       ]
     };
   }
