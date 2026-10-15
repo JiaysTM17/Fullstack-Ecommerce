@@ -1,26 +1,14 @@
 /**
  * Count-Min-Log Sketch (CML Sketch)
- * (Pavan & Tirthapura 2017, Ting 2018)
- * Thuật toán phác thảo tần suất xấp xỉ Logarithmic Count-Min Sketch
- * Nén các bộ đếm tần suất 32/64 bit xuống chỉ còn 8-bit (Uint8Array)
- * Tăng bậc đếm theo xác suất P(inc) = gamma^(-c) với gamma = 1.08
- * Tiết kiệm 75% dung lượng RAM so với Count-Min Sketch truyền thống
- * Ứng dụng: Đo lường tần suất xem, click và giỏ hàng của hàng triệu SKU trong Flash Sale
+ * (Guillaume Pitel & Geoffroy Savin, 2014)
+ * Phase 46 Server Utility Module
  */
 
 class CountMinLogSketch {
-  /**
-   * @param {Object} options
-   * @param {number} options.depth Số hàng hàm băm d (mặc định 4)
-   * @param {number} options.width Số cột bảng băm w (mặc định 1024)
-   * @param {number} options.gamma Cơ số logarit gamma (mặc định 1.08)
-   */
   constructor(options = {}) {
     this.depth = options.depth || 4;
     this.width = options.width || 1024;
     this.gamma = options.gamma || 1.08;
-
-    // Bảng 8-bit counters: Tiết kiệm tối đa bộ nhớ RAM
     this.table = Array.from({ length: this.depth }, () => new Uint8Array(this.width));
   }
 
@@ -45,21 +33,11 @@ class CountMinLogSketch {
     return (h >>> 0) % this.width;
   }
 
-  /**
-   * Chuyển đổi giá trị logarit counter c sang tần suất xấp xỉ thực tế:
-   * E[c] = (gamma^c - 1) / (gamma - 1)
-   */
   _logValueToFrequency(c) {
     if (c === 0) return 0;
     return Math.round((Math.pow(this.gamma, c) - 1) / (this.gamma - 1));
   }
 
-  /**
-   * Ghi nhận một sự kiện vào CML Sketch
-   * Tăng bộ đếm với xác suất P = gamma^(-c)
-   * @param {string} item
-   * @param {number} count Số lần xuất hiện (mặc định 1)
-   */
   add(item, count = 1) {
     if (!item || count <= 0) return;
 
@@ -68,7 +46,7 @@ class CountMinLogSketch {
         const col = this._hash(item, i * 7919 + 31);
         const currentVal = this.table[i][col];
 
-        if (currentVal < 255) { // Tránh tràn Uint8
+        if (currentVal < 255) {
           const p = Math.pow(this.gamma, -currentVal);
           if (Math.random() < p) {
             this.table[i][col]++;
@@ -78,11 +56,6 @@ class CountMinLogSketch {
     }
   }
 
-  /**
-   * Ước lượng tần suất xuất hiện của một phần tử:
-   * Lấy giá trị nhỏ nhất qua d hàng băm (Point Query)
-   * @param {string} item
-   */
   estimate(item) {
     if (!item) return 0;
 
@@ -95,30 +68,34 @@ class CountMinLogSketch {
       }
     }
 
-    if (minLogVal === 0) return 0;
     return this._logValueToFrequency(minLogVal);
   }
 
-  /**
-   * Hợp nhất (Merge) hai CML Sketch có cùng kích thước
-   * @param {CountMinLogSketch} other
-   */
-  merge(other) {
-    if (!other || other.depth !== this.depth || other.width !== this.width) {
-      throw new Error("Cannot merge CML sketches of mismatched dimensions");
-    }
+  getStats() {
+    let nonZeroCells = 0;
+    const totalCells = this.depth * this.width;
+
     for (let i = 0; i < this.depth; i++) {
       for (let j = 0; j < this.width; j++) {
-        if (other.table[i][j] > this.table[i][j]) {
-          this.table[i][j] = other.table[i][j];
-        }
+        if (this.table[i][j] > 0) nonZeroCells++;
       }
     }
+
+    const memoryBytes = totalCells;
+    const standardCmBytes = totalCells * 4;
+
+    return {
+      depth: this.depth,
+      width: this.width,
+      gamma: this.gamma,
+      totalCells,
+      nonZeroCells,
+      sparsityRatio: Number(((totalCells - nonZeroCells) / totalCells).toFixed(4)),
+      memoryBytes,
+      memorySavingsPercent: Number(((1 - memoryBytes / standardCmBytes) * 100).toFixed(1))
+    };
   }
 
-  /**
-   * Reset bộ đếm về 0
-   */
   reset() {
     for (let i = 0; i < this.depth; i++) {
       this.table[i].fill(0);

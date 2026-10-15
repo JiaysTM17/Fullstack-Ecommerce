@@ -277,6 +277,12 @@ import {
   RainbowDqnBidding,
   DEFAULT_BSS_STATIONS,
   EVRPTWBSSRouter,
+  // Phase 50 Enterprise Algorithms
+  DDSketchQuantiles,
+  SACPerPricing,
+  DEFAULT_SPX_DEPOTS,
+  DEFAULT_CHARGING_STATIONS,
+  MDEVRPNLRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -392,6 +398,9 @@ import { HFVRPTWRouter as ServerHFVRPTWRouter, VEHICLE_PROFILES as ServerVehicle
 import { HyperBitBitEstimator as ServerHyperBitBitEstimator } from "../../server/src/utils/hyperBitBitEstimator.js";
 import { RainbowDqnBidding as ServerRainbowDqnBidding } from "../../server/src/utils/rainbowDqnBidding.js";
 import { EVRPTWBSSRouter as ServerEVRPTWBSSRouter, DEFAULT_BSS_STATIONS as ServerDefaultBSSStations } from "../../server/src/utils/evrptwBssRouter.js";
+import { DDSketchQuantiles as ServerDDSketchQuantiles } from "../../server/src/utils/ddSketchQuantiles.js";
+import { SACPerPricing as ServerSACPerPricing } from "../../server/src/utils/sacPerPricing.js";
+import { MDEVRPNLRouter as ServerMDEVRPNLRouter, DEFAULT_SPX_DEPOTS as ServerDefaultSpxDepots, DEFAULT_CHARGING_STATIONS as ServerDefaultChargingStations } from "../../server/src/utils/mdevrpNlRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -22230,6 +22239,366 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(greenDispatch.fulfilledOrders, 1);
       expect.ok(greenDispatch.totalKm > 0);
       expect.ok(greenDispatch.totalCo2SavedKg > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 197: DDSketch Relative-Error Quantiles, SAC-PER Dynamic Pricing & MDEVRP-NL-TW Multi-Depot Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 197: DDSketch Quantile Estimator, SAC-PER Dynamic Pricing & MDEVRP-NL-TW Suite", () => {
+    // --- DDSKETCH RELATIVE-ERROR QUANTILE ESTIMATOR (8 Tests) ---
+    test("F197-T01: Initial DDSketch state has 0 observations, min Infinity, max -Infinity", () => {
+      const sketch = new DDSketchQuantiles();
+      expect.equal(sketch.count, 0);
+      expect.equal(sketch.min, Infinity);
+      expect.equal(sketch.max, -Infinity);
+      expect.equal(sketch.getQuantile(0.5), 0);
+    });
+
+    test("F197-T02: Tracks positive numbers and calculates accurate median (P50) within relative error alpha", () => {
+      const sketch = new DDSketchQuantiles({ alpha: 0.01 }); // 1% relative error
+      // Insert numbers 1 to 1000
+      for (let i = 1; i <= 1000; i++) {
+        sketch.add(i);
+      }
+      expect.equal(sketch.count, 1000);
+      expect.equal(sketch.min, 1);
+      expect.equal(sketch.max, 1000);
+
+      const p50 = sketch.getQuantile(0.5);
+      // Actual median is 500, relative error <= 1% means 495 <= p50 <= 505
+      expect.ok(Math.abs(p50 - 500) / 500 <= 0.02);
+    });
+
+    test("F197-T03: Calculates P90, P95, P99, P99.9 tail latencies accurately for microservice SLA", () => {
+      const sketch = new DDSketchQuantiles({ alpha: 0.01 });
+      for (let i = 1; i <= 10000; i++) {
+        sketch.add(i);
+      }
+      const p90 = sketch.getQuantile(0.90);
+      const p95 = sketch.getQuantile(0.95);
+      const p99 = sketch.getQuantile(0.99);
+      const p99_9 = sketch.getQuantile(0.999);
+
+      expect.ok(Math.abs(p90 - 9000) / 9000 <= 0.02);
+      expect.ok(Math.abs(p95 - 9500) / 9500 <= 0.02);
+      expect.ok(Math.abs(p99 - 9900) / 9900 <= 0.02);
+      expect.ok(Math.abs(p99_9 - 9990) / 9990 <= 0.02);
+      expect.ok(p90 < p95);
+      expect.ok(p95 < p99);
+      expect.ok(p99 <= p99_9);
+    });
+
+    test("F197-T04: Tracks negative numbers and zero values correctly", () => {
+      const sketch = new DDSketchQuantiles({ alpha: 0.02 });
+      sketch.add(-100);
+      sketch.add(-50);
+      sketch.add(0, 5); // 5 zeros
+      sketch.add(50);
+      sketch.add(100);
+
+      expect.equal(sketch.count, 9);
+      expect.equal(sketch.min, -100);
+      expect.equal(sketch.max, 100);
+      const median = sketch.getQuantile(0.5);
+      expect.equal(median, 0);
+    });
+
+    test("F197-T05: getSlaMetrics returns complete SLA report including p50, p90, p95, p99, p99_9, avg, and alpha", () => {
+      const sketch = new DDSketchQuantiles({ alpha: 0.01 });
+      const latenciesMs = [12, 15, 18, 22, 25, 30, 45, 60, 120, 250];
+      latenciesMs.forEach(lat => sketch.add(lat));
+
+      const sla = sketch.getSlaMetrics();
+      expect.equal(sla.count, 10);
+      expect.equal(sla.min, 12);
+      expect.equal(sla.max, 250);
+      expect.ok(sla.avg > 0);
+      expect.ok(sla.p50 >= 15 && sla.p50 <= 35);
+      expect.ok(sla.p99 >= 120);
+      expect.equal(sla.relativeErrorAlpha, 0.01);
+    });
+
+    test("F197-T06: Fully mergeable across distributed sketches without losing quantile accuracy", () => {
+      const sketchNodeA = new DDSketchQuantiles({ alpha: 0.01 });
+      const sketchNodeB = new DDSketchQuantiles({ alpha: 0.01 });
+
+      for (let i = 1; i <= 500; i++) sketchNodeA.add(i);
+      for (let i = 501; i <= 1000; i++) sketchNodeB.add(i);
+
+      sketchNodeA.merge(sketchNodeB);
+      expect.equal(sketchNodeA.count, 1000);
+      expect.equal(sketchNodeA.min, 1);
+      expect.equal(sketchNodeA.max, 1000);
+
+      const p50 = sketchNodeA.getQuantile(0.5);
+      expect.ok(Math.abs(p50 - 500) / 500 <= 0.02);
+    });
+
+    test("F197-T07: Reset clears bins, count, min, max, sum and allows reuse", () => {
+      const sketch = new DDSketchQuantiles();
+      sketch.add(100);
+      sketch.add(200);
+      expect.equal(sketch.count, 2);
+
+      sketch.reset();
+      expect.equal(sketch.count, 0);
+      expect.equal(sketch.min, Infinity);
+      expect.equal(sketch.max, -Infinity);
+      expect.equal(sketch.sum, 0);
+
+      sketch.add(50);
+      expect.equal(sketch.count, 1);
+      expect.equal(sketch.min, 50);
+      expect.equal(sketch.max, 50);
+    });
+
+    test("F197-T08: Server vs Client DDSketchQuantiles consistency on identical streams", () => {
+      const serverSketch = new ServerDDSketchQuantiles({ alpha: 0.01 });
+      const clientSketch = new DDSketchQuantiles({ alpha: 0.01 });
+
+      const testValues = [45, 88, 120, 230, 310, 50, 75, 190, 420, 500];
+      testValues.forEach(v => {
+        serverSketch.add(v);
+        clientSketch.add(v);
+      });
+
+      expect.equal(serverSketch.count, clientSketch.count);
+      expect.equal(serverSketch.min, clientSketch.min);
+      expect.equal(serverSketch.max, clientSketch.max);
+      expect.equal(serverSketch.getQuantile(0.5), clientSketch.getQuantile(0.5));
+      expect.equal(serverSketch.getQuantile(0.95), clientSketch.getQuantile(0.95));
+    });
+
+    // --- SAC-PER DYNAMIC PRICING (7 Tests) ---
+    test("F197-T09: SACPerPricing initializes weights, hyperparameters, and empty PER buffer", () => {
+      const sac = new SACPerPricing({ stateDim: 5, gamma: 0.99, alpha: 0.20 });
+      expect.equal(sac.stateDim, 5);
+      expect.equal(sac.gamma, 0.99);
+      expect.equal(sac.alpha, 0.20);
+      expect.equal(sac.memory.length, 0);
+    });
+
+    test("F197-T10: selectAction produces continuous pricing action in range [-0.20, +0.25]", () => {
+      const sac = new SACPerPricing();
+      const state = [0.2, 0.3, 0.3, 1.2, 0.25];
+      const res = sac._sampleAction(state, true);
+
+      expect.ok(res.action >= -0.20 && res.action <= 0.25);
+      expect.ok(typeof res.logProb === 'number');
+    });
+
+    test("F197-T11: storeTransition inserts transitions into PER buffer with maxPriority", () => {
+      const sac = new SACPerPricing();
+      sac.storeTransition([0.2, 0.3, 0.3, 1.0, 0.1], 0.05, 10.0, [0.2, 0.32, 0.3, 1.1, 0.1], false);
+      expect.equal(sac.memory.length, 1);
+      expect.equal(sac.memory[0].reward, 10.0);
+      expect.ok(sac.memory[0].priority > 0);
+    });
+
+    test("F197-T12: trainStep executes PER training with importance sampling when sufficient experience exists", () => {
+      const sac = new SACPerPricing({ bufferSize: 100 });
+      // Feed 35 transitions
+      for (let i = 0; i < 35; i++) {
+        sac.storeTransition([0.2, 0.3, 0.3, 1.0, 0.1], 0.02, 5.0 + i, [0.2, 0.3, 0.3, 1.0, 0.1], false);
+      }
+      const trainRes = sac.trainStep(16);
+      expect.equal(trainRes.trained, true);
+      expect.equal(trainRes.batchSize, 16);
+      expect.ok(trainRes.avgTdError >= 0);
+    });
+
+    test("F197-T13: optimizePrice recommends profitable price and computes gross margin", () => {
+      const sac = new SACPerPricing();
+      const pricing = sac.optimizePrice({
+        cogs: 200000,
+        currentPrice: 280000,
+        competitorPrice: 290000,
+        demandIndex: 1.5,
+        inventoryDays: 10
+      });
+
+      expect.equal(pricing.status, 'SAC_PER_OPTIMAL_PRICED');
+      expect.ok(pricing.recommendedPrice >= pricing.hardFloorPrice);
+      expect.ok(pricing.grossMarginPercent > 0);
+      expect.equal(pricing.hardFloorPrice, 210000); // 200,000 * 1.05
+    });
+
+    test("F197-T14: Strict COGS guardrail enforces price >= COGS * 1.05 even under extreme downward pressure", () => {
+      const sac = new SACPerPricing();
+      const cogs = 500000;
+      const pricing = sac.optimizePrice({
+        cogs,
+        currentPrice: 300000, // Deflated price below COGS
+        competitorPrice: 350000, // Competitor selling below cogs
+        demandIndex: 0.5,
+        inventoryDays: 90
+      });
+
+      const hardFloor = Math.round(cogs * 1.05);
+      expect.ok(pricing.recommendedPrice >= hardFloor);
+      expect.equal(pricing.guardrailApplied, true);
+    });
+
+    test("F197-T15: Server vs Client SACPerPricing consistency on identical state evaluation", () => {
+      const serverSac = new ServerSACPerPricing();
+      const clientSac = new SACPerPricing();
+
+      const serverRes = serverSac.optimizePrice({ cogs: 150000, currentPrice: 200000 });
+      const clientRes = clientSac.optimizePrice({ cogs: 150000, currentPrice: 200000 });
+
+      expect.equal(serverRes.status, clientRes.status);
+      expect.equal(serverRes.hardFloorPrice, clientRes.hardFloorPrice);
+      expect.equal(serverRes.cogs, clientRes.cogs);
+    });
+
+    // --- MDEVRP-NL-TW MULTI-DEPOT ROUTER (5 Tests) ---
+    test("F197-T16: computeChargingTimeMinutes accurately models CC fast phase (2%/min) and CV trickle phase (0.5%/min)", () => {
+      const router = new MDEVRPNLRouter();
+      // Fast phase: 20% to 80% = 60% delta / 2.0%/min = 30 minutes
+      const tFast = router.computeChargingTimeMinutes(20.0, 80.0);
+      expect.equal(tFast, 30);
+
+      // Trickle phase: 80% to 100% = 20% delta / 0.5%/min = 40 minutes
+      const tTrickle = router.computeChargingTimeMinutes(80.0, 100.0);
+      expect.equal(tTrickle, 40);
+
+      // Combined 20% to 100% = 30 + 40 = 70 minutes
+      const tCombined = router.computeChargingTimeMinutes(20.0, 100.0);
+      expect.equal(tCombined, 70);
+    });
+
+    test("F197-T17: findNearestDepot and findNearestChargingStation correctly identify closest facility", () => {
+      const router = new MDEVRPNLRouter();
+      // Near Hoan Kiem (21.0285, 105.8542)
+      const locHK = { lat: 21.029, lng: 105.855 };
+      const nearestDepot = router.findNearestDepot(locHK);
+      expect.equal(nearestDepot.depot.id, 'DEPOT_HOAN_KIEM');
+      expect.ok(nearestDepot.distKm < 1.0);
+
+      // Near Ba Dinh (21.0340, 105.8300)
+      const locBD = { lat: 21.035, lng: 105.831 };
+      const nearestCS = router.findNearestChargingStation(locBD);
+      expect.equal(nearestCS.station.id, 'CS_BA_DINH');
+      expect.ok(nearestCS.distKm < 1.0);
+    });
+
+    test("F197-T18: planMultiDepotElectricRoutes distributes orders across multiple depots and vehicles", () => {
+      const router = new MDEVRPNLRouter();
+      const orders = [
+        { id: 'ORD_HK_1', lat: 21.028, lng: 105.853, weightKg: 5, earlyMinutes: 0, lateMinutes: 180 },
+        { id: 'ORD_CG_1', lat: 21.035, lng: 105.792, weightKg: 8, earlyMinutes: 0, lateMinutes: 240 },
+        { id: 'ORD_LB_1', lat: 21.046, lng: 105.886, weightKg: 6, earlyMinutes: 0, lateMinutes: 200 }
+      ];
+
+      const res = router.planMultiDepotElectricRoutes(orders);
+      expect.equal(res.status, 'MDEVRP_NL_OPTIMAL_SCHEDULED');
+      expect.equal(res.fulfilledOrders, 3);
+      expect.ok(res.activeVehiclesCount >= 2);
+      expect.ok(res.totalKm > 0);
+      expect.ok(res.totalCo2SavedKg > 0);
+    });
+
+    test("F197-T19: Low initial battery vehicle triggers non-linear charging stop and partial recharge to 85%", () => {
+      const router = new MDEVRPNLRouter();
+      const availableEVs = [
+        { id: 'LOW_BATT_MD_EV', homeDepotId: 'DEPOT_HOAN_KIEM', initialBattery: 18.0 }
+      ];
+      const orders = [
+        { id: 'FAR_MD_ORDER', lat: 21.055, lng: 105.875, weightKg: 5, earlyMinutes: 0, lateMinutes: 300, serviceMinutes: 10 }
+      ];
+
+      const res = router.planMultiDepotElectricRoutes(orders, { availableEVs });
+      expect.equal(res.status, 'MDEVRP_NL_OPTIMAL_SCHEDULED');
+      expect.equal(res.fulfilledOrders, 1);
+      expect.ok(res.chargingEventsCount >= 1);
+
+      const route = res.routes[0];
+      const chargeStop = route.stops.find(s => s.type === 'NONLINEAR_CHARGING_STATION');
+      expect.ok(chargeStop !== undefined);
+      expect.equal(chargeStop.batteryAfterCharge, 85.0);
+      expect.equal(chargeStop.chargingCurve, 'PIECEWISE_LINEAR_CC_CV');
+    });
+
+    test("F197-T20: Server vs Client MDEVRPNLRouter consistency on identical orders and depot configuration", () => {
+      const serverRouter = new ServerMDEVRPNLRouter();
+      const clientRouter = new MDEVRPNLRouter();
+
+      const orders = [
+        { id: 'SYNC_MD_1', lat: 21.030, lng: 105.850, weightKg: 4, earlyMinutes: 0, lateMinutes: 120 }
+      ];
+
+      const serverRes = serverRouter.planMultiDepotElectricRoutes(orders);
+      const clientRes = clientRouter.planMultiDepotElectricRoutes(orders);
+
+      expect.equal(serverRes.status, clientRes.status);
+      expect.equal(serverRes.fulfilledOrders, clientRes.fulfilledOrders);
+      expect.equal(serverRes.totalKm, clientRes.totalKm);
+      expect.equal(serverRes.totalCo2SavedKg, clientRes.totalCo2SavedKg);
+    });
+
+    // --- TRI-ROLE AI COPILOTS & PIPELINE (4 Tests) ---
+    test("F197-T21: Admin Sentinel Copilot (Sections 131, 132, 133) responds to DDSketch, SAC-PER, and MDEVRP-NL queries", () => {
+      const res131 = generateAdminCopilotResponse("giám sát phân vị độ trễ ddsketch relative-error");
+      expect.equal(res131.tag, "DDSKETCH RELATIVE-ERROR QUANTILES");
+      expect.ok(res131.text.includes("DDSKETCH"));
+
+      const res132 = generateAdminCopilotResponse("tối ưu hóa giá bán bằng sac-per soft actor-critic");
+      expect.equal(res132.tag, "SAC-PER MULTI-OBJECTIVE PRICING");
+      expect.ok(res132.text.includes("SAC-PER"));
+
+      const res133 = generateAdminCopilotResponse("lập lịch xe điện đa kho mdevrp sạc phi tuyến");
+      expect.equal(res133.tag, "MDEVRP-NL-TW MULTI-DEPOT LOGISTICS");
+      expect.ok(res133.text.includes("MDEVRP"));
+    });
+
+    test("F197-T22: Seller ShopSmart Copilot (Section 59) advises sellers on SLA latency, SAC-PER pricing, and multi-depot green delivery", () => {
+      const res = generateSellerCopilotResponse("tư vấn phân vị sla gian hàng ddsketch và định giá sac-per");
+      expect.equal(res.tag, "DDSKETCH, SAC-PER & MDEVRP-NL-TW LOGISTICS");
+      expect.ok(res.text.includes("DDSketch"));
+      expect.ok(res.text.includes("SAC-PER"));
+    });
+
+    test("F197-T23: Buyer AI Assistant triggers Intent 52 (DDSKETCH_SACPER_MDEVRPNL_ASSIST)", () => {
+      const res = generateAiChatResponse("giải thích độ trễ sla ddsketch, trợ giá sac-per và xe điện đa kho");
+      expect.equal(res.intent, "DDSKETCH_SACPER_MDEVRPNL_ASSIST");
+      expect.ok(res.replyText.includes("DDSketch"));
+      expect.ok(res.replyText.includes("SAC-PER"));
+      expect.ok(res.replyText.includes("MDEVRP"));
+    });
+
+    test("F197-T24: End-to-End Pipeline: DDSketch monitors checkout latency SLA, SAC-PER prices flash sale items with COGS guard, MDEVRP-NL-TW dispatches multi-depot electric delivery fleet", () => {
+      // Step 1: DDSketch tracks 500 checkout transaction latencies and guarantees relative error
+      const dd = new ServerDDSketchQuantiles({ alpha: 0.01 });
+      for (let i = 20; i <= 519; i++) {
+        dd.add(i);
+      }
+      const slaReport = dd.getSlaMetrics();
+      expect.equal(slaReport.count, 500);
+      expect.ok(slaReport.p99 > 500);
+
+      // Step 2: SAC-PER optimizes dynamic price with strict COGS guardrail
+      const sac = new ServerSACPerPricing();
+      const pricing = sac.optimizePrice({
+        cogs: 300000,
+        currentPrice: 420000,
+        competitorPrice: 410000,
+        demandIndex: 1.4,
+        inventoryDays: 12
+      });
+      expect.equal(pricing.status, 'SAC_PER_OPTIMAL_PRICED');
+      expect.ok(pricing.recommendedPrice >= 315000); // 300,000 * 1.05
+      expect.ok(pricing.grossMarginPercent > 0);
+
+      // Step 3: MDEVRP-NL-TW dispatches multi-depot green electric fleet
+      const router = new ServerMDEVRPNLRouter();
+      const dispatch = router.planMultiDepotElectricRoutes([
+        { id: 'ECO_ORDER_MULTI_1', lat: 21.031, lng: 105.851, weightKg: 4, earlyMinutes: 0, lateMinutes: 180, serviceMinutes: 10 }
+      ]);
+      expect.equal(dispatch.status, 'MDEVRP_NL_OPTIMAL_SCHEDULED');
+      expect.equal(dispatch.fulfilledOrders, 1);
+      expect.ok(dispatch.totalKm > 0);
+      expect.ok(dispatch.totalCo2SavedKg > 0);
     });
   });
 });

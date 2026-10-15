@@ -24527,6 +24527,657 @@ export class EVRPTWBSSRouter {
   }
 }
 
+// ==============================================================================
+// PHASE 50 ENTERPRISE ALGORITHMS SUITE (Feature 197)
+// 1. DDSketch Quantile Estimator (Charles Masson et al., Datadog / VLDB 2019)
+// 2. Soft Actor-Critic with Prioritized Experience Replay (SAC-PER - Haarnoja et al., ICML 2018)
+// 3. Multi-Depot Electric Vehicle Routing with Non-linear Charging (MDEVRP-NL-TW - Montoya 2017)
+// ==============================================================================
+
+// PHASE 50 ALGORITHM 1: DDSketch Relative-Error Quantile Estimator
+export class DDSketchQuantiles {
+  constructor(options = {}) {
+    this.alpha = options.alpha || 0.01;
+    this.maxNumBins = options.maxNumBins || 2048;
+
+    this.gamma = (1.0 + this.alpha) / (1.0 - this.alpha);
+    this.gammaLn = Math.log(this.gamma);
+
+    this.positiveBins = new Map();
+    this.negativeBins = new Map();
+    this.zeroCount = 0;
+
+    this.count = 0;
+    this.min = Infinity;
+    this.max = -Infinity;
+    this.sum = 0;
+  }
+
+  _valToKey(val) {
+    return Math.ceil(Math.log(val) / this.gammaLn);
+  }
+
+  _keyToVal(key) {
+    return (2.0 * Math.pow(this.gamma, key)) / (this.gamma + 1.0);
+  }
+
+  add(val, count = 1) {
+    if (typeof val !== 'number' || isNaN(val) || count <= 0) return;
+
+    this.count += count;
+    this.sum += val * count;
+    if (val < this.min) this.min = val;
+    if (val > this.max) this.max = val;
+
+    if (val === 0) {
+      this.zeroCount += count;
+      return;
+    }
+
+    if (val > 0) {
+      const key = this._valToKey(val);
+      this.positiveBins.set(key, (this.positiveBins.get(key) || 0) + count);
+    } else {
+      const key = this._valToKey(-val);
+      this.negativeBins.set(key, (this.negativeBins.get(key) || 0) + count);
+    }
+  }
+
+  getQuantile(q) {
+    if (this.count === 0) return 0;
+    if (q <= 0) return this.min;
+    if (q >= 1.0) return this.max;
+
+    const rank = q * (this.count - 1);
+    let cumulative = 0;
+
+    if (this.negativeBins.size > 0) {
+      const negKeys = Array.from(this.negativeBins.keys()).sort((a, b) => b - a);
+      for (const k of negKeys) {
+        cumulative += this.negativeBins.get(k);
+        if (cumulative > rank) {
+          return -this._keyToVal(k);
+        }
+      }
+    }
+
+    cumulative += this.zeroCount;
+    if (cumulative > rank) {
+      return 0;
+    }
+
+    const posKeys = Array.from(this.positiveBins.keys()).sort((a, b) => a - b);
+    for (const k of posKeys) {
+      cumulative += this.positiveBins.get(k);
+      if (cumulative > rank) {
+        return Number(this._keyToVal(k).toFixed(4));
+      }
+    }
+
+    return this.max;
+  }
+
+  getSlaMetrics() {
+    return {
+      count: this.count,
+      min: this.count > 0 ? Number(this.min.toFixed(2)) : 0,
+      max: this.count > 0 ? Number(this.max.toFixed(2)) : 0,
+      avg: this.count > 0 ? Number((this.sum / this.count).toFixed(2)) : 0,
+      p50: this.getQuantile(0.50),
+      p90: this.getQuantile(0.90),
+      p95: this.getQuantile(0.95),
+      p99: this.getQuantile(0.99),
+      p99_9: this.getQuantile(0.999),
+      relativeErrorAlpha: this.alpha
+    };
+  }
+
+  merge(other) {
+    if (!other || other.count === 0) return;
+
+    this.count += other.count;
+    this.sum += other.sum;
+    this.zeroCount += other.zeroCount;
+    if (other.min < this.min) this.min = other.min;
+    if (other.max > this.max) this.max = other.max;
+
+    for (const [k, c] of other.positiveBins.entries()) {
+      this.positiveBins.set(k, (this.positiveBins.get(k) || 0) + c);
+    }
+    for (const [k, c] of other.negativeBins.entries()) {
+      this.negativeBins.set(k, (this.negativeBins.get(k) || 0) + c);
+    }
+  }
+
+  reset() {
+    this.positiveBins.clear();
+    this.negativeBins.clear();
+    this.zeroCount = 0;
+    this.count = 0;
+    this.min = Infinity;
+    this.max = -Infinity;
+    this.sum = 0;
+  }
+
+  getStats() {
+    return {
+      alpha: this.alpha,
+      gamma: Number(this.gamma.toFixed(6)),
+      totalObservations: this.count,
+      positiveBinsCount: this.positiveBins.size,
+      negativeBinsCount: this.negativeBins.size,
+      zeroCount: this.zeroCount,
+      totalActiveBins: this.positiveBins.size + this.negativeBins.size + (this.zeroCount > 0 ? 1 : 0),
+      estimatedMemoryBytes: (this.positiveBins.size + this.negativeBins.size) * 16 + 64
+    };
+  }
+}
+
+// PHASE 50 ALGORITHM 2: Soft Actor-Critic with Prioritized Experience Replay (SAC-PER)
+export class SACPerPricing {
+  constructor(options = {}) {
+    this.stateDim = options.stateDim || 5;
+    this.gamma = options.gamma || 0.99;
+    this.alpha = options.alpha || 0.20;
+    this.tau = options.tau || 0.01;
+    this.bufferSize = options.bufferSize || 2000;
+    this.perAlpha = options.perAlpha || 0.6;
+    this.perBeta = options.perBeta || 0.4;
+
+    this.memory = [];
+    this.maxPriority = 1.0;
+
+    this.wQ1 = new Float64Array(this.stateDim + 1);
+    this.wQ2 = new Float64Array(this.stateDim + 1);
+    this.wQ1Target = new Float64Array(this.stateDim + 1);
+    this.wQ2Target = new Float64Array(this.stateDim + 1);
+
+    this.wPolicyMean = new Float64Array(this.stateDim);
+    this.wPolicyLogStd = new Float64Array(this.stateDim);
+
+    this._initializeWeights();
+  }
+
+  _initializeWeights() {
+    for (let i = 0; i <= this.stateDim; i++) {
+      this.wQ1[i] = (Math.random() - 0.5) * 0.1;
+      this.wQ2[i] = (Math.random() - 0.5) * 0.1;
+      this.wQ1Target[i] = this.wQ1[i];
+      this.wQ2Target[i] = this.wQ2[i];
+    }
+    for (let i = 0; i < this.stateDim; i++) {
+      this.wPolicyMean[i] = (Math.random() - 0.5) * 0.05;
+      this.wPolicyLogStd[i] = -1.0;
+    }
+  }
+
+  _computeQ(weights, state, action) {
+    let score = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      score += weights[i] * (state[i] || 0);
+    }
+    score += weights[this.stateDim] * action;
+    return score;
+  }
+
+  _sampleAction(state, evalMode = false) {
+    let mean = 0;
+    let logStd = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      const s = state[i] || 0;
+      mean += this.wPolicyMean[i] * s;
+      logStd += this.wPolicyLogStd[i] * s;
+    }
+
+    logStd = Math.max(-2, Math.min(1, logStd));
+    const std = Math.exp(logStd);
+
+    let rawAction = mean;
+    if (!evalMode) {
+      const u1 = Math.random() || 1e-7;
+      const u2 = Math.random() || 1e-7;
+      const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      rawAction = mean + std * z;
+    }
+
+    const tanhVal = Math.tanh(rawAction);
+    const actionRange = 0.225;
+    const actionOffset = 0.025;
+    const action = Math.max(-0.20, Math.min(0.25, tanhVal * actionRange + actionOffset));
+
+    const logProb = -0.5 * Math.pow((rawAction - mean) / std, 2) - Math.log(std * Math.sqrt(2 * Math.PI)) - Math.log(1 - tanhVal * tanhVal + 1e-6);
+
+    return { action: Number(action.toFixed(4)), logProb, mean: Number(mean.toFixed(4)), std: Number(std.toFixed(4)) };
+  }
+
+  storeTransition(state, action, reward, nextState, done = false) {
+    const priority = this.maxPriority;
+    if (this.memory.length >= this.bufferSize) {
+      this.memory.shift();
+    }
+    this.memory.push({
+      state: [...state],
+      action,
+      reward,
+      nextState: [...nextState],
+      done,
+      priority
+    });
+  }
+
+  trainStep(batchSize = 32) {
+    if (this.memory.length < batchSize) {
+      return { trained: false, reason: 'INSUFFICIENT_EXPERIENCE_REPLAY' };
+    }
+
+    let sumPriority = 0;
+    const priorities = this.memory.map(m => {
+      const p = Math.pow(m.priority, this.perAlpha);
+      sumPriority += p;
+      return p;
+    });
+
+    const sampledIndices = [];
+    for (let i = 0; i < batchSize; i++) {
+      let r = Math.random() * sumPriority;
+      let chosenIdx = 0;
+      for (let j = 0; j < priorities.length; j++) {
+        r -= priorities[j];
+        if (r <= 0) {
+          chosenIdx = j;
+          break;
+        }
+      }
+      sampledIndices.push(chosenIdx);
+    }
+
+    let totalTdError = 0;
+    const n = this.memory.length;
+
+    for (const idx of sampledIndices) {
+      const exp = this.memory[idx];
+      const prob = priorities[idx] / sumPriority;
+      const isWeight = Math.pow(n * prob, -this.perBeta);
+
+      const nextAct = this._sampleAction(exp.nextState, false);
+      const q1TargetVal = this._computeQ(this.wQ1Target, exp.nextState, nextAct.action);
+      const q2TargetVal = this._computeQ(this.wQ2Target, exp.nextState, nextAct.action);
+      const minQTarget = Math.min(q1TargetVal, q2TargetVal);
+      const targetVal = exp.done ? exp.reward : exp.reward + this.gamma * (minQTarget - this.alpha * nextAct.logProb);
+
+      const q1Current = this._computeQ(this.wQ1, exp.state, exp.action);
+      const tdError = targetVal - q1Current;
+      totalTdError += Math.abs(tdError);
+
+      const newPriority = Math.abs(tdError) + 1e-5;
+      exp.priority = newPriority;
+      if (newPriority > this.maxPriority) {
+        this.maxPriority = newPriority;
+      }
+
+      const lr = 0.01 * Math.min(1.0, isWeight);
+      for (let i = 0; i < this.stateDim; i++) {
+        this.wQ1[i] += lr * tdError * exp.state[i];
+        this.wQ2[i] += lr * tdError * exp.state[i];
+      }
+      this.wQ1[this.stateDim] += lr * tdError * exp.action;
+      this.wQ2[this.stateDim] += lr * tdError * exp.action;
+
+      const curAct = this._sampleAction(exp.state, false);
+      const qVal = this._computeQ(this.wQ1, exp.state, curAct.action);
+      const policyLossGrad = qVal - this.alpha * curAct.logProb;
+      for (let i = 0; i < this.stateDim; i++) {
+        this.wPolicyMean[i] += 0.005 * policyLossGrad * exp.state[i];
+      }
+    }
+
+    for (let i = 0; i <= this.stateDim; i++) {
+      this.wQ1Target[i] = this.tau * this.wQ1[i] + (1 - this.tau) * this.wQ1Target[i];
+      this.wQ2Target[i] = this.tau * this.wQ2[i] + (1 - this.tau) * this.wQ2Target[i];
+    }
+
+    return {
+      trained: true,
+      batchSize,
+      avgTdError: Number((totalTdError / batchSize).toFixed(4)),
+      maxPriority: Number(this.maxPriority.toFixed(4))
+    };
+  }
+
+  optimizePrice(itemData = {}) {
+    const cogs = itemData.cogs || 100000;
+    const currentPrice = itemData.currentPrice || cogs * 1.3;
+    const competitorPrice = itemData.competitorPrice || currentPrice;
+    const demandIndex = itemData.demandIndex !== undefined ? itemData.demandIndex : 1.0;
+    const inventoryDays = itemData.inventoryDays || 15;
+
+    const state = [
+      Math.min(2.0, cogs / 500000),
+      Math.min(2.0, currentPrice / 500000),
+      Math.min(2.0, competitorPrice / 500000),
+      Math.min(2.0, demandIndex),
+      Math.min(2.0, inventoryDays / 60)
+    ];
+
+    const { action, logProb } = this._sampleAction(state, true);
+    let proposedPrice = Math.round(currentPrice * (1.0 + action));
+
+    const hardFloorPrice = Math.round(cogs * 1.05);
+    let guardrailApplied = false;
+
+    if (proposedPrice < hardFloorPrice) {
+      proposedPrice = hardFloorPrice;
+      guardrailApplied = true;
+    }
+
+    const grossMarginPercent = Number((((proposedPrice - cogs) / proposedPrice) * 100).toFixed(2));
+    const priceDeltaPercent = Number((((proposedPrice - currentPrice) / currentPrice) * 100).toFixed(2));
+
+    return {
+      status: 'SAC_PER_OPTIMAL_PRICED',
+      cogs,
+      originalPrice: currentPrice,
+      recommendedPrice: proposedPrice,
+      competitorPrice,
+      priceDeltaPercent,
+      grossMarginPercent,
+      entropyCoefficient: this.alpha,
+      guardrailApplied,
+      hardFloorPrice,
+      suggestedStrategy: proposedPrice > currentPrice
+        ? 'TĂNG GIÁ HƯỞNG BIÊN LỢI NHUẬN CAO (HIGH DEMAND / SHORT SUPPLY)'
+        : proposedPrice < currentPrice
+          ? 'HẠ GIÁ KÍCH CẦU THANH LÝ TỒN KHO AN TOÀN (INVENTORY CLEARANCE)'
+          : 'GIỮ NGUYÊN GIÁ CÂN BẰNG TỐI ƯU (STABLE NASH EQUILIBRIUM)'
+    };
+  }
+}
+
+// PHASE 50 ALGORITHM 3: MDEVRP-NL-TW (Multi-Depot Electric Fleet with Non-linear Charging)
+export const DEFAULT_SPX_DEPOTS = [
+  { id: 'DEPOT_HOAN_KIEM', name: 'Hub SPX Hoàn Kiếm (Trung Tâm)', lat: 21.0285, lng: 105.8542 },
+  { id: 'DEPOT_CAU_GIAY', name: 'Hub SPX Cầu Giấy (Phía Tây)', lat: 21.0360, lng: 105.7900 },
+  { id: 'DEPOT_LONG_BIEN', name: 'Hub SPX Long Biên (Phía Đông)', lat: 21.0450, lng: 105.8850 }
+];
+
+export const DEFAULT_CHARGING_STATIONS = [
+  { id: 'CS_BA_DINH', name: 'Trạm Sạc Siêu Nhanh Ba Đình', lat: 21.0340, lng: 105.8300, maxPowerKw: 60 },
+  { id: 'CS_DONG_DA', name: 'Trạm Sạc Đống Đa', lat: 21.0180, lng: 105.8280, maxPowerKw: 45 },
+  { id: 'CS_HAI_BA_TRUNG', name: 'Trạm Sạc Hai Bà Trưng', lat: 21.0080, lng: 105.8520, maxPowerKw: 45 },
+  { id: 'CS_TAY_HO', name: 'Trạm Sạc Tây Hồ', lat: 21.0600, lng: 105.8200, maxPowerKw: 60 }
+];
+
+export class MDEVRPNLRouter {
+  constructor(options = {}) {
+    this.depots = options.depots || DEFAULT_SPX_DEPOTS;
+    this.chargingStations = options.chargingStations || DEFAULT_CHARGING_STATIONS;
+    this.batteryConsumptionPerKm = options.batteryConsumptionPercentPerKm || 1.2;
+    this.minBatterySafety = options.minBatterySafetyPercent || 15.0;
+    this.vehicleCapacityKg = options.vehicleCapacityKg || 35.0;
+    this.avgSpeedKmH = options.avgSpeedKmH || 30.0;
+    this.fastChargeRate = options.fastChargeRatePercentPerMin || 2.0;
+    this.trickleChargeRate = options.trickleChargeRatePercentPerMin || 0.5;
+  }
+
+  _haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(2));
+  }
+
+  getDistance(locA, locB) {
+    return this._haversineKm(locA.lat, locA.lng, locB.lat, locB.lng);
+  }
+
+  computeChargingTimeMinutes(currentBatt, targetBatt) {
+    const start = Math.max(0, Math.min(100, currentBatt));
+    const end = Math.max(start, Math.min(100, targetBatt));
+    if (end <= start) return 0;
+
+    let timeMinutes = 0;
+    if (start < 80.0) {
+      const fastEnd = Math.min(80.0, end);
+      const deltaPercent = fastEnd - start;
+      timeMinutes += deltaPercent / this.fastChargeRate;
+    }
+
+    if (end > 80.0) {
+      const trickleStart = Math.max(80.0, start);
+      const deltaPercent = end - trickleStart;
+      timeMinutes += deltaPercent / this.trickleChargeRate;
+    }
+
+    return Math.round(timeMinutes);
+  }
+
+  findNearestDepot(loc) {
+    let nearest = this.depots[0];
+    let minDist = Infinity;
+    for (const d of this.depots) {
+      const dist = this.getDistance(loc, d);
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = d;
+      }
+    }
+    return { depot: nearest, distKm: minDist };
+  }
+
+  findNearestChargingStation(loc) {
+    let nearest = this.chargingStations[0];
+    let minDist = Infinity;
+    for (const cs of this.chargingStations) {
+      const dist = this.getDistance(loc, cs);
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = cs;
+      }
+    }
+    return { station: nearest, distKm: minDist };
+  }
+
+  planMultiDepotElectricRoutes(orders = [], options = {}) {
+    if (!orders || orders.length === 0) {
+      return {
+        status: 'MDEVRP_NO_ORDERS',
+        totalOrders: 0,
+        fulfilledOrders: 0,
+        unfulfilledOrders: [],
+        chargingEventsCount: 0,
+        totalKm: 0,
+        totalCo2SavedKg: 0,
+        routes: []
+      };
+    }
+
+    const fleet = [];
+    const customVehicles = options.availableEVs || [];
+
+    if (customVehicles.length > 0) {
+      customVehicles.forEach((v, idx) => {
+        const homeDepot = v.homeDepotId
+          ? this.depots.find(d => d.id === v.homeDepotId) || this.depots[idx % this.depots.length]
+          : this.depots[idx % this.depots.length];
+        fleet.push({
+          id: v.id || `EV_MD_${idx + 1}`,
+          name: v.name || `Xe Điện ${v.id || idx + 1}`,
+          homeDepot,
+          batteryPercent: v.initialBattery !== undefined ? v.initialBattery : 100.0,
+          remainingCapacityKg: this.vehicleCapacityKg,
+          currentLocation: { lat: homeDepot.lat, lng: homeDepot.lng },
+          currentTimeMinutes: 0,
+          totalDistKm: 0,
+          chargingEvents: 0,
+          routeStops: []
+        });
+      });
+    } else {
+      this.depots.forEach((depot, idx) => {
+        fleet.push({
+          id: `EV_DEPOT_${depot.id}`,
+          name: `Xe Điện SPX ${depot.name}`,
+          homeDepot: depot,
+          batteryPercent: 100.0,
+          remainingCapacityKg: this.vehicleCapacityKg,
+          currentLocation: { lat: depot.lat, lng: depot.lng },
+          currentTimeMinutes: 0,
+          totalDistKm: 0,
+          chargingEvents: 0,
+          routeStops: []
+        });
+      });
+    }
+
+    const fulfilledOrders = [];
+    const unservedOrders = [];
+    let totalChargingEvents = 0;
+
+    for (const order of orders) {
+      const weight = order.weightKg !== undefined ? order.weightKg : (order.demandKg || 2);
+      let bestVehicle = null;
+      let minScore = Infinity;
+
+      for (const ev of fleet) {
+        if (ev.remainingCapacityKg < weight) continue;
+
+        const distToOrder = this.getDistance(ev.currentLocation, order);
+        const distToHomeDepot = this.getDistance(order, ev.homeDepot);
+        const roundTripBatteryNeeded = (distToOrder + distToHomeDepot) * this.batteryConsumptionPerKm;
+        const projectedBattery = ev.batteryPercent - roundTripBatteryNeeded;
+
+        if (projectedBattery >= this.minBatterySafety && ev.batteryPercent > 20.0) {
+          if (distToOrder < minScore) {
+            minScore = distToOrder;
+            bestVehicle = ev;
+          }
+        } else {
+          const { station, distKm: distToStation } = this.findNearestChargingStation(ev.currentLocation);
+          const battToStation = distToStation * this.batteryConsumptionPerKm;
+          if (ev.batteryPercent - battToStation >= 5.0) {
+            const distFromStationToOrder = this.getDistance(station, order);
+            const totalDetour = distToStation + distFromStationToOrder;
+            if (totalDetour < minScore) {
+              minScore = totalDetour;
+              bestVehicle = ev;
+            }
+          }
+        }
+      }
+
+      if (bestVehicle) {
+        const directDist = this.getDistance(bestVehicle.currentLocation, order);
+        const returnDist = this.getDistance(order, bestVehicle.homeDepot);
+        const batteryNeededRoundTrip = (directDist + returnDist) * this.batteryConsumptionPerKm;
+
+        if (bestVehicle.batteryPercent - batteryNeededRoundTrip < this.minBatterySafety || bestVehicle.batteryPercent <= 20.0) {
+          const { station, distKm: distToStation } = this.findNearestChargingStation(bestVehicle.currentLocation);
+          const travelMinutes = Math.round((distToStation / this.avgSpeedKmH) * 60);
+
+          bestVehicle.totalDistKm += distToStation;
+          bestVehicle.currentTimeMinutes += travelMinutes;
+          bestVehicle.batteryPercent -= distToStation * this.batteryConsumptionPerKm;
+
+          const targetBatt = 85.0;
+          const chargeTime = this.computeChargingTimeMinutes(bestVehicle.batteryPercent, targetBatt);
+
+          bestVehicle.currentTimeMinutes += chargeTime;
+          bestVehicle.batteryPercent = targetBatt;
+          bestVehicle.chargingEvents++;
+          totalChargingEvents++;
+
+          bestVehicle.routeStops.push({
+            type: 'NONLINEAR_CHARGING_STATION',
+            stationId: station.id,
+            name: station.name,
+            arrivalMinutes: bestVehicle.currentTimeMinutes - chargeTime,
+            departureMinutes: bestVehicle.currentTimeMinutes,
+            chargeTimeMinutes: chargeTime,
+            batteryAfterCharge: targetBatt,
+            chargingCurve: 'PIECEWISE_LINEAR_CC_CV',
+            lat: station.lat,
+            lng: station.lng
+          });
+
+          bestVehicle.currentLocation = { lat: station.lat, lng: station.lng };
+        }
+
+        const legDist = this.getDistance(bestVehicle.currentLocation, order);
+        const travelMin = Math.round((legDist / this.avgSpeedKmH) * 60);
+        let arrivalTime = bestVehicle.currentTimeMinutes + travelMin;
+        if (arrivalTime < (order.earlyMinutes || 0)) {
+          arrivalTime = order.earlyMinutes || 0;
+        }
+
+        bestVehicle.currentTimeMinutes = arrivalTime + (order.serviceMinutes || 5);
+        bestVehicle.totalDistKm += legDist;
+        bestVehicle.batteryPercent = Number((bestVehicle.batteryPercent - legDist * this.batteryConsumptionPerKm).toFixed(1));
+        bestVehicle.remainingCapacityKg -= weight;
+        bestVehicle.currentLocation = { lat: order.lat, lng: order.lng };
+
+        bestVehicle.routeStops.push({
+          type: 'CUSTOMER_DELIVERY',
+          orderId: order.id,
+          deliveredKg: weight,
+          arrivalMinutes: arrivalTime,
+          departureMinutes: bestVehicle.currentTimeMinutes,
+          batteryRemainingPercent: bestVehicle.batteryPercent,
+          lat: order.lat,
+          lng: order.lng
+        });
+
+        fulfilledOrders.push(order.id);
+      } else {
+        unservedOrders.push({
+          orderId: order.id,
+          reason: 'OUT_OF_MULTI_DEPOT_BATTERY_RANGE'
+        });
+      }
+    }
+
+    for (const ev of fleet) {
+      if (ev.routeStops.length > 0) {
+        const returnDist = this.getDistance(ev.currentLocation, ev.homeDepot);
+        ev.totalDistKm += returnDist;
+        ev.batteryPercent = Math.max(0, Number((ev.batteryPercent - returnDist * this.batteryConsumptionPerKm).toFixed(1)));
+        ev.currentTimeMinutes += Math.round((returnDist / this.avgSpeedKmH) * 60);
+      }
+    }
+
+    const activeRoutes = fleet.filter(v => v.routeStops.length > 0);
+    const totalKm = Number(activeRoutes.reduce((acc, v) => acc + v.totalDistKm, 0).toFixed(1));
+    const totalCo2SavedKg = Number((totalKm * 0.12).toFixed(2));
+
+    return {
+      status: 'MDEVRP_NL_OPTIMAL_SCHEDULED',
+      totalOrders: orders.length,
+      fulfilledOrders: fulfilledOrders.length,
+      unfulfilledOrders: unservedOrders,
+      activeDepotsCount: new Set(activeRoutes.map(r => r.homeDepot.id)).size,
+      activeVehiclesCount: activeRoutes.length,
+      chargingEventsCount: totalChargingEvents,
+      totalKm,
+      totalCo2SavedKg,
+      greenLogisticsBadge: 'SPX_MULTI_DEPOT_NONLINEAR_ELECTRIC_FLEET',
+      routes: activeRoutes.map(v => ({
+        vehicleId: v.id,
+        name: v.name,
+        homeDepot: v.homeDepot,
+        stopsCount: v.routeStops.length,
+        chargingEvents: v.chargingEvents,
+        finalBatteryPercent: v.batteryPercent,
+        totalDistKm: Number(v.totalDistKm.toFixed(1)),
+        stops: v.routeStops
+      }))
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -24790,6 +25441,12 @@ export default {
   RainbowDqnBidding,
   DEFAULT_BSS_STATIONS,
   EVRPTWBSSRouter,
+  // Phase 50 Enterprise Algorithms
+  DDSketchQuantiles,
+  SACPerPricing,
+  DEFAULT_SPX_DEPOTS,
+  DEFAULT_CHARGING_STATIONS,
+  MDEVRPNLRouter,
 };
 
 

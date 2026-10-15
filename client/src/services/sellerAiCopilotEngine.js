@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1187,6 +1187,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem lượt xem 2-bit HyperBitBit',
         'Tối ưu hóa giá thầu Rainbow DQN',
         'Kiểm tra lịch trình xe điện đổi pin BSS'
+      ]
+    };
+  }
+
+  // 59. Phân Vị Độ Trễ DDSketch, Định Giá SAC-PER & Xe Điện Đa Kho MDEVRP-NL (Phase 50 - Feature 197)
+  if (/ddsketch|sac-per|sac per|mdevrp|sạc phi tuyến|phân vị sla gian hàng|định giá entropy|xe điện đa kho/i.test(raw)) {
+    return {
+      text: `🚀 **BỘ BA THUẬT TOÁN DOANH NGHIỆP: PHÂN VỊ DDSKETCH, ĐỊNH GIÁ SAC-PER & GIAO VẬN MDEVRP-NL**:
+- **Giám sát độ trễ và SLA đơn hàng với DDSketch**:
+  - Đo lường chính xác các phân vị P50, P90, P99 về tốc độ chuẩn bị hàng của shop và phản hồi tin nhắn CSKH với sai số tương đối $< 1\\%$.
+- **Định giá tự động đa mục tiêu bằng Soft Actor-Critic (SAC-PER)**:
+  - Tối đa hóa entropy giúp AI khám phá mức giá tối ưu doanh thu mà vẫn luôn khóa chặt giá sàn an toàn $\\text{COGS} \\times 1.05$, không bao giờ lo bán lỗ!
+- **Giao vận xanh đa kho SPX Express (MDEVRP-NL-TW)**:
+  - Đơn hàng của shop được tự động gom về hub gần nhất (Hoàn Kiếm, Cầu Giấy, Long Biên) và giao bằng xe máy điện với thuật toán sạc nhanh CC 80% tối ưu thời gian!`,
+      type: 'recommendation',
+      tag: 'DDSKETCH, SAC-PER & MDEVRP-NL-TW LOGISTICS',
+      suggestions: [
+        'Xem phân vị SLA độ trễ DDSketch',
+        'Tối ưu hóa giá bán SAC-PER',
+        'Lập lịch giao vận xe điện đa kho'
       ]
     };
   }

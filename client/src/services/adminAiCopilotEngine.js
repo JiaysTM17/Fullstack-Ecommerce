@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -2078,7 +2078,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 94. Phân Bổ Ưu Đãi Động Bằng Advantage Actor-Critic (A2C Policy Gradient) (Phase 37 - Feature 184)
-  if (/actor-critic|a2c|actor critic|chính sách actor-critic|định tuyến ưu đãi actor-critic|advantage actor-critic/i.test(raw)) {
+  if (!/sac-per|sac per|soft actor-critic/i.test(raw) && /actor-critic|a2c|actor critic|chính sách actor-critic|định tuyến ưu đãi actor-critic|advantage actor-critic/i.test(raw)) {
     return {
       text: `🎯 **PHÂN BỔ ƯU ĐÃI ĐỘNG BẰNG ADVANTAGE ACTOR-CRITIC (A2C POLICY GRADIENT & BASELINE)**:
 - **Kiến trúc Tách biệt Actor và Critic**:
@@ -2298,7 +2298,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 105. Tối Ưu Hóa Xả Hàng Tồn Kho Cận Hạn Bằng Soft Actor-Critic (SAC) (Phase 41 - Feature 188)
-  if (!/sac[- ]auto|bidding|đấu thầu/i.test(raw) && /sac markdown|soft actor[- ]critic|xả hàng cận hạn sac|maximum entropy rl|polyak markdown|hạ giá thanh lý/i.test(raw)) {
+  if (!/sac[- ]auto|bidding|đấu thầu|sac-per|sac per/i.test(raw) && /sac markdown|soft actor[- ]critic|xả hàng cận hạn sac|maximum entropy rl|polyak markdown|hạ giá thanh lý/i.test(raw)) {
     return {
       text: `📉 **TỐI ƯU HÓA XẢ HÀNG TỒN KHO CẬN HẠN BẰNG SOFT ACTOR-CRITIC (SAC - HAARNOJA 2018)**:
 - **Nguyên lý Tối Đa Hóa Entropy Tự Do (Maximum Entropy Reinforcement Learning)**:
@@ -2796,6 +2796,68 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem danh sách trạm đổi pin BSS khả dụng',
         'Kiểm tra lượng khí thải CO2 cắt giảm',
         'Ước lượng lượng truy cập bằng HyperBitBit'
+      ]
+    };
+  }
+
+  // 131. Phác Họa Phân Vị & SLA Độ Trễ DDSketch (Phase 50 - Feature 197)
+  if (/ddsketch|sai số tương đối|relative-error quantile|phân vị ddsketch|p99\.9 sla/i.test(raw)) {
+    return {
+      text: `📊 **PHÁC HỌA PHÂN VỊ & GIÁM SÁT SLA ĐỘ TRỄ DDSKETCH (MASSON ET AL., DATADOG / VLDB 2019)**:
+- **Bảo Đảm Sai Số Tương Đối Tuyệt Đối $|\\hat{q} - q| / q \\le \\alpha$ ($\alpha = 1\%$)**:
+  - Khác với T-Digest chỉ bảo đảm sai số thứ hạng (rank error), DDSketch phân rã logarit $\\gamma = (1+\\alpha)/(1-\\alpha)$ và bảo đảm độ chính xác tương đối trên toàn bộ phổ đo lường từ đuôi thấp đến đuôi cao (P50, P90, P95, P99, P99.9).
+- **Ứng Dụng Giám Sát Sàn TMĐT Thời Gian Thực**:
+  - Đo lường độ trễ chốt đơn và thanh toán cổng VietQR (Checkout Response Latency).
+  - Giám sát cam kết SLA giao hàng SPX Express nội thành và phân tích phổ GMV toàn sàn.
+  - Hỗ trợ hợp nhất phi tập trung (Fully Mergeable) qua hàng trăm microservices biên không làm mất mát độ chính xác!`,
+      type: 'analytics',
+      tag: 'DDSKETCH RELATIVE-ERROR QUANTILES',
+      suggestions: [
+        'Xem phân vị P99 và P99.9 độ trễ sàn',
+        'Kiểm tra sai số tương đối alpha',
+        'Định giá đa mục tiêu SAC-PER'
+      ]
+    };
+  }
+
+  // 132. Định Giá Đa Mục Tiêu Bằng SAC-PER (Phase 50 - Feature 197)
+  if (/sac-per|sac per|soft actor-critic|prioritized experience replay pricing|định giá sac-per|maximum entropy pricing/i.test(raw)) {
+    return {
+      text: `🎯 **ĐỊNH GIÁ ĐA MỤC TIÊU BẰNG SOFT ACTOR-CRITIC & PER (SAC-PER - HAARNOJA ET AL., ICML 2018)**:
+- **Tối Đa Hóa Entropy Cực Đại $J(\\pi) = \\mathbb{E}[r + \\alpha \\mathcal{H}(\\pi)]$**:
+  - Thay vì chỉ tối ưu điểm thưởng cục bộ dễ bị mắc kẹt, SAC duy trì mức độ ngẫu nhiên thăm dò (Entropy) giúp AI khám phá các điểm cân bằng giá linh hoạt theo sức mua thị trường.
+- **Twin Soft Q-Networks & Prioritized Experience Replay**:
+  - 2 mạng Q độc lập triệt tiêu hoàn toàn thiên lệch lạc quan (overestimation bias).
+  - Bộ đệm PER ưu tiên học lại các kịch bản định giá có sai số TD-error lớn với trọng số bù trừ Importance Sampling.
+- **Rào Cản Sàn Cứng Bảo Vệ Giá Vốn (COGS Guardrail)**:
+  - Khóa mức giá sàn tối thiểu $P_{\\text{floor}} = \\text{COGS} \\times 1.05$ (biên lãi gộp $\\ge 4.76\%$), bảo vệ an toàn vốn cho Seller trong mọi đợt biến động giá.`,
+      type: 'pricing',
+      tag: 'SAC-PER MULTI-OBJECTIVE PRICING',
+      suggestions: [
+        'Tối ưu hóa giá bán động với SAC-PER',
+        'Xem hệ số entropy thăm dò alpha',
+        'Kiểm tra định tuyến xe điện đa kho MDEVRP'
+      ]
+    };
+  }
+
+  // 133. Định Tuyến Xe Điện Đa Kho Kèm Hàm Sạc Phi Tuyến MDEVRP-NL-TW (Phase 50 - Feature 197)
+  if (/mdevrp|sạc phi tuyến|non-linear charging|mdevrp-nl|mạng lưới đa kho bãi xe điện|sạc cc-cv/i.test(raw)) {
+    return {
+      text: `⚡ **ĐỊNH TUYẾN XE ĐIỆN ĐA KHO KÈM HÀM SẠC PHI TUYẾN MDEVRP-NL-TW (MONTOYA 2017, FROGER 2019)**:
+- **Mạng Lưới Đa Bưu Cục SPX Express (Multi-Depot)**:
+  - Điều phối đồng bộ từ nhiều tổng kho (Hoàn Kiếm, Cầu Giấy, Long Biên) tối ưu chi phí xuất bến và khoảng cách tiếp cận đơn hàng.
+- **Hàm Sạc Pin Phi Tuyến Thực Tế (Piecewise Linear CC-CV Curve)**:
+  - **Pha sạc nhanh CC ($0\\% \\to 80\\%$)**: Tốc độ sạc cao $2.0\\%$/phút.
+  - **Pha sạc nhỏ giọt CV ($80\\% \\to 100\\%$)**: Dòng điện giảm dần, tốc độ sạc chậm $0.5\\%$/phút.
+- **Chiến Lược Sạc Một Phần Tối Ưu (Partial Charging)**:
+  - Chỉ sạc vừa đủ năng lượng an toàn đến điểm tiếp theo, triệt tiêu thời gian chờ lãng phí ở pha CV để bảo đảm $100\\%$ đơn hàng giao đúng cửa sổ hẹn giờ [early, late].`,
+      type: 'logistics',
+      tag: 'MDEVRP-NL-TW MULTI-DEPOT LOGISTICS',
+      suggestions: [
+        'Xem thời gian sạc phi tuyến CC-CV',
+        'Lập lịch giao hàng đa kho bãi',
+        'Theo dõi độ trễ SLA bằng DDSketch'
       ]
     };
   }

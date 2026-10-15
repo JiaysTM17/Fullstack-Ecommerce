@@ -331,7 +331,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
 
   // 1. Kết hợp Tìm sản phẩm + Xin Voucher / Freeship
   if (
-    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh/i.test(lower) &&
+    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho/i.test(lower) &&
     (/mua|tìm|sản phẩm|\báo\b|\bquần\b|tai nghe|chuột|bàn phím|nồi|son|giày/i.test(lower)) &&
     (/voucher|mã|giảm giá|freeship|miễn phí ship/i.test(lower))
   ) {
@@ -438,7 +438,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // ĐƠN HÀNG, TIẾN ĐỘ VẬN ĐƠN, KHIẾU NẠI GIAO TRỄ
   // -------------------------------------------------------------
-  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
+  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
     const orders = lookupCustomerOrders(lower);
     if (orders.length > 0) {
       return {
@@ -484,7 +484,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2|branch[- ]and[- ]cut|vrptw|contraction|benders|mdpdptw|d[- ]darp|dynamic darp|tqpo|cml|count[- ]min[- ]log|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2|branch[- ]and[- ]cut|vrptw|contraction|benders|mdpdptw|d[- ]darp|dynamic darp|tqpo|cml|count[- ]min[- ]log|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -1010,6 +1010,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'HYPERBITBIT_RAINBOWDQN_EVRPTWBSS_ASSIST',
       replyText: `**[LƯỢT XEM SIÊU NÉN HYPERBITBIT, DEAL CHUẨN RAINBOW DQN & GIAO HÀNG XANH ĐỔI PIN EVRPTW]:**\n\n• **Lượt xem thật cập nhật từng tích tắc (HyperBitBit)**: Công nghệ phác thảo 2-bit siêu nhẹ đo lường hàng triệu lượt xem Flash Sale trên toàn sàn mà không bao giờ bị nghẽn mạng!\n• **Giá deal giảm sâu nhất nhờ học tăng cường đỉnh cao (Rainbow DQN)**: Hệ thống 6 cải tiến độc lập cân đối chi phí quảng cáo và trợ giá tối ưu để bạn luôn săn được deal giá rẻ nhất.\n• **Đội xe máy điện giao hàng Net-Zero đổi pin siêu tốc (E-VRPTW-BSS)**: Kiện hàng SPX Express được giao bằng 100% xe điện bảo vệ môi trường, ghé trạm đổi pin nhanh 5 phút để luôn giao tới tận tay bạn đúng hẹn!`,
       suggestions: ['Xem lượt xem thật HyperBitBit', 'Săn deal trợ giá Rainbow DQN', 'Theo dõi bưu tá xe điện SPX'],
+    };
+  }
+
+  // 52. Phân Vị Độ Trễ DDSketch, Giá Đa Mục Tiêu SAC-PER & Xe Điện Đa Kho MDEVRP-NL (DDSKETCH_SACPER_MDEVRPNL_ASSIST)
+  if (/ddsketch|sac-per|sac per|mdevrp|sạc phi tuyến|độ trễ sla|xe điện đa kho/i.test(lower)) {
+    return {
+      intent: 'DDSKETCH_SACPER_MDEVRPNL_ASSIST',
+      replyText: `**[GIÁM SÁT ĐỘ TRỄ DDSKETCH, ĐỊNH GIÁ TỐI ƯU SAC-PER & GIAO VẬN ĐA KHO MDEVRP-NL]:**\n\n• **Chốt đơn siêu tốc đảm bảo chuẩn SLA (DDSketch)**: Hệ thống giám sát độ trễ chốt đơn và thanh toán VietQR với sai số dưới 1%, cam kết trải nghiệm mượt mà không bao giờ giật lag!\n• **Giá bán luôn ưu đãi và công bằng (SAC-PER)**: AI cân bằng đa mục tiêu giúp bạn luôn nhận được mức giá trợ giá tốt nhất mà không lo gian lận tăng giá ảo.\n• **Đội xe điện đa kho giao nhanh đúng hẹn (MDEVRP-NL-TW)**: Đơn hàng được điều phối từ kho SPX gần bạn nhất với thuật toán sạc nhanh thông minh, giao hàng chuẩn giờ cam kết!`,
+      suggestions: ['Kiểm tra độ trễ thanh toán DDSketch', 'Săn deal trợ giá SAC-PER', 'Xem bưu cục SPX gần nhất'],
     };
   }
 
