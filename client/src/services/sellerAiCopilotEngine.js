@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|cross[- ]dock/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1347,6 +1347,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem từ khóa xu hướng Sticky Sampling',
         'Phân tích định giá phòng vệ rủi ro QR-DDPG',
         'Đăng ký giao hàng hỏa tốc Drone SPX'
+      ]
+    };
+  }
+
+  // 67. Bộ Ba Thuật Toán BJKST Distinct Count, AWAC Pricing & Gom Hàng Cross-Dock VRPTW-CC (Phase 58 - Feature 205)
+  if (/bjkst|distinct count|awac|advantage-weighted|vrptw-cc|cross[- ]dock|trung chuyển gom hàng/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN BJKST, AWAC PRICING & CROSS-DOCKING VRPTW-CC (${currentShop.name})**:
+- **Đếm chính xác khách hàng độc nhất BJKST**:
+  - Đo lường chuẩn xác số lượng người xem duy nhất (Unique Visitors) ghé thăm gian hàng mỗi giờ, nhận diện các khung giờ cao điểm để tung voucher kích cầu mà không bị sai lệch bởi người xem lặp lại.
+- **Định giá học tăng cường thích ứng AWAC**:
+  - Khai thác tối đa dữ liệu bán hàng quá khứ (Offline Sales Logs) để đề xuất mức giá khuyến mãi tối ưu theo hàm trọng số lợi thế $\\exp(A / \\lambda)$, gia tăng tỷ lệ chuyển đổi mà luôn bảo đảm không bao giờ bán dưới giá vốn $\\text{COGS} \\times 1.05$.
+- **Trung chuyển gom hàng siêu tốc qua SPX Cross-Dock Hubs (VRPTW-CC)**:
+  - Bưu kiện xuất kho ngoại thành của shop được xe tải lớn gom về 3 trạm Cross-Dock (Long Biên, Mỹ Đình, Hoàng Mai), phân loại trực tiếp sang xe van nội thành trong $20\\text{ phút}$, nâng hệ số lấp đầy xe lên $85\\%$ và giao tới người mua nhanh hơn nửa ngày!`,
+      type: 'recommendation',
+      tag: 'BJKST, AWAC & CROSS-DOCK VRPTW-CC',
+      suggestions: [
+        'Xem lượng khách duy nhất BJKST của shop',
+        'Định giá tối ưu lợi thế AWAC',
+        'Lộ trình trung chuyển gom hàng Cross-Dock'
       ]
     };
   }

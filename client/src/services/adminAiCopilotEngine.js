@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -3296,6 +3296,71 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem bản đồ phi vụ bay drone song song',
         'Kiểm tra ranh giới 3 vùng cấm bay No-Fly Zones',
         'Thống kê thời gian makespan rút ngắn nhờ drone'
+      ]
+    };
+  }
+
+  // 155. Ước Lượng Số Lượng Phần Tử Phân Biệt BJKST (Phase 58 - Feature 205)
+  if (/bjkst|distinct elements|f0 moment|số lượng phân biệt|đếm duy nhất bjkst|trailing zeros/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG SỐ PHẦN TỬ PHÂN BIỆT BJKST (BAR-YOSSEF ET AL. FOCS 2002)**:
+- **Cấu Trúc Lấy Mẫu Bằng Số Lượng Số Không Đuôi (Trailing-Zeros Subsampling)**:
+  - BJKST duy trì bộ đệm kích thước $B = \\lceil 2 / \\varepsilon^2 \\rceil$. Khi số lượng phần tử phân biệt nhỏ, thuật toán đếm **chính xác $100\\%$ (Exact Count)**.
+  - Khi luồng mở rộng vượt quá $B$, ngưỡng chặn số không đuôi $z_0$ tự động tăng dần ($z_0 \\leftarrow z_0 + 1$), loại bỏ các phần tử có $z < z_0$ và ước lượng:
+    $$\\hat{F}_0 = |B_{\\text{set}}| \\times 2^{z_0}$$
+- **Cam Kết Chặn Sai Số Toán Học Tối Ưu $(\\varepsilon, \\delta)$**:
+  - Tiêu thụ bộ nhớ bit tối ưu $O\\left(\\frac{1}{\\varepsilon^2} \\log \\frac{1}{\\delta} + \\log n\\right)$, tiết kiệm RAM vượt trội so với bảng băm truyền thống.
+- **Ứng Dụng Thực Tiễn Sàn**:
+  - Đếm chuẩn xác số lượng người mua duy nhất (Unique Visitors) và danh mục SKU tương tác mỗi phút trong Mega Sale.`,
+      type: 'algorithm',
+      tag: 'BJKST DISTINCT ELEMENTS ESTIMATOR',
+      suggestions: [
+        'Xem ước lượng UV thời gian thực BJKST',
+        'Kiểm tra ngưỡng đệm buffer capacity B',
+        'So sánh BJKST với HyperLogLog'
+      ]
+    };
+  }
+
+  // 156. Định Giá Thích Ứng Offline-to-Online AWAC (Phase 58 - Feature 205)
+  if (/awac|advantage-weighted|advantage weighted|offline-to-online|hồi quy trọng số lợi thế|cogs floor awac/i.test(raw)) {
+    return {
+      text: `📈 **ĐỊNH GIÁ THÍCH ỨNG OFFLINE-TO-ONLINE AWAC (NAIR ET AL. NEURIPS 2020)**:
+- **Học Tăng Cường Thích Ứng Dữ Liệu Quá Khứ (Advantage-Weighted Regression)**:
+  - Tận dụng kho dữ liệu giao dịch bán hàng lịch sử đồ sộ (Offline Dataset) mà không gây ra hiện tượng lệch phân phối thảm họa (OOD divergence):
+    $$\\pi^*(a|s) \\propto \\beta(a|s) \\exp\\left( \\frac{1}{\\lambda} A(s, a) \\right)$$
+  - Tự động gán trọng số lũy thừa cho các mức giá mang lại Lợi thế $A(s, a) = Q(s, a) - V(s)$ vượt trội so với chính sách hành vi nền $\\beta(a|s)$.
+- **Bảo Vệ Kép Sàn Giá Vốn & Trần Cạnh Tranh**:
+  - Tuyệt đối không cho phép giá bán rơi xuống dưới rào cản $\\text{COGS} \\times 1.05$.
+  - Khóa trần giá đối thủ cùng phân khúc $+15\\%$ để bảo đảm tính cạnh tranh cao nhất trên sàn!`,
+      type: 'pricing',
+      tag: 'AWAC DYNAMIC PRICING',
+      suggestions: [
+        'Xem trọng số lợi thế Advantage A(s, a)',
+        'Kiểm tra rào cản giá vốn COGS x 1.05',
+        'Tối ưu hóa giá bán Markdown theo AWAC'
+      ]
+    };
+  }
+
+  // 157. Điều Phối Trung Chuyển Gom Hàng Cross-Docking VRPTW-CC (Phase 58 - Feature 205)
+  if (/vrptw-cc|vrptw cc|cross[- ]dock|cross-docking|trung chuyển gom hàng|cross-dock hub|đồng bộ hóa cross-dock/i.test(raw)) {
+    return {
+      text: `🚛 **ĐIỀU PHỐI GOM HÀNG TRUNG CHUYỂN CROSS-DOCKING VRPTW-CC (SANTOS 2011, GRANGIER 2017)**:
+- **Mô Hình Hai Chặng Thu Gom & Giao Vận (Inbound & Outbound Transshipment)**:
+  - Xe tải lớn gom hàng từ các kho shop ngoại thành (Gia Lâm, Đông Anh, Hoài Đức) về trực tiếp 3 trung tâm **SPX Cross-Dock Hubs (Long Biên, Mỹ Đình, Hoàng Mai)**.
+  - Phân loại và chuyển thẳng sang các xe van giao nội thành mà **hoàn toàn không lưu kho trung gian (Zero Storage)**!
+- **Đồng Bộ Hóa Cửa Sổ Thời Gian Khắt Khe**:
+  - Đội xe van giao hàng chặng cuối chỉ xuất phát sau khi toàn bộ xe gom hàng chặng đầu hoàn tất dỡ hàng và phân loại (thời gian dwell time $20 - 25\\text{ phút}$).
+- **Hiệu Quả Vận Hành Chuỗi Cung Ứng**:
+  - Tăng hệ số lấp đầy phương tiện (Load Factor) từ $45\\%$ lên **$85\\%$**.
+  - Cắt giảm triệt để chạy rỗng chiều về và tiết kiệm trung bình **$0.18\\text{ kg CO}_2/\\text{km}$** hành trình!`,
+      type: 'logistics',
+      tag: 'VRPTW-CC CROSS-DOCK ROUTING',
+      suggestions: [
+        'Xem bản đồ 3 trạm SPX Cross-Dock Hubs',
+        'Kiểm tra thời gian đồng bộ hóa Inbound & Outbound',
+        'Thống kê hệ số lấp đầy xe Load Factor 85%'
       ]
     };
   }

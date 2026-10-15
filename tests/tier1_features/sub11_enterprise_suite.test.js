@@ -316,6 +316,11 @@ import {
   StickySamplingFrequentItems,
   QRDPGElasticPricing,
   VRPTWPDDroneRouter,
+  // Phase 58 Enterprise Algorithms
+  BJKSTDistinctElementsEstimator,
+  AWACDynamicPricing,
+  DEFAULT_CROSS_DOCKS,
+  VRPTWCCLogisticsRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -455,6 +460,9 @@ import { EVRPBDSRouter as ServerEVRPBDSRouter, DEFAULT_SOLAR_HUBS as ServerDefau
 import { StickySamplingFrequentItems as ServerStickySamplingFrequentItems } from "../../server/src/utils/stickySamplingFrequentItems.js";
 import { QRDPGElasticPricing as ServerQRDPGElasticPricing } from "../../server/src/utils/qrdpgElasticPricing.js";
 import { VRPTWPDDroneRouter as ServerVRPTWPDDroneRouter } from "../../server/src/utils/vrptwPdDroneRouter.js";
+import { BJKSTDistinctElementsEstimator as ServerBJKSTDistinctElementsEstimator } from "../../server/src/utils/bjkstDistinctElementsEstimator.js";
+import { AWACDynamicPricing as ServerAWACDynamicPricing } from "../../server/src/utils/awacDynamicPricing.js";
+import { VRPTWCCLogisticsRouter as ServerVRPTWCCLogisticsRouter, DEFAULT_CROSS_DOCKS as ServerDefaultCrossDocksList } from "../../server/src/utils/vrptwCcLogisticsRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -25384,6 +25392,368 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(routePlan.summary.droneDelivered, 1);
       expect.equal(routePlan.summary.vanDelivered, 0);
       expect.ok(routePlan.summary.totalCo2SavedKg >= 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 205: BJKST Distinct Elements, AWAC Pricing & VRPTW-CC Cross-Dock Logistics Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 205: BJKST Distinct Elements, AWAC Pricing & VRPTW-CC Cross-Dock Logistics Suite", () => {
+    // -----------------------------------------------------------------------
+    // BJKST DISTINCT ELEMENTS ESTIMATOR (Tests 1-7)
+    // -----------------------------------------------------------------------
+    test("F205-T01: BJKSTDistinctElementsEstimator initialization with epsilon, delta, and buffer capacity", () => {
+      const estimator = new BJKSTDistinctElementsEstimator({ epsilon: 0.1, delta: 0.01 });
+      expect.equal(estimator.epsilon, 0.1);
+      expect.equal(estimator.delta, 0.01);
+      expect.ok(estimator.bufferCapacity >= 16);
+      expect.equal(estimator.z0, 0);
+      expect.equal(estimator.totalUpdates, 0);
+    });
+
+    test("F205-T02: BJKSTDistinctElementsEstimator exact count when unique items <= bufferCapacity (z0 = 0)", () => {
+      const estimator = new BJKSTDistinctElementsEstimator({ bufferCapacity: 50 });
+      for (let i = 1; i <= 25; i++) {
+        estimator.update(`USER_UV_${i}`);
+      }
+
+      const est = estimator.estimate();
+      expect.equal(est.isExact, true);
+      expect.equal(est.estimatedCardinality, 25);
+      expect.equal(est.currentCutoff, 0);
+      expect.equal(est.bufferSize, 25);
+    });
+
+    test("F205-T03: BJKSTDistinctElementsEstimator duplicate updates do not increase distinct count", () => {
+      const estimator = new BJKSTDistinctElementsEstimator({ bufferCapacity: 50 });
+      for (let i = 0; i < 10; i++) {
+        estimator.update("IDENTICAL_BUYER_SESSION");
+      }
+      expect.equal(estimator.totalUpdates, 10);
+      const est = estimator.estimate();
+      expect.equal(est.estimatedCardinality, 1);
+    });
+
+    test("F205-T04: BJKSTDistinctElementsEstimator buffer overflow triggers cutoff z0 advancement and eviction", () => {
+      // Small buffer to force overflow
+      const estimator = new BJKSTDistinctElementsEstimator({ bufferCapacity: 16 });
+      for (let i = 0; i < 150; i++) {
+        estimator.update(`STREAM_ITEM_${i}`);
+      }
+
+      expect.ok(estimator.z0 > 0);
+      expect.ok(estimator.buffer.size <= 16);
+      const est = estimator.estimate();
+      expect.equal(est.isExact, false);
+      expect.ok(est.estimatedCardinality >= 16);
+    });
+
+    test("F205-T05: BJKSTDistinctElementsEstimator cardinality formula scales buffer size by 2^z0", () => {
+      const estimator = new BJKSTDistinctElementsEstimator({ bufferCapacity: 32 });
+      for (let i = 0; i < 200; i++) {
+        estimator.update(`ITEM_CAR_${i}`);
+      }
+
+      const est = estimator.estimate();
+      const expected = Math.round(est.bufferSize * Math.pow(2, est.currentCutoff));
+      expect.equal(est.estimatedCardinality, expected);
+    });
+
+    test("F205-T06: BJKSTDistinctElementsEstimator merge combines sketches and aligns cutoff levels", () => {
+      const e1 = new BJKSTDistinctElementsEstimator({ bufferCapacity: 64 });
+      const e2 = new BJKSTDistinctElementsEstimator({ bufferCapacity: 64 });
+
+      for (let i = 0; i < 30; i++) e1.update(`SHARED_ITEM_${i}`);
+      for (let i = 20; i < 50; i++) e2.update(`SHARED_ITEM_${i}`);
+
+      e1.merge(e2);
+      expect.ok(e1.totalUpdates >= 60);
+      const est = e1.estimate();
+      expect.ok(est.estimatedCardinality >= 30);
+    });
+
+    test("F205-T07: BJKSTDistinctElementsEstimator throws error on merging invalid instance", () => {
+      const estimator = new BJKSTDistinctElementsEstimator();
+      expect.throws(() => estimator.merge(null));
+      expect.throws(() => estimator.merge({}));
+    });
+
+    // -----------------------------------------------------------------------
+    // AWAC DYNAMIC PRICING (Tests 8-14)
+    // -----------------------------------------------------------------------
+    test("F205-T08: AWACDynamicPricing initialization and feature normalization vector dimensions", () => {
+      const awac = new AWACDynamicPricing({ temperatureLambda: 1.0, weightClipMax: 20.0 });
+      expect.equal(awac.temperatureLambda, 1.0);
+      expect.equal(awac.weightClipMax, 20.0);
+
+      const norm = awac.normalizeState({
+        cogs: 250000,
+        basePrice: 320000,
+        competitorPrice: 310000,
+        demandIndex: 1.2,
+        inventoryUrgency: 0.15
+      });
+      expect.equal(norm.length, 5);
+      expect.ok(norm[0] > 0);
+      expect.equal(norm[3], 1.2);
+    });
+
+    test("F205-T09: AWACDynamicPricing predictBehavioralAction outputs baseline multiplier in [0.70, 1.40]", () => {
+      const awac = new AWACDynamicPricing();
+      const mult = awac.predictBehavioralAction({
+        cogs: 100000,
+        basePrice: 140000,
+        competitorPrice: 135000,
+        demandIndex: 1.1,
+        inventoryUrgency: 0.3
+      });
+      expect.ok(mult >= 0.70 && mult <= 1.40);
+    });
+
+    test("F205-T10: AWACDynamicPricing evaluateQ, evaluateV, and computeAdvantage A(s, a)", () => {
+      const awac = new AWACDynamicPricing();
+      const state = {
+        cogs: 500000,
+        basePrice: 650000,
+        competitorPrice: 620000,
+        demandIndex: 1.3,
+        inventoryUrgency: 0.1
+      };
+      const v = awac.evaluateV(state);
+      const q = awac.evaluateQ(state, 1.1);
+      const adv = awac.computeAdvantage(state, 1.1);
+
+      expect.ok(Math.abs(adv - (q - v)) < 1e-6);
+    });
+
+    test("F205-T11: AWACDynamicPricing computeAdvantageWeight applies exponentiation and upper clipping", () => {
+      const awac = new AWACDynamicPricing({ temperatureLambda: 1.0, weightClipMax: 15.0 });
+      const wSmall = awac.computeAdvantageWeight(0.5);
+      expect.ok(Math.abs(wSmall - Math.exp(0.5)) < 1e-4);
+
+      const wHuge = awac.computeAdvantageWeight(100.0);
+      expect.equal(wHuge, 15.0); // Clipped at 15
+    });
+
+    test("F205-T12: AWACDynamicPricing optimizePrice enforces COGS safety floor x 1.05", () => {
+      const awac = new AWACDynamicPricing();
+      awac.behavioralBias = -5.0; // Drive policy heavily down
+      const res = awac.optimizePrice({
+        cogs: 300000,
+        basePrice: 310000,
+        competitorPrice: 290000,
+        demandIndex: 0.1
+      });
+
+      expect.equal(res.decisionTag, "FLOOR_OVERRIDE_COGS_SECURED");
+      expect.equal(res.proposedPrice, 300000 * 1.05);
+      expect.ok(res.marginAnalysis.grossMarginVnd >= 15000);
+    });
+
+    test("F205-T13: AWACDynamicPricing optimizePrice enforces competitor price ceiling x 1.15", () => {
+      const awac = new AWACDynamicPricing();
+      awac.behavioralBias = 5.0; // Drive policy high
+      const res = awac.optimizePrice({
+        cogs: 100000,
+        basePrice: 350000,
+        competitorPrice: 200000,
+        demandIndex: 2.0
+      });
+
+      expect.equal(res.decisionTag, "CEILING_OVERRIDE_COMPETITOR_RESTRICTED");
+      expect.equal(res.proposedPrice, Math.round(200000 * 1.15));
+    });
+
+    test("F205-T14: AWACDynamicPricing optimizePrice returns AWAC_ADVANTAGE_OPTIMAL within safe bounds", () => {
+      const awac = new AWACDynamicPricing();
+      const res = awac.optimizePrice({
+        cogs: 100000,
+        basePrice: 140000,
+        competitorPrice: 145000,
+        demandIndex: 1.1,
+        inventoryUrgency: 0.2
+      });
+
+      expect.ok(res.decisionTag === "AWAC_ADVANTAGE_OPTIMAL" || res.decisionTag === "BEHAVIORAL_BASELINE_FALLBACK");
+      expect.ok(res.proposedPrice >= 100000 * 1.05);
+      expect.ok(res.proposedPrice <= 145000 * 1.15);
+    });
+
+    // -----------------------------------------------------------------------
+    // VRPTW-CC CROSS-DOCK LOGISTICS ROUTING (Tests 15-19)
+    // -----------------------------------------------------------------------
+    test("F205-T15: VRPTWCCLogisticsRouter initialization with default cross-dock hubs and speed profiles", () => {
+      const router = new VRPTWCCLogisticsRouter();
+      expect.equal(router.crossDocks.length, 3);
+      expect.equal(router.crossDocks[0].id, "XD_LONG_BIEN");
+      expect.equal(router.truckSpeedKmh, 32.0);
+      expect.equal(router.vanSpeedKmh, 28.0);
+      expect.equal(router.co2PerKm, 0.18);
+    });
+
+    test("F205-T16: VRPTWCCLogisticsRouter findNearestCrossDock selects closest transshipment facility", () => {
+      const router = new VRPTWCCLogisticsRouter();
+      // Near Gia Lâm (eastern Hanoi): should choose Long Biên
+      const nearEast = router.findNearestCrossDock(21.0500, 105.9000);
+      expect.equal(nearEast.crossDock.id, "XD_LONG_BIEN");
+      expect.ok(nearEast.distanceKm < 5.0);
+
+      // Near Cầu Giấy (western Hanoi): should choose Mỹ Đình
+      const nearWest = router.findNearestCrossDock(21.0300, 105.7800);
+      expect.equal(nearWest.crossDock.id, "XD_MY_DINH");
+      expect.ok(nearWest.distanceKm < 5.0);
+    });
+
+    test("F205-T17: VRPTWCCLogisticsRouter planCrossDockRoutes handles empty orders list cleanly", () => {
+      const router = new VRPTWCCLogisticsRouter();
+      const plan = router.planCrossDockRoutes([]);
+      expect.equal(plan.status, "EMPTY_ORDERS");
+      expect.equal(plan.summary.totalOrders, 0);
+      expect.equal(plan.summary.totalDistanceKm, 0);
+    });
+
+    test("F205-T18: VRPTWCCLogisticsRouter planCrossDockRoutes synchronizes outbound fleet with dwell time", () => {
+      const router = new VRPTWCCLogisticsRouter();
+      const orders = [
+        { id: "ORD_XD_1", originLat: 21.0600, originLng: 105.9200, destLat: 21.0180, destLng: 105.8280, timeWindow: [0, 240] },
+        { id: "ORD_XD_2", originLat: 21.0550, originLng: 105.9100, destLat: 21.0100, destLng: 105.8200, timeWindow: [0, 240] },
+      ];
+
+      const plan = router.planCrossDockRoutes(orders);
+      expect.equal(plan.status, "VRPTW_CC_SUCCESS");
+      expect.equal(plan.summary.totalOrders, 2);
+      expect.equal(plan.inboundLegs.length, 2);
+      expect.equal(plan.outboundLegs.length, 2);
+
+      // Check synchronization: crossDockSortCompleteMin >= inbound max arrival + sortDwellMin
+      expect.ok(plan.summary.crossDockSortCompleteMin > plan.summary.crossDockDwellTimeMin);
+      expect.ok(plan.summary.finalMakespanMin > plan.summary.crossDockSortCompleteMin);
+    });
+
+    test("F205-T19: VRPTWCCLogisticsRouter planCrossDockRoutes achieves 85% consolidation load factor and CO2 savings", () => {
+      const router = new VRPTWCCLogisticsRouter();
+      const orders = [
+        { id: "ORD_CONS_1", originLat: 21.050, originLng: 105.900, destLat: 21.020, destLng: 105.830 },
+        { id: "ORD_CONS_2", originLat: 21.052, originLng: 105.902, destLat: 21.022, destLng: 105.832 },
+        { id: "ORD_CONS_3", originLat: 21.054, originLng: 105.904, destLat: 21.024, destLng: 105.834 }
+      ];
+
+      const plan = router.planCrossDockRoutes(orders);
+      expect.equal(plan.summary.consolidatedLoadFactorPercent, 85.0);
+      expect.ok(plan.summary.totalDistanceKm > 0);
+      expect.ok(plan.summary.co2SavedKg >= 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT-SERVER ALGORITHMIC SYMMETRY (Tests 20-22)
+    // -----------------------------------------------------------------------
+    test("F205-T20: Client and Server algorithmic symmetry: BJKSTDistinctElementsEstimator produce identical estimates and cutoffs", () => {
+      const clientBJKST = new BJKSTDistinctElementsEstimator({ bufferCapacity: 32 });
+      const serverBJKST = new ServerBJKSTDistinctElementsEstimator({ bufferCapacity: 32 });
+
+      for (let i = 0; i < 50; i++) {
+        clientBJKST.update(`SYM_ITEM_${i}`);
+        serverBJKST.update(`SYM_ITEM_${i}`);
+      }
+
+      const cEst = clientBJKST.estimate();
+      const sEst = serverBJKST.estimate();
+
+      expect.equal(cEst.estimatedCardinality, sEst.estimatedCardinality);
+      expect.equal(cEst.isExact, sEst.isExact);
+      expect.equal(cEst.currentCutoff, sEst.currentCutoff);
+      expect.equal(cEst.bufferSize, sEst.bufferSize);
+    });
+
+    test("F205-T21: Client and Server algorithmic symmetry: AWACDynamicPricing produce identical prices and decisions", () => {
+      const clientAWAC = new AWACDynamicPricing();
+      const serverAWAC = new ServerAWACDynamicPricing();
+
+      const item = {
+        cogs: 400000,
+        basePrice: 550000,
+        competitorPrice: 530000,
+        demandIndex: 1.25,
+        inventoryUrgency: 0.1
+      };
+
+      const cRes = clientAWAC.optimizePrice(item);
+      const sRes = serverAWAC.optimizePrice(item);
+
+      expect.equal(cRes.proposedPrice, sRes.proposedPrice);
+      expect.equal(cRes.decisionTag, sRes.decisionTag);
+      expect.equal(cRes.actionMultiplier, sRes.actionMultiplier);
+      expect.equal(cRes.advantage, sRes.advantage);
+    });
+
+    test("F205-T22: Client and Server algorithmic symmetry: VRPTWCCLogisticsRouter produce identical routing plans and makespan", () => {
+      const clientRouter = new VRPTWCCLogisticsRouter();
+      const serverRouter = new ServerVRPTWCCLogisticsRouter();
+
+      const orders = [
+        { id: "SYM_ORD_1", originLat: 21.050, originLng: 105.900, destLat: 21.020, destLng: 105.830 },
+        { id: "SYM_ORD_2", originLat: 21.055, originLng: 105.910, destLat: 21.025, destLng: 105.835 }
+      ];
+
+      const cPlan = clientRouter.planCrossDockRoutes(orders);
+      const sPlan = serverRouter.planCrossDockRoutes(orders);
+
+      expect.equal(cPlan.summary.totalDistanceKm, sPlan.summary.totalDistanceKm);
+      expect.equal(cPlan.summary.crossDockSortCompleteMin, sPlan.summary.crossDockSortCompleteMin);
+      expect.equal(cPlan.summary.finalMakespanMin, sPlan.summary.finalMakespanMin);
+      expect.equal(cPlan.summary.co2SavedKg, sPlan.summary.co2SavedKg);
+    });
+
+    // -----------------------------------------------------------------------
+    // COPILOT INTEGRATION & END-TO-END PIPELINE (Tests 23-24)
+    // -----------------------------------------------------------------------
+    test("F205-T23: Tri-Role Copilots integration: Admin, Seller, and Buyer AI respond to Phase 58 queries", () => {
+      // 1. Admin Copilot
+      const adminRes1 = generateAdminCopilotResponse("Kiểm tra bjkst distinct elements đếm duy nhất");
+      expect.ok(adminRes1.text.includes("BJKST"));
+
+      const adminRes2 = generateAdminCopilotResponse("Phân tích định giá awac advantage-weighted");
+      expect.ok(adminRes2.text.includes("AWAC"));
+
+      const adminRes3 = generateAdminCopilotResponse("Điều phối trung chuyển gom hàng cross-docking vrptw-cc");
+      expect.ok(adminRes3.text.includes("VRPTW-CC"));
+
+      // 2. Seller Copilot
+      const sellerRes = generateSellerCopilotResponse("Tư vấn bjkst distinct count và định giá awac");
+      expect.ok(sellerRes.text.includes("BJKST"));
+
+      // 3. Buyer AI
+      const buyerRes = generateAiChatResponse("Xem ưu đãi bjkst và giao hàng cross-dock");
+      expect.equal(buyerRes.intent, "BJKST_AWAC_CROSS_DOCK");
+    });
+
+    test("F205-T24: End-to-End E-Commerce Pipeline: BJKST UV Tracking -> AWAC Advantage Pricing -> VRPTW-CC Cross-Dock Fulfillment", () => {
+      // Step 1: Track active unique buyers via BJKST streaming sketch
+      const bjkst = new ServerBJKSTDistinctElementsEstimator({ bufferCapacity: 64 });
+      for (let i = 0; i < 40; i++) bjkst.update(`BUYER_SESSION_${i}`);
+      const uvEst = bjkst.estimate();
+      expect.equal(uvEst.estimatedCardinality, 40);
+
+      // Step 2: Safe offline-to-online pricing via AWAC with advantage weighting
+      const awac = new ServerAWACDynamicPricing();
+      const pricing = awac.optimizePrice({
+        cogs: 1500000,
+        basePrice: 2000000,
+        competitorPrice: 1950000,
+        demandIndex: 1.3
+      });
+      expect.ok(pricing.proposedPrice >= 1500000 * 1.05);
+      expect.ok(pricing.decisionTag.includes("AWAC") || pricing.decisionTag.includes("OPTIMAL") || pricing.decisionTag.includes("FALLBACK"));
+
+      // Step 3: Fast cross-dock consolidation and delivery without storage
+      const router = new ServerVRPTWCCLogisticsRouter();
+      const orders = [
+        { id: "ORD_E2E_1", originLat: 21.0500, originLng: 105.9000, destLat: 21.0200, destLng: 105.8300 }
+      ];
+      const plan = router.planCrossDockRoutes(orders);
+      expect.equal(plan.status, "VRPTW_CC_SUCCESS");
+      expect.equal(plan.summary.totalOrders, 1);
+      expect.ok(plan.summary.finalMakespanMin > 0);
     });
   });
 });
