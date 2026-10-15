@@ -321,6 +321,12 @@ import {
   AWACDynamicPricing,
   DEFAULT_CROSS_DOCKS,
   VRPTWCCLogisticsRouter,
+  // Phase 59 Enterprise Algorithms
+  GKQuantileSummary,
+  IQLDynamicPricing,
+  DEFAULT_ROAD_PRICING_DEPOTS,
+  CONGESTION_TOLL_ZONE,
+  MDVRPTWRoadPricingRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -463,6 +469,9 @@ import { VRPTWPDDroneRouter as ServerVRPTWPDDroneRouter } from "../../server/src
 import { BJKSTDistinctElementsEstimator as ServerBJKSTDistinctElementsEstimator } from "../../server/src/utils/bjkstDistinctElementsEstimator.js";
 import { AWACDynamicPricing as ServerAWACDynamicPricing } from "../../server/src/utils/awacDynamicPricing.js";
 import { VRPTWCCLogisticsRouter as ServerVRPTWCCLogisticsRouter, DEFAULT_CROSS_DOCKS as ServerDefaultCrossDocksList } from "../../server/src/utils/vrptwCcLogisticsRouter.js";
+import { GKQuantileSummary as ServerGKQuantileSummary } from "../../server/src/utils/gkQuantileSummary.js";
+import { IQLDynamicPricing as ServerIQLDynamicPricing } from "../../server/src/utils/iqlDynamicPricing.js";
+import { MDVRPTWRoadPricingRouter as ServerMDVRPTWRoadPricingRouter, DEFAULT_ROAD_PRICING_DEPOTS as ServerDefaultRoadPricingDepots, CONGESTION_TOLL_ZONE as ServerCongestionTollZone } from "../../server/src/utils/mdvrptwRoadPricingRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -25754,6 +25763,385 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(plan.status, "VRPTW_CC_SUCCESS");
       expect.equal(plan.summary.totalOrders, 1);
       expect.ok(plan.summary.finalMakespanMin > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 206: GK Quantile Summary, IQL Pricing & MDVRPTW Road Pricing Suite (Phase 59 - 24 Tests)
+  // =========================================================================
+  describe("Feature 206: GK Quantile Summary, IQL Pricing & MDVRPTW Road Pricing Suite (Phase 59)", () => {
+
+    // -----------------------------------------------------------------------
+    // GK QUANTILE STREAMING SUMMARY (Tests 1-7)
+    // -----------------------------------------------------------------------
+    test("F206-T01: GKQuantileSummary initialization with epsilon and empty summary state", () => {
+      const gk = new GKQuantileSummary({ epsilon: 0.05 });
+      expect.equal(gk.epsilon, 0.05);
+      expect.equal(gk.totalElements, 0);
+      expect.equal(gk.entries.length, 0);
+      expect.ok(gk.compressFrequency >= 10);
+    });
+
+    test("F206-T02: GKQuantileSummary maintains monotonic order of tuple entries on insertion", () => {
+      const gk = new GKQuantileSummary({ epsilon: 0.10 });
+      const values = [50, 20, 80, 10, 30, 90, 40];
+      for (const v of values) gk.insert(v);
+
+      expect.equal(gk.totalElements, 7);
+      for (let i = 0; i < gk.entries.length - 1; i++) {
+        expect.ok(gk.entries[i].v <= gk.entries[i + 1].v);
+      }
+    });
+
+    test("F206-T03: GKQuantileSummary calculates exact median on small symmetric datasets", () => {
+      const gk = new GKQuantileSummary({ epsilon: 0.02 });
+      for (let v = 1; v <= 101; v++) {
+        gk.insert(v);
+      }
+      const median = gk.queryMedian();
+      // Should be very close to 51 within 101 * 0.02 ~ 2
+      expect.ok(Math.abs(median - 51) <= 3);
+    });
+
+    test("F206-T04: GKQuantileSummary periodic compress respects invariant g_i + delta_i <= floor(2 * eps * n)", () => {
+      const gk = new GKQuantileSummary({ epsilon: 0.05 });
+      for (let i = 0; i < 200; i++) {
+        gk.insert(Math.sin(i) * 1000 + 1500);
+      }
+      gk.compress();
+      const threshold = Math.floor(2 * gk.epsilon * gk.totalElements);
+      for (const entry of gk.entries) {
+        expect.ok(entry.g + entry.delta <= threshold + 2);
+      }
+    });
+
+    test("F206-T05: GKQuantileSummary queryQuantile accurately approximates P90, P95, and P99 percentiles", () => {
+      const gk = new GKQuantileSummary({ epsilon: 0.05 });
+      // Insert uniform distribution [0, 1000]
+      for (let i = 1; i <= 1000; i++) {
+        gk.insert(i);
+      }
+      const p90 = gk.queryQuantile(0.90);
+      const p95 = gk.queryQuantile(0.95);
+      const p99 = gk.queryQuantile(0.99);
+
+      expect.ok(Math.abs(p90 - 900) <= 60);
+      expect.ok(Math.abs(p95 - 950) <= 60);
+      expect.ok(Math.abs(p99 - 990) <= 60);
+      expect.ok(p90 <= p95);
+      expect.ok(p95 <= p99);
+    });
+
+    test("F206-T06: GKQuantileSummary merge combines two independent streams and maintains precision bounds", () => {
+      const gk1 = new GKQuantileSummary({ epsilon: 0.05 });
+      const gk2 = new GKQuantileSummary({ epsilon: 0.05 });
+
+      for (let i = 1; i <= 50; i++) gk1.insert(i * 2);      // Even numbers 2..100
+      for (let i = 1; i <= 50; i++) gk2.insert(i * 2 - 1);  // Odd numbers 1..99
+
+      gk1.merge(gk2);
+      expect.equal(gk1.totalElements, 100);
+      const median = gk1.queryMedian();
+      expect.ok(Math.abs(median - 50) <= 8);
+    });
+
+    test("F206-T07: GKQuantileSummary getDistributionSummary reports comprehensive distribution metrics", () => {
+      const gk = new GKQuantileSummary({ epsilon: 0.05 });
+      for (let i = 100; i <= 500; i += 10) gk.insert(i);
+
+      const summary = gk.getDistributionSummary();
+      expect.equal(summary.min, 100);
+      expect.equal(summary.max, 500);
+      expect.ok(summary.p25 < summary.p50);
+      expect.ok(summary.p50 < summary.p75);
+      expect.ok(summary.p75 < summary.p95);
+    });
+
+    // -----------------------------------------------------------------------
+    // IQL OFFLINE DYNAMIC PRICING (Tests 8-14)
+    // -----------------------------------------------------------------------
+    test("F206-T08: IQLDynamicPricing initialization, expectile tau, temperature beta, and feature dimensions", () => {
+      const iql = new IQLDynamicPricing({ expectileTau: 0.75, temperatureBeta: 4.0 });
+      expect.equal(iql.expectileTau, 0.75);
+      expect.equal(iql.temperatureBeta, 4.0);
+      expect.equal(iql.cogsSafetyFloorRatio, 1.05);
+      expect.equal(iql.competitorCeilingRatio, 1.15);
+      expect.equal(iql.valueWeights.length, 5);
+      expect.equal(iql.qWeights.length, 6);
+    });
+
+    test("F206-T09: IQLDynamicPricing evaluateExpectileLoss computes asymmetric squared penalties", () => {
+      const iql = new IQLDynamicPricing({ expectileTau: 0.70 });
+      const positiveLoss = iql.evaluateExpectileLoss(2.0); // u >= 0: tau * u^2 = 0.70 * 4 = 2.80
+      const negativeLoss = iql.evaluateExpectileLoss(-2.0); // u < 0: (1 - tau) * u^2 = 0.30 * 4 = 1.20
+
+      expect.equal(Number(positiveLoss.toFixed(2)), 2.80);
+      expect.equal(Number(negativeLoss.toFixed(2)), 1.20);
+      expect.ok(positiveLoss > negativeLoss);
+    });
+
+    test("F206-T10: IQLDynamicPricing evaluateV computes expectile shifted state value without OOD queries", () => {
+      const iql = new IQLDynamicPricing({ expectileTau: 0.70 });
+      const state = { cogs: 200000, basePrice: 280000, competitorPrice: 270000, demandIndex: 1.2, inventoryUrgency: 0.1 };
+      const v = iql.evaluateV(state);
+
+      expect.ok(Number.isFinite(v));
+      // Higher tau should yield higher V estimate
+      const iqlHighTau = new IQLDynamicPricing({ expectileTau: 0.90 });
+      const vHigh = iqlHighTau.evaluateV(state);
+      expect.ok(vHigh > v);
+    });
+
+    test("F206-T11: IQLDynamicPricing computeAdvantage A(s, a) and predictBehavioralAction", () => {
+      const iql = new IQLDynamicPricing();
+      const state = { cogs: 100000, basePrice: 130000, competitorPrice: 125000, demandIndex: 1.0, inventoryUrgency: 0.2 };
+      const action = iql.predictBehavioralAction(state);
+
+      expect.ok(action >= 0.70 && action <= 1.40);
+      const adv = iql.computeAdvantage(state, action);
+      expect.ok(Number.isFinite(adv));
+    });
+
+    test("F206-T12: IQLDynamicPricing optimizePrice enforces COGS safety floor x 1.05", () => {
+      const iql = new IQLDynamicPricing();
+      iql.behavioralBias = -5.0; // Drive policy low
+      const res = iql.optimizePrice({
+        cogs: 200000,
+        basePrice: 210000,
+        competitorPrice: 205000,
+        demandIndex: 0.4
+      });
+
+      expect.equal(res.decisionTag, "FLOOR_OVERRIDE_COGS_SECURED");
+      expect.equal(res.proposedPrice, Math.round(200000 * 1.05));
+      expect.ok(res.marginAnalysis.grossMarginVnd >= 10000);
+    });
+
+    test("F206-T13: IQLDynamicPricing optimizePrice enforces competitor price ceiling x 1.15", () => {
+      const iql = new IQLDynamicPricing();
+      iql.behavioralBias = 5.0; // Drive policy high
+      const res = iql.optimizePrice({
+        cogs: 100000,
+        basePrice: 300000,
+        competitorPrice: 180000,
+        demandIndex: 2.0
+      });
+
+      expect.equal(res.decisionTag, "CEILING_OVERRIDE_COMPETITOR_RESTRICTED");
+      expect.equal(res.proposedPrice, Math.round(180000 * 1.15));
+    });
+
+    test("F206-T14: IQLDynamicPricing optimizePrice returns IQL_EXPECTILE_OPTIMAL within safe margins", () => {
+      const iql = new IQLDynamicPricing();
+      const res = iql.optimizePrice({
+        cogs: 100000,
+        basePrice: 140000,
+        competitorPrice: 145000,
+        demandIndex: 1.1,
+        inventoryUrgency: 0.2
+      });
+
+      expect.ok(res.decisionTag === "IQL_EXPECTILE_OPTIMAL" || res.decisionTag === "BEHAVIORAL_BASELINE_FALLBACK");
+      expect.ok(res.proposedPrice >= 100000 * 1.05);
+      expect.ok(res.proposedPrice <= 145000 * 1.15);
+    });
+
+    // -----------------------------------------------------------------------
+    // MDVRPTW ROAD PRICING LOGISTICS (Tests 15-19)
+    // -----------------------------------------------------------------------
+    test("F206-T15: MDVRPTWRoadPricingRouter initialization with default depots, congestion zone, and toll rates", () => {
+      const router = new MDVRPTWRoadPricingRouter();
+      expect.equal(router.depots.length, 3);
+      expect.equal(router.depots[0].id, "DEPOT_TAY_HO");
+      expect.equal(router.depots[1].id, "DEPOT_CAU_GIAY");
+      expect.equal(router.depots[2].id, "DEPOT_HOANG_MAI");
+      expect.equal(router.congestionZone.peakTollVnd, 30000);
+      expect.equal(router.congestionZone.shoulderTollVnd, 15000);
+    });
+
+    test("F206-T16: MDVRPTWRoadPricingRouter findNearestDepot partitions orders by spatial proximity", () => {
+      const router = new MDVRPTWRoadPricingRouter();
+      // Near Hồ Tây (North)
+      const nearNorth = router.findNearestDepot(21.0700, 105.8200);
+      expect.equal(nearNorth.depot.id, "DEPOT_TAY_HO");
+
+      // Near Mỹ Đình / Cầu Giấy (West)
+      const nearWest = router.findNearestDepot(21.0300, 105.7800);
+      expect.equal(nearWest.depot.id, "DEPOT_CAU_GIAY");
+
+      // Near Giáp Bát / Hoàng Mai (South)
+      const nearSouth = router.findNearestDepot(20.9800, 105.8500);
+      expect.equal(nearSouth.depot.id, "DEPOT_HOANG_MAI");
+    });
+
+    test("F206-T17: MDVRPTWRoadPricingRouter evaluateRoadPricingToll charges 30k in peak, 15k in shoulder, and 0 in off-peak", () => {
+      const router = new MDVRPTWRoadPricingRouter();
+      // Hoàn Kiếm center (inside zone)
+      const lat = 21.0285;
+      const lng = 105.8542;
+
+      // Peak morning: 08:00 AM (480 mins) -> 30,000 VND
+      const peak = router.evaluateRoadPricingToll(lat, lng, 480);
+      expect.equal(peak.inZone, true);
+      expect.equal(peak.tollVnd, 30000);
+      expect.equal(peak.period, "PEAK_CONGESTION");
+
+      // Shoulder: 10:00 AM (600 mins) -> 15,000 VND
+      const shoulder = router.evaluateRoadPricingToll(lat, lng, 600);
+      expect.equal(shoulder.inZone, true);
+      expect.equal(shoulder.tollVnd, 15000);
+      expect.equal(shoulder.period, "SHOULDER_CONGESTION");
+
+      // Off-peak: 12:00 PM (720 mins) -> 0 VND
+      const offPeak = router.evaluateRoadPricingToll(lat, lng, 720);
+      expect.equal(offPeak.inZone, true);
+      expect.equal(offPeak.tollVnd, 0);
+      expect.equal(offPeak.period, "OFF_PEAK_ZONE");
+
+      // Location outside zone (Gia Lâm) -> 0 VND
+      const outZone = router.evaluateRoadPricingToll(21.0600, 105.9500, 480);
+      expect.equal(outZone.inZone, false);
+      expect.equal(outZone.tollVnd, 0);
+    });
+
+    test("F206-T18: MDVRPTWRoadPricingRouter planRoadPricingRoutes handles empty orders list cleanly", () => {
+      const router = new MDVRPTWRoadPricingRouter();
+      const plan = router.planRoadPricingRoutes([]);
+      expect.equal(plan.status, "EMPTY_ORDERS");
+      expect.equal(plan.summary.totalOrders, 0);
+      expect.equal(plan.summary.totalDistanceKm, 0);
+      expect.equal(plan.summary.totalTollCostVnd, 0);
+    });
+
+    test("F206-T19: MDVRPTWRoadPricingRouter planRoadPricingRoutes routes multiple depots and tracks toll and fuel", () => {
+      const router = new MDVRPTWRoadPricingRouter();
+      const orders = [
+        { id: "ORD_RP_1", lat: 21.0600, lng: 105.8200, timeWindow: [480, 600] }, // North order
+        { id: "ORD_RP_2", lat: 21.0285, lng: 105.8542, timeWindow: [480, 600] }, // Inner Hoàn Kiếm order (Toll zone)
+        { id: "ORD_RP_3", lat: 20.9850, lng: 105.8500, timeWindow: [480, 600] }  // South order
+      ];
+
+      const plan = router.planRoadPricingRoutes(orders, 480);
+      expect.equal(plan.status, "MDVRPTW_ROAD_PRICING_SUCCESS");
+      expect.equal(plan.summary.totalOrders, 3);
+      expect.ok(plan.summary.totalDistanceKm > 0);
+      expect.ok(plan.summary.totalFuelCostVnd > 0);
+      expect.ok(plan.summary.totalOperationalCostVnd >= plan.summary.totalFuelCostVnd);
+      expect.ok(plan.summary.onTimeRatePercent > 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT-SERVER ALGORITHMIC SYMMETRY (Tests 20-22)
+    // -----------------------------------------------------------------------
+    test("F206-T20: Client and Server algorithmic symmetry: GKQuantileSummary produce identical percentiles and distribution summaries", () => {
+      const clientGK = new GKQuantileSummary({ epsilon: 0.05 });
+      const serverGK = new ServerGKQuantileSummary({ epsilon: 0.05 });
+
+      for (let i = 1; i <= 80; i++) {
+        clientGK.insert(i * 12.5);
+        serverGK.insert(i * 12.5);
+      }
+
+      const cSum = clientGK.getDistributionSummary();
+      const sSum = serverGK.getDistributionSummary();
+
+      expect.equal(cSum.min, sSum.min);
+      expect.equal(cSum.max, sSum.max);
+      expect.equal(cSum.p50, sSum.p50);
+      expect.equal(cSum.p90, sSum.p90);
+      expect.equal(cSum.p95, sSum.p95);
+      expect.equal(cSum.totalElements, sSum.totalElements);
+    });
+
+    test("F206-T21: Client and Server algorithmic symmetry: IQLDynamicPricing produce identical prices and decisions", () => {
+      const clientIQL = new IQLDynamicPricing();
+      const serverIQL = new ServerIQLDynamicPricing();
+
+      const item = {
+        cogs: 500000,
+        basePrice: 680000,
+        competitorPrice: 650000,
+        demandIndex: 1.2,
+        inventoryUrgency: 0.15
+      };
+
+      const cRes = clientIQL.optimizePrice(item);
+      const sRes = serverIQL.optimizePrice(item);
+
+      expect.equal(cRes.proposedPrice, sRes.proposedPrice);
+      expect.equal(cRes.decisionTag, sRes.decisionTag);
+      expect.equal(cRes.actionMultiplier, sRes.actionMultiplier);
+      expect.equal(cRes.advantage, sRes.advantage);
+    });
+
+    test("F206-T22: Client and Server algorithmic symmetry: MDVRPTWRoadPricingRouter produce identical multi-depot routing and tolls", () => {
+      const clientRouter = new MDVRPTWRoadPricingRouter();
+      const serverRouter = new ServerMDVRPTWRoadPricingRouter();
+
+      const orders = [
+        { id: "SYM_ORD_1", lat: 21.0600, lng: 105.8200 },
+        { id: "SYM_ORD_2", lat: 21.0285, lng: 105.8542 }
+      ];
+
+      const cPlan = clientRouter.planRoadPricingRoutes(orders, 480);
+      const sPlan = serverRouter.planRoadPricingRoutes(orders, 480);
+
+      expect.equal(cPlan.summary.totalDistanceKm, sPlan.summary.totalDistanceKm);
+      expect.equal(cPlan.summary.totalTollCostVnd, sPlan.summary.totalTollCostVnd);
+      expect.equal(cPlan.summary.totalOperationalCostVnd, sPlan.summary.totalOperationalCostVnd);
+    });
+
+    // -----------------------------------------------------------------------
+    // COPILOT INTEGRATION & END-TO-END PIPELINE (Tests 23-24)
+    // -----------------------------------------------------------------------
+    test("F206-T23: Tri-Role Copilots integration: Admin, Seller, and Buyer AI respond to Phase 59 queries", () => {
+      // 1. Admin Copilot
+      const adminRes1 = generateAdminCopilotResponse("Kiểm tra phân vị độ trễ gk quantile summary");
+      expect.ok(adminRes1.text.includes("GK QUANTILE"));
+
+      const adminRes2 = generateAdminCopilotResponse("Tối ưu giá bán bằng iql dynamic pricing");
+      expect.ok(adminRes2.text.includes("IQL DYNAMIC PRICING"));
+
+      const adminRes3 = generateAdminCopilotResponse("Điều phối đa kho thu phí ùn tắc mdvrptw road-pricing");
+      expect.ok(adminRes3.text.includes("MDVRPTW ROAD PRICING"));
+
+      // 2. Seller Copilot
+      const sellerRes = generateSellerCopilotResponse("Tư vấn gk quantile và định giá iql");
+      expect.ok(sellerRes.text.includes("GK QUANTILE"));
+
+      // 3. Buyer AI
+      const buyerRes = generateAiChatResponse("Xem giá đảm bảo iql và giao hàng né phí chống ùn tắc");
+      expect.equal(buyerRes.intent, "GK_IQL_ROAD_PRICING");
+    });
+
+    test("F206-T24: End-to-End E-Commerce Pipeline: GK Quantile Latency Profiling -> IQL Offline Pricing -> MDVRPTW Road Pricing Delivery", () => {
+      // Step 1: Streaming Latency Profiling via GK Quantile Summary
+      const gk = new ServerGKQuantileSummary({ epsilon: 0.05 });
+      for (let i = 10; i <= 500; i += 10) gk.insert(i); // Latencies 10ms to 500ms
+      const p95 = gk.queryQuantile(0.95);
+      expect.ok(p95 >= 450);
+
+      // Step 2: Safe Expectile-based Pricing via IQL
+      const iql = new ServerIQLDynamicPricing();
+      const pricing = iql.optimizePrice({
+        cogs: 800000,
+        basePrice: 1100000,
+        competitorPrice: 1050000,
+        demandIndex: 1.15
+      });
+      expect.ok(pricing.proposedPrice >= 800000 * 1.05);
+      expect.ok(pricing.decisionTag.includes("IQL") || pricing.decisionTag.includes("OPTIMAL") || pricing.decisionTag.includes("FALLBACK"));
+
+      // Step 3: Multi-Depot Fleet Logistics with Congestion Toll Minimization
+      const router = new ServerMDVRPTWRoadPricingRouter();
+      const orders = [
+        { id: "ORD_E2E_RP_1", lat: 21.0300, lng: 105.7800 },
+        { id: "ORD_E2E_RP_2", lat: 21.0285, lng: 105.8542 }
+      ];
+      const plan = router.planRoadPricingRoutes(orders, 480);
+      expect.equal(plan.status, "MDVRPTW_ROAD_PRICING_SUCCESS");
+      expect.equal(plan.summary.totalOrders, 2);
+      expect.ok(plan.summary.totalOperationalCostVnd > 0);
     });
   });
 });

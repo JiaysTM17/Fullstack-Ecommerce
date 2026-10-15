@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|cross[- ]dock/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|cross[- ]dock|gk[- ]quantile|iql|road[- ]pricing|mdvrptw/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1367,6 +1367,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem lượng khách duy nhất BJKST của shop',
         'Định giá tối ưu lợi thế AWAC',
         'Lộ trình trung chuyển gom hàng Cross-Dock'
+      ]
+    };
+  }
+
+  // 68. Bộ Ba Thuật Toán GK Quantile Summary, IQL Pricing & Điều Phối Road Pricing MDVRPTW (Phase 59 - Feature 206)
+  if (/gk[- ]quantile|gk quantile|phân vị gk|iql|implicit q[- ]learning|hồi quy kỳ vọng|road[- ]pricing|mdvrptw|thu phí nội đô|phí chống ùn tắc/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN GK QUANTILE, IQL PRICING & ĐIỀU PHỐI ROAD PRICING (${currentShop.name})**:
+- **Phân tích phân vị giá trị giỏ hàng GK Quantile Summary**:
+  - Tự động thống kê phân vị giá trị đơn hàng ($P_{50}, P_{75}, P_{95}$) của shop để định mức ngưỡng kích hoạt Freeship Extra và Voucher ưu đãi chính xác với hành vi thanh toán thực tế của khách hàng.
+- **Định giá thích ứng an toàn tuyệt đối IQL Pricing**:
+  - Ứng dụng hồi quy kỳ vọng bất đối xứng (Expectile $\\tau = 0.70$) học từ lịch sử đơn hàng để tự động tối ưu hóa giá bán chiến dịch Flash Sale mà không cần thăm dò giá rủi ro (No OOD Query), bảo đảm biên lợi nhuận ròng luôn cao hơn $\\text{COGS} \\times 1.05$.
+- **Vận chuyển thông minh thích ứng biểu phí nội đô MDVRPTW**:
+  - Đơn hàng xuất kho của shop được SPX Express điều phối linh hoạt từ 3 Hub vùng ven (Tây Hồ, Cầu Giấy, Hoàng Mai). AI tự động tính toán lộ trình né phí ùn tắc cao điểm ($30.000\\text{₫}$) hoặc chọn khung giờ lân cận để vừa bảo đảm giao đúng hẹn vừa tiết kiệm tối đa cước ship!`,
+      type: 'recommendation',
+      tag: 'GK QUANTILE, IQL & ROAD PRICING MDVRPTW',
+      suggestions: [
+        'Xem phân vị giá trị đơn hàng P50-P95',
+        'Tư vấn định giá an toàn IQL Pricing',
+        'Lộ trình vận chuyển né phí ùn tắc SPX'
       ]
     };
   }

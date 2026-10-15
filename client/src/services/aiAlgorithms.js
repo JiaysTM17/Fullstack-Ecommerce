@@ -30022,6 +30022,535 @@ export class VRPTWCCLogisticsRouter {
   }
 }
 
+// =========================================================================
+// PHASE 59: ENTERPRISE SUITE (FEATURE 206)
+// 1. GKQuantileSummary (Greenwald & Khanna, SIGMOD 2001)
+// 2. IQLDynamicPricing (Implicit Q-Learning, Kostrikov et al., ICLR 2022)
+// 3. MDVRPTWRoadPricingRouter (Multi-Depot Routing with Congestion Road Pricing)
+// =========================================================================
+
+export class GKQuantileSummary {
+  constructor(options = {}) {
+    this.epsilon = Math.max(0.001, Math.min(0.20, options.epsilon || 0.05));
+    this.entries = [];
+    this.totalElements = 0;
+    this.compressFrequency = Math.max(10, Math.floor(1 / (2 * this.epsilon)));
+  }
+
+  insert(val) {
+    const v = Number(val);
+    if (!Number.isFinite(v)) return;
+
+    this.totalElements += 1;
+    const n = this.totalElements;
+    const maxDelta = Math.floor(2 * this.epsilon * n);
+
+    if (this.entries.length === 0) {
+      this.entries.push({ v, g: 1, delta: 0 });
+      return;
+    }
+
+    if (v < this.entries[0].v) {
+      this.entries.unshift({ v, g: 1, delta: 0 });
+    } else if (v >= this.entries[this.entries.length - 1].v) {
+      this.entries.push({ v, g: 1, delta: 0 });
+    } else {
+      let low = 0;
+      let high = this.entries.length - 1;
+      let insertIdx = high;
+
+      while (low <= high) {
+        const mid = (low + high) >> 1;
+        if (this.entries[mid].v >= v) {
+          insertIdx = mid;
+          high = mid - 1;
+        } else {
+          low = mid + 1;
+        }
+      }
+
+      this.entries.splice(insertIdx, 0, { v, g: 1, delta: maxDelta });
+    }
+
+    if (this.totalElements % this.compressFrequency === 0) {
+      this.compress();
+    }
+  }
+
+  compress() {
+    if (this.entries.length <= 2) return;
+
+    const threshold = Math.floor(2 * this.epsilon * this.totalElements);
+    const newEntries = [];
+    newEntries.push(this.entries[0]);
+
+    let i = 1;
+    while (i < this.entries.length - 1) {
+      const current = this.entries[i];
+      const next = this.entries[i + 1];
+
+      if (current.g + next.g + next.delta <= threshold) {
+        next.g += current.g;
+        i++;
+      } else {
+        newEntries.push(current);
+        i++;
+      }
+    }
+
+    newEntries.push(this.entries[this.entries.length - 1]);
+    this.entries = newEntries;
+  }
+
+  queryQuantile(phi) {
+    if (this.entries.length === 0) return 0;
+    const clampedPhi = Math.max(0, Math.min(1.0, Number(phi) || 0));
+
+    if (clampedPhi === 0) return this.entries[0].v;
+    if (clampedPhi === 1.0) return this.entries[this.entries.length - 1].v;
+
+    const targetRank = clampedPhi * this.totalElements;
+
+    let cumulativeG = 0;
+    let prevRank = 0;
+    let prevVal = this.entries[0].v;
+
+    for (let i = 0; i < this.entries.length; i++) {
+      cumulativeG += this.entries[i].g;
+      const curRank = cumulativeG + (this.entries[i].delta / 2);
+
+      if (curRank >= targetRank) {
+        if (i === 0 || curRank === prevRank) {
+          return this.entries[i].v;
+        }
+        const alpha = (targetRank - prevRank) / (curRank - prevRank);
+        return Number((prevVal + alpha * (this.entries[i].v - prevVal)).toFixed(2));
+      }
+
+      prevRank = curRank;
+      prevVal = this.entries[i].v;
+    }
+
+    return this.entries[this.entries.length - 1].v;
+  }
+
+  queryMedian() {
+    return this.queryQuantile(0.50);
+  }
+
+  getDistributionSummary() {
+    return {
+      totalElements: this.totalElements,
+      activeTuples: this.entries.length,
+      epsilon: this.epsilon,
+      min: this.entries.length > 0 ? this.entries[0].v : 0,
+      p25: this.queryQuantile(0.25),
+      p50: this.queryQuantile(0.50),
+      p75: this.queryQuantile(0.75),
+      p90: this.queryQuantile(0.90),
+      p95: this.queryQuantile(0.95),
+      p99: this.queryQuantile(0.99),
+      max: this.entries.length > 0 ? this.entries[this.entries.length - 1].v : 0
+    };
+  }
+
+  merge(other) {
+    if (!(other instanceof GKQuantileSummary)) {
+      throw new Error("Target must be an instance of GKQuantileSummary");
+    }
+
+    const merged = [];
+    let i = 0;
+    let j = 0;
+
+    while (i < this.entries.length && j < other.entries.length) {
+      if (this.entries[i].v <= other.entries[j].v) {
+        merged.push({ ...this.entries[i++] });
+      } else {
+        merged.push({ ...other.entries[j++] });
+      }
+    }
+
+    while (i < this.entries.length) merged.push({ ...this.entries[i++] });
+    while (j < other.entries.length) merged.push({ ...other.entries[j++] });
+
+    this.entries = merged;
+    this.totalElements += other.totalElements;
+    this.epsilon = Math.max(this.epsilon, other.epsilon);
+    this.compress();
+    return this;
+  }
+}
+
+export class IQLDynamicPricing {
+  constructor(options = {}) {
+    this.expectileTau = Math.min(0.95, Math.max(0.50, options.expectileTau || 0.70));
+    this.temperatureBeta = Math.max(0.1, options.temperatureBeta || 3.0);
+    this.cogsSafetyFloorRatio = options.cogsSafetyFloorRatio || 1.05;
+    this.competitorCeilingRatio = options.competitorCeilingRatio || 1.15;
+
+    this.valueWeights = options.valueWeights || [0.15, 0.35, -0.05, 0.40, -0.25];
+    this.valueBias = options.valueBias !== undefined ? options.valueBias : 0.0;
+
+    this.qWeights = options.qWeights || [0.18, 0.38, -0.08, 0.45, -0.28, 0.30];
+    this.qBias = options.qBias !== undefined ? options.qBias : 0.0;
+
+    this.behavioralWeights = options.behavioralWeights || [0.08, 0.15, -0.03, 0.12, -0.08];
+    this.behavioralBias = options.behavioralBias !== undefined ? options.behavioralBias : 0.0;
+  }
+
+  normalizeState(state) {
+    const cogs = Math.max(1, state.cogs || 100000);
+    const basePrice = Math.max(1, state.basePrice || cogs * 1.25);
+    const competitorPrice = Math.max(1, state.competitorPrice || basePrice);
+    const demandIndex = Math.max(0, Math.min(2.0, state.demandIndex !== undefined ? state.demandIndex : 1.0));
+    const inventoryUrgency = Math.max(0, Math.min(1.0, state.inventoryUrgency !== undefined ? state.inventoryUrgency : 0.2));
+
+    return [
+      Math.log(cogs) / 15.0,
+      Math.log(basePrice) / 15.0,
+      Math.log(competitorPrice) / 15.0,
+      demandIndex,
+      inventoryUrgency
+    ];
+  }
+
+  evaluateExpectileLoss(diff, tau = this.expectileTau) {
+    const u = Number(diff);
+    const weight = u < 0 ? (1.0 - tau) : tau;
+    return weight * u * u;
+  }
+
+  evaluateV(state) {
+    const sNorm = this.normalizeState(state);
+    let v = this.valueBias;
+    for (let i = 0; i < sNorm.length; i++) {
+      v += sNorm[i] * this.valueWeights[i];
+    }
+    const expectileShift = (this.expectileTau - 0.5) * 0.40;
+    return v + expectileShift;
+  }
+
+  evaluateQ(state, action) {
+    const sNorm = this.normalizeState(state);
+    const sa = [...sNorm, action];
+    let q = this.qBias;
+    for (let i = 0; i < sa.length; i++) {
+      q += sa[i] * this.qWeights[i];
+    }
+    return q;
+  }
+
+  computeAdvantage(state, action) {
+    const q = this.evaluateQ(state, action);
+    const v = this.evaluateV(state);
+    return q - v;
+  }
+
+  predictBehavioralAction(state) {
+    const sNorm = this.normalizeState(state);
+    let dot = this.behavioralBias;
+    for (let i = 0; i < sNorm.length; i++) {
+      dot += sNorm[i] * this.behavioralWeights[i];
+    }
+    const tanh = Math.tanh(dot);
+    return Math.max(0.70, Math.min(1.40, 1.0 + tanh * 0.25));
+  }
+
+  optimizePrice(item) {
+    const cogs = Math.max(1000, Number(item.cogs) || 100000);
+    const basePrice = Math.max(cogs, Number(item.basePrice) || Math.round(cogs * 1.3));
+    const competitorPrice = Number(item.competitorPrice) || basePrice;
+    const demandIndex = item.demandIndex !== undefined ? Number(item.demandIndex) : 1.0;
+    const inventoryUrgency = item.inventoryUrgency !== undefined ? Number(item.inventoryUrgency) : 0.2;
+
+    const state = { cogs, basePrice, competitorPrice, demandIndex, inventoryUrgency };
+
+    const behavioralAction = this.predictBehavioralAction(state);
+    const vVal = this.evaluateV(state);
+
+    const candidates = [
+      behavioralAction * 0.90,
+      behavioralAction * 0.95,
+      behavioralAction,
+      behavioralAction * 1.05,
+      behavioralAction * 1.10
+    ].map(a => Math.max(0.70, Math.min(1.40, a)));
+
+    let weightedActionSum = 0;
+    let totalWeight = 0;
+    let bestAdvantage = -Infinity;
+    let bestAction = behavioralAction;
+
+    for (const a of candidates) {
+      const adv = this.computeAdvantage(state, a);
+      const w = Math.min(20.0, Math.exp(Math.min(10.0, this.temperatureBeta * adv)));
+      weightedActionSum += a * w;
+      totalWeight += w;
+
+      if (adv > bestAdvantage) {
+        bestAdvantage = adv;
+        bestAction = a;
+      }
+    }
+
+    const extractedAction = totalWeight > 0 ? (weightedActionSum / totalWeight) : behavioralAction;
+    let calculatedPrice = Math.round(basePrice * extractedAction);
+
+    const safetyFloor = Math.round(cogs * this.cogsSafetyFloorRatio);
+    const safetyCeiling = Math.round(competitorPrice * this.competitorCeilingRatio);
+
+    let decisionTag = "IQL_EXPECTILE_OPTIMAL";
+
+    if (calculatedPrice < safetyFloor) {
+      calculatedPrice = safetyFloor;
+      decisionTag = "FLOOR_OVERRIDE_COGS_SECURED";
+    } else if (calculatedPrice > safetyCeiling) {
+      calculatedPrice = safetyCeiling;
+      decisionTag = "CEILING_OVERRIDE_COMPETITOR_RESTRICTED";
+    } else if (bestAdvantage < 0) {
+      decisionTag = "BEHAVIORAL_BASELINE_FALLBACK";
+    }
+
+    const grossMarginVnd = calculatedPrice - cogs;
+    const marginPercent = Number(((grossMarginVnd / calculatedPrice) * 100).toFixed(2));
+
+    return {
+      proposedPrice: calculatedPrice,
+      basePrice,
+      cogs,
+      competitorPrice,
+      actionMultiplier: Number(extractedAction.toFixed(4)),
+      behavioralAction: Number(behavioralAction.toFixed(4)),
+      advantage: Number(bestAdvantage.toFixed(4)),
+      stateValueV: Number(vVal.toFixed(4)),
+      expectileTau: this.expectileTau,
+      decisionTag,
+      marginAnalysis: {
+        grossMarginVnd,
+        marginPercent,
+        safetyFloorVnd: safetyFloor,
+        safetyCeilingVnd: safetyCeiling
+      }
+    };
+  }
+}
+
+export const DEFAULT_ROAD_PRICING_DEPOTS = [
+  { id: "DEPOT_TAY_HO", name: "SPX Hub Tây Hồ (Bắc)", lat: 21.0650, lng: 105.8180, fleetSize: 8 },
+  { id: "DEPOT_CAU_GIAY", name: "SPX Hub Cầu Giấy (Tây)", lat: 21.0320, lng: 105.7860, fleetSize: 10 },
+  { id: "DEPOT_HOANG_MAI", name: "SPX Hub Hoàng Mai (Nam)", lat: 20.9780, lng: 105.8520, fleetSize: 8 }
+];
+
+export const CONGESTION_TOLL_ZONE = {
+  id: "ZONE_ERP_INNER_HANOI",
+  name: "Vành Đai 1-2 Nội Đô (Hoàn Kiếm - Ba Đình - Đống Đa)",
+  centerLat: 21.0285,
+  centerLng: 105.8542,
+  radiusKm: 3.2,
+  peakMorning: [450, 540],
+  peakEvening: [1020, 1110],
+  shoulderMorning: [540, 630],
+  shoulderEvening: [930, 1020],
+  peakTollVnd: 30000,
+  shoulderTollVnd: 15000
+};
+
+export class MDVRPTWRoadPricingRouter {
+  constructor(options = {}) {
+    this.depots = options.depots || DEFAULT_ROAD_PRICING_DEPOTS;
+    this.congestionZone = options.congestionZone || CONGESTION_TOLL_ZONE;
+    this.urbanSpeedKmh = options.urbanSpeedKmh || 28.0;
+    this.congestedSpeedKmh = options.congestedSpeedKmh || 16.0;
+    this.fuelCostPerKm = options.fuelCostPerKm || 1800;
+    this.serviceTimePerOrderMin = 5.0;
+  }
+
+  calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(3));
+  }
+
+  findNearestDepot(lat, lng) {
+    let bestDepot = this.depots[0];
+    let minDist = Infinity;
+
+    for (const d of this.depots) {
+      const dist = this.calculateDistance(lat, lng, d.lat, d.lng);
+      if (dist < minDist) {
+        minDist = dist;
+        bestDepot = d;
+      }
+    }
+
+    return { depot: bestDepot, distanceKm: minDist };
+  }
+
+  isInCongestionZone(lat, lng) {
+    const distToCenter = this.calculateDistance(lat, lng, this.congestionZone.centerLat, this.congestionZone.centerLng);
+    return distToCenter <= this.congestionZone.radiusKm;
+  }
+
+  evaluateRoadPricingToll(lat, lng, minuteOfDay) {
+    if (!this.isInCongestionZone(lat, lng)) {
+      return { inZone: false, tollVnd: 0, period: "OFF_ZONE" };
+    }
+
+    const t = minuteOfDay % 1440;
+    const zone = this.congestionZone;
+
+    if ((t >= zone.peakMorning[0] && t <= zone.peakMorning[1]) ||
+        (t >= zone.peakEvening[0] && t <= zone.peakEvening[1])) {
+      return { inZone: true, tollVnd: zone.peakTollVnd, period: "PEAK_CONGESTION" };
+    }
+
+    if ((t >= zone.shoulderMorning[0] && t <= zone.shoulderMorning[1]) ||
+        (t >= zone.shoulderEvening[0] && t <= zone.shoulderEvening[1])) {
+      return { inZone: true, tollVnd: zone.shoulderTollVnd, period: "SHOULDER_CONGESTION" };
+    }
+
+    return { inZone: true, tollVnd: 0, period: "OFF_PEAK_ZONE" };
+  }
+
+  planRoadPricingRoutes(orders = [], startMinuteOfDay = 480) {
+    if (!orders || orders.length === 0) {
+      return {
+        status: "EMPTY_ORDERS",
+        summary: {
+          totalOrders: 0,
+          totalDistanceKm: 0,
+          totalTollCostVnd: 0,
+          totalFuelCostVnd: 0,
+          totalOperationalCostVnd: 0,
+          onTimeRatePercent: 100.0
+        },
+        depotRoutes: []
+      };
+    }
+
+    const depotClusters = new Map();
+    for (const d of this.depots) {
+      depotClusters.set(d.id, { depot: d, orders: [] });
+    }
+
+    for (const ord of orders) {
+      const { depot } = this.findNearestDepot(ord.lat, ord.lng);
+      depotClusters.get(depot.id).orders.push(ord);
+    }
+
+    let overallDistanceKm = 0;
+    let overallTollVnd = 0;
+    let onTimeCount = 0;
+    const depotRoutes = [];
+
+    for (const [depotId, cluster] of depotClusters.entries()) {
+      if (cluster.orders.length === 0) continue;
+
+      let currentLat = cluster.depot.lat;
+      let currentLng = cluster.depot.lng;
+      let currentMinute = startMinuteOfDay;
+      let depotDistKm = 0;
+      let depotTollVnd = 0;
+      const stops = [];
+
+      const unvisited = [...cluster.orders];
+      while (unvisited.length > 0) {
+        let bestIdx = 0;
+        let minDist = Infinity;
+
+        for (let i = 0; i < unvisited.length; i++) {
+          const d = this.calculateDistance(currentLat, currentLng, unvisited[i].lat, unvisited[i].lng);
+          if (d < minDist) {
+            minDist = d;
+            bestIdx = i;
+          }
+        }
+
+        const nextOrd = unvisited.splice(bestIdx, 1)[0];
+        const inZone = this.isInCongestionZone(nextOrd.lat, nextOrd.lng);
+        const speed = inZone ? this.congestedSpeedKmh : this.urbanSpeedKmh;
+        const transitMin = (minDist / speed) * 60;
+        currentMinute += transitMin;
+        depotDistKm += minDist;
+
+        const tollInfo = this.evaluateRoadPricingToll(nextOrd.lat, nextOrd.lng, currentMinute);
+        depotTollVnd += tollInfo.tollVnd;
+
+        const tw = nextOrd.timeWindow || [startMinuteOfDay, startMinuteOfDay + 360];
+        if (currentMinute < tw[0]) {
+          currentMinute = tw[0];
+        }
+
+        const isLate = currentMinute > tw[1];
+        if (!isLate) {
+          onTimeCount += 1;
+        }
+
+        currentMinute += this.serviceTimePerOrderMin;
+
+        stops.push({
+          orderId: nextOrd.id,
+          lat: nextOrd.lat,
+          lng: nextOrd.lng,
+          distanceFromLastKm: Number(minDist.toFixed(2)),
+          arrivalTimeMin: Number((currentMinute - this.serviceTimePerOrderMin).toFixed(1)),
+          departureTimeMin: Number(currentMinute.toFixed(1)),
+          timeWindow: tw,
+          onTime: !isLate,
+          inCongestionZone: inZone,
+          roadPricingTollVnd: tollInfo.tollVnd,
+          tollPeriod: tollInfo.period
+        });
+
+        currentLat = nextOrd.lat;
+        currentLng = nextOrd.lng;
+      }
+
+      const returnDist = this.calculateDistance(currentLat, currentLng, cluster.depot.lat, cluster.depot.lng);
+      depotDistKm += returnDist;
+      currentMinute += (returnDist / this.urbanSpeedKmh) * 60;
+
+      overallDistanceKm += depotDistKm;
+      overallTollVnd += depotTollVnd;
+
+      depotRoutes.push({
+        depotId,
+        depotName: cluster.depot.name,
+        ordersServed: cluster.orders.length,
+        routeDistanceKm: Number(depotDistKm.toFixed(2)),
+        routeTollVnd: depotTollVnd,
+        routeDurationMin: Number((currentMinute - startMinuteOfDay).toFixed(1)),
+        stops
+      });
+    }
+
+    const totalFuelCostVnd = Math.round(overallDistanceKm * this.fuelCostPerKm);
+    const totalOperationalCostVnd = totalFuelCostVnd + overallTollVnd;
+    const onTimeRatePercent = Number(((onTimeCount / orders.length) * 100).toFixed(1));
+
+    return {
+      status: "MDVRPTW_ROAD_PRICING_SUCCESS",
+      summary: {
+        totalOrders: orders.length,
+        totalDepotsUsed: depotRoutes.length,
+        totalDistanceKm: Number(overallDistanceKm.toFixed(2)),
+        totalTollCostVnd: overallTollVnd,
+        totalFuelCostVnd: totalFuelCostVnd,
+        totalOperationalCostVnd,
+        onTimeRatePercent
+      },
+      depotRoutes
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -30329,7 +30858,14 @@ export default {
   AWACDynamicPricing,
   DEFAULT_CROSS_DOCKS,
   VRPTWCCLogisticsRouter,
+  // Phase 59 Enterprise Algorithms
+  GKQuantileSummary,
+  IQLDynamicPricing,
+  DEFAULT_ROAD_PRICING_DEPOTS,
+  CONGESTION_TOLL_ZONE,
+  MDVRPTWRoadPricingRouter,
 };
+
 
 
 

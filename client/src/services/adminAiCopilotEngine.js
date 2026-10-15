@@ -454,7 +454,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
-  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
 - **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock|road[- ]pricing|mdvrptw/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -3361,6 +3361,70 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem bản đồ 3 trạm SPX Cross-Dock Hubs',
         'Kiểm tra thời gian đồng bộ hóa Inbound & Outbound',
         'Thống kê hệ số lấp đầy xe Load Factor 85%'
+      ]
+    };
+  }
+
+  // 158. Giám Sát Phân Vị Độ Trễ & Phân Bố Đơn Hàng GK Quantile Summary (Phase 59 - Feature 206)
+  if (/gk[- ]quantile|gk quantile|greenwald|phân vị gk|độ trễ p99|phân vị độ trễ/i.test(raw)) {
+    return {
+      text: `📊 **TỔNG HỢP PHÂN VỊ TẤT ĐỊNH STREAMING GK QUANTILE SUMMARY (GREENWALD-KHANNA SIGMOD 2001)**:
+- **Nguyên lý Thuật toán Định lượng $(\\varepsilon)$-Approximate**:
+  - Duy trì các bộ dữ liệu nén $(v_i, g_i, \\Delta_i)$ thoả mãn bất đẳng thức bất biến:
+    $$g_i + \\Delta_i \\le \\lfloor 2\\varepsilon n \\rfloor$$
+  - Cho phép ước lượng chuẩn xác tuyệt đối các phân vị quan trọng ($P_{50}, P_{90}, P_{95}, P_{99}$) với sai số giới hạn chặt trong phạm vi $\\pm \\varepsilon \\cdot n$.
+- **Ứng dụng Giám sát Toàn Sàn Mini Shopee**:
+  - Theo dõi độ trễ API thanh toán VietQR ($P_{99} < 350\\text{ms}$) và thời gian khóa tồn kho trong Flash Sale.
+  - Phân tích phân bổ giá trị đơn hàng (AOV Distribution) để phát hiện bất thường và hành vi gom đơn đầu cơ!`,
+      type: 'analytics',
+      tag: 'GK QUANTILE SUMMARY',
+      suggestions: [
+        'Xem báo cáo phân vị độ trễ P50-P95-P99',
+        'Kiểm tra sai số epsilon của bộ nén GK',
+        'Nén dữ liệu định kỳ GK Quantile'
+      ]
+    };
+  }
+
+  // 159. Định Giá Ngoại Tuyến Kỳ Vọng IQL Dynamic Pricing (Phase 59 - Feature 206)
+  if (/iql|implicit q[- ]learning|hồi quy kỳ vọng|expectile|iql pricing/i.test(raw)) {
+    return {
+      text: `🏷️ **ĐỊNH GIÁ HỌC TĂNG CƯỜNG NGOẠI TUYẾN IQL DYNAMIC PRICING (KOSTRIKOV ET AL. ICLR 2022)**:
+- **Cơ chế Hồi Quy Kỳ Vọng Bất Đối Xứng (Expectile Regression)**:
+  - Học hàm giá trị $V(s)$ trực tiếp từ dữ liệu lịch sử giao dịch thông qua tổn thất:
+    $$L_2^\\tau(u) = |\\tau - \\mathbf{1}(u < 0)| u^2$$
+  - Hoàn toàn **không truy vấn hành động ngoại vi (No OOD Query)**, triệt tiêu $100\\%$ nguy cơ định giá ảo tưởng hoặc sụp đổ chính sách!
+- **Hàng Rào Bảo Vệ Kép (Dual Safety Guardrails)**:
+  - Safety Floor khóa cứng $\\ge \\text{COGS} \\times 1.05$ (đảm bảo biên lãi gộp tối thiểu $+5\\%$).
+  - Safety Ceiling kiểm soát $\\le P_{\\text{competitor}} \\times 1.15$ (không bao giờ vượt quá $15\\%$ giá đối thủ).`,
+      type: 'pricing',
+      tag: 'IQL DYNAMIC PRICING',
+      suggestions: [
+        'Kiểm tra tham số Expectile Tau (0.70)',
+        'Kiểm toán hàm lợi thế Advantage A(s, a)',
+        'Xem tỷ lệ chặn giá sàn COGS Floor'
+      ]
+    };
+  }
+
+  // 160. Điều Phối Giao Hàng Đa Kho Thu Phí Ùn Tắc MDVRPTW Road Pricing (Phase 59 - Feature 206)
+  if (/mdvrptw|road[- ]pricing|thu phí nội đô|phí chống ùn tắc|vành đai 1|vành đai 2|phí giờ cao điểm|tây hồ|cầu giấy|hoàng mai/i.test(raw)) {
+    return {
+      text: `🚚 **ĐIỀU PHỐI ĐA KHO THU PHÍ ÙN TẮC MDVRPTW ROAD PRICING ROUTER (YANG & BELL 1997, WANG ET AL. 2018)**:
+- **Mạng Lưới Đa Kho Xuất Phát (Multi-Depot SPX Hubs)**:
+  - Hub Tây Hồ (Bắc), Hub Cầu Giấy (Tây), Hub Hoàng Mai (Nam) đồng loạt phát lệnh điều phối.
+- **Biểu Phí Chống Ùn Tắc Vành Đai 1 & 2 Hà Nội (Electronic Road Pricing - ERP)**:
+  - Khung giờ cao điểm ($07:30 - 09:00$ & $17:00 - 18:30$): $30.000\\text{₫/lượt vào lõi nội đô}$.
+  - Khung giờ lân cận ($09:00 - 10:30$ & $15:30 - 17:00$): $15.000\\text{₫/lượt}$.
+  - Khung giờ thấp điểm & ngoại vi: Miễn phí $0\\text{₫}$.
+- **Tối Ưu Đa Mục Tiêu (Chi Phí Xăng Dầu + Phí ERP + SLA Giờ Hẹn)**:
+  - AI tự động tính toán đánh đổi: nếu đi đường vòng tốn thêm xăng $>$ phí ùn tắc thì chấp nhận trả phí ERP để giao hàng đúng khung giờ cam kết (SLA $> 98\\%$)!`,
+      type: 'logistics',
+      tag: 'MDVRPTW ROAD PRICING ROUTER',
+      suggestions: [
+        'Xem bản đồ phân vùng thu phí ERP Hoàn Kiếm',
+        'Kiểm tra biểu phí cao điểm sáng và chiều',
+        'Thống kê tổng chi phí vận hành Fleet Cost'
       ]
     };
   }
