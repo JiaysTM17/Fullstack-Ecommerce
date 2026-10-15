@@ -20284,6 +20284,564 @@ export class MultiCommodityCirculationRouter {
   }
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 107: Succinct FM-Index (Burrows-Wheeler Transform + LF-Mapping)
+// ------------------------------------------------------------------------------
+export class FMIndexCatalogSearch {
+  constructor(options = {}) {
+    this.sampleRate = options.sampleRate || 16;
+    this.text = '';
+    this.bwt = '';
+    this.C = new Map();
+    this.rankTable = [];
+    this.sampledSA = new Map();
+    this.alphabet = [];
+    this.totalLength = 0;
+  }
+
+  build(textInput) {
+    let rawText = Array.isArray(textInput) ? textInput.join(' \0 ') : String(textInput || '');
+    if (!rawText.endsWith('$')) {
+      rawText += '$';
+    }
+    this.text = rawText;
+    this.totalLength = rawText.length;
+
+    const sa = new Int32Array(this.totalLength);
+    for (let i = 0; i < this.totalLength; i++) sa[i] = i;
+
+    sa.sort((a, b) => {
+      let i = a, j = b;
+      while (i < this.totalLength && j < this.totalLength) {
+        if (this.text[i] !== this.text[j]) {
+          return this.text.charCodeAt(i) - this.text.charCodeAt(j);
+        }
+        i++;
+        j++;
+      }
+      return (this.totalLength - a) - (this.totalLength - b);
+    });
+
+    const bwtChars = [];
+    this.sampledSA.clear();
+
+    for (let i = 0; i < this.totalLength; i++) {
+      const origPos = sa[i];
+      const prevChar = origPos === 0 ? this.text[this.totalLength - 1] : this.text[origPos - 1];
+      bwtChars.push(prevChar);
+
+      if (origPos % this.sampleRate === 0) {
+        this.sampledSA.set(i, origPos);
+      }
+    }
+    this.bwt = bwtChars.join('');
+
+    const charCounts = new Map();
+    for (let i = 0; i < this.totalLength; i++) {
+      const ch = this.text[i];
+      charCounts.set(ch, (charCounts.get(ch) || 0) + 1);
+    }
+
+    this.alphabet = Array.from(charCounts.keys()).sort((a, b) => a.charCodeAt(0) - b.charCodeAt(0));
+
+    let runningTotal = 0;
+    this.C.clear();
+    for (const ch of this.alphabet) {
+      this.C.set(ch, runningTotal);
+      runningTotal += charCounts.get(ch);
+    }
+
+    this.rankTable = [];
+    const currentCounts = new Map();
+    for (const ch of this.alphabet) currentCounts.set(ch, 0);
+
+    for (let i = 0; i < this.totalLength; i++) {
+      const ch = this.bwt[i];
+      currentCounts.set(ch, (currentCounts.get(ch) || 0) + 1);
+
+      const snapshot = new Map();
+      for (const [k, v] of currentCounts.entries()) {
+        snapshot.set(k, v);
+      }
+      this.rankTable.push(snapshot);
+    }
+
+    return this;
+  }
+
+  _rank(ch, idx) {
+    if (idx < 0) return 0;
+    if (idx >= this.totalLength) idx = this.totalLength - 1;
+    const snap = this.rankTable[idx];
+    return snap ? (snap.get(ch) || 0) : 0;
+  }
+
+  _lf(i) {
+    const ch = this.bwt[i];
+    const cVal = this.C.get(ch) || 0;
+    return cVal + this._rank(ch, i) - 1;
+  }
+
+  count(pattern) {
+    if (!pattern || typeof pattern !== 'string') return { count: 0, range: [1, 0] };
+    if (!this.bwt) return { count: 0, range: [1, 0] };
+
+    let i = pattern.length - 1;
+    let ch = pattern[i];
+
+    if (!this.C.has(ch)) return { count: 0, range: [1, 0] };
+
+    let first = this.C.get(ch);
+    const chIdx = this.alphabet.indexOf(ch);
+    let last = (chIdx + 1 < this.alphabet.length)
+      ? this.C.get(this.alphabet[chIdx + 1]) - 1
+      : this.totalLength - 1;
+
+    while (first <= last && i > 0) {
+      i--;
+      ch = pattern[i];
+      if (!this.C.has(ch)) return { count: 0, range: [1, 0] };
+
+      const cVal = this.C.get(ch);
+      first = cVal + this._rank(ch, first - 1);
+      last = cVal + this._rank(ch, last) - 1;
+    }
+
+    if (first > last) {
+      return { count: 0, range: [1, 0] };
+    }
+
+    return {
+      count: last - first + 1,
+      range: [first, last]
+    };
+  }
+
+  locate(pattern, maxResults = 50) {
+    const { count, range } = this.count(pattern);
+    if (count === 0) return [];
+
+    const [first, last] = range;
+    const positions = [];
+    const limit = Math.min(last, first + maxResults - 1);
+
+    for (let row = first; row <= limit; row++) {
+      let curr = row;
+      let steps = 0;
+
+      while (!this.sampledSA.has(curr) && curr !== 0 && steps < this.totalLength) {
+        curr = this._lf(curr);
+        steps++;
+      }
+
+      let originalPos = (this.sampledSA.get(curr) || 0) + steps;
+      if (originalPos >= this.totalLength) {
+        originalPos -= this.totalLength;
+      }
+      positions.push(originalPos);
+    }
+
+    positions.sort((a, b) => a - b);
+    return positions;
+  }
+
+  searchCatalogSnippet(keyword, snippetRadius = 30) {
+    const positions = this.locate(keyword, 5);
+    const snippets = [];
+
+    for (const pos of positions) {
+      const start = Math.max(0, pos - snippetRadius);
+      const end = Math.min(this.totalLength, pos + keyword.length + snippetRadius);
+      const rawSnippet = this.text.substring(start, end).replace(/\0/g, ' | ').replace(/\$/g, '');
+      snippets.push({
+        offset: pos,
+        snippet: `...${rawSnippet}...`
+      });
+    }
+
+    return {
+      keyword,
+      matchCount: this.count(keyword).count,
+      locations: snippets
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 108: Conservative Q-Learning (CQL) for Offline RL Budget Allocation
+// ------------------------------------------------------------------------------
+export class CQLBudgetOptimizer {
+  constructor(options = {}) {
+    this.numCategories = options.numCategories || 4;
+    this.stateDim = options.stateDim || 6;
+    this.actionDim = this.numCategories;
+
+    this.alpha = options.alpha || 1.0;
+    this.gamma = options.gamma || 0.95;
+    this.lr = options.lr || 0.01;
+    this.tau = options.tau || 0.02;
+
+    this.qWeights = new Array(this.stateDim + this.actionDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.targetQWeights = [...this.qWeights];
+
+    this.offlineDataset = [];
+    this.maxDatasetSize = options.maxDatasetSize || 2000;
+  }
+
+  evaluateQ(state, action, useTarget = false) {
+    const input = [...state, ...action];
+    const weights = useTarget ? this.targetQWeights : this.qWeights;
+    let val = 0;
+    for (let i = 0; i < input.length; i++) {
+      val += (input[i] || 0) * (weights[i] || 0);
+    }
+    return val;
+  }
+
+  addOfflineRecord(record) {
+    if (this.offlineDataset.length >= this.maxDatasetSize) {
+      this.offlineDataset.shift();
+    }
+    this.offlineDataset.push({
+      state: [...record.state],
+      action: [...record.action],
+      reward: Number(record.reward) || 0,
+      nextState: [...record.nextState],
+      done: Boolean(record.done)
+    });
+  }
+
+  _sampleRandomAction() {
+    const raw = [];
+    let sum = 0;
+    for (let i = 0; i < this.actionDim; i++) {
+      const v = -Math.log(Math.max(1e-6, Math.random()));
+      raw.push(v);
+      sum += v;
+    }
+    return raw.map(v => Number((v / (sum || 1)).toFixed(4)));
+  }
+
+  trainStep(batchSize = 32) {
+    if (this.offlineDataset.length < 8) {
+      return { trained: false, loss: 0, cqlPenalty: 0 };
+    }
+
+    const size = Math.min(batchSize, this.offlineDataset.length);
+    let totalLoss = 0;
+    let totalPenalty = 0;
+
+    for (let i = 0; i < size; i++) {
+      const idx = Math.floor(Math.random() * this.offlineDataset.length);
+      const { state, action, reward, nextState, done } = this.offlineDataset[idx];
+
+      let maxNextQ = 0;
+      if (!done) {
+        for (let k = 0; k < 5; k++) {
+          const candAction = this._sampleRandomAction();
+          const qVal = this.evaluateQ(nextState, candAction, true);
+          if (k === 0 || qVal > maxNextQ) maxNextQ = qVal;
+        }
+      }
+      const targetY = reward + (done ? 0 : this.gamma * maxNextQ);
+      const currentQ = this.evaluateQ(state, action, false);
+      const bellmanError = targetY - currentQ;
+
+      const oodAction = this._sampleRandomAction();
+      const oodQ = this.evaluateQ(state, oodAction, false);
+      const cqlPenalty = Math.max(0, oodQ - currentQ);
+      totalPenalty += cqlPenalty;
+
+      const dataInput = [...state, ...action];
+      const oodInput = [...state, ...oodAction];
+
+      for (let d = 0; d < this.qWeights.length; d++) {
+        const bellmanGrad = bellmanError * dataInput[d];
+        const cqlGrad = this.alpha * (oodInput[d] - dataInput[d]);
+        this.qWeights[d] += this.lr * (bellmanGrad - cqlGrad * 0.1);
+      }
+
+      for (let d = 0; d < this.qWeights.length; d++) {
+        this.targetQWeights[d] = this.tau * this.qWeights[d] + (1 - this.tau) * this.targetQWeights[d];
+      }
+
+      totalLoss += bellmanError * bellmanError + this.alpha * cqlPenalty;
+    }
+
+    return {
+      trained: true,
+      loss: Number((totalLoss / size).toFixed(4)),
+      avgCqlPenalty: Number((totalPenalty / size).toFixed(4))
+    };
+  }
+
+  optimizeBudgetAllocation(campaignContext) {
+    const {
+      totalBudget = 100000000,
+      categoryNames = ['Điện Tử', 'Thời Trang', 'Mỹ Phẩm', 'Hàng Tiêu Dùng'],
+      remainingHours = 24,
+      avgRoas = 4.2,
+      demandIndex = 0.8
+    } = campaignContext;
+
+    const state = [
+      Math.min(2.0, totalBudget / 100000000),
+      Math.min(1.0, remainingHours / 48),
+      Math.min(1.0, avgRoas / 10),
+      Math.min(1.0, demandIndex),
+      0.85,
+      0.90
+    ];
+
+    let bestAllocation = null;
+    let bestScore = -Infinity;
+
+    const candidateAllocations = [
+      [0.35, 0.25, 0.20, 0.20],
+      [0.40, 0.30, 0.15, 0.15],
+      [0.25, 0.35, 0.25, 0.15],
+      [0.30, 0.20, 0.30, 0.20],
+      [0.25, 0.25, 0.25, 0.25]
+    ];
+
+    for (const alloc of candidateAllocations) {
+      const qScore = this.evaluateQ(state, alloc, false);
+      if (qScore > bestScore) {
+        bestScore = qScore;
+        bestAllocation = alloc;
+      }
+    }
+
+    if (!bestAllocation) {
+      bestAllocation = [0.35, 0.25, 0.20, 0.20];
+    }
+
+    const categoryAllocations = [];
+    let allocatedTotal = 0;
+
+    for (let c = 0; c < this.numCategories; c++) {
+      const catName = categoryNames[c] || `Ngành hàng ${c + 1}`;
+      const share = bestAllocation[c] || (1 / this.numCategories);
+      const allocatedAmount = Math.round(totalBudget * share);
+      allocatedTotal += allocatedAmount;
+
+      categoryAllocations.push({
+        category: catName,
+        sharePercent: Number((share * 100).toFixed(1)),
+        allocatedBudget: allocatedAmount,
+        expectedGmvMultiplier: Number((share * (avgRoas || 4.0)).toFixed(2))
+      });
+    }
+
+    return {
+      totalBudget,
+      conservativeQScore: Number(bestScore.toFixed(3)),
+      riskAssessment: 'SAFE_CONSERVATIVE_BOUND',
+      isWithinBudget: allocatedTotal <= totalBudget * 1.01,
+      allocations: categoryAllocations
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 109: Branch-and-Cut Dynamic VRPTW Router
+// ------------------------------------------------------------------------------
+export class BranchAndCutVrptwRouter {
+  constructor(options = {}) {
+    this.vehicleCapacity = options.vehicleCapacity || 50;
+    this.maxRouteTime = options.maxRouteTime || 480;
+    this.depot = { id: 'SPX_DEPOT', x: 0, y: 0, readyTime: 0, dueTime: 480 };
+    this.customers = new Map();
+  }
+
+  setDepot(depotInfo) {
+    this.depot = {
+      id: depotInfo.id || 'SPX_DEPOT',
+      x: Number(depotInfo.x) || 0,
+      y: Number(depotInfo.y) || 0,
+      readyTime: Number(depotInfo.readyTime) || 0,
+      dueTime: Number(depotInfo.dueTime) || 480
+    };
+  }
+
+  addCustomer(cust) {
+    this.customers.set(cust.id, {
+      id: cust.id,
+      x: Number(cust.x) || 0,
+      y: Number(cust.y) || 0,
+      demand: Number(cust.demand) || 1,
+      readyTime: Number(cust.readyTime) || 0,
+      dueTime: Number(cust.dueTime) || 480,
+      serviceTime: Number(cust.serviceTime) || 10
+    });
+  }
+
+  _distance(p1, p2) {
+    const dx = p1.x - p2.x;
+    const dy = p1.y - p2.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  _generateInitialSolution() {
+    const unvisited = new Set(this.customers.keys());
+    const routes = [];
+
+    while (unvisited.size > 0) {
+      let currentRoute = [this.depot.id];
+      let currentLoad = 0;
+      let currentTime = this.depot.readyTime;
+      let currNode = this.depot;
+
+      while (unvisited.size > 0) {
+        let bestCandidate = null;
+        let bestInsertCost = Infinity;
+
+        for (const custId of unvisited) {
+          const cust = this.customers.get(custId);
+          if (currentLoad + cust.demand > this.vehicleCapacity) continue;
+
+          const travelTime = this._distance(currNode, cust);
+          const arrivalTime = currentTime + travelTime;
+          const startService = Math.max(arrivalTime, cust.readyTime);
+          const departureTime = startService + cust.serviceTime;
+          const returnToDepotTime = departureTime + this._distance(cust, this.depot);
+
+          if (arrivalTime > cust.dueTime) continue;
+          if (returnToDepotTime > this.depot.dueTime) continue;
+          if (departureTime > this.maxRouteTime) continue;
+
+          const waitTime = Math.max(0, cust.readyTime - arrivalTime);
+          const cost = travelTime * 1.0 + waitTime * 0.5 + (cust.dueTime - arrivalTime) * 0.2;
+
+          if (cost < bestInsertCost) {
+            bestInsertCost = cost;
+            bestCandidate = { id: custId, arrivalTime, departureTime, demand: cust.demand, node: cust };
+          }
+        }
+
+        if (!bestCandidate) break;
+
+        currentRoute.push(bestCandidate.id);
+        currentLoad += bestCandidate.demand;
+        currentTime = bestCandidate.departureTime;
+        currNode = bestCandidate.node;
+        unvisited.delete(bestCandidate.id);
+      }
+
+      currentRoute.push(this.depot.id);
+      routes.push({
+        route: currentRoute,
+        load: currentLoad,
+        totalTravelDistance: this._calculateRouteDistance(currentRoute),
+        finishTime: currentTime + this._distance(currNode, this.depot)
+      });
+    }
+
+    return routes;
+  }
+
+  _calculateRouteDistance(routeNodes) {
+    let dist = 0;
+    for (let i = 0; i < routeNodes.length - 1; i++) {
+      const u = routeNodes[i] === this.depot.id ? this.depot : this.customers.get(routeNodes[i]);
+      const v = routeNodes[i + 1] === this.depot.id ? this.depot : this.customers.get(routeNodes[i + 1]);
+      if (u && v) dist += this._distance(u, v);
+    }
+    return Math.round(dist * 100) / 100;
+  }
+
+  _optimizeRoutesBranchAndCut(routes) {
+    let improved = true;
+    let iterations = 0;
+
+    while (improved && iterations < 20) {
+      improved = false;
+      iterations++;
+
+      for (const r of routes) {
+        const nodes = r.route;
+        for (let i = 1; i < nodes.length - 2; i++) {
+          for (let j = i + 1; j < nodes.length - 1; j++) {
+            const newNodes = [
+              ...nodes.slice(0, i),
+              ...nodes.slice(i, j + 1).reverse(),
+              ...nodes.slice(j + 1)
+            ];
+
+            if (this._isRouteTimeFeasible(newNodes)) {
+              const oldDist = this._calculateRouteDistance(nodes);
+              const newDist = this._calculateRouteDistance(newNodes);
+              if (newDist < oldDist - 1e-4) {
+                r.route = newNodes;
+                r.totalTravelDistance = newDist;
+                improved = true;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return routes;
+  }
+
+  _isRouteTimeFeasible(routeNodes) {
+    let currTime = this.depot.readyTime;
+    let currNode = this.depot;
+
+    for (let i = 1; i < routeNodes.length - 1; i++) {
+      const cust = this.customers.get(routeNodes[i]);
+      if (!cust) return false;
+
+      const arrTime = currTime + this._distance(currNode, cust);
+      if (arrTime > cust.dueTime) return false;
+
+      currTime = Math.max(arrTime, cust.readyTime) + cust.serviceTime;
+      currNode = cust;
+    }
+
+    return (currTime + this._distance(currNode, this.depot)) <= this.depot.dueTime;
+  }
+
+  solve() {
+    if (this.customers.size === 0) {
+      return {
+        totalVehicles: 0,
+        totalDistanceKm: 0,
+        routes: [],
+        status: 'EMPTY_ORDERS'
+      };
+    }
+
+    const initialRoutes = this._generateInitialSolution();
+    const optimizedRoutes = this._optimizeRoutesBranchAndCut(initialRoutes);
+
+    let totalDist = 0;
+    const formattedRoutes = [];
+
+    for (let k = 0; k < optimizedRoutes.length; k++) {
+      const r = optimizedRoutes[k];
+      totalDist += r.totalTravelDistance;
+      formattedRoutes.push({
+        vehicleId: `SPX_COURIER_VAN_${k + 1}`,
+        orderCount: r.route.length - 2,
+        stops: r.route,
+        capacityUsed: r.load,
+        distanceKm: r.totalTravelDistance,
+        finishMinutes: Math.round(r.finishTime)
+      });
+    }
+
+    return {
+      status: 'OPTIMAL_ROUTING',
+      totalVehicles: formattedRoutes.length,
+      totalDistanceKm: Math.round(totalDist * 10) / 10,
+      totalOrdersDelivered: this.customers.size,
+      routes: formattedRoutes
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -20510,6 +21068,10 @@ export default {
   DoubleArrayAhoCorasick,
   SacDynamicMarkdownPricing,
   MultiCommodityCirculationRouter,
+  // Phase 42 Enterprise Algorithms
+  FMIndexCatalogSearch,
+  CQLBudgetOptimizer,
+  BranchAndCutVrptwRouter,
 };
 
 

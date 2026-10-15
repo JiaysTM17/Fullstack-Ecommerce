@@ -1031,6 +1031,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 51. Tra Cứu Toàn Văn FM-Index, Ngân Sách Flash Sale CQL & Giao Đúng Khung Giờ VRPTW (Phase 42 - Feature 189)
+  if (/fm[- ]index|burrows[- ]wheeler|tra cứu toàn văn fm-index|cql budget|ngân sách cql|branch[- ]and[- ]cut vrptw|khung giờ hẹn giao|giao đúng hẹn vrptw/i.test(raw)) {
+    return {
+      text: `🔎 **TRA CỨU TOÀN VĂN FM-INDEX, PHÂN BỔ NGÂN SÁCH CQL & GIAO HẸN GIỜ VRPTW (${currentShop.name})**:
+- **Tra cứu linh kiện & mã SKU toàn văn bằng FM-Index (BWT)**:
+  - Khách hàng gõ bất kỳ chuỗi con, model chip hay mã phụ kiện nào của shop đều được tìm ra trong tích tắc với thuật toán Backward Search $O(m)$, gia tăng tối đa tỷ lệ tìm thấy sản phẩm!
+- **Tối ưu hóa ngân sách tài trợ voucher Mega Sale bằng CQL (Offline RL)**:
+  - Hệ thống tự động tính toán tỷ lệ phân bổ ngân sách khuyến mãi cho shop dựa trên dữ liệu giao dịch lịch sử, triệt tiêu rủi ro vượt trần ngân sách quảng cáo.
+- **Cam kết giao hàng đúng khung giờ hẹn (Branch-and-Cut VRPTW)**:
+  - Đơn hàng hẹn giờ giao của shop (sáng/chiều/hỏa tốc) được tối ưu lộ trình bưu tá SPX, giảm thiểu tỷ lệ hoàn hàng và giữ vững uy tín 5 sao cho gian hàng!`,
+      type: 'recommendation',
+      tag: 'FM-INDEX, CQL BUDGET & VRPTW DELIVERY',
+      suggestions: [
+        'Tra cứu mã linh kiện bằng FM-Index',
+        'Tối ưu hóa ngân sách voucher CQL',
+        'Kiểm tra lộ trình giao hẹn giờ VRPTW'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

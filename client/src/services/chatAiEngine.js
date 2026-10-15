@@ -331,7 +331,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
 
   // 1. Kết hợp Tìm sản phẩm + Xin Voucher / Freeship
   if (
-    !/chuông báo|báo giá|interval treap|simrank/i.test(lower) &&
+    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw/i.test(lower) &&
     (/mua|tìm|sản phẩm|\báo\b|\bquần\b|tai nghe|chuột|bàn phím|nồi|son|giày/i.test(lower)) &&
     (/voucher|mã|giảm giá|freeship|miễn phí ship/i.test(lower))
   ) {
@@ -438,7 +438,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // ĐƠN HÀNG, TIẾN ĐỘ VẬN ĐƠN, KHIẾU NẠI GIAO TRỄ
   // -------------------------------------------------------------
-  if (/đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
+  if (!/fm[- ]index|burrows|cql|vrptw/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
     const orders = lookupCustomerOrders(lower);
     if (orders.length > 0) {
       return {
@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -771,7 +771,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 25. Lộ Trình Giao Hàng Xanh SPX & Khung Giờ Flash Sale (GREEN_LOGISTICS_VRP_ASSIST)
-  if (/vrp|giao hàng xanh|green logistics|giảm co2|tiết kiệm phát thải|lộ trình spx|khung giờ flash sale/i.test(lower)) {
+  if (!/vrptw|fm[- ]index|burrows|cql/i.test(lower) && /vrp|giao hàng xanh|green logistics|giảm co2|tiết kiệm phát thải|lộ trình spx|khung giờ flash sale/i.test(lower)) {
     return {
       intent: 'GREEN_LOGISTICS_VRP_ASSIST',
       replyText: `**[VẬN CHUYỂN XANH SPX & FLASH SALE] THUẬT TOÁN ĐỊNH TUYẾN ĐỘI XE VRP & CÂY ĐOẠN:**\n\n• **Logistics Thân Thiện Môi Trường**: Thuật toán định tuyến đa kho (MULTI-DEPOT VRP) tự động tối ưu các điểm dừng giao hàng theo vòng cung ngắn nhất, cắt giảm trung bình 25% quãng đường di chuyển và giảm phát thải khí carbon (CO₂) cho mỗi kiện hàng của bạn!\n• **Săn Deal Khung Giờ Vàng**: Công nghệ Cây Đoạn (Lazy Segment Tree) bảo đảm bạn đặt mua thành công đúng số lượng hàng giảm giá trong các khung giờ vàng (00h, 12h, 20h) mà không bao giờ bị báo ảo hay hủy đơn vì thiếu hàng!`,
@@ -938,6 +938,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'SAC_DOUBLE_ARRAY_COMMODITY_ASSIST',
       replyText: `**[XẢ HÀNG CẬN DATE SAC, KIỂM DUYỆT TỪ CẤM & LUÂN CHUYỂN KHO LIÊN MIỀN]:**\n\n• **Săn deal xả hàng cận date cực sốc (SAC)**: Các mặt hàng date gần được giảm sâu tới 50% - 70% theo thuật toán Soft Actor-Critic giúp bạn săn được sản phẩm chất lượng với giá rẻ nhất!\n• **Mua sắm an toàn, nói không với hàng giả/vi phạm (Double-Array)**: Bộ lọc từ cấm tốc độ cao giúp sàn quét sạch bài đăng lừa đảo hoặc vi phạm tiêu chuẩn cộng đồng.\n• **Giao hàng nhanh từ mạng lưới kho liên kết (Multi-Commodity)**: Hàng hóa được tự động luân chuyển giữa các tổng kho SPX Hà Nội - Đà Nẵng - TP.HCM để luôn có sẵn hàng giao tận tay bạn trong ngày!`,
       suggestions: ['Săn deal xả hàng cận date', 'Xem danh mục chính hãng', 'Tra cứu hành trình liên kho'],
+    };
+  }
+
+  // 44. Tìm Kiếm Chuỗi Con FM-Index, Ngân Sách CQL & Giao Đúng Giờ VRPTW (FM_INDEX_CQL_VRPTW_ASSIST)
+  if (/fm[- ]index|burrows[- ]wheeler|tra cứu toàn văn fm-index|cql budget|ngân sách cql|branch[- ]and[- ]cut vrptw|khung giờ hẹn giao|giao đúng hẹn vrptw/i.test(lower)) {
+    return {
+      intent: 'FM_INDEX_CQL_VRPTW_ASSIST',
+      replyText: `**[TÌM KIẾM MÃ LINH KIỆN FM-INDEX, VOUCHER TOÀN SÀN & GIAO HÀNG ĐÚNG HẸN]:**\n\n• **Tìm mã sản phẩm, model chuẩn xác (FM-Index)**: Công nghệ nén toàn văn BWT giúp bạn tìm kiếm mọi mã linh kiện, model chi tiết trong tích tắc với độ chính xác tuyệt đối!\n• **Kho voucher trợ giá khủng (CQL)**: Hệ thống học tăng cường ngoại tuyến tự động cấp ngân sách ưu đãi cho các ngành hàng hot nhất, giúp bạn luôn có mã giảm sâu khi chốt đơn.\n• **Giao đúng khung giờ bạn chọn (VRPTW)**: Lựa chọn khung giờ nhận hàng thuận tiện (Sáng, Chiều, Tối), shipper SPX sẽ có mặt chính xác theo lịch hẹn cam kết!`,
+      suggestions: ['Tìm theo mã linh kiện', 'Nhận voucher ngành hàng', 'Chọn khung giờ nhận hàng'],
     };
   }
 

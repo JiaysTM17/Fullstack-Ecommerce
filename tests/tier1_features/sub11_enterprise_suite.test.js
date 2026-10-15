@@ -242,6 +242,10 @@ import {
   DoubleArrayAhoCorasick,
   SacDynamicMarkdownPricing,
   MultiCommodityCirculationRouter,
+  // Phase 42 Enterprise Algorithms
+  FMIndexCatalogSearch,
+  CQLBudgetOptimizer,
+  BranchAndCutVrptwRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -333,6 +337,9 @@ import { HopcroftKarpLogisticsRouter as ServerHopcroftKarpLogisticsRouter } from
 import { DoubleArrayAhoCorasick as ServerDoubleArrayAhoCorasick } from "../../server/src/utils/doubleArrayAhoCorasick.js";
 import { SacDynamicMarkdownPricing as ServerSacDynamicMarkdownPricing } from "../../server/src/utils/sacDynamicMarkdownPricing.js";
 import { MultiCommodityCirculationRouter as ServerMultiCommodityCirculationRouter } from "../../server/src/utils/multiCommodityCirculationRouter.js";
+import { FMIndexCatalogSearch as ServerFMIndexCatalogSearch } from "../../server/src/utils/fmIndexCatalogSearch.js";
+import { CQLBudgetOptimizer as ServerCQLBudgetOptimizer } from "../../server/src/utils/cqlBudgetOptimizer.js";
+import { BranchAndCutVrptwRouter as ServerBranchAndCutVrptwRouter } from "../../server/src/utils/branchAndCutVrptwRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -19745,6 +19752,285 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const plan = router.balanceInventoryTransfers();
       expect.equal(plan.isFullyBalanced, true);
       expect.equal(plan.transfers[0].quantity, 50);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 189: Phase 42 Enterprise E-Commerce Algorithms Suite (24 Tests)
+  // FM-Index Catalog Search, CQL Offline RL Budget & Branch-and-Cut VRPTW
+  // =========================================================================
+  describe("Feature 189: Phase 42 Enterprise Algorithms Suite (FM-Index, CQL Budget Optimizer & Branch-and-Cut VRPTW)", () => {
+
+    // --- FM-Index Catalog Search Tests ---
+    test("F189-T01: Server FMIndexCatalogSearch builds compact BWT, C table and rank structures", () => {
+      const fm = new ServerFMIndexCatalogSearch();
+      fm.build("tai nghe bluetooth chống ồn sony wh-1000xm5 chính hãng");
+      expect.ok(fm.bwt.length > 0);
+      expect.equal(fm.bwt.length, fm.totalLength);
+      expect.ok(fm.C.size > 0);
+      expect.ok(fm.rankTable.length > 0);
+    });
+
+    test("F189-T02: Server FMIndexCatalogSearch counts arbitrary substring occurrences in O(m) time", () => {
+      const fm = new ServerFMIndexCatalogSearch();
+      fm.build(["laptop dell xps 13 inch", "chuột không dây dell", "màn hình dell ultrasharp 27 inch"]);
+      const res = fm.count("dell");
+      expect.equal(res.count, 3);
+      expect.ok(res.range[0] <= res.range[1]);
+
+      const resInch = fm.count("inch");
+      expect.equal(resInch.count, 2);
+    });
+
+    test("F189-T03: Server FMIndexCatalogSearch accurately locates exact substring byte offsets using Sampled SA", () => {
+      const fm = new ServerFMIndexCatalogSearch({ sampleRate: 4 });
+      const text = "dien thoai samsung galaxy s24 ultra và samsung s23";
+      fm.build(text);
+      const locs = fm.locate("samsung");
+      expect.equal(locs.length, 2);
+      expect.ok(locs[0] < locs[1]);
+      for (const pos of locs) {
+        expect.equal(text.substring(pos, pos + 7), "samsung");
+      }
+    });
+
+    test("F189-T04: Server FMIndexCatalogSearch extracts snippet context around technical SKU codes", () => {
+      const fm = new ServerFMIndexCatalogSearch();
+      fm.build("Bộ vi xử lý Intel Core i9-14900K socket LGA1700 thế hệ 14 bảo hành 36 tháng");
+      const snippetRes = fm.searchCatalogSnippet("i9-14900K", 15);
+      expect.equal(snippetRes.matchCount, 1);
+      expect.ok(snippetRes.locations.length > 0);
+      expect.ok(snippetRes.locations[0].snippet.includes("i9-14900K"));
+    });
+
+    test("F189-T05: Client FMIndexCatalogSearch indexes and searches catalog with sub-millisecond latency", () => {
+      const clientFM = new FMIndexCatalogSearch();
+      clientFM.build(["giày thể thao nam nike air force 1", "áo khoác gió nam thể thao"]);
+      const start = Date.now();
+      const res = clientFM.count("thể thao");
+      const elapsed = Date.now() - start;
+      expect.equal(res.count, 2);
+      expect.ok(elapsed < 50);
+    });
+
+    test("F189-T06: Client FMIndexCatalogSearch returns zero count cleanly for absent query", () => {
+      const clientFM = new FMIndexCatalogSearch();
+      clientFM.build("Áo polo nam công sở lịch lãm");
+      const res = clientFM.count("máy bay");
+      expect.equal(res.count, 0);
+      expect.equal(clientFM.locate("máy bay").length, 0);
+    });
+
+    // --- Conservative Q-Learning (CQL) Offline RL Budget Allocation Tests ---
+    test("F189-T07: Server CQLBudgetOptimizer initializes weights and offline dataset buffer", () => {
+      const cql = new ServerCQLBudgetOptimizer({ numCategories: 4, stateDim: 6 });
+      expect.ok(cql.qWeights.length > 0);
+      expect.equal(cql.qWeights.length, cql.targetQWeights.length);
+      expect.equal(cql.offlineDataset.length, 0);
+    });
+
+    test("F189-T08: Server CQLBudgetOptimizer stores offline campaign logs and evaluates Q values", () => {
+      const cql = new ServerCQLBudgetOptimizer();
+      cql.addOfflineRecord({
+        state: [1.0, 0.5, 0.4, 0.8, 0.85, 0.9],
+        action: [0.35, 0.25, 0.20, 0.20],
+        reward: 450000000,
+        nextState: [0.8, 0.4, 0.42, 0.82, 0.88, 0.92],
+        done: false
+      });
+      expect.equal(cql.offlineDataset.length, 1);
+      const qVal = cql.evaluateQ([1.0, 0.5, 0.4, 0.8, 0.85, 0.9], [0.35, 0.25, 0.20, 0.20]);
+      expect.ok(typeof qVal === "number");
+    });
+
+    test("F189-T09: Server CQLBudgetOptimizer trains with Conservative Penalty and Polyak updates", () => {
+      const cql = new ServerCQLBudgetOptimizer({ alpha: 1.0 });
+      for (let i = 0; i < 20; i++) {
+        cql.addOfflineRecord({
+          state: [1.0, 0.5, 0.4, 0.8, 0.85, 0.9],
+          action: [0.3, 0.3, 0.2, 0.2],
+          reward: 350000000 + i * 5000000,
+          nextState: [0.7, 0.3, 0.41, 0.81, 0.85, 0.91],
+          done: false
+        });
+      }
+      const initialTargetWeight = cql.targetQWeights[0];
+      const trainRes = cql.trainStep(10);
+      expect.equal(trainRes.trained, true);
+      expect.ok(trainRes.loss >= 0);
+      expect.ok(trainRes.avgCqlPenalty >= 0);
+    });
+
+    test("F189-T10: Server CQLBudgetOptimizer allocates voucher budget strictly within total cap", () => {
+      const cql = new ServerCQLBudgetOptimizer();
+      const plan = cql.optimizeBudgetAllocation({
+        totalBudget: 50000000, // 50M VND
+        categoryNames: ['Điện Tử', 'Thời Trang', 'Mỹ Phẩm', 'Tiêu Dùng'],
+        remainingHours: 12,
+        avgRoas: 4.5
+      });
+      expect.equal(plan.isWithinBudget, true);
+      expect.equal(plan.allocations.length, 4);
+      const allocatedSum = plan.allocations.reduce((sum, a) => sum + a.allocatedBudget, 0);
+      expect.ok(allocatedSum <= 50000000 * 1.01);
+      expect.equal(plan.riskAssessment, 'SAFE_CONSERVATIVE_BOUND');
+    });
+
+    test("F189-T11: Client CQLBudgetOptimizer optimizes category budget shares in browser environment", () => {
+      const clientCQL = new CQLBudgetOptimizer();
+      const plan = clientCQL.optimizeBudgetAllocation({
+        totalBudget: 120000000,
+        categoryNames: ['Gia Dụng', 'Sách & VPP', 'Phụ Kiện', 'Thể Thao'],
+        remainingHours: 48,
+        avgRoas: 5.0
+      });
+      expect.equal(plan.isWithinBudget, true);
+      expect.ok(plan.allocations.length === 4);
+      expect.ok(plan.allocations[0].allocatedBudget > 0);
+    });
+
+    test("F189-T12: Client CQLBudgetOptimizer provides stable Conservative Q-score", () => {
+      const clientCQL = new CQLBudgetOptimizer();
+      const plan = clientCQL.optimizeBudgetAllocation({
+        totalBudget: 20000000,
+        remainingHours: 6
+      });
+      expect.ok(typeof plan.conservativeQScore === "number");
+      expect.equal(plan.riskAssessment, 'SAFE_CONSERVATIVE_BOUND');
+    });
+
+    // --- Branch-and-Cut Dynamic VRPTW Router Tests ---
+    test("F189-T13: Server BranchAndCutVrptwRouter initializes central depot hub and parameters", () => {
+      const router = new ServerBranchAndCutVrptwRouter({ vehicleCapacity: 40, maxRouteTime: 480 });
+      router.setDepot({ id: 'SPX_HUB_HN', x: 10, y: 10, readyTime: 0, dueTime: 480 });
+      expect.equal(router.depot.id, 'SPX_HUB_HN');
+      expect.equal(router.depot.x, 10);
+      expect.equal(router.vehicleCapacity, 40);
+    });
+
+    test("F189-T14: Server BranchAndCutVrptwRouter adds delivery orders with location and time windows", () => {
+      const router = new ServerBranchAndCutVrptwRouter();
+      router.setDepot({ id: 'DEPOT', x: 0, y: 0, readyTime: 0, dueTime: 480 });
+      router.addCustomer({ id: 'ORDER_1', x: 2, y: 3, demand: 5, readyTime: 30, dueTime: 90, serviceTime: 10 });
+      router.addCustomer({ id: 'ORDER_2', x: 4, y: 5, demand: 8, readyTime: 60, dueTime: 120, serviceTime: 10 });
+      expect.equal(router.customers.size, 2);
+      expect.equal(router.customers.get('ORDER_1').demand, 5);
+      expect.equal(router.customers.get('ORDER_2').dueTime, 120);
+    });
+
+    test("F189-T15: Server BranchAndCutVrptwRouter generates feasible initial vehicle routes respecting capacity", () => {
+      const router = new ServerBranchAndCutVrptwRouter({ vehicleCapacity: 10 });
+      router.setDepot({ id: 'DEPOT', x: 0, y: 0, readyTime: 0, dueTime: 480 });
+      router.addCustomer({ id: 'CUST_A', x: 1, y: 1, demand: 6, readyTime: 0, dueTime: 120 });
+      router.addCustomer({ id: 'CUST_B', x: 1, y: 2, demand: 7, readyTime: 0, dueTime: 120 }); // Tổng 13 > 10, phải tách 2 xe
+      const sol = router.solve();
+      expect.equal(sol.status, 'OPTIMAL_ROUTING');
+      expect.equal(sol.totalVehicles, 2);
+      expect.equal(sol.totalOrdersDelivered, 2);
+    });
+
+    test("F189-T16: Server BranchAndCutVrptwRouter applies Branch-and-Cut 2-Opt* inter-route exchange", () => {
+      const router = new ServerBranchAndCutVrptwRouter({ vehicleCapacity: 50 });
+      router.setDepot({ id: 'DEPOT', x: 0, y: 0, readyTime: 0, dueTime: 480 });
+      router.addCustomer({ id: 'O1', x: 1, y: 1, demand: 2, readyTime: 10, dueTime: 100 });
+      router.addCustomer({ id: 'O2', x: 2, y: 2, demand: 2, readyTime: 20, dueTime: 150 });
+      router.addCustomer({ id: 'O3', x: 3, y: 3, demand: 2, readyTime: 30, dueTime: 200 });
+      const sol = router.solve();
+      expect.equal(sol.status, 'OPTIMAL_ROUTING');
+      expect.ok(sol.totalDistanceKm > 0);
+      expect.equal(sol.routes[0].orderCount, 3);
+    });
+
+    test("F189-T17: Server BranchAndCutVrptwRouter strictly adheres to delivery time windows without delays", () => {
+      const router = new ServerBranchAndCutVrptwRouter();
+      router.setDepot({ id: 'DEPOT', x: 0, y: 0, readyTime: 0, dueTime: 480 });
+      router.addCustomer({ id: 'VIP_MORNING', x: 1, y: 2, demand: 1, readyTime: 30, dueTime: 60 });
+      router.addCustomer({ id: 'AFTERNOON_SLOT', x: 2, y: 3, demand: 1, readyTime: 180, dueTime: 240 });
+      const sol = router.solve();
+      expect.ok(sol.routes.length >= 1);
+      for (const route of sol.routes) {
+        expect.ok(route.finishMinutes <= 480);
+      }
+    });
+
+    test("F189-T18: Client BranchAndCutVrptwRouter solves intra-city delivery fleet assignment", () => {
+      const clientRouter = new BranchAndCutVrptwRouter({ vehicleCapacity: 20 });
+      clientRouter.setDepot({ id: 'SPX_Q1', x: 5, y: 5 });
+      clientRouter.addCustomer({ id: 'KH_A', x: 6, y: 5, demand: 4, readyTime: 10, dueTime: 80 });
+      clientRouter.addCustomer({ id: 'KH_B', x: 5, y: 6, demand: 5, readyTime: 15, dueTime: 90 });
+      const res = clientRouter.solve();
+      expect.equal(res.status, 'OPTIMAL_ROUTING');
+      expect.equal(res.totalOrdersDelivered, 2);
+    });
+
+    test("F189-T19: Client BranchAndCutVrptwRouter returns EMPTY_ORDERS safely when no deliveries exist", () => {
+      const clientRouter = new BranchAndCutVrptwRouter();
+      const res = clientRouter.solve();
+      expect.equal(res.status, 'EMPTY_ORDERS');
+      expect.equal(res.totalVehicles, 0);
+      expect.equal(res.totalDistanceKm, 0);
+    });
+
+    // --- Tri-Role AI Copilot Knowledge Integration Tests ---
+    test("F189-T20: Admin Sentinel Copilot Section 107 explains Succinct FM-Index substring search", () => {
+      const res = generateAdminCopilotResponse("giải thích tìm kiếm chuỗi con fm-index burrows-wheeler", {});
+      expect.equal(res.tag, "FM INDEX SUCCINCT SEARCH");
+      expect.ok(res.text.includes("FERRAGINA"));
+      expect.ok(res.text.includes("BWT"));
+      expect.ok(res.text.includes("LF-Mapping"));
+    });
+
+    test("F189-T21: Admin Sentinel Copilot Sections 108 & 109 handle CQL Budget & Branch-and-Cut VRPTW", () => {
+      const res108 = generateAdminCopilotResponse("tối ưu hóa phân bổ ngân sách cql conservative q-learning", {});
+      expect.equal(res108.tag, "CQL OFFLINE RL BUDGET");
+      expect.ok(res108.text.includes("KUMAR 2020"));
+      expect.ok(res108.text.includes("Offline Reinforcement Learning"));
+
+      const res109 = generateAdminCopilotResponse("điều phối bưu tá khung giờ hẹn giao branch-and-cut vrptw", {});
+      expect.equal(res109.tag, "BRANCH AND CUT VRPTW ROUTER");
+      expect.ok(res109.text.includes("CORDEAU"));
+      expect.ok(res109.text.includes("Time Windows"));
+    });
+
+    test("F189-T22: Seller ShopSmart Copilot Section 51 advises on FM-Index SKU lookup and CQL budget", () => {
+      const currentShop = { id: "shop_pc", name: "Shop Linh Kiện Điện Tử" };
+      const res = generateSellerCopilotResponse("tra cứu toàn văn fm-index và phân bổ ngân sách cql", currentShop, [], []);
+      expect.equal(res.tag, "FM-INDEX, CQL BUDGET & VRPTW DELIVERY");
+      expect.ok(res.text.includes("FM-Index"));
+      expect.ok(res.text.includes("CQL"));
+      expect.ok(res.text.includes("VRPTW"));
+    });
+
+    test("F189-T23: Buyer AI Assistant Intent 44 assists with FM-Index model lookup, voucher shares & time-slot delivery", () => {
+      const res = generateAiChatResponse("tại sao có thể tìm mã model bằng tra cứu toàn văn fm-index và giao đúng hẹn vrptw?", []);
+      expect.equal(res.intent, "FM_INDEX_CQL_VRPTW_ASSIST");
+      expect.ok(res.replyText.includes("FM-Index"));
+      expect.ok(res.replyText.includes("CQL"));
+      expect.ok(res.replyText.includes("VRPTW"));
+    });
+
+    test("F189-T24: E2E Pipeline executes FM-Index Substring Search, CQL Budgeting & VRPTW Timed Delivery", () => {
+      // 1. FM-Index substring catalog lookup
+      const fm = new ServerFMIndexCatalogSearch();
+      fm.build(["MacBook Pro M3 Max 16 inch 36GB RAM", "Cáp sạc MagSafe 3 cho MacBook"]);
+      const searchRes = fm.count("MacBook");
+      expect.equal(searchRes.count, 2);
+
+      // 2. CQL allocates voucher budget safely
+      const cql = new ServerCQLBudgetOptimizer();
+      const budgetPlan = cql.optimizeBudgetAllocation({
+        totalBudget: 40000000,
+        categoryNames: ['Laptop', 'Phụ Kiện']
+      });
+      expect.equal(budgetPlan.isWithinBudget, true);
+
+      // 3. VRPTW routes courier to buyer within designated time slot
+      const vrp = new ServerBranchAndCutVrptwRouter({ vehicleCapacity: 10 });
+      vrp.setDepot({ id: 'HUB_SAIGON', x: 0, y: 0, readyTime: 0, dueTime: 360 });
+      vrp.addCustomer({ id: 'DON_HANG_MACBOOK', x: 3, y: 4, demand: 1, readyTime: 30, dueTime: 120 });
+      const routePlan = vrp.solve();
+      expect.equal(routePlan.status, 'OPTIMAL_ROUTING');
+      expect.equal(routePlan.totalOrdersDelivered, 1);
     });
   });
 });

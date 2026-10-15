@@ -658,7 +658,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 28. Điều Phối Bưu Tá SPX Tối Ưu Đa Tiêu Chí (Hungarian Algorithm - Kuhn-Munkres)
-  if (!/hopcroft[- ]karp|hopcroft|primal[- ]dual|đối ngẫu sơ cấp|spatial quadtree|quadtree|cây tứ phân|kuhn-munkres max weight|ghép đôi cực đại hai phía|trọng số nhãn khả thi|công bằng tải bưu tá|workload fairness|kuhn-munkres đối ngẫu/i.test(raw) && /hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
+  if (!/hopcroft[- ]karp|hopcroft|primal[- ]dual|đối ngẫu sơ cấp|spatial quadtree|quadtree|cây tứ phân|kuhn-munkres max weight|ghép đôi cực đại hai phía|trọng số nhãn khả thi|công bằng tải bưu tá|workload fairness|kuhn-munkres đối ngẫu|vrptw|cửa sổ thời gian|khung giờ hẹn/i.test(raw) && /hungarian|kuhn-munkres|điều phối bưu tá|gán đơn bưu tá|spx dispatch|ghép cặp bưu tá/i.test(raw)) {
     return {
       text: `🚚 **ĐIỀU PHỐI BƯU TÁ TỐI ƯU HUNGARIAN (Kuhn-Munkres $O(V^3)$)**:
 - **Mục đích**: Thuật toán Hungarian (Kuhn-Munkres) ghép cặp tự động và tối ưu cực tiểu tổng chi phí giao vận giữa $N$ bưu tá SPX Express và $M$ đơn hàng hỏa tốc.
@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (/vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -2018,7 +2018,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 91. Tối Ưu Định Giá Động Flash Sale Bằng Double Q-Learning (Phase 36 - Feature 183)
-  if (/double q|q-learning|học tăng cường kép|triệt tiêu maximization bias|double q-learning pricing/i.test(raw)) {
+  if (!/cql|conservative/i.test(raw) && /double q|q-learning|học tăng cường kép|triệt tiêu maximization bias|double q-learning pricing/i.test(raw)) {
     return {
       text: `💰 **ĐỊNH GIÁ ĐỘNG FLASH SALE BẰNG DOUBLE Q-LEARNING VỚI EXPERIENCE REPLAY**:
 - **Triệt tiêu Thiên lệch Cực đại hóa (Maximization Bias Elimination - Hasselt 2010)**:
@@ -2333,6 +2333,63 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem ma trận luân chuyển hàng tồn kho Hub SPX',
         'Đối soát công nợ COD liên bưu cục',
         'Kiểm tra bảng nén Double-Array Aho-Corasick'
+      ]
+    };
+  }
+
+  // 107. Tìm Kiếm Chuỗi Con Toàn Văn Súc Tích Bằng FM-Index (Phase 42 - Feature 189)
+  if (/fm[- ]index|burrows[- ]wheeler|lf[- ]mapping|tìm kiếm chuỗi con fm-index|bwt catalog/i.test(raw)) {
+    return {
+      text: `🔬 **TÌM KIẾM CHUỖI CON TOÀN VĂN SÚC TÍCH BẰNG FM-INDEX (FERRAGINA & MANZINI 2000)**:
+- **Nguyên lý Nén Toàn Văn BWT & LF-Mapping**:
+  - Biến đổi Burrows-Wheeler Transform ($BWT$) sắp xếp các hậu tố theo ngữ cảnh tuần hoàn, kết hợp mảng tần suất $C[c]$ và bảng Rank tích lũy.
+  - Cho phép đếm số lượt xuất hiện của bất kỳ mã linh kiện, chuỗi con kỹ thuật nào trong kho hàng triệu sản phẩm chỉ trong đúng $O(m)$ bước Backward Search (với $m$ là độ dài chuỗi mẫu), hoàn toàn độc lập với kích thước toàn sàn $N$!
+- **Định vị vị trí siêu tốc bằng Suffix Array Lấy Mẫu (Sampled SA)**:
+  - Chỉ lưu vết các chỉ số hậu tố chia hết cho tỷ lệ mẫu ($k = 16$), giảm dung lượng lưu trữ xuống nhỏ hơn cả văn bản gốc đồng thời trích xuất ngữ cảnh tức thì!`,
+      type: 'general',
+      tag: 'FM INDEX SUCCINCT SEARCH',
+      suggestions: [
+        'Kiểm tra tốc độ đếm chuỗi con Backward Search',
+        'Định vị vị trí mã sản phẩm bằng Sampled SA',
+        'Tối ưu hóa ngân sách Offline RL bằng CQL'
+      ]
+    };
+  }
+
+  // 108. Phân Bổ Ngân Sách Flash Sale Bằng Conservative Q-Learning (CQL) (Phase 42 - Feature 189)
+  if (/cql budget|conservative q[- ]learning|offline rl budget|ngân sách cql|phân bổ voucher cql/i.test(raw)) {
+    return {
+      text: `💼 **TỐI ƯU HÓA PHÂN BỔ NGÂN SÁCH FLASH SALE BẰNG CONSERVATIVE Q-LEARNING (CQL - KUMAR 2020)**:
+- **Nguyên lý Offline Reinforcement Learning Bảo Toàn Rủi Ro**:
+  - Học trực tiếp từ nhật ký dữ liệu giao dịch lịch sử mà không cần thử nghiệm mạo hiểm trực tiếp trên sàn, tránh nguy cơ thất thoát ngân sách hàng tỷ đồng.
+  - Bổ sung số hạng phạt Conservative Penalty trừng phạt nặng các hành động phân bổ ngoài phân phối (Out-of-Distribution - OOD Actions), thiết lập chặn dưới an toàn: $\\hat{V}^\\pi(s) \\le V^\\pi(s)$.
+- **Bảo toàn trần ngân sách rủi ro (Zero Budget Breach)**:
+  - Tự động tìm tỷ lệ chia ngân sách voucher tối ưu giữa các ngành hàng (Điện tử, Thời trang, Tiêu dùng, Mỹ phẩm) thúc đẩy GMV toàn sàn đạt đỉnh!`,
+      type: 'recommendation',
+      tag: 'CQL OFFLINE RL BUDGET',
+      suggestions: [
+        'Phân tích ma trận phân bổ ngân sách ngành hàng CQL',
+        'Kiểm tra chặn dưới an toàn Conservative Bound',
+        'Lập lộ trình giao hàng khung giờ Branch-and-Cut VRPTW'
+      ]
+    };
+  }
+
+  // 109. Điều Phối Bưu Tá Khung Giờ Hẹn Giao Branch-and-Cut VRPTW (Phase 42 - Feature 189)
+  if (/branch[- ]and[- ]cut vrptw|vrptw router|khung giờ hẹn giao|lộ trình giao hàng hẹn giờ|cửa sổ thời gian vrptw/i.test(raw)) {
+    return {
+      text: `🚚 **ĐIỀU PHỐI BƯU TÁ KHUNG GIỜ HẸN GIAO BẰNG BRANCH-AND-CUT VRPTW (CORDEAU ET AL. 2002)**:
+- **Tối ưu hóa Lộ trình Đa Xe với Cửa Sổ Thời Gian (Vehicle Routing with Time Windows)**:
+  - Khách hàng chọn khung giờ nhận nghiêm ngặt (Giao sáng 8h-11h, Giao chiều 14h-17h, Giao 2H). Hệ thống mô hình hóa bài toán quy hoạch nguyên hỗn hợp (MIP).
+  - Tích hợp các lát cắt phân vùng sức chứa (Capacity Inequalities Cut) và lát cắt bất khả thi thời gian (Time Window Infeasibility Cut) triệt tiêu các nhánh nghiệm không tối ưu.
+- **Tiết kiệm 25% quãng đường & Loại bỏ 100% rủi ro trễ hẹn**:
+  - Ghép tuyến thông minh kết hợp trao đổi chặng con (2-Opt* Inter-route Exchange), giúp bưu tá tối ưu từng chuyến xe mà không bao giờ bị vi phạm cam kết SLA giao hàng!`,
+      type: 'logistics',
+      tag: 'BRANCH AND CUT VRPTW ROUTER',
+      suggestions: [
+        'Xem lộ trình bưu tá SPX theo khung giờ hẹn',
+        'Kiểm tra tải trọng xe bưu tá VRPTW',
+        'Tra cứu chuỗi con bằng FM-Index'
       ]
     };
   }
