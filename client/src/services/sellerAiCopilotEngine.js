@@ -119,7 +119,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 5. Quản Lý Đơn Hàng & Xử Lý Giao SPX (Order Fulfillment)
-  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router|bưu cục|drop-off|gần shop|geohash|sdvrptw|split delivery|chia nhỏ đơn hàng|count[- ]sketch|td3|hfvrptw|evrptw|mdevrp|tdvrptw|mopo|ultraloglog/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
+  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router|bưu cục|drop-off|gần shop|geohash|sdvrptw|split delivery|chia nhỏ đơn hàng|count[- ]sketch|td3|hfvrptw|evrptw|mdevrp|tdvrptw|mopo|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
     const pendingCount = shopOrders.filter(o => o.status === 'pending').length;
     return {
       text: `📦 **TIẾN ĐỘ XỬ LÝ ĐƠN HÀNG GIAN HÀNG**:
@@ -143,7 +143,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     const daysRemaining = Math.round(totalStock / avgDailySales);
 
     return {
-      text: `📊 **DỰ BÁO TỐC ĐỘ BÁN & SỐ NGÀY CÒN HÀNG (RUN RATE & DIR - ${currentShop.name})**:
+      text: `📊 **DỰ BÁO TỐC ĐỘ BÂN & SỐ NGÀY CÒN HÀNG (RUN RATE & DIR - ${currentShop.name})**:
 - **Tốc độ bán trung bình (Daily Run Rate)**: **~${avgDailySales}** sản phẩm/ngày.
 - **Tổng tồn kho sẵn có toàn shop**: **${totalStock}** sản phẩm.
 - **Dự báo số ngày bán còn lại (DIR)**: **${daysRemaining} ngày** trước khi cạn kho toàn bộ.
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1227,6 +1227,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem đếm khách 4-bit UltraLogLog',
         'Tối ưu hóa giá bán ngoại tuyến MOPO',
         'Kiểm tra định tuyến né tắc đường TDVRPTW'
+      ]
+    };
+  }
+
+  // 61. Bộ Ba Thuật Toán KMV Sketch, CQL Continuous Pricing & 2E-VRPTW Cross-Docking (Phase 52 - Feature 199)
+  if (/kmv sketch|ước lượng kmv|cql continuous|cql liên tục|2e-vrptw|giao hàng hai tầng|xe tải trung chuyển/i.test(raw)) {
+    return {
+      text: `🚀 **BỘ BA THUẬT TOÁN ĐO LƯỜNG TẬP KHÁCH, ĐỊNH GIÁ LIÊN TỤC & GIAO VẬN HAI TẦNG VỆ TINH (PHASE 52 - ${currentShop.name})**:
+- **Đo lường tập khách hàng & độ tương đồng bằng KMV Sketch (Bar-Yossef 2002)**:
+  - Duy trì $k$ giá trị băm nhỏ nhất bằng Max-Heap, ước lượng chính xác quy mô khách quan tâm gian hàng và độ tương đồng Jaccard giữa các chiến dịch khuyến mãi mà không lưu trữ thông tin cá nhân.
+- **Định giá bán tối ưu hành động liên tục bằng CQL Continuous (Kumar NeurIPS 2020)**:
+  - Tự động điều chỉnh biên độ giá $a \\in [-0.25, +0.25]$ với hàm kích hoạt Tanh và Twin-Critic ($Q_1, Q_2$), khóa cứng sàn an toàn tài chính $\\text{COGS} \\times 1.05$ bảo vệ trọn vẹn điểm hòa vốn của shop.
+- **Mạng lưới giao vận đô thị hai tầng với trạm vệ tinh 2E-VRPTW-CD (Perboli 2011)**:
+  - Xe tải điện feeder van trung chuyển từ CDC tới các trạm cross-docking vệ tinh, bưu tá xe máy điện xanh nhận hàng giao ngay chặng cuối ngõ hẻm với thời gian đồng bộ chuẩn xác!`,
+      type: 'recommendation',
+      tag: 'KMV, CQL CONTINUOUS & TWO-ECHELON CROSS-DOCK LOGISTICS',
+      suggestions: [
+        'Đo lường tập khách bằng KMV Sketch',
+        'Tối ưu giá liên tục bằng CQL Continuous',
+        'Mạng lưới giao vận hai tầng 2E-VRPTW'
       ]
     };
   }

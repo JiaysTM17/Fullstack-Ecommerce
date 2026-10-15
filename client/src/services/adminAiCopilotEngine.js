@@ -2926,6 +2926,68 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
+  // 137. Ước Lượng Tập Khách Hàng Bằng K-Minimum Values Sketch (Phase 52 - Feature 199)
+  if (/kmv sketch|k-minimum values|ước lượng kmv|jaccard kmv|cardinality kmv/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG SỐ LƯỢNG TRUY CẬP & ĐỘ TƯƠNG ĐỒNG BẰNG K-MINIMUM VALUES (KMV) SKETCH (BAR-YOSSEF 2002, BEYER 2007)**:
+- **Nguyên Lý Toán Học Không Thiên Lệch**:
+  - Duy trì danh sách $k$ giá trị băm nhỏ nhất chuẩn hóa trong khoảng $(0, 1)$ bằng cấu trúc Max-Heap.
+  - Công thức ước lượng: $\\hat{N} = \\frac{k - 1}{U_{(k)}}$ với sai số chuẩn lý thuyết $SE \\approx \\frac{1}{\\sqrt{k - 2}}$.
+- **Bảo Vệ Quyền Riêng Tư & An Toàn Dữ Liệu**:
+  - Tuyệt đối không lưu trữ ID hay số điện thoại khách hàng, chỉ giữ $k$ số thực dấu phẩy động.
+- **Ước Lượng Tương Đồng Jaccard Không Cần Raw Data**:
+  - Tính toán $\\hat{J}(A, B) = \\frac{|S_A \\cap S_B \\cap K|}{|K|}$ trực tiếp giữa 2 tệp khách hàng của các chiến dịch Flash Sale khác nhau!`,
+      type: 'analytics',
+      tag: 'KMV SKETCH ESTIMATOR',
+      suggestions: [
+        'Ước lượng tệp khách hàng trùng lặp bằng KMV',
+        'Tối ưu giá liên tục bằng CQL Continuous',
+        'Định tuyến bưu tá hai tầng 2E-VRPTW'
+      ]
+    };
+  }
+
+  // 138. Định Giá Bán Tối Ưu Hành Động Liên Tục Bằng CQL Continuous (Phase 52 - Feature 199)
+  if (/cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
+    return {
+      text: `💰 **ĐỊNH GIÁ BÁN TỐI ƯU HÀNH ĐỘNG LIÊN TỤC CONSERVATIVE Q-LEARNING (CQL) (KUMAR ET AL., NEURIPS 2020)**:
+- **Kiến Trúc Actor-Critic Liên Tục**:
+  - Không gian hành động liên tục: tỷ lệ điều chỉnh giá $a \\in [-0.25, +0.25]$ thông qua hàm kích hoạt Squashed Tanh.
+  - Twin-Critic ($Q_1, Q_2$) triệt tiêu hiện tượng ước lượng phóng đại (Overestimation Bias) của thuật toán Q-Learning truyền thống.
+- **Hàm Phạt Bảo Thủ Ngoại Tuyến (Offline Conservative Penalty)**:
+  - $\\min_Q \\alpha (\\mathbb{E}_{\\pi}[Q] - \\mathbb{E}_{\\mathcal{D}}[Q]) + \\frac{1}{2} \\text{TD-Error}^2$ giúp chính sách không xuất hiện ảo giác ngoài vùng phân phối dữ liệu lịch sử (OOD Actions).
+- **Khóa Sàn An Toàn Tài Chính**:
+  - Nghiêm cấm bán dưới giá sàn: $\\text{Price}_{\\min} = \\text{COGS} \\times 1.05$, bảo toàn $100\\%$ điểm hòa vốn cho doanh nghiệp!`,
+      type: 'finance',
+      tag: 'CQL CONTINUOUS PRICING',
+      suggestions: [
+        'Định giá an toàn bằng CQL Continuous',
+        'Ước lượng độ co giãn giá ngoại tuyến',
+        'Điều phối mạng lưới giao vận 2E-VRPTW'
+      ]
+    };
+  }
+
+  // 139. Điều Phối Giao Vận Đô Thị Hai Tầng 2E-VRPTW-CD (Phase 52 - Feature 199)
+  if (/2e-vrptw|two-echelon|giao hàng hai tầng|trạm trung chuyển vệ tinh|cross-docking vệ tinh|mobile electric hub/i.test(raw)) {
+    return {
+      text: `🚚 **MÔ HÌNH GIAO VẬN ĐÔ THỊ HAI TẦNG VỚI TRẠM CROSS-DOCKING VỆ TINH 2E-VRPTW-CD (PERBOLI 2011, HEMMELMAYR 2012)**:
+- **Tầng 1 (First Echelon) - Xe Tải Điện Trung Chuyển (Electric Feeder Vans)**:
+  - Vận chuyển kiện hàng khối lượng lớn (tải trọng 300kg) từ CDC Sóc Sơn tới 4 trạm Cross-Docking vệ tinh (Hoàn Kiếm, Cầu Giấy, Đống Đa, Hai Bà Trưng).
+- **Tầng 2 (Second Echelon) - Đội Xe Máy Điện Xanh (Electric Cargo Motorbikes)**:
+  - Nhận hàng tại trạm vệ tinh và phân phối chặng cuối (Last-mile delivery) tới người nhận trong ngõ hẻm đô thị (tải trọng 35kg).
+- **Đồng Bộ Thời Gian Không Lưu Kho (Cross-Docking Synchronization)**:
+  - Bưu tá xe máy chỉ xuất phát sau khi xe tải van cập bến trạm vệ tinh cộng thêm 15 phút bốc dỡ ($T_{\\text{start}} = T_{\\text{arrival}} + 15\\text{ phút}$), triệt tiêu chi phí lưu kho bãi trung gian!`,
+      type: 'logistics',
+      tag: '2E-VRPTW CROSS-DOCKING LOGISTICS',
+      suggestions: [
+        'Xem lộ trình xe van trung chuyển CDC',
+        'Xem lộ trình xe máy điện giao chặng cuối',
+        'Ước lượng lượng truy cập bằng KMV Sketch'
+      ]
+    };
+  }
+
   // 39. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

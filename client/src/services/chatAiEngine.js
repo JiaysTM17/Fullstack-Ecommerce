@@ -331,7 +331,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
 
   // 1. Kết hợp Tìm sản phẩm + Xin Voucher / Freeship
   if (
-    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx/i.test(lower) &&
+    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển/i.test(lower) &&
     (/mua|tìm|sản phẩm|\báo\b|\bquần\b|tai nghe|chuột|bàn phím|nồi|son|giày/i.test(lower)) &&
     (/voucher|mã|giảm giá|freeship|miễn phí ship/i.test(lower))
   ) {
@@ -438,7 +438,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // ĐƠN HÀNG, TIẾN ĐỘ VẬN ĐƠN, KHIẾU NẠI GIAO TRỄ
   // -------------------------------------------------------------
-  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
+  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
     const orders = lookupCustomerOrders(lower);
     if (orders.length > 0) {
       return {
@@ -484,7 +484,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2|branch[- ]and[- ]cut|vrptw|contraction|benders|mdpdptw|d[- ]darp|dynamic darp|tqpo|cml|count[- ]min[- ]log|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2|branch[- ]and[- ]cut|vrptw|contraction|benders|mdpdptw|d[- ]darp|dynamic darp|tqpo|cml|count[- ]min[- ]log|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -1028,6 +1028,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'ULTRALOGLOG_MOPO_TDVRPTW_ASSIST',
       replyText: `**[ĐẾM KHÁCH 4-BIT ULTRALOGLOG, ĐỊNH GIÁ AN TOÀN MOPO & GIAO VẬN NÉ TẮC ĐƯỜNG TDVRPTW]:**\n\n• **Lượt xem thật chuẩn xác siêu nén (UltraLogLog)**: Công nghệ nén thanh ghi 4-bit tiết kiệm 33% RAM ghi nhận chính xác từng người xem deal trên sàn Mini Shopee mà không lo quá tải!\n• **Giá trợ giá chuẩn mực từ dữ liệu lịch sử (MOPO)**: Học tăng cường ngoại tuyến với cơ chế phạt bất định giúp loại bỏ rủi ro, bảo đảm khách hàng nhận được mức giá trợ giá bền vững và không bao giờ bị đội giá ảo.\n• **Đội xe SPX Express thông minh thích ứng giờ cao điểm (TDVRPTW)**: Tự động điều chỉnh lộ trình né các tuyến phố ùn tắc sáng (07h-09h) và chiều tối (17h-19h), đảm bảo kiện hàng được giao tới tay bạn chuẩn từng phút!`,
       suggestions: ['Xem lượng khách xem UltraLogLog', 'Săn deal bảo đảm MOPO', 'Theo dõi lộ trình né tắc đường SPX'],
+    };
+  }
+
+  // 54. Ước Lượng Lượng Khách KMV, Trợ Giá Liên Tục CQL & Giao Hàng Vệ Tinh Hai Tầng 2E-VRPTW (KMV_CQL_2EVRPTW_ASSIST)
+  if (/kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển|giao hàng hai tầng|trạm vệ tinh/i.test(lower)) {
+    return {
+      intent: 'KMV_CQL_2EVRPTW_ASSIST',
+      replyText: `**[ƯỚC LƯỢNG KHÁCH KMV, TRỢ GIÁ LIÊN TỤC CQL & GIAO HÀNG HAI TẦNG 2E-VRPTW-CD]:**\n\n• **Bảo mật tuyệt đối thông tin cá nhân (KMV Sketch)**: Công nghệ băm K-Minimum Values đo lường chính xác lượng khách quan tâm và sự tương đồng giữa các chương trình Flash Sale mà không lưu trữ ID hay số điện thoại của bạn!\n• **Giá trợ giá liên tục thông minh (CQL Continuous)**: Học tăng cường ngoại tuyến tự động điều chỉnh mức giá tối ưu theo thời gian thực mà không bao giờ bán dưới giá vốn an toàn.\n• **Giao hàng thần tốc qua trạm vệ tinh hai tầng (2E-VRPTW-CD)**: Xe tải van trung chuyển từ CDC tới các trạm vệ tinh đô thị, đội xe máy điện xanh phân phối chặng cuối tận ngõ nhà bạn đúng giờ hẹn!`,
+      suggestions: ['Xem lượng quan tâm bằng KMV', 'Săn giá tốt CQL Continuous', 'Tra cứu giao hàng hai tầng 2E-VRPTW'],
     };
   }
 

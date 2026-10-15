@@ -288,6 +288,11 @@ import {
   MOPOPricing,
   TRAFFIC_PERIODS,
   TDVRPTWRouter,
+  // Phase 52 Enterprise Algorithms
+  KMVSketchEstimator,
+  CQLContinuousPricing,
+  DEFAULT_SATELLITE_CROSS_DOCKS,
+  TwoEchelonVRPTWRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -409,6 +414,9 @@ import { MDEVRPNLRouter as ServerMDEVRPNLRouter, DEFAULT_SPX_DEPOTS as ServerDef
 import { UltraLogLogEstimator as ServerUltraLogLogEstimator } from "../../server/src/utils/ultraLogLogEstimator.js";
 import { MOPOPricing as ServerMOPOPricing } from "../../server/src/utils/mopoPricing.js";
 import { TDVRPTWRouter as ServerTDVRPTWRouter, TRAFFIC_PERIODS as ServerTrafficPeriods } from "../../server/src/utils/tdvrptwRouter.js";
+import { KMVSketchEstimator as ServerKMVSketchEstimator } from "../../server/src/utils/kmvSketchEstimator.js";
+import { CQLContinuousPricing as ServerCQLContinuousPricing } from "../../server/src/utils/cqlContinuousPricing.js";
+import { TwoEchelonVRPTWRouter as ServerTwoEchelonVRPTWRouter, DEFAULT_SATELLITE_CROSS_DOCKS as ServerDefaultCrossDocks } from "../../server/src/utils/twoEchelonVrptwRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -22979,6 +22987,348 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(plan.status, 'TDVRPTW_OPTIMAL_SCHEDULED');
       expect.equal(plan.fulfilledOrders, 1);
       expect.ok(plan.totalDistKm > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 199: KMV Sketch, CQL Continuous Action Pricing & 2E-VRPTW-CD Cross-Docking (24 Tests)
+  // =========================================================================
+  describe("Feature 199: KMV Sketch, CQL Continuous Pricing & 2E-VRPTW-CD Logistics", () => {
+    // -----------------------------------------------------------------------
+    // KMV SKETCH ESTIMATOR (Tests 1-6)
+    // -----------------------------------------------------------------------
+    test("F199-T01: KMVSketchEstimator maintains exactly k minimum normalized hash values via Max-Heap", () => {
+      const kmv = new ServerKMVSketchEstimator({ k: 16 });
+      for (let i = 0; i < 100; i++) {
+        kmv.add(`user_test_${i}`);
+      }
+      expect.equal(kmv.size(), 16);
+      const values = kmv.getValues();
+      expect.equal(values.length, 16);
+      for (let i = 0; i < values.length - 1; i++) {
+        expect.ok(values[i] <= values[i + 1]);
+      }
+      expect.ok(values[values.length - 1] > 0 && values[values.length - 1] < 1);
+    });
+
+    test("F199-T02: KMVSketchEstimator (k-1)/U_(k) accurately predicts stream cardinality within standard error", () => {
+      const kmv = new ServerKMVSketchEstimator({ k: 128 });
+      const streamSize = 1500;
+      for (let i = 0; i < streamSize; i++) {
+        kmv.add(`customer_session_${i}`);
+      }
+      const estimate = kmv.estimate();
+      const se = kmv.standardError();
+      expect.ok(se > 0 && se < 0.15); // 1 / sqrt(126) ≈ 0.089
+      // Estimate should be reasonable (within ~25% for k=128)
+      expect.ok(estimate >= 1000 && estimate <= 2100);
+    });
+
+    test("F199-T03: KMVSketchEstimator handles stream with duplicate keys correctly (idempotent)", () => {
+      const kmv = new ServerKMVSketchEstimator({ k: 32 });
+      for (let i = 0; i < 50; i++) {
+        kmv.add(`repeat_key_${i % 10}`);
+      }
+      // Only 10 distinct keys added, heap size should be 10 (< k=32)
+      expect.equal(kmv.size(), 10);
+      expect.equal(kmv.estimate(), 10);
+    });
+
+    test("F199-T04: KMVSketchEstimator merges two sketches correctly producing union estimate", () => {
+      const kmvA = new ServerKMVSketchEstimator({ k: 64 });
+      const kmvB = new ServerKMVSketchEstimator({ k: 64 });
+      for (let i = 0; i < 500; i++) kmvA.add(`stream_a_${i}`);
+      for (let i = 250; i < 750; i++) kmvB.add(`stream_b_${i}`); // 250 overlap
+      const merged = kmvA.merge(kmvB);
+      expect.equal(merged.size(), 64);
+      const unionEstimate = merged.estimate();
+      expect.ok(unionEstimate >= 500 && unionEstimate <= 1600);
+    });
+
+    test("F199-T05: KMVSketchEstimator calculates Jaccard similarity between two customer sets without raw data", () => {
+      const kmvA = new ServerKMVSketchEstimator({ k: 64 });
+      const kmvB = new ServerKMVSketchEstimator({ k: 64 });
+      // 50% overlap: 50 items common, 50 unique to each -> J = 50 / 150 ≈ 0.33
+      for (let i = 0; i < 100; i++) kmvA.add(`user_overlap_${i}`);
+      for (let i = 50; i < 150; i++) kmvB.add(`user_overlap_${i}`);
+      const jaccard = kmvA.jaccardSimilarity(kmvB);
+      expect.ok(jaccard >= 0.15 && jaccard <= 0.6);
+    });
+
+    test("F199-T06: KMVSketchEstimator serializes to JSON and restores accurately", () => {
+      const kmv = new ServerKMVSketchEstimator({ k: 32 });
+      for (let i = 0; i < 100; i++) kmv.add(`serialized_user_${i}`);
+      const json = kmv.toJSON();
+      expect.equal(json.k, 32);
+      expect.equal(json.values.length, 32);
+      const restored = ServerKMVSketchEstimator.fromJSON(json);
+      expect.equal(restored.estimate(), kmv.estimate());
+      expect.equal(restored.size(), 32);
+    });
+
+    // -----------------------------------------------------------------------
+    // CQL CONTINUOUS ACTION PRICING (Tests 7-12)
+    // -----------------------------------------------------------------------
+    test("F199-T07: CQLContinuousPricing Actor squashes continuous action output into [-0.25, +0.25]", () => {
+      const cql = new ServerCQLContinuousPricing();
+      const state = [0.5, 0.2, 0.8, -0.4];
+      const action = cql.predictAction(state);
+      expect.ok(action >= -0.25 && action <= 0.25);
+    });
+
+    test("F199-T08: CQLContinuousPricing Twin-Critic computes conservative Q values with uncertainty penalty", () => {
+      const cql = new ServerCQLContinuousPricing({ conservativeAlpha: 0.1 });
+      const state = [0.1, 0.4, 0.3, 0.2];
+      const evalResult = cql.evaluate(state, 0.05);
+      expect.ok(evalResult.minQ !== undefined);
+      expect.ok(evalResult.q1 !== undefined);
+      expect.ok(evalResult.q2 !== undefined);
+      expect.ok(evalResult.conservativeValue <= Math.max(evalResult.q1, evalResult.q2));
+    });
+
+    test("F199-T09: CQLContinuousPricing enforces hard floor price (COGS * 1.05)", () => {
+      const cql = new ServerCQLContinuousPricing({ minMarginFloor: 0.05 });
+      const pricing = cql.optimizePrice({
+        cogs: 200000,
+        currentPrice: 210000,
+        competitorPrice: 150000, // Very low competitor
+        demandIndex: 0.5,
+        inventoryDays: 60
+      });
+      expect.equal(pricing.status, 'CQL_CONTINUOUS_OPTIMAL_PRICED');
+      expect.ok(pricing.recommendedPrice >= 210000); // 200,000 * 1.05 = 210,000
+      expect.ok(pricing.grossMarginPercent >= 4.7);
+    });
+
+    test("F199-T10: CQLContinuousPricing updates offline replay buffer and tracks loss", () => {
+      const cql = new ServerCQLContinuousPricing();
+      const batch = [
+        { state: [0.2, 0.1, 0.5, 0.1], action: 0.05, reward: 120, nextState: [0.22, 0.1, 0.52, 0.1] },
+        { state: [0.4, 0.3, 0.2, -0.2], action: -0.1, reward: 95, nextState: [0.38, 0.3, 0.25, -0.15] }
+      ];
+      const step = cql.update(batch);
+      expect.ok(step.criticLoss !== undefined);
+      expect.ok(step.actorLoss !== undefined);
+    });
+
+    test("F199-T11: CQLContinuousPricing recommends markdown for aged deadstock inventory", () => {
+      const cql = new ServerCQLContinuousPricing();
+      const pricing = cql.optimizePrice({
+        cogs: 100000,
+        currentPrice: 200000,
+        competitorPrice: 180000,
+        demandIndex: 0.8,
+        inventoryDays: 95 // Deadstock
+      });
+      expect.ok(pricing.recommendedPrice < 200000);
+      expect.ok(pricing.recommendedPrice >= 105000);
+      expect.equal(pricing.status, 'CQL_CONTINUOUS_OPTIMAL_PRICED');
+    });
+
+    test("F199-T12: CQLContinuousPricing reacts competitively to competitor pressure while respecting floor", () => {
+      const cql = new ServerCQLContinuousPricing();
+      const pricingHigh = cql.optimizePrice({
+        cogs: 300000,
+        currentPrice: 400000,
+        competitorPrice: 450000,
+        demandIndex: 1.5,
+        inventoryDays: 5
+      });
+      const pricingLow = cql.optimizePrice({
+        cogs: 300000,
+        currentPrice: 400000,
+        competitorPrice: 350000,
+        demandIndex: 0.9,
+        inventoryDays: 20
+      });
+      expect.ok(pricingHigh.recommendedPrice > pricingLow.recommendedPrice);
+      expect.ok(pricingLow.recommendedPrice >= 315000); // 300k * 1.05
+    });
+
+    // -----------------------------------------------------------------------
+    // TWO-ECHELON VRPTW WITH CROSS-DOCKING (Tests 13-18)
+    // -----------------------------------------------------------------------
+    test("F199-T13: TwoEchelonVRPTWRouter assigns orders to nearest satellite cross-dock", () => {
+      const router = new ServerTwoEchelonVRPTWRouter();
+      // Hoan Kiem order (near SATELLITE_HK: 21.028, 105.854)
+      const orders = [
+        { id: 'ORD_HK_1', lat: 21.029, lng: 105.855, weightKg: 2, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 5 },
+        { id: 'ORD_CG_1', lat: 21.036, lng: 105.783, weightKg: 3, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 5 }
+      ];
+      const plan = router.planTwoEchelonRoutes(orders);
+      expect.equal(plan.status, '2E_VRPTW_CD_OPTIMAL_SCHEDULED');
+      expect.equal(plan.fulfilledOrders, 2);
+      expect.equal(plan.unassignedOrders.length, 0);
+    });
+
+    test("F199-T14: First-echelon electric feeder vans carry grouped orders within 300kg limit", () => {
+      const router = new ServerTwoEchelonVRPTWRouter();
+      const orders = [
+        { id: 'ORD_VAN_1', lat: 21.028, lng: 105.854, weightKg: 50, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 10 },
+        { id: 'ORD_VAN_2', lat: 21.029, lng: 105.855, weightKg: 60, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 10 }
+      ];
+      const plan = router.planTwoEchelonRoutes(orders);
+      expect.ok(plan.echelon1Routes.length >= 1);
+      for (const r of plan.echelon1Routes) {
+        expect.ok(r.loadKg <= 300);
+      }
+    });
+
+    test("F199-T15: Second-echelon electric motorbikes respect 35kg capacity constraint", () => {
+      const router = new ServerTwoEchelonVRPTWRouter();
+      const orders = [
+        { id: 'BIKE_ORD_1', lat: 21.028, lng: 105.853, weightKg: 20, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 5 },
+        { id: 'BIKE_ORD_2', lat: 21.029, lng: 105.854, weightKg: 20, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 5 }
+      ];
+      const plan = router.planTwoEchelonRoutes(orders);
+      expect.ok(plan.echelon2Routes.length >= 1);
+      for (const r of plan.echelon2Routes) {
+        expect.ok(r.loadKg <= 35);
+      }
+    });
+
+    test("F199-T16: TwoEchelonVRPTWRouter enforces cross-dock synchronization delay (transfer >= 15 min)", () => {
+      const router = new ServerTwoEchelonVRPTWRouter({ crossDockTransferMinutes: 15 });
+      const orders = [
+        { id: 'SYNC_ORD_1', lat: 21.028, lng: 105.854, weightKg: 5, earlyMinutes: 480, lateMinutes: 700, serviceMinutes: 10 }
+      ];
+      const plan = router.planTwoEchelonRoutes(orders, { startMinute: 420 }); // Van departs at 7:00 AM (420m)
+      expect.ok(plan.crossDockMetrics.length >= 1);
+      const hkMetric = plan.crossDockMetrics.find(m => m.dockId === 'CD_HOAN_KIEM' || m.alias === 'SATELLITE_HK');
+      expect.ok(hkMetric !== undefined);
+      // readyTime = arrival + 15 min
+      expect.ok(hkMetric.readyTimeMinutes > 420 + 15);
+      // Echelon 2 bike departs at readyTime
+      const bikeRoute = plan.echelon2Routes[0];
+      expect.ok(bikeRoute.startTimeMinutes >= hkMetric.readyTimeMinutes);
+    });
+
+    test("F199-T17: TwoEchelonVRPTWRouter computes CO2 emissions saved compared to diesel truck baseline", () => {
+      const router = new ServerTwoEchelonVRPTWRouter();
+      const orders = [
+        { id: 'CO2_ORD_1', lat: 21.030, lng: 105.850, weightKg: 4, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 5 }
+      ];
+      const plan = router.planTwoEchelonRoutes(orders);
+      expect.ok(plan.totalCo2SavedKg > 0);
+      expect.ok(plan.totalKm > 0);
+    });
+
+    test("F199-T18: TwoEchelonVRPTWRouter applies soft penalty for deliveries exceeding late window", () => {
+      const router = new ServerTwoEchelonVRPTWRouter();
+      // Very strict early deadline (cannot be met due to van travel + crossdock transfer)
+      const orders = [
+        { id: 'LATE_ORD_1', lat: 21.030, lng: 105.850, weightKg: 2, earlyMinutes: 420, lateMinutes: 430, serviceMinutes: 5 }
+      ];
+      const plan = router.planTwoEchelonRoutes(orders, { startMinute: 420 });
+      expect.equal(plan.fulfilledOrders, 1);
+      expect.ok(plan.totalLateMinutes > 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT VS SERVER CONSISTENCY (Tests 19-20)
+    // -----------------------------------------------------------------------
+    test("F199-T19: Client and Server KMVSketchEstimator produce identical hash order and estimates", () => {
+      const clientKMV = new KMVSketchEstimator({ k: 32 });
+      const serverKMV = new ServerKMVSketchEstimator({ k: 32 });
+      for (let i = 0; i < 200; i++) {
+        const key = `sync_customer_${i}`;
+        clientKMV.add(key);
+        serverKMV.add(key);
+      }
+      expect.equal(clientKMV.size(), serverKMV.size());
+      expect.equal(clientKMV.estimate(), serverKMV.estimate());
+      expect.equal(clientKMV.standardError(), serverKMV.standardError());
+      const clientVals = clientKMV.getValues();
+      const serverVals = serverKMV.getValues();
+      for (let i = 0; i < clientVals.length; i++) {
+        expect.equal(clientVals[i], serverVals[i]);
+      }
+    });
+
+    test("F199-T20: Client and Server TwoEchelonVRPTWRouter produce identical routing plans and metrics", () => {
+      const clientRouter = new TwoEchelonVRPTWRouter();
+      const serverRouter = new ServerTwoEchelonVRPTWRouter();
+      const orders = [
+        { id: 'ORD_CONSISTENCY_1', lat: 21.028, lng: 105.854, weightKg: 5, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 10 },
+        { id: 'ORD_CONSISTENCY_2', lat: 21.036, lng: 105.783, weightKg: 8, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 10 }
+      ];
+      const clientPlan = clientRouter.planTwoEchelonRoutes(orders, { startMinute: 420 });
+      const serverPlan = serverRouter.planTwoEchelonRoutes(orders, { startMinute: 420 });
+      expect.equal(clientPlan.fulfilledOrders, serverPlan.fulfilledOrders);
+      expect.equal(clientPlan.totalKm, serverPlan.totalKm);
+      expect.equal(clientPlan.totalDistKm, serverPlan.totalDistKm);
+      expect.equal(clientPlan.totalCo2SavedKg, serverPlan.totalCo2SavedKg);
+      expect.equal(clientPlan.totalLateMinutes, serverPlan.totalLateMinutes);
+    });
+
+    // -----------------------------------------------------------------------
+    // AI COPILOT INTEGRATIONS & END-TO-END PIPELINE (Tests 21-24)
+    // -----------------------------------------------------------------------
+    test("F199-T21: Admin Sentinel Copilot (Sections 137, 138, 139) responds to KMV, CQL Continuous, and 2E-VRPTW queries", () => {
+      const res137 = generateAdminCopilotResponse("ước lượng truy cập bằng kmv sketch k-minimum values");
+      expect.equal(res137.tag, "KMV SKETCH ESTIMATOR");
+      expect.ok(res137.text.includes("KMV"));
+
+      const res138 = generateAdminCopilotResponse("tối ưu hóa định giá cql continuous hành động liên tục");
+      expect.equal(res138.tag, "CQL CONTINUOUS PRICING");
+      expect.ok(res138.text.includes("CQL"));
+
+      const res139 = generateAdminCopilotResponse("mô hình giao hàng hai tầng 2e-vrptw trạm trung chuyển vệ tinh");
+      expect.equal(res139.tag, "2E-VRPTW CROSS-DOCKING LOGISTICS");
+      expect.ok(res139.text.includes("2E-VRPTW"));
+    });
+
+    test("F199-T22: Seller ShopSmart Copilot (Section 61) advises sellers on KMV UVs, continuous pricing, and two-echelon shipping", () => {
+      const res = generateSellerCopilotResponse("tư vấn đo lường bằng kmv sketch, cql continuous và giao hàng hai tầng 2e-vrptw");
+      expect.equal(res.tag, "KMV, CQL CONTINUOUS & TWO-ECHELON CROSS-DOCK LOGISTICS");
+      expect.ok(res.text.includes("KMV"));
+      expect.ok(res.text.includes("CQL"));
+      expect.ok(res.text.includes("2E-VRPTW"));
+    });
+
+    test("F199-T23: Buyer AI Assistant triggers Intent 54 (KMV_CQL_2EVRPTW_ASSIST)", () => {
+      const res = generateAiChatResponse("giải thích ước lượng khách kmv, deal cql continuous và giao hàng hai tầng 2e-vrptw");
+      expect.equal(res.intent, "KMV_CQL_2EVRPTW_ASSIST");
+      expect.ok(res.replyText.includes("KMV"));
+      expect.ok(res.replyText.includes("CQL"));
+      expect.ok(res.replyText.includes("2E-VRPTW"));
+    });
+
+    test("F199-T24: End-to-End Pipeline: KMV tracks campaign unique buyers & overlaps, CQL continuous prices Flash Sale items, and 2E-VRPTW-CD dispatches cross-docked electric fleet", () => {
+      // Step 1: KMV tracks campaign A and B visitors and calculates overlap Jaccard
+      const kmvCampA = new ServerKMVSketchEstimator({ k: 64 });
+      const kmvCampB = new ServerKMVSketchEstimator({ k: 64 });
+      for (let i = 0; i < 500; i++) kmvCampA.add(`buyer_vip_${i}`);
+      for (let i = 250; i < 750; i++) kmvCampB.add(`buyer_vip_${i}`); // 250 overlap
+      const uvA = kmvCampA.estimate();
+      const uvB = kmvCampB.estimate();
+      expect.ok(uvA >= 300 && uvA <= 950);
+      expect.ok(uvB >= 300 && uvB <= 950);
+      const overlapSim = kmvCampA.jaccardSimilarity(kmvCampB);
+      expect.ok(overlapSim >= 0.10 && overlapSim <= 0.6);
+
+      // Step 2: CQL Continuous prices item with continuous action and floor protection
+      const cql = new ServerCQLContinuousPricing();
+      const pricing = cql.optimizePrice({
+        cogs: 500000,
+        currentPrice: 700000,
+        competitorPrice: 650000,
+        demandIndex: 1.2,
+        inventoryDays: 30
+      });
+      expect.equal(pricing.status, 'CQL_CONTINUOUS_OPTIMAL_PRICED');
+      expect.ok(pricing.recommendedPrice >= 525000); // 500k * 1.05
+      expect.ok(pricing.grossMarginPercent > 0);
+
+      // Step 3: Two-Echelon VRPTW with Cross-Docking schedules van from CDC to Satellite, then bike to buyers
+      const router = new ServerTwoEchelonVRPTWRouter();
+      const plan = router.planTwoEchelonRoutes([
+        { id: 'E2E_2E_ORD_1', lat: 21.028, lng: 105.854, weightKg: 3.5, earlyMinutes: 480, lateMinutes: 660, serviceMinutes: 10 }
+      ], { startMinute: 420 });
+      expect.equal(plan.status, '2E_VRPTW_CD_OPTIMAL_SCHEDULED');
+      expect.equal(plan.fulfilledOrders, 1);
+      expect.ok(plan.totalKm > 0);
+      expect.ok(plan.totalCo2SavedKg > 0);
     });
   });
 });
