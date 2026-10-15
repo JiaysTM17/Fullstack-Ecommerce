@@ -1010,6 +1010,27 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 50. Tư Vấn Xả Hàng SAC, Kiểm Duyệt Double-Array & Luân Chuyển Đa Kho (Phase 41 - Feature 188)
+  if (/sac markdown|hạ giá thanh lý|xả hàng cận hạn|kiểm duyệt từ cấm double[- ]array|double[- ]array|multi[- ]commodity|luân chuyển đa kho/i.test(raw)) {
+    return {
+      text: `📦 **TƯ VẤN XẢ HÀNG SAC, KIỂM DUYỆT TỪ CẤM DOUBLE-ARRAY & LUÂN CHUYỂN ĐA KHO (${currentShop.name})**:
+- **Chiến lược Xả Hàng Tồn Cận Date Bằng Soft Actor-Critic (SAC)**:
+  - Tự động tính toán đường cong hạ giá thanh lý tối ưu theo số ngày cận hạn ($DIR$) và tỷ lệ tồn kho.
+  - Tối đa hóa hàm Entropy $\\mathcal{H}(\\pi)$ tránh bán tháo lỗ sâu quá sớm, giúp shop thu hồi dòng vốn lưu động nhanh nhất với biên thu hồi tối đa!
+- **Kiểm duyệt từ cấm mô tả siêu tốc Double-Array Aho-Corasick**:
+  - Quét sạch toàn bộ từ khóa nhạy cảm, quảng cáo spam trong tiêu đề và mô tả sản phẩm của shop chỉ trong $O(L)$, đảm bảo đăng bài chuẩn SEO không lo bị sàn gắn cờ vi phạm.
+- **Cân bằng luân chuyển kho Multi-Commodity Min-Cost Circulation**:
+  - Gợi ý điều chuyển hàng giữa các kho vệ tinh chi phí thấp nhất, hạn chế đứt gãy nguồn cung tại các khu vực đang có nhu cầu mua sắm đột biến!`,
+      type: 'recommendation',
+      tag: 'SAC CLEARANCE, DOUBLE-ARRAY & MULTI-COMMODITY',
+      suggestions: [
+        'Tính toán mức giảm giá xả hàng SAC',
+        'Kiểm tra từ cấm bài đăng Double-Array',
+        'Gợi ý luân chuyển hàng giữa các kho'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

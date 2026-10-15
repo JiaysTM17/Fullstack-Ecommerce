@@ -19758,6 +19758,532 @@ export class HopcroftKarpLogisticsRouter {
   }
 }
 
+// ============================================================================
+// PHASE 41 ENTERPRISE ALGORITHMS
+// ============================================================================
+
+export class DoubleArrayAhoCorasick {
+  constructor(options = {}) {
+    this.initialCapacity = options.initialCapacity || 4096;
+    this.base = new Int32Array(this.initialCapacity);
+    this.check = new Int32Array(this.initialCapacity).fill(-1);
+    this.fail = new Int32Array(this.initialCapacity);
+    this.output = new Map();
+    this.size = 1;
+    this.base[0] = 1;
+    this.check[0] = 0;
+  }
+
+  _resize(minCapacity) {
+    let newCap = this.base.length * 2;
+    while (newCap <= minCapacity) newCap *= 2;
+
+    const newBase = new Int32Array(newCap);
+    const newCheck = new Int32Array(newCap).fill(-1);
+    const newFail = new Int32Array(newCap);
+
+    newBase.set(this.base);
+    newCheck.set(this.check);
+    newFail.set(this.fail);
+
+    this.base = newBase;
+    this.check = newCheck;
+    this.fail = newFail;
+  }
+
+  build(patterns) {
+    if (!patterns || patterns.length === 0) return this;
+    const root = { children: new Map(), output: [] };
+
+    for (const pat of patterns) {
+      const word = (pat.keyword || pat).toLowerCase().trim();
+      if (!word) continue;
+
+      let curr = root;
+      for (let i = 0; i < word.length; i++) {
+        const charCode = word.charCodeAt(i);
+        if (!curr.children.has(charCode)) {
+          curr.children.set(charCode, { children: new Map(), output: [] });
+        }
+        curr = curr.children.get(charCode);
+      }
+      curr.output.push({
+        keyword: word,
+        category: pat.category || 'PROHIBITED',
+        severity: pat.severity || 'HIGH'
+      });
+    }
+
+    const nodeQueue = [{ trieNode: root, daIndex: 0 }];
+    const stateMap = new Map();
+    stateMap.set(root, 0);
+
+    while (nodeQueue.length > 0) {
+      const { trieNode, daIndex } = nodeQueue.shift();
+      const childrenEntries = Array.from(trieNode.children.entries());
+      if (childrenEntries.length === 0) continue;
+
+      let baseVal = 1;
+      let found = false;
+
+      while (!found) {
+        found = true;
+        for (const [charCode] of childrenEntries) {
+          const nextPos = baseVal + charCode;
+          if (nextPos >= this.check.length) {
+            this._resize(nextPos + 1);
+          }
+          if (this.check[nextPos] !== -1) {
+            found = false;
+            break;
+          }
+        }
+        if (!found) baseVal++;
+      }
+
+      this.base[daIndex] = baseVal;
+
+      for (const [charCode, childNode] of childrenEntries) {
+        const nextPos = baseVal + charCode;
+        this.check[nextPos] = daIndex;
+        if (nextPos >= this.size) this.size = nextPos + 1;
+
+        if (childNode.output.length > 0) {
+          this.output.set(nextPos, [...childNode.output]);
+        }
+
+        stateMap.set(childNode, nextPos);
+        nodeQueue.push({ trieNode: childNode, daIndex: nextPos });
+      }
+    }
+
+    const failQueue = [];
+    for (const [, childPos] of root.children.entries()) {
+      const daPos = stateMap.get(childPos);
+      this.fail[daPos] = 0;
+      failQueue.push(daPos);
+    }
+
+    while (failQueue.length > 0) {
+      const r = failQueue.shift();
+      const rBase = this.base[r];
+      if (rBase <= 0) continue;
+
+      for (let charCode = 0; charCode < 65536; charCode++) {
+        const s = rBase + charCode;
+        if (s < this.check.length && this.check[s] === r) {
+          failQueue.push(s);
+
+          let f = this.fail[r];
+          while (f > 0 && !this._hasTransition(f, charCode)) {
+            f = this.fail[f];
+          }
+
+          const fallback = this._transition(f, charCode);
+          this.fail[s] = fallback;
+
+          if (this.output.has(fallback)) {
+            const currentOut = this.output.get(s) || [];
+            this.output.set(s, currentOut.concat(this.output.get(fallback)));
+          }
+        }
+      }
+    }
+
+    return this;
+  }
+
+  _hasTransition(state, charCode) {
+    const next = this.base[state] + charCode;
+    return next < this.check.length && this.check[next] === state;
+  }
+
+  _transition(state, charCode) {
+    const next = this.base[state] + charCode;
+    if (next < this.check.length && this.check[next] === state) {
+      return next;
+    }
+    return state === 0 ? 0 : this._transition(this.fail[state], charCode);
+  }
+
+  search(text) {
+    if (!text || typeof text !== 'string') return [];
+    const normalized = text.toLowerCase();
+    const matches = [];
+    let state = 0;
+
+    for (let i = 0; i < normalized.length; i++) {
+      const charCode = normalized.charCodeAt(i);
+
+      while (state > 0 && !this._hasTransition(state, charCode)) {
+        state = this.fail[state];
+      }
+
+      state = this._hasTransition(state, charCode)
+        ? (this.base[state] + charCode)
+        : 0;
+
+      if (this.output.has(state)) {
+        for (const item of this.output.get(state)) {
+          matches.push({
+            keyword: item.keyword,
+            category: item.category,
+            severity: item.severity,
+            position: i - item.keyword.length + 1
+          });
+        }
+      }
+    }
+
+    return matches;
+  }
+
+  moderate(text, maskChar = '*') {
+    const matches = this.search(text);
+    if (matches.length === 0) {
+      return { isClean: true, maskedText: text, violationsCount: 0, violations: [] };
+    }
+
+    let chars = text.split('');
+    for (const match of matches) {
+      const start = Math.max(0, match.position);
+      const end = Math.min(chars.length, start + match.keyword.length);
+      for (let p = start; p < end; p++) {
+        chars[p] = maskChar;
+      }
+    }
+
+    return {
+      isClean: false,
+      maskedText: chars.join(''),
+      violationsCount: matches.length,
+      violations: matches
+    };
+  }
+}
+
+export class SacDynamicMarkdownPricing {
+  constructor(options = {}) {
+    this.obsDim = options.obsDim || 4;
+    this.actionDim = 1;
+    this.gamma = options.gamma || 0.98;
+    this.tau = options.tau || 0.05;
+    this.alpha = options.alpha || 0.2;
+    this.actorLr = options.actorLr || 0.01;
+    this.criticLr = options.criticLr || 0.02;
+
+    this.actorMeanWeights = new Array(this.obsDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.actorLogStd = 0.0;
+    this.q1Weights = new Array(this.obsDim + 1).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.q2Weights = new Array(this.obsDim + 1).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.targetQ1Weights = [...this.q1Weights];
+    this.targetQ2Weights = [...this.q2Weights];
+    this.replayBuffer = [];
+    this.maxBufferSize = options.maxBufferSize || 1000;
+  }
+
+  _forwardActor(obs) {
+    let z = 0;
+    for (let i = 0; i < this.obsDim; i++) {
+      z += (obs[i] || 0) * this.actorMeanWeights[i];
+    }
+    const mean = 1 / (1 + Math.exp(-Math.max(-10, Math.min(10, z))));
+    const std = Math.exp(Math.max(-2, Math.min(1, this.actorLogStd)));
+    return { mean, std };
+  }
+
+  sampleAction(obs, deterministic = false) {
+    const { mean, std } = this._forwardActor(obs);
+    if (deterministic) {
+      return { action: mean, logProb: 0 };
+    }
+
+    const u1 = Math.max(1e-7, Math.random());
+    const u2 = Math.random();
+    const eps = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+
+    let rawAction = mean + std * eps;
+    const action = Math.max(0.0, Math.min(1.0, rawAction));
+    const logProb = -0.5 * Math.pow((rawAction - mean) / (std + 1e-6), 2) - Math.log(std * Math.sqrt(2 * Math.PI));
+
+    return { action, logProb };
+  }
+
+  evaluateQ(obs, action, useTarget = false) {
+    const input = [...obs, action];
+    const w1 = useTarget ? this.targetQ1Weights : this.q1Weights;
+    const w2 = useTarget ? this.targetQ2Weights : this.q2Weights;
+
+    let q1 = 0;
+    let q2 = 0;
+    for (let i = 0; i < input.length; i++) {
+      q1 += (input[i] || 0) * w1[i];
+      q2 += (input[i] || 0) * w2[i];
+    }
+    return { q1, q2 };
+  }
+
+  storeTransition(obs, action, reward, nextObs, done = false) {
+    if (this.replayBuffer.length >= this.maxBufferSize) {
+      this.replayBuffer.shift();
+    }
+    this.replayBuffer.push({
+      obs: [...obs],
+      action: Number(action) || 0,
+      reward: Number(reward) || 0,
+      nextObs: [...nextObs],
+      done: Boolean(done)
+    });
+  }
+
+  trainBatch(batchSize = 16) {
+    if (this.replayBuffer.length < 8) {
+      return { trained: false, avgLoss: 0 };
+    }
+
+    const size = Math.min(batchSize, this.replayBuffer.length);
+    let criticLossSum = 0;
+
+    for (let i = 0; i < size; i++) {
+      const idx = Math.floor(Math.random() * this.replayBuffer.length);
+      const { obs, action, reward, nextObs, done } = this.replayBuffer[idx];
+
+      let targetQ = reward;
+      if (!done) {
+        const nextSample = this.sampleAction(nextObs, false);
+        const nextQ = this.evaluateQ(nextObs, nextSample.action, true);
+        const minNextQ = Math.min(nextQ.q1, nextQ.q2);
+        targetQ += this.gamma * (minNextQ - this.alpha * nextSample.logProb);
+      }
+
+      const currentQ = this.evaluateQ(obs, action, false);
+      const err1 = targetQ - currentQ.q1;
+      const err2 = targetQ - currentQ.q2;
+      criticLossSum += err1 * err1 + err2 * err2;
+
+      const input = [...obs, action];
+      for (let d = 0; d < input.length; d++) {
+        this.q1Weights[d] += this.criticLr * err1 * input[d];
+        this.q2Weights[d] += this.criticLr * err2 * input[d];
+      }
+
+      const currentSample = this.sampleAction(obs, false);
+      const qEval = this.evaluateQ(obs, currentSample.action, false);
+      const minCurrentQ = Math.min(qEval.q1, qEval.q2);
+      const actorAdvantage = minCurrentQ - this.alpha * currentSample.logProb;
+
+      for (let d = 0; d < this.obsDim; d++) {
+        this.actorMeanWeights[d] += this.actorLr * actorAdvantage * (obs[d] || 0) * 0.05;
+      }
+
+      for (let d = 0; d < input.length; d++) {
+        this.targetQ1Weights[d] = this.tau * this.q1Weights[d] + (1 - this.tau) * this.targetQ1Weights[d];
+        this.targetQ2Weights[d] = this.tau * this.q2Weights[d] + (1 - this.tau) * this.targetQ2Weights[d];
+      }
+    }
+
+    return {
+      trained: true,
+      avgLoss: Number((criticLossSum / size).toFixed(4)),
+      currentAlpha: this.alpha
+    };
+  }
+
+  computeClearancePricing(productContext) {
+    const {
+      basePrice = 200000,
+      daysToExpiry = 45,
+      totalShelfDays = 180,
+      stockRemaining = 80,
+      initialStock = 100,
+      dailySalesRate = 0.5,
+      costPrice = 120000
+    } = productContext;
+
+    const daysRatio = Math.max(0, Math.min(1.0, daysToExpiry / (totalShelfDays || 1)));
+    const stockRatio = Math.max(0, Math.min(1.0, stockRemaining / (initialStock || 1)));
+    const velocityRate = Math.max(0, Math.min(1.0, dailySalesRate / 5.0));
+    const marginRatio = Math.max(0, Math.min(1.0, (basePrice - costPrice) / (basePrice || 1)));
+
+    const obs = [daysRatio, stockRatio, velocityRate, marginRatio];
+    const { action } = this.sampleAction(obs, true);
+
+    const discountPercent = Math.round(action * 50);
+    const clearancePrice = Math.max(costPrice * 0.95, Math.round(basePrice * (1 - discountPercent / 100)));
+    const expectedRecoveryCash = Math.round(clearancePrice * stockRemaining);
+    const estimatedDaysToClear = Math.max(1, Math.round(stockRemaining / (Math.max(0.1, dailySalesRate * (1 + action * 2)))));
+
+    return {
+      originalPrice: basePrice,
+      costPrice,
+      discountPercent,
+      clearancePrice,
+      expectedRecoveryCash,
+      estimatedDaysToClear,
+      entropyPolicyConfidence: Number((1.0 - Math.abs(action - 0.5)).toFixed(2)),
+      recommendationLevel: daysRatio < 0.25 ? 'URGENT_CLEARANCE' : daysRatio < 0.5 ? 'MODERATE_MARKDOWN' : 'NORMAL_SALE'
+    };
+  }
+}
+
+export class MultiCommodityCirculationRouter {
+  constructor(options = {}) {
+    this.nodes = new Set();
+    this.edges = [];
+    this.nodeBalances = new Map();
+  }
+
+  addNode(id, balances = {}) {
+    this.nodes.add(id);
+    this.nodeBalances.set(id, {
+      inventory: Number(balances.inventoryBalance) || 0,
+      cash: Number(balances.cashBalance) || 0
+    });
+  }
+
+  addEdge(from, to, params = {}) {
+    this.nodes.add(from);
+    this.nodes.add(to);
+    const distance = Number(params.distanceKm) || 10;
+    const unitCost = Number(params.unitCostKm) || 1200;
+    const cost = Math.round(distance * unitCost);
+
+    this.edges.push({
+      id: `${from}->${to}`,
+      from,
+      to,
+      capacity: Number(params.capacity) || 1000,
+      cost,
+      distanceKm: distance
+    });
+  }
+
+  balanceInventoryTransfers() {
+    const supplyNodes = [];
+    const demandNodes = [];
+
+    for (const [nodeId, bal] of this.nodeBalances.entries()) {
+      if (bal.inventory > 0) supplyNodes.push({ id: nodeId, supply: bal.inventory });
+      if (bal.inventory < 0) demandNodes.push({ id: nodeId, demand: -bal.inventory });
+    }
+
+    if (supplyNodes.length === 0 || demandNodes.length === 0) {
+      return {
+        transfers: [],
+        totalFuelCost: 0,
+        unmetDemand: 0,
+        isFullyBalanced: true
+      };
+    }
+
+    const distMatrix = new Map();
+    const nextHop = new Map();
+    const nodeList = Array.from(this.nodes);
+
+    for (const u of nodeList) {
+      distMatrix.set(u, new Map());
+      nextHop.set(u, new Map());
+      for (const v of nodeList) {
+        distMatrix.get(u).set(v, u === v ? 0 : Infinity);
+        nextHop.get(u).set(v, null);
+      }
+    }
+
+    for (const edge of this.edges) {
+      if (edge.cost < distMatrix.get(edge.from).get(edge.to)) {
+        distMatrix.get(edge.from).set(edge.to, edge.cost);
+        nextHop.get(edge.from).set(edge.to, edge.to);
+      }
+    }
+
+    for (const k of nodeList) {
+      for (const i of nodeList) {
+        for (const j of nodeList) {
+          const d_ik = distMatrix.get(i).get(k);
+          const d_kj = distMatrix.get(k).get(j);
+          if (d_ik + d_kj < distMatrix.get(i).get(j)) {
+            distMatrix.get(i).set(j, d_ik + d_kj);
+            nextHop.get(i).set(j, nextHop.get(i).get(k));
+          }
+        }
+      }
+    }
+
+    const transfers = [];
+    let totalCost = 0;
+    const remainingSupplies = supplyNodes.map(s => ({ ...s }));
+    const remainingDemands = demandNodes.map(d => ({ ...d }));
+
+    const pairs = [];
+    for (let s = 0; s < remainingSupplies.length; s++) {
+      for (let d = 0; d < remainingDemands.length; d++) {
+        const u = remainingSupplies[s].id;
+        const v = remainingDemands[d].id;
+        const cost = distMatrix.get(u).get(v);
+        if (cost !== Infinity) {
+          pairs.push({ sIdx: s, dIdx: d, from: u, to: v, unitCost: cost });
+        }
+      }
+    }
+    pairs.sort((a, b) => a.unitCost - b.unitCost);
+
+    for (const pair of pairs) {
+      const sItem = remainingSupplies[pair.sIdx];
+      const dItem = remainingDemands[pair.dIdx];
+      if (sItem.supply <= 0 || dItem.demand <= 0) continue;
+
+      const transferQty = Math.min(sItem.supply, dItem.demand);
+      const transferCost = transferQty * pair.unitCost;
+
+      transfers.push({
+        fromHub: pair.from,
+        toHub: pair.to,
+        quantity: transferQty,
+        unitCost: pair.unitCost,
+        totalCost: transferCost
+      });
+
+      totalCost += transferCost;
+      sItem.supply -= transferQty;
+      dItem.demand -= transferQty;
+    }
+
+    const unmetDemand = remainingDemands.reduce((sum, d) => sum + d.demand, 0);
+
+    return {
+      transfers,
+      totalFuelCost: totalCost,
+      unmetDemand,
+      isFullyBalanced: unmetDemand === 0
+    };
+  }
+
+  balanceCodSettlements(centralVaultId = 'HUB_CENTRAL_VAULT') {
+    const satelliteCashTransfers = [];
+    let totalRemittedCash = 0;
+
+    for (const [nodeId, bal] of this.nodeBalances.entries()) {
+      if (nodeId === centralVaultId) continue;
+      if (bal.cash > 0) {
+        satelliteCashTransfers.push({
+          sourceStationId: nodeId,
+          targetVaultId: centralVaultId,
+          remittedAmount: bal.cash,
+          settlementFee: Math.round(bal.cash * 0.001)
+        });
+        totalRemittedCash += bal.cash;
+      }
+    }
+
+    return {
+      centralVaultId,
+      totalRemittedCash,
+      transfersCount: satelliteCashTransfers.length,
+      settlements: satelliteCashTransfers
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -19980,6 +20506,10 @@ export default {
   SuccinctRankSelectBitmap,
   PpoBundleOptimizer,
   HopcroftKarpLogisticsRouter,
+  // Phase 41 Enterprise Algorithms
+  DoubleArrayAhoCorasick,
+  SacDynamicMarkdownPricing,
+  MultiCommodityCirculationRouter,
 };
 
 

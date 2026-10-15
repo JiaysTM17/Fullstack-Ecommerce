@@ -159,7 +159,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 5. Đối Soát Dòng Tiền Ký Quỹ & Nợ Đọng COD Bưu Tá (Escrow Vault & COD Float Reconciliation)
-  if (!/merkle|double-entry|kế toán kép/i.test(raw) && /ký quỹ|escrow|dòng tiền|nợ đọng|đối soát cod|tiền về|nợ bưu tá|cod.*bưu tá|bưu tá.*cod/i.test(raw)) {
+  if (!/merkle|double-entry|kế toán kép|multi[- ]commodity|đa hàng hóa/i.test(raw) && /ký quỹ|escrow|dòng tiền|nợ đọng|đối soát cod|tiền về|nợ bưu tá|cod.*bưu tá|bưu tá.*cod/i.test(raw)) {
     const escrowVal = context.escrowBalance || Math.round(totalRevenue * 0.3);
     const codFloatEst = Math.round(totalRevenue * 0.15);
     return {
@@ -334,7 +334,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 12. Kiểm Duyệt Nội Dung & Quét Từ Cấm Siêu Tốc (Aho-Corasick Multi-Pattern Automaton)
-  if (!/đa mẫu|giao dịch ngoài sàn|aho-corasick đa mẫu/i.test(raw) && /aho-corasick|kiểm duyệt từ cấm|hàng giả|quét từ cấm|censor|lọc từ cấm/i.test(raw)) {
+  if (!/double[- ]array|đa mẫu|giao dịch ngoài sàn|aho-corasick đa mẫu/i.test(raw) && /aho-corasick|kiểm duyệt từ cấm|hàng giả|quét từ cấm|censor|lọc từ cấm/i.test(raw)) {
     return {
       text: `🛡️ **THUẬT TOÁN KIỂM DUYỆT TỪ CẤM SIÊU TỐC AHO-CORASICK (AUTOMATON)**:
 - **Mục đích thiết kế**: Quét và tự động che dấu (Censor) hàng nghìn từ cấm, hàng giả, hàng nhái (*"fake", "rep 1:1", "nhái", "lừa đảo"*) trong tiêu đề sản phẩm, đánh giá và tin nhắn chat.
@@ -1035,7 +1035,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 42. Kiểm Duyệt Nội Dung Đa Mẫu Tuyến Tính Bằng Aho-Corasick (Phase 17 - Feature 164)
-  if (/aho-corasick|kiểm duyệt nội dung|từ cấm đa mẫu|quét giao dịch ngoài sàn|chặn hàng nhái|từ ngữ nhạy cảm/i.test(raw)) {
+  if (!/double[- ]array/i.test(raw) && /aho-corasick|kiểm duyệt nội dung|từ cấm đa mẫu|quét giao dịch ngoài sàn|chặn hàng nhái|từ ngữ nhạy cảm/i.test(raw)) {
     return {
       text: `🛑 **HỆ THỐNG KIỂM DUYỆT ĐA MẪU TUYẾN TÍNH AHO-CORASICK (O(N + M + Z))**:
 - **Nguyên lý máy hữu hạn Aho-Corasick Automaton**:
@@ -2272,6 +2272,67 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem ma trận ghép cặp bưu tá Hopcroft-Karp',
         'Kiểm tra gom đơn theo đợt Batching',
         'Tối ưu hóa bộ lọc Succinct Bitmap'
+      ]
+    };
+  }
+
+  // 104. Kiểm Duyệt Từ Cấm Tức Thì Bằng Double-Array Aho-Corasick (Phase 41 - Feature 188)
+  if (/double[- ]array|aho[- ]corasick|kiểm duyệt từ cấm double-array|base check trie|y-fast trie.*aho/i.test(raw)) {
+    return {
+      text: `🔍 **KIỂM DUYỆT TỪ CẤM SIÊU TỐC BẰNG DOUBLE-ARRAY AHO-CORASICK (AOE 1989 & YATA 2007)**:
+- **Cấu trúc Nén Mảng Phẳng $BASE$ & $CHECK$**:
+  - Chuyển đổi toàn bộ cây Trie từ cấm khổng lồ thành 2 mảng phẳng 1 chiều nguyên thủy (Int32Array), nén hơn 80% bộ nhớ RAM so với con trỏ Object truyền thống.
+  - Mỗi bước chuyển trạng thái $s \\to t$ qua ký tự $c$ chỉ tốn 1 phép toán $O(1)$: $t = BASE[s] + c$, với điều kiện kiểm tra hợp lệ $CHECK[t] === s$.
+- **Hệ thống Failure Links Tự Động Phân Giải**:
+  - Tích hợp liên kết thất bại (Fail Links) và danh mục Output tích lũy, quét toàn bộ văn bản mô tả sản phẩm / đánh giá dài $L$ ký tự trong đúng $O(L)$ thời gian tuyến tính!
+- **Tự động che mặt nạ (Masking) vi phạm**:
+  - Phát hiện đa từ khóa đồng thời và thay thế các từ cấm thành ký tự che dấu an toàn (\`***\`).`,
+      type: 'general',
+      tag: 'DOUBLE ARRAY AHO CORASICK',
+      suggestions: [
+        'Kiểm tra bảng chuyển trạng thái BASE và CHECK',
+        'Thực thi kiểm duyệt từ cấm đa từ khóa',
+        'Tối ưu hóa xả hàng cận hạn SAC Markdown'
+      ]
+    };
+  }
+
+  // 105. Tối Ưu Hóa Xả Hàng Tồn Kho Cận Hạn Bằng Soft Actor-Critic (SAC) (Phase 41 - Feature 188)
+  if (/sac markdown|soft actor[- ]critic|xả hàng cận hạn sac|maximum entropy rl|polyak markdown|hạ giá thanh lý/i.test(raw)) {
+    return {
+      text: `📉 **TỐI ƯU HÓA XẢ HÀNG TỒN KHO CẬN HẠN BẰNG SOFT ACTOR-CRITIC (SAC - HAARNOJA 2018)**:
+- **Nguyên lý Tối Đa Hóa Entropy Tự Do (Maximum Entropy Reinforcement Learning)**:
+  - Khác với RL cổ điển chỉ tham lam cực đại hóa phần thưởng tức thời, SAC tối ưu đồng thời cả phần thưởng doanh thu và độ hỗn loạn (Entropy): $\\mathcal{H}(\\pi(\\cdot|s))$.
+  - Ngăn ngừa chính sách định giá rơi vào bẫy cực tiểu cục bộ (Local Minima) hoặc giảm giá quá sớm làm bốc hơi toàn bộ biên lợi nhuận của gian hàng.
+- **Kiến trúc Double Q-Critics & Cập nhật mềm Polyak (Polyak Averaging)**:
+  - Sử dụng 2 mạng lưới Critic độc lập $Q_1, Q_2$ và lấy giá trị nhỏ nhất $\\min(Q_1, Q_2)$ để triệt tiêu hoàn toàn hiện tượng ước lượng lạc quan quá mức (Overestimation Bias).
+  - Cập nhật mạng mục tiêu liên tục qua tham số Polyak $\\tau = 0.005$, sinh mức chiết khấu linh hoạt (0% - 70%) thanh lý sạch kho trước hạn sử dụng!`,
+      type: 'recommendation',
+      tag: 'SAC CLEARANCE PRICING',
+      suggestions: [
+        'Phân tích đường cong hạ giá SAC Markdown',
+        'Kiểm tra cập nhật mềm Polyak Double-Q',
+        'Cân bằng luân chuyển kho Multi-Commodity'
+      ]
+    };
+  }
+
+  // 106. Luân Chuyển Hàng Liên Kho Hub & Đối Soát COD Đa Hàng Hóa (Phase 41 - Feature 188)
+  if (/multi[- ]commodity|luân chuyển đa hàng hóa|đối soát cod bưu cục|cân bằng tồn kho liên kho|min[- ]cost circulation/i.test(raw)) {
+    return {
+      text: `🔄 **LUÂN CHUYỂN HÀNG HÓA LIÊN KHO & ĐỐI SOÁT NỢ COD ĐA BƯU CỤC (MULTI-COMMODITY MIN-COST CIRCULATION - KLEIN 1967)**:
+- **Tối ưu hóa Lưu thông Đa Hàng Hóa (Multi-Commodity Circulation)**:
+  - Mô hình hóa mạng lưới logistics SPX Express và luồng tiền thu hộ COD dưới dạng đồ thị có hướng đa luồng với sức chứa hữu hạn.
+  - Tự động ghép cặp các kho/bưu cục dư thừa hàng tồn (Surplus Hubs) với các bưu cục thiếu hụt cục bộ (Deficit Hubs) theo lộ trình chi phí nhỏ nhất (Shortest Cost Routing).
+- **Phân tách luồng tồn kho vật lý và luồng tài chính COD**:
+  - Luân chuyển hàng hóa giữa các kho vùng miền (Kho Hà Nội, Đà Nẵng, TP.HCM) giảm 35% chi phí vận chuyển chặng giữa.
+  - Thu hồi và đối soát dòng tiền thu hộ COD từ mạng lưới bưu cục vệ tinh, triệt tiêu rủi ro chiếm dụng vốn và thất thoát tiền mặt!`,
+      type: 'logistics',
+      tag: 'MULTI COMMODITY CIRCULATION',
+      suggestions: [
+        'Xem ma trận luân chuyển hàng tồn kho Hub SPX',
+        'Đối soát công nợ COD liên bưu cục',
+        'Kiểm tra bảng nén Double-Array Aho-Corasick'
       ]
     };
   }

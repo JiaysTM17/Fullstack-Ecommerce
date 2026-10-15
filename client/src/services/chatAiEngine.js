@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -661,7 +661,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
 
   // 13. Săn Deal Xả Kho Giá Sốc Về Giá Sàn (CLEARANCE_DEALS_EXPLORE)
-  if (/săn hàng xả kho|deal xả kho|hàng giảm giá sâu|xả tồn kho|xả hàng đón mẫu mới/i.test(lower)) {
+  if (!/sac|double[- ]array|multi[- ]commodity/i.test(lower) && /săn hàng xả kho|deal xả kho|hàng giảm giá sâu|xả tồn kho|xả hàng đón mẫu mới/i.test(lower)) {
     return {
       intent: 'CLEARANCE_DEALS_EXPLORE',
       replyText: `**[CHỢ XẢ KHO MINI SHOPEE] GIẢM ĐẾN 40% - 50% VỀ SÁT GIÁ GỐC!**\n\n• **Thanh lý tồn kho chính hãng**: Các sản phẩm tồn kho được giảm giá sâu theo thuật toán suy giảm tuổi tồn kho (Inventory Age Decay) để nhường chỗ cho bộ sưu tập mới.\n• **Cam kết chất lượng**: 100% hàng mới nguyên seal, chính hãng từ các Shop Mall uy tín với chính sách bảo hành và đổi trả 15 ngày miễn phí!`,
@@ -929,6 +929,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'SUCCINCT_PPO_HOPCROFT_ASSIST',
       replyText: `**[MUA SẮM THÔNG MINH, COMBO GIÁ HỜI & GIAO HÀNG SIÊU TỐC]:**\n\n• **Bộ lọc sản phẩm siêu tốc (Succinct Bitmap)**: Lọc hàng trăm nghìn deal Mall, Flash Sale, FreeShip Xtra trong nháy mắt với độ mượt tuyệt đối!\n• **Gợi ý Combo Mua Kèm Hời Nhất (PPO)**: Tự động đề xuất các món đồ hoàn hảo đi kèm (Áo + Quần, Điện thoại + Ốp sạc) với mức giảm giá combo sâu nhất tiết kiệm tối đa cho bạn!\n• **Điều phối giao hàng giờ cao điểm (Hopcroft-Karp)**: Vào các dịp Sale lớn, thuật toán ghép đơn song song giúp bưu tá lấy hàng và giao ngay tới tay bạn mà không bị tắc nghẽn kho!`,
       suggestions: ['Xem combo mua kèm hot', 'Lọc sản phẩm Flash Sale', 'Theo dõi bưu tá giao hàng'],
+    };
+  }
+
+  // 43. Xả Hàng Tồn Cận Hạn SAC, Kiểm Duyệt Double-Array & Điều Chuyển Kho Hub (SAC_DOUBLE_ARRAY_COMMODITY_ASSIST)
+  if (/sac markdown|xả hàng cận hạn sac|hạ giá sac|kiểm duyệt từ cấm double[- ]array|double[- ]array|luân chuyển đa hàng hóa|multi[- ]commodity/i.test(lower)) {
+    return {
+      intent: 'SAC_DOUBLE_ARRAY_COMMODITY_ASSIST',
+      replyText: `**[XẢ HÀNG CẬN DATE SAC, KIỂM DUYỆT TỪ CẤM & LUÂN CHUYỂN KHO LIÊN MIỀN]:**\n\n• **Săn deal xả hàng cận date cực sốc (SAC)**: Các mặt hàng date gần được giảm sâu tới 50% - 70% theo thuật toán Soft Actor-Critic giúp bạn săn được sản phẩm chất lượng với giá rẻ nhất!\n• **Mua sắm an toàn, nói không với hàng giả/vi phạm (Double-Array)**: Bộ lọc từ cấm tốc độ cao giúp sàn quét sạch bài đăng lừa đảo hoặc vi phạm tiêu chuẩn cộng đồng.\n• **Giao hàng nhanh từ mạng lưới kho liên kết (Multi-Commodity)**: Hàng hóa được tự động luân chuyển giữa các tổng kho SPX Hà Nội - Đà Nẵng - TP.HCM để luôn có sẵn hàng giao tận tay bạn trong ngày!`,
+      suggestions: ['Săn deal xả hàng cận date', 'Xem danh mục chính hãng', 'Tra cứu hành trình liên kho'],
     };
   }
 
