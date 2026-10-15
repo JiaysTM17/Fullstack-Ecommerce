@@ -454,7 +454,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
-  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg|opoe/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
 - **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock|road[- ]pricing|mdvrptw/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock|road[- ]pricing|mdvrptw|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -3425,6 +3425,68 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem bản đồ phân vùng thu phí ERP Hoàn Kiếm',
         'Kiểm tra biểu phí cao điểm sáng và chiều',
         'Thống kê tổng chi phí vận hành Fleet Cost'
+      ]
+    };
+  }
+
+  // 161. Đếm Sự Kiện Siêu Nhẹ Morris Log-Log Counter (Phase 60 - Feature 207)
+  if (/morris|morris counter|log[- ]log counter|đếm xấp xỉ morris|đếm clickstream|morris\+\+/i.test(raw)) {
+    return {
+      text: `🔢 **ĐẾM SỰ KIỆN XẤP XỈ SIÊU NÉN MORRIS LOG-LOG COUNTER (ROBERT MORRIS 1978, FLAJOLET 1985)**:
+- **Nguyên lý Thuật toán Đếm Xác Suất Không Gian $O(\\log \\log n)$**:
+  - Tăng giá trị thanh ghi $X$ với xác suất hình học $P(\\text{inc}) = a^{-X}$ (với $a = 2.0$).
+  - Ước lượng không chệch:
+    $$\\hat{n} = \\frac{a^X - 1}{a - 1}$$
+  - Kiến trúc đa thanh ghi **Morris++** kết hợp trung bình $m$ bộ đếm độc lập giúp triệt tiêu phương sai với sai số tương đối $\\sigma = \\frac{1}{\\sqrt{2m}}$.
+- **Ứng dụng Giám sát Mini Shopee**:
+  - Ghi nhận hàng trăm triệu sự kiện clickstream, lượt hiển thị banner Flash Sale và lượt đọc cache sản phẩm với dung lượng RAM gần như bằng $0$!`,
+      type: 'analytics',
+      tag: 'MORRIS LOG-LOG COUNTER',
+      suggestions: [
+        'Xem độ chính xác bộ đếm Morris++',
+        'Kiểm tra số thanh ghi active registers',
+        'Thống kê sự kiện clickstream toàn sàn'
+      ]
+    };
+  }
+
+  // 162. Định Giá Ngoại Tuyến Phạt Bất Định OPOE Dynamic Pricing (Phase 60 - Feature 207)
+  if (/opoe|epistemic uncertainty|phạt bất định nhận thức|pessimistic offline rl|opoe pricing/i.test(raw)) {
+    return {
+      text: `🏷️ **ĐỊNH GIÁ NGOẠI TUYẾN PHẠT BẤT ĐỊNH OPOE DYNAMIC PRICING (JIN ET AL. ICLR 2021)**:
+- **Nguyên lý Bi quan Hóa Đối Phó Rủi Ro (Provably Efficient Pessimism)**:
+  - Định lượng độ bất định nhận thức (Epistemic Uncertainty) thông qua chuẩn Mahalanobis trên ma trận hiệp phương sai đặc trưng $\\Sigma$:
+    $$\\Gamma(s, a) = \\kappa \\sqrt{\\phi(s, a)^\\top \\Sigma^{-1} \\phi(s, a)}$$
+  - Hàm giá trị bi quan: $\\hat{Q}(s, a) = Q_{\\text{nominal}}(s, a) - \\Gamma(s, a)$.
+  - Triệt tiêu hoàn toàn các mức giá giảm thấu trời ở những danh mục ít dữ liệu (Uncovered State-Action space).
+- **Hàng Rào Bảo Vệ Kép**: Khóa chặt giá sàn $\\ge \\text{COGS} \\times 1.05$ và trần đối thủ $\\le P_{\\text{competitor}} \\times 1.15$.`,
+      type: 'pricing',
+      tag: 'OPOE DYNAMIC PRICING',
+      suggestions: [
+        'Kiểm tra hệ số phạt bất định Kappa (0.35)',
+        'Kiểm toán độ phủ ma trận hiệp phương sai Sigma',
+        'Xem tỷ lệ chặn giá sàn COGS Floor'
+      ]
+    };
+  }
+
+  // 163. Điều Phối Giao Hàng & Thu Hồi Đổi Trả Đồng Thời VRPSPDTW (Phase 60 - Feature 207)
+  if (/vrpspd|simultaneous pickup|giao thu đồng thời|đổi trả tận nhà|thu hồi hàng đổi trả|reverse logistics/i.test(raw)) {
+    return {
+      text: `🚚 **ĐIỀU PHỐI GIAO HÀNG & THU HỒI ĐỔI TRẢ ĐỒNG THỜI VRPSPDTW (MONTANÉ & PISINGER 2006)**:
+- **Mô Hình Hai Chiều Thu Giao Kết Hợp (Simultaneous Forward & Reverse Logistics)**:
+  - Bưu tá SPX vừa giao bưu kiện mới vừa thu hồi sản phẩm bảo hành / đổi trả của khách hàng trong cùng 1 lần dừng.
+- **Giám Sát Tải Trọng Động Khắt Khe Trên Hành Trình**:
+  - Tải trọng tại điểm $i$: $L_i = L_{i-1} - \\text{delivery}_i + \\text{pickup}_i \\le Q_{\\text{max}}$ (bảo đảm không bao giờ vượt quá tải trọng xe ở bất kỳ thời điểm nào trên tuyến).
+- **Lợi Ích Vận Hành Đột Phá**:
+  - Cắt giảm **$100\\%$** các chuyến xe quay lại thu hồi hàng riêng biệt.
+  - Tiết kiệm **$39.4\\%$** tổng quãng đường di chuyển và rút ngắn chu kỳ hoàn tiền/đổi hàng cho người mua từ $48\\text{h}$ xuống trong ngày!`,
+      type: 'logistics',
+      tag: 'VRPSPDTW REVERSE LOGISTICS',
+      suggestions: [
+        'Xem biểu đồ tải trọng động trên tuyến',
+        'Kiểm tra tỷ lệ giao hàng & đổi trả thành công',
+        'Thống kê quãng đường và CO2 tiết kiệm'
       ]
     };
   }

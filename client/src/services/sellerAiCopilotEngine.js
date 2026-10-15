@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|cross[- ]dock|gk[- ]quantile|iql|road[- ]pricing|mdvrptw/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|cross[- ]dock|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1387,6 +1387,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem phân vị giá trị đơn hàng P50-P95',
         'Tư vấn định giá an toàn IQL Pricing',
         'Lộ trình vận chuyển né phí ùn tắc SPX'
+      ]
+    };
+  }
+
+  // 69. Bộ Ba Thuật Toán Morris LogLog Counter, OPOE Pricing & Điều Phối VRPSPDTW Giao Thu Đồng Thời (Phase 60 - Feature 207)
+  if (/morris|loglog counter|đếm morris|opoe|epistemic uncertainty|bất định nhận thức|vrpspd|simultaneous pickup|giao thu đồng thời|đổi trả tận nhà/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN MORRIS COUNTER, OPOE PRICING & ĐIỀU PHỐI GIAO THU ĐỒNG THỜI VRPSPDTW (${currentShop.name})**:
+- **Bộ đếm xác suất Morris LogLog Counter siêu tiết kiệm RAM**:
+  - Ghi nhận hàng triệu lượt xem sản phẩm và tương tác Flash Sale chỉ với thanh ghi nhỏ $O(\\log \\log n)$ bit. Công nghệ Morris++ khử phương sai giúp shop nắm bắt lưu lượng thời gian thực mà không làm chậm server.
+- **Định giá Offline OPOE triệt tiêu rủi ro bất định (Epistemic Uncertainty Penalization)**:
+  - Tự động phạt điểm không chắc chắn $\\Gamma(s, a) = \\kappa \\sqrt{\\phi^\\top \\Sigma^{-1} \\phi}$ với những mức giá chưa có đủ dữ liệu lịch sử, đảm bảo giá bán Flash Sale luôn tối ưu doanh thu và khóa cứng sàn an toàn $\\text{COGS} \\times 1.05$.
+- **Vận chuyển hai chiều thông minh VRPSPDTW (Simultaneous Pickup & Delivery)**:
+  - Tối ưu hóa chu trình giao hàng mới đồng thời thu hồi hàng đổi trả/bảo hành trong cùng một chuyến xe SPX. Kiểm soát tải trọng động $L_i \\le Q_{\\text{capacity}}$, giảm $40\\%$ chi phí logistics ngược và rút ngắn thời gian xử lý khiếu nại cho khách hàng!`,
+      type: 'recommendation',
+      tag: 'MORRIS COUNTER, OPOE & VRPSPDTW LOGISTICS',
+      suggestions: [
+        'Xem thống kê lượt xem Morris Counter',
+        'Tư vấn định giá OPOE triệt tiêu rủi ro',
+        'Điều phối giao thu đồng thời VRPSPDTW'
       ]
     };
   }

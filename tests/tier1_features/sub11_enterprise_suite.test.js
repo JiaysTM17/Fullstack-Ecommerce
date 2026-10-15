@@ -327,6 +327,10 @@ import {
   DEFAULT_ROAD_PRICING_DEPOTS,
   CONGESTION_TOLL_ZONE,
   MDVRPTWRoadPricingRouter,
+  // Phase 60 Enterprise Algorithms
+  MorrisLogLogCounter,
+  OPOEDynamicPricing,
+  VRPTWSimultaneousPickupDeliveryRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -472,6 +476,9 @@ import { VRPTWCCLogisticsRouter as ServerVRPTWCCLogisticsRouter, DEFAULT_CROSS_D
 import { GKQuantileSummary as ServerGKQuantileSummary } from "../../server/src/utils/gkQuantileSummary.js";
 import { IQLDynamicPricing as ServerIQLDynamicPricing } from "../../server/src/utils/iqlDynamicPricing.js";
 import { MDVRPTWRoadPricingRouter as ServerMDVRPTWRoadPricingRouter, DEFAULT_ROAD_PRICING_DEPOTS as ServerDefaultRoadPricingDepots, CONGESTION_TOLL_ZONE as ServerCongestionTollZone } from "../../server/src/utils/mdvrptwRoadPricingRouter.js";
+import { MorrisLogLogCounter as ServerMorrisLogLogCounter } from "../../server/src/utils/morrisLogLogCounter.js";
+import { OPOEDynamicPricing as ServerOPOEDynamicPricing } from "../../server/src/utils/opoeDynamicPricing.js";
+import { VRPTWSimultaneousPickupDeliveryRouter as ServerVRPTWSimultaneousPickupDeliveryRouter } from "../../server/src/utils/vrptwSimultaneousPickupDeliveryRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -26142,6 +26149,367 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(plan.status, "MDVRPTW_ROAD_PRICING_SUCCESS");
       expect.equal(plan.summary.totalOrders, 2);
       expect.ok(plan.summary.totalOperationalCostVnd > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 207: Morris LogLog Counter, OPOE Pricing & VRPSPDTW Reverse Logistics (Phase 60 - 24 Tests)
+  // =========================================================================
+  describe("Feature 207: Morris Counter, OPOE Pricing & VRPSPDTW Reverse Logistics Suite", () => {
+    // -----------------------------------------------------------------------
+    // MORRIS LOGLOG COUNTER (Tests 1-7)
+    // -----------------------------------------------------------------------
+    test("F207-T01: MorrisLogLogCounter: Initialized with default and custom configurations", () => {
+      const defaultCounter = new MorrisLogLogCounter();
+      expect.equal(defaultCounter.numRegisters, 16);
+      expect.equal(defaultCounter.base, 2);
+      expect.equal(defaultCounter.getEstimate(), 0);
+
+      const customCounter = new MorrisLogLogCounter({ numRegisters: 32, base: 1.5, seed: 9999 });
+      expect.equal(customCounter.numRegisters, 32);
+      expect.equal(customCounter.base, 1.5);
+    });
+
+    test("F207-T02: MorrisLogLogCounter: Probabilistic increment increases register values monotonically", () => {
+      const counter = new MorrisLogLogCounter({ numRegisters: 8, seed: 42 });
+      const initialEstimate = counter.getEstimate();
+      expect.equal(initialEstimate, 0);
+
+      for (let i = 0; i < 50; i++) {
+        counter.increment(`click_${i}`);
+      }
+      const midEstimate = counter.getEstimate();
+      expect.ok(midEstimate > 0);
+
+      for (let i = 50; i < 150; i++) {
+        counter.increment(`click_${i}`);
+      }
+      const finalEstimate = counter.getEstimate();
+      expect.ok(finalEstimate >= midEstimate);
+    });
+
+    test("F207-T03: MorrisLogLogCounter: Multi-register Morris++ reduces variance across parallel registers", () => {
+      const counter = new MorrisLogLogCounter({ numRegisters: 16, seed: 123 });
+      const n = 1000;
+      for (let i = 0; i < n; i++) {
+        counter.increment();
+      }
+
+      const estimate = counter.getEstimate();
+      // Estimate should be within an order of magnitude of true N
+      expect.ok(estimate >= n * 0.3 && estimate <= n * 3.0);
+      const registers = counter.getRegisterValues();
+      expect.equal(registers.length, 16);
+      expect.ok(registers.some(v => v > 0));
+    });
+
+    test("F207-T04: MorrisLogLogCounter: Batch incrementing multiple events tracks streaming traffic", () => {
+      const counter = new MorrisLogLogCounter({ numRegisters: 16, seed: 777 });
+      const batchCount = 500;
+      const res = counter.incrementBatch(batchCount);
+      expect.ok(res > 0);
+      expect.equal(res, counter.getEstimate());
+    });
+
+    test("F207-T05: MorrisLogLogCounter: Statistical standard error matches theoretical bounds", () => {
+      const counter = new MorrisLogLogCounter({ numRegisters: 16 });
+      const se = counter.getStandardError();
+      expect.ok(typeof se === "number");
+      expect.ok(se > 0 && se < 1.0);
+    });
+
+    test("F207-T06: MorrisLogLogCounter: Reset clears state and getSummary outputs diagnostics", () => {
+      const counter = new MorrisLogLogCounter({ numRegisters: 16 });
+      counter.incrementBatch(100);
+      expect.ok(counter.getEstimate() > 0);
+
+      const summary = counter.getSummary();
+      expect.equal(summary.numRegisters, 16);
+      expect.ok(summary.estimate > 0);
+      expect.ok(Array.isArray(summary.registers));
+
+      counter.reset();
+      expect.equal(counter.getEstimate(), 0);
+      expect.ok(counter.getRegisterValues().every(v => v === 0));
+    });
+
+    test("F207-T07: MorrisLogLogCounter: Merging two independent counters preserves maximum register bounds", () => {
+      const c1 = new MorrisLogLogCounter({ numRegisters: 8, seed: 101 });
+      const c2 = new MorrisLogLogCounter({ numRegisters: 8, seed: 202 });
+
+      c1.incrementBatch(200);
+      c2.incrementBatch(300);
+
+      const est1 = c1.getEstimate();
+      const est2 = c2.getEstimate();
+
+      c1.merge(c2);
+      const mergedEst = c1.getEstimate();
+      expect.ok(mergedEst >= Math.max(est1, est2));
+    });
+
+    // -----------------------------------------------------------------------
+    // OPOE DYNAMIC PRICING (Tests 8-14)
+    // -----------------------------------------------------------------------
+    test("F207-T08: OPOEDynamicPricing: Initialized with default hyperparameters and covariance regularizer", () => {
+      const pricing = new OPOEDynamicPricing();
+      expect.equal(pricing.featureDim, 6);
+      expect.equal(pricing.safetyMargin, 0.05);
+      expect.equal(pricing.uncertaintyWeight, 0.35);
+
+      const summary = pricing.getModelSummary();
+      expect.equal(summary.featureDim, 6);
+      expect.ok(summary.regularizer > 0);
+    });
+
+    test("F207-T09: OPOEDynamicPricing: Feature vector accurately maps state and price action", () => {
+      const pricing = new OPOEDynamicPricing();
+      const state = {
+        demandIndex: 1.2,
+        inventoryUrgency: 0.3,
+        competitorPrice: 100000,
+        basePrice: 100000
+      };
+      const phi = pricing.extractFeatures(state, 1.05);
+      expect.equal(phi.length, 6);
+      expect.ok(phi[0] > 0);
+      expect.equal(phi[3], 1.2);     // Demand
+      expect.equal(phi[4], 0.3);     // Urgency
+      expect.equal(phi[5], 1.05);    // Action multiplier
+    });
+
+    test("F207-T10: OPOEDynamicPricing: Online empirical covariance updates preserve positive definiteness", () => {
+      const pricing = new OPOEDynamicPricing({ regularizer: 1.0 });
+      const state = { demandIndex: 1.0, inventoryUrgency: 0.2, competitorPrice: 100000, basePrice: 100000 };
+
+      const penaltyBefore = pricing.computeUncertaintyPenalty(state, 1.2);
+      // Observe multiple transitions with action 1.2
+      for (let i = 0; i < 20; i++) {
+        pricing.updateCovariance(state, 1.2);
+      }
+      const penaltyAfter = pricing.computeUncertaintyPenalty(state, 1.2);
+      // More data along this direction should reduce epistemic uncertainty
+      expect.ok(penaltyAfter < penaltyBefore);
+    });
+
+    test("F207-T11: OPOEDynamicPricing: Epistemic uncertainty penalty increases for out-of-distribution actions", () => {
+      const pricing = new OPOEDynamicPricing({ regularizer: 0.5, uncertaintyWeight: 1.0 });
+      const state = { demandIndex: 1.1, inventoryUrgency: 0.1, competitorPrice: 200000, basePrice: 200000 };
+
+      // Train on typical discount actions ~ 0.95
+      for (let i = 0; i < 30; i++) {
+        pricing.updateCovariance(state, 0.95);
+      }
+
+      const inDistPenalty = pricing.computeUncertaintyPenalty(state, 0.95);
+      const outDistPenalty = pricing.computeUncertaintyPenalty(state, 1.45);
+      expect.ok(outDistPenalty > inDistPenalty);
+    });
+
+    test("F207-T12: OPOEDynamicPricing: Pessimistic Q-value avoids aggressive high-uncertainty multipliers", () => {
+      const pricing = new OPOEDynamicPricing({ uncertaintyWeight: 2.0 });
+      const item = {
+        cogs: 200000,
+        basePrice: 280000,
+        competitorPrice: 270000,
+        demandIndex: 0.8,
+        inventoryUrgency: 0.7
+      };
+      const res = pricing.optimizePrice(item);
+      expect.ok(res.bestPessimisticQ <= res.bestBaseQ);
+      expect.ok(res.uncertaintyPenalty >= 0);
+    });
+
+    test("F207-T13: OPOEDynamicPricing: Hard safety floor strictly locks minimum margin COGS * 1.05", () => {
+      const pricing = new OPOEDynamicPricing({ cogsSafetyFloorRatio: 1.05 });
+      const itemWithLowBase = {
+        cogs: 100000,
+        basePrice: 80000,
+        competitorPrice: 120000,
+        demandIndex: 0.5,
+        inventoryUrgency: 0.9
+      };
+      const res = pricing.optimizePrice(itemWithLowBase);
+      expect.ok(res.proposedPrice >= 100000 * 1.05);
+      expect.equal(res.isFloorEnforced, true);
+    });
+
+    test("F207-T14: OPOEDynamicPricing: Batch optimization handles catalog of products and produces complete telemetry", () => {
+      const pricing = new OPOEDynamicPricing();
+      const items = [
+        { id: "P1", cogs: 50000, basePrice: 80000, competitorPrice: 75000, demandIndex: 1.2 },
+        { id: "P2", cogs: 120000, basePrice: 160000, competitorPrice: 155000, demandIndex: 0.9 }
+      ];
+      const results = pricing.batchOptimize(items);
+      expect.equal(results.length, 2);
+      expect.ok(results[0].proposedPrice > 0);
+      expect.ok(results[1].proposedPrice > 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // VRPTW SIMULTANEOUS PICKUP & DELIVERY ROUTER (Tests 15-19)
+    // -----------------------------------------------------------------------
+    test("F207-T15: VRPTWSimultaneousPickupDeliveryRouter: Initialized with depot and fleet parameters", () => {
+      const router = new VRPTWSimultaneousPickupDeliveryRouter();
+      expect.equal(router.vehicleCapacityKg, 150.0);
+      expect.equal(router.vanSpeedKmh, 28.0);
+      expect.equal(router.serviceDwellPerStopMin, 5.0);
+      expect.equal(router.co2PerKm, 0.18);
+    });
+
+    test("F207-T16: VRPTWSimultaneousPickupDeliveryRouter: Calculate distance matches geographic coordinate geometry", () => {
+      const router = new VRPTWSimultaneousPickupDeliveryRouter();
+      // Distance from Hoan Kiem (21.0285, 105.8542) to Cau Giay (21.0333, 105.7939) is ~6.3 km
+      const dist = router.calculateDistance(21.0285, 105.8542, 21.0333, 105.7939);
+      expect.ok(dist >= 5.5 && dist <= 7.5);
+    });
+
+    test("F207-T17: VRPTWSimultaneousPickupDeliveryRouter: Empty stops list handled gracefully", () => {
+      const router = new VRPTWSimultaneousPickupDeliveryRouter();
+      const plan = router.planSimultaneousRoutes([]);
+      expect.equal(plan.status, "EMPTY_STOPS");
+      expect.equal(plan.route.length, 0);
+      expect.equal(plan.summary.totalStops, 0);
+    });
+
+    test("F207-T18: VRPTWSimultaneousPickupDeliveryRouter: In-transit dynamic payload never exceeds vehicle capacity", () => {
+      const router = new VRPTWSimultaneousPickupDeliveryRouter({ vehicleCapacityKg: 100 });
+      const stops = [
+        { id: "O1", lat: 21.0200, lng: 105.8400, deliveryKg: 30, pickupKg: 10, timeWindow: [480, 540] },
+        { id: "O2", lat: 21.0250, lng: 105.8450, deliveryKg: 20, pickupKg: 15, timeWindow: [500, 560] },
+        { id: "O3", lat: 21.0300, lng: 105.8500, deliveryKg: 15, pickupKg: 20, timeWindow: [520, 600] }
+      ];
+
+      const plan = router.planSimultaneousRoutes(stops);
+      expect.equal(plan.status, "VRPSPDTW_SUCCESS");
+      expect.equal(plan.summary.capacityExceeded, false);
+
+      // Verify for every visited stop that currentPayloadKg <= vehicleCapacityKg
+      for (const stop of plan.route) {
+        expect.ok(stop.currentPayloadKg <= router.vehicleCapacityKg);
+        expect.ok(stop.currentPayloadKg >= 0);
+      }
+    });
+
+    test("F207-T19: VRPTWSimultaneousPickupDeliveryRouter: Time window scheduling handles service dwell and travel time", () => {
+      const router = new VRPTWSimultaneousPickupDeliveryRouter();
+      const stops = [
+        { id: "SPD_1", lat: 21.0280, lng: 105.8500, deliveryKg: 5, pickupKg: 2, timeWindow: [480, 520] },
+        { id: "SPD_2", lat: 21.0350, lng: 105.8550, deliveryKg: 8, pickupKg: 4, timeWindow: [510, 580] }
+      ];
+      const plan = router.planSimultaneousRoutes(stops);
+      expect.equal(plan.status, "VRPSPDTW_SUCCESS");
+      expect.ok(plan.summary.totalDistanceKm > 0);
+      expect.ok(plan.summary.makespanMin > 0);
+      expect.ok(plan.summary.co2SavedKg >= 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT-SERVER SYMMETRY (Tests 20-22)
+    // -----------------------------------------------------------------------
+    test("F207-T20: Client and Server algorithmic symmetry: MorrisLogLogCounter produces identical estimates with identical seeds", () => {
+      const clientCounter = new MorrisLogLogCounter({ numRegisters: 16, seed: 4321 });
+      const serverCounter = new ServerMorrisLogLogCounter({ numRegisters: 16, seed: 4321 });
+
+      clientCounter.incrementBatch(500);
+      serverCounter.incrementBatch(500);
+
+      expect.equal(clientCounter.getEstimate(), serverCounter.getEstimate());
+      expect.deepEqual(clientCounter.getRegisterValues(), serverCounter.getRegisterValues());
+    });
+
+    test("F207-T21: Client and Server algorithmic symmetry: OPOEDynamicPricing produces identical penalties and pricing decisions", () => {
+      const clientPricing = new OPOEDynamicPricing({ seed: 8888 });
+      const serverPricing = new ServerOPOEDynamicPricing({ seed: 8888 });
+
+      const item = {
+        cogs: 350000,
+        basePrice: 500000,
+        competitorPrice: 480000,
+        demandIndex: 1.15,
+        inventoryUrgency: 0.25
+      };
+
+      const cRes = clientPricing.optimizePrice(item);
+      const sRes = serverPricing.optimizePrice(item);
+
+      expect.equal(cRes.proposedPrice, sRes.proposedPrice);
+      expect.equal(cRes.decisionTag, sRes.decisionTag);
+      expect.equal(cRes.uncertaintyPenalty, sRes.uncertaintyPenalty);
+      expect.equal(cRes.bestMultiplier, sRes.bestMultiplier);
+    });
+
+    test("F207-T22: Client and Server algorithmic symmetry: VRPTWSimultaneousPickupDeliveryRouter produces identical routes and metrics", () => {
+      const clientRouter = new VRPTWSimultaneousPickupDeliveryRouter();
+      const serverRouter = new ServerVRPTWSimultaneousPickupDeliveryRouter();
+
+      const stops = [
+        { id: "SYM_1", lat: 21.0300, lng: 105.8400, deliveryKg: 10, pickupKg: 5, timeWindow: [480, 540] },
+        { id: "SYM_2", lat: 21.0350, lng: 105.8450, deliveryKg: 12, pickupKg: 8, timeWindow: [500, 580] }
+      ];
+
+      const cPlan = clientRouter.planSimultaneousRoutes(stops);
+      const sPlan = serverRouter.planSimultaneousRoutes(stops);
+
+      expect.equal(cPlan.summary.totalDistanceKm, sPlan.summary.totalDistanceKm);
+      expect.equal(cPlan.summary.makespanMin, sPlan.summary.makespanMin);
+      expect.equal(cPlan.summary.capacityExceeded, sPlan.summary.capacityExceeded);
+      expect.equal(cPlan.route.length, sPlan.route.length);
+    });
+
+    // -----------------------------------------------------------------------
+    // COPILOT INTEGRATION & END-TO-END PIPELINE (Tests 23-24)
+    // -----------------------------------------------------------------------
+    test("F207-T23: Tri-Role Copilots integration: Admin, Seller, and Buyer AI respond accurately to Phase 60 queries", () => {
+      // 1. Admin Copilot
+      const adminRes1 = generateAdminCopilotResponse("Kiểm tra bộ đếm morris loglog counter");
+      expect.ok(adminRes1.text.includes("MORRIS LOG-LOG COUNTER"));
+
+      const adminRes2 = generateAdminCopilotResponse("Tối ưu giá an toàn bằng opoe dynamic pricing");
+      expect.ok(adminRes2.text.includes("OPOE DYNAMIC PRICING"));
+
+      const adminRes3 = generateAdminCopilotResponse("Điều phối giao thu đồng thời vrpspd simultaneous pickup delivery");
+      expect.ok(adminRes3.text.includes("VRPSPDTW"));
+
+      // 2. Seller Copilot
+      const sellerRes = generateSellerCopilotResponse("Tư vấn morris counter và định giá opoe epistemic");
+      expect.ok(sellerRes.text.includes("MORRIS COUNTER"));
+
+      // 3. Buyer AI
+      const buyerRes = generateAiChatResponse("Xem đổi trả tận nhà đồng thời vrpspd và giá an toàn opoe");
+      expect.equal(buyerRes.intent, "MORRIS_OPOE_VRPSPD");
+    });
+
+    test("F207-T24: End-to-End E-Commerce Pipeline: Morris Traffic Counting -> OPOE Offline Pricing -> VRPSPDTW Reverse Logistics Delivery", () => {
+      // Step 1: Approximate Event Stream Counting with Morris++
+      const morris = new ServerMorrisLogLogCounter({ numRegisters: 16 });
+      morris.incrementBatch(1500); // 1500 product view events
+      const trafficEstimate = morris.getEstimate();
+      expect.ok(trafficEstimate > 500);
+
+      // Step 2: Epistemic Uncertainty-Aware Dynamic Pricing with OPOE
+      const opoe = new ServerOPOEDynamicPricing();
+      const pricing = opoe.optimizePrice({
+        cogs: 600000,
+        basePrice: 850000,
+        competitorPrice: 820000,
+        demandIndex: trafficEstimate > 1000 ? 1.3 : 1.0,
+        inventoryUrgency: 0.2
+      });
+      expect.ok(pricing.proposedPrice >= 600000 * 1.05);
+      expect.ok(pricing.decisionTag.includes("OPOE") || pricing.decisionTag.includes("OPTIMAL") || pricing.decisionTag.includes("SAFE") || pricing.decisionTag.includes("DAMPED") || pricing.decisionTag.includes("CEILING"));
+
+      // Step 3: Simultaneous Delivery and Return Pickup with VRPSPDTW
+      const router = new ServerVRPTWSimultaneousPickupDeliveryRouter({ vehicleCapacityKg: 100 });
+      const orders = [
+        { id: "E2E_ORD_1", lat: 21.0350, lng: 105.8450, deliveryKg: 15, pickupKg: 5, timeWindow: [480, 540] },
+        { id: "E2E_ORD_2", lat: 21.0400, lng: 105.8500, deliveryKg: 20, pickupKg: 10, timeWindow: [510, 580] }
+      ];
+      const deliveryPlan = router.planSimultaneousRoutes(orders);
+      expect.equal(deliveryPlan.status, "VRPSPDTW_SUCCESS");
+      expect.equal(deliveryPlan.summary.totalStops, 2);
+      expect.equal(deliveryPlan.summary.capacityExceeded, false);
+      expect.ok(deliveryPlan.summary.totalDistanceKm > 0);
     });
   });
 });

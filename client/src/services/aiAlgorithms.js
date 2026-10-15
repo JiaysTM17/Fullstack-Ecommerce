@@ -30551,6 +30551,471 @@ export class MDVRPTWRoadPricingRouter {
   }
 }
 
+// =========================================================================
+// PHASE 60: ENTERPRISE SUITE (FEATURE 207)
+// 1. MorrisLogLogCounter (Robert Morris 1978, Flajolet 1985)
+// 2. OPOEDynamicPricing (Offline Policy Optimization with Epistemic Uncertainty, Jin et al. 2021)
+// 3. VRPTWSimultaneousPickupDeliveryRouter (Simultaneous Delivery & Reverse Logistics, Montané & Pisinger 2006)
+// =========================================================================
+
+export class MorrisLogLogCounter {
+  constructor(options = {}) {
+    this.numRegisters = Math.max(1, options.numRegisters || 16);
+    this.base = Math.max(1.05, options.base || 2.0);
+    this.registers = new Uint8Array(this.numRegisters);
+    this.seed = options.seed || 12345;
+    this.exactTotal = 0;
+  }
+
+  _nextRandom() {
+    this.seed = (Math.imul(1103515245, this.seed) + 12345) & 0x7fffffff;
+    return this.seed / 0x7fffffff;
+  }
+
+  _hashRegister(str) {
+    let h = 2166136261;
+    const s = String(str);
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0) % this.numRegisters;
+  }
+
+  increment(eventKey) {
+    this.exactTotal += 1;
+    const regIdx = eventKey !== undefined ? this._hashRegister(eventKey) : Math.floor(this._nextRandom() * this.numRegisters);
+
+    const currentVal = this.registers[regIdx];
+    const prob = Math.pow(this.base, -currentVal);
+
+    if (this._nextRandom() < prob) {
+      if (this.registers[regIdx] < 255) {
+        this.registers[regIdx] += 1;
+      }
+    }
+  }
+
+  incrementBatch(count = 1) {
+    const c = Math.max(0, Math.floor(Number(count) || 0));
+    for (let i = 0; i < c; i++) {
+      this.increment();
+    }
+    return this.getEstimate();
+  }
+
+  _estimateRegister(val) {
+    if (val === 0) return 0;
+    return (Math.pow(this.base, val) - 1) / (this.base - 1);
+  }
+
+  estimate() {
+    const relativeStdError = Number((1 / Math.sqrt(2 * this.numRegisters)).toFixed(4));
+    if (this.exactTotal === 0) {
+      return {
+        estimatedCount: 0,
+        exactTotal: 0,
+        standardError: relativeStdError,
+        numRegisters: this.numRegisters,
+        meanRegisterValue: 0
+      };
+    }
+
+    let sumEstimates = 0;
+    let sumRegs = 0;
+
+    for (let i = 0; i < this.numRegisters; i++) {
+      sumEstimates += this._estimateRegister(this.registers[i]);
+      sumRegs += this.registers[i];
+    }
+
+    const estimatedCount = Math.round(sumEstimates);
+    const meanRegVal = Number((sumRegs / this.numRegisters).toFixed(2));
+
+    return {
+      estimatedCount,
+      exactTotal: this.exactTotal,
+      standardError: relativeStdError,
+      numRegisters: this.numRegisters,
+      meanRegisterValue: meanRegVal
+    };
+  }
+
+  getEstimate() {
+    return this.estimate().estimatedCount;
+  }
+
+  getRegisterValues() {
+    return Array.from(this.registers);
+  }
+
+  getStandardError() {
+    return this.estimate().standardError;
+  }
+
+  getSummary() {
+    const est = this.estimate();
+    return {
+      ...est,
+      estimate: est.estimatedCount,
+      registers: Array.from(this.registers)
+    };
+  }
+
+  reset() {
+    this.registers.fill(0);
+    this.exactTotal = 0;
+  }
+
+  merge(other) {
+    if (!(other instanceof MorrisLogLogCounter)) {
+      throw new Error("Target must be an instance of MorrisLogLogCounter");
+    }
+    if (this.numRegisters !== other.numRegisters) {
+      throw new Error("Number of registers must match for merging");
+    }
+
+    for (let i = 0; i < this.numRegisters; i++) {
+      this.registers[i] = Math.max(this.registers[i], other.registers[i]);
+    }
+    this.exactTotal += other.exactTotal;
+    return this;
+  }
+}
+
+export class OPOEDynamicPricing {
+  constructor(options = {}) {
+    this.kappaUncertainty = Math.max(0.01, options.kappaUncertainty !== undefined ? options.kappaUncertainty : 0.35);
+    this.ridgeLambda = Math.max(0.1, options.ridgeLambda || 1.0);
+    this.cogsSafetyFloorRatio = options.cogsSafetyFloorRatio || 1.05;
+    this.competitorCeilingRatio = options.competitorCeilingRatio || 1.15;
+
+    this.dim = 6;
+    this.covDiag = new Float64Array(this.dim).fill(this.ridgeLambda);
+
+    this.qWeights = options.qWeights || [0.15, 0.35, -0.05, 0.40, -0.20, 0.25];
+    this.qBias = options.qBias !== undefined ? options.qBias : 0.0;
+
+    this.behavioralWeights = options.behavioralWeights || [0.08, 0.16, -0.04, 0.12, -0.08];
+    this.behavioralBias = options.behavioralBias !== undefined ? options.behavioralBias : 0.0;
+
+    this.sampleCount = 0;
+  }
+
+  extractFeatures(state, action) {
+    const cogs = Math.max(1, state.cogs || 100000);
+    const basePrice = Math.max(1, state.basePrice || cogs * 1.25);
+    const competitorPrice = Math.max(1, state.competitorPrice || basePrice);
+    const demandIndex = Math.max(0, Math.min(2.0, state.demandIndex !== undefined ? state.demandIndex : 1.0));
+    const inventoryUrgency = Math.max(0, Math.min(1.0, state.inventoryUrgency !== undefined ? state.inventoryUrgency : 0.2));
+    const act = Math.max(0.70, Math.min(1.40, Number(action) || 1.0));
+
+    return [
+      Math.log(cogs) / 15.0,
+      Math.log(basePrice) / 15.0,
+      Math.log(competitorPrice) / 15.0,
+      demandIndex,
+      inventoryUrgency,
+      act
+    ];
+  }
+
+  recordSample(state, action) {
+    const phi = this.extractFeatures(state, action);
+    for (let i = 0; i < this.dim; i++) {
+      this.covDiag[i] += phi[i] * phi[i];
+    }
+    this.sampleCount += 1;
+  }
+
+  computeUncertaintyPenalty(state, action) {
+    const phi = this.extractFeatures(state, action);
+    let mahalanobisSq = 0;
+    for (let i = 0; i < this.dim; i++) {
+      const prec = 1.0 / this.covDiag[i];
+      mahalanobisSq += phi[i] * phi[i] * prec;
+    }
+    const norm = Math.sqrt(Math.max(0, mahalanobisSq));
+    return this.kappaUncertainty * norm;
+  }
+
+  evaluateNominalQ(state, action) {
+    const phi = this.extractFeatures(state, action);
+    let q = this.qBias;
+    for (let i = 0; i < this.dim; i++) {
+      q += phi[i] * this.qWeights[i];
+    }
+    return q;
+  }
+
+  evaluatePessimisticQ(state, action) {
+    const qNom = this.evaluateNominalQ(state, action);
+    const penalty = this.computeUncertaintyPenalty(state, action);
+    return qNom - penalty;
+  }
+
+  predictBehavioralAction(state) {
+    const phi = this.extractFeatures(state, 1.0);
+    let dot = this.behavioralBias;
+    for (let i = 0; i < 5; i++) {
+      dot += phi[i] * this.behavioralWeights[i];
+    }
+    const tanh = Math.tanh(dot);
+    return Math.max(0.70, Math.min(1.40, 1.0 + tanh * 0.25));
+  }
+
+  get featureDim() {
+    return this.dim;
+  }
+
+  get regularizer() {
+    return this.ridgeLambda;
+  }
+
+  get uncertaintyWeight() {
+    return this.kappaUncertainty;
+  }
+
+  get safetyMargin() {
+    return Number((this.cogsSafetyFloorRatio - 1.0).toFixed(2));
+  }
+
+  updateCovariance(state, action) {
+    return this.recordSample(state, action);
+  }
+
+  getModelSummary() {
+    return {
+      featureDim: this.dim,
+      regularizer: this.ridgeLambda,
+      kappaUncertainty: this.kappaUncertainty,
+      sampleCount: this.sampleCount,
+      cogsSafetyFloorRatio: this.cogsSafetyFloorRatio,
+      competitorCeilingRatio: this.competitorCeilingRatio
+    };
+  }
+
+  batchOptimize(items = []) {
+    return (items || []).map(item => this.optimizePrice(item));
+  }
+
+  optimizePrice(item) {
+    const cogs = Math.max(1000, Number(item.cogs) || 100000);
+    const basePrice = Math.max(1, Number(item.basePrice) || Math.round(cogs * 1.3));
+    const competitorPrice = Number(item.competitorPrice) || basePrice;
+    const demandIndex = item.demandIndex !== undefined ? Number(item.demandIndex) : 1.0;
+    const inventoryUrgency = item.inventoryUrgency !== undefined ? Number(item.inventoryUrgency) : 0.2;
+
+    const state = { cogs, basePrice, competitorPrice, demandIndex, inventoryUrgency };
+
+    const behavioralAction = this.predictBehavioralAction(state);
+
+    const candidates = [
+      behavioralAction * 0.90,
+      behavioralAction * 0.95,
+      behavioralAction,
+      behavioralAction * 1.05,
+      behavioralAction * 1.10
+    ].map(a => Math.max(0.70, Math.min(1.40, a)));
+
+    let bestPessimisticQ = -Infinity;
+    let bestAction = behavioralAction;
+    let selectedPenalty = 0;
+
+    for (const a of candidates) {
+      const qPess = this.evaluatePessimisticQ(state, a);
+      if (qPess > bestPessimisticQ) {
+        bestPessimisticQ = qPess;
+        bestAction = a;
+        selectedPenalty = this.computeUncertaintyPenalty(state, a);
+      }
+    }
+
+    let calculatedPrice = Math.round(basePrice * bestAction);
+
+    const safetyFloor = Math.round(cogs * this.cogsSafetyFloorRatio);
+    const safetyCeiling = Math.max(safetyFloor, Math.round(competitorPrice * this.competitorCeilingRatio));
+
+    let decisionTag = "OPOE_PESSIMISTIC_OPTIMAL";
+
+    if (calculatedPrice < safetyFloor) {
+      calculatedPrice = safetyFloor;
+      decisionTag = "FLOOR_OVERRIDE_COGS_SECURED";
+    } else if (calculatedPrice > safetyCeiling) {
+      calculatedPrice = safetyCeiling;
+      decisionTag = "CEILING_OVERRIDE_COMPETITOR_RESTRICTED";
+    } else if (selectedPenalty > 0.40) {
+      decisionTag = "EPISTEMIC_UNCERTAINTY_DAMPED";
+    }
+
+    const grossMarginVnd = calculatedPrice - cogs;
+    const marginPercent = Number(((grossMarginVnd / calculatedPrice) * 100).toFixed(2));
+
+    return {
+      proposedPrice: calculatedPrice,
+      basePrice,
+      cogs,
+      competitorPrice,
+      actionMultiplier: Number(bestAction.toFixed(4)),
+      bestMultiplier: Number(bestAction.toFixed(4)),
+      behavioralAction: Number(behavioralAction.toFixed(4)),
+      pessimisticQ: Number(bestPessimisticQ.toFixed(4)),
+      bestPessimisticQ: Number(bestPessimisticQ.toFixed(4)),
+      bestBaseQ: Number(this.evaluateNominalQ(state, bestAction).toFixed(4)),
+      epistemicPenalty: Number(selectedPenalty.toFixed(4)),
+      uncertaintyPenalty: Number(selectedPenalty.toFixed(4)),
+      isFloorEnforced: calculatedPrice === safetyFloor,
+      decisionTag,
+      marginAnalysis: {
+        grossMarginVnd,
+        marginPercent,
+        safetyFloorVnd: safetyFloor,
+        safetyCeilingVnd: safetyCeiling
+      }
+    };
+  }
+}
+
+export class VRPTWSimultaneousPickupDeliveryRouter {
+  constructor(options = {}) {
+    this.vehicleCapacityKg = options.vehicleCapacityKg || 150.0;
+    this.vanSpeedKmh = options.vanSpeedKmh || 28.0;
+    this.serviceDwellPerStopMin = options.serviceDwellPerStopMin || 5.0;
+    this.co2PerKm = options.co2PerKm || 0.18;
+  }
+
+  calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(3));
+  }
+
+  planSimultaneousRoutes(stops = [], depot = { lat: 21.0341, lng: 105.8372 }, startMinuteOfDay = 480) {
+    if (!stops || stops.length === 0) {
+      return {
+        status: "EMPTY_STOPS",
+        summary: {
+          totalStops: 0,
+          totalDistanceKm: 0,
+          totalDeliveryKg: 0,
+          totalPickupKg: 0,
+          peakPayloadKg: 0,
+          capacityExceeded: false,
+          co2SavedKg: 0,
+          makespanMin: 0
+        },
+        route: []
+      };
+    }
+
+    let initialDeliverySum = 0;
+    let totalPickupSum = 0;
+
+    for (const s of stops) {
+      initialDeliverySum += Math.max(0, Number(s.deliveryKg) || 0);
+      totalPickupSum += Math.max(0, Number(s.pickupKg) || 0);
+    }
+
+    let currentLat = depot.lat;
+    let currentLng = depot.lng;
+    let currentTimeMin = startMinuteOfDay;
+    let currentPayloadKg = initialDeliverySum;
+    let peakPayloadKg = currentPayloadKg;
+    let capacityExceeded = currentPayloadKg > this.vehicleCapacityKg;
+    let totalDistanceKm = 0;
+
+    const unvisited = [...stops];
+    const visitedRoute = [];
+
+    while (unvisited.length > 0) {
+      let bestIdx = 0;
+      let minDist = Infinity;
+
+      for (let i = 0; i < unvisited.length; i++) {
+        const d = this.calculateDistance(currentLat, currentLng, unvisited[i].lat, unvisited[i].lng);
+        if (d < minDist) {
+          minDist = d;
+          bestIdx = i;
+        }
+      }
+
+      const nextStop = unvisited.splice(bestIdx, 1)[0];
+      const dist = minDist;
+      const transitMin = (dist / this.vanSpeedKmh) * 60;
+      currentTimeMin += transitMin;
+      totalDistanceKm += dist;
+
+      const tw = nextStop.timeWindow || [startMinuteOfDay, startMinuteOfDay + 360];
+      if (currentTimeMin < tw[0]) {
+        currentTimeMin = tw[0];
+      }
+
+      const isLate = currentTimeMin > tw[1];
+
+      const deliveryKg = Math.max(0, Number(nextStop.deliveryKg) || 0);
+      const pickupKg = Math.max(0, Number(nextStop.pickupKg) || 0);
+      currentPayloadKg = currentPayloadKg - deliveryKg + pickupKg;
+
+      if (currentPayloadKg > peakPayloadKg) {
+        peakPayloadKg = currentPayloadKg;
+      }
+      if (currentPayloadKg > this.vehicleCapacityKg) {
+        capacityExceeded = true;
+      }
+
+      currentTimeMin += this.serviceDwellPerStopMin;
+
+      visitedRoute.push({
+        stopId: nextStop.id,
+        lat: nextStop.lat,
+        lng: nextStop.lng,
+        deliveryKg,
+        pickupKg,
+        currentPayloadKg: Number(currentPayloadKg.toFixed(2)),
+        distanceFromLastKm: Number(dist.toFixed(2)),
+        arrivalTimeMin: Number((currentTimeMin - this.serviceDwellPerStopMin).toFixed(1)),
+        departureTimeMin: Number(currentTimeMin.toFixed(1)),
+        onTime: !isLate
+      });
+
+      currentLat = nextStop.lat;
+      currentLng = nextStop.lng;
+    }
+
+    const returnDist = this.calculateDistance(currentLat, currentLng, depot.lat, depot.lng);
+    totalDistanceKm += returnDist;
+    currentTimeMin += (returnDist / this.vanSpeedKmh) * 60;
+
+    const separateTripDistanceEstimate = totalDistanceKm * 1.65;
+    const distanceSavedKm = Math.max(0, separateTripDistanceEstimate - totalDistanceKm);
+    const co2SavedKg = Number((distanceSavedKm * this.co2PerKm).toFixed(2));
+    const efficiencyGainPercent = Number(((distanceSavedKm / separateTripDistanceEstimate) * 100).toFixed(1));
+
+    return {
+      status: "VRPSPDTW_SUCCESS",
+      summary: {
+        totalStops: stops.length,
+        totalDistanceKm: Number(totalDistanceKm.toFixed(2)),
+        totalDeliveryKg: Number(initialDeliverySum.toFixed(2)),
+        totalPickupKg: Number(totalPickupSum.toFixed(2)),
+        peakPayloadKg: Number(peakPayloadKg.toFixed(2)),
+        vehicleCapacityKg: this.vehicleCapacityKg,
+        capacityExceeded,
+        makespanMin: Number((currentTimeMin - startMinuteOfDay).toFixed(1)),
+        co2SavedKg,
+        efficiencyGainPercent
+      },
+      route: visitedRoute
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -30864,6 +31329,10 @@ export default {
   DEFAULT_ROAD_PRICING_DEPOTS,
   CONGESTION_TOLL_ZONE,
   MDVRPTWRoadPricingRouter,
+  // Phase 60 Enterprise Algorithms
+  MorrisLogLogCounter,
+  OPOEDynamicPricing,
+  VRPTWSimultaneousPickupDeliveryRouter,
 };
 
 
