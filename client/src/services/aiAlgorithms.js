@@ -28563,6 +28563,456 @@ export class VRPTWCRSRouter {
   }
 }
 
+// =========================================================================
+// PHASE 56 ENTERPRISE ALGORITHMS SUITE (FEATURE 203)
+// =========================================================================
+
+/**
+ * SpaceSavingItemsets - Filtered Space-Saving & Lossy Counting Algorithm for Streaming Frequent Bundles
+ */
+export class SpaceSavingItemsets {
+  constructor(options = {}) {
+    this.maxBuckets = options.maxBuckets || 128;
+    this.supportThreshold = options.supportThreshold || 0.02;
+    this.epsilon = options.epsilon || (1 / this.maxBuckets);
+    this.buckets = new Map();
+    this.totalEvents = 0;
+  }
+
+  _canonicalKey(itemOrPair) {
+    if (Array.isArray(itemOrPair)) {
+      if (itemOrPair.length === 1) return String(itemOrPair[0]);
+      return [...itemOrPair].map(String).sort().join(' & ');
+    }
+    return String(itemOrPair);
+  }
+
+  update(transaction, weight = 1) {
+    if (weight <= 0) return;
+    if (Array.isArray(transaction) && transaction.length > 1) {
+      const items = [...new Set(transaction)];
+      for (let i = 0; i < items.length; i++) {
+        this._updateSingle(this._canonicalKey(items[i]), weight);
+        for (let j = i + 1; j < items.length; j++) {
+          this._updateSingle(this._canonicalKey([items[i], items[j]]), weight);
+        }
+      }
+    } else {
+      const key = this._canonicalKey(transaction);
+      this._updateSingle(key, weight);
+    }
+    this.totalEvents += weight;
+  }
+
+  _updateSingle(key, weight) {
+    if (this.buckets.has(key)) {
+      const entry = this.buckets.get(key);
+      entry.count += weight;
+      return;
+    }
+    if (this.buckets.size < this.maxBuckets) {
+      this.buckets.set(key, { count: weight, error: 0 });
+      return;
+    }
+    let minKey = null;
+    let minVal = Infinity;
+    for (const [k, v] of this.buckets.entries()) {
+      if (v.count < minVal) {
+        minVal = v.count;
+        minKey = k;
+      }
+    }
+    this.buckets.delete(minKey);
+    this.buckets.set(key, {
+      count: minVal + weight,
+      error: minVal,
+    });
+  }
+
+  estimate(itemOrPair) {
+    const key = this._canonicalKey(itemOrPair);
+    if (!this.buckets.has(key)) {
+      return { estimatedCount: 0, maxError: 0, minCount: 0, support: 0 };
+    }
+    const { count, error } = this.buckets.get(key);
+    const minCount = Math.max(0, count - error);
+    const support = this.totalEvents > 0 ? Number((count / this.totalEvents).toFixed(4)) : 0;
+    return { estimatedCount: count, maxError: error, minCount, support };
+  }
+
+  getFrequentItemsets(k = 10) {
+    const results = [];
+    const minRequiredCount = this.totalEvents * this.supportThreshold;
+    for (const [key, v] of this.buckets.entries()) {
+      const isGuaranteed = (v.count - v.error) >= minRequiredCount;
+      const support = this.totalEvents > 0 ? Number((v.count / this.totalEvents).toFixed(4)) : 0;
+      results.push({
+        itemset: key,
+        isPair: key.includes(' & '),
+        estimatedCount: v.count,
+        maxError: v.error,
+        minCount: Math.max(0, v.count - v.error),
+        support,
+        isGuaranteed,
+      });
+    }
+    results.sort((a, b) => b.estimatedCount - a.estimatedCount);
+    return results.slice(0, k);
+  }
+
+  merge(other) {
+    if (this.maxBuckets !== other.maxBuckets) {
+      throw new Error("Cannot merge SpaceSaving summaries with different bucket capacities");
+    }
+    for (const [key, entry] of other.buckets.entries()) {
+      if (this.buckets.has(key)) {
+        const cur = this.buckets.get(key);
+        cur.count += entry.count;
+        cur.error += entry.error;
+      } else if (this.buckets.size < this.maxBuckets) {
+        this.buckets.set(key, { ...entry });
+      } else {
+        let minKey = null;
+        let minVal = Infinity;
+        for (const [k, v] of this.buckets.entries()) {
+          if (v.count < minVal) {
+            minVal = v.count;
+            minKey = k;
+          }
+        }
+        this.buckets.delete(minKey);
+        this.buckets.set(key, {
+          count: minVal + entry.count,
+          error: minVal + entry.error,
+        });
+      }
+    }
+    this.totalEvents += other.totalEvents;
+  }
+
+  getStats() {
+    return {
+      maxBuckets: this.maxBuckets,
+      currentOccupancy: this.buckets.size,
+      totalEvents: this.totalEvents,
+      supportThreshold: this.supportThreshold,
+      theoreticalMaxErrorRatio: Number((1 / this.maxBuckets).toFixed(4)),
+    };
+  }
+}
+
+/**
+ * CPOPricing - Constrained Policy Optimization (CPO & Lagrangian PPO) for Safe Dynamic Pricing & Ads Bidding
+ */
+export class CPOPricing {
+  constructor(options = {}) {
+    this.budgetLimit = options.budgetLimit || 500000;
+    this.maxCogsRisk = options.maxCogsRisk !== undefined ? options.maxCogsRisk : 0.02;
+    this.lambdaBudget = options.lambdaBudget !== undefined ? options.lambdaBudget : 0.5;
+    this.lambdaCogs = options.lambdaCogs !== undefined ? options.lambdaCogs : 1.0;
+    this.learningRate = options.learningRate || 0.01;
+    this.cogsFloorMultiplier = options.cogsFloorMultiplier || 1.05;
+    this.actorWeights = [0.25, -0.15, 0.05, -0.20, 0.35];
+    this.actorBias = 1.0;
+  }
+
+  _extractStateVector(state) {
+    const compPrice = state.competitorPrice || state.basePrice || 100000;
+    const basePrice = state.basePrice || compPrice;
+    const compRatio = Math.min(2.0, compPrice / Math.max(1, basePrice));
+    const stockRatio = Math.min(1.0, Math.max(0, (state.stock || 50) / 100));
+    const hourNorm = ((state.hourOfDay !== undefined ? state.hourOfDay : 12) % 24) / 24;
+    const elasticity = Math.min(3.0, Math.max(0.2, state.elasticity || 1.2));
+    const conversion = Math.min(1.0, Math.max(0.0, state.conversionRate || 0.05));
+    return [compRatio, stockRatio, hourNorm, elasticity, conversion];
+  }
+
+  predictAction(state) {
+    const s = this._extractStateVector(state);
+    let raw = this.actorBias;
+    for (let i = 0; i < s.length; i++) {
+      raw += this.actorWeights[i] * s[i];
+    }
+    const budgetSuppression = Math.min(0.15, this.lambdaBudget * 0.05);
+    const cogsCorrection = Math.min(0.20, this.lambdaCogs * 0.08);
+    const constrainedAction = raw - budgetSuppression + cogsCorrection * 0.5;
+    return Math.max(0.70, Math.min(1.40, constrainedAction));
+  }
+
+  updateDualVariables(observedBudgetBurn, observedCogsBreachRate) {
+    const budgetError = observedBudgetBurn - this.budgetLimit;
+    const cogsError = observedCogsBreachRate - this.maxCogsRisk;
+    this.lambdaBudget = Math.max(0, Number((this.lambdaBudget + this.learningRate * (budgetError / 100000)).toFixed(4)));
+    this.lambdaCogs = Math.max(0, Number((this.lambdaCogs + this.learningRate * (cogsError * 10)).toFixed(4)));
+    return {
+      lambdaBudget: this.lambdaBudget,
+      lambdaCogs: this.lambdaCogs,
+      budgetViolated: budgetError > 0,
+      cogsViolated: cogsError > 0,
+    };
+  }
+
+  optimizePrice(product, marketContext = {}) {
+    const cogs = product.cogs || product.costPrice || (product.price ? product.price * 0.70 : 100000);
+    const basePrice = product.price || product.basePrice || cogs * 1.30;
+    const competitorPrice = marketContext.competitorPrice || product.competitorPrice || basePrice * 1.05;
+
+    const state = {
+      basePrice,
+      competitorPrice,
+      stock: product.stock !== undefined ? product.stock : 50,
+      hourOfDay: marketContext.hourOfDay !== undefined ? marketContext.hourOfDay : 12,
+      elasticity: marketContext.elasticity || product.elasticity || 1.2,
+      conversionRate: marketContext.conversionRate || 0.05,
+    };
+
+    const action = this.predictAction(state);
+    let rawSuggestedPrice = Math.round(basePrice * action);
+    const ceilingPrice = Math.round(competitorPrice * 1.20);
+    const hardFloorPrice = Math.round(cogs * this.cogsFloorMultiplier);
+
+    let safetyStatus = 'CPO_CONSTRAINED_OPTIMAL';
+    let finalPrice = rawSuggestedPrice;
+
+    if (finalPrice > ceilingPrice) {
+      finalPrice = ceilingPrice;
+      safetyStatus = 'COMPETITOR_CEILING_ENFORCED';
+    }
+    if (finalPrice < hardFloorPrice) {
+      finalPrice = hardFloorPrice;
+      safetyStatus = 'COGS_FLOOR_ENFORCED';
+    }
+    if (this.lambdaBudget > 1.5 && safetyStatus === 'CPO_CONSTRAINED_OPTIMAL') {
+      safetyStatus = 'BUDGET_THROTTLED_CONSERVATIVE';
+    }
+
+    const netProfitMargin = (finalPrice - cogs) / finalPrice;
+    const estimatedRoas = Number((finalPrice / Math.max(1, cogs * 0.15)).toFixed(2));
+
+    return {
+      productId: product.id || product.productId || 'SKU_CPO_OPTIMIZED',
+      cogs,
+      basePrice,
+      competitorPrice,
+      suggestedPrice: finalPrice,
+      action: Number(action.toFixed(4)),
+      hardFloorPrice,
+      ceilingPrice,
+      lambdaBudget: this.lambdaBudget,
+      lambdaCogs: this.lambdaCogs,
+      netProfitMargin: Number(netProfitMargin.toFixed(4)),
+      estimatedRoas,
+      safetyStatus,
+    };
+  }
+}
+
+export const DEFAULT_SOLAR_HUBS = [
+  { id: 'HUB_SOLAR_LONGBIEN', name: 'SPX Long Biên Solar Micro-Hub', lat: 21.0420, lng: 105.8920, solarKw: 150, chargers: 8 },
+  { id: 'HUB_SOLAR_NAMTULIEM', name: 'SPX Nam Từ Liêm Solar Micro-Hub', lat: 21.0120, lng: 105.7650, solarKw: 200, chargers: 10 },
+  { id: 'HUB_SOLAR_HOANGMAI', name: 'SPX Hoàng Mai Solar Micro-Hub', lat: 20.9780, lng: 105.8450, solarKw: 120, chargers: 6 },
+  { id: 'HUB_SOLAR_BACTULIEM', name: 'SPX Bắc Từ Liêm Solar Micro-Hub', lat: 21.0650, lng: 105.7580, solarKw: 100, chargers: 6 },
+];
+
+/**
+ * EVRPBDSRouter - Electric Vehicle Routing with Battery Degradation & Solar-Assisted Charging
+ */
+export class EVRPBDSRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || {
+      id: 'DEPOT_HANOI_CENTRAL',
+      name: 'SPX Express Central Hub - Ba Đình',
+      lat: 21.0341,
+      lng: 105.8372,
+    };
+    this.solarHubs = options.solarHubs || DEFAULT_SOLAR_HUBS;
+    this.batteryCapacityKwh = options.batteryCapacityKwh || 40;
+    this.kwhPerKm = options.kwhPerKm || 0.18;
+    this.batteryPackCostVnd = options.batteryPackCostVnd || 120000000;
+    this.averageSpeedKmH = options.averageSpeedKmH || 32;
+
+    this.tariffSchedule = {
+      offPeak: 1180,
+      standard: 1850,
+      peak: 3250,
+    };
+  }
+
+  calculateDistanceKm(p1, p2) {
+    const R = 6371;
+    const dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
+    const dLng = ((p2.lng - p1.lng) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((p1.lat * Math.PI) / 180) *
+        Math.cos((p2.lat * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(4));
+  }
+
+  getElectricityTariff(hourOfDay, isSolarHub = true) {
+    const hour = hourOfDay % 24;
+    let baseTariff = this.tariffSchedule.standard;
+    if (hour >= 22 || hour < 4) {
+      baseTariff = this.tariffSchedule.offPeak;
+    } else if ((hour >= 9.5 && hour < 11.5) || (hour >= 17 && hour < 20)) {
+      baseTariff = this.tariffSchedule.peak;
+    }
+
+    let solarDiscount = 0;
+    if (isSolarHub && hour >= 8 && hour <= 16) {
+      solarDiscount = 0.40;
+    }
+
+    const effectiveTariff = Math.round(baseTariff * (1 - solarDiscount));
+    return {
+      baseTariff,
+      effectiveTariff,
+      solarDiscountPercent: Math.round(solarDiscount * 100),
+      isSolarActive: solarDiscount > 0,
+    };
+  }
+
+  estimateBatteryDegradation(startSoc, endSoc) {
+    const dod = Math.max(0, startSoc - endSoc);
+    const energyUsedKwh = dod * this.batteryCapacityKwh;
+    const alphaDeg = 0.00015;
+    const dodStressFactor = Math.pow(Math.max(0.1, dod), 1.6);
+    const cycleEquivalent = energyUsedKwh / this.batteryCapacityKwh;
+    const healthLossFraction = alphaDeg * dodStressFactor * cycleEquivalent;
+    const degradationCostVnd = Math.round(this.batteryPackCostVnd * healthLossFraction);
+
+    return {
+      degradationCostVnd,
+      dodPercent: Number((dod * 100).toFixed(1)),
+      healthLossFraction: Number(healthLossFraction.toFixed(7)),
+    };
+  }
+
+  findNearestSolarHub(currentCoord) {
+    let nearest = null;
+    let minDist = Infinity;
+    for (const hub of this.solarHubs) {
+      const d = this.calculateDistanceKm(currentCoord, hub);
+      if (d < minDist) {
+        minDist = d;
+        nearest = hub;
+      }
+    }
+    return {
+      nearestHub: nearest,
+      distanceKm: Number(minDist.toFixed(2)),
+    };
+  }
+
+  planGreenFleetRoutes(orders = [], options = {}) {
+    if (!orders || orders.length === 0) {
+      return { status: 'EVRP_BDS_EMPTY', totalOrders: 0, routes: [] };
+    }
+
+    const startSoc = options.initialSoc !== undefined ? options.initialSoc : 0.95;
+    const minSafetySoc = options.minSafetySoc !== undefined ? options.minSafetySoc : 0.20;
+    const currentHour = options.departureHour !== undefined ? options.departureHour : 8.5;
+
+    let currLoc = this.depot;
+    let currSoc = startSoc;
+    let totalDistKm = 0;
+    let totalDegradationCostVnd = 0;
+    let solarRechargeCount = 0;
+    let solarKwhCharged = 0;
+    let solarCostSavingsVnd = 0;
+
+    const sequencedStops = [];
+    const remainingOrders = [...orders];
+
+    while (remainingOrders.length > 0) {
+      let bestIdx = 0;
+      let minDist = Infinity;
+
+      for (let i = 0; i < remainingOrders.length; i++) {
+        const coord = remainingOrders[i].coordinates || remainingOrders[i];
+        const d = this.calculateDistanceKm(currLoc, coord);
+        if (d < minDist) {
+          minDist = d;
+          bestIdx = i;
+        }
+      }
+
+      const nextOrder = remainingOrders.splice(bestIdx, 1)[0];
+      const coord = nextOrder.coordinates || nextOrder;
+      const energyNeeded = minDist * this.kwhPerKm;
+      const socDrain = energyNeeded / this.batteryCapacityKwh;
+
+      if ((currSoc - socDrain) < minSafetySoc) {
+        const hubDetour = this.findNearestSolarHub(currLoc);
+        if (hubDetour.nearestHub) {
+          const detourDist = hubDetour.distanceKm;
+          totalDistKm += detourDist;
+
+          const targetSoc = 0.80;
+          const kwhToCharge = (targetSoc - currSoc) * this.batteryCapacityKwh;
+          const tariffInfo = this.getElectricityTariff(currentHour, true);
+
+          const standardCost = kwhToCharge * tariffInfo.baseTariff;
+          const actualSolarCost = kwhToCharge * tariffInfo.effectiveTariff;
+          const savings = standardCost - actualSolarCost;
+
+          solarRechargeCount++;
+          solarKwhCharged += kwhToCharge;
+          solarCostSavingsVnd += savings;
+
+          sequencedStops.push({
+            stopType: 'SOLAR_MICRO_HUB_RECHARGE',
+            hubId: hubDetour.nearestHub.id,
+            name: hubDetour.nearestHub.name,
+            kwhCharged: Number(kwhToCharge.toFixed(2)),
+            tariffVndPerKwh: tariffInfo.effectiveTariff,
+            isSolarActive: tariffInfo.isSolarActive,
+          });
+
+          currSoc = targetSoc;
+          currLoc = hubDetour.nearestHub;
+        }
+      }
+
+      const actualDist = this.calculateDistanceKm(currLoc, coord);
+      totalDistKm += actualDist;
+      const actualSocDrain = (actualDist * this.kwhPerKm) / this.batteryCapacityKwh;
+      const deg = this.estimateBatteryDegradation(currSoc, currSoc - actualSocDrain);
+      totalDegradationCostVnd += deg.degradationCostVnd;
+
+      currSoc = Math.max(0.05, currSoc - actualSocDrain);
+      currLoc = coord;
+
+      sequencedStops.push({
+        stopType: 'CUSTOMER_DELIVERY',
+        orderId: nextOrder.id || `ORD_${sequencedStops.length + 1}`,
+        coordinates: coord,
+        batterySocAfter: Number((currSoc * 100).toFixed(1)),
+      });
+    }
+
+    const returnDist = this.calculateDistanceKm(currLoc, this.depot);
+    totalDistKm += returnDist;
+    const co2SavedKg = Number((totalDistKm * 0.18).toFixed(2));
+
+    return {
+      status: 'EVRP_BDS_SUCCESS',
+      totalOrders: orders.length,
+      totalDistanceKm: Number(totalDistKm.toFixed(2)),
+      finalBatterySocPercent: Number((currSoc * 100).toFixed(1)),
+      totalBatteryDegradationCostVnd: totalDegradationCostVnd,
+      solarRechargeCount,
+      solarKwhCharged: Number(solarKwhCharged.toFixed(2)),
+      solarCostSavingsVnd: Math.round(solarCostSavingsVnd),
+      co2SavedKg,
+      stops: sequencedStops,
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -28856,6 +29306,11 @@ export default {
   CalQLPricing,
   DEFAULT_SMART_LOCKERS,
   VRPTWCRSRouter,
+  // Phase 56 Enterprise Algorithms
+  SpaceSavingItemsets,
+  CPOPricing,
+  DEFAULT_SOLAR_HUBS,
+  EVRPBDSRouter,
 };
 
 

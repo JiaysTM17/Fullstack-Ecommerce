@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1307,6 +1307,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Kiểm tra chỉ số đột biến AMS Sketch',
         'Tối ưu hóa giá bán bằng Cal-QL',
         'Giao hàng qua tủ khóa thông minh'
+      ]
+    };
+  }
+
+  // 65. Bộ Ba Thuật Toán Space-Saving Itemsets, CPO Safe Pricing & Xe Điện Sạc Mặt Trời EVRP-BDS (Phase 56 - Feature 203)
+  if (/space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cpo pricing|cpo[- ]pricing|evrp-bds|sạc mặt trời|solar micro-hub/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN SPACE-SAVING, CPO PRICING & XE ĐIỆN SẠC MẶT TRỜI (${currentShop.name})**:
+- **Bắt sóng combo mua kèm bùng nổ Space-Saving & Lossy Counting**:
+  - Không cần tốn kém bộ nhớ $O(N^2)$: Thuật toán trích xuất tức thì các cặp sản phẩm mua kèm thường xuyên nhất (Ví dụ: Sản phẩm chính của shop đi kèm phụ kiện) để shop tạo ngay Deal Sốc Mua Kèm (Add-on Deals) thu hút khách!
+- **Định giá an toàn & đấu thầu có ràng buộc kép CPO (Lagrangian PPO)**:
+  - Khóa chặt hai rào cản tài chính: Hệ số nhân Lagrange tự thích ứng ghì giá thầu khi chạm ngưỡng ngân sách ngày và tuyệt đối bảo vệ sàn an toàn $\\text{COGS} \\times 1.05$.
+- **Đội xe tải điện xanh & trạm sạc năng lượng mặt trời EVRP-BDS**:
+  - Đơn hàng xuất kho của shop được vận chuyển bởi đội xe điện SPX tối ưu theo tuổi thọ cell pin (tránh xả sâu DoD) và nạp điện sạch tại 4 Solar Micro-Hubs (Long Biên, Nam Từ Liêm, Hoàng Mai, Bắc Từ Liêm) giảm $40\\%$ chi phí năng lượng!`,
+      type: 'recommendation',
+      tag: 'SPACE-SAVING, CPO & SOLAR EVRP-BDS',
+      suggestions: [
+        'Khai phá cặp sản phẩm mua kèm Space-Saving',
+        'Tối ưu hóa giá thầu an toàn CPO',
+        'Xem lộ trình xe điện sạc mặt trời EVRP-BDS'
       ]
     };
   }

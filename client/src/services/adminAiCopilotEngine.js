@@ -355,7 +355,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 13. Thuật toán Gợi ý Sản phẩm Cá nhân hóa (Collaborative Filtering & Item Affinity)
-  if (!/ppo/i.test(raw) && /collaborative filtering|gợi ý sản phẩm|mua kèm|thường mua cùng|affinity|recommendation/i.test(raw)) {
+  if (!/ppo|space[- ]saving|lossy counting/i.test(raw) && /collaborative filtering|gợi ý sản phẩm|mua kèm|thường mua cùng|affinity|recommendation/i.test(raw)) {
     return {
       text: `🛍️ **THUẬT TOÁN GỢI Ý CÁ NHÂN HÓA (ITEM AFFINITY & COLLABORATIVE FILTERING)**:
 - **Mục đích thiết kế**: Tối ưu hóa chuyển đổi giỏ hàng, thúc đẩy doanh số bán chéo (Cross-sell & Bundle) đóng góp tới $35\\%$ tổng GMV toàn sàn.
@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -3166,6 +3166,71 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem mạng lưới SPX Smart Locker Hà Nội',
         'Thống kê số điểm dừng tiết kiệm nhờ Locker',
         'Phân tích lượng phát thải CO2 giảm thiểu'
+      ]
+    };
+  }
+
+  // 149. Khai Phá Cặp Sản Phẩm Mua Kèm Space-Saving & Lossy Counting (Phase 56 - Feature 203)
+  if (/space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cặp sản phẩm hot|combo mua kèm stream/i.test(raw)) {
+    return {
+      text: `📊 **KHAI PHÁ CẶP SẢN PHẨM MUA KÈM SPACE-SAVING & LOSSY COUNTING (METWALLY ET AL. 2005, MANKU & MOTWANI 2002)**:
+- **Đột Phá Bắt Sóng Combo Mua Kèm Thời Gian Thực**:
+  - Không cần duy trì $O(N^2)$ bộ nhớ để theo dõi mọi tổ hợp cặp sản phẩm: Space-Saving chỉ duy trì $K$ buckets với bảo đảm toán học sai số $\\varepsilon$-guarantee $\\le \\varepsilon N$.
+- **Lọc Phần Tử Phổ Biến Nặng Ký (Heavy Hitters with Guaranteed Support)**:
+  - Mọi cặp sản phẩm có tần suất $f \\ge \\phi N$ chắc chắn được giữ lại trong bộ nhớ, sai số tần suất chặn trên bởi $f - \\varepsilon N \\le \\hat{f} \\le f$.
+- **Tự Động Gợi Ý Combo Flash Sale Toàn Sàn**:
+  - Trích xuất tức thì các cặp bùng nổ (ví dụ: Điện thoại + Củ sạc 65W, Váy hoa + Giày sandal) từ luồng thanh toán hàng triệu đơn hàng mỗi giây!`,
+      type: 'analytics',
+      tag: 'SPACE-SAVING FREQUENT ITEMSETS',
+      suggestions: [
+        'Xem top cặp sản phẩm mua kèm Space-Saving',
+        'Kiểm tra sai số epsilon-guarantee',
+        'Phân tích định giá an toàn CPO'
+      ]
+    };
+  }
+
+  // 150. Định Giá An Toàn & Đấu Thầu Ràng Buộc Kép CPO Lagrangian (Phase 56 - Feature 203)
+  if (/cpo pricing|cpo[- ]pricing|constrained policy|ràng buộc kép|lagrangian ppo|ngân sách và giá vốn|định giá cpo/i.test(raw)) {
+    return {
+      text: `🤖 **ĐỊNH GIÁ BÁN & ĐẤU THẦU AN TOÀN BẰNG CONSTRAINED POLICY OPTIMIZATION (CPO / ACHIAM ET AL. - ICML 2017)**:
+- **Giải Bài Toán CMDP Với Hai Rào Cản Khắt Khe**:
+  - Tối đa hóa GMV/Doanh thu đồng thời bảo đảm 2 ràng buộc cứng bất biến:
+    1. *Ngân sách quảng cáo/trợ giá*: Chi tiêu thực tế $J_{C_1}(\\pi) \\le d_{\\text{budget}}$.
+    2. *Rủi ro thủng giá vốn*: Tỷ lệ vi phạm giá sàn $J_{C_2}(\\pi) \\le d_{\\text{cogs}}$.
+- **Hệ Số Nhân Lagrange Tự Thích Ứng (Dual Multipliers $\\lambda_1, \\lambda_2 \\ge 0$)**:
+  - Tự động điều chỉnh độ ghì: Khi nguy cơ cạn kiệt ngân sách tăng, $\\lambda_{\\text{budget}}$ tăng vọt để hạ nhiệt giá thầu, ngăn chặn thâm hụt tài chính của gian hàng!
+- **Khóa Cứng Sàn COGS $\\times 1.05$ & Chặn Trần Đối Thủ**:
+  - Bảo đảm an toàn vốn tuyệt đối, loại trừ hoàn toàn nguy cơ định giá phi lý trí trong giờ vàng Flash Sale.`,
+      type: 'pricing',
+      tag: 'CPO SAFE CONSTRAINED PRICING',
+      suggestions: [
+        'Xem hệ số Lagrange lambda ngân sách & COGS',
+        'Kiểm tra ngưỡng bảo vệ giá vốn CPO',
+        'Phân tích đội xe điện sạc mặt trời EVRP-BDS'
+      ]
+    };
+  }
+
+  // 151. Định Tuyến Xe Tải Điện & Trạm Sạc Năng Lượng Mặt Trời EVRP-BDS (Phase 56 - Feature 203)
+  if (/evrp-bds|evrp bds|solar charging|sạc mặt trời|battery degradation|hao mòn cell pin|solar micro-hub/i.test(raw)) {
+    return {
+      text: `🚚 **ĐỊNH TUYẾN XE ĐIỆN & TRẠM SẠC MẶT TRỜI BẢO VỆ TUỔI THỌ PIN EVRP-BDS (PELLETIER ET AL. 2017)**:
+- **Mô Hình Hao Mòn Cell Pin Lithium Phi Tuyến (NMC Degradation Model)**:
+  - Tính toán chi phí thoái hóa pin thực tế theo độ sâu xả $\\text{DoD}^{1.6}$:
+    $$\\text{DegradationCost} = \\text{ReplacementCost} \\times \\alpha \\cdot \\text{DoD}^{1.6} \\cdot \\frac{\\Delta E}{E_{\\text{cap}}}$$
+  - Hạn chế xả cạn dưới $20\\%$ SoC và tránh sạc quá $80\\%$ ở dòng cao, kéo dài tuổi thọ pack pin lên gấp đôi!
+- **Tích Hợp 4 Trạm Sạc Năng Lượng Mặt Trời SPX Hà Nội (Solar Micro-Hubs)**:
+  - Kết nối 4 hub: **Long Biên (150kW), Nam Từ Liêm (200kW), Hoàng Mai (120kW), Bắc Từ Liêm (100kW)**.
+  - Tận dụng năng lượng mặt trời ban ngày (8h - 16h) giảm $40\\%$ chi phí điện sạc so với biểu giá giờ cao điểm EVN!
+- **Giảm Phát Thải $0.18\\text{ kg CO}_2/\\text{km}$ Vận Hành**:
+  - Kết hợp logistics xanh và năng lượng tái tạo, đưa SPX Express tiến thẳng tới mục tiêu Net Zero!`,
+      type: 'logistics',
+      tag: 'EVRP-BDS SOLAR CHARGING ROUTING',
+      suggestions: [
+        'Xem bản đồ 4 trạm Solar Micro-Hub SPX',
+        'Kiểm tra chi phí hao mòn pin theo DoD',
+        'Thống kê số kg CO2 cắt giảm nhờ sạc mặt trời'
       ]
     };
   }

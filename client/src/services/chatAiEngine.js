@@ -405,7 +405,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 4. Tư vấn phối đồ & Gợi ý Combo mua kèm (Cross-sell & Bundle)
-  if (!/deal sốc|tiết kiệm|fp-growth|lift|ppo|succinct/i.test(lower) && /phối đồ|combo|mua kèm|set đồ|mix đồ|đi cùng|phù hợp với/i.test(lower)) {
+  if (!/deal sốc|tiết kiệm|fp-growth|lift|ppo|succinct|space[- ]saving|lossy counting|cpo|evrp[- ]bds|sạc mặt trời/i.test(lower) && /phối đồ|combo|mua kèm|set đồ|mix đồ|đi cùng|phù hợp với/i.test(lower)) {
     const isFashion = /áo|quần|giày|đầm|váy/i.test(lower);
     const isTech = /sạc|tai nghe|chuột|bàn phím|laptop/i.test(lower);
 
@@ -469,7 +469,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VÒNG QUAY MAY MẮN & MINI XU (GAMIFICATION RULES)
   // -------------------------------------------------------------
-  if (!/fisher-yates|provably fair|xu hướng|reservoir|hld|smart locker|spx locker|tủ khóa thông minh|vrptw-crs/i.test(lower) && /vòng quay|quay thưởng|lượt quay|mini xu|\bxu\b|điểm danh|thưởng/i.test(lower)) {
+  if (!/fisher-yates|provably fair|xu hướng|reservoir|hld|smart locker|spx locker|tủ khóa thông minh|vrptw-crs|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời/i.test(lower) && /vòng quay|quay thưởng|lượt quay|mini xu|\bxu\b|điểm danh|thưởng/i.test(lower)) {
     return {
       intent: 'GAMIFICATION_INFO',
       replyText: `**[ĐẶC QUYỀN] QUY TẮC VÒNG QUAY MAY MẮN & MINI XU CHUẨN XÁC:**\n\n• **Hoàn toàn miễn phí, TUYỆT ĐỐI KHÔNG trừ xu khi quay** (Xu được giữ để giảm giá khi mua sắm).\n• **1 lượt quay miễn phí mỗi ngày** (làm mới tự động vào 00:00 nửa đêm).\n• **Tặng thêm +1 lượt quay cho MỖI ĐƠN HÀNG đặt thành công**!\n• 100% cơ hội trúng quà: Xu thưởng khủng tới 5.000 Xu, Voucher 10%, Freeship 30k.\n\n**Số dư của bạn:** **${userCoins.toLocaleString('vi-VN')} Xu** | **Lượt quay:** **${totalSpins} lượt**`,
@@ -484,7 +484,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2|branch[- ]and[- ]cut|vrptw|contraction|benders|mdpdptw|d[- ]darp|dynamic darp|tqpo|cml|count[- ]min[- ]log|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|min-sum latency|chèn hỏa tốc|ams|f2 moment|calql|cal-ql|vrptw-crs|smart locker|spx locker|tủ khóa thông minh/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2|branch[- ]and[- ]cut|vrptw|contraction|benders|mdpdptw|d[- ]darp|dynamic darp|tqpo|cml|count[- ]min[- ]log|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|min-sum latency|chèn hỏa tốc|ams|f2 moment|calql|cal-ql|vrptw-crs|smart locker|spx locker|tủ khóa thông minh|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|solar micro-hub/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|min-sum latency|chèn hỏa tốc|ams|f2 moment|calql|cal-ql|vrptw-crs|smart locker|spx locker|tủ khóa thông minh/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|min-sum latency|chèn hỏa tốc|ams|f2 moment|calql|cal-ql|vrptw-crs|smart locker|spx locker|tủ khóa thông minh|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|solar micro-hub/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -1064,6 +1064,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'AMS_CALQL_LOCKER_ASSIST',
       replyText: `**[MOMENT AMS, ĐỊNH GIÁ HIỆU CHUẨN CAL-QL & TỦ KHÓA THÔNG MINH VRPTW-CRS]:**\n\n• **Bắt sóng xu hướng bất ngờ (AMS Sketch $F_2$)**: Đo lường chuẩn xác độ biến động và độ tập trung lượt xem/mua trong Flash Sale bằng moment tần số bậc 2 $F_2$, phát hiện ngay trào lưu hot trend mà không lo nghẽn bộ nhớ!\n• **Định giá hiệu chuẩn an toàn (Cal-QL Pricing)**: AI định giá offline thông minh tự động hiệu chuẩn theo giá tham chiếu nền $V^\\mu(s)$, chỉ phạt thận trọng khi vượt ngưỡng và luôn khóa trần đối thủ cùng sàn giá vốn $+5\\%$.\n• **Nhận hàng tủ khóa thông minh (VRPTW-CRS Smart Locker)**: Tự động gom đơn tới 5 trạm SPX Smart Locker (Times City, Keangnam, Royal City, IPH, Tràng Tiền) trong bán kính đi bộ $\\le 400\\text{m}$, tặng ngay 500 Xu thưởng cho bạn và giảm khí thải CO2 bảo vệ môi trường!`,
       suggestions: ['Xem tủ SPX Smart Locker gần tôi', 'Săn giá ưu đãi Cal-QL an toàn', 'Nhận 500 Xu nhận hàng tại tủ'],
+    };
+  }
+
+  // 58. Cặp Mua Kèm Space-Saving, Định Giá Ràng Buộc CPO & Xe Điện Sạc Mặt Trời EVRP-BDS (SPACE_SAVING_CPO_SOLAR_ASSIST)
+  if (/space[- ]saving|lossy counting|frequent itemsets|mua kèm combo|cpo pricing|cpo[- ]pricing|evrp-bds|sạc mặt trời|solar micro-hub|xe điện mặt trời/i.test(lower)) {
+    return {
+      intent: 'SPACE_SAVING_CPO_SOLAR_ASSIST',
+      replyText: `**[COMBO SPACE-SAVING, ĐỊNH GIÁ AN TOÀN CPO & XE ĐIỆN SẠC MẶT TRỜI EVRP-BDS]:**\n\n• **Gợi ý combo mua kèm hot (Space-Saving)**: AI tự động phân tích hàng triệu giỏ hàng thời gian thực để gợi ý ngay các cặp sản phẩm mua kèm thường xuyên nhất với giá ưu đãi kịch sàn!\n• **Định giá an toàn kép (CPO Pricing)**: Bảo đảm trợ giá tối đa cho người mua nhưng luôn khóa rào cản ngân sách và bảo vệ vốn sản xuất cho shop đối tác.\n• **Giao hàng bằng xe điện sạc năng lượng mặt trời (EVRP-BDS)**: Đơn hàng của bạn được giao bởi đội xe điện SPX nạp năng lượng sạch tại 4 Solar Micro-Hubs (Long Biên, Nam Từ Liêm, Hoàng Mai, Bắc Từ Liêm), giảm 100% khói bụi và bảo vệ môi trường!`,
+      suggestions: ['Xem combo mua kèm Space-Saving', 'Săn deal trợ giá CPO', 'Khám phá lộ trình giao xe điện sạch'],
     };
   }
 

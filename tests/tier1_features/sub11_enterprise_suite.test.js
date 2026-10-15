@@ -307,6 +307,11 @@ import {
   CalQLPricing,
   DEFAULT_SMART_LOCKERS,
   VRPTWCRSRouter,
+  // Phase 56 Enterprise Algorithms
+  SpaceSavingItemsets,
+  CPOPricing,
+  DEFAULT_SOLAR_HUBS,
+  EVRPBDSRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -440,6 +445,9 @@ import { DTRPLogisticsRouter as ServerDTRPLogisticsRouter } from "../../server/s
 import { AMSFrequencyMomentEstimator as ServerAMSFrequencyMomentEstimator } from "../../server/src/utils/amsFrequencyMomentEstimator.js";
 import { CalQLPricing as ServerCalQLPricing } from "../../server/src/utils/calQlPricing.js";
 import { VRPTWCRSRouter as ServerVRPTWCRSRouter, DEFAULT_SMART_LOCKERS as ServerDefaultSmartLockers } from "../../server/src/utils/vrptwCrsRouter.js";
+import { SpaceSavingItemsets as ServerSpaceSavingItemsets } from "../../server/src/utils/spaceSavingItemsets.js";
+import { CPOPricing as ServerCPOPricing } from "../../server/src/utils/cpoPricing.js";
+import { EVRPBDSRouter as ServerEVRPBDSRouter, DEFAULT_SOLAR_HUBS as ServerDefaultSolarHubs } from "../../server/src/utils/evrpBdsRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -24539,6 +24547,432 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(plan.relocatedOrdersCount, 2);
       expect.ok(plan.dwellMinutesSaved > 0);
       expect.equal(plan.totalCoinsAwarded, 1000);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 203: Filtered Space-Saving Frequent Itemsets (SpaceSavingItemsets),
+  // Constrained Policy Optimization Pricing (CPOPricing), and Electric Vehicle
+  // Routing with Battery Degradation & Solar Charging (EVRPBDSRouter) (24 Tests)
+  // =========================================================================
+  describe("Feature 203: SpaceSaving Itemsets, CPO Safe Pricing & EVRP-BDS Solar Logistics Suite", () => {
+    // -----------------------------------------------------------------------
+    // SPACE-SAVING FREQUENT ITEMSETS (Tests 01-07)
+    // -----------------------------------------------------------------------
+    test("F203-T01: SpaceSavingItemsets initialization and canonical order-independent itemset key hashing", () => {
+      const ss = new ServerSpaceSavingItemsets({ maxBuckets: 16 });
+      expect.equal(ss.maxBuckets, 16);
+      expect.equal(ss.buckets.size, 0);
+
+      const key1 = ss._canonicalKey(["SKU_IPHONE", "SKU_CHARGER"]);
+      const key2 = ss._canonicalKey(["SKU_CHARGER", "SKU_IPHONE"]);
+      expect.equal(key1, key2);
+      expect.equal(key1, "SKU_CHARGER & SKU_IPHONE");
+    });
+
+    test("F203-T02: SpaceSavingItemsets single item updates and bounded count estimation", () => {
+      const ss = new ServerSpaceSavingItemsets({ maxBuckets: 32 });
+      for (let i = 0; i < 25; i++) {
+        ss.update("SKU_AIRPODS", 1);
+      }
+      const est = ss.estimate("SKU_AIRPODS");
+      expect.equal(est.estimatedCount, 25);
+      expect.equal(est.maxError, 0);
+      expect.equal(est.minCount, 25);
+      expect.equal(est.support, 1.0);
+
+      // Unseen item
+      const unseen = ss.estimate("SKU_NONEXISTENT");
+      expect.equal(unseen.estimatedCount, 0);
+    });
+
+    test("F203-T03: SpaceSavingItemsets transaction bundle update extracts and updates pairwise combinations", () => {
+      const ss = new ServerSpaceSavingItemsets({ maxBuckets: 64 });
+      const cart = ["SKU_PHONE", "SKU_CASE", "SKU_SCREEN_PROTECTOR"];
+      ss.update(cart, 5);
+
+      // Check single items
+      expect.ok(ss.estimate("SKU_PHONE").estimatedCount >= 5);
+      expect.ok(ss.estimate("SKU_CASE").estimatedCount >= 5);
+
+      // Check pairwise combinations
+      const pair = ss.estimate(["SKU_CASE", "SKU_PHONE"]);
+      expect.equal(pair.estimatedCount, 5);
+      expect.equal(pair.maxError, 0);
+    });
+
+    test("F203-T04: SpaceSavingItemsets minimum bucket eviction under capacity pressure preserves heavy hitters", () => {
+      // Small capacity of 3 buckets
+      const ss = new ServerSpaceSavingItemsets({ maxBuckets: 3 });
+      ss.update("HEAVY_1", 100);
+      ss.update("HEAVY_2", 80);
+      ss.update("LIGHT_1", 2);
+
+      // Add 4th item causing eviction of LIGHT_1 (count 2)
+      ss.update("NEW_ITEM", 5);
+
+      expect.equal(ss.buckets.size, 3);
+      expect.ok(ss.buckets.has("HEAVY_1"));
+      expect.ok(ss.buckets.has("HEAVY_2"));
+      expect.ok(ss.buckets.has("NEW_ITEM"));
+
+      const newItemEst = ss.estimate("NEW_ITEM");
+      expect.equal(newItemEst.estimatedCount, 7); // 2 (evicted min) + 5
+      expect.equal(newItemEst.maxError, 2);
+      expect.equal(newItemEst.minCount, 5);
+    });
+
+    test("F203-T05: SpaceSavingItemsets getFrequentItemsets returns sorted frequent itemsets with guaranteed bounds", () => {
+      const ss = new ServerSpaceSavingItemsets({ maxBuckets: 32, supportThreshold: 0.10 });
+      ss.update(["ITEM_A", "ITEM_B"], 50);
+      ss.update(["ITEM_C", "ITEM_D"], 10);
+      ss.update(["ITEM_E"], 5);
+
+      const topItemsets = ss.getFrequentItemsets(5);
+      expect.ok(topItemsets.length > 0);
+      expect.ok(topItemsets[0].estimatedCount >= topItemsets[1].estimatedCount);
+      expect.equal(topItemsets[0].isGuaranteed, true);
+    });
+
+    test("F203-T06: SpaceSavingItemsets merge combines disjoint and overlapping sketches accurately", () => {
+      const ss1 = new ServerSpaceSavingItemsets({ maxBuckets: 16 });
+      const ss2 = new ServerSpaceSavingItemsets({ maxBuckets: 16 });
+
+      ss1.update("COMMON_SKU", 20);
+      ss1.update("SKU_PART_1", 10);
+
+      ss2.update("COMMON_SKU", 30);
+      ss2.update("SKU_PART_2", 15);
+
+      ss1.merge(ss2);
+      expect.equal(ss1.estimate("COMMON_SKU").estimatedCount, 50);
+      expect.equal(ss1.estimate("SKU_PART_2").estimatedCount, 15);
+      expect.equal(ss1.totalEvents, 75);
+    });
+
+    test("F203-T07: SpaceSavingItemsets throws error when merging sketches of mismatched capacities", () => {
+      const ss1 = new ServerSpaceSavingItemsets({ maxBuckets: 16 });
+      const ss2 = new ServerSpaceSavingItemsets({ maxBuckets: 32 });
+
+      expect.throws(() => {
+        ss1.merge(ss2);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // CPO PRICING SUITE (Tests 08-14)
+    // -----------------------------------------------------------------------
+    test("F203-T08: CPOPricing initialization and feature normalization vector dimensions", () => {
+      const cpo = new ServerCPOPricing({ budgetLimit: 1000000, maxCogsRisk: 0.05 });
+      expect.equal(cpo.budgetLimit, 1000000);
+      expect.equal(cpo.maxCogsRisk, 0.05);
+      expect.equal(cpo.lambdaBudget, 0.5);
+      expect.equal(cpo.lambdaCogs, 1.0);
+
+      const vec = cpo._extractStateVector({
+        basePrice: 200000,
+        competitorPrice: 210000,
+        stock: 40,
+        hourOfDay: 14,
+        elasticity: 1.1,
+        conversionRate: 0.08,
+      });
+      expect.equal(vec.length, 5);
+      vec.forEach(v => {
+        expect.ok(typeof v === "number" && !isNaN(v));
+      });
+    });
+
+    test("F203-T09: CPOPricing predictAction applies bounded multiplier in [0.70, 1.40]", () => {
+      const cpo = new ServerCPOPricing();
+      const action = cpo.predictAction({
+        basePrice: 150000,
+        competitorPrice: 160000,
+        stock: 30,
+        hourOfDay: 20,
+      });
+      expect.ok(action >= 0.70 && action <= 1.40);
+    });
+
+    test("F203-T10: CPOPricing dual variables update via subgradient ascent under budget and cogs pressure", () => {
+      const cpo = new ServerCPOPricing({ budgetLimit: 500000, maxCogsRisk: 0.02, learningRate: 0.05 });
+      const initialLambdaB = cpo.lambdaBudget;
+      const initialLambdaC = cpo.lambdaCogs;
+
+      // Heavy budget breach (800k > 500k) and COGS breach (0.06 > 0.02)
+      const res = cpo.updateDualVariables(800000, 0.06);
+      expect.equal(res.budgetViolated, true);
+      expect.equal(res.cogsViolated, true);
+      expect.ok(res.lambdaBudget > initialLambdaB);
+      expect.ok(res.lambdaCogs > initialLambdaC);
+    });
+
+    test("F203-T11: CPOPricing optimizePrice enforces COGS profit floor x 1.05 (COGS_FLOOR_ENFORCED)", () => {
+      const cpo = new ServerCPOPricing({ cogsFloorMultiplier: 1.05 });
+      // Force extreme negative actor bias
+      cpo.actorBias = 0.5;
+      cpo.actorWeights.fill(-1.0);
+
+      const pricing = cpo.optimizePrice({
+        id: "SKU_CPO_FLOOR",
+        price: 100000,
+        cogs: 100000, // floor is 105k
+        competitorPrice: 150000,
+        stock: 20,
+      });
+
+      expect.equal(pricing.safetyStatus, "COGS_FLOOR_ENFORCED");
+      expect.equal(pricing.suggestedPrice, 100000 * 1.05);
+      expect.ok(pricing.suggestedPrice >= pricing.hardFloorPrice);
+    });
+
+    test("F203-T12: CPOPricing optimizePrice enforces competitor price ceiling (COMPETITOR_CEILING_ENFORCED)", () => {
+      const cpo = new ServerCPOPricing();
+      cpo.actorBias = 1.4;
+      cpo.actorWeights.fill(0.0);
+
+      const pricing = cpo.optimizePrice({
+        id: "SKU_CPO_CEIL",
+        price: 100000,
+        cogs: 40000,
+        competitorPrice: 50000, // ceiling = 50k * 1.20 = 60k
+        stock: 50,
+      });
+
+      expect.equal(pricing.safetyStatus, "COMPETITOR_CEILING_ENFORCED");
+      expect.equal(pricing.suggestedPrice, 60000);
+      expect.ok(pricing.suggestedPrice <= pricing.ceilingPrice);
+    });
+
+    test("F203-T13: CPOPricing optimizePrice throttles prices when lambdaBudget exceeds threshold (BUDGET_THROTTLED_CONSERVATIVE)", () => {
+      const cpo = new ServerCPOPricing();
+      cpo.lambdaBudget = 2.0; // High budget multiplier
+      cpo.actorBias = 1.0;
+      cpo.actorWeights.fill(0.0);
+
+      const pricing = cpo.optimizePrice({
+        id: "SKU_CPO_THROTTLE",
+        price: 100000,
+        cogs: 60000,
+        competitorPrice: 120000,
+        stock: 30,
+      });
+
+      expect.equal(pricing.safetyStatus, "BUDGET_THROTTLED_CONSERVATIVE");
+    });
+
+    test("F203-T14: CPOPricing optimizePrice returns CPO_CONSTRAINED_OPTIMAL within safety limits", () => {
+      const cpo = new ServerCPOPricing({ lambdaBudget: 0.5 });
+      cpo.actorBias = 1.0;
+      cpo.actorWeights.fill(0.0);
+
+      const pricing = cpo.optimizePrice({
+        id: "SKU_CPO_OPTIMAL",
+        price: 200000,
+        cogs: 120000,
+        competitorPrice: 220000,
+        stock: 50,
+      });
+
+      expect.equal(pricing.safetyStatus, "CPO_CONSTRAINED_OPTIMAL");
+      expect.ok(pricing.suggestedPrice >= pricing.hardFloorPrice);
+      expect.ok(pricing.suggestedPrice <= pricing.ceilingPrice);
+      expect.ok(pricing.netProfitMargin > 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // EVRP-BDS SOLAR LOGISTICS (Tests 15-19)
+    // -----------------------------------------------------------------------
+    test("F203-T15: EVRPBDSRouter initialization with DEFAULT_SOLAR_HUBS and tariff schedule", () => {
+      const router = new ServerEVRPBDSRouter();
+      expect.equal(router.solarHubs.length, 4);
+      expect.equal(router.batteryCapacityKwh, 40);
+      expect.equal(router.tariffSchedule.offPeak, 1180);
+      expect.equal(router.tariffSchedule.peak, 3250);
+    });
+
+    test("F203-T16: EVRPBDSRouter getElectricityTariff returns peak, standard, off-peak rates and 40% daytime solar discount", () => {
+      const router = new ServerEVRPBDSRouter();
+
+      // Midnight: off-peak
+      const midnight = router.getElectricityTariff(1, false);
+      expect.equal(midnight.baseTariff, 1180);
+      expect.equal(midnight.isSolarActive, false);
+
+      // Noon at Solar Hub: standard tariff with 40% solar discount
+      const noonSolar = router.getElectricityTariff(12, true);
+      expect.equal(noonSolar.solarDiscountPercent, 40);
+      expect.equal(noonSolar.isSolarActive, true);
+      expect.equal(noonSolar.effectiveTariff, Math.round(noonSolar.baseTariff * 0.60));
+
+      // Peak hour at 18:00 (no solar)
+      const eveningPeak = router.getElectricityTariff(18, true);
+      expect.equal(eveningPeak.baseTariff, 3250);
+      expect.equal(eveningPeak.isSolarActive, false);
+    });
+
+    test("F203-T17: EVRPBDSRouter estimateBatteryDegradation calculates non-linear cell wear based on DoD^1.6", () => {
+      const router = new ServerEVRPBDSRouter({ batteryCapacityKwh: 40, batteryPackCostVnd: 120000000 });
+
+      // Shallow discharge: 95% -> 85% (DoD = 10%)
+      const shallow = router.estimateBatteryDegradation(0.95, 0.85);
+      expect.equal(shallow.dodPercent, 10.0);
+      expect.ok(shallow.degradationCostVnd >= 0);
+
+      // Deep discharge: 95% -> 25% (DoD = 70%)
+      const deep = router.estimateBatteryDegradation(0.95, 0.25);
+      expect.equal(deep.dodPercent, 70.0);
+      // Non-linear wear means deep discharge costs much more than 7x shallow
+      expect.ok(deep.degradationCostVnd > shallow.degradationCostVnd * 5);
+    });
+
+    test("F203-T18: EVRPBDSRouter findNearestSolarHub identifies closest rooftop solar charging micro-hub", () => {
+      const router = new ServerEVRPBDSRouter();
+      // Near Long Biên Hub (21.042, 105.892)
+      const nearLB = router.findNearestSolarHub({ lat: 21.043, lng: 105.890 });
+      expect.equal(nearLB.nearestHub.id, "HUB_SOLAR_LONGBIEN");
+      expect.ok(nearLB.distanceKm < 1.0);
+
+      // Near Nam Từ Liêm Hub (21.012, 105.765)
+      const nearNTL = router.findNearestSolarHub({ lat: 21.015, lng: 105.768 });
+      expect.equal(nearNTL.nearestHub.id, "HUB_SOLAR_NAMTULIEM");
+    });
+
+    test("F203-T19: EVRPBDSRouter planGreenFleetRoutes schedules route, triggers solar detour when SoC drops below safety reserve, and computes CO2 savings", () => {
+      const router = new ServerEVRPBDSRouter();
+      const orders = [
+        { id: "ORD_GREEN_1", lat: 21.040, lng: 105.895 },
+        { id: "ORD_GREEN_2", lat: 21.010, lng: 105.760 },
+        { id: "ORD_GREEN_3", lat: 20.980, lng: 105.840 },
+      ];
+
+      // Starting with low SoC 25% to trigger solar charging detour
+      const plan = router.planGreenFleetRoutes(orders, { initialSoc: 0.25, minSafetySoc: 0.20 });
+      expect.equal(plan.status, "EVRP_BDS_SUCCESS");
+      expect.equal(plan.totalOrders, 3);
+      expect.ok(plan.solarRechargeCount >= 1);
+      expect.ok(plan.solarKwhCharged > 0);
+      expect.ok(plan.totalBatteryDegradationCostVnd > 0);
+      expect.ok(plan.co2SavedKg > 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT-SERVER SYMMETRY (Tests 20-22)
+    // -----------------------------------------------------------------------
+    test("F203-T20: Client and Server algorithmic symmetry: SpaceSavingItemsets identical estimates and frequent itemsets", () => {
+      const clientSS = new SpaceSavingItemsets({ maxBuckets: 16 });
+      const serverSS = new ServerSpaceSavingItemsets({ maxBuckets: 16 });
+
+      const carts = [
+        ["SKU_PHONE_01", "SKU_CASE_01"],
+        ["SKU_PHONE_01", "SKU_CASE_01"],
+        ["SKU_LAPTOP_01", "SKU_MOUSE_01"],
+      ];
+
+      carts.forEach(cart => {
+        clientSS.update(cart, 1);
+        serverSS.update(cart, 1);
+      });
+
+      expect.equal(clientSS.estimate(["SKU_PHONE_01", "SKU_CASE_01"]).estimatedCount, serverSS.estimate(["SKU_PHONE_01", "SKU_CASE_01"]).estimatedCount);
+      expect.equal(clientSS.getFrequentItemsets(3).length, serverSS.getFrequentItemsets(3).length);
+    });
+
+    test("F203-T21: Client and Server algorithmic symmetry: CPOPricing identical prices, dual multipliers and safety states", () => {
+      const clientCPO = new CPOPricing({ budgetLimit: 750000 });
+      const serverCPO = new ServerCPOPricing({ budgetLimit: 750000 });
+
+      const sku = {
+        id: "SKU_SYM_CPO",
+        price: 300000,
+        cogs: 210000,
+        competitorPrice: 320000,
+        stock: 25,
+      };
+
+      const clientPricing = clientCPO.optimizePrice(sku);
+      const serverPricing = serverCPO.optimizePrice(sku);
+
+      expect.equal(clientPricing.suggestedPrice, serverPricing.suggestedPrice);
+      expect.equal(clientPricing.safetyStatus, serverPricing.safetyStatus);
+      expect.equal(clientPricing.netProfitMargin, serverPricing.netProfitMargin);
+      expect.equal(clientPricing.lambdaBudget, serverPricing.lambdaBudget);
+    });
+
+    test("F203-T22: Client and Server algorithmic symmetry: EVRPBDSRouter identical routes, degradation costs and solar savings", () => {
+      const clientRouter = new EVRPBDSRouter();
+      const serverRouter = new ServerEVRPBDSRouter();
+
+      const orders = [
+        { id: "ORD_SYM_1", lat: 21.042, lng: 105.892 },
+        { id: "ORD_SYM_2", lat: 21.012, lng: 105.765 },
+      ];
+
+      const clientPlan = clientRouter.planGreenFleetRoutes(orders, { initialSoc: 0.30 });
+      const serverPlan = serverRouter.planGreenFleetRoutes(orders, { initialSoc: 0.30 });
+
+      expect.equal(clientPlan.totalOrders, serverPlan.totalOrders);
+      expect.equal(clientPlan.solarRechargeCount, serverPlan.solarRechargeCount);
+      expect.equal(clientPlan.solarCostSavingsVnd, serverPlan.solarCostSavingsVnd);
+      expect.equal(clientPlan.totalBatteryDegradationCostVnd, serverPlan.totalBatteryDegradationCostVnd);
+    });
+
+    // -----------------------------------------------------------------------
+    // COPILOT INTEGRATION & END-TO-END PIPELINE (Tests 23-24)
+    // -----------------------------------------------------------------------
+    test("F203-T23: Tri-Role Copilots integration: Admin, Seller, and Buyer AI respond to Phase 56 queries", () => {
+      // 1. Admin Copilot
+      const adminRes1 = generateAdminCopilotResponse("Kiểm tra space-saving frequent itemsets mua kèm luồng");
+      expect.ok(adminRes1.text.includes("SPACE-SAVING"));
+
+      const adminRes2 = generateAdminCopilotResponse("Giám sát định giá cpo pricing ràng buộc kép");
+      expect.ok(adminRes2.text.includes("CONSTRAINED POLICY OPTIMIZATION"));
+
+      const adminRes3 = generateAdminCopilotResponse("Điều phối xe tải điện evrp-bds sạc mặt trời");
+      expect.ok(adminRes3.text.includes("EVRP-BDS"));
+
+      // 2. Seller Copilot
+      const sellerRes = generateSellerCopilotResponse("Tư vấn combo mua kèm space-saving và cpo pricing");
+      expect.ok(sellerRes.text.includes("SPACE-SAVING"));
+
+      // 3. Buyer AI
+      const buyerRes = generateAiChatResponse("Xem gợi ý mua kèm combo và giao xe điện sạc mặt trời");
+      expect.equal(buyerRes.intent, "SPACE_SAVING_CPO_SOLAR_ASSIST");
+      expect.ok(buyerRes.replyText.includes("EVRP-BDS"));
+    });
+
+    test("F203-T24: End-to-End E-Commerce Pipeline: Space-Saving Bundle Mining -> CPO Safe Pricing -> EVRP-BDS Solar Logistics", () => {
+      // Step 1: Space-Saving extracts top trending co-purchased bundles
+      const ss = new ServerSpaceSavingItemsets({ maxBuckets: 32 });
+      for (let i = 0; i < 30; i++) {
+        ss.update(["SKU_SMARTPHONE_PRO", "SKU_CHARGER_65W"]);
+      }
+      const frequent = ss.getFrequentItemsets(5);
+      const pairBundle = frequent.find(f => f.isPair);
+      expect.ok(pairBundle);
+      expect.equal(pairBundle.itemset, "SKU_CHARGER_65W & SKU_SMARTPHONE_PRO");
+      expect.equal(pairBundle.estimatedCount, 30);
+
+      // Step 2: CPO optimizes bundle price with strict budget & COGS floor constraints
+      const cpo = new ServerCPOPricing({ cogsFloorMultiplier: 1.05 });
+      const pricing = cpo.optimizePrice({
+        id: "SKU_SMARTPHONE_PRO",
+        cogs: 12000000,
+        price: 15000000,
+        competitorPrice: 14800000,
+      });
+      expect.ok(pricing.suggestedPrice >= 12000000 * 1.05);
+      expect.equal(pricing.safetyStatus, "CPO_CONSTRAINED_OPTIMAL");
+
+      // Step 3: EVRP-BDS schedules zero-emission delivery with rooftop solar micro-hub charging
+      const router = new ServerEVRPBDSRouter();
+      const greenOrders = [
+        { id: "E2E_ORD_GREEN_1", lat: 21.041, lng: 105.890 }, // near Long Biên
+      ];
+      const plan = router.planGreenFleetRoutes(greenOrders);
+      expect.equal(plan.status, "EVRP_BDS_SUCCESS");
+      expect.equal(plan.totalOrders, 1);
+      expect.ok(plan.co2SavedKg > 0);
     });
   });
 });
