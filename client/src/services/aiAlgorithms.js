@@ -27243,6 +27243,750 @@ export class EVRPBssDynamicRouter {
   }
 }
 
+// ==============================================================================
+// PHASE 54 ALGORITHM 1: Fast Count-Min Sketch with Conservative Update & Dyadic Ranges
+// ==============================================================================
+export class FCMSketchEstimator {
+  constructor(options = {}) {
+    this.width = options.width || 1024;
+    this.depth = options.depth || 5;
+    this.dyadicLevels = options.dyadicLevels || 10;
+    this.heavyHitterCapacity = options.heavyHitterCapacity || 50;
+
+    this.table = Array.from({ length: this.depth }, () => new Float64Array(this.width));
+    this.dyadicTables = Array.from({ length: this.dyadicLevels + 1 }, () =>
+      Array.from({ length: this.depth }, () => new Float64Array(this.width))
+    );
+
+    this.prime = 2147483647;
+    this.hashParams = [];
+    for (let i = 0; i < this.depth; i++) {
+      this.hashParams.push({
+        a: 1 + Math.floor(Math.sin(i + 1) * 100000) % 2147483640 + 10007,
+        b: Math.floor(Math.cos(i + 1) * 100000) % 2147483640 + 20011,
+      });
+    }
+
+    this.heavyHitters = [];
+    this.heavyHitterMap = new Map();
+    this.totalItemCount = 0;
+  }
+
+  _hash(key, row) {
+    let num = 0;
+    if (typeof key === 'number') {
+      num = key >>> 0;
+    } else {
+      const str = String(key);
+      for (let i = 0; i < str.length; i++) {
+        num = (num * 31 + str.charCodeAt(i)) >>> 0;
+      }
+    }
+    const { a, b } = this.hashParams[row];
+    const hashVal = Math.abs(Number((BigInt(a) * BigInt(num) + BigInt(b)) % BigInt(this.prime)));
+    return hashVal % this.width;
+  }
+
+  update(key, count = 1) {
+    if (count <= 0) return this.estimate(key);
+
+    const bucketIndices = new Int32Array(this.depth);
+    let minVal = Infinity;
+
+    for (let i = 0; i < this.depth; i++) {
+      const idx = this._hash(key, i);
+      bucketIndices[i] = idx;
+      if (this.table[i][idx] < minVal) {
+        minVal = this.table[i][idx];
+      }
+    }
+
+    const targetVal = minVal + count;
+    for (let i = 0; i < this.depth; i++) {
+      const idx = bucketIndices[i];
+      if (this.table[i][idx] < targetVal) {
+        this.table[i][idx] = targetVal;
+      }
+    }
+
+    this.totalItemCount += count;
+    const estimated = targetVal;
+    this._updateHeavyHitters(key, estimated);
+    return estimated;
+  }
+
+  estimate(key) {
+    let minVal = Infinity;
+    for (let i = 0; i < this.depth; i++) {
+      const idx = this._hash(key, i);
+      const val = this.table[i][idx];
+      if (val < minVal) {
+        minVal = val;
+      }
+    }
+    return minVal === Infinity ? 0 : minVal;
+  }
+
+  updateDyadic(point, count = 1) {
+    if (point < 0 || count <= 0) return;
+    const maxDomain = (1 << this.dyadicLevels) - 1;
+    const p = Math.min(Math.floor(point), maxDomain);
+
+    for (let level = 0; level <= this.dyadicLevels; level++) {
+      const dyadicBucket = p >> level;
+      const dyadicKey = `lvl_${level}_idx_${dyadicBucket}`;
+
+      const bucketIndices = new Int32Array(this.depth);
+      let minVal = Infinity;
+
+      for (let i = 0; i < this.depth; i++) {
+        const idx = this._hash(dyadicKey, i);
+        bucketIndices[i] = idx;
+        if (this.dyadicTables[level][i][idx] < minVal) {
+          minVal = this.dyadicTables[level][i][idx];
+        }
+      }
+
+      const targetVal = minVal + count;
+      for (let i = 0; i < this.depth; i++) {
+        const idx = bucketIndices[i];
+        if (this.dyadicTables[level][i][idx] < targetVal) {
+          this.dyadicTables[level][i][idx] = targetVal;
+        }
+      }
+    }
+  }
+
+  queryDyadicRange(left, right) {
+    const maxDomain = (1 << this.dyadicLevels) - 1;
+    const L = Math.max(0, Math.floor(left));
+    const R = Math.min(maxDomain, Math.floor(right));
+    if (L > R) return 0;
+
+    let rangeSum = 0;
+    let currL = L;
+    let currR = R;
+
+    for (let level = 0; level <= this.dyadicLevels && currL <= currR; level++) {
+      if (currL === currR) {
+        const dyadicKey = `lvl_${level}_idx_${currL}`;
+        rangeSum += this._estimateDyadic(level, dyadicKey);
+        break;
+      }
+      if (currL % 2 === 1) {
+        const dyadicKey = `lvl_${level}_idx_${currL}`;
+        rangeSum += this._estimateDyadic(level, dyadicKey);
+        currL += 1;
+      }
+      if (currR % 2 === 0) {
+        const dyadicKey = `lvl_${level}_idx_${currR}`;
+        rangeSum += this._estimateDyadic(level, dyadicKey);
+        currR -= 1;
+      }
+      currL = currL >> 1;
+      currR = currR >> 1;
+    }
+
+    return rangeSum;
+  }
+
+  _estimateDyadic(level, dyadicKey) {
+    let minVal = Infinity;
+    for (let i = 0; i < this.depth; i++) {
+      const idx = this._hash(dyadicKey, i);
+      const val = this.dyadicTables[level][i][idx];
+      if (val < minVal) {
+        minVal = val;
+      }
+    }
+    return minVal === Infinity ? 0 : minVal;
+  }
+
+  _updateHeavyHitters(key, estimatedCount) {
+    const strKey = String(key);
+    if (this.heavyHitterMap.has(strKey)) {
+      this.heavyHitterMap.set(strKey, estimatedCount);
+      this.heavyHitters.sort((a, b) => a.count - b.count);
+      return;
+    }
+
+    if (this.heavyHitters.length < this.heavyHitterCapacity) {
+      const item = { key: strKey, count: estimatedCount };
+      this.heavyHitters.push(item);
+      this.heavyHitterMap.set(strKey, estimatedCount);
+      this.heavyHitters.sort((a, b) => a.count - b.count);
+    } else if (estimatedCount > this.heavyHitters[0].count) {
+      const removed = this.heavyHitters.shift();
+      this.heavyHitterMap.delete(removed.key);
+      const item = { key: strKey, count: estimatedCount };
+      this.heavyHitters.push(item);
+      this.heavyHitterMap.set(strKey, estimatedCount);
+      this.heavyHitters.sort((a, b) => a.count - b.count);
+    }
+  }
+
+  getTopK(k = 10) {
+    return [...this.heavyHitters]
+      .sort((a, b) => b.count - a.count)
+      .slice(0, k);
+  }
+
+  merge(other) {
+    if (this.width !== other.width || this.depth !== other.depth) {
+      throw new Error("Cannot merge sketches with different width or depth");
+    }
+
+    for (let i = 0; i < this.depth; i++) {
+      for (let j = 0; j < this.width; j++) {
+        this.table[i][j] += other.table[i][j];
+      }
+    }
+
+    if (this.dyadicLevels === other.dyadicLevels) {
+      for (let l = 0; l <= this.dyadicLevels; l++) {
+        for (let i = 0; i < this.depth; i++) {
+          for (let j = 0; j < this.width; j++) {
+            this.dyadicTables[l][i][j] += other.dyadicTables[l][i][j];
+          }
+        }
+      }
+    }
+
+    this.totalItemCount += other.totalItemCount;
+    for (const item of other.heavyHitters) {
+      const currentEst = this.estimate(item.key);
+      this._updateHeavyHitters(item.key, currentEst);
+    }
+  }
+
+  getStatistics() {
+    let nonZeroBuckets = 0;
+    const totalBuckets = this.width * this.depth;
+    for (let i = 0; i < this.depth; i++) {
+      for (let j = 0; j < this.width; j++) {
+        if (this.table[i][j] > 0) nonZeroBuckets++;
+      }
+    }
+
+    return {
+      width: this.width,
+      depth: this.depth,
+      dyadicLevels: this.dyadicLevels,
+      maxDomain: 1 << this.dyadicLevels,
+      totalItemCount: this.totalItemCount,
+      nonZeroBucketRatio: nonZeroBuckets / totalBuckets,
+      heavyHitterCount: this.heavyHitters.length,
+      topHeavyHitter: this.heavyHitters.length > 0 ? this.heavyHitters[this.heavyHitters.length - 1] : null,
+    };
+  }
+}
+
+// ==============================================================================
+// PHASE 54 ALGORITHM 2: Ensemble-Diversified Actor-Critic (EDAC) Pricing
+// ==============================================================================
+export class EDACPricing {
+  constructor(options = {}) {
+    this.ensembleSize = Math.max(3, options.ensembleSize || 4);
+    this.learningRate = options.learningRate || 0.01;
+    this.gamma = options.gamma !== undefined ? options.gamma : 0.95;
+    this.eta = options.etaDiversification !== undefined ? options.etaDiversification : 0.25;
+    this.beta = options.uncertaintyPenaltyBeta !== undefined ? options.uncertaintyPenaltyBeta : 1.5;
+    this.cogsFloorMultiplier = options.cogsFloorMultiplier || 1.05;
+
+    this.featureDim = 5;
+    this.critics = [];
+    for (let i = 0; i < this.ensembleSize; i++) {
+      this.critics.push({
+        wState: Array.from({ length: this.featureDim }, (_, idx) => 0.1 * Math.sin((i + 1) * (idx + 1))),
+        wAction: 0.5 + 0.1 * Math.cos(i + 1),
+        wActionSq: -0.05 - 0.02 * (i % 3),
+        bias: 1.0 + 0.1 * i,
+      });
+    }
+
+    this.actor = {
+      wState: [0.35, -0.2, 0.05, -0.4, 0.3],
+      bias: 1.0,
+    };
+
+    this.replayBuffer = [];
+    this.maxBufferSize = 5000;
+  }
+
+  _extractStateVector(state) {
+    const compPrice = state.competitorPrice || state.basePrice || 100000;
+    const basePrice = state.basePrice || compPrice;
+    const compRatio = Math.min(2.0, compPrice / Math.max(1, basePrice));
+    const stockRatio = Math.min(1.0, Math.max(0, (state.stock || 50) / 100));
+    const hourNorm = ((state.hourOfDay !== undefined ? state.hourOfDay : 12) % 24) / 24;
+    const elasticity = Math.min(3.0, Math.max(0.2, state.elasticity || 1.2));
+    const conversion = Math.min(1.0, Math.max(0.0, state.conversionRate || 0.05));
+
+    return [compRatio, stockRatio, hourNorm, elasticity, conversion];
+  }
+
+  _evaluateCritic(criticIndex, stateVec, action) {
+    const c = this.critics[criticIndex];
+    let q = c.bias + c.wAction * action + c.wActionSq * action * action;
+    for (let j = 0; j < this.featureDim; j++) {
+      q += c.wState[j] * stateVec[j];
+    }
+    return q;
+  }
+
+  _criticActionGradient(criticIndex, action) {
+    const c = this.critics[criticIndex];
+    return c.wAction + 2 * c.wActionSq * action;
+  }
+
+  predictAction(state) {
+    const s = this._extractStateVector(state);
+    let rawAction = this.actor.bias;
+    for (let j = 0; j < this.featureDim; j++) {
+      rawAction += this.actor.wState[j] * s[j];
+    }
+    return Math.max(0.70, Math.min(1.40, rawAction));
+  }
+
+  recordTransition(state, action, reward, nextState, done = false) {
+    if (this.replayBuffer.length >= this.maxBufferSize) {
+      this.replayBuffer.shift();
+    }
+    this.replayBuffer.push({ state, action, reward, nextState, done });
+  }
+
+  evaluateEnsemble(state, action) {
+    const s = this._extractStateVector(state);
+    const qValues = this.critics.map((_, i) => this._evaluateCritic(i, s, action));
+
+    const meanQ = qValues.reduce((a, b) => a + b, 0) / this.ensembleSize;
+    const variance = qValues.reduce((acc, q) => acc + Math.pow(q - meanQ, 2), 0) / this.ensembleSize;
+    const stdQ = Math.sqrt(variance);
+    const lcbQ = meanQ - this.beta * stdQ;
+
+    return {
+      qValues,
+      meanQ,
+      stdQ,
+      lcbQ,
+    };
+  }
+
+  optimizeBatch(transitions = null, epochs = 5) {
+    const data = transitions || this.replayBuffer;
+    if (!data || data.length === 0) {
+      return { trained: false, reason: "No training transitions available" };
+    }
+
+    let totalTdError = 0;
+    let totalDiversityLoss = 0;
+
+    for (let epoch = 0; epoch < epochs; epoch++) {
+      for (const t of data) {
+        const s = this._extractStateVector(t.state);
+        const sNext = this._extractStateVector(t.nextState || t.state);
+        const a = t.action;
+        const r = t.reward;
+
+        const nextAction = this.predictAction(t.nextState || t.state);
+        const nextQValues = this.critics.map((_, i) => this._evaluateCritic(i, sNext, nextAction));
+        const minNextQ = Math.min(...nextQValues);
+        const targetQ = r + (t.done ? 0 : this.gamma * minNextQ);
+
+        const actionGradients = this.critics.map((_, i) => this._criticActionGradient(i, a));
+
+        let pairCount = 0;
+        let gradDotSum = 0;
+        for (let i = 0; i < this.ensembleSize; i++) {
+          for (let j = i + 1; j < this.ensembleSize; j++) {
+            gradDotSum += actionGradients[i] * actionGradients[j];
+            pairCount++;
+          }
+        }
+        const meanGradAlignment = pairCount > 0 ? gradDotSum / pairCount : 0;
+        const diversityPenalty = this.eta * meanGradAlignment;
+        totalDiversityLoss += Math.abs(diversityPenalty);
+
+        for (let i = 0; i < this.ensembleSize; i++) {
+          const predQ = this._evaluateCritic(i, s, a);
+          const tdError = predQ - targetQ;
+          totalTdError += Math.abs(tdError);
+
+          const gradWState = tdError * this.learningRate;
+          for (let j = 0; j < this.featureDim; j++) {
+            this.critics[i].wState[j] -= gradWState * s[j];
+          }
+          this.critics[i].wAction -= (tdError + diversityPenalty) * this.learningRate * a;
+          this.critics[i].wActionSq -= (tdError + diversityPenalty) * this.learningRate * a * a;
+          this.critics[i].bias -= tdError * this.learningRate;
+        }
+
+        const currentA = this.predictAction(t.state);
+        const { lcbQ } = this.evaluateEnsemble(t.state, currentA);
+        const actorGrad = -lcbQ * 0.05;
+        for (let j = 0; j < this.featureDim; j++) {
+          this.actor.wState[j] -= actorGrad * this.learningRate * s[j];
+        }
+        this.actor.bias -= actorGrad * this.learningRate;
+      }
+    }
+
+    return {
+      trained: true,
+      samples: data.length,
+      epochs,
+      avgTdError: totalTdError / (data.length * epochs * this.ensembleSize),
+      avgDiversityLoss: totalDiversityLoss / (data.length * epochs),
+    };
+  }
+
+  optimizePrice(product, marketContext = {}) {
+    const cogs = product.cogs || product.costPrice || (product.price ? product.price * 0.70 : 100000);
+    const basePrice = product.price || product.basePrice || cogs * 1.30;
+    const competitorPrice = marketContext.competitorPrice || product.competitorPrice || basePrice * 1.05;
+
+    const state = {
+      basePrice,
+      competitorPrice,
+      stock: product.stock !== undefined ? product.stock : 50,
+      hourOfDay: marketContext.hourOfDay !== undefined ? marketContext.hourOfDay : 12,
+      elasticity: marketContext.elasticity || product.elasticity || 1.2,
+      conversionRate: marketContext.conversionRate || 0.05,
+    };
+
+    const policyAction = this.predictAction(state);
+    const candidateMultipliers = [
+      policyAction - 0.15,
+      policyAction - 0.05,
+      policyAction,
+      policyAction + 0.05,
+      policyAction + 0.15,
+    ];
+
+    let bestAction = policyAction;
+    let bestLCB = -Infinity;
+    let bestEnsembleMetrics = null;
+
+    for (const action of candidateMultipliers) {
+      const metrics = this.evaluateEnsemble(state, action);
+      if (metrics.lcbQ > bestLCB) {
+        bestLCB = metrics.lcbQ;
+        bestAction = action;
+        bestEnsembleMetrics = metrics;
+      }
+    }
+
+    let rawSuggestedPrice = Math.round(basePrice * bestAction);
+    const ceilingPrice = Math.round(competitorPrice * 1.20);
+    let constrainedPrice = Math.min(rawSuggestedPrice, ceilingPrice);
+
+    const hardFloorPrice = Math.round(cogs * this.cogsFloorMultiplier);
+    const isFloorTriggered = constrainedPrice < hardFloorPrice;
+    const finalPrice = Math.max(constrainedPrice, hardFloorPrice);
+
+    const netProfitMargin = (finalPrice - cogs) / finalPrice;
+
+    return {
+      productId: product.id || product.productId || 'SKU_EDAC_OPTIMIZED',
+      cogs,
+      basePrice,
+      competitorPrice,
+      suggestedPrice: finalPrice,
+      rawAction: bestAction,
+      ensembleMetrics: bestEnsembleMetrics,
+      epistemicUncertaintyStd: bestEnsembleMetrics ? bestEnsembleMetrics.stdQ : 0,
+      hardFloorPrice,
+      ceilingPrice,
+      isFloorTriggered,
+      netProfitMargin: Number(netProfitMargin.toFixed(4)),
+      safetyStatus: isFloorTriggered ? 'FLOOR_OVERRIDE_SECURED' : 'UNCONSTRAINED_OPTIMAL',
+    };
+  }
+}
+
+// ==============================================================================
+// PHASE 54 ALGORITHM 3: Dynamic Traveling Repairperson Logistics Router (DTRP)
+// ==============================================================================
+export class DTRPLogisticsRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || {
+      id: 'DEPOT_HANOI_CENTRAL',
+      name: 'SPX Express Central Hub - Ba Đình, Hà Nội',
+      lat: 21.0341,
+      lng: 105.8372,
+    };
+    this.fleetSize = options.fleetSize || 3;
+    this.vehicleCapacityKg = options.vehicleCapacityKg || 30;
+    this.averageSpeedKmH = options.averageSpeedKmH || 35;
+    this.serviceDurationMinutes = options.serviceDurationMinutes || 5;
+    this.urgentSlaMinutes = options.urgentSlaMinutes || 60;
+    this.alpha = options.latencyWeightAlpha !== undefined ? options.latencyWeightAlpha : 0.7;
+
+    this.couriers = [];
+    for (let i = 0; i < this.fleetSize; i++) {
+      this.couriers.push({
+        courierId: `SPX_COURIER_${i + 1}`,
+        courierName: `Bưu tá SPX Siêu Tốc #${i + 1}`,
+        currentLocation: { ...this.depot },
+        currentPayloadKg: 0,
+        currentMinutes: 0,
+        activeRoute: [],
+        completedDeliveries: [],
+      });
+    }
+  }
+
+  calculateDistanceKm(p1, p2) {
+    const R = 6371;
+    const dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
+    const dLng = ((p2.lng - p1.lng) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((p1.lat * Math.PI) / 180) *
+        Math.cos((p2.lat * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(3));
+  }
+
+  calculateTravelTimeMinutes(distanceKm) {
+    return Number(((distanceKm / this.averageSpeedKmH) * 60).toFixed(2));
+  }
+
+  planInitialRoutes(orders = []) {
+    if (!orders || orders.length === 0) {
+      return { totalRoutes: 0, couriers: this.couriers, cumulativeLatency: 0 };
+    }
+
+    const sortedOrders = [...orders].sort((a, b) => {
+      const distA = this.calculateDistanceKm(this.depot, a.coordinates || this.depot);
+      const distB = this.calculateDistanceKm(this.depot, b.coordinates || this.depot);
+      const prioA = a.isUrgent ? 0 : 1;
+      const prioB = b.isUrgent ? 0 : 1;
+      if (prioA !== prioB) return prioA - prioB;
+      return distA - distB;
+    });
+
+    this.couriers.forEach((c) => {
+      c.activeRoute = [];
+      c.currentPayloadKg = 0;
+      c.currentMinutes = 0;
+      c.currentLocation = { ...this.depot };
+    });
+
+    for (const order of sortedOrders) {
+      const weight = order.weightKg || 2;
+      let assignedCourier = null;
+      let minAdditionalLatency = Infinity;
+
+      for (const courier of this.couriers) {
+        if (courier.currentPayloadKg + weight <= this.vehicleCapacityKg) {
+          const lastLoc = courier.activeRoute.length > 0
+            ? courier.activeRoute[courier.activeRoute.length - 1].coordinates
+            : courier.currentLocation;
+          const dist = this.calculateDistanceKm(lastLoc, order.coordinates);
+          const travelTime = this.calculateTravelTimeMinutes(dist);
+
+          if (travelTime < minAdditionalLatency) {
+            minAdditionalLatency = travelTime;
+            assignedCourier = courier;
+          }
+        }
+      }
+
+      if (!assignedCourier) {
+        assignedCourier = [...this.couriers].sort((a, b) => a.currentPayloadKg - b.currentPayloadKg)[0];
+      }
+
+      const prevLoc = assignedCourier.activeRoute.length > 0
+        ? assignedCourier.activeRoute[assignedCourier.activeRoute.length - 1].coordinates
+        : assignedCourier.currentLocation;
+      const legDist = this.calculateDistanceKm(prevLoc, order.coordinates);
+      const travelMins = this.calculateTravelTimeMinutes(legDist);
+
+      const arrivalTime = assignedCourier.currentMinutes + travelMins;
+      const departureTime = arrivalTime + this.serviceDurationMinutes;
+      const requestTime = order.requestTimeMinutes || 0;
+      const latency = Math.max(0, arrivalTime - requestTime);
+
+      const stop = {
+        orderId: order.orderId || order.id || `ORD_${assignedCourier.activeRoute.length + 1}`,
+        customerName: order.customerName || 'Khách hàng SPX',
+        coordinates: order.coordinates,
+        weightKg: weight,
+        requestTimeMinutes: requestTime,
+        arrivalTimeMinutes: arrivalTime,
+        departureTimeMinutes: departureTime,
+        latencyMinutes: latency,
+        isUrgent: Boolean(order.isUrgent),
+        slaDeadlineMinutes: order.slaDeadlineMinutes || (order.isUrgent ? this.urgentSlaMinutes : 180),
+        slaStatus: arrivalTime <= (order.slaDeadlineMinutes || (order.isUrgent ? this.urgentSlaMinutes : 180)) ? 'ON_TIME' : 'SLA_VIOLATED',
+      };
+
+      assignedCourier.activeRoute.push(stop);
+      assignedCourier.currentPayloadKg += weight;
+      assignedCourier.currentMinutes = departureTime;
+    }
+
+    return this.getFleetDiagnostics();
+  }
+
+  insertDynamicUrgentOrder(urgentOrder, currentTimeMinutes = 15) {
+    const orderWeight = urgentOrder.weightKg || 1.5;
+    const requestTime = urgentOrder.requestTimeMinutes || currentTimeMinutes;
+    const slaDeadline = urgentOrder.slaDeadlineMinutes || (requestTime + this.urgentSlaMinutes);
+
+    let bestCourier = null;
+    let bestInsertIndex = -1;
+    let minCostDelta = Infinity;
+    let bestSimulatedRoute = null;
+
+    for (const courier of this.couriers) {
+      if (courier.currentPayloadKg + orderWeight > this.vehicleCapacityKg) {
+        continue;
+      }
+
+      const route = courier.activeRoute;
+      for (let pos = 0; pos <= route.length; pos++) {
+        const candidateRoute = [...route.slice(0, pos), urgentOrder, ...route.slice(pos)];
+        const simResult = this._simulateRouteSchedule(candidateRoute, courier.currentLocation, currentTimeMinutes);
+
+        if (!simResult.isFeasible) continue;
+
+        const urgentStop = simResult.stops[pos];
+        if (urgentStop.arrivalTimeMinutes > slaDeadline) continue;
+
+        const currentRouteSim = this._simulateRouteSchedule(route, courier.currentLocation, currentTimeMinutes);
+        const deltaLatency = simResult.totalLatency - currentRouteSim.totalLatency;
+        const deltaDistance = simResult.totalDistanceKm - currentRouteSim.totalDistanceKm;
+        const costDelta = deltaLatency * this.alpha + deltaDistance * (1 - this.alpha);
+
+        if (costDelta < minCostDelta) {
+          minCostDelta = costDelta;
+          bestCourier = courier;
+          bestInsertIndex = pos;
+          bestSimulatedRoute = simResult.stops;
+        }
+      }
+    }
+
+    if (!bestCourier) {
+      return {
+        inserted: false,
+        reason: 'NO_FEASIBLE_COURIER_WITHIN_SLA',
+        action: 'DISPATCH_DEDICATED_EMERGENCY_COURIER',
+        urgentOrderId: urgentOrder.orderId || urgentOrder.id,
+      };
+    }
+
+    bestCourier.activeRoute = bestSimulatedRoute;
+    bestCourier.currentPayloadKg += orderWeight;
+    bestCourier.currentMinutes = bestSimulatedRoute[bestSimulatedRoute.length - 1].departureTimeMinutes;
+
+    return {
+      inserted: true,
+      assignedCourierId: bestCourier.courierId,
+      assignedCourierName: bestCourier.courierName,
+      insertionIndex: bestInsertIndex,
+      costDelta: Number(minCostDelta.toFixed(2)),
+      estimatedArrivalMinutes: bestSimulatedRoute[bestInsertIndex].arrivalTimeMinutes,
+      slaMarginMinutes: Number((slaDeadline - bestSimulatedRoute[bestInsertIndex].arrivalTimeMinutes).toFixed(2)),
+      fleetDiagnostics: this.getFleetDiagnostics(),
+    };
+  }
+
+  _simulateRouteSchedule(stops, startLocation, startTimeMinutes) {
+    let currLoc = startLocation;
+    let currTime = startTimeMinutes;
+    let totalDist = 0;
+    let totalLatency = 0;
+    let isFeasible = true;
+    const computedStops = [];
+
+    for (const stop of stops) {
+      const stopCoord = stop.coordinates || this.depot;
+      const legDist = this.calculateDistanceKm(currLoc, stopCoord);
+      const travelMins = this.calculateTravelTimeMinutes(legDist);
+
+      const arrivalTime = currTime + travelMins;
+      const reqTime = stop.requestTimeMinutes || 0;
+      const latency = Math.max(0, arrivalTime - reqTime);
+      const deadline = stop.slaDeadlineMinutes || 180;
+
+      if (arrivalTime > deadline && stop.isUrgent) {
+        isFeasible = false;
+      }
+
+      const departureTime = arrivalTime + this.serviceDurationMinutes;
+      totalDist += legDist;
+      totalLatency += latency;
+
+      computedStops.push({
+        ...stop,
+        arrivalTimeMinutes: arrivalTime,
+        departureTimeMinutes: departureTime,
+        latencyMinutes: latency,
+        slaStatus: arrivalTime <= deadline ? 'ON_TIME' : 'SLA_VIOLATED',
+      });
+
+      currLoc = stopCoord;
+      currTime = departureTime;
+    }
+
+    return {
+      isFeasible,
+      stops: computedStops,
+      totalDistanceKm: Number(totalDist.toFixed(3)),
+      totalLatency: Number(totalLatency.toFixed(2)),
+    };
+  }
+
+  getFleetDiagnostics() {
+    let totalOrders = 0;
+    let onTimeOrders = 0;
+    let totalLatency = 0;
+    let totalDistanceKm = 0;
+
+    const courierSummaries = this.couriers.map((c) => {
+      let cDist = 0;
+      let prevLoc = this.depot;
+      c.activeRoute.forEach((s) => {
+        cDist += this.calculateDistanceKm(prevLoc, s.coordinates || this.depot);
+        prevLoc = s.coordinates || this.depot;
+        totalOrders++;
+        totalLatency += s.latencyMinutes;
+        if (s.slaStatus === 'ON_TIME') onTimeOrders++;
+      });
+      totalDistanceKm += cDist;
+
+      return {
+        courierId: c.courierId,
+        courierName: c.courierName,
+        stopCount: c.activeRoute.length,
+        payloadKg: c.currentPayloadKg,
+        capacityKg: this.vehicleCapacityKg,
+        utilizationRate: Number((c.currentPayloadKg / this.vehicleCapacityKg).toFixed(3)),
+        totalDistanceKm: Number(cDist.toFixed(2)),
+        stops: c.activeRoute,
+      };
+    });
+
+    const otdRate = totalOrders > 0 ? onTimeOrders / totalOrders : 1.0;
+    const avgLatency = totalOrders > 0 ? totalLatency / totalOrders : 0;
+
+    return {
+      fleetSize: this.fleetSize,
+      totalOrdersAssigned: totalOrders,
+      onTimeDeliveryRate: Number(otdRate.toFixed(4)),
+      cumulativeLatencyMinutes: Number(totalLatency.toFixed(2)),
+      averageLatencyMinutes: Number(avgLatency.toFixed(2)),
+      totalDistanceKm: Number(totalDistanceKm.toFixed(2)),
+      couriers: courierSummaries,
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -27527,6 +28271,10 @@ export default {
   TD3BCPricing,
   DEFAULT_DYNAMIC_BSS_STATIONS,
   EVRPBssDynamicRouter,
+  // Phase 54 Enterprise Algorithms
+  FCMSketchEstimator,
+  EDACPricing,
+  DTRPLogisticsRouter,
 };
 
 

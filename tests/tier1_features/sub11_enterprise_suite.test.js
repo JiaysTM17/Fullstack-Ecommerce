@@ -298,6 +298,10 @@ import {
   TD3BCPricing,
   DEFAULT_DYNAMIC_BSS_STATIONS,
   EVRPBssDynamicRouter,
+  // Phase 54 Enterprise Algorithms
+  FCMSketchEstimator,
+  EDACPricing,
+  DTRPLogisticsRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -425,6 +429,9 @@ import { TwoEchelonVRPTWRouter as ServerTwoEchelonVRPTWRouter, DEFAULT_SATELLITE
 import { AKMVSketchEstimator as ServerAKMVSketchEstimator } from "../../server/src/utils/akmvSketchEstimator.js";
 import { TD3BCPricing as ServerTD3BCPricing } from "../../server/src/utils/td3bcPricing.js";
 import { EVRPBssDynamicRouter as ServerEVRPBssDynamicRouter, DEFAULT_DYNAMIC_BSS_STATIONS as ServerDefaultDynamicBSS } from "../../server/src/utils/evrpBssDynamicRouter.js";
+import { FCMSketchEstimator as ServerFCMSketchEstimator } from "../../server/src/utils/fcmSketchEstimator.js";
+import { EDACPricing as ServerEDACPricing } from "../../server/src/utils/edacPricing.js";
+import { DTRPLogisticsRouter as ServerDTRPLogisticsRouter } from "../../server/src/utils/dtrpLogisticsRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -23705,6 +23712,418 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(plan.fulfilledOrders, 1);
       expect.ok(plan.totalDistKm > 0);
       expect.ok(plan.totalCo2SavedKg > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 201: Fast Count-Min Sketch (FCM-CU), Ensemble-Diversified Actor-Critic (EDAC),
+  // and Dynamic Traveling Repairperson Logistics (DTRP) Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 201: FCM Sketch, EDAC Pricing & DTRP Urgent Logistics Suite", () => {
+    // -----------------------------------------------------------------------
+    // FCM-CU SKETCH WITH DYADIC RANGES (Tests 01-07)
+    // -----------------------------------------------------------------------
+    test("F201-T01: FCMSketchEstimator point update and conservative update overestimation resistance", () => {
+      const fcm = new ServerFCMSketchEstimator({ width: 256, depth: 4 });
+      for (let i = 0; i < 50; i++) {
+        fcm.update("flash_sku_101", 1);
+      }
+      const est = fcm.estimate("flash_sku_101");
+      expect.equal(est, 50);
+      expect.equal(fcm.estimate("unseen_sku_999"), 0);
+    });
+
+    test("F201-T02: FCMSketchEstimator handles zero or negative counts gracefully without mutating state", () => {
+      const fcm = new ServerFCMSketchEstimator({ width: 128, depth: 3 });
+      fcm.update("sku_alpha", 10);
+      const estBefore = fcm.estimate("sku_alpha");
+      fcm.update("sku_alpha", 0);
+      fcm.update("sku_alpha", -5);
+      expect.equal(fcm.estimate("sku_alpha"), estBefore);
+    });
+
+    test("F201-T03: FCMSketchEstimator dyadic range decomposition correctly answers single-point queries", () => {
+      const fcm = new ServerFCMSketchEstimator({ width: 256, depth: 4, dyadicLevels: 8 });
+      fcm.updateDyadic(42, 15);
+      const pointSum = fcm.queryDyadicRange(42, 42);
+      expect.equal(pointSum, 15);
+    });
+
+    test("F201-T04: FCMSketchEstimator dyadic range tree query over price intervals and boundary points", () => {
+      const fcm = new ServerFCMSketchEstimator({ width: 512, depth: 4, dyadicLevels: 8 }); // domain [0, 255]
+      // Add counts at price points 10, 20, 30
+      fcm.updateDyadic(10, 5);
+      fcm.updateDyadic(20, 10);
+      fcm.updateDyadic(30, 20);
+      fcm.updateDyadic(100, 50);
+
+      const range10to30 = fcm.queryDyadicRange(10, 30);
+      expect.ok(range10to30 >= 35);
+
+      const range50to90 = fcm.queryDyadicRange(50, 90);
+      expect.equal(range50to90, 0);
+
+      const fullRange = fcm.queryDyadicRange(0, 255);
+      expect.ok(fullRange >= 85);
+    });
+
+    test("F201-T05: FCMSketchEstimator Min-Heap maintains top-K heavy hitters in accurate descending order", () => {
+      const fcm = new ServerFCMSketchEstimator({ width: 256, depth: 4, heavyHitterCapacity: 5 });
+      fcm.update("item_A", 100);
+      fcm.update("item_B", 300);
+      fcm.update("item_C", 50);
+      fcm.update("item_D", 500);
+      fcm.update("item_E", 200);
+      fcm.update("item_F", 400);
+
+      const top3 = fcm.getTopK(3);
+      expect.equal(top3.length, 3);
+      expect.equal(top3[0].key, "item_D");
+      expect.equal(top3[0].count, 500);
+      expect.equal(top3[1].key, "item_F");
+      expect.equal(top3[1].count, 400);
+      expect.equal(top3[2].key, "item_B");
+      expect.equal(top3[2].count, 300);
+    });
+
+    test("F201-T06: FCMSketchEstimator merge of two identical-dimension sketches combines frequencies and dyadic tables", () => {
+      const fcm1 = new ServerFCMSketchEstimator({ width: 256, depth: 4, dyadicLevels: 6 });
+      const fcm2 = new ServerFCMSketchEstimator({ width: 256, depth: 4, dyadicLevels: 6 });
+
+      fcm1.update("common_key", 20);
+      fcm1.updateDyadic(15, 30);
+
+      fcm2.update("common_key", 30);
+      fcm2.updateDyadic(15, 40);
+
+      fcm1.merge(fcm2);
+      expect.equal(fcm1.estimate("common_key"), 50);
+      expect.ok(fcm1.queryDyadicRange(15, 15) >= 70);
+    });
+
+    test("F201-T07: FCMSketchEstimator reject merging sketches with mismatched dimensions", () => {
+      const fcm1 = new ServerFCMSketchEstimator({ width: 128, depth: 3 });
+      const fcm2 = new ServerFCMSketchEstimator({ width: 256, depth: 3 });
+
+      expect.throws(() => {
+        fcm1.merge(fcm2);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // EDAC DIVERSIFIED PRICING (Tests 08-14)
+    // -----------------------------------------------------------------------
+    test("F201-T08: EDACPricing initialization and feature extraction normalizes inputs safely", () => {
+      const edac = new ServerEDACPricing({ ensembleSize: 4 });
+      expect.equal(edac.ensembleSize, 4);
+      expect.equal(edac.critics.length, 4);
+
+      const action = edac.predictAction({
+        basePrice: 200000,
+        competitorPrice: 190000,
+        stock: 45,
+        hourOfDay: 14,
+        elasticity: 1.1,
+        conversionRate: 0.08,
+      });
+      expect.ok(action >= 0.70 && action <= 1.40);
+    });
+
+    test("F201-T09: EDACPricing critic ensemble produces diversified predictions across random initializations", () => {
+      const edac = new ServerEDACPricing({ ensembleSize: 4 });
+      const evalRes = edac.evaluateEnsemble({
+        basePrice: 150000,
+        competitorPrice: 160000,
+        stock: 30,
+        hourOfDay: 20,
+      }, 1.05);
+
+      expect.equal(evalRes.qValues.length, 4);
+      expect.ok(typeof evalRes.meanQ === "number");
+      expect.ok(evalRes.stdQ >= 0);
+      expect.ok(evalRes.lcbQ <= evalRes.meanQ);
+    });
+
+    test("F201-T10: EDACPricing gradient diversity calculation computes pairwise gradient dot product penalties", () => {
+      const edac = new ServerEDACPricing({ ensembleSize: 4, etaDiversification: 0.5 });
+      const grads = edac.critics.map((_, i) => edac._criticActionGradient(i, 1.0));
+      expect.equal(grads.length, 4);
+      grads.forEach(g => expect.ok(typeof g === "number" && !isNaN(g)));
+    });
+
+    test("F201-T11: EDACPricing optimizeBatch trains ensemble and records reductions in TD error and diversity penalty", () => {
+      const edac = new ServerEDACPricing({ ensembleSize: 4, learningRate: 0.02 });
+      const transitions = [];
+      for (let i = 0; i < 20; i++) {
+        transitions.push({
+          state: { basePrice: 100000 + i * 5000, competitorPrice: 110000, stock: 50 },
+          action: 0.95 + (i % 5) * 0.05,
+          reward: 10.0 + (i % 3) * 2.0,
+          nextState: { basePrice: 105000 + i * 5000, competitorPrice: 110000, stock: 48 },
+          done: i === 19,
+        });
+      }
+
+      const trainRes = edac.optimizeBatch(transitions, 3);
+      expect.equal(trainRes.trained, true);
+      expect.equal(trainRes.samples, 20);
+      expect.ok(trainRes.avgTdError >= 0);
+      expect.ok(trainRes.avgDiversityLoss >= 0);
+    });
+
+    test("F201-T12: EDACPricing optimizePrice enforces strictly the mandatory COGS floor (Price >= COGS * 1.05)", () => {
+      const edac = new ServerEDACPricing({ cogsFloorMultiplier: 1.05 });
+      // Product where raw policy would suggest heavily discounted price
+      const proposal = edac.optimizePrice({
+        id: "SKU_DEEP_DISCOUNT",
+        cogs: 200000,
+        price: 210000,
+        competitorPrice: 180000, // Very low competitor
+      });
+
+      const minHardFloor = 200000 * 1.05; // 210,000
+      expect.ok(proposal.suggestedPrice >= minHardFloor);
+      expect.ok(proposal.netProfitMargin >= 0.047); // at least ~5% net margin
+    });
+
+    test("F201-T13: EDACPricing optimizePrice respects competitor ceiling multiplier in unconstrained scenarios", () => {
+      const edac = new ServerEDACPricing();
+      const proposal = edac.optimizePrice({
+        id: "SKU_HIGH_DEMAND",
+        cogs: 100000,
+        price: 300000,
+        competitorPrice: 200000,
+      });
+
+      expect.ok(proposal.suggestedPrice <= Math.round(200000 * 1.20));
+      expect.ok(proposal.suggestedPrice >= 100000 * 1.05);
+    });
+
+    test("F201-T14: EDACPricing replay buffer records transitions and evicts oldest when exceeding max capacity", () => {
+      const edac = new ServerEDACPricing();
+      edac.maxBufferSize = 10;
+      for (let i = 0; i < 15; i++) {
+        edac.recordTransition({ id: i }, 1.0, 5, { id: i + 1 }, false);
+      }
+      expect.equal(edac.replayBuffer.length, 10);
+      expect.equal(edac.replayBuffer[0].state.id, 5);
+      expect.equal(edac.replayBuffer[9].state.id, 14);
+    });
+
+    // -----------------------------------------------------------------------
+    // DTRP URGENT LOGISTICS ROUTER (Tests 15-19)
+    // -----------------------------------------------------------------------
+    test("F201-T15: DTRPLogisticsRouter calculates Haversine distances and travel times accurately", () => {
+      const router = new ServerDTRPLogisticsRouter({ averageSpeedKmH: 30 });
+      // Depot (Ba Đình) to Hoàn Kiếm (~2.5 km)
+      const p1 = { lat: 21.0341, lng: 105.8372 };
+      const p2 = { lat: 21.0285, lng: 105.8542 };
+      const dist = router.calculateDistanceKm(p1, p2);
+      expect.ok(dist >= 1.5 && dist <= 3.5);
+      const travelMins = router.calculateTravelTimeMinutes(dist);
+      expect.ok(travelMins >= 3 && travelMins <= 8);
+    });
+
+    test("F201-T16: DTRPLogisticsRouter planInitialRoutes orders deliveries to minimize min-sum latency", () => {
+      const router = new ServerDTRPLogisticsRouter({ fleetSize: 2 });
+      const orders = [
+        { id: "ORD_REG_1", coordinates: { lat: 21.040, lng: 105.830 }, weightKg: 2, isUrgent: false },
+        { id: "ORD_URG_1", coordinates: { lat: 21.035, lng: 105.845 }, weightKg: 3, isUrgent: true },
+        { id: "ORD_REG_2", coordinates: { lat: 21.025, lng: 105.850 }, weightKg: 2, isUrgent: false },
+      ];
+
+      const diag = router.planInitialRoutes(orders);
+      expect.equal(diag.totalOrdersAssigned, 3);
+      expect.ok(diag.onTimeDeliveryRate >= 0.99);
+      expect.ok(diag.cumulativeLatencyMinutes >= 0);
+    });
+
+    test("F201-T17: DTRPLogisticsRouter insertDynamicUrgentOrder finds optimal insertion point meeting strict SLA (< 60m)", () => {
+      const router = new ServerDTRPLogisticsRouter({ fleetSize: 2, urgentSlaMinutes: 60 });
+      router.planInitialRoutes([
+        { id: "ORD_BASE_1", coordinates: { lat: 21.038, lng: 105.835 }, weightKg: 2, isUrgent: false },
+        { id: "ORD_BASE_2", coordinates: { lat: 21.042, lng: 105.832 }, weightKg: 2, isUrgent: false },
+      ]);
+
+      const urgentOrder = {
+        id: "ORD_SPX_NOW_EMERGENCY",
+        customerName: "Nguyễn Văn A - Cầu Giấy",
+        coordinates: { lat: 21.036, lng: 105.839 },
+        weightKg: 1.5,
+        isUrgent: true,
+        requestTimeMinutes: 10,
+        slaDeadlineMinutes: 70, // 10 + 60 mins
+      };
+
+      const decision = router.insertDynamicUrgentOrder(urgentOrder, 12);
+      expect.equal(decision.inserted, true);
+      expect.ok(decision.assignedCourierId);
+      expect.ok(decision.estimatedArrivalMinutes <= 70);
+      expect.ok(decision.slaMarginMinutes >= 0);
+    });
+
+    test("F201-T18: DTRPLogisticsRouter insertDynamicUrgentOrder triggers emergency dispatch when no courier can meet SLA", () => {
+      const router = new ServerDTRPLogisticsRouter({ fleetSize: 1, vehicleCapacityKg: 5 });
+      // Overload courier with heavy payload
+      router.planInitialRoutes([
+        { id: "ORD_HEAVY", coordinates: { lat: 21.038, lng: 105.835 }, weightKg: 5, isUrgent: false },
+      ]);
+
+      const impossibleOrder = {
+        id: "ORD_IMPOSSIBLE_NOW",
+        coordinates: { lat: 21.080, lng: 105.900 },
+        weightKg: 3, // 5 + 3 = 8 > 5kg capacity
+        isUrgent: true,
+        slaDeadlineMinutes: 20,
+      };
+
+      const decision = router.insertDynamicUrgentOrder(impossibleOrder, 15);
+      expect.equal(decision.inserted, false);
+      expect.equal(decision.action, "DISPATCH_DEDICATED_EMERGENCY_COURIER");
+    });
+
+    test("F201-T19: DTRPLogisticsRouter getFleetDiagnostics calculates On-Time Delivery (OTD) rate and fleet utilization", () => {
+      const router = new ServerDTRPLogisticsRouter({ fleetSize: 2 });
+      router.planInitialRoutes([
+        { id: "ORD_1", coordinates: { lat: 21.030, lng: 105.840 }, weightKg: 5, slaDeadlineMinutes: 120 },
+        { id: "ORD_2", coordinates: { lat: 21.025, lng: 105.850 }, weightKg: 10, slaDeadlineMinutes: 120 },
+      ]);
+
+      const diag = router.getFleetDiagnostics();
+      expect.equal(diag.fleetSize, 2);
+      expect.equal(diag.totalOrdersAssigned, 2);
+      expect.equal(diag.onTimeDeliveryRate, 1.0);
+      expect.ok(diag.totalDistanceKm > 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT-SERVER SYMMETRY & DUAL IMPLEMENTATION CHECKS (Tests 20-22)
+    // -----------------------------------------------------------------------
+    test("F201-T20: Client and Server FCMSketchEstimator produce identical point estimates and dyadic range queries", () => {
+      const clientFCM = new FCMSketchEstimator({ width: 256, depth: 4, dyadicLevels: 8 });
+      const serverFCM = new ServerFCMSketchEstimator({ width: 256, depth: 4, dyadicLevels: 8 });
+
+      const keys = ["deal_item_1", "deal_item_2", "deal_item_3"];
+      keys.forEach((k, idx) => {
+        clientFCM.update(k, (idx + 1) * 10);
+        serverFCM.update(k, (idx + 1) * 10);
+        clientFCM.updateDyadic((idx + 1) * 20, (idx + 1) * 15);
+        serverFCM.updateDyadic((idx + 1) * 20, (idx + 1) * 15);
+      });
+
+      keys.forEach(k => {
+        expect.equal(clientFCM.estimate(k), serverFCM.estimate(k));
+      });
+
+      const clientRange = clientFCM.queryDyadicRange(15, 65);
+      const serverRange = serverFCM.queryDyadicRange(15, 65);
+      expect.equal(clientRange, serverRange);
+    });
+
+    test("F201-T21: Client and Server EDACPricing produce identical pricing proposals, floor triggers, and LCB values", () => {
+      const clientEDAC = new EDACPricing({ cogsFloorMultiplier: 1.05 });
+      const serverEDAC = new ServerEDACPricing({ cogsFloorMultiplier: 1.05 });
+
+      const product = {
+        id: "SKU_SYNC_EDAC",
+        cogs: 300000,
+        price: 450000,
+        competitorPrice: 420000,
+      };
+
+      const clientProposal = clientEDAC.optimizePrice(product);
+      const serverProposal = serverEDAC.optimizePrice(product);
+
+      expect.equal(clientProposal.suggestedPrice, serverProposal.suggestedPrice);
+      expect.equal(clientProposal.hardFloorPrice, serverProposal.hardFloorPrice);
+      expect.equal(clientProposal.isFloorTriggered, serverProposal.isFloorTriggered);
+    });
+
+    test("F201-T22: Client and Server DTRPLogisticsRouter produce identical routing plans and dynamic insertions", () => {
+      const clientRouter = new DTRPLogisticsRouter({ fleetSize: 2 });
+      const serverRouter = new ServerDTRPLogisticsRouter({ fleetSize: 2 });
+
+      const orders = [
+        { id: "ORD_SYNC_1", coordinates: { lat: 21.035, lng: 105.840 }, weightKg: 3 },
+        { id: "ORD_SYNC_2", coordinates: { lat: 21.030, lng: 105.845 }, weightKg: 4 },
+      ];
+
+      const clientPlan = clientRouter.planInitialRoutes(orders);
+      const serverPlan = serverRouter.planInitialRoutes(orders);
+
+      expect.equal(clientPlan.totalOrdersAssigned, serverPlan.totalOrdersAssigned);
+      expect.equal(clientPlan.onTimeDeliveryRate, serverPlan.onTimeDeliveryRate);
+      expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+    });
+
+    // -----------------------------------------------------------------------
+    // COPILOT INTEGRATION (Tests 23)
+    // -----------------------------------------------------------------------
+    test("F201-T23: Tri-Role AI Copilots (Admin Sections 143-145, Seller Section 63, Buyer Intent 56) respond accurately", () => {
+      // 1. Admin Copilot
+      const resFCM = generateAdminCopilotResponse("phác thảo tần suất luồng fcm conservative update khoảng dyadic");
+      expect.equal(resFCM.tag, "FCM CONSERVATIVE SKETCH");
+      expect.ok(resFCM.text.includes("FCM-CU"));
+
+      const resEDAC = generateAdminCopilotResponse("định giá bán ngoại tuyến edac ensemble-diversified actor-critic");
+      expect.equal(resEDAC.tag, "EDAC DIVERSIFIED PRICING");
+      expect.ok(resEDAC.text.includes("EDAC"));
+
+      const resDTRP = generateAdminCopilotResponse("định tuyến bưu tá ngẫu nhiên dtrp min-sum latency chèn hỏa tốc");
+      expect.equal(resDTRP.tag, "DTRP DYNAMIC URGENT ROUTING");
+      expect.ok(resDTRP.text.includes("DTRP"));
+
+      // 2. Seller Copilot
+      const resSeller = generateSellerCopilotResponse("tư vấn bộ ba thuật toán fcm edac dtrp giao hỏa tốc");
+      expect.equal(resSeller.tag, "FCM, EDAC & DTRP URGENT LOGISTICS");
+      expect.ok(resSeller.text.includes("FCM-CU"));
+
+      // 3. Buyer Shopping Assistant
+      const resBuyer = generateAiChatResponse("cho tôi biết về hệ thống fcm edac dtrp giao hỏa tốc");
+      expect.equal(resBuyer.intent, "FCM_EDAC_DTRP_ASSIST");
+      expect.ok(resBuyer.replyText.includes("FCM"));
+    });
+
+    // -----------------------------------------------------------------------
+    // END-TO-END PIPELINE (Test 24)
+    // -----------------------------------------------------------------------
+    test("F201-T24: End-to-End Pipeline: FCM Dyadic Range queries -> EDAC Profit-floor Pricing -> DTRP Min-Sum Latency Logistics Delivery", () => {
+      // Step 1: FCM detects heavy demand in price bracket [100, 200]
+      const fcm = new ServerFCMSketchEstimator({ width: 512, depth: 4, dyadicLevels: 8 });
+      for (let i = 0; i < 200; i++) {
+        fcm.updateDyadic(150, 1);
+      }
+      const demandInBracket = fcm.queryDyadicRange(100, 200);
+      expect.ok(demandInBracket >= 200);
+
+      // Step 2: EDAC optimizes product pricing within the bracket while securing COGS + 5%
+      const edac = new ServerEDACPricing({ cogsFloorMultiplier: 1.05 });
+      const pricing = edac.optimizePrice({
+        id: "SKU_E2E_FCM_EDAC",
+        cogs: 120000,
+        price: 160000,
+        competitorPrice: 155000,
+      });
+      expect.ok(pricing.suggestedPrice >= 120000 * 1.05);
+      expect.equal(pricing.safetyStatus, "UNCONSTRAINED_OPTIMAL");
+
+      // Step 3: DTRP dispatches customer order and handles dynamic instant insertion
+      const dtrp = new ServerDTRPLogisticsRouter({ fleetSize: 2 });
+      dtrp.planInitialRoutes([
+        { id: "E2E_BASE_ORD_1", coordinates: { lat: 21.034, lng: 105.837 }, weightKg: 2 },
+      ]);
+      const urgentInsert = dtrp.insertDynamicUrgentOrder({
+        id: "E2E_URGENT_NOW",
+        coordinates: { lat: 21.036, lng: 105.840 },
+        weightKg: 1.5,
+        isUrgent: true,
+        requestTimeMinutes: 5,
+        slaDeadlineMinutes: 65,
+      }, 10);
+
+      expect.equal(urgentInsert.inserted, true);
+      expect.ok(urgentInsert.estimatedArrivalMinutes <= 65);
+      expect.ok(urgentInsert.costDelta >= 0);
     });
   });
 });

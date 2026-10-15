@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -1449,7 +1449,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 62. Phác Thảo Tần Suất Dữ Liệu Luồng Bằng Conservative Count-Min Sketch
-  if (/conservative count-min|conservative cms|cập nhật thận trọng|heavy hitters.*conservative|phác thảo tần suất/i.test(raw)) {
+  if (!/fcm|dyadic/i.test(raw) && /conservative count-min|conservative cms|cập nhật thận trọng|heavy hitters.*conservative|phác thảo tần suất/i.test(raw)) {
     return {
       text: `📊 **PHÁC THẢO TẦN SUẤT CONSERVATIVE COUNT-MIN SKETCH (GOYAL ET AL. 2012)**:
 - **Cơ chế Cập nhật Thận trọng (Conservative Update)**:
@@ -2078,7 +2078,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 94. Phân Bổ Ưu Đãi Động Bằng Advantage Actor-Critic (A2C Policy Gradient) (Phase 37 - Feature 184)
-  if (!/sac-per|sac per|soft actor-critic/i.test(raw) && /actor-critic|a2c|actor critic|chính sách actor-critic|định tuyến ưu đãi actor-critic|advantage actor-critic/i.test(raw)) {
+  if (!/sac-per|sac per|soft actor-critic|edac|awac/i.test(raw) && /actor-critic|a2c|actor critic|chính sách actor-critic|định tuyến ưu đãi actor-critic|advantage actor-critic/i.test(raw)) {
     return {
       text: `🎯 **PHÂN BỔ ƯU ĐÃI ĐỘNG BẰNG ADVANTAGE ACTOR-CRITIC (A2C POLICY GRADIENT & BASELINE)**:
 - **Kiến trúc Tách biệt Actor và Critic**:
@@ -3046,6 +3046,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem mạng lưới trạm đổi pin BSS Hà Nội',
         'Lập lịch giao hàng xe máy điện xanh',
         'Ước lượng lượng truy cập bằng AKMV'
+      ]
+    };
+  }
+
+  // 143. Phác Thảo Nhanh Tần Suất Luồng & Truy Vấn Khoảng Dyadic FCM-CU (Phase 54 - Feature 201)
+  if (/fcm|conservative update|cu-cms|cập nhật thận trọng fcm|dyadic range|khoảng dyadic|cây dyadic/i.test(raw)) {
+    return {
+      text: `📊 **PHÁC THẢO NHANH TẦN SUẤT LUỒNG VỚI CẬP NHẬT THẬN TRỌNG & KHOẢNG DYADIC FCM-CU (CORMODE & MUTHUKRISHNAN 2005, GOYAL ET AL. 2012)**:
+- **Cập Nhật Thận Trọng Triệt Tiêu Sai Số (Conservative Update)**:
+  - Thay vì tăng toàn bộ $d$ dòng băm, FCM chỉ tăng các bucket bằng giá trị nhỏ nhất $\\min_i C[i, h_i(x)]$, giảm tới **70% sai số thổi phồng** tần suất click và lượt mua SKU trong ngày sale.
+- **Cây Khoảng Dyadic Đa Tầng (Dyadic Range Trees)**:
+  - Phân rã khoảng giá hoặc khung giờ $[L, R]$ thành $O(d \\cdot \\log U)$ khoảng dyadic chuẩn $[k \\cdot 2^j, (k+1) \\cdot 2^j - 1]$, cho phép ước lượng tổng tần suất giao dịch theo khoảng giá siêu tốc trong RAM.
+- **Theo Dõi Heavy Hitters Kích Thước $K$ Bằng Min-Heap**:
+  - Tự động duy trì top sản phẩm nóng nhất sàn với giới hạn dưới tần suất chính xác tuyệt đối!`,
+      type: 'analytics',
+      tag: 'FCM CONSERVATIVE SKETCH',
+      suggestions: [
+        'Truy vấn tần suất khoảng giá dyadic',
+        'Kiểm tra Top-K Heavy Hitters FCM',
+        'So sánh sai số với CMS kinh điển'
+      ]
+    };
+  }
+
+  // 144. Định Giá Ngoại Tuyến Đa Critic Đa Dạng Gradient EDAC (Phase 54 - Feature 201)
+  if (/edac|ensemble-diversified|gradient diversity|đa critic edac|đa dạng gradient|pessimistic lcb/i.test(raw)) {
+    return {
+      text: `🤖 **ĐỊNH GIÁ BÁN NGOẠI TUYẾN ĐA CRITIC VỚI ĐA DẠNG HÓA GRADIENT EDAC (WONG ET AL. 2021, LEVINE 2021)**:
+- **Ensemble $N$ Critic Độc Lập**:
+  - Duy trì ensemble gồm $N \\ge 4$ mạng Critic ($Q_1, \\dots, Q_N$) để đo lường độ bất định nhận thức (Epistemic Uncertainty) đối với các mức giá chưa từng thử nghiệm.
+- **Phạt Đồng Hướng Gradient (Gradient Diversity Regularization)**:
+  - Phạt góc cosine $\\sum_{i \\ne j} (\\nabla_a Q_i \\cdot \\nabla_a Q_j)$ nhằm chủ động phân tán gradient ngoài vùng dữ liệu lịch sử, triệt tiêu sai số ngoại suy (Extrapolation Error).
+- **Quyết Định Giá Bi Quan An Toàn (Pessimistic LCB)**:
+  - Chọn giá theo cận dưới tin cậy $Q_{\\text{LCB}}(s, a) = \\mu_Q(s, a) - \\beta \\cdot \\sigma_Q(s, a)$, kèm khóa sàn bất biến $\\text{COGS} \\times 1.05$ và trần giá đối thủ!`,
+      type: 'pricing',
+      tag: 'EDAC DIVERSIFIED PRICING',
+      suggestions: [
+        'Xem độ bất định định giá EDAC',
+        'Kiểm tra rào cản sàn vốn COGS 5%',
+        'Tối ưu hóa giá Flash Sale an toàn'
+      ]
+    };
+  }
+
+  // 145. Định Tuyến Bưu Tá Động Với Đơn Hàng Hỏa Tốc Ngẫu Nhiên DTRP (Phase 54 - Feature 201)
+  if (/dtrp|min-sum latency|dynamic traveling repairperson|chèn hỏa tốc|đơn hàng ngẫu nhiên dtrp|stochastic urgent|thời gian chờ tích lũy/i.test(raw)) {
+    return {
+      text: `🚚 **ĐỊNH TUYẾN BƯU TÁ ĐỘNG VỚI ĐƠN HÀNG HỎA TỐC NGẪU NHIÊN DTRP (BERTSIMAS & VAN RYZIN 1991, JAILLET 2006)**:
+- **Tối Thiểu Hóa Thời Gian Chờ Tích Lũy (Min-Sum Latency Objective)**:
+  - Thay vì chỉ tối ưu tổng quãng đường (Min-Distance), DTRP tập trung giảm thiểu tổng thời gian chờ của khách hàng $\\sum_i (T_{\\text{arrival}, i} - T_{\\text{request}, i})$, nâng cao chỉ số hài lòng CSAT cho đơn hàng SPX Now 1-2h.
+- **Chèn Động Thời Gian Thực (Online Insertion Heuristic)**:
+  - Khi phát sinh đơn hàng hỏa tốc ngẫu nhiên, hệ thống đánh giá chi phí gia tăng $\\Delta \\text{Latency} \\cdot \\alpha + \\Delta \\text{Distance} \\cdot (1 - \\alpha)$ trên toàn bộ vị trí khả thi của đội xe.
+- **Bảo Đảm Tuyệt Đối Cam Kết SLA Hỏa Tốc (< 60 Phút)**:
+  - Tự động điều phối bưu tá phù hợp nhất hoặc kích hoạt xe dự phòng khẩn cấp nếu vi phạm ngưỡng thời gian cam kết!`,
+      type: 'logistics',
+      tag: 'DTRP DYNAMIC URGENT ROUTING',
+      suggestions: [
+        'Mô phỏng chèn đơn hỏa tốc SPX Now',
+        'Kiểm tra tỷ lệ giao đúng hạn OTD',
+        'Phân tích thời gian chờ trung bình DTRP'
       ]
     };
   }

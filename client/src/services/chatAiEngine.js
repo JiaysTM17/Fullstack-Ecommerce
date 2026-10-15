@@ -484,7 +484,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // VẬN CHUYỂN, GIAO HỎA TỐC 2H (SPX EXPRESS)
   // -------------------------------------------------------------
-  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2|branch[- ]and[- ]cut|vrptw|contraction|benders|mdpdptw|d[- ]darp|dynamic darp|tqpo|cml|count[- ]min[- ]log|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
+  if (!/hungarian|ghép bưu tá|ghép shipper|splay|nghẽn|thông lượng|edmonds-karp|hopcroft|johnson|vrp|giao hàng xanh|co2|branch[- ]and[- ]cut|vrptw|contraction|benders|mdpdptw|d[- ]darp|dynamic darp|tqpo|cml|count[- ]min[- ]log|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|min-sum latency|chèn hỏa tốc/i.test(lower) && /giao hàng|ship|vận chuyển|hỏa tốc|2h|spx now|phí ship|khi nào nhận/i.test(lower)) {
     return {
       intent: 'SHIPPING_INFO',
       replyText: `**[VẬN CHUYỂN] DỊCH VỤ VẬN CHUYỂN HỎA TỐC SPX EXPRESS:**\n\n• **Giao Siêu Tốc 2H (SPX Now):** Áp dụng nội thành TP.HCM & Hà Nội, nhận hàng trong vòng 120 phút.\n• **Giao Tiêu Chuẩn 24H:** Phủ sóng toàn quốc 63 tỉnh thành, giao nhanh đúng hẹn.\n• **Freeship toàn quốc:** Áp dụng mã \`FREESHIP\` để trừ ngay 30.000₫ cước vận chuyển!`,
@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw|count[- ]min[- ]log|cml|tqpo|d[- ]darp|dynamic darp|count[- ]sketch|td3|sdvrptw|split delivery|hll martingale|adaptive kl|hfvrptw|đội xe hỗn hợp|hyperbitbit|rainbow dqn|evrptw|trạm đổi pin|xe điện xanh|ddsketch|sac[- ]per|sac per|mdevrp|sạc phi tuyến|xe điện đa kho|ultraloglog|mopo|tdvrptw|phụ thuộc giao thông|giờ cao điểm spx|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|xe tải trung chuyển|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|min-sum latency|chèn hỏa tốc/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -1049,6 +1049,14 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
     };
   }
 
+  // 56. Phác Thảo Nhanh FCM, Trợ Giá Đa Dạng EDAC & Giao Hỏa Tốc DTRP (FCM_EDAC_DTRP_ASSIST)
+  if (/fcm|conservative update|cu-cms|edac|ensemble-diversified|dtrp|min-sum latency|chèn hỏa tốc|giao hỏa tốc dtrp/i.test(lower)) {
+    return {
+      intent: 'FCM_EDAC_DTRP_ASSIST',
+      replyText: `**[PHÁC THẢO NHANH FCM, TRỢ GIÁ AN TOÀN EDAC & GIAO HỎA TỐC DTRP]:**\n\n• **Bắt sóng sản phẩm sốt dẻo (FCM Sketch & Cây Dyadic)**: Đo lường chính xác lượng tương tác sản phẩm trong từng phân khúc giá Flash Sale mà không sợ nghẽn mạng hay sai số ảo!\n• **Trợ giá thông minh an toàn (EDAC Offline Pricing)**: AI đa chiều tự động cân đối giá ưu đãi tốt nhất cho bạn nhưng luôn bảo vệ uy tín và vốn sản xuất của shop đối tác.\n• **Giao hàng hỏa tốc tối ưu thời gian chờ (DTRP Router)**: Đơn hàng SPX Now 1-2h của bạn được chèn linh hoạt vào tuyến đường bưu tá gần nhất theo mục tiêu giảm thiểu thời gian chờ, nhận hàng đúng hẹn cam kết!`,
+      suggestions: ['Xem khoảng giá hot Dyadic FCM', 'Săn giá trợ giá an toàn EDAC', 'Theo dõi bưu tá hỏa tốc DTRP'],
+    };
+  }
 
   // -------------------------------------------------------------
   // TÌM KIẾM SẢN PHẨM THÔNG MINH

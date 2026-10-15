@@ -728,7 +728,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 36. Theo Dõi SKU Heavy Hitters Bằng Conservative CMS & Đẩy Sản Phẩm Đỉnh Treap (Phase 27 - Feature 174)
-  if (!/interval treap|simrank/i.test(raw) && /heavy hitters|conservative cms|sku.*heavy hitters|treap|cây treap|điểm tài trợ.*treap/i.test(raw)) {
+  if (!/interval treap|simrank|fcm|dyadic/i.test(raw) && /heavy hitters|conservative cms|sku.*heavy hitters|treap|cây treap|điểm tài trợ.*treap/i.test(raw)) {
     return {
       text: `🔥 **THEO DÕI SKU HEAVY HITTERS BẰNG CONSERVATIVE CMS & TỐI ƯU HIỂN THỊ TREAP**:
 - **Bắt trúng mặt hàng Heavy Hitters thời gian thực**:
@@ -1267,6 +1267,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Đo lường tập khách bằng AKMV',
         'Tối ưu giá ngoại tuyến bằng TD3+BC',
         'Định tuyến bưu tá đổi pin siêu tốc EVRP-BSS'
+      ]
+    };
+  }
+
+  // 63. Bộ Ba Thuật Toán FCM-CU Sketch, EDAC Offline Pricing & DTRP Urgent Logistics (Phase 54 - Feature 201)
+  if (/fcm|conservative update|cu-cms|edac|ensemble-diversified|dtrp|min-sum latency|chèn hỏa tốc/i.test(raw)) {
+    return {
+      text: `🚀 **BỘ BA THUẬT TOÁN FCM-CU SKETCH, EDAC PRICING & GIAO HỎA TỐC DTRP (${currentShop.name})**:
+- **Phác thảo tần suất chính xác FCM (Fast Count-Min with Conservative Update & Dyadic Ranges)**:
+  - Giảm tới 70% sai số thổi phồng lượt xem và lượt mua, hỗ trợ truy vấn khoảng giá Flash Sale theo cây Dyadic siêu tốc trong bộ nhớ.
+- **Định giá học tăng cường ngoại tuyến đa Critic EDAC (Ensemble-Diversified Actor-Critic)**:
+  - Sử dụng ensemble đa Critic với cơ chế ép phân tán gradient để tự động phát hiện và né tránh các mức giá mạo hiểm ngoài vùng dữ liệu an toàn; cam kết khóa sàn $\\text{COGS} \\times 1.05$.
+- **Định tuyến giao hàng hỏa tốc ngẫu nhiên DTRP (Dynamic Traveling Repairperson)**:
+  - Tối ưu hóa tổng thời gian chờ tích lũy của khách hàng (Min-Sum Latency) thay vì chỉ nhìn quãng đường, chèn linh hoạt đơn hỏa tốc SPX Now 1-2h của shop mà không vi phạm cam kết SLA!`,
+      type: 'recommendation',
+      tag: 'FCM, EDAC & DTRP URGENT LOGISTICS',
+      suggestions: [
+        'Ước lượng khoảng giá dyadic FCM',
+        'Tối ưu hóa giá an toàn EDAC',
+        'Định tuyến giao hỏa tốc DTRP'
       ]
     };
   }
