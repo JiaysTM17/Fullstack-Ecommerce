@@ -454,7 +454,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
-  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg|opoe/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg|opoe|fast[- ]agms|bcq|mtvrptw|multi[- ]trip/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
 - **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock|road[- ]pricing|mdvrptw|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock|road[- ]pricing|mdvrptw|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|mtvrptw|multi[- ]trip/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -3487,6 +3487,70 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem biểu đồ tải trọng động trên tuyến',
         'Kiểm tra tỷ lệ giao hàng & đổi trả thành công',
         'Thống kê quãng đường và CO2 tiết kiệm'
+      ]
+    };
+  }
+
+  // 164. Ước Lượng Tích Vô Hướng & Tần Suất Luồng Fast-AGMS Sketch (Phase 61 - Feature 208)
+  if (/fast[- ]agms|agms sketch|tích vô hướng luồng|inner product stream|f2 moment|moment tần suất f2/i.test(raw)) {
+    return {
+      text: `⚡ **ƯỚC LƯỢNG TÍCH VÔ HƯỚNG & MOMENT TẦN SUẤT F2 FAST-AGMS SKETCH (ALON ET AL. 2002, CORMODE & GAROFALAKIS 2005)**:
+- **Nguyên lý Đột phá về Tính toán Stream Joins**:
+  - Xây dựng bảng băm $d \\times w$ với hàm băm độc lập 4 bậc (4-wise independent polynomial hashing) và biến ngẫu nhiên Rademacher $\\xi(i) \\in \\{-1, +1\\}$.
+  - Cập nhật dòng sự kiện trong $O(d)$ thao tác atomic.
+- **Ước lượng Moment $F_2$ & Tích vô hướng $\\langle \\mathbf{A}, \\mathbf{B} \\rangle$**:
+  - Sử dụng trung vị của các trung bình (Median-of-Means) triệt tiêu sai số đột biến:
+    $$\\widehat{\\langle \\mathbf{A}, \\mathbf{B} \\rangle} = \\text{median}_{j=1}^d \\left( \\sum_{k=0}^{w-1} C_A[j, k] \\cdot C_B[j, k] \\right)$$
+  - Tính toán độ tương đồng Cosine giữa hành vi clickstream của các nhóm khách hàng hoặc kích thước phép kết nối bảng (Stream Join Size) tức thì trong bộ nhớ cực nhỏ!`,
+      type: 'analytics',
+      tag: 'FAST-AGMS SKETCH',
+      suggestions: [
+        'Xem kích thước Stream Join luồng A và B',
+        'Kiểm tra ước lượng Moment bậc hai F2',
+        'Độ tương đồng Cosine giữa luồng sự kiện'
+      ]
+    };
+  }
+
+  // 165. Định Giá Học Tăng Cường Giới Hạn Mẫu BCQ Dynamic Pricing (Phase 61 - Feature 208)
+  if (/bcq|batch[- ]constrained|bcq pricing|học tăng cường giới hạn mẫu|phát sinh hành động pertubation/i.test(raw)) {
+    return {
+      text: `🤖 **ĐỊNH GIÁ HỌC TĂNG CƯỜNG AN TOÀN NGOẠI TUYẾN BCQ DYNAMIC PRICING (FUJIMOTO ET AL. ICML 2019)**:
+- **Nguyên lý Batch-Constrained Reinforcement Learning**:
+  - Khắc phục triệt để lỗi ngoại suy giá trị (Extrapolation Error) trong học tăng cường ngoại tuyến khi mô hình chọn các mức giá chưa từng xuất hiện trong lịch sử.
+  - Sử dụng mô hình sinh chính sách hành vi $G_\\omega(s)$ để chỉ đề xuất các hành vi tương đồng với dữ liệu quá khứ.
+- **Cơ chế Tinh Chỉnh Hành Động & Clipped Double Q-Evaluation**:
+  - Bổ sung bộ nhiễu tinh chỉnh có chặn: $a = \\text{clip}(a_{\\text{cand}} + \\xi_\\phi(s, a_{\\text{cand}}), -\\xi_{\\max}, +\\xi_{\\max})$.
+  - Đánh giá bi quan giá trị Q với hệ số cân bằng $\\lambda$:
+    $$Q_{\\text{eval}}(s, a) = \\lambda \\min(Q_1, Q_2) + (1-\\lambda)\\max(Q_1, Q_2)$$
+  - Khóa chặt giá sàn $\\ge \\text{COGS} \\times 1.05$ và giá trần đối thủ $\\le P_{\\text{competitor}} \\times 1.15$ bảo vệ an toàn biên lợi nhuận!`,
+      type: 'pricing',
+      tag: 'BCQ DYNAMIC PRICING',
+      suggestions: [
+        'Kiểm tra mức nhiễu tinh chỉnh Xi Max (0.05)',
+        'Xem hệ số phạt Clipped Double Q Lambda (0.75)',
+        'Kiểm toán hàng rào giá sàn COGS Floor'
+      ]
+    };
+  }
+
+  // 166. Định Tuyến Đội Xe Xoay Vòng Nhiều Chuyến MTVRPTW (Phase 61 - Feature 208)
+  if (/mtvrptw|multi[- ]trip|nhiều chuyến trong ngày|xoay vòng xe tải|thời gian nạp lại kho|reload turnaround/i.test(raw)) {
+    return {
+      text: `🚛 **ĐỊNH TUYẾN ĐỘI XE XOAY VÒNG NHIỀU CHUYẾN MTVRPTW (CATTARUZZA ET AL. 2016)**:
+- **Tối Đa Hóa Hiệu Suất Đội Xe Đô Thị (High Asset Utilization)**:
+  - Cho phép mỗi xe tải SPX thực hiện nhiều chuyến giao hàng liên tiếp (Multi-Trip) trong cùng một ca làm việc ($T_{\\text{maxShift}} = 480$ phút).
+  - Tự động quay về kho tái nạp hàng với thời gian nạp lại cố định $\\Delta_{\\text{reload}} = 15$ phút trước khi xuất phát chuyến kế tiếp.
+- **Tuân Thủ Cửa Sổ Thời Gian & Lập Lịch Khắt Khe**:
+  - Tối ưu hóa song song ràng buộc thời gian mở/đóng cửa sổ của khách hàng $[e_i, l_i]$, thời gian phục vụ tại điểm dừng, và giới hạn thời gian kết ca.
+- **Hiệu Quả Thực Tế**:
+  - Giảm đến **$42\\%$** số lượng xe tải cần huy động tại các Hub đô thị mật độ cao, tiết kiệm chi phí khấu hao phương tiện và nhiên liệu!`,
+      type: 'logistics',
+      tag: 'MTVRPTW MULTI-TRIP ROUTER',
+      suggestions: [
+        'Xem số chuyến trung bình trên mỗi xe tải',
+        'Kiểm tra tỷ lệ giao đúng khung giờ On-time Rate',
+        'Thống kê thời gian xoay vòng và chi phí nhiên liệu'
       ]
     };
   }

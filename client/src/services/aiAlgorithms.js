@@ -31016,6 +31016,574 @@ export class VRPTWSimultaneousPickupDeliveryRouter {
   }
 }
 
+// =========================================================================
+// PHASE 61: ENTERPRISE SUITE (FEATURE 208)
+// 1. FastAGMSSketch (Alon, Gibbons, Matias, Szegedy 2002, Cormode & Garofalakis 2005)
+// 2. BCQDynamicPricing (Batch-Constrained Q-Learning, Fujimoto et al. ICML 2019)
+// 3. MTVRPTWLogisticsRouter (Multi-Trip VRPTW, Cattaruzza et al. 2016, Olivera & Viera 2007)
+// =========================================================================
+
+export class FastAGMSSketch {
+  constructor(options = {}) {
+    this.depth = Math.max(1, options.depth || 5);
+    this.width = Math.max(2, options.width || 64);
+    this.seed = options.seed || 42;
+
+    this.tableA = Array.from({ length: this.depth }, () => new Float64Array(this.width));
+    this.tableB = Array.from({ length: this.depth }, () => new Float64Array(this.width));
+
+    this.totalUpdatesA = 0;
+    this.totalUpdatesB = 0;
+
+    this.hashParams = [];
+    let prng = this.seed;
+    const nextRand = () => {
+      prng = (Math.imul(1103515245, prng) + 12345) & 0x7fffffff;
+      return prng;
+    };
+
+    for (let i = 0; i < this.depth; i++) {
+      this.hashParams.push({
+        a1: (nextRand() % 1000003) + 1,
+        b1: nextRand() % 1000003,
+        c1: nextRand() % 1000003,
+        d1: nextRand() % 1000003,
+        a2: (nextRand() % 1000003) + 1,
+        b2: nextRand() % 1000003,
+        c2: nextRand() % 1000003,
+        d2: nextRand() % 1000003,
+      });
+    }
+  }
+
+  _hashKey(key) {
+    if (typeof key === 'number') return key >>> 0;
+    const str = String(key);
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  _getBucket(row, keyHash) {
+    const p = this.hashParams[row];
+    const x = keyHash;
+    const x2 = (x * x) % 1000003;
+    const x3 = (x2 * x) % 1000003;
+    const val = (p.a1 * x3 + p.b1 * x2 + p.c1 * x + p.d1) % 1000003;
+    return Math.abs(val) % this.width;
+  }
+
+  _getSign(row, keyHash) {
+    const p = this.hashParams[row];
+    const x = keyHash;
+    const x2 = (x * x) % 1000003;
+    const x3 = (x2 * x) % 1000003;
+    const val = (p.a2 * x3 + p.b2 * x2 + p.c2 * x + p.d2) % 1000003;
+    return (Math.abs(val) % 2 === 0) ? 1.0 : -1.0;
+  }
+
+  update(key, weight = 1.0, stream = 'A') {
+    const keyHash = this._hashKey(key);
+    const w = Number(weight) || 1.0;
+    const targetTable = (stream === 'B') ? this.tableB : this.tableA;
+
+    if (stream === 'B') {
+      this.totalUpdatesB += Math.abs(w);
+    } else {
+      this.totalUpdatesA += Math.abs(w);
+    }
+
+    for (let i = 0; i < this.depth; i++) {
+      const bucket = this._getBucket(i, keyHash);
+      const sign = this._getSign(i, keyHash);
+      targetTable[i][bucket] += sign * w;
+    }
+  }
+
+  estimateF2(stream = 'A') {
+    const targetTable = (stream === 'B') ? this.tableB : this.tableA;
+    const rowEstimates = [];
+
+    for (let i = 0; i < this.depth; i++) {
+      let sumSq = 0;
+      for (let j = 0; j < this.width; j++) {
+        const val = targetTable[i][j];
+        sumSq += val * val;
+      }
+      rowEstimates.push(sumSq);
+    }
+
+    rowEstimates.sort((a, b) => a - b);
+    const mid = Math.floor(rowEstimates.length / 2);
+    const median = (rowEstimates.length % 2 !== 0)
+      ? rowEstimates[mid]
+      : (rowEstimates[mid - 1] + rowEstimates[mid]) / 2.0;
+
+    return Math.max(0, Number(median.toFixed(2)));
+  }
+
+  estimateInnerProduct() {
+    const rowEstimates = [];
+
+    for (let i = 0; i < this.depth; i++) {
+      let dotProd = 0;
+      for (let j = 0; j < this.width; j++) {
+        dotProd += this.tableA[i][j] * this.tableB[i][j];
+      }
+      rowEstimates.push(dotProd);
+    }
+
+    rowEstimates.sort((a, b) => a - b);
+    const mid = Math.floor(rowEstimates.length / 2);
+    const median = (rowEstimates.length % 2 !== 0)
+      ? rowEstimates[mid]
+      : (rowEstimates[mid - 1] + rowEstimates[mid]) / 2.0;
+
+    return Number(median.toFixed(2));
+  }
+
+  estimateCosineSimilarity() {
+    const f2A = this.estimateF2('A');
+    const f2B = this.estimateF2('B');
+    if (f2A <= 0 || f2B <= 0) return 0.0;
+
+    const innerProd = this.estimateInnerProduct();
+    const denom = Math.sqrt(f2A) * Math.sqrt(f2B);
+    const sim = denom > 0 ? (innerProd / denom) : 0.0;
+    return Number(Math.max(-1.0, Math.min(1.0, sim)).toFixed(4));
+  }
+
+  merge(other) {
+    if (!(other instanceof FastAGMSSketch)) {
+      throw new Error("Target must be an instance of FastAGMSSketch");
+    }
+    if (this.depth !== other.depth || this.width !== other.width) {
+      throw new Error("Sketch dimensions (depth, width) must match for merging");
+    }
+
+    for (let i = 0; i < this.depth; i++) {
+      for (let j = 0; j < this.width; j++) {
+        this.tableA[i][j] += other.tableA[i][j];
+        this.tableB[i][j] += other.tableB[i][j];
+      }
+    }
+    this.totalUpdatesA += other.totalUpdatesA;
+    this.totalUpdatesB += other.totalUpdatesB;
+    return this;
+  }
+
+  reset() {
+    for (let i = 0; i < this.depth; i++) {
+      this.tableA[i].fill(0);
+      this.tableB[i].fill(0);
+    }
+    this.totalUpdatesA = 0;
+    this.totalUpdatesB = 0;
+  }
+
+  getSummary() {
+    const f2A = this.estimateF2('A');
+    const f2B = this.estimateF2('B');
+    const innerProduct = this.estimateInnerProduct();
+    const cosineSimilarity = this.estimateCosineSimilarity();
+
+    return {
+      depth: this.depth,
+      width: this.width,
+      totalUpdatesA: this.totalUpdatesA,
+      totalUpdatesB: this.totalUpdatesB,
+      f2A,
+      f2B,
+      innerProduct,
+      cosineSimilarity
+    };
+  }
+}
+
+export class BCQDynamicPricing {
+  constructor(options = {}) {
+    this.cogsSafetyFloorRatio = options.cogsSafetyFloorRatio || 1.05;
+    this.competitorCeilingRatio = options.competitorCeilingRatio || 1.15;
+    this.doubleQLambda = Math.max(0.5, Math.min(1.0, options.doubleQLambda !== undefined ? options.doubleQLambda : 0.75));
+    this.maxPerturbation = Math.max(0.01, Math.min(0.20, options.maxPerturbation || 0.05));
+    this.candidateCount = Math.max(2, options.candidateCount || 5);
+
+    this.q1Weights = options.q1Weights || [0.20, 0.30, -0.05, 0.45, -0.15, 0.35];
+    this.q1Bias = options.q1Bias !== undefined ? options.q1Bias : 0.05;
+
+    this.q2Weights = options.q2Weights || [0.18, 0.32, -0.08, 0.40, -0.22, 0.30];
+    this.q2Bias = options.q2Bias !== undefined ? options.q2Bias : -0.02;
+
+    this.genWeights = options.genWeights || [0.05, 0.12, -0.03, 0.15, -0.10];
+    this.genBias = options.genBias !== undefined ? options.genBias : 0.0;
+  }
+
+  get safetyMargin() {
+    return Number((this.cogsSafetyFloorRatio - 1.0).toFixed(2));
+  }
+
+  get regularizer() {
+    return this.doubleQLambda;
+  }
+
+  get featureDim() {
+    return 6;
+  }
+
+  extractStateFeatures(state) {
+    const cogs = Math.max(1, state.cogs || 100000);
+    const basePrice = Math.max(1, state.basePrice || cogs * 1.25);
+    const competitorPrice = Math.max(1, state.competitorPrice || basePrice);
+    const demandIndex = Math.max(0, Math.min(2.0, state.demandIndex !== undefined ? state.demandIndex : 1.0));
+    const inventoryUrgency = Math.max(0, Math.min(1.0, state.inventoryUrgency !== undefined ? state.inventoryUrgency : 0.2));
+
+    return [
+      Math.log(cogs) / 15.0,
+      Math.log(basePrice) / 15.0,
+      Math.log(competitorPrice) / 15.0,
+      demandIndex,
+      inventoryUrgency
+    ];
+  }
+
+  sampleBehavioralAction(state) {
+    const sNorm = this.extractStateFeatures(state);
+    let dot = this.genBias;
+    for (let i = 0; i < sNorm.length; i++) {
+      dot += sNorm[i] * this.genWeights[i];
+    }
+    const tanh = Math.tanh(dot);
+    return Math.max(0.75, Math.min(1.35, 1.0 + tanh * 0.20));
+  }
+
+  generateActionCandidates(state, count = this.candidateCount) {
+    const baseAction = this.sampleBehavioralAction(state);
+    const candidates = [];
+    const step = (2 * this.maxPerturbation) / Math.max(1, count - 1);
+
+    for (let i = 0; i < count; i++) {
+      const perturbation = -this.maxPerturbation + i * step;
+      const act = Math.max(0.70, Math.min(1.40, baseAction + perturbation));
+      candidates.push(Number(act.toFixed(4)));
+    }
+    return candidates;
+  }
+
+  evaluateQ1(state, action) {
+    const sNorm = this.extractStateFeatures(state);
+    const sa = [...sNorm, action];
+    let q = this.q1Bias;
+    for (let i = 0; i < sa.length; i++) {
+      q += sa[i] * this.q1Weights[i];
+    }
+    return q;
+  }
+
+  evaluateQ2(state, action) {
+    const sNorm = this.extractStateFeatures(state);
+    const sa = [...sNorm, action];
+    let q = this.q2Bias;
+    for (let i = 0; i < sa.length; i++) {
+      q += sa[i] * this.q2Weights[i];
+    }
+    return q;
+  }
+
+  evaluateDoubleQ(state, action) {
+    const q1 = this.evaluateQ1(state, action);
+    const q2 = this.evaluateQ2(state, action);
+    const minQ = Math.min(q1, q2);
+    const maxQ = Math.max(q1, q2);
+    const doubleQ = this.doubleQLambda * minQ + (1 - this.doubleQLambda) * maxQ;
+    return { q1, q2, minQ, maxQ, doubleQ };
+  }
+
+  optimizePrice(item) {
+    const cogs = Math.max(1000, Number(item.cogs) || 100000);
+    const basePrice = Math.max(1, Number(item.basePrice) || Math.round(cogs * 1.3));
+    const competitorPrice = Number(item.competitorPrice) || basePrice;
+    const demandIndex = item.demandIndex !== undefined ? Number(item.demandIndex) : 1.0;
+    const inventoryUrgency = item.inventoryUrgency !== undefined ? Number(item.inventoryUrgency) : 0.2;
+
+    const state = { cogs, basePrice, competitorPrice, demandIndex, inventoryUrgency };
+    const candidates = this.generateActionCandidates(state);
+    const behavioralAction = this.sampleBehavioralAction(state);
+
+    let bestAction = behavioralAction;
+    let bestDoubleQ = -Infinity;
+    let bestDetails = null;
+
+    for (const a of candidates) {
+      const qEval = this.evaluateDoubleQ(state, a);
+      if (qEval.doubleQ > bestDoubleQ) {
+        bestDoubleQ = qEval.doubleQ;
+        bestAction = a;
+        bestDetails = qEval;
+      }
+    }
+
+    let calculatedPrice = Math.round(basePrice * bestAction);
+
+    const safetyFloor = Math.round(cogs * this.cogsSafetyFloorRatio);
+    const safetyCeiling = Math.max(safetyFloor, Math.round(competitorPrice * this.competitorCeilingRatio));
+
+    let decisionTag = "BCQ_BATCH_CONSTRAINED_OPTIMAL";
+
+    if (calculatedPrice < safetyFloor) {
+      calculatedPrice = safetyFloor;
+      decisionTag = "FLOOR_OVERRIDE_COGS_SECURED";
+    } else if (calculatedPrice > safetyCeiling) {
+      calculatedPrice = safetyCeiling;
+      decisionTag = "CEILING_OVERRIDE_COMPETITOR_RESTRICTED";
+    }
+
+    const grossMarginVnd = calculatedPrice - cogs;
+    const marginPercent = Number(((grossMarginVnd / calculatedPrice) * 100).toFixed(2));
+
+    return {
+      proposedPrice: calculatedPrice,
+      basePrice,
+      cogs,
+      competitorPrice,
+      actionMultiplier: Number(bestAction.toFixed(4)),
+      bestMultiplier: Number(bestAction.toFixed(4)),
+      behavioralAction: Number(behavioralAction.toFixed(4)),
+      bestDoubleQ: Number(bestDoubleQ.toFixed(4)),
+      q1Value: Number((bestDetails ? bestDetails.q1 : 0).toFixed(4)),
+      q2Value: Number((bestDetails ? bestDetails.q2 : 0).toFixed(4)),
+      isFloorEnforced: calculatedPrice === safetyFloor,
+      decisionTag,
+      marginAnalysis: {
+        grossMarginVnd,
+        marginPercent,
+        safetyFloorVnd: safetyFloor,
+        safetyCeilingVnd: safetyCeiling
+      }
+    };
+  }
+
+  batchOptimize(items = []) {
+    return (items || []).map(item => this.optimizePrice(item));
+  }
+
+  getModelSummary() {
+    return {
+      algorithm: "BCQDynamicPricing",
+      cogsSafetyFloorRatio: this.cogsSafetyFloorRatio,
+      competitorCeilingRatio: this.competitorCeilingRatio,
+      doubleQLambda: this.doubleQLambda,
+      maxPerturbation: this.maxPerturbation,
+      candidateCount: this.candidateCount,
+      featureDim: this.featureDim
+    };
+  }
+}
+
+export class MTVRPTWLogisticsRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || { id: 'SPX_CENTRAL_HUB', lat: 21.0285, lng: 105.8542 };
+    this.vehicleCapacityKg = options.vehicleCapacityKg || 100.0;
+    this.fleetSize = Math.max(1, options.fleetSize || 3);
+    this.maxShiftMinutes = Math.max(60, options.maxShiftMinutes || 480);
+    this.reloadTimeMinutes = Math.max(0, options.reloadTimeMinutes !== undefined ? options.reloadTimeMinutes : 15);
+    this.vanSpeedKmh = options.vanSpeedKmh || 28.0;
+    this.serviceDwellPerStopMin = options.serviceDwellPerStopMin !== undefined ? options.serviceDwellPerStopMin : 5.0;
+    this.fuelCostPerKm = options.fuelCostPerKm || 1800;
+  }
+
+  calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(3));
+  }
+
+  planMultiTripRoutes(stops = [], depot = this.depot, startMinuteOfDay = 480) {
+    if (!stops || stops.length === 0) {
+      return {
+        status: "EMPTY_STOPS",
+        summary: {
+          totalStops: 0,
+          totalTrips: 0,
+          activeVehicles: 0,
+          totalDistanceKm: 0,
+          totalFulfillmentTimeMin: 0,
+          totalFuelCostVnd: 0,
+          onTimeRatePercent: 100.0,
+          averageStopsPerTrip: 0,
+          capacityViolations: 0
+        },
+        vehicleSchedules: []
+      };
+    }
+
+    const vehicles = Array.from({ length: this.fleetSize }, (_, idx) => ({
+      vehicleId: `SPX_VAN_${idx + 1}`,
+      currentMinute: startMinuteOfDay,
+      totalDistanceKm: 0,
+      trips: []
+    }));
+
+    const unassigned = [...stops];
+    let overallDistanceKm = 0;
+    let onTimeCount = 0;
+    let totalAssigned = 0;
+
+    while (unassigned.length > 0) {
+      let earliestVehicle = null;
+      let minAvailableTime = Infinity;
+
+      for (const v of vehicles) {
+        const timeElapsed = v.currentMinute - startMinuteOfDay;
+        if (timeElapsed < this.maxShiftMinutes && v.currentMinute < minAvailableTime) {
+          minAvailableTime = v.currentMinute;
+          earliestVehicle = v;
+        }
+      }
+
+      if (!earliestVehicle) {
+        break;
+      }
+
+      let currentTripPayload = 0;
+      let currentLat = depot.lat;
+      let currentLng = depot.lng;
+      let tripTime = earliestVehicle.currentMinute;
+      let tripDistanceKm = 0;
+      const tripStops = [];
+
+      while (unassigned.length > 0) {
+        let bestCandidateIdx = -1;
+        let bestDist = Infinity;
+
+        for (let i = 0; i < unassigned.length; i++) {
+          const candidate = unassigned[i];
+          const demand = Math.max(1, Number(candidate.demandKg) || 5);
+          if (currentTripPayload + demand <= this.vehicleCapacityKg) {
+            const d = this.calculateDistance(currentLat, currentLng, candidate.lat, candidate.lng);
+            if (d < bestDist) {
+              bestDist = d;
+              bestCandidateIdx = i;
+            }
+          }
+        }
+
+        if (bestCandidateIdx === -1) {
+          break;
+        }
+
+        const chosenStop = unassigned.splice(bestCandidateIdx, 1)[0];
+        const demand = Math.max(1, Number(chosenStop.demandKg) || 5);
+        currentTripPayload += demand;
+        tripDistanceKm += bestDist;
+
+        const travelTimeMin = (bestDist / this.vanSpeedKmh) * 60;
+        tripTime += travelTimeMin;
+
+        const tw = chosenStop.timeWindow || [startMinuteOfDay, startMinuteOfDay + this.maxShiftMinutes];
+        const arrivalTime = tripTime;
+        if (tripTime < tw[0]) {
+          tripTime = tw[0];
+        }
+        const isOnTime = tripTime <= tw[1];
+        if (isOnTime) onTimeCount += 1;
+
+        tripTime += (chosenStop.serviceDurationMin || this.serviceDwellPerStopMin);
+
+        tripStops.push({
+          stopId: chosenStop.id,
+          lat: chosenStop.lat,
+          lng: chosenStop.lng,
+          demandKg: demand,
+          distanceFromLastKm: Number(bestDist.toFixed(2)),
+          arrivalTimeMin: Number(arrivalTime.toFixed(1)),
+          departureTimeMin: Number(tripTime.toFixed(1)),
+          onTime: isOnTime
+        });
+
+        currentLat = chosenStop.lat;
+        currentLng = chosenStop.lng;
+        totalAssigned += 1;
+      }
+
+      if (tripStops.length > 0) {
+        const returnDist = this.calculateDistance(currentLat, currentLng, depot.lat, depot.lng);
+        tripDistanceKm += returnDist;
+        const returnTime = (returnDist / this.vanSpeedKmh) * 60;
+        tripTime += returnTime;
+
+        const tripIndex = earliestVehicle.trips.length + 1;
+        earliestVehicle.trips.push({
+          tripIndex,
+          tripDistanceKm: Number(tripDistanceKm.toFixed(2)),
+          tripDurationMin: Number((tripTime - earliestVehicle.currentMinute).toFixed(1)),
+          tripPayloadKg: Number(currentTripPayload.toFixed(2)),
+          startTimeMin: Number(earliestVehicle.currentMinute.toFixed(1)),
+          endTimeMin: Number(tripTime.toFixed(1)),
+          stops: tripStops
+        });
+
+        earliestVehicle.totalDistanceKm += tripDistanceKm;
+        overallDistanceKm += tripDistanceKm;
+
+        earliestVehicle.currentMinute = tripTime + this.reloadTimeMinutes;
+      } else {
+        earliestVehicle.currentMinute = startMinuteOfDay + this.maxShiftMinutes + 1;
+      }
+    }
+
+    const activeVehicles = vehicles.filter(v => v.trips.length > 0);
+    const totalTrips = activeVehicles.reduce((sum, v) => sum + v.trips.length, 0);
+    const totalFuelCostVnd = Math.round(overallDistanceKm * this.fuelCostPerKm);
+    const onTimeRatePercent = totalAssigned > 0 ? Number(((onTimeCount / totalAssigned) * 100).toFixed(1)) : 100.0;
+    const averageStopsPerTrip = totalTrips > 0 ? Number((totalAssigned / totalTrips).toFixed(2)) : 0;
+
+    let maxFinishTime = startMinuteOfDay;
+    for (const v of activeVehicles) {
+      if (v.trips.length > 0) {
+        const lastTrip = v.trips[v.trips.length - 1];
+        if (lastTrip.endTimeMin > maxFinishTime) {
+          maxFinishTime = lastTrip.endTimeMin;
+        }
+      }
+    }
+    const totalFulfillmentTimeMin = Number((maxFinishTime - startMinuteOfDay).toFixed(1));
+
+    return {
+      status: "MTVRPTW_SUCCESS",
+      summary: {
+        totalStops: stops.length,
+        assignedStops: totalAssigned,
+        unassignedStops: unassigned.length,
+        totalTrips,
+        activeVehicles: activeVehicles.length,
+        totalDistanceKm: Number(overallDistanceKm.toFixed(2)),
+        totalFulfillmentTimeMin,
+        totalFuelCostVnd,
+        onTimeRatePercent,
+        averageStopsPerTrip,
+        capacityViolations: 0
+      },
+      vehicleSchedules: activeVehicles.map(v => ({
+        vehicleId: v.vehicleId,
+        tripsCount: v.trips.length,
+        totalVehicleDistanceKm: Number(v.totalDistanceKm.toFixed(2)),
+        totalVehicleDurationMin: Number((v.currentMinute - startMinuteOfDay - (v.trips.length > 0 ? this.reloadTimeMinutes : 0)).toFixed(1)),
+        shiftFinishedOnTime: (v.currentMinute - startMinuteOfDay) <= (this.maxShiftMinutes + this.reloadTimeMinutes),
+        trips: v.trips
+      }))
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -31333,6 +31901,10 @@ export default {
   MorrisLogLogCounter,
   OPOEDynamicPricing,
   VRPTWSimultaneousPickupDeliveryRouter,
+  // Phase 61 Enterprise Algorithms
+  FastAGMSSketch,
+  BCQDynamicPricing,
+  MTVRPTWLogisticsRouter,
 };
 
 

@@ -331,6 +331,10 @@ import {
   MorrisLogLogCounter,
   OPOEDynamicPricing,
   VRPTWSimultaneousPickupDeliveryRouter,
+  // Phase 61 Enterprise Algorithms
+  FastAGMSSketch,
+  BCQDynamicPricing,
+  MTVRPTWLogisticsRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -479,6 +483,9 @@ import { MDVRPTWRoadPricingRouter as ServerMDVRPTWRoadPricingRouter, DEFAULT_ROA
 import { MorrisLogLogCounter as ServerMorrisLogLogCounter } from "../../server/src/utils/morrisLogLogCounter.js";
 import { OPOEDynamicPricing as ServerOPOEDynamicPricing } from "../../server/src/utils/opoeDynamicPricing.js";
 import { VRPTWSimultaneousPickupDeliveryRouter as ServerVRPTWSimultaneousPickupDeliveryRouter } from "../../server/src/utils/vrptwSimultaneousPickupDeliveryRouter.js";
+import { FastAGMSSketch as ServerFastAGMSSketch } from "../../server/src/utils/fastAgmsSketch.js";
+import { BCQDynamicPricing as ServerBCQDynamicPricing } from "../../server/src/utils/bcqDynamicPricing.js";
+import { MTVRPTWLogisticsRouter as ServerMTVRPTWLogisticsRouter } from "../../server/src/utils/mtvrptwLogisticsRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -26510,6 +26517,440 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(deliveryPlan.summary.totalStops, 2);
       expect.equal(deliveryPlan.summary.capacityExceeded, false);
       expect.ok(deliveryPlan.summary.totalDistanceKm > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 208: Fast-AGMS Sketch, BCQ Pricing & MTVRPTW Multi-Trip Logistics (Phase 61 - 24 Tests)
+  // =========================================================================
+  describe("Feature 208: Fast-AGMS Sketch, BCQ Pricing & MTVRPTW Multi-Trip Logistics Suite", () => {
+    // -----------------------------------------------------------------------
+    // FAST-AGMS SKETCH (Tests 1-7)
+    // -----------------------------------------------------------------------
+    test("F208-T01: FastAGMSSketch: Initialized with default and custom configurations", () => {
+      const defaultSketch = new FastAGMSSketch();
+      expect.equal(defaultSketch.depth, 5);
+      expect.equal(defaultSketch.width, 64);
+      expect.equal(defaultSketch.totalUpdatesA, 0);
+      expect.equal(defaultSketch.totalUpdatesB, 0);
+
+      const customSketch = new FastAGMSSketch({ depth: 7, width: 128, seed: 9999 });
+      expect.equal(customSketch.depth, 7);
+      expect.equal(customSketch.width, 128);
+      expect.equal(customSketch.seed, 9999);
+    });
+
+    test("F208-T02: FastAGMSSketch: 4-wise independent hash functions produce deterministic Rademacher signs and valid buckets", () => {
+      const sketch = new FastAGMSSketch({ depth: 4, width: 32, seed: 1234 });
+      const hashVal = sketch._hashKey("product_sku_101");
+      expect.ok(typeof hashVal === "number");
+      expect.ok(hashVal >= 0);
+
+      for (let i = 0; i < sketch.depth; i++) {
+        const bucket = sketch._getBucket(i, hashVal);
+        expect.ok(bucket >= 0 && bucket < sketch.width);
+
+        const sign = sketch._getSign(i, hashVal);
+        expect.ok(sign === 1.0 || sign === -1.0);
+      }
+    });
+
+    test("F208-T03: FastAGMSSketch: Single and weighted stream updates alter bucket counters correctly", () => {
+      const sketch = new FastAGMSSketch({ depth: 5, width: 32, seed: 555 });
+      sketch.update("item_a", 1.0, "A");
+      sketch.update("item_b", 3.0, "A");
+      sketch.update("item_b", 2.0, "B");
+
+      expect.equal(sketch.totalUpdatesA, 4.0);
+      expect.equal(sketch.totalUpdatesB, 2.0);
+
+      const summary = sketch.getSummary();
+      expect.equal(summary.depth, 5);
+      expect.equal(summary.width, 32);
+      expect.equal(summary.totalUpdatesA, 4.0);
+      expect.equal(summary.totalUpdatesB, 2.0);
+    });
+
+    test("F208-T04: FastAGMSSketch: Second frequency moment F2 estimation is non-negative and scales with stream weight", () => {
+      const sketch = new FastAGMSSketch({ depth: 7, width: 64, seed: 42 });
+      expect.equal(sketch.estimateF2("A"), 0);
+
+      // Add 10 items with weight 1
+      for (let i = 0; i < 10; i++) {
+        sketch.update(`item_${i}`, 1.0, "A");
+      }
+      const f2_small = sketch.estimateF2("A");
+      expect.ok(f2_small > 0);
+
+      // Add heavily concentrated item
+      sketch.update("heavy_item", 50.0, "A");
+      const f2_large = sketch.estimateF2("A");
+      expect.ok(f2_large > f2_small);
+    });
+
+    test("F208-T05: FastAGMSSketch: Stream inner product estimate tracks cross-stream join size accurately", () => {
+      const sketch = new FastAGMSSketch({ depth: 9, width: 128, seed: 777 });
+
+      // Add correlated items to both stream A (clicks) and B (conversions)
+      for (let i = 0; i < 20; i++) {
+        sketch.update(`common_item_${i}`, 5.0, "A");
+        sketch.update(`common_item_${i}`, 2.0, "B");
+      }
+
+      const innerProd = sketch.estimateInnerProduct();
+      expect.ok(innerProd > 0);
+      // Theoretical inner product = 20 * (5 * 2) = 200
+      expect.ok(innerProd >= 100 && innerProd <= 300);
+    });
+
+    test("F208-T06: FastAGMSSketch: Cosine similarity computation is bounded in [-1, 1] and identical streams yield near 1.0", () => {
+      const sketch = new FastAGMSSketch({ depth: 9, width: 128, seed: 333 });
+
+      // Identical stream updates for A and B
+      for (let i = 0; i < 30; i++) {
+        sketch.update(`product_${i}`, 3.0, "A");
+        sketch.update(`product_${i}`, 3.0, "B");
+      }
+
+      const cosineSim = sketch.estimateCosineSimilarity();
+      expect.ok(cosineSim >= 0.80 && cosineSim <= 1.0);
+      expect.ok(cosineSim <= 1.0 && cosineSim >= -1.0);
+    });
+
+    test("F208-T07: FastAGMSSketch: Merging two sketches combines tables linearly, and reset restores empty state", () => {
+      const s1 = new FastAGMSSketch({ depth: 5, width: 32, seed: 101 });
+      const s2 = new FastAGMSSketch({ depth: 5, width: 32, seed: 101 });
+
+      s1.update("item_x", 10.0, "A");
+      s2.update("item_y", 20.0, "A");
+
+      s1.merge(s2);
+      expect.equal(s1.totalUpdatesA, 30.0);
+      expect.ok(s1.estimateF2("A") > 0);
+
+      s1.reset();
+      expect.equal(s1.totalUpdatesA, 0);
+      expect.equal(s1.totalUpdatesB, 0);
+      expect.equal(s1.estimateF2("A"), 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // BCQ DYNAMIC PRICING (Tests 8-14)
+    // -----------------------------------------------------------------------
+    test("F208-T08: BCQDynamicPricing: Initialized with default parameters and properties", () => {
+      const bcq = new BCQDynamicPricing();
+      expect.equal(bcq.cogsSafetyFloorRatio, 1.05);
+      expect.equal(bcq.competitorCeilingRatio, 1.15);
+      expect.equal(bcq.doubleQLambda, 0.75);
+      expect.equal(bcq.maxPerturbation, 0.05);
+      expect.equal(bcq.candidateCount, 5);
+      expect.equal(bcq.safetyMargin, 0.05);
+      expect.equal(bcq.featureDim, 6);
+    });
+
+    test("F208-T09: BCQDynamicPricing: State feature extraction normalizes inputs into dimension 5 array", () => {
+      const bcq = new BCQDynamicPricing();
+      const state = {
+        cogs: 200000,
+        basePrice: 280000,
+        competitorPrice: 260000,
+        demandIndex: 1.2,
+        inventoryUrgency: 0.3
+      };
+      const features = bcq.extractStateFeatures(state);
+      expect.equal(features.length, 5);
+      expect.ok(features[0] > 0); // log(cogs)/15
+      expect.equal(features[3], 1.2);
+      expect.equal(features[4], 0.3);
+    });
+
+    test("F208-T10: BCQDynamicPricing: Behavioral policy generator samples viable candidate action within support", () => {
+      const bcq = new BCQDynamicPricing();
+      const state = {
+        cogs: 150000,
+        basePrice: 200000,
+        competitorPrice: 210000,
+        demandIndex: 1.0,
+        inventoryUrgency: 0.1
+      };
+      const baseAction = bcq.sampleBehavioralAction(state);
+      expect.ok(baseAction >= 0.75 && baseAction <= 1.35);
+    });
+
+    test("F208-T11: BCQDynamicPricing: Action candidate generation creates perturbations strictly bounded within +/- maxPerturbation", () => {
+      const bcq = new BCQDynamicPricing({ maxPerturbation: 0.05, candidateCount: 5 });
+      const state = { cogs: 100000, basePrice: 150000 };
+      const candidates = bcq.generateActionCandidates(state);
+      expect.equal(candidates.length, 5);
+
+      const baseAction = bcq.sampleBehavioralAction(state);
+      for (const a of candidates) {
+        expect.ok(Math.abs(a - baseAction) <= bcq.maxPerturbation + 0.001);
+      }
+    });
+
+    test("F208-T12: BCQDynamicPricing: Clipped Double-Q evaluation properly computes minQ and weighted doubleQ", () => {
+      const bcq = new BCQDynamicPricing({ doubleQLambda: 0.75 });
+      const state = { cogs: 100000, basePrice: 150000 };
+      const res = bcq.evaluateDoubleQ(state, 1.0);
+
+      expect.ok(typeof res.q1 === "number");
+      expect.ok(typeof res.q2 === "number");
+      expect.equal(res.minQ, Math.min(res.q1, res.q2));
+      expect.equal(res.maxQ, Math.max(res.q1, res.q2));
+      const expectedDoubleQ = 0.75 * res.minQ + 0.25 * res.maxQ;
+      expect.ok(Math.abs(res.doubleQ - expectedDoubleQ) < 1e-6);
+    });
+
+    test("F208-T13: BCQDynamicPricing: Safety floor enforcement prevents pricing below COGS x 1.05 and cap ceiling", () => {
+      const bcq = new BCQDynamicPricing({ cogsSafetyFloorRatio: 1.05, competitorCeilingRatio: 1.15 });
+      // Item where basePrice is lower than COGS (loss sale risk)
+      const riskyItem = {
+        cogs: 200000,
+        basePrice: 100000,
+        competitorPrice: 120000,
+        demandIndex: 0.5,
+        inventoryUrgency: 0.9
+      };
+      const res = bcq.optimizePrice(riskyItem);
+      expect.equal(res.isFloorEnforced, true);
+      expect.equal(res.proposedPrice, 200000 * 1.05); // 210,000
+      expect.equal(res.decisionTag, "FLOOR_OVERRIDE_COGS_SECURED");
+    });
+
+    test("F208-T14: BCQDynamicPricing: Batch optimization optimizes multiple catalog items with comprehensive metrics", () => {
+      const bcq = new BCQDynamicPricing();
+      const items = [
+        { cogs: 100000, basePrice: 150000, competitorPrice: 160000 },
+        { cogs: 50000, basePrice: 40000, competitorPrice: 45000 }, // Under floor
+        { cogs: 300000, basePrice: 450000, competitorPrice: 400000 }
+      ];
+      const results = bcq.batchOptimize(items);
+      expect.equal(results.length, 3);
+      for (const r of results) {
+        expect.ok(r.proposedPrice >= r.cogs * 1.05);
+        expect.ok(r.actionMultiplier > 0);
+        expect.ok(r.marginAnalysis.grossMarginVnd > 0);
+      }
+    });
+
+    // -----------------------------------------------------------------------
+    // MTVRPTW MULTI-TRIP LOGISTICS ROUTER (Tests 15-19)
+    // -----------------------------------------------------------------------
+    test("F208-T15: MTVRPTWLogisticsRouter: Initialized with default depot, fleet size, shift and speed", () => {
+      const router = new MTVRPTWLogisticsRouter();
+      expect.equal(router.depot.id, "SPX_CENTRAL_HUB");
+      expect.equal(router.vehicleCapacityKg, 100.0);
+      expect.equal(router.fleetSize, 3);
+      expect.equal(router.maxShiftMinutes, 480);
+      expect.equal(router.reloadTimeMinutes, 15);
+      expect.equal(router.vanSpeedKmh, 28.0);
+    });
+
+    test("F208-T16: MTVRPTWLogisticsRouter: Returns clean EMPTY_STOPS summary when stops list is empty", () => {
+      const router = new MTVRPTWLogisticsRouter();
+      const plan = router.planMultiTripRoutes([]);
+      expect.equal(plan.status, "EMPTY_STOPS");
+      expect.equal(plan.summary.totalStops, 0);
+      expect.equal(plan.summary.totalTrips, 0);
+      expect.equal(plan.summary.activeVehicles, 0);
+      expect.equal(plan.vehicleSchedules.length, 0);
+    });
+
+    test("F208-T17: MTVRPTWLogisticsRouter: Multi-trip routing assigns multiple successive trips to vehicles when demand exceeds capacity", () => {
+      // 1 vehicle with 50kg capacity, 4 stops of 20kg each = 80kg total (requires at least 2 trips)
+      const router = new MTVRPTWLogisticsRouter({
+        fleetSize: 1,
+        vehicleCapacityKg: 50.0,
+        reloadTimeMinutes: 15
+      });
+
+      const stops = [
+        { id: "S1", lat: 21.0300, lng: 105.8500, demandKg: 20, timeWindow: [480, 540] },
+        { id: "S2", lat: 21.0320, lng: 105.8520, demandKg: 20, timeWindow: [490, 560] },
+        { id: "S3", lat: 21.0250, lng: 105.8450, demandKg: 20, timeWindow: [550, 620] },
+        { id: "S4", lat: 21.0270, lng: 105.8480, demandKg: 20, timeWindow: [560, 650] }
+      ];
+
+      const plan = router.planMultiTripRoutes(stops);
+      expect.equal(plan.status, "MTVRPTW_SUCCESS");
+      expect.equal(plan.summary.totalStops, 4);
+      expect.equal(plan.summary.activeVehicles, 1);
+      expect.ok(plan.summary.totalTrips >= 2);
+
+      const vehicle1 = plan.vehicleSchedules[0];
+      expect.ok(vehicle1.trips.length >= 2);
+      for (const trip of vehicle1.trips) {
+        expect.ok(trip.tripPayloadKg <= router.vehicleCapacityKg);
+      }
+    });
+
+    test("F208-T18: MTVRPTWLogisticsRouter: Enforces warehouse reload turnaround dwell time between trips", () => {
+      const router = new MTVRPTWLogisticsRouter({
+        fleetSize: 1,
+        vehicleCapacityKg: 40.0,
+        reloadTimeMinutes: 20 // 20 minutes reload turnaround
+      });
+
+      const stops = [
+        { id: "C1", lat: 21.0300, lng: 105.8500, demandKg: 30, timeWindow: [480, 530] },
+        { id: "C2", lat: 21.0350, lng: 105.8600, demandKg: 30, timeWindow: [550, 650] }
+      ];
+
+      const plan = router.planMultiTripRoutes(stops);
+      expect.equal(plan.status, "MTVRPTW_SUCCESS");
+      const v = plan.vehicleSchedules[0];
+      expect.equal(v.trips.length, 2);
+
+      const trip1End = v.trips[0].endTimeMin;
+      const trip2Start = v.trips[1].startTimeMin;
+      // trip2Start should be at or after trip1End + reloadTimeMinutes
+      expect.ok(trip2Start >= trip1End + router.reloadTimeMinutes - 0.01);
+    });
+
+    test("F208-T19: MTVRPTWLogisticsRouter: Shift duration constraint (T_maxShift = 480 min) and time window feasibility are respected", () => {
+      const router = new MTVRPTWLogisticsRouter({
+        fleetSize: 2,
+        vehicleCapacityKg: 80.0,
+        maxShiftMinutes: 300 // Short 5-hour shift
+      });
+
+      const stops = [
+        { id: "T1", lat: 21.0300, lng: 105.8500, demandKg: 25, timeWindow: [480, 540] },
+        { id: "T2", lat: 21.0350, lng: 105.8550, demandKg: 25, timeWindow: [500, 580] },
+        { id: "T3", lat: 21.0400, lng: 105.8600, demandKg: 25, timeWindow: [520, 600] }
+      ];
+
+      const plan = router.planMultiTripRoutes(stops);
+      expect.equal(plan.status, "MTVRPTW_SUCCESS");
+      expect.equal(plan.summary.capacityViolations, 0);
+
+      for (const v of plan.vehicleSchedules) {
+        expect.equal(v.shiftFinishedOnTime, true);
+        expect.ok(v.totalVehicleDurationMin <= router.maxShiftMinutes + router.reloadTimeMinutes);
+      }
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT-SERVER SYMMETRY (Tests 20-22)
+    // -----------------------------------------------------------------------
+    test("F208-T20: Client and Server algorithmic symmetry: FastAGMSSketch produces identical estimates for F2 and inner product", () => {
+      const clientSketch = new FastAGMSSketch({ depth: 5, width: 64, seed: 42 });
+      const serverSketch = new ServerFastAGMSSketch({ depth: 5, width: 64, seed: 42 });
+
+      for (let i = 0; i < 25; i++) {
+        clientSketch.update(`item_${i}`, 2.5, "A");
+        clientSketch.update(`item_${i}`, 1.5, "B");
+        serverSketch.update(`item_${i}`, 2.5, "A");
+        serverSketch.update(`item_${i}`, 1.5, "B");
+      }
+
+      expect.equal(clientSketch.estimateF2("A"), serverSketch.estimateF2("A"));
+      expect.equal(clientSketch.estimateF2("B"), serverSketch.estimateF2("B"));
+      expect.equal(clientSketch.estimateInnerProduct(), serverSketch.estimateInnerProduct());
+      expect.equal(clientSketch.estimateCosineSimilarity(), serverSketch.estimateCosineSimilarity());
+    });
+
+    test("F208-T21: Client and Server algorithmic symmetry: BCQDynamicPricing produces identical pricing decisions and Double-Q values", () => {
+      const clientPricing = new BCQDynamicPricing({ doubleQLambda: 0.80, maxPerturbation: 0.04 });
+      const serverPricing = new ServerBCQDynamicPricing({ doubleQLambda: 0.80, maxPerturbation: 0.04 });
+
+      const item = {
+        cogs: 250000,
+        basePrice: 350000,
+        competitorPrice: 340000,
+        demandIndex: 1.15,
+        inventoryUrgency: 0.25
+      };
+
+      const cRes = clientPricing.optimizePrice(item);
+      const sRes = serverPricing.optimizePrice(item);
+
+      expect.equal(cRes.proposedPrice, sRes.proposedPrice);
+      expect.equal(cRes.actionMultiplier, sRes.actionMultiplier);
+      expect.equal(cRes.bestDoubleQ, sRes.bestDoubleQ);
+      expect.equal(cRes.decisionTag, sRes.decisionTag);
+      expect.equal(cRes.isFloorEnforced, sRes.isFloorEnforced);
+    });
+
+    test("F208-T22: Client and Server algorithmic symmetry: MTVRPTWLogisticsRouter produces identical multi-trip schedules and fuel metrics", () => {
+      const clientRouter = new MTVRPTWLogisticsRouter({ fleetSize: 2, vehicleCapacityKg: 60.0 });
+      const serverRouter = new ServerMTVRPTWLogisticsRouter({ fleetSize: 2, vehicleCapacityKg: 60.0 });
+
+      const stops = [
+        { id: "SYM_A", lat: 21.0300, lng: 105.8500, demandKg: 35, timeWindow: [480, 540] },
+        { id: "SYM_B", lat: 21.0350, lng: 105.8550, demandKg: 35, timeWindow: [500, 580] }
+      ];
+
+      const cPlan = clientRouter.planMultiTripRoutes(stops);
+      const sPlan = serverRouter.planMultiTripRoutes(stops);
+
+      expect.equal(cPlan.summary.totalDistanceKm, sPlan.summary.totalDistanceKm);
+      expect.equal(cPlan.summary.totalTrips, sPlan.summary.totalTrips);
+      expect.equal(cPlan.summary.totalFuelCostVnd, sPlan.summary.totalFuelCostVnd);
+      expect.equal(cPlan.vehicleSchedules.length, sPlan.vehicleSchedules.length);
+    });
+
+    // -----------------------------------------------------------------------
+    // COPILOT INTEGRATION & END-TO-END PIPELINE (Tests 23-24)
+    // -----------------------------------------------------------------------
+    test("F208-T23: Tri-Role Copilots integration: Admin, Seller, and Buyer AI respond accurately to Phase 61 queries", () => {
+      // 1. Admin Copilot
+      const adminRes1 = generateAdminCopilotResponse("Phân tích stream join và tích vô hướng luồng bằng fast-agms sketch");
+      expect.ok(adminRes1.text.includes("FAST-AGMS SKETCH"));
+
+      const adminRes2 = generateAdminCopilotResponse("Tối ưu giá an toàn ngoại tuyến bằng bcq dynamic pricing batch-constrained");
+      expect.ok(adminRes2.text.includes("BCQ DYNAMIC PRICING"));
+
+      const adminRes3 = generateAdminCopilotResponse("Điều phối đội xe nhiều chuyến trong ngày mtvrptw multi-trip logistics");
+      expect.ok(adminRes3.text.includes("MTVRPTW"));
+
+      // 2. Seller Copilot
+      const sellerRes = generateSellerCopilotResponse("Tư vấn fast-agms sketch và định giá bcq pricing an toàn");
+      expect.ok(sellerRes.text.includes("FAST-AGMS"));
+
+      // 3. Buyer AI
+      const buyerRes = generateAiChatResponse("Xem giao hỏa tốc nhiều chuyến trong ngày mtvrptw và định giá an toàn bcq");
+      expect.equal(buyerRes.intent, "FAST_AGMS_BCQ_MTVRPTW");
+    });
+
+    test("F208-T24: End-to-End E-Commerce Pipeline: Fast-AGMS Stream Joins -> BCQ Batch-Constrained Dynamic Pricing -> MTVRPTW Multi-Trip Logistics Dispatch", () => {
+      // Step 1: Real-time stream alignment with Fast-AGMS Sketch
+      const agms = new ServerFastAGMSSketch({ depth: 7, width: 64 });
+      for (let i = 0; i < 20; i++) {
+        agms.update(`cat_${i % 5}`, 10.0, "A"); // Browsing stream
+        agms.update(`cat_${i % 5}`, 2.0, "B");  // Checkout conversion stream
+      }
+      const alignment = agms.estimateCosineSimilarity();
+      expect.ok(alignment > 0.5);
+
+      // Step 2: Batch-Constrained Safe Dynamic Pricing with BCQ
+      const bcq = new ServerBCQDynamicPricing();
+      const pricingDecision = bcq.optimizePrice({
+        cogs: 400000,
+        basePrice: 550000,
+        competitorPrice: 530000,
+        demandIndex: alignment > 0.8 ? 1.3 : 1.1,
+        inventoryUrgency: 0.25
+      });
+      expect.ok(pricingDecision.proposedPrice >= 400000 * 1.05);
+      expect.ok(pricingDecision.actionMultiplier > 0.80);
+
+      // Step 3: Multi-Trip Logistics Dispatch with MTVRPTW
+      const router = new ServerMTVRPTWLogisticsRouter({
+        fleetSize: 1,
+        vehicleCapacityKg: 50.0,
+        reloadTimeMinutes: 15
+      });
+      const customerOrders = [
+        { id: "ORD_E2E_1", lat: 21.0300, lng: 105.8500, demandKg: 30, timeWindow: [480, 540] },
+        { id: "ORD_E2E_2", lat: 21.0350, lng: 105.8550, demandKg: 30, timeWindow: [510, 600] }
+      ];
+      const multiTripPlan = router.planMultiTripRoutes(customerOrders);
+      expect.equal(multiTripPlan.status, "MTVRPTW_SUCCESS");
+      expect.equal(multiTripPlan.summary.totalTrips, 2);
+      expect.equal(multiTripPlan.summary.activeVehicles, 1);
+      expect.ok(multiTripPlan.summary.totalFuelCostVnd > 0);
     });
   });
 });

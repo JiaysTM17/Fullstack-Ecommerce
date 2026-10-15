@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|cross[- ]dock|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|cross[- ]dock|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1407,6 +1407,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem thống kê lượt xem Morris Counter',
         'Tư vấn định giá OPOE triệt tiêu rủi ro',
         'Điều phối giao thu đồng thời VRPSPDTW'
+      ]
+    };
+  }
+
+  // 70. Bộ Ba Thuật Toán Fast-AGMS Sketch, BCQ Pricing & MTVRPTW Đội Xe Nhiều Chuyến (Phase 61 - Feature 208)
+  if (/fast[- ]agms|agms sketch|tích vô hướng luồng|bcq|batch[- ]constrained|mtvrptw|multi[- ]trip|nhiều chuyến trong ngày|xoay vòng xe tải/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN FAST-AGMS SKETCH, BCQ PRICING & ĐIỀU PHỐI ĐA CHUYẾN MTVRPTW (${currentShop.name})**:
+- **Ước lượng liên kết luồng hành vi Fast-AGMS Sketch**:
+  - Tính toán tích vô hướng luồng $\\langle \\mathbf{A}, \\mathbf{B} \\rangle$ và Moment bậc hai $F_2$ với hàm băm 4 bậc và biến Rademacher $\\pm 1$. Giúp shop phân tích tức thì độ tương đồng giữa giỏ hàng khách mua và chiến dịch Flash Sale mà không cần tải toàn bộ dữ liệu.
+- **Định giá học tăng cường an toàn ngoại tuyến BCQ Dynamic Pricing**:
+  - Khắc phục triệt để rủi ro ngoại suy sai giá bằng mô hình hành vi $G_\\omega(s)$, tinh chỉnh nhiễu $\\xi_\\phi$ và Clipped Double Q-Learning bi quan. Giữ chặt giá bán Flash Sale luôn tối ưu doanh thu và nằm trên sàn an toàn $\\text{COGS} \\times 1.05$.
+- **Vận chuyển xoay vòng nhiều chuyến MTVRPTW (Multi-Trip VRPTW)**:
+  - Tối ưu hóa đội xe SPX chạy nhiều chuyến trong một ngày với thời gian nạp lại hàng tại kho $\\Delta_{\\text{reload}} = 15$ phút, bảo đảm đơn hàng của shop được chuyển giao tức thì đến tay người mua trong ca làm việc, giảm thời gian chờ giao nhận đến $35\\%$!`,
+      type: 'recommendation',
+      tag: 'FAST-AGMS, BCQ & MTVRPTW LOGISTICS',
+      suggestions: [
+        'Xem phân tích luồng Fast-AGMS',
+        'Tư vấn định giá an toàn BCQ Pricing',
+        'Điều phối đội xe nhiều chuyến MTVRPTW'
       ]
     };
   }
