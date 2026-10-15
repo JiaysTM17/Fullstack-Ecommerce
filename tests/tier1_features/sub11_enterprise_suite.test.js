@@ -250,6 +250,10 @@ import {
   UkkonenSuffixTree,
   GaeFlashSaleScheduler,
   ContractionHierarchiesRouter,
+  // Phase 44 Enterprise Algorithms
+  HeavyKeeperTrendRadar,
+  QRDQNCreditRisk,
+  BendersMultiEchelonInventory,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -347,6 +351,9 @@ import { BranchAndCutVrptwRouter as ServerBranchAndCutVrptwRouter } from "../../
 import { UkkonenSuffixTree as ServerUkkonenSuffixTree } from "../../server/src/utils/ukkonenSuffixTree.js";
 import { GaeFlashSaleScheduler as ServerGaeFlashSaleScheduler } from "../../server/src/utils/gaeFlashSaleScheduler.js";
 import { ContractionHierarchiesRouter as ServerContractionHierarchiesRouter } from "../../server/src/utils/contractionHierarchiesRouter.js";
+import { HeavyKeeperTrendRadar as ServerHeavyKeeperTrendRadar } from "../../server/src/utils/heavyKeeperTrendRadar.js";
+import { QRDQNCreditRisk as ServerQRDQNCreditRisk } from "../../server/src/utils/qrDqnCreditRisk.js";
+import { BendersMultiEchelonInventory as ServerBendersMultiEchelonInventory } from "../../server/src/utils/bendersMultiEchelonInventory.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -20318,6 +20325,298 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const deliveryRoute = ch.queryShortestPath('KHO_TONG_HN', 'HUB_DA_NANG');
       expect.equal(deliveryRoute.status, 'OPTIMAL_HIGHWAY');
       expect.equal(deliveryRoute.distance, 750);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 191: HeavyKeeper Streaming Trend Radar, QR-DQN Credit Risk & Benders Supply Chain Suite (Phase 44) (24 Tests)
+  // =========================================================================
+  describe("Feature 191: HeavyKeeper Streaming Trend Radar, QR-DQN Credit Risk & Benders Supply Chain Suite", () => {
+    // --- 1. HeavyKeeper with Exponential Decay (Chen et al. 2018) ---
+    test("F191-T01: Server HeavyKeeper records stream, fingerprints item, and counts occurrences correctly", () => {
+      const radar = new ServerHeavyKeeperTrendRadar({ depth: 4, width: 128, decayBase: 1.08 });
+      const count1 = radar.record("PROD_VIRAL_DRESS", 5);
+      expect.ok(count1 >= 5);
+      const count2 = radar.record("PROD_VIRAL_DRESS", 10);
+      expect.ok(count2 >= 15);
+    });
+
+    test("F191-T02: MinHeapTopK maintains priority queue order and tracks top elements within capacity", () => {
+      const heap = new ServerHeavyKeeperTrendRadar().topKHeap;
+      heap.insertOrUpdate("ITEM_A", 100);
+      heap.insertOrUpdate("ITEM_B", 250);
+      heap.insertOrUpdate("ITEM_C", 50);
+      expect.equal(heap.size(), 3);
+      expect.equal(heap.peek().key, "ITEM_C");
+      const top = heap.getTopK();
+      expect.equal(top[0].key, "ITEM_B");
+      expect.equal(top[0].count, 250);
+      expect.equal(top[2].key, "ITEM_C");
+    });
+
+    test("F191-T03: HeavyKeeper handles hash collisions with decayBase probability decay", () => {
+      const radar = new ServerHeavyKeeperTrendRadar({ depth: 2, width: 16, decayBase: 1.08 });
+      // Record elephant flow
+      radar.record("ELEPHANT_IPHONE_16", 50);
+      const countBefore = radar.query("ELEPHANT_IPHONE_16");
+      expect.ok(countBefore >= 50);
+
+      // Record mice flows that may collide
+      for (let i = 0; i < 20; i++) {
+        radar.record(`MICE_ITEM_${i}`, 1);
+      }
+      const countAfter = radar.query("ELEPHANT_IPHONE_16");
+      // Elephant flow retains majority of its count despite mice flow collisions
+      expect.ok(countAfter >= 35);
+    });
+
+    test("F191-T04: HeavyKeeper queries stream item count and returns estimated frequency", () => {
+      const radar = new ServerHeavyKeeperTrendRadar();
+      radar.record("KEYWORD_SON_MOI", 12);
+      expect.equal(radar.query("KEYWORD_SON_MOI"), 12);
+      expect.equal(radar.query("NON_EXISTENT_KEYWORD"), 0);
+      expect.equal(radar.query(""), 0);
+    });
+
+    test("F191-T05: HeavyKeeper applies exponential time decay correctly on elapsed time", () => {
+      const radar = new ServerHeavyKeeperTrendRadar({ halfLifeMs: 1000 });
+      radar.record("HOT_TREND_HOODIE", 100);
+
+      // Artificially age the cells by 1000ms (1 half-life)
+      const past = Date.now() - 1000;
+      for (let i = 0; i < radar.depth; i++) {
+        for (let j = 0; j < radar.width; j++) {
+          if (radar.table[i][j].count > 0) {
+            radar.table[i][j].lastUpdated = past;
+          }
+        }
+      }
+
+      const decayedCount = radar.query("HOT_TREND_HOODIE");
+      expect.ok(decayedCount <= 55 && decayedCount >= 45); // Half-life decay ~50%
+    });
+
+    test("F191-T06: HeavyKeeper getTrendingTopK returns sorted trending items with heat scores", () => {
+      const radar = new ServerHeavyKeeperTrendRadar({ topKLimit: 3 });
+      radar.record("PROD_1", 20);
+      radar.record("PROD_2", 80);
+      radar.record("PROD_3", 50);
+      radar.record("PROD_4", 10);
+
+      const trending = radar.getTrendingTopK();
+      expect.equal(trending.length, 3);
+      expect.equal(trending[0].itemId, "PROD_2");
+      expect.ok(trending[0].estimatedViews >= 80);
+      expect.ok(trending[0].heatScore > 0);
+      expect.equal(trending[1].itemId, "PROD_3");
+      expect.equal(trending[2].itemId, "PROD_1");
+    });
+
+    test("F191-T07: Client HeavyKeeperTrendRadar tracks high-velocity views and returns viral trending items", () => {
+      const clientRadar = new HeavyKeeperTrendRadar({ topKLimit: 5 });
+      clientRadar.record("LIVESTREAM_LIPSTICK", 40);
+      clientRadar.record("LIVESTREAM_SUNSCREEN", 90);
+      const list = clientRadar.getTrendingTopK();
+      expect.ok(list.length >= 2);
+      expect.equal(list[0].itemId, "LIVESTREAM_SUNSCREEN");
+    });
+
+    // --- 2. Distributional RL with Quantile Regression (QR-DQN, Dabney 2018) ---
+    test("F191-T08: Server QRDQNCreditRisk initializes quantile positions tau_i = (2i - 1) / (2N)", () => {
+      const model = new ServerQRDQNCreditRisk({ numQuantiles: 8 });
+      expect.equal(model.tau.length, 8);
+      expect.equal(Number(model.tau[0].toFixed(4)), Number((1 / 16).toFixed(4)));
+      expect.equal(Number(model.tau[7].toFixed(4)), Number((15 / 16).toFixed(4)));
+    });
+
+    test("F191-T09: Server QRDQNCreditRisk predicts sorted quantile vectors theta(s, a)", () => {
+      const model = new ServerQRDQNCreditRisk({ numQuantiles: 8, stateDim: 5 });
+      const state = [0.8, 0.95, 1.2, 0.05, 0.5];
+      const quantiles = model.predictQuantiles(state, 1);
+      expect.equal(quantiles.length, 8);
+      // Check monotonically non-decreasing
+      for (let i = 1; i < quantiles.length; i++) {
+        expect.ok(quantiles[i] >= quantiles[i - 1]);
+      }
+    });
+
+    test("F191-T10: Server QRDQNCreditRisk computes expected Q-value as arithmetic mean of quantiles", () => {
+      const model = new ServerQRDQNCreditRisk({ numQuantiles: 4, stateDim: 3 });
+      const state = [1, 1, 1];
+      const quantiles = model.predictQuantiles(state, 0);
+      const expected = model.expectedQ(state, 0);
+      const manualMean = quantiles.reduce((a, b) => a + b, 0) / 4;
+      expect.equal(Number(expected.toFixed(4)), Number(manualMean.toFixed(4)));
+    });
+
+    test("F191-T11: Server QRDQNCreditRisk computes CVaR (Conditional Value-at-Risk) on lowest quantiles", () => {
+      const model = new ServerQRDQNCreditRisk({ numQuantiles: 8, stateDim: 5 });
+      const state = [0.9, 0.9, 1.0, 0.1, 0.8];
+      const cvar = model.computeCVaR(state, 0, 0.25);
+      const expectedQ = model.expectedQ(state, 0);
+      // CVaR for lower tail of sorted quantiles is less than or equal to expected Q
+      expect.ok(cvar <= expectedQ + 1e-4);
+    });
+
+    test("F191-T12: Server QRDQNCreditRisk Huber Quantile Loss penalizes asymmetric quantile errors", () => {
+      const model = new ServerQRDQNCreditRisk({ kappa: 1.0 });
+      // Error u = target - prediction
+      const lossUnder = model._huberQuantileLoss(0.5, 0.9); // Under-predicting high quantile
+      const lossOver = model._huberQuantileLoss(-0.5, 0.9);  // Over-predicting high quantile
+      expect.ok(lossUnder > lossOver); // Under-predicting high quantile incurs larger penalty
+    });
+
+    test("F191-T13: Server QRDQNCreditRisk records experience and performs trainStep with soft target update", () => {
+      const model = new ServerQRDQNCreditRisk({ numQuantiles: 4, stateDim: 5 });
+      for (let i = 0; i < 10; i++) {
+        model.recordExperience([0.8, 0.9, 1.0, 0.05, 0.5], 1, 10.0, [0.85, 0.95, 1.1, 0.03, 0.55], false);
+      }
+      const trainRes = model.trainStep(8);
+      expect.equal(trainRes.trained, true);
+      expect.ok(trainRes.avgLoss >= 0);
+    });
+
+    test("F191-T14: Server QRDQNCreditRisk assesses customer credit context, assigns tier, limit and instant refund", () => {
+      const model = new ServerQRDQNCreditRisk();
+      const goodCustomer = {
+        trustScore: 92,
+        completedOrders: 35,
+        totalOrders: 36,
+        monthlySpend: 8000000,
+        accountAgeMonths: 18
+      };
+      const assessment = model.assessCustomerCredit(goodCustomer);
+      expect.ok(['LOW_RISK', 'PRIME_EXCELLENT', 'MODERATE_CAUTIOUS'].includes(assessment.riskTier));
+      expect.ok(typeof assessment.approvedSpayLaterLimit === 'number');
+      expect.ok(typeof assessment.canInstantRefund === 'boolean');
+      expect.ok(assessment.recommendation.length > 0);
+    });
+
+    test("F191-T15: Client QRDQNCreditRisk evaluates buyer risk profile and calculates CVaR metrics", () => {
+      const clientModel = new QRDQNCreditRisk();
+      const riskyCustomer = {
+        trustScore: 30,
+        completedOrders: 2,
+        totalOrders: 10,
+        monthlySpend: 200000,
+        accountAgeMonths: 1
+      };
+      const res = clientModel.assessCustomerCredit(riskyCustomer);
+      expect.ok(res.cvarTailRiskScore !== undefined);
+      expect.ok(typeof res.approvedSpayLaterLimit === 'number');
+    });
+
+    // --- 3. Benders Decomposition for Multi-Echelon Supply Chain (Jacques Benders 1962) ---
+    test("F191-T16: Server BendersMultiEchelonInventory solveSubproblem detects infeasibility when capacity < demand", () => {
+      const benders = new ServerBendersMultiEchelonInventory();
+      // Total demand is 2500+1200+900+1500+3500+1400 = 11,000
+      // If we only open RDC_BAC_NINH (capacity 5000), capacity is insufficient
+      const res = benders.solveSubproblem([1, 0, 0]);
+      expect.equal(res.feasible, false);
+      expect.equal(res.cutType, 'FEASIBILITY');
+      expect.equal(res.shortfall, 11000 - 5000);
+    });
+
+    test("F191-T17: Server BendersMultiEchelonInventory solveSubproblem generates optimality cut with greedy lowest cost", () => {
+      const benders = new ServerBendersMultiEchelonInventory();
+      // Open all 3 hubs: 5000 + 3000 + 6000 = 14000 >= 11000 demand
+      const res = benders.solveSubproblem([1, 1, 1]);
+      expect.equal(res.feasible, true);
+      expect.equal(res.cutType, 'OPTIMALITY');
+      expect.ok(res.shippingCost > 0);
+      expect.equal(res.allocations.length > 0, true);
+      expect.equal(res.penalty, 0);
+    });
+
+    test("F191-T18: Server BendersMultiEchelonInventory optimizeSupplyChain evaluates configurations and generates cuts", () => {
+      const benders = new ServerBendersMultiEchelonInventory();
+      const plan = benders.optimizeSupplyChain();
+      expect.equal(plan.status, 'BENDERS_OPTIMAL_CONVERGED');
+      expect.ok(plan.bendersCutsGenerated >= 3);
+      expect.ok(plan.cutsSummary.some(c => c.type === 'FEASIBILITY_CUT'));
+      expect.ok(plan.cutsSummary.some(c => c.type === 'OPTIMALITY_CUT'));
+    });
+
+    test("F191-T19: Server BendersMultiEchelonInventory finds optimal hub configuration and allocation plan", () => {
+      const benders = new ServerBendersMultiEchelonInventory();
+      const plan = benders.optimizeSupplyChain();
+      expect.ok(plan.bestSolution.openHubs.length >= 2);
+      expect.ok(plan.bestSolution.totalCost > 0);
+      expect.ok(plan.bestSolution.allocations.length >= 5);
+      // Verify all demands are satisfied
+      const delivered = plan.bestSolution.allocations.reduce((sum, a) => sum + a.quantity, 0);
+      expect.equal(delivered, 11000);
+    });
+
+    test("F191-T20: Client BendersMultiEchelonInventory solves multi-echelon network and converges", () => {
+      const clientBenders = new BendersMultiEchelonInventory();
+      const plan = clientBenders.optimizeSupplyChain();
+      expect.equal(plan.status, 'BENDERS_OPTIMAL_CONVERGED');
+      expect.ok(plan.bestSolution.totalCost > 0);
+      expect.ok(plan.convergedGap >= 0);
+    });
+
+    // --- Tri-Role AI Copilot Knowledge Integration Tests ---
+    test("F191-T21: Admin Sentinel Copilot Section 113 explains HeavyKeeper Trend Radar & Elephant Flows", () => {
+      const res = generateAdminCopilotResponse("bắt dòng lớn bằng heavykeeper trend radar và elephant flows", {});
+      expect.equal(res.tag, "HEAVYKEEPER STREAMING TREND RADAR");
+      expect.ok(res.text.includes("CHEN ET AL."));
+      expect.ok(res.text.includes("Mice Flows"));
+      expect.ok(res.text.includes("Min-Heap"));
+    });
+
+    test("F191-T22: Admin Sentinel Copilot Sections 114 & 115 explain QR-DQN Credit Risk & Benders Decomposition", () => {
+      const res114 = generateAdminCopilotResponse("đánh giá rủi ro tín dụng qr-dqn distributional credit risk spaylater", {});
+      expect.equal(res114.tag, "QR-DQN DISTRIBUTIONAL CREDIT RISK");
+      expect.ok(res114.text.includes("DABNEY 2018"));
+      expect.ok(res114.text.includes("CVaR"));
+
+      const res115 = generateAdminCopilotResponse("phân rã benders multi-echelon supply chain inventory optimization kho vùng", {});
+      expect.equal(res115.tag, "BENDERS MULTI-ECHELON INVENTORY DECOMPOSITION");
+      expect.ok(res115.text.includes("BENDERS 1962"));
+      expect.ok(res115.text.includes("Subproblem"));
+    });
+
+    test("F191-T23: Seller ShopSmart Copilot Section 53 advises on HeavyKeeper Trends, QR-DQN Credit & Benders Supply", () => {
+      const currentShop = { id: "shop_mall", name: "Anker Official Mall" };
+      const res = generateSellerCopilotResponse("tư vấn đón đầu xu hướng heavykeeper, rủi ro tín dụng qr-dqn và tối ưu kho benders", currentShop, [], []);
+      expect.equal(res.tag, "HEAVYKEEPER TREND, QR-DQN CREDIT & BENDERS SUPPLY");
+      expect.ok(res.text.includes("HeavyKeeper"));
+      expect.ok(res.text.includes("QR-DQN"));
+      expect.ok(res.text.includes("Benders"));
+    });
+
+    test("F191-T24: Buyer AI Assistant Intent 46 assists with viral trends, SpayLater wallet & multi-hub delivery, and E2E Pipeline coordinates all 3 algorithms", () => {
+      // 1. Buyer AI responds to Intent 46
+      const res = generateAiChatResponse("sao biết sản phẩm nào đang hot theo heavykeeper trend radar và mua trả sau qr-dqn?", []);
+      expect.equal(res.intent, "HEAVYKEEPER_QRDQN_BENDERS_ASSIST");
+      expect.ok(res.replyText.includes("HeavyKeeper"));
+      expect.ok(res.replyText.includes("QR-DQN"));
+      expect.ok(res.replyText.includes("Benders"));
+
+      // 2. E2E Pipeline coordination
+      // Step A: HeavyKeeper detects viral trending product
+      const radar = new ServerHeavyKeeperTrendRadar();
+      radar.record("VIRAL_ROBOT_VACUUM", 85);
+      const trending = radar.getTrendingTopK();
+      expect.equal(trending[0].itemId, "VIRAL_ROBOT_VACUUM");
+
+      // Step B: QR-DQN assesses buyer credit for purchasing the trending product via SpayLater
+      const qrDqn = new ServerQRDQNCreditRisk();
+      const credit = qrDqn.assessCustomerCredit({
+        trustScore: 88,
+        completedOrders: 20,
+        totalOrders: 22,
+        monthlySpend: 6000000,
+        accountAgeMonths: 12
+      });
+      expect.ok(credit.approvedSpayLaterLimit >= 0);
+
+      // Step C: Benders Decomposition optimizes regional hub dispatch for delivering the order
+      const benders = new ServerBendersMultiEchelonInventory();
+      const supplyPlan = benders.optimizeSupplyChain();
+      expect.equal(supplyPlan.status, 'BENDERS_OPTIMAL_CONVERGED');
+      expect.ok(supplyPlan.bestSolution.totalCost > 0);
     });
   });
 });

@@ -331,7 +331,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
 
   // 1. Kết hợp Tìm sản phẩm + Xin Voucher / Freeship
   if (
-    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction/i.test(lower) &&
+    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders/i.test(lower) &&
     (/mua|tìm|sản phẩm|\báo\b|\bquần\b|tai nghe|chuột|bàn phím|nồi|son|giày/i.test(lower)) &&
     (/voucher|mã|giảm giá|freeship|miễn phí ship/i.test(lower))
   ) {
@@ -438,7 +438,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // ĐƠN HÀNG, TIẾN ĐỘ VẬN ĐƠN, KHIẾU NẠI GIAO TRỄ
   // -------------------------------------------------------------
-  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
+  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
     const orders = lookupCustomerOrders(lower);
     if (orders.length > 0) {
       return {
@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -956,6 +956,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'UKKONEN_GAE_CH_ASSIST',
       replyText: `**[LÁ CHẮN ĐÁNH GIÁ THẬT UKKONEN, FLASH SALE KHỦNG & GIAO HÀNG LIÊN TỈNH SIÊU TỐC]:**\n\n• **Bảo vệ bạn khỏi đánh giá ảo (Ukkonen)**: Thuật toán cây hậu tố rút gọn phát hiện các đoạn văn bản seeding sao chép, giúp bạn chỉ đọc các đánh giá thật 100% từ người mua thực tế!\n• **Săn Deal Vàng đúng khung giờ vàng (GAE)**: AI phân tích lưu lượng để mở bán Flash Sale giảm sâu tới 50% vào các khung giờ vàng (0h, 12h, 21h) với ưu đãi độc quyền dành riêng cho bạn.\n• **Giao hàng liên tỉnh Bắc - Nam siêu tốc (Contraction Hierarchies)**: Công nghệ định tuyến đường cao tốc thông minh giúp kiện hàng SPX Express luân chuyển xuyên Việt và giao đến tận cửa nhà bạn chỉ trong 24h!`,
       suggestions: ['Xem sản phẩm có đánh giá chuẩn', 'Săn Flash Sale khung giờ vàng', 'Tra cứu hành trình đơn liên tỉnh'],
+    };
+  }
+
+  // 46. Bắt Trend HeavyKeeper, Hạn Mức SpayLater QR-DQN & Điều Phối Kho Benders (HEAVYKEEPER_QRDQN_BENDERS_ASSIST)
+  if (/heavykeeper|heavy keeper|trending stream|bắt trend heavykeeper|qr[- ]dqn|hạn mức qr-dqn|ví trả sau qr-dqn|benders|chuỗi cung ứng benders/i.test(lower)) {
+    return {
+      intent: 'HEAVYKEEPER_QRDQN_BENDERS_ASSIST',
+      replyText: `**[XU HƯỚNG BÙNG NỔ HEAVYKEEPER, VÍ TRẢ SAU SPAYLATER & KHO HÀNG LIÊN TỈNH BENDERS]:**\n\n• **Bắt trọn sản phẩm Hot Trend bùng nổ (HeavyKeeper)**: Thuật toán luồng streaming cập nhật từng giây danh sách các món đồ đang được hàng triệu người săn đón trong Livestream!\n• **Mua trước trả sau 0% lãi suất (QR-DQN)**: Hệ thống học phân phối tự động cấp hạn mức SpayLater lên tới 30.000.000₫ và hỗ trợ hoàn tiền 1-chạm cực kỳ an toàn.\n• **Hàng luôn sẵn kho gần bạn nhất (Benders)**: Mạng lưới chuỗi cung ứng đa tầng Bắc - Trung - Nam tự động điều phối tồn kho về bưu cục gần nhà bạn, đặt là có ngay không lo hết hàng!`,
+      suggestions: ['Xem sản phẩm Hot Trend', 'Kích hoạt Ví Trả Sau SpayLater', 'Tra cứu kho hàng gần nhất'],
     };
   }
 

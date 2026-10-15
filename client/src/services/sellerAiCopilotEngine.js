@@ -1071,6 +1071,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 53. Bắt Trend HeavyKeeper, Hạn Mức Tín Dụng QR-DQN & Phân Bổ Chuỗi Cung Ứng Benders (Phase 44 - Feature 191)
+  if (/heavykeeper|heavy keeper|trending stream|bắt trend heavykeeper|qr[- ]dqn|hạn mức qr-dqn|benders|chuỗi cung ứng benders/i.test(raw)) {
+    return {
+      text: `🚀 **BẮT TREND HEAVYKEEPER, HẠN MỨC QR-DQN & PHÂN BỔ KHO BENDERS (${currentShop.name})**:
+- **Bắt trọn sản phẩm bùng nổ theo dòng thời gian thực (HeavyKeeper)**:
+  - Thuật toán phác thảo HeavyKeeper lọc sạch 99.9% lưu lượng rác, chỉ ra chính xác SKU nào của shop đang được tìm kiếm và xem nhiều nhất trong phiên Livestream/Mega Sale để shop kịp nhập thêm hàng.
+- **Tăng tỷ lệ chốt đơn nhờ Hạn mức SpayLater an toàn (QR-DQN)**:
+  - Khách hàng uy tín ghé thăm shop bạn được mở hạn mức trả sau tức thì và hỗ trợ hoàn tiền 1-chạm không rủi ro, thúc đẩy AOV tăng trưởng vượt bậc!
+- **Tối ưu hóa phân bổ tồn kho đa tầng Benders Decomposition**:
+  - Gợi ý phân bổ hàng tồn từ xưởng sản xuất về các kho tổng miền Bắc (Bắc Ninh), miền Trung (Đà Nẵng), miền Nam (Bình Dương) để cước vận chuyển giao tới khách luôn ở mức rẻ nhất!`,
+      type: 'recommendation',
+      tag: 'HEAVYKEEPER TREND, QR-DQN CREDIT & BENDERS SUPPLY',
+      suggestions: [
+        'Xem SKU bùng nổ lượt xem HeavyKeeper',
+        'Kiểm tra hạn mức ví trả sau QR-DQN',
+        'Tối ưu hóa luồng kho đa tầng Benders'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

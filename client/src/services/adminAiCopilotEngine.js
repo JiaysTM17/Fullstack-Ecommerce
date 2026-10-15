@@ -136,7 +136,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 4. Radar phát hiện gian lận & Người mua bất thường (Fraud Radar / Buyer Abuse)
-  if (!/sybil|dsu|disjoint set|lsh|minhash|catalog clone|sao chép catalog|bản quyền ảnh|phash|dhash|hamming|bellman-ford|chu trình âm|simhash|review spam|tarjan|scc|wash[- ]trading/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
+  if (!/sybil|dsu|disjoint set|lsh|minhash|catalog clone|sao chép catalog|bản quyền ảnh|phash|dhash|hamming|bellman-ford|chu trình âm|simhash|review spam|tarjan|scc|wash[- ]trading|heavykeeper|qr[- ]dqn|benders/i.test(raw) && /gian lận|bùng đơn|buyer abuse|radar|lừa đảo|bom hàng|đơn ảo|tài khoản xấu|bất thường/i.test(raw)) {
     const anomalyCount = fraudAnomaliesCount || (fraudData?.criticalCount ?? 0) || (fraudData?.mediumCount ?? 1);
     return {
       text: `🚨 **RADAR PHÁT HIỆN GIAN LẬN TOÀN SÀN (AI FRAUD GUARD)**:
@@ -2449,6 +2449,63 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Truy vấn tuyến đường ngắn nhất liên tỉnh CH',
         'Xem danh sách cạnh tắt Shortcut Edges đã tạo',
         'Kiểm tra phát hiện đạo văn Ukkonen Suffix Tree'
+      ]
+    };
+  }
+
+  // 113. Radar Bắt Trend Sản Phẩm Bùng Nổ HeavyKeeper & Suy Giảm Thời Gian Thực (Phase 44 - Feature 191)
+  if (/heavykeeper|heavy keeper|trending stream|bắt trend streaming|elephant flows|suy giảm xác suất/i.test(raw)) {
+    return {
+      text: `🔥 **RADAR BẮT TREND SẢN PHẨM BÙNG NỔ THỜI GIAN THỰC HEAVYKEEPER (CHEN ET AL. - SIGCOMM 2018)**:
+- **Nguyên lý Triệt Tiêu Nhiễu Chuột Cắn Voi (Mice Flow Decay)**:
+  - Khi hàng triệu clickstream đổ về, các sản phẩm nhỏ (Mice Flows) dễ làm bão hòa bộ đếm Top-K.
+  - HeavyKeeper áp dụng cơ chế suy giảm xác suất $P(\\text{decay}) = b^{-c}$ ($b = 1.08$) khi xảy ra va chạm băm: sản phẩm có lượt xem lớn (Elephant Flow) gần như bất biến trước va chạm, duy trì độ chính xác $\\ge 99.9\\%$!
+- **Hồ chứa Min-Heap Top-K & Bán rã thời gian thực (Exponential Time Decay)**:
+  - Bộ đếm tự động phân rã theo chu kỳ bán rã $\\tau = 60\\text{s}$, phản ánh trung thực danh sách các mặt hàng đang viral sốt dẻo trên sàn và trong livestream!`,
+      type: 'analytics',
+      tag: 'HEAVYKEEPER STREAMING TREND RADAR',
+      suggestions: [
+        'Xem Top-K sản phẩm đang bùng nổ lượt xem',
+        'Đo lường sai số phác thảo HeavyKeeper',
+        'Quản trị hạn mức tín dụng QR-DQN'
+      ]
+    };
+  }
+
+  // 114. Quản Trị Rủi Ro Tín Dụng & Hạn Mức Ví Trả Sau Bằng QR-DQN (Phase 44 - Feature 191)
+  if (/qr[- ]dqn|quantile regression|phân phối lượng phân vị|cvar tail risk|rủi ro đuôi cvar|ví trả sau qr-dqn/i.test(raw)) {
+    return {
+      text: `💳 **QUẢN TRỊ RỦI RO TÍN DỤNG & CẤP HẠN MỨC VÍ BẰNG QUANTILE REGRESSION DQN (QR-DQN - DABNEY 2018)**:
+- **Đột phá Học Tăng Cường Phân Phối (Distributional RL)**:
+  - Khác với Q-Learning truyền thống chỉ ước lượng giá trị trung bình $\\mathbb{E}[Q]$, QR-DQN mô hình hóa phân phối đầy đủ xác suất lợi ích $Z(s, a)$ qua $N$ lượng phân vị $\\tau_i = \\frac{2i - 1}{2N}$.
+  - Huấn luyện mạng nơ-ron bằng hàm tổn thất Huber Quantile Regression Loss mượt mà, chống bùng nổ gradient.
+- **Bảo toàn Rủi Ro Đuôi (CVaR - Conditional Value-at-Risk Tail Risk Minimization)**:
+  - Hệ thống tính toán kịch bản xấu nhất ở phân vị 25% dưới cùng, tự động cấp hạn mức Ví Trả Sau Mini SpayLater (5M - 30M VND) và quyết định Hoàn Tiền Tức Thì (Instant Refund) mà không lo bị nợ xấu bùng tiền!`,
+      type: 'finance',
+      tag: 'QR-DQN DISTRIBUTIONAL CREDIT RISK',
+      suggestions: [
+        'Đánh giá rủi ro đuôi CVaR hạn mức ví',
+        'Xem phân phối lượng phân vị QR-DQN',
+        'Tối ưu hóa đa tầng chuỗi cung ứng Benders'
+      ]
+    };
+  }
+
+  // 115. Tối Ưu Hóa Chuỗi Cung Ứng Đa Tầng Bằng Phân Rã Benders (Phase 44 - Feature 191)
+  if (/benders|phân rã benders|benders decomposition|multi[- ]echelon|chuỗi cung ứng đa tầng|benders cuts/i.test(raw)) {
+    return {
+      text: `🏭 **TỐI ƯU HÓA CHUỖI CUNG ỨNG ĐA TẦNG BẰNG PHÂN RÃ BENDERS (JACQUES BENDERS 1962)**:
+- **Phân rã Bài toán Quy hoạch Nguyên Hỗn hợp (MIP)**:
+  - **Master Problem (MP)**: Xác định biến nguyên nhị phân $y \\in \\{0, 1\\}^K$ quyết định kích hoạt mở các Tổng kho Vùng (Kho Bắc Ninh, Đà Nẵng, Bình Dương) cân đối chi phí cố định vận hành.
+  - **Dual Subproblem (DSP)**: Với cấu hình kho cố định, giải bài toán luồng phân bổ hàng hóa liên tầng tới các bưu cục vệ tinh địa phương với chi phí vận chuyển tối thiểu.
+- **Tạo Lát Cắt Benders Tự Động (Optimality & Feasibility Cuts)**:
+  - Lặp lại liên tục việc bơm các ràng buộc cắt siêu phẳng cho đến khi khoảng cách giữa Upper Bound và Lower Bound hội tụ ($\text{Gap} < \\epsilon$), tiết kiệm hàng trăm triệu đồng chi phí logistics mỗi tháng!`,
+      type: 'logistics',
+      tag: 'BENDERS MULTI-ECHELON INVENTORY DECOMPOSITION',
+      suggestions: [
+        'Xem cấu hình mở kho Benders tối ưu',
+        'Kiểm tra lát cắt Benders Optimality Cuts',
+        'Bắt trend sản phẩm HeavyKeeper'
       ]
     };
   }
