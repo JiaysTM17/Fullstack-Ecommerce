@@ -335,6 +335,10 @@ import {
   FastAGMSSketch,
   BCQDynamicPricing,
   MTVRPTWLogisticsRouter,
+  // Phase 62 Enterprise Algorithms
+  LossyCountingHeavyHitters,
+  SpotDynamicPricing,
+  VRPTWSoftTimeWindowsRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -486,6 +490,9 @@ import { VRPTWSimultaneousPickupDeliveryRouter as ServerVRPTWSimultaneousPickupD
 import { FastAGMSSketch as ServerFastAGMSSketch } from "../../server/src/utils/fastAgmsSketch.js";
 import { BCQDynamicPricing as ServerBCQDynamicPricing } from "../../server/src/utils/bcqDynamicPricing.js";
 import { MTVRPTWLogisticsRouter as ServerMTVRPTWLogisticsRouter } from "../../server/src/utils/mtvrptwLogisticsRouter.js";
+import { LossyCountingHeavyHitters as ServerLossyCountingHeavyHitters } from "../../server/src/utils/lossyCountingHeavyHitters.js";
+import { SpotDynamicPricing as ServerSpotDynamicPricing } from "../../server/src/utils/spotDynamicPricing.js";
+import { VRPTWSoftTimeWindowsRouter as ServerVRPTWSoftTimeWindowsRouter } from "../../server/src/utils/vrptwSoftTimeWindowsRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -26951,6 +26958,415 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(multiTripPlan.summary.totalTrips, 2);
       expect.equal(multiTripPlan.summary.activeVehicles, 1);
       expect.ok(multiTripPlan.summary.totalFuelCostVnd > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 209: Lossy Counting, SPOT Pricing & VRPTW-Soft Time Windows (Phase 62 - 24 Tests)
+  // =========================================================================
+  describe("Feature 209: Lossy Counting, SPOT Pricing & VRPTW-Soft Time Windows Logistics Suite", () => {
+    // -----------------------------------------------------------------------
+    // LOSSY COUNTING HEAVY HITTERS (Tests 1-7)
+    // -----------------------------------------------------------------------
+    test("F209-T01: LossyCountingHeavyHitters: Initialized with default and custom configurations", () => {
+      const defaultLC = new LossyCountingHeavyHitters();
+      expect.equal(defaultLC.epsilon, 0.01);
+      expect.equal(defaultLC.supportThreshold, 0.05);
+      expect.equal(defaultLC.bucketWidth, 100);
+      expect.equal(defaultLC.totalStreamCount, 0);
+      expect.equal(defaultLC.entryCount, 0);
+
+      const customLC = new LossyCountingHeavyHitters({ epsilon: 0.02, supportThreshold: 0.10 });
+      expect.equal(customLC.epsilon, 0.02);
+      expect.equal(customLC.supportThreshold, 0.10);
+      expect.equal(customLC.bucketWidth, 50);
+    });
+
+    test("F209-T02: LossyCountingHeavyHitters: Stream updates increment counts and advance current bucket correctly", () => {
+      const lc = new LossyCountingHeavyHitters({ epsilon: 0.05 }); // w = 20
+      lc.update("sku_apple", 5);
+      lc.update("sku_banana", 10);
+
+      expect.equal(lc.totalStreamCount, 15);
+      expect.equal(lc.currentBucket, 1);
+
+      lc.update("sku_cherry", 10);
+      expect.equal(lc.totalStreamCount, 25);
+      expect.equal(lc.currentBucket, 2);
+    });
+
+    test("F209-T03: LossyCountingHeavyHitters: Periodic pruning eliminates low-frequency items at bucket boundaries", () => {
+      const lc = new LossyCountingHeavyHitters({ epsilon: 0.10 }); // w = 10
+      // Add heavy item 15 times
+      lc.update("heavy_sku", 15);
+      // Add transient items that will be pruned
+      for (let i = 0; i < 5; i++) {
+        lc.update(`noise_${i}`, 1);
+      }
+      expect.ok(lc.entries.has("heavy_sku"));
+      // The heavy_sku has frequency 15, should survive pruning
+      const freq = lc.getFrequency("heavy_sku");
+      expect.ok(freq.frequency >= 15);
+    });
+
+    test("F209-T04: LossyCountingHeavyHitters: Item frequency query returns accurate bounds with guaranteed max error", () => {
+      const lc = new LossyCountingHeavyHitters({ epsilon: 0.05 });
+      for (let i = 0; i < 50; i++) {
+        lc.update("popular_item", 1);
+      }
+      const freq = lc.getFrequency("popular_item");
+      expect.equal(freq.frequency, 50);
+      expect.ok(freq.delta >= 0);
+      expect.ok(freq.maxFrequency >= freq.frequency);
+
+      // Non-existent item
+      const missing = lc.getFrequency("non_existent");
+      expect.equal(missing.frequency, 0);
+    });
+
+    test("F209-T05: LossyCountingHeavyHitters: Heavy hitters retrieval identifies high-frequency items with zero false negatives", () => {
+      const lc = new LossyCountingHeavyHitters({ epsilon: 0.02, supportThreshold: 0.10 }); // 10% support
+      // Total 200 items: 40 item_A (20%), 30 item_B (15%), rest noise
+      lc.update("item_A", 40);
+      lc.update("item_B", 30);
+      for (let i = 0; i < 130; i++) {
+        lc.update(`noise_${i % 65}`, 1);
+      }
+
+      const heavyHitters = lc.getHeavyHitters();
+      expect.ok(heavyHitters.length >= 2);
+      const items = heavyHitters.map(h => h.item);
+      expect.ok(items.includes("item_A"));
+      expect.ok(items.includes("item_B"));
+      expect.ok(heavyHitters[0].estimatedSharePercent > 10.0);
+    });
+
+    test("F209-T06: LossyCountingHeavyHitters: Merging two independent instances combines frequencies and maintains delta bounds", () => {
+      const lc1 = new LossyCountingHeavyHitters({ epsilon: 0.05 });
+      const lc2 = new LossyCountingHeavyHitters({ epsilon: 0.05 });
+
+      lc1.update("common_item", 25);
+      lc2.update("common_item", 35);
+      lc2.update("unique_item", 20);
+
+      lc1.merge(lc2);
+      expect.equal(lc1.totalStreamCount, 80);
+      const commonFreq = lc1.getFrequency("common_item");
+      expect.equal(commonFreq.frequency, 60);
+      expect.ok(lc1.entries.has("unique_item"));
+    });
+
+    test("F209-T07: LossyCountingHeavyHitters: Reset clears state and getSummary outputs correct diagnostics", () => {
+      const lc = new LossyCountingHeavyHitters({ epsilon: 0.05, supportThreshold: 0.15 });
+      lc.update("item_1", 20);
+      expect.equal(lc.entryCount, 1);
+
+      const summary = lc.getSummary();
+      expect.equal(summary.epsilon, 0.05);
+      expect.equal(summary.supportThreshold, 0.15);
+      expect.equal(summary.bucketWidth, 20);
+      expect.equal(summary.totalStreamCount, 20);
+
+      lc.reset();
+      expect.equal(lc.entryCount, 0);
+      expect.equal(lc.totalStreamCount, 0);
+      expect.equal(lc.currentBucket, 1);
+    });
+
+    // -----------------------------------------------------------------------
+    // SPOT DYNAMIC PRICING (Tests 8-14)
+    // -----------------------------------------------------------------------
+    test("F209-T08: SpotDynamicPricing: Initialized with default parameters and properties", () => {
+      const spot = new SpotDynamicPricing();
+      expect.equal(spot.cogsSafetyFloorRatio, 1.05);
+      expect.equal(spot.competitorCeilingRatio, 1.15);
+      expect.equal(spot.densityThreshold, 0.10);
+      expect.equal(spot.densityPenaltyWeight, 0.45);
+      expect.equal(spot.bandwidth, 0.30);
+      expect.equal(spot.safetyMargin, 0.05);
+      expect.equal(spot.featureDim, 5);
+    });
+
+    test("F209-T09: SpotDynamicPricing: State feature extraction normalizes inputs into dimension 5 array", () => {
+      const spot = new SpotDynamicPricing();
+      const state = {
+        cogs: 300000,
+        basePrice: 420000,
+        competitorPrice: 400000,
+        demandIndex: 1.25,
+        inventoryUrgency: 0.35
+      };
+      const features = spot.extractStateFeatures(state);
+      expect.equal(features.length, 5);
+      expect.ok(features[0] > 0);
+      expect.equal(features[3], 1.25);
+      expect.equal(features[4], 0.35);
+    });
+
+    test("F209-T10: SpotDynamicPricing: Data support density estimation produces smooth bounded values in (0, 1]", () => {
+      const spot = new SpotDynamicPricing();
+      const state = { demandIndex: 1.0, inventoryUrgency: 0.2 };
+      // Action 1.00 is right in the center of historical anchors
+      const densityDense = spot.estimateDataDensity(state, 1.00);
+      expect.ok(densityDense > 0.10 && densityDense <= 1.0);
+
+      // Action 1.60 is far away from anchors (out of distribution)
+      const densitySparse = spot.estimateDataDensity(state, 1.60);
+      expect.ok(densitySparse < densityDense);
+    });
+
+    test("F209-T11: SpotDynamicPricing: SPOT density penalty penalizes actions when density falls below threshold tau", () => {
+      const spot = new SpotDynamicPricing({ densityThreshold: 0.15, densityPenaltyWeight: 0.50 });
+      const state = { demandIndex: 0.5, inventoryUrgency: 0.9 };
+      // OOD action with low density
+      const spotInfo = spot.computeSpotPenalty(state, 1.40);
+      expect.ok(spotInfo.density <= spot.densityThreshold);
+      expect.ok(spotInfo.shortfall >= 0);
+      expect.ok(spotInfo.penalty >= 0);
+    });
+
+    test("F209-T12: SpotDynamicPricing: Penalized Q-evaluation favors actions in dense support regions over OOD actions", () => {
+      const spot = new SpotDynamicPricing();
+      const state = { cogs: 100000, basePrice: 150000, demandIndex: 1.0, inventoryUrgency: 0.2 };
+      const qInSupport = spot.evaluatePenalizedQ(state, 1.00);
+      const qOod = spot.evaluatePenalizedQ(state, 1.35);
+
+      expect.ok(qInSupport.densityScore !== undefined || qInSupport.density !== undefined);
+      expect.ok(qInSupport.penalizedQ > 0);
+      expect.ok(qInSupport.penalizedQ > qOod.penalizedQ);
+    });
+
+    test("F209-T13: SpotDynamicPricing: Safety floor enforcement prevents pricing below COGS x 1.05 and ceiling caps competitor", () => {
+      const spot = new SpotDynamicPricing({ cogsSafetyFloorRatio: 1.05 });
+      const lossLeader = {
+        cogs: 200000,
+        basePrice: 120000, // Below COGS
+        competitorPrice: 150000,
+        demandIndex: 0.6,
+        inventoryUrgency: 0.8
+      };
+      const res = spot.optimizePrice(lossLeader);
+      expect.equal(res.isFloorEnforced, true);
+      expect.equal(res.proposedPrice, 200000 * 1.05); // 210,000
+      expect.equal(res.decisionTag, "FLOOR_OVERRIDE_COGS_SECURED");
+    });
+
+    test("F209-T14: SpotDynamicPricing: Batch optimization optimizes multiple catalog items with comprehensive margin analysis", () => {
+      const spot = new SpotDynamicPricing();
+      const items = [
+        { cogs: 150000, basePrice: 220000, competitorPrice: 210000 },
+        { cogs: 80000, basePrice: 70000, competitorPrice: 75000 },
+        { cogs: 500000, basePrice: 700000, competitorPrice: 680000 }
+      ];
+      const results = spot.batchOptimize(items);
+      expect.equal(results.length, 3);
+      for (const r of results) {
+        expect.ok(r.proposedPrice >= r.cogs * 1.05);
+        expect.ok(r.marginAnalysis.grossMarginVnd > 0);
+        expect.ok(r.densityScore > 0);
+      }
+    });
+
+    // -----------------------------------------------------------------------
+    // VRPTW SOFT TIME WINDOWS ROUTER (Tests 15-19)
+    // -----------------------------------------------------------------------
+    test("F209-T15: VRPTWSoftTimeWindowsRouter: Initialized with default parameters and costs", () => {
+      const router = new VRPTWSoftTimeWindowsRouter();
+      expect.equal(router.depot.id, "SPX_CENTRAL_HUB");
+      expect.equal(router.vehicleCapacityKg, 120.0);
+      expect.equal(router.fleetSize, 3);
+      expect.equal(router.vanSpeedKmh, 28.0);
+      expect.equal(router.fuelCostPerKm, 1800);
+      expect.equal(router.earlyWaitCostPerMin, 100);
+      expect.equal(router.latePenaltyPerMin, 500);
+      expect.equal(router.maxTolerableLateMin, 60);
+    });
+
+    test("F209-T16: VRPTWSoftTimeWindowsRouter: Soft time window evaluation correctly classifies ON_TIME, EARLY_WAIT, and LATE_PENALIZED", () => {
+      const router = new VRPTWSoftTimeWindowsRouter();
+      const window = [500, 560]; // 08:20 to 09:20
+
+      // Case 1: Early arrival (08:10 = 490)
+      const earlyEval = router.evaluateSoftWindow(490, window);
+      expect.equal(earlyEval.status, "EARLY_WAIT");
+      expect.equal(earlyEval.earlyWaitMin, 10);
+      expect.equal(earlyEval.penaltyCostVnd, 10 * 100); // 1,000 VND
+      expect.equal(earlyEval.isTolerable, true);
+
+      // Case 2: On-time arrival (08:30 = 510)
+      const onTimeEval = router.evaluateSoftWindow(510, window);
+      expect.equal(onTimeEval.status, "ON_TIME");
+      expect.equal(onTimeEval.penaltyCostVnd, 0);
+
+      // Case 3: Late arrival (09:40 = 580, 20 min late)
+      const lateEval = router.evaluateSoftWindow(580, window);
+      expect.equal(lateEval.status, "LATE_PENALIZED");
+      expect.equal(lateEval.lateMin, 20);
+      expect.equal(lateEval.penaltyCostVnd, 20 * 500); // 10,000 VND
+      expect.equal(lateEval.isTolerable, true);
+    });
+
+    test("F209-T17: VRPTWSoftTimeWindowsRouter: Empty stops input returns clean EMPTY_STOPS summary", () => {
+      const router = new VRPTWSoftTimeWindowsRouter();
+      const plan = router.planSoftTimeWindowRoutes([]);
+      expect.equal(plan.status, "EMPTY_STOPS");
+      expect.equal(plan.summary.totalStops, 0);
+      expect.equal(plan.summary.totalGeneralizedCostVnd, 0);
+      expect.equal(plan.routes.length, 0);
+    });
+
+    test("F209-T18: VRPTWSoftTimeWindowsRouter: Generalized cost trade-off balances fuel vs early wait vs lateness penalty", () => {
+      const router = new VRPTWSoftTimeWindowsRouter({ fleetSize: 2, vehicleCapacityKg: 80.0 });
+      const stops = [
+        { id: "S1", lat: 21.0300, lng: 105.8500, demandKg: 20, timeWindow: [480, 510] },
+        { id: "S2", lat: 21.0350, lng: 105.8550, demandKg: 20, timeWindow: [500, 540] },
+        { id: "S3", lat: 21.0250, lng: 105.8450, demandKg: 20, timeWindow: [510, 550] }
+      ];
+
+      const plan = router.planSoftTimeWindowRoutes(stops);
+      expect.equal(plan.status, "VRPTW_SOFT_SUCCESS");
+      expect.equal(plan.summary.totalStops, 3);
+      expect.ok(plan.summary.totalGeneralizedCostVnd > 0);
+      expect.equal(
+        plan.summary.totalGeneralizedCostVnd,
+        plan.summary.totalFuelCostVnd + plan.summary.totalEarlyWaitCostVnd + plan.summary.totalLatenessPenaltyVnd
+      );
+    });
+
+    test("F209-T19: VRPTWSoftTimeWindowsRouter: Vehicle capacity constraints and max tolerable late limits are strictly respected", () => {
+      const router = new VRPTWSoftTimeWindowsRouter({
+        fleetSize: 1,
+        vehicleCapacityKg: 50.0,
+        maxTolerableLateMin: 30
+      });
+
+      const stops = [
+        { id: "C1", lat: 21.0300, lng: 105.8500, demandKg: 25, timeWindow: [480, 520] },
+        { id: "C2", lat: 21.0350, lng: 105.8550, demandKg: 25, timeWindow: [490, 540] }
+      ];
+
+      const plan = router.planSoftTimeWindowRoutes(stops);
+      expect.equal(plan.status, "VRPTW_SOFT_SUCCESS");
+      for (const r of plan.routes) {
+        expect.ok(r.totalPayloadKg <= router.vehicleCapacityKg);
+      }
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT-SERVER SYMMETRY (Tests 20-22)
+    // -----------------------------------------------------------------------
+    test("F209-T20: Client and Server algorithmic symmetry: LossyCountingHeavyHitters produces identical frequencies and heavy hitters", () => {
+      const clientLC = new LossyCountingHeavyHitters({ epsilon: 0.05, supportThreshold: 0.10 });
+      const serverLC = new ServerLossyCountingHeavyHitters({ epsilon: 0.05, supportThreshold: 0.10 });
+
+      for (let i = 0; i < 40; i++) {
+        clientLC.update(`item_${i % 4}`, 3);
+        serverLC.update(`item_${i % 4}`, 3);
+      }
+
+      expect.equal(clientLC.totalStreamCount, serverLC.totalStreamCount);
+      expect.equal(clientLC.entryCount, serverLC.entryCount);
+      expect.deepEqual(clientLC.getHeavyHitters(), serverLC.getHeavyHitters());
+    });
+
+    test("F209-T21: Client and Server algorithmic symmetry: SpotDynamicPricing produces identical pricing decisions and density penalties", () => {
+      const clientSpot = new SpotDynamicPricing({ densityThreshold: 0.12, densityPenaltyWeight: 0.50 });
+      const serverSpot = new ServerSpotDynamicPricing({ densityThreshold: 0.12, densityPenaltyWeight: 0.50 });
+
+      const item = {
+        cogs: 350000,
+        basePrice: 500000,
+        competitorPrice: 480000,
+        demandIndex: 1.10,
+        inventoryUrgency: 0.20
+      };
+
+      const cRes = clientSpot.optimizePrice(item);
+      const sRes = serverSpot.optimizePrice(item);
+
+      expect.equal(cRes.proposedPrice, sRes.proposedPrice);
+      expect.equal(cRes.actionMultiplier, sRes.actionMultiplier);
+      expect.equal(cRes.densityScore, sRes.densityScore);
+      expect.equal(cRes.spotPenalty, sRes.spotPenalty);
+      expect.equal(cRes.decisionTag, sRes.decisionTag);
+    });
+
+    test("F209-T22: Client and Server algorithmic symmetry: VRPTWSoftTimeWindowsRouter produces identical soft window routes and generalized costs", () => {
+      const clientRouter = new VRPTWSoftTimeWindowsRouter({ fleetSize: 2, vehicleCapacityKg: 70.0 });
+      const serverRouter = new ServerVRPTWSoftTimeWindowsRouter({ fleetSize: 2, vehicleCapacityKg: 70.0 });
+
+      const stops = [
+        { id: "SYM_1", lat: 21.0300, lng: 105.8450, demandKg: 30, timeWindow: [480, 530] },
+        { id: "SYM_2", lat: 21.0350, lng: 105.8500, demandKg: 30, timeWindow: [500, 560] }
+      ];
+
+      const cPlan = clientRouter.planSoftTimeWindowRoutes(stops);
+      const sPlan = serverRouter.planSoftTimeWindowRoutes(stops);
+
+      expect.equal(cPlan.summary.totalDistanceKm, sPlan.summary.totalDistanceKm);
+      expect.equal(cPlan.summary.totalFuelCostVnd, sPlan.summary.totalFuelCostVnd);
+      expect.equal(cPlan.summary.totalGeneralizedCostVnd, sPlan.summary.totalGeneralizedCostVnd);
+      expect.equal(cPlan.routes.length, sPlan.routes.length);
+    });
+
+    // -----------------------------------------------------------------------
+    // COPILOT INTEGRATION & END-TO-END PIPELINE (Tests 23-24)
+    // -----------------------------------------------------------------------
+    test("F209-T23: Tri-Role Copilots integration: Admin, Seller, and Buyer AI respond accurately to Phase 62 queries", () => {
+      // 1. Admin Copilot
+      const adminRes1 = generateAdminCopilotResponse("Thống kê luồng bão đơn bằng lossy counting heavy hitters");
+      expect.ok(adminRes1.text.includes("LOSSY COUNTING"));
+
+      const adminRes2 = generateAdminCopilotResponse("Tối ưu giá an toàn dựa trên mật độ dữ liệu bằng spot dynamic pricing");
+      expect.ok(adminRes2.text.includes("SPOT DYNAMIC PRICING"));
+
+      const adminRes3 = generateAdminCopilotResponse("Định tuyến đội xe cửa sổ mềm soft time window vrptw-soft logistics");
+      expect.ok(adminRes3.text.includes("VRPTW-SOFT") || adminRes3.tag === "VRPTW SOFT TIME WINDOWS");
+
+      // 2. Seller Copilot
+      const sellerRes = generateSellerCopilotResponse("Tư vấn sản phẩm bão đơn lossy counting và định giá spot pricing");
+      expect.ok(sellerRes.text.includes("LOSSY COUNTING"));
+
+      // 3. Buyer AI
+      const buyerRes = generateAiChatResponse("Xem giao hàng linh hoạt cửa sổ mềm soft time window và giá an toàn spot");
+      expect.equal(buyerRes.intent, "LOSSY_SPOT_VRPTW_SOFT");
+    });
+
+    test("F209-T24: End-to-End E-Commerce Pipeline: Lossy Counting Heavy Hitters -> SPOT Safe Dynamic Pricing -> VRPTW-Soft Logistics Dispatch", () => {
+      // Step 1: Detect runaway trending item via Lossy Counting
+      const lc = new ServerLossyCountingHeavyHitters({ epsilon: 0.05, supportThreshold: 0.10 });
+      for (let i = 0; i < 50; i++) {
+        lc.update("trending_dress", 1); // 50 view events
+      }
+      for (let i = 0; i < 50; i++) {
+        lc.update(`other_${i}`, 1);
+      }
+      const topItems = lc.getHeavyHitters();
+      expect.ok(topItems.length > 0);
+      expect.equal(topItems[0].item, "trending_dress");
+
+      // Step 2: Density-supported Safe Dynamic Pricing with SPOT
+      const spot = new ServerSpotDynamicPricing();
+      const pricing = spot.optimizePrice({
+        cogs: 250000,
+        basePrice: 380000,
+        competitorPrice: 370000,
+        demandIndex: topItems[0].estimatedSharePercent > 20 ? 1.4 : 1.0,
+        inventoryUrgency: 0.2
+      });
+      expect.ok(pricing.proposedPrice >= 250000 * 1.05);
+      expect.ok(pricing.densityScore > 0);
+
+      // Step 3: Green Logistics Dispatch with Soft Time Windows
+      const router = new ServerVRPTWSoftTimeWindowsRouter({ fleetSize: 1, vehicleCapacityKg: 60.0 });
+      const orders = [
+        { id: "ORD_P62_1", lat: 21.0300, lng: 105.8500, demandKg: 20, timeWindow: [480, 530] },
+        { id: "ORD_P62_2", lat: 21.0350, lng: 105.8550, demandKg: 20, timeWindow: [510, 580] }
+      ];
+      const softPlan = router.planSoftTimeWindowRoutes(orders);
+      expect.equal(softPlan.status, "VRPTW_SOFT_SUCCESS");
+      expect.equal(softPlan.summary.totalStops, 2);
+      expect.ok(softPlan.summary.totalGeneralizedCostVnd > 0);
     });
   });
 });

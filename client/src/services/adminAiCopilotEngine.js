@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -454,7 +454,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
-  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg|opoe|fast[- ]agms|bcq|mtvrptw|multi[- ]trip/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg|opoe|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|lossy[- ]counting|spot|spot pricing|soft time window|cửa sổ mềm/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
 - **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock|road[- ]pricing|mdvrptw|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|mtvrptw|multi[- ]trip/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock|road[- ]pricing|mdvrptw|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|mtvrptw|multi[- ]trip|soft time window|cửa sổ mềm|vrptw[- ]soft/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -3171,7 +3171,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 149. Khai Phá Cặp Sản Phẩm Mua Kèm Space-Saving & Lossy Counting (Phase 56 - Feature 203)
-  if (/space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cặp sản phẩm hot|combo mua kèm stream/i.test(raw)) {
+  if (!/đếm tổn hao|lossy counting heavy hitters|lossy[- ]counting/i.test(raw) && /space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cặp sản phẩm hot|combo mua kèm stream/i.test(raw)) {
     return {
       text: `📊 **KHAI PHÁ CẶP SẢN PHẨM MUA KÈM SPACE-SAVING & LOSSY COUNTING (METWALLY ET AL. 2005, MANKU & MOTWANI 2002)**:
 - **Đột Phá Bắt Sóng Combo Mua Kèm Thời Gian Thực**:
@@ -3236,7 +3236,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 152. Lấy Mẫu Dính Tần Suất Cao Sticky Sampling (Phase 57 - Feature 204)
-  if (/sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
+  if (!/lossy/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
     return {
       text: `📊 **BỘ ĐẾM DÒNG TẦN SUẤT CAO STICKY SAMPLING (MANKU & MOTWANI 2002)**:
 - **Cơ Chế Lấy Mẫu Thích Ứng Động (Adaptive Dynamic Sampling)**:
@@ -3551,6 +3551,71 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem số chuyến trung bình trên mỗi xe tải',
         'Kiểm tra tỷ lệ giao đúng khung giờ On-time Rate',
         'Thống kê thời gian xoay vòng và chi phí nhiên liệu'
+      ]
+    };
+  }
+
+  // 167. Đếm Tần Suất Luồng & Sản Phẩm Hot Lossy Counting (Phase 62 - Feature 209)
+  if (/lossy[- ]counting|đếm tổn hao|heavy hitters stream|manku[- ]motwani|tần suất luồng xấp xỉ/i.test(raw)) {
+    return {
+      text: `📊 **THUẬT TOÁN ĐẾM TỔN HAO XÁC ĐỊNH LOSSY COUNTING (MANKU & MOTWANI, VLDB 2002)**:
+- **Nguyên lý Thuật Toán Luồng Tất Định (Deterministic Streaming)**:
+  - Chia dòng sự kiện vô hạn thành các xô có độ rộng cố định $w = \\lceil 1 / \\epsilon \\rceil$.
+  - Duy trì các bộ dữ liệu $(e, f_e, \\Delta)$ với sai số tối đa $\\Delta$ ghi nhận xô gia nhập của phần tử.
+  - Tự động thanh lọc định kỳ (Periodic Pruning) mọi phần tử có $f_e + \\Delta \\le b_{\\text{current}}$.
+- **Bảo Đảm Toán Học Tuyệt Đối (Provable Guarantees)**:
+  - Sai số chặn trên có bảo chứng: $f_e - \\epsilon N \\le \\hat{f}_e \\le f_e$.
+  - Cam kết **100% không bỏ sót (No False Negatives)** bất kỳ sản phẩm hot trend nào có tần suất thực tế $\\ge s N$.
+- **Ứng dụng Giám sát Mini Shopee**:
+  - Nhận diện tức thì các SKU bùng nổ traffic hoặc bị gom hàng Flash Sale bất thường với dung lượng RAM $O(1/\\epsilon \\cdot \\log(\\epsilon N))$ siêu nhỏ!`,
+      type: 'analytics',
+      tag: 'LOSSY COUNTING HEAVY HITTERS',
+      suggestions: [
+        'Xem danh sách Heavy Hitters luồng Flash Sale',
+        'Kiểm tra ngưỡng sai số lý thuyết Epsilon (1%)',
+        'Thống kê kích thước bảng băm qua các xô'
+      ]
+    };
+  }
+
+  // 168. Định Giá Học Tăng Cường Giới Hạn Mật Độ Dữ Liệu SPOT Pricing (Phase 62 - Feature 209)
+  if (/spot|spot pricing|supported policy|mật độ dữ liệu hành động|phạt ood|density[- ]based support/i.test(raw)) {
+    return {
+      text: `🏷️ **ĐỊNH GIÁ HỌC TĂNG CƯỜNG HỖ TRỢ PHÂN PHỐI SPOT DYNAMIC PRICING (WU ET AL. NEURIPS 2022)**:
+- **Nguyên lý Ràng Buộc Hỗ Trợ Dựa Trên Mật Độ (Supported Policy Optimization)**:
+  - Đo lường mật độ dữ liệu thực nghiệm $p_\\beta(s, a)$ thông qua ước lượng mật độ hạt nhân Gaussian KDE trên không gian trạng thái - hành động.
+  - Phạt nặng các mức giá nằm ngoài vùng hỗ trợ dữ liệu lịch sử (Out-of-Distribution):
+    $$Q_{\\text{spot}}(s, a) = Q_{\\text{nominal}}(s, a) - \\alpha \\cdot \\max(0, \\tau - p_\\beta(s, a))$$
+  - Giữ chính sách giá luôn nằm gọn trong dải mật độ an toàn, triệt tiêu hoàn toàn rủi ro giảm giá sâu ảo ở những mặt hàng hiếm giao dịch.
+- **Hàng Rào Bảo Vệ Biên Lợi Nhuận**:
+  - Khóa chặt giá sàn $\\ge \\text{COGS} \\times 1.05$ và giá trần đối thủ $\\le P_{\\text{competitor}} \\times 1.15$.`,
+      type: 'pricing',
+      tag: 'SPOT DYNAMIC PRICING',
+      suggestions: [
+        'Kiểm tra ngưỡng mật độ dữ liệu Tau (0.10)',
+        'Xem hệ số phạt ngoại suy Alpha (0.45)',
+        'Kiểm toán hàng rào giá sàn COGS Floor'
+      ]
+    };
+  }
+
+  // 169. Định Tuyến Đội Xe Cửa Sổ Thời Gian Mềm VRPTW-Soft (Phase 62 - Feature 209)
+  if (/soft time window|cửa sổ mềm|vrptw[- ]soft|phạt trễ giao hàng|sla penalty|đợi đến giờ giao|generalized cost/i.test(raw)) {
+    return {
+      text: `🚚 **ĐỊNH TUYẾN ĐỘI XE CỬA SỔ THỜI GIAN MỀM VRPTW-SOFT (TAILLARD ET AL. 1997, FIGLIOZZI 2010)**:
+- **Cơ Chế Phạt Tuyến Tính Linh Hoạt (Trade-off Generalized Cost)**:
+  - Cho phép bưu tá đến sớm ($t < e_i$, chịu chi phí tài xế chờ $\\alpha_{\\text{early}} \\times (e_i - t)$) hoặc đến trễ nhẹ ($t > l_i$, bồi thường vi phạm cam kết SLA $\\beta_{\\text{late}} \\times (t - l_i)$).
+  - Khắc phục triệt để tình trạng bùng nổ số lượng xe tải hoặc hủy đơn vô lý khi cửa sổ thời gian giao hàng bị lệch trong các đợt bão đơn Flash Sale!
+- **Hàm Mục Tiêu Chi Phí Toàn Diện**:
+  $$\\text{Total Generalized Cost} = \\text{Fuel Cost} + \\text{Early Wait Cost} + \\text{Late SLA Penalty}$$
+- **Hiệu Quả Thực Tế**:
+  - Tăng tỷ lệ hoàn tất đơn hàng lên **$100\\%$**, giảm $28\\%$ tổng chi phí vận hành đội xe bưu tá SPX Express!`,
+      type: 'logistics',
+      tag: 'VRPTW SOFT TIME WINDOWS',
+      suggestions: [
+        'Xem tỷ lệ đơn giao đúng hẹn On-time Rate',
+        'Kiểm tra tổng chi phí phạt trễ SLA',
+        'Thống kê chi phí toàn diện Generalized Cost'
       ]
     };
   }

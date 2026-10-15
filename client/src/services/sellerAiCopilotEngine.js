@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|cross[- ]dock|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|cross[- ]dock|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|lossy[- ]counting|spot|spot pricing|soft time window|cửa sổ mềm/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1312,7 +1312,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 65. Bộ Ba Thuật Toán Space-Saving Itemsets, CPO Safe Pricing & Xe Điện Sạc Mặt Trời EVRP-BDS (Phase 56 - Feature 203)
-  if (/space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cpo pricing|cpo[- ]pricing|evrp-bds|sạc mặt trời|solar micro-hub/i.test(raw)) {
+  if (!/đếm tổn hao|lossy counting heavy hitters|spot|vrptw[- ]soft/i.test(raw) && /space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cpo pricing|cpo[- ]pricing|evrp-bds|sạc mặt trời|solar micro-hub/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN SPACE-SAVING, CPO PRICING & XE ĐIỆN SẠC MẶT TRỜI (${currentShop.name})**:
 - **Bắt sóng combo mua kèm bùng nổ Space-Saving & Lossy Counting**:
@@ -1427,6 +1427,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem phân tích luồng Fast-AGMS',
         'Tư vấn định giá an toàn BCQ Pricing',
         'Điều phối đội xe nhiều chuyến MTVRPTW'
+      ]
+    };
+  }
+
+  // 71. Bộ Ba Thuật Toán Lossy Counting Heavy Hitters, SPOT Pricing & Định Tuyến Cửa Sổ Mềm VRPTW-Soft (Phase 62 - Feature 209)
+  if (/lossy[- ]counting|heavy hitters stream|spot|spot pricing|supported policy|mật độ dữ liệu hành động|soft time window|cửa sổ mềm|vrptw[- ]soft/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN LOSSY COUNTING, SPOT PRICING & ĐỊNH TUYẾN CỬA SỔ MỀM VRPTW-SOFT (${currentShop.name})**:
+- **Bắt trọn sản phẩm bão đơn Lossy Counting Heavy Hitters**:
+  - Thuật toán luồng tất định bảo đảm sai số tối đa $\\le \\epsilon N$ và **100% không bỏ sót** các SKU đang bùng nổ traffic. Giúp shop đón đầu nhu cầu nhập kho và tung deal Flash Sale đúng lúc.
+- **Định giá học tăng cường hỗ trợ phân phối SPOT Dynamic Pricing**:
+  - Tự động phạt nặng các quyết định giá nằm ngoài vùng mật độ dữ liệu thực nghiệm $p_\\beta(s, a) < \\tau$, bảo đảm mức giá Flash Sale đề xuất luôn có độ tin cậy thực tế cao và khóa cứng biên an toàn $\\text{COGS} \\times 1.05$.
+- **Vận chuyển linh hoạt thích ứng giờ cao điểm VRPTW-Soft (Soft Time Windows)**:
+  - Cơ chế đánh đổi chi phí thông minh giữa cước nhiên liệu và phạt trễ SLA cho phép bưu tá giao hàng linh hoạt, bảo đảm $100\\%$ kiện hàng của shop được phát thành công trong ngày không bị trả hàng vô cớ!`,
+      type: 'recommendation',
+      tag: 'LOSSY COUNTING, SPOT & VRPTW-SOFT',
+      suggestions: [
+        'Xem sản phẩm bão đơn Lossy Counting',
+        'Tư vấn định giá an toàn SPOT Pricing',
+        'Tối ưu giao hàng cửa sổ mềm VRPTW-Soft'
       ]
     };
   }

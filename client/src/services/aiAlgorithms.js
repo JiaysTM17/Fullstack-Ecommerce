@@ -31584,6 +31584,588 @@ export class MTVRPTWLogisticsRouter {
   }
 }
 
+// =========================================================================
+// PHASE 62: ENTERPRISE SUITE (FEATURE 209)
+// 1. LossyCountingHeavyHitters (Rajeev Motwani & Gurmeet Singh Manku, VLDB 2002)
+// 2. SpotDynamicPricing (Supported Policy Optimization for Offline RL, Wu et al. NeurIPS 2022)
+// 3. VRPTWSoftTimeWindowsRouter (Vehicle Routing Problem with Soft Time Windows & Penalty Functions)
+// =========================================================================
+
+export class LossyCountingHeavyHitters {
+  constructor(options = {}) {
+    this.epsilon = Math.max(0.0001, Math.min(0.2, options.epsilon !== undefined ? options.epsilon : 0.01));
+    this.supportThreshold = Math.max(this.epsilon, Math.min(0.99, options.supportThreshold !== undefined ? options.supportThreshold : 0.05));
+    this.bucketWidth = Math.ceil(1.0 / this.epsilon);
+
+    this.entries = new Map();
+    this.totalStreamCount = 0;
+    this.currentBucket = 1;
+  }
+
+  get entryCount() {
+    return this.entries.size;
+  }
+
+  get maxErrorBound() {
+    return Math.floor(this.epsilon * this.totalStreamCount);
+  }
+
+  update(item, count = 1) {
+    const key = String(item);
+    const c = Math.max(1, Math.round(Number(count) || 1));
+
+    for (let k = 0; k < c; k++) {
+      this.totalStreamCount += 1;
+      this.currentBucket = Math.ceil(this.totalStreamCount / this.bucketWidth);
+
+      if (this.entries.has(key)) {
+        const entry = this.entries.get(key);
+        entry.frequency += 1;
+      } else {
+        this.entries.set(key, {
+          frequency: 1,
+          delta: this.currentBucket - 1
+        });
+      }
+
+      if (this.totalStreamCount % this.bucketWidth === 0) {
+        this._prune(this.currentBucket);
+      }
+    }
+  }
+
+  updateBatch(items = []) {
+    for (const it of items) {
+      if (typeof it === 'object' && it !== null && it.item !== undefined) {
+        this.update(it.item, it.count || 1);
+      } else {
+        this.update(it, 1);
+      }
+    }
+  }
+
+  _prune(bucketId) {
+    for (const [key, entry] of this.entries.entries()) {
+      if (entry.frequency + entry.delta <= bucketId) {
+        this.entries.delete(key);
+      }
+    }
+  }
+
+  getFrequency(item) {
+    const key = String(item);
+    if (!this.entries.has(key)) {
+      return {
+        frequency: 0,
+        delta: 0,
+        minFrequency: 0,
+        maxFrequency: this.maxErrorBound
+      };
+    }
+
+    const entry = this.entries.get(key);
+    return {
+      frequency: entry.frequency,
+      delta: entry.delta,
+      minFrequency: entry.frequency,
+      maxFrequency: entry.frequency + entry.delta
+    };
+  }
+
+  getHeavyHitters(customSupport = this.supportThreshold) {
+    const support = Math.max(this.epsilon, customSupport);
+    const threshold = (support - this.epsilon) * this.totalStreamCount;
+    const results = [];
+
+    for (const [key, entry] of this.entries.entries()) {
+      if (entry.frequency >= threshold) {
+        const estimatedShare = this.totalStreamCount > 0
+          ? Number(((entry.frequency / this.totalStreamCount) * 100).toFixed(2))
+          : 0.0;
+        results.push({
+          item: key,
+          estimatedFrequency: entry.frequency,
+          maxError: entry.delta,
+          estimatedSharePercent: estimatedShare,
+          guaranteedMinFrequency: entry.frequency,
+          guaranteedMaxFrequency: entry.frequency + entry.delta
+        });
+      }
+    }
+
+    results.sort((a, b) => b.estimatedFrequency - a.estimatedFrequency);
+    return results;
+  }
+
+  merge(other) {
+    if (!(other instanceof LossyCountingHeavyHitters)) {
+      throw new Error("Target must be an instance of LossyCountingHeavyHitters");
+    }
+
+    for (const [key, entry] of other.entries.entries()) {
+      if (this.entries.has(key)) {
+        const cur = this.entries.get(key);
+        cur.frequency += entry.frequency;
+        cur.delta = Math.max(cur.delta, entry.delta);
+      } else {
+        this.entries.set(key, {
+          frequency: entry.frequency,
+          delta: entry.delta
+        });
+      }
+    }
+
+    this.totalStreamCount += other.totalStreamCount;
+    this.currentBucket = Math.max(this.currentBucket, other.currentBucket);
+    this._prune(this.currentBucket);
+    return this;
+  }
+
+  reset() {
+    this.entries.clear();
+    this.totalStreamCount = 0;
+    this.currentBucket = 1;
+  }
+
+  getSummary() {
+    return {
+      epsilon: this.epsilon,
+      supportThreshold: this.supportThreshold,
+      bucketWidth: this.bucketWidth,
+      currentBucket: this.currentBucket,
+      totalStreamCount: this.totalStreamCount,
+      uniqueEntriesCount: this.entries.size,
+      maxTheoreticalError: this.maxErrorBound
+    };
+  }
+}
+
+export class SpotDynamicPricing {
+  constructor(options = {}) {
+    this.cogsSafetyFloorRatio = options.cogsSafetyFloorRatio || 1.05;
+    this.competitorCeilingRatio = options.competitorCeilingRatio || 1.15;
+    this.densityThreshold = Math.max(0.01, Math.min(0.50, options.densityThreshold !== undefined ? options.densityThreshold : 0.10));
+    this.densityPenaltyWeight = Math.max(0.05, options.densityPenaltyWeight || 0.45);
+    this.bandwidth = Math.max(0.10, options.bandwidth || 0.30);
+
+    this.candidateMultipliers = [0.85, 0.90, 0.95, 1.00, 1.05, 1.10, 1.15, 1.20];
+
+    this.supportAnchors = options.supportAnchors || [
+      [1.0, 0.2, 1.00],
+      [1.2, 0.1, 1.05],
+      [0.8, 0.5, 0.95],
+      [1.5, 0.1, 1.10],
+      [0.7, 0.8, 0.90],
+      [1.1, 0.3, 1.00],
+      [1.3, 0.2, 1.08],
+      [0.9, 0.4, 0.96]
+    ];
+  }
+
+  get safetyMargin() {
+    return Number((this.cogsSafetyFloorRatio - 1.0).toFixed(2));
+  }
+
+  get regularizer() {
+    return this.densityPenaltyWeight;
+  }
+
+  get featureDim() {
+    return 5;
+  }
+
+  extractStateFeatures(state) {
+    const cogs = Math.max(1, Number(state.cogs) || 100000);
+    const basePrice = Math.max(1, Number(state.basePrice) || Math.round(cogs * 1.3));
+    const competitorPrice = Math.max(1, Number(state.competitorPrice) || basePrice);
+    const demandIndex = Math.max(0, Math.min(2.5, state.demandIndex !== undefined ? Number(state.demandIndex) : 1.0));
+    const inventoryUrgency = Math.max(0, Math.min(1.0, state.inventoryUrgency !== undefined ? Number(state.inventoryUrgency) : 0.2));
+
+    return [
+      Math.log(cogs) / 15.0,
+      Math.log(basePrice) / 15.0,
+      Math.log(competitorPrice) / 15.0,
+      demandIndex,
+      inventoryUrgency
+    ];
+  }
+
+  estimateDataDensity(state, action) {
+    const demandIndex = state.demandIndex !== undefined ? Number(state.demandIndex) : 1.0;
+    const inventoryUrgency = state.inventoryUrgency !== undefined ? Number(state.inventoryUrgency) : 0.2;
+    const act = Number(action) || 1.0;
+
+    const point = [demandIndex, inventoryUrgency, act];
+    let totalKernel = 0;
+    const bwSq = this.bandwidth * this.bandwidth;
+
+    for (const anchor of this.supportAnchors) {
+      let distSq = 0;
+      for (let i = 0; i < point.length; i++) {
+        const diff = point[i] - anchor[i];
+        distSq += diff * diff;
+      }
+      totalKernel += Math.exp(-distSq / (2 * bwSq));
+    }
+
+    const avgDensity = totalKernel / this.supportAnchors.length;
+    return Number(Math.max(1e-4, Math.min(1.0, avgDensity)).toFixed(4));
+  }
+
+  computeSpotPenalty(state, action) {
+    const density = this.estimateDataDensity(state, action);
+    const shortfall = Math.max(0, this.densityThreshold - density);
+    const penalty = this.densityPenaltyWeight * shortfall;
+    return {
+      density,
+      shortfall: Number(shortfall.toFixed(4)),
+      penalty: Number(penalty.toFixed(4))
+    };
+  }
+
+  evaluateNominalQ(state, action) {
+    const demandIndex = state.demandIndex !== undefined ? Number(state.demandIndex) : 1.0;
+    const inventoryUrgency = state.inventoryUrgency !== undefined ? Number(state.inventoryUrgency) : 0.2;
+    const competitorRatio = (state.competitorPrice && state.basePrice)
+      ? state.competitorPrice / state.basePrice
+      : 1.0;
+
+    const conversion = Math.max(0.01, Math.min(0.95, (1.20 - 0.70 * action) * demandIndex));
+    const clearanceBonus = inventoryUrgency * (1.10 - action) * 0.3;
+    const compAdvantage = (competitorRatio - action) * 0.15;
+
+    return Number((action * conversion + clearanceBonus + compAdvantage).toFixed(4));
+  }
+
+  evaluatePenalizedQ(state, action) {
+    const nominalQ = this.evaluateNominalQ(state, action);
+    const spotInfo = this.computeSpotPenalty(state, action);
+    const penalizedQ = nominalQ - spotInfo.penalty;
+    return {
+      nominalQ,
+      penalizedQ: Number(penalizedQ.toFixed(4)),
+      density: spotInfo.density,
+      spotPenalty: spotInfo.penalty
+    };
+  }
+
+  optimizePrice(item) {
+    const cogs = Math.max(1000, Number(item.cogs) || 100000);
+    const basePrice = Math.max(1, Number(item.basePrice) || Math.round(cogs * 1.3));
+    const competitorPrice = Number(item.competitorPrice) || basePrice;
+    const demandIndex = item.demandIndex !== undefined ? Number(item.demandIndex) : 1.0;
+    const inventoryUrgency = item.inventoryUrgency !== undefined ? Number(item.inventoryUrgency) : 0.2;
+
+    const state = { cogs, basePrice, competitorPrice, demandIndex, inventoryUrgency };
+
+    let bestAction = 1.0;
+    let bestPenalizedQ = -Infinity;
+    let bestDetails = null;
+
+    for (const a of this.candidateMultipliers) {
+      const qEval = this.evaluatePenalizedQ(state, a);
+      if (qEval.penalizedQ > bestPenalizedQ) {
+        bestPenalizedQ = qEval.penalizedQ;
+        bestAction = a;
+        bestDetails = qEval;
+      }
+    }
+
+    let calculatedPrice = Math.round(basePrice * bestAction);
+    const safetyFloor = Math.round(cogs * this.cogsSafetyFloorRatio);
+    const safetyCeiling = Math.max(safetyFloor, Math.round(competitorPrice * this.competitorCeilingRatio));
+
+    let decisionTag = "SPOT_DENSITY_SUPPORTED_OPTIMAL";
+
+    if (calculatedPrice < safetyFloor) {
+      calculatedPrice = safetyFloor;
+      decisionTag = "FLOOR_OVERRIDE_COGS_SECURED";
+    } else if (calculatedPrice > safetyCeiling) {
+      calculatedPrice = safetyCeiling;
+      decisionTag = "CEILING_OVERRIDE_COMPETITOR_RESTRICTED";
+    }
+
+    const grossMarginVnd = calculatedPrice - cogs;
+    const marginPercent = Number(((grossMarginVnd / calculatedPrice) * 100).toFixed(2));
+
+    return {
+      proposedPrice: calculatedPrice,
+      basePrice,
+      cogs,
+      competitorPrice,
+      actionMultiplier: Number(bestAction.toFixed(4)),
+      bestMultiplier: Number(bestAction.toFixed(4)),
+      bestPenalizedQ: Number(bestPenalizedQ.toFixed(4)),
+      nominalQ: bestDetails ? bestDetails.nominalQ : 0,
+      densityScore: bestDetails ? bestDetails.density : 0,
+      spotPenalty: bestDetails ? bestDetails.spotPenalty : 0,
+      isFloorEnforced: calculatedPrice === safetyFloor,
+      decisionTag,
+      marginAnalysis: {
+        grossMarginVnd,
+        marginPercent,
+        safetyFloorVnd: safetyFloor,
+        safetyCeilingVnd: safetyCeiling
+      }
+    };
+  }
+
+  batchOptimize(items = []) {
+    return (items || []).map(item => this.optimizePrice(item));
+  }
+
+  getModelSummary() {
+    return {
+      algorithm: "SpotDynamicPricing",
+      cogsSafetyFloorRatio: this.cogsSafetyFloorRatio,
+      competitorCeilingRatio: this.competitorCeilingRatio,
+      densityThreshold: this.densityThreshold,
+      densityPenaltyWeight: this.densityPenaltyWeight,
+      bandwidth: this.bandwidth,
+      anchorsCount: this.supportAnchors.length
+    };
+  }
+}
+
+export class VRPTWSoftTimeWindowsRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || { id: 'SPX_CENTRAL_HUB', lat: 21.0285, lng: 105.8542 };
+    this.vehicleCapacityKg = options.vehicleCapacityKg || 120.0;
+    this.fleetSize = Math.max(1, options.fleetSize || 3);
+    this.vanSpeedKmh = options.vanSpeedKmh || 28.0;
+    this.serviceDwellPerStopMin = options.serviceDwellPerStopMin !== undefined ? options.serviceDwellPerStopMin : 5.0;
+    this.fuelCostPerKm = options.fuelCostPerKm || 1800;
+    this.earlyWaitCostPerMin = options.earlyWaitCostPerMin !== undefined ? options.earlyWaitCostPerMin : 100;
+    this.latePenaltyPerMin = options.latePenaltyPerMin !== undefined ? options.latePenaltyPerMin : 500;
+    this.maxTolerableLateMin = options.maxTolerableLateMin || 60;
+  }
+
+  calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(3));
+  }
+
+  evaluateSoftWindow(arrivalTimeMin, timeWindow = [480, 600]) {
+    const [earliest, latest] = timeWindow;
+    let status = "ON_TIME";
+    let earlyWaitMin = 0;
+    let lateMin = 0;
+    let penaltyCostVnd = 0;
+    let departureTimeMin = arrivalTimeMin + this.serviceDwellPerStopMin;
+
+    if (arrivalTimeMin < earliest) {
+      status = "EARLY_WAIT";
+      earlyWaitMin = earliest - arrivalTimeMin;
+      penaltyCostVnd = Math.round(earlyWaitMin * this.earlyWaitCostPerMin);
+      departureTimeMin = earliest + this.serviceDwellPerStopMin;
+    } else if (arrivalTimeMin > latest) {
+      status = "LATE_PENALIZED";
+      lateMin = arrivalTimeMin - latest;
+      penaltyCostVnd = Math.round(lateMin * this.latePenaltyPerMin);
+      departureTimeMin = arrivalTimeMin + this.serviceDwellPerStopMin;
+    }
+
+    const isTolerable = lateMin <= this.maxTolerableLateMin;
+
+    return {
+      status,
+      earlyWaitMin: Number(earlyWaitMin.toFixed(1)),
+      lateMin: Number(lateMin.toFixed(1)),
+      penaltyCostVnd,
+      departureTimeMin: Number(departureTimeMin.toFixed(1)),
+      isTolerable
+    };
+  }
+
+  planSoftTimeWindowRoutes(stops = [], depot = this.depot, startMinuteOfDay = 480) {
+    if (!stops || stops.length === 0) {
+      return {
+        status: "EMPTY_STOPS",
+        summary: {
+          totalStops: 0,
+          activeVehicles: 0,
+          totalDistanceKm: 0,
+          totalFuelCostVnd: 0,
+          totalEarlyWaitMinutes: 0,
+          totalEarlyWaitCostVnd: 0,
+          totalLateMinutes: 0,
+          totalLatenessPenaltyVnd: 0,
+          totalGeneralizedCostVnd: 0,
+          onTimeStopsCount: 0,
+          lateStopsCount: 0,
+          earlyStopsCount: 0,
+          onTimeRatePercent: 100.0,
+          unassignedStopsCount: 0
+        },
+        routes: []
+      };
+    }
+
+    const unassigned = [...stops];
+    const routes = [];
+    let overallDistanceKm = 0;
+    let overallFuelCostVnd = 0;
+    let overallEarlyWaitMin = 0;
+    let overallEarlyWaitCostVnd = 0;
+    let overallLateMin = 0;
+    let overallLatePenaltyVnd = 0;
+    let onTimeCount = 0;
+    let earlyCount = 0;
+    let lateCount = 0;
+
+    for (let vIdx = 0; vIdx < this.fleetSize && unassigned.length > 0; vIdx++) {
+      const vehicleId = `SPX_VAN_${vIdx + 1}`;
+      let currentLat = depot.lat;
+      let currentLng = depot.lng;
+      let currentTime = startMinuteOfDay;
+      let currentPayload = 0;
+      let routeDistanceKm = 0;
+      let routeEarlyCost = 0;
+      let routeLatePenalty = 0;
+      const visitedStops = [];
+
+      while (unassigned.length > 0) {
+        let bestStopIdx = -1;
+        let bestGeneralizedDelta = Infinity;
+        let bestDistance = 0;
+        let bestWindowEval = null;
+
+        for (let i = 0; i < unassigned.length; i++) {
+          const candidate = unassigned[i];
+          const demand = Number(candidate.demandKg) || 1.0;
+
+          if (currentPayload + demand > this.vehicleCapacityKg) {
+            continue;
+          }
+
+          const dist = this.calculateDistance(currentLat, currentLng, candidate.lat, candidate.lng);
+          const transitTimeMin = (dist / this.vanSpeedKmh) * 60;
+          const arrivalTime = currentTime + transitTimeMin;
+          const windowEval = this.evaluateSoftWindow(arrivalTime, candidate.timeWindow || [startMinuteOfDay, startMinuteOfDay + 480]);
+
+          if (!windowEval.isTolerable) {
+            continue;
+          }
+
+          const incrementalFuelCost = dist * this.fuelCostPerKm;
+          const generalizedDelta = incrementalFuelCost + windowEval.penaltyCostVnd;
+
+          if (generalizedDelta < bestGeneralizedDelta) {
+            bestGeneralizedDelta = generalizedDelta;
+            bestStopIdx = i;
+            bestDistance = dist;
+            bestWindowEval = windowEval;
+          }
+        }
+
+        if (bestStopIdx === -1) {
+          break;
+        }
+
+        const [chosenStop] = unassigned.splice(bestStopIdx, 1);
+        const demand = Number(chosenStop.demandKg) || 1.0;
+        currentPayload += demand;
+        routeDistanceKm += bestDistance;
+
+        const transitTimeMin = (bestDistance / this.vanSpeedKmh) * 60;
+        const arrivalTime = currentTime + transitTimeMin;
+
+        if (bestWindowEval.status === "ON_TIME") {
+          onTimeCount += 1;
+        } else if (bestWindowEval.status === "EARLY_WAIT") {
+          earlyCount += 1;
+        } else {
+          lateCount += 1;
+        }
+
+        overallEarlyWaitMin += bestWindowEval.earlyWaitMin;
+        overallEarlyWaitCostVnd += (bestWindowEval.status === "EARLY_WAIT" ? bestWindowEval.penaltyCostVnd : 0);
+        overallLateMin += bestWindowEval.lateMin;
+        overallLatePenaltyVnd += (bestWindowEval.status === "LATE_PENALIZED" ? bestWindowEval.penaltyCostVnd : 0);
+
+        routeEarlyCost += (bestWindowEval.status === "EARLY_WAIT" ? bestWindowEval.penaltyCostVnd : 0);
+        routeLatePenalty += (bestWindowEval.status === "LATE_PENALIZED" ? bestWindowEval.penaltyCostVnd : 0);
+
+        visitedStops.push({
+          stopId: chosenStop.id,
+          lat: chosenStop.lat,
+          lng: chosenStop.lng,
+          demandKg: demand,
+          distanceFromLastKm: Number(bestDistance.toFixed(2)),
+          arrivalTimeMin: Number(arrivalTime.toFixed(1)),
+          departureTimeMin: bestWindowEval.departureTimeMin,
+          timeWindowStatus: bestWindowEval.status,
+          earlyWaitMin: bestWindowEval.earlyWaitMin,
+          lateMin: bestWindowEval.lateMin,
+          penaltyCostVnd: bestWindowEval.penaltyCostVnd
+        });
+
+        currentLat = chosenStop.lat;
+        currentLng = chosenStop.lng;
+        currentTime = bestWindowEval.departureTimeMin;
+      }
+
+      if (visitedStops.length > 0) {
+        const returnDist = this.calculateDistance(currentLat, currentLng, depot.lat, depot.lng);
+        routeDistanceKm += returnDist;
+        const returnTime = (returnDist / this.vanSpeedKmh) * 60;
+        currentTime += returnTime;
+
+        const routeFuelCostVnd = Math.round(routeDistanceKm * this.fuelCostPerKm);
+        overallDistanceKm += routeDistanceKm;
+        overallFuelCostVnd += routeFuelCostVnd;
+
+        routes.push({
+          vehicleId,
+          stopsCount: visitedStops.length,
+          totalPayloadKg: Number(currentPayload.toFixed(2)),
+          routeDistanceKm: Number(routeDistanceKm.toFixed(2)),
+          routeDurationMin: Number((currentTime - startMinuteOfDay).toFixed(1)),
+          fuelCostVnd: routeFuelCostVnd,
+          earlyWaitCostVnd: routeEarlyCost,
+          latenessPenaltyVnd: routeLatePenalty,
+          routeGeneralizedCostVnd: routeFuelCostVnd + routeEarlyCost + routeLatePenalty,
+          stops: visitedStops
+        });
+      }
+    }
+
+    const totalAssigned = stops.length - unassigned.length;
+    const onTimeRatePercent = totalAssigned > 0
+      ? Number(((onTimeCount / totalAssigned) * 100).toFixed(1))
+      : 100.0;
+    const totalGeneralizedCostVnd = overallFuelCostVnd + overallEarlyWaitCostVnd + overallLatePenaltyVnd;
+
+    return {
+      status: "VRPTW_SOFT_SUCCESS",
+      summary: {
+        totalStops: totalAssigned,
+        activeVehicles: routes.length,
+        totalDistanceKm: Number(overallDistanceKm.toFixed(2)),
+        totalFuelCostVnd: overallFuelCostVnd,
+        totalEarlyWaitMinutes: Number(overallEarlyWaitMin.toFixed(1)),
+        totalEarlyWaitCostVnd: overallEarlyWaitCostVnd,
+        totalLateMinutes: Number(overallLateMin.toFixed(1)),
+        totalLatenessPenaltyVnd: overallLatePenaltyVnd,
+        totalGeneralizedCostVnd,
+        onTimeStopsCount: onTimeCount,
+        earlyStopsCount: earlyCount,
+        lateStopsCount: lateCount,
+        onTimeRatePercent,
+        unassignedStopsCount: unassigned.length
+      },
+      routes
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -31905,6 +32487,10 @@ export default {
   FastAGMSSketch,
   BCQDynamicPricing,
   MTVRPTWLogisticsRouter,
+  // Phase 62 Enterprise Algorithms
+  LossyCountingHeavyHitters,
+  SpotDynamicPricing,
+  VRPTWSoftTimeWindowsRouter,
 };
 
 
