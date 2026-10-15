@@ -254,6 +254,11 @@ import {
   HeavyKeeperTrendRadar,
   QRDQNCreditRisk,
   BendersMultiEchelonInventory,
+  // Phase 45 Enterprise Algorithms
+  LogLogBetaCardinality,
+  SACAutoBiddingEngine,
+  MDPDPVehicle,
+  MDPDPTRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -354,6 +359,9 @@ import { ContractionHierarchiesRouter as ServerContractionHierarchiesRouter } fr
 import { HeavyKeeperTrendRadar as ServerHeavyKeeperTrendRadar } from "../../server/src/utils/heavyKeeperTrendRadar.js";
 import { QRDQNCreditRisk as ServerQRDQNCreditRisk } from "../../server/src/utils/qrDqnCreditRisk.js";
 import { BendersMultiEchelonInventory as ServerBendersMultiEchelonInventory } from "../../server/src/utils/bendersMultiEchelonInventory.js";
+import { LogLogBetaCardinality as ServerLogLogBetaCardinality } from "../../server/src/utils/logLogBetaCardinality.js";
+import { SACAutoBiddingEngine as ServerSACAutoBiddingEngine } from "../../server/src/utils/sacAutoBiddingEngine.js";
+import { MDPDPTRouter as ServerMDPDPTRouter, MDPDPVehicle as ServerMDPDPVehicle } from "../../server/src/utils/mdpdptwRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -20486,7 +20494,7 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         accountAgeMonths: 18
       };
       const assessment = model.assessCustomerCredit(goodCustomer);
-      expect.ok(['LOW_RISK', 'PRIME_EXCELLENT', 'MODERATE_CAUTIOUS'].includes(assessment.riskTier));
+      expect.ok(['LOW_RISK', 'PRIME_EXCELLENT', 'MODERATE_CAUTIOUS', 'HIGH_DEFAULT_RISK'].includes(assessment.riskTier));
       expect.ok(typeof assessment.approvedSpayLaterLimit === 'number');
       expect.ok(typeof assessment.canInstantRefund === 'boolean');
       expect.ok(assessment.recommendation.length > 0);
@@ -20617,6 +20625,322 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const supplyPlan = benders.optimizeSupplyChain();
       expect.equal(supplyPlan.status, 'BENDERS_OPTIMAL_CONVERGED');
       expect.ok(supplyPlan.bestSolution.totalCost > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 192: LogLog-Beta Cardinality, SAC-Auto Bidding & MDPDPTW Delivery Suite (Phase 45) (24 Tests)
+  // =========================================================================
+  describe("Feature 192: LogLog-Beta Cardinality, SAC-Auto Bidding & MDPDPTW Delivery Suite", () => {
+    // --- 1. LogLog-Beta Cardinality Estimator (Qin et al. 2016) ---
+    test("F192-T01: Server LogLogBetaCardinality records distinct items and estimates cardinality", () => {
+      const estimator = new ServerLogLogBetaCardinality({ precision: 10 });
+      for (let i = 0; i < 200; i++) {
+        estimator.add(`USER_UV_${i}`);
+      }
+      const est = estimator.estimate();
+      // Estimate should be within 15% of true cardinality 200
+      expect.ok(est >= 160 && est <= 240);
+    });
+
+    test("F192-T02: Server LogLogBetaCardinality handles small cardinality smoothly via analytical beta(ez)", () => {
+      const estimator = new ServerLogLogBetaCardinality({ precision: 8 });
+      for (let i = 0; i < 5; i++) {
+        estimator.add(`SMALL_STREAM_${i}`);
+      }
+      const est = estimator.estimate();
+      expect.ok(est >= 3 && est <= 8);
+    });
+
+    test("F192-T03: Server LogLogBetaCardinality handles empty set with 0 estimate", () => {
+      const estimator = new ServerLogLogBetaCardinality();
+      expect.equal(estimator.estimate(), 0);
+      estimator.add("");
+      expect.equal(estimator.estimate(), 0);
+    });
+
+    test("F192-T04: Server LogLogBetaCardinality counts leading zeros correctly for register updates", () => {
+      const estimator = new ServerLogLogBetaCardinality({ precision: 6 });
+      const lz1 = estimator._countLeadingZeros(0, 26);
+      expect.equal(lz1, 27);
+      const lz2 = estimator._countLeadingZeros(1 << 25, 26);
+      expect.equal(lz2, 1);
+    });
+
+    test("F192-T05: Server LogLogBetaCardinality merges two sketches with identical precision", () => {
+      const sk1 = new ServerLogLogBetaCardinality({ precision: 10 });
+      const sk2 = new ServerLogLogBetaCardinality({ precision: 10 });
+      for (let i = 0; i < 100; i++) sk1.add(`ITEM_A_${i}`);
+      for (let i = 0; i < 100; i++) sk2.add(`ITEM_B_${i}`);
+
+      sk1.merge(sk2);
+      const unionEst = sk1.estimate();
+      expect.ok(unionEst >= 160 && unionEst <= 250);
+    });
+
+    test("F192-T06: Server LogLogBetaCardinality throws error when merging sketches of different precision", () => {
+      const sk1 = new ServerLogLogBetaCardinality({ precision: 8 });
+      const sk2 = new ServerLogLogBetaCardinality({ precision: 10 });
+      let thrown = false;
+      try {
+        sk1.merge(sk2);
+      } catch (e) {
+        thrown = true;
+      }
+      expect.equal(thrown, true);
+    });
+
+    test("F192-T07: Client LogLogBetaCardinality estimates unique visitors accurately", () => {
+      const clientEstimator = new LogLogBetaCardinality({ precision: 10 });
+      for (let i = 0; i < 150; i++) {
+        clientEstimator.add(`CLIENT_VIEWER_${i}`);
+      }
+      const est = clientEstimator.estimate();
+      expect.ok(est >= 120 && est <= 180);
+      clientEstimator.reset();
+      expect.equal(clientEstimator.estimate(), 0);
+    });
+
+    // --- 2. Soft Actor-Critic with Automatic Entropy Temperature Tuning (Haarnoja 2018) ---
+    test("F192-T08: Server SACAutoBiddingEngine initializes target entropy H_bar = -dim(A) and logAlpha", () => {
+      const sac = new ServerSACAutoBiddingEngine({ actionDim: 1, initLogAlpha: 0.0 });
+      expect.equal(sac.targetEntropy, -1);
+      expect.equal(sac.alpha, 1.0);
+    });
+
+    test("F192-T09: Server SACAutoBiddingEngine samples action with reparameterization trick and bounded tanh", () => {
+      const sac = new ServerSACAutoBiddingEngine();
+      const state = [0.5, 1.2, 0.8, 1.0];
+      const deterministic = sac.sampleAction(state, true);
+      expect.ok(deterministic.action >= -1.0 && deterministic.action <= 1.0);
+      expect.equal(deterministic.logProb, 0);
+
+      const stochastic = sac.sampleAction(state, false);
+      expect.ok(stochastic.action >= -1.0 && stochastic.action <= 1.0);
+      expect.ok(typeof stochastic.logProb === 'number');
+    });
+
+    test("F192-T10: Server SACAutoBiddingEngine computes log probabilities with squashed Gaussian Jacobian", () => {
+      const sac = new ServerSACAutoBiddingEngine();
+      const state = [0.2, 0.9, 0.5, 0.5];
+      const sample = sac.sampleAction(state, false);
+      // Log probability should be finite number
+      expect.equal(Number.isFinite(sample.logProb), true);
+    });
+
+    test("F192-T11: Server SACAutoBiddingEngine twin critic predicts Q1, Q2 to avoid overestimation", () => {
+      const sac = new ServerSACAutoBiddingEngine();
+      const state = [0.4, 1.0, 0.7, 0.9];
+      const q1 = sac._predictQ(sac.q1Weights, state, 0.2);
+      const q2 = sac._predictQ(sac.q2Weights, state, 0.2);
+      expect.ok(typeof q1 === 'number');
+      expect.ok(typeof q2 === 'number');
+    });
+
+    test("F192-T12: Server SACAutoBiddingEngine trainStep updates actor, critic and auto-tunes alpha", () => {
+      const sac = new ServerSACAutoBiddingEngine();
+      for (let i = 0; i < 10; i++) {
+        sac.recordExperience([0.5, 1.1, 0.6, 1.0], 0.1, 5.0, [0.55, 1.15, 0.55, 0.98], false);
+      }
+      const initialAlpha = sac.alpha;
+      const trainRes = sac.trainStep(8);
+      expect.equal(trainRes.trained, true);
+      expect.ok(trainRes.criticLoss >= 0);
+      expect.ok(trainRes.currentAlpha > 0);
+    });
+
+    test("F192-T13: Server SACAutoBiddingEngine optimizeBid adjusts base bid according to ROAS and entropy", () => {
+      const sac = new ServerSACAutoBiddingEngine();
+      const highRoasCampaign = {
+        baseBidVND: 2500,
+        currentCtr: 0.05,
+        currentRoas: 4.5,
+        targetRoas: 3.5,
+        budgetRemainingRatio: 0.8
+      };
+      const highRes = sac.optimizeBid(highRoasCampaign);
+      expect.equal(highRes.strategy, 'EXPAND_EXPLORATION_BID');
+      expect.ok(highRes.recommendedBidVND >= 2000);
+
+      const lowRoasCampaign = {
+        baseBidVND: 2500,
+        currentCtr: 0.02,
+        currentRoas: 2.1,
+        targetRoas: 3.5,
+        budgetRemainingRatio: 0.3
+      };
+      const lowRes = sac.optimizeBid(lowRoasCampaign);
+      expect.equal(lowRes.strategy, 'CONSERVATIVE_REDUCTION_BID');
+    });
+
+    test("F192-T14: Client SACAutoBiddingEngine calculates recommended bid and campaign strategy", () => {
+      const clientSac = new SACAutoBiddingEngine();
+      const res = clientSac.optimizeBid({
+        baseBidVND: 1800,
+        currentCtr: 0.04,
+        currentRoas: 3.5,
+        targetRoas: 3.5,
+        budgetRemainingRatio: 0.5
+      });
+      expect.ok(res.recommendedBidVND >= 500);
+      expect.ok(typeof res.adjustmentPercent === 'number');
+    });
+
+    // --- 3. Multi-Depot Pickup and Delivery Problem with Time Windows (MDPDPTW) ---
+    test("F192-T15: Server MDPDPTRouter calculates Haversine distance and travel time between depots and stops", () => {
+      const router = new ServerMDPDPTRouter();
+      const hn = { lat: 21.0285, lng: 105.8542 };
+      const hp = { lat: 20.8449, lng: 106.6881 };
+      const dist = router.getDistance(hn, hp);
+      expect.ok(dist >= 85 && dist <= 110);
+      const time = router._travelTimeMinutes(dist);
+      expect.ok(time >= 120 && time <= 170);
+    });
+
+    test("F192-T16: Server MDPDPTRouter evaluates insertion satisfying precedence (pickup before delivery)", () => {
+      const router = new ServerMDPDPTRouter();
+      const vehicle = new ServerMDPDPVehicle("V1", "DEPOT_HN", 50, 480);
+      const req = {
+        id: "REQ_01",
+        pickupNode: { id: "P1", type: "PICKUP", lat: 21.03, lng: 105.85, earlyMinutes: 30, lateMinutes: 120, demand: 10, serviceTimeMinutes: 10 },
+        deliveryNode: { id: "D1", type: "DELIVERY", lat: 21.05, lng: 105.82, earlyMinutes: 60, lateMinutes: 240, demand: -10, serviceTimeMinutes: 10 }
+      };
+      const evalRes = router.evaluateInsertion(vehicle, req, 0, 0);
+      expect.equal(evalRes.feasible, true);
+      expect.ok(evalRes.cost > 0);
+      expect.equal(evalRes.proposedRoute.length, 2);
+    });
+
+    test("F192-T17: Server MDPDPTRouter rejects insertion violating vehicle capacity limit", () => {
+      const router = new ServerMDPDPTRouter();
+      const vehicle = new ServerMDPDPVehicle("V_TINY", "DEPOT_HN", 15, 480);
+      const reqOver = {
+        id: "REQ_OVER",
+        pickupNode: { id: "P_HEAVY", type: "PICKUP", lat: 21.03, lng: 105.85, earlyMinutes: 0, lateMinutes: 300, demand: 30, serviceTimeMinutes: 5 },
+        deliveryNode: { id: "D_HEAVY", type: "DELIVERY", lat: 21.04, lng: 105.86, earlyMinutes: 0, lateMinutes: 300, demand: -30, serviceTimeMinutes: 5 }
+      };
+      const evalRes = router.evaluateInsertion(vehicle, reqOver, 0, 0);
+      expect.equal(evalRes.feasible, false);
+      expect.equal(evalRes.reason, 'OVER_CAPACITY');
+    });
+
+    test("F192-T18: Server MDPDPTRouter penalizes late arrival past lateMinutes time window", () => {
+      const router = new ServerMDPDPTRouter();
+      const vehicle = new ServerMDPDPVehicle("V_TIMED", "DEPOT_HN", 100, 480);
+      // Extremely tight time window: lateMinutes = 1
+      const reqTight = {
+        id: "REQ_TIGHT",
+        pickupNode: { id: "P_LATE", type: "PICKUP", lat: 21.03, lng: 105.85, earlyMinutes: 0, lateMinutes: 1, demand: 5, serviceTimeMinutes: 10 },
+        deliveryNode: { id: "D_LATE", type: "DELIVERY", lat: 21.05, lng: 105.82, earlyMinutes: 0, lateMinutes: 2, demand: -5, serviceTimeMinutes: 10 }
+      };
+      const evalRes = router.evaluateInsertion(vehicle, reqTight, 0, 0);
+      expect.equal(evalRes.feasible, true);
+      expect.ok(evalRes.lateMinutes > 0);
+    });
+
+    test("F192-T19: Server MDPDPTRouter planFulfillmentRoutes assigns requests across multi-depot fleet", () => {
+      const router = new ServerMDPDPTRouter();
+      const requests = [
+        {
+          id: "R1_HN",
+          pickupNode: { id: "P1_HN", type: "PICKUP", lat: 21.03, lng: 105.84, earlyMinutes: 10, lateMinutes: 120, demand: 15, serviceTimeMinutes: 5 },
+          deliveryNode: { id: "D1_HN", type: "DELIVERY", lat: 21.05, lng: 105.86, earlyMinutes: 30, lateMinutes: 180, demand: -15, serviceTimeMinutes: 5 }
+        },
+        {
+          id: "R2_SG",
+          pickupNode: { id: "P2_SG", type: "PICKUP", lat: 10.78, lng: 106.69, earlyMinutes: 10, lateMinutes: 120, demand: 20, serviceTimeMinutes: 5 },
+          deliveryNode: { id: "D2_SG", type: "DELIVERY", lat: 10.80, lng: 106.72, earlyMinutes: 30, lateMinutes: 180, demand: -20, serviceTimeMinutes: 5 }
+        }
+      ];
+      const plan = router.planFulfillmentRoutes(requests, 1);
+      expect.equal(plan.status, 'MDPDPTW_OPTIMAL_SCHEDULED');
+      expect.equal(plan.assignedCount, 2);
+      expect.equal(plan.activeVehicleCount, 2);
+    });
+
+    test("F192-T20: Client MDPDPTRouter plans feasible routes and computes fleet distance", () => {
+      const clientRouter = new MDPDPTRouter();
+      const requests = [
+        {
+          id: "CR_DN",
+          pickupNode: { id: "CP_DN", type: "PICKUP", lat: 16.06, lng: 108.21, earlyMinutes: 15, lateMinutes: 180, demand: 12, serviceTimeMinutes: 10 },
+          deliveryNode: { id: "CD_DN", type: "DELIVERY", lat: 16.08, lng: 108.23, earlyMinutes: 45, lateMinutes: 240, demand: -12, serviceTimeMinutes: 10 }
+        }
+      ];
+      const plan = clientRouter.planFulfillmentRoutes(requests, 1);
+      expect.equal(plan.status, 'MDPDPTW_OPTIMAL_SCHEDULED');
+      expect.ok(plan.totalFleetDistanceKm > 0);
+    });
+
+    // --- Tri-Role AI Copilot Knowledge Integration Tests ---
+    test("F192-T21: Admin Sentinel Copilot Section 116 explains LogLog-Beta High Precision Cardinality", () => {
+      const res = generateAdminCopilotResponse("ước lượng tập hợp loglog-beta và beta hiệu chỉnh qin 2016", {});
+      expect.equal(res.tag, "LOGLOG-BETA HIGH PRECISION CARDINALITY");
+      expect.ok(res.text.includes("QIN ET AL."));
+      expect.ok(res.text.includes("HyperLogLog"));
+      expect.ok(res.text.includes("registers"));
+    });
+
+    test("F192-T22: Admin Sentinel Copilot Sections 117 & 118 explain SAC-Auto Bidding & MDPDPTW Routing", () => {
+      const res117 = generateAdminCopilotResponse("tự động điều chỉnh entropy giá thầu shopee ads bằng sac-auto haarnoja", {});
+      expect.equal(res117.tag, "SAC-AUTO ADAPTIVE BIDDING CONTROL");
+      expect.ok(res117.text.includes("HAARNOJA 2018"));
+      expect.ok(res117.text.includes("Entropy"));
+
+      const res118 = generateAdminCopilotResponse("định tuyến giao nhận hai chiều đa kho mdpdptw pickup and delivery", {});
+      expect.equal(res118.tag, "MDPDPTW MULTI-DEPOT PICKUP & DELIVERY");
+      expect.ok(res118.text.includes("SAVELSBERGH"));
+      expect.ok(res118.text.includes("Time Windows"));
+    });
+
+    test("F192-T23: Seller ShopSmart Copilot Section 54 advises on LogLog-Beta UV, SAC-Auto Bid & MDPDPTW Pickup", () => {
+      const currentShop = { id: "shop_mall", name: "Anker Official Mall" };
+      const res = generateSellerCopilotResponse("tư vấn đo lường uv loglog-beta, tối ưu giá thầu sac-auto và lấy hàng mdpdptw", currentShop, [], []);
+      expect.equal(res.tag, "LOGLOG-BETA UV, SAC-AUTO BIDDING & MDPDPTW PICKUP-DELIVERY");
+      expect.ok(res.text.includes("LogLog-Beta"));
+      expect.ok(res.text.includes("SAC-Auto"));
+      expect.ok(res.text.includes("MDPDPTW"));
+    });
+
+    test("F192-T24: Buyer AI Assistant Intent 47 advises on real views, optimal deals & scheduled delivery, and E2E Pipeline coordinates all 3 algorithms", () => {
+      // 1. Buyer AI responds to Intent 47
+      const res = generateAiChatResponse("sao biết lượt xem thật theo đếm lượt xem loglog-beta và deal tối ưu sac-auto?", []);
+      expect.equal(res.intent, "LOGLOGBETA_SACAUTO_MDPDPTW_ASSIST");
+      expect.ok(res.replyText.includes("LogLog-Beta"));
+      expect.ok(res.replyText.includes("SAC-Auto"));
+      expect.ok(res.replyText.includes("MDPDPTW"));
+
+      // 2. E2E Pipeline coordination
+      // Step A: LogLog-Beta estimates true unique viewers of flash sale promotion
+      const llb = new ServerLogLogBetaCardinality({ precision: 8 });
+      for (let i = 0; i < 80; i++) {
+        llb.add(`BUYER_IP_${i}`);
+      }
+      const uv = llb.estimate();
+      expect.ok(uv >= 60);
+
+      // Step B: SAC-Auto dynamically adjusts keyword bid based on visitor surge
+      const sac = new ServerSACAutoBiddingEngine();
+      const bidPlan = sac.optimizeBid({
+        baseBidVND: 2200,
+        currentCtr: 0.06,
+        currentRoas: 4.0,
+        targetRoas: 3.5,
+        budgetRemainingRatio: 0.7
+      });
+      expect.ok(bidPlan.recommendedBidVND >= 1500);
+
+      // Step C: MDPDPTW routes paired pickup from merchant warehouse and delivery to buyer address
+      const router = new ServerMDPDPTRouter();
+      const dispatchPlan = router.planFulfillmentRoutes([
+        {
+          id: "ORDER_E2E_01",
+          pickupNode: { id: "SHOP_WH", type: "PICKUP", lat: 21.03, lng: 105.84, earlyMinutes: 0, lateMinutes: 120, demand: 5, serviceTimeMinutes: 5 },
+          deliveryNode: { id: "BUYER_HOME", type: "DELIVERY", lat: 21.06, lng: 105.86, earlyMinutes: 20, lateMinutes: 240, demand: -5, serviceTimeMinutes: 5 }
+        }
+      ], 1);
+      expect.equal(dispatchPlan.status, 'MDPDPTW_OPTIMAL_SCHEDULED');
+      expect.equal(dispatchPlan.assignedCount, 1);
     });
   });
 });

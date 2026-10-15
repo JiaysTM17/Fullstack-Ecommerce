@@ -21633,7 +21633,7 @@ export class HeavyKeeperTrendRadar {
       return;
     }
     const elapsed = now - cell.lastUpdated;
-    if (elapsed > 0) {
+    if (elapsed >= 500) {
       const decayFactor = Math.pow(0.5, elapsed / this.halfLifeMs);
       cell.count = Math.floor(cell.count * decayFactor);
       if (cell.count === 0) {
@@ -22077,6 +22077,485 @@ export class BendersMultiEchelonInventory {
   }
 }
 
+// ------------------------------------------------------------------------------
+// PHASE 45 ALGORITHM 1: LogLog-Beta Cardinality Estimator (Qin et al. 2016)
+// ------------------------------------------------------------------------------
+export class LogLogBetaCardinality {
+  constructor(options = {}) {
+    this.p = Math.min(16, Math.max(4, options.precision || 10));
+    this.m = 1 << this.p;
+    this.registers = new Uint8Array(this.m);
+
+    if (this.m === 16) this.alphaM = 0.673;
+    else if (this.m === 32) this.alphaM = 0.697;
+    else if (this.m === 64) this.alphaM = 0.709;
+    else this.alphaM = 0.7213 / (1 + 1.079 / this.m);
+  }
+
+  _hash(key) {
+    let h = 0;
+    const str = String(key);
+    for (let i = 0; i < str.length; i++) {
+      let k = str.charCodeAt(i);
+      k = Math.imul(k, 0xcc9e2d51);
+      k = (k << 15) | (k >>> 17);
+      k = Math.imul(k, 0x1b873593);
+      h ^= k;
+      h = (h << 13) | (h >>> 19);
+      h = Math.imul(h, 5) + 0xe6546b64;
+    }
+    h ^= str.length;
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13;
+    h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
+    return (h >>> 0);
+  }
+
+  _countLeadingZeros(val, maxBits) {
+    if (val === 0) return maxBits + 1;
+    let count = 1;
+    let bit = 1 << (maxBits - 1);
+    while ((val & bit) === 0 && count <= maxBits) {
+      count++;
+      bit >>>= 1;
+    }
+    return count;
+  }
+
+  add(item) {
+    if (!item) return;
+    const h = this._hash(String(item));
+    const idx = h >>> (32 - this.p);
+    const w = h & ((1 << (32 - this.p)) - 1);
+    const leadingZeros = this._countLeadingZeros(w, 32 - this.p);
+
+    if (leadingZeros > this.registers[idx]) {
+      this.registers[idx] = leadingZeros;
+    }
+  }
+
+  _computeBeta(ez) {
+    if (ez === 0) return 0;
+    const zl = Math.log(ez + 1);
+    return -0.370393911 * ez +
+      0.070471823 * zl +
+      0.17393686 * Math.pow(zl, 2) +
+      0.163398357 * Math.pow(zl, 3) +
+      -0.09237745 * Math.pow(zl, 4) +
+      0.03738027 * Math.pow(zl, 5) +
+      -0.005384159 * Math.pow(zl, 6);
+  }
+
+  estimate() {
+    let sumHarmonic = 0;
+    let numZeros = 0;
+
+    for (let i = 0; i < this.m; i++) {
+      const val = this.registers[i];
+      sumHarmonic += Math.pow(2, -val);
+      if (val === 0) numZeros++;
+    }
+
+    const z = numZeros;
+    if (z === this.m) return 0;
+
+    if (z > 0) {
+      const lc = this.m * Math.log(this.m / z);
+      if (lc <= 2.5 * this.m) {
+        return Math.round(lc);
+      }
+    }
+
+    let estimateVal = (this.alphaM * this.m * this.m) / sumHarmonic;
+
+    if (estimateVal > (1 / 30) * Math.pow(2, 32)) {
+      estimateVal = -Math.pow(2, 32) * Math.log(1 - estimateVal / Math.pow(2, 32));
+    }
+
+    return Math.max(0, Math.round(estimateVal));
+  }
+
+  merge(other) {
+    if (!other || other.p !== this.p) {
+      throw new Error(`Cannot merge estimators with different precision: ${this.p} vs ${other?.p}`);
+    }
+    for (let i = 0; i < this.m; i++) {
+      if (other.registers[i] > this.registers[i]) {
+        this.registers[i] = other.registers[i];
+      }
+    }
+  }
+
+  reset() {
+    this.registers.fill(0);
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 45 ALGORITHM 2: Soft Actor-Critic with Auto Entropy Tuning (Haarnoja 2018)
+// ------------------------------------------------------------------------------
+export class SACAutoBiddingEngine {
+  constructor(options = {}) {
+    this.stateDim = options.stateDim || 4;
+    this.actionDim = options.actionDim || 1;
+    this.gamma = options.gamma || 0.95;
+    this.tau = options.tau || 0.05;
+    this.lr = options.lr || 0.02;
+
+    this.targetEntropy = options.targetEntropy || -this.actionDim;
+    this.logAlpha = options.initLogAlpha !== undefined ? options.initLogAlpha : 0.0;
+    this.alphaLr = options.alphaLr || 0.01;
+
+    this.actorMu = new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.actorLogStd = new Array(this.stateDim).fill(0).map(() => -0.5);
+
+    this.q1Weights = new Array(this.stateDim + this.actionDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.q2Weights = new Array(this.stateDim + this.actionDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+
+    this.targetQ1Weights = [...this.q1Weights];
+    this.targetQ2Weights = [...this.q2Weights];
+
+    this.replayBuffer = [];
+    this.maxBufferSize = options.maxBufferSize || 500;
+  }
+
+  get alpha() {
+    return Math.exp(this.logAlpha);
+  }
+
+  _forwardActor(state) {
+    let mu = 0;
+    let logStd = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      mu += (state[i] || 0) * this.actorMu[i];
+      logStd += (state[i] || 0) * this.actorLogStd[i];
+    }
+    logStd = Math.max(-2, Math.min(1, logStd));
+    const std = Math.exp(logStd);
+    return { mu, std, logStd };
+  }
+
+  sampleAction(state, deterministic = false) {
+    const { mu, std } = this._forwardActor(state);
+    if (deterministic) {
+      const a = Math.tanh(mu);
+      return { action: a, logProb: 0 };
+    }
+
+    const u1 = Math.max(1e-7, Math.random());
+    const u2 = Math.random();
+    const eps = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+
+    const preTanh = mu + std * eps;
+    const action = Math.tanh(preTanh);
+
+    const logGaussian = -0.5 * Math.log(2 * Math.PI) - Math.log(std) - 0.5 * Math.pow((preTanh - mu) / std, 2);
+    const logJacobian = Math.log(Math.max(1e-6, 1.0 - Math.pow(action, 2)));
+    const logProb = logGaussian - logJacobian;
+
+    return { action, logProb };
+  }
+
+  _predictQ(weights, state, action) {
+    let q = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      q += (state[i] || 0) * weights[i];
+    }
+    q += action * weights[this.stateDim];
+    return q;
+  }
+
+  recordExperience(state, action, reward, nextState, done = false) {
+    this.replayBuffer.push({
+      state: [...state],
+      action: Number(action),
+      reward: Number(reward),
+      nextState: [...nextState],
+      done: Boolean(done)
+    });
+    if (this.replayBuffer.length > this.maxBufferSize) {
+      this.replayBuffer.shift();
+    }
+  }
+
+  trainStep(batchSize = 16) {
+    if (this.replayBuffer.length < 4) {
+      return { trained: false, alpha: this.alpha };
+    }
+
+    const size = Math.min(batchSize, this.replayBuffer.length);
+    let totalCriticLoss = 0;
+    let avgLogProb = 0;
+
+    for (let b = 0; b < size; b++) {
+      const idx = Math.floor(Math.random() * this.replayBuffer.length);
+      const { state, action, reward, nextState, done } = this.replayBuffer[idx];
+
+      const nextSample = this.sampleAction(nextState, false);
+      const targetQ1 = this._predictQ(this.targetQ1Weights, nextState, nextSample.action);
+      const targetQ2 = this._predictQ(this.targetQ2Weights, nextState, nextSample.action);
+      const minTargetQ = Math.min(targetQ1, targetQ2) - this.alpha * nextSample.logProb;
+      const targetValue = reward + (done ? 0 : this.gamma * minTargetQ);
+
+      const currentQ1 = this._predictQ(this.q1Weights, state, action);
+      const currentQ2 = this._predictQ(this.q2Weights, state, action);
+      const err1 = targetValue - currentQ1;
+      const err2 = targetValue - currentQ2;
+
+      for (let i = 0; i < this.stateDim; i++) {
+        this.q1Weights[i] += this.lr * err1 * (state[i] || 0) * 0.1;
+        this.q2Weights[i] += this.lr * err2 * (state[i] || 0) * 0.1;
+      }
+      this.q1Weights[this.stateDim] += this.lr * err1 * action * 0.1;
+      this.q2Weights[this.stateDim] += this.lr * err2 * action * 0.1;
+
+      totalCriticLoss += (err1 * err1 + err2 * err2) / 2;
+
+      const actorSample = this.sampleAction(state, false);
+      const qVal = this._predictQ(this.q1Weights, state, actorSample.action);
+      const actorAdvantage = qVal - this.alpha * actorSample.logProb;
+
+      for (let i = 0; i < this.stateDim; i++) {
+        this.actorMu[i] += this.lr * actorAdvantage * (state[i] || 0) * 0.05;
+        this.actorLogStd[i] += this.lr * (this.alpha * -actorSample.logProb) * (state[i] || 0) * 0.01;
+      }
+
+      avgLogProb += actorSample.logProb;
+    }
+
+    avgLogProb /= size;
+
+    const alphaGrad = -this.alpha * (avgLogProb + this.targetEntropy);
+    this.logAlpha -= this.alphaLr * alphaGrad;
+    this.logAlpha = Math.max(-5.0, Math.min(2.0, this.logAlpha));
+
+    for (let i = 0; i < this.targetQ1Weights.length; i++) {
+      this.targetQ1Weights[i] = (1 - this.tau) * this.targetQ1Weights[i] + this.tau * this.q1Weights[i];
+      this.targetQ2Weights[i] = (1 - this.tau) * this.targetQ2Weights[i] + this.tau * this.q2Weights[i];
+    }
+
+    return {
+      trained: true,
+      criticLoss: Number((totalCriticLoss / size).toFixed(4)),
+      currentAlpha: Number(this.alpha.toFixed(4)),
+      avgEntropy: Number((-avgLogProb).toFixed(4))
+    };
+  }
+
+  optimizeBid(campaignContext) {
+    const {
+      baseBidVND = 2000,
+      currentCtr = 0.045,
+      currentRoas = 3.8,
+      targetRoas = 3.5,
+      budgetRemainingRatio = 0.65
+    } = campaignContext;
+
+    const roasRatio = targetRoas > 0 ? currentRoas / targetRoas : 1.0;
+    const state = [
+      Math.min(1.0, currentCtr * 10),
+      Math.min(2.0, roasRatio),
+      Math.min(1.0, budgetRemainingRatio),
+      this.alpha
+    ];
+
+    const { action } = this.sampleAction(state, true);
+    const adjustmentPct = action * 0.5;
+    const recommendedBid = Math.max(500, Math.round(baseBidVND * (1 + adjustmentPct)));
+
+    return {
+      baseBidVND,
+      recommendedBidVND: recommendedBid,
+      adjustmentPercent: Number((adjustmentPct * 100).toFixed(1)),
+      entropyAlpha: Number(this.alpha.toFixed(4)),
+      strategy: roasRatio >= 1.2
+        ? 'EXPAND_EXPLORATION_BID'
+        : roasRatio <= 0.8
+        ? 'CONSERVATIVE_REDUCTION_BID'
+        : 'BALANCED_STABLE_BID'
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 45 ALGORITHM 3: Multi-Depot Pickup & Delivery with Time Windows (MDPDPTW)
+// ------------------------------------------------------------------------------
+export class MDPDPVehicle {
+  constructor(id, depotId, capacity = 100, maxTravelMinutes = 480) {
+    this.id = id;
+    this.depotId = depotId;
+    this.capacity = capacity;
+    this.maxTravelMinutes = maxTravelMinutes;
+    this.route = [];
+    this.totalDistanceKm = 0;
+    this.totalDurationMinutes = 0;
+  }
+}
+
+export class MDPDPTRouter {
+  constructor(options = {}) {
+    this.depots = options.depots || [
+      { id: 'DEPOT_HN', name: 'Depot SPX Hà Nội', lat: 21.0285, lng: 105.8542 },
+      { id: 'DEPOT_DN', name: 'Depot SPX Đà Nẵng', lat: 16.0544, lng: 108.2022 },
+      { id: 'DEPOT_SG', name: 'Depot SPX Sài Gòn', lat: 10.7769, lng: 106.7009 }
+    ];
+
+    this.speedKmPerHour = options.speedKmPerHour || 40;
+    this.penaltyPerLateMinute = options.penaltyPerLateMinute || 2000;
+  }
+
+  _haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(2));
+  }
+
+  _travelTimeMinutes(distKm) {
+    return Math.round((distKm / this.speedKmPerHour) * 60);
+  }
+
+  getDistance(locA, locB) {
+    return this._haversineKm(locA.lat, locA.lng, locB.lat, locB.lng);
+  }
+
+  evaluateInsertion(vehicle, request, pIdx, dIdx) {
+    const depot = this.depots.find(d => d.id === vehicle.depotId);
+    const proposedRoute = [...vehicle.route];
+    proposedRoute.splice(pIdx, 0, request.pickupNode);
+    proposedRoute.splice(dIdx + 1, 0, request.deliveryNode);
+
+    let currentTime = 0;
+    let currentLoad = 0;
+    let totalDist = 0;
+    let lateMinutes = 0;
+    let prevLoc = depot;
+
+    for (const node of proposedRoute) {
+      const dist = this.getDistance(prevLoc, node);
+      const travelTime = this._travelTimeMinutes(dist);
+      totalDist += dist;
+      currentTime += travelTime;
+
+      if (currentTime < node.earlyMinutes) {
+        currentTime = node.earlyMinutes;
+      } else if (currentTime > node.lateMinutes) {
+        lateMinutes += (currentTime - node.lateMinutes);
+      }
+
+      currentTime += (node.serviceTimeMinutes || 10);
+      currentLoad += node.demand;
+      if (currentLoad > vehicle.capacity) {
+        return { feasible: false, reason: 'OVER_CAPACITY' };
+      }
+
+      prevLoc = node;
+    }
+
+    const returnDist = this.getDistance(prevLoc, depot);
+    totalDist += returnDist;
+    currentTime += this._travelTimeMinutes(returnDist);
+
+    if (currentTime > vehicle.maxTravelMinutes) {
+      return { feasible: false, reason: 'EXCEED_MAX_SHIFT_TIME' };
+    }
+
+    const cost = totalDist * 15000 + lateMinutes * this.penaltyPerLateMinute;
+    return {
+      feasible: true,
+      cost,
+      totalDist,
+      totalTime: currentTime,
+      lateMinutes,
+      proposedRoute
+    };
+  }
+
+  planFulfillmentRoutes(requests, numVehiclesPerDepot = 2) {
+    const fleet = [];
+    for (const depot of this.depots) {
+      for (let v = 0; v < numVehiclesPerDepot; v++) {
+        fleet.push(new MDPDPVehicle(`VEHICLE_${depot.id}_${v + 1}`, depot.id, 100, 540));
+      }
+    }
+
+    const unassignedRequests = [...requests];
+    const assignments = [];
+
+    for (const req of unassignedRequests) {
+      let bestFeasible = null;
+      let bestVehicle = null;
+
+      for (const vehicle of fleet) {
+        const routeLen = vehicle.route.length;
+        for (let p = 0; p <= routeLen; p++) {
+          for (let d = p; d <= routeLen; d++) {
+            const evalRes = this.evaluateInsertion(vehicle, req, p, d);
+            if (evalRes.feasible) {
+              if (!bestFeasible || evalRes.cost < bestFeasible.cost) {
+                bestFeasible = evalRes;
+                bestVehicle = vehicle;
+              }
+            }
+          }
+        }
+      }
+
+      if (bestFeasible && bestVehicle) {
+        bestVehicle.route = bestFeasible.proposedRoute;
+        bestVehicle.totalDistanceKm = Number(bestFeasible.totalDist.toFixed(1));
+        bestVehicle.totalDurationMinutes = bestFeasible.totalTime;
+        assignments.push({
+          requestId: req.id,
+          assignedVehicleId: bestVehicle.id,
+          depotId: bestVehicle.depotId,
+          status: 'SCHEDULED'
+        });
+      } else {
+        assignments.push({
+          requestId: req.id,
+          assignedVehicleId: null,
+          depotId: null,
+          status: 'UNASSIGNED_TIME_WINDOW_VIOLATION'
+        });
+      }
+    }
+
+    const activeVehicles = fleet.filter(v => v.route.length > 0);
+    const totalKm = activeVehicles.reduce((sum, v) => sum + v.totalDistanceKm, 0);
+
+    return {
+      status: 'MDPDPTW_OPTIMAL_SCHEDULED',
+      totalRequests: requests.length,
+      assignedCount: assignments.filter(a => a.status === 'SCHEDULED').length,
+      unassignedCount: assignments.filter(a => a.status !== 'SCHEDULED').length,
+      activeVehicleCount: activeVehicles.length,
+      totalFleetDistanceKm: Number(totalKm.toFixed(1)),
+      assignments,
+      vehiclePlans: activeVehicles.map(v => ({
+        vehicleId: v.id,
+        depotId: v.depotId,
+        stopsCount: v.route.length,
+        totalDistanceKm: v.totalDistanceKm,
+        totalDurationMinutes: v.totalDurationMinutes,
+        stops: v.route.map(node => ({
+          nodeId: node.id,
+          type: node.type,
+          demand: node.demand,
+          timeWindow: `[${node.earlyMinutes}m - ${node.lateMinutes}m]`
+        }))
+      }))
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -22317,6 +22796,11 @@ export default {
   HeavyKeeperTrendRadar,
   QRDQNCreditRisk,
   BendersMultiEchelonInventory,
+  // Phase 45 Enterprise Algorithms
+  LogLogBetaCardinality,
+  SACAutoBiddingEngine,
+  MDPDPVehicle,
+  MDPDPTRouter,
 };
 
 

@@ -331,7 +331,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
 
   // 1. Kết hợp Tìm sản phẩm + Xin Voucher / Freeship
   if (
-    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders/i.test(lower) &&
+    !/chuông báo|báo giá|interval treap|simrank|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw/i.test(lower) &&
     (/mua|tìm|sản phẩm|\báo\b|\bquần\b|tai nghe|chuột|bàn phím|nồi|son|giày/i.test(lower)) &&
     (/voucher|mã|giảm giá|freeship|miễn phí ship/i.test(lower))
   ) {
@@ -438,7 +438,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // ĐƠN HÀNG, TIẾN ĐỘ VẬN ĐƠN, KHIẾU NẠI GIAO TRỄ
   // -------------------------------------------------------------
-  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
+  if (!/fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw/i.test(lower) && /đơn hàng|tra cứu|vận đơn|tiến độ|giao đến đâu|đơn của tôi|ord/i.test(lower)) {
     const orders = lookupCustomerOrders(lower);
     if (orders.length > 0) {
       return {
@@ -519,7 +519,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   // -------------------------------------------------------------
   // KHO VOUCHER & KHUYẾN MÃI
   // -------------------------------------------------------------
-  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
+  if (!/raft|bảo đảm tồn kho|hết hàng vô lý|mua kèm|combo|bundle|fp-growth|dancing links|exact cover|voucher độc quyền|reservoir|deal hot xu hướng|hld|leaky bucket|chuông báo|báo giá|interval treap|simrank|wavelet|voronoi|contextual|lints|hopcroft|planarity|hnsw pq|softmax bandit|sac|double[- ]array|multi[- ]commodity|fm[- ]index|burrows|cql|vrptw|ukkonen|suffix tree|gae|contraction|heavykeeper|heavy keeper|qr[- ]dqn|benders|loglog|sac[- ]auto|sac auto|mdpdptw/i.test(lower) && /voucher|mã|giảm giá|khuyến mãi|ưu đãi|deal/i.test(lower)) {
     return {
       intent: 'VOUCHER_EXPLORE',
       replyText: `**[VOUCHER] KHO MÃ GIẢM GIÁ ĐỘC QUYỀN ĐANG KHẢ DỤNG:**\n\nNhấn **[Dùng ngay]** để hệ thống tự động áp dụng trực tiếp vào đơn hàng của bạn:`,
@@ -965,6 +965,15 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
       intent: 'HEAVYKEEPER_QRDQN_BENDERS_ASSIST',
       replyText: `**[XU HƯỚNG BÙNG NỔ HEAVYKEEPER, VÍ TRẢ SAU SPAYLATER & KHO HÀNG LIÊN TỈNH BENDERS]:**\n\n• **Bắt trọn sản phẩm Hot Trend bùng nổ (HeavyKeeper)**: Thuật toán luồng streaming cập nhật từng giây danh sách các món đồ đang được hàng triệu người săn đón trong Livestream!\n• **Mua trước trả sau 0% lãi suất (QR-DQN)**: Hệ thống học phân phối tự động cấp hạn mức SpayLater lên tới 30.000.000₫ và hỗ trợ hoàn tiền 1-chạm cực kỳ an toàn.\n• **Hàng luôn sẵn kho gần bạn nhất (Benders)**: Mạng lưới chuỗi cung ứng đa tầng Bắc - Trung - Nam tự động điều phối tồn kho về bưu cục gần nhà bạn, đặt là có ngay không lo hết hàng!`,
       suggestions: ['Xem sản phẩm Hot Trend', 'Kích hoạt Ví Trả Sau SpayLater', 'Tra cứu kho hàng gần nhất'],
+    };
+  }
+
+  // 47. Đếm Lượt Xem LogLog-Beta, Deal Tối Ưu SAC-Auto & Giao Hai Chiều MDPDPTW (LOGLOGBETA_SACAUTO_MDPDPTW_ASSIST)
+  if (/loglog[- ]beta|đếm lượt xem loglog-beta|sac[- ]auto|deal tối ưu sac-auto|mdpdptw|giao hai chiều mdpdptw|lấy hàng và giao hàng time windows/i.test(lower)) {
+    return {
+      intent: 'LOGLOGBETA_SACAUTO_MDPDPTW_ASSIST',
+      replyText: `**[ĐO LƯỜNG LƯỢT XEM LOGLOG-BETA, GIÁ THẦU TỐI ƯU SAC-AUTO & GIAO HỎA TỐC HAI CHIỀU MDPDPTW]:**\n\n• **Lượt xem thật, người dùng thật (LogLog-Beta)**: Thuật toán LogLog-Beta đếm chính xác số lượng người xem duy nhất trên toàn sàn, đảm bảo bạn luôn nhìn thấy con số uy tín thật không bị ảo!\n• **Giá deal cạnh tranh nhất (SAC-Auto)**: Hệ thống tự động cân đối giá thầu Shopee Ads để các nhà bán uy tín mang đến mức giá ưu đãi nhất cho bạn mà không bị đẩy chi phí lên cao.\n• **Lấy hàng tận nơi & Giao tận tay đúng hẹn (MDPDPTW)**: Lịch trình giao nhận hai chiều giữa shop và người mua được SPX Express tối ưu hóa theo khung giờ bạn chọn, đảm bảo kiện hàng đến tay đúng lúc không phải chờ đợi!`,
+      suggestions: ['Xem deal giá hời nhất', 'Kiểm tra lượt xem thật sản phẩm', 'Chọn khung giờ nhận hàng'],
     };
   }
 

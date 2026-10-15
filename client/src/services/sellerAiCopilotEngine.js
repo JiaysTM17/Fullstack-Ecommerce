@@ -1091,6 +1091,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 54. Đo Lường UV LogLog-Beta, Tối Ưu Thầu SAC-Auto & Lấy Giao Hai Chiều MDPDPTW (Phase 45 - Feature 192)
+  if (/loglog[- ]beta|đo lường uv loglog-beta|sac[- ]auto|tối ưu giá thầu sac-auto|mdpdptw|lấy hàng giao hàng mdpdptw/i.test(raw)) {
+    return {
+      text: `📈 **ĐO LƯỜNG UV LOGLOG-BETA, TỐI ƯU THẦU SAC-AUTO & LẤY GIAO HAI CHIỀU MDPDPTW (${currentShop.name})**:
+- **Đo lường lượng khách truy cập duy nhất (UV) chính xác tuyệt đối (LogLog-Beta)**:
+  - Công thức hiệu chỉnh beta(tau) giải tích giúp shop theo dõi số lượt xem duy nhất trên từng trang sản phẩm và gian hàng mà không bị lệch sai số ở quy mô nhỏ.
+- **Tự động tinh chỉnh giá thầu Shopee Ads với SAC-Auto**:
+  - Hệ thống tự động cân chỉnh nhiệt độ entropy alpha, tự động tăng bid cho các từ khóa đem lại ROAS cao và tiết kiệm ngân sách khi thị trường cạnh tranh gay gắt.
+- **Lấy hàng tận kho và giao hàng theo khung giờ hẹn (MDPDPTW)**:
+  - Xe SPX Express được điều phối tối ưu theo bài toán MDPDPTW ghé kho shop lấy hàng đúng khung giờ cam kết (Pickup Time Window) và chuyển phát trực tiếp tới khách hàng trong ngày!`,
+      type: 'recommendation',
+      tag: 'LOGLOG-BETA UV, SAC-AUTO BIDDING & MDPDPTW PICKUP-DELIVERY',
+      suggestions: [
+        'Xem thống kê UV LogLog-Beta',
+        'Tối ưu hóa giá thầu Shopee Ads SAC-Auto',
+        'Kiểm tra lịch lấy hàng SPX MDPDPTW'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

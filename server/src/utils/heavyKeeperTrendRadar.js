@@ -123,7 +123,7 @@ class HeavyKeeperTrendRadar {
       return;
     }
     const elapsed = now - cell.lastUpdated;
-    if (elapsed > 0) {
+    if (elapsed >= 500) {
       const decayFactor = Math.pow(0.5, elapsed / this.halfLifeMs);
       cell.count = Math.floor(cell.count * decayFactor);
       if (cell.count === 0) {

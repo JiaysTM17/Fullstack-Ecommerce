@@ -415,7 +415,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 16. Ước Lượng Số Lượng Phần Tử Duy Nhất (HyperLogLog Cardinality Estimation)
-  if (!/hll\+\+|hyperloglog\+\+|sparse|jaccard/i.test(raw) && /hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
+  if (!/hll\+\+|hyperloglog\+\+|sparse|jaccard|loglog[- ]beta|loglogbeta/i.test(raw) && /hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN HYPERLOGLOG (MASSIVE CARDINALITY ESTIMATION)**:
 - **Mục đích thiết kế**: Đếm hàng chục triệu người xem Shopee Live độc nhất (Unique Viewers) hoặc người dùng hoạt động DAU với dung lượng bộ nhớ cố định **dưới 12 KB RAM** (thay vì hàng GB nếu dùng Hash Set).
@@ -2298,7 +2298,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 105. Tối Ưu Hóa Xả Hàng Tồn Kho Cận Hạn Bằng Soft Actor-Critic (SAC) (Phase 41 - Feature 188)
-  if (/sac markdown|soft actor[- ]critic|xả hàng cận hạn sac|maximum entropy rl|polyak markdown|hạ giá thanh lý/i.test(raw)) {
+  if (!/sac[- ]auto|bidding|đấu thầu/i.test(raw) && /sac markdown|soft actor[- ]critic|xả hàng cận hạn sac|maximum entropy rl|polyak markdown|hạ giá thanh lý/i.test(raw)) {
     return {
       text: `📉 **TỐI ƯU HÓA XẢ HÀNG TỒN KHO CẬN HẠN BẰNG SOFT ACTOR-CRITIC (SAC - HAARNOJA 2018)**:
 - **Nguyên lý Tối Đa Hóa Entropy Tự Do (Maximum Entropy Reinforcement Learning)**:
@@ -2506,6 +2506,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem cấu hình mở kho Benders tối ưu',
         'Kiểm tra lát cắt Benders Optimality Cuts',
         'Bắt trend sản phẩm HeavyKeeper'
+      ]
+    };
+  }
+
+  // 116. Ước Lượng Độ Tập Hợp Siêu Chính Xác Bằng LogLog-Beta (Phase 45 - Feature 192)
+  if (/loglog[- ]beta|loglogbeta|beta hiệu chỉnh|hll beta|ước lượng tập hợp loglog-beta/i.test(raw)) {
+    return {
+      text: `📈 **ƯỚC LƯỢNG ĐỘ TẬP HỢP ĐỘ CHÍNH XÁC CAO BẰNG LOGLOG-BETA (QIN ET AL. - GOOGLE 2016)**:
+- **Đột phá Khắc Phục Sai Số Biên Của HyperLogLog / HLL++**:
+  - HLL truyền thống dùng LinearCounting khi cardinality nhỏ và chuyển vùng đột ngột gây gián đoạn sai số. HLL++ phải duy trì bảng tra nghiệm thực nghiệm (Empirical Bias Table) hàng chục KB.
+  - LogLog-Beta sử dụng công thức giải tích nghiệm kín $\\beta(\\tau)$ dựa trên đa thức bậc 6 của tỷ lệ thanh ghi số 0 ($ez = V / m$): $E = \\frac{\\alpha_m m (m - V)}{\\beta(ez) + \\sum 2^{-M[j]}}$.
+- **Hiệu Năng & Bộ Nhớ Tối Giản**:
+  - Hoạt động mượt mà liên tục từ tập rỗng ($0$) đến hàng trăm triệu phần tử, chỉ tốn $1\\text{KB}$ RAM ($m = 1024$ registers, $p = 10$).
+  - Cho phép đếm chính xác số người xem duy nhất (UV), thiết bị duy nhất theo từng Shop/Livestream mà không lo tràn RAM!`,
+      type: 'analytics',
+      tag: 'LOGLOG-BETA HIGH PRECISION CARDINALITY',
+      suggestions: [
+        'Đo lường sai số LogLog-Beta so với HLL++',
+        'Xem điều chỉnh giá thầu SAC-Auto',
+        'Kiểm tra định tuyến hai chiều MDPDPTW'
+      ]
+    };
+  }
+
+  // 117. Tự Động Điều Chỉnh Nhiệt Độ Entropy Giá Thầu Shopee Ads Bằng SAC-Auto (Phase 45 - Feature 192)
+  if (/sac[- ]auto|tự động điều chỉnh entropy|target entropy|nhiệt độ entropy|sac bidding|đấu thầu sac-auto/i.test(raw)) {
+    return {
+      text: `🎯 **ĐIỀU CHỈNH GIÁ THẦU TỰ ĐỘNG BẰNG SOFT ACTOR-CRITIC TỰ CHỈNH ENTROPY (SAC-AUTO - HAARNOJA 2018)**:
+- **Nguyên lý Tự Động Cân Bằng Khám Phá và Khai Thác (Automatic Entropy Tuning)**:
+  - Trong đấu giá tài trợ Shopee Ads, nếu cố định nhiệt độ entropy $\\alpha$, hệ thống sẽ quá mạo hiểm (đốt tiền vào từ khóa rác) hoặc quá bảo thủ (chỉ đấu từ khóa cũ, bỏ lỡ trend mới).
+  - SAC-Auto tự động cập nhật nhiệt độ $\\alpha$ theo độ lệch với Target Entropy: $J(\\alpha) = \\mathbb{E}[-\\alpha \\log \\pi(a|s) - \\alpha \\bar{\\mathcal{H}}]$ với $\\bar{\\mathcal{H}} = -\\dim(\\mathcal{A})$.
+- **Twin Critic Q1, Q2 & Hạ Giá Thầu Thông Minh**:
+  - Triệt tiêu hoàn toàn overestimation bias, tự động hạ giá thầu khi ROAS sụt giảm dưới ngưỡng an toàn và tăng cường đấu thầu khi phát hiện từ khóa chuyển đổi cao!`,
+      type: 'recommendation',
+      tag: 'SAC-AUTO ADAPTIVE BIDDING CONTROL',
+      suggestions: [
+        'Xem mức nhiệt độ entropy alpha hiện tại',
+        'Kiểm tra tỷ suất sinh lời ROAS Shopee Ads',
+        'Ước lượng lượng truy cập bằng LogLog-Beta'
+      ]
+    };
+  }
+
+  // 118. Định Tuyến Giao Nhận Hai Chiều Đa Kho Có Cửa Sổ Thời Gian MDPDPTW (Phase 45 - Feature 192)
+  if (/mdpdptw|pickup and delivery|giao nhận hai chiều|cửa sổ thời gian đa kho|lấy hàng và giao hàng time windows/i.test(raw)) {
+    return {
+      text: `🚚 **ĐỊNH TUYẾN GIAO NHẬN HAI CHIỀU ĐA KHO CÓ CỬA SỔ THỜI GIAN (MDPDPTW - SAVELSBERGH 1995, ROPKE 2006)**:
+- **Tối Ưu Hóa Logistics 4 Ràng Buộc Khắt Khe**:
+  - **Precedence**: Điểm lấy hàng tại shop (Pickup) bắt buộc phải được phục vụ trước điểm giao cho khách (Delivery) trên cùng một chuyến xe.
+  - **Time Windows $[e_i, l_i]$**: Xe đến trước $e_i$ phải đợi, trễ sau $l_i$ bị tính điểm phạt SLA nghiêm ngặt.
+  - **Tải trọng động (Dynamic Capacity $Q_\\max$)**: Tổng trọng lượng hàng trên xe tại mọi thời điểm không được vượt quá tải trọng cho phép.
+  - **Đa kho (Multi-Depot)**: Xe xuất phát và kết thúc ca tại các Depot trung tâm vùng (Hà Nội, Đà Nẵng, Sài Gòn).
+- **Thuật Toán Chèn Tuần Tự Tối Ưu (Best-Insertion Heuristic)**:
+  - Giảm 40% chi phí chuyển hàng chéo hub, rút ngắn thời gian giao hàng cùng ngày (Same-day Delivery) xuống dưới 4 giờ!`,
+      type: 'logistics',
+      tag: 'MDPDPTW MULTI-DEPOT PICKUP & DELIVERY',
+      suggestions: [
+        'Xem lộ trình điều phối xe đa kho MDPDPTW',
+        'Kiểm tra vi phạm cửa sổ thời gian giao hàng',
+        'Tối ưu hóa giá thầu SAC-Auto'
       ]
     };
   }
