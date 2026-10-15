@@ -99,7 +99,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 4. Phân Tích Hiệu Suất Shopee Ads & Đấu Thầu Từ Khóa (Ads ROI & ROAS)
-  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
+  if (!/maddpg|primal[- ]dual|ivf[- ]pq|dueling|dqn|quadtree|manku|gsp|quality score|điểm chất lượng|ad rank|pid|pacing|anti-windup|td3|twin delayed|sac[- ]auto|count[- ]sketch|sdvrptw|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d/i.test(raw) && /quảng cáo|ads|roas|cpc|ctr|từ khóa|đấu thầu|hiệu quả ads/i.test(raw)) {
     return {
       text: `🎯 **PHÂN TÍCH HIỆU SUẤT QUẢNG CÁO SHOPEE ADS (${currentShop.name})**:
 - **Chỉ số ROAS mục tiêu**: Khuyến nghị duy trì **ROAS ≥ 3.5x** (Mỗi 1.000₫ tiền quảng cáo đem lại ít nhất 3.500₫ doanh thu).
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1327,6 +1327,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Khai phá cặp sản phẩm mua kèm Space-Saving',
         'Tối ưu hóa giá thầu an toàn CPO',
         'Xem lộ trình xe điện sạc mặt trời EVRP-BDS'
+      ]
+    };
+  }
+
+  // 66. Bộ Ba Thuật Toán Sticky Sampling, QR-DDPG CVaR Pricing & Giao Drone Tự Hành VRPTW-D (Phase 57 - Feature 204)
+  if (/sticky[- ]sampling|sticky sampling|lấy mẫu dính|qrdpg|qr-ddpg|quantile regression|cvar pricing|drone|vrptw-d|giao hàng drone/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN STICKY SAMPLING, QR-DDPG & DRONE TỰ HÀNH (${currentShop.name})**:
+- **Bắt trọn từ khóa và sản phẩm viral Sticky Sampling**:
+  - Thuật toán thích ứng luồng tự động nhân đôi tỷ lệ lấy mẫu theo số lượng giao dịch, giúp shop nắm bắt tức thì xu hướng tìm kiếm bùng nổ của khách hàng mà không cần tốn chi phí hạ tầng máy chủ lớn.
+- **Định giá phân phối QR-DDPG phòng ngừa rủi ro CVaR**:
+  - Không chỉ tối ưu doanh thu trung bình, AI phân tích 8 phân vị lợi nhuận và đo lường rủi ro đuôi (CVaR). Khi tỷ lệ trả hàng tăng cao, giá bán tự động điều chỉnh thận trọng và luôn khóa cứng sàn lợi nhuận $\\text{COGS} \\times 1.05$.
+- **Giao hỏa tốc bằng Drone tự hành kết hợp Xe tải mẹ SPX VRPTW-D**:
+  - Các bưu kiện nhẹ ($\\le 2.5\\text{kg}$) của shop được Drone tiếp vận cất cánh thẳng từ nóc xe tải, bay vượt qua các điểm kẹt xe đô thị, rút ngắn thời gian giao hàng tới $45\\%$ và giảm tối đa tỷ lệ hủy đơn do trễ hẹn!`,
+      type: 'recommendation',
+      tag: 'STICKY SAMPLING, QR-DDPG & DRONE VRPTW-D',
+      suggestions: [
+        'Xem từ khóa xu hướng Sticky Sampling',
+        'Phân tích định giá phòng vệ rủi ro QR-DDPG',
+        'Đăng ký giao hàng hỏa tốc Drone SPX'
       ]
     };
   }

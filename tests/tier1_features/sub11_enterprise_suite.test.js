@@ -312,6 +312,10 @@ import {
   CPOPricing,
   DEFAULT_SOLAR_HUBS,
   EVRPBDSRouter,
+  // Phase 57 Enterprise Algorithms
+  StickySamplingFrequentItems,
+  QRDPGElasticPricing,
+  VRPTWPDDroneRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -448,6 +452,9 @@ import { VRPTWCRSRouter as ServerVRPTWCRSRouter, DEFAULT_SMART_LOCKERS as Server
 import { SpaceSavingItemsets as ServerSpaceSavingItemsets } from "../../server/src/utils/spaceSavingItemsets.js";
 import { CPOPricing as ServerCPOPricing } from "../../server/src/utils/cpoPricing.js";
 import { EVRPBDSRouter as ServerEVRPBDSRouter, DEFAULT_SOLAR_HUBS as ServerDefaultSolarHubs } from "../../server/src/utils/evrpBdsRouter.js";
+import { StickySamplingFrequentItems as ServerStickySamplingFrequentItems } from "../../server/src/utils/stickySamplingFrequentItems.js";
+import { QRDPGElasticPricing as ServerQRDPGElasticPricing } from "../../server/src/utils/qrdpgElasticPricing.js";
+import { VRPTWPDDroneRouter as ServerVRPTWPDDroneRouter } from "../../server/src/utils/vrptwPdDroneRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -24973,6 +24980,410 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(plan.status, "EVRP_BDS_SUCCESS");
       expect.equal(plan.totalOrders, 1);
       expect.ok(plan.co2SavedKg > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 204: Sticky Sampling, QR-DDPG CVaR Pricing & VRPTW-D Drone Logistics Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 204: Sticky Sampling, QR-DDPG CVaR Pricing & VRPTW-D Drone Logistics Suite", () => {
+    // -----------------------------------------------------------------------
+    // STICKY SAMPLING FREQUENT ITEMS (Tests 1-7)
+    // -----------------------------------------------------------------------
+    test("F204-T01: StickySamplingFrequentItems initialization and default parameters", () => {
+      const sampler = new StickySamplingFrequentItems({ support: 0.05, epsilon: 0.01, delta: 0.005 });
+      expect.equal(sampler.support, 0.05);
+      expect.equal(sampler.epsilon, 0.01);
+      expect.equal(sampler.delta, 0.005);
+      expect.equal(sampler.samplingRate, 1);
+      expect.equal(sampler.totalCount, 0);
+      expect.ok(sampler.t >= 10);
+      expect.equal(sampler.nextThreshold, 2 * sampler.t);
+    });
+
+    test("F204-T02: StickySamplingFrequentItems single item updates and table insertion at r=1", () => {
+      const sampler = new StickySamplingFrequentItems({ support: 0.05, epsilon: 0.01, delta: 0.005 });
+      sampler.update("IPHONE_16_PRO");
+      sampler.update("IPHONE_16_PRO");
+      sampler.update("MACBOOK_AIR_M3");
+
+      expect.equal(sampler.totalCount, 3);
+      const est1 = sampler.estimate("IPHONE_16_PRO");
+      expect.equal(est1.estimatedFrequency, 2);
+      expect.equal(est1.item, "IPHONE_16_PRO");
+
+      const est2 = sampler.estimate("MACBOOK_AIR_M3");
+      expect.equal(est2.estimatedFrequency, 1);
+    });
+
+    test("F204-T03: StickySamplingFrequentItems handles weighted updates and total element accounting", () => {
+      const sampler = new StickySamplingFrequentItems({ support: 0.05, epsilon: 0.01, delta: 0.005 });
+      sampler.update("AIRPODS_PRO", 5);
+      expect.equal(sampler.totalCount, 5);
+      const est = sampler.estimate("AIRPODS_PRO");
+      expect.equal(est.estimatedFrequency, 5);
+    });
+
+    test("F204-T04: StickySamplingFrequentItems decays counts when totalCount crosses threshold 2t", () => {
+      // Use small t for testing decay
+      const sampler = new StickySamplingFrequentItems({ support: 0.1, epsilon: 0.05, delta: 0.05 });
+      const threshold = sampler.nextThreshold;
+      
+      // Feed elements to pass 2t
+      for (let i = 0; i < threshold + 10; i++) {
+        sampler.update(`ITEM_${i % 5}`);
+      }
+
+      expect.ok(sampler.samplingRate >= 2);
+      expect.ok(sampler.totalCount > threshold);
+    });
+
+    test("F204-T05: StickySamplingFrequentItems estimate frequency returns supportRate and isFrequent flag", () => {
+      const sampler = new StickySamplingFrequentItems({ support: 0.1, epsilon: 0.02, delta: 0.01 });
+      for (let i = 0; i < 50; i++) {
+        sampler.update("VIRAL_KEYWORD_HOT");
+      }
+      for (let i = 0; i < 50; i++) {
+        sampler.update(`NOISE_${i}`);
+      }
+
+      const est = sampler.estimate("VIRAL_KEYWORD_HOT");
+      expect.ok(est.estimatedFrequency >= 30);
+      expect.ok(est.supportRate >= 0.2);
+      expect.equal(est.isFrequent, true);
+
+      const missing = sampler.estimate("NON_EXISTENT_KEYWORD");
+      expect.equal(missing.estimatedFrequency, 0);
+      expect.equal(missing.isFrequent, false);
+    });
+
+    test("F204-T06: StickySamplingFrequentItems getFrequentItems returns heavy hitters sorted in descending order", () => {
+      const sampler = new StickySamplingFrequentItems({ support: 0.05, epsilon: 0.01, delta: 0.005 });
+      for (let i = 0; i < 40; i++) sampler.update("TOP_1_ITEM");
+      for (let i = 0; i < 20; i++) sampler.update("TOP_2_ITEM");
+      for (let i = 0; i < 5; i++) sampler.update("TOP_3_ITEM");
+
+      const heavy = sampler.getFrequentItems();
+      expect.ok(heavy.length >= 2);
+      expect.equal(heavy[0].item, "TOP_1_ITEM");
+      expect.equal(heavy[1].item, "TOP_2_ITEM");
+      expect.ok(heavy[0].estimatedFrequency >= heavy[1].estimatedFrequency);
+    });
+
+    test("F204-T07: StickySamplingFrequentItems merge combines disjoint and overlapping sketches", () => {
+      const s1 = new StickySamplingFrequentItems({ support: 0.05, epsilon: 0.01, delta: 0.005 });
+      const s2 = new StickySamplingFrequentItems({ support: 0.05, epsilon: 0.01, delta: 0.005 });
+
+      s1.update("COMMON_ITEM", 10);
+      s1.update("ONLY_IN_S1", 5);
+
+      s2.update("COMMON_ITEM", 15);
+      s2.update("ONLY_IN_S2", 8);
+
+      s1.merge(s2);
+      expect.equal(s1.totalCount, 38);
+      const estCommon = s1.estimate("COMMON_ITEM");
+      expect.ok(estCommon.estimatedFrequency >= 20);
+
+      expect.throws(() => s1.merge(null));
+    });
+
+    // -----------------------------------------------------------------------
+    // QR-DDPG ELASTIC PRICING (Tests 8-14)
+    // -----------------------------------------------------------------------
+    test("F204-T08: QRDPGElasticPricing initialization and feature normalization vector dimensions", () => {
+      const qrdpg = new QRDPGElasticPricing({ numQuantiles: 8, kappa: 1.0 });
+      expect.equal(qrdpg.numQuantiles, 8);
+      expect.equal(qrdpg.tau.length, 8);
+      expect.equal(qrdpg.tau[0], 0.5 / 8);
+
+      const norm = qrdpg.normalizeState({
+        cogs: 200000,
+        basePrice: 280000,
+        competitorPrice: 275000,
+        demandIndex: 1.2,
+        returnRiskRate: 0.08
+      });
+      expect.equal(norm.length, 5);
+      expect.ok(norm[0] > 0);
+      expect.equal(norm[3], 1.2);
+    });
+
+    test("F204-T09: QRDPGElasticPricing predictAction outputs bounded multiplier in [0.70, 1.40]", () => {
+      const qrdpg = new QRDPGElasticPricing();
+      const mult = qrdpg.predictAction({
+        cogs: 100000,
+        basePrice: 150000,
+        competitorPrice: 140000,
+        demandIndex: 1.5,
+        returnRiskRate: 0.02
+      });
+      expect.ok(mult >= 0.70 && mult <= 1.40);
+    });
+
+    test("F204-T10: QRDPGElasticPricing evaluateQuantiles produces sorted monotonic quantile distribution", () => {
+      const qrdpg = new QRDPGElasticPricing({ numQuantiles: 8 });
+      const quantiles = qrdpg.evaluateQuantiles({
+        cogs: 500000,
+        basePrice: 650000,
+        competitorPrice: 640000,
+        demandIndex: 1.1,
+        returnRiskRate: 0.05
+      }, 1.1);
+
+      expect.equal(quantiles.length, 8);
+      for (let i = 1; i < quantiles.length; i++) {
+        expect.ok(quantiles[i] >= quantiles[i - 1]);
+      }
+    });
+
+    test("F204-T11: QRDPGElasticPricing computeCVaR calculates bottom alpha percentile expected return", () => {
+      const qrdpg = new QRDPGElasticPricing({ numQuantiles: 8, cvarAlpha: 0.25 });
+      const mockQuantiles = [-1.5, -0.8, 0.2, 0.5, 0.9, 1.2, 1.8, 2.5];
+      const cvar = qrdpg.computeCVaR(mockQuantiles);
+      // For N=8, alpha=0.25 => k = ceil(0.25 * 8) = 2 bottom quantiles: (-1.5 + -0.8) / 2 = -1.15
+      expect.ok(Math.abs(cvar - (-1.15)) < 1e-4);
+    });
+
+    test("F204-T12: QRDPGElasticPricing optimizePrice enforces COGS safety floor x 1.05", () => {
+      const qrdpg = new QRDPGElasticPricing();
+      // Set actor weights to strongly depress price
+      qrdpg.actorBias = -5.0;
+      const res = qrdpg.optimizePrice({
+        cogs: 200000,
+        basePrice: 210000,
+        competitorPrice: 190000,
+        demandIndex: 0.2
+      });
+
+      expect.equal(res.decisionTag, "FLOOR_OVERRIDE_COGS_SECURED");
+      expect.equal(res.proposedPrice, 200000 * 1.05);
+      expect.ok(res.marginAnalysis.grossMarginVnd >= 10000);
+    });
+
+    test("F204-T13: QRDPGElasticPricing optimizePrice enforces competitor price ceiling x 1.15", () => {
+      const qrdpg = new QRDPGElasticPricing();
+      qrdpg.actorBias = 5.0; // Drive price high
+      const res = qrdpg.optimizePrice({
+        cogs: 100000,
+        basePrice: 300000,
+        competitorPrice: 200000,
+        demandIndex: 2.0
+      });
+
+      expect.equal(res.decisionTag, "CEILING_OVERRIDE_COMPETITOR_RESTRICTED");
+      expect.equal(res.proposedPrice, Math.round(200000 * 1.15));
+    });
+
+    test("F204-T14: QRDPGElasticPricing optimizePrice triggers CVAR_RISK_AVERSE_DAMPED on high return risk", () => {
+      const qrdpg = new QRDPGElasticPricing();
+      qrdpg.actorBias = 0.5;
+      const res = qrdpg.optimizePrice({
+        cogs: 100000,
+        basePrice: 150000,
+        competitorPrice: 160000,
+        demandIndex: 1.0,
+        returnRiskRate: 0.25 // high return rate > 15%
+      });
+
+      expect.equal(res.decisionTag, "CVAR_RISK_AVERSE_DAMPED");
+      expect.equal(res.riskMetrics.riskAversionTriggered, true);
+    });
+
+    // -----------------------------------------------------------------------
+    // VRPTW-D DRONE-ASSISTED VEHICLE ROUTING (Tests 15-19)
+    // -----------------------------------------------------------------------
+    test("F204-T15: VRPTWPDDroneRouter initialization with default mothership van, drone specs and no-fly zones", () => {
+      const router = new VRPTWPDDroneRouter();
+      expect.equal(router.vanSpeedKmh, 30.0);
+      expect.equal(router.droneSpeedKmh, 50.0);
+      expect.equal(router.droneMaxPayloadKg, 2.5);
+      expect.equal(router.droneMaxRangeKm, 15.0);
+      expect.equal(router.noFlyZones.length, 3);
+      expect.equal(router.defaultHub.id, "HUB_DONG_DA");
+    });
+
+    test("F204-T16: VRPTWPDDroneRouter checkNoFlyZone identifies locations in Ba Đình, Gia Lâm, and corridor", () => {
+      const router = new VRPTWPDDroneRouter();
+      // Near Ba Đình: 21.0360, 105.8340
+      const nfz1 = router.checkNoFlyZone(21.0365, 105.8345);
+      expect.equal(nfz1.inNoFlyZone, true);
+      expect.ok(nfz1.zoneName.includes("Ba Đình"));
+
+      // Far away in Hà Đông: 20.9700, 105.7700
+      const safe = router.checkNoFlyZone(20.9700, 105.7700);
+      expect.equal(safe.inNoFlyZone, false);
+    });
+
+    test("F204-T17: VRPTWPDDroneRouter evaluateDroneEligibility accepts light packages and flags overweight", () => {
+      const router = new VRPTWPDDroneRouter();
+      const lightOrder = {
+        id: "ORD_LIGHT",
+        lat: 21.0100,
+        lng: 105.8200,
+        weightKg: 1.2
+      };
+      const eligLight = router.evaluateDroneEligibility(lightOrder);
+      expect.equal(eligLight.eligible, true);
+      expect.equal(eligLight.recommendedMode, "DRONE_DISPATCH");
+
+      const heavyOrder = {
+        id: "ORD_HEAVY",
+        lat: 21.0100,
+        lng: 105.8200,
+        weightKg: 5.0
+      };
+      const eligHeavy = router.evaluateDroneEligibility(heavyOrder);
+      expect.equal(eligHeavy.eligible, false);
+      expect.ok(eligHeavy.reason.includes("OVERWEIGHT"));
+      expect.equal(eligHeavy.recommendedMode, "VAN_REQUIRED");
+    });
+
+    test("F204-T18: VRPTWPDDroneRouter evaluateDroneEligibility rejects delivery in No-Fly Zones", () => {
+      const router = new VRPTWPDDroneRouter();
+      const nfzOrder = {
+        id: "ORD_NFZ",
+        lat: 21.0360,
+        lng: 105.8340, // inside Ba Đình
+        weightKg: 0.8
+      };
+      const res = router.evaluateDroneEligibility(nfzOrder);
+      expect.equal(res.eligible, false);
+      expect.ok(res.reason.includes("RESTRICTED_AIRSPACE"));
+      expect.equal(res.recommendedMode, "VAN_REQUIRED");
+    });
+
+    test("F204-T19: VRPTWPDDroneRouter planDroneAssistedRoutes coordinates parallel van and drone deliveries", () => {
+      const router = new VRPTWPDDroneRouter();
+      const testOrders = [
+        { id: "ORD_1_DRONE", lat: 21.0150, lng: 105.8250, weightKg: 1.0, timeWindow: [0, 120] },
+        { id: "ORD_2_DRONE", lat: 21.0120, lng: 105.8300, weightKg: 1.5, timeWindow: [0, 120] },
+        { id: "ORD_3_VAN_HEAVY", lat: 21.0050, lng: 105.8150, weightKg: 8.0, timeWindow: [0, 120] },
+        { id: "ORD_4_VAN_NFZ", lat: 21.0360, lng: 105.8340, weightKg: 1.0, timeWindow: [0, 120] },
+      ];
+
+      const plan = router.planDroneAssistedRoutes(testOrders);
+      expect.equal(plan.summary.totalOrders, 4);
+      expect.equal(plan.summary.droneDelivered, 2);
+      expect.equal(plan.summary.vanDelivered, 2);
+      expect.ok(plan.summary.parallelTimeSavingsMin >= 0);
+      expect.ok(plan.summary.totalCo2SavedKg >= 0);
+      expect.ok(plan.summary.makespanMin > 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT-SERVER ALGORITHMIC SYMMETRY (Tests 20-22)
+    // -----------------------------------------------------------------------
+    test("F204-T20: Client and Server algorithmic symmetry: StickySamplingFrequentItems produce identical estimates and stats", () => {
+      const clientSampler = new StickySamplingFrequentItems({ support: 0.05, epsilon: 0.01, delta: 0.005 });
+      const serverSampler = new ServerStickySamplingFrequentItems({ support: 0.05, epsilon: 0.01, delta: 0.005 });
+
+      for (let i = 0; i < 20; i++) {
+        clientSampler.update("SYMMETRY_QUERY_1", 2);
+        serverSampler.update("SYMMETRY_QUERY_1", 2);
+      }
+
+      const cEst = clientSampler.estimate("SYMMETRY_QUERY_1");
+      const sEst = serverSampler.estimate("SYMMETRY_QUERY_1");
+
+      expect.equal(cEst.estimatedFrequency, sEst.estimatedFrequency);
+      expect.equal(cEst.supportRate, sEst.supportRate);
+      expect.equal(cEst.isFrequent, sEst.isFrequent);
+      expect.equal(clientSampler.totalCount, serverSampler.totalCount);
+    });
+
+    test("F204-T21: Client and Server algorithmic symmetry: QRDPGElasticPricing produce identical prices and decisions", () => {
+      const clientQR = new QRDPGElasticPricing();
+      const serverQR = new ServerQRDPGElasticPricing();
+
+      const item = {
+        cogs: 350000,
+        basePrice: 480000,
+        competitorPrice: 470000,
+        demandIndex: 1.3,
+        returnRiskRate: 0.04
+      };
+
+      const cRes = clientQR.optimizePrice(item);
+      const sRes = serverQR.optimizePrice(item);
+
+      expect.equal(cRes.proposedPrice, sRes.proposedPrice);
+      expect.equal(cRes.decisionTag, sRes.decisionTag);
+      expect.equal(cRes.actionMultiplier, sRes.actionMultiplier);
+      expect.equal(cRes.riskMetrics.expectedReturn, sRes.riskMetrics.expectedReturn);
+    });
+
+    test("F204-T22: Client and Server algorithmic symmetry: VRPTWPDDroneRouter produce identical routing plans and drone allocations", () => {
+      const clientRouter = new VRPTWPDDroneRouter();
+      const serverRouter = new ServerVRPTWPDDroneRouter();
+
+      const orders = [
+        { id: "SYM_ORD_1", lat: 21.0140, lng: 105.8220, weightKg: 1.2 },
+        { id: "SYM_ORD_2", lat: 21.0020, lng: 105.8100, weightKg: 10.0 }
+      ];
+
+      const cPlan = clientRouter.planDroneAssistedRoutes(orders);
+      const sPlan = serverRouter.planDroneAssistedRoutes(orders);
+
+      expect.equal(cPlan.summary.vanDelivered, sPlan.summary.vanDelivered);
+      expect.equal(cPlan.summary.droneDelivered, sPlan.summary.droneDelivered);
+      expect.equal(cPlan.summary.makespanMin, sPlan.summary.makespanMin);
+      expect.equal(cPlan.summary.totalCo2SavedKg, sPlan.summary.totalCo2SavedKg);
+    });
+
+    // -----------------------------------------------------------------------
+    // COPILOT INTEGRATION & END-TO-END PIPELINE (Tests 23-24)
+    // -----------------------------------------------------------------------
+    test("F204-T23: Tri-Role Copilots integration: Admin, Seller, and Buyer AI respond to Phase 57 queries", () => {
+      // 1. Admin Copilot
+      const adminRes1 = generateAdminCopilotResponse("Kiểm tra sticky sampling tần suất cao luồng");
+      expect.ok(adminRes1.text.includes("STICKY SAMPLING"));
+
+      const adminRes2 = generateAdminCopilotResponse("Phân tích định giá qrdpg rủi ro cvar");
+      expect.ok(adminRes2.text.includes("QR-DDPG"));
+
+      const adminRes3 = generateAdminCopilotResponse("Điều phối giao hàng drone tự hành vrptw-d");
+      expect.ok(adminRes3.text.includes("VRPTW-D"));
+
+      // 2. Seller Copilot
+      const sellerRes = generateSellerCopilotResponse("Tư vấn từ khóa sticky sampling và định giá qrdpg drone");
+      expect.ok(sellerRes.text.includes("STICKY SAMPLING"));
+
+      // 3. Buyer AI
+      const buyerRes = generateAiChatResponse("Xem sản phẩm hot sticky sampling và giao hàng drone");
+      expect.equal(buyerRes.intent, "STICKY_QRDPG_DRONE_ASSIST");
+    });
+
+    test("F204-T24: End-to-End E-Commerce Pipeline: Sticky Sampling Trend -> QR-DDPG CVaR Pricing -> VRPTW-D Drone Fulfillment", () => {
+      // Step 1: Detect viral trending queries via Sticky Sampling in real-time stream
+      const sampler = new ServerStickySamplingFrequentItems({ support: 0.05, epsilon: 0.01, delta: 0.005 });
+      for (let i = 0; i < 50; i++) sampler.update("SMART_WATCH_ULTRA");
+      for (let i = 0; i < 20; i++) sampler.update("NOISE_QUERY");
+      const trends = sampler.getFrequentItems();
+      expect.ok(trends.length >= 1);
+      expect.equal(trends[0].item, "SMART_WATCH_ULTRA");
+
+      // Step 2: Risk-aware dynamic pricing via QR-DDPG with CVaR protection
+      const pricer = new ServerQRDPGElasticPricing();
+      const pricing = pricer.optimizePrice({
+        cogs: 2000000,
+        basePrice: 2800000,
+        competitorPrice: 2750000,
+        demandIndex: 1.4,
+        returnRiskRate: 0.05
+      });
+      expect.ok(pricing.proposedPrice >= 2000000 * 1.05);
+      expect.ok(pricing.decisionTag.includes("QRDPG") || pricing.decisionTag.includes("OPTIMAL") || pricing.decisionTag.includes("CVAR") || pricing.decisionTag.includes("CEILING"));
+
+      // Step 3: Fast last-mile delivery via Mothership Van + Autonomous Drone
+      const router = new ServerVRPTWPDDroneRouter();
+      const customerOrders = [
+        { id: "ORD_CUSTOMER_SMART_WATCH", lat: 21.0185, lng: 105.8295, weightKg: 0.4 } // lightweight 400g near hub
+      ];
+      const routePlan = router.planDroneAssistedRoutes(customerOrders);
+      expect.equal(routePlan.summary.droneDelivered, 1);
+      expect.equal(routePlan.summary.vanDelivered, 0);
+      expect.ok(routePlan.summary.totalCo2SavedKg >= 0);
     });
   });
 });

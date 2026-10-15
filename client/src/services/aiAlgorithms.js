@@ -29013,6 +29013,570 @@ export class EVRPBDSRouter {
   }
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 152: StickySamplingFrequentItems - Sticky Sampling Algorithm (Manku & Motwani 2002)
+// ------------------------------------------------------------------------------
+export class StickySamplingFrequentItems {
+  constructor(options = {}) {
+    this.support = Math.max(0.001, Math.min(0.5, options.support || 0.05));
+    this.epsilon = Math.max(0.0001, Math.min(this.support * 0.5, options.epsilon || 0.01));
+    this.delta = Math.max(1e-6, Math.min(0.1, options.delta || 0.005));
+
+    this.t = Math.ceil((1 / this.epsilon) * Math.log(1 / (this.support * this.delta)));
+    if (this.t < 10) this.t = 10;
+
+    this.samplingRate = 1;
+    this.totalCount = 0;
+    this.nextThreshold = 2 * this.t;
+    this.table = new Map();
+  }
+
+  update(item, weight = 1) {
+    if (item === undefined || item === null || item === '') return;
+    const key = String(item).trim();
+    if (!key) return;
+
+    const w = Math.max(1, Math.floor(weight));
+    for (let i = 0; i < w; i++) {
+      this.totalCount++;
+
+      if (this.table.has(key)) {
+        const entry = this.table.get(key);
+        entry.frequency++;
+      } else {
+        const rand = Math.random();
+        if (rand < (1 / this.samplingRate)) {
+          this.table.set(key, { frequency: 1 });
+        }
+      }
+
+      if (this.totalCount >= this.nextThreshold) {
+        this._diminishAndEvict();
+        this.samplingRate *= 2;
+        this.nextThreshold *= 2;
+      }
+    }
+  }
+
+  _diminishAndEvict() {
+    const keys = Array.from(this.table.keys());
+    for (const key of keys) {
+      const entry = this.table.get(key);
+      let survivingCount = 0;
+      for (let c = 0; c < entry.frequency; c++) {
+        if (Math.random() < 0.5) {
+          survivingCount++;
+        }
+      }
+      if (survivingCount <= 0) {
+        this.table.delete(key);
+      } else {
+        entry.frequency = survivingCount;
+      }
+    }
+  }
+
+  estimate(item) {
+    const key = String(item).trim();
+    if (!key || !this.table.has(key)) {
+      return {
+        item: key,
+        estimatedFrequency: 0,
+        supportRate: 0,
+        isFrequent: false
+      };
+    }
+
+    const entry = this.table.get(key);
+    const estFreq = entry.frequency * this.samplingRate;
+    const rate = this.totalCount > 0 ? (estFreq / this.totalCount) : 0;
+    const minThreshold = (this.support - this.epsilon) * this.totalCount;
+
+    return {
+      item: key,
+      estimatedFrequency: estFreq,
+      supportRate: Number(rate.toFixed(4)),
+      isFrequent: estFreq >= minThreshold
+    };
+  }
+
+  getFrequentItems(customThreshold = null) {
+    const minCount = customThreshold !== null
+      ? customThreshold
+      : (this.support - this.epsilon) * this.totalCount;
+
+    const results = [];
+    for (const [key, entry] of this.table.entries()) {
+      const estFreq = entry.frequency * this.samplingRate;
+      if (estFreq >= minCount) {
+        results.push({
+          item: key,
+          estimatedFrequency: estFreq,
+          supportRate: this.totalCount > 0 ? Number((estFreq / this.totalCount).toFixed(4)) : 0,
+          isConfident: estFreq >= (this.support * this.totalCount)
+        });
+      }
+    }
+
+    results.sort((a, b) => b.estimatedFrequency - a.estimatedFrequency);
+    return results;
+  }
+
+  merge(other) {
+    if (!other || !(other instanceof StickySamplingFrequentItems)) {
+      throw new Error("Invalid StickySampling instance to merge");
+    }
+
+    const targetSamplingRate = Math.max(this.samplingRate, other.samplingRate);
+
+    if (this.samplingRate < targetSamplingRate) {
+      const ratio = this.samplingRate / targetSamplingRate;
+      for (const [key, entry] of this.table.entries()) {
+        entry.frequency = Math.max(1, Math.round(entry.frequency * ratio));
+      }
+      this.samplingRate = targetSamplingRate;
+    }
+
+    const otherRatio = other.samplingRate / targetSamplingRate;
+    for (const [key, entry] of other.table.entries()) {
+      const adjustedCount = Math.max(1, Math.round(entry.frequency * otherRatio));
+      if (this.table.has(key)) {
+        this.table.get(key).frequency += adjustedCount;
+      } else {
+        this.table.set(key, { frequency: adjustedCount });
+      }
+    }
+
+    this.totalCount += other.totalCount;
+    this.support = Math.min(this.support, other.support);
+    this.epsilon = Math.min(this.epsilon, other.epsilon);
+    this.delta = Math.min(this.delta, other.delta);
+  }
+
+  getStats() {
+    return {
+      totalElementsProcessed: this.totalCount,
+      uniqueEntriesInTable: this.table.size,
+      currentSamplingRate: this.samplingRate,
+      stepThresholdT: this.t,
+      nextDecayThreshold: this.nextThreshold,
+      supportParameterS: this.support,
+      epsilonParameter: this.epsilon,
+      failureProbabilityDelta: this.delta,
+      theoreticalMaxEntries: Math.ceil((1 / this.epsilon) * Math.log(1 / (this.support * this.delta)))
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 153: QRDPGElasticPricing - Quantile Regression DDPG for Dynamic Pricing (Dabney et al. 2018)
+// ------------------------------------------------------------------------------
+export class QRDPGElasticPricing {
+  constructor(options = {}) {
+    this.numQuantiles = options.numQuantiles || 8;
+    this.kappa = options.kappa || 1.0;
+    this.learningRateActor = options.learningRateActor || 0.01;
+    this.learningRateCritic = options.learningRateCritic || 0.02;
+    this.discountFactor = options.discountFactor || 0.95;
+    this.cvarAlpha = Math.max(0.1, Math.min(1.0, options.cvarAlpha || 0.25));
+
+    this.tau = [];
+    for (let i = 1; i <= this.numQuantiles; i++) {
+      this.tau.push((i - 0.5) / this.numQuantiles);
+    }
+
+    this.actorWeights = options.actorWeights || [0.05, 0.10, -0.05, 0.15, -0.20];
+    this.actorBias = options.actorBias !== undefined ? options.actorBias : 1.0;
+
+    this.criticQuantileWeights = [];
+    for (let q = 0; q < this.numQuantiles; q++) {
+      const qOffset = (q - (this.numQuantiles - 1) / 2) * 0.15;
+      this.criticQuantileWeights.push([
+        0.1 + qOffset,
+        0.2 + qOffset * 0.5,
+        -0.1,
+        0.3 + qOffset * 0.8,
+        -0.4 - qOffset * 0.5,
+        0.25 + qOffset * 0.3
+      ]);
+    }
+
+    this.replayBuffer = [];
+    this.maxBufferSize = options.maxBufferSize || 200;
+  }
+
+  normalizeState(state) {
+    const cogs = Math.max(1, state.cogs || 100000);
+    const basePrice = Math.max(1, state.basePrice || cogs * 1.25);
+    const competitorPrice = Math.max(1, state.competitorPrice || basePrice);
+    const demandIndex = Math.max(0, Math.min(2.0, state.demandIndex !== undefined ? state.demandIndex : 1.0));
+    const returnRiskRate = Math.max(0, Math.min(1.0, state.returnRiskRate !== undefined ? state.returnRiskRate : 0.05));
+
+    return [
+      Math.log(cogs) / 15.0,
+      Math.log(basePrice) / 15.0,
+      Math.log(competitorPrice) / 15.0,
+      demandIndex,
+      returnRiskRate
+    ];
+  }
+
+  predictAction(state) {
+    const sNorm = this.normalizeState(state);
+    let dot = this.actorBias;
+    for (let i = 0; i < sNorm.length; i++) {
+      dot += sNorm[i] * this.actorWeights[i];
+    }
+    const tanh = Math.tanh(dot);
+    const rawAction = 1.0 + tanh * 0.35;
+    return Math.max(0.70, Math.min(1.40, rawAction));
+  }
+
+  evaluateQuantiles(state, action) {
+    const sNorm = this.normalizeState(state);
+    const saVector = [...sNorm, action];
+
+    const quantiles = [];
+    for (let q = 0; q < this.numQuantiles; q++) {
+      let qVal = 0;
+      for (let i = 0; i < saVector.length; i++) {
+        qVal += saVector[i] * this.criticQuantileWeights[q][i];
+      }
+      quantiles.push(qVal);
+    }
+
+    quantiles.sort((a, b) => a - b);
+    return quantiles;
+  }
+
+  computeCVaR(quantiles) {
+    if (!quantiles || quantiles.length === 0) return 0;
+    const k = Math.max(1, Math.ceil(this.cvarAlpha * quantiles.length));
+    let sum = 0;
+    for (let i = 0; i < k; i++) {
+      sum += quantiles[i];
+    }
+    return sum / k;
+  }
+
+  _huberLoss(u) {
+    const absU = Math.abs(u);
+    if (absU <= this.kappa) {
+      return 0.5 * u * u;
+    }
+    return this.kappa * (absU - 0.5 * this.kappa);
+  }
+
+  recordTransition(state, action, reward, nextState, done = false) {
+    if (this.replayBuffer.length >= this.maxBufferSize) {
+      this.replayBuffer.shift();
+    }
+    this.replayBuffer.push({ state, action, reward, nextState, done });
+  }
+
+  optimizePrice(item) {
+    const cogs = Math.max(1000, Number(item.cogs) || 100000);
+    const basePrice = Math.max(cogs, Number(item.basePrice) || Math.round(cogs * 1.3));
+    const competitorPrice = Number(item.competitorPrice) || basePrice;
+    const demandIndex = item.demandIndex !== undefined ? Number(item.demandIndex) : 1.0;
+    const returnRiskRate = item.returnRiskRate !== undefined ? Number(item.returnRiskRate) : 0.05;
+
+    const state = { cogs, basePrice, competitorPrice, demandIndex, returnRiskRate };
+    const actionMultiplier = this.predictAction(state);
+    const quantiles = this.evaluateQuantiles(state, actionMultiplier);
+    const expectedReturn = quantiles.reduce((acc, v) => acc + v, 0) / quantiles.length;
+    const cvarRiskReturn = this.computeCVaR(quantiles);
+
+    let adjustedMultiplier = actionMultiplier;
+    let riskAversionTriggered = false;
+
+    if (returnRiskRate > 0.15 || cvarRiskReturn < expectedReturn * 0.7) {
+      riskAversionTriggered = true;
+      adjustedMultiplier = 1.0 + (actionMultiplier - 1.0) * 0.5;
+    }
+
+    let calculatedPrice = Math.round(basePrice * adjustedMultiplier);
+    const safetyFloor = Math.round(cogs * 1.05);
+    const safetyCeiling = Math.round(competitorPrice * 1.15);
+
+    let decisionTag = "QRDPG_DISTRIBUTIONAL_OPTIMAL";
+
+    if (calculatedPrice < safetyFloor) {
+      calculatedPrice = safetyFloor;
+      decisionTag = "FLOOR_OVERRIDE_COGS_SECURED";
+    } else if (calculatedPrice > safetyCeiling) {
+      calculatedPrice = safetyCeiling;
+      decisionTag = "CEILING_OVERRIDE_COMPETITOR_RESTRICTED";
+    } else if (riskAversionTriggered) {
+      decisionTag = "CVAR_RISK_AVERSE_DAMPED";
+    }
+
+    const grossMarginVnd = calculatedPrice - cogs;
+    const marginPercent = Number(((grossMarginVnd / calculatedPrice) * 100).toFixed(2));
+
+    return {
+      proposedPrice: calculatedPrice,
+      basePrice,
+      cogs,
+      competitorPrice,
+      actionMultiplier: Number(adjustedMultiplier.toFixed(4)),
+      decisionTag,
+      riskMetrics: {
+        numQuantiles: this.numQuantiles,
+        expectedReturn: Number(expectedReturn.toFixed(4)),
+        cvarAlpha: this.cvarAlpha,
+        cvarBottomReturn: Number(cvarRiskReturn.toFixed(4)),
+        quantiles: quantiles.map(q => Number(q.toFixed(4))),
+        riskAversionTriggered
+      },
+      marginAnalysis: {
+        grossMarginVnd,
+        marginPercent,
+        safetyFloorVnd: safetyFloor,
+        safetyCeilingVnd: safetyCeiling
+      }
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 154: VRPTWPDDroneRouter - Vehicle Routing with Drones (Murray & Chu 2015)
+// ------------------------------------------------------------------------------
+export class VRPTWPDDroneRouter {
+  constructor(options = {}) {
+    this.vanSpeedKmh = options.vanSpeedKmh || 30.0;
+    this.vanCapacityKg = options.vanCapacityKg || 1000.0;
+    this.vanCostPerKm = options.vanCostPerKm || 12000;
+    this.vanCo2PerKm = 0.18;
+
+    this.droneSpeedKmh = options.droneSpeedKmh || 50.0;
+    this.droneMaxPayloadKg = options.droneMaxPayloadKg || 2.5;
+    this.droneMaxRangeKm = options.droneMaxRangeKm || 15.0;
+    this.droneMaxFlightTimeMin = options.droneMaxFlightTimeMin || 20.0;
+    this.droneCostPerKm = options.droneCostPerKm || 3000;
+    this.droneCo2PerKm = 0.02;
+    this.droneLaunchTimeMin = 1.0;
+    this.droneRecoveryTimeMin = 1.5;
+
+    this.defaultHub = options.hub || {
+      id: 'HUB_DONG_DA',
+      name: 'SPX Central Mega-Hub Đống Đa',
+      lat: 21.0180,
+      lng: 105.8280
+    };
+
+    this.noFlyZones = options.noFlyZones || [
+      { id: 'NFZ_BA_DINH', name: 'Khu vực Trung tâm Hành chính Ba Đình', lat: 21.0360, lng: 105.8340, radiusKm: 1.2 },
+      { id: 'NFZ_GIA_LAM', name: 'Sân bay Gia Lâm & Vùng tiếp cận', lat: 21.0400, lng: 105.8850, radiusKm: 2.0 },
+      { id: 'NFZ_NOI_BAI_CORRIDOR', name: 'Hành lang Cất hạ cánh Nội Bài', lat: 21.1500, lng: 105.8000, radiusKm: 4.0 }
+    ];
+  }
+
+  haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(3));
+  }
+
+  checkNoFlyZone(lat, lng) {
+    for (const nfz of this.noFlyZones) {
+      const dist = this.haversineDistance(lat, lng, nfz.lat, nfz.lng);
+      if (dist <= nfz.radiusKm) {
+        return { inNoFlyZone: true, zoneName: nfz.name };
+      }
+    }
+    return { inNoFlyZone: false };
+  }
+
+  evaluateDroneEligibility(order, launchLocation = this.defaultHub) {
+    const weightKg = Number(order.weightKg) || 1.0;
+    const distToCustomer = this.haversineDistance(launchLocation.lat, launchLocation.lng, order.lat, order.lng);
+    const roundTripDist = distToCustomer * 2;
+    const flightTimeMin = (roundTripDist / this.droneSpeedKmh) * 60 + this.droneLaunchTimeMin + this.droneRecoveryTimeMin;
+
+    const nfzCheck = this.checkNoFlyZone(order.lat, order.lng);
+
+    if (weightKg > this.droneMaxPayloadKg) {
+      return {
+        eligible: false,
+        reason: `OVERWEIGHT_EXCEEDS_PAYLOAD (${weightKg}kg > ${this.droneMaxPayloadKg}kg)`,
+        recommendedMode: 'VAN_REQUIRED'
+      };
+    }
+
+    if (nfzCheck.inNoFlyZone) {
+      return {
+        eligible: false,
+        reason: `RESTRICTED_AIRSPACE (${nfzCheck.zoneName})`,
+        recommendedMode: 'VAN_REQUIRED'
+      };
+    }
+
+    if (roundTripDist > this.droneMaxRangeKm) {
+      return {
+        eligible: false,
+        reason: `RANGE_EXCEEDED (${roundTripDist.toFixed(1)}km > ${this.droneMaxRangeKm}km)`,
+        recommendedMode: 'VAN_REQUIRED'
+      };
+    }
+
+    if (flightTimeMin > this.droneMaxFlightTimeMin) {
+      return {
+        eligible: false,
+        reason: `BATTERY_DURATION_EXCEEDED (${flightTimeMin.toFixed(1)}m > ${this.droneMaxFlightTimeMin}m)`,
+        recommendedMode: 'VAN_REQUIRED'
+      };
+    }
+
+    return {
+      eligible: true,
+      reason: 'DRONE_ELIGIBLE_GREEN_DISPATCH',
+      recommendedMode: 'DRONE_DISPATCH',
+      flightDistKm: Number(distToCustomer.toFixed(2)),
+      flightTimeMin: Number(flightTimeMin.toFixed(1))
+    };
+  }
+
+  planDroneAssistedRoutes(orders = []) {
+    if (!orders || orders.length === 0) {
+      return {
+        vanRoutes: [],
+        droneSorties: [],
+        summary: {
+          totalOrders: 0,
+          vanDelivered: 0,
+          droneDelivered: 0,
+          parallelTimeSavingsMin: 0,
+          totalCo2SavedKg: 0,
+          makespanMin: 0
+        }
+      };
+    }
+
+    const vanOrders = [];
+    const droneSorties = [];
+
+    for (const order of orders) {
+      const eligibility = this.evaluateDroneEligibility(order, this.defaultHub);
+      if (eligibility.eligible) {
+        droneSorties.push({
+          orderId: order.id,
+          recipient: order.recipient || 'Khách hàng',
+          lat: order.lat,
+          lng: order.lng,
+          weightKg: order.weightKg,
+          timeWindow: order.timeWindow || [0, 180],
+          flightDistKm: eligibility.flightDistKm,
+          flightTimeMin: eligibility.flightTimeMin,
+          co2EmittedKg: Number((eligibility.flightDistKm * 2 * this.droneCo2PerKm).toFixed(3)),
+          costVnd: Math.round(eligibility.flightDistKm * 2 * this.droneCostPerKm)
+        });
+      } else {
+        vanOrders.push({
+          ...order,
+          vanIneligibilityReason: eligibility.reason
+        });
+      }
+    }
+
+    let currentLat = this.defaultHub.lat;
+    let currentLng = this.defaultHub.lng;
+    let currentVanTimeMin = 0;
+    let totalVanDistKm = 0;
+    const scheduledVanStops = [];
+
+    const unvisitedVan = [...vanOrders];
+    while (unvisitedVan.length > 0) {
+      let nearestIdx = 0;
+      let minDist = Infinity;
+      for (let i = 0; i < unvisitedVan.length; i++) {
+        const d = this.haversineDistance(currentLat, currentLng, unvisitedVan[i].lat, unvisitedVan[i].lng);
+        if (d < minDist) {
+          minDist = d;
+          nearestIdx = i;
+        }
+      }
+
+      const nextStop = unvisitedVan.splice(nearestIdx, 1)[0];
+      const travelTimeMin = (minDist / this.vanSpeedKmh) * 60;
+      currentVanTimeMin += travelTimeMin;
+      totalVanDistKm += minDist;
+
+      const tw = nextStop.timeWindow || [0, 180];
+      if (currentVanTimeMin < tw[0]) {
+        currentVanTimeMin = tw[0];
+      }
+      currentVanTimeMin += 5;
+
+      scheduledVanStops.push({
+        orderId: nextStop.id,
+        lat: nextStop.lat,
+        lng: nextStop.lng,
+        arrivalTimeMin: Number(currentVanTimeMin.toFixed(1)),
+        distanceFromLastKm: Number(minDist.toFixed(2))
+      });
+
+      currentLat = nextStop.lat;
+      currentLng = nextStop.lng;
+    }
+
+    const returnDist = this.haversineDistance(currentLat, currentLng, this.defaultHub.lat, this.defaultHub.lng);
+    totalVanDistKm += returnDist;
+    const finalVanMakespan = currentVanTimeMin + (returnDist / this.vanSpeedKmh) * 60;
+
+    let totalDroneDistKm = 0;
+    let totalDroneCo2Kg = 0;
+    let maxDroneSortieTime = 0;
+
+    for (const sortie of droneSorties) {
+      totalDroneDistKm += sortie.flightDistKm * 2;
+      totalDroneCo2Kg += sortie.co2EmittedKg;
+      if (sortie.flightTimeMin > maxDroneSortieTime) {
+        maxDroneSortieTime = sortie.flightTimeMin;
+      }
+    }
+
+    let hypotheticalVanExtraDist = 0;
+    for (const s of droneSorties) {
+      hypotheticalVanExtraDist += s.flightDistKm * 2;
+    }
+    const hypotheticalVanCo2 = hypotheticalVanExtraDist * this.vanCo2PerKm;
+    const co2SavedKg = Math.max(0, hypotheticalVanCo2 - totalDroneCo2Kg);
+
+    const sequentialTimeWithoutDrone = finalVanMakespan + (hypotheticalVanExtraDist / this.vanSpeedKmh) * 60;
+    const actualMakespan = Math.max(finalVanMakespan, maxDroneSortieTime);
+    const timeSavingsMin = Math.max(0, sequentialTimeWithoutDrone - actualMakespan);
+
+    return {
+      hub: this.defaultHub,
+      vanRoute: {
+        stops: scheduledVanStops,
+        totalStops: scheduledVanStops.length,
+        totalDistanceKm: Number(totalVanDistKm.toFixed(2)),
+        makespanMin: Number(finalVanMakespan.toFixed(1)),
+        co2EmittedKg: Number((totalVanDistKm * this.vanCo2PerKm).toFixed(3))
+      },
+      droneSorties,
+      droneDeliveredCount: droneSorties.length,
+      vanDeliveredCount: scheduledVanStops.length,
+      summary: {
+        totalOrders: orders.length,
+        vanDelivered: scheduledVanStops.length,
+        droneDelivered: droneSorties.length,
+        parallelTimeSavingsMin: Number(timeSavingsMin.toFixed(1)),
+        totalCo2SavedKg: Number(co2SavedKg.toFixed(3)),
+        makespanMin: Number(actualMakespan.toFixed(1)),
+        droneSharePercent: orders.length > 0 ? Number(((droneSorties.length / orders.length) * 100).toFixed(1)) : 0
+      }
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -29311,6 +29875,10 @@ export default {
   CPOPricing,
   DEFAULT_SOLAR_HUBS,
   EVRPBDSRouter,
+  // Phase 57 Enterprise Algorithms
+  StickySamplingFrequentItems,
+  QRDPGElasticPricing,
+  VRPTWPDDroneRouter,
 };
 
 

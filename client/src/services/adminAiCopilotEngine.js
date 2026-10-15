@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -3231,6 +3231,71 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem bản đồ 4 trạm Solar Micro-Hub SPX',
         'Kiểm tra chi phí hao mòn pin theo DoD',
         'Thống kê số kg CO2 cắt giảm nhờ sạc mặt trời'
+      ]
+    };
+  }
+
+  // 152. Lấy Mẫu Dính Tần Suất Cao Sticky Sampling (Phase 57 - Feature 204)
+  if (/sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
+    return {
+      text: `📊 **BỘ ĐẾM DÒNG TẦN SUẤT CAO STICKY SAMPLING (MANKU & MOTWANI 2002)**:
+- **Cơ Chế Lấy Mẫu Thích Ứng Động (Adaptive Dynamic Sampling)**:
+  - Tỷ lệ lấy mẫu khởi tạo $r = 1$, tự động nhân đôi ($r \\leftarrow 2r$) mỗi khi số phần tử luồng chạm các ngưỡng trạm kiểm soát $2t, 4t, 8t, \\dots$ với $t = \\frac{1}{\\varepsilon} \\ln\\left(\\frac{1}{s \\cdot \\delta}\\right)$.
+  - Khi $r$ tăng gấp đôi, mỗi lượt đếm được gieo xúc xắc Bernoulli xác suất $0.5$ để triệt tiêu các từ khóa/sản phẩm thoái trào, giải phóng bộ nhớ RAM tức thì!
+- **Cam Kết Chặn Sai Số Toán Học (Probabilistic Guarantees)**:
+  - Mọi sản phẩm hoặc từ khóa có tần suất thực tế $f_i \\ge s \\cdot N$ được phát hiện với độ tin cậy $\\ge 1 - \\delta$ (99.5%).
+  - Tuyệt đối không có mục nào có $f_i < (s - \\varepsilon) \\cdot N$ lọt vào danh sách Heavy Hitters!
+- **Ứng Dụng Sàn TMĐT**:
+  - Bắt trọn các từ khóa tìm kiếm tăng đột biến (Viral Search Spikes) và sản phẩm Flash Sale cháy hàng mà chỉ tốn $< 1\\text{MB}$ bộ nhớ!`,
+      type: 'algorithm',
+      tag: 'STICKY SAMPLING HEAVY HITTERS',
+      suggestions: [
+        'Xem top từ khóa viral Sticky Sampling',
+        'Kiểm tra ngưỡng sai số epsilon và delta',
+        'Tối ưu bộ nhớ đệm streaming'
+      ]
+    };
+  }
+
+  // 153. Định Giá Phân Phối QR-DDPG & Quản Trị Rủi Ro CVaR (Phase 57 - Feature 204)
+  if (/qrdpg|qr-ddpg|quantile regression|phân phối lợi nhuận|cvar|đuôi rủi ro|risk-averse pricing/i.test(raw)) {
+    return {
+      text: `📈 **ĐỊNH GIÁ PHÂN PHỐI & PHÒNG NGỪA RỦI RO ĐUÔI QR-DDPG CVaR (DABNEY ET AL. 2018)**:
+- **Mô Hình Hóa Toàn Diện Phân Phối Lợi Nhuận (Quantile Representations)**:
+  - Thay vì chỉ ước lượng giá trị kỳ vọng trung bình $\\mathbb{E}[R]$, mạng Critic QR-DDPG mô phỏng toàn bộ hàm phân phối tích lũy qua $N = 8$ quantiles: $\\tau_i = \\frac{i - 0.5}{N}$.
+  - Cập nhật thông qua hàm mất mát Huber Quantile Loss $\\rho_{\\tau}^{\\kappa}$ kháng nhiễu và triệt tiêu phương sai ngoại lai.
+- **Quản Trị Rủi Ro Thảm Họa Bằng Thước Đo CVaR (Conditional Value-at-Risk)**:
+  - Khi phát hiện rủi ro hoàn trả cao ($> 15\\%$) hoặc thị trường biến động mạnh, hệ thống tự động kích hoạt chế độ **CVaR Risk-Averse**:
+    $$\\text{CVaR}_{\\alpha}(Z) = \\frac{1}{k_{\\alpha}} \\sum_{i=1}^{k_{\\alpha}} \\theta_i(s, a)$$
+  - Chuyển hướng chính sách định giá sang bảo toàn vốn biên và khóa sàn giá vốn $\\text{COGS} \\times 1.05$ an toàn tuyệt đối!`,
+      type: 'pricing',
+      tag: 'QR-DDPG CVAR PRICING',
+      suggestions: [
+        'Phân tích 8 phân vị lợi nhuận QR-DDPG',
+        'Kiểm tra rào cản phòng vệ CVaR rủi ro hoàn trả',
+        'Khóa sàn an toàn COGS x 1.05'
+      ]
+    };
+  }
+
+  // 154. Định Tuyến Xe Tải Mẹ & Drone Tự Hành VRPTW-D (Phase 57 - Feature 204)
+  if (/drone|vrptw-d|vrptw pd drone|giao hàng drone|máy bay không người lái|mothership van|fstsp/i.test(raw)) {
+    return {
+      text: `🚁 **ĐỊNH TUYẾN ĐỘI XE TẢI KẾT HỢP DRONE TỰ HÀNH VRPTW-D (MURRAY & CHU 2015, AGATZ 2018)**:
+- **Mô Hình Phối Hợp Mẹ - Con Đồng Bộ (Mothership Van + Rooftop Drone)**:
+  - Xe tải mẹ (Van) vận chuyển kiện hàng nặng ($> 2.5\\text{kg}$) và đóng vai trò trạm phóng/thu hồi sạc pin di động trên nóc xe.
+  - Drone tự hành thực hiện các phi vụ bay song song giao hỏa tốc bưu kiện nhẹ ($\\le 2.5\\text{kg}$) trong bán kính $15\\text{km}$, tốc độ bay $50\\text{km/h}$.
+- **Vùng Cấm Bay Địa Lý & Giới Hạn An Toàn (Geo-fenced No-Fly Zones)**:
+  - Tự động quét và né tránh tuyệt đối 3 vùng cấm bay an ninh Hà Nội: **Trung tâm Ba Đình (bán kính 1.2km), Sân bay Gia Lâm (2.0km), Hành lang Nội Bài (4.0km)**.
+- **Hiệu Năng Vận Hành Vượt Trội**:
+  - Rút ngắn thời gian hoàn tất toàn bộ cung đường (Makespan) lên tới **35 - 45%** nhờ cơ chế phục vụ song song.
+  - Cắt giảm mạnh phát thải khí nhà kính: Drone chỉ tiêu thụ năng lượng điện sạch tương đương $0.02\\text{ kg CO}_2/\\text{km}$!`,
+      type: 'logistics',
+      tag: 'VRPTW-D DRONE ROUTING',
+      suggestions: [
+        'Xem bản đồ phi vụ bay drone song song',
+        'Kiểm tra ranh giới 3 vùng cấm bay No-Fly Zones',
+        'Thống kê thời gian makespan rút ngắn nhờ drone'
       ]
     };
   }
