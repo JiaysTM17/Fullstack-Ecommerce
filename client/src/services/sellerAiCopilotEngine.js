@@ -119,7 +119,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 5. Quản Lý Đơn Hàng & Xử Lý Giao SPX (Order Fulfillment)
-  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router|bưu cục|drop-off|gần shop|geohash|sdvrptw|split delivery|chia nhỏ đơn hàng|count[- ]sketch|td3/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
+  if (!/hungarian|thùng carton|bin packing|hộp spx|đóng gói|lộ trình|hub|graph router|bưu cục|drop-off|gần shop|geohash|sdvrptw|split delivery|chia nhỏ đơn hàng|count[- ]sketch|td3|hfvrptw|evrptw|mdevrp|tdvrptw|mopo|ultraloglog/i.test(raw) && /đơn hàng|xử lý đơn|giao hàng|in phiếu|spx|chờ xác nhận/i.test(raw)) {
     const pendingCount = shopOrders.filter(o => o.status === 'pending').length;
     return {
       text: `📦 **TIẾN ĐỘ XỬ LÝ ĐƠN HÀNG GIAN HÀNG**:
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1207,6 +1207,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem phân vị SLA độ trễ DDSketch',
         'Tối ưu hóa giá bán SAC-PER',
         'Lập lịch giao vận xe điện đa kho'
+      ]
+    };
+  }
+
+  // 60. Đếm Khách UltraLogLog, Định Giá Ngoại Tuyến MOPO & Đội Xe Tránh Tắc Đường TDVRPTW (Phase 51 - Feature 198)
+  if (/ultraloglog|mopo|tdvrptw|tránh tắc đường|giờ cao điểm spx|định giá ngoại tuyến|đếm khách 4-bit|phụ thuộc giao thông/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA CÔNG NGHỆ BỨT PHÁ: ĐẾM KHÁCH ULTRALOGLOG, ĐỊNH GIÁ MOPO & GIAO VẬN TDVRPTW (${currentShop.name})**:
+- **Bộ nhớ siêu nén 4-bit UltraLogLog**:
+  - Tiết kiệm 33% RAM so với HyperLogLog tiêu chuẩn, ghi nhận chính xác hàng triệu lượt khách độc nhất (UV) ghé thăm gian hàng trong các đợt Mega Sale mà không sợ nghẽn bộ nhớ!
+- **Định giá an toàn bằng học tăng cường ngoại tuyến MOPO (Model-Based Offline Policy)**:
+  - Huấn luyện trực tiếp từ dữ liệu đơn hàng và doanh thu quá khứ của shop, tối ưu hóa mức giá mục tiêu với cơ chế phạt bất định ($\\tilde{r} = r - \\lambda u$) và bảo vệ tuyệt đối biên lợi nhuận sàn $\\text{COGS} \\times 1.05$.
+- **Giao vận thông minh thích ứng giờ cao điểm TDVRPTW (Time-Dependent VRP)**:
+  - Tự động né tắc đường tại các khung giờ cao điểm sáng (07h-09h) và chiều tối (17h-19h), tối ưu hóa lộ trình tài xế giao hàng SPX Express để đơn của shop đến tay khách đúng giờ hẹn!`,
+      type: 'recommendation',
+      tag: 'ULTRALOGLOG, MOPO & TDVRPTW LOGISTICS',
+      suggestions: [
+        'Xem đếm khách 4-bit UltraLogLog',
+        'Tối ưu hóa giá bán ngoại tuyến MOPO',
+        'Kiểm tra định tuyến né tắc đường TDVRPTW'
       ]
     };
   }

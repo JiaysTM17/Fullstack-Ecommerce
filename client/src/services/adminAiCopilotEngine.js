@@ -1506,7 +1506,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 65. Xếp Hạng Doanh Số & Phân Vị GMV Bằng Cây Fenwick (BIT) (Phase 28 - Feature 175)
-  if (!/2d|2 chiều|hyperbitbit|hyper-bitbit/i.test(raw) && /fenwick|cây fenwick|binary indexed tree|\bbit\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
+  if (!/2d|2 chiều|hyperbitbit|hyper-bitbit|ultraloglog|4-bit/i.test(raw) && /fenwick|cây fenwick|binary indexed tree|\bbit\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
     return {
       text: `📊 **XẾP HẠNG DOANH SỐ & PHÂN VỊ GMV BẰNG CÂY FENWICK (BINARY INDEXED TREE - BIT)**:
 - **Cấu trúc dữ liệu Fenwick Tree (Peter Fenwick 1994)**:
@@ -2858,6 +2858,70 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem thời gian sạc phi tuyến CC-CV',
         'Lập lịch giao hàng đa kho bãi',
         'Theo dõi độ trễ SLA bằng DDSketch'
+      ]
+    };
+  }
+
+  // 134. Ước Lượng Độ Tập Hợp Siêu Nén UltraLogLog (Phase 51 - Feature 198)
+  if (/ultraloglog|ultra loglog|ước lượng 4-bit|nibble cardinality/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG ĐỘ TẬP HỢP SIÊU NÉN ULTRALOGLOG (SEDGEWICK, HEULE, TING 2021)**:
+- **Tiết Kiệm 33% Bộ Nhớ Bằng Thanh Ghi 4-Bit (Half-Byte Nibbles)**:
+  - Thay vì lưu trữ 6-bit hoặc 8-bit trên mỗi thanh ghi như HyperLogLog truyền thống, UltraLogLog nén thanh ghi thành các giá trị vi sai 4-bit kết hợp với cơ chế dịch chuyển cơ sở toàn cục (Global Base Shift).
+- **Độ Chính Xác Chuẩn Tương Đương HLL Tiêu Chuẩn**:
+  - Sai số chuẩn tiệm cận $\\text{SE} \\approx \\frac{1.04}{\\sqrt{m}}$, hoàn toàn tương đương HLL chuẩn nhưng chỉ tốn **128 bytes** cho $m = 256$ thanh ghi.
+- **Ứng Dụng Giám Sát Lưu Lượng Toàn Sàn**:
+  - Đo lường chính xác số người xem duy nhất (UV) của các phiên Livestream triệu view và giám sát phân tích số IP truy vấn đồng thời qua microservices biên!`,
+      type: 'analytics',
+      tag: 'ULTRALOGLOG CARDINALITY',
+      suggestions: [
+        'Xem độ lệch cơ sở toàn cục baseShift',
+        'Kiểm tra sai số chuẩn UltraLogLog',
+        'Tối ưu định giá ngoại tuyến MOPO'
+      ]
+    };
+  }
+
+  // 135. Định Giá Ngoại Tuyến An Toàn Bằng MOPO (Phase 51 - Feature 198)
+  if (/mopo\b|mopo pricing|offline policy optimization|định giá ngoại tuyến mopo|phạt bất định mopo/i.test(raw)) {
+    return {
+      text: `🎯 **ĐỊNH GIÁ NGOẠI TUYẾN AN TOÀN BẰNG MOPO (MODEL-BASED OFFLINE POLICY OPTIMIZATION - YU ET AL. 2020)**:
+- **Không Thử Nghiệm Ngẫu Nhiên Trên Khách Hàng Thật (Zero Online Risk)**:
+  - Học chính sách tối ưu giá bán trực tiếp từ tập dữ liệu đơn hàng và lượt click lịch sử mà không cần đưa bot thử nghiệm rủi ro vào môi trường live traffic.
+- **Lượng Hóa Độ Bất Định Nhận Thức (Epistemic Uncertainty)**:
+  - Sử dụng Ensemble $K=4$ mô hình động học dự báo phản ứng thị trường.
+  - Phạt nặng các mức giá nằm ngoài vùng dữ liệu đã được chứng thực (Out-Of-Distribution): $\\tilde{r}(s, a) = r(s, a) - \\lambda u(s, a)$.
+- **Khóa Chặt Biên Lãi Gộp An Toàn**:
+  - Tự động áp dụng trần giá sàn COGS Guardrail $P_{\\text{floor}} = \\text{COGS} \\times 1.05$, ngăn ngừa mọi rủi ro tài chính cho nhà bán hàng!`,
+      type: 'pricing',
+      tag: 'MOPO OFFLINE PRICING',
+      suggestions: [
+        'Khảo sát độ bất định nhận thức MOPO',
+        'Tối ưu hóa giá bán Flash Sale ngoại tuyến',
+        'Định tuyến bưu tá tránh giờ cao điểm TDVRPTW'
+      ]
+    };
+  }
+
+  // 136. Định Tuyến Bưu Tá Phụ Thuộc Giao Thông Giờ Cao Điểm TDVRPTW-STW (Phase 51 - Feature 198)
+  if (/tdvrptw|phụ thuộc giao thông|traffic-dependent|giờ cao điểm spx|cửa sổ mềm tdvrptw/i.test(raw)) {
+    return {
+      text: `🚛 **ĐỊNH TUYẾN BƯU TÁ PHỤ THUỘC GIAO THÔNG GIỜ CAO ĐIỂM TDVRPTW-STW (MALANDRAKI 1992, ICHOUA 2003)**:
+- **Mô Phỏng Thực Tế 5 Khung Giờ Giao Thông Đô Thị**:
+  - Cao điểm sáng (07h-09h) kẹt xe: $12\\text{ km/h}$.
+  - Giờ hành chính trưa (09h-16h30) ổn định: $28\\text{ km/h}$.
+  - Cao điểm chiều (16h30-19h30) tan tầm: $14\\text{ km/h}$.
+  - Buổi tối & Đêm đường thông thoáng: $32 - 35\\text{ km/h}$.
+- **Nguyên Lý FIFO Tuyệt Đối (First-In-First-Out)**:
+  - Đảm bảo tính toán thời gian luân chuyển liên tục không bao giờ xảy ra nghịch lý xe đi sau tới trước.
+- **Cửa Sổ Thời Gian Mềm (Soft Time Windows)**:
+  - Áp dụng hàm phạt trễ mềm thay vì hủy đơn đột ngột, tối ưu hóa tỷ lệ giao hàng đúng hẹn đạt trên $98\\%$!`,
+      type: 'logistics',
+      tag: 'TDVRPTW TIME-DEPENDENT ROUTING',
+      suggestions: [
+        'Xem vận tốc giao thông theo khung giờ',
+        'Lập lịch bưu tá tránh giờ cao điểm',
+        'Ước lượng lượng truy cập bằng UltraLogLog'
       ]
     };
   }

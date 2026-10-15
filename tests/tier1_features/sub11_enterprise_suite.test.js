@@ -283,6 +283,11 @@ import {
   DEFAULT_SPX_DEPOTS,
   DEFAULT_CHARGING_STATIONS,
   MDEVRPNLRouter,
+  // Phase 51 Enterprise Algorithms
+  UltraLogLogEstimator,
+  MOPOPricing,
+  TRAFFIC_PERIODS,
+  TDVRPTWRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -401,6 +406,9 @@ import { EVRPTWBSSRouter as ServerEVRPTWBSSRouter, DEFAULT_BSS_STATIONS as Serve
 import { DDSketchQuantiles as ServerDDSketchQuantiles } from "../../server/src/utils/ddSketchQuantiles.js";
 import { SACPerPricing as ServerSACPerPricing } from "../../server/src/utils/sacPerPricing.js";
 import { MDEVRPNLRouter as ServerMDEVRPNLRouter, DEFAULT_SPX_DEPOTS as ServerDefaultSpxDepots, DEFAULT_CHARGING_STATIONS as ServerDefaultChargingStations } from "../../server/src/utils/mdevrpNlRouter.js";
+import { UltraLogLogEstimator as ServerUltraLogLogEstimator } from "../../server/src/utils/ultraLogLogEstimator.js";
+import { MOPOPricing as ServerMOPOPricing } from "../../server/src/utils/mopoPricing.js";
+import { TDVRPTWRouter as ServerTDVRPTWRouter, TRAFFIC_PERIODS as ServerTrafficPeriods } from "../../server/src/utils/tdvrptwRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -22599,6 +22607,378 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(dispatch.fulfilledOrders, 1);
       expect.ok(dispatch.totalKm > 0);
       expect.ok(dispatch.totalCo2SavedKg > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 198: UltraLogLog Estimator, MOPO Pricing, and TDVRPTW-STW Fleet Router (24 Tests)
+  // =========================================================================
+  describe("Feature 198: UltraLogLog, MOPO Offline Pricing & TDVRPTW Traffic Fleet Suite", () => {
+    // -----------------------------------------------------------------------
+    // ALGORITHM 1: UltraLogLog 4-Bit Estimator (Sedgewick, Heule, Ting 2021)
+    // -----------------------------------------------------------------------
+    test("F198-T01: UltraLogLog initializes with precision p=8 (m=256 registers, 128 bytes, baseShift=0)", () => {
+      const ull = new UltraLogLogEstimator({ precision: 8 });
+      expect.equal(ull.p, 8);
+      expect.equal(ull.m, 256);
+      expect.equal(ull.numBytes, 128);
+      expect.equal(ull.baseShift, 0);
+      expect.equal(ull.totalInserts, 0);
+      expect.equal(ull.estimate(), 0);
+    });
+
+    test("F198-T02: UltraLogLog estimates distinct visitors with high accuracy (low relative error)", () => {
+      const ull = new UltraLogLogEstimator({ precision: 8 });
+      const n = 1000;
+      for (let i = 0; i < n; i++) {
+        ull.add(`user_visitor_${i}_session`);
+      }
+      const est = ull.estimate();
+      expect.ok(est >= n * 0.75 && est <= n * 1.35);
+      expect.equal(ull.totalInserts, n);
+    });
+
+    test("F198-T03: UltraLogLog nibble encoding and base shift adjustment operates correctly", () => {
+      const ull = new UltraLogLogEstimator({ precision: 4 }); // m = 16 registers, 8 bytes
+      // Directly verify nibble getters and setters
+      ull._setNibble(0, 10);
+      ull._setNibble(1, 15);
+      expect.equal(ull._getNibble(0), 10);
+      expect.equal(ull._getNibble(1), 15);
+
+      // Verify baseShift behavior
+      ull._adjustBaseShift(2);
+      expect.equal(ull.baseShift, 2);
+      expect.equal(ull._getNibble(0), 8);
+      expect.equal(ull._getNibble(1), 13);
+    });
+
+    test("F198-T04: UltraLogLog handles duplicate insertions with identical estimate (Idempotence)", () => {
+      const ull = new UltraLogLogEstimator({ precision: 8 });
+      for (let rep = 0; rep < 5; rep++) {
+        for (let i = 0; i < 200; i++) {
+          ull.add(`visitor_dup_${i}`);
+        }
+      }
+      const est = ull.estimate();
+      expect.ok(est >= 140 && est <= 280);
+      expect.equal(ull.totalInserts, 1000);
+    });
+
+    test("F198-T05: UltraLogLog merges two independent estimators across different base shifts", () => {
+      const ull1 = new UltraLogLogEstimator({ precision: 8 });
+      const ull2 = new UltraLogLogEstimator({ precision: 8 });
+
+      for (let i = 0; i < 300; i++) {
+        ull1.add(`stream_a_${i}`);
+      }
+      for (let i = 200; i < 600; i++) {
+        ull2.add(`stream_b_${i}`);
+      }
+
+      ull1.merge(ull2);
+      const combinedEst = ull1.estimate();
+      expect.ok(combinedEst >= 400 && combinedEst <= 850);
+      expect.equal(ull1.totalInserts, 700);
+    });
+
+    test("F198-T06: UltraLogLog reports memory statistics proving 33% RAM savings vs 6-bit HLL", () => {
+      const ull = new UltraLogLogEstimator({ precision: 8 });
+      for (let i = 0; i < 50; i++) ull.add(`item_${i}`);
+      const stats = ull.getMemoryStats();
+      expect.equal(stats.m, 256);
+      expect.equal(stats.ramBytes, 128);
+      expect.equal(stats.hllStandard6BitBytes, 192);
+      expect.equal(stats.savedBytesVs6BitHLL, 64);
+      expect.equal(stats.memorySavingPercent, "33.33%");
+    });
+
+    test("F198-T07: Server and Client UltraLogLogEstimator yield identical results", () => {
+      const clientUll = new UltraLogLogEstimator({ precision: 8 });
+      const serverUll = new ServerUltraLogLogEstimator({ precision: 8 });
+
+      const testKeys = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta'];
+      testKeys.forEach(k => {
+        clientUll.add(k);
+        serverUll.add(k);
+      });
+
+      expect.equal(clientUll.estimate(), serverUll.estimate());
+      expect.equal(clientUll.baseShift, serverUll.baseShift);
+      expect.deepEqual(Array.from(clientUll.registers), Array.from(serverUll.registers));
+    });
+
+    // -----------------------------------------------------------------------
+    // ALGORITHM 2: MOPO Model-Based Offline Policy Optimization (Yu et al. NeurIPS 2020)
+    // -----------------------------------------------------------------------
+    test("F198-T08: MOPOPricing initializes with ensemble models, penalty factor lambda, and safety floor", () => {
+      const mopo = new MOPOPricing({ ensembleSize: 4, lambda: 0.5, floorMargin: 0.05 });
+      expect.equal(mopo.ensembleSize, 4);
+      expect.equal(mopo.lambda, 0.5);
+      expect.equal(mopo.floorMargin, 0.05);
+      expect.equal(mopo.ensembleModels.length, 4);
+    });
+
+    test("F198-T09: MOPOPricing optimizes price using offline transaction logs without out-of-distribution divergence", () => {
+      const mopo = new MOPOPricing();
+      const result = mopo.optimizePrice({
+        cogs: 200000,
+        currentPrice: 300000,
+        historicalAvgPrice: 290000,
+        competitorPrice: 285000,
+        demandIndex: 1.2,
+        inventoryDays: 20
+      });
+
+      expect.equal(result.status, 'MOPO_OPTIMAL_PRICED');
+      expect.ok(result.recommendedPrice >= 210000); // 200,000 * 1.05
+      expect.ok(result.penalizedReward !== undefined);
+      expect.ok(result.uncertaintyMeasure >= 0);
+      expect.ok(result.candidateEvaluations.length > 0);
+    });
+
+    test("F198-T10: MOPOPricing uncertainty penalty r_tilde = r - lambda * u penalizes high-variance models", () => {
+      const mopo = new MOPOPricing({ lambda: 1.0 });
+      const lowRisk = mopo.predictEnsemble({ priceDelta: 0.0, currentPrice: 100000, historicalAvgPrice: 100000, demandIndex: 1.0, inventoryDays: 30 });
+      const highRisk = mopo.predictEnsemble({ priceDelta: 0.35, currentPrice: 100000, historicalAvgPrice: 100000, demandIndex: 1.0, inventoryDays: 30 });
+
+      // High deviation from historical experience increases uncertainty u
+      expect.ok(highRisk.uncertainty >= lowRisk.uncertainty);
+    });
+
+    test("F198-T11: MOPOPricing activates strict COGS guardrail (floor = COGS * 1.05) when candidate falls below floor", () => {
+      const mopo = new MOPOPricing();
+      // Provide currentPrice far below COGS to guarantee guardrail triggers
+      const result = mopo.optimizePrice({
+        cogs: 500000,
+        currentPrice: 300000,
+        historicalAvgPrice: 300000,
+        competitorPrice: 280000,
+        demandIndex: 0.8,
+        inventoryDays: 60
+      });
+
+      expect.equal(result.status, 'MOPO_OPTIMAL_PRICED');
+      expect.equal(result.guardrailApplied, true);
+      expect.equal(result.recommendedPrice, 525000); // 500000 * 1.05
+      expect.ok(result.hardFloorPrice === 525000);
+    });
+
+    test("F198-T12: MOPOPricing ensemble predictions return individual models and epistemic uncertainty", () => {
+      const mopo = new MOPOPricing({ ensembleSize: 4 });
+      const pred = mopo.predictEnsemble({
+        priceDelta: -0.05,
+        currentPrice: 250000,
+        historicalAvgPrice: 250000,
+        demandIndex: 1.1,
+        inventoryDays: 15
+      });
+
+      expect.equal(pred.predictions.length, 4);
+      expect.ok(typeof pred.meanExpectedRevenue === 'number');
+      expect.ok(pred.uncertainty >= 0);
+    });
+
+    test("F198-T13: Sensitivity to lambda: higher lambda enforces stricter conservatism on price deviations", () => {
+      const mopoConservative = new MOPOPricing({ lambda: 2.5 });
+      const mopoAggressive = new MOPOPricing({ lambda: 0.05 });
+
+      const input = {
+        cogs: 100000,
+        currentPrice: 150000,
+        historicalAvgPrice: 150000,
+        competitorPrice: 160000,
+        demandIndex: 1.5,
+        inventoryDays: 5
+      };
+
+      const resCons = mopoConservative.optimizePrice(input);
+      const resAggr = mopoAggressive.optimizePrice(input);
+
+      expect.ok(resCons.status === 'MOPO_OPTIMAL_PRICED');
+      expect.ok(resAggr.status === 'MOPO_OPTIMAL_PRICED');
+      expect.ok(resCons.penalizedReward <= resAggr.penalizedReward);
+    });
+
+    test("F198-T14: Server and Client MOPOPricing produce identical outputs on identical inputs", () => {
+      const clientMopo = new MOPOPricing();
+      const serverMopo = new ServerMOPOPricing();
+
+      const input = {
+        cogs: 220000,
+        currentPrice: 310000,
+        historicalAvgPrice: 300000,
+        competitorPrice: 305000,
+        demandIndex: 1.3,
+        inventoryDays: 18
+      };
+
+      const clientRes = clientMopo.optimizePrice(input);
+      const serverRes = serverMopo.optimizePrice(input);
+
+      expect.equal(clientRes.recommendedPrice, serverRes.recommendedPrice);
+      expect.equal(clientRes.hardFloorPrice, serverRes.hardFloorPrice);
+      expect.equal(clientRes.guardrailApplied, serverRes.guardrailApplied);
+    });
+
+    // -----------------------------------------------------------------------
+    // ALGORITHM 3: TDVRPTW-STW Time-Dependent VRP with Soft Time Windows (Ichoua 2003)
+    // -----------------------------------------------------------------------
+    test("F198-T15: TDVRPTW validates 5 Vietnamese urban traffic periods and speeds", () => {
+      const router = new TDVRPTWRouter();
+      expect.equal(TRAFFIC_PERIODS.length, 5);
+      expect.equal(TRAFFIC_PERIODS[1].name, 'CAO_ĐIỂM_SÁNG');
+      expect.equal(TRAFFIC_PERIODS[1].avgSpeedKmH, 12.0); // 12 km/h (tắc đường sáng)
+      expect.equal(TRAFFIC_PERIODS[3].name, 'CAO_ĐIỂM_CHIỀU');
+      expect.equal(TRAFFIC_PERIODS[3].avgSpeedKmH, 14.0); // 14 km/h (tắc đường chiều)
+
+      // 08:00 (480 min) is CAO_ĐIỂM_SÁNG
+      expect.equal(router.getPeriodAtTime(480).name, 'CAO_ĐIỂM_SÁNG');
+      // 12:00 (720 min) is GIỜ_HÀNH_CHÍNH
+      expect.equal(router.getPeriodAtTime(720).name, 'GIỜ_HÀNH_CHÍNH');
+      // 18:00 (1080 min) is CAO_ĐIỂM_CHIỀU
+      expect.equal(router.getPeriodAtTime(1080).name, 'CAO_ĐIỂM_CHIỀU');
+      // 23:00 (1380 min) is BUỔI_TỐI
+      expect.equal(router.getPeriodAtTime(1380).name, 'BUỔI_TỐI');
+    });
+
+    test("F198-T16: TDVRPTW travel time calculation obeys FIFO property (departure order preserved)", () => {
+      const router = new TDVRPTWRouter({ baseSpeedKmH: 30 });
+      const distKm = 10;
+      const t1 = 450; // 07:30 (Morning rush start)
+      const t2 = 470; // 07:50
+
+      const travelTime1 = router.computeTravelTimeMinutes(distKm, t1);
+      const travelTime2 = router.computeTravelTimeMinutes(distKm, t2);
+
+      // Arrival time of vehicle departing earlier must be <= arrival time of vehicle departing later (FIFO)
+      expect.ok(t1 + travelTime1 <= t2 + travelTime2);
+    });
+
+    test("F198-T17: Route planning during morning rush incurs longer travel time and lower speed", () => {
+      const router = new TDVRPTWRouter({ baseSpeedKmH: 30 });
+      const distKm = 8;
+      const morningRushTime = router.computeTravelTimeMinutes(distKm, 480); // 08:00 morning rush
+      const dayNormalTime = router.computeTravelTimeMinutes(distKm, 720);   // 12:00 normal daytime
+
+      expect.ok(morningRushTime > dayNormalTime);
+      expect.ok(router.getSpeedAtTime(480) < router.getSpeedAtTime(720));
+    });
+
+    test("F198-T18: Soft time window penalties are calculated accurately when courier arrives late", () => {
+      const router = new TDVRPTWRouter({ latePenaltyPerMinute: 2000 });
+      const orders = [
+        { id: 'ORD_STW_1', lat: 21.035, lng: 105.855, weightKg: 5, earlyMinutes: 420, lateMinutes: 450, serviceMinutes: 10 }
+      ];
+
+      // Start late at 460 (after lateMinutes 450)
+      const plan = router.planTimeDependentRoutes(orders, { startMinute: 460 });
+      expect.equal(plan.status, 'TDVRPTW_OPTIMAL_SCHEDULED');
+      expect.ok(plan.totalLateMinutes > 0);
+      expect.ok(plan.totalPenaltyCostVND > 0);
+    });
+
+    test("F198-T19: TDVRPTW manages vehicle capacity limits and splits orders across fleet", () => {
+      const router = new TDVRPTWRouter();
+      const fleet = [
+        { id: 'SPX_BIKE_1', name: 'Nguyễn Văn An', capacityKg: 10 },
+        { id: 'SPX_BIKE_2', name: 'Trần Minh Tuấn', capacityKg: 10 }
+      ];
+
+      const orders = [
+        { id: 'ORD_CAP_1', lat: 21.032, lng: 105.852, weightKg: 8, earlyMinutes: 420, lateMinutes: 600, serviceMinutes: 10 },
+        { id: 'ORD_CAP_2', lat: 21.036, lng: 105.856, weightKg: 8, earlyMinutes: 420, lateMinutes: 600, serviceMinutes: 10 }
+      ];
+
+      const plan = router.planTimeDependentRoutes(orders, fleet, 450);
+      expect.equal(plan.fulfilledOrders, 2);
+      expect.equal(plan.unfulfilledOrders.length, 0);
+      expect.equal(plan.routes.length, 2); // Split across 2 bikes
+    });
+
+    test("F198-T20: Server and Client TDVRPTWRouter produce identical routing plans", () => {
+      const clientRouter = new TDVRPTWRouter();
+      const serverRouter = new ServerTDVRPTWRouter();
+
+      const orders = [
+        { id: 'ORD_SYNC_1', lat: 21.031, lng: 105.853, weightKg: 4, earlyMinutes: 480, lateMinutes: 540, serviceMinutes: 10 },
+        { id: 'ORD_SYNC_2', lat: 21.038, lng: 105.848, weightKg: 6, earlyMinutes: 500, lateMinutes: 600, serviceMinutes: 10 }
+      ];
+
+      const clientPlan = clientRouter.planTimeDependentRoutes(orders, { startMinute: 480 });
+      const serverPlan = serverRouter.planTimeDependentRoutes(orders, { startMinute: 480 });
+
+      expect.equal(clientPlan.fulfilledOrders, serverPlan.fulfilledOrders);
+      expect.equal(clientPlan.totalDistKm, serverPlan.totalDistKm);
+      expect.equal(clientPlan.totalLateMinutes, serverPlan.totalLateMinutes);
+      expect.equal(clientPlan.totalPenaltyCostVND, serverPlan.totalPenaltyCostVND);
+    });
+
+    // -----------------------------------------------------------------------
+    // AI COPILOT INTEGRATIONS & END-TO-END PIPELINE (Tests 21-24)
+    // -----------------------------------------------------------------------
+    test("F198-T21: Admin Sentinel Copilot (Sections 134, 135, 136) responds to UltraLogLog, MOPO, and TDVRPTW queries", () => {
+      const res134 = generateAdminCopilotResponse("ước lượng truy cập 4-bit ultraloglog");
+      expect.equal(res134.tag, "ULTRALOGLOG CARDINALITY");
+      expect.ok(res134.text.includes("UltraLogLog"));
+
+      const res135 = generateAdminCopilotResponse("tối ưu hóa định giá ngoại tuyến mopo an toàn sàn");
+      expect.equal(res135.tag, "MOPO OFFLINE PRICING");
+      expect.ok(res135.text.includes("MOPO"));
+
+      const res136 = generateAdminCopilotResponse("lập lịch giao hàng né tắc đường tdvrptw giờ cao điểm");
+      expect.equal(res136.tag, "TDVRPTW TIME-DEPENDENT ROUTING");
+      expect.ok(res136.text.includes("TDVRPTW"));
+    });
+
+    test("F198-T22: Seller ShopSmart Copilot (Section 60) advises sellers on 4-bit UV count, MOPO pricing, and rush hour avoidance", () => {
+      const res = generateSellerCopilotResponse("tư vấn đếm khách 4-bit ultraloglog, định giá ngoại tuyến mopo và né tắc đường spx");
+      expect.equal(res.tag, "ULTRALOGLOG, MOPO & TDVRPTW LOGISTICS");
+      expect.ok(res.text.includes("UltraLogLog"));
+      expect.ok(res.text.includes("MOPO"));
+      expect.ok(res.text.includes("TDVRPTW"));
+    });
+
+    test("F198-T23: Buyer AI Assistant triggers Intent 53 (ULTRALOGLOG_MOPO_TDVRPTW_ASSIST)", () => {
+      const res = generateAiChatResponse("giải thích đếm khách 4-bit ultraloglog, deal ngoại tuyến mopo và giao hàng giờ cao điểm spx");
+      expect.equal(res.intent, "ULTRALOGLOG_MOPO_TDVRPTW_ASSIST");
+      expect.ok(res.replyText.includes("UltraLogLog"));
+      expect.ok(res.replyText.includes("MOPO"));
+      expect.ok(res.replyText.includes("TDVRPTW"));
+    });
+
+    test("F198-T24: End-to-End Pipeline: UltraLogLog tracks flash sale UVs with 128 bytes, MOPO prices items safely from logs, and TDVRPTW routes orders avoiding rush hour congestion", () => {
+      // Step 1: UltraLogLog tracks 1,000 visitors using compact 128-byte table
+      const ull = new ServerUltraLogLogEstimator({ precision: 8 });
+      for (let i = 0; i < 1000; i++) {
+        ull.add(`buyer_vip_${i}`);
+      }
+      const uvEstimate = ull.estimate();
+      expect.ok(uvEstimate >= 750 && uvEstimate <= 1350);
+      expect.equal(ull.numBytes, 128);
+
+      // Step 2: MOPO optimizes item price from historical logs with COGS guardrail
+      const mopo = new ServerMOPOPricing();
+      const pricing = mopo.optimizePrice({
+        cogs: 400000,
+        currentPrice: 550000,
+        historicalAvgPrice: 540000,
+        competitorPrice: 530000,
+        demandIndex: 1.4,
+        inventoryDays: 14
+      });
+      expect.equal(pricing.status, 'MOPO_OPTIMAL_PRICED');
+      expect.ok(pricing.recommendedPrice >= 420000); // 400,000 * 1.05
+      expect.ok(pricing.grossMarginPercent > 0);
+
+      // Step 3: TDVRPTW schedules delivery fleet avoiding traffic jams
+      const router = new ServerTDVRPTWRouter();
+      const plan = router.planTimeDependentRoutes([
+        { id: 'E2E_ORDER_1', lat: 21.032, lng: 105.852, weightKg: 3, earlyMinutes: 480, lateMinutes: 600, serviceMinutes: 10 }
+      ], { startMinute: 480 });
+      expect.equal(plan.status, 'TDVRPTW_OPTIMAL_SCHEDULED');
+      expect.equal(plan.fulfilledOrders, 1);
+      expect.ok(plan.totalDistKm > 0);
     });
   });
 });
